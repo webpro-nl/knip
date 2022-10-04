@@ -1,0 +1,44 @@
+{
+  "name": "exportman",
+  "version": "0.0.0",
+  "description": "Find unused files and exports in your TypeScript project",
+  "main": "dist/index.js",
+  "bin": {
+    "exportman": "dist/cli.js"
+  },
+  "scripts": {
+    "test": "node --loader tsx --test test/*.spec.ts",
+    "watch": "tsc --watch",
+    "build": "rm -rf dist && tsc",
+    "prepublishOnly": "npm test && npm run build",
+    "release": "release-it"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [],
+  "author": {
+    "name": "Lars Kappert",
+    "email": "lars@webpro.nl"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "ts-morph": "16.0.0",
+    "ts-morph-helpers": "0.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.1",
+    "release-it": "15.5.0",
+    "tsx": "3.9.0",
+    "typescript": "4.8.4"
+  },
+  "release-it": {
+    "github": {
+      "release": true
+    }
+  },
+  "engines": {
+    "node": ">=16.17.0"
+  },
+  "engineStrict": true
+}
