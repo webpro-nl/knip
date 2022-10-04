@@ -106,6 +106,8 @@ export async function run(configuration: Configuration) {
               identifier = declaration;
             } else if (declaration.isKind(ts.SyntaxKind.FunctionDeclaration)) {
               identifier = declaration.getFirstChildByKindOrThrow(ts.SyntaxKind.Identifier);
+            } else if (declaration.isKind(ts.SyntaxKind.PropertyAccessExpression)) {
+              identifier = declaration.getLastChildByKindOrThrow(ts.SyntaxKind.Identifier);
             } else {
               identifier = declaration.getFirstDescendantByKind(ts.SyntaxKind.Identifier);
             }
