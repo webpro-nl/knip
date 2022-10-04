@@ -50,7 +50,7 @@ const isFindUnusedTypes = onlyTypes === true || isFindAll;
 const isFindDuplicateExports = onlyDuplicates === true || isFindAll;
 
 const main = async () => {
-  const { allUnusedFiles, allUnusedExports, allUnusedTypes, allDuplicateExports } = await run({
+  const issues = await run({
     ...configuration,
     cwd,
     isShowProgress,
@@ -61,10 +61,10 @@ const main = async () => {
     isIgnoreNamespaceImports: Boolean(ignoreNamespaceImports)
   });
 
-  if (isFindUnusedFiles) logIssueGroupResult(cwd, 'UNUSED FILES', allUnusedFiles);
-  if (isFindUnusedExports) logIssueGroupResult(cwd, 'UNUSED EXPORTS', allUnusedExports);
-  if (isFindUnusedTypes) logIssueGroupResult(cwd, 'UNUSED TYPES', allUnusedTypes);
-  if (isFindDuplicateExports) logIssueGroupResult(cwd, 'DUPLICATE EXPORTS', allDuplicateExports);
+  if (isFindUnusedFiles) logIssueGroupResult(cwd, 'UNUSED FILES', issues.file);
+  if (isFindUnusedExports) logIssueGroupResult(cwd, 'UNUSED EXPORTS', issues.export);
+  if (isFindUnusedTypes) logIssueGroupResult(cwd, 'UNUSED TYPES', issues.type);
+  if (isFindDuplicateExports) logIssueGroupResult(cwd, 'DUPLICATE EXPORTS', issues.duplicate);
 };
 
 main();

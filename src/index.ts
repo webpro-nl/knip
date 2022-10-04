@@ -1,11 +1,11 @@
 import path from 'node:path';
-import { ts } from 'ts-morph';
+import { SourceFile, ts } from 'ts-morph';
 import { findDuplicateExportedNames } from 'ts-morph-helpers';
 import { hasSymbol } from 'ts-morph-helpers/dist/experimental';
 import { createProject, partitionSourceFiles, getType } from './util';
 import { getLine, LineRewriter } from './log';
 import type { Identifier } from 'ts-morph';
-import type { Configuration, Issue, Issues } from './types';
+import type { Configuration, Issues, Issue } from './types';
 
 const lineRewriter = new LineRewriter();
 
@@ -35,22 +35,28 @@ export async function run(configuration: Configuration) {
   const [, usedNonEntryFiles] = partitionSourceFiles(usedProductionFiles, entryFiles);
 
   // Set up the results
-  const allUnusedFiles: Issues = unusedProductionFiles.map(sourceFile => ({ sourceFile, name: '' }));
-  const allUnusedExports: Issues = [];
-  const allUnusedTypes: Issues = [];
-  const allDuplicateExports: Issues = [];
-  const processedNonEntryFiles: Issues = [];
+  const issues: Issues = {
+    file: new Map(),
+    export: new Map(),
+    type: new Map(),
+    duplicate: new Map()
+  };
+
+  unusedProductionFiles.forEach(file =>
+    issues.file.set(file.getFilePath(), { filePath: file.getFilePath(), symbol: '' })
+  );
+
+  const processedNonEntryFiles: SourceFile[] = [];
 
   if (isShowProgress) {
     // Create proxies to automatically update output when result arrays are updated
-    const set = (target: Issues, prop: any, issue: Issue) => {
-      target[prop] = issue;
-      updateProcessingOutput(issue);
-      return true;
-    };
-    new Proxy(allUnusedExports, { set });
-    new Proxy(allUnusedTypes, { set });
-    new Proxy(allDuplicateExports, { set });
+    new Proxy(issues, {
+      get(target, prop, issue) {
+        let value = Reflect.get(target, prop, issue);
+        updateProcessingOutput(issue);
+        return typeof value == 'function' ? value.bind(target) : value;
+      }
+    });
   }
 
   // OK, this looks ugly
@@ -61,14 +67,12 @@ export async function run(configuration: Configuration) {
     const percentage = Math.floor((counter / total) * 100);
     const messages = [getLine(`${percentage}%`, `of files processed (${counter} of ${total})`)];
     isFindUnusedFiles && messages.push(getLine(unusedProductionFiles.length, 'unused files'));
-    isFindUnusedExports && messages.push(getLine(allUnusedExports.length, 'unused exports'));
-    isFindUnusedTypes && messages.push(getLine(allUnusedTypes.length, 'unused types'));
-    isFindDuplicateExports && messages.push(getLine(allDuplicateExports.length, 'duplicate exports'));
+    isFindUnusedExports && messages.push(getLine(issues.export.size, 'unused exports'));
+    isFindUnusedTypes && messages.push(getLine(issues.type.size, 'unused types'));
+    isFindDuplicateExports && messages.push(getLine(issues.duplicate.size, 'duplicate exports'));
     if (counter < total) {
       messages.push('');
-      messages.push(
-        `Current file: ${path.relative(cwd, item.sourceFile.getFilePath())}${item.name ? `@ ${item.name}` : ''}`
-      );
+      messages.push(`Processing: ${path.relative(cwd, item.filePath)}`);
     }
     lineRewriter.update(messages);
   };
@@ -76,16 +80,18 @@ export async function run(configuration: Configuration) {
   // Skip when only interested in unused files
   if (isFindUnusedExports || isFindUnusedTypes || isFindDuplicateExports) {
     usedNonEntryFiles.forEach(sourceFile => {
-      processedNonEntryFiles.push({ sourceFile, name: '' });
-      updateProcessingOutput({ sourceFile, name: '' });
+      const filePath = sourceFile.getFilePath();
+      processedNonEntryFiles.push(sourceFile);
+      updateProcessingOutput({ filePath: sourceFile.getFilePath(), symbol: '' });
 
       // The file is used, let's visit all export declarations to see which of them are not used somewhere else
       const exportDeclarations = sourceFile.getExportedDeclarations();
 
       if (isFindDuplicateExports) {
         const duplicateExports = findDuplicateExportedNames(sourceFile);
-        duplicateExports.forEach(names => {
-          allDuplicateExports.push({ sourceFile, name: names.join(', ') });
+        duplicateExports.forEach(symbols => {
+          const symbol = symbols.join(', ');
+          issues.duplicate.set(`${filePath}:${symbol}`, { filePath, symbols, symbol });
         });
       }
 
@@ -113,9 +119,14 @@ export async function run(configuration: Configuration) {
             }
 
             if (identifier) {
+              const identifierText = identifier.getText();
+
+              if (isFindUnusedExports && issues.export.has(`${filePath}:${identifierText}`)) return;
+              if (isFindUnusedTypes && issues.type.has(`${filePath}:${identifierText}`)) return;
+
               const refs = identifier.findReferences();
               if (refs.length === 0) {
-                allUnusedExports.push({ sourceFile, name: identifier.getText() });
+                issues.export.set(`${filePath}:${identifierText}`, { filePath, symbol: identifierText });
               } else {
                 const refFiles = new Set(refs.map(r => r.compilerObject.references.map(r => r.fileName)).flat());
 
@@ -133,9 +144,9 @@ export async function run(configuration: Configuration) {
 
                 // No more reasons left to think this identifier is used somewhere else, report it as unused
                 if (type) {
-                  allUnusedTypes.push({ sourceFile, name: `${type} ${identifier.getText()}` });
+                  issues.type.set(`${filePath}:${identifierText}`, { filePath, type, symbol: identifierText });
                 } else {
-                  allUnusedExports.push({ sourceFile, name: identifier.getText() });
+                  issues.export.set(`${filePath}:${identifierText}`, { filePath, symbol: identifierText });
                 }
               }
             }
@@ -147,5 +158,10 @@ export async function run(configuration: Configuration) {
 
   if (isShowProgress) lineRewriter.resetLines();
 
-  return { allUnusedFiles, allUnusedExports, allUnusedTypes, allDuplicateExports };
+  return {
+    file: Array.from(issues.file.values()),
+    export: Array.from(issues.export.values()),
+    type: Array.from(issues.type.values()),
+    duplicate: Array.from(issues.duplicate.values())
+  };
 }

@@ -1,20 +1,18 @@
 import path from 'node:path';
-import type { SourceFile } from 'ts-morph';
-import type { Issues } from './types';
+import type { Issue } from './types';
 
 export const getLine = (value: number | string, text: string) => `${String(value).padStart(5)} ${text}`;
 
-const logIssueLine = (cwd: string, sourceFile: SourceFile, description: string, pad: number) => {
-  const filePath = path.relative(cwd, sourceFile.getFilePath());
-  console.log(`${description ? description.padEnd(pad + 2) : ''}${filePath}`);
+const logIssueLine = (cwd: string, filePath: string, description: string, pad: number) => {
+  console.log(`${description ? description.padEnd(pad + 2) : ''}${path.relative(cwd, filePath)}`);
 };
 
-export const logIssueGroupResult = (cwd: string, title: string, unusedItems: Issues) => {
-  console.log(`--- ${title} (${unusedItems.length})`);
-  if (unusedItems.length) {
-    const padLength = Array.from(unusedItems).sort((a, b) => b.name.length - a.name.length)[0]?.name.length ?? 0;
-    const sortedItems = unusedItems.sort((a, b) => (b.sourceFile.getFilePath() < a.sourceFile.getFilePath() ? 1 : -1));
-    sortedItems.forEach(({ sourceFile, name }) => logIssueLine(cwd, sourceFile, name, padLength));
+export const logIssueGroupResult = (cwd: string, title: string, issues: Issue[]) => {
+  console.log(`--- ${title} (${issues.length})`);
+  if (issues.length) {
+    const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
+    const padLength = [...issues].sort((a, b) => b.symbol.length - a.symbol.length);
+    sortedByFilePath.forEach(({ filePath, symbol }) => logIssueLine(cwd, filePath, symbol, padLength[0].symbol.length));
   } else {
     console.log('N/A');
   }
