@@ -1,6 +1,6 @@
 {
   "name": "exportman",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Find unused files and exports in your TypeScript project",
   "main": "dist/index.js",
   "bin": {
