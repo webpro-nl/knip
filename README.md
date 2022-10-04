@@ -70,9 +70,9 @@ Options:
 
 Examples:
 
-$ export --config ./exportman.json
+$ exportman --config ./exportman.json
 
-$ export --config ./exportman.js --onlyFiles --onlyDuplicates
+$ exportman --config ./exportman.js --onlyFiles --onlyDuplicates
 
 More info: https://github.com/webpro/exportman
 ```
@@ -141,7 +141,7 @@ This will output the production files that are not imported from test files or t
 ## Example Output
 
 ```
-$ export --config ./exportman.json
+$ exportman --config ./exportman.json
 --- UNUSED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx
@@ -161,7 +161,7 @@ Registration, default  src/components/Registration.tsx
 ProductsList, default  src/components/Products.tsx
 ```
 
-## Why Yet Another unused export finder?
+## Why Yet Another unused file/export finder?
 
 There are some fine modules available in the same category:
 

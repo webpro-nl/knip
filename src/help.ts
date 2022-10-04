@@ -1,5 +1,5 @@
 export const printHelp = () => {
-  console.log(`exporteer --config ./config.js[on]
+  console.log(`exportman --config ./config.js[on]
 
 Options:
   --config [file]               Path of configuration file (JS or JSON),
@@ -13,9 +13,9 @@ Options:
 
 Examples:
 
-$ export --config ./exporteer.json
+$ exportman --config ./exportman.json
 
-$ export --config ./exporteer.js --onlyFiles --onlyDuplicates
+$ exportman --config ./exportman.js --onlyFiles --onlyDuplicates
 
-More info: https://github.com/webpro/exporteer`);
+More info: https://github.com/webpro/exportman`);
 };
