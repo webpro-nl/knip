@@ -17,7 +17,7 @@ export async function run(configuration: Configuration) {
     isFindUnusedExports,
     isFindUnusedTypes,
     isFindDuplicateExports,
-    isIgnoreNamespaceImports
+    isFollowSymbols
   } = configuration;
 
   // Create workspace for entry files + resolved dependencies
@@ -134,7 +134,7 @@ export async function run(configuration: Configuration) {
 
                 if (!isReferencedOnlyBySelf) return; // This identifier is used somewhere else
 
-                if (!isIgnoreNamespaceImports) {
+                if (isFollowSymbols) {
                   const symbol = identifier.getSymbol();
                   if (symbol) {
                     const referencingSourceFiles = sourceFile.getReferencingSourceFiles();

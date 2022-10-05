@@ -9,7 +9,7 @@ export type Configuration = {
   isFindUnusedExports?: boolean;
   isFindUnusedTypes?: boolean;
   isFindDuplicateExports?: boolean;
-  isIgnoreNamespaceImports?: boolean;
+  isFollowSymbols?: boolean;
 };
 
 type FilePath = string;

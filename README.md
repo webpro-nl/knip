@@ -66,7 +66,8 @@ Options:
   --onlyExports                 Report only unused exports
   --onlyTypes                   Report only unused types
   --onlyDuplicates              Report only unused duplicate exports
-  --ignoreNamespaceImports      Ignore namespace imports (affects onlyFiles and onlyDuplicates)
+  --ignoreNamespaceImports      Ignore namespace imports (affects onlyExports and onlyTypes)
+  --noProgress                  Don't show dynamic progress updates
 
 Examples:
 

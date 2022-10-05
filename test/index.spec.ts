@@ -15,7 +15,7 @@ test('run', async () => {
     isFindUnusedExports: true,
     isFindUnusedTypes: true,
     isFindDuplicateExports: true,
-    isIgnoreNamespaceImports: false
+    isFollowSymbols: false
   });
 
   assert(issues.file.length === 1);

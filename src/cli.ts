@@ -17,7 +17,7 @@ const {
     onlyTypes,
     onlyDuplicates,
     ignoreNamespaceImports = false,
-    hideProgress = false
+    noProgress = false
   }
 } = parseArgs({
   allowPositionals: true,
@@ -29,7 +29,7 @@ const {
     onlyTypes: { type: 'boolean' },
     onlyDuplicates: { type: 'boolean' },
     ignoreNamespaceImports: { type: 'boolean' },
-    hideProgress: { type: 'boolean' }
+    noProgress: { type: 'boolean' }
   }
 });
 
@@ -42,7 +42,7 @@ const cwd = cwdArg ? path.resolve(cwdArg) : process.cwd();
 
 const configuration: Configuration = require(path.resolve(config));
 
-const isShowProgress = !hideProgress || !process.stdout.isTTY;
+const isShowProgress = !noProgress || !process.stdout.isTTY;
 const isFindAll = !onlyFiles && !onlyExports && !onlyTypes && !onlyDuplicates;
 const isFindUnusedFiles = onlyFiles === true || isFindAll;
 const isFindUnusedExports = onlyExports === true || isFindAll;
@@ -58,7 +58,7 @@ const main = async () => {
     isFindUnusedExports,
     isFindUnusedTypes,
     isFindDuplicateExports,
-    isIgnoreNamespaceImports: Boolean(ignoreNamespaceImports)
+    isFollowSymbols: !ignoreNamespaceImports
   });
 
   if (isFindUnusedFiles) logIssueGroupResult(cwd, 'UNUSED FILES', issues.file);
