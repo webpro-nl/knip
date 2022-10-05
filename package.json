@@ -23,10 +23,12 @@
   },
   "license": "ISC",
   "dependencies": {
+    "micromatch": "4.0.5",
     "ts-morph": "16.0.0",
     "ts-morph-helpers": "0.3.0"
   },
   "devDependencies": {
+    "@types/micromatch": "4.0.2",
     "@types/node": "18.8.1",
     "release-it": "15.5.0",
     "tsx": "3.9.0",

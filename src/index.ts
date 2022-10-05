@@ -21,13 +21,13 @@ export async function run(configuration: Configuration) {
   } = configuration;
 
   // Create workspace for entry files + resolved dependencies
-  const production = createProject(cwd, configuration.entryFiles);
+  const production = await createProject(cwd, configuration.entryFiles);
   const entryFiles = production.getSourceFiles();
   production.resolveSourceFileDependencies();
   const productionFiles = production.getSourceFiles();
 
   // Create workspace for the entire project
-  const project = createProject(cwd, configuration.filePatterns);
+  const project = await createProject(cwd, configuration.filePatterns);
   const projectFiles = project.getSourceFiles();
 
   // Slice & dice used & unused files

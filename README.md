@@ -57,11 +57,12 @@ This will analyze the project and output unused files, exports, types and duplic
 
 ```
 ❯ npx exportman
-exportman --config ./config.js[on]
+exportman --config ./config.js[on] [options]
 
 Options:
   --config [file]               Path of configuration file (JS or JSON),
                                 requires `entryFiles: []` and `filePatterns: []`
+  --cwd                         Working directory (default: current working directory)
   --onlyFiles                   Report only unused files
   --onlyExports                 Report only unused exports
   --onlyTypes                   Report only unused types
@@ -72,8 +73,8 @@ Options:
 Examples:
 
 $ exportman --config ./exportman.json
-
 $ exportman --config ./exportman.js --onlyFiles --onlyDuplicates
+$ exportman --config ./exportman.json --cwd packages/client
 
 More info: https://github.com/webpro/exportman
 ```
@@ -81,6 +82,30 @@ More info: https://github.com/webpro/exportman
 ## More configuration examples
 
 ### Monorepos
+
+#### Separate packages
+
+In repos with multiple packages, the `--cwd` option comes in handy. With similar package structures, the packages can be
+configured conveniently using globs:
+
+```json
+{
+  "packages/*": {
+    "entryFiles": ["src/index.ts"],
+    "filePatterns": ["src/**/*.{ts,tsx}", "!**/*.spec.{ts,tsx}"]
+  }
+}
+```
+
+Packages can also be explicitly configured per package directory. To scan the packages separately, using the first match
+from the configuration file:
+
+```
+exportman --cwd packages/client --config exportman.json
+exportman --cwd packages/services --config exportman.json
+```
+
+#### Connected projects (e.g. using Nx)
 
 A good example of a large project setup is a monorepo, such as created with Nx. Let's take an example project
 configuration for an Nx project using Next.js, Jest and Storybook:

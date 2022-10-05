@@ -1,15 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import { run } from '../src/index';
-import { SourceFile } from 'ts-morph';
-
-const match = (sourceFile: SourceFile, filePath: string) => filePath.endsWith(filePath);
 
 test('run', async () => {
   const issues = await run({
     cwd: 'test/fixtures/basic',
-    entryFiles: ['test/fixtures/basic/index.ts'],
-    filePatterns: ['test/fixtures/basic/*.ts'],
+    entryFiles: ['index.ts'],
+    filePatterns: ['*.ts'],
     isShowProgress: false,
     isFindUnusedFiles: true,
     isFindUnusedExports: true,

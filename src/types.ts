@@ -1,9 +1,10 @@
-import { SourceFile } from 'ts-morph';
-
-export type Configuration = {
-  cwd: string;
+type LocalConfiguration = {
   entryFiles: string[];
   filePatterns: string[];
+};
+
+export type Configuration = LocalConfiguration & {
+  cwd: string;
   isShowProgress: boolean;
   isFindUnusedFiles?: boolean;
   isFindUnusedExports?: boolean;
@@ -11,6 +12,8 @@ export type Configuration = {
   isFindDuplicateExports?: boolean;
   isFollowSymbols?: boolean;
 };
+
+export type ImportedConfiguration = LocalConfiguration | Record<string, LocalConfiguration>;
 
 type FilePath = string;
 type Type = 'type' | 'interface' | 'enum';
