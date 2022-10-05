@@ -2,6 +2,18 @@
   "name": "exportman",
   "version": "0.0.3",
   "description": "Find unused files and exports in your TypeScript project",
+  "keywords": [
+    "find",
+    "detect",
+    "unused",
+    "files",
+    "exports",
+    "types",
+    "duplicates",
+    "typescript",
+    "maintenance",
+    "unimported"
+  ],
   "main": "dist/index.js",
   "bin": {
     "exportman": "dist/cli.js"
@@ -16,7 +28,6 @@
   "files": [
     "dist"
   ],
-  "keywords": [],
   "author": {
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
