@@ -1,7 +1,7 @@
-<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="361px" height="251px" viewBox="-0.5 -0.5 361 251" content="&lt;mxfile&gt;&lt;diagram id=&quot;aBSJ2wiErNnF0jAXrX3s&quot; name=&quot;Page-1&quot;&gt;tZTBjpswEIafBql7WAnwQumxpLvtpdKqOfTs2AN4azA1Tkj69B3DAEFJpFbKXsD+xjM28/8mYJv6+NXytvpuJOggDuUxYF+COE6yj/j04DSCKEqJlFZJYgvYqj9AMCS6VxK61UJnjHaqXUNhmgaEWzFurenXywqj17u2vIQLsBVcX9KfSrpqpFkSLvwbqLKado5CitR8Wkygq7g0/RlizwHbWGPcOKqPG9C+eVNfxryXG9H5YBYa9y8Jn8aEA9d7+rZXa958z7AtSmOT41RjpXxn/WndiVqQ/t77I+aFadxjNwj0GRdESYsi50scR6V/f/DFXrlzYJvu4U5FpzJSHe5SB9s0lJpovKoaY+fQYDjJ+0o52LZc+EiPHkdWuVrjLPL7Kq03Rhs75LEiEyAE8s5Z8wvOIrsseULTsJxrVTbI7Gia4eRk+yjxmbiXasof5KlkPt4BrIPjTfGj2VJ4F8HU4OwJl1BCRiaka8gYzfvF0ywlVp35OZ6MzukelXPpxWo4ILfdsGp4zXpyL5wyzXB3JdzLfNgPe3rxdn64m6qSQ1ZcVTUVGeyKKyq+g2TJpWSzOivJwv+XDKfLj2iInf3O2fNf&lt;/diagram&gt;&lt;/mxfile&gt;">
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="361px" height="251px" viewBox="-0.5 -0.5 361 251" content="&lt;mxfile&gt;&lt;diagram id=&quot;aBSJ2wiErNnF0jAXrX3s&quot; name=&quot;Page-1&quot;&gt;tZTBbqMwEIafBml7WAnwQumxpKV7WalqDj07eALeGswaJyR9+o5hCKCkUitlcyD2N+Oxmf83HltVhyfDm/KPFqC80BcHjz14YRglt/h04DiAIIiJFEYKYhNYy3cg6BPdSQHtItFqraxsljDXdQ25XTBujO6WaVutlrs2vIAzsM65OqevUthyoEnkT/w3yKIcdw58ilR8TCbQllzobobYo8dWRms7jKrDCpRr3tiXYV32SfR0MAO1/cqCu2HBnqsdvduz0X9dz7AtUmGTw1hhpXRj3GntkVoQ/9u5I6ZbXdufbS/QPSYEUYMip1McR4X7/+GKPXNrwdTtzZWKjmWE3F+lDrapLzXScFE1xM6hwXCSdqW0sG547iIdehxZaSuFs8DtK5VaaaVNv45l2R3+kLfW6DeYRTZJ9AtNw1KuZFEjM4Np+pOT7YPIrcS9ZF28kKei0/HmSpP4ezAWDjNEyj+BrsCaI6ZQNCET0jVkjObd5GkWEytnfg5Ho3O6R8Wp9GQ1HJDbPrGqf8l6Ypdbqev+7gq4lvmwReaYOTvfXE3VOE7DLLukapwnsNleUPE/SBadS3ZSZyGZ/33JcDp9iPrY7HPOHj8A&lt;/diagram&gt;&lt;/mxfile&gt;">
     <defs/>
     <g>
-        <ellipse cx="180" cy="125" rx="180" ry="125" fill="#f8cecc" stroke="#b85450" pointer-events="all"/>
+        <ellipse cx="180" cy="125" rx="180" ry="125" fill="#ff9999" stroke="#b85450" pointer-events="all"/>
         <g transform="translate(-0.5 -0.5)">
             <switch>
                 <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
@@ -22,7 +22,7 @@
                 </text>
             </switch>
         </g>
-        <ellipse cx="125" cy="120" rx="125" ry="100" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all"/>
+        <ellipse cx="125" cy="120" rx="125" ry="100" fill="#66b2ff" stroke="#6c8ebf" pointer-events="all"/>
         <g transform="translate(-0.5 -0.5)">
             <switch>
                 <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
