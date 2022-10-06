@@ -1,8 +1,10 @@
 import path from 'node:path';
 import type { Issue, Issues, Configuration } from '../types';
 
-const logIssueLine = (cwd: string, filePath: string, symbol: string, padding: number) => {
-  console.log(`${symbol.padEnd(padding + 2)}${path.relative(cwd, filePath)}`);
+const logIssueLine = ({ issue, cwd, padding }: { issue: Issue; cwd: string; padding: number }) => {
+  console.log(
+    `${issue.symbol.padEnd(padding + 2)}${issue.symbolType?.padEnd(11) || ''}${path.relative(cwd, issue.filePath)}`
+  );
 };
 
 const logIssueGroupResult = (issues: string[], cwd: string, title: false | string) => {
@@ -20,7 +22,7 @@ const logIssueGroupResults = (issues: Issue[], cwd: string, title: false | strin
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
     const padding = [...issues].sort((a, b) => b.symbol.length - a.symbol.length)[0].symbol.length;
-    sortedByFilePath.forEach(({ filePath, symbol }) => logIssueLine(cwd, filePath, symbol, padding));
+    sortedByFilePath.forEach(issue => logIssueLine({ issue, cwd, padding }));
   } else {
     console.log('N/A');
   }
@@ -31,11 +33,13 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
     isOnlyFiles,
     isOnlyExports,
     isOnlyTypes,
+    isOnlyNsMembers,
     isOnlyDuplicates,
     isFindUnusedFiles,
     isFindUnusedExports,
     isFindUnusedTypes,
-    isFindDuplicateExports
+    isFindNsImports,
+    isFindDuplicateExports,
   } = config;
 
   if (isFindUnusedFiles) {
@@ -55,6 +59,13 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
       .map(issues => Object.values(issues))
       .flat();
     logIssueGroupResults(unusedTypes, cwd, !isOnlyTypes && 'UNUSED TYPES');
+  }
+
+  if (isFindNsImports) {
+    const unusedExports = Object.values(issues.member)
+      .map(issues => Object.values(issues))
+      .flat();
+    logIssueGroupResults(unusedExports, cwd, !isOnlyNsMembers && 'UNUSED NAMESPACE MEMBERS');
   }
 
   if (isFindDuplicateExports) {

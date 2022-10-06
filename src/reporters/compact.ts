@@ -1,25 +1,21 @@
 import path from 'node:path';
-import type { Issues, Configuration } from '../types';
+import type { Issue, Issues, Configuration } from '../types';
 
-const logIssueLine = (cwd: string, filePath: string, symbols: string[]) => {
-  console.log(`${path.relative(cwd, filePath)}: ${symbols.join(', ')}`);
+const logIssueLine = (cwd: string, filePath: string, symbols?: string[]) => {
+  console.log(`${path.relative(cwd, filePath)}${symbols ? `: ${symbols.join(', ')}` : ''}`);
 };
 
 const logIssueGroupResult = (issues: string[], cwd: string, title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort();
-    sortedByFilePath.forEach(filePath => console.log(path.relative(cwd, filePath)));
+    sortedByFilePath.forEach(filePath => logIssueLine(cwd, filePath));
   } else {
     console.log('N/A');
   }
 };
 
-const logIssueGroupResults = (
-  issues: { filePath: string; symbols: string[] }[],
-  cwd: string,
-  title: false | string
-) => {
+const logIssueGroupResults = (issues: Issue[], cwd: string, title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
@@ -34,11 +30,13 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
     isOnlyFiles,
     isOnlyExports,
     isOnlyTypes,
+    isOnlyNsMembers,
     isOnlyDuplicates,
     isFindUnusedFiles,
     isFindUnusedExports,
     isFindUnusedTypes,
-    isFindDuplicateExports
+    isFindNsImports,
+    isFindDuplicateExports,
   } = config;
 
   if (isFindUnusedFiles) {
@@ -49,10 +47,7 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
   if (isFindUnusedExports) {
     const unusedExports = Object.values(issues.export).map(issues => {
       const items = Object.values(issues);
-      return {
-        filePath: items[0].filePath,
-        symbols: items.map(i => i.symbol)
-      };
+      return { ...items[0], symbols: items.map(i => i.symbol) };
     });
     logIssueGroupResults(unusedExports, cwd, !isOnlyExports && 'UNUSED EXPORTS');
   }
@@ -60,22 +55,23 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
   if (isFindUnusedTypes) {
     const unusedTypes = Object.values(issues.type).map(issues => {
       const items = Object.values(issues);
-      return {
-        filePath: items[0].filePath,
-        symbols: items.map(i => i.symbol)
-      };
+      return { ...items[0], symbols: items.map(i => i.symbol) };
     });
     logIssueGroupResults(unusedTypes, cwd, !isOnlyTypes && 'UNUSED TYPES');
   }
 
-  if (isFindDuplicateExports) {
-    const unusedDuplicates = Object.values(issues.duplicate).map(issues => {
+  if (isFindNsImports) {
+    const unusedMembers = Object.values(issues.member).map(issues => {
       const items = Object.values(issues);
-      return {
-        filePath: items[0].filePath,
-        symbols: items.map(i => i.symbols ?? []).flat()
-      };
+      return { ...items[0], symbols: items.map(i => i.symbol) };
     });
+    logIssueGroupResults(unusedMembers, cwd, !isOnlyNsMembers && 'UNUSED NAMESPACE MEMBERS');
+  }
+
+  if (isFindDuplicateExports) {
+    const unusedDuplicates = Object.values(issues.duplicate)
+      .map(issues => Object.values(issues))
+      .flat();
     logIssueGroupResults(unusedDuplicates, cwd, !isOnlyDuplicates && 'DUPLICATE EXPORTS');
   }
 };
