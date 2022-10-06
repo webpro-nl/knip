@@ -9,11 +9,12 @@ export type Configuration = LocalConfiguration & {
   isOnlyExports: boolean;
   isOnlyTypes: boolean;
   isOnlyDuplicates: boolean;
+  isOnlyNsMembers: boolean;
   isFindUnusedFiles: boolean;
   isFindUnusedExports: boolean;
   isFindUnusedTypes: boolean;
   isFindDuplicateExports: boolean;
-  isFollowSymbols: boolean;
+  isFindNsImports: boolean;
   isShowProgress: boolean;
 };
 
@@ -24,14 +25,13 @@ export type SymbolType = 'type' | 'interface' | 'enum';
 
 type UnusedFileIssues = Set<FilePath>;
 type UnusedExportIssues = Record<string, Record<string, Issue>>;
-type UnusedTypeIssues = Record<string, Record<string, Issue>>;
-type DuplicateExportIssues = Record<string, Record<string, Issue>>;
 
 export type Issue = { filePath: FilePath; symbol: string; symbols?: string[]; symbolType?: SymbolType };
 
 export type Issues = {
   file: UnusedFileIssues;
   export: UnusedExportIssues;
-  type: UnusedTypeIssues;
-  duplicate: DuplicateExportIssues;
+  type: UnusedExportIssues;
+  duplicate: UnusedExportIssues;
+  member: UnusedExportIssues;
 };

@@ -8,8 +8,8 @@ Options:
   --onlyFiles                   Report only unused files
   --onlyExports                 Report only unused exports
   --onlyTypes                   Report only unused types
+  --onlyNsMembers               Report only unreferenced members of namespace imports
   --onlyDuplicates              Report only unused duplicate exports
-  --ignoreNamespaceImports      Ignore namespace imports (affects onlyExports and onlyTypes)
   --noProgress                  Don't show dynamic progress updates
   --reporter                    Select reporter: symbols, compact (default: symbols)
 

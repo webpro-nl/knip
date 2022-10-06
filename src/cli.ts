@@ -16,8 +16,8 @@ const {
     onlyFiles: isOnlyFiles = false,
     onlyExports: isOnlyExports = false,
     onlyTypes: isOnlyTypes = false,
+    onlyNsMembers: isOnlyNsMembers = false,
     onlyDuplicates: isOnlyDuplicates = false,
-    ignoreNamespaceImports = false,
     noProgress = false,
     reporter = 'symbols'
   }
@@ -30,7 +30,7 @@ const {
     onlyExports: { type: 'boolean' },
     onlyTypes: { type: 'boolean' },
     onlyDuplicates: { type: 'boolean' },
-    ignoreNamespaceImports: { type: 'boolean' },
+    onlyNsMembers: { type: 'boolean' },
     noProgress: { type: 'boolean' },
     reporter: { type: 'string' }
   }
@@ -46,10 +46,11 @@ const cwd = cwdArg ? path.resolve(cwdArg) : process.cwd();
 const configuration: ImportedConfiguration = require(path.resolve(config));
 
 const isShowProgress = !noProgress || !process.stdout.isTTY;
-const isFindAll = !isOnlyFiles && !isOnlyExports && !isOnlyTypes && !isOnlyDuplicates;
+const isFindAll = !isOnlyFiles && !isOnlyExports && !isOnlyTypes && !isOnlyNsMembers && !isOnlyDuplicates;
 const isFindUnusedFiles = isOnlyFiles === true || isFindAll;
 const isFindUnusedExports = isOnlyExports === true || isFindAll;
 const isFindUnusedTypes = isOnlyTypes === true || isFindAll;
+const isFindNsImports = isOnlyNsMembers === true || isFindAll;
 const isFindDuplicateExports = isOnlyDuplicates === true || isFindAll;
 
 const report =
@@ -68,13 +69,14 @@ const main = async () => {
     isOnlyFiles,
     isOnlyExports,
     isOnlyTypes,
+    isOnlyNsMembers,
     isOnlyDuplicates,
     isFindUnusedFiles,
     isFindUnusedExports,
     isFindUnusedTypes,
+    isFindNsImports,
     isFindDuplicateExports,
-    isFollowSymbols: !ignoreNamespaceImports,
-    isShowProgress
+    isShowProgress,
   });
 
   const issues = await run(config);

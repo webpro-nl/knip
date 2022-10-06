@@ -1,7 +1,6 @@
 import path from 'node:path';
 import { ts } from 'ts-morph';
-import { findDuplicateExportedNames } from 'ts-morph-helpers';
-import { hasSymbol } from 'ts-morph-helpers/dist/experimental';
+import { findDuplicateExportedNames, findReferencingNamespaceNodes } from 'ts-morph-helpers';
 import { createProject, partitionSourceFiles, getType } from './util';
 import { getLine, LineRewriter } from './log';
 import type { Identifier } from 'ts-morph';
@@ -17,7 +16,7 @@ export async function run(configuration: Configuration) {
     isFindUnusedExports,
     isFindUnusedTypes,
     isFindDuplicateExports,
-    isFollowSymbols
+    isFindNsImports,
   } = configuration;
 
   // Create workspace for entry files + resolved dependencies
@@ -39,7 +38,8 @@ export async function run(configuration: Configuration) {
     file: new Set(unusedProductionFiles.map(file => file.getFilePath())),
     export: {},
     type: {},
-    duplicate: {}
+    duplicate: {},
+    member: {},
   };
 
   const counters = {
@@ -47,7 +47,8 @@ export async function run(configuration: Configuration) {
     export: 0,
     type: 0,
     duplicate: 0,
-    processed: issues.file.size
+    member: 0,
+    processed: issues.file.size,
   };
 
   // OK, this looks ugly
@@ -60,6 +61,7 @@ export async function run(configuration: Configuration) {
     isFindUnusedFiles && messages.push(getLine(unusedProductionFiles.length, 'unused files'));
     isFindUnusedExports && messages.push(getLine(counters.export, 'unused exports'));
     isFindUnusedTypes && messages.push(getLine(counters.type, 'unused types'));
+    isFindNsImports && messages.push(getLine(counters.member, 'unused namespace members'));
     isFindDuplicateExports && messages.push(getLine(counters.duplicate, 'duplicate exports'));
     if (counter < total) {
       messages.push('');
@@ -68,7 +70,7 @@ export async function run(configuration: Configuration) {
     lineRewriter.update(messages);
   };
 
-  const addIssue = (issueType: 'export' | 'type' | 'duplicate', issue: Issue) => {
+  const addIssue = (issueType: 'export' | 'type' | 'duplicate' | 'member', issue: Issue) => {
     const { filePath, symbol } = issue;
     const key = path.relative(cwd, filePath);
     issues[issueType][key] = issues[issueType][key] ?? {};
@@ -78,7 +80,7 @@ export async function run(configuration: Configuration) {
   };
 
   // Skip when only interested in unused files
-  if (isFindUnusedExports || isFindUnusedTypes || isFindDuplicateExports) {
+  if (isFindUnusedExports || isFindUnusedTypes || isFindNsImports || isFindDuplicateExports) {
     usedNonEntryFiles.forEach(sourceFile => {
       const filePath = sourceFile.getFilePath();
 
@@ -93,7 +95,7 @@ export async function run(configuration: Configuration) {
         });
       }
 
-      if (isFindUnusedExports || isFindUnusedTypes) {
+      if (isFindUnusedExports || isFindUnusedTypes || isFindNsImports) {
         const uniqueExportedSymbols = new Set([...exportDeclarations.values()].flat());
         if (uniqueExportedSymbols.size === 1) return; // Only one exported identifier means it's used somewhere else
 
@@ -101,8 +103,10 @@ export async function run(configuration: Configuration) {
           declarations.forEach(declaration => {
             const type = getType(declaration);
 
-            if (!isFindUnusedTypes && type) return;
-            if (!isFindUnusedExports && !type) return;
+            if (!isFindNsImports) {
+              if (!isFindUnusedTypes && type) return;
+              if (!isFindUnusedExports && !type) return;
+            }
 
             let identifier: Identifier | undefined;
 
@@ -138,11 +142,10 @@ export async function run(configuration: Configuration) {
 
                 if (!isReferencedOnlyBySelf) return; // This identifier is used somewhere else
 
-                if (isFollowSymbols) {
-                  const symbol = identifier.getSymbol();
-                  if (symbol) {
-                    const referencingSourceFiles = sourceFile.getReferencingSourceFiles();
-                    if (hasSymbol(referencingSourceFiles, symbol)) return; // This identifier is used somewhere else
+                if (isFindNsImports) {
+                  if (findReferencingNamespaceNodes(sourceFile).length > 0) {
+                    addIssue('member', { filePath, symbol: identifierText });
+                    return;
                   }
                 }
 

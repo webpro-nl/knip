@@ -36,7 +36,7 @@
   "dependencies": {
     "micromatch": "4.0.5",
     "ts-morph": "16.0.0",
-    "ts-morph-helpers": "0.3.0"
+    "ts-morph-helpers": "0.5.0"
   },
   "devDependencies": {
     "@types/micromatch": "4.0.2",
