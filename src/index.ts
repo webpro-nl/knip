@@ -134,6 +134,7 @@ export async function run(configuration: Configuration) {
 
               if (isFindUnusedExports && issues.export[filePath]?.[identifierText]) return;
               if (isFindUnusedTypes && issues.type[filePath]?.[identifierText]) return;
+              if (isFindNsImports && issues.member[filePath]?.[identifierText]) return;
 
               const refs = identifier.findReferences();
 
@@ -146,15 +147,10 @@ export async function run(configuration: Configuration) {
 
                 if (!isReferencedOnlyBySelf) return; // This identifier is used somewhere else
 
-                if (isFindNsImports) {
-                  if (findReferencingNamespaceNodes(sourceFile).length > 0) {
-                    addIssue('member', { filePath, symbol: identifierText });
-                    return;
-                  }
-                }
-
                 // No more reasons left to think this identifier is used somewhere else, report it as unused
-                if (type) {
+                if (findReferencingNamespaceNodes(sourceFile).length > 0) {
+                  addIssue('member', { filePath, symbol: identifierText });
+                } else if (type) {
                   addIssue('type', { filePath, symbol: identifierText, symbolType: type });
                 } else {
                   addIssue('export', { filePath, symbol: identifierText });
