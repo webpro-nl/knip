@@ -10,25 +10,31 @@ test('run', async () => {
     isOnlyFiles: false,
     isOnlyExports: false,
     isOnlyTypes: false,
+    isOnlyNsMembers: false,
     isOnlyDuplicates: false,
     isFindUnusedFiles: true,
     isFindUnusedExports: true,
     isFindUnusedTypes: true,
     isFindDuplicateExports: true,
-    isFollowSymbols: false,
-    isShowProgress: false
+    isFindNsImports: true,
+    isShowProgress: false,
+    jsDocOptions: {
+      isReadPublicTag: false,
+    },
   });
 
   assert(issues.file.size === 1);
-
   assert(Array.from(issues.file)[0].endsWith('dangling.ts'));
 
   assert(Object.values(issues.export).length === 1);
-  assert(issues.export['ns.ts']['z'].symbol === 'z');
+  assert(issues.export['dep.ts']['unused'].symbol === 'unused');
 
-  assert(Object.values(issues.type).length === 2);
+  assert(Object.values(issues.type).length === 1);
   assert(issues.type['dep.ts']['Dep'].symbolType === 'type');
-  assert(issues.type['ns.ts']['NS'].symbolType === 'interface');
+
+  assert(Object.values(issues.member).length === 1);
+  assert(issues.member['ns.ts']['NS'].symbol === 'NS');
+  assert(issues.member['ns.ts']['z'].symbol === 'z');
 
   assert(Object.values(issues.duplicate).length === 1);
   assert(issues.duplicate['dep.ts']['dep,default'].symbols?.[0] === 'dep');
