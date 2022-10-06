@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { SourceFile, ts } from 'ts-morph';
+import { ts } from 'ts-morph';
 import { findDuplicateExportedNames } from 'ts-morph-helpers';
 import { hasSymbol } from 'ts-morph-helpers/dist/experimental';
 import { createProject, partitionSourceFiles, getType } from './util';
@@ -36,40 +36,31 @@ export async function run(configuration: Configuration) {
 
   // Set up the results
   const issues: Issues = {
-    file: new Map(),
-    export: new Map(),
-    type: new Map(),
-    duplicate: new Map()
+    file: new Set(unusedProductionFiles.map(file => file.getFilePath())),
+    export: {},
+    type: {},
+    duplicate: {}
   };
 
-  unusedProductionFiles.forEach(file =>
-    issues.file.set(file.getFilePath(), { filePath: file.getFilePath(), symbol: '' })
-  );
-
-  const processedNonEntryFiles: SourceFile[] = [];
-
-  if (isShowProgress) {
-    // Create proxies to automatically update output when result arrays are updated
-    new Proxy(issues, {
-      get(target, prop, issue) {
-        let value = Reflect.get(target, prop, issue);
-        updateProcessingOutput(issue);
-        return typeof value == 'function' ? value.bind(target) : value;
-      }
-    });
-  }
+  const counters = {
+    file: issues.file.size,
+    export: 0,
+    type: 0,
+    duplicate: 0,
+    processed: issues.file.size
+  };
 
   // OK, this looks ugly
   const updateProcessingOutput = (item: Issue) => {
     if (!isShowProgress) return;
-    const counter = unusedProductionFiles.length + processedNonEntryFiles.length;
+    const counter = unusedProductionFiles.length + counters.processed;
     const total = unusedProductionFiles.length + usedNonEntryFiles.length;
     const percentage = Math.floor((counter / total) * 100);
     const messages = [getLine(`${percentage}%`, `of files processed (${counter} of ${total})`)];
     isFindUnusedFiles && messages.push(getLine(unusedProductionFiles.length, 'unused files'));
-    isFindUnusedExports && messages.push(getLine(issues.export.size, 'unused exports'));
-    isFindUnusedTypes && messages.push(getLine(issues.type.size, 'unused types'));
-    isFindDuplicateExports && messages.push(getLine(issues.duplicate.size, 'duplicate exports'));
+    isFindUnusedExports && messages.push(getLine(counters.export, 'unused exports'));
+    isFindUnusedTypes && messages.push(getLine(counters.type, 'unused types'));
+    isFindDuplicateExports && messages.push(getLine(counters.duplicate, 'duplicate exports'));
     if (counter < total) {
       messages.push('');
       messages.push(`Processing: ${path.relative(cwd, item.filePath)}`);
@@ -77,12 +68,19 @@ export async function run(configuration: Configuration) {
     lineRewriter.update(messages);
   };
 
+  const addIssue = (issueType: 'export' | 'type' | 'duplicate', issue: Issue) => {
+    const { filePath, symbol } = issue;
+    const key = path.relative(cwd, filePath);
+    issues[issueType][key] = issues[issueType][key] ?? {};
+    issues[issueType][key][symbol] = issue;
+    counters[issueType]++;
+    if (isShowProgress) updateProcessingOutput(issue);
+  };
+
   // Skip when only interested in unused files
   if (isFindUnusedExports || isFindUnusedTypes || isFindDuplicateExports) {
     usedNonEntryFiles.forEach(sourceFile => {
       const filePath = sourceFile.getFilePath();
-      processedNonEntryFiles.push(sourceFile);
-      updateProcessingOutput({ filePath: sourceFile.getFilePath(), symbol: '' });
 
       // The file is used, let's visit all export declarations to see which of them are not used somewhere else
       const exportDeclarations = sourceFile.getExportedDeclarations();
@@ -90,8 +88,8 @@ export async function run(configuration: Configuration) {
       if (isFindDuplicateExports) {
         const duplicateExports = findDuplicateExportedNames(sourceFile);
         duplicateExports.forEach(symbols => {
-          const symbol = symbols.join(', ');
-          issues.duplicate.set(`${filePath}:${symbol}`, { filePath, symbols, symbol });
+          const symbol = symbols.join(',');
+          addIssue('duplicate', { filePath, symbol, symbols });
         });
       }
 
@@ -121,12 +119,12 @@ export async function run(configuration: Configuration) {
             if (identifier) {
               const identifierText = identifier.getText();
 
-              if (isFindUnusedExports && issues.export.has(`${filePath}:${identifierText}`)) return;
-              if (isFindUnusedTypes && issues.type.has(`${filePath}:${identifierText}`)) return;
+              if (isFindUnusedExports && issues.export[filePath]?.[identifierText]) return;
+              if (isFindUnusedTypes && issues.type[filePath]?.[identifierText]) return;
 
               const refs = identifier.findReferences();
               if (refs.length === 0) {
-                issues.export.set(`${filePath}:${identifierText}`, { filePath, symbol: identifierText });
+                addIssue('export', { filePath, symbol: identifierText });
               } else {
                 const refFiles = new Set(refs.map(r => r.compilerObject.references.map(r => r.fileName)).flat());
 
@@ -144,24 +142,20 @@ export async function run(configuration: Configuration) {
 
                 // No more reasons left to think this identifier is used somewhere else, report it as unused
                 if (type) {
-                  issues.type.set(`${filePath}:${identifierText}`, { filePath, type, symbol: identifierText });
+                  addIssue('type', { filePath, symbol: identifierText, symbolType: type });
                 } else {
-                  issues.export.set(`${filePath}:${identifierText}`, { filePath, symbol: identifierText });
+                  addIssue('export', { filePath, symbol: identifierText });
                 }
               }
             }
           });
         });
       }
+      counters.processed++;
     });
   }
 
   if (isShowProgress) lineRewriter.resetLines();
 
-  return {
-    file: Array.from(issues.file.values()),
-    export: Array.from(issues.export.values()),
-    type: Array.from(issues.type.values()),
-    duplicate: Array.from(issues.duplicate.values())
-  };
+  return issues;
 }

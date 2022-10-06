@@ -4,21 +4,22 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { printHelp } from './help';
 import { resolveConfig } from './util';
-import { logIssueGroupResult } from './log';
+import reporters from './reporters';
 import { run } from '.';
-import type { ImportedConfiguration } from './types';
+import type { ImportedConfiguration, Configuration } from './types';
 
 const {
   values: {
     help,
     cwd: cwdArg,
     config,
-    onlyFiles,
-    onlyExports,
-    onlyTypes,
-    onlyDuplicates,
+    onlyFiles: isOnlyFiles = false,
+    onlyExports: isOnlyExports = false,
+    onlyTypes: isOnlyTypes = false,
+    onlyDuplicates: isOnlyDuplicates = false,
     ignoreNamespaceImports = false,
-    noProgress = false
+    noProgress = false,
+    reporter = 'symbols'
   }
 } = parseArgs({
   options: {
@@ -30,7 +31,8 @@ const {
     onlyTypes: { type: 'boolean' },
     onlyDuplicates: { type: 'boolean' },
     ignoreNamespaceImports: { type: 'boolean' },
-    noProgress: { type: 'boolean' }
+    noProgress: { type: 'boolean' },
+    reporter: { type: 'string' }
   }
 });
 
@@ -44,33 +46,40 @@ const cwd = cwdArg ? path.resolve(cwdArg) : process.cwd();
 const configuration: ImportedConfiguration = require(path.resolve(config));
 
 const isShowProgress = !noProgress || !process.stdout.isTTY;
-const isFindAll = !onlyFiles && !onlyExports && !onlyTypes && !onlyDuplicates;
-const isFindUnusedFiles = onlyFiles === true || isFindAll;
-const isFindUnusedExports = onlyExports === true || isFindAll;
-const isFindUnusedTypes = onlyTypes === true || isFindAll;
-const isFindDuplicateExports = onlyDuplicates === true || isFindAll;
+const isFindAll = !isOnlyFiles && !isOnlyExports && !isOnlyTypes && !isOnlyDuplicates;
+const isFindUnusedFiles = isOnlyFiles === true || isFindAll;
+const isFindUnusedExports = isOnlyExports === true || isFindAll;
+const isFindUnusedTypes = isOnlyTypes === true || isFindAll;
+const isFindDuplicateExports = isOnlyDuplicates === true || isFindAll;
+
+const report =
+  reporter in reporters ? reporters[reporter as keyof typeof reporters] : require(path.join(cwd, reporter));
 
 const main = async () => {
-  const config = resolveConfig(configuration, cwdArg);
-  if (!config) {
+  const resolvedConfig = resolveConfig(configuration, cwdArg);
+
+  if (!resolvedConfig) {
     printHelp();
     process.exit(1);
   }
-  const issues = await run({
-    ...config,
+
+  const config: Configuration = Object.assign({}, resolvedConfig, {
     cwd,
-    isShowProgress,
+    isOnlyFiles,
+    isOnlyExports,
+    isOnlyTypes,
+    isOnlyDuplicates,
     isFindUnusedFiles,
     isFindUnusedExports,
     isFindUnusedTypes,
     isFindDuplicateExports,
-    isFollowSymbols: !ignoreNamespaceImports
+    isFollowSymbols: !ignoreNamespaceImports,
+    isShowProgress
   });
 
-  if (isFindUnusedFiles) logIssueGroupResult(cwd, 'UNUSED FILES', issues.file);
-  if (isFindUnusedExports) logIssueGroupResult(cwd, 'UNUSED EXPORTS', issues.export);
-  if (isFindUnusedTypes) logIssueGroupResult(cwd, 'UNUSED TYPES', issues.type);
-  if (isFindDuplicateExports) logIssueGroupResult(cwd, 'DUPLICATE EXPORTS', issues.duplicate);
+  const issues = await run(config);
+
+  report({ issues, cwd, config });
 };
 
 main();

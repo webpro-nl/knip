@@ -5,30 +5,29 @@ type LocalConfiguration = {
 
 export type Configuration = LocalConfiguration & {
   cwd: string;
+  isOnlyFiles: boolean;
+  isOnlyExports: boolean;
+  isOnlyTypes: boolean;
+  isOnlyDuplicates: boolean;
+  isFindUnusedFiles: boolean;
+  isFindUnusedExports: boolean;
+  isFindUnusedTypes: boolean;
+  isFindDuplicateExports: boolean;
+  isFollowSymbols: boolean;
   isShowProgress: boolean;
-  isFindUnusedFiles?: boolean;
-  isFindUnusedExports?: boolean;
-  isFindUnusedTypes?: boolean;
-  isFindDuplicateExports?: boolean;
-  isFollowSymbols?: boolean;
 };
 
 export type ImportedConfiguration = LocalConfiguration | Record<string, LocalConfiguration>;
 
 type FilePath = string;
-type Type = 'type' | 'interface' | 'enum';
+export type SymbolType = 'type' | 'interface' | 'enum';
 
-type UnusedFileIssue = { filePath: FilePath; symbol: string };
-type UnusedExportIssue = { filePath: FilePath; symbol: string };
-type UnusedTypeIssue = { filePath: FilePath; symbol: string; type: Type };
-type DuplicateExportIssue = { filePath: FilePath; symbol: string; symbols: string[] };
+type UnusedFileIssues = Set<FilePath>;
+type UnusedExportIssues = Record<string, Record<string, Issue>>;
+type UnusedTypeIssues = Record<string, Record<string, Issue>>;
+type DuplicateExportIssues = Record<string, Record<string, Issue>>;
 
-type UnusedFileIssues = Map<FilePath, UnusedFileIssue>;
-type UnusedExportIssues = Map<string, UnusedExportIssue>;
-type UnusedTypeIssues = Map<string, UnusedTypeIssue>;
-type DuplicateExportIssues = Map<string, DuplicateExportIssue>;
-
-export type Issue = UnusedFileIssue | UnusedExportIssue | UnusedTypeIssue | DuplicateExportIssue;
+export type Issue = { filePath: FilePath; symbol: string; symbols?: string[]; symbolType?: SymbolType };
 
 export type Issues = {
   file: UnusedFileIssues;

@@ -86,6 +86,7 @@ Options:
   --onlyDuplicates              Report only unused duplicate exports
   --ignoreNamespaceImports      Ignore namespace imports (affects onlyExports and onlyTypes)
   --noProgress                  Don't show dynamic progress updates
+  --reporter                    Select reporter: symbols, compact (default: symbols)
 
 Examples:
 
@@ -174,6 +175,8 @@ can be tweaked further to the project structure.
 
 ## Example Output
 
+### Default reporter
+
 ```
 $ exportman --config ./exportman.json
 --- UNUSED FILES (2)
@@ -193,6 +196,27 @@ interface ProductDetail    src/types/Product.ts
 --- DUPLICATE EXPORTS (2)
 Registration, default  src/components/Registration.tsx
 ProductsList, default  src/components/Products.tsx
+```
+
+### Compact
+
+```
+$ exportman --config ./exportman.json --reporter compact
+--- UNUSED FILES (2)
+src/chat/helpers.ts
+src/components/SideBar.tsx
+--- UNUSED EXPORTS (4)
+src/common/src/string/index.ts: lowercaseFirstLetter
+src/components/Registration.tsx: RegistrationBox
+src/css.ts: clamp
+src/services/authentication.ts: restoreSession, PREFIX
+--- UNUSED TYPES (3)
+src/components/Registration/registrationMachine.ts: RegistrationServices, RegistrationAction
+src/components/Registration.tsx: ComponentProps
+src/types/Product.ts: ProductDetail
+--- DUPLICATE EXPORTS (2)
+src/components/Registration.tsx: Registration, default
+src/components/Products.tsx: ProductsList, default
 ```
 
 ## Why Yet Another unused file/export finder?

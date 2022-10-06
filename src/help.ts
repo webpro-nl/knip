@@ -11,6 +11,7 @@ Options:
   --onlyDuplicates              Report only unused duplicate exports
   --ignoreNamespaceImports      Ignore namespace imports (affects onlyExports and onlyTypes)
   --noProgress                  Don't show dynamic progress updates
+  --reporter                    Select reporter: symbols, compact (default: symbols)
 
 Examples:
 
