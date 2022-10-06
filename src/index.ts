@@ -108,7 +108,13 @@ export async function run(configuration: Configuration) {
 
             if (declaration.isKind(ts.SyntaxKind.Identifier)) {
               identifier = declaration;
-            } else if (declaration.isKind(ts.SyntaxKind.FunctionDeclaration)) {
+            } else if (
+              declaration.isKind(ts.SyntaxKind.FunctionDeclaration) ||
+              declaration.isKind(ts.SyntaxKind.ClassDeclaration) ||
+              declaration.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
+              declaration.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
+              declaration.isKind(ts.SyntaxKind.EnumDeclaration)
+            ) {
               identifier = declaration.getFirstChildByKindOrThrow(ts.SyntaxKind.Identifier);
             } else if (declaration.isKind(ts.SyntaxKind.PropertyAccessExpression)) {
               identifier = declaration.getLastChildByKindOrThrow(ts.SyntaxKind.Identifier);
