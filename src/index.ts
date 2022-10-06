@@ -17,6 +17,7 @@ export async function run(configuration: Configuration) {
     isFindUnusedTypes,
     isFindDuplicateExports,
     isFindNsImports,
+    jsDocOptions,
   } = configuration;
 
   // Create workspace for entry files + resolved dependencies
@@ -108,6 +109,8 @@ export async function run(configuration: Configuration) {
               if (!isFindUnusedExports && !type) return;
             }
 
+            if (jsDocOptions.isReadPublicTag && ts.getJSDocPublicTag(declaration.compilerNode)) return;
+
             let identifier: Identifier | undefined;
 
             if (declaration.isKind(ts.SyntaxKind.Identifier)) {
@@ -133,6 +136,7 @@ export async function run(configuration: Configuration) {
               if (isFindUnusedTypes && issues.type[filePath]?.[identifierText]) return;
 
               const refs = identifier.findReferences();
+
               if (refs.length === 0) {
                 addIssue('export', { filePath, symbol: identifierText });
               } else {

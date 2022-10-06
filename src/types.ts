@@ -16,6 +16,9 @@ export type Configuration = LocalConfiguration & {
   isFindDuplicateExports: boolean;
   isFindNsImports: boolean;
   isShowProgress: boolean;
+  jsDocOptions: {
+    isReadPublicTag: boolean;
+  };
 };
 
 export type ImportedConfiguration = LocalConfiguration | Record<string, LocalConfiguration>;

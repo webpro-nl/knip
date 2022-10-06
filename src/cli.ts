@@ -19,8 +19,9 @@ const {
     onlyNsMembers: isOnlyNsMembers = false,
     onlyDuplicates: isOnlyDuplicates = false,
     noProgress = false,
-    reporter = 'symbols'
-  }
+    reporter = 'symbols',
+    jsdoc = [],
+  },
 } = parseArgs({
   options: {
     help: { type: 'boolean' },
@@ -32,8 +33,9 @@ const {
     onlyDuplicates: { type: 'boolean' },
     onlyNsMembers: { type: 'boolean' },
     noProgress: { type: 'boolean' },
-    reporter: { type: 'string' }
-  }
+    reporter: { type: 'string' },
+    jsdoc: { type: 'string', multiple: true },
+  },
 });
 
 if (help || !config) {
@@ -56,6 +58,10 @@ const isFindDuplicateExports = isOnlyDuplicates === true || isFindAll;
 const report =
   reporter in reporters ? reporters[reporter as keyof typeof reporters] : require(path.join(cwd, reporter));
 
+const jsDocOptions = {
+  isReadPublicTag: jsdoc.includes('public'),
+};
+
 const main = async () => {
   const resolvedConfig = resolveConfig(configuration, cwdArg);
 
@@ -77,6 +83,7 @@ const main = async () => {
     isFindNsImports,
     isFindDuplicateExports,
     isShowProgress,
+    jsDocOptions,
   });
 
   const issues = await run(config);
