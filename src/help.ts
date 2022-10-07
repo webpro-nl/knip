@@ -4,10 +4,10 @@ export const printHelp = () => {
 Options:
   -c/--config [file]   Configuration file path (default: ./exportman.json or package.json#exportman)
   --cwd                Working directory (default: current working directory)
-  --maxIssues          Maximum number of unreferenced files until non-zero exit code (default: 1)
-  --only               Report only listed issue group(s): files, exports, types, members, duplicates
-  --exclude            Exclude issue group(s) from report: files, exports, types, members, duplicates
-  --noProgress         Don't show dynamic progress updates
+  --max-issues         Maximum number of unreferenced files until non-zero exit code (default: 1)
+  --only               Report only listed issue group(s): files, exports, types, nsExports, nsTypes, duplicates
+  --exclude            Exclude issue group(s) from report: files, exports, types, nsExports, nsTypes, duplicates
+  --no-progress        Don't show dynamic progress updates
   --reporter           Select reporter: symbols, compact (default: symbols)
   --jsdoc              Enable JSDoc parsing, with options: public (default: disabled)
 

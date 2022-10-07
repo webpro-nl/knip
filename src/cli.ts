@@ -15,10 +15,10 @@ const {
     config = 'exportman.json',
     only = [],
     exclude = [],
-    noProgress = false,
+    'no-progress': noProgress = false,
     reporter = 'symbols',
     jsdoc = [],
-    maxIssues = '1',
+    'max-issues': maxIssues = '1',
   },
 } = parseArgs({
   options: {
@@ -27,10 +27,10 @@ const {
     config: { type: 'string', short: 'c' },
     only: { type: 'string', multiple: true },
     exclude: { type: 'string', multiple: true },
-    noProgress: { type: 'boolean' },
+    'no-progress': { type: 'boolean' },
     reporter: { type: 'string' },
     jsdoc: { type: 'string', multiple: true },
-    maxIssues: { type: 'string' },
+    'max-issues': { type: 'string' },
   },
 });
 
