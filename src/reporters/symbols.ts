@@ -29,49 +29,37 @@ const logIssueGroupResults = (issues: Issue[], cwd: string, title: false | strin
 };
 
 export default ({ issues, config, cwd }: { issues: Issues; config: Configuration; cwd: string }) => {
-  const {
-    isOnlyFiles,
-    isOnlyExports,
-    isOnlyTypes,
-    isOnlyNsMembers,
-    isOnlyDuplicates,
-    isFindUnusedFiles,
-    isFindUnusedExports,
-    isFindUnusedTypes,
-    isFindNsImports,
-    isFindDuplicateExports,
-  } = config;
+  const { include } = config;
+  const reportMultipleGroups = Object.values(include).filter(Boolean).length > 1;
 
-  if (isFindUnusedFiles) {
-    const unusedFiles = Array.from(issues.file);
-    logIssueGroupResult(unusedFiles, cwd, !isOnlyFiles && 'UNUSED FILES');
+  if (include.files) {
+    const unusedFiles = Array.from(issues.files);
+    logIssueGroupResult(unusedFiles, cwd, reportMultipleGroups && 'UNUSED FILES');
   }
 
-  if (isFindUnusedExports) {
-    const unusedExports = Object.values(issues.export)
-      .map(issues => Object.values(issues))
-      .flat();
-    logIssueGroupResults(unusedExports, cwd, !isOnlyExports && 'UNUSED EXPORTS');
+  if (include.exports) {
+    const unusedExports = Object.values(issues.exports).map(Object.values).flat();
+    logIssueGroupResults(unusedExports, cwd, reportMultipleGroups && 'UNUSED EXPORTS');
   }
 
-  if (isFindUnusedTypes) {
-    const unusedTypes = Object.values(issues.type)
+  if (include.types) {
+    const unusedTypes = Object.values(issues.types)
       .map(issues => Object.values(issues))
       .flat();
-    logIssueGroupResults(unusedTypes, cwd, !isOnlyTypes && 'UNUSED TYPES');
+    logIssueGroupResults(unusedTypes, cwd, reportMultipleGroups && 'UNUSED TYPES');
   }
 
-  if (isFindNsImports) {
-    const unusedExports = Object.values(issues.member)
+  if (include.members) {
+    const unusedExports = Object.values(issues.members)
       .map(issues => Object.values(issues))
       .flat();
-    logIssueGroupResults(unusedExports, cwd, !isOnlyNsMembers && 'UNUSED NAMESPACE MEMBERS');
+    logIssueGroupResults(unusedExports, cwd, reportMultipleGroups && 'UNUSED NAMESPACE MEMBERS');
   }
 
-  if (isFindDuplicateExports) {
-    const unusedDuplicates = Object.values(issues.duplicate)
+  if (include.duplicates) {
+    const unusedDuplicates = Object.values(issues.duplicates)
       .map(issues => Object.values(issues))
       .flat();
-    logIssueGroupResults(unusedDuplicates, cwd, !isOnlyDuplicates && 'DUPLICATE EXPORTS');
+    logIssueGroupResults(unusedDuplicates, cwd, reportMultipleGroups && 'DUPLICATE EXPORTS');
   }
 };

@@ -1,24 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ts, Project } from 'ts-morph';
-import micromatch from 'micromatch';
 import type { SourceFile, ExportedDeclarations } from 'ts-morph';
-import type { ImportedConfiguration, Configuration } from './types';
-
-export const resolveConfig = (importedConfiguration: ImportedConfiguration, cwdArg?: string) => {
-  if (cwdArg && !('filePatterns' in importedConfiguration)) {
-    const importedConfigKey = Object.keys(importedConfiguration).find(pattern => micromatch.isMatch(cwdArg, pattern));
-    if (importedConfigKey) {
-      return importedConfiguration[importedConfigKey];
-    }
-  }
-  if (!cwdArg && !('filePatterns' in importedConfiguration)) {
-    console.error('Unable to find `filePatterns` in configuration.');
-    console.info('Add it at root level, or use the --cwd argument with a matching configuration.\n');
-    return;
-  }
-  return importedConfiguration as Configuration;
-};
 
 const isFile = async (filePath: string) => {
   try {
@@ -29,7 +12,7 @@ const isFile = async (filePath: string) => {
   }
 };
 
-const findFile = async (cwd: string, fileName: string): Promise<string> => {
+export const findFile = async (cwd: string, fileName: string): Promise<string> => {
   const filePath = path.join(cwd, fileName);
   if (await isFile(filePath)) return filePath;
   return findFile(path.resolve(cwd, '..'), fileName);

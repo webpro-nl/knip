@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveConfig } from '../src/util';
+import { resolveConfig } from '../src/util/config';
 
 const baseConfig = { entryFiles: ['index.ts'], filePatterns: ['*.ts'] };
 

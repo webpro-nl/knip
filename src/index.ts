@@ -4,21 +4,12 @@ import { findDuplicateExportedNames, findReferencingNamespaceNodes } from 'ts-mo
 import { createProject, partitionSourceFiles, getType } from './util';
 import { getLine, LineRewriter } from './log';
 import type { Identifier } from 'ts-morph';
-import type { Configuration, Issues, Issue } from './types';
+import type { Configuration, Issues, Issue, IssueType } from './types';
 
 const lineRewriter = new LineRewriter();
 
 export async function run(configuration: Configuration) {
-  const {
-    cwd,
-    isShowProgress,
-    isFindUnusedFiles,
-    isFindUnusedExports,
-    isFindUnusedTypes,
-    isFindDuplicateExports,
-    isFindNsImports,
-    jsDocOptions,
-  } = configuration;
+  const { cwd, isShowProgress, include, jsDocOptions } = configuration;
 
   // Create workspace for entry files + resolved dependencies
   const production = await createProject(cwd, configuration.entryFiles);
@@ -36,20 +27,20 @@ export async function run(configuration: Configuration) {
 
   // Set up the results
   const issues: Issues = {
-    file: new Set(unusedProductionFiles.map(file => file.getFilePath())),
-    export: {},
-    type: {},
-    duplicate: {},
-    member: {},
+    files: new Set(unusedProductionFiles.map(file => file.getFilePath())),
+    exports: {},
+    types: {},
+    duplicates: {},
+    members: {}
   };
 
   const counters = {
-    file: issues.file.size,
-    export: 0,
-    type: 0,
-    duplicate: 0,
-    member: 0,
-    processed: issues.file.size,
+    files: issues.files.size,
+    exports: 0,
+    types: 0,
+    duplicates: 0,
+    members: 0,
+    processed: issues.files.size
   };
 
   // OK, this looks ugly
@@ -59,11 +50,11 @@ export async function run(configuration: Configuration) {
     const total = unusedProductionFiles.length + usedNonEntryFiles.length;
     const percentage = Math.floor((counter / total) * 100);
     const messages = [getLine(`${percentage}%`, `of files processed (${counter} of ${total})`)];
-    isFindUnusedFiles && messages.push(getLine(unusedProductionFiles.length, 'unused files'));
-    isFindUnusedExports && messages.push(getLine(counters.export, 'unused exports'));
-    isFindUnusedTypes && messages.push(getLine(counters.type, 'unused types'));
-    isFindNsImports && messages.push(getLine(counters.member, 'unused namespace members'));
-    isFindDuplicateExports && messages.push(getLine(counters.duplicate, 'duplicate exports'));
+    include.files && messages.push(getLine(unusedProductionFiles.length, 'unused files'));
+    include.exports && messages.push(getLine(counters.exports, 'unused exports'));
+    include.types && messages.push(getLine(counters.types, 'unused types'));
+    include.members && messages.push(getLine(counters.members, 'unused namespace members'));
+    include.duplicates && messages.push(getLine(counters.duplicates, 'duplicate exports'));
     if (counter < total) {
       messages.push('');
       messages.push(`Processing: ${path.relative(cwd, item.filePath)}`);
@@ -71,7 +62,7 @@ export async function run(configuration: Configuration) {
     lineRewriter.update(messages);
   };
 
-  const addIssue = (issueType: 'export' | 'type' | 'duplicate' | 'member', issue: Issue) => {
+  const addIssue = (issueType: Exclude<IssueType, 'files'>, issue: Issue) => {
     const { filePath, symbol } = issue;
     const key = path.relative(cwd, filePath);
     issues[issueType][key] = issues[issueType][key] ?? {};
@@ -81,22 +72,22 @@ export async function run(configuration: Configuration) {
   };
 
   // Skip when only interested in unused files
-  if (isFindUnusedExports || isFindUnusedTypes || isFindNsImports || isFindDuplicateExports) {
+  if (include.exports || include.types || include.members || include.duplicates) {
     usedNonEntryFiles.forEach(sourceFile => {
       const filePath = sourceFile.getFilePath();
 
       // The file is used, let's visit all export declarations to see which of them are not used somewhere else
       const exportDeclarations = sourceFile.getExportedDeclarations();
 
-      if (isFindDuplicateExports) {
+      if (include.duplicates) {
         const duplicateExports = findDuplicateExportedNames(sourceFile);
         duplicateExports.forEach(symbols => {
           const symbol = symbols.join(',');
-          addIssue('duplicate', { filePath, symbol, symbols });
+          addIssue('duplicates', { filePath, symbol, symbols });
         });
       }
 
-      if (isFindUnusedExports || isFindUnusedTypes || isFindNsImports) {
+      if (include.exports || include.types || include.members) {
         const uniqueExportedSymbols = new Set([...exportDeclarations.values()].flat());
         if (uniqueExportedSymbols.size === 1) return; // Only one exported identifier means it's used somewhere else
 
@@ -104,9 +95,9 @@ export async function run(configuration: Configuration) {
           declarations.forEach(declaration => {
             const type = getType(declaration);
 
-            if (!isFindNsImports) {
-              if (!isFindUnusedTypes && type) return;
-              if (!isFindUnusedExports && !type) return;
+            if (!include.members) {
+              if (!include.types && type) return;
+              if (!include.exports && !type) return;
             }
 
             if (jsDocOptions.isReadPublicTag && ts.getJSDocPublicTag(declaration.compilerNode)) return;
@@ -132,14 +123,14 @@ export async function run(configuration: Configuration) {
             if (identifier) {
               const identifierText = identifier.getText();
 
-              if (isFindUnusedExports && issues.export[filePath]?.[identifierText]) return;
-              if (isFindUnusedTypes && issues.type[filePath]?.[identifierText]) return;
-              if (isFindNsImports && issues.member[filePath]?.[identifierText]) return;
+              if (include.exports && issues.exports[filePath]?.[identifierText]) return;
+              if (include.types && issues.types[filePath]?.[identifierText]) return;
+              if (include.members && issues.members[filePath]?.[identifierText]) return;
 
               const refs = identifier.findReferences();
 
               if (refs.length === 0) {
-                addIssue('export', { filePath, symbol: identifierText });
+                addIssue('exports', { filePath, symbol: identifierText });
               } else {
                 const refFiles = new Set(refs.map(r => r.compilerObject.references.map(r => r.fileName)).flat());
 
@@ -149,11 +140,11 @@ export async function run(configuration: Configuration) {
 
                 // No more reasons left to think this identifier is used somewhere else, report it as unused
                 if (findReferencingNamespaceNodes(sourceFile).length > 0) {
-                  addIssue('member', { filePath, symbol: identifierText });
+                  addIssue('members', { filePath, symbol: identifierText });
                 } else if (type) {
-                  addIssue('type', { filePath, symbol: identifierText, symbolType: type });
+                  addIssue('types', { filePath, symbol: identifierText, symbolType: type });
                 } else {
-                  addIssue('export', { filePath, symbol: identifierText });
+                  addIssue('exports', { filePath, symbol: identifierText });
                 }
               }
             }
