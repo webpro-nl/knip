@@ -19,7 +19,7 @@ export type IssueType = keyof Issues;
 
 type LocalConfiguration = {
   entryFiles: string[];
-  filePatterns: string[];
+  projectFiles: string[];
 };
 
 export type Configuration = LocalConfiguration & {

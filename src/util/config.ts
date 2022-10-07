@@ -17,14 +17,14 @@ export const importConfig = (cwd: string, configArg: string) => {
 };
 
 export const resolveConfig = (importedConfiguration: ImportedConfiguration, cwdArg?: string) => {
-  if (cwdArg && !('filePatterns' in importedConfiguration)) {
+  if (cwdArg && !('projectFiles' in importedConfiguration)) {
     const importedConfigKey = Object.keys(importedConfiguration).find(pattern => micromatch.isMatch(cwdArg, pattern));
     if (importedConfigKey) {
       return importedConfiguration[importedConfigKey];
     }
   }
-  if (!cwdArg && (!importedConfiguration.entryFiles || !importedConfiguration.filePatterns)) {
-    console.error('Unable to find `entryFiles` and/or `filePatterns` in configuration.');
+  if (!cwdArg && (!importedConfiguration.entryFiles || !importedConfiguration.projectFiles)) {
+    console.error('Unable to find `entryFiles` and/or `projectFiles` in configuration.');
     console.info('Add it at root level, or use the --cwd argument with a matching configuration.\n');
     return;
   }

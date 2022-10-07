@@ -10,7 +10,7 @@
                             <div style="display: inline-block; font-size: 15px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
                                 Project files
                                 <br style="font-size: 15px"/>
-                                (filePatterns)
+                                (projectFiles)
                                 <br style="font-size: 15px"/>
                                 <div style="font-size: 15px"></div>
                             </div>

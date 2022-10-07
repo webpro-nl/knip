@@ -8,7 +8,7 @@ test('run', async () => {
     ...baseConfig,
     cwd: 'test/fixtures/basic',
     entryFiles: ['index.ts'],
-    filePatterns: ['*.ts'],
+    projectFiles: ['*.ts'],
   });
 
   assert(counters.files === 1);

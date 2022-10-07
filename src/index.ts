@@ -18,7 +18,7 @@ export async function run(configuration: Configuration) {
   const productionFiles = production.getSourceFiles();
 
   // Create workspace for the entire project
-  const project = await createProject(cwd, configuration.filePatterns);
+  const project = await createProject(cwd, configuration.projectFiles);
   const projectFiles = project.getSourceFiles();
 
   // Slice & dice used & unreferenced files
@@ -54,8 +54,8 @@ export async function run(configuration: Configuration) {
     const messages = [getLine(`${percentage}%`, `of files processed (${counter} of ${total})`)];
     include.files && messages.push(getLine(unreferencedProductionFiles.length, 'unused files'));
     include.exports && messages.push(getLine(counters.exports, 'unused exports'));
-    include.types && messages.push(getLine(counters.types, 'unused types'));
     include.nsExports && messages.push(getLine(counters.nsExports, 'unused exports in namespace'));
+    include.types && messages.push(getLine(counters.types, 'unused types'));
     include.nsTypes && messages.push(getLine(counters.nsTypes, 'unused types in namespace'));
     include.duplicates && messages.push(getLine(counters.duplicates, 'duplicate exports'));
     if (counter < total) {
