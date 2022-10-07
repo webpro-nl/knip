@@ -46,9 +46,14 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
     logIssueGroupResults(unreferencedTypes, cwd, reportMultipleGroups && 'UNUSED TYPES');
   }
 
-  if (include.members) {
-    const unreferencedExports = Object.values(issues.members).map(Object.values).flat();
-    logIssueGroupResults(unreferencedExports, cwd, reportMultipleGroups && 'UNUSED NAMESPACE MEMBERS');
+  if (include.nsExports) {
+    const unreferencedNsExports = Object.values(issues.nsExports).map(Object.values).flat();
+    logIssueGroupResults(unreferencedNsExports, cwd, reportMultipleGroups && 'UNUSED EXPORTS IN NAMESPACE');
+  }
+
+  if (include.nsTypes) {
+    const unreferencedNsTypes = Object.values(issues.nsExports).map(Object.values).flat();
+    logIssueGroupResults(unreferencedNsTypes, cwd, reportMultipleGroups && 'UNUSED TYPES IN NAMESPACE');
   }
 
   if (include.duplicates) {

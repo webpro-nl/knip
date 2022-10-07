@@ -10,8 +10,9 @@ export type Issues = {
   files: UnusedFileIssues;
   exports: UnusedExportIssues;
   types: UnusedExportIssues;
+  nsExports: UnusedExportIssues;
+  nsTypes: UnusedExportIssues;
   duplicates: UnusedExportIssues;
-  members: UnusedExportIssues;
 };
 
 export type IssueType = keyof Issues;

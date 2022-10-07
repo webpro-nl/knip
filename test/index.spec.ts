@@ -23,10 +23,13 @@ test('run', async () => {
   assert(Object.values(issues.types).length === 1);
   assert(issues.types['dep.ts']['Dep'].symbolType === 'type');
 
-  assert(counters.members === 2);
-  assert(Object.values(issues.members).length === 1);
-  assert(issues.members['ns.ts']['NS'].symbol === 'NS');
-  assert(issues.members['ns.ts']['z'].symbol === 'z');
+  assert(counters.nsExports === 1);
+  assert(Object.values(issues.nsExports).length === 1);
+  assert(issues.nsExports['ns.ts']['z'].symbol === 'z');
+
+  assert(counters.nsTypes === 1);
+  assert(Object.values(issues.nsTypes).length === 1);
+  assert(issues.nsTypes['ns.ts']['NS'].symbol === 'NS');
 
   assert(counters.duplicates === 1);
   assert(Object.values(issues.duplicates).length === 1);

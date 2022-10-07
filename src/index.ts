@@ -30,16 +30,18 @@ export async function run(configuration: Configuration) {
     files: new Set(unreferencedProductionFiles.map(file => file.getFilePath())),
     exports: {},
     types: {},
+    nsExports: {},
+    nsTypes: {},
     duplicates: {},
-    members: {},
   };
 
   const counters = {
     files: issues.files.size,
     exports: 0,
     types: 0,
+    nsExports: 0,
+    nsTypes: 0,
     duplicates: 0,
-    members: 0,
     processed: issues.files.size,
   };
 
@@ -53,7 +55,8 @@ export async function run(configuration: Configuration) {
     include.files && messages.push(getLine(unreferencedProductionFiles.length, 'unused files'));
     include.exports && messages.push(getLine(counters.exports, 'unused exports'));
     include.types && messages.push(getLine(counters.types, 'unused types'));
-    include.members && messages.push(getLine(counters.members, 'unused namespace members'));
+    include.nsExports && messages.push(getLine(counters.nsExports, 'unused exports in namespace'));
+    include.nsTypes && messages.push(getLine(counters.nsTypes, 'unused types in namespace'));
     include.duplicates && messages.push(getLine(counters.duplicates, 'duplicate exports'));
     if (counter < total) {
       messages.push('');
@@ -72,7 +75,7 @@ export async function run(configuration: Configuration) {
   };
 
   // Skip when only interested in unreferenced files
-  if (include.exports || include.types || include.members || include.duplicates) {
+  if (include.exports || include.types || include.nsExports || include.nsTypes || include.duplicates) {
     usedNonEntryFiles.forEach(sourceFile => {
       const filePath = sourceFile.getFilePath();
 
@@ -87,7 +90,7 @@ export async function run(configuration: Configuration) {
         });
       }
 
-      if (include.exports || include.types || include.members) {
+      if (include.exports || include.types || include.nsExports || include.nsTypes) {
         const uniqueExportedSymbols = new Set([...exportDeclarations.values()].flat());
         if (uniqueExportedSymbols.size === 1) return; // Only one exported identifier means it's used somewhere else
 
@@ -95,7 +98,7 @@ export async function run(configuration: Configuration) {
           declarations.forEach(declaration => {
             const type = getType(declaration);
 
-            if (!include.members) {
+            if (!include.nsExports && !include.nsTypes) {
               if (!include.types && type) return;
               if (!include.exports && !type) return;
             }
@@ -125,7 +128,8 @@ export async function run(configuration: Configuration) {
 
               if (include.exports && issues.exports[filePath]?.[identifierText]) return;
               if (include.types && issues.types[filePath]?.[identifierText]) return;
-              if (include.members && issues.members[filePath]?.[identifierText]) return;
+              if (include.nsExports && issues.nsExports[filePath]?.[identifierText]) return;
+              if (include.nsTypes && issues.nsTypes[filePath]?.[identifierText]) return;
 
               const refs = identifier.findReferences();
 
@@ -140,7 +144,11 @@ export async function run(configuration: Configuration) {
 
                 // No more reasons left to think this identifier is used somewhere else, report it as unreferenced
                 if (findReferencingNamespaceNodes(sourceFile).length > 0) {
-                  addIssue('members', { filePath, symbol: identifierText });
+                  if (type) {
+                    addIssue('nsTypes', { filePath, symbol: identifierText });
+                  } else {
+                    addIssue('nsExports', { filePath, symbol: identifierText });
+                  }
                 } else if (type) {
                   addIssue('types', { filePath, symbol: identifierText, symbolType: type });
                 } else {

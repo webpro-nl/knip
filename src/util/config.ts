@@ -32,7 +32,7 @@ export const resolveConfig = (importedConfiguration: ImportedConfiguration, cwdA
 };
 
 export const resolveIncludedFromArgs = (onlyArg: string[], excludeArg: string[]) => {
-  const groups: IssueType[] = ['files', 'exports', 'types', 'members', 'duplicates'];
+  const groups: IssueType[] = ['files', 'exports', 'types', 'nsExports', 'nsTypes', 'duplicates'];
   const only = onlyArg.map(value => value.split(',')).flat() as IssueType[];
   const exclude = excludeArg.map(value => value.split(',')).flat() as IssueType[];
   const includes = (only.length > 0 ? only : groups).filter((group: IssueType) => !exclude.includes(group));
