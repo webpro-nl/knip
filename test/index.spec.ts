@@ -33,5 +33,5 @@ test('run', async () => {
 
   assert(counters.duplicates === 1);
   assert(Object.values(issues.duplicates).length === 1);
-  assert(issues.duplicates['dep.ts']['dep,default'].symbols?.[0] === 'dep');
+  assert(issues.duplicates['dep.ts']['dep|default'].symbols?.[0] === 'dep');
 });

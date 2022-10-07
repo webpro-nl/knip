@@ -2,8 +2,9 @@ import path from 'node:path';
 import type { Issue, Issues, Configuration } from '../types';
 
 const logIssueLine = ({ issue, cwd, padding }: { issue: Issue; cwd: string; padding: number }) => {
+  const symbols = issue.symbols ? issue.symbols.join(', ') : issue.symbol;
   console.log(
-    `${issue.symbol.padEnd(padding + 2)}${issue.symbolType?.padEnd(11) || ''}${path.relative(cwd, issue.filePath)}`
+    `${symbols.padEnd(padding + 2)}${issue.symbolType?.padEnd(11) || ''}${path.relative(cwd, issue.filePath)}`
   );
 };
 
@@ -52,7 +53,7 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
   }
 
   if (include.nsTypes) {
-    const unreferencedNsTypes = Object.values(issues.nsExports).map(Object.values).flat();
+    const unreferencedNsTypes = Object.values(issues.nsTypes).map(Object.values).flat();
     logIssueGroupResults(unreferencedNsTypes, cwd, reportMultipleGroups && 'UNUSED TYPES IN NAMESPACE');
   }
 

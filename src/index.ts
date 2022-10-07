@@ -85,7 +85,7 @@ export async function run(configuration: Configuration) {
       if (include.duplicates) {
         const duplicateExports = findDuplicateExportedNames(sourceFile);
         duplicateExports.forEach(symbols => {
-          const symbol = symbols.join(',');
+          const symbol = symbols.join('|');
           addIssue('duplicates', { filePath, symbol, symbols });
         });
       }
@@ -145,7 +145,7 @@ export async function run(configuration: Configuration) {
                 // No more reasons left to think this identifier is used somewhere else, report it as unreferenced
                 if (findReferencingNamespaceNodes(sourceFile).length > 0) {
                   if (type) {
-                    addIssue('nsTypes', { filePath, symbol: identifierText });
+                    addIssue('nsTypes', { filePath, symbol: identifierText, symbolType: type });
                   } else {
                     addIssue('nsExports', { filePath, symbol: identifierText });
                   }
