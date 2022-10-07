@@ -24,7 +24,7 @@ Similar projects either detect only unimported files, or only unused exports. Mo
 entry files, an essential feature to produce good results. This also allows to unleash Exportman on a specific part of
 your project, and work these separately.
 
-Exportman is another fresh take on keeping your projects clean & tidy.
+🦸 Exportman is another fresh take on keeping your projects clean & tidy!
 
 ## Installation
 
@@ -39,11 +39,11 @@ Create a configuration file, let's name it `.exportman.json` with these contents
 ```json
 {
   "entryFiles": ["src/index.ts"],
-  "filePatterns": ["src/**/*.ts", "!**/*.spec.ts"]
+  "projectFiles": ["src/**/*.ts", "!**/*.spec.ts"]
 }
 ```
 
-The `entryFiles` target the starting point(s) to resolve production code dependencies. The `filePatterns` should contain
+The `entryFiles` target the starting point(s) to resolve production code dependencies. The `projectFiles` should contain
 all files it should match them against, including potentially unused files.
 
 Then run the checks:
@@ -54,20 +54,20 @@ npx exportman --config .exportman
 
 This will analyze the project and output unused files, exports, types and duplicate exports.
 
-Use `--onlyFiles` when configuring Exportman for faster initial results.
+Use `--only files` when configuring Exportman for faster initial results.
 
 ## How It Works
 
 Exportman works by creating two sets of files:
 
 1. Production code is the set of files resolved from the `entryFiles`.
-2. Project files are the full set of files matching the `filePatterns`.
+2. They are matched against the set of `projectFiles`.
 3. The subset of project files that are not production code will be reported as unused files (in red).
 4. Then the production code (in blue) will be scanned for unused exports.
 
 ![How it works](./assets/how-it-works.drawio.svg)
 
-Clean and actionable reports are achieved when non-production code such as tests are excluded from the `filePatterns`
+Clean and actionable reports are achieved when non-production code such as tests are excluded from the `projectFiles`
 (using negation patterns such as `!**/*.test.ts`).
 
 ## Options
@@ -80,8 +80,8 @@ Options:
   -c/--config [file]   Configuration file path (default: ./exportman.json or package.json#exportman)
   --cwd                Working directory (default: current working directory)
   --max-issues         Maximum number of unreferenced files until non-zero exit code (default: 1)
-  --only               Report only listed issue group(s): files, exports, types, members, duplicates
-  --exclude            Exclude issue group(s) from report: files, exports, types, members, duplicates
+  --only               Report only listed issue group(s): files, exports, types, nsExports, nsTypes, duplicates
+  --exclude            Exclude issue group(s) from report: files, exports, types, nsExports, nsTypes, duplicates
   --no-progress        Don't show dynamic progress updates
   --reporter           Select reporter: symbols, compact (default: symbols)
   --jsdoc              Enable JSDoc parsing, with options: public (default: disabled)
@@ -94,6 +94,34 @@ $ exportman -c ./exportman.js --reporter compact --jsdoc public
 
 More info: https://github.com/webpro/exportman
 ```
+
+## Reading the report
+
+After analyzing all the files resolved from the `entryFiles` against the `projectFiles`, the report contains the
+following groups of issues:
+
+- Unused **files**: no references to this file have been found
+- Unused **exports**: unable to find references to this exported variable
+- Unused exports in namespaces (1): unable to find references to this exported variable, and it has become a member of a
+  re-exported namespace (**nsExports**)
+- Unused types: no references to this exported type have been found
+- Unused types in namespaces (1): this exported variable is not directly referenced, and it has become a member a
+  re-exported namespace (**nsTypes**)
+- Duplicate exports - the same thing is exported more than once with different names (**duplicates**)
+
+Each group type (in **bold**) can be used in the `--only` and `--exclude` arguments to slice & dice the report to your
+needs.
+
+🚀 The process is considerably faster when reporting only the `files` and/or `duplicates` groups.
+
+## Now what?
+
+After verifying that files reported as unused are indeed not referenced anywhere, they can be deleted.
+
+Remove the `export` keyword in front of unused exports. Then you (or tools such as ESLint) can see whether the variable
+or type is used within its own file. If this is not the case, it can be removed completely.
+
+🔁 Repeat the process to reveal new unused files and exports. Sometimes it's so liberating to delete things.
 
 ## More configuration examples
 
@@ -111,7 +139,7 @@ of `entryFiles`:
 ```json
 {
   "entryFiles": ["src/index.ts", "src/**/*.spec.ts"],
-  "filePatterns": ["src/**/*.ts", "!**/*.e2e.ts"]
+  "projectFiles": ["src/**/*.ts", "!**/*.e2e.ts"]
 }
 ```
 
@@ -128,7 +156,7 @@ configured using globs:
 {
   "packages/*": {
     "entryFiles": ["src/index.ts"],
-    "filePatterns": ["src/**/*.{ts,tsx}", "!**/*.spec.{ts,tsx}"]
+    "projectFiles": ["src/**/*.{ts,tsx}", "!**/*.spec.{ts,tsx}"]
   }
 }
 ```
@@ -151,7 +179,7 @@ add logic and/or comments:
 ```js
 const entryFiles = ['apps/**/pages/**/*.{js,ts,tsx}'];
 
-const filePatterns = [
+const projectFiles = [
   '{apps,libs}/**/*.{ts,tsx}',
   // Next.js
   '!**/next.config.js',
@@ -165,7 +193,7 @@ const filePatterns = [
   '!**/*.stories.tsx',
 ];
 
-module.exports = { entryFiles, filePatterns };
+module.exports = { entryFiles, projectFiles };
 ```
 
 This should give good results about unused files and exports for the monorepo. After the first run, the configuration
@@ -177,16 +205,16 @@ can be tweaked further to the project structure.
 
 ```
 $ exportman --config ./exportman.json
---- UNREFERENCED FILES (2)
+--- UNUSED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx
---- UNREFERENCED EXPORTS (5)
+--- UNUSED EXPORTS (5)
 lowercaseFirstLetter  src/common/src/string/index.ts
 RegistrationBox       src/components/Registration.tsx
 clamp                 src/css.ts
 restoreSession        src/services/authentication.ts
 PREFIX                src/services/authentication.ts
---- UNREFERENCED TYPES (4)
+--- UNUSED TYPES (4)
 enum RegistrationServices  src/components/Registration/registrationMachine.ts
 type RegistrationAction    src/components/Registration/registrationMachine.ts
 type ComponentProps        src/components/Registration.tsx
@@ -200,15 +228,15 @@ ProductsList, default  src/components/Products.tsx
 
 ```
 $ exportman --config ./exportman.json --reporter compact
---- UNREFERENCED FILES (2)
+--- UNUSED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx
---- UNREFERENCED EXPORTS (4)
+--- UNUSED EXPORTS (4)
 src/common/src/string/index.ts: lowercaseFirstLetter
 src/components/Registration.tsx: RegistrationBox
 src/css.ts: clamp
 src/services/authentication.ts: restoreSession, PREFIX
---- UNREFERENCED TYPES (3)
+--- UNUSED TYPES (3)
 src/components/Registration/registrationMachine.ts: RegistrationServices, RegistrationAction
 src/components/Registration.tsx: ComponentProps
 src/types/Product.ts: ProductDetail
