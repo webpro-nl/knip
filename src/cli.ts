@@ -48,10 +48,6 @@ const isShowProgress = !noProgress || !process.stdout.isTTY;
 const report =
   reporter in reporters ? reporters[reporter as keyof typeof reporters] : require(path.join(cwd, reporter));
 
-const jsDocOptions = {
-  isReadPublicTag: jsdoc.includes('public'),
-};
-
 const main = async () => {
   const resolvedConfig = resolveConfig(configuration, cwdArg);
 
@@ -64,7 +60,9 @@ const main = async () => {
     cwd,
     include: resolveIncludedFromArgs(only, exclude),
     isShowProgress,
-    jsDocOptions,
+    jsDocOptions: {
+      isReadPublicTag: jsdoc.includes('public'),
+    },
   });
 
   const { issues, counters } = await run(config);

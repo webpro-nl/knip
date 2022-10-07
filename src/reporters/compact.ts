@@ -8,8 +8,7 @@ const logIssueLine = (cwd: string, filePath: string, symbols?: string[]) => {
 const logIssueGroupResult = (issues: string[], cwd: string, title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
-    const sortedByFilePath = issues.sort();
-    sortedByFilePath.forEach(filePath => logIssueLine(cwd, filePath));
+    issues.sort().forEach(filePath => logIssueLine(cwd, filePath));
   } else {
     console.log('N/A');
   }

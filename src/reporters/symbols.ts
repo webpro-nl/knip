@@ -10,8 +10,7 @@ const logIssueLine = ({ issue, cwd, padding }: { issue: Issue; cwd: string; padd
 const logIssueGroupResult = (issues: string[], cwd: string, title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
-    const sortedByFilePath = issues.sort();
-    sortedByFilePath.forEach(filePath => console.log(path.relative(cwd, filePath)));
+    issues.sort().forEach(filePath => console.log(path.relative(cwd, filePath)));
   } else {
     console.log('N/A');
   }

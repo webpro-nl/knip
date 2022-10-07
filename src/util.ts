@@ -30,7 +30,7 @@ export const createProject = async (cwd: string, paths?: string | string[]) => {
   const workspace = new Project({
     tsConfigFilePath,
     skipAddingFilesFromTsConfig: true,
-    skipFileDependencyResolution: true
+    skipFileDependencyResolution: true,
   });
   if (paths) workspace.addSourceFilesAtPaths(resolvePaths(cwd, paths));
   return workspace;
