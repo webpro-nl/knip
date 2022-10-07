@@ -42,14 +42,14 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
     logIssueGroupResults(unreferencedExports, cwd, reportMultipleGroups && 'UNUSED EXPORTS');
   }
 
-  if (include.types) {
-    const unreferencedTypes = Object.values(issues.types).map(Object.values).flat();
-    logIssueGroupResults(unreferencedTypes, cwd, reportMultipleGroups && 'UNUSED TYPES');
-  }
-
   if (include.nsExports) {
     const unreferencedNsExports = Object.values(issues.nsExports).map(Object.values).flat();
     logIssueGroupResults(unreferencedNsExports, cwd, reportMultipleGroups && 'UNUSED EXPORTS IN NAMESPACE');
+  }
+
+  if (include.types) {
+    const unreferencedTypes = Object.values(issues.types).map(Object.values).flat();
+    logIssueGroupResults(unreferencedTypes, cwd, reportMultipleGroups && 'UNUSED TYPES');
   }
 
   if (include.nsTypes) {

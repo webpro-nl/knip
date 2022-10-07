@@ -41,20 +41,20 @@ export default ({ issues, config, cwd }: { issues: Issues; config: Configuration
     logIssueGroupResults(unreferencedExports, cwd, reportMultipleGroups && 'UNREFERENCED EXPORTS');
   }
 
-  if (include.types) {
-    const unreferencedTypes = Object.values(issues.types).map(issues => {
-      const items = Object.values(issues);
-      return { ...items[0], symbols: items.map(i => i.symbol) };
-    });
-    logIssueGroupResults(unreferencedTypes, cwd, reportMultipleGroups && 'UNREFERENCED TYPES');
-  }
-
   if (include.nsExports) {
     const unreferencedNsExports = Object.values(issues.nsExports).map(issues => {
       const items = Object.values(issues);
       return { ...items[0], symbols: items.map(i => i.symbol) };
     });
     logIssueGroupResults(unreferencedNsExports, cwd, reportMultipleGroups && 'UNREFERENCED EXPORTS IN NAMESPACE');
+  }
+
+  if (include.types) {
+    const unreferencedTypes = Object.values(issues.types).map(issues => {
+      const items = Object.values(issues);
+      return { ...items[0], symbols: items.map(i => i.symbol) };
+    });
+    logIssueGroupResults(unreferencedTypes, cwd, reportMultipleGroups && 'UNREFERENCED TYPES');
   }
 
   if (include.nsTypes) {
