@@ -21,17 +21,17 @@ export async function run(configuration: Configuration) {
   const project = await createProject(cwd, configuration.filePatterns);
   const projectFiles = project.getSourceFiles();
 
-  // Slice & dice used & unused files
-  const [usedProductionFiles, unusedProductionFiles] = partitionSourceFiles(projectFiles, productionFiles);
+  // Slice & dice used & unreferenced files
+  const [usedProductionFiles, unreferencedProductionFiles] = partitionSourceFiles(projectFiles, productionFiles);
   const [, usedNonEntryFiles] = partitionSourceFiles(usedProductionFiles, entryFiles);
 
   // Set up the results
   const issues: Issues = {
-    files: new Set(unusedProductionFiles.map(file => file.getFilePath())),
+    files: new Set(unreferencedProductionFiles.map(file => file.getFilePath())),
     exports: {},
     types: {},
     duplicates: {},
-    members: {}
+    members: {},
   };
 
   const counters = {
@@ -40,17 +40,17 @@ export async function run(configuration: Configuration) {
     types: 0,
     duplicates: 0,
     members: 0,
-    processed: issues.files.size
+    processed: issues.files.size,
   };
 
   // OK, this looks ugly
   const updateProcessingOutput = (item: Issue) => {
     if (!isShowProgress) return;
-    const counter = unusedProductionFiles.length + counters.processed;
-    const total = unusedProductionFiles.length + usedNonEntryFiles.length;
+    const counter = unreferencedProductionFiles.length + counters.processed;
+    const total = unreferencedProductionFiles.length + usedNonEntryFiles.length;
     const percentage = Math.floor((counter / total) * 100);
     const messages = [getLine(`${percentage}%`, `of files processed (${counter} of ${total})`)];
-    include.files && messages.push(getLine(unusedProductionFiles.length, 'unused files'));
+    include.files && messages.push(getLine(unreferencedProductionFiles.length, 'unused files'));
     include.exports && messages.push(getLine(counters.exports, 'unused exports'));
     include.types && messages.push(getLine(counters.types, 'unused types'));
     include.members && messages.push(getLine(counters.members, 'unused namespace members'));
@@ -71,7 +71,7 @@ export async function run(configuration: Configuration) {
     if (isShowProgress) updateProcessingOutput(issue);
   };
 
-  // Skip when only interested in unused files
+  // Skip when only interested in unreferenced files
   if (include.exports || include.types || include.members || include.duplicates) {
     usedNonEntryFiles.forEach(sourceFile => {
       const filePath = sourceFile.getFilePath();
@@ -138,7 +138,7 @@ export async function run(configuration: Configuration) {
 
                 if (!isReferencedOnlyBySelf) return; // This identifier is used somewhere else
 
-                // No more reasons left to think this identifier is used somewhere else, report it as unused
+                // No more reasons left to think this identifier is used somewhere else, report it as unreferenced
                 if (findReferencingNamespaceNodes(sourceFile).length > 0) {
                   addIssue('members', { filePath, symbol: identifierText });
                 } else if (type) {

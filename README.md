@@ -178,16 +178,16 @@ can be tweaked further to the project structure.
 
 ```
 $ exportman --config ./exportman.json
---- UNUSED FILES (2)
+--- UNREFERENCED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx
---- UNUSED EXPORTS (5)
+--- UNREFERENCED EXPORTS (5)
 lowercaseFirstLetter  src/common/src/string/index.ts
 RegistrationBox       src/components/Registration.tsx
 clamp                 src/css.ts
 restoreSession        src/services/authentication.ts
 PREFIX                src/services/authentication.ts
---- UNUSED TYPES (4)
+--- UNREFERENCED TYPES (4)
 enum RegistrationServices  src/components/Registration/registrationMachine.ts
 type RegistrationAction    src/components/Registration/registrationMachine.ts
 type ComponentProps        src/components/Registration.tsx
@@ -201,15 +201,15 @@ ProductsList, default  src/components/Products.tsx
 
 ```
 $ exportman --config ./exportman.json --reporter compact
---- UNUSED FILES (2)
+--- UNREFERENCED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx
---- UNUSED EXPORTS (4)
+--- UNREFERENCED EXPORTS (4)
 src/common/src/string/index.ts: lowercaseFirstLetter
 src/components/Registration.tsx: RegistrationBox
 src/css.ts: clamp
 src/services/authentication.ts: restoreSession, PREFIX
---- UNUSED TYPES (3)
+--- UNREFERENCED TYPES (3)
 src/components/Registration/registrationMachine.ts: RegistrationServices, RegistrationAction
 src/components/Registration.tsx: ComponentProps
 src/types/Product.ts: ProductDetail

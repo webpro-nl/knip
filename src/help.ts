@@ -4,7 +4,7 @@ export const printHelp = () => {
 Options:
   -c/--config [file]   Configuration file path (default: ./exportman.json or package.json#exportman)
   --cwd                Working directory (default: current working directory)
-  --maxIssues          Maximum number of unused files until non-zero exit code (default: 1)
+  --maxIssues          Maximum number of unreferenced files until non-zero exit code (default: 1)
   --only               Report only listed issue group(s): files, exports, types, members, duplicates
   --exclude            Exclude issue group(s) from report: files, exports, types, members, duplicates
   --noProgress         Don't show dynamic progress updates
