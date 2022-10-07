@@ -12,7 +12,7 @@ const {
   values: {
     help,
     cwd: cwdArg,
-    config,
+    config = 'exportman.json',
     only = [],
     exclude = [],
     noProgress = false,
@@ -24,7 +24,7 @@ const {
   options: {
     help: { type: 'boolean' },
     cwd: { type: 'string' },
-    config: { type: 'string' },
+    config: { type: 'string', short: 'c' },
     only: { type: 'string', multiple: true },
     exclude: { type: 'string', multiple: true },
     noProgress: { type: 'boolean' },
@@ -34,14 +34,15 @@ const {
   },
 });
 
-if (help || !config) {
+if (help) {
   printHelp();
   process.exit(0);
 }
 
 const cwd = cwdArg ? path.resolve(cwdArg) : process.cwd();
 
-const configuration: ImportedConfiguration = require(path.resolve(config));
+const configuration: ImportedConfiguration =
+  require(path.join(cwd, 'package.json')).exportman ?? require(path.resolve(config));
 
 const isShowProgress = !noProgress || !process.stdout.isTTY;
 
