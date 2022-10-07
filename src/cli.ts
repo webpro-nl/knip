@@ -18,6 +18,7 @@ const {
     noProgress = false,
     reporter = 'symbols',
     jsdoc = [],
+    maxIssues = '1',
   },
 } = parseArgs({
   options: {
@@ -29,6 +30,7 @@ const {
     noProgress: { type: 'boolean' },
     reporter: { type: 'string' },
     jsdoc: { type: 'string', multiple: true },
+    maxIssues: { type: 'string' },
   },
 });
 
@@ -65,9 +67,11 @@ const main = async () => {
     jsDocOptions,
   });
 
-  const issues = await run(config);
+  const { issues, counters } = await run(config);
 
   report({ issues, cwd, config });
+
+  if (counters.files > Number(maxIssues)) process.exit(counters.files);
 };
 
 main();

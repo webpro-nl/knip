@@ -81,6 +81,7 @@ Options:
                                 requires `entryFiles: []` and `filePatterns: []`
   --cwd                         Working directory (default: current working directory)
   --only                        Report only listed issue group(s): files, exports, types, members, duplicates
+  --maxIssues                   Maximum number of unused files until non-zero exit code (default: 1)
   --exclude                     Exclude issue group(s) from report: files, exports, types, members, duplicates
   --noProgress                  Don't show dynamic progress updates
   --reporter                    Select reporter: symbols, compact (default: symbols)

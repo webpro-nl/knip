@@ -157,5 +157,5 @@ export async function run(configuration: Configuration) {
 
   if (isShowProgress) lineRewriter.resetLines();
 
-  return issues;
+  return { issues, counters };
 }

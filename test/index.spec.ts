@@ -4,7 +4,7 @@ import { run } from '../src/index';
 import baseConfig from './fixtures/baseConfig';
 
 test('run', async () => {
-  const issues = await run({
+  const { issues, counters } = await run({
     ...baseConfig,
     cwd: 'test/fixtures/basic',
     entryFiles: ['index.ts'],
