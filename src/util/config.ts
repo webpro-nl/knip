@@ -1,5 +1,20 @@
+import path from 'node:path';
 import micromatch from 'micromatch';
 import type { ImportedConfiguration, Configuration, IssueType } from '../types';
+
+export const importConfig = (cwd: string, configArg: string) => {
+  try {
+    const manifest = require(path.join(cwd, 'package.json'));
+    if ('exportman' in manifest) return manifest.exportman;
+    else throw new Error('Unable to find `exportman` key in package.json');
+  } catch (error) {
+    try {
+      return require(path.resolve(configArg));
+    } catch (error) {
+      console.error(`Unable to find configuration at ${path.join(cwd, configArg)}\n`);
+    }
+  }
+};
 
 export const resolveConfig = (importedConfiguration: ImportedConfiguration, cwdArg?: string) => {
   if (cwdArg && !('filePatterns' in importedConfiguration)) {
@@ -8,8 +23,8 @@ export const resolveConfig = (importedConfiguration: ImportedConfiguration, cwdA
       return importedConfiguration[importedConfigKey];
     }
   }
-  if (!cwdArg && !('filePatterns' in importedConfiguration)) {
-    console.error('Unable to find `filePatterns` in configuration.');
+  if (!cwdArg && (!importedConfiguration.entryFiles || !importedConfiguration.filePatterns)) {
+    console.error('Unable to find `entryFiles` and/or `filePatterns` in configuration.');
     console.info('Add it at root level, or use the --cwd argument with a matching configuration.\n');
     return;
   }

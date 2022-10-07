@@ -3,10 +3,10 @@
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { printHelp } from './help';
-import { resolveConfig, resolveIncludedFromArgs } from './util/config';
+import { importConfig, resolveConfig, resolveIncludedFromArgs } from './util/config';
 import reporters from './reporters';
 import { run } from '.';
-import type { ImportedConfiguration, Configuration, IssueType } from './types';
+import type { Configuration } from './types';
 
 const {
   values: {
@@ -41,8 +41,12 @@ if (help) {
 
 const cwd = cwdArg ? path.resolve(cwdArg) : process.cwd();
 
-const configuration: ImportedConfiguration =
-  require(path.join(cwd, 'package.json')).exportman ?? require(path.resolve(config));
+const configuration = importConfig(cwd, config);
+
+if (!configuration) {
+  printHelp();
+  process.exit(1);
+}
 
 const isShowProgress = !noProgress || !process.stdout.isTTY;
 
