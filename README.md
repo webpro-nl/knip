@@ -18,11 +18,11 @@ This is where Exportman comes in:
 - [x] Supports JavaScript inside TypeScript projects (`"allowJs": true`)
 - [ ] Supports JavaScript-only projects with CommonJS and ESM (no `tsconfig.json`) - TODO
 
-Exportman really shines in larger projects where you have much more files (such as `/docs`, `/tools` and `/scripts`)
-than only production code. The `includes` setting in `tsconfig.json` is often too broad, resulting in too many false
-negatives. Similar projects either detect only unimported files, or only unused exports. Most of them don't work by
-configuring entry files, an essential feature to produce good results. This also allows to unleash Exportman on a
-specific part of your project, and work these separately.
+Exportman really shines in larger projects where you have non-production files (such as `/docs`, `/tools` and
+`/scripts`). The `includes` setting in `tsconfig.json` is often too broad, resulting in too many false negatives.
+Similar projects either detect only unimported files, or only unused exports. Most of them don't work by configuring
+entry files, an essential feature to produce good results. This also allows to unleash Exportman on a specific part of
+your project, and work these separately.
 
 Exportman is another fresh take on keeping your projects clean & tidy.
 
