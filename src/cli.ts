@@ -48,7 +48,7 @@ if (!configuration) {
   process.exit(1);
 }
 
-const isShowProgress = !noProgress || !process.stdout.isTTY;
+const isShowProgress = noProgress !== false || (process.stdout.isTTY && typeof process.stdout.cursorTo === 'function');
 
 const report =
   reporter in reporters ? reporters[reporter as keyof typeof reporters] : require(path.join(cwd, reporter));

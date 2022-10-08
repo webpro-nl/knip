@@ -71,7 +71,7 @@ export async function run(configuration: Configuration) {
     issues[issueType][key] = issues[issueType][key] ?? {};
     issues[issueType][key][symbol] = issue;
     counters[issueType]++;
-    if (isShowProgress) updateProcessingOutput(issue);
+    updateProcessingOutput(issue);
   };
 
   // Skip when only interested in unreferenced files
