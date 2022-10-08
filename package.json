@@ -22,10 +22,11 @@
     "exportman": "dist/cli.js"
   },
   "scripts": {
+    "exportman": "exportman",
     "test": "node --loader tsx --test test/*.spec.ts",
     "watch": "tsc --watch",
     "build": "rm -rf dist && tsc",
-    "prepublishOnly": "npm test && npm run build",
+    "prepublishOnly": "npm test && npm run build && npm run exportman",
     "release": "release-it"
   },
   "files": [
