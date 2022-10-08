@@ -12,13 +12,13 @@ const isFile = async (filePath: string) => {
   }
 };
 
-export const findFile = async (cwd: string, fileName: string): Promise<string> => {
+const findFile = async (cwd: string, fileName: string): Promise<string> => {
   const filePath = path.join(cwd, fileName);
   if (await isFile(filePath)) return filePath;
   return findFile(path.resolve(cwd, '..'), fileName);
 };
 
-export const resolvePaths = (cwd: string, patterns: string | string[]) => {
+const resolvePaths = (cwd: string, patterns: string | string[]) => {
   return [patterns].flat().map(pattern => {
     if (pattern.startsWith('!')) return '!' + path.join(cwd, pattern.slice(1));
     return path.join(cwd, pattern);
@@ -50,11 +50,6 @@ export const partitionSourceFiles = (projectFiles: SourceFile[], productionFiles
   });
   return [usedFiles, unusedFiles];
 };
-
-export const isType = (declaration: ExportedDeclarations) =>
-  declaration.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
-  declaration.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
-  declaration.isKind(ts.SyntaxKind.EnumDeclaration);
 
 export const getType = (declaration: ExportedDeclarations) => {
   if (declaration.isKind(ts.SyntaxKind.TypeAliasDeclaration)) return 'type';

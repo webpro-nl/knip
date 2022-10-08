@@ -1,5 +1,5 @@
 type FilePath = string;
-export type SymbolType = 'type' | 'interface' | 'enum';
+type SymbolType = 'type' | 'interface' | 'enum';
 
 type UnusedFileIssues = Set<FilePath>;
 type UnusedExportIssues = Record<string, Record<string, Issue>>;
