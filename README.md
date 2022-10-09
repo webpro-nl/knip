@@ -1,6 +1,6 @@
-# Exportman 🦸
+# ✂️ Knip
 
-Exportman scans your TypeScript projects for **unused files and exports**. For comparison, ESLint finds unused variables
+Knip scans your TypeScript projects for **unused files and exports**. For comparison, ESLint finds unused variables
 inside files in isolation, but this will not be flagged:
 
 ```ts
@@ -10,7 +10,7 @@ export const myVar = true;
 Unused files will also not be detected by ESLint. So how do you know which files and exports are no longer used? This
 requires an analysis of all the right files in the project.
 
-This is where Exportman comes in:
+This is where Knip comes in:
 
 - [x] Resolves all (unused) files in your project and reports **unused files and exports**.
 - [x] Verifies that exported symbols are actually used in other files, even when part of an imported namespace.
@@ -18,23 +18,23 @@ This is where Exportman comes in:
 - [x] Supports JavaScript inside TypeScript projects (`"allowJs": true`)
 - [ ] Supports JavaScript-only projects with CommonJS and ESM (no `tsconfig.json`) - TODO
 
-Exportman really shines in larger projects where you have non-production files (such as `/docs`, `/tools` and
-`/scripts`). The `includes` setting in `tsconfig.json` is often too broad, resulting in too many false negatives.
-Similar projects either detect only unimported files, or only unused exports. Most of them don't work by configuring
-entry files, an essential feature to produce good results. This also allows to unleash Exportman on a specific part of
-your project, and work these separately.
+Knip really shines in larger projects where you have non-production files (such as `/docs`, `/tools` and `/scripts`).
+The `includes` setting in `tsconfig.json` is often too broad, resulting in too many false negatives. Similar projects
+either detect only unimported files, or only unused exports. Most of them don't work by configuring entry files, an
+essential feature to produce good results. This also allows to unleash knip on a specific part of your project, and work
+these separately.
 
-🦸 Exportman is another fresh take on keeping your projects clean & tidy!
+✂️ Knip is another fresh take on keeping your projects clean & tidy!
 
 ## Installation
 
 ```
-npm install -D exportman
+npm install -D knip
 ```
 
 ## Usage
 
-Create a configuration file, let's name it `.exportman.json` with these contents:
+Create a configuration file, let's give it the default name `knip.json` with these contents:
 
 ```json
 {
@@ -49,16 +49,16 @@ all files it should match them against, including potentially unused files.
 Then run the checks:
 
 ```
-npx exportman --config .exportman
+npx knip
 ```
 
 This will analyze the project and output unused files, exports, types and duplicate exports.
 
-Use `--only files` when configuring Exportman for faster initial results.
+Use `--only files` when configuring knip for faster initial results.
 
 ## How It Works
 
-Exportman works by creating two sets of files:
+knip works by creating two sets of files:
 
 1. Production code is the set of files resolved from the `entryFiles`.
 2. They are matched against the set of `projectFiles`.
@@ -73,11 +73,11 @@ Clean and actionable reports are achieved when non-production code such as tests
 ## Options
 
 ```
-❯ npx exportman
-exportman [options]
+❯ npx knip
+knip [options]
 
 Options:
-  -c/--config [file]   Configuration file path (default: ./exportman.json or package.json#exportman)
+  -c/--config [file]   Configuration file path (default: ./knip.json or package.json#knip)
   --cwd                Working directory (default: current working directory)
   --max-issues         Maximum number of unreferenced files until non-zero exit code (default: 1)
   --only               Report only listed issue group(s): files, exports, types, nsExports, nsTypes, duplicates
@@ -88,11 +88,11 @@ Options:
 
 Examples:
 
-$ exportman
-$ exportman --cwd packages/client --only files
-$ exportman -c ./exportman.js --reporter compact --jsdoc public
+$ knip
+$ knip --cwd packages/client --only files
+$ knip -c ./knip.js --reporter compact --jsdoc public
 
-More info: https://github.com/webpro/exportman
+More info: https://github.com/webpro/knip
 ```
 
 ## Reading the report
@@ -166,8 +166,8 @@ Packages can also be explicitly configured per package directory.
 To scan the packages separately, using the first match from the configuration file:
 
 ```
-exportman --cwd packages/client --config exportman.json
-exportman --cwd packages/services --config exportman.json
+knip --cwd packages/client --config knip.json
+knip --cwd packages/services --config knip.json
 ```
 
 #### Connected projects
@@ -204,7 +204,7 @@ can be tweaked further to the project structure.
 ### Default reporter
 
 ```
-$ exportman --config ./exportman.json
+$ knip --config ./knip.json
 --- UNUSED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx
@@ -227,7 +227,7 @@ ProductsList, default  src/components/Products.tsx
 ### Compact
 
 ```
-$ exportman --config ./exportman.json --reporter compact
+$ knip --config ./knip.json --reporter compact
 --- UNUSED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx

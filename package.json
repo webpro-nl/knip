@@ -1,5 +1,5 @@
 {
-  "name": "exportman",
+  "name": "knip",
   "version": "0.1.1",
   "description": "Find unused files and exports in your TypeScript project",
   "keywords": [
@@ -14,19 +14,19 @@
     "maintenance",
     "unimported"
   ],
-  "repository": "github:webpro/exportman",
-  "homepage": "https://github.com/webpro/exportman",
-  "bugs": "https://github.com/webpro/exportman/issues",
+  "repository": "github:webpro/knip",
+  "homepage": "https://github.com/webpro/knip",
+  "bugs": "https://github.com/webpro/knip/issues",
   "main": "dist/index.js",
   "bin": {
-    "exportman": "dist/cli.js"
+    "knip": "dist/cli.js"
   },
   "scripts": {
-    "exportman": "exportman",
+    "knip": "node ./dist/cli.js",
     "test": "node --loader tsx --test test/*.spec.ts",
     "watch": "tsc --watch",
     "build": "rm -rf dist && tsc",
-    "prepublishOnly": "npm test && npm run build && npm run exportman",
+    "prepublishOnly": "npm test && npm run build && npm run knip",
     "release": "release-it"
   },
   "files": [

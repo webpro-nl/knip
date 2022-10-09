@@ -1,8 +1,8 @@
 export const printHelp = () => {
-  console.log(`exportman [options]
+  console.log(`knip [options]
 
 Options:
-  -c/--config [file]   Configuration file path (default: ./exportman.json or package.json#exportman)
+  -c/--config [file]   Configuration file path (default: ./knip.json or package.json#knip)
   --cwd                Working directory (default: current working directory)
   --max-issues         Maximum number of unreferenced files until non-zero exit code (default: 1)
   --only               Report only listed issue group(s): files, exports, types, nsExports, nsTypes, duplicates
@@ -13,9 +13,9 @@ Options:
 
 Examples:
 
-$ exportman
-$ exportman --cwd packages/client --only files
-$ exportman -c ./exportman.js --reporter compact --jsdoc public
+$ knip
+$ knip --cwd packages/client --only files
+$ knip -c ./knip.js --reporter compact --jsdoc public
 
-More info: https://github.com/webpro/exportman`);
+More info: https://github.com/webpro/knip`);
 };

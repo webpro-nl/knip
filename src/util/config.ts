@@ -5,8 +5,8 @@ import type { ImportedConfiguration, Configuration, IssueType } from '../types';
 export const importConfig = (cwd: string, configArg: string) => {
   try {
     const manifest = require(path.join(cwd, 'package.json'));
-    if ('exportman' in manifest) return manifest.exportman;
-    else throw new Error('Unable to find `exportman` key in package.json');
+    if ('knip' in manifest) return manifest.knip;
+    else throw new Error('Unable to find `knip` key in package.json');
   } catch (error) {
     try {
       return require(path.resolve(configArg));

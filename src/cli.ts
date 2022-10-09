@@ -12,7 +12,7 @@ const {
   values: {
     help,
     cwd: cwdArg,
-    config = 'exportman.json',
+    config = 'knip.json',
     only = [],
     exclude = [],
     'no-progress': noProgress = false,
