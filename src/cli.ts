@@ -6,7 +6,7 @@ import { printHelp } from './help';
 import { importConfig, resolveConfig, resolveIncludedFromArgs } from './util/config';
 import reporters from './reporters';
 import { run } from '.';
-import type { Configuration } from './types';
+import type { Configuration, IssueGroup } from './types';
 
 const {
   values: {
@@ -18,7 +18,7 @@ const {
     'no-progress': noProgress = false,
     reporter = 'symbols',
     jsdoc = [],
-    'max-issues': maxIssues = '1',
+    'max-issues': maxIssues = '0',
   },
 } = parseArgs({
   options: {
@@ -48,7 +48,8 @@ if (!configuration) {
   process.exit(1);
 }
 
-const isShowProgress = noProgress !== false || (process.stdout.isTTY && typeof process.stdout.cursorTo === 'function');
+const isShowProgress =
+  noProgress === false ? process.stdout.isTTY && typeof process.stdout.cursorTo === 'function' : !noProgress;
 
 const report =
   reporter in reporters ? reporters[reporter as keyof typeof reporters] : require(path.join(cwd, reporter));
@@ -74,7 +75,11 @@ const main = async () => {
 
   report({ issues, cwd, config });
 
-  if (counters.files > Number(maxIssues)) process.exit(counters.files);
+  const group = include.files ? 'files' : (Object.keys(include) as IssueGroup[]).find(key => include[key]);
+  if (group) {
+    const count = counters[group];
+    if (count > Number(maxIssues)) process.exit(count);
+  }
 };
 
 main();
