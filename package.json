@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Find unused files and exports in your TypeScript project",
   "keywords": [
     "find",
