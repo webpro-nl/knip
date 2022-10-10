@@ -6,7 +6,7 @@ import baseConfig from './fixtures/baseConfig';
 test('run', async () => {
   const { issues, counters } = await run({
     ...baseConfig,
-    cwd: 'test/fixtures/basic',
+    workingDir: 'test/fixtures/basic',
     entryFiles: ['index.ts'],
     projectFiles: ['*.ts'],
   });

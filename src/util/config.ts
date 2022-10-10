@@ -1,40 +1,45 @@
-import path from 'node:path';
 import micromatch from 'micromatch';
-import type { ImportedConfiguration, Configuration, IssueType } from '../types';
-
-export const importConfig = (cwd: string, configArg: string) => {
-  try {
-    const manifest = require(path.join(cwd, 'package.json'));
-    if ('knip' in manifest) return manifest.knip;
-    else throw new Error('Unable to find `knip` key in package.json');
-  } catch (error) {
-    try {
-      return require(path.resolve(configArg));
-    } catch (error) {
-      console.error(`Unable to find configuration at ${path.join(cwd, configArg)}\n`);
-    }
-  }
-};
+import type { ImportedConfiguration, LocalConfiguration, Configuration, IssueType, IssueGroup } from '../types';
 
 export const resolveConfig = (importedConfiguration: ImportedConfiguration, cwdArg?: string) => {
+  const configKeys = Object.keys(importedConfiguration);
   if (cwdArg && !('projectFiles' in importedConfiguration)) {
-    const importedConfigKey = Object.keys(importedConfiguration).find(pattern => micromatch.isMatch(cwdArg, pattern));
+    const importedConfigKey = configKeys.find(pattern => micromatch.isMatch(cwdArg.replace(/\/$/, ''), pattern));
     if (importedConfigKey) {
       return importedConfiguration[importedConfigKey];
     }
   }
   if (!cwdArg && (!importedConfiguration.entryFiles || !importedConfiguration.projectFiles)) {
     console.error('Unable to find `entryFiles` and/or `projectFiles` in configuration.');
-    console.info('Add it at root level, or use the --cwd argument with a matching configuration.\n');
+    console.info(`Add it at root level, or use --cwd and match one of: ${configKeys.join(', ')}\n`);
     return;
   }
   return importedConfiguration as Configuration;
 };
 
-export const resolveIncludedFromArgs = (onlyArg: string[], excludeArg: string[]) => {
-  const groups: IssueType[] = ['files', 'exports', 'types', 'nsExports', 'nsTypes', 'duplicates'];
-  const only = onlyArg.map(value => value.split(',')).flat() as IssueType[];
-  const exclude = excludeArg.map(value => value.split(',')).flat() as IssueType[];
-  const includes = (only.length > 0 ? only : groups).filter((group: IssueType) => !exclude.includes(group));
-  return groups.reduce((r, group) => ((r[group] = includes.includes(group)), r), {} as Configuration['include']);
+export const resolveIncludedIssueGroups = (
+  includeArg: string[],
+  excludeArg: string[],
+  resolvedConfig?: LocalConfiguration
+) => {
+  const groups: IssueGroup[] = [
+    'files',
+    'dependencies',
+    'unlisted',
+    'exports',
+    'types',
+    'nsExports',
+    'nsTypes',
+    'duplicates',
+  ];
+  const include = [includeArg, resolvedConfig?.include ?? []]
+    .flat()
+    .map(value => value.split(','))
+    .flat() as IssueGroup[];
+  const exclude = [excludeArg, resolvedConfig?.exclude ?? []]
+    .flat()
+    .map(value => value.split(','))
+    .flat() as IssueGroup[];
+  const includes = (include.length > 0 ? include : groups).filter((group: IssueGroup) => !exclude.includes(group));
+  return groups.reduce((r, group) => ((r[group] = includes.includes(group)), r), {} as Configuration['report']);
 };

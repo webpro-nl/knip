@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@tootallnate/once": "*",
+    "@sindresorhus/is": "*",
+    "has": "*"
+  }
+}

@@ -1,51 +1,59 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveIncludedFromArgs } from '../src/util/config';
+import { resolveIncludedIssueGroups } from '../src/util/config';
 
-test('resolveIncludedFromArgs (all)', async () => {
-  const config = resolveIncludedFromArgs([], []);
+test('resolveIncludedIssueGroups (all)', async () => {
+  const config = resolveIncludedIssueGroups([], []);
   assert.deepEqual(config, {
+    dependencies: true,
     duplicates: true,
     exports: true,
     files: true,
     nsExports: true,
     nsTypes: true,
     types: true,
+    unlisted: true,
   });
 });
 
-test('resolveIncludedFromArgs (only 1)', async () => {
-  const config = resolveIncludedFromArgs(['duplicates'], []);
+test('resolveIncludedIssueGroups (include 1)', async () => {
+  const config = resolveIncludedIssueGroups(['duplicates'], []);
   assert.deepEqual(config, {
+    dependencies: false,
     duplicates: true,
     exports: false,
     files: false,
     nsExports: false,
     nsTypes: false,
     types: false,
+    unlisted: false,
   });
 });
 
-test('resolveIncludedFromArgs (exclude 2)', async () => {
-  const config = resolveIncludedFromArgs([], ['duplicates', 'nsTypes']);
+test('resolveIncludedIssueGroups (exclude 2)', async () => {
+  const config = resolveIncludedIssueGroups([], ['duplicates', 'nsTypes']);
   assert.deepEqual(config, {
+    dependencies: true,
     duplicates: false,
     exports: true,
     files: true,
     nsExports: true,
     nsTypes: false,
     types: true,
+    unlisted: true,
   });
 });
 
-test('resolveIncludedFromArgs (overlap)', async () => {
-  const config = resolveIncludedFromArgs(['exports', 'files', 'nsTypes'], ['files', 'duplicates']);
+test('resolveIncludedIssueGroups (overlap)', async () => {
+  const config = resolveIncludedIssueGroups(['exports', 'files', 'nsTypes'], ['files', 'duplicates']);
   assert.deepEqual(config, {
+    dependencies: false,
     duplicates: false,
     exports: true,
     files: false,
     nsExports: false,
     nsTypes: true,
     types: false,
+    unlisted: false,
   });
 });

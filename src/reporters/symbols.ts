@@ -1,64 +1,79 @@
 import path from 'node:path';
 import type { Issue, Issues, Configuration } from '../types';
 
-const logIssueLine = ({ issue, cwd, padding }: { issue: Issue; cwd: string; padding: number }) => {
+const logIssueLine = ({ issue, workingDir, padding }: { issue: Issue; workingDir: string; padding: number }) => {
   const symbols = issue.symbols ? issue.symbols.join(', ') : issue.symbol;
   console.log(
-    `${symbols.padEnd(padding + 2)}${issue.symbolType?.padEnd(11) || ''}${path.relative(cwd, issue.filePath)}`
+    `${symbols.padEnd(padding + 2)}${issue.symbolType?.padEnd(11) || ''}${path.relative(workingDir, issue.filePath)}`
   );
 };
 
-const logIssueGroupResult = (issues: string[], cwd: string, title: false | string) => {
+const logIssueGroupResult = (issues: string[], workingDir: string, title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
-    issues.sort().forEach(filePath => console.log(path.relative(cwd, filePath)));
+    issues.sort().forEach(value => console.log(value.startsWith('/') ? path.relative(workingDir, value) : value));
   } else {
-    console.log('N/A');
+    console.log('Not found');
   }
 };
 
-const logIssueGroupResults = (issues: Issue[], cwd: string, title: false | string) => {
+const logIssueGroupResults = (issues: Issue[], workingDir: string, title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
     const padding = [...issues].sort((a, b) => b.symbol.length - a.symbol.length)[0].symbol.length;
-    sortedByFilePath.forEach(issue => logIssueLine({ issue, cwd, padding }));
+    sortedByFilePath.forEach(issue => logIssueLine({ issue, workingDir, padding }));
   } else {
-    console.log('N/A');
+    console.log('Not found');
   }
 };
 
-export default ({ issues, config, cwd }: { issues: Issues; config: Configuration; cwd: string }) => {
-  const { include } = config;
-  const reportMultipleGroups = Object.values(include).filter(Boolean).length > 1;
+export default ({ issues, config, workingDir }: { issues: Issues; config: Configuration; workingDir: string }) => {
+  const { report, isDev } = config;
+  const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
-  if (include.files) {
+  if (report.files) {
     const unreferencedFiles = Array.from(issues.files);
-    logIssueGroupResult(unreferencedFiles, cwd, reportMultipleGroups && 'UNUSED FILES');
+    logIssueGroupResult(unreferencedFiles, workingDir, reportMultipleGroups && 'UNUSED FILES');
   }
 
-  if (include.exports) {
+  if (report.dependencies) {
+    const unreferencedDependencies = Array.from(issues.dependencies);
+    logIssueGroupResult(unreferencedDependencies, workingDir, reportMultipleGroups && 'UNUSED DEPENDENCIES');
+  }
+
+  if (report.dependencies && isDev) {
+    const unreferencedDevDependencies = Array.from(issues.devDependencies);
+    logIssueGroupResult(unreferencedDevDependencies, workingDir, reportMultipleGroups && 'UNUSED DEV DEPENDENCIES');
+  }
+
+  if (report.unlisted) {
+    const unresolvedDependencies = Object.values(issues.unresolved).map(Object.values).flat();
+    logIssueGroupResults(unresolvedDependencies, workingDir, reportMultipleGroups && 'UNLISTED DEPENDENCIES');
+  }
+
+  if (report.exports) {
     const unreferencedExports = Object.values(issues.exports).map(Object.values).flat();
-    logIssueGroupResults(unreferencedExports, cwd, reportMultipleGroups && 'UNUSED EXPORTS');
+    logIssueGroupResults(unreferencedExports, workingDir, reportMultipleGroups && 'UNUSED EXPORTS');
   }
 
-  if (include.nsExports) {
+  if (report.nsExports) {
     const unreferencedNsExports = Object.values(issues.nsExports).map(Object.values).flat();
-    logIssueGroupResults(unreferencedNsExports, cwd, reportMultipleGroups && 'UNUSED EXPORTS IN NAMESPACE');
+    logIssueGroupResults(unreferencedNsExports, workingDir, reportMultipleGroups && 'UNUSED EXPORTS IN NAMESPACE');
   }
 
-  if (include.types) {
+  if (report.types) {
     const unreferencedTypes = Object.values(issues.types).map(Object.values).flat();
-    logIssueGroupResults(unreferencedTypes, cwd, reportMultipleGroups && 'UNUSED TYPES');
+    logIssueGroupResults(unreferencedTypes, workingDir, reportMultipleGroups && 'UNUSED TYPES');
   }
 
-  if (include.nsTypes) {
+  if (report.nsTypes) {
     const unreferencedNsTypes = Object.values(issues.nsTypes).map(Object.values).flat();
-    logIssueGroupResults(unreferencedNsTypes, cwd, reportMultipleGroups && 'UNUSED TYPES IN NAMESPACE');
+    logIssueGroupResults(unreferencedNsTypes, workingDir, reportMultipleGroups && 'UNUSED TYPES IN NAMESPACE');
   }
 
-  if (include.duplicates) {
+  if (report.duplicates) {
     const unreferencedDuplicates = Object.values(issues.duplicates).map(Object.values).flat();
-    logIssueGroupResults(unreferencedDuplicates, cwd, reportMultipleGroups && 'DUPLICATE EXPORTS');
+    logIssueGroupResults(unreferencedDuplicates, workingDir, reportMultipleGroups && 'DUPLICATE EXPORTS');
   }
 };

@@ -1,22 +1,7 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
-import { ts, Project } from 'ts-morph';
-import type { SourceFile, ExportedDeclarations } from 'ts-morph';
-
-const isFile = async (filePath: string) => {
-  try {
-    const stats = await fs.stat(filePath);
-    return stats.isFile();
-  } catch {
-    return false;
-  }
-};
-
-const findFile = async (cwd: string, fileName: string): Promise<string> => {
-  const filePath = path.join(cwd, fileName);
-  if (await isFile(filePath)) return filePath;
-  return findFile(path.resolve(cwd, '..'), fileName);
-};
+import { Project } from 'ts-morph';
+import { findFile } from './path';
+import type { SourceFile } from 'ts-morph';
 
 const resolvePaths = (cwd: string, patterns: string | string[]) => {
   return [patterns].flat().map(pattern => {
@@ -49,10 +34,4 @@ export const partitionSourceFiles = (projectFiles: SourceFile[], productionFiles
     }
   });
   return [usedFiles, unusedFiles];
-};
-
-export const getType = (declaration: ExportedDeclarations) => {
-  if (declaration.isKind(ts.SyntaxKind.TypeAliasDeclaration)) return 'type';
-  if (declaration.isKind(ts.SyntaxKind.InterfaceDeclaration)) return 'interface';
-  if (declaration.isKind(ts.SyntaxKind.EnumDeclaration)) return 'enum';
 };
