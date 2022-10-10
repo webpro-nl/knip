@@ -12,8 +12,9 @@ requires an analysis of all the right files in the project.
 
 This is where Knip comes in:
 
-- [x] Resolves all (unused) files in your project and reports **unused files and exports**.
+- [x] Resolves all (unused) files in your project and reports **unused files, dependencies and exports**.
 - [x] Verifies that exported symbols are actually used in other files, even when part of an imported namespace.
+- [x] Finds dependencies not listed in `package.json`.
 - [x] Finds duplicate exports of the same symbol.
 - [x] Supports JavaScript inside TypeScript projects (`"allowJs": true`)
 - [ ] Supports JavaScript-only projects with CommonJS and ESM (no `tsconfig.json`) - TODO
@@ -54,21 +55,20 @@ npx knip
 
 This will analyze the project and output unused files, exports, types and duplicate exports.
 
-Use `--only files` when configuring knip for faster initial results.
+Use `--include files` when configuring knip the first time for faster initial results.
 
 ## How It Works
 
-knip works by creating two sets of files:
+Knip works by creating two sets of files:
 
 1. Production code is the set of files resolved from the `entryFiles`.
 2. They are matched against the set of `projectFiles`.
-3. The subset of project files that are not production code will be reported as unused files (in red).
+3. The subset of project files that is not production code will be reported as unused files (in red).
 4. Then the production code (in blue) will be scanned for unused exports.
 
 ![How it works](./assets/how-it-works.drawio.svg)
 
-Clean and actionable reports are achieved when non-production code such as tests are excluded from the `projectFiles`
-(using negation patterns such as `!**/*.test.ts`).
+Please read on if you think you have too many results: [too many false positives?](#too-many-false-positives)
 
 ## Options
 
@@ -79,78 +79,91 @@ knip [options]
 Options:
   -c/--config [file]   Configuration file path (default: ./knip.json or package.json#knip)
   --cwd                Working directory (default: current working directory)
-  --max-issues         Maximum number of unreferenced files until non-zero exit code (default: 1)
-  --only               Report only listed issue group(s): files, exports, types, nsExports, nsTypes, duplicates
-  --exclude            Exclude issue group(s) from report: files, exports, types, nsExports, nsTypes, duplicates
+  --include            Report only listed issue group(s) (see below)
+  --exclude            Exclude issue group(s) from report (see below)
+  --dev                Include `devDependencies` in report(s) (default: false)
   --no-progress        Don't show dynamic progress updates
+  --max-issues         Maximum number of issues before non-zero exit code (default: 0)
   --reporter           Select reporter: symbols, compact (default: symbols)
   --jsdoc              Enable JSDoc parsing, with options: public (default: disabled)
+
+Issue groups: files, dependencies, unlisted, exports, nsExports, types, nsTypes, duplicates
 
 Examples:
 
 $ knip
-$ knip --cwd packages/client --only files
+$ knip --cwd packages/client --include files
 $ knip -c ./knip.js --reporter compact --jsdoc public
 
 More info: https://github.com/webpro/knip
 ```
+
+🚀 Knip is considerably faster when only the `files` and/or `duplicates` groups are included.
 
 ## Reading the report
 
 After analyzing all the files resolved from the `entryFiles` against the `projectFiles`, the report contains the
 following groups of issues:
 
-- Unused **files**: no references to this file have been found
-- Unused **exports**: unable to find references to this exported variable
-- Unused exports in namespaces (1): unable to find references to this exported variable, and it has become a member of a
-  re-exported namespace (**nsExports**)
-- Unused types: no references to this exported type have been found
-- Unused types in namespaces (1): this exported variable is not directly referenced, and it has become a member a
-  re-exported namespace (**nsTypes**)
-- Duplicate exports - the same thing is exported more than once with different names (**duplicates**)
+- `files` - Unused files: did not find references to this file
+- `dependencies` - Unused dependencies: did not find references to this dependency
+- `unlisted` - Unlisted dependencies: this dependency is used, but not listed in package.json (1)
+- `exports` - Unused exports: did not find references to this exported variable
+- `nsExports` - Unused exports in namespaces: did not find direct references to this exported variable (2)
+- `types` - Unused types: did not find references to this exported type
+- `nsTypes` - Unused types in namespaces: did not find direct references to this exported variable (2)
+- `duplicates` - Duplicate exports: the same thing is exported more than once with different names
 
-Each group type (in **bold**) can be used in the `--only` and `--exclude` arguments to slice & dice the report to your
-needs.
+Each group type can be an `--include` or `--exclude` to slice & dice the report to your needs.
 
-🚀 The process is considerably faster when reporting only the `files` and/or `duplicates` groups.
+1. This may also include dependencies that could not be resolved properly, such as `local/dir/file.ts`.
+2. The variable or type is not referenced directly, and has become a member of a namespace. That's why Knip is not sure
+   whether this export can be removed, so please look into it:
 
 ## Now what?
 
-After verifying that files reported as unused are indeed not referenced anywhere, they can be deleted.
+As always, make sure to backup files or use Git before deleting files or making changes. Run tests to verify results.
 
-Remove the `export` keyword in front of unused exports. Then you (or tools such as ESLint) can see whether the variable
-or type is used within its own file. If this is not the case, it can be removed completely.
+- Unused files can be deleted.
+- Unused dependencies can be removed from `package.json`.
+- Unlisted dependencies should be added to `package.json`.
+- Unused exports and types: remove the `export` keyword in front of unused exports. Then you (or tools such as ESLint)
+  can see whether the variable or type is used within its own file. If this is not the case, it can be removed.
 
 🔁 Repeat the process to reveal new unused files and exports. Sometimes it's so liberating to delete things.
 
-## More configuration examples
+## Too many false positives?
 
-### Test files
+The default configuration for Knip is very strict and targets production code. For best results, it is recommended to
+exclude files such as tests from the project files. Here's why: when including tests and other non-production files,
+they may prevent production files from being reported as unused.
 
-For best results, it is recommended to exclude files such as tests from the project files. When including tests and
-other non-production files, they may prevent production files from being reported as unused. Not including them will
-make it clear what production files can be removed (including dependent files!).
+Excluding non-production files from the `projectFiles` allows Knip to understand what production code can be removed
+(including dependent files!).
 
-The same goes for any type of non-production files, such as Storybook stories or end-to-end tests.
+Non-production code includes files such as end-to-end tests, tooling, scripts, Storybook stories, etc.
 
-To report dangling files and exports that are not used by any of the production or test files, include both to the set
-of `entryFiles`:
+To include both production and test files to analyze the project as a whole, include both sets of files to `entryFiles`,
+and add `dev: true`:
 
 ```json
 {
-  "entryFiles": ["src/index.ts", "src/**/*.spec.ts"],
-  "projectFiles": ["src/**/*.ts", "!**/*.e2e.ts"]
+  "dev": true,
+  "entryFiles": ["src/index.ts", "src/**/*.spec.ts", "src/**/*.e2e.ts"],
+  "projectFiles": ["src/**/*.ts"]
 }
 ```
 
-In theory this idea could be extended to report some kind of test coverage.
+Knip will now report unused files and exports for the combined set of files as configured in `entryFiles`.
+
+## More configuration examples
 
 ### Monorepos
 
 #### Separate packages
 
-In repos with multiple packages, the `--cwd` option comes in handy. With similar package structures, the packages can be
-configured using globs:
+In repos with multiple (published) packages, the `--cwd` option comes in handy. With similar package structures, the
+packages can be configured using globs:
 
 ```json
 {
@@ -173,8 +186,8 @@ knip --cwd packages/services --config knip.json
 #### Connected projects
 
 A good example of a large project setup is a monorepo, such as created with Nx. Let's take an example project
-configuration for an Nx project using Next.js, Jest and Storybook. This can also be a JavaScript file, which allows to
-add logic and/or comments:
+configuration for an Nx project using Next.js, Jest and Storybook. This configuration file can also be a JavaScript
+file, which allows to add logic and/or comments (e.g. `knip.js`):
 
 ```js
 const entryFiles = ['apps/**/pages/**/*.{js,ts,tsx}'];
