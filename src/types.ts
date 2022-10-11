@@ -34,8 +34,13 @@ export type IssueGroup =
   | 'nsTypes'
   | 'duplicates';
 
-export type LocalConfiguration = {
-  dev?: boolean;
+export type BaseLocalConfiguration = {
+  entryFiles: string[];
+  projectFiles: string[];
+};
+
+export type LocalConfiguration = BaseLocalConfiguration & {
+  dev?: boolean | BaseLocalConfiguration;
   entryFiles: string[];
   projectFiles: string[];
   include?: string[];

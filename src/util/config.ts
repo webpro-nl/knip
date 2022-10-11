@@ -1,20 +1,33 @@
 import micromatch from 'micromatch';
-import type { ImportedConfiguration, LocalConfiguration, Configuration, IssueType, IssueGroup } from '../types';
+import type { ImportedConfiguration, LocalConfiguration, Configuration, IssueGroup } from '../types';
 
-export const resolveConfig = (importedConfiguration: ImportedConfiguration, cwdArg?: string) => {
+export const resolveConfig = (
+  importedConfiguration: ImportedConfiguration,
+  options?: { workingDir?: string; isDev?: boolean }
+): LocalConfiguration | undefined => {
+  let resolvedConfig = importedConfiguration;
+  const { workingDir, isDev } = options ?? {};
+
   const configKeys = Object.keys(importedConfiguration);
-  if (cwdArg && !('projectFiles' in importedConfiguration)) {
-    const importedConfigKey = configKeys.find(pattern => micromatch.isMatch(cwdArg.replace(/\/$/, ''), pattern));
+
+  if (workingDir && !('projectFiles' in importedConfiguration)) {
+    const importedConfigKey = configKeys.find(pattern => micromatch.isMatch(workingDir.replace(/\/$/, ''), pattern));
     if (importedConfigKey) {
-      return importedConfiguration[importedConfigKey];
+      resolvedConfig = importedConfiguration[importedConfigKey];
     }
   }
-  if (!cwdArg && (!importedConfiguration.entryFiles || !importedConfiguration.projectFiles)) {
+
+  if (isDev && typeof resolvedConfig.dev === 'object' && 'projectFiles' in resolvedConfig.dev) {
+    resolvedConfig = resolvedConfig.dev;
+  }
+
+  if (!resolvedConfig.entryFiles || !resolvedConfig.projectFiles) {
     console.error('Unable to find `entryFiles` and/or `projectFiles` in configuration.');
-    console.info(`Add it at root level, or use --cwd and match one of: ${configKeys.join(', ')}\n`);
+    console.info(`Add these properties at root level, or use --cwd and match one of: ${configKeys.join(', ')}\n`);
     return;
   }
-  return importedConfiguration as Configuration;
+
+  return resolvedConfig as LocalConfiguration;
 };
 
 export const resolveIncludedIssueGroups = (

@@ -66,7 +66,7 @@ const main = async () => {
   const localConfiguration = require(localConfigurationPath);
   const manifest = require(manifestPath);
 
-  const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, cwdArg);
+  const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, { workingDir: cwdArg, isDev });
 
   if (!resolvedConfig) {
     printHelp();
