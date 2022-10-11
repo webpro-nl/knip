@@ -149,6 +149,8 @@ export async function run(configuration: Configuration) {
 
             if (declaration.isKind(ts.SyntaxKind.Identifier)) {
               identifier = declaration;
+            } else if (declaration.isKind(ts.SyntaxKind.ArrowFunction)) {
+              // TODO No ReferenceFindableNode/Identifier available?
             } else if (
               declaration.isKind(ts.SyntaxKind.FunctionDeclaration) ||
               declaration.isKind(ts.SyntaxKind.ClassDeclaration) ||
