@@ -13,7 +13,7 @@ import type { Configuration, IssueGroup } from './types';
 const {
   values: {
     help,
-    cwd: cwdArg,
+    dir,
     config: configFilePath = 'knip.json',
     tsConfig: tsConfigFilePath,
     include = [],
@@ -29,7 +29,7 @@ const {
     help: { type: 'boolean' },
     config: { type: 'string', short: 'c' },
     tsConfig: { type: 'string', short: 't' },
-    cwd: { type: 'string' },
+    dir: { type: 'string' },
     include: { type: 'string', multiple: true },
     exclude: { type: 'string', multiple: true },
     dev: { type: 'boolean' },
@@ -46,7 +46,7 @@ if (help) {
 }
 
 const cwd = process.cwd();
-const workingDir = cwdArg ? path.resolve(cwdArg) : cwd;
+const workingDir = dir ? path.resolve(dir) : cwd;
 
 const isShowProgress =
   noProgress === false ? process.stdout.isTTY && typeof process.stdout.cursorTo === 'function' : !noProgress;
@@ -67,7 +67,7 @@ const main = async () => {
     process.exit(1);
   }
 
-  const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, { workingDir: cwdArg, isDev });
+  const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, { workingDir: dir, isDev });
 
   if (!resolvedConfig) {
     printHelp();
