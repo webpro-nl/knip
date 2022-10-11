@@ -178,7 +178,7 @@ export async function run(configuration: Configuration) {
               } else {
                 const refFiles = new Set(refs.map(r => r.compilerObject.references.map(r => r.fileName)).flat());
 
-                const isReferencedOnlyBySelf = refFiles.size === 1 && [...refFiles][0] === sourceFile.getFilePath();
+                const isReferencedOnlyBySelf = refFiles.size === 1 && [...refFiles][0] === filePath;
 
                 if (!isReferencedOnlyBySelf) return; // This identifier is used somewhere else
 
