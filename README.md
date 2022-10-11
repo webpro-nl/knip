@@ -295,16 +295,48 @@ src/components/Registration.tsx: Registration, default
 src/components/Products.tsx: ProductsList, default
 ```
 
-## Why Yet Another unused file/export finder?
+## Why Yet Another unused file/dependency/export finder?
 
-There are some fine modules available in the same category:
+There are already some great packages available. Getting good results when finding unused files, dependencies and
+exports is not trivial. Repositories don't seem to get any smaller and with the rise of monorepos even more so. Tools
+like this need to analyze potentially many and/or large files, which is memory and time-consuming. Although I normally
+try to stick to the Unix philosophy, here I believe it's efficient to merge these issue reports into a single tool. When
+building a dependency graph of the project, an abstract syntax tree for each file, and traversing all of this, why not
+collect the various issues in one go?
 
-- [unimported](https://github.com/smeijer/unimported)
-- [ts-unused-exports](https://github.com/pzavolinsky/ts-unused-exports)
-- [no-unused-export](https://github.com/plantain-00/no-unused-export)
-- [ts-prune](https://github.com/nadeesha/ts-prune)
-- [find-unused-exports](https://github.com/jaydenseric/find-unused-exports)
+## Comparison
 
-However, the results where not always accurate, and none of them tick my boxes to find both unused files and exports. Or
-let me configure entry files and scope the project files for clean results. Especially for larger projects this kind of
-configuration is necessary. That's why I took another stab at it.
+This table is a work in progress, but here's a first impression. Based on their docs (please report any mistakes):
+
+| Feature                     |  **knip**  | [depcheck][1] | [unimported][2] | [ts-unused-exports][3] | [ts-prune][4] | [find-unused-exports][5] |
+| --------------------------- | :--------: | :-----------: | :-------------: | :--------------------: | :-----------: | :----------------------: |
+| Unused files                |     ✅     |       -       |       ✅        |           -            |       -       |            -             |
+| Unused dependencies         |     ✅     |      ✅       |       ✅        |           -            |       -       |            -             |
+| Unlisted dependencies       |     ✅     |      ✅       |       ✅        |           -            |       -       |            -             |
+| Custom dependency resolvers | ❌ [#7][6] |      ✅       |     ❌ (1)      |           -            |       -       |            -             |
+| Unused exports              |     ✅     |       -       |        -        |           ✅           |      ✅       |            ✅            |
+| Duplicate exports           |     ✅     |       -       |        -        |           ❌           |      ❌       |            ❌            |
+| Search namespaces           |     ✅     |       -       |        -        |           ✅           |      ❌       |            ❌            |
+| Custom reporters            |     ✅     |       -       |        -        |           -            |       -       |            -             |
+| Pure JavaScript/ESM         |     ✅     |      ✅       |       ✅        |           -            |       -       |            ✅            |
+| Configure entry files       |     ✅     |      ❌       |       ✅        |           ❌           |      ❌       |            ❌            |
+| Support monorepo            |   🟠 (2)   |       -       |        -        |           -            |       -       |            -             |
+| ESLint plugin available     |     -      |       -       |        -        |           ✅           |       -       |            -             |
+
+✅ = Supported, ❌ = Not supported, - = Out of scope
+
+1. unimported is strict and works based on production files and `dependencies`, so does not have custom dependency
+   resolvers which are usually only needed for `devDependencies`.
+2. knip wants to [support monorepos](#monorepos) properly, the first steps in this direction are implemented.
+
+## Knip?!
+
+Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
+for the job. I'm motivated to make knip perfectly suited for the job of cutting projects to perfection! ✂️
+
+[1]: https://github.com/depcheck/depcheck
+[2]: https://github.com/smeijer/unimported
+[3]: https://github.com/pzavolinsky/ts-unused-exports
+[4]: https://github.com/nadeesha/ts-prune
+[5]: https://github.com/jaydenseric/find-unused-exports
+[6]: https://github.com/webpro/knip/issues/7
