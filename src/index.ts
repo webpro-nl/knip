@@ -17,13 +17,13 @@ export async function run(configuration: Configuration) {
     getDependencyAnalyzer(configuration);
 
   // Create workspace for entry files + resolved dependencies
-  const production = await createProject(workingDir, configuration.entryFiles);
+  const production = await createProject(configuration, configuration.entryFiles);
   const entryFiles = production.getSourceFiles();
   production.resolveSourceFileDependencies();
   const productionFiles = production.getSourceFiles();
 
   // Create workspace for the entire project
-  const project = await createProject(workingDir, configuration.projectFiles);
+  const project = await createProject(configuration, configuration.projectFiles);
   const projectFiles = project.getSourceFiles();
 
   // Slice & dice used & unreferenced files

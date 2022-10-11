@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { Project } from 'ts-morph';
-import { findFile } from './path';
 import type { SourceFile } from 'ts-morph';
+import type { Configuration } from '../types';
 
 const resolvePaths = (cwd: string, patterns: string | string[]) => {
   return [patterns].flat().map(pattern => {
@@ -10,14 +10,15 @@ const resolvePaths = (cwd: string, patterns: string | string[]) => {
   });
 };
 
-export const createProject = async (cwd: string, paths?: string | string[]) => {
-  const tsConfigFilePath = await findFile(cwd, 'tsconfig.json');
+export const createProject = async (configuration: Configuration, paths?: string | string[]) => {
+  const { tsConfigFilePath, workingDir } = configuration;
+  const tsConfig = tsConfigFilePath ? { tsConfigFilePath } : { compilerOptions: { allowJs: true } };
   const workspace = new Project({
-    tsConfigFilePath,
+    ...tsConfig,
     skipAddingFilesFromTsConfig: true,
     skipFileDependencyResolution: true,
   });
-  if (paths) workspace.addSourceFilesAtPaths(resolvePaths(cwd, paths));
+  if (paths) workspace.addSourceFilesAtPaths(resolvePaths(workingDir, paths));
   return workspace;
 };
 
