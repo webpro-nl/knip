@@ -40,7 +40,7 @@ export default ({ issues, config, workingDir }: { issues: Issues; config: Config
 
   if (report.dependencies && isDev) {
     const unreferencedDevDependencies = Array.from(issues.devDependencies);
-    logIssueGroupResult(unreferencedDevDependencies, workingDir, reportMultipleGroups && 'UNUSED DEV DEPENDENCIES');
+    logIssueGroupResult(unreferencedDevDependencies, workingDir, 'UNUSED DEV DEPENDENCIES');
   }
 
   if (report.unlisted) {
