@@ -1,14 +1,16 @@
 # ✂️ Knip
 
-Knip scans your TypeScript projects for **unused files and exports**. For comparison, ESLint finds unused variables
-inside files in isolation, but this will not be flagged:
+Knip scans your JavaScript and TypeScript projects for **unused files, dependencies and exports**. Things that should be
+eliminated. Less code means better performance and less to maintain, important for both UX and DX!
+
+For comparison, ESLint finds unused variables inside files in isolation, but this will not be flagged:
 
 ```ts
 export const myVar = true;
 ```
 
-Unused files will also not be detected by ESLint. So how do you know which files and exports are no longer used? This
-requires an analysis of all the right files in the project.
+Unused files will also not be detected by ESLint. So how do you know which files, dependencies and exports are no longer
+used? This requires an analysis of all the right files in the project.
 
 This is where Knip comes in:
 
@@ -17,7 +19,7 @@ This is where Knip comes in:
 - [x] Finds dependencies not listed in `package.json`.
 - [x] Finds duplicate exports of the same symbol.
 - [x] Supports JavaScript inside TypeScript projects (`"allowJs": true`)
-- [ ] Supports JavaScript-only projects with CommonJS and ESM (no `tsconfig.json`) - TODO
+- [x] Supports JavaScript-only projects using ESM (without a `tsconfig.json`)
 
 Knip really shines in larger projects where you have non-production files (such as `/docs`, `/tools` and `/scripts`).
 The `includes` setting in `tsconfig.json` is often too broad, resulting in too many false negatives. Similar projects
@@ -78,7 +80,8 @@ knip [options]
 
 Options:
   -c/--config [file]   Configuration file path (default: ./knip.json or package.json#knip)
-  --cwd                Working directory (default: current working directory)
+  -t/--tsConfig [file] TypeScript configuration path (default: ./tsconfig.json)
+  --dir                Working directory (default: current working directory)
   --include            Report only listed issue group(s) (see below)
   --exclude            Exclude issue group(s) from report (see below)
   --dev                Include `devDependencies` in report(s) (default: false)
@@ -92,7 +95,7 @@ Issue groups: files, dependencies, unlisted, exports, nsExports, types, nsTypes,
 Examples:
 
 $ knip
-$ knip --cwd packages/client --include files
+$ knip --dir packages/client --include files
 $ knip -c ./knip.js --reporter compact --jsdoc public
 
 More info: https://github.com/webpro/knip
@@ -143,8 +146,10 @@ Excluding non-production files from the `projectFiles` allows Knip to understand
 
 Non-production code includes files such as end-to-end tests, tooling, scripts, Storybook stories, etc.
 
+Think of it the same way as you would split `dependencies` and `devDependencies` in `package.json`.
+
 To include both production and test files to analyze the project as a whole, include both sets of files to `entryFiles`,
-and add `dev: true`:
+and add `dev: true` to a file named such as `knip.dev.json`:
 
 ```json
 {
@@ -154,7 +159,29 @@ and add `dev: true`:
 }
 ```
 
-Knip will now report unused files and exports for the combined set of files as configured in `entryFiles`.
+Use `-c knip.dev.json` and unused files and exports for the combined set of files as configured in `entryFiles` will be
+reported.
+
+An alternative way to store `dev` configuration is in this example `package.json`:
+
+```json
+{
+  "name": "my-package",
+  "scripts": {
+    "knip": "knip"
+  },
+  "knip": {
+    "entryFiles": ["src/index.ts"],
+    "projectFiles": ["src/**/*.ts", "!**/*.spec.ts"],
+    "dev": {
+      "entryFiles": ["src/index.ts", "src/**/*.spec.ts", "src/**/*.e2e.ts"],
+      "projectFiles": ["src/**/*.ts"]
+    }
+  }
+}
+```
+
+This way, the `--dev` flag will use the `dev` options (and also add `devDependencies` to the `dependencies` report).
 
 ## More configuration examples
 
@@ -179,8 +206,8 @@ Packages can also be explicitly configured per package directory.
 To scan the packages separately, using the first match from the configuration file:
 
 ```
-knip --cwd packages/client --config knip.json
-knip --cwd packages/services --config knip.json
+knip --cwd packages/client
+knip --cwd packages/services
 ```
 
 #### Connected projects
@@ -217,10 +244,14 @@ can be tweaked further to the project structure.
 ### Default reporter
 
 ```
-$ knip --config ./knip.json
+$ knip
 --- UNUSED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx
+--- UNUSED DEPENDENCIES (1)
+moment
+--- UNLISTED DEPENDENCIES (1)
+react
 --- UNUSED EXPORTS (5)
 lowercaseFirstLetter  src/common/src/string/index.ts
 RegistrationBox       src/components/Registration.tsx
@@ -240,10 +271,14 @@ ProductsList, default  src/components/Products.tsx
 ### Compact
 
 ```
-$ knip --config ./knip.json --reporter compact
+$ knip --reporter compact
 --- UNUSED FILES (2)
 src/chat/helpers.ts
 src/components/SideBar.tsx
+--- UNUSED DEPENDENCIES (1)
+moment
+--- UNLISTED DEPENDENCIES (1)
+react
 --- UNUSED EXPORTS (4)
 src/common/src/string/index.ts: lowercaseFirstLetter
 src/components/Registration.tsx: RegistrationBox
