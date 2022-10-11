@@ -5,7 +5,8 @@ import { parseArgs } from 'node:util';
 import ts from 'typescript';
 import { printHelp } from './help';
 import { resolveConfig, resolveIncludedIssueGroups } from './util/config';
-import { findFile } from './util/path';
+import { findFile } from './util/fs';
+import { readIgnorePatterns, convertPattern } from './util/ignore';
 import reporters from './reporters';
 import { run } from '.';
 import type { Configuration, IssueGroup } from './types';
@@ -20,6 +21,8 @@ const {
     exclude = [],
     dev: isDev = false,
     'no-progress': noProgress = false,
+    ignore = [],
+    'no-gitignore': isNoGitIgnore = false,
     reporter = 'symbols',
     jsdoc = [],
     'max-issues': maxIssues = '0',
@@ -34,6 +37,8 @@ const {
     exclude: { type: 'string', multiple: true },
     dev: { type: 'boolean' },
     'max-issues': { type: 'string' },
+    ignore: { type: 'string', multiple: true },
+    'no-gitignore': { type: 'boolean' },
     'no-progress': { type: 'boolean' },
     reporter: { type: 'string' },
     jsdoc: { type: 'string', multiple: true },
@@ -97,6 +102,12 @@ const main = async () => {
     }
   }
 
+  const ignorePatterns = ignore.map(convertPattern);
+  if (!isNoGitIgnore) {
+    const patterns = await readIgnorePatterns(cwd, workingDir);
+    patterns.forEach(pattern => ignorePatterns.push(pattern));
+  }
+
   const config: Configuration = {
     workingDir,
     report,
@@ -105,6 +116,7 @@ const main = async () => {
     isDev: typeof resolvedConfig.dev === 'boolean' ? resolvedConfig.dev : isDev,
     tsConfigFilePath,
     tsConfigPaths,
+    ignorePatterns,
     isShowProgress,
     jsDocOptions: {
       isReadPublicTag: jsdoc.includes('public'),

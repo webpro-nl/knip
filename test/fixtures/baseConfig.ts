@@ -15,6 +15,7 @@ const config = {
   isDev: false,
   tsConfigFilePath: undefined,
   tsConfigPaths: [],
+  ignorePatterns: [],
   isShowProgress: false,
   jsDocOptions: {
     isReadPublicTag: false,

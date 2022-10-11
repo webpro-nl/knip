@@ -79,16 +79,18 @@ Please read on if you think you have too many results: [too many false positives
 knip [options]
 
 Options:
-  -c/--config [file]   Configuration file path (default: ./knip.json or package.json#knip)
-  -t/--tsConfig [file] TypeScript configuration path (default: ./tsconfig.json)
-  --dir                Working directory (default: current working directory)
-  --include            Report only listed issue group(s) (see below)
-  --exclude            Exclude issue group(s) from report (see below)
-  --dev                Include `devDependencies` in report(s) (default: false)
-  --no-progress        Don't show dynamic progress updates
-  --max-issues         Maximum number of issues before non-zero exit code (default: 0)
-  --reporter           Select reporter: symbols, compact (default: symbols)
-  --jsdoc              Enable JSDoc parsing, with options: public (default: disabled)
+  -c/--config [file]     Configuration file path (default: ./knip.json or package.json#knip)
+  -t/--tsConfig [file]   TypeScript configuration path (default: ./tsconfig.json)
+  --dir                  Working directory (default: current working directory)
+  --include              Report only listed issue group(s) (see below)
+  --exclude              Exclude issue group(s) from report (see below)
+  --ignore               Ignore files matching this glob pattern (can be set multiple times)
+  --no-gitignore         Don't use .gitignore
+  --dev                  Include `devDependencies` in report(s)
+  --no-progress          Don't show dynamic progress updates
+  --max-issues           Maximum number of issues before non-zero exit code (default: 0)
+  --reporter             Select reporter: symbols, compact (default: symbols)
+  --jsdoc                Enable JSDoc parsing, with options: public
 
 Issue groups: files, dependencies, unlisted, exports, nsExports, types, nsTypes, duplicates
 
@@ -97,6 +99,7 @@ Examples:
 $ knip
 $ knip --dir packages/client --include files
 $ knip -c ./knip.js --reporter compact --jsdoc public
+$ knip --ignore 'lib/**/*.ts' --ignore build
 
 More info: https://github.com/webpro/knip
 ```

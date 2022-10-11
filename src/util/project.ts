@@ -1,24 +1,20 @@
-import path from 'node:path';
 import { Project } from 'ts-morph';
 import type { SourceFile } from 'ts-morph';
+import { resolvePaths } from './path';
 import type { Configuration } from '../types';
 
-const resolvePaths = (cwd: string, patterns: string | string[]) => {
-  return [patterns].flat().map(pattern => {
-    if (pattern.startsWith('!')) return '!' + path.join(cwd, pattern.slice(1));
-    return path.join(cwd, pattern);
-  });
-};
-
-export const createProject = async (configuration: Configuration, paths?: string | string[]) => {
-  const { tsConfigFilePath, workingDir } = configuration;
+export const createProject = async (configuration: Configuration, paths?: string[]) => {
+  const { tsConfigFilePath, ignorePatterns } = configuration;
   const tsConfig = tsConfigFilePath ? { tsConfigFilePath } : { compilerOptions: { allowJs: true } };
   const workspace = new Project({
     ...tsConfig,
     skipAddingFilesFromTsConfig: true,
     skipFileDependencyResolution: true,
   });
-  if (paths) workspace.addSourceFilesAtPaths(resolvePaths(workingDir, paths));
+  if (paths) {
+    const resolvedPaths = resolvePaths(configuration, paths);
+    workspace.addSourceFilesAtPaths([...resolvedPaths, ...ignorePatterns]);
+  }
   return workspace;
 };
 

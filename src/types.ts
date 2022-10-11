@@ -59,6 +59,7 @@ export type Configuration = LocalConfiguration & {
   isDev: boolean;
   tsConfigFilePath: undefined | string;
   tsConfigPaths: string[];
+  ignorePatterns: string[];
   isShowProgress: boolean;
   jsDocOptions: {
     isReadPublicTag: boolean;

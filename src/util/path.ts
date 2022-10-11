@@ -1,21 +1,12 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
+import type { Configuration } from '../types';
 
-const isFile = async (filePath: string) => {
-  try {
-    const stats = await fs.stat(filePath);
-    return stats.isFile();
-  } catch {
-    return false;
-  }
+export const addWorkingDirToPattern = (workingDir: string, pattern: string) => {
+  if (pattern.startsWith('!')) return '!' + path.join(workingDir, pattern.slice(1));
+  return path.join(workingDir, pattern);
 };
 
-export const findFile = async (cwd: string, fileName: string): Promise<string | undefined> => {
-  const filePath = path.join(cwd, fileName);
-  if (await isFile(filePath)) {
-    return filePath;
-  } else {
-    const parentDir = path.resolve(cwd, '..');
-    return parentDir === '/' ? undefined : findFile(parentDir, fileName);
-  }
+export const resolvePaths = (configuration: Configuration, patterns: string[]) => {
+  const { workingDir } = configuration;
+  return patterns.map(pattern => addWorkingDirToPattern(workingDir, pattern));
 };
