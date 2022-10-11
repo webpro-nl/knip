@@ -19,7 +19,7 @@ export type Issues = {
   duplicates: UnusedExportIssues;
 };
 
-export type IssueType = keyof Issues;
+type IssueType = keyof Issues;
 export type ProjectIssueType = Extract<IssueType, 'files' | 'dependencies' | 'devDependencies'>;
 export type SymbolIssueType = Exclude<IssueType, ProjectIssueType>;
 
@@ -34,7 +34,7 @@ export type IssueGroup =
   | 'nsTypes'
   | 'duplicates';
 
-export type BaseLocalConfiguration = {
+type BaseLocalConfiguration = {
   entryFiles: string[];
   projectFiles: string[];
 };

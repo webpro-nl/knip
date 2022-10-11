@@ -5,7 +5,7 @@ import { addWorkingDirToPattern } from './path';
 
 export const convertPattern = (pattern: string) => (pattern.startsWith('!') ? pattern.substring(1) : `!${pattern}`);
 
-export const readIgnoreFile = async (filePath: string) => {
+const readIgnoreFile = async (filePath: string) => {
   let contents = '';
   try {
     contents = (await fs.readFile(filePath)).toString();
@@ -15,7 +15,7 @@ export const readIgnoreFile = async (filePath: string) => {
   return contents.split(/\r?\n/).filter(line => line && !line.startsWith('#'));
 };
 
-export const traverseDirs = async (rootDir: string, currentDir: string, patterns: string[] = []): Promise<string[]> => {
+const traverseDirs = async (rootDir: string, currentDir: string, patterns: string[] = []): Promise<string[]> => {
   const gitIgnorePath = path.join(currentDir, '.gitignore');
   const parentDir = path.resolve(currentDir, '..');
   if (await isFile(gitIgnorePath)) {
