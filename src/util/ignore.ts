@@ -10,7 +10,7 @@ const readIgnoreFile = async (filePath: string) => {
   try {
     contents = (await fs.readFile(filePath)).toString();
   } catch (error) {
-    // TODO
+    // Ignore silently (not every folder of every repo has a .gitignore file)
   }
   return contents.split(/\r?\n/).filter(line => line && !line.startsWith('#'));
 };

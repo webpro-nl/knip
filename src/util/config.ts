@@ -23,7 +23,7 @@ export const resolveConfig = (
 
   if (!resolvedConfig.entryFiles || !resolvedConfig.projectFiles) {
     console.error('Unable to find `entryFiles` and/or `projectFiles` in configuration.');
-    console.info(`Add these properties at root level, or use --cwd and match one of: ${configKeys.join(', ')}\n`);
+    console.info(`Add these properties at root level, or use --dir and match one of: ${configKeys.join(', ')}\n`);
     return;
   }
 

@@ -1,7 +1,7 @@
 # ✂️ Knip
 
-Knip scans your JavaScript and TypeScript projects for **unused files, dependencies and exports**. Things that should be
-eliminated. Less code means better performance and less to maintain, important for both UX and DX!
+Knip scans your JavaScript and TypeScript projects for **unused files, dependencies and exports**: things that can be
+removed! Less code means better performance and less to maintain, important for both UX and DX!
 
 For comparison, ESLint finds unused variables inside files in isolation, but this will not be flagged:
 
@@ -142,7 +142,7 @@ As always, make sure to backup files or use Git before deleting files or making 
 
 The default configuration for Knip is very strict and targets production code. For best results, it is recommended to
 exclude files such as tests from the project files. Here's why: when including tests and other non-production files,
-they may prevent production files from being reported as unused.
+they may import production files, which will prevent them from being reported as unused.
 
 Excluding non-production files from the `projectFiles` allows Knip to understand what production code can be removed
 (including dependent files!).
@@ -162,8 +162,7 @@ and add `dev: true` to a file named such as `knip.dev.json`:
 }
 ```
 
-Use `-c knip.dev.json` and unused files and exports for the combined set of files as configured in `entryFiles` will be
-reported.
+Now use `-c knip.dev.json` to find unused files and exports for the combined set of files as configured in `entryFiles`.
 
 An alternative way to store `dev` configuration is in this example `package.json`:
 
@@ -192,7 +191,7 @@ This way, the `--dev` flag will use the `dev` options (and also add `devDependen
 
 #### Separate packages
 
-In repos with multiple (published) packages, the `--cwd` option comes in handy. With similar package structures, the
+In repos with multiple (published) packages, the `--dir` option comes in handy. With similar package structures, the
 packages can be configured using globs:
 
 ```json
@@ -209,8 +208,8 @@ Packages can also be explicitly configured per package directory.
 To scan the packages separately, using the first match from the configuration file:
 
 ```
-knip --cwd packages/client
-knip --cwd packages/services
+knip --dir packages/client
+knip --dir packages/services
 ```
 
 #### Connected projects
