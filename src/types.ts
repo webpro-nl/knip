@@ -57,6 +57,7 @@ export type Configuration = LocalConfiguration & {
   dependencies: string[];
   devDependencies: string[];
   isDev: boolean;
+  tsConfigFilePath: undefined | string;
   tsConfigPaths: string[];
   isShowProgress: boolean;
   jsDocOptions: {

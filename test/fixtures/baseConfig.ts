@@ -13,6 +13,7 @@ const config = {
   dependencies: [],
   devDependencies: [],
   isDev: false,
+  tsConfigFilePath: undefined,
   tsConfigPaths: [],
   isShowProgress: false,
   jsDocOptions: {

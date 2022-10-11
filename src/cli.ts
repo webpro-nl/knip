@@ -15,6 +15,7 @@ const {
     help,
     cwd: cwdArg,
     config: configFilePath = 'knip.json',
+    tsConfig: tsConfigFilePath,
     include = [],
     exclude = [],
     dev: isDev = false,
@@ -27,6 +28,7 @@ const {
   options: {
     help: { type: 'boolean' },
     config: { type: 'string', short: 'c' },
+    tsConfig: { type: 'string', short: 't' },
     cwd: { type: 'string' },
     include: { type: 'string', multiple: true },
     exclude: { type: 'string', multiple: true },
@@ -55,16 +57,15 @@ const printReport =
 const main = async () => {
   const localConfigurationPath = await findFile(workingDir, configFilePath);
   const manifestPath = await findFile(workingDir, 'package.json');
+  const localConfiguration = localConfigurationPath && require(localConfigurationPath);
+  const manifest = manifestPath && require(manifestPath);
 
-  if (!manifestPath || !localConfigurationPath) {
+  if (!localConfigurationPath && !manifest.knip) {
     const location = workingDir === cwd ? 'current directory' : `${path.relative(cwd, workingDir)} or up.`;
-    console.error(`Unable to find ${configFilePath} (or package.json#knip) in ${location}\n`);
+    console.error(`Unable to find ${configFilePath} or package.json#knip in ${location}\n`);
     printHelp();
     process.exit(1);
   }
-
-  const localConfiguration = require(localConfigurationPath);
-  const manifest = require(manifestPath);
 
   const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, { workingDir: cwdArg, isDev });
 
@@ -75,23 +76,25 @@ const main = async () => {
 
   const report = resolveIncludedIssueGroups(include, exclude, resolvedConfig);
 
-  const tsConfigFile = await findFile(workingDir, 'tsconfig.json');
-  if (!tsConfigFile) {
-    const location = workingDir === cwd ? 'current directory' : `${path.relative(cwd, workingDir)} or up.`;
-    console.error(`Unable to find ${tsConfigFile} or package.json in ${location}\n`);
+  let tsConfigPaths: string[] = [];
+  const tsConfigPath = await findFile(workingDir, tsConfigFilePath ?? 'tsconfig.json');
+  if (tsConfigFilePath && !tsConfigPath) {
+    console.error(`Unable to find ${tsConfigFilePath}\n`);
     printHelp();
     process.exit(1);
   }
 
-  const tsConfig = ts.readConfigFile(tsConfigFile, ts.sys.readFile);
-  const tsConfigPaths = tsConfig.config.compilerOptions?.paths
-    ? Object.keys(tsConfig.config.compilerOptions.paths).map(p => p.replace(/\*/g, '**'))
-    : [];
+  if (tsConfigPath) {
+    const tsConfig = ts.readConfigFile(tsConfigPath, ts.sys.readFile);
+    tsConfigPaths = tsConfig.config.compilerOptions?.paths
+      ? Object.keys(tsConfig.config.compilerOptions.paths).map(p => p.replace(/\*/g, '**'))
+      : [];
 
-  if (tsConfig.error) {
-    console.error(`An error occured when reading ${path.relative(cwd, tsConfigFile)}.\n`);
-    printHelp();
-    process.exit(1);
+    if (tsConfig.error) {
+      console.error(`An error occured when reading ${path.relative(cwd, tsConfigPath)}.\n`);
+      printHelp();
+      process.exit(1);
+    }
   }
 
   const config: Configuration = {
@@ -99,7 +102,8 @@ const main = async () => {
     report,
     dependencies: Object.keys(manifest.dependencies ?? {}),
     devDependencies: Object.keys(manifest.devDependencies ?? {}),
-    isDev: resolvedConfig.dev ?? isDev,
+    isDev: typeof resolvedConfig.dev === 'boolean' ? resolvedConfig.dev : isDev,
+    tsConfigFilePath,
     tsConfigPaths,
     isShowProgress,
     jsDocOptions: {

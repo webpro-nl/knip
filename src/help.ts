@@ -3,6 +3,7 @@ export const printHelp = () => {
 
 Options:
   -c/--config [file]   Configuration file path (default: ./knip.json or package.json#knip)
+  -t/--tsConfig [file] TypeScript configuration path (default: ./tsconfig.json)
   --cwd                Working directory (default: current working directory)
   --include            Report only listed issue group(s) (see below)
   --exclude            Exclude issue group(s) from report (see below)
