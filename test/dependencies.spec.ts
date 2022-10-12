@@ -1,16 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { run } from '../src/index';
-import baseConfig from './fixtures/baseConfig';
+import { main } from '../src';
 
-test('run', async () => {
-  const { issues, counters } = await run({
-    ...baseConfig,
-    workingDir: 'test/fixtures/dependencies',
-    entryFiles: ['entry.ts'],
-    projectFiles: ['*.ts'],
-    dependencies: ['@sindresorhus/is', '@tootallnate/once', 'has'],
-    devDependencies: [],
+test('Find unused dependencies', async () => {
+  const workingDir = 'test/fixtures/dependencies';
+
+  const { issues, counters } = await main({
+    cwd: workingDir,
+    workingDir,
+    include: [],
+    exclude: [],
+    ignore: [],
+    isNoGitIgnore: true,
+    isDev: false,
+    isShowProgress: false,
+    jsDoc: [],
   });
 
   assert(Array.from(issues.files)[0].endsWith('unused.ts'));

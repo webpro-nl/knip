@@ -1,14 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { run } from '../src/index';
+import { findIssues } from '../src/runner';
+import { createTestProject } from './helpers';
 import baseConfig from './fixtures/baseConfig';
 
-test('run', async () => {
-  const { issues, counters } = await run({
-    ...baseConfig,
-    workingDir: 'test/fixtures/basic',
+test('findIssues', async () => {
+  const workingDir = 'test/fixtures/basic';
+  const projectOptions = {};
+
+  const { entryFiles, productionFiles, projectFiles } = createTestProject({
+    workingDir,
+    projectOptions,
     entryFiles: ['index.ts'],
     projectFiles: ['*.ts'],
+  });
+
+  const { issues, counters } = await findIssues({
+    ...baseConfig,
+    workingDir,
+    entryFiles,
+    productionFiles,
+    projectFiles,
   });
 
   assert(counters.files === 1);

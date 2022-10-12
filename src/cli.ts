@@ -2,14 +2,10 @@
 
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import ts from 'typescript';
+import { main } from '.';
 import { printHelp } from './help';
-import { resolveConfig, resolveIncludedIssueGroups } from './util/config';
-import { findFile } from './util/fs';
-import { readIgnorePatterns, convertPattern } from './util/ignore';
 import reporters from './reporters';
-import { run } from '.';
-import type { Configuration, IssueGroup } from './types';
+import type { IssueGroup } from './types';
 
 const {
   values: {
@@ -19,13 +15,13 @@ const {
     tsConfig: tsConfigFilePath,
     include = [],
     exclude = [],
-    dev: isDev = false,
-    'no-progress': noProgress = false,
     ignore = [],
     'no-gitignore': isNoGitIgnore = false,
+    dev: isDev = false,
+    'no-progress': noProgress = false,
     reporter = 'symbols',
-    jsdoc = [],
     'max-issues': maxIssues = '0',
+    jsdoc: jsDoc = [],
   },
 } = parseArgs({
   options: {
@@ -35,11 +31,11 @@ const {
     dir: { type: 'string' },
     include: { type: 'string', multiple: true },
     exclude: { type: 'string', multiple: true },
-    dev: { type: 'boolean' },
-    'max-issues': { type: 'string' },
     ignore: { type: 'string', multiple: true },
     'no-gitignore': { type: 'boolean' },
+    dev: { type: 'boolean' },
     'no-progress': { type: 'boolean' },
+    'max-issues': { type: 'string' },
     reporter: { type: 'string' },
     jsdoc: { type: 'string', multiple: true },
   },
@@ -59,81 +55,38 @@ const isShowProgress =
 const printReport =
   reporter in reporters ? reporters[reporter as keyof typeof reporters] : require(path.join(workingDir, reporter));
 
-const main = async () => {
-  const localConfigurationPath = await findFile(workingDir, configFilePath);
-  const manifestPath = await findFile(workingDir, 'package.json');
-  const localConfiguration = localConfigurationPath && require(localConfigurationPath);
-  const manifest = manifestPath && require(manifestPath);
+const run = async () => {
+  try {
+    const { report, issues, counters } = await main({
+      cwd,
+      workingDir,
+      configFilePath,
+      tsConfigFilePath,
+      include,
+      exclude,
+      ignore,
+      isNoGitIgnore,
+      isDev,
+      isShowProgress,
+      jsDoc,
+    });
+    printReport({ report, issues, workingDir, isDev });
 
-  if (!localConfigurationPath && !manifest.knip) {
-    const location = workingDir === cwd ? 'current directory' : `${path.relative(cwd, workingDir)} or up.`;
-    console.error(`Unable to find ${configFilePath} or package.json#knip in ${location}\n`);
-    printHelp();
-    process.exit(1);
-  }
-
-  const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, { workingDir: dir, isDev });
-
-  if (!resolvedConfig) {
-    printHelp();
-    process.exit(1);
-  }
-
-  const report = resolveIncludedIssueGroups(include, exclude, resolvedConfig);
-
-  let tsConfigPaths: string[] = [];
-  const tsConfigPath = await findFile(workingDir, tsConfigFilePath ?? 'tsconfig.json');
-  if (tsConfigFilePath && !tsConfigPath) {
-    console.error(`Unable to find ${tsConfigFilePath}\n`);
-    printHelp();
-    process.exit(1);
-  }
-
-  if (tsConfigPath) {
-    const tsConfig = ts.readConfigFile(tsConfigPath, ts.sys.readFile);
-    tsConfigPaths = tsConfig.config.compilerOptions?.paths
-      ? Object.keys(tsConfig.config.compilerOptions.paths).map(p => p.replace(/\*/g, '**'))
-      : [];
-
-    if (tsConfig.error) {
-      console.error(`An error occured when reading ${path.relative(cwd, tsConfigPath)}.\n`);
+    const reportGroup = report.files ? 'files' : (Object.keys(report) as IssueGroup[]).find(key => report[key]);
+    const counterGroup = reportGroup === 'unlisted' ? 'unresolved' : reportGroup;
+    if (counterGroup) {
+      const count = counters[counterGroup];
+      if (count > Number(maxIssues)) process.exit(count);
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(error.message + '\n');
       printHelp();
       process.exit(1);
     }
-  }
-
-  const ignorePatterns = ignore.map(convertPattern);
-  if (!isNoGitIgnore) {
-    const patterns = await readIgnorePatterns(cwd, workingDir);
-    patterns.forEach(pattern => ignorePatterns.push(pattern));
-  }
-
-  const config: Configuration = {
-    workingDir,
-    report,
-    dependencies: Object.keys(manifest.dependencies ?? {}),
-    devDependencies: Object.keys(manifest.devDependencies ?? {}),
-    isDev: typeof resolvedConfig.dev === 'boolean' ? resolvedConfig.dev : isDev,
-    tsConfigFilePath,
-    tsConfigPaths,
-    ignorePatterns,
-    isShowProgress,
-    jsDocOptions: {
-      isReadPublicTag: jsdoc.includes('public'),
-    },
-    ...resolvedConfig,
-  };
-
-  const { issues, counters } = await run(config);
-
-  printReport({ issues, workingDir, config });
-
-  const reportGroup = report.files ? 'files' : (Object.keys(report) as IssueGroup[]).find(key => report[key]);
-  const counterGroup = reportGroup === 'unlisted' ? 'unresolved' : reportGroup;
-  if (counterGroup) {
-    const count = counters[counterGroup];
-    if (count > Number(maxIssues)) process.exit(count);
+    // We should never arrive here, but also not swallow silently
+    throw error;
   }
 };
 
-main();
+run();

@@ -1,5 +1,4 @@
 const config = {
-  cwd: '.',
   report: {
     files: true,
     dependencies: true,
@@ -13,9 +12,7 @@ const config = {
   dependencies: [],
   devDependencies: [],
   isDev: false,
-  tsConfigFilePath: undefined,
   tsConfigPaths: [],
-  ignorePatterns: [],
   isShowProgress: false,
   jsDocOptions: {
     isReadPublicTag: false,

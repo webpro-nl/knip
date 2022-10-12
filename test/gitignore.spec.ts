@@ -2,14 +2,14 @@ import test from 'node:test';
 import path from 'path';
 import assert from 'node:assert/strict';
 import { run } from '../src/index';
-import { readIgnorePatterns, convertPattern } from '../src/util/ignore';
+import { readIgnorePatterns, negatePattern } from '../src/util/ignore';
 import baseConfig from './fixtures/baseConfig';
 
 const resolve = dir => path.resolve('test/fixtures/gitignore', dir);
 
 test('convertPattern', () => {
-  assert(convertPattern('dist'), '!dist');
-  assert(convertPattern('build/*.ts'), '!build/*.ts');
+  assert(negatePattern('dist'), '!dist');
+  assert(negatePattern('build/*.ts'), '!build/*.ts');
 });
 
 test('readIgnorePatterns', async () => {

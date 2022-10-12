@@ -1,0 +1,11 @@
+{
+  "name": "basic",
+  "knip": {
+    "entryFiles": [
+      "index.ts"
+    ],
+    "projectFiles": [
+      "*.ts"
+    ]
+  }
+}

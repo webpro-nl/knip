@@ -1,3 +1,5 @@
+import { SourceFile } from 'ts-morph';
+
 type SymbolType = 'type' | 'interface' | 'enum';
 
 type UnusedFileIssues = Set<string>;
@@ -41,25 +43,40 @@ type BaseLocalConfiguration = {
 
 export type LocalConfiguration = BaseLocalConfiguration & {
   dev?: boolean | BaseLocalConfiguration;
-  entryFiles: string[];
-  projectFiles: string[];
   include?: string[];
   exclude?: string[];
 };
 
 export type ImportedConfiguration = LocalConfiguration | Record<string, LocalConfiguration>;
 
-export type Configuration = LocalConfiguration & {
+export type UnresolvedConfiguration = {
+  cwd: string;
   workingDir: string;
-  report: {
-    [key in IssueGroup]: boolean;
-  };
+  configFilePath?: string;
+  tsConfigFilePath?: string;
+  include: string[];
+  exclude: string[];
+  ignore: string[];
+  isNoGitIgnore: boolean;
+  isDev: boolean;
+  isShowProgress: boolean;
+  jsDoc: string[];
+};
+
+export type Report = {
+  [key in IssueGroup]: boolean;
+};
+
+export type Configuration = {
+  workingDir: string;
+  report: Report;
+  projectFiles: SourceFile[];
+  productionFiles: SourceFile[];
+  entryFiles: SourceFile[];
   dependencies: string[];
   devDependencies: string[];
   isDev: boolean;
-  tsConfigFilePath: undefined | string;
   tsConfigPaths: string[];
-  ignorePatterns: string[];
   isShowProgress: boolean;
   jsDocOptions: {
     isReadPublicTag: boolean;
