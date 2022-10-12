@@ -1,12 +1,21 @@
 import path from 'node:path';
-import { globby } from 'globby';
+import type { globby, Options } from 'globby';
+
+let _globby: typeof globby;
+const glob = async function (patterns: readonly string[], options: Options) {
+  if (!_globby) {
+    const { globby } = await (eval('import("globby")') as Promise<typeof import('globby')>);
+    _globby = globby;
+  }
+  return _globby(patterns, options);
+};
 
 export const prependDirToPattern = (workingDir: string, pattern: string) => {
   if (pattern.startsWith('!')) return '!' + path.join(workingDir, pattern.slice(1));
   return path.join(workingDir, pattern);
 };
 
-export const resolvePaths = ({
+export const resolvePaths = async ({
   cwd,
   workingDir,
   patterns,
@@ -19,7 +28,7 @@ export const resolvePaths = ({
   ignore: string[];
   gitignore: boolean;
 }) =>
-  globby(
+  glob(
     patterns.map(pattern => prependDirToPattern(path.relative(cwd, workingDir), pattern)),
     {
       cwd,
