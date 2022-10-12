@@ -57,7 +57,7 @@ export type UnresolvedConfiguration = {
   include: string[];
   exclude: string[];
   ignore: string[];
-  isNoGitIgnore: boolean;
+  gitignore: boolean;
   isDev: boolean;
   isShowProgress: boolean;
   jsDoc: string[];

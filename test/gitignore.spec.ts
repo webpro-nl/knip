@@ -1,46 +1,41 @@
 import test from 'node:test';
 import path from 'path';
 import assert from 'node:assert/strict';
-import { run } from '../src/index';
-import { readIgnorePatterns, negatePattern } from '../src/util/ignore';
-import baseConfig from './fixtures/baseConfig';
-
-const resolve = dir => path.resolve('test/fixtures/gitignore', dir);
-
-test('convertPattern', () => {
-  assert(negatePattern('dist'), '!dist');
-  assert(negatePattern('build/*.ts'), '!build/*.ts');
-});
-
-test('readIgnorePatterns', async () => {
-  const patterns = await readIgnorePatterns(resolve('.'), resolve('libs/util/type'));
-  assert.deepEqual(patterns, [
-    `!${resolve('libs/util/type/*.js')}`,
-    `!${resolve('libs/*.ts')}`,
-    `!${resolve('build')}`,
-    `!${resolve('dist.ts')}`,
-  ]);
-});
+import { main } from '../src';
 
 test('ignorePatterns', async () => {
-  const { issues } = await run({
-    ...baseConfig,
-    workingDir: resolve('.'),
-    entryFiles: ['index.ts'],
-    projectFiles: ['**/*'],
-    ignorePatterns: [`!${resolve('dist.ts')}`, `!${resolve('build')}`],
+  const cwd = path.resolve('test/fixtures/gitignore');
+  const workingDir = path.join(cwd, 'packages/a');
+
+  const { issues } = await main({
+    cwd,
+    workingDir,
+    include: [],
+    exclude: [],
+    ignore: [],
+    gitignore: true,
+    isDev: false,
+    isShowProgress: false,
+    jsDoc: [],
   });
 
   assert.equal(issues.files.size, 0);
 });
 
 test('ignorePatterns (disabled)', async () => {
-  const { issues } = await run({
-    ...baseConfig,
-    workingDir: resolve('.'),
-    entryFiles: ['index.ts'],
-    projectFiles: ['**/*'],
-    ignorePatterns: [],
+  const cwd = path.resolve('test/fixtures/gitignore');
+  const workingDir = path.join(cwd, 'packages/a');
+
+  const { issues } = await main({
+    cwd,
+    workingDir,
+    include: [],
+    exclude: [],
+    ignore: [],
+    gitignore: false,
+    isDev: false,
+    isShowProgress: false,
+    jsDoc: [],
   });
 
   assert.equal(issues.files.size, 3);

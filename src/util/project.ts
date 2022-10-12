@@ -1,27 +1,13 @@
 import { Project } from 'ts-morph';
-import { resolvePaths } from './path';
 import type { ProjectOptions, SourceFile } from 'ts-morph';
 
-export const createProject = ({
-  workingDir,
-  projectOptions,
-  paths,
-  ignorePatterns = [],
-}: {
-  workingDir: string;
-  projectOptions: ProjectOptions;
-  paths?: string[];
-  ignorePatterns?: string[];
-}) => {
+export const createProject = ({ projectOptions, paths }: { projectOptions: ProjectOptions; paths?: string[] }) => {
   const workspace = new Project({
     ...projectOptions,
     skipAddingFilesFromTsConfig: true,
     skipFileDependencyResolution: true,
   });
-  if (paths) {
-    const resolvedPaths = resolvePaths(workingDir, paths);
-    workspace.addSourceFilesAtPaths([...resolvedPaths, ...ignorePatterns]);
-  }
+  if (paths) workspace.addSourceFilesAtPaths(paths);
   return workspace;
 };
 

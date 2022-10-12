@@ -2,7 +2,7 @@ import path from 'node:path';
 import ts from 'typescript';
 import { resolveConfig, resolveIncludedIssueGroups } from './util/config';
 import { findFile } from './util/fs';
-import { readIgnorePatterns, negatePattern } from './util/ignore';
+import { resolvePaths } from './util/path';
 import { createProject } from './util/project';
 import { findIssues } from './runner';
 import type { UnresolvedConfiguration, Configuration } from './types';
@@ -16,7 +16,7 @@ export const main = async (options: UnresolvedConfiguration) => {
     include,
     exclude,
     ignore,
-    isNoGitIgnore,
+    gitignore,
     isDev,
     isShowProgress,
     jsDoc,
@@ -58,32 +58,30 @@ export const main = async (options: UnresolvedConfiguration) => {
     }
   }
 
-  const ignorePatterns = ignore.map(negatePattern);
-  if (!isNoGitIgnore) {
-    const patterns = await readIgnorePatterns(cwd, workingDir);
-    patterns.forEach(pattern => ignorePatterns.push(pattern));
-  }
-
   const projectOptions = tsConfigFilePath ? { tsConfigFilePath } : { compilerOptions: { allowJs: true } };
 
   // Create workspace for entry files + resolved dependencies
-  const production = createProject({
+  const entryPaths = await resolvePaths({
+    cwd,
     workingDir,
-    projectOptions,
-    paths: resolvedConfig.entryFiles,
-    ignorePatterns,
+    patterns: resolvedConfig.entryFiles,
+    ignore,
+    gitignore,
   });
+  const production = createProject({ projectOptions, paths: entryPaths });
   const entryFiles = production.getSourceFiles();
   production.resolveSourceFileDependencies();
   const productionFiles = production.getSourceFiles();
 
   // Create workspace for the entire project
-  const project = createProject({
+  const projectPaths = await resolvePaths({
+    cwd,
     workingDir,
-    projectOptions,
-    paths: resolvedConfig.projectFiles,
-    ignorePatterns,
+    patterns: resolvedConfig.projectFiles,
+    ignore,
+    gitignore,
   });
+  const project = createProject({ projectOptions, paths: projectPaths });
   const projectFiles = project.getSourceFiles();
 
   const config: Configuration = {

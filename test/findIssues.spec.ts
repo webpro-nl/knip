@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert';
+import path from 'node:path';
 import { findIssues } from '../src/runner';
 import { createTestProject } from './helpers';
 import baseConfig from './fixtures/baseConfig';
@@ -11,8 +12,8 @@ test('findIssues', async () => {
   const { entryFiles, productionFiles, projectFiles } = createTestProject({
     workingDir,
     projectOptions,
-    entryFiles: ['index.ts'],
-    projectFiles: ['*.ts'],
+    entryFiles: [path.join(workingDir, 'index.ts')],
+    projectFiles: [path.join(workingDir, '*.ts')],
   });
 
   const { issues, counters } = await findIssues({

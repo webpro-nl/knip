@@ -11,8 +11,6 @@ import type { Configuration, Issues, Issue, ProjectIssueType, SymbolIssueType } 
 const lineRewriter = new LineRewriter();
 
 export async function findIssues(configuration: Configuration) {
-  console.log(configuration);
-
   const { workingDir, isShowProgress, report, isDev, jsDocOptions } = configuration;
   const { entryFiles, productionFiles, projectFiles } = configuration;
 

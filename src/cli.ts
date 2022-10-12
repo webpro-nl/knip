@@ -65,7 +65,7 @@ const run = async () => {
       include,
       exclude,
       ignore,
-      isNoGitIgnore,
+      gitignore: !isNoGitIgnore,
       isDev,
       isShowProgress,
       jsDoc,
