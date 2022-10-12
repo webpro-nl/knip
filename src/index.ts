@@ -5,6 +5,7 @@ import { findFile } from './util/fs';
 import { resolvePaths } from './util/path';
 import { createProject } from './util/project';
 import { findIssues } from './runner';
+import { ConfigurationError } from './util/errors';
 import type { UnresolvedConfiguration, Configuration } from './types';
 
 export const main = async (options: UnresolvedConfiguration) => {
@@ -29,14 +30,14 @@ export const main = async (options: UnresolvedConfiguration) => {
 
   if (!localConfigurationPath && !manifest.knip) {
     const location = workingDir === cwd ? 'current directory' : `${path.relative(cwd, workingDir)} or up.`;
-    throw new Error(`Unable to find ${configFilePath} or package.json#knip in ${location}`);
+    throw new ConfigurationError(`Unable to find ${configFilePath} or package.json#knip in ${location}`);
   }
 
   const dir = path.relative(cwd, workingDir);
   const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, { workingDir: dir, isDev });
 
   if (!resolvedConfig) {
-    throw new Error('Unable to find `entryFiles` and/or `projectFiles` in configuration.');
+    throw new ConfigurationError('Unable to find `entryFiles` and/or `projectFiles` in configuration.');
   }
 
   const report = resolveIncludedIssueGroups(include, exclude, resolvedConfig);
@@ -44,7 +45,7 @@ export const main = async (options: UnresolvedConfiguration) => {
   let tsConfigPaths: string[] = [];
   const tsConfigPath = await findFile(workingDir, tsConfigFilePath ?? 'tsconfig.json');
   if (tsConfigFilePath && !tsConfigPath) {
-    throw new Error(`Unable to find ${tsConfigFilePath}`);
+    throw new ConfigurationError(`Unable to find ${tsConfigFilePath}`);
   }
 
   if (tsConfigPath) {
@@ -54,7 +55,7 @@ export const main = async (options: UnresolvedConfiguration) => {
       : [];
 
     if (tsConfig.error) {
-      throw new Error(`An error occured when reading ${path.relative(cwd, tsConfigPath)}`);
+      throw new ConfigurationError(`An error occured when reading ${path.relative(cwd, tsConfigPath)}`);
     }
   }
 

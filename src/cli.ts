@@ -5,6 +5,7 @@ import { parseArgs } from 'node:util';
 import { main } from '.';
 import { printHelp } from './help';
 import reporters from './reporters';
+import { ConfigurationError } from './util/errors';
 import type { IssueGroup } from './types';
 
 const {
@@ -70,6 +71,7 @@ const run = async () => {
       isShowProgress,
       jsDoc,
     });
+
     printReport({ report, issues, workingDir, isDev });
 
     const reportGroup = report.files ? 'files' : (Object.keys(report) as IssueGroup[]).find(key => report[key]);
@@ -79,7 +81,7 @@ const run = async () => {
       if (count > Number(maxIssues)) process.exit(count);
     }
   } catch (error: unknown) {
-    if (error instanceof Error) {
+    if (error instanceof ConfigurationError) {
       console.error(error.message + '\n');
       printHelp();
       process.exit(1);
