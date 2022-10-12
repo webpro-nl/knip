@@ -59,7 +59,7 @@ export const main = async (options: UnresolvedConfiguration) => {
     }
   }
 
-  const projectOptions = tsConfigFilePath ? { tsConfigFilePath } : { compilerOptions: { allowJs: true } };
+  const projectOptions = tsConfigPath ? { tsConfigFilePath: tsConfigPath } : { compilerOptions: { allowJs: true } };
 
   // Create workspace for entry files + resolved dependencies
   const entryPaths = await resolvePaths({
