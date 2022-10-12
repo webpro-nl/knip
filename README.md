@@ -22,12 +22,14 @@ This is where Knip comes in:
 - [x] Supports JavaScript-only projects using ESM (without a `tsconfig.json`)
 
 Knip really shines in larger projects where you have non-production files (such as `/docs`, `/tools` and `/scripts`).
-The `includes` setting in `tsconfig.json` is often too broad, resulting in too many false negatives. Similar projects
-either detect only unimported files, or only unused exports. Most of them don't work by configuring entry files, an
-essential feature to produce good results. This also allows to unleash knip on a specific part of your project, and work
-these separately.
+The `includes` setting in `tsconfig.json` is often too broad, resulting in too many false negatives. To produce good
+results it's essential to configure entry files. A comparison with similar toos answers the question
+[Why yet another unused file/dependency/export finder?](#why-yet-another-unused-filedependencyexport-finder)
 
-✂️ Knip is another fresh take on keeping your projects clean & tidy!
+Knip is a fresh take on keeping your projects clean & tidy!
+
+[![An orange cow with scissors, Van Gogh style](./assets/cow-with-orange-scissors-van-gogh-style.webp)](https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC)
+<sup>_“An orange cow with scissors, Van Gogh style” - generated with OpenAI_</sup>
 
 ## Installation
 
