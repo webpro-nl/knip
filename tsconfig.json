@@ -21,5 +21,6 @@
     "target": "es2022"
   },
   "include": ["./src/**/*.ts"],
-  "exclude": ["./src/**/*.spec.ts"]
+  "exclude": ["./src/**/*.spec.ts"],
+  "files": ["./@types/github-codeowners/index.d.ts"]
 }

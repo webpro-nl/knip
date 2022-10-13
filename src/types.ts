@@ -92,3 +92,14 @@ export type Configuration = {
     level: number;
   };
 };
+
+export type ReporterOptions = {
+  report: Report;
+  issues: Issues;
+  cwd: string;
+  workingDir: string;
+  isDev: boolean;
+  options: string;
+};
+
+export type Reporter = (options: ReporterOptions) => void;

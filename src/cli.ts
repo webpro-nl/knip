@@ -21,6 +21,7 @@ const {
     dev: isDev = false,
     'no-progress': noProgress = false,
     reporter = 'symbols',
+    'reporter-options': reporterOptions = '',
     'max-issues': maxIssues = '0',
     jsdoc: jsDoc = [],
     debug: isDebug = false,
@@ -40,6 +41,7 @@ const {
     'no-progress': { type: 'boolean' },
     'max-issues': { type: 'string' },
     reporter: { type: 'string' },
+    'reporter-options': { type: 'string' },
     jsdoc: { type: 'string', multiple: true },
     debug: { type: 'boolean' },
     'debug-level': { type: 'string' },
@@ -80,7 +82,7 @@ const run = async () => {
       },
     });
 
-    printReport({ report, issues, workingDir, isDev });
+    printReport({ report, issues, cwd, workingDir, isDev, options: reporterOptions });
 
     const reportGroup = report.files ? 'files' : (Object.keys(report) as IssueGroup[]).find(key => report[key]);
     const counterGroup = reportGroup === 'unlisted' ? 'unresolved' : reportGroup;
