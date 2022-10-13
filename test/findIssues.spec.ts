@@ -22,6 +22,10 @@ test('findIssues', async () => {
     entryFiles,
     productionFiles,
     projectFiles,
+    debug: {
+      isEnabled: false,
+      level: 0,
+    },
   });
 
   assert(counters.files === 1);

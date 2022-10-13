@@ -29,6 +29,8 @@ export const resolvePaths = async ({
   gitignore: boolean;
 }) =>
   glob(
+    // Prepend relative --dir to patterns to use cwd (not workingDir), because
+    // we want to glob everything to include all (git)ignore patterns
     patterns.map(pattern => prependDirToPattern(path.relative(cwd, workingDir), pattern)),
     {
       cwd,

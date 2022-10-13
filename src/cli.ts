@@ -23,6 +23,8 @@ const {
     reporter = 'symbols',
     'max-issues': maxIssues = '0',
     jsdoc: jsDoc = [],
+    debug: isDebug = false,
+    'debug-level': debugLevel = '1',
   },
 } = parseArgs({
   options: {
@@ -39,6 +41,8 @@ const {
     'max-issues': { type: 'string' },
     reporter: { type: 'string' },
     jsdoc: { type: 'string', multiple: true },
+    debug: { type: 'boolean' },
+    'debug-level': { type: 'string' },
   },
 });
 
@@ -70,6 +74,10 @@ const run = async () => {
       isDev,
       isShowProgress,
       jsDoc,
+      debug: {
+        isEnabled: isDebug,
+        level: isDebug ? Number(debugLevel) : 0,
+      },
     });
 
     printReport({ report, issues, workingDir, isDev });

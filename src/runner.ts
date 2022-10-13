@@ -5,6 +5,7 @@ import { partitionSourceFiles } from './util/project';
 import { getType } from './util/type';
 import { getDependencyAnalyzer } from './util/dependencies';
 import { getLine, LineRewriter } from './log';
+import { debugLogSourceFiles } from './util/debug';
 import type { Identifier } from 'ts-morph';
 import type { Configuration, Issues, Issue, ProjectIssueType, SymbolIssueType } from './types';
 
@@ -20,6 +21,11 @@ export async function findIssues(configuration: Configuration) {
   // Slice & dice used & unreferenced files
   const [usedProductionFiles, unreferencedProductionFiles] = partitionSourceFiles(projectFiles, productionFiles);
   const [usedEntryFiles, usedNonEntryFiles] = partitionSourceFiles(usedProductionFiles, entryFiles);
+
+  debugLogSourceFiles(configuration, 1, 'usedProductionFiles', usedProductionFiles);
+  debugLogSourceFiles(configuration, 1, 'unreferencedProductionFiles', unreferencedProductionFiles);
+  debugLogSourceFiles(configuration, 1, 'usedEntryFiles', usedEntryFiles);
+  debugLogSourceFiles(configuration, 1, 'usedNonEntryFiles', usedNonEntryFiles);
 
   // Set up the results
   const issues: Issues = {
@@ -86,6 +92,8 @@ export async function findIssues(configuration: Configuration) {
   };
 
   if (report.dependencies || report.unlisted) {
+    // Performance optimization: a separate traversal over only the entry files to find unused/unlisted dependencies,
+    // the rest will be done during the non-entry files traversal.
     usedEntryFiles.forEach(sourceFile => {
       counters.processed++;
       const unresolvedDependencies = getUnresolvedDependencies(sourceFile);
@@ -93,7 +101,7 @@ export async function findIssues(configuration: Configuration) {
     });
   }
 
-  // Skip when only interested in unreferenced files
+  // Skip expensive traversal when only reporting unreferenced files
   if (
     report.dependencies ||
     report.unlisted ||
@@ -103,6 +111,7 @@ export async function findIssues(configuration: Configuration) {
     report.nsTypes ||
     report.duplicates
   ) {
+    // We only traverse the non-entry production files, since entry files and any exports are marked as used.
     usedNonEntryFiles.forEach(sourceFile => {
       counters.processed++;
       const filePath = sourceFile.getFilePath();
@@ -177,7 +186,8 @@ export async function findIssues(configuration: Configuration) {
 
                 if (!isReferencedOnlyBySelf) return; // This identifier is used somewhere else
 
-                // No more reasons left to think this identifier is used somewhere else, report it as unreferenced
+                // No more reasons left to think this identifier is used somewhere else, report it as unreferenced. If
+                // it's on a namespace somewhere, report it in a separate issue type.
                 if (findReferencingNamespaceNodes(sourceFile).length > 0) {
                   if (type) {
                     addSymbolIssue('nsTypes', { filePath, symbol: identifierText, symbolType: type });

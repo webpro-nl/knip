@@ -61,6 +61,10 @@ export type UnresolvedConfiguration = {
   isDev: boolean;
   isShowProgress: boolean;
   jsDoc: string[];
+  debug: {
+    isEnabled: boolean;
+    level: number;
+  };
 };
 
 export type Report = {
@@ -80,5 +84,9 @@ export type Configuration = {
   isShowProgress: boolean;
   jsDocOptions: {
     isReadPublicTag: boolean;
+  };
+  debug: {
+    isEnabled: boolean;
+    level: number;
   };
 };

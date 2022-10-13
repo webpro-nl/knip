@@ -11,10 +11,14 @@ test('Find unused files and exports', async () => {
     include: [],
     exclude: [],
     ignore: [],
-    isNoGitIgnore: true,
+    gitignore: false,
     isDev: false,
     isShowProgress: false,
     jsDoc: [],
+    debug: {
+      isEnabled: false,
+      level: 0,
+    },
   });
 
   assert(issues.files.size === 1);

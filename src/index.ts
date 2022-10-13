@@ -6,6 +6,7 @@ import { resolvePaths } from './util/path';
 import { createProject } from './util/project';
 import { findIssues } from './runner';
 import { ConfigurationError } from './util/errors';
+import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug';
 import type { UnresolvedConfiguration, Configuration } from './types';
 
 export const main = async (options: UnresolvedConfiguration) => {
@@ -21,7 +22,10 @@ export const main = async (options: UnresolvedConfiguration) => {
     isDev,
     isShowProgress,
     jsDoc,
+    debug,
   } = options;
+
+  debugLogObject(options, 1, 'Unresolved onfiguration', options);
 
   const localConfigurationPath = configFilePath && (await findFile(workingDir, configFilePath));
   const manifestPath = await findFile(workingDir, 'package.json');
@@ -35,6 +39,8 @@ export const main = async (options: UnresolvedConfiguration) => {
 
   const dir = path.relative(cwd, workingDir);
   const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, { workingDir: dir, isDev });
+
+  debugLogObject(options, 1, 'Resolved onfiguration', resolvedConfig);
 
   if (!resolvedConfig) {
     throw new ConfigurationError('Unable to find `entryFiles` and/or `projectFiles` in configuration.');
@@ -61,7 +67,6 @@ export const main = async (options: UnresolvedConfiguration) => {
 
   const projectOptions = tsConfigPath ? { tsConfigFilePath: tsConfigPath } : { compilerOptions: { allowJs: true } };
 
-  // Create workspace for entry files + resolved dependencies
   const entryPaths = await resolvePaths({
     cwd,
     workingDir,
@@ -69,12 +74,18 @@ export const main = async (options: UnresolvedConfiguration) => {
     ignore,
     gitignore,
   });
+  debugLogFiles(options, 1, 'Globbed entry paths', entryPaths);
+
+  // Create workspace for entry files, but don't resolve dependencies yet
   const production = createProject({ projectOptions, paths: entryPaths });
   const entryFiles = production.getSourceFiles();
+  debugLogSourceFiles(options, 1, 'Included entry source files', entryFiles);
+
+  // Now resolve dependencies of entry files to find all production files
   production.resolveSourceFileDependencies();
   const productionFiles = production.getSourceFiles();
+  debugLogSourceFiles(options, 1, 'Included production source files', productionFiles);
 
-  // Create workspace for the entire project
   const projectPaths = await resolvePaths({
     cwd,
     workingDir,
@@ -82,8 +93,12 @@ export const main = async (options: UnresolvedConfiguration) => {
     ignore,
     gitignore,
   });
+  debugLogFiles(options, 1, 'Globbed project paths', projectPaths);
+
+  // Create workspace for the entire project
   const project = createProject({ projectOptions, paths: projectPaths });
   const projectFiles = project.getSourceFiles();
+  debugLogSourceFiles(options, 1, 'Included project source files', projectFiles);
 
   const config: Configuration = {
     workingDir,
@@ -99,9 +114,12 @@ export const main = async (options: UnresolvedConfiguration) => {
     jsDocOptions: {
       isReadPublicTag: jsDoc.includes('public'),
     },
+    debug,
   };
 
   const { issues, counters } = await findIssues(config);
+
+  debugLogObject(options, 2, 'Issues', issues);
 
   return { report, issues, counters };
 };

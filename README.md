@@ -93,6 +93,8 @@ Options:
   --max-issues           Maximum number of issues before non-zero exit code (default: 0)
   --reporter             Select reporter: symbols, compact (default: symbols)
   --jsdoc                Enable JSDoc parsing, with options: public
+  --debug                Show debug output
+  --debug-level          Set verbosity of debug output (default: 1, max: 2)
 
 Issue groups: files, dependencies, unlisted, exports, nsExports, types, nsTypes, duplicates
 

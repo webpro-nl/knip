@@ -17,6 +17,10 @@ test('ignorePatterns', async () => {
     isDev: false,
     isShowProgress: false,
     jsDoc: [],
+    debug: {
+      isEnabled: false,
+      level: 0,
+    },
   });
 
   assert.equal(issues.files.size, 0);
@@ -36,6 +40,10 @@ test('ignorePatterns (disabled)', async () => {
     isDev: false,
     isShowProgress: false,
     jsDoc: [],
+    debug: {
+      isEnabled: false,
+      level: 0,
+    },
   });
 
   assert.equal(issues.files.size, 3);

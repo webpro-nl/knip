@@ -11,10 +11,14 @@ test('Find unused dependencies', async () => {
     include: [],
     exclude: [],
     ignore: [],
-    isNoGitIgnore: true,
+    gitignore: false,
     isDev: false,
     isShowProgress: false,
     jsDoc: [],
+    debug: {
+      isEnabled: false,
+      level: 0,
+    },
   });
 
   assert(Array.from(issues.files)[0].endsWith('unused.ts'));
