@@ -20,6 +20,7 @@ This is where Knip comes in:
 - [x] Finds duplicate exports of the same symbol.
 - [x] Supports JavaScript inside TypeScript projects (`"allowJs": true`)
 - [x] Supports JavaScript-only projects using ESM (without a `tsconfig.json`)
+- [x] Features multiple [reporters](#reporters) and supports [custom reporters](#custom-reporters).
 
 Knip really shines in larger projects where you have non-production files (such as `/docs`, `/tools` and `/scripts`).
 The `includes` setting in `tsconfig.json` is often too broad, resulting in too many false negatives. To produce good
@@ -91,7 +92,8 @@ Options:
   --dev                  Include `devDependencies` in report(s)
   --no-progress          Don't show dynamic progress updates
   --max-issues           Maximum number of issues before non-zero exit code (default: 0)
-  --reporter             Select reporter: symbols, compact (default: symbols)
+  --reporter             Select reporter: symbols, compact, codeowners (default: symbols)
+  --reporter-options     Pass extra options to the reporter (as JSON string, see example)
   --jsdoc                Enable JSDoc parsing, with options: public
   --debug                Show debug output
   --debug-level          Set verbosity of debug output (default: 1, max: 2)
@@ -104,6 +106,7 @@ $ knip
 $ knip --dir packages/client --include files
 $ knip -c ./knip.js --reporter compact --jsdoc public
 $ knip --ignore 'lib/**/*.ts' --ignore build
+$ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 
 More info: https://github.com/webpro/knip
 ```
@@ -245,9 +248,38 @@ module.exports = { entryFiles, projectFiles };
 This should give good results about unused files and exports for the monorepo. After the first run, the configuration
 can be tweaked further to the project structure.
 
-## Example Output
+## Reporters
 
-### Default reporter
+For starters, Knip already contains a few useful reporters:
+
+- `symbol` (default)
+- `compact`
+- `codeowners`
+
+### Custom Reporters
+
+When a `--reporter ./my-reporter` is passed, the default export of that module should have this interface:
+
+```ts
+type Reporter = (options: ReporterOptions) => void;
+
+type ReporterOptions = {
+  report: Report;
+  issues: Issues;
+  cwd: string;
+  workingDir: string;
+  isDev: boolean;
+  options: string;
+};
+```
+
+The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service, anything really!
+
+### Example Output
+
+#### Symbol (default)
+
+The default reporter shows the sorted symbols first:
 
 ```
 $ knip
@@ -274,7 +306,9 @@ Registration, default  src/components/Registration.tsx
 ProductsList, default  src/components/Products.tsx
 ```
 
-### Compact
+#### Compact
+
+The compact reporter shows the sorted files first, and then a list of symbols:
 
 ```
 $ knip --reporter compact
@@ -298,6 +332,37 @@ src/types/Product.ts: ProductDetail
 src/components/Registration.tsx: Registration, default
 src/components/Products.tsx: ProductsList, default
 ```
+
+#### Code Owners
+
+The `codeowners` reporter is like `compact`, but shows the sorted code owners (according to `.github/CODEOWNERS`) first:
+
+```
+$ knip --reporter codeowners
+--- UNUSED FILES (2)
+@org/team src/chat/helpers.ts
+@org/owner src/components/SideBar.tsx
+--- UNUSED DEPENDENCIES (1)
+@org/admin moment
+--- UNLISTED DEPENDENCIES (1)
+@org/owner src/components/Registration.tsx react
+--- UNUSED EXPORTS (4)
+@org/team src/common/src/string/index.ts: lowercaseFirstLetter
+@org/owner src/components/Registration.tsx: RegistrationBox
+@org/owner src/css.ts: clamp
+@org/owner src/services/authentication.ts: restoreSession, PREFIX
+--- UNUSED TYPES (3)
+@org/owner src/components/Registration/registrationMachine.ts: RegistrationServices, RegistrationAction
+@org/owner src/components/Registration.tsx: ComponentProps
+@org/owner src/types/Product.ts: ProductDetail
+--- DUPLICATE EXPORTS (2)
+@org/owner src/components/Registration.tsx: Registration, default
+@org/owner src/components/Products.tsx: ProductsList, default
+```
+
+The owner of `package.json` is considered the owner of unused (dev) dependencies.
+
+Use `--reporter-options '{"path":".github/CODEOWNERS"}'` to pass another location for the code owners file.
 
 ## Why Yet Another unused file/dependency/export finder?
 

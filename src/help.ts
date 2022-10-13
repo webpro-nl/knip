@@ -12,7 +12,8 @@ Options:
   --dev                  Include \`devDependencies\` in report(s)
   --no-progress          Don't show dynamic progress updates
   --max-issues           Maximum number of issues before non-zero exit code (default: 0)
-  --reporter             Select reporter: symbols, compact (default: symbols)
+  --reporter             Select reporter: symbols, compact, codeowners (default: symbols)
+  --reporter-options     Pass extra options to the reporter (as JSON string, see example)
   --jsdoc                Enable JSDoc parsing, with options: public
   --debug                Show debug output
   --debug-level          Set verbosity of debug output (default: 1, max: 2)
@@ -25,6 +26,7 @@ $ knip
 $ knip --dir packages/client --include files
 $ knip -c ./knip.js --reporter compact --jsdoc public
 $ knip --ignore 'lib/**/*.ts' --ignore build
+$ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 
 More info: https://github.com/webpro/knip`);
 };
