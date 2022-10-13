@@ -10,7 +10,7 @@ const glob = async function (patterns: readonly string[], options: Options) {
   return _globby(patterns, options);
 };
 
-export const prependDirToPattern = (workingDir: string, pattern: string) => {
+const prependDirToPattern = (workingDir: string, pattern: string) => {
   if (pattern.startsWith('!')) return '!' + path.join(workingDir, pattern.slice(1));
   return path.join(workingDir, pattern);
 };

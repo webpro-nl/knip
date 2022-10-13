@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { Issue, Issues, Report } from '../types';
+import type { Issue, ReporterOptions } from '../types';
 
 const logIssueLine = ({ issue, workingDir, padding }: { issue: Issue; workingDir: string; padding: number }) => {
   const symbols = issue.symbols ? issue.symbols.join(', ') : issue.symbol;
@@ -28,17 +28,7 @@ const logIssueGroupResults = (issues: Issue[], workingDir: string, title: false 
   }
 };
 
-export default ({
-  report,
-  issues,
-  workingDir,
-  isDev,
-}: {
-  report: Report;
-  issues: Issues;
-  workingDir: string;
-  isDev: boolean;
-}) => {
+export default ({ report, issues, workingDir, isDev }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
   if (report.files) {
