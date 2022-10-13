@@ -1,12 +1,14 @@
 {
   "name": "knip",
   "version": "0.4.2",
-  "description": "Find unused files and exports in your TypeScript project",
+  "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript project",
   "keywords": [
     "find",
     "detect",
     "unused",
+    "unreferenced",
     "files",
+    "dependencies",
     "exports",
     "types",
     "duplicates",
