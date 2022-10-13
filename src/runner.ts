@@ -50,8 +50,8 @@ export async function findIssues(configuration: Configuration) {
   // OK, this looks ugly
   const updateProcessingOutput = (item: Issue) => {
     if (!isShowProgress) return;
-    const counter = unreferencedProductionFiles.length + counters.processed;
-    const total = unreferencedProductionFiles.length + usedNonEntryFiles.length;
+    const counter = counters.processed;
+    const total = projectFiles.length;
     const percentage = Math.floor((counter / total) * 100);
     const messages = [getLine(`${percentage}%`, `of files processed (${counter} of ${total})`)];
     report.files && messages.push(getLine(unreferencedProductionFiles.length, 'unused files'));
@@ -87,6 +87,7 @@ export async function findIssues(configuration: Configuration) {
 
   if (report.dependencies || report.unlisted) {
     usedEntryFiles.forEach(sourceFile => {
+      counters.processed++;
       const unresolvedDependencies = getUnresolvedDependencies(sourceFile);
       unresolvedDependencies.forEach(issue => addSymbolIssue('unresolved', issue));
     });
@@ -103,6 +104,7 @@ export async function findIssues(configuration: Configuration) {
     report.duplicates
   ) {
     usedNonEntryFiles.forEach(sourceFile => {
+      counters.processed++;
       const filePath = sourceFile.getFilePath();
 
       if (report.dependencies || report.unlisted) {
@@ -192,7 +194,6 @@ export async function findIssues(configuration: Configuration) {
           });
         });
       }
-      counters.processed++;
     });
   }
 
