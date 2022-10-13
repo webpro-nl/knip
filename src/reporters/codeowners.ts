@@ -38,7 +38,7 @@ const logIssueGroupResults = (issues: OwnedIssue[], cwd: string, title: false | 
 export default ({ report, issues, cwd, isDev, options }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
-    opts = JSON.parse(options);
+    opts = options ? JSON.parse(options) : opts;
   } catch (error) {
     console.error(error);
   }
