@@ -78,6 +78,8 @@ export type Configuration = {
   productionFiles: SourceFile[];
   entryFiles: SourceFile[];
   dependencies: string[];
+  peerDependencies: string[];
+  optionalDependencies: string[];
   devDependencies: string[];
   isDev: boolean;
   tsConfigPaths: string[];

@@ -3,5 +3,14 @@
     "@tootallnate/once": "*",
     "@sindresorhus/is": "*",
     "has": "*"
+  },
+  "peerDependencies": {
+    "jquery": "*"
+  },
+  "optionalDependencies": {
+    "fs-extra": "*"
+  },
+  "devDependencies": {
+    "mocha": "*"
   }
 }

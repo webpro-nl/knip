@@ -8,7 +8,9 @@ const compact = <T>(collection: (T | undefined)[]) =>
   Array.from(new Set(collection)).filter((value): value is T => Boolean(value));
 
 export const getDependencyAnalyzer = (configuration: Configuration) => {
-  const { dependencies, devDependencies, tsConfigPaths } = configuration;
+  const { dependencies, devDependencies, peerDependencies, optionalDependencies, tsConfigPaths } = configuration;
+
+  const productionDependencies = [...dependencies, ...peerDependencies, ...optionalDependencies];
 
   const referencedDependencies: Set<string> = new Set();
 
@@ -28,10 +30,10 @@ export const getDependencyAnalyzer = (configuration: Configuration) => {
       if (tsConfigPaths.length > 0 && micromatch.isMatch(moduleSpecifier, tsConfigPaths)) return;
       const parts = moduleSpecifier.split('/').slice(0, 2);
       const packageName = moduleSpecifier.startsWith('@') ? parts.join('/') : parts[0];
-      if (!dependencies.includes(packageName) && !devDependencies.includes(packageName)) {
+      if (!productionDependencies.includes(packageName) && !devDependencies.includes(packageName)) {
         unresolvedDependencies.add({ filePath: sourceFile.getFilePath(), symbol: moduleSpecifier });
       }
-      if (dependencies.includes(packageName) || devDependencies.includes(packageName)) {
+      if (productionDependencies.includes(packageName) || devDependencies.includes(packageName)) {
         referencedDependencies.add(packageName);
       }
     });
@@ -39,7 +41,8 @@ export const getDependencyAnalyzer = (configuration: Configuration) => {
     return unresolvedDependencies;
   };
 
-  const getUnusedDependencies = () => dependencies.filter(dependency => !referencedDependencies.has(dependency));
+  const getUnusedDependencies = () =>
+    productionDependencies.filter(dependency => !referencedDependencies.has(dependency));
 
   const getUnusedDevDependencies = () => devDependencies.filter(dependency => !referencedDependencies.has(dependency));
 

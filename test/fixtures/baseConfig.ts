@@ -10,6 +10,8 @@ const config = {
     duplicates: true,
   },
   dependencies: [],
+  peerDependencies: [],
+  optionalDependencies: [],
   devDependencies: [],
   isDev: false,
   tsConfigPaths: [],

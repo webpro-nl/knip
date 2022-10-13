@@ -107,6 +107,8 @@ export const main = async (options: UnresolvedConfiguration) => {
     productionFiles,
     projectFiles,
     dependencies: Object.keys(manifest.dependencies ?? {}),
+    peerDependencies: Object.keys(manifest.peerDependencies ?? {}),
+    optionalDependencies: Object.keys(manifest.optionalDependencies ?? {}),
     devDependencies: Object.keys(manifest.devDependencies ?? {}),
     isDev: typeof resolvedConfig.dev === 'boolean' ? resolvedConfig.dev : isDev,
     tsConfigPaths,
