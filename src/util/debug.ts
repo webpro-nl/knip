@@ -8,7 +8,7 @@ const logArray = (collection: string[]) => console.log(util.inspect(collection, 
 
 export const debugLogObject = (config: Config, minimumLevel: number, name: string, obj: unknown) => {
   if (minimumLevel > config.debug.level) return;
-  console.log(`[exportman] ${name}:`);
+  console.log(`[knip] ${name}:`);
   console.log(util.inspect(obj, { depth: null, colors: true }));
 };
 
@@ -16,10 +16,10 @@ export const debugLogFiles = (config: Config, minimumLevel: number, name: string
   if (minimumLevel > config.debug.level) return;
   const { debug } = config;
   if (debug.level > 1) {
-    console.debug(`[exportman] ${name} (${filePaths.length}):`);
+    console.debug(`[knip] ${name} (${filePaths.length}):`);
     logArray(filePaths);
   } else {
-    console.debug(`[exportman] ${name} (${filePaths.length})`);
+    console.debug(`[knip] ${name} (${filePaths.length})`);
   }
 };
 
@@ -28,10 +28,10 @@ export const debugLogSourceFiles = (config: Config, minimumLevel: number, name: 
   const { debug } = config;
   if (debug.level > 1) {
     // let files = Array.from(sourceFiles);
-    console.debug(`[exportman] ${name} (${sourceFiles.length}):`);
+    console.debug(`[knip] ${name} (${sourceFiles.length}):`);
     logArray(sourceFiles.map(sourceFile => sourceFile.getFilePath()));
   } else {
-    console.debug(`[exportman] ${name} (${sourceFiles.length})`);
+    console.debug(`[knip] ${name} (${sourceFiles.length})`);
   }
 };
 
@@ -39,10 +39,10 @@ export const debugLogDiff = (config: Config, minimumLevel: number, name: string,
   if (minimumLevel > config.debug.level) return;
   const onlyInA = arrA.filter(itemA => !arrB.includes(itemA)).sort();
   const onlyInB = arrB.filter(itemB => !arrA.includes(itemB)).sort();
-  console.log(`[exportman] ${name}`);
-  console.log(`[exportman] Only in left:`);
+  console.log(`[knip] ${name}`);
+  console.log(`[knip] Only in left:`);
   logArray(onlyInA);
   console.log();
-  console.log(`[exportman] Only in right:`);
+  console.log(`[knip] Only in right:`);
   logArray(onlyInB);
 };
