@@ -45,7 +45,7 @@
     "is-builtin-module": "3.2.0",
     "micromatch": "4.0.5",
     "ts-morph": "16.0.0",
-    "ts-morph-helpers": "0.5.1"
+    "ts-morph-helpers": "0.6.0"
   },
   "devDependencies": {
     "@types/micromatch": "4.0.2",

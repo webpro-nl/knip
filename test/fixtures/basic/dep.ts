@@ -1,4 +1,5 @@
 import * as ns from './ns';
+import _default from './default';
 
 const x = ns.x;
 const y = ns.y;

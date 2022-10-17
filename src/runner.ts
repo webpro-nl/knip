@@ -1,6 +1,10 @@
 import path from 'node:path';
 import { ts } from 'ts-morph';
-import { findDuplicateExportedNames, findReferencingNamespaceNodes } from 'ts-morph-helpers';
+import {
+  findDuplicateExportedNames,
+  hasReferencingDefaultImport,
+  findReferencingNamespaceNodes,
+} from 'ts-morph-helpers';
 import { partitionSourceFiles } from './util/project';
 import { getType } from './util/type';
 import { getDependencyAnalyzer } from './util/dependencies';
@@ -123,7 +127,7 @@ export async function findIssues(configuration: Configuration) {
 
       // The default strategy is to not report unused exports for entry files.
       // When this option is set explicitly, or in zero-config mode, unused exports are also reported for entry files
-      if (!isIncludeEntryFiles && entryFiles.includes(sourceFile)) return;
+      if (!isIncludeEntryFiles && usedEntryFiles.includes(sourceFile)) return;
 
       if (report.exports || report.types || report.nsExports || report.nsTypes) {
         if (!isIncludeEntryFiles) {
@@ -149,10 +153,15 @@ export async function findIssues(configuration: Configuration) {
               identifier = declaration;
             } else if (
               declaration.isKind(ts.SyntaxKind.ArrowFunction) ||
-              declaration.isKind(ts.SyntaxKind.ObjectLiteralExpression)
+              declaration.isKind(ts.SyntaxKind.ObjectLiteralExpression) ||
+              declaration.isKind(ts.SyntaxKind.ArrayLiteralExpression) ||
+              declaration.isKind(ts.SyntaxKind.StringLiteral) ||
+              declaration.isKind(ts.SyntaxKind.NumericLiteral)
             ) {
-              // No ReferenceFindableNode/Identifier available
-              fakeIdentifier = 'default';
+              // No ReferenceFindableNode/Identifier available for anonymous default exports, let's go the extra mile
+              if (!hasReferencingDefaultImport(sourceFile)) {
+                fakeIdentifier = 'default';
+              }
             } else if (
               declaration.isKind(ts.SyntaxKind.FunctionDeclaration) ||
               declaration.isKind(ts.SyntaxKind.ClassDeclaration) ||
