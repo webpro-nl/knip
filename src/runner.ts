@@ -143,11 +143,16 @@ export async function findIssues(configuration: Configuration) {
             if (jsDocOptions.isReadPublicTag && ts.getJSDocPublicTag(declaration.compilerNode)) return;
 
             let identifier: Identifier | undefined;
+            let fakeIdentifier: string | undefined;
 
             if (declaration.isKind(ts.SyntaxKind.Identifier)) {
               identifier = declaration;
-            } else if (declaration.isKind(ts.SyntaxKind.ArrowFunction)) {
-              // TODO No ReferenceFindableNode/Identifier available?
+            } else if (
+              declaration.isKind(ts.SyntaxKind.ArrowFunction) ||
+              declaration.isKind(ts.SyntaxKind.ObjectLiteralExpression)
+            ) {
+              // No ReferenceFindableNode/Identifier available
+              fakeIdentifier = 'default';
             } else if (
               declaration.isKind(ts.SyntaxKind.FunctionDeclaration) ||
               declaration.isKind(ts.SyntaxKind.ClassDeclaration) ||
@@ -162,15 +167,15 @@ export async function findIssues(configuration: Configuration) {
               identifier = declaration.getFirstDescendantByKind(ts.SyntaxKind.Identifier);
             }
 
-            if (identifier) {
-              const identifierText = identifier.getText();
+            if (identifier || fakeIdentifier) {
+              const identifierText = fakeIdentifier ?? identifier?.getText() ?? '*';
 
               if (report.exports && issues.exports[filePath]?.[identifierText]) return;
               if (report.types && issues.types[filePath]?.[identifierText]) return;
               if (report.nsExports && issues.nsExports[filePath]?.[identifierText]) return;
               if (report.nsTypes && issues.nsTypes[filePath]?.[identifierText]) return;
 
-              const refs = identifier.findReferences();
+              const refs = identifier?.findReferences() ?? [];
 
               if (refs.length === 0) {
                 addSymbolIssue('exports', { filePath, symbol: identifierText });
