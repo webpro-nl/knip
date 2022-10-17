@@ -434,7 +434,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 
 [1]: #reporters
 [2]: #custom-reporters
-[3]: #why-yet-another-unused-filedependencyexport-finder
+[3]: #really-another-unused-filedependencyexport-finder
 [4]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [5]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
 [6]: ./assets/how-it-works.drawio.svg
