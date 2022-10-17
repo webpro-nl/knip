@@ -12,6 +12,7 @@ test('Find unused files and exports with JS entry file', async () => {
     exclude: [],
     ignore: [],
     gitignore: false,
+    isIncludeEntryFiles: false,
     isDev: false,
     isShowProgress: false,
     jsDoc: [],

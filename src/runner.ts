@@ -13,7 +13,7 @@ const lineRewriter = new LineRewriter();
 
 export async function findIssues(configuration: Configuration) {
   const { workingDir, isShowProgress, report, isDev, jsDocOptions } = configuration;
-  const { entryFiles, productionFiles, projectFiles } = configuration;
+  const { entryFiles, productionFiles, projectFiles, isIncludeEntryFiles } = configuration;
 
   const { getUnresolvedDependencies, getUnusedDependencies, getUnusedDevDependencies } =
     getDependencyAnalyzer(configuration);
@@ -91,16 +91,6 @@ export async function findIssues(configuration: Configuration) {
     updateProcessingOutput(issue);
   };
 
-  if (report.dependencies || report.unlisted) {
-    // Performance optimization: a separate traversal over only the entry files to find unused/unlisted dependencies,
-    // the rest will be done during the non-entry files traversal.
-    usedEntryFiles.forEach(sourceFile => {
-      counters.processed++;
-      const unresolvedDependencies = getUnresolvedDependencies(sourceFile);
-      unresolvedDependencies.forEach(issue => addSymbolIssue('unresolved', issue));
-    });
-  }
-
   // Skip expensive traversal when only reporting unreferenced files
   if (
     report.dependencies ||
@@ -111,8 +101,7 @@ export async function findIssues(configuration: Configuration) {
     report.nsTypes ||
     report.duplicates
   ) {
-    // We only traverse the non-entry production files, since entry files and any exports are marked as used.
-    usedNonEntryFiles.forEach(sourceFile => {
+    usedProductionFiles.forEach(sourceFile => {
       counters.processed++;
       const filePath = sourceFile.getFilePath();
 
@@ -132,9 +121,15 @@ export async function findIssues(configuration: Configuration) {
         });
       }
 
+      // The default strategy is to not report unused exports for entry files.
+      // When this option is set explicitly, or in zero-config mode, unused exports are also reported for entry files
+      if (!isIncludeEntryFiles && entryFiles.includes(sourceFile)) return;
+
       if (report.exports || report.types || report.nsExports || report.nsTypes) {
-        const uniqueExportedSymbols = new Set([...exportDeclarations.values()].flat());
-        if (uniqueExportedSymbols.size === 1) return; // Only one exported identifier means it's used somewhere else
+        if (!isIncludeEntryFiles) {
+          const uniqueExportedSymbols = new Set([...exportDeclarations.values()].flat());
+          if (uniqueExportedSymbols.size === 1) return; // Only one exported identifier means it's used somewhere else
+        }
 
         exportDeclarations.forEach(declarations => {
           declarations.forEach(declaration => {

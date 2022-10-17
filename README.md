@@ -209,6 +209,11 @@ Using the `--dev` flag will now switch to the non-production analysis.
 
 Depending on the complexity of the project, be aware that it might require some fine-tuning on your end.
 
+## Zero-config
+
+Knip can work without any configuration. Then an existing `tsconfig.json` file is required. Since `entryFiles` and
+`projectFiles` are now the same, Knip is unable to report unused files.
+
 ## More configuration examples
 
 ### Monorepos

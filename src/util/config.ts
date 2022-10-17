@@ -5,6 +5,8 @@ export const resolveConfig = (
   importedConfiguration: ImportedConfiguration,
   options?: { workingDir?: string; isDev?: boolean }
 ): LocalConfiguration | undefined => {
+  if (!importedConfiguration) return;
+
   let resolvedConfig = importedConfiguration;
   const { workingDir, isDev } = options ?? {};
 

@@ -10,6 +10,7 @@ Options:
   --ignore               Ignore files matching this glob pattern (can be set multiple times)
   --no-gitignore         Don't use .gitignore
   --dev                  Include \`devDependencies\` in report(s)
+  --include-entry-files  Report unused exports and types for entry files
   --no-progress          Don't show dynamic progress updates
   --max-issues           Maximum number of issues before non-zero exit code (default: 0)
   --reporter             Select reporter: symbols, compact, codeowners (default: symbols)

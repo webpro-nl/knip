@@ -12,6 +12,7 @@ test('Find unused dependencies', async () => {
     exclude: [],
     ignore: [],
     gitignore: false,
+    isIncludeEntryFiles: false,
     isDev: false,
     isShowProgress: false,
     jsDoc: [],

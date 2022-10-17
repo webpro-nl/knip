@@ -58,6 +58,7 @@ export type UnresolvedConfiguration = {
   exclude: string[];
   ignore: string[];
   gitignore: boolean;
+  isIncludeEntryFiles: boolean;
   isDev: boolean;
   isShowProgress: boolean;
   jsDoc: string[];
@@ -77,6 +78,7 @@ export type Configuration = {
   projectFiles: SourceFile[];
   productionFiles: SourceFile[];
   entryFiles: SourceFile[];
+  isIncludeEntryFiles: boolean;
   dependencies: string[];
   peerDependencies: string[];
   optionalDependencies: string[];

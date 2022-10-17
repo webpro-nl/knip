@@ -7,18 +7,19 @@ import { createProject } from './util/project';
 import { findIssues } from './runner';
 import { ConfigurationError } from './util/errors';
 import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug';
-import type { UnresolvedConfiguration, Configuration } from './types';
+import type { UnresolvedConfiguration, Configuration, LocalConfiguration } from './types';
 
 export const main = async (options: UnresolvedConfiguration) => {
   const {
     cwd,
     workingDir,
-    configFilePath = 'knip.json',
-    tsConfigFilePath,
+    configFilePath: configFilePathArg,
+    tsConfigFilePath: tsConfigFilePathArg,
     include,
     exclude,
     ignore,
     gitignore,
+    isIncludeEntryFiles,
     isDev,
     isShowProgress,
     jsDoc,
@@ -27,78 +28,93 @@ export const main = async (options: UnresolvedConfiguration) => {
 
   debugLogObject(options, 1, 'Unresolved onfiguration', options);
 
-  const localConfigurationPath = configFilePath && (await findFile(workingDir, configFilePath));
-  const manifestPath = await findFile(workingDir, 'package.json');
-  const localConfiguration = localConfigurationPath && require(localConfigurationPath);
+  const manifestPath = await findFile(cwd, workingDir, 'package.json');
   const manifest = manifestPath && require(manifestPath);
 
-  if (!localConfigurationPath && !manifest.knip) {
-    const location = workingDir === cwd ? 'current directory' : `${path.relative(cwd, workingDir)} or up.`;
-    throw new ConfigurationError(`Unable to find ${configFilePath} or package.json#knip in ${location}`);
+  const configFilePath = configFilePathArg ?? 'knip.json';
+  const resolvedConfigFilePath = await findFile(cwd, workingDir, configFilePath);
+  const localConfig = resolvedConfigFilePath && require(resolvedConfigFilePath);
+  if (configFilePathArg && !resolvedConfigFilePath) {
+    throw new ConfigurationError(`Unable to find ${configFilePathArg}`);
   }
 
-  const dir = path.relative(cwd, workingDir);
-  const resolvedConfig = resolveConfig(manifest.knip ?? localConfiguration, { workingDir: dir, isDev });
-
-  debugLogObject(options, 1, 'Resolved onfiguration', resolvedConfig);
-
-  if (!resolvedConfig) {
-    throw new ConfigurationError('Unable to find `entryFiles` and/or `projectFiles` in configuration.');
+  const tsConfigFilePath = tsConfigFilePathArg ?? 'tsconfig.json';
+  const resolvedTsConfigFilePath = await findFile(cwd, workingDir, tsConfigFilePath);
+  if (tsConfigFilePathArg && !resolvedTsConfigFilePath) {
+    throw new ConfigurationError(`Unable to find ${tsConfigFilePathArg}`);
   }
-
-  const report = resolveIncludedIssueGroups(include, exclude, resolvedConfig);
 
   let tsConfigPaths: string[] = [];
-  const tsConfigPath = await findFile(workingDir, tsConfigFilePath ?? 'tsconfig.json');
-  if (tsConfigFilePath && !tsConfigPath) {
-    throw new ConfigurationError(`Unable to find ${tsConfigFilePath}`);
-  }
-
-  if (tsConfigPath) {
-    const tsConfig = ts.readConfigFile(tsConfigPath, ts.sys.readFile);
-    tsConfigPaths = tsConfig.config.compilerOptions?.paths
-      ? Object.keys(tsConfig.config.compilerOptions.paths).map(p => p.replace(/\*/g, '**'))
+  if (resolvedTsConfigFilePath) {
+    const config = ts.readConfigFile(resolvedTsConfigFilePath, ts.sys.readFile);
+    tsConfigPaths = config.config.compilerOptions?.paths
+      ? Object.keys(config.config.compilerOptions.paths).map(p => p.replace(/\*/g, '**')) // TODO Replacement too naive?
       : [];
-
-    if (tsConfig.error) {
-      throw new ConfigurationError(`An error occured when reading ${path.relative(cwd, tsConfigPath)}`);
+    if (config.error) {
+      throw new ConfigurationError(`Unable to read ${path.relative(cwd, resolvedTsConfigFilePath)}`);
     }
   }
 
-  const projectOptions = tsConfigPath ? { tsConfigFilePath: tsConfigPath } : { compilerOptions: { allowJs: true } };
+  const dir = path.relative(cwd, workingDir);
+  const resolvedConfig = resolveConfig(manifest.knip ?? localConfig, { workingDir: dir, isDev });
 
-  const entryPaths = await resolvePaths({
-    cwd,
-    workingDir,
-    patterns: resolvedConfig.entryFiles,
-    ignore,
-    gitignore,
-  });
-  debugLogFiles(options, 1, 'Globbed entry paths', entryPaths);
+  debugLogObject(options, 1, 'Resolved onfiguration', resolvedConfig);
 
-  // Create workspace for entry files, but don't resolve dependencies yet
-  const production = createProject({ projectOptions, paths: entryPaths });
-  const entryFiles = production.getSourceFiles();
-  debugLogSourceFiles(options, 1, 'Included entry source files', entryFiles);
+  if (!resolvedConfigFilePath && !manifest.knip && !resolvedTsConfigFilePath) {
+    throw new ConfigurationError(`Unable to find ${configFilePath} or package.json#knip or ${tsConfigFilePath}`);
+  }
 
-  // Now resolve dependencies of entry files to find all production files
-  production.resolveSourceFileDependencies();
-  const productionFiles = production.getSourceFiles();
-  debugLogSourceFiles(options, 1, 'Included production source files', productionFiles);
+  const { entryFiles, productionFiles, projectFiles } = await (async () => {
+    if (resolvedConfig) {
+      const skipAddFiles = { skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true };
+      const projectOptions = resolvedTsConfigFilePath
+        ? { tsConfigFilePath: resolvedTsConfigFilePath }
+        : { compilerOptions: { allowJs: true } };
 
-  const projectPaths = await resolvePaths({
-    cwd,
-    workingDir,
-    patterns: resolvedConfig.projectFiles,
-    ignore,
-    gitignore,
-  });
-  debugLogFiles(options, 1, 'Globbed project paths', projectPaths);
+      const entryPaths = await resolvePaths({
+        cwd,
+        workingDir,
+        patterns: resolvedConfig.entryFiles,
+        ignore,
+        gitignore,
+      });
+      debugLogFiles(options, 1, 'Globbed entry paths', entryPaths);
 
-  // Create workspace for the entire project
-  const project = createProject({ projectOptions, paths: projectPaths });
-  const projectFiles = project.getSourceFiles();
-  debugLogSourceFiles(options, 1, 'Included project source files', projectFiles);
+      // Create workspace for entry files, but don't resolve dependencies yet
+      const production = createProject({ ...projectOptions, ...skipAddFiles }, entryPaths);
+      const entryFiles = production.getSourceFiles();
+      debugLogSourceFiles(options, 1, 'Included entry source files', entryFiles);
+
+      // Now resolve dependencies of entry files to find all production files
+      production.resolveSourceFileDependencies();
+      const productionFiles = production.getSourceFiles();
+      debugLogSourceFiles(options, 1, 'Included production source files', productionFiles);
+
+      const projectPaths = await resolvePaths({
+        cwd,
+        workingDir,
+        patterns: resolvedConfig.projectFiles,
+        ignore,
+        gitignore,
+      });
+      debugLogFiles(options, 1, 'Globbed project paths', projectPaths);
+
+      // Create workspace for the entire project
+      const project = createProject({ ...projectOptions, ...skipAddFiles }, projectPaths);
+      const projectFiles = project.getSourceFiles();
+      debugLogSourceFiles(options, 1, 'Included project source files', projectFiles);
+
+      return { entryFiles, productionFiles, projectFiles };
+    } else {
+      // Zero-config resolution, just pass the TS config to ts-morph
+      const project = createProject({ tsConfigFilePath: resolvedTsConfigFilePath });
+      const files = project.getSourceFiles();
+      return { entryFiles: files, productionFiles: files, projectFiles: files };
+    }
+  })();
+
+  // No (need to report) unused files in zero-config mode
+  const report = resolveIncludedIssueGroups(include, resolvedConfig ? exclude : ['files'], resolvedConfig);
 
   const config: Configuration = {
     workingDir,
@@ -106,11 +122,12 @@ export const main = async (options: UnresolvedConfiguration) => {
     entryFiles,
     productionFiles,
     projectFiles,
+    isIncludeEntryFiles: !resolvedConfig || isIncludeEntryFiles,
     dependencies: Object.keys(manifest.dependencies ?? {}),
     peerDependencies: Object.keys(manifest.peerDependencies ?? {}),
     optionalDependencies: Object.keys(manifest.optionalDependencies ?? {}),
     devDependencies: Object.keys(manifest.devDependencies ?? {}),
-    isDev: typeof resolvedConfig.dev === 'boolean' ? resolvedConfig.dev : isDev,
+    isDev: typeof resolvedConfig?.dev === 'boolean' ? resolvedConfig.dev : isDev,
     tsConfigPaths,
     isShowProgress,
     jsDocOptions: {

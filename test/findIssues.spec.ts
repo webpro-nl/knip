@@ -7,10 +7,9 @@ import baseConfig from './fixtures/baseConfig';
 
 test('findIssues', async () => {
   const workingDir = 'test/fixtures/basic';
-  const projectOptions = {};
+  const projectOptions = { skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true };
 
   const { entryFiles, productionFiles, projectFiles } = createTestProject({
-    workingDir,
     projectOptions,
     entryFiles: [path.join(workingDir, 'index.ts')],
     projectFiles: [path.join(workingDir, '*.ts')],

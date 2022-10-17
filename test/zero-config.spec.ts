@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert';
+import path from 'node:path';
 import { main } from '../src';
 
 test('Find unused files and exports', async () => {
-  const workingDir = 'test/fixtures/basic';
+  const workingDir = path.resolve('test/fixtures/zero-config');
 
   const { issues, counters } = await main({
     cwd: workingDir,
@@ -12,7 +13,7 @@ test('Find unused files and exports', async () => {
     exclude: [],
     ignore: [],
     gitignore: false,
-    isIncludeEntryFiles: false,
+    isIncludeEntryFiles: true,
     isDev: false,
     isShowProgress: false,
     jsDoc: [],
@@ -22,11 +23,11 @@ test('Find unused files and exports', async () => {
     },
   });
 
-  assert(issues.files.size === 1);
-  assert(Array.from(issues.files)[0].endsWith('dangling.ts'));
+  assert.equal(issues.files.size, 0);
 
-  assert(Object.values(issues.exports).length === 1);
-  assert(issues.exports['dep.ts']['unused'].symbol === 'unused');
+  assert.equal(Object.values(issues.exports).length, 2);
+  assert.equal(issues.exports['dep.ts']['unused'].symbol, 'unused');
+  assert.equal(issues.exports['index.ts']['b'].symbol, 'b');
 
   assert(Object.values(issues.types).length === 1);
   assert(issues.types['dep.ts']['Dep'].symbolType === 'type');
@@ -44,11 +45,11 @@ test('Find unused files and exports', async () => {
     dependencies: 0,
     devDependencies: 0,
     duplicates: 1,
-    exports: 1,
-    files: 1,
+    exports: 2,
+    files: 0,
     nsExports: 1,
     nsTypes: 1,
-    processed: 4,
+    processed: 3,
     types: 1,
     unresolved: 0,
   });
