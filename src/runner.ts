@@ -26,10 +26,10 @@ export async function findIssues(configuration: Configuration) {
   const [usedProductionFiles, unreferencedProductionFiles] = partitionSourceFiles(projectFiles, productionFiles);
   const [usedEntryFiles, usedNonEntryFiles] = partitionSourceFiles(usedProductionFiles, entryFiles);
 
-  debugLogSourceFiles(configuration, 1, 'usedProductionFiles', usedProductionFiles);
-  debugLogSourceFiles(configuration, 1, 'unreferencedProductionFiles', unreferencedProductionFiles);
-  debugLogSourceFiles(configuration, 1, 'usedEntryFiles', usedEntryFiles);
-  debugLogSourceFiles(configuration, 1, 'usedNonEntryFiles', usedNonEntryFiles);
+  debugLogSourceFiles(configuration, 1, 'Used production files', usedProductionFiles);
+  debugLogSourceFiles(configuration, 1, 'Unreferenced production files', unreferencedProductionFiles);
+  debugLogSourceFiles(configuration, 1, 'Used entry files', usedEntryFiles);
+  debugLogSourceFiles(configuration, 1, 'Used non-entry files', usedNonEntryFiles);
 
   // Set up the results
   const issues: Issues = {
