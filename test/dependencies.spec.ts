@@ -29,7 +29,7 @@ test('Find unused dependencies', async () => {
   assert(issues.dependencies.has('fs-extra'));
   assert(!issues.dependencies.has('mocha'));
 
-  assert(Object.keys(issues.unresolved).length === 2);
+  assert.equal(Object.keys(issues.unresolved).length, 2);
   assert(issues.unresolved['dep.ts']['ansi-regex']);
   assert(issues.unresolved['entry.ts']['not-exist']);
 

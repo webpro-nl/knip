@@ -9,7 +9,7 @@ const config = {
     nsTypes: true,
     duplicates: true,
   },
-  includeEntryFiles: false,
+  isIncludeEntryFiles: false,
   dependencies: [],
   peerDependencies: [],
   optionalDependencies: [],
