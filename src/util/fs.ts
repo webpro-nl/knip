@@ -10,12 +10,13 @@ const isFile = async (filePath: string) => {
   }
 };
 
-export const findFile = async (cwd: string, fileName: string): Promise<string | undefined> => {
-  const filePath = path.join(cwd, fileName);
+export const findFile = async (cwd: string, workingDir: string, fileName: string): Promise<string | undefined> => {
+  const filePath = path.join(workingDir, fileName);
   if (await isFile(filePath)) {
     return filePath;
   } else {
-    const parentDir = path.resolve(cwd, '..');
-    return parentDir === '/' ? undefined : findFile(parentDir, fileName);
+    if (cwd === workingDir) return;
+    const parentDir = path.resolve(workingDir, '..');
+    return findFile(cwd, parentDir, fileName);
   }
 };
