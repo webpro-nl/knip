@@ -8,16 +8,16 @@ import {
 import { partitionSourceFiles } from './util/project';
 import { getType } from './util/type';
 import { getDependencyAnalyzer } from './util/dependencies';
-import { getLine, LineRewriter } from './log';
 import { debugLogSourceFiles } from './util/debug';
+import { getCountersUpdater, getMessageUpdater } from './progress';
 import type { Identifier } from 'ts-morph';
-import type { Configuration, Issues, Issue, ProjectIssueType, SymbolIssueType } from './types';
-
-const lineRewriter = new LineRewriter();
+import type { Configuration, Issues, Issue, Counters, ProjectIssueType, SymbolIssueType } from './types';
 
 export async function findIssues(configuration: Configuration) {
-  const { workingDir, isShowProgress, report, isDev, jsDocOptions } = configuration;
+  const { workingDir, report, isDev, jsDocOptions } = configuration;
   const { entryFiles, productionFiles, projectFiles, isIncludeEntryFiles } = configuration;
+
+  const updateMessage = getMessageUpdater(configuration);
 
   const { getUnresolvedDependencies, getUnusedDependencies, getUnusedDevDependencies } =
     getDependencyAnalyzer(configuration);
@@ -44,7 +44,7 @@ export async function findIssues(configuration: Configuration) {
     duplicates: {},
   };
 
-  const counters = {
+  const counters: Counters = {
     files: issues.files.size,
     dependencies: issues.dependencies.size,
     devDependencies: issues.dependencies.size,
@@ -55,28 +55,10 @@ export async function findIssues(configuration: Configuration) {
     nsTypes: 0,
     duplicates: 0,
     processed: issues.files.size,
+    total: projectFiles.length,
   };
 
-  // OK, this looks ugly
-  const updateProcessingOutput = (item: Issue) => {
-    if (!isShowProgress) return;
-    const counter = counters.processed;
-    const total = projectFiles.length;
-    const percentage = Math.floor((counter / total) * 100);
-    const messages = [getLine(`${percentage}%`, `of files processed (${counter} of ${total})`)];
-    report.files && messages.push(getLine(unreferencedProductionFiles.length, 'unused files'));
-    report.unlisted && messages.push(getLine(counters.unresolved, 'unlisted dependencies'));
-    report.exports && messages.push(getLine(counters.exports, 'unused exports'));
-    report.nsExports && messages.push(getLine(counters.nsExports, 'unused exports in namespace'));
-    report.types && messages.push(getLine(counters.types, 'unused types'));
-    report.nsTypes && messages.push(getLine(counters.nsTypes, 'unused types in namespace'));
-    report.duplicates && messages.push(getLine(counters.duplicates, 'duplicate exports'));
-    if (counter < total) {
-      messages.push('');
-      messages.push(`Processing: ${path.relative(workingDir, item.filePath)}`);
-    }
-    lineRewriter.update(messages);
-  };
+  const updateCounters = getCountersUpdater(configuration, counters);
 
   const addSymbolIssue = (issueType: SymbolIssueType, issue: Issue) => {
     const { filePath, symbol } = issue;
@@ -84,7 +66,7 @@ export async function findIssues(configuration: Configuration) {
     issues[issueType][key] = issues[issueType][key] ?? {};
     issues[issueType][key][symbol] = issue;
     counters[issueType]++;
-    updateProcessingOutput(issue);
+    updateCounters(issue);
   };
 
   const addProjectIssue = (issueType: ProjectIssueType, issue: Issue) => {
@@ -92,8 +74,10 @@ export async function findIssues(configuration: Configuration) {
       issues[issueType].add(issue.symbol);
       counters[issueType]++;
     }
-    updateProcessingOutput(issue);
+    updateCounters(issue);
   };
+
+  updateMessage('Connecting the dots...');
 
   // Skip expensive traversal when only reporting unreferenced files
   if (
@@ -225,7 +209,7 @@ export async function findIssues(configuration: Configuration) {
     }
   }
 
-  if (isShowProgress) lineRewriter.resetLines();
+  updateCounters();
 
   return { issues, counters };
 }

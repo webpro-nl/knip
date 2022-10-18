@@ -42,6 +42,7 @@ test('Find unused dependencies', async () => {
     nsExports: 0,
     nsTypes: 0,
     processed: 3,
+    total: 3,
     types: 0,
     unresolved: 3,
   });

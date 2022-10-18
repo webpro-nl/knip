@@ -49,6 +49,7 @@ test('Find unused files and exports with JS entry file', async () => {
     nsExports: 1,
     nsTypes: 1,
     processed: 4,
+    total: 4,
     types: 1,
     unresolved: 0,
   });

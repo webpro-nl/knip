@@ -7,6 +7,7 @@ import { createProject } from './util/project';
 import { findIssues } from './runner';
 import { ConfigurationError } from './util/errors';
 import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug';
+import { getMessageUpdater } from './progress';
 import type { UnresolvedConfiguration, Configuration, LocalConfiguration } from './types';
 
 export const main = async (options: UnresolvedConfiguration) => {
@@ -26,7 +27,11 @@ export const main = async (options: UnresolvedConfiguration) => {
     debug,
   } = options;
 
+  const updateMessage = getMessageUpdater(options);
+
   debugLogObject(options, 1, 'Unresolved onfiguration', options);
+
+  updateMessage('Reading configuration and manifest files...');
 
   const manifestPath = await findFile(cwd, workingDir, 'package.json');
   const manifest = manifestPath && require(manifestPath);
@@ -71,6 +76,7 @@ export const main = async (options: UnresolvedConfiguration) => {
         ? { tsConfigFilePath: resolvedTsConfigFilePath }
         : { compilerOptions: { allowJs: true } };
 
+      updateMessage('Resolving entry files...');
       const entryPaths = await resolvePaths({
         cwd,
         workingDir,
@@ -90,6 +96,7 @@ export const main = async (options: UnresolvedConfiguration) => {
       const productionFiles = production.getSourceFiles();
       debugLogSourceFiles(options, 1, 'Included production source files', productionFiles);
 
+      updateMessage('Resolving project files...');
       const projectPaths = await resolvePaths({
         cwd,
         workingDir,
@@ -106,6 +113,7 @@ export const main = async (options: UnresolvedConfiguration) => {
 
       return { entryFiles, productionFiles, projectFiles };
     } else {
+      updateMessage('Resolving project files...');
       // Zero-config resolution, just pass the TS config to ts-morph
       const project = createProject({ tsConfigFilePath: resolvedTsConfigFilePath });
       const files = project.getSourceFiles();

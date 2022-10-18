@@ -50,6 +50,7 @@ test('Find unused files and exports', async () => {
     nsExports: 1,
     nsTypes: 1,
     processed: 3,
+    total: 3,
     types: 1,
     unresolved: 0,
   });
