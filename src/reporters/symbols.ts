@@ -1,11 +1,13 @@
 import path from 'node:path';
 import type { Issue, ReporterOptions } from '../types';
 
-const logIssueLine = ({ issue, workingDir, padding }: { issue: Issue; workingDir: string; padding: number }) => {
+const TRUNCATE_WIDTH = 40;
+
+const logIssueLine = (issue: Issue, workingDir: string, maxWidth: number) => {
   const symbols = issue.symbols ? issue.symbols.join(', ') : issue.symbol;
-  console.log(
-    `${symbols.padEnd(padding + 2)}${issue.symbolType?.padEnd(11) || ''}${path.relative(workingDir, issue.filePath)}`
-  );
+  const truncatedSymbol = symbols.length > maxWidth ? symbols.slice(0, maxWidth - 3) + '...' : symbols;
+  const filePath = path.relative(workingDir, issue.filePath);
+  console.log(`${truncatedSymbol.padEnd(maxWidth + 2)}${issue.symbolType?.padEnd(11) || ''}${filePath}`);
 };
 
 const logIssueGroupResult = (issues: string[], workingDir: string, title: false | string) => {
@@ -17,12 +19,12 @@ const logIssueGroupResult = (issues: string[], workingDir: string, title: false 
   }
 };
 
-const logIssueGroupResults = (issues: Issue[], workingDir: string, title: false | string) => {
+const logIssueGroupResults = (issues: Issue[], workingDir: string, title: false | string, isTruncate = false) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
-    const padding = [...issues].sort((a, b) => b.symbol.length - a.symbol.length)[0].symbol.length;
-    sortedByFilePath.forEach(issue => logIssueLine({ issue, workingDir, padding }));
+    const maxWidth = isTruncate ? TRUNCATE_WIDTH : issues.reduce((max, issue) => Math.max(issue.symbol.length, max), 0);
+    sortedByFilePath.forEach(issue => logIssueLine(issue, workingDir, maxWidth));
   } else {
     console.log('Not found');
   }
@@ -73,6 +75,6 @@ export default ({ report, issues, workingDir, isDev }: ReporterOptions) => {
 
   if (report.duplicates) {
     const unreferencedDuplicates = Object.values(issues.duplicates).map(Object.values).flat();
-    logIssueGroupResults(unreferencedDuplicates, workingDir, reportMultipleGroups && 'DUPLICATE EXPORTS');
+    logIssueGroupResults(unreferencedDuplicates, workingDir, reportMultipleGroups && 'DUPLICATE EXPORTS', true);
   }
 };
