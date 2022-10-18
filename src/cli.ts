@@ -59,7 +59,7 @@ const cwd = process.cwd();
 const workingDir = dir ? path.resolve(dir) : cwd;
 
 const isShowProgress =
-  noProgress === false ? process.stdout.isTTY && typeof process.stdout.cursorTo === 'function' : !noProgress;
+  !isDebug && noProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
 
 const printReport =
   reporter in reporters ? reporters[reporter as keyof typeof reporters] : require(path.join(workingDir, reporter));
