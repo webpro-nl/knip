@@ -86,13 +86,12 @@ const run = async () => {
     });
 
     printReport({ report, issues, cwd, workingDir, isDev, options: reporterOptions });
+    const totalErrorCount = (Object.keys(report) as IssueGroup[])
+      .filter((reportGroup) => report[reportGroup])
+      .map(reportGroup => reportGroup === 'unlisted' ? 'unresolved' : reportGroup)
+      .reduce((errorCount: number, reportGroup) => errorCount + counters[reportGroup], 0);
 
-    const reportGroup = report.files ? 'files' : (Object.keys(report) as IssueGroup[]).find(key => report[key]);
-    const counterGroup = reportGroup === 'unlisted' ? 'unresolved' : reportGroup;
-    if (counterGroup) {
-      const count = counters[counterGroup];
-      if (count > Number(maxIssues)) process.exit(count);
-    }
+    if (totalErrorCount > Number(maxIssues)) process.exit(totalErrorCount);
   } catch (error: unknown) {
     if (error instanceof ConfigurationError) {
       console.error(error.message + '\n');
