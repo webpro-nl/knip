@@ -28,6 +28,8 @@ export const resolveConfig = (
     return;
   }
 
+  resolvedConfig.dev = Boolean(typeof resolvedConfig.dev === 'boolean' ? resolvedConfig.dev : isDev);
+
   return resolvedConfig as LocalConfiguration;
 };
 

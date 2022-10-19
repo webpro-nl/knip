@@ -7,7 +7,7 @@ import { findIssues } from './runner';
 import { ConfigurationError } from './util/errors';
 import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug';
 import { getMessageUpdater } from './progress';
-import type { UnresolvedConfiguration, Configuration, LocalConfiguration } from './types';
+import type { UnresolvedConfiguration, Configuration } from './types';
 
 export const main = async (options: UnresolvedConfiguration) => {
   const {
@@ -132,7 +132,7 @@ export const main = async (options: UnresolvedConfiguration) => {
     peerDependencies: Object.keys(manifest.peerDependencies ?? {}),
     optionalDependencies: Object.keys(manifest.optionalDependencies ?? {}),
     devDependencies: Object.keys(manifest.devDependencies ?? {}),
-    isDev: typeof resolvedConfig?.dev === 'boolean' ? resolvedConfig.dev : isDev,
+    isDev: Boolean(resolvedConfig?.dev),
     tsConfigPaths,
     isShowProgress,
     jsDocOptions: {
