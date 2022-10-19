@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { resolveConfig, resolveIncludedIssueGroups } from './util/config';
+import { resolveConfig, resolveIncludedIssueTypes } from './util/config';
 import { findFile } from './util/fs';
 import { relative, resolvePaths } from './util/path';
 import { createProject } from './util/project';
@@ -119,7 +119,7 @@ export const main = async (options: UnresolvedConfiguration) => {
   })();
 
   // No (need to report) unused files in zero-config mode
-  const report = resolveIncludedIssueGroups(include, resolvedConfig ? exclude : ['files'], resolvedConfig);
+  const report = resolveIncludedIssueTypes(include, resolvedConfig ? exclude : ['files'], resolvedConfig);
 
   const config: Configuration = {
     workingDir,

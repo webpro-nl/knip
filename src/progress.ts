@@ -23,7 +23,7 @@ export const getCountersUpdater = (configuration: Configuration, counters: Count
     const messages = [getLine(`${percentage}%`, `of files processed (${processed} of ${total})`)];
 
     report.files && messages.push(getLine(counters.files, 'unused files'));
-    report.unlisted && messages.push(getLine(counters.unresolved, 'unlisted dependencies'));
+    report.unlisted && messages.push(getLine(counters.unlisted, 'unlisted dependencies'));
     report.exports && messages.push(getLine(counters.exports, 'unused exports'));
     report.nsExports && messages.push(getLine(counters.nsExports, 'unused exports in namespace'));
     report.types && messages.push(getLine(counters.types, 'unused types'));

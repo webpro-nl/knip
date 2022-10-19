@@ -1,5 +1,7 @@
-import type { Issue, ReporterOptions } from '../types';
 import { relative } from '../util/path';
+import { ISSUE_TYPE_TITLE } from './constants';
+import type { Entries } from 'type-fest';
+import type { Issue, ReporterOptions, IssueSet } from '../types';
 
 const TRUNCATE_WIDTH = 40;
 
@@ -33,48 +35,16 @@ const logIssueRecord = (issues: Issue[], title: false | string, isTruncate = fal
 export default ({ report, issues }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
-  if (report.files) {
-    const unreferencedFiles = Array.from(issues.files);
-    logIssueGroupResult(unreferencedFiles, workingDir, reportMultipleGroups && 'UNUSED FILES');
-  }
-
-  if (report.dependencies) {
-    const unreferencedDependencies = Array.from(issues.dependencies);
-    logIssueGroupResult(unreferencedDependencies, workingDir, reportMultipleGroups && 'UNUSED DEPENDENCIES');
-  }
-
-  if (report.dependencies && isDev) {
-    const unreferencedDevDependencies = Array.from(issues.devDependencies);
-    logIssueGroupResult(unreferencedDevDependencies, workingDir, 'UNUSED DEV DEPENDENCIES');
-  }
-
-  if (report.unlisted) {
-    const unresolvedDependencies = Object.values(issues.unresolved).map(Object.values).flat();
-    logIssueGroupResults(unresolvedDependencies, workingDir, reportMultipleGroups && 'UNLISTED DEPENDENCIES');
-  }
-
-  if (report.exports) {
-    const unreferencedExports = Object.values(issues.exports).map(Object.values).flat();
-    logIssueGroupResults(unreferencedExports, workingDir, reportMultipleGroups && 'UNUSED EXPORTS');
-  }
-
-  if (report.nsExports) {
-    const unreferencedNsExports = Object.values(issues.nsExports).map(Object.values).flat();
-    logIssueGroupResults(unreferencedNsExports, workingDir, reportMultipleGroups && 'UNUSED EXPORTS IN NAMESPACE');
-  }
-
-  if (report.types) {
-    const unreferencedTypes = Object.values(issues.types).map(Object.values).flat();
-    logIssueGroupResults(unreferencedTypes, workingDir, reportMultipleGroups && 'UNUSED TYPES');
-  }
-
-  if (report.nsTypes) {
-    const unreferencedNsTypes = Object.values(issues.nsTypes).map(Object.values).flat();
-    logIssueGroupResults(unreferencedNsTypes, workingDir, reportMultipleGroups && 'UNUSED TYPES IN NAMESPACE');
-  }
-
-  if (report.duplicates) {
-    const unreferencedDuplicates = Object.values(issues.duplicates).map(Object.values).flat();
-    logIssueGroupResults(unreferencedDuplicates, workingDir, reportMultipleGroups && 'DUPLICATE EXPORTS', true);
+  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+    if (isReportType) {
+      const title = reportMultipleGroups && ISSUE_TYPE_TITLE[reportType];
+      if (issues[reportType] instanceof Set) {
+        logIssueSet(Array.from(issues[reportType] as IssueSet), title);
+      } else {
+        const issuesForType = Object.values(issues[reportType]).map(Object.values).flat();
+        const isTruncate = Boolean(issuesForType[0]?.symbols?.length);
+        logIssueRecord(issuesForType, title, isTruncate);
+      }
+    }
   }
 };

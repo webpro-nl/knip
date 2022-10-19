@@ -1,7 +1,9 @@
 import path from 'node:path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership';
-import type { Issue, ReporterOptions } from '../types';
 import { relative } from '../util/path';
+import { ISSUE_TYPE_TITLE } from './constants';
+import type { Entries } from 'type-fest';
+import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types';
 
 type OwnedIssue = Issue & { owner: string };
 
@@ -46,68 +48,28 @@ export default ({ report, issues, options }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   const [dependenciesOwner = '[no-owner]'] = codeownersEngine.calcFileOwnership('package.json');
   const fallbackOwner = dependenciesOwner;
+
   const calcFileOwnership = (filePath: string) =>
-    codeownersEngine.calcFileOwnership(path.relative(cwd, filePath))[0] ?? fallbackOwner;
+    codeownersEngine.calcFileOwnership(relative(filePath))[0] ?? fallbackOwner;
+  const addOwner = (issue: Issue) => ({ ...issue, owner: calcFileOwnership(issue.filePath) });
 
-  const toIssueWithOwner = (issues: Record<string, Issue>) => {
-    const items = Object.values(issues);
-    return { ...items[0], symbols: items.map(i => i.symbol), owner: calcFileOwnership(items[0].filePath) };
-  };
-
-  if (report.files) {
-    const unreferencedFilesByOwner = Array.from(issues.files).map(filePath => ({
-      symbol: filePath,
-      owner: calcFileOwnership(filePath),
-    }));
-    logIssueGroupResult(unreferencedFilesByOwner, cwd, reportMultipleGroups && 'UNUSED FILES');
-  }
-
-  if (report.dependencies) {
-    const unreferencedDependencies = Array.from(issues.dependencies).map(dependency => ({
-      symbol: dependency,
-      owner: dependenciesOwner,
-    }));
-    logIssueGroupResult(unreferencedDependencies, cwd, reportMultipleGroups && 'UNUSED DEPENDENCIES');
-  }
-
-  if (report.dependencies && isDev) {
-    const unreferencedDevDependencies = Array.from(issues.devDependencies).map(dependency => ({
-      symbol: dependency,
-      owner: dependenciesOwner,
-    }));
-    logIssueGroupResult(unreferencedDevDependencies, cwd, 'UNUSED DEV DEPENDENCIES');
-  }
-
-  if (report.unlisted) {
-    const unreferencedDependencies = Object.values(issues.unresolved).map(toIssueWithOwner);
-    logIssueGroupResults(unreferencedDependencies, cwd, reportMultipleGroups && 'UNLISTED DEPENDENCIES');
-  }
-
-  if (report.exports) {
-    const unreferencedExports = Object.values(issues.exports).map(toIssueWithOwner);
-    logIssueGroupResults(unreferencedExports, cwd, reportMultipleGroups && 'UNUSED EXPORTS');
-  }
-
-  if (report.nsExports) {
-    const unreferencedNsExports = Object.values(issues.nsExports).map(toIssueWithOwner);
-    logIssueGroupResults(unreferencedNsExports, cwd, reportMultipleGroups && 'UNUSED EXPORTS IN NAMESPACE');
-  }
-
-  if (report.types) {
-    const unreferencedTypes = Object.values(issues.types).map(toIssueWithOwner);
-    logIssueGroupResults(unreferencedTypes, cwd, reportMultipleGroups && 'UNUSED TYPES');
-  }
-
-  if (report.nsTypes) {
-    const unreferencedNsTypes = Object.values(issues.nsTypes).map(toIssueWithOwner);
-    logIssueGroupResults(unreferencedNsTypes, cwd, reportMultipleGroups && 'UNUSED TYPES IN NAMESPACE');
-  }
-
-  if (report.duplicates) {
-    const unreferencedDuplicates = Object.values(issues.duplicates)
-      .map(issues => Object.values(issues))
-      .flat()
-      .map(issue => ({ ...issue, owner: calcFileOwnership(issue.filePath) }));
-    logIssueGroupResults(unreferencedDuplicates, cwd, reportMultipleGroups && 'DUPLICATE EXPORTS');
+  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+    if (isReportType) {
+      const title = reportMultipleGroups && ISSUE_TYPE_TITLE[reportType];
+      if (issues[reportType] instanceof Set) {
+        const toIssue = (filePath: string) => ({ filePath, symbol: filePath });
+        const issuesForType = Array.from(issues[reportType] as IssueSet).map(toIssue);
+        logIssueSet(issuesForType.map(addOwner), title);
+      } else if (reportType === 'duplicates') {
+        const issuesForType = Object.values(issues[reportType]).map(Object.values).flat().map(addOwner);
+        logIssueRecord(issuesForType, title);
+      } else {
+        const issuesForType = Object.values(issues[reportType] as IssueRecords).map(issues => {
+          const items = Object.values(issues);
+          return addOwner({ ...items[0], symbols: items.map(issue => issue.symbol) });
+        });
+        logIssueRecord(issuesForType, title);
+      }
+    }
   }
 };

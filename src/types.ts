@@ -2,39 +2,29 @@ import { SourceFile } from 'ts-morph';
 
 type SymbolType = 'type' | 'interface' | 'enum';
 
-type UnusedFileIssues = Set<string>;
-type UnusedExportIssues = Record<string, Record<string, Issue>>;
-type UnresolvedDependencyIssues = Record<string, Record<string, Issue>>;
-type UnusedDependencyIssues = Set<string>;
-
 export type Issue = { filePath: string; symbol: string; symbols?: string[]; symbolType?: SymbolType };
+export type IssueSet = Set<string>;
+export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export type Issues = {
-  files: UnusedFileIssues;
-  dependencies: UnusedDependencyIssues;
-  devDependencies: UnusedDependencyIssues;
-  unresolved: UnresolvedDependencyIssues;
-  exports: UnusedExportIssues;
-  types: UnusedExportIssues;
-  nsExports: UnusedExportIssues;
-  nsTypes: UnusedExportIssues;
-  duplicates: UnusedExportIssues;
+  files: IssueSet;
+  dependencies: IssueSet;
+  devDependencies: IssueSet;
+  unlisted: IssueRecords;
+  exports: IssueRecords;
+  types: IssueRecords;
+  nsExports: IssueRecords;
+  nsTypes: IssueRecords;
+  duplicates: IssueRecords;
 };
 
-type IssueType = keyof Issues;
+export type IssueType = keyof Issues;
 export type ProjectIssueType = Extract<IssueType, 'files' | 'dependencies' | 'devDependencies'>;
 export type SymbolIssueType = Exclude<IssueType, ProjectIssueType>;
 
-// Slightly different issue groups for better(?) UX
-export type IssueGroup =
-  | 'files'
-  | 'dependencies'
-  | 'unlisted'
-  | 'exports'
-  | 'nsExports'
-  | 'types'
-  | 'nsTypes'
-  | 'duplicates';
+export type Report = {
+  [key in keyof Issues]: boolean;
+};
 
 type BaseLocalConfiguration = {
   entryFiles: string[];
@@ -66,10 +56,6 @@ export type UnresolvedConfiguration = {
     isEnabled: boolean;
     level: number;
   };
-};
-
-export type Report = {
-  [key in IssueGroup]: boolean;
 };
 
 export type Configuration = {

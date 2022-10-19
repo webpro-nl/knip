@@ -29,9 +29,9 @@ test('Find unused dependencies', async () => {
   assert(issues.dependencies.has('fs-extra'));
   assert(!issues.dependencies.has('mocha'));
 
-  assert.equal(Object.keys(issues.unresolved).length, 2);
-  assert(issues.unresolved['dep.ts']['ansi-regex']);
-  assert(issues.unresolved['entry.ts']['not-exist']);
+  assert.equal(Object.keys(issues.unlisted).length, 2);
+  assert(issues.unlisted['dep.ts']['ansi-regex']);
+  assert(issues.unlisted['entry.ts']['not-exist']);
 
   assert.deepEqual(counters, {
     dependencies: 3,
@@ -44,6 +44,6 @@ test('Find unused dependencies', async () => {
     processed: 3,
     total: 3,
     types: 0,
-    unresolved: 3,
+    unlisted: 3,
   });
 });

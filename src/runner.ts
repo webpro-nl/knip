@@ -36,7 +36,7 @@ export async function findIssues(configuration: Configuration) {
     files: new Set(unreferencedProductionFiles.map(file => file.getFilePath())),
     dependencies: new Set(),
     devDependencies: new Set(),
-    unresolved: {},
+    unlisted: {},
     exports: {},
     types: {},
     nsExports: {},
@@ -48,7 +48,7 @@ export async function findIssues(configuration: Configuration) {
     files: issues.files.size,
     dependencies: issues.dependencies.size,
     devDependencies: issues.dependencies.size,
-    unresolved: 0,
+    unlisted: 0,
     exports: 0,
     types: 0,
     nsExports: 0,
@@ -95,7 +95,7 @@ export async function findIssues(configuration: Configuration) {
 
       if (report.dependencies || report.unlisted) {
         const unresolvedDependencies = getUnresolvedDependencies(sourceFile);
-        unresolvedDependencies.forEach(issue => addSymbolIssue('unresolved', issue));
+        unresolvedDependencies.forEach(issue => addSymbolIssue('unlisted', issue));
       }
 
       // The file is used, let's visit all export declarations to see which of them are not used somewhere else

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveIncludedIssueGroups } from '../src/util/config';
+import { resolveIncludedIssueTypes } from '../src/util/config';
 
-test('resolveIncludedIssueGroups (all)', async () => {
-  const config = resolveIncludedIssueGroups([], []);
+test('resolveIncludedIssueTypes (all)', async () => {
+  const config = resolveIncludedIssueTypes([], []);
   assert.deepEqual(config, {
     dependencies: true,
     duplicates: true,
@@ -16,8 +16,8 @@ test('resolveIncludedIssueGroups (all)', async () => {
   });
 });
 
-test('resolveIncludedIssueGroups (include 1)', async () => {
-  const config = resolveIncludedIssueGroups(['duplicates'], []);
+test('resolveIncludedIssueTypes (include 1)', async () => {
+  const config = resolveIncludedIssueTypes(['duplicates'], []);
   assert.deepEqual(config, {
     dependencies: false,
     duplicates: true,
@@ -30,8 +30,8 @@ test('resolveIncludedIssueGroups (include 1)', async () => {
   });
 });
 
-test('resolveIncludedIssueGroups (exclude 2)', async () => {
-  const config = resolveIncludedIssueGroups([], ['duplicates', 'nsTypes']);
+test('resolveIncludedIssueTypes (exclude 2)', async () => {
+  const config = resolveIncludedIssueTypes([], ['duplicates', 'nsTypes']);
   assert.deepEqual(config, {
     dependencies: true,
     duplicates: false,
@@ -44,8 +44,8 @@ test('resolveIncludedIssueGroups (exclude 2)', async () => {
   });
 });
 
-test('resolveIncludedIssueGroups (overlap)', async () => {
-  const config = resolveIncludedIssueGroups(['exports', 'files', 'nsTypes'], ['files', 'duplicates']);
+test('resolveIncludedIssueTypes (overlap)', async () => {
+  const config = resolveIncludedIssueTypes(['exports', 'files', 'nsTypes'], ['files', 'duplicates']);
   assert.deepEqual(config, {
     dependencies: false,
     duplicates: false,

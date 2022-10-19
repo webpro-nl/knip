@@ -6,7 +6,7 @@ import { main } from '.';
 import { printHelp } from './help';
 import reporters from './reporters';
 import { ConfigurationError } from './util/errors';
-import type { IssueGroup } from './types';
+import type { IssueType } from './types';
 
 const {
   values: {
@@ -87,9 +87,8 @@ const run = async () => {
 
     await printReport({ report, issues, cwd, workingDir, isDev, options: reporterOptions });
 
-    const totalErrorCount = (Object.keys(report) as IssueGroup[])
+    const totalErrorCount = (Object.keys(report) as IssueType[])
       .filter(reportGroup => report[reportGroup])
-      .map(reportGroup => (reportGroup === 'unlisted' ? 'unresolved' : reportGroup))
       .reduce((errorCount: number, reportGroup) => errorCount + counters[reportGroup], 0);
 
     if (totalErrorCount > Number(maxIssues)) process.exit(totalErrorCount);
@@ -99,7 +98,7 @@ const run = async () => {
       printHelp();
       process.exit(1);
     }
-    // We should never arrive here, but also not swallow silently
+    // We shouldn't arrive here, but not swallow either, so re-throw
     throw error;
   }
 };

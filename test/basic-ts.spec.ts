@@ -52,6 +52,6 @@ test('Find unused files and exports', async () => {
     processed: 5,
     total: 5,
     types: 1,
-    unresolved: 0,
+    unlisted: 0,
   });
 });

@@ -1,5 +1,5 @@
 import micromatch from 'micromatch';
-import type { ImportedConfiguration, LocalConfiguration, Configuration, IssueGroup } from '../types';
+import type { ImportedConfiguration, LocalConfiguration, Configuration, IssueType } from '../types';
 
 export const resolveConfig = (
   importedConfiguration: ImportedConfiguration,
@@ -33,29 +33,22 @@ export const resolveConfig = (
   return resolvedConfig as LocalConfiguration;
 };
 
-export const resolveIncludedIssueGroups = (
+export const resolveIncludedIssueTypes = (
   includeArg: string[],
   excludeArg: string[],
   resolvedConfig?: LocalConfiguration
 ) => {
-  const groups: IssueGroup[] = [
-    'files',
-    'dependencies',
-    'unlisted',
-    'exports',
-    'types',
-    'nsExports',
-    'nsTypes',
-    'duplicates',
-  ];
+  // Automatically inject the devDependencies report type in dev mode
+  const deps: IssueType[] = resolvedConfig?.dev ? ['dependencies', 'devDependencies'] : ['dependencies'];
+  const groups: IssueType[] = ['files', ...deps, 'unlisted', 'exports', 'types', 'nsExports', 'nsTypes', 'duplicates'];
   const include = [includeArg, resolvedConfig?.include ?? []]
     .flat()
     .map(value => value.split(','))
-    .flat() as IssueGroup[];
+    .flat();
   const exclude = [excludeArg, resolvedConfig?.exclude ?? []]
     .flat()
     .map(value => value.split(','))
-    .flat() as IssueGroup[];
-  const includes = (include.length > 0 ? include : groups).filter((group: IssueGroup) => !exclude.includes(group));
+    .flat();
+  const includes = (include.length > 0 ? include : groups).filter(group => !exclude.includes(group));
   return groups.reduce((r, group) => ((r[group] = includes.includes(group)), r), {} as Configuration['report']);
 };

@@ -51,6 +51,6 @@ test('Find unused files and exports with JS entry file', async () => {
     processed: 4,
     total: 4,
     types: 1,
-    unresolved: 0,
+    unlisted: 0,
   });
 });
