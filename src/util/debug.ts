@@ -35,7 +35,8 @@ export const debugLogSourceFiles = (config: Config, minimumLevel: number, name: 
   }
 };
 
-export const debugLogDiff = (config: Config, minimumLevel: number, name: string, arrA: string[], arrB: string[]) => {
+// ESLint should detect this unused variable within this file
+const debugLogDiff = (config: Config, minimumLevel: number, name: string, arrA: string[], arrB: string[]) => {
   if (minimumLevel > config.debug.level) return;
   const onlyInA = arrA.filter(itemA => !arrB.includes(itemA)).sort();
   const onlyInB = arrB.filter(itemB => !arrA.includes(itemB)).sort();
