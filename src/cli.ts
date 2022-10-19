@@ -85,7 +85,8 @@ const run = async () => {
       },
     });
 
-    printReport({ report, issues, cwd, workingDir, isDev, options: reporterOptions });
+    await printReport({ report, issues, cwd, workingDir, isDev, options: reporterOptions });
+
     const totalErrorCount = (Object.keys(report) as IssueGroup[])
       .filter(reportGroup => report[reportGroup])
       .map(reportGroup => (reportGroup === 'unlisted' ? 'unresolved' : reportGroup))

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-const isFile = async (filePath: string) => {
+export const isFile = async (filePath: string) => {
   try {
     const stats = await fs.stat(filePath);
     return stats.isFile();
