@@ -29,7 +29,7 @@ export const main = async (options: UnresolvedConfiguration) => {
 
   const updateMessage = getMessageUpdater(options);
 
-  debugLogObject(options, 1, 'Unresolved onfiguration', options);
+  debugLogObject(options, 1, 'Unresolved configuration', options);
 
   updateMessage('Reading configuration and manifest files...');
 
@@ -63,7 +63,7 @@ export const main = async (options: UnresolvedConfiguration) => {
   const dir = path.relative(cwd, workingDir);
   const resolvedConfig = resolveConfig(manifest.knip ?? localConfig, { workingDir: dir, isDev });
 
-  debugLogObject(options, 1, 'Resolved onfiguration', resolvedConfig);
+  debugLogObject(options, 1, 'Resolved configuration', resolvedConfig);
 
   if (!resolvedConfigFilePath && !manifest.knip && !resolvedTsConfigFilePath) {
     throw new ConfigurationError(`Unable to find ${configFilePath} or package.json#knip or ${tsConfigFilePath}`);
