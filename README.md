@@ -36,7 +36,7 @@ with OpenAI_</sup>
 
     npm install -D knip
 
-Knip requires at least Node.js v16.17 or v18. Knip is _cutting edge!_
+Knip supports LTS versions of Node.js, and currently requires at least Node.js v16.17 or v18.3. Knip is _cutting edge!_
 
 ## Usage
 
