@@ -1,8 +1,7 @@
-import path from 'node:path';
 import ts from 'typescript';
 import { resolveConfig, resolveIncludedIssueGroups } from './util/config';
 import { findFile } from './util/fs';
-import { resolvePaths } from './util/path';
+import { relative, resolvePaths } from './util/path';
 import { createProject } from './util/project';
 import { findIssues } from './runner';
 import { ConfigurationError } from './util/errors';
@@ -56,11 +55,11 @@ export const main = async (options: UnresolvedConfiguration) => {
       ? Object.keys(config.config.compilerOptions.paths).map(p => p.replace(/\*/g, '**')) // TODO Replacement too naive?
       : [];
     if (config.error) {
-      throw new ConfigurationError(`Unable to read ${path.relative(cwd, resolvedTsConfigFilePath)}`);
+      throw new ConfigurationError(`Unable to read ${relative(resolvedTsConfigFilePath)}`);
     }
   }
 
-  const dir = path.relative(cwd, workingDir);
+  const dir = relative(workingDir);
   const resolvedConfig = resolveConfig(manifest.knip ?? localConfig, { workingDir: dir, isDev });
 
   debugLogObject(options, 1, 'Resolved configuration', resolvedConfig);
@@ -78,7 +77,6 @@ export const main = async (options: UnresolvedConfiguration) => {
 
       updateMessage('Resolving entry files...');
       const entryPaths = await resolvePaths({
-        cwd,
         workingDir,
         patterns: resolvedConfig.entryFiles,
         ignore,
@@ -98,7 +96,6 @@ export const main = async (options: UnresolvedConfiguration) => {
 
       updateMessage('Resolving project files...');
       const projectPaths = await resolvePaths({
-        cwd,
         workingDir,
         patterns: resolvedConfig.projectFiles,
         ignore,

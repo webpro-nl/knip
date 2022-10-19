@@ -1,24 +1,24 @@
-import path from 'node:path';
 import type { Issue, ReporterOptions } from '../types';
+import { relative } from '../util/path';
 
-const logIssueLine = (workingDir: string, filePath: string, symbols?: string[]) => {
-  console.log(`${path.relative(workingDir, filePath)}${symbols ? `: ${symbols.join(', ')}` : ''}`);
+const logIssueLine = (filePath: string, symbols?: string[]) => {
+  console.log(`${relative(filePath)}${symbols ? `: ${symbols.join(', ')}` : ''}`);
 };
 
-const logIssueGroupResult = (issues: string[], workingDir: string, title: false | string) => {
+const logIssueSet = (issues: string[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
-    issues.sort().forEach(value => console.log(value.startsWith('/') ? path.relative(workingDir, value) : value));
+    issues.sort().forEach(value => console.log(value.startsWith('/') ? relative(value) : value));
   } else {
     console.log('Not found');
   }
 };
 
-const logIssueGroupResults = (issues: Issue[], workingDir: string, title: false | string) => {
+const logIssueRecord = (issues: Issue[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
-    sortedByFilePath.forEach(({ filePath, symbols }) => logIssueLine(workingDir, filePath, symbols));
+    sortedByFilePath.forEach(({ filePath, symbols }) => logIssueLine(filePath, symbols));
   } else {
     console.log('Not found');
   }

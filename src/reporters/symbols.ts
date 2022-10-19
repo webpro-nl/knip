@@ -1,36 +1,36 @@
-import path from 'node:path';
 import type { Issue, ReporterOptions } from '../types';
+import { relative } from '../util/path';
 
 const TRUNCATE_WIDTH = 40;
 
-const logIssueLine = (issue: Issue, workingDir: string, maxWidth: number) => {
+const logIssueLine = (issue: Issue, maxWidth: number) => {
   const symbols = issue.symbols ? issue.symbols.join(', ') : issue.symbol;
   const truncatedSymbol = symbols.length > maxWidth ? symbols.slice(0, maxWidth - 3) + '...' : symbols;
-  const filePath = path.relative(workingDir, issue.filePath);
+  const filePath = relative(issue.filePath);
   console.log(`${truncatedSymbol.padEnd(maxWidth + 2)}${issue.symbolType?.padEnd(11) || ''}${filePath}`);
 };
 
-const logIssueGroupResult = (issues: string[], workingDir: string, title: false | string) => {
+const logIssueSet = (issues: string[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
-    issues.sort().forEach(value => console.log(value.startsWith('/') ? path.relative(workingDir, value) : value));
+    issues.sort().forEach(value => console.log(value.startsWith('/') ? relative(value) : value));
   } else {
     console.log('Not found');
   }
 };
 
-const logIssueGroupResults = (issues: Issue[], workingDir: string, title: false | string, isTruncate = false) => {
+const logIssueRecord = (issues: Issue[], title: false | string, isTruncate = false) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
     const maxWidth = isTruncate ? TRUNCATE_WIDTH : issues.reduce((max, issue) => Math.max(issue.symbol.length, max), 0);
-    sortedByFilePath.forEach(issue => logIssueLine(issue, workingDir, maxWidth));
+    sortedByFilePath.forEach(issue => logIssueLine(issue, maxWidth));
   } else {
     console.log('Not found');
   }
 };
 
-export default ({ report, issues, workingDir, isDev }: ReporterOptions) => {
+export default ({ report, issues }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
   if (report.files) {

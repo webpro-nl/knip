@@ -1,5 +1,5 @@
-import path from 'node:path';
 import { getLine, LineRewriter } from './log';
+import { relative } from './util/path';
 import type { Configuration, Counters, Issue } from './types';
 
 const lineRewriter = new LineRewriter();
@@ -11,7 +11,7 @@ export const getMessageUpdater = (configuration: { isShowProgress: boolean }) =>
 };
 
 export const getCountersUpdater = (configuration: Configuration, counters: Counters) => {
-  const { workingDir, isShowProgress, report } = configuration;
+  const { isShowProgress, report } = configuration;
 
   if (!isShowProgress) return () => {};
 
@@ -32,7 +32,7 @@ export const getCountersUpdater = (configuration: Configuration, counters: Count
 
     if (processed < total) {
       messages.push('');
-      messages.push(`Processing: ${path.relative(workingDir, issue.filePath)}`);
+      messages.push(`Processing: ${relative(issue.filePath)}`);
     }
 
     lineRewriter.update(messages);

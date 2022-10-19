@@ -1,6 +1,10 @@
 import path from 'node:path';
 import type { globby, Options } from 'globby';
 
+const cwd = process.cwd();
+
+export const relative = (to: string) => path.relative(cwd, to);
+
 let _globby: typeof globby;
 const glob = async function (patterns: readonly string[], options: Options) {
   if (!_globby) {
@@ -16,13 +20,11 @@ const prependDirToPattern = (workingDir: string, pattern: string) => {
 };
 
 export const resolvePaths = async ({
-  cwd,
   workingDir,
   patterns,
   ignore,
   gitignore,
 }: {
-  cwd: string;
   workingDir: string;
   patterns: string[];
   ignore: string[];
@@ -31,7 +33,7 @@ export const resolvePaths = async ({
   glob(
     // Prepend relative --dir to patterns to use cwd (not workingDir), because
     // we want to glob everything to include all (git)ignore patterns
-    patterns.map(pattern => prependDirToPattern(path.relative(cwd, workingDir), pattern)),
+    patterns.map(pattern => prependDirToPattern(relative(workingDir), pattern)),
     {
       cwd,
       ignore,

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership';
 import type { Issue, ReporterOptions } from '../types';
+import { relative } from '../util/path';
 
 type OwnedIssue = Issue & { owner: string };
 
@@ -8,34 +9,32 @@ type ExtraReporterOptions = {
   path?: string;
 };
 
-const logIssueLine = (owner: string, cwd: string, filePath: string, symbols?: string[]) => {
-  console.log(`${owner} ${path.relative(cwd, filePath)}${symbols ? `: ${symbols.join(', ')}` : ''}`);
+const logIssueLine = (owner: string, filePath: string, symbols?: string[]) => {
+  console.log(`${owner} ${relative(filePath)}${symbols ? `: ${symbols.join(', ')}` : ''}`);
 };
 
-const logIssueGroupResult = (issues: { symbol: string; owner: string }[], cwd: string, title: false | string) => {
+const logIssueSet = (issues: { symbol: string; owner: string }[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     issues
       .sort((a, b) => (a.owner < b.owner ? -1 : 1))
-      .forEach(issue =>
-        console.log(issue.owner, issue.symbol.startsWith('/') ? path.relative(cwd, issue.symbol) : issue.symbol)
-      );
+      .forEach(issue => console.log(issue.owner, issue.symbol.startsWith('/') ? relative(issue.symbol) : issue.symbol));
   } else {
     console.log('Not found');
   }
 };
 
-const logIssueGroupResults = (issues: OwnedIssue[], cwd: string, title: false | string) => {
+const logIssueRecord = (issues: OwnedIssue[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.owner < b.owner ? -1 : 1));
-    sortedByFilePath.forEach(({ filePath, symbols, owner }) => logIssueLine(owner, cwd, filePath, symbols));
+    sortedByFilePath.forEach(({ filePath, symbols, owner }) => logIssueLine(owner, filePath, symbols));
   } else {
     console.log('Not found');
   }
 };
 
-export default ({ report, issues, cwd, isDev, options }: ReporterOptions) => {
+export default ({ report, issues, options }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;

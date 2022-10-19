@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { isFile } from '../util/fs';
+import { relative } from '../util/path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership';
 import type { Issue, ReporterOptions } from '../types';
 
@@ -32,7 +33,7 @@ export default async ({ report, issues, cwd, options }: ReporterOptions) => {
   const flatten = (issues: Record<string, Record<string, Issue>>) => Object.values(issues).map(Object.values).flat();
 
   const initRow = (filePath: string) => {
-    const file = path.relative(cwd, filePath);
+    const file = relative(filePath);
     const row: Row = {
       file,
       ...(codeownersEngine && { owners: codeownersEngine.calcFileOwnership(file) }),
