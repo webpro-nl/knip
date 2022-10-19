@@ -87,8 +87,8 @@ const run = async () => {
 
     printReport({ report, issues, cwd, workingDir, isDev, options: reporterOptions });
     const totalErrorCount = (Object.keys(report) as IssueGroup[])
-      .filter((reportGroup) => report[reportGroup])
-      .map(reportGroup => reportGroup === 'unlisted' ? 'unresolved' : reportGroup)
+      .filter(reportGroup => report[reportGroup])
+      .map(reportGroup => (reportGroup === 'unlisted' ? 'unresolved' : reportGroup))
       .reduce((errorCount: number, reportGroup) => errorCount + counters[reportGroup], 0);
 
     if (totalErrorCount > Number(maxIssues)) process.exit(totalErrorCount);
