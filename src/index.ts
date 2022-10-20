@@ -9,7 +9,7 @@ import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug
 import { getMessageUpdater } from './progress';
 import type { UnresolvedConfiguration, Configuration } from './types';
 
-export const main = async (options: UnresolvedConfiguration) => {
+export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => {
   const {
     cwd,
     workingDir,
@@ -24,11 +24,11 @@ export const main = async (options: UnresolvedConfiguration) => {
     isShowProgress,
     jsDoc,
     debug,
-  } = options;
+  } = unresolvedConfiguration;
 
-  const updateMessage = getMessageUpdater(options);
+  const updateMessage = getMessageUpdater(unresolvedConfiguration);
 
-  debugLogObject(options, 1, 'Unresolved configuration', options);
+  debugLogObject(debug, 1, 'Unresolved configuration', unresolvedConfiguration);
 
   updateMessage('Reading configuration and manifest files...');
 
@@ -62,7 +62,7 @@ export const main = async (options: UnresolvedConfiguration) => {
   const dir = relative(workingDir);
   const resolvedConfig = resolveConfig(manifest.knip ?? localConfig, { workingDir: dir, isDev });
 
-  debugLogObject(options, 1, 'Resolved configuration', resolvedConfig);
+  debugLogObject(debug, 1, 'Resolved configuration', resolvedConfig);
 
   if (!resolvedConfigFilePath && !manifest.knip && !resolvedTsConfigFilePath) {
     throw new ConfigurationError(`Unable to find ${configFilePath} or package.json#knip or ${tsConfigFilePath}`);
@@ -82,17 +82,17 @@ export const main = async (options: UnresolvedConfiguration) => {
         ignore,
         gitignore,
       });
-      debugLogFiles(options, 1, 'Globbed entry paths', entryPaths);
+      debugLogFiles(debug, 1, 'Globbed entry paths', entryPaths);
 
       // Create workspace for entry files, but don't resolve dependencies yet
       const production = createProject({ ...projectOptions, ...skipAddFiles }, entryPaths);
       const entryFiles = production.getSourceFiles();
-      debugLogSourceFiles(options, 1, 'Included entry source files', entryFiles);
+      debugLogSourceFiles(debug, 1, 'Included entry source files', entryFiles);
 
       // Now resolve dependencies of entry files to find all production files
       production.resolveSourceFileDependencies();
       const productionFiles = production.getSourceFiles();
-      debugLogSourceFiles(options, 1, 'Included production source files', productionFiles);
+      debugLogSourceFiles(debug, 1, 'Included production source files', productionFiles);
 
       updateMessage('Resolving project files...');
       const projectPaths = await resolvePaths({
@@ -101,12 +101,12 @@ export const main = async (options: UnresolvedConfiguration) => {
         ignore,
         gitignore,
       });
-      debugLogFiles(options, 1, 'Globbed project paths', projectPaths);
+      debugLogFiles(debug, 1, 'Globbed project paths', projectPaths);
 
       // Create workspace for the entire project
       const project = createProject({ ...projectOptions, ...skipAddFiles }, projectPaths);
       const projectFiles = project.getSourceFiles();
-      debugLogSourceFiles(options, 1, 'Included project source files', projectFiles);
+      debugLogSourceFiles(debug, 1, 'Included project source files', projectFiles);
 
       return { entryFiles, productionFiles, projectFiles };
     } else {
@@ -143,7 +143,7 @@ export const main = async (options: UnresolvedConfiguration) => {
 
   const { issues, counters } = await findIssues(config);
 
-  debugLogObject(options, 2, 'Issues', issues);
+  debugLogObject(debug, 2, 'Issues', issues);
 
   return { report, issues, counters };
 };

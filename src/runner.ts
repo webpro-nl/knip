@@ -14,7 +14,7 @@ import type { Identifier } from 'ts-morph';
 import type { Configuration, Issues, Issue, Counters, ProjectIssueType, SymbolIssueType } from './types';
 
 export async function findIssues(configuration: Configuration) {
-  const { workingDir, report, isDev, jsDocOptions } = configuration;
+  const { workingDir, report, isDev, jsDocOptions, debug } = configuration;
   const { entryFiles, productionFiles, projectFiles, isIncludeEntryFiles } = configuration;
 
   const updateMessage = getMessageUpdater(configuration);
@@ -26,10 +26,10 @@ export async function findIssues(configuration: Configuration) {
   const [usedProductionFiles, unreferencedProductionFiles] = partitionSourceFiles(projectFiles, productionFiles);
   const [usedEntryFiles, usedNonEntryFiles] = partitionSourceFiles(usedProductionFiles, entryFiles);
 
-  debugLogSourceFiles(configuration, 1, 'Used production files', usedProductionFiles);
-  debugLogSourceFiles(configuration, 1, 'Unreferenced production files', unreferencedProductionFiles);
-  debugLogSourceFiles(configuration, 1, 'Used entry files', usedEntryFiles);
-  debugLogSourceFiles(configuration, 1, 'Used non-entry files', usedNonEntryFiles);
+  debugLogSourceFiles(debug, 1, 'Used production files', usedProductionFiles);
+  debugLogSourceFiles(debug, 1, 'Unreferenced production files', unreferencedProductionFiles);
+  debugLogSourceFiles(debug, 1, 'Used entry files', usedEntryFiles);
+  debugLogSourceFiles(debug, 1, 'Used non-entry files', usedNonEntryFiles);
 
   // Set up the results
   const issues: Issues = {
