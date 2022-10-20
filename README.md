@@ -125,10 +125,12 @@ following types of issues:
 - `nsTypes` - Unused types in namespaces: did not find direct references to this exported variable (2)
 - `duplicates` - Duplicate exports: the same thing is exported more than once with different names from the same file
 
-1.  This may also include dependencies that could not be resolved properly (such as non-relative `local/dir/file.ts` not
-    and `local` not being in `node_modules`).
+1.  This includes dependencies that could not be resolved. For instance, what does `unresolved/dir/module` mean?
+    - To target something in the (missing) `node_modules/unresolved` package?
+    - Target a local module that should have a relative path?
+    - It does not match any `paths` entry in `tsconfig.json#compilerOptions`.
 2.  The variable or type is not referenced directly, and has become a member of a namespace. That's why Knip is not sure
-    whether this export can be removed, so please look into it:
+    whether this export can be removed, so please look into it.
 
 You can `--include` or `--exclude` any of the types to slice & dice the report to your needs. Alternatively, they can be
 added to the configuration (e.g. `"exclude": ["dependencies"]`).
@@ -140,8 +142,8 @@ As always, make sure to backup files or use Git before deleting files or making 
 - Unused files can be removed.
 - Unused dependencies can be removed from `package.json`.
 - Unlisted dependencies should be added to `package.json`.
-- Unused exports and types: remove the `export` keyword in front of unused exports. Then you (or tools such as the
-  TypeScript language server in VS Code and/or ESLint) can see whether the variable or type is used within the same
+- Unused exports and types: remove the `export` keyword in front of unused exports. Then you (or tools such as
+  TypeScript language services in VS Code and/or ESLint) can see whether the variable or type is used within the same
   file. If this is not the case, it can be removed.
 
 🔁 Repeat the process to reveal new unused files and exports. Sometimes it's so liberating to remove things!
