@@ -2,6 +2,7 @@ const config = {
   report: {
     files: true,
     dependencies: true,
+    devDependencies: true,
     unlisted: true,
     exports: true,
     types: true,
