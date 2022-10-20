@@ -13,10 +13,10 @@ const findRequireModuleSpecifiers = (sourceFile: SourceFile) =>
     expression.getFirstDescendantByKind(ts.SyntaxKind.StringLiteral)
   );
 
-const isExternalDependency = (moduleSpecifier: string, tsConfigPaths: string[]) => {
+const isExternalDependency = (moduleSpecifier: string, tsConfigPathGlobs: string[]) => {
   if (moduleSpecifier.startsWith('.')) return false;
   if (isBuiltinModule(moduleSpecifier)) return false;
-  if (tsConfigPaths.length > 0 && micromatch.isMatch(moduleSpecifier, tsConfigPaths)) return false;
+  if (tsConfigPathGlobs.length > 0 && micromatch.isMatch(moduleSpecifier, tsConfigPathGlobs)) return false;
   return true;
 };
 
@@ -26,7 +26,7 @@ const resolvePackageName = (moduleSpecifier: string) => {
 };
 
 export const getDependencyAnalyzer = (configuration: Configuration) => {
-  const { dependencies, devDependencies, peerDependencies, optionalDependencies, tsConfigPaths } = configuration;
+  const { dependencies, devDependencies, peerDependencies, optionalDependencies, tsConfigPathGlobs } = configuration;
 
   const productionDependencies = [...dependencies, ...peerDependencies, ...optionalDependencies];
 
@@ -41,7 +41,7 @@ export const getDependencyAnalyzer = (configuration: Configuration) => {
     const moduleSpecifiers = compact([importLiterals, requireCallExpressions].flat()).map(i => i.getLiteralText());
 
     moduleSpecifiers.forEach(moduleSpecifier => {
-      if (!isExternalDependency(moduleSpecifier, tsConfigPaths)) return;
+      if (!isExternalDependency(moduleSpecifier, tsConfigPathGlobs)) return;
 
       const packageName = resolvePackageName(moduleSpecifier);
 

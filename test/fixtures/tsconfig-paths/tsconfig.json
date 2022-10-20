@@ -1,0 +1,12 @@
+{
+  "include": ["*.ts"],
+  "exclude": ["exclude.ts"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@alias/*": ["aliased-dir/*"],
+      "@internal": ["internal-package/index.ts"],
+      "unprefixed": ["unprefixed/module.ts"]
+    }
+  }
+}

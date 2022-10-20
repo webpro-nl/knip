@@ -70,7 +70,7 @@ export type Configuration = {
   optionalDependencies: string[];
   devDependencies: string[];
   isDev: boolean;
-  tsConfigPaths: string[];
+  tsConfigPathGlobs: string[];
   isShowProgress: boolean;
   jsDocOptions: {
     isReadPublicTag: boolean;

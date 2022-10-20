@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { main } from '../src';
 
-test('Find unused files and exports', async () => {
+test('Find unused exports in zero-config mode', async () => {
   const workingDir = path.resolve('test/fixtures/zero-config');
 
   const { issues, counters } = await main({

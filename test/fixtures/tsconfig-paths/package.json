@@ -1,0 +1,6 @@
+{
+  "name": "zero-config",
+  "dependencies": {
+    "internal": "*"
+  }
+}

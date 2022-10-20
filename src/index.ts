@@ -48,10 +48,10 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
     throw new ConfigurationError(`Unable to find ${tsConfigFilePathArg}`);
   }
 
-  let tsConfigPaths: string[] = [];
+  let tsConfigPathGlobs: string[] = [];
   if (resolvedTsConfigFilePath) {
     const config = ts.readConfigFile(resolvedTsConfigFilePath, ts.sys.readFile);
-    tsConfigPaths = config.config.compilerOptions?.paths
+    tsConfigPathGlobs = config.config.compilerOptions?.paths
       ? Object.keys(config.config.compilerOptions.paths).map(p => p.replace(/\*/g, '**')) // TODO Replacement too naive?
       : [];
     if (config.error) {
@@ -133,7 +133,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
     optionalDependencies: Object.keys(manifest.optionalDependencies ?? {}),
     devDependencies: Object.keys(manifest.devDependencies ?? {}),
     isDev: Boolean(resolvedConfig?.dev),
-    tsConfigPaths,
+    tsConfigPathGlobs: tsConfigPathGlobs,
     isShowProgress,
     jsDocOptions: {
       isReadPublicTag: jsDoc.includes('public'),

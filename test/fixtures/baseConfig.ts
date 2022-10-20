@@ -15,7 +15,7 @@ const config = {
   optionalDependencies: [],
   devDependencies: [],
   isDev: false,
-  tsConfigPaths: [],
+  tsConfigPathGlobs: [],
   isShowProgress: false,
   jsDocOptions: {
     isReadPublicTag: false,
