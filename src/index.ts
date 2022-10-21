@@ -77,6 +77,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
 
       updateMessage('Resolving entry files...');
       const entryPaths = await resolvePaths({
+        cwd,
         workingDir,
         patterns: resolvedConfig.entryFiles,
         ignore,
@@ -96,6 +97,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
 
       updateMessage('Resolving project files...');
       const projectPaths = await resolvePaths({
+        cwd,
         workingDir,
         patterns: resolvedConfig.projectFiles,
         ignore,

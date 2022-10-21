@@ -15,16 +15,18 @@ const glob = async function (patterns: readonly string[], options: Options) {
 };
 
 const prependDirToPattern = (workingDir: string, pattern: string) => {
-  if (pattern.startsWith('!')) return '!' + path.join(workingDir, pattern.slice(1));
-  return path.join(workingDir, pattern);
+  if (pattern.startsWith('!')) return '!' + path.posix.join(workingDir, pattern.slice(1));
+  return path.posix.join(workingDir, pattern);
 };
 
 export const resolvePaths = async ({
+  cwd,
   workingDir,
   patterns,
   ignore,
   gitignore,
 }: {
+  cwd: string;
   workingDir: string;
   patterns: string[];
   ignore: string[];
@@ -33,7 +35,7 @@ export const resolvePaths = async ({
   glob(
     // Prepend relative --dir to patterns to use cwd (not workingDir), because
     // we want to glob everything to include all (git)ignore patterns
-    patterns.map(pattern => prependDirToPattern(relative(workingDir), pattern)),
+    patterns.map(pattern => prependDirToPattern(path.posix.relative(cwd, workingDir), pattern)),
     {
       cwd,
       ignore: [...ignore, '**/node_modules'],
