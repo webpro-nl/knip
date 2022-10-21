@@ -62,7 +62,7 @@ export async function findIssues(configuration: Configuration) {
 
   const addSymbolIssue = (issueType: SymbolIssueType, issue: Issue) => {
     const { filePath, symbol } = issue;
-    const key = path.relative(workingDir, filePath);
+    const key = path.relative(workingDir, filePath).replace(/\\/g, '/');
     issues[issueType][key] = issues[issueType][key] ?? {};
     issues[issueType][key][symbol] = issue;
     counters[issueType]++;
