@@ -36,7 +36,7 @@ export const resolvePaths = async ({
     patterns.map(pattern => prependDirToPattern(relative(workingDir), pattern)),
     {
       cwd,
-      ignore,
+      ignore: [...ignore, '**/node_modules'],
       gitignore,
       absolute: true,
     }
