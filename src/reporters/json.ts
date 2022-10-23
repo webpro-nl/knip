@@ -3,7 +3,7 @@ import { isFile } from '../util/fs';
 import { relative } from '../util/path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership';
 import type { Entries } from 'type-fest';
-import type { Report, ReporterOptions, IssueSet, IssueRecords } from '../types';
+import type { Report, ReporterOptions, IssueSet, IssueRecords, SymbolIssueType } from '../types';
 
 type ExtraReporterOptions = {
   codeowners?: string;
@@ -13,16 +13,15 @@ type Row = {
   file: string;
   owners: string[];
   files?: boolean;
+  dependencies?: string[];
+  devDependencies?: string[];
   unlisted?: string[];
   exports?: string[];
   types?: string[];
   duplicates?: string[];
 };
 
-type ReportEntries = Omit<Report, 'dependencies' | 'devDependencies'>;
-type MergedReportEntries = Exclude<keyof ReportEntries, 'files'>;
-
-const mergeTypes = (type: MergedReportEntries) =>
+const mergeTypes = (type: SymbolIssueType) =>
   type === 'exports' || type === 'nsExports' ? 'exports' : type === 'types' || type === 'nsTypes' ? 'types' : type;
 
 export default async ({ report, issues, options }: ReporterOptions) => {
@@ -45,6 +44,8 @@ export default async ({ report, issues, options }: ReporterOptions) => {
       file,
       ...(codeownersEngine && { owners: codeownersEngine.calcFileOwnership(file) }),
       ...(report.files && { files: false }),
+      ...(report.dependencies && { dependencies: [] }),
+      ...(report.devDependencies && { devDependencies: [] }),
       ...(report.unlisted && { unlisted: [] }),
       ...((report.exports || report.nsExports) && { exports: [] }),
       ...((report.types || report.nsTypes) && { types: [] }),
@@ -53,7 +54,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
     return row;
   };
 
-  for (const [reportType, isReportType] of Object.entries(report) as Entries<ReportEntries>) {
+  for (const [reportType, isReportType] of Object.entries(report) as Entries<Report>) {
     if (isReportType) {
       if (reportType === 'files') {
         Array.from(issues[reportType] as IssueSet).forEach(filePath => {
