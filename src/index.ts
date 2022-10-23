@@ -1,7 +1,8 @@
 import ts from 'typescript';
 import { resolveConfig, resolveIncludedIssueTypes } from './util/config';
 import { findFile } from './util/fs';
-import { relative, resolvePaths } from './util/path';
+import { relative } from './util/path';
+import { glob } from './util/glob';
 import { createProject } from './util/project';
 import { findIssues } from './runner';
 import { ConfigurationError } from './util/errors';
@@ -80,7 +81,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
         : { compilerOptions: { allowJs: true } };
 
       updateMessage('Resolving entry files...');
-      const entryPaths = await resolvePaths({
+      const entryPaths = await glob({
         cwd,
         workingDir,
         patterns: resolvedConfig.entryFiles,
@@ -100,7 +101,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
       debugLogSourceFiles(debug, 1, 'Included production source files', productionFiles);
 
       updateMessage('Resolving project files...');
-      const projectPaths = await resolvePaths({
+      const projectPaths = await glob({
         cwd,
         workingDir,
         patterns: resolvedConfig.projectFiles,
