@@ -14,22 +14,18 @@ export const debugLogObject = (debug: Debug, minimumLevel: number, name: string,
 
 export const debugLogFiles = (debug: Debug, minimumLevel: number, name: string, filePaths: string[]) => {
   if (minimumLevel > debug.level) return;
+  console.debug(`[knip] ${name} (${filePaths.length}):`);
   if (debug.level > 1) {
-    console.debug(`[knip] ${name} (${filePaths.length}):`);
     logArray(filePaths);
-  } else {
-    console.debug(`[knip] ${name} (${filePaths.length})`);
   }
 };
 
 export const debugLogSourceFiles = (debug: Debug, minimumLevel: number, name: string, sourceFiles: SourceFile[]) => {
   if (minimumLevel > debug.level) return;
+  console.debug(`[knip] ${name} (${sourceFiles.length})`);
   if (debug.level > 1) {
-    // let files = Array.from(sourceFiles);
-    console.debug(`[knip] ${name} (${sourceFiles.length}):`);
-    logArray(sourceFiles.map(sourceFile => sourceFile.getFilePath()));
-  } else {
-    console.debug(`[knip] ${name} (${sourceFiles.length})`);
+    const files = sourceFiles.map(sourceFile => sourceFile.getFilePath());
+    logArray(files);
   }
 };
 

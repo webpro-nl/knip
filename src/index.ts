@@ -3,7 +3,7 @@ import { resolveConfig, resolveIncludedIssueTypes } from './util/config';
 import { findFile } from './util/fs';
 import { relative } from './util/path';
 import { glob } from './util/glob';
-import { createProject } from './util/project';
+import { createProject, removeExternalSourceFiles } from './util/project';
 import { findIssues } from './runner';
 import { ConfigurationError } from './util/errors';
 import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug';
@@ -93,12 +93,12 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
       // Create workspace for entry files, but don't resolve dependencies yet
       const production = createProject({ ...projectOptions, ...skipAddFiles }, entryPaths);
       const entryFiles = production.getSourceFiles();
-      debugLogSourceFiles(debug, 1, 'Included entry source files', entryFiles);
+      debugLogSourceFiles(debug, 1, 'Resolved entry source files', entryFiles);
 
       // Now resolve dependencies of entry files to find all production files
       production.resolveSourceFileDependencies();
-      const productionFiles = production.getSourceFiles();
-      debugLogSourceFiles(debug, 1, 'Included production source files', productionFiles);
+      const productionFiles = removeExternalSourceFiles(production);
+      debugLogSourceFiles(debug, 1, 'Resolved production source files', productionFiles);
 
       updateMessage('Resolving project files...');
       const projectPaths = await glob({
@@ -113,7 +113,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
       // Create workspace for the entire project
       const project = createProject({ ...projectOptions, ...skipAddFiles }, projectPaths);
       const projectFiles = project.getSourceFiles();
-      debugLogSourceFiles(debug, 1, 'Included project source files', projectFiles);
+      debugLogSourceFiles(debug, 1, 'Resolved project source files', projectFiles);
 
       return { entryFiles, productionFiles, projectFiles };
     } else {
