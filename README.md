@@ -83,9 +83,10 @@ Knip works by creating two sets of files:
       --ignore               Ignore files matching this glob pattern (can be set multiple times)
       --no-gitignore         Don't use .gitignore
       --dev                  Include `devDependencies` in report(s)
+      --include-entry-files  Report unused exports and types for entry files
       --no-progress          Don't show dynamic progress updates
       --max-issues           Maximum number of issues before non-zero exit code (default: 0)
-      --reporter             Select reporter: symbols, compact, codeowners (default: symbols)
+      --reporter             Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options     Pass extra options to the reporter (as JSON string, see example)
       --jsdoc                Enable JSDoc parsing, with options: public
       --debug                Show debug output
@@ -310,9 +311,22 @@ per file like this:
 ```json
 [
   {
+    "file": "package.json",
+    "owners": ["@org/admin"],
+    "files": false,
+    "dependencies": ["jquery", "moment"],
+    "devDependencies": [],
+    "unlisted": [],
+    "exports": [],
+    "types": [],
+    "duplicates": []
+  },
+  {
     "file": "src/Registration.tsx",
     "owners": ["@org/owner"],
     "files": true,
+    "dependencies": [],
+    "devDependencies": [],
     "unlisted": ["react"],
     "exports": ["lowercaseFirstLetter", "RegistrationBox"],
     "types": ["RegistrationServices", "RegistrationAction"],

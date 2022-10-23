@@ -13,7 +13,7 @@ Options:
   --include-entry-files  Report unused exports and types for entry files
   --no-progress          Don't show dynamic progress updates
   --max-issues           Maximum number of issues before non-zero exit code (default: 0)
-  --reporter             Select reporter: symbols, compact, codeowners (default: symbols)
+  --reporter             Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options     Pass extra options to the reporter (as JSON string, see example)
   --jsdoc                Enable JSDoc parsing, with options: public
   --debug                Show debug output
