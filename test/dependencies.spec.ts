@@ -23,11 +23,11 @@ test('Find unused dependencies', async () => {
   });
 
   assert(Array.from(issues.files)[0].endsWith('unused.ts'));
-  assert.equal(issues.dependencies.size, 3);
-  assert(issues.dependencies.has('@tootallnate/once'));
-  assert(issues.dependencies.has('jquery'));
-  assert(issues.dependencies.has('fs-extra'));
-  assert(!issues.dependencies.has('mocha'));
+  assert.equal(Object.keys(issues.dependencies['package.json']).length, 3);
+  assert(issues.dependencies['package.json']['@tootallnate/once']);
+  assert(issues.dependencies['package.json']['jquery']);
+  assert(issues.dependencies['package.json']['fs-extra']);
+  assert(!issues.dependencies['package.json']['mocha']);
 
   assert.equal(Object.keys(issues.unlisted).length, 2);
   assert(issues.unlisted['dep.ts']['ansi-regex']);

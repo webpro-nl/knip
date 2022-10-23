@@ -8,8 +8,8 @@ export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export type Issues = {
   files: IssueSet;
-  dependencies: IssueSet;
-  devDependencies: IssueSet;
+  dependencies: IssueRecords;
+  devDependencies: IssueRecords;
   unlisted: IssueRecords;
   exports: IssueRecords;
   types: IssueRecords;
@@ -19,8 +19,7 @@ export type Issues = {
 };
 
 export type IssueType = keyof Issues;
-export type ProjectIssueType = Extract<IssueType, 'files' | 'dependencies' | 'devDependencies'>;
-export type SymbolIssueType = Exclude<IssueType, ProjectIssueType>;
+export type SymbolIssueType = Exclude<IssueType, 'files'>;
 
 export type Report = {
   [key in keyof Issues]: boolean;
@@ -65,6 +64,7 @@ export type Configuration = {
   productionFiles: SourceFile[];
   entryFiles: SourceFile[];
   isIncludeEntryFiles: boolean;
+  manifestPath: string;
   dependencies: string[];
   peerDependencies: string[];
   optionalDependencies: string[];

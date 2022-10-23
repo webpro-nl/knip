@@ -35,6 +35,10 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
   const manifestPath = await findFile(cwd, workingDir, 'package.json');
   const manifest = manifestPath && require(manifestPath);
 
+  if (!manifestPath || !manifest) {
+    throw new ConfigurationError('Unable to find package.json');
+  }
+
   const configFilePath = configFilePathArg ?? 'knip.json';
   const resolvedConfigFilePath = await findFile(cwd, workingDir, configFilePath);
   const localConfig = resolvedConfigFilePath && require(resolvedConfigFilePath);
@@ -130,6 +134,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
     productionFiles,
     projectFiles,
     isIncludeEntryFiles: !resolvedConfig || isIncludeEntryFiles,
+    manifestPath,
     dependencies: Object.keys(manifest.dependencies ?? {}),
     peerDependencies: Object.keys(manifest.peerDependencies ?? {}),
     optionalDependencies: Object.keys(manifest.optionalDependencies ?? {}),

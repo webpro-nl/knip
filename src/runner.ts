@@ -11,11 +11,12 @@ import { getDependencyAnalyzer } from './util/dependencies';
 import { debugLogSourceFiles } from './util/debug';
 import { getCountersUpdater, getMessageUpdater } from './progress';
 import type { Identifier } from 'ts-morph';
-import type { Configuration, Issues, Issue, Counters, ProjectIssueType, SymbolIssueType } from './types';
+import type { Configuration, Issues, Issue, Counters, SymbolIssueType } from './types';
 
 export async function findIssues(configuration: Configuration) {
   const { workingDir, report, isDev, jsDocOptions, debug } = configuration;
   const { entryFiles, productionFiles, projectFiles, isIncludeEntryFiles } = configuration;
+  const { manifestPath } = configuration;
 
   const updateMessage = getMessageUpdater(configuration);
 
@@ -34,8 +35,8 @@ export async function findIssues(configuration: Configuration) {
   // Set up the results
   const issues: Issues = {
     files: new Set(unreferencedProductionFiles.map(file => file.getFilePath())),
-    dependencies: new Set(),
-    devDependencies: new Set(),
+    dependencies: {},
+    devDependencies: {},
     unlisted: {},
     exports: {},
     types: {},
@@ -46,8 +47,8 @@ export async function findIssues(configuration: Configuration) {
 
   const counters: Counters = {
     files: issues.files.size,
-    dependencies: issues.dependencies.size,
-    devDependencies: issues.dependencies.size,
+    dependencies: 0,
+    devDependencies: 0,
     unlisted: 0,
     exports: 0,
     types: 0,
@@ -66,14 +67,6 @@ export async function findIssues(configuration: Configuration) {
     issues[issueType][key] = issues[issueType][key] ?? {};
     issues[issueType][key][symbol] = issue;
     counters[issueType]++;
-    updateCounters(issue);
-  };
-
-  const addProjectIssue = (issueType: ProjectIssueType, issue: Issue) => {
-    if (!issues[issueType].has(issue.symbol)) {
-      issues[issueType].add(issue.symbol);
-      counters[issueType]++;
-    }
     updateCounters(issue);
   };
 
@@ -202,10 +195,10 @@ export async function findIssues(configuration: Configuration) {
 
   if (report.dependencies) {
     const unusedDependencies = getUnusedDependencies();
-    unusedDependencies.forEach(symbol => addProjectIssue('dependencies', { filePath: '', symbol }));
+    unusedDependencies.forEach(symbol => addSymbolIssue('dependencies', { filePath: manifestPath, symbol }));
     if (isDev) {
       const unusedDevDependencies = getUnusedDevDependencies();
-      unusedDevDependencies.forEach(symbol => addProjectIssue('devDependencies', { filePath: '', symbol }));
+      unusedDevDependencies.forEach(symbol => addSymbolIssue('devDependencies', { filePath: manifestPath, symbol }));
     }
   }
 
