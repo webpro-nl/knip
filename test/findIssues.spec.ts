@@ -31,10 +31,11 @@ test('findIssues', async () => {
   assert.equal(issues.files.size, 1);
   assert(Array.from(issues.files)[0].endsWith('dangling.ts'));
 
-  assert.equal(counters.exports, 2);
-  assert.equal(Object.values(issues.exports).length, 2);
-  assert.equal(issues.exports['dep.ts']['unused'].symbol, 'unused');
+  assert.equal(counters.exports, 3);
+  assert.equal(Object.values(issues.exports).length, 3);
   assert.equal(issues.exports['default.ts']['notDefault'].symbol, 'notDefault');
+  assert.equal(issues.exports['dep.ts']['unused'].symbol, 'unused');
+  assert.equal(issues.exports['dynamic.ts']['unused'].symbol, 'unused');
 
   assert.equal(counters.types, 1);
   assert.equal(Object.values(issues.types).length, 1);
