@@ -1,0 +1,14 @@
+{
+  "name": "basic",
+  "dependencies": {
+    "react": "*"
+  },
+  "knip": {
+    "entryFiles": [
+      "App.tsx"
+    ],
+    "projectFiles": [
+      "*.tsx"
+    ]
+  }
+}
