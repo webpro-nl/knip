@@ -11,6 +11,7 @@ const config = {
     duplicates: true,
   },
   isIncludeEntryFiles: false,
+  manifestPath: 'package.json',
   dependencies: [],
   peerDependencies: [],
   optionalDependencies: [],

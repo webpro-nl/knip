@@ -1,25 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { main } from '../src';
+import baseArguments from './fixtures/baseArguments';
 
 test('Resolve modules properly using tsconfig paths and globs', async () => {
   const workingDir = 'test/fixtures/tsconfig-paths';
 
   const { issues, counters } = await main({
+    ...baseArguments,
     cwd: workingDir,
     workingDir,
-    include: [],
-    exclude: [],
-    ignore: [],
-    gitignore: false,
-    isIncludeEntryFiles: false,
-    isDev: false,
-    isShowProgress: false,
-    jsDoc: [],
-    debug: {
-      isEnabled: false,
-      level: 0,
-    },
   });
 
   assert.equal(issues.dependencies['package.json']['internal'].symbol, 'internal');

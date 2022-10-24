@@ -2,25 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { main } from '../src';
+import baseArguments from './fixtures/baseArguments';
 
 test('Find unused exports in zero-config mode', async () => {
   const workingDir = path.resolve('test/fixtures/zero-config');
 
   const { issues, counters } = await main({
+    ...baseArguments,
     cwd: workingDir,
     workingDir,
-    include: [],
-    exclude: [],
-    ignore: [],
-    gitignore: false,
     isIncludeEntryFiles: true,
-    isDev: false,
-    isShowProgress: false,
-    jsDoc: [],
-    debug: {
-      isEnabled: false,
-      level: 0,
-    },
   });
 
   assert.equal(issues.files.size, 0);
