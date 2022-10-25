@@ -1,5 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { createRequire } from 'node:module';
+
+const require = createRequire(process.cwd());
 
 export const isFile = async (filePath: string) => {
   try {
@@ -21,11 +24,4 @@ export const findFile = async (cwd: string, workingDir: string, fileName: string
   }
 };
 
-export const loadJSON = async (filePath: string) => {
-  const module = await import(filePath, {
-    assert: {
-      type: 'json',
-    },
-  });
-  return module && module.default;
-};
+export const loadJSON = (filePath: string) => require(filePath);
