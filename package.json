@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/micromatch": "4.0.2",
-    "@types/node": "18.11.4",
+    "@types/node": "18.11.5",
     "globstar": "1.0.0",
     "prettier": "2.7.1",
     "release-it": "15.5.0",
@@ -65,7 +65,7 @@
     }
   },
   "engines": {
-    "node": ">=16.17.0 <17 || >=18.3.0"
+    "node": ">=16.17.0 <17 || >=18.6.0"
   },
   "engineStrict": true
 }
