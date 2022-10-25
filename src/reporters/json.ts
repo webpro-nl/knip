@@ -1,9 +1,9 @@
 import path from 'node:path';
-import { isFile } from '../util/fs';
-import { relative } from '../util/path';
-import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership';
+import { isFile } from '../util/fs.js';
+import { relative } from '../util/path.js';
+import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import type { Entries } from 'type-fest';
-import type { Report, ReporterOptions, IssueSet, IssueRecords, SymbolIssueType } from '../types';
+import type { Report, ReporterOptions, IssueSet, IssueRecords, SymbolIssueType } from '../types.js';
 
 type ExtraReporterOptions = {
   codeowners?: string;

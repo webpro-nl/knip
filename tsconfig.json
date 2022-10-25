@@ -7,8 +7,8 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "lib": ["esnext"],
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "esnext",
+    "moduleResolution": "nodenext",
     "noEmit": false,
     "outDir": "./dist",
     "removeComments": true,
@@ -18,7 +18,7 @@
     "skipLibCheck": true,
     "sourceMap": false,
     "strict": true,
-    "target": "es2022"
+    "target": "esnext"
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./src/**/*.spec.ts"],

@@ -1,7 +1,7 @@
-import { relative } from '../util/path';
-import { ISSUE_TYPE_TITLE } from './constants';
+import { relative } from '../util/path.js';
+import { ISSUE_TYPE_TITLE } from './constants.js';
 import type { Entries } from 'type-fest';
-import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types';
+import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types.js';
 
 const logIssueLine = (filePath: string, symbols?: string[]) => {
   console.log(`${relative(filePath)}${symbols ? `: ${symbols.join(', ')}` : ''}`);

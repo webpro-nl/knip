@@ -1,8 +1,8 @@
 import test from 'node:test';
 import path from 'path';
 import assert from 'node:assert/strict';
-import { main } from '../src';
-import baseArguments from './fixtures/baseArguments';
+import { main } from '../src/index.js';
+import baseArguments from './fixtures/baseArguments.js';
 
 test('Obey gitignore', async () => {
   const cwd = path.resolve('test/fixtures/gitignore');

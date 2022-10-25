@@ -1,14 +1,5 @@
 import path from 'node:path';
-import type { globby, Options } from 'globby';
-
-let _globby: typeof globby;
-const globProxy = async function (patterns: readonly string[], options: Options) {
-  if (!_globby) {
-    const { globby } = await (eval('import("globby")') as Promise<typeof import('globby')>);
-    _globby = globby;
-  }
-  return _globby(patterns, options);
-};
+import { globby } from 'globby';
 
 const ensurePosixPath = (value: string) => value.split(path.sep).join(path.posix.sep);
 
@@ -33,7 +24,7 @@ export const glob = async ({
   const cwdPosix = ensurePosixPath(cwd);
   const workingDirPosix = ensurePosixPath(workingDir);
 
-  return globProxy(
+  return globby(
     // Prepend relative --dir to patterns to use cwd (not workingDir), because
     // we want to glob everything to include all (git)ignore patterns
     patterns.map(pattern => prependDirToPattern(path.posix.relative(cwdPosix, workingDirPosix), pattern)),

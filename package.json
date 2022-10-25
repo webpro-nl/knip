@@ -23,6 +23,7 @@
   "bin": {
     "knip": "dist/cli.js"
   },
+  "type": "module",
   "scripts": {
     "knip": "node ./dist/cli.js --jsdoc public",
     "test": "globstar -- node --loader tsx --test \"test/*.spec.ts\"",

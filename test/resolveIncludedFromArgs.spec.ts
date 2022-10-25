@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveIncludedIssueTypes } from '../src/util/config';
+import { resolveIncludedIssueTypes } from '../src/util/config.js';
 
 test('resolveIncludedIssueTypes (all)', async () => {
   const config = resolveIncludedIssueTypes([], []);

@@ -1,4 +1,4 @@
-import * as ns from './ns';
+import * as ns from './ns.js';
 
 const x = ns.x;
 const y = ns.y;

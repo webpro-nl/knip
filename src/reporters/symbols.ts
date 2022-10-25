@@ -1,7 +1,7 @@
-import { relative } from '../util/path';
-import { ISSUE_TYPE_TITLE } from './constants';
+import { relative } from '../util/path.js';
+import { ISSUE_TYPE_TITLE } from './constants.js';
 import type { Entries } from 'type-fest';
-import type { Issue, ReporterOptions, IssueSet } from '../types';
+import type { Issue, ReporterOptions, IssueSet } from '../types.js';
 
 const TRUNCATE_WIDTH = 40;
 

@@ -1,1 +1,1 @@
-declare module '@snyk/github-codeowners/dist/lib/ownership';
+declare module '@snyk/github-codeowners/dist/lib/ownership/index.js';

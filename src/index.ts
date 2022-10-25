@@ -1,14 +1,14 @@
 import ts from 'typescript';
-import { resolveConfig, resolveIncludedIssueTypes } from './util/config';
-import { findFile } from './util/fs';
-import { relative } from './util/path';
-import { glob } from './util/glob';
-import { createProject, removeExternalSourceFiles } from './util/project';
-import { findIssues } from './runner';
-import { ConfigurationError } from './util/errors';
-import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug';
-import { getMessageUpdater } from './progress';
-import type { UnresolvedConfiguration, Configuration } from './types';
+import { resolveConfig, resolveIncludedIssueTypes } from './util/config.js';
+import { findFile, loadJSON } from './util/fs.js';
+import { relative } from './util/path.js';
+import { glob } from './util/glob.js';
+import { createProject, removeExternalSourceFiles } from './util/project.js';
+import { findIssues } from './runner.js';
+import { ConfigurationError } from './util/errors.js';
+import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug.js';
+import { getMessageUpdater } from './progress.js';
+import type { UnresolvedConfiguration, Configuration } from './types.js';
 
 export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => {
   const {
@@ -34,7 +34,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
   updateMessage('Reading configuration and manifest files...');
 
   const manifestPath = await findFile(cwd, workingDir, 'package.json');
-  const manifest = manifestPath && require(manifestPath);
+  const manifest = manifestPath && (await loadJSON(manifestPath));
 
   if (!manifestPath || !manifest) {
     throw new ConfigurationError('Unable to find package.json');
@@ -42,7 +42,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
 
   const configFilePath = configFilePathArg ?? 'knip.json';
   const resolvedConfigFilePath = await findFile(cwd, workingDir, configFilePath);
-  const localConfig = resolvedConfigFilePath && require(resolvedConfigFilePath);
+  const localConfig = resolvedConfigFilePath && (await loadJSON(resolvedConfigFilePath));
   if (configFilePathArg && !resolvedConfigFilePath) {
     throw new ConfigurationError(`Unable to find ${configFilePathArg}`);
   }

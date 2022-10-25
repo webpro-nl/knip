@@ -1,5 +1,5 @@
-import * as ns from './ns';
-import _default from './default';
+import * as ns from './ns.js';
+import _default from './default.js';
 
 const x = ns.x;
 const y = ns.y;

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { main } from '../src';
-import baseArguments from './fixtures/baseArguments';
+import { main } from '../src/index.js';
+import baseArguments from './fixtures/baseArguments.js';
 
 test('Support JSX/TSX files', async () => {
   const workingDir = 'test/fixtures/react';

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import { main } from '../src';
-import baseArguments from './fixtures/baseArguments';
+import { main } from '../src/index.js';
+import baseArguments from './fixtures/baseArguments.js';
 
 test('Find unused exports in zero-config mode', async () => {
   const workingDir = path.resolve('test/fixtures/zero-config');

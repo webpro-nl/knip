@@ -5,13 +5,13 @@ import {
   hasReferencingDefaultImport,
   findReferencingNamespaceNodes,
 } from 'ts-morph-helpers';
-import { partitionSourceFiles } from './util/project';
-import { getType } from './util/type';
-import { getDependencyAnalyzer } from './util/dependencies';
-import { debugLogSourceFiles } from './util/debug';
-import { getCountersUpdater, getMessageUpdater } from './progress';
+import { partitionSourceFiles } from './util/project.js';
+import { getType } from './util/type.js';
+import { getDependencyAnalyzer } from './util/dependencies.js';
+import { debugLogSourceFiles } from './util/debug.js';
+import { getCountersUpdater, getMessageUpdater } from './progress.js';
 import type { Identifier } from 'ts-morph';
-import type { Configuration, Issues, Issue, Counters, SymbolIssueType } from './types';
+import type { Configuration, Issues, Issue, Counters, SymbolIssueType } from './types.js';
 
 export async function findIssues(configuration: Configuration) {
   const { workingDir, report, isDev, jsDocOptions, debug } = configuration;

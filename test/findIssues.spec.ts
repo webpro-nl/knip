@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import { findIssues } from '../src/runner';
-import { createTestProject } from './helpers';
-import baseConfig from './fixtures/baseConfig';
+import { findIssues } from '../src/runner.js';
+import { createTestProject } from './helpers/index.js';
+import baseConfig from './fixtures/baseConfig.js';
 
 test('findIssues', async () => {
   const workingDir = 'test/fixtures/basic';

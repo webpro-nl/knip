@@ -1,6 +1,6 @@
-import { getLine, LineRewriter } from './log';
-import { relative } from './util/path';
-import type { Configuration, Counters, Issue } from './types';
+import { getLine, LineRewriter } from './log.js';
+import { relative } from './util/path.js';
+import type { Configuration, Counters, Issue } from './types.js';
 
 const lineRewriter = new LineRewriter();
 

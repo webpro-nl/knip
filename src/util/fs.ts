@@ -20,3 +20,12 @@ export const findFile = async (cwd: string, workingDir: string, fileName: string
     return findFile(cwd, parentDir, fileName);
   }
 };
+
+export const loadJSON = async (filePath: string) => {
+  const module = await import(filePath, {
+    assert: {
+      type: 'json',
+    },
+  });
+  return module && module.default;
+};

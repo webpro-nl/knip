@@ -1,5 +1,5 @@
 import micromatch from 'micromatch';
-import type { ImportedConfiguration, LocalConfiguration, Configuration, IssueType, Report } from '../types';
+import type { ImportedConfiguration, LocalConfiguration, Configuration, IssueType, Report } from '../types.js';
 
 export const resolveConfig = (
   importedConfiguration: ImportedConfiguration,

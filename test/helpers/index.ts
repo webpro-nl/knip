@@ -1,5 +1,5 @@
 import { ProjectOptions } from 'ts-morph';
-import { createProject } from '../../src/util/project';
+import { createProject } from '../../src/util/project.js';
 
 export const createTestProject = ({
   projectOptions,

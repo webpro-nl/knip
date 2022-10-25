@@ -3,7 +3,7 @@ import isBuiltinModule from 'is-builtin-module';
 import micromatch from 'micromatch';
 import { findCallExpressionsByName } from 'ts-morph-helpers';
 import type { SourceFile } from 'ts-morph';
-import type { Configuration, Issue } from '../types';
+import type { Configuration, Issue } from '../types.js';
 
 const compact = <T>(collection: (T | undefined)[]) =>
   Array.from(new Set(collection)).filter((value): value is T => Boolean(value));
