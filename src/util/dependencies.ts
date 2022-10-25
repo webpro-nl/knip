@@ -1,5 +1,6 @@
+// @ts-ignore Member actually exists: https://nodejs.org/api/module.html#moduleisbuiltinmodulename
+import { isBuiltin } from 'node:module';
 import { ts } from 'ts-morph';
-import isBuiltinModule from 'is-builtin-module';
 import micromatch from 'micromatch';
 import { findCallExpressionsByName } from 'ts-morph-helpers';
 import type { SourceFile } from 'ts-morph';
@@ -16,7 +17,7 @@ const findRequireModuleSpecifiers = (sourceFile: SourceFile) =>
 
 const isExternalDependency = (moduleSpecifier: string, tsConfigPathGlobs: string[]) => {
   if (moduleSpecifier.startsWith('.')) return false;
-  if (isBuiltinModule(moduleSpecifier)) return false;
+  if (isBuiltin(moduleSpecifier)) return false;
   if (tsConfigPathGlobs.length > 0 && micromatch.isMatch(moduleSpecifier, tsConfigPathGlobs)) return false;
   return true;
 };
