@@ -196,10 +196,10 @@ export async function findIssues(configuration: Configuration) {
   if (report.dependencies) {
     const unusedDependencies = getUnusedDependencies();
     unusedDependencies.forEach(symbol => addSymbolIssue('dependencies', { filePath: manifestPath, symbol }));
-    if (isDev) {
-      const unusedDevDependencies = getUnusedDevDependencies();
-      unusedDevDependencies.forEach(symbol => addSymbolIssue('devDependencies', { filePath: manifestPath, symbol }));
-    }
+  }
+  if (report.devDependencies) {
+    const unusedDevDependencies = getUnusedDevDependencies();
+    unusedDevDependencies.forEach(symbol => addSymbolIssue('devDependencies', { filePath: manifestPath, symbol }));
   }
 
   updateCounters();

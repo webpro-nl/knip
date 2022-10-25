@@ -33,15 +33,23 @@ export const resolveConfig = (
   return resolvedConfig as LocalConfiguration;
 };
 
+const ISSUE_TYPES: IssueType[] = [
+  'files',
+  'dependencies',
+  'devDependencies',
+  'unlisted',
+  'exports',
+  'types',
+  'nsExports',
+  'nsTypes',
+  'duplicates',
+];
+
 export const resolveIncludedIssueTypes = (
   includeArg: string[],
   excludeArg: string[],
   resolvedConfig?: LocalConfiguration
 ) => {
-  // Automatically inject the devDependencies report type in dev mode
-  const deps: IssueType[] = resolvedConfig?.dev ? ['dependencies', 'devDependencies'] : ['dependencies'];
-  const groups: IssueType[] = ['files', ...deps, 'unlisted', 'exports', 'types', 'nsExports', 'nsTypes', 'duplicates'];
-
   // Allow space-separated argument values (--include files,dependencies)
   const normalizedIncludesArg = includeArg.map(value => value.split(',')).flat();
   const normalizedExcludesArg = excludeArg.map(value => value.split(',')).flat();
@@ -52,7 +60,11 @@ export const resolveIncludedIssueTypes = (
 
   const include = [normalizedIncludesArg, includes].flat();
   const exclude = [normalizedExcludesArg, excludes].flat();
-  const included = (include.length > 0 ? include : groups).filter(group => !exclude.includes(group));
 
-  return groups.reduce((types, group) => ((types[group] = included.includes(group)), types), {} as Report);
+  include.includes('dependencies') && include.push('devDependencies');
+  !resolvedConfig?.dev && exclude.push('devDependencies');
+
+  const included = (include.length > 0 ? include : ISSUE_TYPES).filter(group => !exclude.includes(group));
+
+  return ISSUE_TYPES.reduce((types, group) => ((types[group] = included.includes(group)), types), {} as Report);
 };
