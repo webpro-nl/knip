@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { globby } from 'globby';
+import { timerify } from './performance.js';
 
 const ensurePosixPath = (value: string) => value.split(path.sep).join(path.posix.sep);
 
@@ -8,7 +9,7 @@ const prependDirToPattern = (workingDir: string, pattern: string) => {
   return path.posix.join(workingDir, pattern);
 };
 
-export const glob = async ({
+const glob = async ({
   cwd,
   workingDir,
   patterns,
@@ -36,3 +37,5 @@ export const glob = async ({
     }
   );
 };
+
+export const _glob = timerify(glob);

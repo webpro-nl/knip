@@ -2,8 +2,8 @@ import ts from 'typescript';
 import { resolveConfig, resolveIncludedIssueTypes } from './util/config.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { relative } from './util/path.js';
-import { glob } from './util/glob.js';
-import { createProject, removeExternalSourceFiles } from './util/project.js';
+import { _glob } from './util/glob.js';
+import { _createProject, _resolveSourceFileDependencies, _removeExternalSourceFiles } from './util/project.js';
 import { findIssues } from './runner.js';
 import { ConfigurationError } from './util/errors.js';
 import { debugLogObject, debugLogFiles, debugLogSourceFiles } from './util/debug.js';
@@ -81,7 +81,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
         : { compilerOptions: { allowJs: true } };
 
       updateMessage('Resolving entry files...');
-      const entryPaths = await glob({
+      const entryPaths = await _glob({
         cwd,
         workingDir,
         patterns: resolvedConfig.entryFiles,
@@ -91,17 +91,17 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
       debugLogFiles(debug, 1, 'Globbed entry paths', entryPaths);
 
       // Create workspace for entry files, but don't resolve dependencies yet
-      const production = createProject({ ...projectOptions, ...skipAddFiles }, entryPaths);
+      const production = _createProject({ ...projectOptions, ...skipAddFiles }, entryPaths);
       const entryFiles = production.getSourceFiles();
       debugLogSourceFiles(debug, 1, 'Resolved entry source files', entryFiles);
 
       // Now resolve dependencies of entry files to find all production files
-      production.resolveSourceFileDependencies();
-      const productionFiles = removeExternalSourceFiles(production);
+      _resolveSourceFileDependencies(production);
+      const productionFiles = _removeExternalSourceFiles(production);
       debugLogSourceFiles(debug, 1, 'Resolved production source files', productionFiles);
 
       updateMessage('Resolving project files...');
-      const projectPaths = await glob({
+      const projectPaths = await _glob({
         cwd,
         workingDir,
         patterns: resolvedConfig.projectFiles,
@@ -111,7 +111,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
       debugLogFiles(debug, 1, 'Globbed project paths', projectPaths);
 
       // Create workspace for the entire project
-      const project = createProject({ ...projectOptions, ...skipAddFiles }, projectPaths);
+      const project = _createProject({ ...projectOptions, ...skipAddFiles }, projectPaths);
       const projectFiles = project.getSourceFiles();
       debugLogSourceFiles(debug, 1, 'Resolved project source files', projectFiles);
 
@@ -119,7 +119,7 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
     } else {
       updateMessage('Resolving project files...');
       // Zero-config resolution, just pass the TS config to ts-morph
-      const project = createProject({ tsConfigFilePath: resolvedTsConfigFilePath });
+      const project = _createProject({ tsConfigFilePath: resolvedTsConfigFilePath });
       const files = project.getSourceFiles();
       return { entryFiles: files, productionFiles: files, projectFiles: files };
     }

@@ -42,9 +42,11 @@
   "license": "ISC",
   "dependencies": {
     "@snyk/github-codeowners": "1.0.0",
+    "easy-table": "1.2.0",
     "globby": "13.1.2",
     "is-builtin-module": "3.2.0",
     "micromatch": "4.0.5",
+    "summary": "2.1.0",
     "ts-morph": "16.0.0",
     "ts-morph-helpers": "0.6.1"
   },

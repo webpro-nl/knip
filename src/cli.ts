@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import path from 'node:path';
-import { parseArgs } from 'node:util';
+import parsedArgs from './util/parseArgs.js';
 import { main } from './index.js';
 import { printHelp } from './help.js';
 import reporters from './reporters/index.js';
 import { ConfigurationError } from './util/errors.js';
+import { measure } from './util/performance.js';
 import type { IssueType } from './types.js';
 
 const {
@@ -28,27 +29,7 @@ const {
     debug: isDebug = false,
     'debug-level': debugLevel = '1',
   },
-} = parseArgs({
-  options: {
-    help: { type: 'boolean' },
-    config: { type: 'string', short: 'c' },
-    tsConfig: { type: 'string', short: 't' },
-    dir: { type: 'string' },
-    include: { type: 'string', multiple: true },
-    exclude: { type: 'string', multiple: true },
-    ignore: { type: 'string', multiple: true },
-    'no-gitignore': { type: 'boolean' },
-    dev: { type: 'boolean' },
-    'include-entry-files': { type: 'boolean' },
-    'no-progress': { type: 'boolean' },
-    'max-issues': { type: 'string' },
-    reporter: { type: 'string' },
-    'reporter-options': { type: 'string' },
-    jsdoc: { type: 'string', multiple: true },
-    debug: { type: 'boolean' },
-    'debug-level': { type: 'string' },
-  },
-});
+} = parsedArgs;
 
 if (help) {
   printHelp();
@@ -90,6 +71,8 @@ const run = async () => {
     const totalErrorCount = (Object.keys(report) as IssueType[])
       .filter(reportGroup => report[reportGroup])
       .reduce((errorCount: number, reportGroup) => errorCount + counters[reportGroup], 0);
+
+    await measure.print();
 
     if (totalErrorCount > Number(maxIssues)) process.exit(totalErrorCount);
   } catch (error: unknown) {

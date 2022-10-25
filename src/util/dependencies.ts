@@ -3,6 +3,7 @@ import isBuiltinModule from 'is-builtin-module';
 import micromatch from 'micromatch';
 import { findCallExpressionsByName } from 'ts-morph-helpers';
 import type { SourceFile } from 'ts-morph';
+import { timerify } from './performance.js';
 import type { Configuration, Issue } from '../types.js';
 
 const compact = <T>(collection: (T | undefined)[]) =>
@@ -32,7 +33,7 @@ export const getDependencyAnalyzer = (configuration: Configuration) => {
 
   const referencedDependencies: Set<string> = new Set();
 
-  const getUnresolvedDependencies = (sourceFile: SourceFile) => {
+  const findUnresolvedDependencies = (sourceFile: SourceFile) => {
     const unresolvedDependencies: Set<Issue> = new Set();
 
     // Unfortunately `sourceFile.getReferencedSourceFiles` does not seem to return `require` calls, so here we are.
@@ -61,5 +62,9 @@ export const getDependencyAnalyzer = (configuration: Configuration) => {
 
   const getUnusedDevDependencies = () => devDependencies.filter(dependency => !referencedDependencies.has(dependency));
 
-  return { getUnresolvedDependencies, getUnusedDependencies, getUnusedDevDependencies };
+  return {
+    _findUnresolvedDependencies: timerify(findUnresolvedDependencies),
+    getUnusedDependencies,
+    getUnusedDevDependencies,
+  };
 };

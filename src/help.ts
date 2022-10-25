@@ -18,6 +18,7 @@ Options:
   --jsdoc                Enable JSDoc parsing, with options: public
   --debug                Show debug output
   --debug-level          Set verbosity of debug output (default: 1, max: 2)
+  --performance          Measure running time of expensive functions and display stats table
 
 Issue types: files, dependencies, unlisted, exports, nsExports, types, nsTypes, duplicates
 

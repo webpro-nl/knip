@@ -1,11 +1,13 @@
 import path from 'node:path';
 import { ts } from 'ts-morph';
 import {
-  findDuplicateExportedNames,
-  hasReferencingDefaultImport,
-  findReferencingNamespaceNodes,
-} from 'ts-morph-helpers';
-import { partitionSourceFiles } from './util/project.js';
+  partitionSourceFiles,
+  _findDuplicateExportedNames,
+  _hasReferencingDefaultImport,
+  _findReferencingNamespaceNodes,
+  _getExportedDeclarations,
+  _findReferences,
+} from './util/project.js';
 import { getType } from './util/type.js';
 import { getDependencyAnalyzer } from './util/dependencies.js';
 import { debugLogSourceFiles } from './util/debug.js';
@@ -14,13 +16,13 @@ import type { Identifier } from 'ts-morph';
 import type { Configuration, Issues, Issue, Counters, SymbolIssueType } from './types.js';
 
 export async function findIssues(configuration: Configuration) {
-  const { workingDir, report, isDev, jsDocOptions, debug } = configuration;
+  const { workingDir, report, jsDocOptions, debug } = configuration;
   const { entryFiles, productionFiles, projectFiles, isIncludeEntryFiles } = configuration;
   const { manifestPath } = configuration;
 
   const updateMessage = getMessageUpdater(configuration);
 
-  const { getUnresolvedDependencies, getUnusedDependencies, getUnusedDevDependencies } =
+  const { _findUnresolvedDependencies, getUnusedDependencies, getUnusedDevDependencies } =
     getDependencyAnalyzer(configuration);
 
   // Slice & dice used & unreferenced files
@@ -87,15 +89,12 @@ export async function findIssues(configuration: Configuration) {
       const filePath = sourceFile.getFilePath();
 
       if (report.dependencies || report.unlisted) {
-        const unresolvedDependencies = getUnresolvedDependencies(sourceFile);
+        const unresolvedDependencies = _findUnresolvedDependencies(sourceFile);
         unresolvedDependencies.forEach(issue => addSymbolIssue('unlisted', issue));
       }
 
-      // The file is used, let's visit all export declarations to see which of them are not used somewhere else
-      const exportDeclarations = sourceFile.getExportedDeclarations();
-
       if (report.duplicates) {
-        const duplicateExports = findDuplicateExportedNames(sourceFile);
+        const duplicateExports = _findDuplicateExportedNames(sourceFile);
         duplicateExports.forEach(symbols => {
           const symbol = symbols.join('|');
           addSymbolIssue('duplicates', { filePath, symbol, symbols });
@@ -107,6 +106,9 @@ export async function findIssues(configuration: Configuration) {
       if (!isIncludeEntryFiles && usedEntryFiles.includes(sourceFile)) return;
 
       if (report.exports || report.types || report.nsExports || report.nsTypes) {
+        // The file is used, let's visit all export declarations to see which of them are not used somewhere else
+        const exportDeclarations = _getExportedDeclarations(sourceFile);
+
         if (!isIncludeEntryFiles) {
           const uniqueExportedSymbols = new Set([...exportDeclarations.values()].flat());
           if (uniqueExportedSymbols.size === 1) return; // Only one exported identifier means it's used somewhere else
@@ -136,7 +138,7 @@ export async function findIssues(configuration: Configuration) {
               declaration.isKind(ts.SyntaxKind.NumericLiteral)
             ) {
               // No ReferenceFindableNode/Identifier available for anonymous default exports, let's go the extra mile
-              if (!hasReferencingDefaultImport(sourceFile)) {
+              if (!_hasReferencingDefaultImport(sourceFile)) {
                 fakeIdentifier = 'default';
               }
             } else if (
@@ -161,7 +163,7 @@ export async function findIssues(configuration: Configuration) {
               if (report.nsExports && issues.nsExports[filePath]?.[identifierText]) return;
               if (report.nsTypes && issues.nsTypes[filePath]?.[identifierText]) return;
 
-              const refs = identifier?.findReferences() ?? [];
+              const refs = _findReferences(identifier);
 
               if (refs.length === 0) {
                 addSymbolIssue('exports', { filePath, symbol: identifierText });
@@ -174,7 +176,7 @@ export async function findIssues(configuration: Configuration) {
 
                 // No more reasons left to think this identifier is used somewhere else, report it as unreferenced. If
                 // it's on a namespace somewhere, report it in a separate issue type.
-                if (findReferencingNamespaceNodes(sourceFile).length > 0) {
+                if (_findReferencingNamespaceNodes(sourceFile).length > 0) {
                   if (type) {
                     addSymbolIssue('nsTypes', { filePath, symbol: identifierText, symbolType: type });
                   } else {
