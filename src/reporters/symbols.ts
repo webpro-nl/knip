@@ -1,16 +1,11 @@
+import EasyTable from 'easy-table';
 import { relative } from '../util/path.js';
 import { ISSUE_TYPE_TITLE } from './constants.js';
 import type { Entries } from 'type-fest';
 import type { Issue, ReporterOptions, IssueSet } from '../types.js';
 
 const TRUNCATE_WIDTH = 40;
-
-const logIssueLine = (issue: Issue, maxWidth: number) => {
-  const symbols = issue.symbols ? issue.symbols.join(', ') : issue.symbol;
-  const truncatedSymbol = symbols.length > maxWidth ? symbols.slice(0, maxWidth - 3) + '...' : symbols;
-  const filePath = relative(issue.filePath);
-  console.log(`${truncatedSymbol.padEnd(maxWidth + 2)}${issue.symbolType?.padEnd(11) || ''}${filePath}`);
-};
+const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? text.slice(0, TRUNCATE_WIDTH - 3) + '...' : text);
 
 const logIssueSet = (issues: string[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
@@ -24,9 +19,15 @@ const logIssueSet = (issues: string[], title: false | string) => {
 const logIssueRecord = (issues: Issue[], title: false | string, isTruncate = false) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
-    const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
-    const maxWidth = isTruncate ? TRUNCATE_WIDTH : issues.reduce((max, issue) => Math.max(issue.symbol.length, max), 0);
-    sortedByFilePath.forEach(issue => logIssueLine(issue, maxWidth));
+    const table = new EasyTable();
+    issues.forEach(issue => {
+      table.cell('symbol', issue.symbols ? truncate(issue.symbols.join(', ')) : issue.symbol);
+      issue.parentSymbol && table.cell('parentSymbol', issue.parentSymbol);
+      issue.symbolType && table.cell('symbolType', issue.symbolType);
+      table.cell('filePath', relative(issue.filePath));
+      table.newRow();
+    });
+    console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
   } else {
     console.log('Not found');
   }
