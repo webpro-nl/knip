@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
 import baseArguments from './fixtures/baseArguments.js';
+import baseCounters from './fixtures/baseCounters.js';
 
 test('Find unused dependencies', async () => {
   const workingDir = 'test/fixtures/dependencies';
@@ -24,16 +25,11 @@ test('Find unused dependencies', async () => {
   assert(issues.unlisted['entry.ts']['not-exist']);
 
   assert.deepEqual(counters, {
-    dependencies: 3,
-    devDependencies: 0,
-    duplicates: 0,
-    exports: 0,
+    ...baseCounters,
     files: 1,
-    nsExports: 0,
-    nsTypes: 0,
+    dependencies: 3,
+    unlisted: 3,
     processed: 3,
     total: 3,
-    types: 0,
-    unlisted: 3,
   });
 });

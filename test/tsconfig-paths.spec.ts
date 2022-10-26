@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
 import baseArguments from './fixtures/baseArguments.js';
+import baseCounters from './fixtures/baseCounters.js';
 
 test('Resolve modules properly using tsconfig paths and globs', async () => {
   const workingDir = 'test/fixtures/tsconfig-paths';
@@ -21,15 +22,10 @@ test('Resolve modules properly using tsconfig paths and globs', async () => {
   assert.equal(issues.exports['unprefixed/module.ts']['unused'].symbol, 'unused');
 
   assert.deepEqual(counters, {
-    files: 0,
+    ...baseCounters,
     dependencies: 1,
-    devDependencies: 0,
     unlisted: 2,
     exports: 2,
-    types: 0,
-    nsExports: 0,
-    nsTypes: 0,
-    duplicates: 0,
     processed: 4,
     total: 4,
   });

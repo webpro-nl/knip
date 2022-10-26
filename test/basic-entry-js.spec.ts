@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
 import baseArguments from './fixtures/baseArguments.js';
+import baseCounters from './fixtures/baseCounters.js';
 
 test('Find unused files and exports with JS entry file', async () => {
   const workingDir = 'test/fixtures/entry-js';
@@ -31,16 +32,15 @@ test('Find unused files and exports with JS entry file', async () => {
   assert.equal(issues.duplicates['dep.ts']['dep|default'].symbols?.[0], 'dep');
 
   assert.deepEqual(counters, {
-    dependencies: 0,
-    devDependencies: 0,
-    duplicates: 1,
-    exports: 1,
+    ...baseCounters,
     files: 1,
+    unlisted: 0,
+    exports: 1,
     nsExports: 1,
     nsTypes: 1,
+    types: 1,
+    duplicates: 1,
     processed: 4,
     total: 4,
-    types: 1,
-    unlisted: 0,
   });
 });
