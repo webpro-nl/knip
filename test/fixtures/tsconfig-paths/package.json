@@ -1,5 +1,5 @@
 {
-  "name": "zero-config",
+  "name": "tsconfig-paths",
   "dependencies": {
     "internal": "*"
   }
