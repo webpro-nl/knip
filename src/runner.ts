@@ -160,7 +160,11 @@ export async function findIssues(configuration: Configuration) {
                 const refs = _findReferences(member);
                 if (hasExternalReferences(refs, filePath)) return;
                 if (hasInternalReferences(refs)) return;
-                addSymbolIssue('enumMembers', { filePath, symbol: member.getName() });
+                addSymbolIssue('enumMembers', {
+                  filePath,
+                  symbol: member.getName(),
+                  parentSymbol: identifier?.getText(),
+                });
               });
             } else if (declaration.isKind(ts.SyntaxKind.ClassDeclaration)) {
               identifier = declaration.getFirstChildByKindOrThrow(ts.SyntaxKind.Identifier);
@@ -174,7 +178,11 @@ export async function findIssues(configuration: Configuration) {
                   const refs = _findReferences(member);
                   if (hasExternalReferences(refs, filePath)) return;
                   if (hasInternalReferences(refs)) return;
-                  addSymbolIssue('classMembers', { filePath, symbol: member.getName() });
+                  addSymbolIssue('classMembers', {
+                    filePath,
+                    symbol: member.getName(),
+                    parentSymbol: identifier?.getText(),
+                  });
                 }
               });
             } else if (declaration.isKind(ts.SyntaxKind.PropertyAccessExpression)) {

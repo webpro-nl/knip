@@ -11,8 +11,10 @@ type ExtraReporterOptions = {
   path?: string;
 };
 
-const logIssueLine = (owner: string, filePath: string, symbols?: string[]) => {
-  console.log(`${owner} ${relative(filePath)}${symbols ? `: ${symbols.join(', ')}` : ''}`);
+const logIssueLine = (owner: string, filePath: string, symbols?: string[], parentSymbol?: string) => {
+  const symbol = symbols ? `: ${symbols.join(', ')}` : '';
+  const parent = parentSymbol ? ` (${parentSymbol})` : '';
+  console.log(`${owner} ${relative(filePath)}${symbol}${parent}`);
 };
 
 const logIssueSet = (issues: { symbol: string; owner: string }[], title: false | string) => {
@@ -30,7 +32,9 @@ const logIssueRecord = (issues: OwnedIssue[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.owner < b.owner ? -1 : 1));
-    sortedByFilePath.forEach(({ filePath, symbols, owner }) => logIssueLine(owner, filePath, symbols));
+    sortedByFilePath.forEach(({ filePath, symbols, owner, parentSymbol }) =>
+      logIssueLine(owner, filePath, symbols, parentSymbol)
+    );
   } else {
     console.log('Not found');
   }

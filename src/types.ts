@@ -2,7 +2,13 @@ import { SourceFile } from 'ts-morph';
 
 type SymbolType = 'type' | 'interface' | 'enum';
 
-export type Issue = { filePath: string; symbol: string; symbols?: string[]; symbolType?: SymbolType };
+export type Issue = {
+  filePath: string;
+  symbol: string;
+  symbols?: string[];
+  symbolType?: SymbolType;
+  parentSymbol?: string;
+};
 export type IssueSet = Set<string>;
 export type IssueRecords = Record<string, Record<string, Issue>>;
 
