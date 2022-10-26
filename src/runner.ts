@@ -80,16 +80,11 @@ export async function findIssues(configuration: Configuration) {
 
   updateMessage('Connecting the dots...');
 
+  const isReportTypes = report.types || report.nsTypes || report.enumMembers;
+  const isReportExports = report.exports || report.nsExports || report.classMembers;
+
   // Skip expensive traversal when only reporting unreferenced files
-  if (
-    report.dependencies ||
-    report.unlisted ||
-    report.exports ||
-    report.types ||
-    report.nsExports ||
-    report.nsTypes ||
-    report.duplicates
-  ) {
+  if (report.dependencies || report.unlisted || report.duplicates || isReportExports || isReportTypes) {
     usedProductionFiles.forEach(sourceFile => {
       counters.processed++;
       const filePath = sourceFile.getFilePath();
@@ -111,7 +106,14 @@ export async function findIssues(configuration: Configuration) {
       // When this option is set explicitly, or in zero-config mode, unused exports are also reported for entry files
       if (!isIncludeEntryFiles && usedEntryFiles.includes(sourceFile)) return;
 
-      if (report.exports || report.types || report.nsExports || report.nsTypes) {
+      if (
+        report.exports ||
+        report.types ||
+        report.nsExports ||
+        report.nsTypes ||
+        report.classMembers ||
+        report.enumMembers
+      ) {
         // The file is used, let's visit all export declarations to see which of them are not used somewhere else
         const exportDeclarations = _getExportedDeclarations(sourceFile);
 
@@ -124,10 +126,8 @@ export async function findIssues(configuration: Configuration) {
           declarations.forEach(declaration => {
             const type = getType(declaration);
 
-            if (!report.nsExports && !report.nsTypes) {
-              if (!report.types && type) return;
-              if (!report.exports && !type) return;
-            }
+            if (type && !isReportTypes) return;
+            if (!type && !isReportExports) return;
 
             if (jsDocOptions.isReadPublicTag && ts.getJSDocPublicTag(declaration.compilerNode)) return;
 
