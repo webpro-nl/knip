@@ -3,8 +3,10 @@ import { ISSUE_TYPE_TITLE } from './constants.js';
 import type { Entries } from 'type-fest';
 import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types.js';
 
-const logIssueLine = (filePath: string, symbols?: string[]) => {
-  console.log(`${relative(filePath)}${symbols ? `: ${symbols.join(', ')}` : ''}`);
+const logIssueLine = (filePath: string, symbols?: string[], parentSymbol?: string) => {
+  const symbol = symbols ? `: ${symbols.join(', ')}` : '';
+  const parent = parentSymbol ? ` (${parentSymbol})` : '';
+  console.log(`${relative(filePath)}${symbol}${parent}`);
 };
 
 const logIssueSet = (issues: string[], title: false | string) => {
@@ -20,7 +22,7 @@ const logIssueRecord = (issues: Issue[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
-    sortedByFilePath.forEach(({ filePath, symbols }) => logIssueLine(filePath, symbols));
+    sortedByFilePath.forEach(({ filePath, symbols, parentSymbol }) => logIssueLine(filePath, symbols, parentSymbol));
   } else {
     console.log('Not found');
   }
