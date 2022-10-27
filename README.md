@@ -17,12 +17,11 @@ things that can be removed?
 The dots don't connect themselves. This is where Knip comes in:
 
 - [x] Finds **unused files, dependencies and exports**.
-- [x] Finds dependencies not listed in `package.json`.
-- [x] Verifies that exported symbols are actually used in other files, even when part of an imported namespace.
-- [x] Supports JavaScript inside TypeScript projects (`"allowJs": true`).
-- [x] Finds duplicate exports of the same symbol.
-- [x] Supports JavaScript ES Module-based projects without a `tsconfig.json`.
-- [x] Features multiple [reporters][1] and supports [custom reporters][2].
+- [x] Finds used dependencies not listed in `package.json`.
+- [x] Finds duplicate exports.
+- [x] Supports JavaScript (without `tsconfig.json`, or TypeScript `allowJs: true`).
+- [x] Features multiple [reporters][1] and supports [custom reporters][2] (think JSON and `CODEOWNERS`)
+- [x] Run Knip as part of your CI environment to detect issues and prevent regressions.
 
 Knip really shines in larger projects. A little bit of configuration will pay off, I promise. A comparison with similar
 tools answers the question [why another unused file/dependency/export finder?][3]
@@ -32,11 +31,27 @@ Knip is a fresh take on keeping your projects clean & tidy!
 [![An orange cow with scissors, Van Gogh style][5]][4] <sup>_“An orange cow with scissors, Van Gogh style” - generated
 with OpenAI_</sup>
 
+## Roadmap
+
+Please report any false positives by [opening an issue in this repo][6]. Bonus points for adding a public repository or
+opening a pull request with a directory and example files in `test/fixtures`. Correctness and bug fixes have priority
+over new features:
+
+### Upcoming Features
+
+- [ ] Find unused members of classes and enums (#11 and #20).
+- [ ] Custom dependency resolvers: find dependencies used in npm scripts.
+- [ ] Custom dependency resolvers: find unused and unlisted plugins for Webpack, ESLint & Babel, etc. (#7)
+- [ ] Smart default configurations and more fine-grained configuration options.
+- [ ] Full support for monorepos (partial [monorepos support][7] with `--dir` exists).
+- [ ] Fix issues: remove `export` keyword, uninstall unused dependencies, delete files (like `--fix` of ESLint).
+- [ ] Add more reporters and report customization options (#3).
+
 ## Installation
 
     npm install -D knip
 
-Knip supports LTS versions of Node.js, and currently requires at least Node.js v16.17 or v18.3. Knip is _cutting edge!_
+Knip supports LTS versions of Node.js, and currently requires at least Node.js v16.17 or v18.6. Knip is _cutting edge!_
 
 ## Usage
 
@@ -67,7 +82,7 @@ Knip works by creating two sets of files:
 3.  The subset of project files that is not production code will be reported as unused files (in red).
 4.  Then the production code (in blue) will be analyzed for unused exports.
 
-![How it works][6]
+![How it works][8]
 
 ## Options
 
@@ -88,7 +103,6 @@ Knip works by creating two sets of files:
       --max-issues           Maximum number of issues before non-zero exit code (default: 0)
       --reporter             Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options     Pass extra options to the reporter (as JSON string, see example)
-      --jsdoc                Enable JSDoc parsing, with options: public
       --debug                Show debug output
       --debug-level          Set verbosity of debug output (default: 1, max: 2)
       --performance          Measure running time of expensive functions and display stats table
@@ -99,19 +113,11 @@ Knip works by creating two sets of files:
 
     $ knip
     $ knip --dir packages/client --include files
-    $ knip -c ./knip.js --reporter compact --jsdoc public
+    $ knip -c ./knip.js --reporter compact
     $ knip --ignore 'lib/**/*.ts' --ignore build
     $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 
     More info: https://github.com/webpro/knip
-
-## Performance
-
-🚀 Knip is considerably faster when only the `files` and/or `duplicates` types are included. Finding unused exports
-requires deeper analysis (`exports`, `nsExports`, `types`, `nsTypes`). The following example commands do the same:
-
-    knip --include files --include duplicates
-    knip --include files,duplicates
 
 ## Reading the report
 
@@ -125,7 +131,9 @@ following types of issues:
 - `nsExports` - Unused exports in namespaces: did not find direct references to this exported variable (2)
 - `types` - Unused types: did not find references to this exported type
 - `nsTypes` - Unused types in namespaces: did not find direct references to this exported variable (2)
-- `duplicates` - Duplicate exports: the same thing is exported more than once with different names from the same file
+- `duplicates` - Duplicate exports: the same thing is exported more than once with different names
+
+Notes:
 
 1.  This includes dependencies that could not be resolved. For instance, what does `unresolved/dir/module` mean?
     - To target something in the (missing) `node_modules/unresolved` package?
@@ -147,14 +155,45 @@ As always, make sure to backup files or use Git before deleting files or making 
 - Unused exports and types: remove the `export` keyword in front of unused exports. Then you (or tools such as
   TypeScript language services in VS Code and/or ESLint) can see whether the variable or type is used within the same
   file. If this is not the case, it can be removed.
+- Duplicate exports can be removed to export only once, make sure to import that everywhere.
 
 🔁 Repeat the process to reveal new unused files and exports. Sometimes it's so liberating to remove things!
 
-## Production versus non-production code
+## Performance
+
+🚀 Knip finds issues of type `files`, `dependencies`, `unlisted` and `duplicates` very fast. Finding unused exports
+requires deeper analysis (`exports`, `nsExports`, `types`, `nsTypes`). The following example commands do the same:
+
+    knip --include files --include dependencies
+    knip --include files,dependencies
+
+Use `--performance` to see where most of the time is spent.
+
+## Configuration
+
+### Libraries versus Applications
+
+Libraries and applications are identical when it comes to files and dependencies: whatever is unused should be removed.
+Yet libraries usually have exports meant to be used by other libraries or applications. Such public variables and types
+in libraries can be marked with the JSDoc `@public` tag:
+
+```js
+/**
+ * Merge two objects.
+ *
+ * @public
+ */
+
+export const merge = function () {};
+```
+
+Knip does not report public exports and types as unused.
+
+### Production versus non-production code
 
 Feels like you're getting too many false positives? Let's talk about `entryFiles` and `projectFiles`.
 
-### Production code
+#### Production code
 
 The default configuration for Knip is very strict and targets production code. Non-production files such as tests should
 not be part of the `entryFiles` and `projectFiles`. Here's why: test and other non-production files often import
@@ -166,7 +205,7 @@ production files, which will prevent the production files from being reported as
 
 This will ensure Knip understands what production code can be removed.
 
-### Non-production code
+#### Non-production code
 
 Non-production code includes files such as unit tests, end-to-end tests, tooling, scripts, Storybook stories, etc. Think
 of it the same way as the convention to split `dependencies` and `devDependencies` in `package.json`.
@@ -245,9 +284,8 @@ To analyze the packages separately, using the matching pattern from the configur
 
 #### Connected projects
 
-A good example of a large project setup is a monorepo. Let's take an example (Nx) project configuration using Next.js,
-Jest and Storybook, which has multiple apps and libs. They are not published separately and don't have their own
-`package.json`.
+Let's take another example Nx project configuration using Next.js, Jest and Storybook, which has multiple apps and libs.
+They are not published separately and don't have their own `package.json`.
 
 This configuration file can also be a JavaScript file, which allows to add logic and/or comments (e.g. `knip.js`):
 
@@ -278,10 +316,10 @@ configuration can be tweaked further to the project structure.
 
 Knip provides the following built-in reporters:
 
-- [`json`](#json)
-- [`symbol`](#symbol-default) (default)
-- [`compact`](#compact)
-- [`codeowners`](#code-owners)
+- [`json`][9]
+- [`symbol`][10] (default)
+- [`compact`][11]
+- [`codeowners`][12]
 
 ### Custom Reporters
 
@@ -336,38 +374,31 @@ per file like this:
 ]
 ```
 
-The keys match the [known issue types](#reading-the-report).
+The keys match the [known issue types][13].
 
 #### Usage Ideas
 
-Use tools like [miller](https://github.com/johnkerl/miller) or [jtbl](https://github.com/kellyjonbrazil/jtbl) to consume
-the JSON and render a table in the terminal.
+Use tools like [miller][14] or [jtbl][15] to consume the JSON and render a table in the terminal.
 
 ##### Table
 
-```
-$ npx knip --reporter json | mlr --ijson --opprint --no-auto-flatten cat
-file                  owners      files  unlisted  exports                                types                                     duplicates
-src/Registration.tsx  @org/owner  true   react     lowercaseFirstLetter, RegistrationBox  RegistrationServices, RegistrationAction  Registration, default
-src/ProductsList.tsx  @org/team   false  -         -                                      ProductDetail                             -
-```
+    $ npx knip --reporter json | mlr --ijson --opprint --no-auto-flatten cat
+    file                  owners      files  unlisted  exports                                types                                     duplicates
+    src/Registration.tsx  @org/owner  true   react     lowercaseFirstLetter, RegistrationBox  RegistrationServices, RegistrationAction  Registration, default
+    src/ProductsList.tsx  @org/team   false  -         -                                      ProductDetail                             -
 
 ##### Markdown Table
 
-```
-$ npx knip --reporter json | mlr --ijson --omd --no-auto-flatten cat
-| file | owners | files | duplicates |
-| --- | --- | --- | --- |
-| src/Registration.tsx | @org/owner | true | Registration, default |
-| src/ProductsList.tsx | @org/team | false |  |
-```
+    $ npx knip --reporter json | mlr --ijson --omd --no-auto-flatten cat
+    | file | owners | files | duplicates |
+    | --- | --- | --- | --- |
+    | src/Registration.tsx | @org/owner | true | Registration, default |
+    | src/ProductsList.tsx | @org/team | false |  |
 
 Include specific issue types and/or replace the `cat` command with `put` for clean output:
 
-```
-npx knip --include files,duplicates --reporter json | mlr --ijson --opprint --no-auto-flatten put 'for (e in $*) { if(is_array($[e])) { $[e] = joinv($[e], ", ") } }'
-npx knip --reporter json | mlr --ijson --omd --no-auto-flatten put 'for (e in $*) { if(is_array($[e])) { $[e] = joinv($[e], ", ") } }'
-```
+    npx knip --include files,duplicates --reporter json | mlr --ijson --opprint --no-auto-flatten put 'for (e in $*) { if(is_array($[e])) { $[e] = joinv($[e], ", ") } }'
+    npx knip --reporter json | mlr --ijson --omd --no-auto-flatten put 'for (e in $*) { if(is_array($[e])) { $[e] = joinv($[e], ", ") } }'
 
 ### More Output Examples
 
@@ -464,20 +495,20 @@ collect the various issues in one go?
 
 This table is a work in progress, but here's a first impression. Based on their docs (please report any mistakes):
 
-| Feature                           | **knip** | [depcheck][7] | [unimported][8] | [ts-unused-exports][9] | [ts-prune][10] | [find-unused-exports][11] |
-| --------------------------------- | :------: | :-----------: | :-------------: | :--------------------: | :------------: | :-----------------------: |
-| Unused files                      |    ✅    |       -       |       ✅        |           -            |       -        |             -             |
-| Unused dependencies               |    ✅    |      ✅       |       ✅        |           -            |       -        |             -             |
-| Unlisted dependencies             |    ✅    |      ✅       |       ✅        |           -            |       -        |             -             |
-| [Custom dependency resolvers][12] |    ❌    |      ✅       |       ❌        |           -            |       -        |             -             |
-| Unused exports                    |    ✅    |       -       |        -        |           ✅           |       ✅       |            ✅             |
-| Duplicate exports                 |    ✅    |       -       |        -        |           ❌           |       ❌       |            ❌             |
-| Search namespaces                 |    ✅    |       -       |        -        |           ✅           |       ❌       |            ❌             |
-| Custom reporters                  |    ✅    |       -       |        -        |           -            |       -        |             -             |
-| Pure JavaScript/ESM               |    ✅    |      ✅       |       ✅        |           -            |       -        |            ✅             |
-| Configure entry files             |    ✅    |      ❌       |       ✅        |           ❌           |       ❌       |            ❌             |
-| [Support monorepos][13]           |    🟠    |       -       |        -        |           -            |       -        |             -             |
-| ESLint plugin available           |    -     |       -       |        -        |           ✅           |       -        |             -             |
+| Feature                           | **knip** | [depcheck][16] | [unimported][17] | [ts-unused-exports][18] | [ts-prune][19] | [find-unused-exports][20] |
+| --------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: | :-----------------------: |
+| Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |             -             |
+| Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
+| Unlisted dependencies             |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
+| [Custom dependency resolvers][21] |    ❌    |       ✅       |        ❌        |            -            |       -        |             -             |
+| Unused exports                    |    ✅    |       -        |        -         |           ✅            |       ✅       |            ✅             |
+| Duplicate exports                 |    ✅    |       -        |        -         |           ❌            |       ❌       |            ❌             |
+| Search namespaces                 |    ✅    |       -        |        -         |           ✅            |       ❌       |            ❌             |
+| Custom reporters                  |    ✅    |       -        |        -         |            -            |       -        |             -             |
+| JavaScript support                |    ✅    |       ✅       |        ✅        |            -            |       -        |            ✅             |
+| Configure entry files             |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |            ❌             |
+| [Support monorepos][22]           |    🟠    |       -        |        -         |            -            |       -        |             -             |
+| ESLint plugin available           |    -     |       -        |        -         |           ✅            |       -        |             -             |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
 
@@ -492,7 +523,8 @@ directory of a monorepo is nice for DX. But Knip will need some help to find it 
 `eslint-plugin-cypress` _dependency_. Or see it is not listed in `package.json`. Or that the dependency is still listed,
 but no longer in use. Many popular projects reference plugins in similar ways, such as Babel, Webpack and Storybook.
 
-Big compliments to [depcheck][15] which already does this! They call this "specials". [Knip has this ambition][16], too.
+Big compliments to [depcheck][23] which already does this! They call this "specials". This is on [Knip's roadmap][24],
+as well, with the additional ambition to also find used dependencies that are not listed in `package.json`.
 
 unimported is strict in this regard and works based on production files and `dependencies`, so does not have custom
 dependency resolvers which are usually only needed for `devDependencies`.
@@ -514,14 +546,22 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [3]: #really-another-unused-filedependencyexport-finder
 [4]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [5]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[6]: ./assets/how-it-works.drawio.svg
-[7]: https://github.com/depcheck/depcheck
-[8]: https://github.com/smeijer/unimported
-[9]: https://github.com/pzavolinsky/ts-unused-exports
-[10]: https://github.com/nadeesha/ts-prune
-[11]: https://github.com/jaydenseric/find-unused-exports
-[12]: #custom-dependency-resolvers
-[13]: #monorepos-1
-[14]: #monorepos
-[15]: https://github.com/depcheck/depcheck#special
-[16]: https://github.com/webpro/knip/issues/7
+[6]: https://github.com/webpro/knip/issues
+[7]: #monorepos
+[8]: ./assets/how-it-works.drawio.svg
+[9]: #json
+[10]: #symbol-default
+[11]: #compact
+[12]: #code-owners
+[13]: #reading-the-report
+[14]: https://github.com/johnkerl/miller
+[15]: https://github.com/kellyjonbrazil/jtbl
+[16]: https://github.com/depcheck/depcheck
+[17]: https://github.com/smeijer/unimported
+[18]: https://github.com/pzavolinsky/ts-unused-exports
+[19]: https://github.com/nadeesha/ts-prune
+[20]: https://github.com/jaydenseric/find-unused-exports
+[21]: #custom-dependency-resolvers
+[22]: #monorepos-1
+[23]: https://github.com/depcheck/depcheck#special
+[24]: #roadmap
