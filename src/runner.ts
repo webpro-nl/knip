@@ -148,9 +148,9 @@ export async function findIssues(configuration: Configuration) {
               declaration.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
               declaration.isKind(ts.SyntaxKind.EnumDeclaration)
             ) {
-              identifier = declaration.getFirstChildByKindOrThrow(ts.SyntaxKind.Identifier);
+              identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
             } else if (declaration.isKind(ts.SyntaxKind.PropertyAccessExpression)) {
-              identifier = declaration.getLastChildByKindOrThrow(ts.SyntaxKind.Identifier);
+              identifier = declaration.getLastChildByKind(ts.SyntaxKind.Identifier);
             } else {
               identifier = declaration.getFirstDescendantByKind(ts.SyntaxKind.Identifier);
             }
