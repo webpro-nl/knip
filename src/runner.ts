@@ -16,7 +16,7 @@ import type { Identifier } from 'ts-morph';
 import type { Configuration, Issues, Issue, Counters, SymbolIssueType } from './types.js';
 
 export async function findIssues(configuration: Configuration) {
-  const { workingDir, report, jsDocOptions, debug } = configuration;
+  const { workingDir, report, debug } = configuration;
   const { entryFiles, productionFiles, projectFiles, isIncludeEntryFiles } = configuration;
   const { manifestPath } = configuration;
 
@@ -123,7 +123,7 @@ export async function findIssues(configuration: Configuration) {
               if (!report.exports && !type) return;
             }
 
-            if (jsDocOptions.isReadPublicTag && ts.getJSDocPublicTag(declaration.compilerNode)) return;
+            if (ts.getJSDocPublicTag(declaration.compilerNode)) return;
 
             let identifier: Identifier | undefined;
             let fakeIdentifier: string | undefined;

@@ -19,9 +19,6 @@ const config = {
   isDev: false,
   tsConfigPathGlobs: [],
   isShowProgress: false,
-  jsDocOptions: {
-    isReadPublicTag: false,
-  },
 };
 
 export default config;

@@ -6,7 +6,6 @@ const baseArguments = {
   isIncludeEntryFiles: false,
   isDev: false,
   isShowProgress: false,
-  jsDoc: [],
   debug: {
     isEnabled: false,
     level: 0,

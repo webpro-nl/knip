@@ -50,7 +50,6 @@ export type UnresolvedConfiguration = {
   isIncludeEntryFiles: boolean;
   isDev: boolean;
   isShowProgress: boolean;
-  jsDoc: string[];
   debug: {
     isEnabled: boolean;
     level: number;
@@ -72,9 +71,6 @@ export type Configuration = {
   isDev: boolean;
   tsConfigPathGlobs: string[];
   isShowProgress: boolean;
-  jsDocOptions: {
-    isReadPublicTag: boolean;
-  };
   debug: {
     isEnabled: boolean;
     level: number;

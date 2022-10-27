@@ -16,7 +16,6 @@ export default parseArgs({
     'max-issues': { type: 'string' },
     reporter: { type: 'string' },
     'reporter-options': { type: 'string' },
-    jsdoc: { type: 'string', multiple: true },
     debug: { type: 'boolean' },
     'debug-level': { type: 'string' },
     performance: { type: 'boolean' },

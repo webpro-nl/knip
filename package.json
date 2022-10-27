@@ -25,7 +25,7 @@
   },
   "type": "module",
   "scripts": {
-    "knip": "node ./dist/cli.js --jsdoc public",
+    "knip": "node ./dist/cli.js",
     "test": "globstar -- node --loader tsx --test \"test/*.spec.ts\"",
     "watch": "tsc --watch",
     "build": "rm -rf dist && tsc",

@@ -25,7 +25,6 @@ const {
     reporter = 'symbols',
     'reporter-options': reporterOptions = '',
     'max-issues': maxIssues = '0',
-    jsdoc: jsDoc = [],
     debug: isDebug = false,
     'debug-level': debugLevel = '1',
   },
@@ -59,7 +58,6 @@ const run = async () => {
       isIncludeEntryFiles,
       isDev,
       isShowProgress,
-      jsDoc,
       debug: {
         isEnabled: isDebug,
         level: isDebug ? Number(debugLevel) : 0,

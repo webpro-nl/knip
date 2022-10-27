@@ -23,7 +23,6 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
     isIncludeEntryFiles,
     isDev,
     isShowProgress,
-    jsDoc,
     debug,
   } = unresolvedConfiguration;
 
@@ -143,9 +142,6 @@ export const main = async (unresolvedConfiguration: UnresolvedConfiguration) => 
     isDev: Boolean(resolvedConfig?.dev),
     tsConfigPathGlobs: tsConfigPathGlobs,
     isShowProgress,
-    jsDocOptions: {
-      isReadPublicTag: jsDoc.includes('public'),
-    },
     debug,
   };
 
