@@ -93,9 +93,9 @@ Knip works by creating two sets of files:
       -c/--config [file]     Configuration file path (default: ./knip.json or package.json#knip)
       -t/--tsConfig [file]   TypeScript configuration path (default: ./tsconfig.json)
       --dir                  Working directory (default: current working directory)
-      --include              Report only listed issue type(s) (see below)
-      --exclude              Exclude issue type(s) from report (see below)
-      --ignore               Ignore files matching this glob pattern (can be set multiple times)
+      --include              Report only listed issue type(s), can be repeated
+      --exclude              Exclude issue type(s) from report, can be repeated
+      --ignore               Ignore files matching this glob pattern, can be repeated
       --no-gitignore         Don't use .gitignore
       --dev                  Include `devDependencies` in report(s)
       --include-entry-files  Report unused exports and types for entry files
@@ -107,7 +107,7 @@ Knip works by creating two sets of files:
       --debug-level          Set verbosity of debug output (default: 1, max: 2)
       --performance          Measure running time of expensive functions and display stats table
 
-    Issue types: files, dependencies, unlisted, exports, nsExports, types, nsTypes, duplicates
+    Issue types: files, dependencies, unlisted, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
 
     Examples:
 
@@ -125,13 +125,18 @@ After analyzing all the files resolved from the `entryFiles` against the `projec
 following types of issues:
 
 - `files` - Unused files: did not find references to this file
-- `dependencies` - Unused dependencies: did not find references to this dependency
-- `unlisted` - Unlisted dependencies: imported dependencies, but not listed in package.json (1)
-- `exports` - Unused exports: did not find references to this exported variable
-- `nsExports` - Unused exports in namespaces: did not find direct references to this exported variable (2)
-- `types` - Unused types: did not find references to this exported type
-- `nsTypes` - Unused types in namespaces: did not find direct references to this exported variable (2)
-- `duplicates` - Duplicate exports: the same thing is exported more than once with different names
+- Dependencies (`package.json`)
+  - `dependencies` - Unused dependencies: did not find references to this dependency
+  - `unlisted` - Unlisted dependencies: used dependencies, but not listed in package.json (1)
+- Values (JavaScript)
+  - `exports` - Unused exports: did not find references to this exported variable
+  - `nsExports` - Unused exports in namespaces: did not find direct references to this exported variable (2)
+  - `classMembers` - Unused class members: did not find references to this member of the exported class
+- Types (TypeSscript)
+  - `types` - Unused types: did not find references to this exported type
+  - `nsTypes` - Unused types in namespaces: did not find direct references to this exported variable (2)
+  - `enumMembers` - Unused enum members: did not find references to this member of the exported enum
+- `duplicates` - Duplicate exports: the same thing is exported more than once
 
 Notes:
 
@@ -162,10 +167,16 @@ As always, make sure to backup files or use Git before deleting files or making 
 ## Performance
 
 🚀 Knip finds issues of type `files`, `dependencies`, `unlisted` and `duplicates` very fast. Finding unused exports
-requires deeper analysis (`exports`, `nsExports`, `types`, `nsTypes`). The following example commands do the same:
+requires deeper analysis (`exports`, `nsExports`, `classMembers`, `types`, `nsTypes`, `enumMembers`).
+
+Use `--include` to report only specific issue types (the following example commands do the same):
 
     knip --include files --include dependencies
     knip --include files,dependencies
+
+Use `--exclude` to ignore reports you're not interested in:
+
+    knip --include files --exclude classMembers,enumMembers
 
 Use `--performance` to see where most of the time is spent.
 
@@ -496,12 +507,14 @@ collect the various issues in one go?
 This table is a work in progress, but here's a first impression. Based on their docs (please report any mistakes):
 
 | Feature                           | **knip** | [depcheck][16] | [unimported][17] | [ts-unused-exports][18] | [ts-prune][19] | [find-unused-exports][20] |
-| --------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: | :-----------------------: |
+| :-------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: | :-----------------------: |
 | Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |             -             |
 | Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
 | Unlisted dependencies             |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
-| [Custom dependency resolvers][21] |    ❌    |       ✅       |        ❌        |            -            |       -        |             -             |
+| [Custom dependency resolvers][21] |    ❌    |       ✅       |        ❌        |            -            |       -        |             -             |
 | Unused exports                    |    ✅    |       -        |        -         |           ✅            |       ✅       |            ✅             |
+| Unused class members              |    ✅    |       -        |        -         |            -            |       -        |             -             |
+| Unused enum members               |    ✅    |       -        |        -         |            -            |       -        |             -             |
 | Duplicate exports                 |    ✅    |       -        |        -         |           ❌            |       ❌       |            ❌             |
 | Search namespaces                 |    ✅    |       -        |        -         |           ✅            |       ❌       |            ❌             |
 | Custom reporters                  |    ✅    |       -        |        -         |            -            |       -        |             -             |
@@ -519,8 +532,8 @@ Knip wants to [support monorepos][14] properly, the first steps in this directio
 ## Custom dependency resolvers
 
 Using a string like `"plugin:cypress/recommended"` in the `extends` property of a `.eslintrc.json` in a package
-directory of a monorepo is nice for DX. But Knip will need some help to find it and to understand this _resolves to_ the
-`eslint-plugin-cypress` _dependency_. Or see it is not listed in `package.json`. Or that the dependency is still listed,
+directory of a monorepo is nice for DX. But Knip will need some help to find it and to understand this resolves to the
+`eslint-plugin-cypress` dependency. Or see it is not listed in `package.json`. Or that the dependency is still listed,
 but no longer in use. Many popular projects reference plugins in similar ways, such as Babel, Webpack and Storybook.
 
 Big compliments to [depcheck][23] which already does this! They call this "specials". This is on [Knip's roadmap][24],
