@@ -80,11 +80,11 @@ export async function findIssues(configuration: Configuration) {
 
   updateMessage('Connecting the dots...');
 
+  const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
-  const isReportExports = report.exports || report.nsExports || report.classMembers;
 
   // Skip expensive traversal when only reporting unreferenced files
-  if (report.dependencies || report.unlisted || report.duplicates || isReportExports || isReportTypes) {
+  if (report.dependencies || report.unlisted || report.duplicates || isReportValues || isReportTypes) {
     usedProductionFiles.forEach(sourceFile => {
       counters.processed++;
       const filePath = sourceFile.getFilePath();
@@ -127,7 +127,7 @@ export async function findIssues(configuration: Configuration) {
             const type = getType(declaration);
 
             if (type && !isReportTypes) return;
-            if (!type && !isReportExports) return;
+            if (!type && !isReportValues) return;
 
             if (ts.getJSDocPublicTag(declaration.compilerNode)) return;
 
