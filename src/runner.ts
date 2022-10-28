@@ -8,8 +8,8 @@ import {
   _getExportedDeclarations,
   _findReferences,
   hasExternalReferences,
-  hasInternalReferences,
 } from './util/project.js';
+import { findUnusedClassMembers, findUnusedEnumMembers } from './util/members.js';
 import { getType } from './util/type.js';
 import { getDependencyAnalyzer } from './util/dependencies.js';
 import { debugLogSourceFiles } from './util/debug.js';
@@ -154,37 +154,25 @@ export async function findIssues(configuration: Configuration) {
             ) {
               identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
             } else if (declaration.isKind(ts.SyntaxKind.EnumDeclaration)) {
-              identifier = declaration.getFirstChildByKindOrThrow(ts.SyntaxKind.Identifier);
-              const members = declaration.getMembers();
-              members.forEach(member => {
-                const refs = _findReferences(member);
-                if (hasExternalReferences(refs, filePath)) return;
-                if (hasInternalReferences(refs)) return;
-                addSymbolIssue('enumMembers', {
-                  filePath,
-                  symbol: member.getName(),
-                  parentSymbol: identifier?.getText(),
-                });
-              });
+              identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
+              if (report.enumMembers)
+                findUnusedEnumMembers(declaration, filePath).forEach(member =>
+                  addSymbolIssue('enumMembers', {
+                    filePath,
+                    symbol: member.getName(),
+                    parentSymbol: identifier?.getText(),
+                  })
+                );
             } else if (declaration.isKind(ts.SyntaxKind.ClassDeclaration)) {
-              identifier = declaration.getFirstChildByKindOrThrow(ts.SyntaxKind.Identifier);
-              const members = declaration.getMembers();
-              members.forEach(member => {
-                const isPrivate = member.getCombinedModifierFlags() & ts.ModifierFlags.Private;
-                if (
-                  !isPrivate &&
-                  (member.isKind(ts.SyntaxKind.PropertyDeclaration) || member.isKind(ts.SyntaxKind.MethodDeclaration))
-                ) {
-                  const refs = _findReferences(member);
-                  if (hasExternalReferences(refs, filePath)) return;
-                  if (hasInternalReferences(refs)) return;
+              identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
+              if (report.classMembers)
+                findUnusedClassMembers(declaration, filePath).forEach(member =>
                   addSymbolIssue('classMembers', {
                     filePath,
                     symbol: member.getName(),
                     parentSymbol: identifier?.getText(),
-                  });
-                }
-              });
+                  })
+                );
             } else if (declaration.isKind(ts.SyntaxKind.PropertyAccessExpression)) {
               identifier = declaration.getLastChildByKind(ts.SyntaxKind.Identifier);
             } else {

@@ -1,3 +1,13 @@
+enum UnexportedEnun {
+  Member = 1,
+}
+
+class UnexportedClass {
+  prop;
+  public publicProp;
+  public publicMethod() {}
+}
+
 export enum MyEnum {
   A_UsedExternal = 1,
   B_Unused = 1,
@@ -14,21 +24,21 @@ export class MyClass {
   private aUnusedPrivate = 1;
   private aUsedPrivate = 1;
 
-  public bPublic = 1;
+  public bUnusedPublic = 1;
   public bUsedExternal = 1;
   public bInternal = 1;
 
-  cProp = 1;
+  cUnusedProp = 1;
   cUsedExternal: MyEnum.C_UsedInternal = 1;
 
   bound = () => {
     return this.bInternal + this.aUsedPrivate;
   };
 
-  dMember() {}
+  dUnusedMember() {}
   dUsedExternal() {}
 
-  static eStatic = 1;
+  static eUnusedStatic = 1;
   static eUsedExternal = 1;
 }
 

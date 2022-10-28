@@ -17,10 +17,10 @@ test('Find unused enum and class members', async () => {
   assert(issues.enumMembers['members.ts']['B_Unused']);
 
   assert.equal(Object.keys(issues.classMembers['members.ts']).length, 4);
-  assert(issues.classMembers['members.ts']['bPublic']);
-  assert(issues.classMembers['members.ts']['cProp']);
-  assert(issues.classMembers['members.ts']['dMember']);
-  assert(issues.classMembers['members.ts']['eStatic']);
+  assert(issues.classMembers['members.ts']['bUnusedPublic']);
+  assert(issues.classMembers['members.ts']['cUnusedProp']);
+  assert(issues.classMembers['members.ts']['dUnusedMember']);
+  assert(issues.classMembers['members.ts']['eUnusedStatic']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
