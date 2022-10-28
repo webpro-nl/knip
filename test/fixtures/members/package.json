@@ -1,0 +1,12 @@
+{
+  "name": "members",
+  "dependencies": {},
+  "knip": {
+    "entryFiles": [
+      "index.ts"
+    ],
+    "projectFiles": [
+      "*.ts"
+    ]
+  }
+}

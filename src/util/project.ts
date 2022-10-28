@@ -5,10 +5,10 @@ import {
   findReferencingNamespaceNodes,
 } from 'ts-morph-helpers';
 import { timerify } from './performance.js';
-import type { ProjectOptions, SourceFile, Identifier } from 'ts-morph';
+import type { ProjectOptions, SourceFile, ReferenceFindableNode, ReferencedSymbol } from 'ts-morph';
 
 const getExportedDeclarations = (sourceFile: SourceFile) => sourceFile.getExportedDeclarations();
-const findReferences = (identifier?: Identifier) => identifier?.findReferences() ?? [];
+const findReferences = (identifier?: ReferenceFindableNode) => identifier?.findReferences() ?? [];
 
 const createProject = (projectOptions: ProjectOptions, paths?: string[]) => {
   const project = new Project(projectOptions);
@@ -43,6 +43,15 @@ export const partitionSourceFiles = (projectFiles: SourceFile[], productionFiles
     }
   });
   return [usedFiles, unusedFiles];
+};
+
+export const hasExternalReferences = (refs: ReferencedSymbol[], filePath: string) => {
+  const refFiles = new Set(refs.map(r => r.compilerObject.references.map(r => r.fileName)).flat());
+  return !(refFiles.size === 1 && [...refFiles][0] === filePath);
+};
+
+export const hasInternalReferences = (refs: ReferencedSymbol[]) => {
+  return refs.map(ref => ref.getReferences()).flat().length > 1;
 };
 
 export const _createProject = timerify(createProject);

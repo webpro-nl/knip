@@ -19,6 +19,8 @@ type Row = {
   exports?: string[];
   types?: string[];
   duplicates?: string[];
+  enumMembers?: string[];
+  classMembers?: string[];
 };
 
 const mergeTypes = (type: SymbolIssueType) =>

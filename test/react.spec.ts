@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
 import baseArguments from './fixtures/baseArguments.js';
+import baseCounters from './fixtures/baseCounters.js';
 
 test('Support JSX/TSX files', async () => {
   const workingDir = 'test/fixtures/react';
@@ -13,16 +14,8 @@ test('Support JSX/TSX files', async () => {
   });
 
   assert.deepEqual(counters, {
-    dependencies: 0,
-    devDependencies: 0,
-    duplicates: 0,
-    exports: 0,
-    files: 0,
-    nsExports: 0,
-    nsTypes: 0,
+    ...baseCounters,
     processed: 2,
     total: 2,
-    types: 0,
-    unlisted: 0,
   });
 });

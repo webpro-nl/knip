@@ -28,6 +28,8 @@ export const getCountersUpdater = (configuration: Configuration, counters: Count
     report.nsExports && messages.push(getLine(counters.nsExports, 'unused exports in namespace'));
     report.types && messages.push(getLine(counters.types, 'unused types'));
     report.nsTypes && messages.push(getLine(counters.nsTypes, 'unused types in namespace'));
+    report.enumMembers && messages.push(getLine(counters.enumMembers, 'unused enum members'));
+    report.classMembers && messages.push(getLine(counters.classMembers, 'unused class members'));
     report.duplicates && messages.push(getLine(counters.duplicates, 'duplicate exports'));
 
     if (processed < total) {

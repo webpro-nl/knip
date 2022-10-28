@@ -7,6 +7,8 @@ import {
   _findReferencingNamespaceNodes,
   _getExportedDeclarations,
   _findReferences,
+  hasExternalReferences,
+  hasInternalReferences,
 } from './util/project.js';
 import { getType } from './util/type.js';
 import { getDependencyAnalyzer } from './util/dependencies.js';
@@ -45,6 +47,8 @@ export async function findIssues(configuration: Configuration) {
     nsExports: {},
     nsTypes: {},
     duplicates: {},
+    enumMembers: {},
+    classMembers: {},
   };
 
   const counters: Counters = {
@@ -57,6 +61,8 @@ export async function findIssues(configuration: Configuration) {
     nsExports: 0,
     nsTypes: 0,
     duplicates: 0,
+    enumMembers: 0,
+    classMembers: 0,
     processed: issues.files.size,
     total: projectFiles.length,
   };
@@ -143,12 +149,34 @@ export async function findIssues(configuration: Configuration) {
               }
             } else if (
               declaration.isKind(ts.SyntaxKind.FunctionDeclaration) ||
-              declaration.isKind(ts.SyntaxKind.ClassDeclaration) ||
               declaration.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
-              declaration.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
-              declaration.isKind(ts.SyntaxKind.EnumDeclaration)
+              declaration.isKind(ts.SyntaxKind.InterfaceDeclaration)
             ) {
               identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
+            } else if (declaration.isKind(ts.SyntaxKind.EnumDeclaration)) {
+              identifier = declaration.getFirstChildByKindOrThrow(ts.SyntaxKind.Identifier);
+              const members = declaration.getMembers();
+              members.forEach(member => {
+                const refs = _findReferences(member);
+                if (hasExternalReferences(refs, filePath)) return;
+                if (hasInternalReferences(refs)) return;
+                addSymbolIssue('enumMembers', { filePath, symbol: member.getName() });
+              });
+            } else if (declaration.isKind(ts.SyntaxKind.ClassDeclaration)) {
+              identifier = declaration.getFirstChildByKindOrThrow(ts.SyntaxKind.Identifier);
+              const members = declaration.getMembers();
+              members.forEach(member => {
+                const isPrivate = member.getCombinedModifierFlags() & ts.ModifierFlags.Private;
+                if (
+                  !isPrivate &&
+                  (member.isKind(ts.SyntaxKind.PropertyDeclaration) || member.isKind(ts.SyntaxKind.MethodDeclaration))
+                ) {
+                  const refs = _findReferences(member);
+                  if (hasExternalReferences(refs, filePath)) return;
+                  if (hasInternalReferences(refs)) return;
+                  addSymbolIssue('classMembers', { filePath, symbol: member.getName() });
+                }
+              });
             } else if (declaration.isKind(ts.SyntaxKind.PropertyAccessExpression)) {
               identifier = declaration.getLastChildByKind(ts.SyntaxKind.Identifier);
             } else {
@@ -168,11 +196,7 @@ export async function findIssues(configuration: Configuration) {
               if (refs.length === 0) {
                 addSymbolIssue('exports', { filePath, symbol: identifierText });
               } else {
-                const refFiles = new Set(refs.map(r => r.compilerObject.references.map(r => r.fileName)).flat());
-
-                const isReferencedOnlyBySelf = refFiles.size === 1 && [...refFiles][0] === filePath;
-
-                if (!isReferencedOnlyBySelf) return; // This identifier is used somewhere else
+                if (hasExternalReferences(refs, filePath)) return;
 
                 // No more reasons left to think this identifier is used somewhere else, report it as unreferenced. If
                 // it's on a namespace somewhere, report it in a separate issue type.

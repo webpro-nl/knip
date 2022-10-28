@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import { resolveIncludedIssueTypes } from '../src/util/config.js';
 
 const issueTypes = [
+  'classMembers',
   'dependencies',
   'devDependencies',
   'duplicates',
+  'enumMembers',
   'exports',
   'files',
   'nsExports',

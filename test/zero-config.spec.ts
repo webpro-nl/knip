@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { main } from '../src/index.js';
 import baseArguments from './fixtures/baseArguments.js';
+import baseCounters from './fixtures/baseCounters.js';
 
 test('Find unused exports in zero-config mode', async () => {
   const workingDir = path.resolve('test/fixtures/zero-config');
@@ -33,16 +34,13 @@ test('Find unused exports in zero-config mode', async () => {
   assert.equal(issues.duplicates['dep.ts']['dep|default'].symbols?.[0], 'dep');
 
   assert.deepEqual(counters, {
-    dependencies: 0,
-    devDependencies: 0,
-    duplicates: 1,
+    ...baseCounters,
     exports: 2,
-    files: 0,
     nsExports: 1,
+    types: 1,
     nsTypes: 1,
+    duplicates: 1,
     processed: 3,
     total: 3,
-    types: 1,
-    unlisted: 0,
   });
 });

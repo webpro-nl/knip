@@ -7,5 +7,7 @@ export const ISSUE_TYPE_TITLE = {
   nsExports: 'UNUSED EXPORTS IN NAMESPACE',
   types: 'UNUSED TYPES',
   nsTypes: 'UNUSED TYPES IN NAMESPACE',
+  enumMembers: 'UNUSED ENUM MEMBERS',
+  classMembers: 'UNUSED CLASS MEMBERS',
   duplicates: 'DUPLICATE EXPORTS',
 };

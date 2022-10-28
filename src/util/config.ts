@@ -42,6 +42,8 @@ const ISSUE_TYPES: IssueType[] = [
   'types',
   'nsExports',
   'nsTypes',
+  'classMembers',
+  'enumMembers',
   'duplicates',
 ];
 

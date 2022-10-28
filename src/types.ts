@@ -16,6 +16,8 @@ export type Issues = {
   nsExports: IssueRecords;
   nsTypes: IssueRecords;
   duplicates: IssueRecords;
+  enumMembers: IssueRecords;
+  classMembers: IssueRecords;
 };
 
 export type IssueType = keyof Issues;
