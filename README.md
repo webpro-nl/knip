@@ -19,6 +19,7 @@ The dots don't connect themselves. This is where Knip comes in:
 - [x] Finds **unused files, dependencies and exports**.
 - [x] Finds used dependencies not listed in `package.json`.
 - [x] Finds duplicate exports.
+- [x] Find unused members of classes and enums
 - [x] Supports JavaScript (without `tsconfig.json`, or TypeScript `allowJs: true`).
 - [x] Features multiple [reporters][1] and supports [custom reporters][2] (think JSON and `CODEOWNERS`)
 - [x] Run Knip as part of your CI environment to detect issues and prevent regressions.
@@ -39,7 +40,6 @@ over new features:
 
 ### Upcoming Features
 
-- [ ] Find unused members of classes and enums (#11 and #20).
 - [ ] Custom dependency resolvers: find dependencies used in npm scripts.
 - [ ] Custom dependency resolvers: find unused and unlisted plugins for Webpack, ESLint & Babel, etc. (#7)
 - [ ] Smart default configurations and more fine-grained configuration options.
