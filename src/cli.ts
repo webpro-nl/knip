@@ -7,6 +7,7 @@ import { printHelp } from './help.js';
 import reporters from './reporters/index.js';
 import { ConfigurationError } from './util/errors.js';
 import { measure } from './util/performance.js';
+import load from './util/loader.js';
 import type { IssueType } from './types.js';
 
 const {
@@ -42,7 +43,7 @@ const isShowProgress =
   !isDebug && noProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
 
 const printReport =
-  reporter in reporters ? reporters[reporter as keyof typeof reporters] : await import(path.join(workingDir, reporter));
+  reporter in reporters ? reporters[reporter as keyof typeof reporters] : await load(path.join(workingDir, reporter));
 
 const run = async () => {
   try {

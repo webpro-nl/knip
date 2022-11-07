@@ -44,6 +44,7 @@
   "dependencies": {
     "@snyk/github-codeowners": "1.0.0",
     "easy-table": "1.2.0",
+    "esbuild-register": "3.3.3",
     "globby": "13.1.2",
     "micromatch": "4.0.5",
     "summary": "2.1.0",
