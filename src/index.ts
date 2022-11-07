@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import { ts } from 'ts-morph';
 import { resolveConfig, resolveIncludedIssueTypes } from './util/config.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { relative } from './util/path.js';
