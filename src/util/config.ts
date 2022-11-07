@@ -24,7 +24,8 @@ export const resolveConfig = (
   }
 
   if (!resolvedConfig.entryFiles || !resolvedConfig.projectFiles) {
-    console.info(`Add these properties at root level, or use --dir and match one of: ${configKeys.join(', ')}\n`);
+    console.info(`Add "entryFiles" and "projectFiles" properties at root level`);
+    configKeys.length && console.info(`or use --dir and match one of: ${configKeys.join(', ')}\n`);
     return;
   }
 
