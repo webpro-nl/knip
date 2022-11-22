@@ -1,4 +1,6 @@
 {
+  "ignoreBinaries": ["rm"],
+  "ignoreFiles": ["**/fixtures/**"],
   "entryFiles": ["src/cli.ts"],
   "projectFiles": ["src/**/*.ts"]
 }

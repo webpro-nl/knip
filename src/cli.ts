@@ -1,32 +1,28 @@
 #!/usr/bin/env node
 
 import path from 'node:path';
-import parsedArgs from './util/parseArgs.js';
-import { main } from './index.js';
-import { printHelp } from './help.js';
+import { register } from 'esbuild-register/dist/node.js';
+import { printHelp } from './util/help.js';
 import reporters from './reporters/index.js';
 import { ConfigurationError } from './util/errors.js';
+import parsedArgs from './util/parseArgs.js';
 import { measure } from './util/performance.js';
-import type { IssueType } from './types.js';
+import { main } from './index.js';
+import type { IssueType } from './types/issues.js';
+
+register();
 
 const {
   values: {
     help,
-    dir,
-    config: configFilePath,
-    tsConfig: tsConfigFilePath,
-    include = [],
-    exclude = [],
-    ignore = [],
     'no-gitignore': isNoGitIgnore = false,
-    dev: isDev = false,
-    'include-entry-files': isIncludeEntryFiles = false,
+    strict: isStrict = false,
+    production: isProduction = false,
     'no-progress': noProgress = false,
     reporter = 'symbols',
     'reporter-options': reporterOptions = '',
     'max-issues': maxIssues = '0',
     debug: isDebug = false,
-    'debug-level': debugLevel = '1',
   },
 } = parsedArgs;
 
@@ -36,35 +32,24 @@ if (help) {
 }
 
 const cwd = process.cwd();
-const workingDir = dir ? path.resolve(dir) : cwd;
 
 const isShowProgress =
   !isDebug && noProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
 
 const printReport =
-  reporter in reporters ? reporters[reporter as keyof typeof reporters] : await import(path.join(workingDir, reporter));
+  reporter in reporters ? reporters[reporter as keyof typeof reporters] : await import(path.join(cwd, reporter));
 
 const run = async () => {
   try {
     const { report, issues, counters } = await main({
       cwd,
-      workingDir,
-      configFilePath,
-      tsConfigFilePath,
-      include,
-      exclude,
-      ignore,
       gitignore: !isNoGitIgnore,
-      isIncludeEntryFiles,
-      isDev,
+      isStrict,
+      isProduction,
       isShowProgress,
-      debug: {
-        isEnabled: isDebug,
-        level: isDebug ? Number(debugLevel) : 0,
-      },
     });
 
-    await printReport({ report, issues, cwd, workingDir, isDev, options: reporterOptions });
+    await printReport({ report, issues, cwd, isProduction, options: reporterOptions });
 
     const totalErrorCount = (Object.keys(report) as IssueType[])
       .filter(reportGroup => report[reportGroup])
@@ -84,4 +69,4 @@ const run = async () => {
   }
 };
 
-run();
+await run();

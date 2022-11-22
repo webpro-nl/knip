@@ -5,7 +5,7 @@ import type { ClassDeclaration, EnumDeclaration } from 'ts-morph';
 export const findUnusedClassMembers = (declaration: ClassDeclaration, filePath: string) => {
   const members = declaration.getMembers();
   return members.filter((member): member is MethodDeclaration | PropertyDeclaration => {
-    const isPrivate = member.getCombinedModifierFlags() & ts.ModifierFlags.Private;
+    const isPrivate = Boolean(member.getCombinedModifierFlags() & ts.ModifierFlags.Private);
     if (
       !isPrivate &&
       (member.isKind(ts.SyntaxKind.PropertyDeclaration) || member.isKind(ts.SyntaxKind.MethodDeclaration))

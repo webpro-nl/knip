@@ -1,5 +1,7 @@
 import path from 'node:path';
 import { globby } from 'globby';
+import { compact } from './array.js';
+import { debugLogObject } from './debug.js';
 import { timerify } from './performance.js';
 
 const ensurePosixPath = (value: string) => value.split(path.sep).join(path.posix.sep);
@@ -9,33 +11,62 @@ const prependDirToPattern = (workingDir: string, pattern: string) => {
   return path.posix.join(workingDir, pattern);
 };
 
+export const negate = (pattern: string) => `!${pattern}`;
+
+const sortNegatedLast = (a: string, b: string) => (a.startsWith('!') ? 1 : b.startsWith('!') ? -1 : 0);
+
 const glob = async ({
   cwd,
-  workingDir,
+  workingDir = cwd,
   patterns,
-  ignore,
-  gitignore,
+  ignore = [],
+  gitignore = true,
 }: {
   cwd: string;
-  workingDir: string;
+  workingDir?: string;
   patterns: string[];
-  ignore: string[];
-  gitignore: boolean;
+  ignore?: string[];
+  gitignore?: boolean;
 }) => {
   const cwdPosix = ensurePosixPath(cwd);
   const workingDirPosix = ensurePosixPath(workingDir);
+  const relativePath = path.posix.relative(cwdPosix, workingDirPosix);
 
-  return globby(
-    // Prepend relative --dir to patterns to use cwd (not workingDir), because
-    // we want to glob everything to include all (git)ignore patterns
-    patterns.map(pattern => prependDirToPattern(path.posix.relative(cwdPosix, workingDirPosix), pattern)),
-    {
-      cwd,
-      ignore: [...ignore, '**/node_modules/**'],
-      gitignore,
-      absolute: true,
-    }
-  );
+  // Prepend relative --dir to patterns to use cwd (not workingDir), because
+  // we want to glob everything from root/cwd to include all gitignore files and ignore patterns
+  const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
+  const globPatterns = compact([patterns].flat().map(prepend)).sort(sortNegatedLast);
+
+  const ignorePatterns = [...ignore, '**/node_modules/**'];
+
+  debugLogObject(2, "Globbin'", { cwd, globPatterns, ignorePatterns });
+
+  return globby(globPatterns, {
+    cwd,
+    ignore: ignorePatterns,
+    gitignore,
+    absolute: true,
+    dot: true,
+  });
 };
 
+const pureGlob = async ({ cwd, patterns, ignore }: { cwd: string; patterns: string[]; ignore: string[] }) =>
+  globby(patterns, {
+    cwd,
+    ignore: [...ignore, '**/node_modules/**'],
+    absolute: true,
+  });
+
+const dirGlob = async ({ cwd, patterns, ignore }: { cwd: string; patterns: string[]; ignore: string[] }) =>
+  globby(patterns, {
+    cwd,
+    ignore: [...ignore, '**/node_modules/**'],
+    expandDirectories: false,
+    onlyDirectories: true,
+  });
+
 export const _glob = timerify(glob);
+
+export const _pureGlob = timerify(pureGlob);
+
+export const _dirGlob = timerify(dirGlob);

@@ -1,0 +1,14 @@
+{
+  "name": "babel",
+  "scripts": {},
+  "devDependencies": {
+    "@babel/plugin-syntax-dynamic-import": "*",
+    "@babel/preset-env": "*",
+    "@babel/preset-react": "*",
+    "@babel/preset-typescript": "*",
+    "babel-plugin-macros": "*",
+    "babel-plugin-prismjs": "*",
+    "dotenv": "*",
+    "underscore": "1.13.6"
+  }
+}

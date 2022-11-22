@@ -26,6 +26,8 @@
   "type": "module",
   "scripts": {
     "knip": "node ./dist/cli.js",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "test": "globstar -- node --loader tsx --test \"test/*.spec.ts\"",
     "watch": "tsc --watch",
     "build": "rm -rf dist && tsc",
@@ -42,25 +44,36 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@esbuild-kit/esm-loader": "2.5.0",
     "@snyk/github-codeowners": "1.0.0",
     "easy-table": "1.2.0",
+    "esbuild": "0.15.15",
+    "esbuild-register": "3.4.1",
+    "eslint": "8.28.0",
     "globby": "13.1.2",
     "micromatch": "4.0.5",
+    "strip-json-comments": "5.0.0",
     "summary": "2.1.0",
-    "ts-morph": "16.0.0",
-    "ts-morph-helpers": "0.6.1"
+    "ts-morph": "17.0.0",
+    "ts-morph-helpers": "0.6.2",
+    "zod": "3.19.1"
   },
   "devDependencies": {
+    "@jest/types": "29.3.1",
+    "@types/eslint": "8.4.10",
     "@types/micromatch": "4.0.2",
-    "@types/node": "18.11.5",
+    "@types/node": "18.11.9",
+    "@typescript-eslint/eslint-plugin": "5.44.0",
+    "@typescript-eslint/parser": "5.44.0",
+    "eslint-import-resolver-typescript": "3.5.2",
+    "eslint-plugin-import": "2.26.0",
     "globstar": "1.0.0",
-    "prettier": "2.7.1",
     "release-it": "15.5.0",
     "remark-cli": "11.0.0",
     "remark-preset-webpro": "0.0.1",
-    "tsx": "3.11.0",
-    "type-fest": "3.1.0",
-    "typescript": "4.8.4"
+    "tsx": "3.12.1",
+    "type-fest": "3.2.0",
+    "typescript": "4.9.3"
   },
   "release-it": {
     "github": {

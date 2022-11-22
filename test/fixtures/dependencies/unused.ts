@@ -1,5 +1,5 @@
-import once from '@tootallnate/once';
 import { EventEmitter } from 'events';
+import once from '@tootallnate/once';
 
 const emitter = new EventEmitter();
 

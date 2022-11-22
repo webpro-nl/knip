@@ -1,0 +1,46 @@
+{
+  "name": "workspaces",
+  "workspaces": [
+    "docs",
+    "apps/*",
+    "packages/*"
+  ],
+  "knip": {
+    "workspaces": {
+      ".": {
+        "entryFiles": [],
+        "projectFiles": []
+      },
+      "*": {
+        "entryFiles": [
+          "index.ts"
+        ],
+        "projectFiles": [
+          "**/*.ts"
+        ]
+      },
+      "apps/*": {
+        "entryFiles": [
+          "index.ts"
+        ],
+        "projectFiles": [
+          "**/*.ts"
+        ]
+      },
+      "packages/*": {
+        "entryFiles": [
+          "index.ts"
+        ],
+        "projectFiles": [
+          "**/*.ts",
+          "!ignored/*.ts"
+        ]
+      }
+    }
+  },
+  "dependencies": {
+    "eslint": "*",
+    "root-dependency": "*",
+    "any": "*"
+  }
+}

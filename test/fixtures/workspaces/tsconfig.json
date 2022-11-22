@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "paths": {
+      "@scoped/lib-a": ["./packages/lib-a/index.ts"],
+      "@scoped/lib-b": ["./packages/lib-b/index.ts"]
+    }
+  }
+}

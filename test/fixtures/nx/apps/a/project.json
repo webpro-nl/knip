@@ -1,0 +1,21 @@
+{
+  "sourceRoot": "apps/a",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/next:build"
+    },
+    "serve": {
+      "executor": "@nrwl/next:server"
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint"
+    },
+    "test": {
+      "executor": "@nrwl/cypress:cypress"
+    },
+    "tsc": {
+      "executor": "./tools/executors/tsc:tsc"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "definitely-typed",
+  "dependencies": {
+    "micromatch": "*"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "@types/micromatch": "*",
+    "@types/without-the-package": "*",
+    "@types/unused": "*"
+  }
+}

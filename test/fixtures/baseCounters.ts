@@ -1,4 +1,4 @@
-const baseArguments = {
+const baseCounters = {
   files: 0,
   dependencies: 0,
   devDependencies: 0,
@@ -14,4 +14,4 @@ const baseArguments = {
   total: 0,
 };
 
-export default baseArguments;
+export default baseCounters;

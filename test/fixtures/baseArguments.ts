@@ -1,15 +1,9 @@
 const baseArguments = {
-  include: [],
-  exclude: [],
-  ignore: [],
+  cwd: '.',
   gitignore: false,
-  isIncludeEntryFiles: false,
-  isDev: false,
+  isStrict: false,
+  isProduction: false,
   isShowProgress: false,
-  debug: {
-    isEnabled: false,
-    level: 0,
-  },
 };
 
 export default baseArguments;

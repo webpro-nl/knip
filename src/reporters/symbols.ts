@@ -1,8 +1,8 @@
 import EasyTable from 'easy-table';
 import { relative } from '../util/path.js';
 import { ISSUE_TYPE_TITLE } from './constants.js';
+import type { Issue, ReporterOptions, IssueSet } from '../types/issues.js';
 import type { Entries } from 'type-fest';
-import type { Issue, ReporterOptions, IssueSet } from '../types.js';
 
 const TRUNCATE_WIDTH = 40;
 const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? text.slice(0, TRUNCATE_WIDTH - 3) + '...' : text);
@@ -16,7 +16,7 @@ const logIssueSet = (issues: string[], title: false | string) => {
   }
 };
 
-const logIssueRecord = (issues: Issue[], title: false | string, isTruncate = false) => {
+const logIssueRecord = (issues: Issue[], title: false | string) => {
   title && console.log(`--- ${title} (${issues.length})`);
   if (issues.length) {
     const table = new EasyTable();
@@ -43,8 +43,7 @@ export default ({ report, issues }: ReporterOptions) => {
         logIssueSet(Array.from(issues[reportType] as IssueSet), title);
       } else {
         const issuesForType = Object.values(issues[reportType]).map(Object.values).flat();
-        const isTruncate = Boolean(issuesForType[0]?.symbols?.length);
-        logIssueRecord(issuesForType, title, isTruncate);
+        logIssueRecord(issuesForType, title);
       }
     }
   }

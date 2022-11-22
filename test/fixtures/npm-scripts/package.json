@@ -1,0 +1,18 @@
+{
+  "name": "npm-scripts",
+  "scripts": {
+    "watch": "nodemon index.js",
+    "build": "rm -rf && dotenv -- nx build npm-scripts",
+    "deploy": "NODE_ENV=production pm2 start index.js",
+    "deploy:dev": "pm2-dev start index.js",
+    "test": "bash test/unit.sh && bash test/e2e.sh"
+  },
+  "dependencies": {
+    "express": "*"
+  },
+  "devDependencies": {
+    "pm2": "*",
+    "nx": "*",
+    "unused": "*"
+  }
+}

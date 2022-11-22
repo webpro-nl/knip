@@ -1,8 +1,8 @@
 import { performance, PerformanceObserver, PerformanceEntry } from 'node:perf_hooks';
-import Summary from 'summary';
 import EasyTable from 'easy-table';
 import parsedArgs from './parseArgs.js';
 import type { TimerifyOptions } from 'node:perf_hooks';
+import Summary from 'summary';
 
 type Timerify = <T extends (...params: any[]) => any>(fn: T, options?: TimerifyOptions) => T;
 

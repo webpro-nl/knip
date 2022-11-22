@@ -2,8 +2,8 @@ import path from 'node:path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import { relative } from '../util/path.js';
 import { ISSUE_TYPE_TITLE } from './constants.js';
+import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types/issues.js';
 import type { Entries } from 'type-fest';
-import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types.js';
 
 type OwnedIssue = Issue & { owner: string };
 

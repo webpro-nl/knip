@@ -1,8 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createRequire } from 'node:module';
-
-const require = createRequire(process.cwd());
+import stripJsonComments from 'strip-json-comments';
 
 export const isFile = async (filePath: string) => {
   try {
@@ -13,15 +11,16 @@ export const isFile = async (filePath: string) => {
   }
 };
 
-export const findFile = async (cwd: string, workingDir: string, fileName: string): Promise<string | undefined> => {
+export const findFile = async (workingDir: string, fileName: string): Promise<string | undefined> => {
   const filePath = path.join(workingDir, fileName);
-  if (await isFile(filePath)) {
-    return filePath;
-  } else {
-    if (cwd === workingDir) return;
-    const parentDir = path.resolve(workingDir, '..');
-    return findFile(cwd, parentDir, fileName);
-  }
+  return (await isFile(filePath)) ? filePath : undefined;
 };
 
-export const loadJSON = (filePath: string) => require(filePath);
+export const loadJSON = async (filePath: string) => {
+  try {
+    const contents = await fs.readFile(filePath);
+    return JSON.parse(stripJsonComments(contents.toString()));
+  } catch (error) {
+    // console.log(error?.toString());
+  }
+};
