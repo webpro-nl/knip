@@ -29,12 +29,14 @@ tools answers the question [why another unused file/dependency/export finder?][3
 
 Knip is a fresh take on keeping your projects clean & tidy!
 
-[![An orange cow with scissors, Van Gogh style][5]][4] <sup>_“An orange cow with scissors, Van Gogh style” - generated
+**NOTE:** See the [v1.0.0-alpha.0 "Atlantic" release][4] for a big milestone in the development of Knip.
+
+[![An orange cow with scissors, Van Gogh style][6]][5] <sup>_“An orange cow with scissors, Van Gogh style” - generated
 with OpenAI_</sup>
 
 ## Roadmap
 
-Please report any false positives by [opening an issue in this repo][6]. Bonus points for adding a public repository or
+Please report any false positives by [opening an issue in this repo][7]. Bonus points for adding a public repository or
 opening a pull request with a directory and example files in `test/fixtures`. Correctness and bug fixes have priority
 over new features:
 
@@ -43,7 +45,7 @@ over new features:
 - [ ] Custom dependency resolvers: find dependencies used in npm scripts.
 - [ ] Custom dependency resolvers: find unused and unlisted plugins for Webpack, ESLint & Babel, etc. (#7)
 - [ ] Smart default configurations and more fine-grained configuration options.
-- [ ] Full support for monorepos (partial [monorepos support][7] with `--dir` exists).
+- [ ] Full support for monorepos (partial [monorepos support][8] with `--dir` exists).
 - [ ] Fix issues: remove `export` keyword, uninstall unused dependencies, delete files (like `--fix` of ESLint).
 - [ ] Add more reporters and report customization options (#3).
 
@@ -82,7 +84,7 @@ Knip works by creating two sets of files:
 3.  The subset of project files that is not production code will be reported as unused files (in red).
 4.  Then the production code (in blue) will be analyzed for unused exports.
 
-![How it works][8]
+![How it works][9]
 
 ## Options
 
@@ -327,10 +329,10 @@ configuration can be tweaked further to the project structure.
 
 Knip provides the following built-in reporters:
 
-- [`json`][9]
-- [`symbol`][10] (default)
-- [`compact`][11]
-- [`codeowners`][12]
+- [`json`][10]
+- [`symbol`][11] (default)
+- [`compact`][12]
+- [`codeowners`][13]
 
 ### Custom Reporters
 
@@ -385,11 +387,11 @@ per file like this:
 ]
 ```
 
-The keys match the [known issue types][13].
+The keys match the [known issue types][14].
 
 #### Usage Ideas
 
-Use tools like [miller][14] or [jtbl][15] to consume the JSON and render a table in the terminal.
+Use tools like [miller][15] or [jtbl][16] to consume the JSON and render a table in the terminal.
 
 ##### Table
 
@@ -506,12 +508,12 @@ collect the various issues in one go?
 
 This table is a work in progress, but here's a first impression. Based on their docs (please report any mistakes):
 
-| Feature                           | **knip** | [depcheck][16] | [unimported][17] | [ts-unused-exports][18] | [ts-prune][19] | [find-unused-exports][20] |
+| Feature                           | **knip** | [depcheck][17] | [unimported][18] | [ts-unused-exports][19] | [ts-prune][20] | [find-unused-exports][21] |
 | :-------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: | :-----------------------: |
 | Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |             -             |
 | Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
 | Unlisted dependencies             |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
-| [Custom dependency resolvers][21] |    ❌    |       ✅       |        ❌        |            -            |       -        |             -             |
+| [Custom dependency resolvers][22] |    ❌    |       ✅       |        ❌        |            -            |       -        |             -             |
 | Unused exports                    |    ✅    |       -        |        -         |           ✅            |       ✅       |            ✅             |
 | Unused class members              |    ✅    |       -        |        -         |            -            |       -        |             -             |
 | Unused enum members               |    ✅    |       -        |        -         |            -            |       -        |             -             |
@@ -520,10 +522,12 @@ This table is a work in progress, but here's a first impression. Based on their 
 | Custom reporters                  |    ✅    |       -        |        -         |            -            |       -        |             -             |
 | JavaScript support                |    ✅    |       ✅       |        ✅        |            -            |       -        |            ✅             |
 | Configure entry files             |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |            ❌             |
-| [Support monorepos][22]           |    🟠    |       -        |        -         |            -            |       -        |             -             |
+| [Support monorepos][23]           |    🟠    |       -        |        -         |            -            |       -        |             -             |
 | ESLint plugin available           |    -     |       -        |        -         |           ✅            |       -        |             -             |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
+
+**NOTE:** See the [v1.0.0-alpha.0 "Atlantic" release][6] for a big milestone in the development of Knip.
 
 ## Monorepos
 
@@ -536,7 +540,7 @@ directory of a monorepo is nice for DX. But Knip will need some help to find it 
 `eslint-plugin-cypress` dependency. Or see it is not listed in `package.json`. Or that the dependency is still listed,
 but no longer in use. Many popular projects reference plugins in similar ways, such as Babel, Webpack and Storybook.
 
-Big compliments to [depcheck][23] which already does this! They call this "specials". This is on [Knip's roadmap][24],
+Big compliments to [depcheck][24] which already does this! They call this "specials". This is on [Knip's roadmap][25],
 as well, with the additional ambition to also find used dependencies that are not listed in `package.json`.
 
 unimported is strict in this regard and works based on production files and `dependencies`, so does not have custom
@@ -557,24 +561,25 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [1]: #reporters
 [2]: #custom-reporters
 [3]: #really-another-unused-filedependencyexport-finder
-[4]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
-[5]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[6]: https://github.com/webpro/knip/issues
-[7]: #monorepos
-[8]: ./assets/how-it-works.drawio.svg
-[9]: #json
-[10]: #symbol-default
-[11]: #compact
-[12]: #code-owners
-[13]: #reading-the-report
-[14]: https://github.com/johnkerl/miller
-[15]: https://github.com/kellyjonbrazil/jtbl
-[16]: https://github.com/depcheck/depcheck
-[17]: https://github.com/smeijer/unimported
-[18]: https://github.com/pzavolinsky/ts-unused-exports
-[19]: https://github.com/nadeesha/ts-prune
-[20]: https://github.com/jaydenseric/find-unused-exports
-[21]: #custom-dependency-resolvers
-[22]: #monorepos-1
-[23]: https://github.com/depcheck/depcheck#special
-[24]: #roadmap
+[4]: https://github.com/webpro/knip/releases
+[5]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
+[6]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
+[7]: https://github.com/webpro/knip/issues
+[8]: #monorepos
+[9]: ./assets/how-it-works.drawio.svg
+[10]: #json
+[11]: #symbol-default
+[12]: #compact
+[13]: #code-owners
+[14]: #reading-the-report
+[15]: https://github.com/johnkerl/miller
+[16]: https://github.com/kellyjonbrazil/jtbl
+[17]: https://github.com/depcheck/depcheck
+[18]: https://github.com/smeijer/unimported
+[19]: https://github.com/pzavolinsky/ts-unused-exports
+[20]: https://github.com/nadeesha/ts-prune
+[21]: https://github.com/jaydenseric/find-unused-exports
+[22]: #custom-dependency-resolvers
+[23]: #monorepos-1
+[24]: https://github.com/depcheck/depcheck#special
+[25]: #roadmap
