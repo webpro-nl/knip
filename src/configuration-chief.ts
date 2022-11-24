@@ -32,8 +32,8 @@ const defaultConfig: Configuration = {
   ignoreWorkspaces: [],
   workspaces: {
     [ROOT_WORKSPACE_NAME]: {
-      entryFiles: ['index.{js,ts}', 'src/index.{js,ts}'],
-      projectFiles: ['**/*.ts'],
+      entryFiles: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
+      projectFiles: ['**/*.{js,ts,tsx}'],
       ignore: [],
       paths: {},
     },

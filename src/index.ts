@@ -22,7 +22,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLogObject(1, 'Unresolved configuration', unresolvedConfiguration);
 
-  const collector = new IssueCollector({ cwd, isShowProgress, isProduction });
+  const collector = new IssueCollector({ cwd, isShowProgress });
   collector.updateMessage('Reading configuration and manifest files...');
 
   await chief.loadLocalConfig();
@@ -57,7 +57,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (!manifestPath || !manifest) continue;
 
-    deputy.addWorkspace({ name, dir, manifestPath, manifest, isProduction });
+    deputy.addWorkspace({ name, dir, manifestPath, manifest });
 
     const tsConfigFilePath = path.join(dir, 'tsconfig.json');
     const tsConfig = await loadTSConfig(tsConfigFilePath);
@@ -131,7 +131,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         });
         debugLogFiles(1, `Globbed production plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
         pluginWorkspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
-        // pluginWorkspaceEntryPaths.forEach(entryPath => principal.addProjectPath(entryPath));
         pluginWorkspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
 
         if (workspaceEntryPaths.length > 0 || pluginWorkspaceEntryPaths.length > 0) {

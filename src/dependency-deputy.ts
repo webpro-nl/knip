@@ -22,8 +22,6 @@ export default class DependencyDeputy {
 
   tsConfigPathGlobs: Map<string, string[]> = new Map();
 
-  isProduction = false;
-
   constructor() {
     this.referencedDependencies = new Map();
     this.peerDependencies = new Map();
@@ -35,13 +33,11 @@ export default class DependencyDeputy {
     dir,
     manifestPath,
     manifest,
-    isProduction,
   }: {
     name: string;
     dir: string;
     manifestPath: string;
     manifest: PackageJson;
-    isProduction: boolean;
   }) {
     const scripts = Object.values(manifest.scripts ?? {}) as string[];
     const dependencies = Object.keys(manifest.dependencies ?? {});
@@ -63,8 +59,6 @@ export default class DependencyDeputy {
       productionDependencies,
       allDependencies: [...productionDependencies, ...devDependencies],
     });
-
-    this.isProduction = isProduction;
   }
 
   public cancelWorkspace(workspaceName: string) {

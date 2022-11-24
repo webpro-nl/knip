@@ -20,8 +20,8 @@ The dots don't connect themselves. This is where Knip comes in:
 - [x] Finds used dependencies not listed in `package.json`.
 - [x] Finds duplicate exports.
 - [x] Finds unused members of classes and enums
-- [x] Supports workspaces/monorepos
-- [x] Growing list of plugins (= less to configure and custom dependency resolvers)
+- [x] Built-in support for monorepos (workspaces)
+- [x] Growing list of built-in plugins (= less to configure and custom dependency resolvers)
 - [x] Supports JavaScript (without `tsconfig.json`, or TypeScript `allowJs: true`).
 - [x] Features multiple [reporters][1] and supports [custom reporters][2] (think JSON and `CODEOWNERS`)
 - [x] Run Knip as part of your CI environment to detect issues and prevent regressions.

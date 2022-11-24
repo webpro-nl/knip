@@ -13,6 +13,8 @@ const prependDirToPattern = (workingDir: string, pattern: string) => {
 
 export const negate = (pattern: string) => `!${pattern}`;
 
+export const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
+
 const sortNegatedLast = (a: string, b: string) => (a.startsWith('!') ? 1 : b.startsWith('!') ? -1 : 0);
 
 const glob = async ({

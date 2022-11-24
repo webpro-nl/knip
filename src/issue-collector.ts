@@ -7,7 +7,6 @@ import type { Issue, Report } from './types/issues.js';
 type IssueCollectorOptions = {
   cwd: string;
   isShowProgress?: boolean;
-  isProduction?: boolean;
   report?: Report;
 };
 
@@ -27,12 +26,9 @@ export default class IssueCollector {
 
   cwd: string;
   isShowProgress = false;
-  isProduction = false;
 
-  constructor({ cwd, isShowProgress = false, isProduction = false, report }: IssueCollectorOptions) {
+  constructor({ cwd, isShowProgress = false, report }: IssueCollectorOptions) {
     this.lineRewriter = new LineRewriter();
-
-    this.isProduction = isProduction;
     this.cwd = cwd;
 
     this.setIsShowProgress(isShowProgress);

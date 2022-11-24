@@ -1,5 +1,7 @@
 import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
+// https://rollupjs.org/guide/en/#configuration-files
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('rollup');
 
 export const CONFIG_FILE_PATTERNS = [];
