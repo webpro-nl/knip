@@ -7,8 +7,10 @@ import SourceLab from './source-lab.js';
 import { compact } from './util/array.js';
 import { ROOT_WORKSPACE_NAME } from './util/constants.js';
 import { debugLogObject, debugLogFiles } from './util/debug.js';
+import { _findExternalImportModuleSpecifiers } from './util/externalImports.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { _glob } from './util/glob.js';
+import { _findDuplicateExportedNames } from './util/project.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import WorkspaceWorker from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -276,14 +278,26 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const filePath = sourceFile.getFilePath();
     const workspaceDir = workspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir));
     const workspace = workspaces.find(workspace => workspace.dir === workspaceDir);
-    const { externalModuleSpecifiers, issues } = lab.analyzeSourceFile(sourceFile);
-    issues.forEach(issue => issue.type && collector.addIssue(issue));
-    if (workspace) {
+
+    if (workspace && (report.dependencies || report.unlisted)) {
+      const externalModuleSpecifiers = _findExternalImportModuleSpecifiers(sourceFile);
       externalModuleSpecifiers.forEach(moduleSpecifier => {
         const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, moduleSpecifier, isStrict);
         if (unlistedDependency) collector.addIssue({ type: 'unlisted', filePath, symbol: unlistedDependency });
       });
     }
+
+    if (report.duplicates) {
+      const duplicateExports = _findDuplicateExportedNames(sourceFile);
+      duplicateExports.forEach(symbols => {
+        const symbol = symbols.join('|');
+        collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
+      });
+    }
+
+    const issues = lab.analyzeSourceFile(sourceFile);
+
+    issues.forEach(issue => issue.type && collector.addIssue(issue));
   });
 
   collector.removeProgress();

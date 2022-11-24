@@ -1,8 +1,6 @@
 import { ts, Node, SourceFile } from 'ts-morph';
-import { _findExternalImportModuleSpecifiers } from './util/externalImports.js';
 import { findUnusedClassMembers, findUnusedEnumMembers } from './util/members.js';
 import {
-  _findDuplicateExportedNames,
   _hasReferencingDefaultImport,
   _findReferencingNamespaceNodes,
   _getExportedDeclarations,
@@ -48,30 +46,16 @@ export default class SourceLab {
 
   public analyzeSourceFile(sourceFile: SourceFile) {
     const issues: Set<Issue> = new Set();
-    const report = this.report;
     const filePath = sourceFile.getFilePath();
-    let externalModuleSpecifiers: string[] = [];
 
-    if (report.dependencies || report.unlisted) {
-      externalModuleSpecifiers = _findExternalImportModuleSpecifiers(sourceFile);
-    }
-
-    if (report.duplicates) {
-      const duplicateExports = _findDuplicateExportedNames(sourceFile);
-      duplicateExports.forEach(symbols => {
-        const symbol = symbols.join('|');
-        issues.add({ type: 'duplicates', filePath, symbol, symbols });
-      });
-    }
-
-    if (this.skipExportsAnalysis.has(filePath)) return { externalModuleSpecifiers, issues };
+    if (this.skipExportsAnalysis.has(filePath)) return issues;
 
     if (this.isReportExports) {
       const exportsIssues = this.analyzeExports(sourceFile);
       exportsIssues.forEach(issue => issues.add(issue));
     }
 
-    return { externalModuleSpecifiers, issues };
+    return issues;
   }
 
   private analyzeExports(sourceFile: SourceFile) {
