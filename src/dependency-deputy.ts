@@ -2,6 +2,7 @@
 import { isBuiltin } from 'node:module';
 import micromatch from 'micromatch';
 import { WorkspaceConfiguration } from './types/config.js';
+import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PackageJson } from 'type-fest';
 
@@ -148,8 +149,8 @@ export default class DependencyDeputy {
   }
 
   public settleDependencyIssues() {
-    const dependencyIssues: { filePath: string; symbol: string }[] = [];
-    const devDependencyIssues: { filePath: string; symbol: string }[] = [];
+    const dependencyIssues: Issue[] = [];
+    const devDependencyIssues: Issue[] = [];
 
     for (const [workspaceName, { manifestPath }] of this._manifests.entries()) {
       if (this.canceledWorkspaces.has(workspaceName)) continue;
@@ -176,11 +177,11 @@ export default class DependencyDeputy {
 
       this.getProductionDependencies(workspaceName)
         .filter(isUnreferencedDependency)
-        .forEach(symbol => dependencyIssues.push({ filePath: manifestPath, symbol }));
+        .forEach(symbol => dependencyIssues.push({ type: 'dependencies', filePath: manifestPath, symbol }));
 
       this.getDevDependencies(workspaceName)
         .filter(isUnreferencedDependency)
-        .forEach(symbol => devDependencyIssues.push({ filePath: manifestPath, symbol }));
+        .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
     }
 
     return { dependencyIssues, devDependencyIssues };

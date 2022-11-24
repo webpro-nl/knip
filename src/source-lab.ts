@@ -10,7 +10,7 @@ import {
   hasExternalReferences,
 } from './util/project.js';
 import { getType } from './util/type.js';
-import type { Report, IssueTemp } from './types/issues.js';
+import type { Report, Issue } from './types/issues.js';
 import type { Identifier } from 'ts-morph';
 
 type FileLabOptions = {
@@ -47,7 +47,7 @@ export default class SourceLab {
   }
 
   public analyzeSourceFile(sourceFile: SourceFile) {
-    const issues: Set<IssueTemp> = new Set();
+    const issues: Set<Issue> = new Set();
     const report = this.report;
     const filePath = sourceFile.getFilePath();
     let externalModuleSpecifiers: string[] = [];
@@ -75,7 +75,7 @@ export default class SourceLab {
   }
 
   private analyzeExports(sourceFile: SourceFile) {
-    const issues: Set<IssueTemp> = new Set();
+    const issues: Set<Issue> = new Set();
     const report = this.report;
     const filePath = sourceFile.getFilePath();
 

@@ -133,7 +133,9 @@ export default class WorkspaceWorker {
     );
 
     const filePath = path.join(this.dir, 'package.json');
-    dependencies.forEach(dependency => this.referencedDependencyIssues.add({ filePath, symbol: dependency }));
+    dependencies.forEach(dependency =>
+      this.referencedDependencyIssues.add({ type: 'unlisted', filePath, symbol: dependency })
+    );
     dependencies.forEach(dependency => this.referencedDependencies.add(dependency));
 
     this.peerDependencies = peerDependencies;
@@ -303,17 +305,17 @@ export default class WorkspaceWorker {
 
     if (configFilePaths.length === 0) return [];
 
-    const referencedDependencies = (
+    const referencedDependencyIssues = (
       await Promise.all(
         configFilePaths.map(async configFilePath => {
           const dependencies = await pluginCallback(configFilePath, { cwd, manifest: this.manifest });
-          return dependencies.map(symbol => ({ filePath: configFilePath, symbol }));
+          return dependencies.map(symbol => ({ type: 'unlisted', filePath: configFilePath, symbol } as Issue));
         })
       )
     ).flat();
 
-    debugLogIssues(1, `Dependencies used by ${pluginName} configuration`, referencedDependencies);
+    debugLogIssues(1, `Dependencies used by ${pluginName} configuration`, referencedDependencyIssues);
 
-    return referencedDependencies;
+    return referencedDependencyIssues;
   }
 }

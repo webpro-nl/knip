@@ -1,6 +1,7 @@
 type SymbolType = 'type' | 'interface' | 'enum';
 
 export type Issue = {
+  type: SymbolIssueType;
   filePath: string;
   symbol: string;
   symbols?: string[];

@@ -57,18 +57,18 @@ export default ({ report, issues, options }: ReporterOptions) => {
     codeownersEngine.calcFileOwnership(relative(filePath))[0] ?? fallbackOwner;
   const addOwner = (issue: Issue) => ({ ...issue, owner: calcFileOwnership(issue.filePath) });
 
-  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+  for (const [type, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
-      const title = reportMultipleGroups && ISSUE_TYPE_TITLE[reportType];
-      if (issues[reportType] instanceof Set) {
-        const toIssue = (filePath: string) => ({ filePath, symbol: filePath });
-        const issuesForType = Array.from(issues[reportType] as IssueSet).map(toIssue);
+      const title = reportMultipleGroups && ISSUE_TYPE_TITLE[type];
+      if (issues[type] instanceof Set) {
+        const toIssue = (filePath: string) => ({ type, filePath, symbol: filePath } as Issue);
+        const issuesForType = Array.from(issues[type] as IssueSet).map(toIssue);
         logIssueSet(issuesForType.map(addOwner), title);
-      } else if (reportType === 'duplicates') {
-        const issuesForType = Object.values(issues[reportType]).map(Object.values).flat().map(addOwner);
+      } else if (type === 'duplicates') {
+        const issuesForType = Object.values(issues[type]).map(Object.values).flat().map(addOwner);
         logIssueRecord(issuesForType, title);
       } else {
-        const issuesForType = Object.values(issues[reportType] as IssueRecords).map(issues => {
+        const issuesForType = Object.values(issues[type] as IssueRecords).map(issues => {
           const items = Object.values(issues);
           return addOwner({ ...items[0], symbols: items.map(issue => issue.symbol) });
         });

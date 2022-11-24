@@ -250,9 +250,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (!workspaceDependencies.includes(issue.symbol)) {
                 // Unlisted referenced dependencies can be marked as an issue right away (for instant progress output)
                 if (isStrict) {
-                  collector.addIssue('unlisted', issue);
+                  collector.addIssue(issue);
                 } else if (!rootDependencies.includes(issue.symbol)) {
-                  collector.addIssue('unlisted', issue);
+                  collector.addIssue(issue);
                 }
               }
             }
@@ -278,22 +278,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const workspaceDir = workspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir));
     const workspace = workspaces.find(workspace => workspace.dir === workspaceDir);
     const { externalModuleSpecifiers, issues } = lab.analyzeSourceFile(sourceFile);
-    issues.forEach(issue => collector.addIssue(issue.type, issue));
+    issues.forEach(issue => issue.type && collector.addIssue(issue));
     if (workspace) {
       externalModuleSpecifiers.forEach(moduleSpecifier => {
         const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, moduleSpecifier, isStrict);
-        if (unlistedDependency) collector.addIssue('unlisted', { filePath, symbol: unlistedDependency });
+        if (unlistedDependency) collector.addIssue({ type: 'unlisted', filePath, symbol: unlistedDependency });
       });
     }
   });
 
   collector.removeProgress();
 
-  const { dependencyIssues, devDependencyIssues } = deputy.settleDependencyIssues();
-
-  dependencyIssues.forEach(issue => collector.addIssue('dependencies', issue));
-  if (!isProduction) {
-    devDependencyIssues.forEach(issue => collector.addIssue('devDependencies', issue));
+  if (report.dependencies) {
+    const { dependencyIssues, devDependencyIssues } = deputy.settleDependencyIssues();
+    dependencyIssues.forEach(issue => collector.addIssue(issue));
+    if (!isProduction) devDependencyIssues.forEach(issue => collector.addIssue(issue));
   }
 
   const { issues, counters } = collector.getIssues();

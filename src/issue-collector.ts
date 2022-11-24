@@ -2,7 +2,7 @@ import path from 'node:path';
 import { initReport, initIssues, initCounters } from './issues/initializers.js';
 import { getLine, LineRewriter } from './util/log.js';
 import { relative } from './util/path.js';
-import type { Issue, SymbolIssueType, Report } from './types/issues.js';
+import type { Issue, Report } from './types/issues.js';
 
 type IssueCollectorOptions = {
   cwd: string;
@@ -64,13 +64,13 @@ export default class IssueCollector {
     });
   }
 
-  addIssue(issueType: SymbolIssueType, issue: Issue) {
+  addIssue(issue: Issue) {
     issue.filePath = path.relative(this.cwd, issue.filePath);
     const key = relative(issue.filePath);
-    this.issues[issueType][key] = this.issues[issueType][key] ?? {};
-    if (!this.issues[issueType][key][issue.symbol]) {
-      this.issues[issueType][key][issue.symbol] = issue;
-      this.counters[issueType]++;
+    this.issues[issue.type][key] = this.issues[issue.type][key] ?? {};
+    if (!this.issues[issue.type][key][issue.symbol]) {
+      this.issues[issue.type][key][issue.symbol] = issue;
+      this.counters[issue.type]++;
       this.updateProgress(issue);
     }
   }
