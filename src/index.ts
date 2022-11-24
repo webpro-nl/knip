@@ -43,7 +43,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     .filter(workspace => workspace.name !== ROOT_WORKSPACE_NAME)
     .map(workspace => `!${workspace.name}`);
 
-  const lab = new SourceLab({ issueManager: collector, report, workspaceDirs });
+  const lab = new SourceLab({ report, workspaceDirs });
 
   const principal = new ProjectPrincipal();
 
@@ -273,12 +273,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   collector.updateMessage('Connecting the dots...');
 
   usedProductionFiles.forEach(sourceFile => {
+    collector.counters.processed++;
     const filePath = sourceFile.getFilePath();
     const workspaceDir = workspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir));
     const workspace = workspaces.find(workspace => workspace.dir === workspaceDir);
-
-    const externalModuleSpecifiers = lab.analyzeSourceFile(sourceFile);
-
+    const { externalModuleSpecifiers, issues } = lab.analyzeSourceFile(sourceFile);
+    issues.forEach(issue => collector.addIssue(issue.type, issue));
     if (workspace) {
       externalModuleSpecifiers.forEach(moduleSpecifier => {
         const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, moduleSpecifier, isStrict);

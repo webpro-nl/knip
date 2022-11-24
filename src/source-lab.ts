@@ -1,5 +1,4 @@
 import { ts, Node, SourceFile } from 'ts-morph';
-import IssueCollector from './issue-collector.js';
 import { _findExternalImportModuleSpecifiers } from './util/externalImports.js';
 import { findUnusedClassMembers, findUnusedEnumMembers } from './util/members.js';
 import {
@@ -11,11 +10,10 @@ import {
   hasExternalReferences,
 } from './util/project.js';
 import { getType } from './util/type.js';
-import type { Report } from './types/issues.js';
+import type { Report, IssueTemp } from './types/issues.js';
 import type { Identifier } from 'ts-morph';
 
 type FileLabOptions = {
-  issueManager: IssueCollector;
   report: Report;
   workspaceDirs: string[];
 };
@@ -26,7 +24,6 @@ type FileLabOptions = {
  * - Returns external module specifiers (i.e. potential external dependencies)
  */
 export default class SourceLab {
-  issueManager;
   report;
   workspaceDirs;
   skipExportsAnalysis;
@@ -34,8 +31,7 @@ export default class SourceLab {
   isReportValues;
   isReportTypes;
 
-  constructor({ issueManager, report, workspaceDirs }: FileLabOptions) {
-    this.issueManager = issueManager;
+  constructor({ report, workspaceDirs }: FileLabOptions) {
     this.report = report;
     this.workspaceDirs = workspaceDirs;
     this.skipExportsAnalysis = new Set();
@@ -51,14 +47,10 @@ export default class SourceLab {
   }
 
   public analyzeSourceFile(sourceFile: SourceFile) {
-    const im = this.issueManager;
+    const issues: Set<IssueTemp> = new Set();
     const report = this.report;
-
-    let externalModuleSpecifiers: string[] = [];
-
-    im.counters.processed++;
-
     const filePath = sourceFile.getFilePath();
+    let externalModuleSpecifiers: string[] = [];
 
     if (report.dependencies || report.unlisted) {
       externalModuleSpecifiers = _findExternalImportModuleSpecifiers(sourceFile);
@@ -68,21 +60,22 @@ export default class SourceLab {
       const duplicateExports = _findDuplicateExportedNames(sourceFile);
       duplicateExports.forEach(symbols => {
         const symbol = symbols.join('|');
-        im.addIssue('duplicates', { filePath, symbol, symbols });
+        issues.add({ type: 'duplicates', filePath, symbol, symbols });
       });
     }
 
-    if (this.skipExportsAnalysis.has(filePath)) return externalModuleSpecifiers;
+    if (this.skipExportsAnalysis.has(filePath)) return { externalModuleSpecifiers, issues };
 
     if (this.isReportExports) {
-      this.analyzeExports(sourceFile);
+      const exportsIssues = this.analyzeExports(sourceFile);
+      exportsIssues.forEach(issue => issues.add(issue));
     }
 
-    return externalModuleSpecifiers;
+    return { externalModuleSpecifiers, issues };
   }
 
   private analyzeExports(sourceFile: SourceFile) {
-    const im = this.issueManager;
+    const issues: Set<IssueTemp> = new Set();
     const report = this.report;
     const filePath = sourceFile.getFilePath();
 
@@ -110,7 +103,8 @@ export default class SourceLab {
           identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
           if (report.enumMembers) {
             findUnusedEnumMembers(declaration, filePath).forEach(member =>
-              im.addIssue('enumMembers', {
+              issues.add({
+                type: 'enumMembers',
                 filePath,
                 symbol: member.getName(),
                 parentSymbol: identifier?.getText(),
@@ -121,7 +115,8 @@ export default class SourceLab {
           identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
           if (report.classMembers) {
             findUnusedClassMembers(declaration, filePath).forEach(member =>
-              im.addIssue('classMembers', {
+              issues.add({
+                type: 'classMembers',
                 filePath,
                 symbol: member.getName(),
                 parentSymbol: identifier?.getText(),
@@ -169,15 +164,10 @@ export default class SourceLab {
         if (identifier || fakeIdentifier) {
           const identifierText = fakeIdentifier ?? identifier?.getText() ?? '*';
 
-          if (report.exports && im.issues.exports[filePath]?.[identifierText]) return;
-          if (report.types && im.issues.types[filePath]?.[identifierText]) return;
-          if (report.nsExports && im.issues.nsExports[filePath]?.[identifierText]) return;
-          if (report.nsTypes && im.issues.nsTypes[filePath]?.[identifierText]) return;
-
           const refs = _findReferences(identifier);
 
           if (refs.length === 0) {
-            im.addIssue('exports', { filePath, symbol: identifierText });
+            issues.add({ type: 'exports', filePath, symbol: identifierText });
           } else {
             if (hasExternalReferences(refs, filePath)) return;
 
@@ -185,18 +175,20 @@ export default class SourceLab {
             // it's on a namespace somewhere, report it in a separate issue type.
             if (_findReferencingNamespaceNodes(sourceFile).length > 0) {
               if (type) {
-                im.addIssue('nsTypes', { filePath, symbol: identifierText, symbolType: type });
+                issues.add({ type: 'nsTypes', filePath, symbol: identifierText, symbolType: type });
               } else {
-                im.addIssue('nsExports', { filePath, symbol: identifierText });
+                issues.add({ type: 'nsExports', filePath, symbol: identifierText });
               }
             } else if (type) {
-              im.addIssue('types', { filePath, symbol: identifierText, symbolType: type });
+              issues.add({ type: 'types', filePath, symbol: identifierText, symbolType: type });
             } else {
-              im.addIssue('exports', { filePath, symbol: identifierText });
+              issues.add({ type: 'exports', filePath, symbol: identifierText });
             }
           }
         }
       });
     });
+
+    return issues;
   }
 }
