@@ -27,12 +27,23 @@ const pluginWithEntryFilesSchema = z.union([
   }),
 ]);
 
+const pluginWithSampleFilesSchema = z.union([
+  globSchema,
+  z.object({
+    config: globSchema.optional(),
+    entryFiles: globSchema.optional(),
+    productionEntryFiles: globSchema.optional(),
+    projectFiles: globSchema.optional(),
+    sampleFiles: globSchema.optional(),
+  }),
+]);
+
 const pluginsConfigurationSchema = z.object({
   babel: pluginWithEntryFilesSchema,
   capacitor: pluginWithEntryFilesSchema,
   changesets: pluginWithEntryFilesSchema,
   cypress: pluginWithEntryFilesSchema,
-  eslint: pluginWithEntryFilesSchema,
+  eslint: pluginWithSampleFilesSchema,
   gatsby: pluginWithEntryFilesSchema,
   jest: pluginWithEntryFilesSchema,
   next: pluginWithEntryFilesSchema,

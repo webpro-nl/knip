@@ -13,6 +13,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
 
 export const CONFIG_FILE_PATTERNS = ['eslint.config.js', '.eslintrc', '.eslintrc.json', '.eslintrc.js'];
 
+const SAMPLE_FILE_PATHS = ['__placeholder__.js', '__placeholder__.ts'];
+
 const resolvePluginPackageName = (pluginName: string) => {
   return pluginName.startsWith('@')
     ? pluginName.includes('/')
@@ -21,7 +23,7 @@ const resolvePluginPackageName = (pluginName: string) => {
     : `eslint-plugin-${pluginName}`;
 };
 
-const findESLintDependencies: GenericPluginCallback = async (configFilePath, { cwd }) => {
+const findESLintDependencies: GenericPluginCallback = async (configFilePath, { cwd, config }) => {
   if (path.basename(configFilePath) === 'eslint.config.js') {
     // New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
     // We can handle eslint.config.js just like other source code (as dependencies are imported)
@@ -33,18 +35,21 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
     // This is also required when something like @rushstack/eslint-patch/modern-module-resolution is used
 
     const engine = new ESLint({ cwd, overrideConfigFile: configFilePath, useEslintrc: false });
-    const jsConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.js');
-    const tsConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.ts');
-    const tsxConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.spec.tsx');
 
-    const dependencies = [jsConfig, tsConfig, tsxConfig].map(config => {
-      if (!config) return [];
-      const plugins = config.plugins?.map(resolvePluginPackageName) ?? [];
-      const parsers = config.parser ? [config.parser] : [];
-      const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
-      const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-      return [...parsers, ...extraParsers, ...plugins, ...settings].map(getPackageName);
-    });
+    const calculateConfigForFile = async (sampleFile: string): Promise<ESLintConfig> =>
+      await engine.calculateConfigForFile(sampleFile);
+
+    const sampleFiles = config?.sampleFiles.length > 0 ? config.sampleFiles : SAMPLE_FILE_PATHS;
+    const dependencies = await Promise.all(sampleFiles.map(calculateConfigForFile)).then(configs =>
+      configs.flatMap(config => {
+        if (!config) return [];
+        const plugins = config.plugins?.map(resolvePluginPackageName) ?? [];
+        const parsers = config.parser ? [config.parser] : [];
+        const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
+        const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
+        return [...parsers, ...extraParsers, ...plugins, ...settings].map(getPackageName);
+      })
+    );
 
     return compact(dependencies.flat());
   }

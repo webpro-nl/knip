@@ -101,7 +101,7 @@ export default class WorkspaceWorker {
   getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
     return (
       this.config[pluginName] ??
-      this.rootWorkspaceConfig[pluginName] ?? { config: [], entryFiles: [], projectFiles: [] }
+      this.rootWorkspaceConfig[pluginName] ?? { config: [], entryFiles: [], projectFiles: [], sampleFiles: [] }
     );
   }
 
@@ -289,6 +289,7 @@ export default class WorkspaceWorker {
     const cwd = this.dir;
     const ignore = this.getWorkspaceIgnorePatterns();
     const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
+    const pluginConfig = this.getConfigForPlugin(pluginName);
 
     debugLogFiles(1, `Globbed ${pluginName} config file paths`, configFilePaths);
 
@@ -297,7 +298,11 @@ export default class WorkspaceWorker {
     const referencedDependencyIssues = (
       await Promise.all(
         configFilePaths.map(async configFilePath => {
-          const dependencies = await pluginCallback(configFilePath, { cwd, manifest: this.manifest });
+          const dependencies = await pluginCallback(configFilePath, {
+            cwd,
+            manifest: this.manifest,
+            config: pluginConfig,
+          });
           return dependencies.map(symbol => ({ type: 'unlisted', filePath: configFilePath, symbol } as Issue));
         })
       )
