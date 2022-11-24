@@ -6,4 +6,4 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependen
 
 export const CONFIG_FILE_PATTERNS = [];
 
-export const ENTRY_FILE_PATTERNS = ['rollup.config.{js,mjs}'];
+export const ENTRY_FILE_PATTERNS = ['rollup.config.{js,mjs,ts}'];
