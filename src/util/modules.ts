@@ -9,3 +9,10 @@ export const getPackageName = (value: string) => {
 
   return value.startsWith('/') ? value : value.split('/')[0];
 };
+
+export const isDefinitelyTyped = (packageName: string) => packageName.startsWith('@types/');
+
+export const getDefinitelyTypedPackage = (packageName: string) => {
+  if (isDefinitelyTyped(packageName)) return packageName;
+  return '@types/' + packageName.replace('@', '__');
+};

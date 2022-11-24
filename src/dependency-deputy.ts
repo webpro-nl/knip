@@ -2,6 +2,7 @@
 import { isBuiltin } from 'node:module';
 import micromatch from 'micromatch';
 import { WorkspaceConfiguration } from './types/config.js';
+import { isDefinitelyTyped, getDefinitelyTypedPackage } from './util/modules.js';
 import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PackageJson } from 'type-fest';
@@ -111,11 +112,18 @@ export default class DependencyDeputy {
     const workspaceNames = isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
 
-    if (closestWorkspaceName) {
-      this.addReferencedDependency(closestWorkspaceName, packageName);
-    } else {
-      return moduleSpecifier;
+    // Prevent false positives by also marking the `@types/packageName` dependency as referenced
+    const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedPackage(packageName);
+    const closestWorkspaceNameForTypes =
+      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName));
+
+    if (closestWorkspaceName || closestWorkspaceNameForTypes) {
+      closestWorkspaceName && this.addReferencedDependency(closestWorkspaceName, packageName);
+      closestWorkspaceNameForTypes && this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+      return;
     }
+
+    return moduleSpecifier;
   }
 
   isInternalDependency(workspaceName: string, moduleSpecifier: string) {
@@ -152,13 +160,14 @@ export default class DependencyDeputy {
       const referencedDependencies = this.referencedDependencies.get(workspaceName);
 
       const isUnreferencedDependency = (dependency: string): boolean => {
+        // Is referenced, ignore
+        if (referencedDependencies?.has(dependency)) return false;
+
         const [scope, typedDependency] = dependency.split('/');
         if (scope === '@types') {
+          // Ignore `@types/*` packages that don't have a related dependency (e.g. `@types/node`)
           if (IGNORE_DEFINITELY_TYPED.includes(typedDependency)) return false;
-          if (referencedDependencies?.has(dependency)) return false;
-          const [scope, name] = typedDependency.split('__');
-          const typedPackageName = scope && name ? `@${scope}/${name}` : typedDependency;
-          return referencedDependencies ? !referencedDependencies.has(typedPackageName) : false;
+          return !referencedDependencies?.has(typedDependency);
         }
 
         if (!referencedDependencies?.has(dependency)) {

@@ -1,12 +1,18 @@
 {
   "name": "definitely-typed",
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "micromatch": "*"
   },
   "devDependencies": {
-    "@types/node": "*",
+    "@types/estree": "*",
     "@types/micromatch": "*",
+    "@types/mocha": "*",
+    "@types/node": "*",
+    "@types/unused": "*",
     "@types/without-the-package": "*",
-    "@types/unused": "*"
+    "mocha": "*"
   }
 }
