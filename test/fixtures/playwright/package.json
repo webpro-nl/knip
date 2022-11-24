@@ -1,0 +1,9 @@
+{
+  "name": "playwright",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "*"
+  }
+}

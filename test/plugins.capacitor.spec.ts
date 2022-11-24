@@ -7,7 +7,7 @@ const cwd = path.resolve('test/fixtures/capacitor');
 
 test('Unused dependencies in Capacitor configuration (ts)', async () => {
   const configFilePath = path.join(cwd, 'capacitor.config.ts');
-  const dependencies = await capacitor.findDependencies(configFilePath, { cwd });
+  const dependencies = await capacitor.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
     '@capacitor-community/http',
     '@capacitor/app',
@@ -21,7 +21,7 @@ test('Unused dependencies in Capacitor configuration (ts)', async () => {
 
 test('Unused dependencies in Capacitor configuration (json)', async () => {
   const configFilePath = path.join(cwd, 'capacitor.config.json');
-  const dependencies = await capacitor.findDependencies(configFilePath, { cwd });
+  const dependencies = await capacitor.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
     '@capacitor-community/http',
     '@capacitor/android',

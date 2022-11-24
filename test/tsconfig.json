@@ -1,8 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "allowJs": true,
     "baseUrl": ".",
+    "jsx": "preserve",
     "esModuleInterop": true
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*"]
 }
