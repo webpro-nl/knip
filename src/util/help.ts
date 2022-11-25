@@ -9,6 +9,7 @@ Options:
   --include              Report only listed issue type(s), can be repeated
   --exclude              Exclude issue type(s) from report, can be repeated
   --no-progress          Don't show dynamic progress updates
+  --no-exit-code         Always exit with code zero (0)
   --max-issues           Maximum number of issues before non-zero exit code (default: 0)
   --reporter             Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options     Pass extra options to the reporter (as JSON string, see example)

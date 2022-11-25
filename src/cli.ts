@@ -18,6 +18,7 @@ const {
     'no-gitignore': isNoGitIgnore = false,
     strict: isStrict = false,
     production: isProduction = false,
+    'no-exit-code': noExitCode = false,
     'no-progress': noProgress = false,
     reporter = 'symbols',
     'reporter-options': reporterOptions = '',
@@ -57,7 +58,9 @@ const run = async () => {
 
     await measure.print();
 
-    if (totalErrorCount > Number(maxIssues)) process.exit(totalErrorCount);
+    if (!noExitCode && totalErrorCount > Number(maxIssues)) {
+      process.exit(totalErrorCount);
+    }
   } catch (error: unknown) {
     if (error instanceof ConfigurationError) {
       console.error(error.message + '\n');

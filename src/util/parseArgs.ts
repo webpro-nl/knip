@@ -14,6 +14,7 @@ export default parseArgs({
     strict: { type: 'boolean' },
     production: { type: 'boolean' },
     'exclude-entry-files': { type: 'boolean' },
+    'no-exit-code': { type: 'boolean' },
     'no-progress': { type: 'boolean' },
     'max-issues': { type: 'string' },
     reporter: { type: 'string' },
