@@ -52,7 +52,7 @@ export default class WorkspaceWorker {
   peerDependencies: Map<string, Set<string>> = new Map();
 
   negatedWorkspacePatterns: string[] = [];
-  enabled;
+  enabled: Record<PluginName, boolean>;
   isRoot;
 
   constructor({
@@ -79,23 +79,10 @@ export default class WorkspaceWorker {
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.manifest = manifest;
 
-    this.enabled = {
-      babel: false,
-      capacitor: false,
-      changesets: false,
-      cypress: false,
-      eslint: false,
-      gatsby: false,
-      jest: false,
-      next: false,
-      nx: false,
-      playwright: false,
-      postcss: false,
-      remark: false,
-      remix: false,
-      rollup: false,
-      storybook: false,
-    };
+    this.enabled = Object.keys(plugins).reduce(
+      (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
+      {} as Record<PluginName, boolean>
+    );
   }
 
   getConfigForPlugin(pluginName: PluginName): PluginConfiguration {

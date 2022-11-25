@@ -1,6 +1,7 @@
 import path from 'node:path';
 import micromatch from 'micromatch';
 import { z } from 'zod';
+import * as plugins from './plugins/index.js';
 import { LocalConfiguration } from './types/validate.js';
 import { arrayify } from './util/array.js';
 import { ROOT_WORKSPACE_NAME } from './util/constants.js';
@@ -40,23 +41,7 @@ const defaultConfig: Configuration = {
   },
 };
 
-const PLUGIN_NAMES = [
-  'babel',
-  'capacitor',
-  'changesets',
-  'cypress',
-  'eslint',
-  'gatsby',
-  'jest',
-  'next',
-  'nx',
-  'playwright',
-  'postcss',
-  'remark',
-  'remix',
-  'rollup',
-  'storybook',
-];
+const PLUGIN_NAMES = Object.keys(plugins);
 
 type ConfigurationManagerOptions = {
   cwd?: string;
