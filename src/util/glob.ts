@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fg from 'fast-glob';
 import { globby } from 'globby';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
@@ -12,11 +13,10 @@ const prependDirToPattern = (workingDir: string, pattern: string) => {
 };
 
 export const negate = (pattern: string) => `!${pattern}`;
-
-export const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
-
 export const hasProductionSuffix = (pattern: string) => pattern.endsWith('!');
 export const hasNoProductionSuffix = (pattern: string) => !pattern.endsWith('!');
+
+const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
 
 const glob = async ({
   cwd,
@@ -38,7 +38,7 @@ const glob = async ({
   // Prepend relative --dir to patterns to use cwd (not workingDir), because
   // we want to glob everything from root/cwd to include all gitignore files and ignore patterns
   const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
-  const globPatterns = compact([patterns].flat().map(prepend));
+  const globPatterns = compact([patterns].flat().map(prepend).map(removeProductionSuffix));
 
   const ignorePatterns = [...ignore, '**/node_modules/**'];
 

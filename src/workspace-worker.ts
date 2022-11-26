@@ -3,7 +3,7 @@ import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './npm-scripts/index.js';
 import * as plugins from './plugins/index.js';
 import { debugLogFiles, debugLogIssues } from './util/debug.js';
-import { _pureGlob, negate, removeProductionSuffix, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
+import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Issue } from './types/issues.js';
 import type { GenericPluginCallback } from './types/plugins.js';
@@ -131,17 +131,13 @@ export default class WorkspaceWorker {
   getEntryFilePatterns() {
     const { entryFiles } = this.config;
     if (entryFiles.length === 0) return [];
-    return [entryFiles, TEST_FILE_PATTERNS, this.isRoot ? this.negatedWorkspacePatterns : []]
-      .flat()
-      .map(removeProductionSuffix);
+    return [entryFiles, TEST_FILE_PATTERNS, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
   }
 
   getProjectFilePatterns() {
     const { projectFiles } = this.config;
     if (projectFiles.length === 0) return [];
-    return [projectFiles, TEST_FILE_PATTERNS, this.isRoot ? this.negatedWorkspacePatterns : []]
-      .flat()
-      .map(removeProductionSuffix);
+    return [projectFiles, TEST_FILE_PATTERNS, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
   }
 
   getPluginEntryFilePatterns(isProduction = false) {
@@ -157,7 +153,7 @@ export default class WorkspaceWorker {
         }
       }
     }
-    return patterns.flat().map(removeProductionSuffix);
+    return patterns.flat();
   }
 
   getPluginProjectFilePatterns() {
@@ -179,7 +175,7 @@ export default class WorkspaceWorker {
         );
       }
     }
-    return patterns.map(removeProductionSuffix);
+    return patterns;
   }
 
   getPluginConfigPatterns() {
@@ -191,16 +187,19 @@ export default class WorkspaceWorker {
         patterns.push(...(config.length > 0 ? config : defaultConfigFiles));
       }
     }
-    return patterns.map(removeProductionSuffix);
+    return patterns;
   }
 
   getProductionEntryFilePatterns() {
     const entryFiles = this.config.entryFiles.filter(hasProductionSuffix);
     if (entryFiles.length === 0) return [];
     const negatedEntryFiles = this.config.entryFiles.filter(hasNoProductionSuffix).map(negate);
-    return [entryFiles, negatedEntryFiles, negatedTestFilePatterns, this.isRoot ? this.negatedWorkspacePatterns : []]
-      .flat()
-      .map(removeProductionSuffix);
+    return [
+      entryFiles,
+      negatedEntryFiles,
+      negatedTestFilePatterns,
+      this.isRoot ? this.negatedWorkspacePatterns : [],
+    ].flat();
   }
 
   getProductionProjectFilePatterns() {
@@ -223,9 +222,7 @@ export default class WorkspaceWorker {
       negatedPluginProjectFilePatterns,
       negatedTestFilePatterns,
       this.isRoot ? this.negatedWorkspacePatterns : [],
-    ]
-      .flat()
-      .map(removeProductionSuffix);
+    ].flat();
   }
 
   getProductionPluginEntryFilePatterns() {
@@ -240,7 +237,7 @@ export default class WorkspaceWorker {
       }
     }
     if (patterns.length === 0) return [];
-    return [patterns.flat().map(removeProductionSuffix), negatedTestFilePatterns].flat();
+    return [patterns.flat(), negatedTestFilePatterns].flat();
   }
 
   getConfigurationEntryFilePattern(pluginName: PluginName) {
