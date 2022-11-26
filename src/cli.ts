@@ -2,9 +2,9 @@
 
 import path from 'node:path';
 import { register } from 'esbuild-register/dist/node.js';
-import { printHelp } from './util/help.js';
 import reporters from './reporters/index.js';
 import { ConfigurationError } from './util/errors.js';
+import { printHelp } from './util/help.js';
 import parsedArgs from './util/parseArgs.js';
 import { measure } from './util/performance.js';
 import { main } from './index.js';
@@ -14,16 +14,17 @@ register();
 
 const {
   values: {
+    debug: isDebug = false,
     help,
-    'no-gitignore': isNoGitIgnore = false,
-    strict: isStrict = false,
-    production: isProduction = false,
+    'max-issues': maxIssues = '0',
     'no-exit-code': noExitCode = false,
+    'no-gitignore': isNoGitIgnore = false,
     'no-progress': noProgress = false,
+    production: isProduction = false,
     reporter = 'symbols',
     'reporter-options': reporterOptions = '',
-    'max-issues': maxIssues = '0',
-    debug: isDebug = false,
+    strict: isStrict = false,
+    tsConfig,
   },
 } = parsedArgs;
 
@@ -44,6 +45,7 @@ const run = async () => {
   try {
     const { report, issues, counters } = await main({
       cwd,
+      tsConfigFile: tsConfig,
       gitignore: !isNoGitIgnore,
       isStrict,
       isProduction,

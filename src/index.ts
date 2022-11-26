@@ -17,7 +17,7 @@ import type { CommandLineOptions } from './types/cli.js';
 import type { Report } from './types/issues.js';
 
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
-  const { cwd, gitignore, isStrict, isProduction, isShowProgress } = unresolvedConfiguration;
+  const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress } = unresolvedConfiguration;
 
   const chief = new ConfigurationChief({ cwd });
   const deputy = new DependencyDeputy();
@@ -30,8 +30,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   await chief.loadLocalConfig();
 
   const workspaces = await chief.getActiveWorkspaces();
-
-  if (!chief.manifest || !chief.manifestPath) throw new Error('mani');
 
   debugLogObject(1, 'Included workspaces', workspaces);
 
@@ -61,7 +59,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest });
 
-    const tsConfigFilePath = path.join(dir, 'tsconfig.json');
+    const tsConfigFilePath = path.join(dir, tsConfigFile ?? 'tsconfig.json');
     const tsConfig = await loadTSConfig(tsConfigFilePath);
 
     if (isRoot && tsConfig) {

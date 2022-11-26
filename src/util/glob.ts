@@ -15,6 +15,9 @@ export const negate = (pattern: string) => `!${pattern}`;
 
 export const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
 
+export const hasProductionSuffix = (pattern: string) => pattern.endsWith('!');
+export const hasNoProductionSuffix = (pattern: string) => !pattern.endsWith('!');
+
 const sortNegatedLast = (a: string, b: string) => (a.startsWith('!') ? 1 : b.startsWith('!') ? -1 : 0);
 
 const glob = async ({

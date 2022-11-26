@@ -16,8 +16,8 @@ import type { PackageJson } from 'type-fest';
 
 const {
   values: {
-    workspace: rawWorkspaceArg,
     config: rawConfigArg,
+    workspace: rawWorkspaceArg,
     include = [],
     exclude = [],
     strict: isStrict = false,
