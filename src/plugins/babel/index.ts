@@ -31,27 +31,22 @@ const api = {
 
 type BabelFn = (options: typeof api) => BabelConfig;
 
-const getDependenciesFromConfig = (config?: BabelConfig) => {
-  if (config) {
-    const presets =
-      config.presets?.map(preset => (typeof preset === 'string' ? preset : preset[0])).map(resolvePresetName) ?? [];
-    const plugins =
-      config.plugins?.map(plugin => (typeof plugin === 'string' ? plugin : plugin[0])).map(resolvePluginName) ?? [];
-    return compact([...presets, ...plugins]);
-  }
-  return [];
+const getDependenciesFromConfig = (config: BabelConfig) => {
+  const presets =
+    config.presets?.map(preset => (typeof preset === 'string' ? preset : preset[0])).map(resolvePresetName) ?? [];
+  const plugins =
+    config.plugins?.map(plugin => (typeof plugin === 'string' ? plugin : plugin[0])).map(resolvePluginName) ?? [];
+  return compact([...presets, ...plugins]);
 };
 
 const findBabelDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
-  if (configFilePath.endsWith('package.json')) {
-    const config = manifest?.babel as BabelConfig;
-    return getDependenciesFromConfig(config);
-  }
-  let config: BabelConfig | BabelFn = await load(configFilePath);
+  let config: BabelConfig | BabelFn = configFilePath.endsWith('package.json')
+    ? manifest.babel
+    : await load(configFilePath);
   if (typeof config === 'function') {
     config = config(api);
   }
-  return getDependenciesFromConfig(config);
+  return config ? getDependenciesFromConfig(config) : [];
 };
 
 export const findDependencies = timerify(findBabelDependencies);

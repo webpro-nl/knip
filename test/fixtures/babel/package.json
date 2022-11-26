@@ -10,5 +10,10 @@
     "babel-plugin-prismjs": "*",
     "dotenv": "*",
     "underscore": "1.13.6"
+  },
+  "babel": {
+    "presets": [
+      "@babel/env"
+    ]
   }
 }

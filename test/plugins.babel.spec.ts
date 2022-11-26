@@ -2,12 +2,14 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
 import * as babel from '../src/plugins/babel/index';
+import { getManifest } from './helpers';
 
 const cwd = path.resolve('test/fixtures/babel');
+const manifest = getManifest(cwd);
 
 test('Unused dependencies in Babel configuration (.babelrc)', async () => {
   const configFilePath = path.join(cwd, '.babelrc');
-  const dependencies = await babel.findDependencies(configFilePath, { cwd });
+  const dependencies = await babel.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
     '@babel/preset-env',
     '@babel/preset-typescript',
@@ -19,7 +21,7 @@ test('Unused dependencies in Babel configuration (.babelrc)', async () => {
 
 test('Unused dependencies in Babel configuration (.babelrc.js)', async () => {
   const configFilePath = path.join(cwd, '.babelrc.js');
-  const dependencies = await babel.findDependencies(configFilePath, { cwd });
+  const dependencies = await babel.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
     '@babel/preset-env',
     '@babel/preset-typescript',
@@ -33,7 +35,7 @@ test('Unused dependencies in Babel configuration (.babelrc.js)', async () => {
 
 test('Unused dependencies in Babel configuration (babel.config.js)', async () => {
   const configFilePath = path.join(cwd, 'babel.config.js');
-  const dependencies = await babel.findDependencies(configFilePath, { cwd });
+  const dependencies = await babel.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
     '@babel/preset-env',
     '@babel/preset-typescript',
@@ -45,4 +47,10 @@ test('Unused dependencies in Babel configuration (babel.config.js)', async () =>
     '@babel/plugin-transform-runtime',
     'babel-plugin-lodash',
   ]);
+});
+
+test('Unused dependencies in Babel configuration (package.json)', async () => {
+  const configFilePath = path.join(cwd, 'package.json');
+  const dependencies = await babel.findDependencies(configFilePath, { manifest });
+  assert.deepEqual(dependencies, ['@babel/preset-env']);
 });
