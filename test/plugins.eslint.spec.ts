@@ -16,7 +16,7 @@ test('Unused dependencies in ESLint configuration (legacy json)', async () => {
   ]);
 });
 
-test('Unused dependencies in ESLint configuration (legacy commonjs)', async () => {
+test('Unused dependencies in ESLint configuration (legacy js)', async () => {
   const configFilePath = path.join(cwd, '.eslintrc.js');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd });
   assert.deepEqual(dependencies, [
@@ -26,10 +26,4 @@ test('Unused dependencies in ESLint configuration (legacy commonjs)', async () =
     '@nrwl/nx',
     '@typescript-eslint/eslint-plugin',
   ]);
-});
-
-test('Unused dependencies in ESLint configuration (eslint.config.js)', async () => {
-  const configFilePath = path.join(cwd, 'eslint.config.js');
-  const dependencies = await eslint.findDependencies(configFilePath, { cwd });
-  assert.deepEqual(dependencies, []);
 });

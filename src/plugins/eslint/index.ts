@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { ESLint } from 'eslint';
 import { compact } from '../../util/array.js';
 import { getPackageName } from '../../util/modules.js';
@@ -11,9 +10,16 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
   return dependencies.has('eslint');
 };
 
-export const CONFIG_FILE_PATTERNS = ['eslint.config.js', '.eslintrc', '.eslintrc.json', '.eslintrc.js'];
+// New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
+// We can handle eslint.config.js just like other source code (as dependencies are imported)
+export const ENTRY_FILE_PATTERNS = ['eslint.config.js'];
 
-const SAMPLE_FILE_PATHS = ['__placeholder__.js', '__placeholder__.ts'];
+// Legacy: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
+// The only way to reliably resolve legacy configuration is through ESLint itself
+// This is also required when something like @rushstack/eslint-patch/modern-module-resolution is used
+export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json}'];
+
+const SAMPLE_FILE_PATHS = ['sample.js', 'sample.ts'];
 
 const resolvePluginPackageName = (pluginName: string) => {
   return pluginName.startsWith('@')
@@ -24,35 +30,24 @@ const resolvePluginPackageName = (pluginName: string) => {
 };
 
 const findESLintDependencies: GenericPluginCallback = async (configFilePath, { cwd, config }) => {
-  if (path.basename(configFilePath) === 'eslint.config.js') {
-    // New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
-    // We can handle eslint.config.js just like other source code (as dependencies are imported)
-    // Alternatively, we could do the same as in legacy mode, but it would be less reliable and more maintenance
-    return [];
-  } else {
-    // Legacy: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
-    // The only way to reliably resolve legacy configuration is through ESLint itself
-    // This is also required when something like @rushstack/eslint-patch/modern-module-resolution is used
+  const engine = new ESLint({ cwd, overrideConfigFile: configFilePath, useEslintrc: false });
 
-    const engine = new ESLint({ cwd, overrideConfigFile: configFilePath, useEslintrc: false });
+  const calculateConfigForFile = async (sampleFile: string): Promise<ESLintConfig> =>
+    await engine.calculateConfigForFile(sampleFile);
 
-    const calculateConfigForFile = async (sampleFile: string): Promise<ESLintConfig> =>
-      await engine.calculateConfigForFile(sampleFile);
+  const sampleFiles = [...(config?.sampleFiles ?? []), ...SAMPLE_FILE_PATHS];
+  const dependencies = await Promise.all(sampleFiles.map(calculateConfigForFile)).then(configs =>
+    configs.flatMap(config => {
+      if (!config) return [];
+      const plugins = config.plugins?.map(resolvePluginPackageName) ?? [];
+      const parsers = config.parser ? [config.parser] : [];
+      const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
+      const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
+      return [...parsers, ...extraParsers, ...plugins, ...settings].map(getPackageName);
+    })
+  );
 
-    const sampleFiles = config?.sampleFiles.length > 0 ? config.sampleFiles : SAMPLE_FILE_PATHS;
-    const dependencies = await Promise.all(sampleFiles.map(calculateConfigForFile)).then(configs =>
-      configs.flatMap(config => {
-        if (!config) return [];
-        const plugins = config.plugins?.map(resolvePluginPackageName) ?? [];
-        const parsers = config.parser ? [config.parser] : [];
-        const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
-        const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-        return [...parsers, ...extraParsers, ...plugins, ...settings].map(getPackageName);
-      })
-    );
-
-    return compact(dependencies.flat());
-  }
+  return compact(dependencies.flat());
 };
 
 export const findDependencies = timerify(findESLintDependencies);
