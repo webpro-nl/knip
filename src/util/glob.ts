@@ -18,8 +18,6 @@ export const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/,
 export const hasProductionSuffix = (pattern: string) => pattern.endsWith('!');
 export const hasNoProductionSuffix = (pattern: string) => !pattern.endsWith('!');
 
-const sortNegatedLast = (a: string, b: string) => (a.startsWith('!') ? 1 : b.startsWith('!') ? -1 : 0);
-
 const glob = async ({
   cwd,
   workingDir = cwd,
@@ -40,7 +38,7 @@ const glob = async ({
   // Prepend relative --dir to patterns to use cwd (not workingDir), because
   // we want to glob everything from root/cwd to include all gitignore files and ignore patterns
   const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
-  const globPatterns = compact([patterns].flat().map(prepend)).sort(sortNegatedLast);
+  const globPatterns = compact([patterns].flat().map(prepend));
 
   const ignorePatterns = [...ignore, '**/node_modules/**'];
 
