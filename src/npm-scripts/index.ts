@@ -1,6 +1,6 @@
 import { PackageJson } from 'type-fest';
+import { IGNORED_GLOBAL_BINARIES } from '../constants.js';
 import { compact } from '../util/array.js';
-import { IGNORED_GLOBAL_BINARIES } from '../util/constants.js';
 import { timerify } from '../util/performance.js';
 import { getBinariesFromScripts, getPackageManifest } from './helpers.js';
 

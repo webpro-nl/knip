@@ -1,11 +1,11 @@
 import path from 'node:path';
 import ConfigurationChief from './configuration-chief.js';
+import { ROOT_WORKSPACE_NAME } from './constants.js';
 import DependencyDeputy from './dependency-deputy.js';
 import IssueCollector from './issue-collector.js';
 import ProjectPrincipal from './project-principal.js';
 import SourceLab from './source-lab.js';
 import { compact } from './util/array.js';
-import { ROOT_WORKSPACE_NAME } from './util/constants.js';
 import { debugLogObject, debugLogFiles } from './util/debug.js';
 import { _findExternalImportModuleSpecifiers } from './util/externalImports.js';
 import { findFile, loadJSON } from './util/fs.js';

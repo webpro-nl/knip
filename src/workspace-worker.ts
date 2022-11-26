@@ -1,7 +1,7 @@
 import path from 'node:path';
+import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './npm-scripts/index.js';
 import * as plugins from './plugins/index.js';
-import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './util/constants.js';
 import { debugLogFiles, debugLogIssues } from './util/debug.js';
 import { _pureGlob, negate, removeProductionSuffix, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';

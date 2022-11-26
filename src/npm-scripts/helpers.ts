@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS } from '../util/constants.js';
+import { FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS } from '../constants.js';
 
 const require = createRequire(process.cwd());
 

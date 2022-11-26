@@ -1,10 +1,10 @@
 import path from 'node:path';
 import micromatch from 'micromatch';
 import { z } from 'zod';
+import { ROOT_WORKSPACE_NAME } from './constants.js';
 import * as plugins from './plugins/index.js';
 import { LocalConfiguration } from './types/validate.js';
 import { arrayify } from './util/array.js';
-import { ROOT_WORKSPACE_NAME } from './util/constants.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { _dirGlob } from './util/glob.js';
