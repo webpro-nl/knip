@@ -9,9 +9,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
   return dependencies.has('mocha');
 };
 
-export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs}', '.mocharc.{json,jsonc}', 'package.json'];
+export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
 
-// .mocharc.yaml, .mocharc.yml
 export const ENTRY_FILE_PATTERNS = ['test/**/*.{js,cjs,mjs}'];
 
 const findMochaDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {

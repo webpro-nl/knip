@@ -11,7 +11,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "mocha": {
-    "config": [".mocharc.{js,cjs}", ".mocharc.{json,jsonc}", "package.json"],
+    "config": [".mocharc.{js,cjs,json,jsonc,yml,yaml}", "package.json"],
     "entryFiles": ["test/**/*.{js,cjs,mjs}"]
   }
 }
