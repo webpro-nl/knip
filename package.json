@@ -44,7 +44,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@esbuild-kit/esm-loader": "2.5.0",
+    "@esbuild-kit/esm-loader": "2.5.1",
     "@snyk/github-codeowners": "1.0.0",
     "easy-table": "1.2.0",
     "esbuild": "0.15.15",
@@ -54,8 +54,8 @@
     "micromatch": "4.0.5",
     "strip-json-comments": "5.0.0",
     "summary": "2.1.0",
-    "ts-morph": "17.0.0",
-    "ts-morph-helpers": "0.6.2",
+    "ts-morph": "17.0.1",
+    "ts-morph-helpers": "0.6.3",
     "zod": "3.19.1"
   },
   "devDependencies": {
