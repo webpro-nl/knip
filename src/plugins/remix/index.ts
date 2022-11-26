@@ -6,8 +6,6 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
   return dependencies.has('@remix-run/dev');
 };
 
-export const CONFIG_FILE_PATTERNS = [];
-
 export const ENTRY_FILE_PATTERNS = ['remix.config.js', 'remix.init/index.js'];
 
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [

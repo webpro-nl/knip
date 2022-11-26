@@ -8,8 +8,6 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependen
 
 export const CONFIG_FILE_PATTERNS = ['postcss.config.js', 'package.json'];
 
-export const ENTRY_FILE_PATTERNS = [];
-
 const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: PostCSSConfig = configFilePath.endsWith('package.json')
     ? manifest?.postcss
