@@ -4,7 +4,6 @@ export interface PluginConfiguration {
   config: NormalizedGlob;
   entryFiles: NormalizedGlob;
   projectFiles: NormalizedGlob;
-  sampleFiles: NormalizedGlob;
 }
 
 interface PluginsConfiguration {

@@ -1,4 +1,5 @@
 export type ESLintConfig = {
+  extends?: string | string[];
   parser?: string;
   parserOptions?: {
     babelOptions?: {
@@ -7,4 +8,5 @@ export type ESLintConfig = {
   };
   plugins?: string[];
   settings?: Record<string, Record<string, unknown>>;
+  overrides?: { files: string[] }[];
 };

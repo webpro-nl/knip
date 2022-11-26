@@ -1,5 +1,26 @@
 import { compact } from '../../util/array.js';
+import { getPackageName } from '../../util/modules.js';
 import type { ESLintConfig } from './types.js';
+
+export const resolvePluginPackageName = (pluginName: string) => {
+  return pluginName.startsWith('@')
+    ? pluginName.includes('/')
+      ? pluginName
+      : `${pluginName}/eslint-plugin`
+    : `eslint-plugin-${pluginName}`;
+};
+
+export const customResolvePluginPackageNames = (extend: string) => {
+  if (extend.includes('/node_modules/')) return getPackageName(extend);
+  if (extend.startsWith('/') || extend.startsWith('.')) return;
+  if (extend.includes(':')) {
+    const pluginName = extend.replace(/^plugin:/, '').replace(/(\/|:).+$/, '');
+    if (pluginName === 'eslint') return;
+    return resolvePluginPackageName(pluginName);
+  }
+  // TODO Slippery territory, not sure what we have here
+  return extend.includes('eslint') ? getPackageName(extend) : resolvePluginPackageName(extend);
+};
 
 const getImportPluginDependencies = (settings: Record<string, unknown>) => {
   const knownKeys = ['typescript'];

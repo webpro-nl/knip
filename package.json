@@ -50,6 +50,7 @@
     "esbuild": "0.15.15",
     "esbuild-register": "3.4.1",
     "eslint": "8.28.0",
+    "fast-glob": "3.2.12",
     "globby": "13.1.2",
     "js-yaml": "4.1.0",
     "micromatch": "4.0.5",

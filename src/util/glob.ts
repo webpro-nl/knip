@@ -68,8 +68,17 @@ const dirGlob = async ({ cwd, patterns, ignore }: { cwd: string; patterns: strin
     onlyDirectories: true,
   });
 
+const firstGlob = async ({ cwd, patterns }: { cwd: string; patterns: string[] }) => {
+  const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd });
+  for await (const entry of stream) {
+    return entry;
+  }
+};
+
 export const _glob = timerify(glob);
 
 export const _pureGlob = timerify(pureGlob);
 
 export const _dirGlob = timerify(dirGlob);
+
+export const _firstGlob = timerify(firstGlob);

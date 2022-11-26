@@ -88,7 +88,7 @@ export default class WorkspaceWorker {
   getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
     return (
       this.config[pluginName] ??
-      this.rootWorkspaceConfig[pluginName] ?? { config: [], entryFiles: [], projectFiles: [], sampleFiles: [] }
+      this.rootWorkspaceConfig[pluginName] ?? { config: [], entryFiles: [], projectFiles: [] }
     );
   }
 
@@ -292,6 +292,7 @@ export default class WorkspaceWorker {
             cwd,
             manifest: this.manifest,
             config: pluginConfig,
+            workspaceConfig: this.config,
           });
           return dependencies.map(symbol => ({ type: 'unlisted', filePath: configFilePath, symbol } as Issue));
         })

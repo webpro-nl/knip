@@ -132,12 +132,10 @@ export default class ConfigurationChief {
               const entryFiles = isObject && 'entryFiles' in pluginConfig ? arrayify(pluginConfig.entryFiles) : [];
               const projectFiles =
                 isObject && 'projectFiles' in pluginConfig ? arrayify(pluginConfig.projectFiles) : entryFiles;
-              const sampleFiles = isObject && 'sampleFiles' in pluginConfig ? arrayify(pluginConfig.sampleFiles) : [];
               workspaces[workspaceName][pluginName as PluginName] = {
                 config,
                 entryFiles,
                 projectFiles,
-                sampleFiles,
               };
             }
           }
