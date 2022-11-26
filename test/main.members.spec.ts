@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.js';
-import baseArguments from './fixtures/baseArguments.js';
-import baseCounters from './fixtures/baseCounters.js';
+import baseArguments from './helpers/baseArguments.js';
+import baseCounters from './helpers/baseCounters.js';
 
 test('Find unused enum and class members', async () => {
   const cwd = 'test/fixtures/members';

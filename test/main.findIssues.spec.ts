@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
 import { main } from '../src/index.js';
-import baseArguments from './fixtures/baseArguments.js';
+import baseArguments from './helpers/baseArguments.js';
 
 test('Find various issue types of unused exports', async () => {
   const workspaceDir = path.resolve('test/fixtures/basic');
