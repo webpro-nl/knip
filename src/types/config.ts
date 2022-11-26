@@ -24,6 +24,7 @@ interface PluginsConfiguration {
   remix: PluginConfiguration;
   rollup: PluginConfiguration;
   storybook: PluginConfiguration;
+  stryker: PluginConfiguration;
 }
 
 interface BaseWorkspaceConfiguration {

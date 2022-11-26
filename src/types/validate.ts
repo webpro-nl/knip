@@ -55,6 +55,7 @@ const pluginsConfigurationSchema = z.object({
   remix: pluginWithEntryFilesSchema,
   rollup: pluginWithEntryFilesSchema,
   storybook: pluginWithEntryFilesSchema,
+  stryker: pluginWithEntryFilesSchema,
 });
 
 const baseWorkspaceConfigurationSchema = z.object({

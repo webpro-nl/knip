@@ -1,0 +1,5 @@
+{
+  "testRunner": "karma",
+  "checkers": ["typescript"],
+  "plugins": ["@stryker-mutator/karma-runner"]
+}
