@@ -5,7 +5,9 @@ type IsPluginEnabledCallbackOptions = { manifest: PackageJson; dependencies: Set
 
 export type IsPluginEnabledCallback = (options: IsPluginEnabledCallbackOptions) => boolean;
 
+type GenericPluginCallbackOptions = { cwd: string; manifest: PackageJson; config: PluginConfiguration };
+
 export type GenericPluginCallback = (
   configFilePath: string,
-  { cwd, manifest }: { cwd: string; manifest: PackageJson; config: PluginConfiguration }
+  { cwd, manifest, config }: GenericPluginCallbackOptions
 ) => Promise<string[]> | string[];

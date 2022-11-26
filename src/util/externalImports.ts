@@ -4,21 +4,22 @@ import { compact } from './array.js';
 import { timerify } from './performance.js';
 import type { SourceFile } from 'ts-morph';
 
-const findRequireModuleSpecifiers = (sourceFile: SourceFile) =>
-  [findCallExpressionsByName(sourceFile, 'require'), findCallExpressionsByName(sourceFile, 'require.resolve')]
-    .flat()
-    .flatMap(expression => {
-      const list = expression.getFirstChildByKind(ts.SyntaxKind.SyntaxList);
-      return (
-        list?.getFirstChildByKind(ts.SyntaxKind.StringLiteral) ??
-        list?.getFirstChildByKind(ts.SyntaxKind.NoSubstitutionTemplateLiteral) ??
-        list?.getFirstChildByKind(ts.SyntaxKind.TemplateExpression)
-      );
-    });
+const findCommonJSModuleSpecifiers = (sourceFile: SourceFile) =>
+  [
+    ...findCallExpressionsByName(sourceFile, 'require'),
+    ...findCallExpressionsByName(sourceFile, 'require.resolve'),
+  ].flatMap(expression => {
+    const list = expression.getFirstChildByKind(ts.SyntaxKind.SyntaxList);
+    return (
+      list?.getFirstChildByKind(ts.SyntaxKind.StringLiteral) ??
+      list?.getFirstChildByKind(ts.SyntaxKind.NoSubstitutionTemplateLiteral) ??
+      list?.getFirstChildByKind(ts.SyntaxKind.TemplateExpression)
+    );
+  });
 
 const findExternalImportModuleSpecifiers = (sourceFile: SourceFile) => {
   const importLiterals = sourceFile.getImportStringLiterals();
-  const requireCallExpressions = findRequireModuleSpecifiers(sourceFile);
+  const requireCallExpressions = findCommonJSModuleSpecifiers(sourceFile);
   return compact(
     [...importLiterals, ...requireCallExpressions].map(importLiteral => {
       if (!importLiteral) return;
