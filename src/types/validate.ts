@@ -46,6 +46,7 @@ const pluginsConfigurationSchema = z.object({
   eslint: pluginWithSampleFilesSchema,
   gatsby: pluginWithEntryFilesSchema,
   jest: pluginWithEntryFilesSchema,
+  mocha: pluginWithEntryFilesSchema,
   next: pluginWithEntryFilesSchema,
   nx: pluginWithEntryFilesSchema,
   playwright: pluginWithEntryFilesSchema,

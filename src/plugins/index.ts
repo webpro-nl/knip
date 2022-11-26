@@ -5,6 +5,7 @@ export * as cypress from './cypress/index.js';
 export * as eslint from './eslint/index.js';
 export * as gatsby from './gatsby/index.js';
 export * as jest from './jest/index.js';
+export * as mocha from './mocha/index.js';
 export * as next from './next/index.js';
 export * as nx from './nx/index.js';
 export * as playwright from './playwright/index.js';

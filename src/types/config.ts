@@ -15,6 +15,7 @@ interface PluginsConfiguration {
   eslint: PluginConfiguration;
   gatsby: PluginConfiguration;
   jest: PluginConfiguration;
+  mocha: PluginConfiguration;
   next: PluginConfiguration;
   nx: PluginConfiguration;
   playwright: PluginConfiguration;
