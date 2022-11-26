@@ -245,15 +245,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             collector.referencedFiles.add(issue.symbol);
           } else {
             issue.symbol = deputy.resolvePackageName(issue.symbol);
-            if (!deputy.isInternalDependency(name, issue.symbol)) {
-              if (!workspaceDependencies.includes(issue.symbol)) {
-                // Unlisted referenced dependencies can be marked as an issue right away (for instant progress output)
-                if (isStrict) {
-                  collector.addIssue(issue);
-                } else if (!rootDependencies.includes(issue.symbol)) {
-                  collector.addIssue(issue);
-                }
-              }
+            if (deputy.isInternalDependency(name, issue.symbol)) continue;
+            if (workspaceDependencies.includes(issue.symbol)) continue;
+            // Unlisted referenced dependencies can be marked as an issue right away (for instant progress output)
+            if (isStrict) {
+              collector.addIssue(issue);
+            } else if (!rootDependencies.includes(issue.symbol)) {
+              collector.addIssue(issue);
             }
           }
         }
