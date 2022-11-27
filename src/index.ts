@@ -95,6 +95,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     // Add listed peer dependencies, as they're often not referenced anywhere, used to settle dependencies at the end
     deputy.addPeerDependencies(name, worker.peerDependencies);
 
+    // Add installed binaries
+    deputy.setInstalledBinaries(name, worker.installedBinaries);
+
     if (config?.entryFiles && config?.projectFiles) {
       /**
        * Production mode:
@@ -227,10 +230,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
 
       if (!isProduction && (report.dependencies || report.unlisted || report.files)) {
-        const { referencedDependencyIssues, referencedDependencies } = await worker.findDependenciesByPlugins();
-
-        const rootDependencies = deputy.getAllDependencies(ROOT_WORKSPACE_NAME);
         const workspaceDependencies = deputy.getAllDependencies(name);
+        const { referencedDependencyIssues, referencedDependencies } = await worker.findDependenciesByPlugins();
 
         // Add referenced dependencies to settle them at the end
         for (const packageName of workspaceDependencies) {
@@ -245,14 +246,32 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             collector.referencedFiles.add(issue.symbol);
           } else {
             issue.symbol = deputy.resolvePackageName(issue.symbol);
+
+            // Skip direct and internal dependencies
             if (deputy.isInternalDependency(name, issue.symbol)) continue;
             if (workspaceDependencies.includes(issue.symbol)) continue;
-            // Unlisted referenced dependencies can be marked as an issue right away (for instant progress output)
-            if (isStrict) {
-              collector.addIssue(issue);
-            } else if (!rootDependencies.includes(issue.symbol)) {
-              collector.addIssue(issue);
+
+            if (!isStrict && !isRoot) {
+              // Skip dependencies that are listed in root workspace
+              // TODO Look up all ancestors
+              const rootDependencies = deputy.getAllDependencies(ROOT_WORKSPACE_NAME);
+              if (rootDependencies.includes(issue.symbol)) {
+                continue;
+              }
+
+              // Skip binaries that are installed in root workspace
+              // TODO Look up all ancestors
+              const rootBinaries = deputy.getInstalledBinaries(ROOT_WORKSPACE_NAME);
+              if (rootBinaries?.has(issue.symbol)) {
+                // Also, mark the binary's dependency of the root workspace as referenced
+                const dependency = rootBinaries.get(issue.symbol);
+                dependency && deputy.addReferencedDependency(ROOT_WORKSPACE_NAME, dependency);
+                continue;
+              }
             }
+
+            // Unlisted referenced dependencies can be marked as an issue, right away (for instant progress output)
+            collector.addIssue(issue);
           }
         }
       }

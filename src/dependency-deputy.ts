@@ -20,12 +20,14 @@ export default class DependencyDeputy {
   canceledWorkspaces: Set<string>;
   referencedDependencies: Map<string, Set<string>>;
   peerDependencies: Map<string, Map<string, Set<string>>>;
+  installedBinaries: Map<string, Map<string, string>>;
 
   tsConfigPathGlobs: Map<string, string[]> = new Map();
 
   constructor() {
     this.referencedDependencies = new Map();
     this.peerDependencies = new Map();
+    this.installedBinaries = new Map();
     this.canceledWorkspaces = new Set();
   }
 
@@ -84,6 +86,14 @@ export default class DependencyDeputy {
 
   getAllDependencies(workspaceName: string) {
     return this._manifests.get(workspaceName)?.allDependencies ?? [];
+  }
+
+  setInstalledBinaries(workspaceName: string, installedBinaries: Map<string, string>) {
+    this.installedBinaries.set(workspaceName, installedBinaries);
+  }
+
+  getInstalledBinaries(workspaceName: string) {
+    return this.installedBinaries.get(workspaceName);
   }
 
   addTypeScriptConfigPathGlobs(workspaceName: string, paths: Record<string, string[]>) {

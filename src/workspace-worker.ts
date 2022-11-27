@@ -50,6 +50,7 @@ export default class WorkspaceWorker {
 
   referencedDependencies: ReferencedDependencies = new Set();
   peerDependencies: Map<string, Set<string>> = new Map();
+  installedBinaries: Map<string, string> = new Map();
 
   negatedWorkspacePatterns: string[] = [];
   enabled: Record<PluginName, boolean>;
@@ -111,7 +112,7 @@ export default class WorkspaceWorker {
   }
 
   async initReferencedDependencies() {
-    const { dependencies, peerDependencies } = await npm.findDependencies(
+    const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies(
       this.rootConfig.ignoreBinaries,
       this.manifest,
       this.isRoot,
@@ -126,6 +127,8 @@ export default class WorkspaceWorker {
     dependencies.forEach(dependency => this.referencedDependencies.add(dependency));
 
     this.peerDependencies = peerDependencies;
+
+    this.installedBinaries = installedBinaries;
   }
 
   getEntryFilePatterns() {

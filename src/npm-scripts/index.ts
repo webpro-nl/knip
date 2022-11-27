@@ -49,6 +49,7 @@ const findManifestDependencies = async (
   return {
     dependencies: Array.from(referencedDependencies),
     peerDependencies,
+    installedBinaries,
   };
 };
 
