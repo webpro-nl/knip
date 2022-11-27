@@ -111,6 +111,10 @@ export default class DependencyDeputy {
     this.peerDependencies.set(workspaceName, peerDependencies);
   }
 
+  getPeerDependencies(workspaceName: string, dependency: string) {
+    return Array.from(this.peerDependencies.get(workspaceName)?.get(dependency) ?? []);
+  }
+
   public maybeAddListedReferencedDependency(
     workspace: { name: string; dir: string; config: WorkspaceConfiguration; ancestors: string[] },
     moduleSpecifier: string,
@@ -181,7 +185,7 @@ export default class DependencyDeputy {
         }
 
         if (!referencedDependencies?.has(dependency)) {
-          const peerDependencies = Array.from(this.peerDependencies.get(workspaceName)?.get(dependency) ?? []);
+          const peerDependencies = this.getPeerDependencies(workspaceName, dependency);
           return !peerDependencies.find(peerDependency => !isUnreferencedDependency(peerDependency));
         }
 
