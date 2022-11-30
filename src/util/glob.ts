@@ -1,6 +1,7 @@
 import path from 'node:path';
 import fg from 'fast-glob';
 import { globby } from 'globby';
+import memoize from 'nano-memoize';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
 import { timerify } from './performance.js';
@@ -18,19 +19,18 @@ export const hasNoProductionSuffix = (pattern: string) => !pattern.endsWith('!')
 
 const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
 
-const glob = async ({
-  cwd,
-  workingDir = cwd,
-  patterns,
-  ignore = [],
-  gitignore = true,
-}: {
+interface BaseGlobOptions {
   cwd: string;
-  workingDir?: string;
   patterns: string[];
   ignore?: string[];
+}
+
+interface GlobOptions extends BaseGlobOptions {
+  workingDir?: string;
   gitignore?: boolean;
-}) => {
+}
+
+const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = true }: GlobOptions) => {
   const cwdPosix = ensurePosixPath(cwd);
   const workingDirPosix = ensurePosixPath(workingDir);
   const relativePath = path.posix.relative(cwdPosix, workingDirPosix);
@@ -53,14 +53,14 @@ const glob = async ({
   });
 };
 
-const pureGlob = async ({ cwd, patterns, ignore }: { cwd: string; patterns: string[]; ignore: string[] }) =>
+const pureGlob = async ({ cwd, patterns, ignore = [] }: BaseGlobOptions) =>
   globby(patterns, {
     cwd,
     ignore: [...ignore, '**/node_modules/**'],
     absolute: true,
   });
 
-const dirGlob = async ({ cwd, patterns, ignore }: { cwd: string; patterns: string[]; ignore: string[] }) =>
+const dirGlob = async ({ cwd, patterns, ignore = [] }: BaseGlobOptions) =>
   globby(patterns, {
     cwd,
     ignore: [...ignore, '**/node_modules/**'],
@@ -68,17 +68,25 @@ const dirGlob = async ({ cwd, patterns, ignore }: { cwd: string; patterns: strin
     onlyDirectories: true,
   });
 
-const firstGlob = async ({ cwd, patterns }: { cwd: string; patterns: string[] }) => {
+const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
   const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd });
   for await (const entry of stream) {
     return entry;
   }
 };
 
-export const _glob = timerify(glob);
+const memoOptions = { serializer: JSON.stringify, callTimeout: 0 };
+
+const memoizedGlob = memoize(glob, memoOptions);
+Object.defineProperty(memoizedGlob, 'name', { value: 'glob' });
+
+const memoizedFirstGlob = memoize(firstGlob, memoOptions);
+Object.defineProperty(memoizedFirstGlob, 'name', { value: 'firstGlob' });
+
+export const _glob = timerify(memoizedGlob);
 
 export const _pureGlob = timerify(pureGlob);
 
 export const _dirGlob = timerify(dirGlob);
 
-export const _firstGlob = timerify(firstGlob);
+export const _firstGlob = timerify(memoizedFirstGlob);
