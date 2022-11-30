@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import load from '../../util/loader.js';
+import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -21,7 +21,7 @@ export const ENTRY_FILE_PATTERNS = ['.storybook/preview.{js,jsx,ts,tsx}', '**/*.
 export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,ts,tsx}'];
 
 const findStorybookDependencies: GenericPluginCallback = async configFilePath => {
-  const config: StorybookConfig = await load(configFilePath);
+  const config: StorybookConfig = await _load(configFilePath);
   if (config) {
     const addons = config.addons.map(addon =>
       addon.startsWith('.') ? require.resolve(path.join(path.dirname(configFilePath), addon)) : addon

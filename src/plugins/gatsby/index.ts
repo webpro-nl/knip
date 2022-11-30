@@ -1,4 +1,4 @@
-import load from '../../util/loader.js';
+import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.js';
@@ -21,7 +21,7 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
 ];
 
 const findGatsbyDependencies: GenericPluginCallback = async configFilePath => {
-  const config: GatsbyConfig | GatsbyNode = await load(configFilePath);
+  const config: GatsbyConfig | GatsbyNode = await _load(configFilePath);
 
   if (/gatsby-config/.test(configFilePath)) {
     return (config as GatsbyConfig).plugins.map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve));

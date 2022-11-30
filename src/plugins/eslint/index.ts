@@ -1,7 +1,7 @@
 import { ESLint } from 'eslint';
 import { compact } from '../../util/array.js';
 import { _firstGlob } from '../../util/glob.js';
-import load from '../../util/loader.js';
+import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { resolvePluginPackageName, customResolvePluginPackageNames, getDependenciesFromSettings } from './helpers.js';
@@ -25,7 +25,7 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
   // Load the configuration to find `extends` (for dependencies) and `overrides` (for calculateConfigForFile samples)
   const config: ESLintConfig = configFilePath.endsWith('package.json')
     ? manifest.eslintConfig
-    : await load(configFilePath);
+    : await _load(configFilePath);
 
   // Unfortunately we need to resolve root `extends` manually
   const rootExtends = config?.extends ? [config.extends].flat().map(customResolvePluginPackageNames) : [];

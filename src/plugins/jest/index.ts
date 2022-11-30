@@ -1,5 +1,5 @@
 import path from 'node:path';
-import load from '../../util/loader.js';
+import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -16,7 +16,7 @@ export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}'];
 export const ENTRY_FILE_PATTERNS = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
-  const config: Config.InitialOptions = await load(configFilePath);
+  const config: Config.InitialOptions = await _load(configFilePath);
   if (config) {
     if (config.preset) {
       const presetConfigPath = path.join(path.dirname(configFilePath), config.preset);

@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import load from '../../util/loader.js';
+import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { resolvePresetName, resolvePluginName } from './helpers.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -42,7 +42,7 @@ const getDependenciesFromConfig = (config: BabelConfig) => {
 const findBabelDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   let config: BabelConfig | BabelFn = configFilePath.endsWith('package.json')
     ? manifest.babel
-    : await load(configFilePath);
+    : await _load(configFilePath);
   if (typeof config === 'function') {
     config = config(api);
   }

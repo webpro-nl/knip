@@ -1,4 +1,4 @@
-import load from '../../util/loader.js';
+import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { StrykerConfig } from './types.js';
@@ -10,7 +10,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependen
 export const CONFIG_FILE_PATTERNS = ['?(.)stryker.{conf,config}.{js,mjs,json}'];
 
 const findStrykerDependencies: GenericPluginCallback = async configFilePath => {
-  const config: StrykerConfig = await load(configFilePath);
+  const config: StrykerConfig = await _load(configFilePath);
   if (config) {
     const runners = config.testRunner ? [`@stryker-mutator/${config.testRunner}-runner`] : [];
     const checkers = config.checkers ? config.checkers.map(checker => `@stryker-mutator/${checker}-checker`) : [];
