@@ -181,6 +181,14 @@ export default class DependencyDeputy {
         if (scope === '@types') {
           // Ignore `@types/*` packages that don't have a related dependency (e.g. `@types/node`)
           if (IGNORE_DEFINITELY_TYPED.includes(typedDependency)) return false;
+
+          // Ignore typed dependencies that have a peer dependency that's referenced
+          // Example: `next` has `react-dom` as peer dependencies, so `@types/react-dom` can be ignored (i.e. it's used)
+          const peerDependencies = this.getPeerDependencies(workspaceName, typedDependency);
+          if (peerDependencies.length) {
+            return !peerDependencies.find(peerDependency => !isUnreferencedDependency(peerDependency));
+          }
+
           return !referencedDependencies?.has(typedDependency);
         }
 
