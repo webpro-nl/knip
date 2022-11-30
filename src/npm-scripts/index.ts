@@ -1,8 +1,12 @@
 import { PackageJson } from 'type-fest';
 import { IGNORED_GLOBAL_BINARIES } from '../constants.js';
-import { compact } from '../util/array.js';
+import parsedArgs from '../util/parseArgs.js';
 import { timerify } from '../util/performance.js';
 import { getBinariesFromScripts, getPackageManifest } from './helpers.js';
+
+const {
+  values: { production: isProduction = false },
+} = parsedArgs;
 
 const findManifestDependencies = async (
   ignoreBinaries: string[],
@@ -11,10 +15,16 @@ const findManifestDependencies = async (
   dir: string,
   cwd: string
 ) => {
+  const scriptFilter = isProduction ? ['start'] : [];
   const referencedDependencies: Set<string> = new Set();
   const peerDependencies: Map<string, Set<string>> = new Map();
 
-  const scripts = compact(Object.values(manifest.scripts ?? {}));
+  const scripts = Object.entries(manifest.scripts ?? {}).reduce((scripts, [scriptName, script]) => {
+    if (script && (scriptFilter.length === 0 || (scriptFilter.length > 0 && scriptFilter.includes(scriptName)))) {
+      return [...scripts, script];
+    }
+    return scripts;
+  }, [] as string[]);
   const referencedBinaries = getBinariesFromScripts(scripts)
     .filter(binaryName => !IGNORED_GLOBAL_BINARIES.includes(binaryName))
     .filter(binaryName => !ignoreBinaries.includes(binaryName));

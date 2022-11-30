@@ -229,7 +229,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         }
       }
 
-      if (!isProduction && (report.dependencies || report.unlisted || report.files)) {
+      if (report.dependencies || report.unlisted || report.files) {
         const workspaceDependencies = deputy.getAllDependencies(name);
         const { referencedDependencyIssues, referencedDependencies } = await worker.findDependenciesByPlugins();
 
