@@ -27,7 +27,7 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
     ? manifest.eslintConfig
     : await load(configFilePath);
 
-  // Unfortunately we need to resolve (only) the root `extends` manually
+  // Unfortunately we need to resolve root `extends` manually
   const rootExtends = config?.extends ? [config.extends].flat().map(customResolvePluginPackageNames) : [];
 
   // Find a sample file for each root + overrides config (to feed calculateConfigForFile)

@@ -17,9 +17,10 @@ test('Unused dependencies in ESLint configuration (legacy json)', async () => {
   const configFilePath = path.join(cwd, '.eslintrc.json');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
   assert.deepEqual(dependencies, [
-    'eslint-plugin-airbnb',
+    'eslint-config-airbnb',
     '@typescript-eslint/eslint-plugin',
     'eslint-plugin-prettier',
+    'eslint-config-prettier',
     '@typescript-eslint/parser',
     'eslint-plugin-import',
   ]);
@@ -29,7 +30,8 @@ test('Unused dependencies in ESLint configuration (legacy js)', async () => {
   const configFilePath = path.join(cwd, '.eslintrc.js');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
   assert.deepEqual(dependencies, [
-    'eslint-plugin-airbnb',
+    'eslint-config-airbnb',
+    'eslint-config-prettier',
     'eslint-plugin-prettier',
     '@typescript-eslint/eslint-plugin',
     '@scope/eslint-config',

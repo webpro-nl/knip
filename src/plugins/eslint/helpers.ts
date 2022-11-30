@@ -2,13 +2,15 @@ import { compact } from '../../util/array.js';
 import { getPackageName } from '../../util/modules.js';
 import type { ESLintConfig } from './types.js';
 
-export const resolvePluginPackageName = (pluginName: string) => {
+const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', pluginName: string) => {
   return pluginName.startsWith('@')
     ? pluginName.includes('/')
       ? pluginName
-      : `${pluginName}/eslint-plugin`
-    : `eslint-plugin-${pluginName}`;
+      : `${pluginName}/${namespace}`
+    : `${namespace}-${pluginName}`;
 };
+
+export const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
 
 export const customResolvePluginPackageNames = (extend: string) => {
   if (extend.includes('/node_modules/')) return getPackageName(extend);
@@ -16,10 +18,10 @@ export const customResolvePluginPackageNames = (extend: string) => {
   if (extend.includes(':')) {
     const pluginName = extend.replace(/^plugin:/, '').replace(/(\/|:).+$/, '');
     if (pluginName === 'eslint') return;
-    return resolvePluginPackageName(pluginName);
+    return resolvePackageName('eslint-plugin', pluginName);
   }
   // TODO Slippery territory, not sure what we have here
-  return extend.includes('eslint') ? getPackageName(extend) : resolvePluginPackageName(extend);
+  return extend.includes('eslint') ? getPackageName(extend) : resolvePackageName('eslint-config', extend);
 };
 
 const getImportPluginDependencies = (settings: Record<string, unknown>) => {
