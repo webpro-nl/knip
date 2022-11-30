@@ -84,7 +84,7 @@ export default class IssueCollector {
     if (!this.isShowProgress) return;
 
     const { processed, total } = this.counters;
-    const percentage = Math.floor((processed / total) * 100);
+    const percentage = total === 0 ? 0 : Math.floor((processed / total) * 100);
     const messages = [getLine(`${percentage}%`, `of files processed (${processed} of ${total})`)];
 
     this.report.files && messages.push(getLine(this.counters.files, 'unused files'));
