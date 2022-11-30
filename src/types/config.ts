@@ -24,6 +24,7 @@ interface PluginsConfiguration {
   rollup: PluginConfiguration;
   storybook: PluginConfiguration;
   stryker: PluginConfiguration;
+  typescript: PluginConfiguration;
 }
 
 interface BaseWorkspaceConfiguration {

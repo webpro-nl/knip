@@ -15,3 +15,4 @@ export * as remix from './remix/index.js';
 export * as rollup from './rollup/index.js';
 export * as storybook from './storybook/index.js';
 export * as stryker from './stryker/index.js';
+export * as typescript from './typescript/index.js';
