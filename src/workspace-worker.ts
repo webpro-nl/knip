@@ -2,6 +2,7 @@ import path from 'node:path';
 import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './npm-scripts/index.js';
 import * as plugins from './plugins/index.js';
+import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
 import { debugLogFiles, debugLogIssues } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
@@ -49,8 +50,8 @@ export default class WorkspaceWorker {
   rootWorkspaceDir: string;
 
   referencedDependencies: ReferencedDependencies = new Set();
-  peerDependencies: Map<string, Set<string>> = new Map();
-  installedBinaries: Map<string, string> = new Map();
+  peerDependencies: PeerDependencies = new Map();
+  installedBinaries: InstalledBinaries = new Map();
 
   negatedWorkspacePatterns: string[] = [];
   enabled: Record<PluginName, boolean>;

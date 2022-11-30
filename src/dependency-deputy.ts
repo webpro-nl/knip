@@ -5,6 +5,7 @@ import { WorkspaceConfiguration } from './types/config.js';
 import { isDefinitelyTyped, getDefinitelyTypedPackage } from './util/modules.js';
 import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
+import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
 import type { PackageJson } from 'type-fest';
 
 const IGNORE_DEFINITELY_TYPED = ['node'];
@@ -19,8 +20,8 @@ export default class DependencyDeputy {
   manifests: Map<string, PackageJson> = new Map();
   canceledWorkspaces: Set<string>;
   referencedDependencies: Map<string, Set<string>>;
-  peerDependencies: Map<string, Map<string, Set<string>>>;
-  installedBinaries: Map<string, Map<string, string>>;
+  peerDependencies: Map<string, PeerDependencies>;
+  installedBinaries: Map<string, InstalledBinaries>;
 
   tsConfigPathGlobs: Map<string, string[]> = new Map();
 
@@ -88,7 +89,7 @@ export default class DependencyDeputy {
     return this._manifests.get(workspaceName)?.allDependencies ?? [];
   }
 
-  setInstalledBinaries(workspaceName: string, installedBinaries: Map<string, string>) {
+  setInstalledBinaries(workspaceName: string, installedBinaries: Map<string, Set<string>>) {
     this.installedBinaries.set(workspaceName, installedBinaries);
   }
 

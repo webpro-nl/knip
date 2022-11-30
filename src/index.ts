@@ -263,9 +263,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               // TODO Look up all ancestors
               const rootBinaries = deputy.getInstalledBinaries(ROOT_WORKSPACE_NAME);
               if (rootBinaries?.has(issue.symbol)) {
-                // Also, mark the binary's dependency of the root workspace as referenced
-                const dependency = rootBinaries.get(issue.symbol);
-                dependency && deputy.addReferencedDependency(ROOT_WORKSPACE_NAME, dependency);
+                // Also, mark the binary's dependencies of the root workspace as referenced
+                const dependencies = rootBinaries.get(issue.symbol);
+                dependencies?.forEach(dependency => deputy.addReferencedDependency(ROOT_WORKSPACE_NAME, dependency));
                 continue;
               }
             }
