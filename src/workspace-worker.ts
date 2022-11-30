@@ -5,10 +5,15 @@ import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
 import { debugLogFiles, debugLogIssues } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
+import parsedArgs from './util/parseArgs.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Issue } from './types/issues.js';
 import type { GenericPluginCallback } from './types/plugins.js';
 import type { Entries, PackageJson } from 'type-fest';
+
+const {
+  values: { production: isProduction = false },
+} = parsedArgs;
 
 type PluginNames = Entries<typeof plugins>;
 
@@ -143,7 +148,7 @@ export default class WorkspaceWorker {
     if (projectFiles.length === 0) return [];
 
     const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
-    const negatedPluginEntryFilePatterns = this.getPluginEntryFilePatterns(true).map(negate);
+    const negatedPluginEntryFilePatterns = this.getPluginEntryFilePatterns(false).map(negate);
     const negatedPluginProjectFilePatterns = this.getPluginProjectFilePatterns().map(negate);
 
     return [
@@ -156,14 +161,14 @@ export default class WorkspaceWorker {
     ].flat();
   }
 
-  getPluginEntryFilePatterns(isProduction = false) {
+  getPluginEntryFilePatterns(isIncludeProductionEntryFiles = true) {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       if (this.enabled[pluginName]) {
         const { entryFiles } = this.getConfigForPlugin(pluginName);
         const defaultEntryFiles = 'ENTRY_FILE_PATTERNS' in plugin ? plugin.ENTRY_FILE_PATTERNS : [];
         patterns.push(...(entryFiles.length > 0 ? entryFiles : defaultEntryFiles));
-        if (!isProduction) {
+        if (isIncludeProductionEntryFiles) {
           const entryFiles = 'PRODUCTION_ENTRY_FILE_PATTERNS' in plugin ? plugin.PRODUCTION_ENTRY_FILE_PATTERNS : [];
           patterns.push(...entryFiles);
         }
@@ -227,7 +232,7 @@ export default class WorkspaceWorker {
     });
     const negatedEntryFiles = this.config.entryFiles.filter(hasNoProductionSuffix).map(negate);
     const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
-    const negatedPluginEntryFilePatterns = this.getPluginEntryFilePatterns(true).map(negate);
+    const negatedPluginEntryFilePatterns = this.getPluginEntryFilePatterns(false).map(negate);
     const negatedPluginProjectFilePatterns = this.getPluginProjectFilePatterns().map(negate);
 
     return [
@@ -271,7 +276,8 @@ export default class WorkspaceWorker {
 
   public async findDependenciesByPlugins() {
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
-      if (this.enabled[pluginName]) {
+      const isIncludePlugin = isProduction ? `PRODUCTION_ENTRY_FILE_PATTERNS` in plugin : true;
+      if (this.enabled[pluginName] && isIncludePlugin) {
         const hasDependencyFinder = 'findDependencies' in plugin && typeof plugin.findDependencies === 'function';
         if (hasDependencyFinder) {
           const dependencies = await this.findDependenciesByPlugin(pluginName, plugin.findDependencies);
