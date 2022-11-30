@@ -140,7 +140,19 @@ export default class WorkspaceWorker {
   getProjectFilePatterns() {
     const { projectFiles } = this.config;
     if (projectFiles.length === 0) return [];
-    return [projectFiles, TEST_FILE_PATTERNS, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
+
+    const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
+    const negatedPluginEntryFilePatterns = this.getPluginEntryFilePatterns(true).map(negate);
+    const negatedPluginProjectFilePatterns = this.getPluginProjectFilePatterns().map(negate);
+
+    return [
+      projectFiles,
+      negatedPluginConfigPatterns,
+      negatedPluginEntryFilePatterns,
+      negatedPluginProjectFilePatterns,
+      TEST_FILE_PATTERNS,
+      this.isRoot ? this.negatedWorkspacePatterns : [],
+    ].flat();
   }
 
   getPluginEntryFilePatterns(isProduction = false) {
