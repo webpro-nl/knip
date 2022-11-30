@@ -36,13 +36,11 @@ export const getBinariesFromScripts = (npmScripts: string[]) =>
         .filter(command => /^\w/.test(command))
         .map(stripEnvironmentVariables)
         .flatMap(command => {
-          const [binary, argumentOrBinary, ...args] = command.trim().split(' ');
-          if (FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS.includes(binary)) {
-            const dependenciesFromArguments = getDependenciesFromLoaderArguments(args);
-            return [binary, argumentOrBinary, ...dependenciesFromArguments];
-          }
-          const dependenciesFromArguments = getDependenciesFromLoaderArguments([argumentOrBinary, ...args]);
-          return [binary, ...dependenciesFromArguments];
+          const [binary, ...args] = command.trim().split(' ');
+          const firstArgument =
+            FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS.includes(binary) && args.find(arg => !arg.startsWith('-'));
+          const dependenciesFromArguments = getDependenciesFromLoaderArguments(args);
+          return [binary, firstArgument, ...dependenciesFromArguments];
         })
         .forEach(binary => binary && binaries.add(binary));
       return binaries;
