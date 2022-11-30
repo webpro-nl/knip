@@ -9,4 +9,4 @@ export const IGNORED_GLOBAL_BINARIES = ['npm', 'npx', 'node', 'yarn', 'pnpm', 'd
 
 // Not many programs accept another program as their first argument
 // Does this make sense? Can we manage? It does make the whole `npm script` plugin quite powerful, though.
-export const FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS = ['cross-env', 'dotenv'];
+export const FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS = ['npx', 'cross-env', 'dotenv'];
