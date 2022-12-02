@@ -46,6 +46,7 @@
   "dependencies": {
     "@esbuild-kit/esm-loader": "2.5.1",
     "@snyk/github-codeowners": "1.0.0",
+    "chalk": "5.1.2",
     "easy-table": "1.2.0",
     "esbuild": "0.15.15",
     "esbuild-register": "3.4.1",
