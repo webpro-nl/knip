@@ -83,7 +83,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       config,
       rootWorkspaceConfig: chief.getConfigForWorkspace(ROOT_WORKSPACE_NAME),
       manifest,
-      // @ts-ignore
       ancestorManifests: ancestors.map(name => deputy.getManifest(name)),
       rootConfig: chief.config,
       negatedWorkspacePatterns,

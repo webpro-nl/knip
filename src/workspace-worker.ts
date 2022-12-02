@@ -22,11 +22,10 @@ type WorkspaceManagerOptions = {
   dir: string;
   config: WorkspaceConfiguration;
   manifest: PackageJson;
-  ancestorManifests: PackageJson[];
+  ancestorManifests: (PackageJson | undefined)[];
   rootWorkspaceConfig: WorkspaceConfiguration;
   rootConfig: Configuration;
   negatedWorkspacePatterns: string[];
-  rootManifest: PackageJson;
   rootWorkspaceDir: string;
 };
 
@@ -47,7 +46,7 @@ export default class WorkspaceWorker {
   name: string;
   dir: string;
   config: WorkspaceConfiguration;
-  ancestorManifests: PackageJson[];
+  ancestorManifests: (PackageJson | undefined)[];
   rootWorkspaceConfig: WorkspaceConfiguration;
   rootConfig: Configuration;
   referencedDependencyIssues: ReferencedDependencyIssues = new Set();
@@ -107,7 +106,7 @@ export default class WorkspaceWorker {
   setEnabledPlugins() {
     const dependencies = new Set(
       [this.manifest, ...this.ancestorManifests]
-        .flatMap(manifest => [Object.keys(manifest.dependencies ?? {}), Object.keys(manifest.devDependencies ?? {})])
+        .flatMap(manifest => [Object.keys(manifest?.dependencies ?? {}), Object.keys(manifest?.devDependencies ?? {})])
         .flat()
     );
 
