@@ -42,27 +42,27 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@snyk/github-codeowners": "1.0.0",
+    "@snyk/github-codeowners": "1.1.0",
     "easy-table": "1.2.0",
-    "esbuild": "0.15.13",
-    "esbuild-register": "3.3.3",
+    "esbuild": "0.15.18",
+    "esbuild-register": "3.4.1",
     "globby": "13.1.2",
     "micromatch": "4.0.5",
     "summary": "2.1.0",
-    "ts-morph": "16.0.0",
-    "ts-morph-helpers": "0.6.1"
+    "ts-morph": "17.0.1",
+    "ts-morph-helpers": "0.6.3"
   },
   "devDependencies": {
     "@types/micromatch": "4.0.2",
-    "@types/node": "18.11.5",
+    "@types/node": "18.11.11",
     "globstar": "1.0.0",
-    "prettier": "2.7.1",
-    "release-it": "15.5.0",
+    "prettier": "2.8.0",
+    "release-it": "15.5.1",
     "remark-cli": "11.0.0",
     "remark-preset-webpro": "0.0.1",
-    "tsx": "3.11.0",
-    "type-fest": "3.1.0",
-    "typescript": "4.8.4"
+    "tsx": "3.12.1",
+    "type-fest": "3.3.0",
+    "typescript": "4.9.3"
   },
   "release-it": {
     "github": {
