@@ -90,7 +90,7 @@ export default class SourceLab {
               issues.add({
                 type: 'enumMembers',
                 filePath,
-                symbol: member.getName(),
+                symbol: member.getName().replace(/['"`]/g, ''),
                 parentSymbol: identifier?.getText(),
               })
             );
