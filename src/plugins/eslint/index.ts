@@ -1,5 +1,6 @@
 import { ESLint } from 'eslint';
 import { compact } from '../../util/array.js';
+import { debugLogFiles, debugLogObject } from '../../util/debug.js';
 import { _firstGlob } from '../../util/glob.js';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
@@ -32,10 +33,15 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
 
   // Find a sample file for each root + overrides config (to feed calculateConfigForFile)
   const patterns = [workspaceConfig.entryFiles, ...(config?.overrides?.map(overrides => overrides.files) ?? [])];
+
+  debugLogObject('ESLint overrides file patterns', patterns);
+
   const samples = await Promise.all(patterns.map(patterns => _firstGlob({ patterns, cwd })));
   const sampleFilePaths = samples
     .filter((filePath): filePath is string | Buffer => typeof filePath !== 'undefined')
     .map(String);
+
+  debugLogFiles('ESLint overrides sample files', sampleFilePaths);
 
   // Provided with the samples, we can delegate the rest to ESLint
   const engine = new ESLint({ cwd, overrideConfigFile: configFilePath, useEslintrc: false });
