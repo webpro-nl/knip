@@ -1,21 +1,30 @@
-import { PackageJson } from 'type-fest';
 import { IGNORED_GLOBAL_BINARIES } from '../constants.js';
-import { InstalledBinaries, PeerDependencies } from '../types/workspace.js';
-import parsedArgs from '../util/parseArgs.js';
 import { timerify } from '../util/performance.js';
 import { getBinariesFromScripts, getPackageManifest } from './helpers.js';
+import type { Configuration } from '../types/config.js';
+import type { InstalledBinaries, PeerDependencies } from '../types/workspace.js';
+import type { PackageJson } from 'type-fest';
 
-const {
-  values: { production: isProduction = false },
-} = parsedArgs;
+type Options = {
+  rootConfig: Configuration;
+  manifest: PackageJson;
+  isRoot: boolean;
+  isProduction: boolean;
+  isStrict: boolean;
+  dir: string;
+  cwd: string;
+};
 
-const findManifestDependencies = async (
-  ignoreBinaries: string[],
-  manifest: PackageJson,
-  isRoot: boolean,
-  dir: string,
-  cwd: string
-) => {
+const findManifestDependencies = async ({
+  rootConfig,
+  manifest,
+  isRoot,
+  isProduction,
+  isStrict,
+  dir,
+  cwd,
+}: Options) => {
+  const { ignoreBinaries } = rootConfig;
   const scriptFilter = isProduction ? ['start'] : [];
   const referencedDependencies: Set<string> = new Set();
   const peerDependencies: PeerDependencies = new Map();
@@ -60,7 +69,15 @@ const findManifestDependencies = async (
 
   for (const binaryName of referencedBinaries) {
     if (installedBinaries.has(binaryName)) {
-      installedBinaries.get(binaryName)?.forEach(packageName => referencedDependencies.add(packageName ?? binaryName));
+      if (isStrict) {
+        const packageNames = Array.from(installedBinaries.get(binaryName) ?? []);
+        const packageName = packageNames.length === 1 ? packageNames[0] : undefined;
+        referencedDependencies.add(packageName ?? binaryName);
+      } else {
+        installedBinaries
+          .get(binaryName)
+          ?.forEach(packageName => referencedDependencies.add(packageName ?? binaryName));
+      }
     } else {
       referencedDependencies.add(binaryName);
     }

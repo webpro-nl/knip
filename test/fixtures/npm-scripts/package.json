@@ -1,10 +1,11 @@
 {
   "name": "npm-scripts",
   "scripts": {
-    "watch": "nodemon index.js",
+    "nodemon": "nodemon index.js",
     "build": "rm -rf && dotenv -- nx build npm-scripts",
-    "deploy": "NODE_ENV=production pm2 start index.js",
-    "deploy:dev": "pm2-dev start index.js",
+    "pm2": "NODE_ENV=production pm2 start index.js",
+    "dev": "pm2-dev start index.js",
+    "lint": "eslint",
     "test": "bash test/unit.sh && bash test/e2e.sh"
   },
   "dependencies": {
@@ -13,6 +14,10 @@
   "devDependencies": {
     "pm2": "*",
     "nx": "*",
-    "unused": "*"
+    "unused": "*",
+    "eslint": "8.28.0",
+    "eslint-v6": "npm:eslint@6.0.1",
+    "eslint-v7": "npm:eslint@7.0.0",
+    "eslint-v8": "npm:eslint@8.0.2"
   }
 }
