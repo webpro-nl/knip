@@ -22,7 +22,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const chief = new ConfigurationChief({ cwd });
   const deputy = new DependencyDeputy();
 
-  debugLogObject(1, 'Unresolved configuration', unresolvedConfiguration);
+  debugLogObject('Unresolved configuration', unresolvedConfiguration);
 
   const collector = new IssueCollector({ cwd, isShowProgress });
   collector.updateMessage('Reading configuration and manifest files...');
@@ -31,7 +31,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const workspaces = await chief.getActiveWorkspaces();
 
-  debugLogObject(1, 'Included workspaces', workspaces);
+  debugLogObject('Included workspaces', workspaces);
 
   const report = chief.resolveIncludedIssueTypes();
 
@@ -120,7 +120,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           ignore: worker.getWorkspaceIgnorePatterns(),
           gitignore,
         });
-        debugLogFiles(1, `Globbed entry paths${suffix}`, workspaceEntryPaths);
+        debugLogFiles(`Globbed entry paths${suffix}`, workspaceEntryPaths);
         workspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
 
         collector.updateMessage(`Resolving production plugin entry files${suffix}...`);
@@ -131,7 +131,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           ignore: worker.getWorkspaceIgnorePatterns(),
           gitignore,
         });
-        debugLogFiles(1, `Globbed production plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
+        debugLogFiles(`Globbed production plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
         pluginWorkspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
         pluginWorkspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
 
@@ -144,7 +144,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             ignore: worker.getWorkspaceIgnorePatterns(),
             gitignore,
           });
-          debugLogFiles(1, `Globbed project paths${suffix}`, workspaceProjectPaths);
+          debugLogFiles(`Globbed project paths${suffix}`, workspaceProjectPaths);
           workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
         }
 
@@ -163,7 +163,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             ignore: worker.getWorkspaceIgnorePatterns(),
             gitignore,
           });
-          debugLogFiles(1, `Globbed entry paths${suffix}`, workspaceEntryPaths);
+          debugLogFiles(`Globbed entry paths${suffix}`, workspaceEntryPaths);
           workspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
         }
 
@@ -177,7 +177,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             ignore: worker.getWorkspaceIgnorePatterns(),
             gitignore,
           });
-          debugLogFiles(1, `Globbed project paths${suffix}`, workspaceProjectPaths);
+          debugLogFiles(`Globbed project paths${suffix}`, workspaceProjectPaths);
           workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
         }
 
@@ -191,7 +191,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             ignore: worker.getWorkspaceIgnorePatterns(),
             gitignore,
           });
-          debugLogFiles(1, `Globbed plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
+          debugLogFiles(`Globbed plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
           pluginWorkspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
           pluginWorkspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
         }
@@ -206,7 +206,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             ignore: worker.getWorkspaceIgnorePatterns(),
             gitignore,
           });
-          debugLogFiles(1, `Globbed plugin project paths${suffix}`, pluginWorkspaceProjectPaths);
+          debugLogFiles(`Globbed plugin project paths${suffix}`, pluginWorkspaceProjectPaths);
           pluginWorkspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
           pluginWorkspaceProjectPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
         }
@@ -220,7 +220,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             ignore: worker.getWorkspaceIgnorePatterns(),
             gitignore,
           });
-          debugLogFiles(1, `Globbed plugin configuration paths${suffix}`, configurationEntryPaths);
+          debugLogFiles(`Globbed plugin configuration paths${suffix}`, configurationEntryPaths);
 
           configurationEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
           configurationEntryPaths.forEach(entryPath => principal.addProjectPath(entryPath));
@@ -324,7 +324,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const { issues, counters } = collector.getIssues();
 
-  debugLogObject(3, 'Issues', issues);
+  debugLogObject('Issues', issues);
 
   return { report: report as Report, issues, counters };
 };

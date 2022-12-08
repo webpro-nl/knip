@@ -66,17 +66,17 @@ export default class ProjectPrincipal {
   private createProjects() {
     const production = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.entryPaths]);
     const entryFiles = production.getSourceFiles();
-    debugLogSourceFiles(1, `Included entry files`, entryFiles);
+    debugLogSourceFiles(`Included entry files`, entryFiles);
 
     // Now resolve dependencies of entry files to find all production files
     _resolveSourceFileDependencies(production);
     const productionFiles = _removeExternalSourceFiles(production);
-    debugLogSourceFiles(1, 'Included files resolved from entry files', productionFiles);
+    debugLogSourceFiles('Included files resolved from entry files', productionFiles);
 
     // Create workspace for the entire project
     const project = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.projectPaths]);
     const projectFiles = project.getSourceFiles();
-    debugLogSourceFiles(1, 'Included project files', projectFiles);
+    debugLogSourceFiles('Included project files', projectFiles);
 
     return { entryFiles, productionFiles, projectFiles };
   }
@@ -87,10 +87,10 @@ export default class ProjectPrincipal {
     const [usedProductionFiles, unreferencedProductionFiles] = partitionSourceFiles(projectFiles, productionFiles);
     const [usedEntryFiles, usedNonEntryFiles] = partitionSourceFiles(usedProductionFiles, entryFiles);
 
-    debugLogSourceFiles(1, 'Used production files', usedProductionFiles);
-    debugLogFiles(1, 'Unreferenced production files', unreferencedProductionFiles);
-    debugLogSourceFiles(1, 'Used entry files', usedEntryFiles);
-    debugLogFiles(1, 'Used non-entry files', usedNonEntryFiles);
+    debugLogSourceFiles('Used production files', usedProductionFiles);
+    debugLogFiles('Unreferenced production files', unreferencedProductionFiles);
+    debugLogSourceFiles('Used entry files', usedEntryFiles);
+    debugLogFiles('Used non-entry files', usedNonEntryFiles);
 
     return { usedProductionFiles, unreferencedProductionFiles };
   }

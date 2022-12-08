@@ -299,7 +299,7 @@ export default class WorkspaceWorker {
     const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
     const pluginConfig = this.getConfigForPlugin(pluginName);
 
-    debugLogFiles(1, `Globbed ${pluginName} config file paths`, configFilePaths);
+    debugLogFiles(`Globbed ${pluginName} config file paths`, configFilePaths);
 
     if (configFilePaths.length === 0) return [];
 
@@ -317,7 +317,7 @@ export default class WorkspaceWorker {
       )
     ).flat();
 
-    debugLogIssues(1, `Dependencies used by ${pluginName} configuration`, referencedDependencyIssues);
+    debugLogIssues(`Dependencies used by ${pluginName} configuration`, referencedDependencyIssues);
 
     return referencedDependencyIssues;
   }

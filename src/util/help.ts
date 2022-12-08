@@ -14,7 +14,6 @@ Options:
   --reporter             Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options     Pass extra options to the reporter (as JSON string, see example)
   --debug                Show debug output
-  --debug-level          Set verbosity of debug output (default: 1, max: 3)
   --debug-file-filter    Filter for files in debug output (regex as string)
   --performance          Measure running time of expensive functions and display stats table
 
@@ -27,7 +26,7 @@ $ knip --production
 $ knip --workspace packages/client --include files,dependencies
 $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
-$ knip --debug --debug-level 2 --debug-file-filter '(specific|particular)-module'
+$ knip --debug --debug-file-filter '(specific|particular)-module'
 
 More info: https://github.com/webpro/knip`);
 };

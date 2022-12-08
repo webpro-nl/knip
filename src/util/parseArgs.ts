@@ -5,7 +5,6 @@ export default parseArgs({
     config: { type: 'string', short: 'c' },
     debug: { type: 'boolean' },
     'debug-file-filter': { type: 'string' },
-    'debug-level': { type: 'string' },
     exclude: { type: 'string', multiple: true },
     help: { type: 'boolean', short: 'h' },
     ignore: { type: 'string', multiple: true },

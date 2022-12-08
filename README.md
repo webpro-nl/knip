@@ -103,7 +103,6 @@ Knip works by creating two sets of files:
       --reporter             Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options     Pass extra options to the reporter (as JSON string, see example)
       --debug                Show debug output
-      --debug-level          Set verbosity of debug output (default: 1, max: 3)
       --performance          Measure running time of expensive functions and display stats table
 
     Issue types: files, dependencies, unlisted, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates

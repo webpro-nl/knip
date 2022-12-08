@@ -42,7 +42,7 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
 
   const ignorePatterns = [...ignore, '**/node_modules/**'];
 
-  debugLogObject(2, "Globbin'", { cwd, globPatterns, ignorePatterns });
+  debugLogObject("Globbin'", { cwd, globPatterns, ignorePatterns });
 
   return globby(globPatterns, {
     cwd,
@@ -69,7 +69,7 @@ const dirGlob = async ({ cwd, patterns, ignore = [] }: BaseGlobOptions) =>
   });
 
 const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
-  const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd });
+  const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd, ignore: ['**/node_modules/**'] });
   for await (const entry of stream) {
     return entry;
   }
