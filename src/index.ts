@@ -19,7 +19,7 @@ import type { Report } from './types/issues.js';
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress } = unresolvedConfiguration;
 
-  const chief = new ConfigurationChief({ cwd });
+  const chief = new ConfigurationChief({ cwd, isStrict, isProduction });
   const deputy = new DependencyDeputy();
 
   debugLogObject('Unresolved configuration', unresolvedConfiguration);
@@ -87,6 +87,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       rootConfig: chief.config,
       negatedWorkspacePatterns,
       rootWorkspaceDir: cwd,
+      isProduction,
+      isStrict,
     });
 
     await worker.init();

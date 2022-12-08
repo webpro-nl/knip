@@ -15,14 +15,7 @@ import type { Configuration, PluginName, WorkspaceConfiguration } from './types/
 import type { PackageJson } from 'type-fest';
 
 const {
-  values: {
-    config: rawConfigArg,
-    workspace: rawWorkspaceArg,
-    include = [],
-    exclude = [],
-    strict: isStrict = false,
-    production: isProduction = false,
-  },
+  values: { config: rawConfigArg, workspace: rawWorkspaceArg, include = [], exclude = [] },
 } = parsedArgs;
 
 const defaultConfig: Configuration = {
@@ -45,6 +38,8 @@ const PLUGIN_NAMES = Object.keys(plugins);
 
 type ConfigurationManagerOptions = {
   cwd?: string;
+  isStrict: boolean;
+  isProduction: boolean;
 };
 
 /**
@@ -57,13 +52,17 @@ type ConfigurationManagerOptions = {
  */
 export default class ConfigurationChief {
   cwd: string = process.cwd();
+  isStrict = false;
+  isProduction = false;
   config: Configuration;
 
   manifestPath: undefined | string;
   manifest: undefined | PackageJson;
 
-  constructor({ cwd }: ConfigurationManagerOptions) {
+  constructor({ cwd, isStrict, isProduction }: ConfigurationManagerOptions) {
     this.cwd = cwd ?? this.cwd;
+    this.isStrict = isStrict;
+    this.isProduction = isProduction;
 
     this.config = defaultConfig;
   }
@@ -227,8 +226,8 @@ export default class ConfigurationChief {
     return resolveIncludedIssueTypes(include, exclude, {
       include: this.config.include ?? [],
       exclude: this.config.exclude ?? [],
-      isProduction,
-      isStrict,
+      isProduction: this.isProduction,
+      isStrict: this.isStrict,
     });
   }
 }

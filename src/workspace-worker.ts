@@ -5,15 +5,10 @@ import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
 import { debugLogFiles, debugLogIssues } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
-import parsedArgs from './util/parseArgs.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Issue } from './types/issues.js';
 import type { GenericPluginCallback } from './types/plugins.js';
 import type { Entries, PackageJson } from 'type-fest';
-
-const {
-  values: { production: isProduction = false },
-} = parsedArgs;
 
 type PluginNames = Entries<typeof plugins>;
 
@@ -27,6 +22,8 @@ type WorkspaceManagerOptions = {
   rootConfig: Configuration;
   negatedWorkspacePatterns: string[];
   rootWorkspaceDir: string;
+  isStrict: boolean;
+  isProduction: boolean;
 };
 
 type ReferencedDependencyIssues = Set<Issue>;
@@ -60,6 +57,8 @@ export default class WorkspaceWorker {
   negatedWorkspacePatterns: string[] = [];
   enabled: Record<PluginName, boolean>;
   isRoot;
+  isStrict;
+  isProduction;
 
   constructor({
     name,
@@ -71,6 +70,8 @@ export default class WorkspaceWorker {
     negatedWorkspacePatterns,
     manifest,
     rootWorkspaceDir,
+    isStrict,
+    isProduction,
   }: WorkspaceManagerOptions) {
     this.name = name;
     this.dir = dir;
@@ -78,6 +79,8 @@ export default class WorkspaceWorker {
     this.ancestorManifests = ancestorManifests;
 
     this.isRoot = name === ROOT_WORKSPACE_NAME;
+    this.isStrict = isStrict;
+    this.isProduction = isProduction;
 
     this.rootConfig = rootConfig;
     this.rootWorkspaceConfig = rootWorkspaceConfig;
@@ -117,13 +120,15 @@ export default class WorkspaceWorker {
   }
 
   async initReferencedDependencies() {
-    const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies(
-      this.rootConfig.ignoreBinaries,
-      this.manifest,
-      this.isRoot,
-      this.dir,
-      this.rootWorkspaceDir
-    );
+    const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies({
+      rootConfig: this.rootConfig,
+      manifest: this.manifest,
+      isRoot: this.isRoot,
+      isProduction: this.isProduction,
+      isStrict: this.isStrict,
+      dir: this.dir,
+      cwd: this.rootWorkspaceDir,
+    });
 
     const filePath = path.join(this.dir, 'package.json');
     dependencies.forEach(dependency =>
@@ -275,7 +280,7 @@ export default class WorkspaceWorker {
 
   public async findDependenciesByPlugins() {
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
-      const isIncludePlugin = isProduction ? `PRODUCTION_ENTRY_FILE_PATTERNS` in plugin : true;
+      const isIncludePlugin = this.isProduction ? `PRODUCTION_ENTRY_FILE_PATTERNS` in plugin : true;
       if (this.enabled[pluginName] && isIncludePlugin) {
         const hasDependencyFinder = 'findDependencies' in plugin && typeof plugin.findDependencies === 'function';
         if (hasDependencyFinder) {
