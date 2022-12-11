@@ -3,7 +3,6 @@ import micromatch from 'micromatch';
 import { z } from 'zod';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import * as plugins from './plugins/index.js';
-import { LocalConfiguration } from './types/validate.js';
 import { arrayify } from './util/array.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
@@ -11,6 +10,7 @@ import { _dirGlob } from './util/glob.js';
 import parsedArgs from './util/parseArgs.js';
 import { resolveIncludedIssueTypes } from './util/resolveIncludedIssueTypes.js';
 import { workspaceSorter } from './util/sort.js';
+import { LocalConfiguration } from './validate.js';
 import type { Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJson } from 'type-fest';
 
@@ -153,12 +153,16 @@ export default class ConfigurationChief {
     return this.config.workspaces ? Object.keys(this.config.workspaces) : [];
   }
 
+  getAdditionalWorkspaces(manifestWorkspaces: string[]) {
+    return Object.keys(this.config.workspaces).filter(
+      name => !name.includes('*') && !manifestWorkspaces.includes(name)
+    );
+  }
+
   public async getActiveWorkspaces() {
     const manifestWorkspaces = await this.getManifestWorkspaces();
 
-    const additionalWorkspaces = Object.keys(this.config.workspaces).filter(
-      name => !name.includes('*') && !manifestWorkspaces.includes(name)
-    );
+    const additionalWorkspaces = this.getAdditionalWorkspaces(manifestWorkspaces);
 
     const rootWorkspace = {
       name: ROOT_WORKSPACE_NAME,
@@ -167,18 +171,20 @@ export default class ConfigurationChief {
       ancestors: [],
     };
 
-    if (manifestWorkspaces.length === 0 && !rawWorkspaceArg) return [rootWorkspace];
+    const isOnlyRootWorkspace =
+      (manifestWorkspaces.length === 0 && !rawWorkspaceArg) ||
+      (rawWorkspaceArg && ['.', './'].includes(rawWorkspaceArg));
+
+    if (isOnlyRootWorkspace) return [rootWorkspace];
 
     if (rawWorkspaceArg) {
-      return [
-        rootWorkspace,
-        {
-          name: rawWorkspaceArg,
-          dir: path.resolve(this.cwd, rawWorkspaceArg),
-          config: this.getConfigForWorkspace(rawWorkspaceArg),
-          ancestors: [ROOT_WORKSPACE_NAME],
-        },
-      ];
+      const workspace = {
+        name: rawWorkspaceArg,
+        dir: path.resolve(this.cwd, rawWorkspaceArg),
+        config: this.getConfigForWorkspace(rawWorkspaceArg),
+        ancestors: [ROOT_WORKSPACE_NAME],
+      };
+      return this.hasConfigForWorkspace('.') ? [rootWorkspace, workspace] : [workspace];
     }
 
     const workspaces = [...manifestWorkspaces, ...additionalWorkspaces];
