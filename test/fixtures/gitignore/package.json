@@ -6,12 +6,12 @@
   "knip": {
     "workspaces": {
       ".": {
-        "entryFiles": "index.ts",
-        "projectFiles": "**/*.{js,ts}"
+        "entry": "index.ts",
+        "project": "**/*.{js,ts}"
       },
       "packages/a": {
-        "entryFiles": "index.ts",
-        "projectFiles": "**/*.{js,ts}"
+        "entry": "index.ts",
+        "project": "**/*.{js,ts}"
       }
     }
   }

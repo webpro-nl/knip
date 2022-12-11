@@ -1,4 +1,4 @@
 {
-  "entryFiles": ["entry.ts"],
-  "projectFiles": ["*.ts"]
+  "entry": ["entry.ts"],
+  "project": ["*.ts"]
 }

@@ -2,10 +2,10 @@
   "name": "members",
   "dependencies": {},
   "knip": {
-    "entryFiles": [
+    "entry": [
       "index.ts"
     ],
-    "projectFiles": [
+    "project": [
       "*.ts"
     ]
   }

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import micromatch from 'micromatch';
 import { z } from 'zod';
+import { ConfigurationValidator } from './configuration-validator.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import * as plugins from './plugins/index.js';
 import { arrayify } from './util/array.js';
@@ -10,7 +11,6 @@ import { _dirGlob } from './util/glob.js';
 import parsedArgs from './util/parseArgs.js';
 import { resolveIncludedIssueTypes } from './util/resolveIncludedIssueTypes.js';
 import { workspaceSorter } from './util/sort.js';
-import { LocalConfiguration } from './validate.js';
 import type { Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJson } from 'type-fest';
 
@@ -21,13 +21,13 @@ const {
 const defaultConfig: Configuration = {
   include: [],
   exclude: [],
+  ignore: [],
   ignoreBinaries: [],
-  ignoreFiles: [],
   ignoreWorkspaces: [],
   workspaces: {
     [ROOT_WORKSPACE_NAME]: {
-      entryFiles: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
-      projectFiles: ['**/*.{js,ts,tsx}'],
+      entry: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
+      project: ['**/*.{js,ts,tsx}'],
       ignore: [],
     },
   },
@@ -89,11 +89,11 @@ export default class ConfigurationChief {
     const rawLocalConfig = resolvedConfigFilePath ? await loadJSON(resolvedConfigFilePath) : manifest.knip;
 
     if (rawLocalConfig) {
-      this.config = this.normalize(LocalConfiguration.parse(rawLocalConfig));
+      this.config = this.normalize(ConfigurationValidator.parse(rawLocalConfig));
     }
   }
 
-  normalize(rawLocalConfig: z.infer<typeof LocalConfiguration>) {
+  normalize(rawLocalConfig: z.infer<typeof ConfigurationValidator>) {
     const workspaces = rawLocalConfig.workspaces ?? {
       [ROOT_WORKSPACE_NAME]: {
         ...rawLocalConfig,
@@ -103,36 +103,35 @@ export default class ConfigurationChief {
     const include = rawLocalConfig.include ?? defaultConfig.include;
     const exclude = rawLocalConfig.exclude ?? defaultConfig.exclude;
     const ignoreBinaries = rawLocalConfig.ignoreBinaries ?? defaultConfig.ignoreBinaries;
-    const ignoreFiles = arrayify(rawLocalConfig.ignoreFiles ?? defaultConfig.ignoreFiles);
+    const ignore = arrayify(rawLocalConfig.ignore ?? defaultConfig.ignore);
     const ignoreWorkspaces = rawLocalConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
 
     return {
       include,
       exclude,
       ignoreBinaries,
-      ignoreFiles,
+      ignore,
       ignoreWorkspaces,
       workspaces: Object.entries(workspaces)
         .filter(([workspaceName]) => !ignoreWorkspaces.includes(workspaceName))
         .reduce((workspaces, workspace) => {
           const [workspaceName, workspaceConfig] = workspace;
-          const entryFiles = arrayify(workspaceConfig.entryFiles);
+          const entry = arrayify(workspaceConfig.entry);
           workspaces[workspaceName] = {
-            entryFiles,
-            projectFiles: arrayify(workspaceConfig.projectFiles ?? entryFiles),
+            entry,
+            project: arrayify(workspaceConfig.project ?? entry),
             ignore: arrayify(workspaceConfig.ignore),
           };
           for (const [pluginName, pluginConfig] of Object.entries(workspaceConfig)) {
             if (PLUGIN_NAMES.includes(pluginName)) {
               const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
               const config = isObject ? arrayify(pluginConfig.config) : arrayify(pluginConfig);
-              const entryFiles = isObject && 'entryFiles' in pluginConfig ? arrayify(pluginConfig.entryFiles) : [];
-              const projectFiles =
-                isObject && 'projectFiles' in pluginConfig ? arrayify(pluginConfig.projectFiles) : entryFiles;
+              const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : [];
+              const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
               workspaces[workspaceName][pluginName as PluginName] = {
                 config,
-                entryFiles,
-                projectFiles,
+                entry,
+                project,
               };
             }
           }
@@ -229,9 +228,9 @@ export default class ConfigurationChief {
   getConfigForWorkspace(workspaceName: string) {
     const key = this.getConfigKeyForWorkspace(workspaceName);
     if (key) {
-      return this.config?.workspaces?.[key] ?? { entryFiles: [], projectFiles: [], ignore: [] };
+      return this.config?.workspaces?.[key] ?? { entry: [], project: [], ignore: [] };
     }
-    return { entryFiles: [], projectFiles: [], ignore: [] };
+    return { entry: [], project: [], ignore: [] };
   }
 
   resolveIncludedIssueTypes() {

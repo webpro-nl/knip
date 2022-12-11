@@ -11,7 +11,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "playwright": {
-    "entryFiles": ["playwright.config.{js,ts}", ".*{test,spec}.{js,ts,mjs}"]
+    "entry": ["playwright.config.{js,ts}", ".*{test,spec}.{js,ts,mjs}"]
   }
 }
 ```

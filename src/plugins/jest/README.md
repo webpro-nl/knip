@@ -12,7 +12,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 {
   "jest": {
     "config": ["jest.config.{js,ts,mjs,cjs,json}"],
-    "entryFiles": ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"]
+    "entry": ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"]
   }
 }
 ```

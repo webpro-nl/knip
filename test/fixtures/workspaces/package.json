@@ -8,30 +8,30 @@
   "knip": {
     "workspaces": {
       ".": {
-        "entryFiles": [],
-        "projectFiles": []
+        "entry": [],
+        "project": []
       },
       "*": {
-        "entryFiles": [
+        "entry": [
           "index.ts"
         ],
-        "projectFiles": [
+        "project": [
           "**/*.ts"
         ]
       },
       "apps/*": {
-        "entryFiles": [
+        "entry": [
           "index.ts"
         ],
-        "projectFiles": [
+        "project": [
           "**/*.ts"
         ]
       },
       "packages/*": {
-        "entryFiles": [
+        "entry": [
           "index.ts"
         ],
-        "projectFiles": [
+        "project": [
           "**/*.ts",
           "!ignored/*.ts"
         ]

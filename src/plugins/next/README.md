@@ -12,7 +12,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 {
   "next": {
     "config": ["next.config.{js,ts}"],
-    "entryFiles": ["pages/**/*.{js,jsx,ts,tsx}", "src/pages/**/*.{js,jsx,ts,tsx}"]
+    "entry": ["pages/**/*.{js,jsx,ts,tsx}", "src/pages/**/*.{js,jsx,ts,tsx}"]
   }
 }
 ```

@@ -11,7 +11,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "rollup": {
-    "entryFiles": ["rollup.config.{js,mjs,ts}"]
+    "entry": ["rollup.config.{js,mjs,ts}"]
   }
 }
 ```

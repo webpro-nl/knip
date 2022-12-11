@@ -13,7 +13,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 {
   "gatsby": {
     "config": ["gatsby-{config,node}.{js,jsx,ts,tsx}"],
-    "entryFiles": [
+    "entry": [
       "gatsby-{browser,ssr}.{js,jsx,ts,tsx}",
       "src/api/**/*.{js,ts}",
       "src/pages/**/*.{js,jsx,ts,tsx}",

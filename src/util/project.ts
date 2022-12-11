@@ -32,13 +32,13 @@ const removeExternalSourceFiles = (project: Project) =>
 
 // Returns two arrays from items in first argument: one with the intersection, another with the rest
 export const partitionSourceFiles = (
-  projectFiles: SourceFile[],
+  project: SourceFile[],
   productionFiles: SourceFile[]
 ): [SourceFile[], Set<string>] => {
   const productionFilePaths = productionFiles.map(sourceFile => sourceFile.getFilePath());
   const usedFiles: Set<SourceFile> = new Set();
   const unusedFiles: Set<string> = new Set();
-  projectFiles.forEach(projectFile => {
+  project.forEach(projectFile => {
     if (productionFilePaths.includes(projectFile.getFilePath())) {
       usedFiles.add(projectFile);
     } else {

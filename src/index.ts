@@ -97,7 +97,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     // Add installed binaries
     deputy.setInstalledBinaries(name, worker.installedBinaries);
 
-    if (config?.entryFiles && config?.projectFiles) {
+    if (config?.entry && config?.project) {
       /**
        * Production mode:
        * - Resolve entry files

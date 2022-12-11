@@ -95,10 +95,7 @@ export default class WorkspaceWorker {
   }
 
   getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
-    return (
-      this.config[pluginName] ??
-      this.rootWorkspaceConfig[pluginName] ?? { config: [], entryFiles: [], projectFiles: [] }
-    );
+    return this.config[pluginName] ?? this.rootWorkspaceConfig[pluginName] ?? { config: [], entry: [], project: [] };
   }
 
   async init() {
@@ -142,21 +139,21 @@ export default class WorkspaceWorker {
   }
 
   getEntryFilePatterns() {
-    const { entryFiles } = this.config;
-    if (entryFiles.length === 0) return [];
-    return [entryFiles, TEST_FILE_PATTERNS, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
+    const { entry } = this.config;
+    if (entry.length === 0) return [];
+    return [entry, TEST_FILE_PATTERNS, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
   }
 
   getProjectFilePatterns() {
-    const { projectFiles } = this.config;
-    if (projectFiles.length === 0) return [];
+    const { project } = this.config;
+    if (project.length === 0) return [];
 
     const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
     const negatedPluginEntryFilePatterns = this.getPluginEntryFilePatterns(false).map(negate);
     const negatedPluginProjectFilePatterns = this.getPluginProjectFilePatterns().map(negate);
 
     return [
-      projectFiles,
+      project,
       negatedPluginConfigPatterns,
       negatedPluginEntryFilePatterns,
       negatedPluginProjectFilePatterns,
@@ -169,12 +166,12 @@ export default class WorkspaceWorker {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       if (this.enabled[pluginName]) {
-        const { entryFiles } = this.getConfigForPlugin(pluginName);
+        const { entry } = this.getConfigForPlugin(pluginName);
         const defaultEntryFiles = 'ENTRY_FILE_PATTERNS' in plugin ? plugin.ENTRY_FILE_PATTERNS : [];
-        patterns.push(...(entryFiles.length > 0 ? entryFiles : defaultEntryFiles));
+        patterns.push(...(entry.length > 0 ? entry : defaultEntryFiles));
         if (isIncludeProductionEntryFiles) {
-          const entryFiles = 'PRODUCTION_ENTRY_FILE_PATTERNS' in plugin ? plugin.PRODUCTION_ENTRY_FILE_PATTERNS : [];
-          patterns.push(...entryFiles);
+          const entry = 'PRODUCTION_ENTRY_FILE_PATTERNS' in plugin ? plugin.PRODUCTION_ENTRY_FILE_PATTERNS : [];
+          patterns.push(...entry);
         }
       }
     }
@@ -185,17 +182,17 @@ export default class WorkspaceWorker {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       if (this.enabled[pluginName]) {
-        const { entryFiles, projectFiles } = this.getConfigForPlugin(pluginName);
+        const { entry, project } = this.getConfigForPlugin(pluginName);
         const defaultEntryFiles = 'ENTRY_FILE_PATTERNS' in plugin ? plugin.ENTRY_FILE_PATTERNS : [];
         const defaultProjectFiles =
           'PROJECT_FILE_PATTERNS' in plugin ? plugin.PROJECT_FILE_PATTERNS : defaultEntryFiles;
         patterns.push(
-          ...(projectFiles.length > 0
-            ? projectFiles
+          ...(project.length > 0
+            ? project
             : defaultProjectFiles.length > 0
             ? defaultProjectFiles
-            : entryFiles.length > 0
-            ? entryFiles
+            : entry.length > 0
+            ? entry
             : defaultEntryFiles)
         );
       }
@@ -216,31 +213,26 @@ export default class WorkspaceWorker {
   }
 
   getProductionEntryFilePatterns() {
-    const entryFiles = this.config.entryFiles.filter(hasProductionSuffix);
-    if (entryFiles.length === 0) return [];
-    const negatedEntryFiles = this.config.entryFiles.filter(hasNoProductionSuffix).map(negate);
-    return [
-      entryFiles,
-      negatedEntryFiles,
-      negatedTestFilePatterns,
-      this.isRoot ? this.negatedWorkspacePatterns : [],
-    ].flat();
+    const entry = this.config.entry.filter(hasProductionSuffix);
+    if (entry.length === 0) return [];
+    const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
+    return [entry, negatedEntryFiles, negatedTestFilePatterns, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
   }
 
   getProductionProjectFilePatterns() {
-    const projectFiles = this.config.projectFiles;
-    if (projectFiles.length === 0) return this.getProductionEntryFilePatterns();
-    const _projectFiles = this.config.projectFiles.map(pattern => {
+    const project = this.config.project;
+    if (project.length === 0) return this.getProductionEntryFilePatterns();
+    const _project = this.config.project.map(pattern => {
       if (!pattern.endsWith('!') && !pattern.startsWith('!')) return negate(pattern);
       return pattern;
     });
-    const negatedEntryFiles = this.config.entryFiles.filter(hasNoProductionSuffix).map(negate);
+    const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
     const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
     const negatedPluginEntryFilePatterns = this.getPluginEntryFilePatterns(false).map(negate);
     const negatedPluginProjectFilePatterns = this.getPluginProjectFilePatterns().map(negate);
 
     return [
-      _projectFiles,
+      _project,
       negatedEntryFiles,
       negatedPluginConfigPatterns,
       negatedPluginEntryFilePatterns,
@@ -255,9 +247,9 @@ export default class WorkspaceWorker {
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       if (this.enabled[pluginName]) {
         if ('PRODUCTION_ENTRY_FILE_PATTERNS' in plugin) {
-          const { entryFiles } = this.getConfigForPlugin(pluginName);
+          const { entry } = this.getConfigForPlugin(pluginName);
           const defaultEntryFiles = plugin.PRODUCTION_ENTRY_FILE_PATTERNS;
-          patterns.push(...(entryFiles.length > 0 ? entryFiles : defaultEntryFiles));
+          patterns.push(...(entry.length > 0 ? entry : defaultEntryFiles));
         }
       }
     }
@@ -273,9 +265,7 @@ export default class WorkspaceWorker {
   }
 
   getWorkspaceIgnorePatterns() {
-    const ignoreFiles = this.rootConfig.ignoreFiles;
-    const ignore = this.config.ignore;
-    return [...ignoreFiles, ...ignore];
+    return [...this.rootConfig.ignore, ...this.config.ignore];
   }
 
   public async findDependenciesByPlugins() {

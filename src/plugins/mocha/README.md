@@ -12,7 +12,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 {
   "mocha": {
     "config": [".mocharc.{js,cjs,json,jsonc,yml,yaml}", "package.json"],
-    "entryFiles": ["test/**/*.{js,cjs,mjs}"]
+    "entry": ["test/**/*.{js,cjs,mjs}"]
   }
 }
 ```

@@ -33,7 +33,7 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
 
   // Find a sample file for each root + overrides config (to feed calculateConfigForFile)
   const patterns = compact([
-    workspaceConfig.entryFiles,
+    workspaceConfig.entry,
     ...(config?.overrides?.map(overrides => [overrides.files].flat()) ?? []),
   ]);
 

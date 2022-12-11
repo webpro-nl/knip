@@ -10,7 +10,7 @@ const rootConfig = {
   exclude: [],
   workspaces: {},
   ignoreBinaries: ['bash', 'rm'],
-  ignoreFiles: [],
+  ignore: [],
   ignoreWorkspaces: [],
 };
 

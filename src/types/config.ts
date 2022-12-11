@@ -2,8 +2,8 @@ type NormalizedGlob = string[];
 
 export interface PluginConfiguration {
   config: NormalizedGlob;
-  entryFiles: NormalizedGlob;
-  projectFiles: NormalizedGlob;
+  entry: NormalizedGlob;
+  project: NormalizedGlob;
 }
 
 interface PluginsConfiguration {
@@ -28,8 +28,8 @@ interface PluginsConfiguration {
 }
 
 interface BaseWorkspaceConfiguration {
-  entryFiles: NormalizedGlob;
-  projectFiles: NormalizedGlob;
+  entry: NormalizedGlob;
+  project: NormalizedGlob;
   ignore: NormalizedGlob;
 }
 
@@ -40,8 +40,8 @@ export type PluginName = keyof PluginsConfiguration;
 export interface Configuration {
   include: string[];
   exclude: string[];
-  workspaces: Record<string, WorkspaceConfiguration>;
+  ignore: NormalizedGlob;
   ignoreBinaries: string[];
-  ignoreFiles: string[];
   ignoreWorkspaces: string[];
+  workspaces: Record<string, WorkspaceConfiguration>;
 }

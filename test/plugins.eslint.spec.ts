@@ -7,8 +7,8 @@ import { getManifest } from './helpers';
 const cwd = path.resolve('test/fixtures/eslint');
 const manifest = getManifest(cwd);
 const workspaceConfig = {
-  entryFiles: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
-  projectFiles: ['**/*.{js,ts,tsx}'],
+  entry: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
+  project: ['**/*.{js,ts,tsx}'],
   ignore: [],
 };
 

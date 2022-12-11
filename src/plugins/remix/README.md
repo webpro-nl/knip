@@ -11,7 +11,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "remix": {
-    "entryFiles": ["remix.config.js", "remix.init/index.js"]
+    "entry": ["remix.config.js", "remix.init/index.js"]
   }
 }
 ```
