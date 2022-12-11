@@ -32,14 +32,17 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
   const rootExtends = config?.extends ? [config.extends].flat().map(customResolvePluginPackageNames) : [];
 
   // Find a sample file for each root + overrides config (to feed calculateConfigForFile)
-  const patterns = [workspaceConfig.entryFiles, ...(config?.overrides?.map(overrides => overrides.files) ?? [])];
+  const patterns = compact([
+    workspaceConfig.entryFiles,
+    ...(config?.overrides?.map(overrides => [overrides.files].flat()) ?? []),
+  ]);
 
   debugLogObject('ESLint overrides file patterns', patterns);
 
   const samples = await Promise.all(patterns.map(patterns => _firstGlob({ patterns, cwd })));
-  const sampleFilePaths = samples
-    .filter((filePath): filePath is string | Buffer => typeof filePath !== 'undefined')
-    .map(String);
+  const sampleFilePaths = compact(
+    samples.filter((filePath): filePath is string | Buffer => typeof filePath !== 'undefined').map(String)
+  );
 
   debugLogFiles('ESLint overrides sample files', sampleFilePaths);
 
