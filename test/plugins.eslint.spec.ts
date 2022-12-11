@@ -10,7 +10,6 @@ const workspaceConfig = {
   entryFiles: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
   projectFiles: ['**/*.{js,ts,tsx}'],
   ignore: [],
-  paths: {},
 };
 
 test('Unused dependencies in ESLint configuration (legacy json)', async () => {

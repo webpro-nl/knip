@@ -31,7 +31,6 @@ interface BaseWorkspaceConfiguration {
   entryFiles: NormalizedGlob;
   projectFiles: NormalizedGlob;
   ignore: NormalizedGlob;
-  paths: Record<string, string[]>;
 }
 
 export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Partial<PluginsConfiguration> {}

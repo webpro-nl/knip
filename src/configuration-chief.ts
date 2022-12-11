@@ -29,7 +29,6 @@ const defaultConfig: Configuration = {
       entryFiles: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
       projectFiles: ['**/*.{js,ts,tsx}'],
       ignore: [],
-      paths: {},
     },
   },
 };
@@ -122,7 +121,6 @@ export default class ConfigurationChief {
             entryFiles,
             projectFiles: arrayify(workspaceConfig.projectFiles ?? entryFiles),
             ignore: arrayify(workspaceConfig.ignore),
-            paths: workspaceConfig.paths ?? {},
           };
           for (const [pluginName, pluginConfig] of Object.entries(workspaceConfig)) {
             if (PLUGIN_NAMES.includes(pluginName)) {
@@ -231,9 +229,9 @@ export default class ConfigurationChief {
   getConfigForWorkspace(workspaceName: string) {
     const key = this.getConfigKeyForWorkspace(workspaceName);
     if (key) {
-      return this.config?.workspaces?.[key] ?? { entryFiles: [], projectFiles: [], paths: {}, ignore: [] };
+      return this.config?.workspaces?.[key] ?? { entryFiles: [], projectFiles: [], ignore: [] };
     }
-    return { entryFiles: [], projectFiles: [], paths: {}, ignore: [] };
+    return { entryFiles: [], projectFiles: [], ignore: [] };
   }
 
   resolveIncludedIssueTypes() {
