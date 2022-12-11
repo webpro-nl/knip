@@ -202,10 +202,12 @@ export default class DependencyDeputy {
       };
 
       this.getProductionDependencies(workspaceName)
+        .filter(symbol => symbol !== 'knip')
         .filter(isUnreferencedDependency)
         .forEach(symbol => dependencyIssues.push({ type: 'dependencies', filePath: manifestPath, symbol }));
 
       this.getDevDependencies(workspaceName)
+        .filter(symbol => symbol !== 'knip')
         .filter(isUnreferencedDependency)
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
     }
