@@ -202,6 +202,14 @@ export default class ConfigurationChief {
     }));
   }
 
+  async getNegatedWorkspacePatterns() {
+    const manifestWorkspaces = await this.getManifestWorkspaces();
+    const additionalWorkspaces = this.getAdditionalWorkspaces(manifestWorkspaces);
+    return [...manifestWorkspaces, ...additionalWorkspaces]
+      .filter(workspaceName => workspaceName !== ROOT_WORKSPACE_NAME)
+      .map(workspaceName => `!${workspaceName}`);
+  }
+
   private getConfigKeyForWorkspace(workspaceName: string) {
     const configuredWorkspaces = this.getConfiguredWorkspaces();
     return configuredWorkspaces

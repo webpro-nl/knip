@@ -31,6 +31,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const workspaces = await chief.getActiveWorkspaces();
 
+  const negatedWorkspacePatterns = await chief.getNegatedWorkspacePatterns();
+
   debugLogObject('Included workspaces', workspaces);
 
   const report = chief.resolveIncludedIssueTypes();
@@ -38,10 +40,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const workspaceDirs = Object.values(workspaces)
     .map(workspace => workspace.dir)
     .sort((a, b) => b.length - a.length);
-
-  const negatedWorkspacePatterns = Object.values(workspaces)
-    .filter(workspace => workspace.name !== ROOT_WORKSPACE_NAME)
-    .map(workspace => `!${workspace.name}`);
 
   const lab = new SourceLab({ report, workspaceDirs });
 
@@ -316,8 +314,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     issues.forEach(issue => issue.type && collector.addIssue(issue));
   });
 
-  collector.removeProgress();
-
   if (report.dependencies) {
     const { dependencyIssues, devDependencyIssues } = deputy.settleDependencyIssues();
     dependencyIssues.forEach(issue => collector.addIssue(issue));
@@ -326,7 +322,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const { issues, counters } = collector.getIssues();
 
-  debugLogObject('Issues', issues);
+  collector.removeProgress();
 
   return { report: report as Report, issues, counters };
 };
