@@ -1,7 +1,6 @@
 import EasyTable from 'easy-table';
 import { relative } from '../util/path.js';
-import { ISSUE_TYPE_TITLE } from './constants.js';
-import { logTitle, logIssueSet } from './util.js';
+import { getTitle, logTitle, logIssueSet } from './util.js';
 import type { Issue, ReporterOptions, IssueSet } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
@@ -26,7 +25,7 @@ export default ({ report, issues }: ReporterOptions) => {
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
-      const title = reportMultipleGroups && ISSUE_TYPE_TITLE[reportType];
+      const title = reportMultipleGroups && getTitle(reportType);
       const isSet = issues[reportType] instanceof Set;
       const issuesForType = isSet
         ? Array.from(issues[reportType] as IssueSet)

@@ -2,8 +2,7 @@ import path from 'node:path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import chalk from 'chalk';
 import { relative } from '../util/path.js';
-import { ISSUE_TYPE_TITLE } from './constants.js';
-import { logTitle, logIssueLine } from './util.js';
+import { getTitle, logTitle, logIssueLine } from './util.js';
 import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
@@ -48,7 +47,7 @@ export default ({ report, issues, options }: ReporterOptions) => {
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
-      const title = reportMultipleGroups && ISSUE_TYPE_TITLE[reportType];
+      const title = reportMultipleGroups && getTitle(reportType);
       const isSet = issues[reportType] instanceof Set;
       const toIssue = (filePath: string) => ({ type: reportType, filePath, symbol: filePath } as Issue);
 

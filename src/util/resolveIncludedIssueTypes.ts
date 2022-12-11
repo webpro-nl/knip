@@ -1,18 +1,5 @@
-import type { IssueType, Report } from '../types/issues.js';
-
-const ISSUE_TYPES: IssueType[] = [
-  'files',
-  'dependencies',
-  'devDependencies',
-  'unlisted',
-  'exports',
-  'types',
-  'nsExports',
-  'nsTypes',
-  'classMembers',
-  'enumMembers',
-  'duplicates',
-];
+import { ISSUE_TYPES } from '../constants.js';
+import type { Report } from '../types/issues.js';
 
 type Options = {
   isProduction?: boolean;

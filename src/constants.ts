@@ -1,3 +1,5 @@
+import type { IssueType } from './types/issues.js';
+
 export const ROOT_WORKSPACE_NAME = '.';
 
 // This is what gets excluded in --production mode (apart from what plugins would include)
@@ -10,3 +12,31 @@ export const IGNORED_GLOBAL_BINARIES = ['npm', 'npx', 'node', 'yarn', 'pnpm', 'd
 // Not many programs accept another program as their first argument
 // Does this make sense? Can we manage? It does make the whole `npm script` plugin quite powerful, though.
 export const FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS = ['npx', 'cross-env', 'dotenv'];
+
+export const ISSUE_TYPES: IssueType[] = [
+  'files',
+  'dependencies',
+  'devDependencies',
+  'unlisted',
+  'exports',
+  'nsExports',
+  'types',
+  'nsTypes',
+  'enumMembers',
+  'classMembers',
+  'duplicates',
+];
+
+export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
+  files: 'Unused files',
+  dependencies: 'Unused dependencies',
+  devDependencies: 'Unused dev dependencies',
+  unlisted: 'Unlisted or unresolved dependencies',
+  exports: 'Unused exports',
+  nsExports: 'Unused exports in namespaces',
+  types: 'Unused types',
+  nsTypes: 'Unused types in namespaces',
+  enumMembers: 'Unused enum members',
+  classMembers: 'Unused class members',
+  duplicates: 'Duplicate exports',
+};

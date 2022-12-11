@@ -1,5 +1,7 @@
 import path from 'node:path';
+import { ISSUE_TYPES } from './constants.js';
 import { initReport, initIssues, initCounters } from './issues/initializers.js';
+import { getTitle } from './reporters/util.js';
 import { getLine, LineRewriter } from './util/log.js';
 import { relative } from './util/path.js';
 import type { Issue, Report } from './types/issues.js';
@@ -87,15 +89,9 @@ export default class IssueCollector {
     const percentage = total === 0 ? 0 : Math.floor((processed / total) * 100);
     const messages = [getLine(`${percentage}%`, `of files processed (${processed} of ${total})`)];
 
-    this.report.files && messages.push(getLine(this.counters.files, 'unused files'));
-    this.report.unlisted && messages.push(getLine(this.counters.unlisted, 'unlisted dependencies'));
-    this.report.exports && messages.push(getLine(this.counters.exports, 'unused exports'));
-    this.report.nsExports && messages.push(getLine(this.counters.nsExports, 'unused exports in namespace'));
-    this.report.types && messages.push(getLine(this.counters.types, 'unused types'));
-    this.report.nsTypes && messages.push(getLine(this.counters.nsTypes, 'unused types in namespace'));
-    this.report.enumMembers && messages.push(getLine(this.counters.enumMembers, 'unused enum members'));
-    this.report.classMembers && messages.push(getLine(this.counters.classMembers, 'unused class members'));
-    this.report.duplicates && messages.push(getLine(this.counters.duplicates, 'duplicate exports'));
+    for (const type of ISSUE_TYPES) {
+      this.report[type] && messages.push(getLine(this.counters[type], getTitle(type)));
+    }
 
     if (issue && processed < total) {
       messages.push('');

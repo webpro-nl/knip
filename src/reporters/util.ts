@@ -1,5 +1,10 @@
 import chalk from 'chalk';
+import { ISSUE_TYPE_TITLE } from '../constants.js';
 import { relative } from '../util/path.js';
+
+export const getTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => {
+  return ISSUE_TYPE_TITLE[reportType];
+};
 
 export const logTitle = (title: string, count: number) =>
   console.log(`${chalk.bold.yellow.underline(title)} (${count})`);

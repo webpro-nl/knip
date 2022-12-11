@@ -1,5 +1,4 @@
-import { ISSUE_TYPE_TITLE } from './constants.js';
-import { logTitle, logIssueLine, logIssueSet } from './util.js';
+import { getTitle, logTitle, logIssueLine, logIssueSet } from './util.js';
 import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
@@ -14,7 +13,7 @@ export default ({ report, issues }: ReporterOptions) => {
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
-      const title = reportMultipleGroups && ISSUE_TYPE_TITLE[reportType];
+      const title = reportMultipleGroups && getTitle(reportType);
       const isSet = issues[reportType] instanceof Set;
       const issuesForType = isSet
         ? Array.from(issues[reportType] as IssueSet)

@@ -1,23 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { ISSUE_TYPES } from '../src/constants.js';
 import { resolveIncludedIssueTypes } from '../src/util/resolveIncludedIssueTypes.js';
 
-const issueTypes = [
-  'classMembers',
-  'dependencies',
-  'devDependencies',
-  'duplicates',
-  'enumMembers',
-  'exports',
-  'files',
-  'nsExports',
-  'nsTypes',
-  'types',
-  'unlisted',
-];
-
-const all = Object.fromEntries(issueTypes.map(type => [type, true]));
-const none = Object.fromEntries(issueTypes.map(type => [type, false]));
+const all = Object.fromEntries(ISSUE_TYPES.map(type => [type, true]));
+const none = Object.fromEntries(ISSUE_TYPES.map(type => [type, false]));
 
 test('Resolve included issue types (default)', async () => {
   const config = resolveIncludedIssueTypes([], []);
