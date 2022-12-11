@@ -19,5 +19,12 @@
     "eslint-v6": "npm:eslint@6.0.1",
     "eslint-v7": "npm:eslint@7.0.0",
     "eslint-v8": "npm:eslint@8.0.2"
+  },
+  "knip": {
+    "ignoreBinaries": [
+      "rm",
+      "bash",
+      "eslint"
+    ]
   }
 }

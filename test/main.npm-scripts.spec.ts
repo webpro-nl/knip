@@ -10,24 +10,17 @@ test('Unused dependencies in npm scripts', async () => {
   const { issues } = await main({
     ...baseArguments,
     cwd,
-    isStrict: false,
   });
 
-  assert(!issues.devDependencies['package.json']['eslint']);
+  assert(issues.dependencies['package.json']['express']);
+
+  assert(issues.devDependencies['package.json']['unused']);
   assert(!issues.devDependencies['package.json']['eslint-v6']);
   assert(!issues.devDependencies['package.json']['eslint-v7']);
   assert(!issues.devDependencies['package.json']['eslint-v8']);
-});
 
-test('Unused dependencies in npm scripts (strict)', async () => {
-  const { issues } = await main({
-    ...baseArguments,
-    cwd,
-    isStrict: true,
-  });
-
-  assert(!issues.devDependencies['package.json']['eslint']);
-  assert(issues.devDependencies['package.json']['eslint-v6']);
-  assert(issues.devDependencies['package.json']['eslint-v7']);
-  assert(issues.devDependencies['package.json']['eslint-v8']);
+  assert(issues.unlisted['package.json']['nodemon']);
+  assert(issues.unlisted['package.json']['dotenv']);
+  assert(!issues.unlisted['package.json']['rm']);
+  assert(!issues.unlisted['package.json']['bash']);
 });

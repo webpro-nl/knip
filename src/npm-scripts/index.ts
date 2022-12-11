@@ -10,20 +10,11 @@ type Options = {
   manifest: PackageJson;
   isRoot: boolean;
   isProduction: boolean;
-  isStrict: boolean;
   dir: string;
   cwd: string;
 };
 
-const findManifestDependencies = async ({
-  rootConfig,
-  manifest,
-  isRoot,
-  isProduction,
-  isStrict,
-  dir,
-  cwd,
-}: Options) => {
+const findManifestDependencies = async ({ rootConfig, manifest, isRoot, isProduction, dir, cwd }: Options) => {
   const { ignoreBinaries } = rootConfig;
   const scriptFilter = isProduction ? ['start'] : [];
   const referencedDependencies: Set<string> = new Set();
@@ -69,19 +60,18 @@ const findManifestDependencies = async ({
 
   for (const binaryName of referencedBinaries) {
     if (installedBinaries.has(binaryName)) {
-      if (isStrict) {
-        const packageNames = Array.from(installedBinaries.get(binaryName) ?? []);
-        const packageName = packageNames.length === 1 ? packageNames[0] : undefined;
-        referencedDependencies.add(packageName ?? binaryName);
-      } else {
-        installedBinaries
-          .get(binaryName)
-          ?.forEach(packageName => referencedDependencies.add(packageName ?? binaryName));
-      }
+      const packageNames = Array.from(installedBinaries.get(binaryName) ?? []);
+      const packageName = packageNames.length === 1 ? packageNames[0] : undefined;
+      referencedDependencies.add(packageName ?? binaryName);
     } else {
       referencedDependencies.add(binaryName);
     }
   }
+
+  ignoreBinaries.forEach(binaryName => {
+    const packageNames = installedBinaries.get(binaryName);
+    packageNames?.forEach(packageName => referencedDependencies.add(packageName));
+  });
 
   return {
     dependencies: Array.from(referencedDependencies),

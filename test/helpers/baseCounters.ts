@@ -1,8 +1,8 @@
 import { ISSUE_TYPES } from '../../src/constants';
-import { fillObj } from '../../src/util/array';
+import type { IssueType } from '../../src/types/issues';
 
 const baseCounters = {
-  ...fillObj(ISSUE_TYPES, 0),
+  ...(Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, 0])) as Record<IssueType, number>),
   processed: 0,
   total: 0,
 };

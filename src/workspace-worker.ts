@@ -22,7 +22,6 @@ type WorkspaceManagerOptions = {
   rootConfig: Configuration;
   negatedWorkspacePatterns: string[];
   rootWorkspaceDir: string;
-  isStrict: boolean;
   isProduction: boolean;
 };
 
@@ -57,7 +56,6 @@ export default class WorkspaceWorker {
   negatedWorkspacePatterns: string[] = [];
   enabled: Record<PluginName, boolean>;
   isRoot;
-  isStrict;
   isProduction;
 
   constructor({
@@ -70,7 +68,6 @@ export default class WorkspaceWorker {
     negatedWorkspacePatterns,
     manifest,
     rootWorkspaceDir,
-    isStrict,
     isProduction,
   }: WorkspaceManagerOptions) {
     this.name = name;
@@ -79,7 +76,6 @@ export default class WorkspaceWorker {
     this.ancestorManifests = ancestorManifests;
 
     this.isRoot = name === ROOT_WORKSPACE_NAME;
-    this.isStrict = isStrict;
     this.isProduction = isProduction;
 
     this.rootConfig = rootConfig;
@@ -122,7 +118,6 @@ export default class WorkspaceWorker {
       manifest: this.manifest,
       isRoot: this.isRoot,
       isProduction: this.isProduction,
-      isStrict: this.isStrict,
       dir: this.dir,
       cwd: this.rootWorkspaceDir,
     });

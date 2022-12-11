@@ -86,7 +86,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       negatedWorkspacePatterns,
       rootWorkspaceDir: cwd,
       isProduction,
-      isStrict,
     });
 
     await worker.init();
