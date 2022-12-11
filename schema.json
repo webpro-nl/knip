@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/workspace"
+    },
+    {
+      "$ref": "#/definitions/plugins"
+    }
+  ],
+  "properties": {
+    "ignoreBinaries": {
+      "$ref": "#/definitions/list"
+    },
+    "ignoreWorkspaces": {
+      "$ref": "#/definitions/list"
+    },
+    "include": {
+      "$ref": "#/definitions/list"
+    },
+    "exclude": {
+      "$ref": "#/definitions/list"
+    },
+    "workspaces": {
+      "type": "object",
+      "additionalProperties": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/workspace"
+          },
+          {
+            "$ref": "#/definitions/plugins"
+          }
+        ],
+        "unevaluatedProperties": false
+      }
+    }
+  },
+  "unevaluatedProperties": false,
+  "definitions": {
+    "list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "globPatterns": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "workspace": {
+      "description": "Workspace configuration.",
+      "type": "object",
+      "properties": {
+        "entry": {
+          "$ref": "#/definitions/globPatterns"
+        },
+        "project": {
+          "$ref": "#/definitions/globPatterns"
+        },
+        "ignore": {
+          "$ref": "#/definitions/globPatterns"
+        }
+      }
+    },
+    "plugin": {
+      "description": "Knip plugin configuration. See https://github.com/webpro/knip#plugins",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/globPatterns"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "config": {
+              "$ref": "#/definitions/globPatterns"
+            },
+            "entry": {
+              "$ref": "#/definitions/globPatterns"
+            },
+            "project": {
+              "$ref": "#/definitions/globPatterns"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "plugins": {
+      "properties": {
+        "babel": {
+          "$ref": "#/definitions/plugin"
+        },
+        "capacitor": {
+          "$ref": "#/definitions/plugin"
+        },
+        "changesets": {
+          "$ref": "#/definitions/plugin"
+        },
+        "cypress": {
+          "$ref": "#/definitions/plugin"
+        },
+        "eslint": {
+          "$ref": "#/definitions/plugin"
+        },
+        "gatsby": {
+          "$ref": "#/definitions/plugin"
+        },
+        "jest": {
+          "$ref": "#/definitions/plugin"
+        },
+        "mocha": {
+          "$ref": "#/definitions/plugin"
+        },
+        "next": {
+          "$ref": "#/definitions/plugin"
+        },
+        "nx": {
+          "$ref": "#/definitions/plugin"
+        },
+        "playwright": {
+          "$ref": "#/definitions/plugin"
+        },
+        "postcss": {
+          "$ref": "#/definitions/plugin"
+        },
+        "remark": {
+          "$ref": "#/definitions/plugin"
+        },
+        "remix": {
+          "$ref": "#/definitions/plugin"
+        },
+        "rollup": {
+          "$ref": "#/definitions/plugin"
+        },
+        "storybook": {
+          "$ref": "#/definitions/plugin"
+        },
+        "stryker": {
+          "$ref": "#/definitions/plugin"
+        }
+      }
+    }
+  }
+}
