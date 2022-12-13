@@ -1,3 +1,4 @@
 dist
+tmp
 /node_modules
 !/test/**/node_modules
