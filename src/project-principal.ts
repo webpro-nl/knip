@@ -1,6 +1,6 @@
 import path from 'node:path';
-import { ts } from 'ts-morph';
-import { debugLogFiles, debugLogSourceFiles } from './util/debug.js';
+import { ts, Project, SourceFile } from 'ts-morph';
+import { debugLogSourceFiles } from './util/debug.js';
 import {
   _createProject,
   partitionSourceFiles,
@@ -36,6 +36,10 @@ export default class ProjectPrincipal {
   entryPaths: Set<string> = new Set();
   projectPaths: Set<string> = new Set();
 
+  entryWorkspace?: Project;
+  projectWorkspace?: Project;
+  entryFiles?: SourceFile[];
+
   constructor() {
     this.projectOptions = this.tsConfigFilePath
       ? { tsConfigFilePath: this.tsConfigFilePath, compilerOptions }
@@ -44,6 +48,10 @@ export default class ProjectPrincipal {
 
   public addEntryPath(filePath: string) {
     this.entryPaths.add(filePath);
+  }
+
+  public addSourceFile(filePath: string) {
+    this.entryWorkspace?.addSourceFileAtPath(filePath);
   }
 
   public addProjectPath(filePath: string) {
@@ -63,35 +71,45 @@ export default class ProjectPrincipal {
     }
   }
 
-  private createProjects() {
-    const production = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.entryPaths]);
-    const entryFiles = production.getSourceFiles();
-    debugLogSourceFiles(`Included entry files`, entryFiles);
-
-    // Now resolve dependencies of entry files to find all production files
-    _resolveSourceFileDependencies(production);
-    const productionFiles = _removeExternalSourceFiles(production);
-    debugLogSourceFiles('Included files resolved from entry files', productionFiles);
+  public createProjects() {
+    // Create workspace for entry + resolved files (but don't resolve yet)
+    this.entryWorkspace = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.entryPaths]);
+    this.entryFiles = this.entryWorkspace.getSourceFiles();
+    debugLogSourceFiles(`Included entry files`, this.entryFiles);
 
     // Create workspace for the entire project
-    const project = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.projectPaths]);
-    const projectFiles = project.getSourceFiles();
+    this.projectWorkspace = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.projectPaths]);
+    const projectFiles = this.projectWorkspace.getSourceFiles();
     debugLogSourceFiles('Included project files', projectFiles);
+  }
 
-    return { entryFiles, productionFiles, projectFiles };
+  public getResolvedFiles() {
+    if (!this.entryWorkspace) return [];
+    _resolveSourceFileDependencies(this.entryWorkspace);
+    return _removeExternalSourceFiles(this.entryWorkspace);
   }
 
   public settleFiles() {
-    const { entryFiles, productionFiles, projectFiles } = this.createProjects();
-    // Slice & dice used & unreferenced files
-    const [usedProductionFiles, unreferencedProductionFiles] = partitionSourceFiles(projectFiles, productionFiles);
-    const [usedEntryFiles, usedNonEntryFiles] = partitionSourceFiles(usedProductionFiles, entryFiles);
+    const entryFiles = this.entryFiles;
+    const projectFiles = this.projectWorkspace?.getSourceFiles();
 
-    debugLogSourceFiles('Used production files', usedProductionFiles);
-    debugLogFiles('Unreferenced production files', unreferencedProductionFiles);
-    debugLogSourceFiles('Used entry files', usedEntryFiles);
-    debugLogFiles('Used non-entry files', usedNonEntryFiles);
+    if (this.entryWorkspace && entryFiles && projectFiles) {
+      const resolvedFiles = this.getResolvedFiles();
+      debugLogSourceFiles(`Included files resolved from entry files`, resolvedFiles);
 
-    return { usedProductionFiles, unreferencedProductionFiles };
+      const [usedResolvedFiles, unreferencedResolvedFiles] = partitionSourceFiles(projectFiles, resolvedFiles);
+      const [usedEntryFiles, usedNonEntryFiles] = partitionSourceFiles(usedResolvedFiles, entryFiles);
+
+      debugLogSourceFiles('Used production files', usedResolvedFiles);
+      debugLogSourceFiles('Unreferenced production files', unreferencedResolvedFiles);
+      debugLogSourceFiles('Used entry files', usedEntryFiles);
+      debugLogSourceFiles('Used non-entry files', usedNonEntryFiles);
+
+      return { usedResolvedFiles, unreferencedResolvedFiles };
+    }
+
+    const emptySet: Set<SourceFile> = new Set();
+
+    return { usedResolvedFiles: emptySet, unreferencedResolvedFiles: emptySet };
   }
 }

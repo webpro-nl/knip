@@ -15,11 +15,12 @@ test('Find unused files and exports', async () => {
 
   assert.equal(issues.unlisted['index.ts']['no-substitution-tpl-literal'].symbol, 'no-substitution-tpl-literal');
   assert.equal(issues.unlisted['index.ts']['string-literal'].symbol, 'string-literal');
+  assert.equal(issues.unlisted['dir/mod.ts']['another-unlisted'].symbol, 'another-unlisted');
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 2,
-    processed: 1,
-    total: 1,
+    unlisted: 3,
+    processed: 2,
+    total: 2,
   });
 });

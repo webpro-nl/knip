@@ -9,7 +9,7 @@ const templateStringExternal = (value: string) => {
 };
 
 const templateStringInternal = (value: string) => {
-  return require(`./dir/value-c`);
+  return require(`./dir/mod`);
 };
 
 const staticResolve = () => {

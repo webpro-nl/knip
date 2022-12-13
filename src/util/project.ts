@@ -30,22 +30,22 @@ const removeExternalSourceFiles = (project: Project) =>
     return true;
   });
 
-// Returns two arrays from items in first argument: one with the intersection, another with the rest
+// Returns two sets from items in first argument: one with the intersection, another with the rest
 export const partitionSourceFiles = (
-  project: SourceFile[],
+  project: SourceFile[] | Set<SourceFile>,
   productionFiles: SourceFile[]
-): [SourceFile[], Set<string>] => {
+): [Set<SourceFile>, Set<SourceFile>] => {
   const productionFilePaths = productionFiles.map(sourceFile => sourceFile.getFilePath());
   const usedFiles: Set<SourceFile> = new Set();
-  const unusedFiles: Set<string> = new Set();
+  const unusedFiles: Set<SourceFile> = new Set();
   project.forEach(projectFile => {
     if (productionFilePaths.includes(projectFile.getFilePath())) {
       usedFiles.add(projectFile);
     } else {
-      unusedFiles.add(projectFile.getFilePath());
+      unusedFiles.add(projectFile);
     }
   });
-  return [Array.from(usedFiles), unusedFiles];
+  return [usedFiles, unusedFiles];
 };
 
 export const hasExternalReferences = (refs: ReferencedSymbol[], filePath: string) => {

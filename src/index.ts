@@ -7,7 +7,7 @@ import ProjectPrincipal from './project-principal.js';
 import SourceLab from './source-lab.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogFiles } from './util/debug.js';
-import { _findExternalImportModuleSpecifiers } from './util/externalImports.js';
+import { _findImportModuleSpecifiers } from './util/externalImports.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { _findDuplicateExportedNames } from './util/project.js';
@@ -15,6 +15,7 @@ import { loadTSConfig } from './util/tsconfig-loader.js';
 import WorkspaceWorker from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type { Report } from './types/issues.js';
+import type { SourceFile } from 'ts-morph';
 
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress } = unresolvedConfiguration;
@@ -278,26 +279,50 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   collector.setReport(report);
 
-  const { usedProductionFiles, unreferencedProductionFiles } = principal.settleFiles();
-
-  collector.setProjectFilesCount(unreferencedProductionFiles.size + usedProductionFiles.length);
-
-  collector.addFilesIssues(unreferencedProductionFiles);
-
   collector.updateMessage('Connecting the dots...');
 
-  usedProductionFiles.forEach(sourceFile => {
+  principal.createProjects();
+
+  // Finding import module specifiers isn't cheap, so let's cache them
+  const moduleSpecifierCache: WeakMap<SourceFile, [string[], string[]]> = new WeakMap();
+
+  // 1) First pass: let ts-morph resolve used files from entry files (initial dependency graph)
+  const resolvedFiles = principal.getResolvedFiles();
+  collector.setTotalFileCount(resolvedFiles.length);
+
+  // 2) Second pass: add internal source files that ts-morph didn't resolve (referenced through dynamic `import`, `require` and `require.resolve`)
+  resolvedFiles.forEach(sourceFile => {
+    const moduleSpecifiers = _findImportModuleSpecifiers(sourceFile);
+    moduleSpecifierCache.set(sourceFile, moduleSpecifiers);
+    const [internalModuleSpecifiers] = moduleSpecifiers;
+    internalModuleSpecifiers.forEach(resolvedFilePath => {
+      principal.addSourceFile(resolvedFilePath);
+    });
+  });
+
+  // 3) Third pass: final settlement of (un)used production files
+  const { usedResolvedFiles, unreferencedResolvedFiles } = principal.settleFiles();
+
+  collector.addFilesIssues(unreferencedResolvedFiles);
+
+  collector.setTotalFileCount(usedResolvedFiles.size + unreferencedResolvedFiles.size);
+
+  usedResolvedFiles.forEach(sourceFile => {
     collector.counters.processed++;
     const filePath = sourceFile.getFilePath();
-    const workspaceDir = workspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir));
-    const workspace = workspaces.find(workspace => workspace.dir === workspaceDir);
 
-    if (workspace && (report.dependencies || report.unlisted)) {
-      const externalModuleSpecifiers = _findExternalImportModuleSpecifiers(sourceFile);
-      externalModuleSpecifiers.forEach(moduleSpecifier => {
-        const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, moduleSpecifier, isStrict);
-        if (unlistedDependency) collector.addIssue({ type: 'unlisted', filePath, symbol: unlistedDependency });
-      });
+    if (report.dependencies || report.unlisted) {
+      const filePath = sourceFile.getFilePath();
+      const workspaceDir = workspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir));
+      const workspace = workspaces.find(workspace => workspace.dir === workspaceDir);
+      if (workspace) {
+        const [, externalModuleSpecifiers] =
+          moduleSpecifierCache.get(sourceFile) ?? _findImportModuleSpecifiers(sourceFile, { skipInternal: true });
+        externalModuleSpecifiers.forEach(moduleSpecifier => {
+          const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, moduleSpecifier, isStrict);
+          if (unlistedDependency) collector.addIssue({ type: 'unlisted', filePath, symbol: unlistedDependency });
+        });
+      }
     }
 
     if (report.duplicates) {

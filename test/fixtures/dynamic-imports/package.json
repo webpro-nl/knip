@@ -5,7 +5,7 @@
       "index.ts"
     ],
     "project": [
-      "*.ts"
+      "**/*.ts"
     ]
   }
 }

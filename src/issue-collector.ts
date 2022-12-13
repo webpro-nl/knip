@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { SourceFile } from 'ts-morph';
 import { ISSUE_TYPES } from './constants.js';
 import { initReport, initIssues, initCounters } from './issues/initializers.js';
 import { getTitle } from './reporters/util.js';
@@ -48,12 +49,13 @@ export default class IssueCollector {
     this.isShowProgress = isShowProgress;
   }
 
-  setProjectFilesCount(count: number) {
+  setTotalFileCount(count: number) {
     this.counters.total = count;
   }
 
-  addFilesIssues(filePaths: Set<string>) {
-    filePaths.forEach(filePath => {
+  addFilesIssues(sourceFiles: Set<SourceFile>) {
+    sourceFiles.forEach(sourceFile => {
+      const filePath = sourceFile.getFilePath();
       if (!this.referencedFiles.has(filePath)) {
         this.issues.files.add(filePath);
         this.counters.files++;
