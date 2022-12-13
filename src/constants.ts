@@ -34,9 +34,9 @@ export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   unlisted: 'Unlisted or unresolved dependencies',
   exports: 'Unused exports',
   nsExports: 'Unused exports in namespaces',
-  types: 'Unused types',
-  nsTypes: 'Unused types in namespaces',
-  enumMembers: 'Unused enum members',
-  classMembers: 'Unused class members',
+  types: 'Unused exported types',
+  nsTypes: 'Unused exported types in namespaces',
+  enumMembers: 'Unused exported enum members',
+  classMembers: 'Unused exported class members',
   duplicates: 'Duplicate exports',
 };

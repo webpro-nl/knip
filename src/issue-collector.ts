@@ -92,7 +92,7 @@ export default class IssueCollector {
     const messages = [getLine(`${percentage}%`, `of files processed (${processed} of ${total})`)];
 
     for (const type of ISSUE_TYPES) {
-      this.report[type] && messages.push(getLine(this.counters[type], getTitle(type)));
+      this.report[type] && this.counters[type] && messages.push(getLine(this.counters[type], getTitle(type)));
     }
 
     if (issue && processed < total) {

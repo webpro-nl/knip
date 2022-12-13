@@ -100,8 +100,8 @@ export default class ProjectPrincipal {
       const [usedResolvedFiles, unreferencedResolvedFiles] = partitionSourceFiles(projectFiles, resolvedFiles);
       const [usedEntryFiles, usedNonEntryFiles] = partitionSourceFiles(usedResolvedFiles, entryFiles);
 
-      debugLogSourceFiles('Used production files', usedResolvedFiles);
-      debugLogSourceFiles('Unreferenced production files', unreferencedResolvedFiles);
+      debugLogSourceFiles('Used files', usedResolvedFiles);
+      debugLogSourceFiles('Unreferenced files', unreferencedResolvedFiles);
       debugLogSourceFiles('Used entry files', usedEntryFiles);
       debugLogSourceFiles('Used non-entry files', usedNonEntryFiles);
 
