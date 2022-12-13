@@ -18,10 +18,10 @@ export const ENTRY_FILE_PATTERNS = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(sp
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const config: Config.InitialOptions = await _load(configFilePath);
   if (config) {
-    if (config.preset) {
+    if (config.preset && config.preset.startsWith('.')) {
       const presetConfigPath = path.join(path.dirname(configFilePath), config.preset);
-      const baseConfig = await resolveExtensibleConfig(presetConfigPath);
-      Object.assign(config, baseConfig);
+      const presetConfig = await resolveExtensibleConfig(presetConfigPath);
+      Object.assign(config, presetConfig);
     }
   }
   return config;
@@ -31,19 +31,18 @@ const findJestDependencies: GenericPluginCallback = async configFilePath => {
   if (/jest\.config/.test(configFilePath)) {
     const config: Config.InitialOptions = await resolveExtensibleConfig(configFilePath);
     if (config) {
-      const environmentPackages = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
+      const presets = config.preset ? [config.preset] : [];
+      const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
       const resolvers = config.resolver ? [config.resolver] : [];
-      const transformPackages = config.transform
+      const transforms = config.transform
         ? Object.values(config.transform)
             .map(transform => (typeof transform === 'string' ? transform : transform[0]))
             .filter(transform => !transform.includes('<'))
         : [];
       const watchPlugins =
         config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
-      return [...environmentPackages, ...transformPackages, ...resolvers, ...watchPlugins].map(getPackageName);
+      return [...presets, ...environments, ...transforms, ...resolvers, ...watchPlugins].map(getPackageName);
     }
-  } else {
-    // Not supported: Jest transformers
   }
   return [];
 };
