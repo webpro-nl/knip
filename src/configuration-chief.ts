@@ -102,8 +102,8 @@ export default class ConfigurationChief {
 
     const include = rawLocalConfig.include ?? defaultConfig.include;
     const exclude = rawLocalConfig.exclude ?? defaultConfig.exclude;
-    const ignoreBinaries = rawLocalConfig.ignoreBinaries ?? defaultConfig.ignoreBinaries;
     const ignore = arrayify(rawLocalConfig.ignore ?? defaultConfig.ignore);
+    const ignoreBinaries = rawLocalConfig.ignoreBinaries ?? defaultConfig.ignoreBinaries;
     const ignoreWorkspaces = rawLocalConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
 
     return {
@@ -116,12 +116,14 @@ export default class ConfigurationChief {
         .filter(([workspaceName]) => !ignoreWorkspaces.includes(workspaceName))
         .reduce((workspaces, workspace) => {
           const [workspaceName, workspaceConfig] = workspace;
+
           const entry = arrayify(workspaceConfig.entry);
           workspaces[workspaceName] = {
             entry,
             project: arrayify(workspaceConfig.project ?? entry),
             ignore: arrayify(workspaceConfig.ignore),
           };
+
           for (const [pluginName, pluginConfig] of Object.entries(workspaceConfig)) {
             if (PLUGIN_NAMES.includes(pluginName)) {
               const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
