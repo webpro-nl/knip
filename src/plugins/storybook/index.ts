@@ -23,9 +23,10 @@ export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,ts,tsx}'];
 const findStorybookDependencies: GenericPluginCallback = async configFilePath => {
   const config: StorybookConfig = await _load(configFilePath);
   if (config) {
-    const addons = config.addons.map(addon =>
-      addon.startsWith('.') ? require.resolve(path.join(path.dirname(configFilePath), addon)) : addon
-    );
+    const addons =
+      config.addons?.map(addon =>
+        addon.startsWith('.') ? require.resolve(path.join(path.dirname(configFilePath), addon)) : addon
+      ) ?? [];
     const builder = config?.core?.builder;
     const builderPackages =
       builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
