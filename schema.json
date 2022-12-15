@@ -148,6 +148,12 @@
         },
         "stryker": {
           "$ref": "#/definitions/plugin"
+        },
+        "typescript": {
+          "$ref": "#/definitions/plugin"
+        },
+        "webpack": {
+          "$ref": "#/definitions/plugin"
         }
       }
     }

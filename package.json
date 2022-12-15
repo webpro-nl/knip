@@ -76,6 +76,7 @@
     "@types/js-yaml": "4.0.5",
     "@types/micromatch": "4.0.2",
     "@types/node": "18.11.10",
+    "@types/webpack": "5.28.0",
     "@typescript-eslint/eslint-plugin": "5.45.0",
     "@typescript-eslint/parser": "5.45.0",
     "eslint-import-resolver-typescript": "3.5.2",

@@ -42,6 +42,8 @@ const pluginsSchema = z.object({
   rollup: pluginSchema,
   storybook: pluginSchema,
   stryker: pluginSchema,
+  typescript: pluginSchema,
+  webpack: pluginSchema,
 });
 
 const baseWorkspaceConfigurationSchema = z.object({

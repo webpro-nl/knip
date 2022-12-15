@@ -25,6 +25,7 @@ interface PluginsConfiguration {
   storybook: PluginConfiguration;
   stryker: PluginConfiguration;
   typescript: PluginConfiguration;
+  webpack: PluginConfiguration;
 }
 
 interface BaseWorkspaceConfiguration {
