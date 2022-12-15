@@ -13,9 +13,11 @@ test('Unused dependencies in Babel configuration (.babelrc)', async () => {
   assert.deepEqual(dependencies, [
     '@babel/preset-env',
     '@babel/preset-typescript',
+    'react-hot-loader',
     '@babel/plugin-proposal-decorators',
     '@babel/plugin-syntax-dynamic-import',
     'babel-plugin-macros',
+    'babel-preset-minify',
   ]);
 });
 

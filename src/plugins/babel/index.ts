@@ -1,5 +1,6 @@
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
+import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { resolvePresetName, resolvePluginName } from './helpers.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -31,12 +32,13 @@ const api = {
 
 type BabelFn = (options: typeof api) => BabelConfig;
 
-const getDependenciesFromConfig = (config: BabelConfig) => {
+const getDependenciesFromConfig = (config: BabelConfig): string[] => {
   const presets =
     config.presets?.map(preset => (typeof preset === 'string' ? preset : preset[0])).map(resolvePresetName) ?? [];
   const plugins =
     config.plugins?.map(plugin => (typeof plugin === 'string' ? plugin : plugin[0])).map(resolvePluginName) ?? [];
-  return compact([...presets, ...plugins]);
+  const nested = config.env ? Object.values(config.env).flatMap(getDependenciesFromConfig) : [];
+  return compact([...presets, ...plugins, ...nested]).map(getPackageName);
 };
 
 const findBabelDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
