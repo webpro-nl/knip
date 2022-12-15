@@ -30,21 +30,15 @@ const skipAddFiles = { skipAddingFilesFromTsConfig: true, skipFileDependencyReso
  * - Creates two ts-morph projects for combined workspaces to settle un/used files
  */
 export default class ProjectPrincipal {
-  projectOptions: ProjectOptions;
-
+  projectOptions?: ProjectOptions;
   tsConfigFilePath?: string;
+
   entryPaths: Set<string> = new Set();
   projectPaths: Set<string> = new Set();
 
   entryWorkspace?: Project;
   projectWorkspace?: Project;
   entryFiles?: SourceFile[];
-
-  constructor() {
-    this.projectOptions = this.tsConfigFilePath
-      ? { tsConfigFilePath: this.tsConfigFilePath, compilerOptions }
-      : { compilerOptions };
-  }
 
   public addEntryPath(filePath: string) {
     this.entryPaths.add(filePath);
@@ -61,6 +55,7 @@ export default class ProjectPrincipal {
   public addTypeScriptPaths(workspaceDir: string, paths: Record<string, string[]>) {
     for (const [key, entries] of Object.entries(paths)) {
       const workspacePaths = entries.map(entry => path.join(workspaceDir, entry));
+      if (!this.projectOptions) this.projectOptions = {};
       if (!this.projectOptions.compilerOptions) this.projectOptions.compilerOptions = {};
       if (!this.projectOptions.compilerOptions.paths) this.projectOptions.compilerOptions.paths = {};
       if (this.projectOptions.compilerOptions.paths[key]) {
@@ -72,6 +67,10 @@ export default class ProjectPrincipal {
   }
 
   public createProjects() {
+    this.projectOptions = this.tsConfigFilePath
+      ? { tsConfigFilePath: this.tsConfigFilePath, compilerOptions }
+      : { compilerOptions };
+
     // Create workspace for entry + resolved files (but don't resolve yet)
     this.entryWorkspace = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.entryPaths]);
     this.entryFiles = this.entryWorkspace.getSourceFiles();
