@@ -1,6 +1,7 @@
 // @ts-ignore Member actually exists: https://nodejs.org/api/module.html#moduleisbuiltinmodulename
 import { isBuiltin } from 'node:module';
 import micromatch from 'micromatch';
+import { IGNORE_DEFINITELY_TYPED } from './constants.js';
 import { WorkspaceConfiguration } from './types/config.js';
 import { isDefinitelyTyped, getDefinitelyTypedPackage } from './util/modules.js';
 import type { Issue } from './types/issues.js';
@@ -8,7 +9,9 @@ import type { WorkspaceManifests } from './types/workspace.js';
 import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
 import type { PackageJson } from 'type-fest';
 
-const IGNORE_DEFINITELY_TYPED = ['node'];
+type Options = {
+  ignoreDependencies: string[];
+};
 
 /**
  * - Stores manifests
@@ -18,6 +21,7 @@ const IGNORE_DEFINITELY_TYPED = ['node'];
 export default class DependencyDeputy {
   _manifests: WorkspaceManifests = new Map();
   manifests: Map<string, PackageJson> = new Map();
+  ignoreDependencies;
   canceledWorkspaces: Set<string>;
   referencedDependencies: Map<string, Set<string>>;
   peerDependencies: Map<string, PeerDependencies>;
@@ -25,7 +29,8 @@ export default class DependencyDeputy {
 
   tsConfigPathGlobs: Map<string, string[]> = new Map();
 
-  constructor() {
+  constructor({ ignoreDependencies }: Options) {
+    this.ignoreDependencies = ignoreDependencies;
     this.referencedDependencies = new Map();
     this.peerDependencies = new Map();
     this.installedBinaries = new Map();
@@ -202,12 +207,12 @@ export default class DependencyDeputy {
       };
 
       this.getProductionDependencies(workspaceName)
-        .filter(symbol => symbol !== 'knip')
+        .filter(symbol => symbol !== 'knip' && !this.ignoreDependencies.includes(symbol))
         .filter(isUnreferencedDependency)
         .forEach(symbol => dependencyIssues.push({ type: 'dependencies', filePath: manifestPath, symbol }));
 
       this.getDevDependencies(workspaceName)
-        .filter(symbol => symbol !== 'knip')
+        .filter(symbol => symbol !== 'knip' && !this.ignoreDependencies.includes(symbol))
         .filter(isUnreferencedDependency)
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
     }

@@ -13,6 +13,9 @@
     "ignoreBinaries": {
       "$ref": "#/definitions/list"
     },
+    "ignoreDependencies": {
+      "$ref": "#/definitions/list"
+    },
     "ignoreWorkspaces": {
       "$ref": "#/definitions/list"
     },

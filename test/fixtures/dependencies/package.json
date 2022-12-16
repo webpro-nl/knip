@@ -2,7 +2,8 @@
   "dependencies": {
     "@tootallnate/once": "*",
     "@sindresorhus/is": "*",
-    "has": "*"
+    "has": "*",
+    "stream": "*"
   },
   "peerDependencies": {
     "jquery": "*"

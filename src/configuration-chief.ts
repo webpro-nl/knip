@@ -23,6 +23,7 @@ const defaultConfig: Configuration = {
   exclude: [],
   ignore: [],
   ignoreBinaries: [],
+  ignoreDependencies: [],
   ignoreWorkspaces: [],
   workspaces: {
     [ROOT_WORKSPACE_NAME]: {
@@ -104,13 +105,15 @@ export default class ConfigurationChief {
     const exclude = rawLocalConfig.exclude ?? defaultConfig.exclude;
     const ignore = arrayify(rawLocalConfig.ignore ?? defaultConfig.ignore);
     const ignoreBinaries = rawLocalConfig.ignoreBinaries ?? defaultConfig.ignoreBinaries;
+    const ignoreDependencies = rawLocalConfig.ignoreDependencies ?? defaultConfig.ignoreDependencies;
     const ignoreWorkspaces = rawLocalConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
 
     return {
       include,
       exclude,
-      ignoreBinaries,
       ignore,
+      ignoreBinaries,
+      ignoreDependencies,
       ignoreWorkspaces,
       workspaces: Object.entries(workspaces)
         .filter(([workspaceName]) => !ignoreWorkspaces.includes(workspaceName))

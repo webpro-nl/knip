@@ -7,6 +7,7 @@ const rootConfigurationSchema = z.object({
   project: globSchema.optional(),
   ignore: globSchema.optional(),
   ignoreBinaries: z.array(z.string()).optional(),
+  ignoreDependencies: z.array(z.string()).optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
 });
 

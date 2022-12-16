@@ -43,6 +43,7 @@ export interface Configuration {
   exclude: string[];
   ignore: NormalizedGlob;
   ignoreBinaries: string[];
+  ignoreDependencies: string[];
   ignoreWorkspaces: string[];
   workspaces: Record<string, WorkspaceConfiguration>;
 }
