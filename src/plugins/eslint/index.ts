@@ -14,7 +14,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependen
 // Current: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
 // The only way to reliably resolve legacy configuration is through ESLint itself
 // This is also required when something like @rushstack/eslint-patch/modern-module-resolution is used
-export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json}', 'package.json'];
+export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json,cjs}', 'package.json'];
 
 // New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
 // We can handle eslint.config.js just like other source code (as dependencies are imported)
@@ -28,8 +28,11 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
     ? manifest.eslintConfig
     : await _load(configFilePath);
 
-  // Unfortunately we need to resolve root `extends` manually
+  // We resolve root `extends` manually, since they'll get replaced with rules and plugins etc. by ESLint
   const rootExtends = config?.extends ? [config.extends].flat().map(customResolvePluginPackageNames) : [];
+
+  // TODO: Why does (only?) e.g. `plugin:prettier/recommended` also require eslint-config-prettier?
+  if (rootExtends.includes('eslint-plugin-prettier')) rootExtends.push('eslint-config-prettier');
 
   // Find a sample file for each root + overrides config (to feed calculateConfigForFile)
   const patterns = compact([

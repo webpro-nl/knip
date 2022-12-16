@@ -30,10 +30,10 @@ test('Unused dependencies in ESLint configuration (legacy js)', async () => {
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
   assert.deepEqual(dependencies, [
     'eslint-config-airbnb',
-    'eslint-config-prettier',
     'eslint-plugin-prettier',
     '@typescript-eslint/eslint-plugin',
     '@scope/eslint-config',
+    'eslint-config-prettier',
     '@typescript-eslint/parser',
     'eslint-plugin-import',
     '@nrwl/nx',

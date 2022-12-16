@@ -3,7 +3,6 @@ module.exports = {
   extends: [
     './base.eslint.json',
     'airbnb',
-    'prettier',
     'plugin:prettier/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/eslint-recommended',
