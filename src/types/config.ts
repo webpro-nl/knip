@@ -10,6 +10,7 @@ interface PluginsConfiguration {
   babel: PluginConfiguration;
   capacitor: PluginConfiguration;
   changesets: PluginConfiguration;
+  commitlint: PluginConfiguration;
   cypress: PluginConfiguration;
   eslint: PluginConfiguration;
   gatsby: PluginConfiguration;

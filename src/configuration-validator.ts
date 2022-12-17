@@ -29,6 +29,7 @@ const pluginsSchema = z.object({
   babel: pluginSchema,
   capacitor: pluginSchema,
   changesets: pluginSchema,
+  commitlint: pluginSchema,
   cypress: pluginSchema,
   eslint: pluginSchema,
   gatsby: pluginSchema,

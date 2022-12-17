@@ -1,6 +1,7 @@
 export * as babel from './babel/index.js';
 export * as capacitor from './capacitor/index.js';
 export * as changesets from './changesets/index.js';
+export * as commitlint from './commitlint/index.js';
 export * as cypress from './cypress/index.js';
 export * as eslint from './eslint/index.js';
 export * as gatsby from './gatsby/index.js';

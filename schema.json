@@ -110,6 +110,9 @@
         "changesets": {
           "$ref": "#/definitions/plugin"
         },
+        "commitlint": {
+          "$ref": "#/definitions/plugin"
+        },
         "cypress": {
           "$ref": "#/definitions/plugin"
         },
