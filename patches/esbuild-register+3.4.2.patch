@@ -1,0 +1,13 @@
+diff --git a/node_modules/esbuild-register/dist/node.js b/node_modules/esbuild-register/dist/node.js
+index 3bad6cd..d4045c5 100644
+--- a/node_modules/esbuild-register/dist/node.js
++++ b/node_modules/esbuild-register/dist/node.js
+@@ -4727,7 +4727,7 @@ var getOptions = (cwd) => {
+     return {
+       jsxFactory: (_a = data.compilerOptions) == null ? void 0 : _a.jsxFactory,
+       jsxFragment: (_b = data.compilerOptions) == null ? void 0 : _b.jsxFragmentFactory,
+-      target: (_d = (_c = data.compilerOptions) == null ? void 0 : _c.target) == null ? void 0 : _d.toLowerCase()
++      target: 'es2022'
+     };
+   }
+   return {};

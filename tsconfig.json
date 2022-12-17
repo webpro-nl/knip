@@ -18,7 +18,7 @@
     "skipLibCheck": true,
     "sourceMap": false,
     "strict": true,
-    "target": "esnext"
+    "target": "es2022"
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./src/**/*.spec.ts"],
