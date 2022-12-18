@@ -40,8 +40,7 @@ export default class SourceLab {
   }
 
   public skipExportsAnalysisFor(filePath: string | string[]) {
-    if (typeof filePath === 'string') this.skipExportsAnalysis.add(filePath);
-    else filePath.forEach(filePath => this.skipExportsAnalysis.add(filePath));
+    [filePath].flat().forEach(filePath => this.skipExportsAnalysis.add(filePath));
   }
 
   public analyzeSourceFile(sourceFile: SourceFile) {
