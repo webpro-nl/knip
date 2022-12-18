@@ -60,14 +60,6 @@ const pureGlob = async ({ cwd, patterns, ignore = [] }: BaseGlobOptions) =>
     absolute: true,
   });
 
-const dirGlob = async ({ cwd, patterns, ignore = [] }: BaseGlobOptions) =>
-  globby(patterns, {
-    cwd,
-    ignore: [...ignore, '**/node_modules/**'],
-    expandDirectories: false,
-    onlyDirectories: true,
-  });
-
 const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
   const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd, ignore: ['**/node_modules/**'] });
   for await (const entry of stream) {
@@ -86,7 +78,5 @@ Object.defineProperty(memoizedFirstGlob, 'name', { value: 'firstGlob' });
 export const _glob = timerify(memoizedGlob);
 
 export const _pureGlob = timerify(pureGlob);
-
-export const _dirGlob = timerify(dirGlob);
 
 export const _firstGlob = timerify(memoizedFirstGlob);

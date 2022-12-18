@@ -1,4 +1,4 @@
-export const workspaceSorter = (a: string, b: string) => {
+export const byPathDepth = (a: string, b: string) => {
   const depthA = a.split('/');
   const depthB = b.split('/');
   if (depthA.length !== depthB.length) return depthA.length - depthB.length;

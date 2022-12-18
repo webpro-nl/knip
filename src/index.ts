@@ -13,6 +13,7 @@ import { _glob } from './util/glob.js';
 import { getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { _findDuplicateExportedNames } from './util/project.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
+import { byPathDepth } from './util/workspace.js';
 import WorkspaceWorker from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type { Report } from './types/issues.js';
@@ -40,9 +41,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const report = chief.resolveIncludedIssueTypes();
 
+  // Order matters: the root workspace should go first, and then its children, etc.
   const workspaceDirs = Object.values(workspaces)
     .map(workspace => workspace.dir)
-    .sort((a, b) => b.length - a.length);
+    .sort(byPathDepth)
+    .reverse();
 
   const lab = new SourceLab({ report, workspaceDirs });
 

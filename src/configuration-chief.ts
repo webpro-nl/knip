@@ -1,4 +1,5 @@
 import path from 'node:path';
+import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
 import { z } from 'zod';
 import { ConfigurationValidator } from './configuration-validator.js';
@@ -7,12 +8,11 @@ import * as plugins from './plugins/index.js';
 import { arrayify } from './util/array.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
-import { _dirGlob } from './util/glob.js';
 import parsedArgs from './util/parseArgs.js';
 import { resolveIncludedIssueTypes } from './util/resolveIncludedIssueTypes.js';
-import { workspaceSorter } from './util/sort.js';
+import { byPathDepth } from './util/workspace.js';
 import type { Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
-import type { PackageJson } from 'type-fest';
+import type { PackageJson } from '@npmcli/package-json';
 
 const {
   values: { config: rawConfigArg, workspace: rawWorkspaceArg, include = [], exclude = [] },
@@ -145,10 +145,17 @@ export default class ConfigurationChief {
     };
   }
 
-  private async getManifestWorkspaces() {
-    const { workspaces } = this.manifest ?? {};
-    const patterns = workspaces ? (Array.isArray(workspaces) ? workspaces : workspaces.packages ?? []) : [];
-    return _dirGlob({ patterns, cwd: this.cwd, ignore: this.config.ignoreWorkspaces });
+  private async getManifestWorkspaces(): Promise<string[]> {
+    if (this.manifest) {
+      const workspaces = await mapWorkspaces({
+        pkg: this.manifest,
+        cwd: this.cwd,
+        ignore: this.config.ignoreWorkspaces,
+        absolute: false,
+      });
+      return Array.from(workspaces.values()).map(workspaceDir => path.relative(this.cwd, workspaceDir));
+    }
+    return [];
   }
 
   private getConfiguredWorkspaces() {
@@ -194,7 +201,7 @@ export default class ConfigurationChief {
 
     // Return intersection: package.json#workspaces with a match in knip.config#workspaces
     // Also return the additional configured workspaces in knip.json that are not in package.json#workspaces
-    return activeWorkspaces.sort(workspaceSorter).map(name => ({
+    return activeWorkspaces.sort(byPathDepth).map(name => ({
       name,
       dir: path.resolve(this.cwd, name),
       config: this.getConfigForWorkspace(name),
@@ -221,7 +228,7 @@ export default class ConfigurationChief {
   private getConfigKeyForWorkspace(workspaceName: string) {
     const configuredWorkspaces = this.getConfiguredWorkspaces();
     return configuredWorkspaces
-      .sort(workspaceSorter)
+      .sort(byPathDepth)
       .reverse()
       .find(pattern => micromatch.isMatch(workspaceName, pattern));
   }
