@@ -36,7 +36,7 @@
     "knip": "node ./dist/cli.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "test": "globstar -- node --loader tsx --test \"test/*.spec.ts\"",
+    "test": "globstar -- node --loader tsx --test \"test/**/*.spec.ts\"",
     "watch": "tsc --watch",
     "build": "rm -rf dist && tsc",
     "prepublishOnly": "npm test && npm run build && npm run knip",
