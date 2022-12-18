@@ -4,9 +4,14 @@ import path from 'node:path';
 import { load as esmLoad } from '@esbuild-kit/esm-loader';
 import yaml from 'js-yaml';
 import { loadJSON } from './fs.js';
+import parsedArgs from './parseArgs.js';
 import { timerify } from './performance.js';
 
 const require = createRequire(process.cwd());
+
+const {
+  values: { 'no-progress': noProgress = false },
+} = parsedArgs;
 
 const load = async (filePath: string) => {
   if (path.extname(filePath) === '.json' || /rc$/.test(filePath)) {
@@ -26,8 +31,11 @@ const load = async (filePath: string) => {
     const imported = await esmLoad(filePath, {}, require);
     return imported.default ?? imported;
   } catch (error: unknown) {
-    console.log('Failed to load ' + filePath);
-    console.log(error?.toString());
+    if (noProgress) {
+      // Such console logs destroy fancy progress output, will be reported when --no-progress or --debug
+      console.log('Failed to load ' + filePath);
+      console.log(error?.toString());
+    }
   }
 };
 

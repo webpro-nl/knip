@@ -21,6 +21,6 @@ export const loadJSON = async (filePath: string) => {
     const contents = await fs.readFile(filePath);
     return JSON.parse(stripJsonComments(contents.toString()));
   } catch (error) {
-    // console.log(error?.toString());
+    console.log(error?.toString());
   }
 };
