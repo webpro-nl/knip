@@ -3,7 +3,12 @@ import { isBuiltin } from 'node:module';
 import micromatch from 'micromatch';
 import { IGNORE_DEFINITELY_TYPED } from './constants.js';
 import { WorkspaceConfiguration } from './types/config.js';
-import { getPackageNameFromModuleSpecifier, isDefinitelyTyped, getDefinitelyTypedPackage } from './util/modules.js';
+import {
+  getPackageNameFromModuleSpecifier,
+  isDefinitelyTyped,
+  getDefinitelyTypedFor,
+  getPackageFromDefinitelyTyped,
+} from './util/modules.js';
 import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
@@ -133,7 +138,7 @@ export default class DependencyDeputy {
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
-    const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedPackage(packageName);
+    const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedFor(packageName);
     const closestWorkspaceNameForTypes =
       typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName));
 
@@ -180,17 +185,18 @@ export default class DependencyDeputy {
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === '@types') {
+          const typedPackageName = getPackageFromDefinitelyTyped(typedDependency);
           // Ignore `@types/*` packages that don't have a related dependency (e.g. `@types/node`)
-          if (IGNORE_DEFINITELY_TYPED.includes(typedDependency)) return false;
+          if (IGNORE_DEFINITELY_TYPED.includes(typedPackageName)) return false;
 
           // Ignore typed dependencies that have a peer dependency that's referenced
           // Example: `next` has `react-dom` as peer dependencies, so `@types/react-dom` can be ignored (i.e. it's used)
-          const peerDependencies = this.getPeerDependencies(workspaceName, typedDependency);
+          const peerDependencies = this.getPeerDependencies(workspaceName, typedPackageName);
           if (peerDependencies.length) {
             return !peerDependencies.find(peerDependency => !isUnreferencedDependency(peerDependency));
           }
 
-          return !referencedDependencies?.has(typedDependency);
+          return !referencedDependencies?.has(typedPackageName);
         }
 
         if (!referencedDependencies?.has(dependency)) {

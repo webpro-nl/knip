@@ -17,7 +17,16 @@ export const getPackageName = (value: string) => {
 
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith('@types/');
 
-export const getDefinitelyTypedPackage = (packageName: string) => {
+export const getDefinitelyTypedFor = (packageName: string) => {
   if (isDefinitelyTyped(packageName)) return packageName;
-  return '@types/' + packageName.replace('@', '__');
+  if (packageName.startsWith('@')) return '@types/' + packageName.slice(1).replace('/', '__');
+  return '@types/' + packageName;
+};
+
+export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
+  if (typedDependency.includes('__')) {
+    const [scope, packageName] = typedDependency.split('__');
+    return `@${scope}/${packageName}`;
+  }
+  return typedDependency;
 };
