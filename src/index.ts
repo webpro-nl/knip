@@ -10,6 +10,7 @@ import { debugLogObject, debugLogFiles } from './util/debug.js';
 import { _findImportModuleSpecifiers } from './util/externalImports.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { _glob } from './util/glob.js';
+import { getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { _findDuplicateExportedNames } from './util/project.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import WorkspaceWorker from './workspace-worker.js';
@@ -245,7 +246,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (issue.symbol.startsWith('/')) {
             collector.referencedFiles.add(issue.symbol);
           } else {
-            issue.symbol = deputy.resolvePackageName(issue.symbol);
+            issue.symbol = getPackageNameFromModuleSpecifier(issue.symbol);
 
             // Skip direct and internal dependencies
             if (deputy.isInternalDependency(name, issue.symbol)) continue;

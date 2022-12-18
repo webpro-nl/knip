@@ -1,3 +1,8 @@
+export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
+  const parts = moduleSpecifier.split('/').slice(0, 2);
+  return moduleSpecifier.startsWith('@') ? parts.join('/') : parts[0];
+};
+
 export const getPackageName = (value: string) => {
   const match = value.replace(/\\/g, '/').match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/);
   if (match) return match[1];

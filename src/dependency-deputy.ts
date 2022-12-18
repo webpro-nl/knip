@@ -3,7 +3,7 @@ import { isBuiltin } from 'node:module';
 import micromatch from 'micromatch';
 import { IGNORE_DEFINITELY_TYPED } from './constants.js';
 import { WorkspaceConfiguration } from './types/config.js';
-import { isDefinitelyTyped, getDefinitelyTypedPackage } from './util/modules.js';
+import { getPackageNameFromModuleSpecifier, isDefinitelyTyped, getDefinitelyTypedPackage } from './util/modules.js';
 import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
@@ -128,7 +128,7 @@ export default class DependencyDeputy {
   ) {
     if (this.isInternalDependency(workspace.name, moduleSpecifier)) return;
 
-    const packageName = this.resolvePackageName(moduleSpecifier);
+    const packageName = getPackageNameFromModuleSpecifier(moduleSpecifier);
     const workspaceNames = isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
 
@@ -149,7 +149,7 @@ export default class DependencyDeputy {
   isInternalDependency(workspaceName: string, moduleSpecifier: string) {
     if (moduleSpecifier.startsWith('/') || moduleSpecifier.startsWith('.')) return true;
     if (isBuiltin(moduleSpecifier)) return true;
-    const packageName = this.resolvePackageName(moduleSpecifier);
+    const packageName = getPackageNameFromModuleSpecifier(moduleSpecifier);
     return (
       !this.isInDependencies(workspaceName, packageName) && this.isAliasedDependency(workspaceName, moduleSpecifier)
     );
@@ -158,11 +158,6 @@ export default class DependencyDeputy {
   private isAliasedDependency(workspaceName: string, moduleSpecifier: string) {
     const patterns = this.tsConfigPathGlobs.get(workspaceName);
     return patterns && patterns.length > 0 && micromatch.isMatch(moduleSpecifier, patterns);
-  }
-
-  resolvePackageName(moduleSpecifier: string) {
-    const parts = moduleSpecifier.split('/').slice(0, 2);
-    return moduleSpecifier.startsWith('@') ? parts.join('/') : parts[0];
   }
 
   private isInDependencies(workspaceName: string, packageName: string) {
