@@ -32,6 +32,7 @@
   },
   "type": "module",
   "scripts": {
+    "preknip": "npm run build",
     "knip": "node ./dist/cli.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
