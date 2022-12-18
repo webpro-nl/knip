@@ -135,6 +135,9 @@
         "nx": {
           "$ref": "#/definitions/plugin"
         },
+        "nyc": {
+          "$ref": "#/definitions/plugin"
+        },
         "playwright": {
           "$ref": "#/definitions/plugin"
         },

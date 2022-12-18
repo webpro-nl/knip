@@ -20,6 +20,7 @@ interface PluginsConfiguration {
   mocha: PluginConfiguration;
   next: PluginConfiguration;
   nx: PluginConfiguration;
+  nyc: PluginConfiguration;
   playwright: PluginConfiguration;
   postcss: PluginConfiguration;
   remark: PluginConfiguration;

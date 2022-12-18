@@ -38,6 +38,7 @@ const pluginsSchema = z.object({
   mocha: pluginSchema,
   next: pluginSchema,
   nx: pluginSchema,
+  nyc: pluginSchema,
   playwright: pluginSchema,
   postcss: pluginSchema,
   remark: pluginSchema,

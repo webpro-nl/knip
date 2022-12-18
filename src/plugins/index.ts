@@ -9,6 +9,7 @@ export * as jest from './jest/index.js';
 export * as mocha from './mocha/index.js';
 export * as next from './next/index.js';
 export * as nx from './nx/index.js';
+export * as nyc from './nyc/index.js';
 export * as playwright from './playwright/index.js';
 export * as postcss from './postcss/index.js';
 export * as remark from './remark/index.js';
