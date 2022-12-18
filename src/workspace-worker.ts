@@ -178,7 +178,7 @@ export default class WorkspaceWorker {
         }
       }
     }
-    return patterns.flat();
+    return [patterns, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
   }
 
   getPluginProjectFilePatterns() {
@@ -201,7 +201,7 @@ export default class WorkspaceWorker {
         );
       }
     }
-    return patterns;
+    return [patterns, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
   }
 
   getPluginConfigPatterns() {
