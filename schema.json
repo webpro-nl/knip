@@ -153,6 +153,9 @@
         "rollup": {
           "$ref": "#/definitions/plugin"
         },
+        "sentry": {
+          "$ref": "#/definitions/plugin"
+        },
         "storybook": {
           "$ref": "#/definitions/plugin"
         },

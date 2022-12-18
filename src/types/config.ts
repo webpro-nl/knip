@@ -26,6 +26,7 @@ interface PluginsConfiguration {
   remark: PluginConfiguration;
   remix: PluginConfiguration;
   rollup: PluginConfiguration;
+  sentry: PluginConfiguration;
   storybook: PluginConfiguration;
   stryker: PluginConfiguration;
   typescript: PluginConfiguration;

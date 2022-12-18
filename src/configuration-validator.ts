@@ -44,6 +44,7 @@ const pluginsSchema = z.object({
   remark: pluginSchema,
   remix: pluginSchema,
   rollup: pluginSchema,
+  sentry: pluginSchema,
   storybook: pluginSchema,
   stryker: pluginSchema,
   typescript: pluginSchema,
