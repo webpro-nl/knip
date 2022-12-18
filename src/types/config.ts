@@ -23,6 +23,7 @@ interface PluginsConfiguration {
   nyc: PluginConfiguration;
   playwright: PluginConfiguration;
   postcss: PluginConfiguration;
+  prettier: PluginConfiguration;
   remark: PluginConfiguration;
   remix: PluginConfiguration;
   rollup: PluginConfiguration;

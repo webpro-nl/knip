@@ -144,6 +144,9 @@
         "postcss": {
           "$ref": "#/definitions/plugin"
         },
+        "prettier": {
+          "$ref": "#/definitions/plugin"
+        },
         "remark": {
           "$ref": "#/definitions/plugin"
         },

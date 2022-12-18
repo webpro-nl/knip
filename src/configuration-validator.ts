@@ -41,6 +41,7 @@ const pluginsSchema = z.object({
   nyc: pluginSchema,
   playwright: pluginSchema,
   postcss: pluginSchema,
+  prettier: pluginSchema,
   remark: pluginSchema,
   remix: pluginSchema,
   rollup: pluginSchema,
