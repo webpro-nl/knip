@@ -3,7 +3,7 @@ import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './npm-scripts/index.js';
 import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
-import { debugLogFiles, debugLogIssues } from './util/debug.js';
+import { debugLogFiles, debugLogIssues, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Issue } from './types/issues.js';
@@ -91,7 +91,7 @@ export default class WorkspaceWorker {
   }
 
   getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
-    return this.config[pluginName] ?? this.rootWorkspaceConfig[pluginName] ?? { config: [], entry: [], project: [] };
+    return this.config[pluginName] ?? { config: [], entry: [], project: [] };
   }
 
   async init() {
@@ -100,6 +100,7 @@ export default class WorkspaceWorker {
   }
 
   setEnabledPlugins() {
+    // If a dependency is found its own or an ancestor workspace manifest, the plugin is enabled for this workspace too
     const dependencies = new Set(
       [this.manifest, ...this.ancestorManifests]
         .flatMap(manifest => [Object.keys(manifest?.dependencies ?? {}), Object.keys(manifest?.devDependencies ?? {})])
@@ -108,8 +109,14 @@ export default class WorkspaceWorker {
 
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       const hasIsEnabled = typeof plugin.isEnabled === 'function';
-      this.enabled[pluginName] = hasIsEnabled && plugin.isEnabled({ manifest: this.manifest, dependencies });
+      this.enabled[pluginName] =
+        this.config[pluginName] !== false &&
+        hasIsEnabled &&
+        plugin.isEnabled({ manifest: this.manifest, dependencies });
     }
+
+    const enabledPlugins = Object.keys(this.enabled).filter(k => this.enabled[k as PluginName]);
+    debugLogObject(`Enabled plugins (${this.name})`, enabledPlugins);
   }
 
   async initReferencedDependencies() {
@@ -160,8 +167,9 @@ export default class WorkspaceWorker {
   getPluginEntryFilePatterns(isIncludeProductionEntryFiles = true) {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
-      if (this.enabled[pluginName]) {
-        const { entry } = this.getConfigForPlugin(pluginName);
+      const pluginConfig = this.getConfigForPlugin(pluginName);
+      if (this.enabled[pluginName] && pluginConfig) {
+        const { entry } = pluginConfig;
         const defaultEntryFiles = 'ENTRY_FILE_PATTERNS' in plugin ? plugin.ENTRY_FILE_PATTERNS : [];
         patterns.push(...(entry.length > 0 ? entry : defaultEntryFiles));
         if (isIncludeProductionEntryFiles) {
@@ -176,8 +184,9 @@ export default class WorkspaceWorker {
   getPluginProjectFilePatterns() {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
-      if (this.enabled[pluginName]) {
-        const { entry, project } = this.getConfigForPlugin(pluginName);
+      const pluginConfig = this.getConfigForPlugin(pluginName);
+      if (this.enabled[pluginName] && pluginConfig) {
+        const { entry, project } = pluginConfig;
         const defaultEntryFiles = 'ENTRY_FILE_PATTERNS' in plugin ? plugin.ENTRY_FILE_PATTERNS : [];
         const defaultProjectFiles =
           'PROJECT_FILE_PATTERNS' in plugin ? plugin.PROJECT_FILE_PATTERNS : defaultEntryFiles;
@@ -198,8 +207,9 @@ export default class WorkspaceWorker {
   getPluginConfigPatterns() {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
-      if (this.enabled[pluginName]) {
-        const { config } = this.getConfigForPlugin(pluginName);
+      const pluginConfig = this.getConfigForPlugin(pluginName);
+      if (this.enabled[pluginName] && pluginConfig) {
+        const { config } = pluginConfig;
         const defaultConfigFiles = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
         patterns.push(...(config.length > 0 ? config : defaultConfigFiles));
       }
@@ -240,9 +250,10 @@ export default class WorkspaceWorker {
   getProductionPluginEntryFilePatterns() {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
-      if (this.enabled[pluginName]) {
+      const pluginConfig = this.getConfigForPlugin(pluginName);
+      if (this.enabled[pluginName] && pluginConfig) {
         if ('PRODUCTION_ENTRY_FILE_PATTERNS' in plugin) {
-          const { entry } = this.getConfigForPlugin(pluginName);
+          const { entry } = pluginConfig;
           const defaultEntryFiles = plugin.PRODUCTION_ENTRY_FILE_PATTERNS;
           patterns.push(...(entry.length > 0 ? entry : defaultEntryFiles));
         }
@@ -253,10 +264,14 @@ export default class WorkspaceWorker {
   }
 
   getConfigurationEntryFilePattern(pluginName: PluginName) {
-    const { config } = this.getConfigForPlugin(pluginName);
     const plugin = plugins[pluginName];
-    const defaultConfig = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
-    return config.length > 0 ? config : defaultConfig;
+    const pluginConfig = this.getConfigForPlugin(pluginName);
+    if (pluginConfig) {
+      const { config } = pluginConfig;
+      const defaultConfig = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
+      return config.length > 0 ? config : defaultConfig;
+    }
+    return [];
   }
 
   getWorkspaceIgnorePatterns() {
@@ -283,11 +298,14 @@ export default class WorkspaceWorker {
   }
 
   private async findDependenciesByPlugin(pluginName: PluginName, pluginCallback: GenericPluginCallback) {
+    const pluginConfig = this.getConfigForPlugin(pluginName);
+
+    if (!pluginConfig) return [];
+
     const patterns = this.getConfigurationEntryFilePattern(pluginName);
     const cwd = this.dir;
     const ignore = this.getWorkspaceIgnorePatterns();
     const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
-    const pluginConfig = this.getConfigForPlugin(pluginName);
 
     debugLogFiles(`Globbed ${pluginName} config file paths`, configFilePaths);
 

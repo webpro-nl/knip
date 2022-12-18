@@ -17,6 +17,7 @@ const reportConfigSchema = z.object({
 });
 
 const pluginSchema = z.union([
+  z.literal(false),
   globSchema,
   z.object({
     config: globSchema.optional(),

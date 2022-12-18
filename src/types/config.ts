@@ -1,10 +1,12 @@
 type NormalizedGlob = string[];
 
-export interface PluginConfiguration {
-  config: NormalizedGlob;
-  entry: NormalizedGlob;
-  project: NormalizedGlob;
-}
+export type PluginConfiguration =
+  | {
+      config: NormalizedGlob;
+      entry: NormalizedGlob;
+      project: NormalizedGlob;
+    }
+  | false;
 
 interface PluginsConfiguration {
   babel: PluginConfiguration;
