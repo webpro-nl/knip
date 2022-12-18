@@ -18,6 +18,12 @@ const {
   values: { config: rawConfigArg, workspace: rawWorkspaceArg, include = [], exclude = [] },
 } = parsedArgs;
 
+const defaultWorkspaceConfig: WorkspaceConfiguration = {
+  entry: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
+  project: ['**/*.{js,ts,tsx}'],
+  ignore: [],
+};
+
 const defaultConfig: Configuration = {
   include: [],
   exclude: [],
@@ -26,11 +32,7 @@ const defaultConfig: Configuration = {
   ignoreDependencies: [],
   ignoreWorkspaces: [],
   workspaces: {
-    [ROOT_WORKSPACE_NAME]: {
-      entry: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
-      project: ['**/*.{js,ts,tsx}'],
-      ignore: [],
-    },
+    [ROOT_WORKSPACE_NAME]: defaultWorkspaceConfig,
   },
 };
 
@@ -120,10 +122,14 @@ export default class ConfigurationChief {
         .reduce((workspaces, workspace) => {
           const [workspaceName, workspaceConfig] = workspace;
 
-          const entry = arrayify(workspaceConfig.entry);
+          const entry = workspaceConfig.entry ? arrayify(workspaceConfig.entry) : defaultWorkspaceConfig.entry;
           workspaces[workspaceName] = {
             entry,
-            project: arrayify(workspaceConfig.project ?? entry),
+            project: workspaceConfig.project
+              ? arrayify(workspaceConfig.project)
+              : workspaceConfig.entry
+              ? entry
+              : defaultWorkspaceConfig.project,
             ignore: arrayify(workspaceConfig.ignore),
           };
 
