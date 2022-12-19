@@ -45,7 +45,8 @@
     "postinstall": "patch-package"
   },
   "files": [
-    "dist"
+    "dist",
+    "schema.json"
   ],
   "author": {
     "name": "Lars Kappert",
