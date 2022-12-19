@@ -5,6 +5,6 @@
     "@scoped/lib-a": "*",
     "@scoped/lib-b": "*",
     "used": "*",
-    "unused": "*"
+    "unused-app-dependency": "*"
   }
 }

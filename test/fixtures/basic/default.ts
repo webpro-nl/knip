@@ -1,2 +1,2 @@
-export const notDefault = 1;
+export const SomeExport = 1;
 export default () => 1;
