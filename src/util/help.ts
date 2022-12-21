@@ -5,9 +5,12 @@ Options:
   -c/--config [file]     Configuration file path (default: ./knip.json, knip.jsonc or package.json#knip)
   -t/--tsConfig [file]   TypeScript configuration path (default: ./tsconfig.json)
   --production           Analyze only production source files (e.g. no tests, devDependencies, exported types)
+  --strict               Consider only direct dependencies of workspaces. Not devDependencies, not ancestor workspaces.
   --workspace            Analyze a single workspace (default: analyze all configured workspaces)
   --include              Report only listed issue type(s), can be comma-separated or repeated
   --exclude              Exclude issue type(s) from report, can be comma-separated or repeated
+  --ignore               Ignore files matching this glob pattern, can be repeated
+  --no-gitignore         Don't use .gitignore
   --no-progress          Don't show dynamic progress updates
   --no-exit-code         Always exit with code zero (0)
   --max-issues           Maximum number of issues before non-zero exit code (default: 0)
