@@ -1,3 +1,3 @@
-import { dep } from './dep.js';
+import { dep } from './my-module.js';
 
 export const b = dep;

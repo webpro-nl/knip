@@ -1,0 +1,11 @@
+{
+  "name": "js-only",
+  "knip": {
+    "entry": [
+      "index.js"
+    ],
+    "project": [
+      "*.js"
+    ]
+  }
+}

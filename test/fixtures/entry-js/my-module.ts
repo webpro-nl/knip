@@ -1,4 +1,4 @@
-import * as ns from './ns.js';
+import * as ns from './my-namespace.js';
 
 const x = ns.x;
 const y = ns.y;

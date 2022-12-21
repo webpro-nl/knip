@@ -16,20 +16,20 @@ test('Find unused files and exports with JS entry file', async () => {
   assert(Array.from(issues.files)[0].endsWith('dangling.js'));
 
   assert.equal(Object.values(issues.exports).length, 2);
-  assert.equal(issues.exports['dep.ts']['unused'].symbol, 'unused');
+  assert.equal(issues.exports['my-module.ts']['unused'].symbol, 'unused');
   assert.equal(issues.exports['index.js']['b'].symbol, 'b');
 
   assert.equal(Object.values(issues.types).length, 1);
-  assert.equal(issues.types['dep.ts']['Dep'].symbolType, 'type');
+  assert.equal(issues.types['my-module.ts']['Dep'].symbolType, 'type');
 
   assert.equal(Object.values(issues.nsExports).length, 1);
-  assert.equal(issues.nsExports['ns.ts']['z'].symbol, 'z');
+  assert.equal(issues.nsExports['my-namespace.ts']['z'].symbol, 'z');
 
   assert.equal(Object.values(issues.nsTypes).length, 1);
-  assert.equal(issues.nsTypes['ns.ts']['NS'].symbol, 'NS');
+  assert.equal(issues.nsTypes['my-namespace.ts']['NS'].symbol, 'NS');
 
   assert.equal(Object.values(issues.duplicates).length, 1);
-  assert.equal(issues.duplicates['dep.ts']['dep|default'].symbols?.[0], 'dep');
+  assert.equal(issues.duplicates['my-module.ts']['dep|default'].symbols?.[0], 'dep');
 
   assert.deepEqual(counters, {
     ...baseCounters,
