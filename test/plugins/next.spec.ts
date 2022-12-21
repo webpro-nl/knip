@@ -5,7 +5,7 @@ import { main } from '../../src/index.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = path.resolve('test/fixtures/next');
+const cwd = path.resolve('test/fixtures/plugins/next');
 
 test('Unused dependencies in next configuration', async () => {
   const { issues, counters } = await main({

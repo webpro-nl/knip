@@ -4,7 +4,7 @@ import test from 'node:test';
 import * as babel from '../../src/plugins/babel/index.js';
 import { getManifest } from '../helpers';
 
-const cwd = path.resolve('test/fixtures/babel');
+const cwd = path.resolve('test/fixtures/plugins/babel');
 const manifest = getManifest(cwd);
 
 test('Unused dependencies in Babel configuration (.babelrc)', async () => {

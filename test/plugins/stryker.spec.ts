@@ -3,7 +3,7 @@ import path from 'node:path';
 import test from 'node:test';
 import * as stryker from '../../src/plugins/stryker/index.js';
 
-const cwd = path.resolve('test/fixtures/stryker');
+const cwd = path.resolve('test/fixtures/plugins/stryker');
 
 test('Unused dependencies in stryker configuration (js)', async () => {
   const configFilePath = path.join(cwd, '.stryker.conf.js');

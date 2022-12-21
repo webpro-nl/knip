@@ -3,7 +3,7 @@ import path from 'node:path';
 import test from 'node:test';
 import * as gatsby from '../../src/plugins/gatsby/index.js';
 
-const cwd = path.resolve('test/fixtures/gatsby');
+const cwd = path.resolve('test/fixtures/plugins/gatsby');
 
 test('Unused dependencies in Gatsby configuration (gatsby-config.js)', async () => {
   const configFilePath = path.join(cwd, 'gatsby-config.js');

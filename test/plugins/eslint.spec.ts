@@ -4,7 +4,7 @@ import test from 'node:test';
 import * as eslint from '../../src/plugins/eslint/index.js';
 import { getManifest } from '../helpers';
 
-const cwd = path.resolve('test/fixtures/eslint');
+const cwd = path.resolve('test/fixtures/plugins/eslint');
 const manifest = getManifest(cwd);
 const workspaceConfig = {
   entry: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
