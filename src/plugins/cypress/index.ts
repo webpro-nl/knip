@@ -4,8 +4,6 @@ import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('cypress');
 
-export const CONFIG_FILE_PATTERNS = [];
-
 export const ENTRY_FILE_PATTERNS = [
   'cypress.config.{js,ts,mjs,cjs}',
   'cypress/support/e2e.{js,jsx,ts,tsx}',

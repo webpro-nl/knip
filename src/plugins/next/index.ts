@@ -1,5 +1,7 @@
 import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
+// https://nextjs.org/docs/basic-features/pages
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
   return dependencies.has('next');
 };
