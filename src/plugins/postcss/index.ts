@@ -8,13 +8,17 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependen
 
 export const CONFIG_FILE_PATTERNS = ['postcss.config.js', 'package.json'];
 
+export const ENTRY_FILE_PATTERNS = ['postcss.config.js'];
+
 const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: PostCSSConfig = configFilePath.endsWith('package.json')
     ? manifest?.postcss
     : await _load(configFilePath);
 
   return config?.plugins
-    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).map(getPackageName)
+    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins))
+        .filter(plugin => typeof plugin === 'string')
+        .map(getPackageName)
     : [];
 };
 

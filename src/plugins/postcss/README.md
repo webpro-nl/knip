@@ -11,7 +11,8 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "postcss": {
-    "config": ["postcss.config.js", "package.json"]
+    "config": ["postcss.config.js", "package.json"],
+    "entry": ["postcss.config.js"]
   }
 }
 ```
