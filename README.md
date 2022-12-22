@@ -368,24 +368,44 @@ all of this, why not collect the various issues in one go?
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                           | **knip** | [depcheck][39] | [unimported][40] | [ts-unused-exports][41] | [ts-prune][42] | [find-unused-exports][43] |
-| :-------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: | :-----------------------: |
-| Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |             -             |
-| Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
-| Unlisted dependencies             |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
-| [Custom dependency resolvers][44] |    ✅    |       ✅       |        ❌        |            -            |       -        |             -             |
-| Unused exports                    |    ✅    |       -        |        -         |           ✅            |       ✅       |            ✅             |
-| Unused class members              |    ✅    |       -        |        -         |            -            |       -        |             -             |
-| Unused enum members               |    ✅    |       -        |        -         |            -            |       -        |             -             |
-| Duplicate exports                 |    ✅    |       -        |        -         |           ❌            |       ❌       |            ❌             |
-| Search namespaces                 |    ✅    |       -        |        -         |           ✅            |       ❌       |            ❌             |
-| Custom reporters                  |    ✅    |       -        |        -         |            -            |       -        |             -             |
-| JavaScript support                |    ✅    |       ✅       |        ✅        |            -            |       -        |            ✅             |
-| Configure entry files             |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |            ❌             |
-| [Support monorepos][45]           |    ✅    |       -        |        -         |            -            |       -        |             -             |
-| ESLint plugin available           |    -     |       -        |        -         |           ✅            |       -        |             -             |
+| Feature                            | **knip** | [depcheck][39] | [unimported][40] | [ts-unused-exports][41] | [ts-prune][42] | [find-unused-exports][43] |
+| :--------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: | :-----------------------: |
+| Unused files                       |    ✅    |       -        |        ✅        |            -            |       -        |             -             |
+| Unused dependencies                |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
+| Unlisted dependencies              |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
+| [Custom dependency resolvers][44]  |    ✅    |       ✅       |        ❌        |            -            |       -        |             -             |
+| Unused exports                     |    ✅    |       -        |        -         |           ✅            |       ✅       |            ✅             |
+| Unused class members               |    ✅    |       -        |        -         |            -            |       -        |             -             |
+| Unused enum members                |    ✅    |       -        |        -         |            -            |       -        |             -             |
+| Duplicate exports                  |    ✅    |       -        |        -         |           ❌            |       ❌       |            ❌             |
+| Search namespaces                  |    ✅    |       -        |        -         |           ✅            |       ❌       |            ❌             |
+| Custom reporters                   |    ✅    |       -        |        -         |            -            |       -        |             -             |
+| JavaScript support                 |    ✅    |       ✅       |        ✅        |            -            |       -        |            ✅             |
+| Configure entry files              |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |            ❌             |
+| [Support workspaces/monorepos][45] |    ✅    |       ❌       |        ❌        |            -            |       -        |             -             |
+| ESLint plugin available            |    -     |       -        |        -         |           ✅            |       -        |             -             |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
+
+### Migrating from other tools
+
+WIP
+
+### depcheck
+
+The following commands are similar:
+
+    depcheck
+    knip --include dependencies,unlisted
+
+### unimported
+
+The following commands are similar:
+
+    unimported
+    knip --production --include files,dependencies,unlisted
+
+See [production mode](#production-mode).
 
 ## TypeScript language services
 
@@ -443,4 +463,4 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [42]: https://github.com/nadeesha/ts-prune
 [43]: https://github.com/jaydenseric/find-unused-exports
 [44]: #custom-dependency-resolvers
-[45]: #monorepos-1
+[45]: #workspaces--monorepos
