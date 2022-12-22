@@ -14,20 +14,15 @@ const {
 } = parsedArgs;
 
 const load = async (filePath: string) => {
-  if (path.extname(filePath) === '.json' || /rc$/.test(filePath)) {
-    return loadJSON(filePath);
-  }
-
-  if (path.extname(filePath) === '.yaml' || path.extname(filePath) === '.yml') {
-    try {
-      return yaml.load((await fs.readFile(filePath)).toString());
-    } catch (error) {
-      console.log('Failed to load ' + filePath);
-      console.log(error?.toString());
-    }
-  }
-
   try {
+    if (path.extname(filePath) === '.json' || /rc$/.test(filePath)) {
+      return loadJSON(filePath);
+    }
+
+    if (path.extname(filePath) === '.yaml' || path.extname(filePath) === '.yml') {
+      return yaml.load((await fs.readFile(filePath)).toString());
+    }
+
     const imported = await esmLoad(filePath, {}, require);
     return imported.default ?? imported;
   } catch (error: unknown) {

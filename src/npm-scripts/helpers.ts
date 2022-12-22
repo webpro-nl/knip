@@ -49,15 +49,18 @@ export const getBinariesFromScripts = (npmScripts: string[]) =>
 
 export const getPackageManifest = async (workingDir: string, packageName: string, isRoot: boolean, cwd: string) => {
   try {
+    // Use `require` to benefit from caching
     return require(path.join(workingDir, 'node_modules', packageName, 'package.json'));
   } catch (error) {
     if (!isRoot) {
       try {
         return require(path.join(cwd, 'node_modules', packageName, 'package.json'));
       } catch (error) {
+        // TODO: Handle errors properly, perhaps deal with other package managers
         // console.error(error?.toString());
       }
     }
+    // TODO: Handle errors properly, perhaps deal with other package managers
     // console.error(error?.toString());
   }
 };

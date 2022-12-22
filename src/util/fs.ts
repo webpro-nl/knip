@@ -17,10 +17,6 @@ export const findFile = async (workingDir: string, fileName: string): Promise<st
 };
 
 export const loadJSON = async (filePath: string) => {
-  try {
-    const contents = await fs.readFile(filePath);
-    return JSON.parse(stripJsonComments(contents.toString()));
-  } catch (error) {
-    console.log(error?.toString());
-  }
+  const contents = await fs.readFile(filePath);
+  return JSON.parse(stripJsonComments(contents.toString()));
 };
