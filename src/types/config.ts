@@ -2,9 +2,9 @@ type NormalizedGlob = string[];
 
 export type PluginConfiguration =
   | {
-      config: NormalizedGlob;
-      entry: NormalizedGlob;
-      project: NormalizedGlob;
+      config: NormalizedGlob | null;
+      entry: NormalizedGlob | null;
+      project: NormalizedGlob | null;
     }
   | false;
 

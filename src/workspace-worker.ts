@@ -91,7 +91,7 @@ export default class WorkspaceWorker {
   }
 
   getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
-    return this.config[pluginName] ?? { config: [], entry: [], project: [] };
+    return this.config[pluginName] ?? { config: null, entry: null, project: null };
   }
 
   async init() {
@@ -171,7 +171,7 @@ export default class WorkspaceWorker {
       if (this.enabled[pluginName] && pluginConfig) {
         const { entry } = pluginConfig;
         const defaultEntryFiles = 'ENTRY_FILE_PATTERNS' in plugin ? plugin.ENTRY_FILE_PATTERNS : [];
-        patterns.push(...(entry.length > 0 ? entry : defaultEntryFiles));
+        patterns.push(...(entry ?? defaultEntryFiles));
         if (isIncludeProductionEntryFiles) {
           const entry = 'PRODUCTION_ENTRY_FILE_PATTERNS' in plugin ? plugin.PRODUCTION_ENTRY_FILE_PATTERNS : [];
           patterns.push(...entry);
@@ -187,17 +187,14 @@ export default class WorkspaceWorker {
       const pluginConfig = this.getConfigForPlugin(pluginName);
       if (this.enabled[pluginName] && pluginConfig) {
         const { entry, project } = pluginConfig;
-        const defaultEntryFiles = 'ENTRY_FILE_PATTERNS' in plugin ? plugin.ENTRY_FILE_PATTERNS : [];
-        const defaultProjectFiles =
-          'PROJECT_FILE_PATTERNS' in plugin ? plugin.PROJECT_FILE_PATTERNS : defaultEntryFiles;
         patterns.push(
-          ...(project.length > 0
-            ? project
-            : defaultProjectFiles.length > 0
-            ? defaultProjectFiles
-            : entry.length > 0
-            ? entry
-            : defaultEntryFiles)
+          ...(project ??
+            entry ??
+            ('PROJECT_FILE_PATTERNS' in plugin
+              ? plugin.PROJECT_FILE_PATTERNS
+              : 'ENTRY_FILE_PATTERNS' in plugin
+              ? plugin.ENTRY_FILE_PATTERNS
+              : []))
         );
       }
     }
@@ -211,7 +208,7 @@ export default class WorkspaceWorker {
       if (this.enabled[pluginName] && pluginConfig) {
         const { config } = pluginConfig;
         const defaultConfigFiles = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
-        patterns.push(...(config.length > 0 ? config : defaultConfigFiles));
+        patterns.push(...(config ?? defaultConfigFiles));
       }
     }
     return patterns;
@@ -253,9 +250,7 @@ export default class WorkspaceWorker {
       const pluginConfig = this.getConfigForPlugin(pluginName);
       if (this.enabled[pluginName] && pluginConfig) {
         if ('PRODUCTION_ENTRY_FILE_PATTERNS' in plugin) {
-          const { entry } = pluginConfig;
-          const defaultEntryFiles = plugin.PRODUCTION_ENTRY_FILE_PATTERNS;
-          patterns.push(...(entry.length > 0 ? entry : defaultEntryFiles));
+          patterns.push(...(pluginConfig.entry ?? plugin.PRODUCTION_ENTRY_FILE_PATTERNS));
         }
       }
     }
@@ -267,9 +262,8 @@ export default class WorkspaceWorker {
     const plugin = plugins[pluginName];
     const pluginConfig = this.getConfigForPlugin(pluginName);
     if (pluginConfig) {
-      const { config } = pluginConfig;
       const defaultConfig = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
-      return config.length > 0 ? config : defaultConfig;
+      return pluginConfig.config ?? defaultConfig;
     }
     return [];
   }
