@@ -36,6 +36,17 @@ test('Unused dependencies in ESLint configuration (legacy js)', async () => {
     'eslint-config-prettier',
     '@typescript-eslint/parser',
     'eslint-plugin-import',
-    '@nrwl/nx',
+    '@nrwl/eslint-plugin-nx',
+  ]);
+});
+
+test('Unused dependencies in ESLint configuration (legacy yaml)', async () => {
+  const configFilePath = path.join(cwd, '.eslintrc.yml');
+  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
+  assert.deepEqual(dependencies, [
+    '@sinonjs/eslint-config',
+    'eslint-plugin-jsdoc',
+    'eslint-plugin-compat',
+    '@sinonjs/eslint-plugin-no-prototype-methods',
   ]);
 });

@@ -14,11 +14,14 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependen
 // Current: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
 // The only way to reliably resolve legacy configuration is through ESLint itself
 // This is also required when something like @rushstack/eslint-patch/modern-module-resolution is used
-export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json,cjs}', 'package.json'];
+export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
 
 // New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
 // We can handle eslint.config.js just like other source code (as dependencies are imported)
 export const ENTRY_FILE_PATTERNS = ['eslint.config.js'];
+
+// Note: shareable configs should use `peerDependencies` for plugins
+// https://eslint.org/docs/latest/developer-guide/shareable-configs#publishing-a-shareable-config
 
 const findESLintDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
   if (configFilePath.endsWith('package.json') && !manifest.eslintConfig) return [];

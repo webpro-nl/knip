@@ -5,7 +5,7 @@ import type { ESLintConfig } from './types.js';
 const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', pluginName: string) => {
   return pluginName.startsWith('@')
     ? pluginName.includes('/')
-      ? pluginName
+      ? pluginName.replace(/\//, `/${namespace}-`)
       : `${pluginName}/${namespace}`
     : `${namespace}-${pluginName}`;
 };
