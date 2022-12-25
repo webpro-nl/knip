@@ -42,7 +42,9 @@
     "prepublishOnly": "npm test && npm run build && npm run knip",
     "format": "remark README.md -o",
     "release": "release-it",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "add-plugin:help": "echo 'Usage: npm run add-plugin --name=[name] (and update README.md and schema.json)'",
+    "add-plugin": "cp -R src/plugins/_template src/plugins/$npm_config_name && echo \"export * as $npm_config_name from \\\"./$npm_config_name/index.js\\\";\" >> src/plugins/index.ts"
   },
   "files": [
     "dist",

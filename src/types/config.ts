@@ -1,4 +1,8 @@
+import * as Plugins from '../plugins/index.js';
+
 type NormalizedGlob = string[];
+
+export type PluginName = keyof typeof Plugins;
 
 export type PluginConfiguration =
   | {
@@ -8,31 +12,7 @@ export type PluginConfiguration =
     }
   | false;
 
-interface PluginsConfiguration {
-  babel: PluginConfiguration;
-  capacitor: PluginConfiguration;
-  changesets: PluginConfiguration;
-  commitlint: PluginConfiguration;
-  cypress: PluginConfiguration;
-  eslint: PluginConfiguration;
-  gatsby: PluginConfiguration;
-  jest: PluginConfiguration;
-  mocha: PluginConfiguration;
-  next: PluginConfiguration;
-  nx: PluginConfiguration;
-  nyc: PluginConfiguration;
-  playwright: PluginConfiguration;
-  postcss: PluginConfiguration;
-  prettier: PluginConfiguration;
-  remark: PluginConfiguration;
-  remix: PluginConfiguration;
-  rollup: PluginConfiguration;
-  sentry: PluginConfiguration;
-  storybook: PluginConfiguration;
-  stryker: PluginConfiguration;
-  typescript: PluginConfiguration;
-  webpack: PluginConfiguration;
-}
+type PluginsConfiguration = Record<PluginName, PluginConfiguration>;
 
 interface BaseWorkspaceConfiguration {
   entry: NormalizedGlob;
@@ -41,8 +21,6 @@ interface BaseWorkspaceConfiguration {
 }
 
 export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Partial<PluginsConfiguration> {}
-
-export type PluginName = keyof PluginsConfiguration;
 
 export interface Configuration {
   include: string[];
