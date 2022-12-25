@@ -61,14 +61,14 @@ Create a configuration file, let's give it the default name `knip.json` with the
 
 ```json
 {
-  "$schema": "https://unpkg.com/knip@alpha/schema.json",
+  "$schema": "https://unpkg.com/knip@next/schema.json",
   "entry": ["src/index.ts"],
   "project": ["src/**/*.ts"]
 }
 ```
 
-The `entry` files target the starting point(s) to resolve code dependencies. The `project` files should contain all
-files it should match them against, including potentially unused files.
+The `entry` files target the starting point(s) to resolve the rest of the imported code. The `project` files should
+contain all files to match against the files resolved from the entry files, including potentially unused files.
 
 Then run the checks:
 
@@ -184,7 +184,7 @@ be part of the analysis. Here's a simple example:
 ```jsonc
 {
   "ignore": "**/fixtures/**",
-  "ignoreBinaries": ["deno", "git"],
+  "ignoreBinaries": ["rm", "docker-compose"],
   "ignoreWorkspaces": ["packages/ignore-me"],
   "workspaces": {
     "packages/*": {
@@ -262,7 +262,7 @@ idea of how they work and why they are needed:
 - Static configuration files such as JSON and YAML always require a custom dependency resolver.
 
 Custom dependency resolvers return all referenced dependencies for the configuration files it is given. Knip handles the
-rest.
+rest to find which of those dependencies are unused or missing.
 
 ### `entry`
 

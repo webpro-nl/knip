@@ -21,3 +21,5 @@ Note that the `config` files represent the current way to configure ESLint, whil
 represents the new way. The latter is more explicit and expects things like parsers and plugins to be referenced
 directly, which requires such dependencies to be imported first. This means Knip can handle such configuration files as
 regular source code entry files.
+
+Also see [Knip plugins](https://github.com/webpro/knip/blob/next/README.md#plugins) for more information about plugins.
