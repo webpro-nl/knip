@@ -19,8 +19,8 @@ const {
 } = parsedArgs;
 
 const defaultWorkspaceConfig: WorkspaceConfiguration = {
-  entry: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
-  project: ['**/*.{js,ts,tsx}'],
+  entry: ['index.{js,ts,tsx}!', 'src/index.{js,ts,tsx}!'],
+  project: ['**/*.{js,ts,tsx}!'],
   ignore: [],
 };
 
