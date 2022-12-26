@@ -143,7 +143,7 @@ export default class WorkspaceWorker {
   getEntryFilePatterns() {
     const { entry } = this.config;
     if (entry.length === 0) return [];
-    return [entry, TEST_FILE_PATTERNS, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
+    return [entry, TEST_FILE_PATTERNS, this.negatedWorkspacePatterns].flat();
   }
 
   getProjectFilePatterns() {
@@ -160,7 +160,7 @@ export default class WorkspaceWorker {
       negatedPluginEntryFilePatterns,
       negatedPluginProjectFilePatterns,
       TEST_FILE_PATTERNS,
-      this.isRoot ? this.negatedWorkspacePatterns : [],
+      this.negatedWorkspacePatterns,
     ].flat();
   }
 
@@ -178,7 +178,7 @@ export default class WorkspaceWorker {
         }
       }
     }
-    return [patterns, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
+    return [patterns, this.negatedWorkspacePatterns].flat();
   }
 
   getPluginProjectFilePatterns() {
@@ -198,7 +198,7 @@ export default class WorkspaceWorker {
         );
       }
     }
-    return [patterns, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
+    return [patterns, this.negatedWorkspacePatterns].flat();
   }
 
   getPluginConfigPatterns() {
@@ -218,7 +218,7 @@ export default class WorkspaceWorker {
     const entry = this.config.entry.filter(hasProductionSuffix);
     if (entry.length === 0) return [];
     const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
-    return [entry, negatedEntryFiles, negatedTestFilePatterns, this.isRoot ? this.negatedWorkspacePatterns : []].flat();
+    return [entry, negatedEntryFiles, negatedTestFilePatterns, this.negatedWorkspacePatterns].flat();
   }
 
   getProductionProjectFilePatterns() {
@@ -240,7 +240,7 @@ export default class WorkspaceWorker {
       negatedPluginEntryFilePatterns,
       negatedPluginProjectFilePatterns,
       negatedTestFilePatterns,
-      this.isRoot ? this.negatedWorkspacePatterns : [],
+      this.negatedWorkspacePatterns,
     ].flat();
   }
 

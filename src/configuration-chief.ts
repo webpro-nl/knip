@@ -60,6 +60,7 @@ export default class ConfigurationChief {
 
   manifestPath: undefined | string;
   manifest: undefined | PackageJson;
+  manifestWorkspaces: undefined | string[];
 
   constructor({ cwd, isStrict, isProduction }: ConfigurationManagerOptions) {
     this.cwd = cwd ?? this.cwd;
@@ -157,6 +158,7 @@ export default class ConfigurationChief {
   }
 
   private async getManifestWorkspaces(): Promise<string[]> {
+    if (this.manifestWorkspaces) return this.manifestWorkspaces;
     if (this.manifest) {
       const workspaces = await mapWorkspaces({
         pkg: this.manifest,
@@ -164,7 +166,8 @@ export default class ConfigurationChief {
         ignore: this.config.ignoreWorkspaces,
         absolute: false,
       });
-      return Array.from(workspaces.values()).map(workspaceDir => path.relative(this.cwd, workspaceDir));
+      this.manifestWorkspaces = Array.from(workspaces.values()).map(dir => path.relative(this.cwd, dir));
+      return this.manifestWorkspaces;
     }
     return [];
   }
@@ -228,11 +231,18 @@ export default class ConfigurationChief {
     }));
   }
 
-  async getNegatedWorkspacePatterns() {
+  async getDescendentWorkspaces(name: string) {
     const manifestWorkspaces = await this.getManifestWorkspaces();
     const additionalWorkspaces = this.getAdditionalWorkspaces(manifestWorkspaces);
     return [...manifestWorkspaces, ...additionalWorkspaces]
-      .filter(workspaceName => workspaceName !== ROOT_WORKSPACE_NAME)
+      .filter(workspaceName => workspaceName !== name)
+      .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name));
+  }
+
+  async getNegatedWorkspacePatterns(name: string) {
+    const descendentWorkspaces = await this.getDescendentWorkspaces(name);
+    return descendentWorkspaces
+      .map(workspaceName => path.relative(path.join(this.cwd, name), workspaceName))
       .map(workspaceName => `!${workspaceName}`);
   }
 

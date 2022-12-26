@@ -1,0 +1,15 @@
+{
+  "name": "root",
+  "workspaces": [
+    "level-1-1",
+    "level-1-1/level-1-2",
+    "level-1-1/level-1-2/level-1-3"
+  ],
+  "knip": {
+    "workspaces": {
+      "level-1-1": {},
+      "level-1-1/level-1-2": {},
+      "level-1-1/level-1-2/level-1-3": {}
+    }
+  }
+}

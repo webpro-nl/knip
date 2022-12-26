@@ -35,8 +35,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const workspaces = await chief.getActiveWorkspaces();
 
-  const negatedWorkspacePatterns = await chief.getNegatedWorkspacePatterns();
-
   debugLogObject('Included workspaces', workspaces);
 
   const report = chief.resolveIncludedIssueTypes();
@@ -80,6 +78,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const workspaceManifest = deputy.getWorkspaceManifest(name);
 
     if (!workspaceManifest) continue;
+
+    const negatedWorkspacePatterns = await chief.getNegatedWorkspacePatterns(name);
 
     const worker = new WorkspaceWorker({
       name,

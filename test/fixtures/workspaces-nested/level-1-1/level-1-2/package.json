@@ -1,0 +1,9 @@
+{
+  "name": "level-1-2",
+  "dependencies": {
+    "package-1-2": "*"
+  },
+  "devDependencies": {
+    "package-1-2-dev": "*"
+  }
+}
