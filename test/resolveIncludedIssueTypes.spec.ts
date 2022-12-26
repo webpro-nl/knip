@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { ISSUE_TYPES } from '../src/constants.js';
-import { resolveIncludedIssueTypes } from '../src/util/resolveIncludedIssueTypes.js';
+import { resolveIncludedIssueTypes } from '../src/util/resolve-included-issue-types.js';
 
 const all = Object.fromEntries(ISSUE_TYPES.map(type => [type, true]));
 const none = Object.fromEntries(ISSUE_TYPES.map(type => [type, false]));
