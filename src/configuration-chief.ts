@@ -250,9 +250,7 @@ export default class ConfigurationChief {
 
   getConfigForWorkspace(workspaceName: string) {
     const key = this.getConfigKeyForWorkspace(workspaceName);
-    if (key) {
-      return this.config?.workspaces?.[key] ?? { entry: [], project: [], ignore: [] };
-    }
+    if (key && this.config?.workspaces?.[key]) return this.config.workspaces[key];
     return { entry: [], project: [], ignore: [] };
   }
 
