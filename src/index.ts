@@ -7,7 +7,7 @@ import ProjectPrincipal from './project-principal.js';
 import SourceLab from './source-lab.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogFiles } from './util/debug.js';
-import { _findImportModuleSpecifiers } from './util/externalImports.js';
+import { _findImportModuleSpecifiers } from './util/find-import-specifiers.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { getPackageNameFromModuleSpecifier } from './util/modules.js';

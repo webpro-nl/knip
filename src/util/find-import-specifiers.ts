@@ -42,7 +42,11 @@ const findImportModuleSpecifiers = (
   const moduleSpecifiers = compact(
     [...importLiterals, ...requireCallExpressions].map(importLiteral => {
       if (!importLiteral) return;
-      if (importLiteral.isKind(ts.SyntaxKind.TemplateExpression)) return importLiteral.getFullText().slice(1, -1);
+      if (importLiteral.isKind(ts.SyntaxKind.TemplateExpression)) {
+        const literalText = importLiteral.getFullText();
+        if (literalText.includes('${')) return; // Substitutions in template literals are not supported
+        return literalText.slice(1, -1);
+      }
       return importLiteral?.getLiteralText();
     })
   );
