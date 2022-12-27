@@ -5,19 +5,18 @@ import { main } from '../../src/index.js';
 import * as postcss from '../../src/plugins/postcss/index.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { getManifest } from '../helpers/index.js';
 
 const cwd = path.resolve('test/fixtures/plugins/postcss');
+const manifestFilePath = path.join(cwd, 'package.json');
+const manifest = getManifest(cwd);
 
 test('Unused dependencies in postcss configuration (package.json)', async () => {
-  const manifestFilePath = path.join(cwd, 'package.json');
-  const manifest = await import(manifestFilePath);
   const dependencies = await postcss.findDependencies(manifestFilePath, { manifest });
   assert.deepEqual(dependencies, ['autoprefixer']);
 });
 
 test('Unused dependencies in postcss configuration (postcss.config.js)', async () => {
-  const manifestFilePath = path.join(cwd, 'package.json');
-  const manifest = await import(manifestFilePath);
   const configFilePath = path.join(cwd, 'postcss.config.js');
   const dependencies = await postcss.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, []);
