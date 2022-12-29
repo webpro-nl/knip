@@ -8,6 +8,7 @@ import * as plugins from './plugins/index.js';
 import { arrayify } from './util/array.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
+import { ensurePosixPath } from './util/glob.js';
 import parsedArgs from './util/parseArgs.js';
 import { resolveIncludedIssueTypes } from './util/resolve-included-issue-types.js';
 import { byPathDepth } from './util/workspace.js';
@@ -166,7 +167,9 @@ export default class ConfigurationChief {
         ignore: this.config.ignoreWorkspaces,
         absolute: false,
       });
-      this.manifestWorkspaces = Array.from(workspaces.values()).map(dir => path.relative(this.cwd, dir));
+      this.manifestWorkspaces = Array.from(workspaces.values())
+        .map(dir => path.relative(this.cwd, dir))
+        .map(ensurePosixPath);
       return this.manifestWorkspaces;
     }
     return [];
@@ -241,8 +244,9 @@ export default class ConfigurationChief {
 
   async getNegatedWorkspacePatterns(name: string) {
     const descendentWorkspaces = await this.getDescendentWorkspaces(name);
+    const matchName = new RegExp(`^${name}/`);
     return descendentWorkspaces
-      .map(workspaceName => path.relative(path.join(this.cwd, name), workspaceName))
+      .map(workspaceName => workspaceName.replace(matchName, ''))
       .map(workspaceName => `!${workspaceName}`);
   }
 

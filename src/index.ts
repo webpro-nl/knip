@@ -9,7 +9,7 @@ import { compact } from './util/array.js';
 import { debugLogObject, debugLogFiles } from './util/debug.js';
 import { _findImportModuleSpecifiers } from './util/find-import-specifiers.js';
 import { findFile, loadJSON } from './util/fs.js';
-import { _glob } from './util/glob.js';
+import { _glob, ensurePosixPath } from './util/glob.js';
 import { getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { _findDuplicateExportedNames } from './util/project.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
@@ -321,7 +321,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (report.dependencies || report.unlisted) {
       const filePath = sourceFile.getFilePath();
-      const workspaceDir = workspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir));
+      const workspaceDir = workspaceDirs.find(workspaceDir => filePath.startsWith(ensurePosixPath(workspaceDir)));
       const workspace = workspaces.find(workspace => workspace.dir === workspaceDir);
       if (workspace) {
         const [, externalModuleSpecifiers] =

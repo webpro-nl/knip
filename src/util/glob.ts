@@ -6,7 +6,7 @@ import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
 import { timerify } from './performance.js';
 
-const ensurePosixPath = (value: string) => value.split(path.sep).join(path.posix.sep);
+export const ensurePosixPath = (value: string) => value.split(path.sep).join(path.posix.sep);
 
 const prependDirToPattern = (workingDir: string, pattern: string) => {
   if (pattern.startsWith('!')) return '!' + path.posix.join(workingDir, pattern.slice(1));
