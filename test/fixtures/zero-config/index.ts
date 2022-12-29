@@ -1,3 +1,3 @@
-import { dep } from './dep.js';
+import { myExport } from './my-module.js';
 
-export const b = dep;
+export const main = myExport;

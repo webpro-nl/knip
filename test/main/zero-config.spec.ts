@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
+import { main } from '../../src/index.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 test('Find unused exports in zero-config mode', async () => {
   const cwd = path.resolve('test/fixtures/zero-config');
@@ -13,32 +13,33 @@ test('Find unused exports in zero-config mode', async () => {
     cwd,
   });
 
-  assert.equal(issues.files.size, 0);
+  assert.equal(issues.files.size, 1);
 
   assert.equal(Object.values(issues.exports).length, 2);
-  assert.equal(issues.exports['dep.ts']['unused'].symbol, 'unused');
-  assert.equal(issues.exports['index.ts']['b'].symbol, 'b');
+  assert.equal(issues.exports['my-module.ts']['unused'].symbol, 'unused');
+  assert.equal(issues.exports['index.ts']['main'].symbol, 'main');
 
   assert.equal(Object.values(issues.types).length, 1);
-  assert.equal(issues.types['dep.ts']['Dep'].symbolType, 'type');
+  assert.equal(issues.types['my-module.ts']['AnyType'].symbolType, 'type');
 
   assert.equal(Object.values(issues.nsExports).length, 1);
-  assert.equal(issues.nsExports['ns.ts']['z'].symbol, 'z');
+  assert.equal(issues.nsExports['my-namespace.ts']['z'].symbol, 'z');
 
   assert.equal(Object.values(issues.nsTypes).length, 1);
-  assert.equal(issues.nsTypes['ns.ts']['NS'].symbol, 'NS');
+  assert.equal(issues.nsTypes['my-namespace.ts']['NS'].symbol, 'NS');
 
   assert.equal(Object.values(issues.duplicates).length, 1);
-  assert.equal(issues.duplicates['dep.ts']['dep|default'].symbols?.[0], 'dep');
+  assert.equal(issues.duplicates['my-module.ts']['myExport|default'].symbols?.[0], 'myExport');
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     exports: 2,
     nsExports: 1,
     types: 1,
     nsTypes: 1,
     duplicates: 1,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });

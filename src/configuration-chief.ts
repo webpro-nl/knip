@@ -125,13 +125,16 @@ export default class ConfigurationChief {
           const [workspaceName, workspaceConfig] = workspace;
 
           const entry = workspaceConfig.entry ? arrayify(workspaceConfig.entry) : defaultWorkspaceConfig.entry;
+
+          const project = workspaceConfig.project
+            ? arrayify(workspaceConfig.project)
+            : workspaceConfig.entry
+            ? entry
+            : defaultWorkspaceConfig.project;
+
           workspaces[workspaceName] = {
             entry,
-            project: workspaceConfig.project
-              ? arrayify(workspaceConfig.project)
-              : workspaceConfig.entry
-              ? entry
-              : defaultWorkspaceConfig.project,
+            project,
             ignore: arrayify(workspaceConfig.ignore),
           };
 

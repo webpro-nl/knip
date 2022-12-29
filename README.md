@@ -57,7 +57,9 @@ Knip supports LTS versions of Node.js, and currently requires at least Node.js v
 
 ## Usage
 
-Create a configuration file, let's give it the default name `knip.json` with these contents:
+Knip has good defaults and you can run it without any configuration, but especially larger projects get more out of Knip
+with a configuration file (or a `knip` property in `package.json`). Let's name this file `knip.json` with these contents
+(you might want to adjust right away for your project):
 
 ```json
 {
