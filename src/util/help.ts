@@ -10,6 +10,7 @@ Options:
   --include              Report only listed issue type(s), can be comma-separated or repeated
   --exclude              Exclude issue type(s) from report, can be comma-separated or repeated
   --ignore               Ignore files matching this glob pattern, can be repeated
+  --ignore-entry-exports Ignore exports from entry files
   --no-gitignore         Don't use .gitignore
   --no-progress          Don't show dynamic progress updates
   --no-exit-code         Always exit with code zero (0)

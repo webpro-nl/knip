@@ -16,6 +16,7 @@ const {
   values: {
     debug: isDebug = false,
     help,
+    'ignore-entry-exports': isIgnoreEntryExports = false,
     'max-issues': maxIssues = '0',
     'no-exit-code': noExitCode = false,
     'no-gitignore': isNoGitIgnore = false,
@@ -50,6 +51,7 @@ const run = async () => {
       isStrict,
       isProduction,
       isShowProgress,
+      isIgnoreEntryExports,
     });
 
     await printReport({ report, issues, cwd, isProduction, options: reporterOptions });

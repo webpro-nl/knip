@@ -9,6 +9,7 @@ export default parseArgs({
     help: { type: 'boolean', short: 'h' },
     ignore: { type: 'string', multiple: true },
     ignoreBinaries: { type: 'string', multiple: true },
+    'ignore-entry-exports': { type: 'boolean' },
     include: { type: 'string', multiple: true },
     'max-issues': { type: 'string' },
     'no-exit-code': { type: 'boolean' },
