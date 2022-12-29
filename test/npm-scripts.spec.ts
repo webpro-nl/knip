@@ -2,8 +2,10 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
 import * as npm from '../src/npm-scripts';
+import { getManifest } from './helpers';
 
 const cwd = path.resolve('test/fixtures/npm-scripts');
+const manifest = getManifest(cwd);
 
 test('Referenced dependencies in npm scripts', async () => {
   const rootConfig = {
@@ -14,8 +16,6 @@ test('Referenced dependencies in npm scripts', async () => {
     ignoreBinaries: ['bash', 'rm'],
     ignoreWorkspaces: [],
   };
-
-  const manifest = await import(path.join(cwd, 'package.json'));
 
   const config = {
     rootConfig,
