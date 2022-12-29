@@ -11,31 +11,15 @@ on:
 
 jobs:
   test:
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
-      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node: [16, 18]
-        include:
-          - os: ubuntu-latest
-            node: 16
-            experimental: false
-          - os: ubuntu-latest
-            node: 18
-            experimental: false
-          - os: macos-latest
-            node: 16
-            experimental: false
-          - os: macos-latest
-            node: 18
-            experimental: false
-          - os: windows-latest
-            node: 16
-            experimental: true
-          - os: windows-latest
-            node: 18
-            experimental: true
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        node:
+          - 16
+          - 18
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} (Node v${{ matrix.node }})
