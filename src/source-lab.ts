@@ -85,26 +85,16 @@ export default class SourceLab {
         if (declaration.isKind(ts.SyntaxKind.EnumDeclaration)) {
           identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
           if (report.enumMembers) {
-            findUnusedEnumMembers(declaration, filePath).forEach(member =>
-              issues.add({
-                type: 'enumMembers',
-                filePath,
-                symbol: member.getName().replace(/['"`]/g, ''),
-                parentSymbol: identifier?.getText(),
-              })
-            );
+            findUnusedEnumMembers(declaration, filePath).forEach(symbol => {
+              issues.add({ type: 'enumMembers', filePath, symbol, parentSymbol: identifier?.getText() });
+            });
           }
         } else if (declaration.isKind(ts.SyntaxKind.ClassDeclaration)) {
           identifier = declaration.getFirstChildByKind(ts.SyntaxKind.Identifier);
           if (report.classMembers) {
-            findUnusedClassMembers(declaration, filePath).forEach(member =>
-              issues.add({
-                type: 'classMembers',
-                filePath,
-                symbol: member.getName(),
-                parentSymbol: identifier?.getText(),
-              })
-            );
+            findUnusedClassMembers(declaration, filePath).forEach(symbol => {
+              issues.add({ type: 'classMembers', filePath, symbol, parentSymbol: identifier?.getText() });
+            });
           }
         }
 
