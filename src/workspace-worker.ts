@@ -107,7 +107,9 @@ export default class WorkspaceWorker {
         .flat()
     );
 
-    for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
+    const pluginEntries = Object.entries(plugins) as PluginNames;
+
+    for (const [pluginName, plugin] of pluginEntries) {
       const hasIsEnabled = typeof plugin.isEnabled === 'function';
       this.enabled[pluginName] =
         this.config[pluginName] !== false &&
@@ -115,7 +117,7 @@ export default class WorkspaceWorker {
         plugin.isEnabled({ manifest: this.manifest, dependencies });
     }
 
-    const enabledPlugins = Object.keys(this.enabled).filter(k => this.enabled[k as PluginName]);
+    const enabledPlugins = pluginEntries.filter(([name]) => this.enabled[name]).map(([, plugin]) => plugin.NAME);
     debugLogObject(`Enabled plugins (${this.name})`, enabledPlugins);
   }
 
@@ -278,7 +280,7 @@ export default class WorkspaceWorker {
       if (this.enabled[pluginName] && isIncludePlugin) {
         const hasDependencyFinder = 'findDependencies' in plugin && typeof plugin.findDependencies === 'function';
         if (hasDependencyFinder) {
-          const dependencies = await this.findDependenciesByPlugin(pluginName, plugin.findDependencies);
+          const dependencies = await this.findDependenciesByPlugin(pluginName, plugin.NAME, plugin.findDependencies);
           dependencies.forEach(dependency => this.referencedDependencyIssues.add(dependency));
           dependencies.forEach(dependency => this.referencedDependencies.add(dependency.symbol));
         }
@@ -291,7 +293,11 @@ export default class WorkspaceWorker {
     };
   }
 
-  private async findDependenciesByPlugin(pluginName: PluginName, pluginCallback: GenericPluginCallback) {
+  private async findDependenciesByPlugin(
+    pluginName: PluginName,
+    pluginTitle: string,
+    pluginCallback: GenericPluginCallback
+  ) {
     const pluginConfig = this.getConfigForPlugin(pluginName);
 
     if (!pluginConfig) return [];
@@ -301,7 +307,7 @@ export default class WorkspaceWorker {
     const ignore = this.getWorkspaceIgnorePatterns();
     const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
 
-    debugLogFiles(`Globbed ${pluginName} config file paths`, configFilePaths);
+    debugLogFiles(`Globbed ${pluginTitle} config file paths`, configFilePaths);
 
     if (configFilePaths.length === 0) return [];
 
@@ -319,7 +325,7 @@ export default class WorkspaceWorker {
       )
     ).flat();
 
-    debugLogIssues(`Dependencies used by ${pluginName} configuration`, referencedDependencyIssues);
+    debugLogIssues(`Dependencies used by ${pluginTitle} configuration`, referencedDependencyIssues);
 
     return referencedDependencyIssues;
   }
