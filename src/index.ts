@@ -23,7 +23,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress, isIncludeEntryExports } =
     unresolvedConfiguration;
 
-  const chief = new ConfigurationChief({ cwd, isStrict, isProduction });
+  const chief = new ConfigurationChief({ cwd, isProduction });
 
   debugLogObject('Unresolved configuration', unresolvedConfiguration);
 

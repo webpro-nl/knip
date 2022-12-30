@@ -3,7 +3,6 @@ import type { Report } from '../types/issues.js';
 
 type Options = {
   isProduction?: boolean;
-  isStrict?: boolean;
   include?: string[];
   exclude?: string[];
 };

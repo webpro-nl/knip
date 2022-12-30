@@ -41,7 +41,6 @@ const PLUGIN_NAMES = Object.keys(plugins);
 
 type ConfigurationManagerOptions = {
   cwd?: string;
-  isStrict: boolean;
   isProduction: boolean;
 };
 
@@ -55,7 +54,6 @@ type ConfigurationManagerOptions = {
  */
 export default class ConfigurationChief {
   cwd: string = process.cwd();
-  isStrict = false;
   isProduction = false;
   config: Configuration;
 
@@ -63,9 +61,8 @@ export default class ConfigurationChief {
   manifest: undefined | PackageJson;
   manifestWorkspaces: undefined | string[];
 
-  constructor({ cwd, isStrict, isProduction }: ConfigurationManagerOptions) {
+  constructor({ cwd, isProduction }: ConfigurationManagerOptions) {
     this.cwd = cwd ?? this.cwd;
-    this.isStrict = isStrict;
     this.isProduction = isProduction;
 
     this.config = defaultConfig;
@@ -276,7 +273,6 @@ export default class ConfigurationChief {
       include: this.config.include ?? [],
       exclude: this.config.exclude ?? [],
       isProduction: this.isProduction,
-      isStrict: this.isStrict,
     });
   }
 }
