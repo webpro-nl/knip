@@ -11,15 +11,12 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "eslint": {
-    "config": [".eslintrc", ".eslintrc.{js,json}", "package.json"],
+    "config": [".eslintrc", ".eslintrc.{js,json,cjs}", ".eslintrc.{yml,yaml}", "package.json"],
     "entry": ["eslint.config.js"]
   }
 }
 ```
 
-Note that the `config` files represent the current way to configure ESLint, while `eslint.config.js` in `entry`
-represents the new way. The latter is more explicit and expects things like parsers and plugins to be referenced
-directly, which requires such dependencies to be imported first. This means Knip can handle such configuration files as
-regular source code entry files.
+Also see [Knip plugins][1] for more information about plugins.
 
-Also see [Knip plugins](https://github.com/webpro/knip/blob/next/README.md#plugins) for more information about plugins.
+[1]: https://github.com/webpro/knip/blob/next/README.md#plugins

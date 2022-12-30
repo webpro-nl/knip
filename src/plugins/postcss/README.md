@@ -11,10 +11,11 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "postcss": {
-    "config": ["postcss.config.js", "package.json"],
-    "entry": ["postcss.config.js"]
+    "config": ["postcss.config.js", "package.json"]
   }
 }
 ```
 
-Also see [Knip plugins](https://github.com/webpro/knip/blob/next/README.md#plugins) for more information about plugins.
+Also see [Knip plugins][1] for more information about plugins.
+
+[1]: https://github.com/webpro/knip/blob/next/README.md#plugins

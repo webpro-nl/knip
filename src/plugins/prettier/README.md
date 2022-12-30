@@ -11,10 +11,11 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "prettier": {
-    "config": [".prettierrc", ".prettierrc.{json,js,cjs,yml,yaml}", "prettier.config.{js,cjs}", "package.json"],
-    "entry": [".prettierrc.{js,cjs}", "prettier.config.{js,cjs}"]
+    "config": [".prettierrc", ".prettierrc.{json,js,cjs,yml,yaml}", "prettier.config.{js,cjs}", "package.json"]
   }
 }
 ```
 
-Also see [Knip plugins](https://github.com/webpro/knip/blob/next/README.md#plugins) for more information about plugins.
+Also see [Knip plugins][1] for more information about plugins.
+
+[1]: https://github.com/webpro/knip/blob/next/README.md#plugins
