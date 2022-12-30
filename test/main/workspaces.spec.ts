@@ -11,6 +11,7 @@ test('Find unused files, dependencies and exports in workspaces (loose)', async 
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
+    isIncludeEntryExports: true,
     isStrict: false,
   });
 
@@ -45,6 +46,7 @@ test('Find unused files, dependencies and exports in workspaces (strict)', async
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
+    isIncludeEntryExports: true,
     isStrict: true,
   });
 

@@ -4,7 +4,7 @@ const baseArguments = {
   isStrict: false,
   isProduction: false,
   isShowProgress: false,
-  isIgnoreEntryExports: false,
+  isIncludeEntryExports: false,
 };
 
 export default baseArguments;

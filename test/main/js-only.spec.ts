@@ -10,6 +10,7 @@ test('Find unused files and exports with JS entry file', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
+    isIncludeEntryExports: true,
   });
 
   assert.equal(issues.files.size, 1);

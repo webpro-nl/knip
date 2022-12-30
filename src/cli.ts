@@ -5,7 +5,7 @@ import { register } from 'esbuild-register/dist/node.js';
 import reporters from './reporters/index.js';
 import { ConfigurationError } from './util/errors.js';
 import { printHelp } from './util/help.js';
-import parsedArgs from './util/parseArgs.js';
+import parsedArgs from './util/parsed-cli-arguments.js';
 import { measure } from './util/performance.js';
 import { main } from './index.js';
 import type { IssueType } from './types/issues.js';
@@ -16,7 +16,7 @@ const {
   values: {
     debug: isDebug = false,
     help,
-    'ignore-entry-exports': isIgnoreEntryExports = false,
+    'include-entry-exports': isIncludeEntryExports = false,
     'max-issues': maxIssues = '0',
     'no-exit-code': noExitCode = false,
     'no-gitignore': isNoGitIgnore = false,
@@ -51,7 +51,7 @@ const run = async () => {
       isStrict,
       isProduction,
       isShowProgress,
-      isIgnoreEntryExports,
+      isIncludeEntryExports,
     });
 
     await printReport({ report, issues, cwd, isProduction, options: reporterOptions });

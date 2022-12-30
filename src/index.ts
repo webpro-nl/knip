@@ -20,7 +20,7 @@ import type { Report } from './types/issues.js';
 import type { SourceFile } from 'ts-morph';
 
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
-  const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress, isIgnoreEntryExports } =
+  const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress, isIncludeEntryExports } =
     unresolvedConfiguration;
 
   const chief = new ConfigurationChief({ cwd, isStrict, isProduction });
@@ -128,7 +128,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         });
         debugLogFiles(`Globbed entry paths${suffix}`, workspaceEntryPaths);
         workspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
-        if (isIgnoreEntryExports) workspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
+        if (!isIncludeEntryExports) workspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
 
         collector.updateMessage(`Resolving production plugin entry files${suffix}...`);
         const pluginWorkspaceEntryPaths = await _glob({
@@ -172,7 +172,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           });
           debugLogFiles(`Globbed entry paths${suffix}`, workspaceEntryPaths);
           workspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
-          if (isIgnoreEntryExports) workspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
+          if (!isIncludeEntryExports) workspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
         }
 
         {

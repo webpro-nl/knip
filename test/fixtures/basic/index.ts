@@ -6,4 +6,6 @@ async function main() {
   const { used } = await import('./dynamic-import');
 }
 
-export const unusedExportedReference = exportedValue;
+export const entryFileExport = exportedValue;
+
+export type EntryFileExportType = any;

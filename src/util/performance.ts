@@ -1,7 +1,7 @@
 import { performance, PerformanceObserver, PerformanceEntry } from 'node:perf_hooks';
 import EasyTable from 'easy-table';
 import prettyMilliseconds from 'pretty-ms';
-import parsedArgs from './parseArgs.js';
+import parsedArgs from './parsed-cli-arguments.js';
 import type { TimerifyOptions } from 'node:perf_hooks';
 import Summary from 'summary';
 

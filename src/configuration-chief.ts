@@ -9,7 +9,7 @@ import { arrayify } from './util/array.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { ensurePosixPath } from './util/glob.js';
-import parsedArgs from './util/parseArgs.js';
+import parsedArgs from './util/parsed-cli-arguments.js';
 import { resolveIncludedIssueTypes } from './util/resolve-included-issue-types.js';
 import { byPathDepth } from './util/workspace.js';
 import type { Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
