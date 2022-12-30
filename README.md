@@ -272,6 +272,12 @@ rest to find which of those dependencies are unused or missing.
 Other configuration files use `require` or `import` statements to use dependencies, so they can be analyzed like the
 rest of the source files. These configuration files are also considered `entry` files.
 
+### Create a new plugin
+
+Getting false positives because a plugin is missing? Want to help out? Feel free to add your own plugin! Get started:
+
+    npm run create-plugin -- --name [myplugin]
+
 ## Configuration
 
 ### Libraries versus Applications

@@ -38,7 +38,7 @@ for await (const dir of directories) {
     console.log(`Writing README.md for ${NAME} plugin`);
 
     const filePath = path.join(pluginDir, 'README.md');
-    fs.writeFile(filePath, docs);
+    await fs.writeFile(filePath, docs);
 
     plugins.push([NAME, pluginName]);
   }

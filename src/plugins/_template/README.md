@@ -10,7 +10,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 
 ```json
 {
-  "[plugin]": {
+  "PLUGIN_NAME": {
     "config": [],
     "entry": [],
     "project": []
