@@ -42,9 +42,9 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
   const globPatterns = compact([patterns].flat().map(prepend).map(removeProductionSuffix)).sort(negatedLast);
 
-  const ignorePatterns = [...ignore, '**/node_modules/**'];
+  const ignorePatterns = [...ignore.map(pattern => prependDirToPattern(relativePath, pattern)), '**/node_modules/**'];
 
-  debugLogObject("Globbin'", { cwd, globPatterns, ignorePatterns });
+  debugLogObject(`Globbing (${relativePath ?? '.'})`, { cwd, globPatterns, ignorePatterns });
 
   return globby(globPatterns, {
     cwd,
