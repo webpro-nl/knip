@@ -14,6 +14,7 @@ test('Referenced dependencies in npm scripts', async () => {
     workspaces: {},
     ignore: [],
     ignoreBinaries: ['bash', 'rm'],
+    ignoreDependencies: [],
     ignoreWorkspaces: [],
   };
 
