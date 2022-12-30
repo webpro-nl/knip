@@ -8,7 +8,13 @@ type RemarkConfig = {
   plugins: string[];
 };
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('remark-cli');
+export const NAME = 'Remark';
+
+/** @public */
+export const ENABLERS = ['remark-cli'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = [
   'package.json',

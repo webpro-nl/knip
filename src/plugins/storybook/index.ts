@@ -10,9 +10,13 @@ import type { StorybookConfig } from './types.js';
 
 const require = createRequire(process.cwd());
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return dependencies.has('@storybook/core') || dependencies.has('@nrwl/storybook');
-};
+export const NAME = 'Storybook';
+
+/** @public */
+export const ENABLERS = ['@storybook/core', '@nrwl/storybook'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['.storybook/{main,manager}.{js,ts}'];
 

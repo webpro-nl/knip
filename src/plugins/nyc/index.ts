@@ -8,7 +8,13 @@ type NycConfig = {
   extends: string;
 };
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('nyc');
+export const NAME = 'nyc';
+
+/** @public */
+export const ENABLERS = ['nyc'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
 

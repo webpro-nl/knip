@@ -5,9 +5,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://mochajs.org/#configuring-mocha-nodejs
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return dependencies.has('mocha');
-};
+export const NAME = 'Mocha';
+
+/** @public */
+export const ENABLERS = ['mocha'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
 

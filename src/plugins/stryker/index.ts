@@ -5,7 +5,13 @@ import type { StrykerConfig } from './types.js';
 
 // https://stryker-mutator.io/docs/stryker-js/config-file/
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('@stryker-mutator/core');
+export const NAME = 'Stryker';
+
+/** @public */
+export const ENABLERS = ['@stryker-mutator/core'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['?(.)stryker.{conf,config}.{js,mjs,json}'];
 

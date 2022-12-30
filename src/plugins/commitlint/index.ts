@@ -8,7 +8,13 @@ type CommitLintConfig = {
   extends: string[];
 };
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('@commitlint/cli');
+export const NAME = 'commitlint';
+
+/** @public */
+export const ENABLERS = ['@commitlint/cli'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['commitlint.config.{js,ts}'];
 

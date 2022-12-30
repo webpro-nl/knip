@@ -8,7 +8,13 @@ type SentryConfig = {
   extends: string;
 };
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('@sentry/replay');
+export const NAME = 'Sentry';
+
+/** @public */
+export const ENABLERS = ['@sentry/replay'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const ENTRY_FILE_PATTERNS = ['sentry.{client,server}.config.{js,ts}'];
 

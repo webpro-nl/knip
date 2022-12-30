@@ -7,9 +7,13 @@ import type { Config } from '@jest/types';
 
 // https://jestjs.io/docs/configuration
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return dependencies.has('jest');
-};
+export const NAME = 'Jest';
+
+/** @public */
+export const ENABLERS = ['jest'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}'];
 

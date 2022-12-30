@@ -2,9 +2,13 @@ import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://remix.run/docs/en/v1/api/conventions
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return dependencies.has('@remix-run/dev');
-};
+export const NAME = 'Remix';
+
+/** @public */
+export const ENABLERS = ['@remix-run/dev'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const ENTRY_FILE_PATTERNS = ['remix.config.js', 'remix.init/index.js'];
 

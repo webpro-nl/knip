@@ -6,11 +6,15 @@ import type { Configuration, RuleSetRule, RuleSetUseItem } from 'webpack';
 
 // https://webpack.js.org/configuration/
 
+export const NAME = 'Webpack';
+
+/** @public */
+export const ENABLERS = ['webpack'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
+
 export const CONFIG_FILE_PATTERNS = ['webpack.config*.js'];
-
-export const ENTRY_FILE_PATTERNS = ['webpack.config*.js'];
-
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('webpack');
 
 const resolveRuleSetLoaders = (rule: RuleSetRule | '...') => {
   if (!rule || typeof rule === 'string') return [];

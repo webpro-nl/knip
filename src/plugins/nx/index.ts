@@ -11,9 +11,13 @@ interface ProjectConfiguration {
   };
 }
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return dependencies.has('@nrwl/workspace');
-};
+export const NAME = 'Nx';
+
+/** @public */
+export const ENABLERS = ['@nrwl/workspace'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['{apps,libs}/**/project.json'];
 

@@ -17,7 +17,13 @@ type PrettierConfig = {
   )[];
 };
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('prettier');
+export const NAME = 'Prettier';
+
+/** @public */
+export const ENABLERS = ['prettier'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = [
   '.prettierrc',
@@ -25,8 +31,6 @@ export const CONFIG_FILE_PATTERNS = [
   'prettier.config.{js,cjs}',
   'package.json',
 ];
-
-export const ENTRY_FILE_PATTERNS = ['.prettierrc.{js,cjs}', 'prettier.config.{js,cjs}'];
 
 const findPrettierDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: PrettierConfig = configFilePath.endsWith('package.json')

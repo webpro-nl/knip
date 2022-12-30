@@ -5,9 +5,13 @@ import type { CapacitorConfig } from './types.js';
 
 // https://capacitorjs.com/docs/config
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return dependencies.has('@capacitor/core') || dependencies.has('@capacitor/cli');
-};
+export const NAME = 'Capacitor';
+
+/** @public */
+export const ENABLERS = ['@capacitor/core', '@capacitor/cli'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['capacitor.config.ts'];
 

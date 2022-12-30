@@ -5,13 +5,19 @@ import { timerify } from '../../util/performance.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { TsConfigJson } from 'type-fest';
 
-export const CONFIG_FILE_PATTERNS = ['tsconfig.json'];
+export const NAME = 'TypeScript';
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('typescript');
+/** @public */
+export const ENABLERS = ['typescript'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
+
+export const CONFIG_FILE_PATTERNS = ['tsconfig.json'];
 
 const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
   const config: TsConfigJson = await _load(configFilePath);
-  const extend = config?.extends ? [getPackageName(config.extends)] : [];
+  const extend = config?.extends && !config.extends.startsWith('.') ? [getPackageName(config.extends)] : [];
   const plugins = compact(config?.compilerOptions?.plugins?.map(plugin => plugin.name) ?? []);
   return [...extend, ...plugins];
 };

@@ -8,6 +8,14 @@ import type { BabelConfig } from './types.js';
 
 // https://babeljs.io/docs/en/configuration
 
+export const NAME = 'Babel';
+
+/** @public */
+export const ENABLERS = ['@babel/cli', '@babel/core', '@babel/preset-env', '@babel/register'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
+
 export const CONFIG_FILE_PATTERNS = [
   'babel.config.json',
   'babel.config.js',
@@ -16,15 +24,6 @@ export const CONFIG_FILE_PATTERNS = [
   '.babelrc',
   'package.json',
 ];
-
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return (
-    dependencies.has('@babel/cli') ||
-    dependencies.has('@babel/core') ||
-    dependencies.has('@babel/preset-env') ||
-    dependencies.has('@babel/register')
-  );
-};
 
 const api = {
   caller: () => true,

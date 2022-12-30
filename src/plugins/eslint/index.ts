@@ -9,7 +9,13 @@ import { resolvePluginPackageName, customResolvePluginPackageNames, getDependenc
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { ESLintConfig } from './types.js';
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('eslint');
+export const NAME = 'ESLint';
+
+/** @public */
+export const ENABLERS = ['eslint'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 // Current: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
 // The only way to reliably resolve legacy configuration is through ESLint itself

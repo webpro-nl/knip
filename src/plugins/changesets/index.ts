@@ -8,7 +8,13 @@ type ChangesetsConfig = {
   changelog: string | string[];
 };
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => dependencies.has('@changesets/cli');
+export const NAME = 'Changesets';
+
+/** @public */
+export const ENABLERS = ['@changesets/cli'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['.changeset/config.json'];
 

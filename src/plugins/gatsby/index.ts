@@ -6,9 +6,13 @@ import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.js';
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/gatsby-project-structure.md
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/config-files/gatsby-config.md
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return dependencies.has('gatsby') || dependencies.has('gatsby-cli');
-};
+export const NAME = 'Gatsby';
+
+/** @public */
+export const ENABLERS = ['gatsby', 'gatsby-cli'];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
 
 export const CONFIG_FILE_PATTERNS = ['gatsby-{config,node}.{js,jsx,ts,tsx}'];
 
