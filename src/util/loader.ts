@@ -3,8 +3,8 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { load as esmLoad } from '@esbuild-kit/esm-loader';
 import yaml from 'js-yaml';
+import parsedArgs from './cli-arguments.js';
 import { loadJSON } from './fs.js';
-import parsedArgs from './parsed-cli-arguments.js';
 import { timerify } from './performance.js';
 
 const require = createRequire(process.cwd());

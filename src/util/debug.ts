@@ -1,5 +1,5 @@
 import util from 'node:util';
-import parsedArgs from './parsed-cli-arguments.js';
+import parsedArgs from './cli-arguments.js';
 import type { Issue } from '../types/issues.js';
 import type { SourceFile } from 'ts-morph';
 

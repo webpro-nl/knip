@@ -3,9 +3,8 @@
 import path from 'node:path';
 import { register } from 'esbuild-register/dist/node.js';
 import reporters from './reporters/index.js';
+import parsedArgs, { helpText } from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
-import { printHelp } from './util/help.js';
-import parsedArgs from './util/parsed-cli-arguments.js';
 import { measure } from './util/performance.js';
 import { main } from './index.js';
 import type { IssueType } from './types/issues.js';
@@ -30,7 +29,7 @@ const {
 } = parsedArgs;
 
 if (help) {
-  printHelp();
+  console.log(helpText);
   process.exit(0);
 }
 
@@ -68,7 +67,7 @@ const run = async () => {
   } catch (error: unknown) {
     if (error instanceof ConfigurationError) {
       console.error(error.message + '\n');
-      printHelp();
+      console.log(helpText);
       process.exit(1);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
