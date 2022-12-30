@@ -80,29 +80,30 @@ This will analyze the project and output unused files, dependencies and exports.
 
 ## Options
 
-    ❯ npx knip
+    $ npx knip --help
     knip [options]
 
     Options:
-      -c/--config [file]     Configuration file path (default: ./knip.json, knip.jsonc or package.json#knip)
-      -t/--tsConfig [file]   TypeScript configuration path (default: ./tsconfig.json)
-      --production           Analyze only production source files (e.g. no tests, devDependencies, exported types)
-      --strict               Consider only direct dependencies of workspaces. Not devDependencies, not ancestor workspaces.
-      --workspace            Analyze a single workspace (default: analyze all configured workspaces)
-      --include              Report only listed issue type(s), can be comma-separated or repeated
-      --exclude              Exclude issue type(s) from report, can be comma-separated or repeated
-      --ignore               Ignore files matching this glob pattern, can be repeated
-      --no-gitignore         Don't use .gitignore
-      --no-progress          Don't show dynamic progress updates
-      --no-exit-code         Always exit with code zero (0)
-      --max-issues           Maximum number of issues before non-zero exit code (default: 0)
-      --reporter             Select reporter: symbols, compact, codeowners, json (default: symbols)
-      --reporter-options     Pass extra options to the reporter (as JSON string, see example)
-      --debug                Show debug output
-      --debug-file-filter    Filter for files in debug output (regex as string)
-      --performance          Measure running time of expensive functions and display stats table
+      -c/--config [file]       Configuration file path (default: knip.json, knip.jsonc or package.json#knip)
+      -t/--tsConfig [file]     TypeScript configuration path (default: tsconfig.json)
+      --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
+      --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
+      --workspace              Analyze a single workspace (default: analyze all configured workspaces)
+      --include-entry-exports  Include unused exports in entry files (without `@public`)
+      --ignore                 Ignore files matching this glob pattern, can be repeated
+      --no-gitignore           Don't use .gitignore
+      --include                Report only provided issue type(s), can be comma-separated or repeated (1)
+      --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
+      --no-progress            Don't show dynamic progress updates
+      --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
+      --reporter-options       Pass extra options to the reporter (as JSON string, see example)
+      --no-exit-code           Always exit with code zero (0)
+      --max-issues             Maximum number of issues before non-zero exit code (default: 0)
+      --debug                  Show debug output
+      --debug-file-filter      Filter for files in debug output (regex as string)
+      --performance            Measure running time of expensive functions and display stats table
 
-    Issue types: files, dependencies, unlisted, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
+    (1) Issue types: files, dependencies, unlisted, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
 
     Examples:
 
@@ -407,7 +408,7 @@ The following commands are similar:
     unimported
     knip --production --include files,dependencies,unlisted
 
-See [production mode](#production-mode).
+See [production mode][7].
 
 ## TypeScript language services
 
