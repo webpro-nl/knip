@@ -5,6 +5,14 @@ import type { PluginConfig } from './types.js';
 
 // link to docs
 
+export const NAME = '';
+
+/** @public */
+export const ENABLERS = [''];
+
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
+  ENABLERS.some(enabler => dependencies.has(enabler));
+
 export const CONFIG_FILE_PATTERNS = [];
 
 export const ENTRY_FILE_PATTERNS = [];
@@ -12,10 +20,6 @@ export const ENTRY_FILE_PATTERNS = [];
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [];
 
 export const PROJECT_FILE_PATTERNS = [];
-
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => {
-  return dependencies.has('[pkg]');
-};
 
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.plugin : await _load(configFilePath);
