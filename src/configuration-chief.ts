@@ -141,8 +141,7 @@ export default class ConfigurationChief {
                 workspaces[workspaceName][pluginName as PluginName] = false;
               } else {
                 const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
-                const config =
-                  typeof pluginConfig === 'string' ? [pluginConfig] : isObject ? arrayify(pluginConfig.config) : null;
+                const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;
                 const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
                 const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
                 workspaces[workspaceName][pluginName as PluginName] = {
