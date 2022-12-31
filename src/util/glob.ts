@@ -2,6 +2,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import { globby } from 'globby';
 import memoize from 'nano-memoize';
+import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
 import { timerify } from './performance.js';
@@ -47,7 +48,7 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
     '**/node_modules/**',
   ]);
 
-  debugLogObject(`Globbing (${relativePath || '.'})`, { cwd, globPatterns, ignorePatterns });
+  debugLogObject(`Globbing (${relativePath || ROOT_WORKSPACE_NAME})`, { cwd, globPatterns, ignorePatterns });
 
   return globby(globPatterns, {
     cwd,

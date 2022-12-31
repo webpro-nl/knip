@@ -198,7 +198,7 @@ export default class ConfigurationChief {
 
     const isOnlyRootWorkspace =
       (manifestWorkspaces.length === 0 && !rawWorkspaceArg) ||
-      (rawWorkspaceArg && ['.', './'].includes(rawWorkspaceArg));
+      (rawWorkspaceArg && [ROOT_WORKSPACE_NAME, './'].includes(rawWorkspaceArg));
 
     if (isOnlyRootWorkspace) return [rootWorkspace];
 
@@ -209,7 +209,7 @@ export default class ConfigurationChief {
         config: this.getConfigForWorkspace(rawWorkspaceArg),
         ancestors: [ROOT_WORKSPACE_NAME],
       };
-      return this.hasConfigForWorkspace('.') ? [rootWorkspace, workspace] : [workspace];
+      return this.hasConfigForWorkspace(ROOT_WORKSPACE_NAME) ? [rootWorkspace, workspace] : [workspace];
     }
 
     const workspaces = [...manifestWorkspaces, ...additionalWorkspaces];
