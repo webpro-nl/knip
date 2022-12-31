@@ -32,14 +32,13 @@
   },
   "type": "module",
   "scripts": {
-    "preknip": "npm run build",
     "knip": "node ./dist/cli.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "globstar -- node --loader tsx --test \"test/**/*.spec.ts\"",
     "watch": "tsc --watch",
-    "build": "rm -rf dist && tsc && npm run docs",
-    "prepublishOnly": "npm test && npm run docs && npm run build && npm run knip",
+    "prebuild": "rm -rf dist",
+    "build": "tsc",
     "docs": "npm run docs:cli && npm run docs:plugins && npm run docs:format",
     "docs:cli": "tsx ./scripts/update-cli-usage-in-readme.ts",
     "docs:plugins": "tsx ./scripts/generate-plugin-docs.ts",
@@ -101,6 +100,14 @@
     "typescript": "4.9.4"
   },
   "release-it": {
+    "hooks": {
+      "before:init": [
+        "npm run build",
+        "npm run knip",
+        "npm run docs",
+        "npm test"
+      ]
+    },
     "github": {
       "release": true
     }
