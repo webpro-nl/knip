@@ -13,7 +13,19 @@ const manifest = getManifest(cwd);
 test('Find dependencies in Webpack configuration (webpack.config.js)', async () => {
   const configFilePath = path.join(cwd, 'webpack.config.js');
   const dependencies = await webpack.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['babel-loader', 'webpack-cli', 'webpack-dev-server']);
+  assert.deepEqual(dependencies, [
+    'svg-url-loader',
+    'babel-loader',
+    '@babel/preset-env',
+    '@babel/preset-typescript',
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-proposal-object-rest-spread',
+    '@babel/plugin-transform-react-jsx',
+    'babel-plugin-macros',
+    'babel-plugin-styled-components',
+    'webpack-cli',
+    'webpack-dev-server',
+  ]);
 });
 
 test('Find dependencies in Webpack configuration', async () => {
@@ -25,5 +37,5 @@ test('Find dependencies in Webpack configuration', async () => {
   assert(issues.unlisted['webpack.config.js']['babel-loader']);
   assert(issues.unlisted['webpack.config.js']['copy-webpack-plugin']);
 
-  assert.deepEqual(counters, { ...baseCounters, unlisted: 2, processed: 1, total: 1 });
+  assert.deepEqual(counters, { ...baseCounters, unlisted: 10, processed: 1, total: 1 });
 });

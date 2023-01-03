@@ -5,13 +5,27 @@ module.exports = () => {
   return {
     module: {
       rules: [
+        { test: /\.svg/, use: 'svg-url-loader' },
         {
           test: /\.(js|ts)$/,
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
             options: {
-              babelrc: true,
+              presets: [['@babel/preset-env'], ['@babel/typescript', { jsxPragma: 'h' }]],
+              plugins: [
+                '@babel/proposal-class-properties',
+                '@babel/proposal-object-rest-spread',
+                [
+                  '@babel/plugin-transform-react-jsx',
+                  {
+                    pragma: 'h',
+                    pragmaFrag: 'Fragment',
+                  },
+                ],
+                'babel-plugin-macros',
+                'babel-plugin-styled-components',
+              ],
             },
           },
         },

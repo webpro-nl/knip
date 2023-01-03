@@ -319,6 +319,7 @@ export default class WorkspaceWorker {
             manifest: this.manifest,
             config: pluginConfig,
             workspaceConfig: this.config,
+            isProduction: this.isProduction,
           });
           return dependencies.map(symbol => ({ type: 'unlisted', filePath: configFilePath, symbol } as Issue));
         })

@@ -31,7 +31,7 @@ const api = {
 
 type BabelFn = (options: typeof api) => BabelConfig;
 
-const getDependenciesFromConfig = (config: BabelConfig): string[] => {
+export const getDependenciesFromConfig = (config: BabelConfig): string[] => {
   const presets =
     config.presets?.map(preset => (typeof preset === 'string' ? preset : preset[0])).map(resolvePresetName) ?? [];
   const plugins =

@@ -10,9 +10,10 @@ type GenericPluginCallbackOptions = {
   manifest: PackageJson;
   config: PluginConfiguration;
   workspaceConfig: WorkspaceConfiguration;
+  isProduction: boolean;
 };
 
 export type GenericPluginCallback = (
   configFilePath: string,
-  { cwd, manifest, config, workspaceConfig }: GenericPluginCallbackOptions
+  { cwd, manifest, config, workspaceConfig, isProduction }: GenericPluginCallbackOptions
 ) => Promise<string[]> | string[];
