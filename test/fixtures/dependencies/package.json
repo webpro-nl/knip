@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "start": "server",
+    "test": "jest"
+  },
   "dependencies": {
     "@tootallnate/once": "*",
     "@sindresorhus/is": "*",

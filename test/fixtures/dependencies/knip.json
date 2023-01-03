@@ -1,5 +1,5 @@
 {
-  "entry": ["entry.ts"],
-  "project": ["*.ts"],
+  "entry": ["entry.ts!"],
+  "project": ["*.ts!"],
   "ignoreDependencies": ["stream"]
 }

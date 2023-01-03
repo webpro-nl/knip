@@ -349,7 +349,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   if (report.dependencies) {
     const { dependencyIssues, devDependencyIssues } = deputy.settleDependencyIssues();
     dependencyIssues.forEach(issue => collector.addIssue(issue));
-    if (!isProduction) devDependencyIssues.forEach(issue => collector.addIssue(issue));
+    if (!isStrict) devDependencyIssues.forEach(issue => collector.addIssue(issue));
   }
 
   const { issues, counters } = collector.getIssues();
