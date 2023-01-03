@@ -42,7 +42,7 @@
     "docs": "npm run docs:cli && npm run docs:plugins && npm run docs:format",
     "docs:cli": "tsx ./scripts/update-cli-usage-in-readme.ts",
     "docs:plugins": "tsx ./scripts/generate-plugin-docs.ts",
-    "docs:format": "remark README.md src/plugins/*/README.md -o",
+    "docs:format": "remark README.md docs/*.md src/plugins/*/README.md -o",
     "release": "release-it",
     "postinstall": "patch-package",
     "create-plugin": "tsx ./scripts/create-new-plugin.ts"

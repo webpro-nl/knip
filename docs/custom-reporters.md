@@ -51,11 +51,11 @@ per file like this:
 ]
 ```
 
-The keys match the [known issue types][30].
+The keys match the [reported issue types][1]
 
 ## Usage Ideas
 
-Use tools like [miller][31] or [jtbl][32] to consume the JSON and render a table in the terminal.
+Use tools like [miller][2] or [jtbl][3] to consume the JSON and render a table in the terminal.
 
 ### Table
 
@@ -76,3 +76,7 @@ Include specific issue types and/or replace the `cat` command with `put` for cle
 
     npx knip --include files,duplicates --reporter json | mlr --ijson --opprint --no-auto-flatten put 'for (e in $*) { if(is_array($[e])) { $[e] = joinv($[e], ", ") } }'
     npx knip --reporter json | mlr --ijson --omd --no-auto-flatten put 'for (e in $*) { if(is_array($[e])) { $[e] = joinv($[e], ", ") } }'
+
+[1]: ../README.md#reading-the-report
+[2]: https://miller.readthedocs.io
+[3]: https://github.com/kellyjonbrazil/jtbl

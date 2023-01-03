@@ -36,16 +36,11 @@ with OpenAI_</sup>
 
 ## Migrating to v1.0.0
 
-When coming from version v0.13.3 or before, here are the breaking changes:
-
-- The `entryFiles` and `projectFiles` options have been renamed to `entry` and `project`.
-- The `--dev` argument and `dev: true` option are gone, this is now the default mode (see [production mode][7]).
-- Workspaces have been moved from the root of the config to the `workspaces` key (see [workspaces][8]).
-- The `--dir` argument has been renamed to `--workspace`.
+When coming from version v0.13.3 or before, please see [migration to v1][7].
 
 ## Issues
 
-Please report any false positives by [opening an issue in this repo][9]. Bonus points for linking to a public repository
+Please report any false positives by [opening an issue in this repo][8]. Bonus points for linking to a public repository
 using Knip, or even opening a pull request with a directory and example files in `test/fixtures`. Correctness and bug
 fixes have priority over performance and new features.
 
@@ -182,24 +177,18 @@ As always, make sure to backup files or use Git before deleting files or making 
 ## Workspaces & Monorepos
 
 Workspaces and monorepos are handled out-of-the-box by Knip. Every workspace that is part of the Knip configuration will
-be part of the analysis. Here's a simple example:
+be part of the analysis. Here's an example:
 
 ```jsonc
 {
-  "ignore": "**/fixtures/**",
-  "ignoreBinaries": ["rm", "docker-compose"],
   "ignoreWorkspaces": ["packages/ignore-me"],
   "workspaces": {
     "packages/*": {
-      "entry": "{index,cli}.ts!",
+      "entry": "{index,cli}.ts",
       "project": "**/*.ts"
     },
-    "packages/exception": {
-      "entry": "something/different.js"
-    },
-    "not-a-workspace/in-package.json/but-has-package.json": {
-      "entry": ["src/index.ts"],
-      "project": "src/**/*.ts"
+    "packages/my-lib": {
+      "entry": "main.js"
     }
   }
 }
@@ -219,29 +208,29 @@ Here's a small output example when running Knip in a workspace:
 
 Knip contains a growing list of plugins:
 
-- [Babel][10]
-- [Capacitor][11]
-- [Changesets][12]
-- [commitlint][13]
-- [Cypress][14]
-- [ESLint][15]
-- [Gatsby][16]
-- [Jest][17]
-- [Mocha][18]
-- [Next.js][19]
-- [Nx][20]
-- [nyc][21]
-- [Playwright][22]
-- [PostCSS][23]
-- [Prettier][24]
-- [Remark][25]
-- [Remix][26]
-- [Rollup][27]
-- [Sentry][28]
-- [Storybook][29]
-- [Stryker][30]
-- [TypeScript][31]
-- [Webpack][32]
+- [Babel][9]
+- [Capacitor][10]
+- [Changesets][11]
+- [commitlint][12]
+- [Cypress][13]
+- [ESLint][14]
+- [Gatsby][15]
+- [Jest][16]
+- [Mocha][17]
+- [Next.js][18]
+- [Nx][19]
+- [nyc][20]
+- [Playwright][21]
+- [PostCSS][22]
+- [Prettier][23]
+- [Remark][24]
+- [Remix][25]
+- [Rollup][26]
+- [Sentry][27]
+- [Storybook][28]
+- [Stryker][29]
+- [TypeScript][30]
+- [Webpack][31]
 
 Plugins are automatically activated, no need to enable anything. Each plugin is automatically enabled based on simple
 heuristics. Most of them check whether one or one of a few (dev) dependencies are listed in `package.json`. Once
@@ -249,7 +238,7 @@ enabled, they add a set of configuration and/or entry files for Knip to analyze.
 
 Most plugins use one or both of the following file types:
 
-- `config` - custom dependency resolvers are applied to the [config files][33]
+- `config` - custom dependency resolvers are applied to the [config files][32]
 - `entry` - files to include with the analysis of the rest of the source code
 
 ### `config`
@@ -341,10 +330,10 @@ locations. The more plugins Knip will have, the more projects can be analyzed ou
 
 Knip provides the following built-in reporters:
 
-- [`codeowners`][34]
-- [`compact`][35]
-- [`json`][36]
-- [`symbol`][37] (default)
+- [`codeowners`][33]
+- [`compact`][34]
+- [`json`][35]
+- [`symbol`][36] (default)
 
 The `compact` reporter shows the sorted files first, and then a list of symbols:
 
@@ -352,7 +341,7 @@ The `compact` reporter shows the sorted files first, and then a list of symbols:
 
 ### Custom Reporters
 
-When the provided built-in reporters are not quite sufficient, a custom reporter can be implemented.
+When the provided built-in reporters are not sufficient, a custom reporter can be implemented.
 
 Pass `--reporter ./my-reporter`, with the default export of that module having this interface:
 
@@ -371,7 +360,7 @@ type ReporterOptions = {
 
 The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][38].
+Find more details and ideas in [custom reporters][37].
 
 ## Really, another unused file/dependency/export finder?
 
@@ -385,12 +374,12 @@ all of this, why not collect the various issues in one go?
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                            | **knip** | [depcheck][39] | [unimported][40] | [ts-unused-exports][41] | [ts-prune][42] | [find-unused-exports][43] |
+| Feature                            | **knip** | [depcheck][38] | [unimported][39] | [ts-unused-exports][40] | [ts-prune][41] | [find-unused-exports][42] |
 | :--------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: | :-----------------------: |
 | Unused files                       |    ✅    |       -        |        ✅        |            -            |       -        |             -             |
 | Unused dependencies                |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
 | Unlisted dependencies              |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
-| [Custom dependency resolvers][44]  |    ✅    |       ✅       |        ❌        |            -            |       -        |             -             |
+| [Custom dependency resolvers][43]  |    ✅    |       ✅       |        ❌        |            -            |       -        |             -             |
 | Unused exports                     |    ✅    |       -        |        -         |           ✅            |       ✅       |            ✅             |
 | Unused class members               |    ✅    |       -        |        -         |            -            |       -        |             -             |
 | Unused enum members                |    ✅    |       -        |        -         |            -            |       -        |             -             |
@@ -399,7 +388,7 @@ This table is an ongoing comparison. Based on their docs (please report any mist
 | Custom reporters                   |    ✅    |       -        |        -         |            -            |       -        |             -             |
 | JavaScript support                 |    ✅    |       ✅       |        ✅        |            -            |       -        |            ✅             |
 | Configure entry files              |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |            ❌             |
-| [Support workspaces/monorepos][45] |    ✅    |       ❌       |        ❌        |            -            |       -        |             -             |
+| [Support workspaces/monorepos][44] |    ✅    |       ❌       |        ❌        |            -            |       -        |             -             |
 | ESLint plugin available            |    -     |       -        |        -         |           ✅            |       -        |             -             |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
@@ -422,7 +411,7 @@ The following commands are similar:
     unimported
     knip --production --include files,dependencies,unlisted
 
-See [production mode][7].
+See [production mode][45].
 
 ## TypeScript language services
 
@@ -442,42 +431,42 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [4]: #really-another-unused-filedependencyexport-finder
 [5]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [6]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[7]: #production-mode
-[8]: #workspaces--monorepos
-[9]: https://github.com/webpro/knip/issues
-[10]: ./src/plugins/babel
-[11]: ./src/plugins/capacitor
-[12]: ./src/plugins/changesets
-[13]: ./src/plugins/commitlint
-[14]: ./src/plugins/cypress
-[15]: ./src/plugins/eslint
-[16]: ./src/plugins/gatsby
-[17]: ./src/plugins/jest
-[18]: ./src/plugins/mocha
-[19]: ./src/plugins/next
-[20]: ./src/plugins/nx
-[21]: ./src/plugins/nyc
-[22]: ./src/plugins/playwright
-[23]: ./src/plugins/postcss
-[24]: ./src/plugins/prettier
-[25]: ./src/plugins/remark
-[26]: ./src/plugins/remix
-[27]: ./src/plugins/rollup
-[28]: ./src/plugins/sentry
-[29]: ./src/plugins/storybook
-[30]: ./src/plugins/stryker
-[31]: ./src/plugins/typescript
-[32]: ./src/plugins/webpack
-[33]: #config
-[34]: #code-owners
-[35]: #compact
-[36]: #json
-[37]: #symbol-default
-[38]: ./docs/custom-reporters.md
-[39]: https://github.com/depcheck/depcheck
-[40]: https://github.com/smeijer/unimported
-[41]: https://github.com/pzavolinsky/ts-unused-exports
-[42]: https://github.com/nadeesha/ts-prune
-[43]: https://github.com/jaydenseric/find-unused-exports
-[44]: #custom-dependency-resolvers
-[45]: #workspaces--monorepos
+[7]: ./docs/migration-to-v1.md
+[8]: https://github.com/webpro/knip/issues
+[9]: ./src/plugins/babel
+[10]: ./src/plugins/capacitor
+[11]: ./src/plugins/changesets
+[12]: ./src/plugins/commitlint
+[13]: ./src/plugins/cypress
+[14]: ./src/plugins/eslint
+[15]: ./src/plugins/gatsby
+[16]: ./src/plugins/jest
+[17]: ./src/plugins/mocha
+[18]: ./src/plugins/next
+[19]: ./src/plugins/nx
+[20]: ./src/plugins/nyc
+[21]: ./src/plugins/playwright
+[22]: ./src/plugins/postcss
+[23]: ./src/plugins/prettier
+[24]: ./src/plugins/remark
+[25]: ./src/plugins/remix
+[26]: ./src/plugins/rollup
+[27]: ./src/plugins/sentry
+[28]: ./src/plugins/storybook
+[29]: ./src/plugins/stryker
+[30]: ./src/plugins/typescript
+[31]: ./src/plugins/webpack
+[32]: #config
+[33]: #code-owners
+[34]: #compact
+[35]: #json
+[36]: #symbol-default
+[37]: ./docs/custom-reporters.md
+[38]: https://github.com/depcheck/depcheck
+[39]: https://github.com/smeijer/unimported
+[40]: https://github.com/pzavolinsky/ts-unused-exports
+[41]: https://github.com/nadeesha/ts-prune
+[42]: https://github.com/jaydenseric/find-unused-exports
+[43]: #custom-dependency-resolvers
+[44]: #workspaces--monorepos
+[45]: #production-mode
