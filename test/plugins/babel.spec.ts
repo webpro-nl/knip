@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
+import { main } from '../../src/index.js';
 import * as babel from '../../src/plugins/babel/index.js';
 import { getManifest } from '../helpers';
+import baseArguments from '../helpers/baseArguments.js';
 
 const cwd = path.resolve('test/fixtures/plugins/babel');
 const manifest = getManifest(cwd);
@@ -55,4 +57,14 @@ test('Find dependencies in Babel configuration (package.json)', async () => {
   const configFilePath = path.join(cwd, 'package.json');
   const dependencies = await babel.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, ['@babel/preset-env']);
+});
+
+test('External dependency in Babel configuration (.babelrc.js)', async () => {
+  const { issues } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  // This verifies that .babelrc.js is added as entry file and its external module specifiers are found
+  assert(issues.unlisted['.babelrc.js']['dotenv']);
 });
