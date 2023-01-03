@@ -32,8 +32,8 @@ const findManifestDependencies = async ({ rootConfig, manifest, isRoot, isProduc
 
   // Find all binaries for each dependency
   const installedBinaries: InstalledBinaries = new Map();
-  const deps = [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})];
-  for (const packageName of deps) {
+  const packageNames = [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})];
+  for (const packageName of packageNames) {
     const manifest = await getPackageManifest(dir, packageName, isRoot, cwd);
     if (manifest) {
       // Read and store installed binaries

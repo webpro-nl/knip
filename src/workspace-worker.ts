@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
-import * as npm from './npm-scripts/index.js';
+import * as npm from './manifest/index.js';
 import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
 import { debugLogFiles, debugLogIssues, debugLogObject } from './util/debug.js';

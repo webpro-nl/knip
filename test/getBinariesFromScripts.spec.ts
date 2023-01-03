@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getBinariesFromScripts as b } from '../src/npm-scripts/helpers';
+import { getBinariesFromScripts as b } from '../src/manifest/helpers';
 
 test('getBinariesFromScripts', async () => {
   assert.deepEqual(b(['program']), ['program']);

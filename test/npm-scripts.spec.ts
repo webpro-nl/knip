@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
-import * as npm from '../src/npm-scripts';
+import * as npm from '../src/manifest';
 import { getManifest } from './helpers';
 
 const cwd = path.resolve('test/fixtures/npm-scripts');
