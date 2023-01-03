@@ -4,7 +4,14 @@
 
 This plugin is enabled when any of the following packages is in `dependencies` or `devDependencies`:
 
+- @sentry/browser
+- @sentry/electron
+- @sentry/ember
+- @sentry/gatsby
+- @sentry/nextjs
+- @sentry/remix
 - @sentry/replay
+- @sentry/tracing
 
 ## Default configuration
 
