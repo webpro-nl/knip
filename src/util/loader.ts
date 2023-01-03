@@ -10,7 +10,7 @@ import { timerify } from './performance.js';
 const require = createRequire(process.cwd());
 
 const {
-  values: { 'no-progress': noProgress = false },
+  values: { 'no-progress': isNoProgress = false, debug: isDebug = false },
 } = parsedArgs;
 
 const load = async (filePath: string) => {
@@ -26,7 +26,7 @@ const load = async (filePath: string) => {
     const imported = await esmLoad(filePath, {}, require);
     return imported.default ?? imported;
   } catch (error: unknown) {
-    if (noProgress) {
+    if (isNoProgress || isDebug) {
       // Such console logs destroy fancy progress output, will be reported when --no-progress or --debug
       console.log('Failed to load ' + filePath);
       console.log(error?.toString());

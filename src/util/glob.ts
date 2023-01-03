@@ -20,7 +20,7 @@ export const hasNoProductionSuffix = (pattern: string) => !pattern.endsWith('!')
 
 const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
 
-const negatedLast = (a: string) => (a.startsWith('!') ? 1 : -1);
+const negatedLast = (pattern: string) => (pattern.startsWith('!') ? 1 : -1);
 
 interface BaseGlobOptions {
   cwd: string;
@@ -38,8 +38,7 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   const workingDirPosix = ensurePosixPath(workingDir);
   const relativePath = path.posix.relative(cwdPosix, workingDirPosix);
 
-  // Prepend relative --dir to patterns to use cwd (not workingDir), because
-  // we want to glob everything from root/cwd to include all gitignore files and ignore patterns
+  // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
   const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
   const globPatterns = compact([patterns].flat().map(prepend).map(removeProductionSuffix)).sort(negatedLast);
 

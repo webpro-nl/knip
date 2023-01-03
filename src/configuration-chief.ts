@@ -40,7 +40,7 @@ const defaultConfig: Configuration = {
 const PLUGIN_NAMES = Object.keys(plugins);
 
 type ConfigurationManagerOptions = {
-  cwd?: string;
+  cwd: string;
   isProduction: boolean;
 };
 
@@ -53,7 +53,7 @@ type ConfigurationManagerOptions = {
  * - Hands out workspace and plugin configs
  */
 export default class ConfigurationChief {
-  cwd: string = process.cwd();
+  cwd: string;
   isProduction = false;
   config: Configuration;
 
@@ -62,9 +62,8 @@ export default class ConfigurationChief {
   manifestWorkspaces: undefined | string[];
 
   constructor({ cwd, isProduction }: ConfigurationManagerOptions) {
-    this.cwd = cwd ?? this.cwd;
+    this.cwd = cwd;
     this.isProduction = isProduction;
-
     this.config = defaultConfig;
   }
 

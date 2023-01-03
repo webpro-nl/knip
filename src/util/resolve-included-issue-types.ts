@@ -30,7 +30,7 @@ export const resolveIncludedIssueTypes = (
     _exclude.push('enumMembers');
     _exclude.push('devDependencies');
   } else {
-    // Auto-add `devDependencies` when `dependencies` are included or excluded
+    // Auto-add (or remove) `devDependencies` when `dependencies` are included (or excluded)
     if (_include.includes('dependencies')) _include.push('devDependencies');
     if (_exclude.includes('dependencies')) _exclude.push('devDependencies');
   }

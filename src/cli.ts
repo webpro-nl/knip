@@ -19,7 +19,7 @@ const {
     'max-issues': maxIssues = '0',
     'no-exit-code': noExitCode = false,
     'no-gitignore': isNoGitIgnore = false,
-    'no-progress': noProgress = false,
+    'no-progress': isNoProgress = false,
     production: isProduction = false,
     reporter = 'symbols',
     'reporter-options': reporterOptions = '',
@@ -36,7 +36,7 @@ if (help) {
 const cwd = process.cwd();
 
 const isShowProgress =
-  !isDebug && noProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
+  !isDebug && isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
 
 const printReport =
   reporter in reporters ? reporters[reporter as keyof typeof reporters] : await import(path.join(cwd, reporter));

@@ -27,7 +27,7 @@ const newPluginDir = path.join(pluginsDir, name);
 const pluginsBarrelFilePath = path.join(pluginsDir, 'index.ts');
 const schemaFilePath = path.join(cwd, 'schema.json');
 
-const rel = p => path.relative(cwd, p);
+const relative = to => path.relative(cwd, to);
 
 await fs.cp(templateDir, newPluginDir, {
   recursive: true,
@@ -55,7 +55,7 @@ plugins.properties = Object.keys(properties)
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));
 
-console.log(`Created new plugin at ${rel(newPluginDir)}`);
-console.log(`Updated ${rel(newPluginDir)} and ${rel(schemaFilePath)}, please review the changes`);
+console.log(`Created new plugin at ${relative(newPluginDir)}`);
+console.log(`Updated ${relative(newPluginDir)} and ${relative(schemaFilePath)}, please review the changes`);
 console.log('Please populate index.ts with configuration and implementation (see the other plugins for inspiration!)');
 console.log('The README.md can then be generated using `npm run docs:plugins`');

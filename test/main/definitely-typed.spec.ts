@@ -13,7 +13,7 @@ test('Find unused enum and class members', async () => {
     cwd,
   });
 
-  assert(issues.devDependencies['package.json']['@types/unused'].symbol, '@types/unused');
+  assert(issues.devDependencies['package.json']['@types/unused']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
