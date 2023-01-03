@@ -14,7 +14,7 @@ export const ENABLERS = ['webpack'];
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
   ENABLERS.some(enabler => dependencies.has(enabler));
 
-export const CONFIG_FILE_PATTERNS = ['webpack.config*.js'];
+export const CONFIG_FILE_PATTERNS = ['webpack.config*.{js,ts}'];
 
 const resolveRuleSetLoaders = (rule: RuleSetRule | '...') => {
   if (!rule || typeof rule === 'string') return [];
@@ -31,7 +31,11 @@ const resolveUseItemLoader = (use: RuleSetUseItem) => {
 };
 
 const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
-  const config: Configuration = await _load(configFilePath);
+  let config: Configuration | (() => Configuration) = await _load(configFilePath);
+
+  if (typeof config === 'function') {
+    config = config();
+  }
 
   const loaders = (config.module?.rules?.flatMap(resolveRuleSetLoaders) ?? [])
     .map(loader => loader.replace(/\?.*/, ''))

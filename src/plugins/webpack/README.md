@@ -11,7 +11,7 @@ This plugin is enabled when any of the following packages is in `dependencies` o
 ```json
 {
   "webpack": {
-    "config": ["webpack.config*.js"]
+    "config": ["webpack.config*.{js,ts}"]
   }
 }
 ```
