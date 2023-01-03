@@ -5,7 +5,7 @@ import * as changesets from '../../src/plugins/changesets/index.js';
 
 const cwd = path.resolve('test/fixtures/plugins/changesets');
 
-test('Unused dependencies in Changesets configuration', async () => {
+test('Find dependencies in Changesets configuration', async () => {
   const configFilePaths = changesets.CONFIG_FILE_PATTERNS.map(filePath => path.join(cwd, filePath));
   for (const configFilePath of configFilePaths) {
     const dependencies = await changesets.findDependencies(configFilePath);

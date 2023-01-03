@@ -5,7 +5,7 @@ import * as capacitor from '../../src/plugins/capacitor/index.js';
 
 const cwd = path.resolve('test/fixtures/plugins/capacitor');
 
-test('Unused dependencies in Capacitor configuration (ts)', async () => {
+test('Find dependencies in Capacitor configuration (ts)', async () => {
   const configFilePath = path.join(cwd, 'capacitor.config.ts');
   const dependencies = await capacitor.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
@@ -19,7 +19,7 @@ test('Unused dependencies in Capacitor configuration (ts)', async () => {
   ]);
 });
 
-test('Unused dependencies in Capacitor configuration (json)', async () => {
+test('Find dependencies in Capacitor configuration (json)', async () => {
   const configFilePath = path.join(cwd, 'capacitor.config.json');
   const dependencies = await capacitor.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [

@@ -5,7 +5,7 @@ import * as gatsby from '../../src/plugins/gatsby/index.js';
 
 const cwd = path.resolve('test/fixtures/plugins/gatsby');
 
-test('Unused dependencies in Gatsby configuration (gatsby-config.js)', async () => {
+test('Find dependencies in Gatsby configuration (gatsby-config.js)', async () => {
   const configFilePath = path.join(cwd, 'gatsby-config.js');
   const dependencies = await gatsby.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
@@ -23,7 +23,7 @@ test('Unused dependencies in Gatsby configuration (gatsby-config.js)', async () 
   ]);
 });
 
-test('Unused dependencies in Gatsby configuration (gatsby-node.js)', async () => {
+test('Find dependencies in Gatsby configuration (gatsby-node.js)', async () => {
   const configFilePath = path.join(cwd, 'gatsby-node.js');
   const dependencies = await gatsby.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [

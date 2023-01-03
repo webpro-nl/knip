@@ -7,19 +7,19 @@ import { getManifest } from '../helpers';
 const cwd = path.resolve('test/fixtures/plugins/mocha');
 const manifest = getManifest(cwd);
 
-test('Unused dependencies in mocha configuration (.mocharc.json)', async () => {
+test('Find dependencies in Mocha configuration (.mocharc.json)', async () => {
   const configFilePath = path.join(cwd, '.mocharc.json');
   const dependencies = await mocha.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, ['ts-node']);
 });
 
-test('Unused dependencies in mocha configuration (package.json)', async () => {
+test('Find dependencies in Mocha configuration (package.json)', async () => {
   const configFilePath = path.join(cwd, 'package.json');
   const dependencies = await mocha.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, ['ts-node']);
 });
 
-test('Unused dependencies in mocha configuration (.mocharc.yml)', async () => {
+test('Find dependencies in Mocha configuration (.mocharc.yml)', async () => {
   const configFilePath = path.join(cwd, '.mocharc.yml');
   const dependencies = await mocha.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, ['ts-node']);

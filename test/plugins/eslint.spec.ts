@@ -12,7 +12,7 @@ const workspaceConfig = {
   ignore: [],
 };
 
-test('Unused dependencies in ESLint configuration (legacy json)', async () => {
+test('Find dependencies in ESLint configuration (legacy json)', async () => {
   const configFilePath = path.join(cwd, '.eslintrc.json');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
   assert.deepEqual(dependencies, [
@@ -25,7 +25,7 @@ test('Unused dependencies in ESLint configuration (legacy json)', async () => {
   ]);
 });
 
-test('Unused dependencies in ESLint configuration (legacy js)', async () => {
+test('Find dependencies in ESLint configuration (legacy js)', async () => {
   const configFilePath = path.join(cwd, '.eslintrc.js');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
   assert.deepEqual(dependencies, [
@@ -40,7 +40,7 @@ test('Unused dependencies in ESLint configuration (legacy js)', async () => {
   ]);
 });
 
-test('Unused dependencies in ESLint configuration (legacy yaml)', async () => {
+test('Find dependencies in ESLint configuration (legacy yaml)', async () => {
   const configFilePath = path.join(cwd, '.eslintrc.yml');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
   assert.deepEqual(dependencies, [

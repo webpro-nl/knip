@@ -11,18 +11,18 @@ const cwd = path.resolve('test/fixtures/plugins/postcss');
 const manifestFilePath = path.join(cwd, 'package.json');
 const manifest = getManifest(cwd);
 
-test('Unused dependencies in postcss configuration (package.json)', async () => {
+test('Find dependencies in PostCSS configuration (package.json)', async () => {
   const dependencies = await postcss.findDependencies(manifestFilePath, { manifest });
   assert.deepEqual(dependencies, ['autoprefixer']);
 });
 
-test('Unused dependencies in postcss configuration (postcss.config.js)', async () => {
+test('Find dependencies in PostCSS configuration (postcss.config.js)', async () => {
   const configFilePath = path.join(cwd, 'postcss.config.js');
   const dependencies = await postcss.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, []);
 });
 
-test('Unused dependencies in postcss configuration (postcss.config.js function)', async () => {
+test('Find dependencies in PostCSS configuration (postcss.config.js function)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

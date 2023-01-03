@@ -5,7 +5,7 @@ import * as stryker from '../../src/plugins/stryker/index.js';
 
 const cwd = path.resolve('test/fixtures/plugins/stryker');
 
-test('Unused dependencies in stryker configuration (js)', async () => {
+test('Find dependencies in Stryker configuration (js)', async () => {
   const configFilePath = path.join(cwd, '.stryker.conf.js');
   const dependencies = await stryker.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
@@ -16,7 +16,7 @@ test('Unused dependencies in stryker configuration (js)', async () => {
   ]);
 });
 
-test('Unused dependencies in stryker configuration (json)', async () => {
+test('Find dependencies in Stryker configuration (json)', async () => {
   const configFilePath = path.join(cwd, 'stryker.conf.json');
   const dependencies = await stryker.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [

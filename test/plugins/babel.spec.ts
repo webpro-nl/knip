@@ -7,7 +7,7 @@ import { getManifest } from '../helpers';
 const cwd = path.resolve('test/fixtures/plugins/babel');
 const manifest = getManifest(cwd);
 
-test('Unused dependencies in Babel configuration (.babelrc)', async () => {
+test('Find dependencies in Babel configuration (.babelrc)', async () => {
   const configFilePath = path.join(cwd, '.babelrc');
   const dependencies = await babel.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
@@ -21,7 +21,7 @@ test('Unused dependencies in Babel configuration (.babelrc)', async () => {
   ]);
 });
 
-test('Unused dependencies in Babel configuration (.babelrc.js)', async () => {
+test('Find dependencies in Babel configuration (.babelrc.js)', async () => {
   const configFilePath = path.join(cwd, '.babelrc.js');
   const dependencies = await babel.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
@@ -35,7 +35,7 @@ test('Unused dependencies in Babel configuration (.babelrc.js)', async () => {
   ]);
 });
 
-test('Unused dependencies in Babel configuration (babel.config.js)', async () => {
+test('Find dependencies in Babel configuration (babel.config.js)', async () => {
   const configFilePath = path.join(cwd, 'babel.config.js');
   const dependencies = await babel.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
@@ -51,7 +51,7 @@ test('Unused dependencies in Babel configuration (babel.config.js)', async () =>
   ]);
 });
 
-test('Unused dependencies in Babel configuration (package.json)', async () => {
+test('Find dependencies in Babel configuration (package.json)', async () => {
   const configFilePath = path.join(cwd, 'package.json');
   const dependencies = await babel.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, ['@babel/preset-env']);

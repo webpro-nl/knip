@@ -8,7 +8,7 @@ const cwd = path.resolve('test/fixtures/plugins/remark');
 const manifestFilePath = path.join(cwd, 'package.json');
 const manifest = getManifest(cwd);
 
-test('Unused dependencies in remark configuration', async () => {
+test('Find dependencies in Remark configuration', async () => {
   const dependencies = await remark.findDependencies(manifestFilePath, { manifest });
   assert.deepEqual(dependencies, ['remark-preset-webpro']);
 });
