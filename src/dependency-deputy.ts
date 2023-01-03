@@ -190,7 +190,7 @@ export default class DependencyDeputy {
           if (IGNORE_DEFINITELY_TYPED.includes(typedPackageName)) return false;
 
           // Ignore typed dependencies that have a peer dependency that's referenced
-          // Example: `next` has `react-dom` as peer dependencies, so `@types/react-dom` can be ignored (i.e. it's used)
+          // Example: `next` has `react-dom` as peer dependency, so when `@types/react-dom` is listed it can be ignored
           const peerDependencies = this.getPeerDependencies(workspaceName, typedPackageName);
           if (peerDependencies.length) {
             return !peerDependencies.find(peerDependency => !isUnreferencedDependency(peerDependency));

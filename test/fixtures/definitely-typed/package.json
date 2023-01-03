@@ -4,12 +4,14 @@
     "test": "mocha"
   },
   "dependencies": {
+    "next": "*",
     "micromatch": "*"
   },
   "devDependencies": {
     "@types/estree": "*",
     "@types/micromatch": "*",
     "@types/mocha": "*",
+    "@types/react-dom": "*",
     "@types/node": "*",
     "@types/unused": "*",
     "@types/without-the-package": "*",
