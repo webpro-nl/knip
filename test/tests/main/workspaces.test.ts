@@ -35,8 +35,8 @@ test('Find unused files, dependencies and exports in workspaces (loose)', async 
     dependencies: 3,
     unlisted: 1,
     exports: 1,
-    processed: 5,
-    total: 5,
+    processed: 7,
+    total: 7,
   });
 });
 
@@ -74,7 +74,7 @@ test('Find unused files, dependencies and exports in workspaces (strict)', async
     dependencies: 4,
     unlisted: 3,
     exports: 1,
-    processed: 5,
-    total: 5,
+    processed: 7,
+    total: 7,
   });
 });

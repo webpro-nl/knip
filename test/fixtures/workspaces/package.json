@@ -5,6 +5,15 @@
     "apps/*",
     "packages/*"
   ],
+  "dependencies": {
+    "cypress": "*",
+    "root-dependency": "*",
+    "unused-dependency": "*",
+    "typescript": "*"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
   "knip": {
     "workspaces": {
       ".": {
@@ -27,10 +36,5 @@
         ]
       }
     }
-  },
-  "dependencies": {
-    "cypress": "*",
-    "root-dependency": "*",
-    "unused-dependency": "*"
   }
 }

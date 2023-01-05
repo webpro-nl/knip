@@ -3,5 +3,8 @@
   "main": "./index.js",
   "scripts": {
     "e2e": "cypress"
+  },
+  "devDependencies": {
+    "@local/tsconfig": "*"
   }
 }
