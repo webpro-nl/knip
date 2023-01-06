@@ -67,13 +67,19 @@ with a configuration file (or a `knip` property in `package.json`). Let's name t
 The `entry` files target the starting point(s) to resolve the rest of the imported code. The `project` files should
 contain all files to match against the files resolved from the entry files, including potentially unused files.
 
-Then run the checks:
+Then run the checks with `npx knip`, or add a script to `package.json`:
 
-    npx knip
+```json
+{
+  "scripts": {
+    "knip": "knip"
+  }
+}
+```
 
-This will analyze the project and output unused files, dependencies and exports.
+Use `npm run knip` to analyze the project and output unused files, dependencies and exports.
 
-## Options
+## Command-line options
 
     $ npx knip --help
     knip [options]
@@ -216,21 +222,23 @@ Knip contains a growing list of plugins:
 - [ESLint][14]
 - [Gatsby][15]
 - [Jest][16]
-- [Mocha][17]
-- [Next.js][18]
-- [Nx][19]
-- [nyc][20]
-- [Playwright][21]
-- [PostCSS][22]
-- [Prettier][23]
-- [Remark][24]
-- [Remix][25]
-- [Rollup][26]
-- [Sentry][27]
-- [Storybook][28]
-- [Stryker][29]
-- [TypeScript][30]
-- [Webpack][31]
+- [lint-staged][17]
+- [Mocha][18]
+- [Next.js][19]
+- [Nx][20]
+- [nyc][21]
+- [Playwright][22]
+- [PostCSS][23]
+- [Prettier][24]
+- [Release It][25]
+- [Remark][26]
+- [Remix][27]
+- [Rollup][28]
+- [Sentry][29]
+- [Storybook][30]
+- [Stryker][31]
+- [TypeScript][32]
+- [Webpack][33]
 
 Plugins are automatically activated, no need to enable anything. Each plugin is automatically enabled based on simple
 heuristics. Most of them check whether one or one of a few (dev) dependencies are listed in `package.json`. Once
@@ -238,8 +246,10 @@ enabled, they add a set of configuration and/or entry files for Knip to analyze.
 
 Most plugins use one or both of the following file types:
 
-- `config` - custom dependency resolvers are applied to the [config files][32]
+- `config` - custom dependency resolvers are applied to the [config files][34]
 - `entry` - files to include with the analysis of the rest of the source code
+
+See each plugin's documentation for its default values.
 
 ### `config`
 
@@ -260,6 +270,10 @@ rest to find which of those dependencies are unused or missing.
 
 Other configuration files use `require` or `import` statements to use dependencies, so they can be analyzed like the
 rest of the source files. These configuration files are also considered `entry` files.
+
+### Disable a plugin
+
+In case a plugin causes issues, it can be disabled by using `false` as its value (e.g. `"webpack": false`).
 
 ### Create a new plugin
 
@@ -330,10 +344,10 @@ locations. The more plugins Knip will have, the more projects can be analyzed ou
 
 Knip provides the following built-in reporters:
 
-- [`codeowners`][33]
-- [`compact`][34]
-- [`json`][35]
-- [`symbol`][36] (default)
+- [`codeowners`][35]
+- [`compact`][36]
+- [`json`][37]
+- [`symbol`][38] (default)
 
 The `compact` reporter shows the sorted files first, and then a list of symbols:
 
@@ -360,7 +374,7 @@ type ReporterOptions = {
 
 The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][37].
+Find more details and ideas in [custom reporters][39].
 
 ## Really, another unused file/dependency/export finder?
 
@@ -374,12 +388,12 @@ all of this, why not collect the various issues in one go?
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                            | **knip** | [depcheck][38] | [unimported][39] | [ts-unused-exports][40] | [ts-prune][41] | [find-unused-exports][42] |
+| Feature                            | **knip** | [depcheck][40] | [unimported][41] | [ts-unused-exports][42] | [ts-prune][43] | [find-unused-exports][44] |
 | :--------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: | :-----------------------: |
 | Unused files                       |    ✅    |       -        |        ✅        |            -            |       -        |             -             |
 | Unused dependencies                |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
 | Unlisted dependencies              |    ✅    |       ✅       |        ✅        |            -            |       -        |             -             |
-| [Custom dependency resolvers][43]  |    ✅    |       ✅       |        ❌        |            -            |       -        |             -             |
+| [Custom dependency resolvers][45]  |    ✅    |       ✅       |        ❌        |            -            |       -        |             -             |
 | Unused exports                     |    ✅    |       -        |        -         |           ✅            |       ✅       |            ✅             |
 | Unused class members               |    ✅    |       -        |        -         |            -            |       -        |             -             |
 | Unused enum members                |    ✅    |       -        |        -         |            -            |       -        |             -             |
@@ -388,7 +402,7 @@ This table is an ongoing comparison. Based on their docs (please report any mist
 | Custom reporters                   |    ✅    |       -        |        -         |            -            |       -        |             -             |
 | JavaScript support                 |    ✅    |       ✅       |        ✅        |            -            |       -        |            ✅             |
 | Configure entry files              |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |            ❌             |
-| [Support workspaces/monorepos][44] |    ✅    |       ❌       |        ❌        |            -            |       -        |             -             |
+| [Support workspaces/monorepos][46] |    ✅    |       ❌       |        ❌        |            -            |       -        |             -             |
 | ESLint plugin available            |    -     |       -        |        -         |           ✅            |       -        |             -             |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
@@ -411,7 +425,7 @@ The following commands are similar:
     unimported
     knip --production --include files,dependencies,unlisted
 
-See [production mode][45].
+See [production mode][47].
 
 ## TypeScript language services
 
@@ -441,32 +455,34 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [14]: ./src/plugins/eslint
 [15]: ./src/plugins/gatsby
 [16]: ./src/plugins/jest
-[17]: ./src/plugins/mocha
-[18]: ./src/plugins/next
-[19]: ./src/plugins/nx
-[20]: ./src/plugins/nyc
-[21]: ./src/plugins/playwright
-[22]: ./src/plugins/postcss
-[23]: ./src/plugins/prettier
-[24]: ./src/plugins/remark
-[25]: ./src/plugins/remix
-[26]: ./src/plugins/rollup
-[27]: ./src/plugins/sentry
-[28]: ./src/plugins/storybook
-[29]: ./src/plugins/stryker
-[30]: ./src/plugins/typescript
-[31]: ./src/plugins/webpack
-[32]: #config
-[33]: #code-owners
-[34]: #compact
-[35]: #json
-[36]: #symbol-default
-[37]: ./docs/custom-reporters.md
-[38]: https://github.com/depcheck/depcheck
-[39]: https://github.com/smeijer/unimported
-[40]: https://github.com/pzavolinsky/ts-unused-exports
-[41]: https://github.com/nadeesha/ts-prune
-[42]: https://github.com/jaydenseric/find-unused-exports
-[43]: #custom-dependency-resolvers
-[44]: #workspaces--monorepos
-[45]: #production-mode
+[17]: ./src/plugins/lint-staged
+[18]: ./src/plugins/mocha
+[19]: ./src/plugins/next
+[20]: ./src/plugins/nx
+[21]: ./src/plugins/nyc
+[22]: ./src/plugins/playwright
+[23]: ./src/plugins/postcss
+[24]: ./src/plugins/prettier
+[25]: ./src/plugins/release-it
+[26]: ./src/plugins/remark
+[27]: ./src/plugins/remix
+[28]: ./src/plugins/rollup
+[29]: ./src/plugins/sentry
+[30]: ./src/plugins/storybook
+[31]: ./src/plugins/stryker
+[32]: ./src/plugins/typescript
+[33]: ./src/plugins/webpack
+[34]: #config
+[35]: #code-owners
+[36]: #compact
+[37]: #json
+[38]: #symbol-default
+[39]: ./docs/custom-reporters.md
+[40]: https://github.com/depcheck/depcheck
+[41]: https://github.com/smeijer/unimported
+[42]: https://github.com/pzavolinsky/ts-unused-exports
+[43]: https://github.com/nadeesha/ts-prune
+[44]: https://github.com/jaydenseric/find-unused-exports
+[45]: #custom-dependency-resolvers
+[46]: #workspaces--monorepos
+[47]: #production-mode
