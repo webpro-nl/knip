@@ -216,6 +216,10 @@
           "title": "Prettier plugin configuration (https://github.com/webpro/knip/blob/next/src/plugins/prettier/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "release-it": {
+          "title": "Release It plugin configuration (https://github.com/webpro/knip/blob/next/src/plugins/release-it/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "remark": {
           "title": "Remark plugin configuration (https://github.com/webpro/knip/blob/next/src/plugins/remark/README.md)",
           "$ref": "#/definitions/plugin"
