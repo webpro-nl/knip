@@ -6,8 +6,8 @@ export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
 };
 
 export const getPackageName = (value: string) => {
-  const match = ensurePosixPath(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/);
-  if (match) return match[1];
+  const match = ensurePosixPath(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g);
+  if (match) return match[match.length - 1];
 
   if (value.startsWith('@')) {
     const [scope, packageName] = value.split('/');
