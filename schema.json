@@ -188,6 +188,10 @@
           "title": "Jest plugin configuration (https://github.com/webpro/knip/blob/next/src/plugins/jest/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "lint-staged": {
+          "title": "lint-staged plugin configuration (https://github.com/webpro/knip/blob/next/src/plugins/lint-staged/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "mocha": {
           "title": "Mocha plugin configuration (https://github.com/webpro/knip/blob/next/src/plugins/mocha/README.md)",
           "$ref": "#/definitions/plugin"
