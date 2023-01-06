@@ -37,6 +37,10 @@ export const getBinariesFromScripts = (npmScripts: string[]) =>
         .map(stripEnvironmentVariables)
         .flatMap(command => {
           const [binary, ...args] = command.trim().split(' ');
+
+          // Bail out for this exception when dependencies don't need to be listed
+          if (binary === 'npx' && /-y|--yes/.test(args[0])) return [binary];
+
           const firstArgument =
             FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS.includes(binary) && args.find(arg => !arg.startsWith('-'));
           const dependenciesFromArguments = getDependenciesFromLoaderArguments(args);

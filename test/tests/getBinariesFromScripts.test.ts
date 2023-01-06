@@ -37,5 +37,6 @@ test('getBinariesFromScripts', async () => {
   assert.deepEqual(b(['npm run script']), ['npm']);
   assert.deepEqual(b(['npm run publish:latest -- --npm-tag=debug --no-push']), ['npm']);
 
-  assert.deepEqual(b(['npx -y pkg']), ['npx', 'pkg']);
+  assert.deepEqual(b(['npx -y pkg']), ['npx']);
+  assert.deepEqual(b(['npx --yes pkg']), ['npx']);
 });
