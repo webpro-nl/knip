@@ -22,15 +22,16 @@ export const CONFIG_FILE_PATTERNS = ['.storybook/{main,manager}.{js,ts}'];
 
 export const ENTRY_FILE_PATTERNS = ['.storybook/preview.{js,jsx,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
 
-export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,ts,tsx}'];
+export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
 
 const findStorybookDependencies: GenericPluginCallback = async configFilePath => {
   const config: StorybookConfig = await _load(configFilePath);
   if (config) {
     const addons =
-      config.addons?.map(addon =>
-        addon.startsWith('.') ? require.resolve(path.join(path.dirname(configFilePath), addon)) : addon
-      ) ?? [];
+      config.addons?.map(addon => {
+        const name = typeof addon === 'string' ? addon : addon.name;
+        return name.startsWith('.') ? require.resolve(path.join(path.dirname(configFilePath), name)) : name;
+      }) ?? [];
     const builder = config?.core?.builder;
     const builderPackages =
       builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];

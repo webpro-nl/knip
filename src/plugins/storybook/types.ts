@@ -1,5 +1,5 @@
 export type StorybookConfig = {
-  addons?: string[];
+  addons?: (string | { name: string })[];
   core?: {
     builder?: string;
   };
