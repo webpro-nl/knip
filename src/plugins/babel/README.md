@@ -2,12 +2,10 @@
 
 ## Enabled
 
-This plugin is enabled when any of the following packages is in `dependencies` or `devDependencies`:
+This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies`
+or `devDependencies`:
 
-- @babel/cli
-- @babel/core
-- @babel/preset-env
-- @babel/register
+- `/^@babel\//`
 
 ## Default configuration
 

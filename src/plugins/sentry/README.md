@@ -2,16 +2,10 @@
 
 ## Enabled
 
-This plugin is enabled when any of the following packages is in `dependencies` or `devDependencies`:
+This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies`
+or `devDependencies`:
 
-- @sentry/browser
-- @sentry/electron
-- @sentry/ember
-- @sentry/gatsby
-- @sentry/nextjs
-- @sentry/remix
-- @sentry/replay
-- @sentry/tracing
+- `/^@sentry\//`
 
 ## Default configuration
 

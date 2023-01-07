@@ -1,5 +1,6 @@
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { PluginConfig } from './types.js';
 
@@ -10,8 +11,7 @@ export const NAME = '';
 /** @public */
 export const ENABLERS = [''];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [];
 

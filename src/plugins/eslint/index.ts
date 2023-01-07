@@ -5,6 +5,7 @@ import { _firstGlob } from '../../util/glob.js';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
+import { hasDependency } from '../../util/plugin.js';
 import { resolvePluginPackageName, customResolvePluginPackageNames, getDependenciesFromSettings } from './helpers.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { ESLintConfig } from './types.js';
@@ -14,8 +15,7 @@ export const NAME = 'ESLint';
 /** @public */
 export const ENABLERS = ['eslint'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 // Current: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
 // The only way to reliably resolve legacy configuration is through ESLint itself

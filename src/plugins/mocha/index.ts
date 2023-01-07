@@ -1,6 +1,7 @@
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://mochajs.org/#configuring-mocha-nodejs
@@ -10,8 +11,7 @@ export const NAME = 'Mocha';
 /** @public */
 export const ENABLERS = ['mocha'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
 

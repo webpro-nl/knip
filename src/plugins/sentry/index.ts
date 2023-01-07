@@ -1,3 +1,4 @@
+import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://docs.sentry.io/platforms/javascript/configuration/
@@ -5,18 +6,8 @@ import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 export const NAME = 'Sentry';
 
 /** @public */
-export const ENABLERS = [
-  '@sentry/browser',
-  '@sentry/electron',
-  '@sentry/ember',
-  '@sentry/gatsby',
-  '@sentry/nextjs',
-  '@sentry/remix',
-  '@sentry/replay',
-  '@sentry/tracing',
-];
+export const ENABLERS = [/^@sentry\//];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const ENTRY_FILE_PATTERNS = ['sentry.{client,server}.config.{js,ts}'];

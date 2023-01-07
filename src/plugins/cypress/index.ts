@@ -1,3 +1,4 @@
+import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://docs.cypress.io/guides/references/configuration
@@ -7,8 +8,7 @@ export const NAME = 'Cypress';
 /** @public */
 export const ENABLERS = ['cypress'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const ENTRY_FILE_PATTERNS = [
   'cypress.config.{js,ts,mjs,cjs}',

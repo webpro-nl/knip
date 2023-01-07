@@ -1,5 +1,6 @@
 import { load } from 'js-yaml';
 import { timerify } from '../../util/performance.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/remarkjs/remark/blob/main/packages/remark-cli/readme.md
@@ -13,8 +14,7 @@ export const NAME = 'Remark';
 /** @public */
 export const ENABLERS = ['remark-cli'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [
   'package.json',

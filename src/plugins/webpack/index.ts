@@ -1,6 +1,7 @@
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
+import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { BabelConfig } from '../babel/types.js';
@@ -14,8 +15,7 @@ export const NAME = 'Webpack';
 /** @public */
 export const ENABLERS = ['webpack'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = ['webpack.config*.{js,ts}'];
 

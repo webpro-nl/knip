@@ -2,6 +2,7 @@ import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
+import { hasDependency } from '../../util/plugin.js';
 import { resolvePresetName, resolvePluginName } from './helpers.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { BabelConfig } from './types.js';
@@ -11,10 +12,9 @@ import type { BabelConfig } from './types.js';
 export const NAME = 'Babel';
 
 /** @public */
-export const ENABLERS = ['@babel/cli', '@babel/core', '@babel/preset-env', '@babel/register'];
+export const ENABLERS = [/^@babel\//];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [
   'babel.config.json',

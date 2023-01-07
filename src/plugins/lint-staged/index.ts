@@ -1,6 +1,7 @@
 import { getBinariesFromScripts } from '../../manifest/helpers.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { LintStagedConfig } from './types.js';
 
@@ -11,8 +12,7 @@ export const NAME = 'lint-staged';
 /** @public */
 export const ENABLERS = ['lint-staged'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [
   '.lintstagedrc',

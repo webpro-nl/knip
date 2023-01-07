@@ -32,7 +32,7 @@ for await (const dir of directories) {
 
     const docs = docTemplate
       .replace(/# PLUGIN_TITLE/, `# ${NAME}`)
-      .replace(/- PLUGIN_ENABLERS/, ENABLERS.map(enabler => `- ${enabler}`).join(EOL))
+      .replace(/- PLUGIN_ENABLERS/, ENABLERS.map(enabler => `- \`${enabler}\``).join(EOL))
       .replace(/(```json)[\s\S]*(```)/m, `$1${EOL}${JSON.stringify({ [pluginName]: defaults }, null, 2)}${EOL}$2`);
 
     console.log(`Writing README.md for ${NAME} plugin`);

@@ -1,5 +1,6 @@
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/changesets/changesets/blob/main/docs/config-file-options.md
@@ -13,8 +14,7 @@ export const NAME = 'Changesets';
 /** @public */
 export const ENABLERS = ['@changesets/cli'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) =>
-  ENABLERS.some(enabler => dependencies.has(enabler));
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = ['.changeset/config.json'];
 
