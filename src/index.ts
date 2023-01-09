@@ -63,7 +63,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     deputy.addWorkspace({ name, dir, manifestPath, manifest });
 
     const tsConfigFilePath = path.join(dir, tsConfigFile ?? 'tsconfig.json');
-    const tsConfig = await loadTSConfig(tsConfigFilePath);
+    const tsConfig = loadTSConfig(tsConfigFilePath);
 
     if (isRoot && tsConfig) {
       principal.tsConfigFilePath = tsConfigFilePath;

@@ -1,10 +1,12 @@
-import ts from 'typescript';
-import type { TsConfigJson } from 'type-fest';
+import { getTsconfig } from 'get-tsconfig';
+import { ensurePosixPath } from './glob.js';
 
-export const loadTSConfig = async (tsConfigFilePath: string) => {
+const isEqualPath = (inPath: string, outPath: string) => ensurePosixPath(inPath) === ensurePosixPath(outPath);
+
+export const loadTSConfig = (tsConfigFilePath: string) => {
   try {
-    const config = ts.readConfigFile(tsConfigFilePath, ts.sys.readFile);
-    if (!config.error) return config.config as TsConfigJson;
+    const config = getTsconfig(tsConfigFilePath);
+    if (config && isEqualPath(tsConfigFilePath, config.path)) return config.config;
   } catch (error) {
     // TODO
   }
