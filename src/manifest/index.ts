@@ -16,7 +16,7 @@ type Options = {
 
 const findManifestDependencies = async ({ rootConfig, manifest, isRoot, isProduction, dir, cwd }: Options) => {
   const { ignoreBinaries } = rootConfig;
-  const scriptFilter = isProduction ? ['start'] : [];
+  const scriptFilter = isProduction ? ['start', 'postinstall'] : [];
   const referencedDependencies: Set<string> = new Set();
   const peerDependencies: PeerDependencies = new Map();
 

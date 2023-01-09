@@ -310,7 +310,7 @@ Here's what's included in production mode analysis:
 
 - Only `entry` and `project` patterns suffixed with `!`.
 - Only `entry` patterns from plugins exported as `PRODUCTION_ENTRY_FILE_PATTERNS` (such as Next.js and Gatsby).
-- Only the `npm start` script (e.g. not the `test` or other npm scripts in `package.json`).
+- Only the `postinstall` and `start` script (e.g. not the `test` or other npm scripts in `package.json`).
 - Only `exports`, `nsExports` and `classMembers` are included in the report (`types`, `nsTypes`, `enumMembers` are
   ignored).
 
