@@ -63,7 +63,7 @@
     "@snyk/github-codeowners": "1.1.0",
     "chalk": "5.2.0",
     "easy-table": "1.2.0",
-    "esbuild": "0.16.13",
+    "esbuild": "0.16.16",
     "esbuild-register": "3.4.2",
     "eslint": "8.31.0",
     "fast-glob": "3.2.12",
@@ -71,7 +71,7 @@
     "js-yaml": "4.1.0",
     "micromatch": "4.0.5",
     "nano-memoize": "2.0.0",
-    "patch-package": "6.5.0",
+    "patch-package": "6.5.1",
     "pretty-ms": "8.0.0",
     "strip-json-comments": "5.0.0",
     "summary": "2.1.0",
@@ -97,8 +97,8 @@
     "release-it": "15.6.0",
     "remark-cli": "11.0.0",
     "remark-preset-webpro": "0.0.1",
-    "tsx": "3.12.1",
-    "type-fest": "3.5.0",
+    "tsx": "3.12.2",
+    "type-fest": "3.5.1"
   },
   "release-it": {
     "hooks": {
