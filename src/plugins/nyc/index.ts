@@ -20,7 +20,7 @@ export const CONFIG_FILE_PATTERNS = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}
 
 const findNycDependencies: GenericPluginCallback = async configFilePath => {
   const config: NycConfig = await _load(configFilePath);
-  return [config.extends];
+  return config.extends ? [config.extends].flat() : [];
 };
 
 export const findDependencies = timerify(findNycDependencies);
