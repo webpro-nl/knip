@@ -21,7 +21,7 @@ const findMochaDependencies: GenericPluginCallback = async (configFilePath, { ma
   const config = configFilePath.endsWith('package.json') ? manifest.mocha : await _load(configFilePath);
   if (config) {
     const require = config.require;
-    return require ? [require].map(getPackageName) : [];
+    return require ? [require].flat().map(getPackageName) : [];
   }
   return [];
 };
