@@ -73,9 +73,10 @@ export default async ({ report, issues, options }: ReporterOptions) => {
           if (type === 'duplicates') {
             symbols && json[filePath][type]?.push(symbols);
           } else if (type === 'enumMembers' || type === 'classMembers') {
-            if (parentSymbol) {
-              json[filePath][type]![parentSymbol] = json[filePath][type]![parentSymbol] ?? [];
-              json[filePath][type]![parentSymbol].push(symbol);
+            const item = json[filePath][type];
+            if (parentSymbol && item) {
+              item[parentSymbol] = item[parentSymbol] ?? [];
+              item[parentSymbol].push(symbol);
             }
           } else {
             json[filePath][type]?.push(symbol);

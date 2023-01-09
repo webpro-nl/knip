@@ -5,6 +5,7 @@ import parsedArgs from './cli-arguments.js';
 import type { TimerifyOptions } from 'node:perf_hooks';
 import Summary from 'summary';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Timerify = <T extends (...params: any[]) => any>(fn: T, options?: TimerifyOptions) => T;
 
 const { values } = parsedArgs;
