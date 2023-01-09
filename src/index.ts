@@ -300,7 +300,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   // 2) Second pass: add internal source files that ts-morph didn't resolve (referenced through dynamic `import`, `require` and `require.resolve`)
   resolvedFiles.forEach(sourceFile => {
-    const moduleSpecifiers = _findImportModuleSpecifiers(sourceFile);
+    const moduleSpecifiers = _findImportModuleSpecifiers(sourceFile, { skipInternal: false, isStrict });
     moduleSpecifierCache.set(sourceFile, moduleSpecifiers);
     const [internalModuleSpecifiers] = moduleSpecifiers;
     internalModuleSpecifiers.forEach(resolvedFilePath => {
@@ -325,7 +325,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const workspace = workspaces.find(workspace => workspace.dir === workspaceDir);
       if (workspace) {
         const [, externalModuleSpecifiers] =
-          moduleSpecifierCache.get(sourceFile) ?? _findImportModuleSpecifiers(sourceFile, { skipInternal: true });
+          moduleSpecifierCache.get(sourceFile) ??
+          _findImportModuleSpecifiers(sourceFile, { skipInternal: true, isStrict });
         externalModuleSpecifiers.forEach(moduleSpecifier => {
           const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, moduleSpecifier);
           if (unlistedDependency) collector.addIssue({ type: 'unlisted', filePath, symbol: unlistedDependency });

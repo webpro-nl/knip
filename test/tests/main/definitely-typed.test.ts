@@ -7,7 +7,7 @@ import baseCounters from '../../helpers/baseCounters.js';
 
 const cwd = path.resolve('test/fixtures/definitely-typed');
 
-test('Find unused enum and class members', async () => {
+test('Find unused DT @types', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -17,9 +17,26 @@ test('Find unused enum and class members', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 0,
     devDependencies: 1,
     processed: 2,
     total: 2,
+  });
+});
+
+test('Find type imports in production dependencies (strict)', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    isProduction: true,
+    isStrict: true,
+    cwd,
+  });
+
+  assert(issues.dependencies['package.json']['incorrect-production-types']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 1,
+    processed: 1,
+    total: 1,
   });
 });

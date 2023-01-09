@@ -8,6 +8,12 @@ import type { SourceFile } from 'ts-morph';
 
 const require = createRequire(process.cwd());
 
+const getImportStringLiterals = (sourceFile: SourceFile) =>
+  sourceFile
+    .getImportDeclarations()
+    .filter(declaration => !declaration.isTypeOnly())
+    .flatMap(declaration => declaration.getDescendantsOfKind(ts.SyntaxKind.StringLiteral));
+
 const findCommonJSModuleSpecifiers = (sourceFile: SourceFile) =>
   [
     ...findCallExpressionsByName(sourceFile, 'require'),
@@ -34,10 +40,10 @@ const resolveInternal = (filePath: string, moduleSpecifiers: string[]) =>
 
 const findImportModuleSpecifiers = (
   sourceFile: SourceFile,
-  options = { skipInternal: false }
+  options = { skipInternal: false, isStrict: false }
 ): [string[], string[]] => {
   const filePath = sourceFile.getFilePath();
-  const importLiterals = sourceFile.getImportStringLiterals();
+  const importLiterals = options.isStrict ? getImportStringLiterals(sourceFile) : sourceFile.getImportStringLiterals();
   const requireCallExpressions = findCommonJSModuleSpecifiers(sourceFile);
   const moduleSpecifiers = compact(
     [...importLiterals, ...requireCallExpressions].map(importLiteral => {

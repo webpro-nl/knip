@@ -5,7 +5,8 @@
   },
   "dependencies": {
     "next": "*",
-    "micromatch": "*"
+    "micromatch": "*",
+    "incorrect-production-types": "*"
   },
   "devDependencies": {
     "@types/estree": "*",

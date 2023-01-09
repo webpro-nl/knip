@@ -319,6 +319,7 @@ Here's what's included in production mode analysis:
 Additionally, the `--strict` flag can be used to:
 
 - Consider only `dependencies` (not `devDependencies`) when finding unused or unlisted dependencies.
+- Consider only non-type imports (i.e. ignore `import type {}`).
 - Assume each workspace is self-contained: they have their own `dependencies` (and not rely on packages of ancestor
   workspaces).
 
