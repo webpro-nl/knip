@@ -105,6 +105,7 @@
       "before:init": [
         "npm run build",
         "npm run knip",
+        "npm run knip:production",
         "npm run docs",
         "npm test"
       ]
