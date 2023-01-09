@@ -33,6 +33,7 @@
   "type": "module",
   "scripts": {
     "knip": "node ./dist/cli.js",
+    "knip:production": "node ./dist/cli.js --production --strict",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "globstar -- node --loader tsx --test \"test/**/*.test.ts\"",
