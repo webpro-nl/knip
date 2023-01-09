@@ -32,7 +32,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   await chief.loadLocalConfig();
 
-  const deputy = new DependencyDeputy({ ignoreDependencies: chief.config.ignoreDependencies });
+  const deputy = new DependencyDeputy({ isStrict, ignoreDependencies: chief.config.ignoreDependencies });
 
   const workspaces = await chief.getActiveWorkspaces();
 
@@ -327,7 +327,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const [, externalModuleSpecifiers] =
           moduleSpecifierCache.get(sourceFile) ?? _findImportModuleSpecifiers(sourceFile, { skipInternal: true });
         externalModuleSpecifiers.forEach(moduleSpecifier => {
-          const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, moduleSpecifier, isStrict);
+          const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, moduleSpecifier);
           if (unlistedDependency) collector.addIssue({ type: 'unlisted', filePath, symbol: unlistedDependency });
         });
       }
@@ -349,7 +349,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   if (report.dependencies) {
     const { dependencyIssues, devDependencyIssues } = deputy.settleDependencyIssues();
     dependencyIssues.forEach(issue => collector.addIssue(issue));
-    if (!isStrict) devDependencyIssues.forEach(issue => collector.addIssue(issue));
+    if (!isProduction) devDependencyIssues.forEach(issue => collector.addIssue(issue));
   }
 
   const { issues, counters } = collector.getIssues();

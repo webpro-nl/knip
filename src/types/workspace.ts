@@ -6,7 +6,6 @@ type WorkspaceManifest = {
   peerDependencies: string[];
   optionalDependencies: string[];
   devDependencies: string[];
-  productionDependencies: string[];
   allDependencies: string[];
 };
 

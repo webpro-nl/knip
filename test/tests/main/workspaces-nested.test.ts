@@ -7,20 +7,21 @@ import baseCounters from '../../helpers/baseCounters.js';
 
 const cwd = path.resolve('test/fixtures/workspaces-nested');
 
-test('Find unused dependencies in nested workspaces with default config (strict)', async () => {
+test('Find unused dependencies in nested workspaces with default config in production mode (loose)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
-    isStrict: true,
+    isStrict: false,
+    isProduction: true,
   });
 
-  assert(issues.unlisted['level-1-1/level-1-2/level-1-3/index.ts']['package-1-2']);
+  assert(issues.dependencies['level-1-1/level-1-2/level-1-3/package.json']['package-1-3-dev']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
-    processed: 6,
-    total: 6,
+    dependencies: 1,
+    processed: 3,
+    total: 3,
   });
 });
 
@@ -32,10 +33,12 @@ test('Find unused dependencies in nested workspaces with default config in produ
     isProduction: true,
   });
 
+  assert(issues.dependencies['level-1-1/level-1-2/level-1-3/package.json']['package-1-3-dev']);
   assert(issues.unlisted['level-1-1/level-1-2/level-1-3/index.ts']['package-1-2']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    dependencies: 1,
     unlisted: 1,
     processed: 3,
     total: 3,

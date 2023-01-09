@@ -15,6 +15,7 @@ import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
 import type { PackageJson } from 'type-fest';
 
 type Options = {
+  isStrict: boolean;
   ignoreDependencies: string[];
 };
 
@@ -24,6 +25,7 @@ type Options = {
  * - Settles dependency issues
  */
 export default class DependencyDeputy {
+  isStrict;
   _manifests: WorkspaceManifests = new Map();
   manifests: Map<string, PackageJson> = new Map();
   ignoreDependencies;
@@ -34,7 +36,8 @@ export default class DependencyDeputy {
 
   tsConfigPathGlobs: Map<string, string[]> = new Map();
 
-  constructor({ ignoreDependencies }: Options) {
+  constructor({ isStrict, ignoreDependencies }: Options) {
+    this.isStrict = isStrict;
     this.ignoreDependencies = ignoreDependencies;
     this.referencedDependencies = new Map();
     this.peerDependencies = new Map();
@@ -58,7 +61,7 @@ export default class DependencyDeputy {
     const peerDependencies = Object.keys(manifest.peerDependencies ?? {});
     const optionalDependencies = Object.keys(manifest.optionalDependencies ?? {});
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
-    const productionDependencies = [...dependencies, ...peerDependencies, ...optionalDependencies];
+    const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
 
     this.manifests.set(name, manifest);
 
@@ -70,8 +73,7 @@ export default class DependencyDeputy {
       peerDependencies,
       optionalDependencies,
       devDependencies,
-      productionDependencies,
-      allDependencies: [...productionDependencies, ...devDependencies],
+      allDependencies,
     });
   }
 
@@ -88,7 +90,7 @@ export default class DependencyDeputy {
   }
 
   getProductionDependencies(workspaceName: string) {
-    return this._manifests.get(workspaceName)?.productionDependencies ?? [];
+    return this._manifests.get(workspaceName)?.dependencies ?? [];
   }
 
   getDevDependencies(workspaceName: string) {
@@ -128,13 +130,12 @@ export default class DependencyDeputy {
 
   public maybeAddListedReferencedDependency(
     workspace: { name: string; dir: string; config: WorkspaceConfiguration; ancestors: string[] },
-    moduleSpecifier: string,
-    isStrict: boolean
+    moduleSpecifier: string
   ) {
     if (this.isInternalDependency(workspace.name, moduleSpecifier)) return;
 
     const packageName = getPackageNameFromModuleSpecifier(moduleSpecifier);
-    const workspaceNames = isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
+    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
@@ -167,7 +168,8 @@ export default class DependencyDeputy {
 
   private isInDependencies(workspaceName: string, packageName: string) {
     const manifest = this._manifests.get(workspaceName);
-    return Boolean(manifest?.allDependencies.includes(packageName));
+    const dependencies = manifest ? (this.isStrict ? manifest.dependencies : manifest.allDependencies) : [];
+    return dependencies.includes(packageName);
   }
 
   public settleDependencyIssues() {
