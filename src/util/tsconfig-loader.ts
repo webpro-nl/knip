@@ -1,5 +1,5 @@
-import { TsConfigJson } from 'type-fest';
 import ts from 'typescript';
+import type { TsConfigJson } from 'type-fest';
 
 export const loadTSConfig = async (tsConfigFilePath: string) => {
   try {

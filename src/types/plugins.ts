@@ -1,5 +1,5 @@
-import { PackageJson } from 'type-fest';
 import { PluginConfiguration, WorkspaceConfiguration } from './config.js';
+import type { PackageJson } from 'type-fest';
 
 type IsPluginEnabledCallbackOptions = { manifest: PackageJson; dependencies: Set<string> };
 
