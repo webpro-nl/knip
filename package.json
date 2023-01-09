@@ -104,6 +104,7 @@
   "release-it": {
     "hooks": {
       "before:init": [
+        "npm run lint",
         "npm run build",
         "npm run knip",
         "npm run knip:production",
