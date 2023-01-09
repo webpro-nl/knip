@@ -1,12 +1,11 @@
-import { getTsconfig } from 'get-tsconfig';
-import { ensurePosixPath } from './glob.js';
+import { parseTsconfig } from 'get-tsconfig';
+import { isFile } from './fs.js';
 
-const isEqualPath = (inPath: string, outPath: string) => ensurePosixPath(inPath) === ensurePosixPath(outPath);
-
-export const loadTSConfig = (tsConfigFilePath: string) => {
+export const loadTSConfig = async (tsConfigFilePath: string) => {
   try {
-    const config = getTsconfig(tsConfigFilePath);
-    if (config && isEqualPath(tsConfigFilePath, config.path)) return config.config;
+    if (await isFile(tsConfigFilePath)) {
+      return parseTsconfig(tsConfigFilePath);
+    }
   } catch (error) {
     // TODO
   }
