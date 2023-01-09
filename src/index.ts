@@ -71,7 +71,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (tsConfig?.compilerOptions?.paths) {
       deputy.addTypeScriptConfigPathGlobs(name, tsConfig.compilerOptions.paths);
-      principal.addTypeScriptPaths(dir, tsConfig.compilerOptions.paths);
+      principal.addTypeScriptPaths(dir, tsConfig.compilerOptions);
     }
 
     collector.updateMessage(`Resolving custom dependencies...${suffix}`);

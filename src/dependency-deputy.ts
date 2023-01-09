@@ -1,5 +1,6 @@
 // @ts-ignore Member actually exists: https://nodejs.org/api/module.html#moduleisbuiltinmodulename
 import { isBuiltin } from 'node:module';
+import path from 'node:path';
 import micromatch from 'micromatch';
 import { IGNORE_DEFINITELY_TYPED } from './constants.js';
 import { WorkspaceConfiguration } from './types/config.js';

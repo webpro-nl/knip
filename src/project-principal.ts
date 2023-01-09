@@ -8,9 +8,10 @@ import {
   _removeExternalSourceFiles,
 } from './util/project.js';
 import type { ProjectOptions } from 'ts-morph';
+import type { TsConfigJson } from 'type-fest';
 
 // Kitchen sink TypeScript config
-const compilerOptions = {
+const baseCompilerOptions = {
   allowJs: true,
   allowSyntheticDefaultImports: true,
   jsx: ts.JsxEmit.ReactJSX,
@@ -52,9 +53,13 @@ export default class ProjectPrincipal {
     this.projectPaths.add(filePath);
   }
 
-  public addTypeScriptPaths(workspaceDir: string, paths: Record<string, string[]>) {
+  public addTypeScriptPaths(workspaceDir: string, compilerOptions: TsConfigJson['compilerOptions']) {
+    if (!compilerOptions || !compilerOptions.paths) return;
+    const { baseUrl, paths } = compilerOptions;
     for (const [key, entries] of Object.entries(paths)) {
-      const workspacePaths = entries.map(entry => path.join(workspaceDir, entry));
+      const workspacePaths = entries.map(entry =>
+        baseUrl ? path.join(workspaceDir, baseUrl, entry) : path.join(workspaceDir, entry)
+      );
       if (!this.projectOptions) this.projectOptions = {};
       if (!this.projectOptions.compilerOptions) this.projectOptions.compilerOptions = {};
       if (!this.projectOptions.compilerOptions.paths) this.projectOptions.compilerOptions.paths = {};
@@ -67,6 +72,7 @@ export default class ProjectPrincipal {
   }
 
   public createProjects() {
+    const compilerOptions = { ...baseCompilerOptions, ...this.projectOptions?.compilerOptions };
     this.projectOptions = this.tsConfigFilePath
       ? { tsConfigFilePath: this.tsConfigFilePath, compilerOptions }
       : { compilerOptions };
