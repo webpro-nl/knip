@@ -60,7 +60,7 @@ with a configuration file (or a `knip` property in `package.json`). Let's name t
 
 ```json
 {
-  "$schema": "https://unpkg.com/knip@next/schema.json",
+  "$schema": "https://unpkg.com/knip@1/schema.json",
   "entry": ["src/index.ts"],
   "project": ["src/**/*.ts"]
 }
