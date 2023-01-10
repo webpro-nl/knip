@@ -1,37 +1,59 @@
 import util from 'node:util';
+import parsedArgs from './cli-arguments.js';
+import type { Issue } from '../types/issues.js';
 import type { SourceFile } from 'ts-morph';
 
-type Debug = { isEnabled: boolean; level: number };
+const { debug, 'debug-file-filter': debugFileFilter } = parsedArgs.values;
+
+const IS_ENABLED = debug ?? false;
+const FILE_FILTER = debugFileFilter;
 
 // Inspect arrays, otherwise Node [will, knip, ...n-100 more items]
-const logArray = (collection: string[]) => console.log(util.inspect(collection, { maxArrayLength: null }));
+const logArray = (collection: string[]) => console.log(util.inspect(collection.sort(), { maxArrayLength: null }));
 
-export const debugLogObject = (debug: Debug, minimumLevel: number, name: string, obj: unknown) => {
-  if (minimumLevel > debug.level) return;
-  console.log(`[knip] ${name}:`);
+export const debugLogObject = (name: string, obj: unknown) => {
+  if (!IS_ENABLED) return;
+  console.log(`[knip] ${name}`);
   console.log(util.inspect(obj, { depth: null, colors: true }));
 };
 
-export const debugLogFiles = (debug: Debug, minimumLevel: number, name: string, filePaths: string[]) => {
-  if (minimumLevel > debug.level) return;
-  console.debug(`[knip] ${name} (${filePaths.length}):`);
-  if (debug.level > 1) {
-    logArray(filePaths);
+export const debugLogFiles = (name: string, filePaths: Set<string> | string[]) => {
+  if (!IS_ENABLED) return;
+  const size = Array.isArray(filePaths) ? filePaths.length : filePaths.size;
+  console.debug(`[knip] ${name} (${size})`);
+  if (FILE_FILTER) {
+    const fileFilter = new RegExp(FILE_FILTER);
+    logArray(Array.from(filePaths).filter(filePath => fileFilter.test(filePath)));
+  } else {
+    logArray(Array.from(filePaths));
   }
 };
 
-export const debugLogSourceFiles = (debug: Debug, minimumLevel: number, name: string, sourceFiles: SourceFile[]) => {
-  if (minimumLevel > debug.level) return;
-  console.debug(`[knip] ${name} (${sourceFiles.length})`);
-  if (debug.level > 1) {
-    const files = sourceFiles.map(sourceFile => sourceFile.getFilePath());
+export const debugLogSourceFiles = (name: string, sourceFiles: Set<SourceFile> | SourceFile[]) => {
+  if (!IS_ENABLED) return;
+  const size = Array.isArray(sourceFiles) ? sourceFiles.length : sourceFiles.size;
+  console.debug(`[knip] ${name} (${size})`);
+  if (FILE_FILTER) {
+    const fileFilter = new RegExp(FILE_FILTER);
+    const files = Array.from(sourceFiles)
+      .map(sourceFile => sourceFile.getFilePath())
+      .filter(filePath => fileFilter.test(filePath));
+    logArray(files);
+  } else {
+    const files = Array.from(sourceFiles).map(sourceFile => sourceFile.getFilePath());
     logArray(files);
   }
 };
 
-// ESLint should detect this unused variable within this file
-const debugLogDiff = (debug: Debug, minimumLevel: number, name: string, arrA: string[], arrB: string[]) => {
-  if (minimumLevel > debug.level) return;
+export const debugLogIssues = (name: string, issues: Issue[]) => {
+  if (!IS_ENABLED) return;
+  const symbols = Array.from(new Set(issues.map(issue => issue.symbol)));
+  console.debug(`[knip] ${name} (${symbols.length})`);
+  logArray(symbols);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debugLogDiff = (name: string, arrA: string[], arrB: string[]) => {
   const onlyInA = arrA.filter(itemA => !arrB.includes(itemA)).sort();
   const onlyInB = arrB.filter(itemB => !arrA.includes(itemB)).sort();
   console.log(`[knip] ${name}`);

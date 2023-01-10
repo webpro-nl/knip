@@ -1,9 +1,11 @@
-import { dep } from './dep.js';
+import { exportedValue } from './my-module.js';
 
-const dynamic = import('./dynamic');
+const dynamic = import('./dynamic-import');
 
 async function main() {
-  const { used } = await import('./dynamic');
+  const { used } = await import('./dynamic-import');
 }
 
-export const b = dep;
+export const entryFileExport = exportedValue;
+
+export type EntryFileExportType = any;

@@ -1,0 +1,9 @@
+{
+  "name": "jest",
+  "scripts": {},
+  "devDependencies": {
+    "jest": "*",
+    "jest-environment-jsdom": "*",
+    "jest-watch-select-projects": "*"
+  }
+}

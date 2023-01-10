@@ -26,6 +26,7 @@ export class MyClass {
 
   public bUnusedPublic = 1;
   public bUsedExternal = 1;
+  public bUsedExternalFromTypedMemberInstance() {}
   public bInternal = 1;
 
   cUnusedProp = 1;

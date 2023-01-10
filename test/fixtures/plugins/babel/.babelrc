@@ -1,0 +1,14 @@
+{
+  "presets": ["@babel/env", "@babel/typescript"],
+  "plugins": [
+    "react-hot-loader/babel",
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],
+    "@babel/plugin-syntax-dynamic-import",
+    "babel-plugin-macros"
+  ],
+  "env": {
+    "production": {
+      "presets": ["minify"]
+    }
+  }
+}

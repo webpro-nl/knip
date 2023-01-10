@@ -1,0 +1,20 @@
+{
+  "name": "postcss",
+  "scripts": {
+    "postcss": "postcss"
+  },
+  "devDependencies": {
+    "postcss": "*"
+  },
+  "postcss": {
+    "plugins": [
+      "autoprefixer"
+    ]
+  },
+  "knip": {
+    "postcss": {
+      "config": [],
+      "entry": "postcss.config.js"
+    }
+  }
+}

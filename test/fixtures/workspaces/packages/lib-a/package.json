@@ -1,0 +1,10 @@
+{
+  "name": "@scoped/lib-a",
+  "main": "./index.js",
+  "scripts": {
+    "e2e": "cypress"
+  },
+  "devDependencies": {
+    "@local/tsconfig": "*"
+  }
+}

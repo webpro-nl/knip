@@ -1,0 +1,13 @@
+{
+  "name": "sentry",
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack serve"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "*",
+    "webpack-cli": "*",
+    "webpack-dev-server": "*"
+  }
+}

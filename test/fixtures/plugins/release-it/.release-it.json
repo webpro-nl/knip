@@ -1,0 +1,15 @@
+{
+  "github": {
+    "release": true
+  },
+  "npm": {
+    "publish": true
+  },
+  "plugins": {
+    "@release-it/bumper": {},
+    "@release-it/conventional-changelog": {
+      "infile": "CHANGELOG.md",
+      "preset": "angular"
+    }
+  }
+}

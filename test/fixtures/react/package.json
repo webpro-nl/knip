@@ -4,10 +4,10 @@
     "react": "*"
   },
   "knip": {
-    "entryFiles": [
+    "entry": [
       "App.tsx"
     ],
-    "projectFiles": [
+    "project": [
       "*.tsx"
     ]
   }

@@ -1,0 +1,20 @@
+{
+  "name": "gatsby",
+  "scripts": {
+    "serve": "gatsby serve -p 8000"
+  },
+  "devDependencies": {
+    "gatsby": "*",
+    "gatsby-cli": "*",
+    "gatsby-plugin-advanced-sitemap": "*",
+    "gatsby-plugin-create-client-paths": "*",
+    "gatsby-plugin-manifest": "*",
+    "gatsby-plugin-postcss": "*",
+    "gatsby-plugin-react-helmet": "*",
+    "gatsby-plugin-remove-serviceworker": "*",
+    "gatsby-remark-prismjs": "*",
+    "gatsby-source-filesystem": "*",
+    "gatsby-transformer-remark": "*",
+    "@babel/plugin-proposal-export-default-from": "*"
+  }
+}

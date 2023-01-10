@@ -1,10 +1,10 @@
 {
   "name": "entry-js",
   "knip": {
-    "entryFiles": [
+    "entry": [
       "index.js"
     ],
-    "projectFiles": [
+    "project": [
       "*.{js,ts}"
     ]
   }

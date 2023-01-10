@@ -1,0 +1,9 @@
+{
+  "name": "playwright",
+  "scripts": {
+    "build": "rollup"
+  },
+  "devDependencies": {
+    "rollup": "*"
+  }
+}

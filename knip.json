@@ -1,4 +1,6 @@
 {
-  "entryFiles": ["src/cli.ts"],
-  "projectFiles": ["src/**/*.ts"]
+  "entry": ["src/cli.ts!"],
+  "project": ["src/**/*.ts!"],
+  "ignore": ["**/fixtures", "**/_template"],
+  "ignoreBinaries": ["rm"]
 }

@@ -1,0 +1,16 @@
+{
+  "name": "nx",
+  "scripts": {
+    "nx": "nx"
+  },
+  "devDependencies": {
+    "@nrwl/cypress": "*",
+    "@nrwl/devkit": "*",
+    "@nrwl/jest": "*",
+    "@nrwl/linter": "*",
+    "@nrwl/next": "*",
+    "@nrwl/storybook": "*",
+    "@nrwl/web": "*",
+    "@nrwl/workspace": "*"
+  }
+}

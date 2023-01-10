@@ -1,18 +1,28 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
-import { register } from 'esbuild-register/dist/node.js';
+// eslint-disable-next-line import/order -- Somehow this order is an issue in Windows
+import { load as esmLoad } from '@esbuild-kit/esm-loader';
+import yaml from 'js-yaml';
+import { require } from '../util/require.js';
 import { loadJSON } from './fs.js';
+import { logIfDebug } from './log.js';
+import { timerify } from './performance.js';
 
-register();
-
-export default async (filePath: string) => {
-  if (path.extname(filePath) === '.json' || /rc$/.test(filePath)) {
-    return loadJSON(filePath);
-  }
+const load = async (filePath: string) => {
   try {
-    const imported = await import(filePath);
+    if (path.extname(filePath) === '.json' || /rc$/.test(filePath)) {
+      return loadJSON(filePath);
+    }
+
+    if (path.extname(filePath) === '.yaml' || path.extname(filePath) === '.yml') {
+      return yaml.load((await fs.readFile(filePath)).toString());
+    }
+
+    const imported = await esmLoad(filePath, {}, require);
     return imported.default ?? imported;
   } catch (error) {
-    console.log('Failed to load ' + filePath);
-    console.log(error);
+    logIfDebug(error);
   }
 };
+
+export const _load = timerify(load);

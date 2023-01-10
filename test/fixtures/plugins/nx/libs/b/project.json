@@ -1,0 +1,21 @@
+{
+  "sourceRoot": "libs/b",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/next:build"
+    },
+    "serve": {
+      "executor": "@nrwl/next:server"
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest"
+    },
+    "tsc": {
+      "executor": "./tools/executors/tsc:tsc"
+    }
+  }
+}

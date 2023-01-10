@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
           - macos-latest
+          - ubuntu-latest
           - windows-latest
         node:
           - 16
@@ -30,4 +30,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm install
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run knip
+      - run: npm run knip:production
       - run: npm test

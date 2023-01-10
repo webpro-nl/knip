@@ -18,9 +18,13 @@
     "skipLibCheck": true,
     "sourceMap": false,
     "strict": true,
-    "target": "esnext"
+    "target": "es2022"
   },
   "include": ["./src/**/*.ts"],
-  "exclude": ["./src/**/*.spec.ts"],
-  "files": ["./@types/github-codeowners/index.d.ts", "./@types/summary/index.d.ts"]
+  "exclude": [],
+  "files": [
+    "./@types/github-codeowners/index.d.ts",
+    "./@types/summary/index.d.ts",
+    "./@types/@esbuild-kit/esm-loader/index.d.ts"
+  ]
 }

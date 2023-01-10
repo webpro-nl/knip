@@ -1,9 +1,11 @@
 import { performance, PerformanceObserver, PerformanceEntry } from 'node:perf_hooks';
-import Summary from 'summary';
 import EasyTable from 'easy-table';
-import parsedArgs from './parseArgs.js';
+import prettyMilliseconds from 'pretty-ms';
+import parsedArgs from './cli-arguments.js';
 import type { TimerifyOptions } from 'node:perf_hooks';
+import Summary from 'summary';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Timerify = <T extends (...params: any[]) => any>(fn: T, options?: TimerifyOptions) => T;
 
 const { values } = parsedArgs;
@@ -14,12 +16,14 @@ export const timerify: Timerify = fn => (isEnabled ? performance.timerify(fn) : 
 
 class Performance {
   enabled: boolean;
+  startTime = 0;
   entries: PerformanceEntry[] = [];
   instanceId?: number;
   observer?: PerformanceObserver;
 
   constructor(enabled: boolean) {
     if (enabled) {
+      this.startTime = performance.now();
       this.instanceId = Math.floor(performance.now() * 100);
       this.observer = new PerformanceObserver(items => {
         items.getEntries().forEach(entry => {
@@ -55,7 +59,7 @@ class Performance {
     }, {} as Record<string, number[]>);
   }
 
-  getTable(sort = ['sum|des']) {
+  getTable() {
     const entriesByName = this.getEntriesByName();
     const table = new EasyTable();
     Object.entries(entriesByName).map(([name, values]) => {
@@ -68,8 +72,7 @@ class Performance {
       table.cell('sum', stats.sum(), EasyTable.number(2));
       table.newRow();
     });
-    table.total('sum', { printer: EasyTable.number(2) });
-    table.sort(sort);
+    table.sort(['sum|des']);
     return table;
   }
 
@@ -83,6 +86,7 @@ class Performance {
     if (!this.enabled) return;
     await this.flush();
     console.log('\n' + this.getTable().toString().trim());
+    console.log('\nTotal running time:', prettyMilliseconds(performance.now() - this.startTime));
   }
 
   reset() {

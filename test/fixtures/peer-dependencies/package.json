@@ -1,0 +1,8 @@
+{
+  "name": "peer-dependencies",
+  "dependencies": {
+    "host": "*",
+    "peer": "*",
+    "unused": "*"
+  }
+}

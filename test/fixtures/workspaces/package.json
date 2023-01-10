@@ -1,0 +1,40 @@
+{
+  "name": "workspaces",
+  "workspaces": [
+    "docs",
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "cypress": "*",
+    "root-dependency": "*",
+    "unused-dependency": "*",
+    "typescript": "*"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "knip": {
+    "workspaces": {
+      ".": {
+        "entry": [],
+        "project": []
+      },
+      "*": {
+        "entry": "index.ts",
+        "project": "**/*.ts"
+      },
+      "apps/*": {
+        "entry": "index.ts",
+        "project": "**/*.ts"
+      },
+      "packages/*": {
+        "entry": "index.ts",
+        "project": [
+          "**/*.ts",
+          "!ignored/*.ts"
+        ]
+      }
+    }
+  }
+}
