@@ -1,5 +1,6 @@
 import { parseTsconfig } from 'get-tsconfig';
 import { isFile } from './fs.js';
+import { logIfDebug } from './log.js';
 
 export const loadTSConfig = async (tsConfigFilePath: string) => {
   try {
@@ -7,6 +8,7 @@ export const loadTSConfig = async (tsConfigFilePath: string) => {
       return parseTsconfig(tsConfigFilePath);
     }
   } catch (error) {
-    // TODO
+    // get-tsconfig throws for `extends` like `@tsconfig/node16` (but this is still handled in typescript plugin)
+    logIfDebug(error);
   }
 };

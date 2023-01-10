@@ -2,14 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { load as esmLoad } from '@esbuild-kit/esm-loader';
 import yaml from 'js-yaml';
-import parsedArgs from './cli-arguments.js';
 import { require } from '../util/require.js';
 import { loadJSON } from './fs.js';
+import { logIfDebug } from './log.js';
 import { timerify } from './performance.js';
-
-const {
-  values: { 'no-progress': isNoProgress = false, debug: isDebug = false },
-} = parsedArgs;
 
 const load = async (filePath: string) => {
   try {
@@ -23,12 +19,8 @@ const load = async (filePath: string) => {
 
     const imported = await esmLoad(filePath, {}, require);
     return imported.default ?? imported;
-  } catch (error: unknown) {
-    if (isNoProgress || isDebug) {
-      // Such console logs destroy fancy progress output, will be reported when --no-progress or --debug
-      console.log('Failed to load ' + filePath);
-      console.log(error?.toString());
-    }
+  } catch (error) {
+    logIfDebug(error);
   }
 };
 

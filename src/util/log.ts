@@ -1,3 +1,9 @@
+import parsedArgs from './cli-arguments.js';
+
+const {
+  values: { 'no-progress': isNoProgress = false, debug: isDebug = false },
+} = parsedArgs;
+
 export const getLine = (value: number | string, text: string) => `${String(value).padStart(5)} ${text}`;
 
 export class LineRewriter {
@@ -23,3 +29,12 @@ export class LineRewriter {
     this.lines = messages.length;
   }
 }
+
+export const logIfDebug = (error: unknown) => {
+  // Console logs destroy fancy progress output, will be reported when --no-progress or --debug
+  if (isDebug) {
+    console.error(error);
+  } else if (isNoProgress && error instanceof Error) {
+    console.error(error.toString());
+  }
+};
