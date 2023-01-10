@@ -53,6 +53,8 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
     config = config({ production: isProduction }, { mode: isProduction ? 'production' : 'development' });
   }
 
+  if (!config) return [];
+
   const dependencies = [config].flat().flatMap(config => {
     return (config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? [])
       .map(loader => loader.replace(/\?.*/, ''))
