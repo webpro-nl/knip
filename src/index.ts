@@ -104,45 +104,36 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     deputy.setInstalledBinaries(name, worker.installedBinaries);
 
     if (config?.entry && config?.project) {
-      /**
-       * Production mode:
-       * - Resolve entry files
-       * - Resolve project files
-       * - Resolve production plugin entry files
-       *
-       * Non-production mode:
-       * - Resolve entry files
-       * - Resolve project files
-       * - Resolve plugin entry files
-       * - Resolve plugin project files
-       * - Resolve plugin configuration files
-       */
       if (isProduction) {
-        collector.updateMessage(`Resolving entry files${suffix}...`);
-        const workspaceEntryPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getProductionEntryFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogFiles(`Globbed entry paths${suffix}`, workspaceEntryPaths);
-        workspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
-        if (!isIncludeEntryExports) workspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
+        {
+          collector.updateMessage(`Resolving entry files${suffix}...`);
+          const workspaceEntryPaths = await _glob({
+            cwd,
+            workingDir: dir,
+            patterns: worker.getProductionEntryFilePatterns(),
+            ignore: worker.getWorkspaceIgnorePatterns(),
+            gitignore,
+          });
+          debugLogFiles(`Globbed entry paths${suffix}`, workspaceEntryPaths);
+          workspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
+          if (!isIncludeEntryExports) workspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
+        }
 
-        collector.updateMessage(`Resolving production plugin entry files${suffix}...`);
-        const pluginWorkspaceEntryPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getProductionPluginEntryFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogFiles(`Globbed production plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
-        pluginWorkspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
-        pluginWorkspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
+        {
+          collector.updateMessage(`Resolving production plugin entry files${suffix}...`);
+          const pluginWorkspaceEntryPaths = await _glob({
+            cwd,
+            workingDir: dir,
+            patterns: worker.getProductionPluginEntryFilePatterns(),
+            ignore: worker.getWorkspaceIgnorePatterns(),
+            gitignore,
+          });
+          debugLogFiles(`Globbed production plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
+          pluginWorkspaceEntryPaths.forEach(entryPath => principal.addEntryPath(entryPath));
+          pluginWorkspaceEntryPaths.forEach(entryPath => lab.skipExportsAnalysisFor(entryPath));
+        }
 
-        if (workspaceEntryPaths.length > 0 || pluginWorkspaceEntryPaths.length > 0) {
+        {
           collector.updateMessage(`Resolving project files${suffix}...`);
           const workspaceProjectPaths = await _glob({
             cwd,
@@ -153,11 +144,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           });
           debugLogFiles(`Globbed project paths${suffix}`, workspaceProjectPaths);
           workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
-        }
-
-        // Without source files, better cancel the workspace for dependency settling
-        if (workspaceEntryPaths.length === 0 && pluginWorkspaceEntryPaths.length === 0) {
-          deputy.cancelWorkspace(name);
         }
       } else {
         {

@@ -29,7 +29,6 @@ export default class DependencyDeputy {
   _manifests: WorkspaceManifests = new Map();
   manifests: Map<string, PackageJson> = new Map();
   ignoreDependencies;
-  canceledWorkspaces: Set<string>;
   referencedDependencies: Map<string, Set<string>>;
   peerDependencies: Map<string, PeerDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
@@ -42,7 +41,6 @@ export default class DependencyDeputy {
     this.referencedDependencies = new Map();
     this.peerDependencies = new Map();
     this.installedBinaries = new Map();
-    this.canceledWorkspaces = new Set();
   }
 
   public addWorkspace({
@@ -75,10 +73,6 @@ export default class DependencyDeputy {
       devDependencies,
       allDependencies,
     });
-  }
-
-  public cancelWorkspace(workspaceName: string) {
-    this.canceledWorkspaces.add(workspaceName);
   }
 
   getManifest(workspaceName: string) {
@@ -177,8 +171,6 @@ export default class DependencyDeputy {
     const devDependencyIssues: Issue[] = [];
 
     for (const [workspaceName, { manifestPath }] of this._manifests.entries()) {
-      if (this.canceledWorkspaces.has(workspaceName)) continue;
-
       const referencedDependencies = this.referencedDependencies.get(workspaceName);
 
       const isUnreferencedDependency = (dependency: string): boolean => {
