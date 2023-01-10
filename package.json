@@ -1,31 +1,15 @@
 {
   "name": "knip",
   "version": "1.0.0-beta.12",
-  "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript project",
-  "keywords": [
-    "find",
-    "detect",
-    "unused",
-    "unreferenced",
-    "missing",
-    "files",
-    "dependencies",
-    "exports",
-    "types",
-    "duplicates",
-    "typescript",
-    "maintenance",
-    "unimported",
-    "class",
-    "enum",
-    "members",
-    "workspace",
-    "workspaces",
-    "monorepo"
-  ],
-  "repository": "github:webpro/knip",
+  "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects",
   "homepage": "https://github.com/webpro/knip",
+  "repository": "github:webpro/knip",
   "bugs": "https://github.com/webpro/knip/issues",
+  "license": "ISC",
+  "author": {
+    "name": "Lars Kappert",
+    "email": "lars@webpro.nl"
+  },
   "main": "dist/index.js",
   "bin": {
     "knip": "dist/cli.js"
@@ -52,11 +36,6 @@
     "dist",
     "schema.json"
   ],
-  "author": {
-    "name": "Lars Kappert",
-    "email": "lars@webpro.nl"
-  },
-  "license": "ISC",
   "dependencies": {
     "@esbuild-kit/esm-loader": "2.5.4",
     "@npmcli/map-workspaces": "3.0.1",
@@ -101,6 +80,10 @@
     "type-fest": "3.5.1",
     "typescript": "4.9.4"
   },
+  "engines": {
+    "node": ">=16.17.0 <17 || >=18.6.0"
+  },
+  "engineStrict": true,
   "release-it": {
     "hooks": {
       "before:init": [
@@ -121,8 +104,32 @@
       "preset-webpro"
     ]
   },
-  "engines": {
-    "node": ">=16.17.0 <17 || >=18.6.0"
-  },
-  "engineStrict": true
+  "keywords": [
+    "find",
+    "detect",
+    "analyze",
+    "scan",
+    "lint",
+    "unused",
+    "unreferenced",
+    "unresolved",
+    "missing",
+    "unimported",
+    "files",
+    "dependencies",
+    "devDependencies",
+    "exports",
+    "types",
+    "members",
+    "namespaces",
+    "duplicates",
+    "typescript",
+    "maintenance",
+    "class",
+    "enum",
+    "members",
+    "workspace",
+    "workspaces",
+    "monorepo"
+  ]
 }
