@@ -22,6 +22,7 @@ type Options = {
 /**
  * - Stores manifests
  * - Stores referenced external dependencies
+ * - Stores binaries and peer dependencies
  * - Settles dependency issues
  */
 export default class DependencyDeputy {

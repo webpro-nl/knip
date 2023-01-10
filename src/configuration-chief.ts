@@ -46,10 +46,10 @@ type ConfigurationManagerOptions = {
 
 /**
  * - Loads package.json
- * - Loads knip.json
+ * - Loads knip.json/jsonc
  * - Normalizes raw local config
  * - Determines workspaces to analyze
- * - Determines issue types to report
+ * - Determines issue types to report (--include/--exclude)
  * - Hands out workspace and plugin configs
  */
 export default class ConfigurationChief {

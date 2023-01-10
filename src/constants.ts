@@ -12,8 +12,7 @@ export const IGNORED_GLOBAL_BINARIES = ['npm', 'npx', 'node', 'yarn', 'pnpm', 'd
 // The `@types/node` dependency does not require the `node` dependency
 export const IGNORE_DEFINITELY_TYPED = ['node'];
 
-// Not many programs accept another program as their first argument
-// Does this make sense? Can we manage? It does make the whole `npm script` plugin quite powerful, though.
+// Some programs accept another program as their first argument (it's often an argument/sub-program e.g. `git commit`)
 export const FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS = ['npx', 'cross-env', 'dotenv'];
 
 export const ISSUE_TYPES: IssueType[] = [
