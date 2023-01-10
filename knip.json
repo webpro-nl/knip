@@ -1,6 +1,6 @@
 {
-  "ignore": ["**/fixtures", "**/_template"],
-  "ignoreBinaries": ["rm", "echo", "cp"],
   "entry": ["src/cli.ts!"],
-  "project": ["src/**/*.ts!"]
+  "project": ["src/**/*.ts!"],
+  "ignore": ["**/fixtures", "**/_template"],
+  "ignoreBinaries": ["rm"]
 }
