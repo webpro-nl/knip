@@ -60,7 +60,7 @@ const { plugins } = schema.definitions;
 const { properties } = plugins;
 
 properties[name] = {
-  title: `${name} plugin configuration (https://github.com/webpro/knip/blob/next/src/plugins/${name}/README.md)`,
+  title: `${name} plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/${name}/README.md)`,
   $ref: '#/definitions/plugin',
 };
 
