@@ -1,8 +1,6 @@
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS } from '../constants.js';
-
-const require = createRequire(process.cwd());
+import { require } from '../util/require.js';
 
 const normalizeBinaries = (command: string) =>
   command.replace(/(\.\/)?node_modules\/\.bin\/(\w+)/, '$2').replace(/\$\(npm bin\)\/(\w+)/, '$1');
@@ -53,7 +51,6 @@ export const getBinariesFromScripts = (npmScripts: string[]) =>
 
 export const getPackageManifest = async (workingDir: string, packageName: string, isRoot: boolean, cwd: string) => {
   try {
-    // Use `require` to benefit from caching
     return require(path.join(workingDir, 'node_modules', packageName, 'package.json'));
   } catch (error) {
     if (!isRoot) {

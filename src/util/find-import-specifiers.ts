@@ -1,12 +1,10 @@
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { ts } from 'ts-morph';
 import { findCallExpressionsByName } from 'ts-morph-helpers';
+import { require } from '../util/require.js';
 import { compact } from './array.js';
 import { timerify } from './performance.js';
 import type { SourceFile } from 'ts-morph';
-
-const require = createRequire(process.cwd());
 
 const getImportStringLiterals = (sourceFile: SourceFile) =>
   sourceFile
