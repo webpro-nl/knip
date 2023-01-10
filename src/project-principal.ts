@@ -18,7 +18,7 @@ const baseCompilerOptions = {
   esModuleInterop: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
-  target: ts.ScriptTarget.ES2015,
+  target: ts.ScriptTarget.ES2022,
   module: ts.ModuleKind.CommonJS,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
 };
