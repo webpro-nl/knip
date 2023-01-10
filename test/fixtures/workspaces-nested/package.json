@@ -5,8 +5,13 @@
     "level-1-1/level-1-2",
     "level-1-1/level-1-2/level-1-3"
   ],
+  "devDependencies": {
+    "pm2": "*",
+    "eslint-plugin-prefer-let": "*"
+  },
   "knip": {
     "workspaces": {
+      ".": {},
       "level-1-1": {},
       "level-1-1/level-1-2": {},
       "level-1-1/level-1-2/level-1-3": {}

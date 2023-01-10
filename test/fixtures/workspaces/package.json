@@ -21,18 +21,18 @@
         "project": []
       },
       "*": {
-        "entry": "index.ts",
-        "project": "**/*.ts"
+        "entry": "index.ts!",
+        "project": "**/*.ts!"
       },
       "apps/*": {
-        "entry": "index.ts",
-        "project": "**/*.ts"
+        "entry": "index.ts!",
+        "project": "**/*.ts!"
       },
       "packages/*": {
-        "entry": "index.ts",
+        "entry": "index.ts!",
         "project": [
-          "**/*.ts",
-          "!ignored/*.ts"
+          "**/*.ts!",
+          "!ignored/*.ts!"
         ]
       }
     }

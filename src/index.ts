@@ -10,7 +10,6 @@ import { debugLogObject, debugLogFiles } from './util/debug.js';
 import { _findImportModuleSpecifiers } from './util/find-import-specifiers.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { _glob, ensurePosixPath } from './util/glob.js';
-import { getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { _findDuplicateExportedNames } from './util/project.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import { byPathDepth } from './util/workspace.js';
@@ -223,50 +222,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
 
       if (report.dependencies || report.unlisted || report.files) {
-        const workspaceDependencies = deputy.getAllDependencies(name);
-        const { referencedDependencyIssues, referencedDependencies } = await worker.findDependenciesByPlugins();
-
-        // Add referenced dependencies to settle them at the end
-        for (const packageName of workspaceDependencies) {
-          if (referencedDependencies.has(packageName)) {
-            deputy.addReferencedDependency(name, packageName);
-          }
-        }
-
-        for (const issue of referencedDependencyIssues) {
-          // Referenced files "block" the `addFilesIssues` we'll do later on
-          if (issue.symbol.startsWith('/')) {
-            collector.referencedFiles.add(issue.symbol);
-          } else {
-            issue.symbol = getPackageNameFromModuleSpecifier(issue.symbol);
-
-            // Skip direct and internal dependencies
-            if (deputy.isInternalDependency(name, issue.symbol)) continue;
-            if (workspaceDependencies.includes(issue.symbol)) continue;
-
-            if (!isStrict && !isRoot) {
-              // Skip dependencies that are listed in root workspace
-              // TODO Look up all ancestors
-              const rootDependencies = deputy.getAllDependencies(ROOT_WORKSPACE_NAME);
-              if (rootDependencies.includes(issue.symbol)) {
-                continue;
-              }
-
-              // Skip binaries that are installed in root workspace
-              // TODO Look up all ancestors
-              const rootBinaries = deputy.getInstalledBinaries(ROOT_WORKSPACE_NAME);
-              if (rootBinaries?.has(issue.symbol)) {
-                // Also, mark the binary's dependencies of the root workspace as referenced
-                const dependencies = rootBinaries.get(issue.symbol);
-                dependencies?.forEach(dependency => deputy.addReferencedDependency(ROOT_WORKSPACE_NAME, dependency));
-                continue;
-              }
-            }
-
-            // Unlisted referenced dependencies can be marked as an issue, right away (for instant progress output)
-            collector.addIssue(issue);
-          }
-        }
+        const { referencedDependencyIssues } = await worker.findDependenciesByPlugins();
+        referencedDependencyIssues.forEach(issue => {
+          const workspace = { name, dir, config, ancestors };
+          const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, issue.symbol);
+          if (unlistedDependency) collector.addIssue(issue);
+        });
       }
     }
   }

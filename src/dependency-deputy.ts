@@ -92,10 +92,6 @@ export default class DependencyDeputy {
     return this._manifests.get(workspaceName)?.devDependencies ?? [];
   }
 
-  getAllDependencies(workspaceName: string) {
-    return this._manifests.get(workspaceName)?.allDependencies ?? [];
-  }
-
   setInstalledBinaries(workspaceName: string, installedBinaries: Map<string, Set<string>>) {
     this.installedBinaries.set(workspaceName, installedBinaries);
   }
@@ -142,6 +138,18 @@ export default class DependencyDeputy {
       closestWorkspaceName && this.addReferencedDependency(closestWorkspaceName, packageName);
       closestWorkspaceNameForTypes && this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
       return;
+    }
+
+    // Handle binaries
+    for (const name of workspaceNames) {
+      const binaries = this.getInstalledBinaries(name);
+      if (binaries?.has(moduleSpecifier)) {
+        const dependencies = binaries.get(moduleSpecifier);
+        if (dependencies?.size) {
+          dependencies.forEach(dependency => this.addReferencedDependency(name, dependency));
+          return;
+        }
+      }
     }
 
     return moduleSpecifier;
