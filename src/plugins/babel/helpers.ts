@@ -17,3 +17,17 @@ export const resolvePresetName = (pluginName: string) => {
   }
   return pluginName;
 };
+
+const cacheFn = () => void 0;
+cacheFn.forever = () => cacheFn;
+cacheFn.never = () => cacheFn;
+cacheFn.using = () => cacheFn;
+cacheFn.invalidate = () => cacheFn;
+
+export const api = {
+  assertVersion: () => true,
+  cache: cacheFn,
+  caller: () => true,
+  env: () => true,
+  version: '0.0.0',
+};

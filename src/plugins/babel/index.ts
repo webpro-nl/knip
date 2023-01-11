@@ -3,9 +3,9 @@ import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
-import { resolvePresetName, resolvePluginName } from './helpers.js';
+import { resolvePresetName, resolvePluginName, api } from './helpers.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
-import type { BabelConfig } from './types.js';
+import type { BabelConfig, BabelConfigFn } from './types.js';
 
 // https://babeljs.io/docs/en/configuration
 
@@ -25,23 +25,18 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const api = {
-  caller: () => true,
-};
-
-type BabelFn = (options: typeof api) => BabelConfig;
+const getItemName = (value: string | [string, unknown]) =>
+  typeof value === 'string' ? [value] : Array.isArray(value) ? [value[0]] : [];
 
 export const getDependenciesFromConfig = (config: BabelConfig): string[] => {
-  const presets =
-    config.presets?.map(preset => (typeof preset === 'string' ? preset : preset[0])).map(resolvePresetName) ?? [];
-  const plugins =
-    config.plugins?.map(plugin => (typeof plugin === 'string' ? plugin : plugin[0])).map(resolvePluginName) ?? [];
+  const presets = config.presets?.flatMap(getItemName).map(resolvePresetName) ?? [];
+  const plugins = config.plugins?.flatMap(getItemName).map(resolvePluginName) ?? [];
   const nested = config.env ? Object.values(config.env).flatMap(getDependenciesFromConfig) : [];
   return compact([...presets, ...plugins, ...nested]).map(getPackageName);
 };
 
 const findBabelDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
-  let config: BabelConfig | BabelFn = configFilePath.endsWith('package.json')
+  let config: BabelConfig | BabelConfigFn = configFilePath.endsWith('package.json')
     ? manifest.babel
     : await _load(configFilePath);
   if (typeof config === 'function') {

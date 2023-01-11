@@ -5,6 +5,8 @@ const isDistCaller = caller => !!(caller && caller.name === 'babel-gulp');
 const supportsESM = caller => !!((caller && caller.name === 'babel-loader') || caller.useESModules);
 
 module.exports = api => {
+  api.cache(true);
+
   const isDistBundle = api.caller(isDistCaller);
   const isNode = api.caller(isNodeCaller);
   const useESModules = !isNode && api.caller(supportsESM);
