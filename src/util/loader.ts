@@ -10,7 +10,7 @@ import { timerify } from './performance.js';
 
 const load = async (filePath: string) => {
   try {
-    if (path.extname(filePath) === '.json' || /rc$/.test(filePath)) {
+    if (/\.jsonc?$/.test(filePath) || /rc$/.test(filePath)) {
       return loadJSON(filePath);
     }
 

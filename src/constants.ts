@@ -2,7 +2,7 @@ import type { IssueType } from './types/issues.js';
 
 export const ROOT_WORKSPACE_NAME = '.';
 
-export const KNIP_CONFIG_LOCATIONS = ['knip.json', 'knip.jsonc', '.knip.json', '.knip.jsonc'];
+export const KNIP_CONFIG_LOCATIONS = ['knip.json', 'knip.jsonc', '.knip.json', '.knip.jsonc', 'knip.ts', 'knip.js'];
 
 // Zero-config means the following defaults are applied (either for none at all, or for workspaces individually)
 export const DEFAULT_WORKSPACE_CONFIG = {

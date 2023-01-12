@@ -87,7 +87,7 @@ Use `npm run knip` to analyze the project and output unused files, dependencies 
     knip [options]
 
     Options:
-      -c/--config [file]       Configuration file path (default: [.]knip.json[c] or package.json#knip)
+      -c/--config [file]       Configuration file path (default: [.]knip.json[c], knip.js, knip.ts or package.json#knip)
       -t/--tsConfig [file]     TypeScript configuration path (default: tsconfig.json)
       --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
       --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)

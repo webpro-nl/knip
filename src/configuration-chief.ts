@@ -10,6 +10,7 @@ import parsedArgs from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { ensurePosixPath } from './util/glob.js';
+import { _load } from './util/loader.js';
 import { resolveIncludedIssueTypes } from './util/resolve-included-issue-types.js';
 import { byPathDepth } from './util/workspace.js';
 import type { Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
@@ -91,7 +92,7 @@ export default class ConfigurationChief {
       throw new ConfigurationError(`Unable to find ${rawConfigArg} or package.json#knip`);
     }
 
-    const rawLocalConfig = resolvedConfigFilePath ? await loadJSON(resolvedConfigFilePath) : manifest.knip;
+    const rawLocalConfig = resolvedConfigFilePath ? await _load(resolvedConfigFilePath) : manifest.knip;
 
     if (rawLocalConfig) {
       this.config = this.normalize(ConfigurationValidator.parse(rawLocalConfig));
