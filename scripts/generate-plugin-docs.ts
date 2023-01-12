@@ -30,9 +30,19 @@ for await (const dir of directories) {
     if (production?.length > 0) defaults.entry = [...(defaults.entry ?? []), ...production];
     if (project?.length > 0) defaults.project = project;
 
+    const defaultEnableText =
+      'This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies` or `devDependencies`:';
+
+    const enableText =
+      Array.isArray(ENABLERS) && ENABLERS.length > 0
+        ? `${defaultEnableText}\n\n` + ENABLERS.map(enabler => `- \`${enabler}\``).join(EOL)
+        : typeof ENABLERS === 'string'
+        ? ENABLERS
+        : 'N/A';
+
     const docs = docTemplate
       .replace(/# PLUGIN_TITLE/, `# ${NAME}`)
-      .replace(/- PLUGIN_ENABLERS/, ENABLERS.map(enabler => `- \`${enabler}\``).join(EOL))
+      .replace(/PLUGIN_ENABLER/, enableText)
       .replace(/(```json)[\s\S]*(```)/m, `$1${EOL}${JSON.stringify({ [pluginName]: defaults }, null, 2)}${EOL}$2`);
 
     console.log(`Writing README.md for ${NAME} plugin`);
