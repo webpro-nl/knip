@@ -1,0 +1,11 @@
+{
+  "name": "namespace",
+  "knip": {
+    "entry": [
+      "index.ts"
+    ],
+    "project": [
+      "*.ts"
+    ]
+  }
+}

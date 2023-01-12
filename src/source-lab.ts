@@ -14,6 +14,7 @@ import type { Identifier } from 'ts-morph';
 type FileLabOptions = {
   report: Report;
   workspaceDirs: string[];
+  isIncludeEntryExports: boolean;
 };
 
 /**
@@ -24,14 +25,16 @@ type FileLabOptions = {
 export default class SourceLab {
   report;
   workspaceDirs;
+  isIncludeEntryExports;
   skipExportsAnalysis;
   isReportExports;
   isReportValues;
   isReportTypes;
 
-  constructor({ report, workspaceDirs }: FileLabOptions) {
+  constructor({ report, workspaceDirs, isIncludeEntryExports }: FileLabOptions) {
     this.report = report;
     this.workspaceDirs = workspaceDirs;
+    this.isIncludeEntryExports = isIncludeEntryExports;
     this.skipExportsAnalysis = new Set();
 
     this.isReportValues = report.exports || report.nsExports || report.classMembers;
@@ -146,7 +149,14 @@ export default class SourceLab {
 
             // No more reasons left to think this identifier is used somewhere else, report it as unreferenced. If
             // it's on a namespace somewhere, report it in a separate issue type.
-            if (_findReferencingNamespaceNodes(sourceFile).length > 0) {
+            const referencingNodes = _findReferencingNamespaceNodes(sourceFile);
+            if (referencingNodes.length > 0) {
+              // Ignore if namespace is re-exported only by an entry file
+              if (!this.isIncludeEntryExports && referencingNodes.length === 1) {
+                const referencingSourceFile = referencingNodes.at(0)?.getSourceFile().getFilePath();
+                if (this.skipExportsAnalysis.has(referencingSourceFile)) return;
+              }
+
               if (type) {
                 issues.add({ type: 'nsTypes', filePath, symbol: identifierText, symbolType: type });
               } else {

@@ -45,7 +45,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     .sort(byPathDepth)
     .reverse();
 
-  const lab = new SourceLab({ report, workspaceDirs });
+  const lab = new SourceLab({ report, workspaceDirs, isIncludeEntryExports });
 
   const principal = new ProjectPrincipal();
 
