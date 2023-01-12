@@ -3,7 +3,7 @@ import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
 import { z } from 'zod';
 import { ConfigurationValidator } from './configuration-validator.js';
-import { ROOT_WORKSPACE_NAME, DEFAULT_WORKSPACE_CONFIG } from './constants.js';
+import { ROOT_WORKSPACE_NAME, DEFAULT_WORKSPACE_CONFIG, KNIP_CONFIG_LOCATIONS } from './constants.js';
 import * as plugins from './plugins/index.js';
 import { arrayify } from './util/array.js';
 import parsedArgs from './util/cli-arguments.js';
@@ -81,10 +81,11 @@ export default class ConfigurationChief {
     this.manifestPath = manifestPath;
     this.manifest = manifest;
 
-    const configFilePath = rawConfigArg ?? 'knip.json';
-
-    const resolvedConfigFilePath =
-      (await findFile(this.cwd, configFilePath)) ?? (!rawConfigArg && (await findFile(this.cwd, configFilePath + 'c')));
+    let resolvedConfigFilePath;
+    for (const configPath of rawConfigArg ? [rawConfigArg] : KNIP_CONFIG_LOCATIONS) {
+      resolvedConfigFilePath = await findFile(this.cwd, configPath);
+      if (resolvedConfigFilePath) break;
+    }
 
     if (rawConfigArg && !resolvedConfigFilePath && !manifest.knip) {
       throw new ConfigurationError(`Unable to find ${rawConfigArg} or package.json#knip`);
