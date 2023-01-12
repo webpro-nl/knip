@@ -1,5 +1,5 @@
 {
-  "name": "sentry",
+  "name": "webpack",
   "scripts": {
     "build": "webpack",
     "dev": "webpack serve"

@@ -1,5 +1,5 @@
 {
-  "name": "root",
+  "name": "workspaces-nested",
   "workspaces": [
     "level-1-1",
     "level-1-1/level-1-2",

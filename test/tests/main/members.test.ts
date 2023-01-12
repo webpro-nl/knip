@@ -4,9 +4,9 @@ import { main } from '../../../src/index.js';
 import baseArguments from '../../helpers/baseArguments.js';
 import baseCounters from '../../helpers/baseCounters.js';
 
-test('Find unused enum and class members', async () => {
-  const cwd = 'test/fixtures/members';
+const cwd = 'test/fixtures/members';
 
+test('Find unused enum and class members', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

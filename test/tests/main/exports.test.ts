@@ -4,9 +4,9 @@ import { main } from '../../../src/index.js';
 import baseArguments from '../../helpers/baseArguments.js';
 import baseCounters from '../../helpers/baseCounters.js';
 
-test('Find unused files and exports', async () => {
-  const cwd = 'test/fixtures/basic';
+const cwd = 'test/fixtures/exports';
 
+test('Find unused files and exports', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -50,8 +50,6 @@ test('Find unused files and exports', async () => {
 });
 
 test('Find unused files and exports (include entry exports)', async () => {
-  const cwd = 'test/fixtures/basic';
-
   const { issues } = await main({
     ...baseArguments,
     isIncludeEntryExports: true,
