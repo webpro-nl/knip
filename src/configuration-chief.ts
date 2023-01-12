@@ -3,7 +3,7 @@ import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
 import { z } from 'zod';
 import { ConfigurationValidator } from './configuration-validator.js';
-import { ROOT_WORKSPACE_NAME } from './constants.js';
+import { ROOT_WORKSPACE_NAME, DEFAULT_WORKSPACE_CONFIG } from './constants.js';
 import * as plugins from './plugins/index.js';
 import { arrayify } from './util/array.js';
 import parsedArgs from './util/cli-arguments.js';
@@ -26,11 +26,7 @@ const {
   },
 } = parsedArgs;
 
-const defaultWorkspaceConfig: WorkspaceConfiguration = {
-  entry: ['index.{js,ts,tsx}!', 'src/index.{js,ts,tsx}!'],
-  project: ['**/*.{js,ts,tsx}!'],
-  ignore: [],
-};
+const defaultWorkspaceConfig: WorkspaceConfiguration = DEFAULT_WORKSPACE_CONFIG;
 
 const defaultConfig: Configuration = {
   include: [],

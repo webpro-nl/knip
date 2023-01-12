@@ -2,6 +2,13 @@ import type { IssueType } from './types/issues.js';
 
 export const ROOT_WORKSPACE_NAME = '.';
 
+// Zero-config means the following defaults are applied (either for none at all, or for workspaces individually)
+export const DEFAULT_WORKSPACE_CONFIG = {
+  entry: ['index.{js,ts,tsx}!', 'src/index.{js,ts,tsx}!'],
+  project: ['**/*.{js,ts,tsx}!'],
+  ignore: [],
+};
+
 // This is what gets excluded in --production mode (apart from what plugins would include)
 export const TEST_FILE_PATTERNS = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/__tests__/**/*.{js,jsx,ts,tsx}'];
 
