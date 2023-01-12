@@ -408,7 +408,7 @@ how many dependencies are used and how much the project diverges from the defaul
 One important goal of Knip is to minimize the amount of configuration necessary. So when there are feasible ways to
 infer things automatically, reducing the amount of configuration, please open an issue.
 
-### How do I handle too much output/false positives?
+### How do I handle too many output/false positives?
 
 #### Too many unused files
 
@@ -433,6 +433,17 @@ When the project is a library and the exports are meant to be used by consumers 
 
 1.  By default, unused exports of `entry` files are not reported, so you can add the containing file to it.
 2.  The exported values or types can be marked [using the JSDoc `@public` tag][42].
+
+### How to start using Knip in CI while having too many issues to sort out?
+
+Eventually this type of QA only really works when it's tied to an automated workflow. But with too many issues to
+resolve this might not be feasible right away, especially in existing larger codebase. Here are a few options:
+
+- Use `--no-exit-code` for exit code 0 in CI.
+- Use `--include` (or `--exclude`) to report only the issue types don't have errors.
+- Use `ignore` (for files and directories) and `ignoreDependencies` to filter out some problematic areas.
+
+All of this is hiding problems, so please make sure to plan for fixing them and/or open issues here for false positives.
 
 ## Comparison
 
