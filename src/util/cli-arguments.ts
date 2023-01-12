@@ -13,6 +13,8 @@ Options:
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
+  --dependencies           Shortcut for --include dependencies,unlisted
+  --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
   --no-progress            Don't show dynamic progress updates
   --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
@@ -40,7 +42,9 @@ export default parseArgs({
     config: { type: 'string', short: 'c' },
     debug: { type: 'boolean' },
     'debug-file-filter': { type: 'string' },
+    dependencies: { type: 'boolean' },
     exclude: { type: 'string', multiple: true },
+    exports: { type: 'boolean' },
     help: { type: 'boolean', short: 'h' },
     ignore: { type: 'string', multiple: true },
     'include-entry-exports': { type: 'boolean' },

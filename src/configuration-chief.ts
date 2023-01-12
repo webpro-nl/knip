@@ -16,7 +16,14 @@ import type { Configuration, PluginName, WorkspaceConfiguration } from './types/
 import type { PackageJson } from '@npmcli/package-json';
 
 const {
-  values: { config: rawConfigArg, workspace: rawWorkspaceArg, include = [], exclude = [] },
+  values: {
+    config: rawConfigArg,
+    workspace: rawWorkspaceArg,
+    include = [],
+    exclude = [],
+    dependencies = false,
+    exports = false,
+  },
 } = parsedArgs;
 
 const defaultWorkspaceConfig: WorkspaceConfiguration = {
@@ -267,10 +274,18 @@ export default class ConfigurationChief {
   }
 
   resolveIncludedIssueTypes() {
-    return resolveIncludedIssueTypes(include, exclude, {
-      include: this.config.include ?? [],
-      exclude: this.config.exclude ?? [],
-      isProduction: this.isProduction,
-    });
+    return resolveIncludedIssueTypes(
+      {
+        include,
+        exclude,
+        dependencies,
+        exports,
+      },
+      {
+        include: this.config.include ?? [],
+        exclude: this.config.exclude ?? [],
+        isProduction: this.isProduction,
+      }
+    );
   }
 }

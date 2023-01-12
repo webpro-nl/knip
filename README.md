@@ -97,6 +97,8 @@ Use `npm run knip` to analyze the project and output unused files, dependencies 
       --no-gitignore           Don't use .gitignore
       --include                Report only provided issue type(s), can be comma-separated or repeated (1)
       --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
+      --dependencies           Shortcut for --include dependencies,unlisted
+      --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
       --no-progress            Don't show dynamic progress updates
       --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
@@ -158,6 +160,8 @@ Use `--include` to report only specific issue types (the following example comma
 Use `--exclude` to ignore reports you're not interested in:
 
     knip --include files --exclude classMembers,enumMembers
+
+Use `--dependencies` or `--exports` as shortcuts to combine groups of related types.
 
 Still not happy with the results? Getting too much output/false positives? The [FAQ][9] may be useful. Feel free to open
 an issue and I'm happy to look into it.
@@ -460,14 +464,14 @@ This table is an ongoing comparison. Based on their docs (please report any mist
 The following commands are similar:
 
     depcheck
-    knip --include dependencies,unlisted
+    knip --dependencies
 
 ### unimported
 
 The following commands are similar:
 
     unimported
-    knip --production --include files,dependencies,unlisted
+    knip --production --dependencies --include files
 
 Also see [production mode][48].
 
@@ -477,6 +481,7 @@ The following commands are similar:
 
     ts-unused-exports
     knip --include exports,types,nsExports,nsTypes
+    knip --exports  # Adds unused enum and class members
 
 ### ts-prune
 
@@ -484,6 +489,7 @@ The following commands are similar:
 
     ts-prune
     knip --include exports,types
+    knip --exports  # Adds unused exports/types in namespaces and unused enum/class members
 
 ## TypeScript language services
 
