@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+import { toCamelCase } from '../src/util/plugin.js';
 
 const {
   values: { name },
@@ -32,7 +33,7 @@ const pluginTestFilePath = path.join(pluginTestsDir, `${name}.test.ts`);
 const pluginTestFixturesDir = path.join(cwd, 'test/fixtures/plugins');
 const pluginTestFixtureTemplateDir = path.join(pluginTestFixturesDir, '_template');
 const pluginTestFixturePluginDir = path.join(pluginTestFixturesDir, name);
-const camelCasedName = name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
+const camelCasedName = toCamelCase(name);
 
 const relative = to => path.relative(cwd, to);
 

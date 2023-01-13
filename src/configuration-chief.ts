@@ -11,6 +11,7 @@ import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { ensurePosixPath } from './util/glob.js';
 import { _load } from './util/loader.js';
+import { toCamelCase } from './util/plugin.js';
 import { resolveIncludedIssueTypes } from './util/resolve-included-issue-types.js';
 import { byPathDepth } from './util/workspace.js';
 import type { Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
@@ -140,15 +141,16 @@ export default class ConfigurationChief {
           };
 
           for (const [pluginName, pluginConfig] of Object.entries(workspaceConfig)) {
-            if (PLUGIN_NAMES.includes(pluginName)) {
+            const name = toCamelCase(pluginName) as PluginName;
+            if (PLUGIN_NAMES.includes(name)) {
               if (pluginConfig === false) {
-                workspaces[workspaceName][pluginName as PluginName] = false;
+                workspaces[workspaceName][name] = false;
               } else {
                 const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
                 const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;
                 const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
                 const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
-                workspaces[workspaceName][pluginName as PluginName] = {
+                workspaces[workspaceName][name] = {
                   config,
                   entry,
                   project,
