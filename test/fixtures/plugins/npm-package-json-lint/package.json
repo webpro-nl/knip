@@ -1,0 +1,6 @@
+{
+  "name": "npm-package-json-lint",
+  "devDependencies": {
+    "npm-package-json-lint": "*"
+  }
+}

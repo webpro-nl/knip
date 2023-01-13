@@ -38,6 +38,7 @@ const pluginsSchema = z.object({
   'lint-staged': pluginSchema,
   mocha: pluginSchema,
   next: pluginSchema,
+  'npm-package-json-lint': pluginSchema,
   nx: pluginSchema,
   nyc: pluginSchema,
   playwright: pluginSchema,

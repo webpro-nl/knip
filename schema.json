@@ -204,6 +204,10 @@
           "title": "Next.js plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/main/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "npm-package-json-lint": {
+          "title": "npm-package-json-lint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/npm-package-json-lint/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "nx": {
           "title": "Nx plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/nx/README.md)",
           "$ref": "#/definitions/plugin"

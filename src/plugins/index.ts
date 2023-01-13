@@ -10,6 +10,7 @@ export * as lintStaged from './lint-staged/index.js';
 export * as markdownlint from './markdownlint/index.js';
 export * as mocha from './mocha/index.js';
 export * as next from './next/index.js';
+export * as npmPackageJsonLint from './npm-package-json-lint/index.js';
 export * as nx from './nx/index.js';
 export * as nyc from './nyc/index.js';
 export * as playwright from './playwright/index.js';
