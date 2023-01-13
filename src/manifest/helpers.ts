@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { FIRST_ARGUMENT_AS_BINARY_EXCEPTIONS } from '../constants.js';
+import { getArgumentValues } from '../util/plugin.js';
 import { require } from '../util/require.js';
 
 const normalizeBinaries = (command: string) =>
@@ -7,11 +8,8 @@ const normalizeBinaries = (command: string) =>
 
 const stripEnvironmentVariables = (value: string) => value.replace(/([A-Z][^ ]*)=([^ ])+ /g, '');
 
-const getLoaderArgumentValues = (value: string) => {
-  const match = value.match(/ (--(experimental-)?loader|--require|-r)[ =]([^ ]+)/g);
-  if (match) return match.map(value => value.trim().split(/[ =]/)[1].trim());
-  return [];
-};
+const getLoaderArgumentValues = (value: string) =>
+  getArgumentValues(value, / (--(experimental-)?loader|--require|-r)[ =]([^ ]+)/g);
 
 const getDependenciesFromLoaderArguments = (args: string[]) =>
   getLoaderArgumentValues(' ' + args.join(' '))

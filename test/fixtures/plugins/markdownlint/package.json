@@ -1,0 +1,6 @@
+{
+  "name": "markdownlint",
+  "scripts": {
+    "md": "markdownlint \"**/*.md\" --rules rule-package"
+  }
+}

@@ -192,6 +192,10 @@
           "title": "lint-staged plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/lint-staged/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "markdownlint": {
+          "title": "markdownlint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/markdownlint/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "mocha": {
           "title": "Mocha plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/mocha/README.md)",
           "$ref": "#/definitions/plugin"
