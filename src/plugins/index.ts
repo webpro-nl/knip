@@ -5,6 +5,7 @@ export * as commitlint from './commitlint/index.js';
 export * as cypress from './cypress/index.js';
 export * as eslint from './eslint/index.js';
 export * as gatsby from './gatsby/index.js';
+export * as githubActions from './github-actions/index.js';
 export * as jest from './jest/index.js';
 export * as lintStaged from './lint-staged/index.js';
 export * as markdownlint from './markdownlint/index.js';

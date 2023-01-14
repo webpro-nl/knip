@@ -35,6 +35,7 @@ const pluginsSchema = z.object({
   eslint: pluginSchema,
   gatsby: pluginSchema,
   jest: pluginSchema,
+  'github-actions': pluginSchema,
   'lint-staged': pluginSchema,
   mocha: pluginSchema,
   next: pluginSchema,

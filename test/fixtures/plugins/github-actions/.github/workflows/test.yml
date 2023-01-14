@@ -1,0 +1,77 @@
+name: workflow
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: asdf install '${{ matrix.tool }}' '${{ steps.version.outputs.latest }}'
+      - run: cat var/logs/frontend.log
+      - run: cd code
+      - run: curl -X POST "https://example.org/${{ secrets.SECRET }}"
+      - run: docker-compose -f apps/site/docker-compose.dev.yml down
+      - run: docker-compose up -d && sleep 3
+      - run: git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+      - run: git config user.name "${GITHUB_ACTOR}"
+      - run: git pull --force --no-tags origin main:main
+      - run: kill -2 $(lsof -t -i:3000)
+      - run: node -r esbuild-register ./comment.ts
+      - run: node ./scripts/check-dependencies.js
+      - run: npm ci
+      - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+      - run: npm install
+      - run: npm install
+      - run: npm run build
+      - run: npm run publish
+      - run: npx playwright install --with-deps
+      - run: npx prisma migrate reset --force
+      - run: pnpm build
+      - run: pnpm eslint
+      - run: pnpm lint
+      - run: pnpm release-it
+      - run: pnpm run setup:test
+      - run: pnpm run test --coverage
+      - run: semgrep ci --sarif --output=semgrep.sarif
+      - run: unzip ${{ matrix.stack.name }}.zip
+      - run: yarn --frozen-lockfile
+      - run: yarn build
+      - run: yarn dev:seed-db
+      - run: yarn exec knip
+      - run: yarn install
+      - run: yarn nyc report --reporter=lcovonly --reporter=text
+      - run: yarn playwright install-deps chrome
+      - run: yarn playwright install-deps chrome
+      - run: yarn task --task compile --start-from=auto --no-link
+      - run: yarn workspace @apps/website exe script.ts
+      - run: yarn workspace @apps/website playwright test --project=e2e
+      - run: |
+          echo "registry=https://registry.npmjs.org" >> ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+      - run: |
+          package=$(node ./script.js)
+          echo "package=${package}" >> $GITHUB_OUTPUT
+      - run: |
+          for STR in "A" "B"; do
+            npx retry-cli@0.6.0 -- curl --output /dev/null --silent --write-out "@curl-format.txt" "${STR}"
+            npx @scope/retry-cli@0.6.0 -- curl --output /dev/null --silent --write-out "@curl-format.txt" "${STR}"
+          done
+      - run: |
+          git push
+          yarn changeset publish --tag canary
+      - run: |
+          yarn dev:seed-db 2>&1 | tee var/logs/db.log &
+          yarn wait-on --timeout 60000 tcp:0.0.0.0:27017
+      - run: |
+          yarn workspace @apps/website build
+          yarn workspace @apps/website start 2>&1 | tee var/logs/frontend.log &
+          yarn wait-on --timeout 10000 http://0.0.0.0:3000
+      - run: |
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config user.name "${GITHUB_ACTOR}"
+      - run: |
+          curl -X POST https://example.org/dispatches \
+            -H 'Accept: application/vnd.github.v3+json' \
+            -u ${{ secrets.SECRET }} \
+            --data '{"event_type": "request-create-frontpage-branch" }}'

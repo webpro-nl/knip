@@ -1,0 +1,12 @@
+{
+  "name": "github-actions",
+  "scripts": {
+    "build": "",
+    "dev:seed-db": "",
+    "lint": "",
+    "setup:test": "",
+    "task": "",
+    "test:integration": "",
+    "test": ""
+  }
+}

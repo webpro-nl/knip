@@ -233,26 +233,27 @@ Knip contains a growing list of plugins:
 - [Cypress][14]
 - [ESLint][15]
 - [Gatsby][16]
-- [Jest][17]
-- [lint-staged][18]
-- [markdownlint][19]
-- [Mocha][20]
-- [Next.js][21]
-- [npm-package-json-lint][22]
-- [Nx][23]
-- [nyc][24]
-- [Playwright][25]
-- [PostCSS][26]
-- [Prettier][27]
-- [Release It][28]
-- [Remark][29]
-- [Remix][30]
-- [Rollup][31]
-- [Sentry][32]
-- [Storybook][33]
-- [Stryker][34]
-- [TypeScript][35]
-- [Webpack][36]
+- [GitHub Actions][17]
+- [Jest][18]
+- [lint-staged][19]
+- [markdownlint][20]
+- [Mocha][21]
+- [Next.js][22]
+- [npm-package-json-lint][23]
+- [Nx][24]
+- [nyc][25]
+- [Playwright][26]
+- [PostCSS][27]
+- [Prettier][28]
+- [Release It][29]
+- [Remark][30]
+- [Remix][31]
+- [Rollup][32]
+- [Sentry][33]
+- [Storybook][34]
+- [Stryker][35]
+- [TypeScript][36]
+- [Webpack][37]
 
 Plugins are automatically activated, no need to enable anything. Each plugin is automatically enabled based on simple
 heuristics. Most of them check whether one or one of a few (dev) dependencies are listed in `package.json`. Once
@@ -260,7 +261,7 @@ enabled, they add a set of configuration and/or entry files for Knip to analyze.
 
 Most plugins use one or both of the following file types:
 
-- `config` - custom dependency resolvers are applied to the [config files][37]
+- `config` - custom dependency resolvers are applied to the [config files][38]
 - `entry` - files to include with the analysis of the rest of the source code
 
 See each plugin's documentation for its default values.
@@ -340,10 +341,10 @@ locations. The more plugins Knip will have, the more projects can be analyzed ou
 
 Knip provides the following built-in reporters:
 
-- [`codeowners`][38]
-- [`compact`][39]
-- [`json`][40]
-- [`symbol`][41] (default)
+- [`codeowners`][39]
+- [`compact`][40]
+- [`json`][41]
+- [`symbol`][42] (default)
 
 The `compact` reporter shows the sorted files first, and then a list of symbols:
 
@@ -370,7 +371,7 @@ type ReporterOptions = {
 
 The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][42].
+Find more details and ideas in [custom reporters][43].
 
 ## Libraries and "unused" exports
 
@@ -427,14 +428,14 @@ When unused dependencies are related to dependencies having a Knip [plugin][1], 
 for that dependency are at custom locations. The default values are at the plugin's documentation, and can be overridden
 to match the custom location(s).
 
-When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][43].
+When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][44].
 
 #### Too many unused exports
 
 When the project is a library and the exports are meant to be used by consumers of the library, there are two options:
 
 1.  By default, unused exports of `entry` files are not reported, so you can add the containing file to it.
-2.  The exported values or types can be marked [using the JSDoc `@public` tag][44].
+2.  The exported values or types can be marked [using the JSDoc `@public` tag][45].
 
 ### How to start using Knip in CI while having too many issues to sort out?
 
@@ -451,7 +452,7 @@ All of this is hiding problems, so please make sure to plan for fixing them and/
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                            | **knip** | [depcheck][45] | [unimported][46] | [ts-unused-exports][47] | [ts-prune][48] |
+| Feature                            | **knip** | [depcheck][46] | [unimported][47] | [ts-unused-exports][48] | [ts-prune][49] |
 | :--------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files                       |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies                |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -465,7 +466,7 @@ This table is an ongoing comparison. Based on their docs (please report any mist
 | Custom reporters                   |    ✅    |       -        |        -         |            -            |       -        |
 | JavaScript support                 |    ✅    |       ✅       |        ✅        |            -            |       -        |
 | Configure entry files              |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |
-| [Support workspaces/monorepos][49] |    ✅    |       ❌       |        ❌        |            -            |       -        |
+| [Support workspaces/monorepos][50] |    ✅    |       ❌       |        ❌        |            -            |       -        |
 | ESLint plugin available            |    -     |       -        |        -         |           ✅            |       -        |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
@@ -486,7 +487,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][50].
+Also see [production mode][51].
 
 ### ts-unused-exports
 
@@ -532,37 +533,38 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [14]: ./src/plugins/cypress
 [15]: ./src/plugins/eslint
 [16]: ./src/plugins/gatsby
-[17]: ./src/plugins/jest
-[18]: ./src/plugins/lint-staged
-[19]: ./src/plugins/markdownlint
-[20]: ./src/plugins/mocha
-[21]: ./src/plugins/next
-[22]: ./src/plugins/npm-package-json-lint
-[23]: ./src/plugins/nx
-[24]: ./src/plugins/nyc
-[25]: ./src/plugins/playwright
-[26]: ./src/plugins/postcss
-[27]: ./src/plugins/prettier
-[28]: ./src/plugins/release-it
-[29]: ./src/plugins/remark
-[30]: ./src/plugins/remix
-[31]: ./src/plugins/rollup
-[32]: ./src/plugins/sentry
-[33]: ./src/plugins/storybook
-[34]: ./src/plugins/stryker
-[35]: ./src/plugins/typescript
-[36]: ./src/plugins/webpack
-[37]: #config
-[38]: #code-owners
-[39]: #compact
-[40]: #json
-[41]: #symbol-default
-[42]: ./docs/custom-reporters.md
-[43]: #create-a-new-plugin
-[44]: #libraries-and-unused-exports
-[45]: https://github.com/depcheck/depcheck
-[46]: https://github.com/smeijer/unimported
-[47]: https://github.com/pzavolinsky/ts-unused-exports
-[48]: https://github.com/nadeesha/ts-prune
-[49]: #workspaces--monorepos
-[50]: #production-mode
+[17]: ./src/plugins/github-actions
+[18]: ./src/plugins/jest
+[19]: ./src/plugins/lint-staged
+[20]: ./src/plugins/markdownlint
+[21]: ./src/plugins/mocha
+[22]: ./src/plugins/next
+[23]: ./src/plugins/npm-package-json-lint
+[24]: ./src/plugins/nx
+[25]: ./src/plugins/nyc
+[26]: ./src/plugins/playwright
+[27]: ./src/plugins/postcss
+[28]: ./src/plugins/prettier
+[29]: ./src/plugins/release-it
+[30]: ./src/plugins/remark
+[31]: ./src/plugins/remix
+[32]: ./src/plugins/rollup
+[33]: ./src/plugins/sentry
+[34]: ./src/plugins/storybook
+[35]: ./src/plugins/stryker
+[36]: ./src/plugins/typescript
+[37]: ./src/plugins/webpack
+[38]: #config
+[39]: #code-owners
+[40]: #compact
+[41]: #json
+[42]: #symbol-default
+[43]: ./docs/custom-reporters.md
+[44]: #create-a-new-plugin
+[45]: #libraries-and-unused-exports
+[46]: https://github.com/depcheck/depcheck
+[47]: https://github.com/smeijer/unimported
+[48]: https://github.com/pzavolinsky/ts-unused-exports
+[49]: https://github.com/nadeesha/ts-prune
+[50]: #workspaces--monorepos
+[51]: #production-mode
