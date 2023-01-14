@@ -23,7 +23,7 @@
   "properties": {
     "ignoreBinaries": {
       "title": "Binaries to ignore",
-      "examples": ["rm", "docker-compose", "eslint"],
+      "examples": ["rm", "docker-compose", "curl"],
       "$ref": "#/definitions/list"
     },
     "ignoreDependencies": {

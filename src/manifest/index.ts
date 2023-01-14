@@ -1,6 +1,6 @@
-import { IGNORED_GLOBAL_BINARIES } from '../constants.js';
+import { getBinariesFromScripts } from '../util/binaries/index.js';
 import { timerify } from '../util/performance.js';
-import { getBinariesFromScripts, getPackageManifest } from './helpers.js';
+import { getPackageManifest } from './helpers.js';
 import type { Configuration } from '../types/config.js';
 import type { InstalledBinaries, PeerDependencies } from '../types/workspace.js';
 import type { PackageJson } from 'type-fest';
@@ -26,9 +26,7 @@ const findManifestDependencies = async ({ rootConfig, manifest, isRoot, isProduc
     }
     return scripts;
   }, [] as string[]);
-  const referencedBinaries = getBinariesFromScripts(scripts)
-    .filter(binaryName => !IGNORED_GLOBAL_BINARIES.includes(binaryName))
-    .filter(binaryName => !ignoreBinaries.includes(binaryName));
+  const referencedBinaries = getBinariesFromScripts(scripts, { manifest, ignore: rootConfig.ignoreBinaries });
 
   // Find all binaries for each dependency
   const installedBinaries: InstalledBinaries = new Map();

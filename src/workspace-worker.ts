@@ -318,6 +318,7 @@ export default class WorkspaceWorker {
             cwd,
             manifest: this.manifest,
             config: pluginConfig,
+            rootConfig: this.rootConfig,
             workspaceConfig: this.config,
             isProduction: this.isProduction,
           });
