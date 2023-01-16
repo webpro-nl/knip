@@ -5,6 +5,7 @@ import { register } from 'esbuild-register/dist/node.js';
 import reporters from './reporters/index.js';
 import parsedArgs, { helpText } from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
+import { _load } from './util/loader.js';
 import { measure } from './util/performance.js';
 import { main } from './index.js';
 import type { IssueType } from './types/issues.js';
@@ -39,7 +40,7 @@ const isShowProgress =
   !isDebug && isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
 
 const printReport =
-  reporter in reporters ? reporters[reporter as keyof typeof reporters] : await import(path.join(cwd, reporter));
+  reporter in reporters ? reporters[reporter as keyof typeof reporters] : await _load(path.join(cwd, reporter));
 
 const run = async () => {
   try {
