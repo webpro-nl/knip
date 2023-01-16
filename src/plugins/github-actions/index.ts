@@ -1,4 +1,3 @@
-import { EOL } from 'os';
 import { getBinariesFromScripts } from '../../util/binaries/index.js';
 import { _firstGlob } from '../../util/glob.js';
 import { _load } from '../../util/loader.js';
@@ -25,7 +24,7 @@ const findGithubActionsDependencies: GenericPluginCallback = async (configFilePa
 
   const scripts = getValuesByKeyDeep(config, 'run')
     .filter((value): value is string => typeof value === 'string')
-    .flatMap(script => script.split(EOL))
+    .flatMap(script => script.split('\n'))
     .map(script => script.trim());
 
   const binaries = getBinariesFromScripts(scripts, {
