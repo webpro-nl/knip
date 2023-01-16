@@ -37,9 +37,6 @@ export type Report = {
 
 export type Counters = Record<IssueType | 'processed' | 'total', number>;
 
-/**
- * @public
- */
 export type ReporterOptions = {
   report: Report;
   issues: Issues;
@@ -49,7 +46,4 @@ export type ReporterOptions = {
   options: string;
 };
 
-/**
- * @public
- */
 export type Reporter = (options: ReporterOptions) => void;
