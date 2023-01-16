@@ -51,15 +51,3 @@ export const debugLogIssues = (name: string, issues: Issue[]) => {
   console.debug(`[knip] ${name} (${symbols.length})`);
   logArray(symbols);
 };
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const debugLogDiff = (name: string, arrA: string[], arrB: string[]) => {
-  const onlyInA = arrA.filter(itemA => !arrB.includes(itemA)).sort();
-  const onlyInB = arrB.filter(itemB => !arrA.includes(itemB)).sort();
-  console.log(`[knip] ${name}`);
-  console.log(`[knip] Only in left:`);
-  logArray(onlyInA);
-  console.log();
-  console.log(`[knip] Only in right:`);
-  logArray(onlyInB);
-};
