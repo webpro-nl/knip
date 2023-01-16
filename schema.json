@@ -188,6 +188,10 @@
           "title": "github-actions plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/github-actions/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "husky": {
+          "title": "husky plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/husky/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "jest": {
           "title": "Jest plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/jest/README.md)",
           "$ref": "#/definitions/plugin"

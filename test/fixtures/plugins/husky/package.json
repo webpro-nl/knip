@@ -1,0 +1,12 @@
+{
+  "name": "husky",
+  "scripts": {
+    "prepare": "husky install",
+    "build": "node",
+    "test": "node"
+  },
+  "devDependencies": {
+    "husky": "*",
+    "lint-staged": "*"
+  }
+}
