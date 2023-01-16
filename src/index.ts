@@ -18,6 +18,9 @@ import type { CommandLineOptions } from './types/cli.js';
 import type { Report } from './types/issues.js';
 import type { SourceFile } from 'ts-morph';
 
+export type { RawConfiguration as KnipConfig } from './types/config.js';
+export type { Reporter, ReporterOptions } from './types/issues.js';
+
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress, isIncludeEntryExports } =
     unresolvedConfiguration;

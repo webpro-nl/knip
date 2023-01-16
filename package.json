@@ -10,11 +10,12 @@
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
   },
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
   "bin": {
-    "knip": "dist/cli.js"
+    "knip": "./dist/cli.js"
   },
   "type": "module",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "knip": "node ./dist/cli.js",
     "knip:production": "node ./dist/cli.js --production --strict",

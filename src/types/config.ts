@@ -1,4 +1,8 @@
+import { z } from 'zod';
+import { ConfigurationValidator } from '../configuration-validator.js';
 import * as Plugins from '../plugins/index.js';
+
+export type RawConfiguration = z.infer<typeof ConfigurationValidator>;
 
 type NormalizedGlob = string[];
 

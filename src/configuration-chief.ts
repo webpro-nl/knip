@@ -1,7 +1,6 @@
 import path from 'node:path';
 import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
-import { z } from 'zod';
 import { ConfigurationValidator } from './configuration-validator.js';
 import { ROOT_WORKSPACE_NAME, DEFAULT_WORKSPACE_CONFIG, KNIP_CONFIG_LOCATIONS } from './constants.js';
 import * as plugins from './plugins/index.js';
@@ -14,7 +13,7 @@ import { _load } from './util/loader.js';
 import { toCamelCase } from './util/plugin.js';
 import { resolveIncludedIssueTypes } from './util/resolve-included-issue-types.js';
 import { byPathDepth } from './util/workspace.js';
-import type { Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
+import type { RawConfiguration, Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJson } from '@npmcli/package-json';
 
 const {
@@ -100,7 +99,7 @@ export default class ConfigurationChief {
     }
   }
 
-  normalize(rawLocalConfig: z.infer<typeof ConfigurationValidator>) {
+  normalize(rawLocalConfig: RawConfiguration) {
     const workspaces = rawLocalConfig.workspaces ?? {
       [ROOT_WORKSPACE_NAME]: {
         ...rawLocalConfig,
