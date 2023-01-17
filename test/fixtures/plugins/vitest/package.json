@@ -1,0 +1,6 @@
+{
+  "name": "vitest",
+  "devDependencies": {
+    "vitest": "0.27.2"
+  }
+}

@@ -58,6 +58,7 @@ const pluginsSchema = z.object({
   storybook: pluginSchema,
   stryker: pluginSchema,
   typescript: pluginSchema,
+  vitest: pluginSchema,
   webpack: pluginSchema,
 });
 

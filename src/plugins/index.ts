@@ -26,4 +26,5 @@ export * as sentry from './sentry/index.js';
 export * as storybook from './storybook/index.js';
 export * as stryker from './stryker/index.js';
 export * as typescript from './typescript/index.js';
+export * as vitest from './vitest/index.js';
 export * as webpack from './webpack/index.js';
