@@ -3,9 +3,9 @@ import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
+import type { WebpackConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { BabelConfig } from '../babel/types.js';
-import type { WebpackConfig } from './types.js';
 import type { RuleSetRule, RuleSetUseItem } from 'webpack';
 
 // https://webpack.js.org/configuration/

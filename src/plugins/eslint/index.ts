@@ -7,8 +7,8 @@ import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { resolvePluginPackageName, customResolvePluginPackageNames, getDependenciesFromSettings } from './helpers.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { ESLintConfig } from './types.js';
+import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 export const NAME = 'ESLint';
 

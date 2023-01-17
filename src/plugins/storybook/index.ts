@@ -4,8 +4,8 @@ import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { require } from '../../util/require.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { StorybookConfig } from './types.js';
+import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://storybook.js.org/docs/react/configure/overview
 

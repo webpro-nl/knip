@@ -22,6 +22,7 @@ const envPackageNames: Record<Exclude<keyof typeof environments, 'node'>, string
 
 export const getEnvPackageName = (env: VitestEnvironment) => {
   if (env === 'node') return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (env in envPackageNames) return (envPackageNames as any)[env];
   return `vitest-environment-${env}`;
 };
