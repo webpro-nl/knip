@@ -2,14 +2,23 @@
   "sourceRoot": "libs/b",
   "projectType": "application",
   "targets": {
-    "build": {
-      "executor": "@nrwl/next:build"
+    "ls-project-root": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["ls apps/frontend/src"]
+      }
     },
-    "serve": {
-      "executor": "@nrwl/next:server"
+    "webpack": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "webpack"
+      }
     },
-    "lint": {
-      "executor": "@nrwl/linter:eslint"
+    "generate-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx compodoc -p apps/frontend/tsconfig.app.json"
+      }
     },
     "test": {
       "executor": "@nrwl/jest:jest"
