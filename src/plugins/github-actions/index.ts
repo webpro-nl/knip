@@ -12,8 +12,8 @@ export const NAME = 'GitHub Actions';
 /** @public */
 export const ENABLERS = 'This plugin is enabled when a `.yml` file is found in the `.github/workflows` folder.';
 
-export const isEnabled: IsPluginEnabledCallback = () =>
-  Boolean(_firstGlob({ cwd: process.cwd(), patterns: ['.github/workflows/*.yml'] }));
+export const isEnabled: IsPluginEnabledCallback = async ({ cwd }) =>
+  Boolean(await _firstGlob({ cwd, patterns: ['.github/workflows/*.yml'] }));
 
 export const CONFIG_FILE_PATTERNS = ['.github/workflows/*.yml'];
 

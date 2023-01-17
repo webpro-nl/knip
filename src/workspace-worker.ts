@@ -95,11 +95,11 @@ export default class WorkspaceWorker {
   }
 
   async init() {
-    this.setEnabledPlugins();
+    await this.setEnabledPlugins();
     await this.initReferencedDependencies();
   }
 
-  setEnabledPlugins() {
+  async setEnabledPlugins() {
     // If a dependency is found its own or an ancestor workspace manifest, the plugin is enabled for this workspace too
     const dependencies = new Set(
       [this.manifest, ...this.ancestorManifests]
@@ -114,7 +114,7 @@ export default class WorkspaceWorker {
       this.enabled[pluginName] =
         this.config[pluginName] !== false &&
         hasIsEnabled &&
-        plugin.isEnabled({ manifest: this.manifest, dependencies });
+        (await plugin.isEnabled({ cwd: this.dir, manifest: this.manifest, dependencies }));
     }
 
     const enabledPlugins = pluginEntries.filter(([name]) => this.enabled[name]).map(([, plugin]) => plugin.NAME);
