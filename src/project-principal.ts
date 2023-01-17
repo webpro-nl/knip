@@ -55,14 +55,16 @@ export default class ProjectPrincipal {
 
   public addTypeScriptPaths(workspaceDir: string, compilerOptions: TsConfigJson['compilerOptions']) {
     if (!compilerOptions || !compilerOptions.paths) return;
+
+    if (!this.projectOptions) this.projectOptions = {};
+    if (!this.projectOptions.compilerOptions) this.projectOptions.compilerOptions = {};
+    if (!this.projectOptions.compilerOptions.paths) this.projectOptions.compilerOptions.paths = {};
+
     const { baseUrl, paths } = compilerOptions;
     for (const [key, entries] of Object.entries(paths)) {
       const workspacePaths = entries.map(entry =>
         baseUrl ? path.join(workspaceDir, baseUrl, entry) : path.join(workspaceDir, entry)
       );
-      if (!this.projectOptions) this.projectOptions = {};
-      if (!this.projectOptions.compilerOptions) this.projectOptions.compilerOptions = {};
-      if (!this.projectOptions.compilerOptions.paths) this.projectOptions.compilerOptions.paths = {};
       if (this.projectOptions.compilerOptions.paths[key]) {
         this.projectOptions.compilerOptions.paths[key].push(...workspacePaths);
       } else {

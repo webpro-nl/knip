@@ -133,9 +133,12 @@ export default class ConfigurationChief {
             ? entry
             : defaultWorkspaceConfig.project;
 
+          const paths = workspaceConfig.paths ?? defaultWorkspaceConfig.paths;
+
           workspaces[workspaceName] = {
             entry,
             project,
+            paths,
             ignore: arrayify(workspaceConfig.ignore),
           };
 
@@ -269,7 +272,7 @@ export default class ConfigurationChief {
   getConfigForWorkspace(workspaceName: string) {
     const key = this.getConfigKeyForWorkspace(workspaceName);
     if (key && this.config?.workspaces?.[key]) return this.config.workspaces[key];
-    return { entry: [], project: [], ignore: [] };
+    return { entry: [], project: [], paths: {}, ignore: [] };
   }
 
   resolveIncludedIssueTypes() {

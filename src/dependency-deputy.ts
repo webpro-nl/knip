@@ -101,7 +101,9 @@ export default class DependencyDeputy {
   }
 
   addTypeScriptConfigPathGlobs(workspaceName: string, paths: Record<string, string[]>) {
-    this.tsConfigPathGlobs.set(workspaceName, paths ? Object.keys(paths).map(p => p.replace(/\*/g, '**')) : []);
+    const wsPaths = this.tsConfigPathGlobs.get(workspaceName) ?? [];
+    const addPaths = Object.keys(paths).map(value => value.replace(/\*/g, '**'));
+    this.tsConfigPathGlobs.set(workspaceName, [...wsPaths, ...addPaths]);
   }
 
   addReferencedDependency(workspaceName: string, packageName: string) {

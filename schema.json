@@ -117,6 +117,14 @@
           "default": ["**/*.{js,ts,tsx}"],
           "$ref": "#/definitions/globPatterns"
         },
+        "paths": {
+          "title": "",
+          "example": {
+            "~": ["."]
+          },
+          "default": {},
+          "$ref": "#/definitions/paths"
+        },
         "ignore": {
           "title": "Files to ignore in the analysis.",
           "example": ["**/fixtures", "mocks"],
@@ -271,6 +279,15 @@
         "webpack": {
           "title": "Webpack plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/webpack/README.md)",
           "$ref": "#/definitions/plugin"
+        }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperty": {
+        "type": "array",
+        "items": {
+          "type": "string"
         }
       }
     }

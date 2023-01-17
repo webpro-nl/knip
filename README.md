@@ -338,6 +338,27 @@ Plugins also have this distinction. For instance, Next.js entry files for pages 
 this is handled automatically by Knip and its plugins. You only need to point Knip to additional files or custom file
 locations. The more plugins Knip will have, the more projects can be analyzed out of the box!
 
+## Paths
+
+Tools like TypeScript, Webpack and Babel support import aliases in various ways. Knip automatically includes
+`compilerOptions.paths` from the TypeScript configuration, but does not (yet) automatically find other types of import
+aliases. They can be configured manually:
+
+```json
+{
+  "$schema": "/Users/lars/p/knip/schema.json",
+  "paths": {
+    "@lib": ["./lib/index.ts"],
+    "@lib/*": ["./lib/*"]
+  }
+}
+```
+
+Each workspace can also have its own `paths` configured. Note that Knip `paths` follow the TypeScript semantics:
+
+- Path values is an array of relative paths.
+- Paths without an `*` are exact matches.
+
 ## Reporters
 
 Knip provides the following built-in reporters:

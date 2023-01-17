@@ -21,6 +21,7 @@ type PluginsConfiguration = Record<PluginName, PluginConfiguration>;
 interface BaseWorkspaceConfiguration {
   entry: NormalizedGlob;
   project: NormalizedGlob;
+  paths: Record<string, string[]>;
   ignore: NormalizedGlob;
 }
 

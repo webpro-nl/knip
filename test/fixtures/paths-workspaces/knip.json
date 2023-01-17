@@ -1,0 +1,18 @@
+{
+  "$schema": "/Users/lars/p/knip/schema.json",
+  "workspaces": {
+    ".": {
+      "paths": {
+        "~/*": ["./*"],
+        "@lib": ["./lib/index.ts"],
+        "@lib/*": ["./lib/*"]
+      }
+    },
+    "ws": {
+      "paths": {
+        "#util/*": ["./util/*"],
+        "lib/*": ["./lib/*"]
+      }
+    }
+  }
+}

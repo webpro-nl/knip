@@ -1,0 +1,6 @@
+{
+  "name": "paths-workspaces",
+  "workspaces": [
+    "ws"
+  ]
+}

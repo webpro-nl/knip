@@ -76,6 +76,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       principal.addTypeScriptPaths(dir, tsConfig.compilerOptions);
     }
 
+    if (Object.keys(config.paths).length > 0) {
+      deputy.addTypeScriptConfigPathGlobs(name, config.paths);
+      principal.addTypeScriptPaths(dir, { paths: config.paths });
+    }
+
     collector.updateMessage(`Resolving custom dependencies...${suffix}`);
 
     const workspaceManifest = deputy.getWorkspaceManifest(name);

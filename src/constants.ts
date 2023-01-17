@@ -8,6 +8,7 @@ export const KNIP_CONFIG_LOCATIONS = ['knip.json', 'knip.jsonc', '.knip.json', '
 export const DEFAULT_WORKSPACE_CONFIG = {
   entry: ['index.{js,ts,tsx}!', 'src/index.{js,ts,tsx}!'],
   project: ['**/*.{js,ts,tsx}!'],
+  paths: {},
   ignore: [],
 };
 

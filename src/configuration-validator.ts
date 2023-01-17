@@ -2,9 +2,12 @@ import { z } from 'zod';
 
 const globSchema = z.union([z.string(), z.array(z.string())]);
 
+const pathsSchema = z.record(z.string(), z.array(z.string()));
+
 const rootConfigurationSchema = z.object({
   entry: globSchema.optional(),
   project: globSchema.optional(),
+  paths: pathsSchema.optional(),
   ignore: globSchema.optional(),
   ignoreBinaries: z.array(z.string()).optional(),
   ignoreDependencies: z.array(z.string()).optional(),
@@ -61,6 +64,7 @@ const pluginsSchema = z.object({
 const baseWorkspaceConfigurationSchema = z.object({
   entry: globSchema.optional(),
   project: globSchema.optional(),
+  paths: pathsSchema.optional(),
   ignore: globSchema.optional(),
 });
 
