@@ -9,7 +9,7 @@ This plugin is enabled when a `.yml` file is found in the `.github/workflows` fo
 ```json
 {
   "github-actions": {
-    "config": [".github/workflows/*.yml"]
+    "config": [".github/workflows/*.yml", ".github/**/action.{yml,yaml}"]
   }
 }
 ```

@@ -15,7 +15,7 @@ export const ENABLERS = 'This plugin is enabled when a `.yml` file is found in t
 export const isEnabled: IsPluginEnabledCallback = async ({ cwd }) =>
   Boolean(await _firstGlob({ cwd, patterns: ['.github/workflows/*.yml'] }));
 
-export const CONFIG_FILE_PATTERNS = ['.github/workflows/*.yml'];
+export const CONFIG_FILE_PATTERNS = ['.github/workflows/*.yml', '.github/**/action.{yml,yaml}'];
 
 const findGithubActionsDependencies: GenericPluginCallback = async (configFilePath, { manifest, rootConfig }) => {
   const config = await _load(configFilePath);
