@@ -1,3 +1,4 @@
+import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -25,7 +26,7 @@ const findVitestDependencies: GenericPluginCallback = async configFilePath => {
   const environments = cfg.environment ? [getEnvPackageName(cfg.environment)] : [];
   const reporters = getExternalReporters(cfg.reporters);
   const coverage = cfg.coverage?.provider ? [`@vitest/coverage-${cfg.coverage.provider}`] : [];
-  return [...environments, ...reporters, ...coverage];
+  return compact([...environments, ...reporters, ...coverage]);
 };
 
 export const findDependencies = timerify(findVitestDependencies);
