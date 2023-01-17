@@ -142,17 +142,17 @@ export default class ConfigurationChief {
             ignore: arrayify(workspaceConfig.ignore),
           };
 
-          for (const [pluginName, pluginConfig] of Object.entries(workspaceConfig)) {
-            const name = toCamelCase(pluginName) as PluginName;
-            if (PLUGIN_NAMES.includes(name)) {
+          for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
+            const pluginName = toCamelCase(name) as PluginName;
+            if (PLUGIN_NAMES.includes(pluginName)) {
               if (pluginConfig === false) {
-                workspaces[workspaceName][name] = false;
+                workspaces[workspaceName][pluginName] = false;
               } else {
                 const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
                 const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;
                 const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
                 const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
-                workspaces[workspaceName][name] = {
+                workspaces[workspaceName][pluginName] = {
                   config,
                   entry,
                   project,
