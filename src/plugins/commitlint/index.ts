@@ -20,7 +20,7 @@ export const CONFIG_FILE_PATTERNS = ['commitlint.config.{js,ts}'];
 
 const findCommitLintDependencies: GenericPluginCallback = async configFilePath => {
   const config: CommitLintConfig = await _load(configFilePath);
-  return config.extends;
+  return config?.extends ? [config.extends].flat() : [];
 };
 
 export const findDependencies = timerify(findCommitLintDependencies);
