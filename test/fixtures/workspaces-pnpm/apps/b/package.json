@@ -1,0 +1,8 @@
+{
+  "name": "@scoped/app-b",
+  "main": "./index.js",
+  "dependencies": {
+    "@scoped/lib-a": "*",
+    "@scoped/lib-b": "*"
+  }
+}

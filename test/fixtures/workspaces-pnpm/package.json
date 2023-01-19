@@ -1,0 +1,11 @@
+{
+  "name": "workspaces-pnpm",
+  "knip": {
+    "workspaces": {
+      "**": {
+        "entry": "index.ts!",
+        "project": "**/*.ts!"
+      }
+    }
+  }
+}

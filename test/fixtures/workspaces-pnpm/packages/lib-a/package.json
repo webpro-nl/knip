@@ -1,0 +1,4 @@
+{
+  "name": "@scoped/lib-a",
+  "main": "./index.js"
+}

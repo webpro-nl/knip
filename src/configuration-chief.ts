@@ -82,6 +82,13 @@ export default class ConfigurationChief {
     this.manifestPath = manifestPath;
     this.manifest = manifest;
 
+    const pnpmWorkspacesPath = findFile(this.cwd, 'pnpm-workspace.yaml');
+    const pnpmWorkspaces = pnpmWorkspacesPath && (await _load(pnpmWorkspacesPath));
+
+    if (this.manifest && !this.manifest.workspaces && pnpmWorkspaces) {
+      this.manifest.workspaces = pnpmWorkspaces;
+    }
+
     let resolvedConfigFilePath;
     for (const configPath of rawConfigArg ? [rawConfigArg] : KNIP_CONFIG_LOCATIONS) {
       resolvedConfigFilePath = await findFile(this.cwd, configPath);
