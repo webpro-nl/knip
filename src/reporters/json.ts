@@ -36,7 +36,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
 
   const json: Record<string, Row> = {};
   const codeownersFilePath = path.resolve(opts.codeowners ?? '.github/CODEOWNERS');
-  const codeownersEngine = (await isFile(codeownersFilePath)) && OwnershipEngine.FromCodeownersFile(codeownersFilePath);
+  const codeownersEngine = isFile(codeownersFilePath) && OwnershipEngine.FromCodeownersFile(codeownersFilePath);
 
   const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).map(Object.values).flat();
 

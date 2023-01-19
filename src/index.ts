@@ -57,7 +57,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const suffix = isRoot ? '' : ` (${name})`;
 
-    const manifestPath = isRoot ? chief.manifestPath : await findFile(dir, 'package.json');
+    const manifestPath = isRoot ? chief.manifestPath : findFile(dir, 'package.json');
     const manifest = isRoot ? chief.manifest : manifestPath && (await loadJSON(manifestPath));
 
     if (!manifestPath || !manifest) continue;

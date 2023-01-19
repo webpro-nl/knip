@@ -72,7 +72,7 @@ export default class ConfigurationChief {
   }
 
   async loadLocalConfig() {
-    const manifestPath = await findFile(this.cwd, 'package.json');
+    const manifestPath = findFile(this.cwd, 'package.json');
     const manifest = manifestPath && (await loadJSON(manifestPath));
 
     if (!manifestPath || !manifest) {
@@ -91,7 +91,7 @@ export default class ConfigurationChief {
 
     let resolvedConfigFilePath;
     for (const configPath of rawConfigArg ? [rawConfigArg] : KNIP_CONFIG_LOCATIONS) {
-      resolvedConfigFilePath = await findFile(this.cwd, configPath);
+      resolvedConfigFilePath = findFile(this.cwd, configPath);
       if (resolvedConfigFilePath) break;
     }
 

@@ -4,7 +4,7 @@ import { logIfDebug } from './log.js';
 
 export const loadTSConfig = async (tsConfigFilePath: string) => {
   try {
-    if (await isFile(tsConfigFilePath)) {
+    if (isFile(tsConfigFilePath)) {
       return parseTsconfig(tsConfigFilePath);
     }
   } catch (error) {
