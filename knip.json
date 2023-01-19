@@ -2,6 +2,5 @@
   "$schema": "https://unpkg.com/knip@1/schema.json",
   "entry": ["src/{index,cli}.ts!"],
   "project": ["src/**/*.ts!"],
-  "ignore": ["**/fixtures", "**/_template"],
-  "ignoreBinaries": ["rm"]
+  "ignore": ["**/fixtures", "**/_template"]
 }
