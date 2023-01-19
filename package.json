@@ -43,7 +43,7 @@
     "@snyk/github-codeowners": "^1.1.0",
     "chalk": "^5.2.0",
     "easy-table": "^1.2.0",
-    "esbuild": "^0.17.2",
+    "esbuild": "^0.17.3",
     "esbuild-register": "3.4.2",
     "eslint": "^8.32.0",
     "fast-glob": "^3.2.12",
