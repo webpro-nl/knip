@@ -1,10 +1,12 @@
 import { parseArgs } from 'node:util';
 
-export const helpText = `knip [options]
+export const helpText = `✂️  Find unused files, dependencies and exports in your JavaScript and TypeScript projects
+
+Usage: knip [options]
 
 Options:
-  -c/--config [file]       Configuration file path (default: [.]knip.json[c], knip.js, knip.ts or package.json#knip)
-  -t/--tsConfig [file]     TypeScript configuration path (default: tsconfig.json)
+  -c, --config [file]      Configuration file path (default: [.]knip.json[c], knip.js, knip.ts or package.json#knip)
+  -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
   --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
   --workspace              Analyze a single workspace (default: analyze all configured workspaces)
@@ -23,6 +25,8 @@ Options:
   --debug                  Show debug output
   --debug-file-filter      Filter for files in debug output (regex as string)
   --performance            Measure running time of expensive functions and display stats table
+  --h, --help              Print this help text
+  --V, version             Print version
 
 (1) Issue types: files, dependencies, unlisted, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
 
@@ -35,7 +39,7 @@ $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 $ knip --debug --debug-file-filter '(specific|particular)-module'
 
-More info: https://github.com/webpro/knip`;
+More documentation and bug reports: https://github.com/webpro/knip`;
 
 export default parseArgs({
   options: {
@@ -59,6 +63,7 @@ export default parseArgs({
     'reporter-options': { type: 'string' },
     strict: { type: 'boolean' },
     tsConfig: { type: 'string', short: 't' },
+    version: { type: 'boolean', short: 'V' },
     workspace: { type: 'string' },
   },
 });

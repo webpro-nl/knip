@@ -63,6 +63,7 @@
   "devDependencies": {
     "@jest/types": "29.3.1",
     "@npmcli/package-json": "3.0.0",
+    "@release-it/bumper": "^4.0.2",
     "@types/eslint": "8.4.10",
     "@types/js-yaml": "4.0.5",
     "@types/micromatch": "4.0.2",
@@ -98,6 +99,11 @@
     },
     "github": {
       "release": true
+    },
+    "plugins": {
+      "@release-it/bumper": {
+        "out": "{dist,src}/version.*"
+      }
     }
   },
   "remarkConfig": {

@@ -7,6 +7,7 @@ import parsedArgs, { helpText } from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
 import { _load } from './util/loader.js';
 import { measure } from './util/performance.js';
+import { version } from './version.js';
 import { main } from './index.js';
 import type { IssueType } from './types/issues.js';
 
@@ -15,7 +16,7 @@ register();
 const {
   values: {
     debug: isDebug = false,
-    help,
+    help: isHelp,
     'include-entry-exports': isIncludeEntryExports = false,
     'max-issues': maxIssues = '0',
     'no-exit-code': noExitCode = false,
@@ -26,11 +27,17 @@ const {
     'reporter-options': reporterOptions = '',
     strict: isStrict = false,
     tsConfig,
+    version: isVersion,
   },
 } = parsedArgs;
 
-if (help) {
+if (isHelp) {
   console.log(helpText);
+  process.exit(0);
+}
+
+if (isVersion) {
+  console.log(version);
   process.exit(0);
 }
 
