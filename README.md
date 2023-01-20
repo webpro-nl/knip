@@ -363,7 +363,7 @@ aliases. They can be configured manually:
 
 ```json
 {
-  "$schema": "/Users/lars/p/knip/schema.json",
+  "$schema": "https://unpkg.com/knip@1/schema.json",
   "paths": {
     "@lib": ["./lib/index.ts"],
     "@lib/*": ["./lib/*"]
