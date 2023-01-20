@@ -1,6 +1,4 @@
-dist
-tmp
+/dist
 /node_modules
 !/test/**/node_modules
 !/test/**/node_modules/**/dist
-
