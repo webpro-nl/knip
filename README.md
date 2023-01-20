@@ -66,6 +66,19 @@ with a configuration file (or a `knip` property in `package.json`). Let's name t
 The `entry` files target the starting point(s) to resolve the rest of the imported code. The `project` files should
 contain all files to match against the files resolved from the entry files, including potentially unused files.
 
+Use `knip.ts` with TypeScript if you prefer:
+
+```ts
+import type { KnipConfig } from 'knip';
+
+const config: KnipConfig = {
+  entry: ['src/index.ts'],
+  project: ['src/**/*.ts'],
+};
+
+export default config;
+```
+
 If you have, please see [workspaces & monorepos][1].
 
 Then run the checks with `npx knip`. Or first add this script to `package.json`:

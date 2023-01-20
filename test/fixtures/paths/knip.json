@@ -1,9 +1,0 @@
-{
-  "$schema": "/Users/lars/p/knip/schema.json",
-  "paths": {
-    "~/*": ["./*"],
-    "@lib": ["./lib/index.ts"],
-    "@lib/*": ["./lib/*"],
-    "xyz/*": ["abc/*"]
-  }
-}

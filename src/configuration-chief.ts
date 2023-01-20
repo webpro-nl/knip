@@ -65,6 +65,8 @@ export default class ConfigurationChief {
   manifest: undefined | PackageJson;
   manifestWorkspaces: undefined | string[];
 
+  resolvedConfigFilePath: undefined | string;
+
   constructor({ cwd, isProduction }: ConfigurationManagerOptions) {
     this.cwd = cwd;
     this.isProduction = isProduction;
@@ -89,17 +91,16 @@ export default class ConfigurationChief {
       this.manifest.workspaces = pnpmWorkspaces;
     }
 
-    let resolvedConfigFilePath;
     for (const configPath of rawConfigArg ? [rawConfigArg] : KNIP_CONFIG_LOCATIONS) {
-      resolvedConfigFilePath = findFile(this.cwd, configPath);
-      if (resolvedConfigFilePath) break;
+      this.resolvedConfigFilePath = findFile(this.cwd, configPath);
+      if (this.resolvedConfigFilePath) break;
     }
 
-    if (rawConfigArg && !resolvedConfigFilePath && !manifest.knip) {
+    if (rawConfigArg && !this.resolvedConfigFilePath && !manifest.knip) {
       throw new ConfigurationError(`Unable to find ${rawConfigArg} or package.json#knip`);
     }
 
-    const rawLocalConfig = resolvedConfigFilePath ? await _load(resolvedConfigFilePath) : manifest.knip;
+    const rawLocalConfig = this.resolvedConfigFilePath ? await _load(this.resolvedConfigFilePath) : manifest.knip;
 
     if (rawLocalConfig) {
       this.config = this.normalize(ConfigurationValidator.parse(rawLocalConfig));

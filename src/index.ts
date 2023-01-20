@@ -244,6 +244,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   collector.updateMessage('Connecting the dots...');
 
+  if (chief.resolvedConfigFilePath) {
+    principal.removeProjectPath(chief.resolvedConfigFilePath);
+  }
+
   principal.createProjects();
 
   // Finding import module specifiers isn't cheap, so let's cache them

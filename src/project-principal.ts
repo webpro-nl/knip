@@ -53,6 +53,10 @@ export default class ProjectPrincipal {
     this.projectPaths.add(filePath);
   }
 
+  public removeProjectPath(filePath: string) {
+    this.projectPaths.delete(filePath);
+  }
+
   public addTypeScriptPaths(workspaceDir: string, compilerOptions: TsConfigJson['compilerOptions']) {
     if (!compilerOptions || !compilerOptions.paths) return;
 
