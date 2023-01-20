@@ -1,8 +1,8 @@
-import { getDependenciesFromLoaderArguments } from '../index.js';
+import { getDependenciesFromLoaderArguments, getFirstPositionalArg } from '../index.js';
 
 export const resolve = (binary: string, args: string[]) => {
   if (/-y|--yes/.test(args[0])) return [];
   const dependenciesFromArguments = getDependenciesFromLoaderArguments(args);
-  const firstArgument = args.find(arg => !arg.startsWith('-'));
+  const firstArgument = getFirstPositionalArg(args);
   return [firstArgument, ...dependenciesFromArguments];
 };

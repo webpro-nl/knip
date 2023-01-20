@@ -19,6 +19,8 @@ const stripEnvironmentVariables = (value: string) => value.replace(/([A-Z][^ ]*)
 const getLoaderArgumentValues = (value: string) =>
   getArgumentValues(value, / (--(experimental-)?loader|--require|-r)[ =]([^ ]+)/g);
 
+export const getFirstPositionalArg = (args: string[]) => args.find(arg => /^[a-zA-Z@]/.test(arg));
+
 export const getDependenciesFromLoaderArguments = (args: string[]) =>
   getLoaderArgumentValues(' ' + args.join(' '))
     .filter(scripts => !scripts.startsWith('.'))

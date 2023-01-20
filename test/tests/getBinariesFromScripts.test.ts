@@ -46,6 +46,8 @@ test('getBinariesFromScripts', async () => {
 
   assert.deepEqual(b(['npx -y pkg'], opts), []);
   assert.deepEqual(b(['npx --yes pkg'], opts), []);
+  assert.deepEqual(b(['npx --no commitlint --edit ${1}'], opts), ['commitlint']);
+  assert.deepEqual(b(['npx --no -- commitlint --edit ${1}'], opts), ['commitlint']);
 
   assert.deepEqual(b(['pnpm exec program'], opts), ['program']);
   assert.deepEqual(b(['pnpm run program'], opts), ['program']);

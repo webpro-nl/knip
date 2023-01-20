@@ -1,3 +1,4 @@
+import { getFirstPositionalArg } from '../index.js';
 import type { PackageJson } from 'type-fest';
 
 // https://pnpm.io/cli/add
@@ -40,6 +41,6 @@ export const resolve = (binary: string, args: string[], manifest: PackageJson) =
   const [command, ...commandArgs] = args;
   if (scripts.includes(command) || commands.includes(command)) return [];
   if (command === 'run' && scripts.includes(commandArgs[0])) return [];
-  if (command === 'run' || command === 'exec') return commandArgs.find(arg => !arg.startsWith('-'));
-  return args.find(arg => !arg.startsWith('-'));
+  if (command === 'run' || command === 'exec') return getFirstPositionalArg(commandArgs);
+  return getFirstPositionalArg(args);
 };
