@@ -27,7 +27,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const chief = new ConfigurationChief({ cwd, isProduction });
 
-  debugLogObject('Unresolved configuration', unresolvedConfiguration);
+  debugLogObject('Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
   const collector = new IssueCollector({ cwd, isShowProgress });
   collector.updateMessage('Reading configuration and manifest files...');
