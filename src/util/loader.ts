@@ -4,8 +4,8 @@ import path from 'node:path';
 import { load as esmLoad } from '@esbuild-kit/esm-loader';
 import yaml from 'js-yaml';
 import { require } from '../util/require.js';
+import { LoaderError } from './errors.js';
 import { loadJSON } from './fs.js';
-import { logIfDebug } from './log.js';
 import { timerify } from './performance.js';
 
 const load = async (filePath: string) => {
@@ -21,7 +21,7 @@ const load = async (filePath: string) => {
     const imported = await esmLoad(filePath, {}, require);
     return imported.default ?? imported;
   } catch (error) {
-    logIfDebug(error);
+    throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
 };
 
