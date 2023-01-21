@@ -24,18 +24,19 @@ export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,ts,tsx}', '**/*.stori
 
 const findStorybookDependencies: GenericPluginCallback = async configFilePath => {
   const config: StorybookConfig = await _load(configFilePath);
-  if (config) {
-    const addons =
-      config.addons?.map(addon => {
-        const name = typeof addon === 'string' ? addon : addon.name;
-        return name.startsWith('.') ? require.resolve(path.join(path.dirname(configFilePath), name)) : name;
-      }) ?? [];
-    const builder = config?.core?.builder;
-    const builderPackages =
-      builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
-    return [...addons, ...builderPackages].map(getPackageName);
-  }
-  return [];
+
+  if (!config) return [];
+
+  const addons =
+    config.addons?.map(addon => {
+      const name = typeof addon === 'string' ? addon : addon.name;
+      return name.startsWith('.') ? require.resolve(path.join(path.dirname(configFilePath), name)) : name;
+    }) ?? [];
+  const builder = config?.core?.builder;
+  const builderPackages =
+    builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
+
+  return [...addons, ...builderPackages].map(getPackageName);
 };
 
 export const findDependencies = timerify(findStorybookDependencies);
