@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
+import './util/register.js';
 import path from 'node:path';
-import { register } from 'esbuild-register/dist/node.js';
 import reporters from './reporters/index.js';
 import parsedArgs, { helpText } from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
@@ -10,8 +10,6 @@ import { measure } from './util/performance.js';
 import { version } from './version.js';
 import { main } from './index.js';
 import type { IssueType } from './types/issues.js';
-
-register();
 
 const {
   values: {
