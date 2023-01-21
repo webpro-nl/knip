@@ -32,10 +32,17 @@ export const ENTRY_FILE_PATTERNS = ['eslint.config.js'];
 const findESLintDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
   if (configFilePath.endsWith('package.json') && !manifest.eslintConfig) return [];
 
-  // Load the configuration to find `extends` (for dependencies) and `overrides` (for calculateConfigForFile samples)
-  const config: ESLintConfig = configFilePath.endsWith('package.json')
-    ? manifest.eslintConfig
-    : await _load(configFilePath);
+  let config: ESLintConfig | undefined = undefined;
+  try {
+    // Load the configuration to find `extends` (for dependencies) and `overrides` (for calculateConfigForFile samples)
+    config = configFilePath.endsWith('package.json') ? manifest.eslintConfig : await _load(configFilePath);
+  } catch (error) {
+    // Ignore if thrown by https://github.com/microsoft/rushstack/blob/main/eslint/eslint-patch/src/modern-module-resolution.ts
+    // The `engine.calculateConfigForFile` will still handle it later on.
+    if (error instanceof Error && error.cause instanceof Error && !/Failed to patch ESLint/.test(error.cause.message)) {
+      throw error;
+    }
+  }
 
   // We resolve root `extends` manually, since they'll get replaced with rules and plugins etc. by ESLint
   const rootExtends = config?.extends ? [config.extends].flat().map(customResolvePluginPackageNames) : [];
