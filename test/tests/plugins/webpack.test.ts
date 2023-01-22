@@ -19,10 +19,14 @@ test('Find dependencies in Webpack configuration (webpack.config.js)', async () 
     '@babel/preset-env',
     '@babel/preset-typescript',
     '@babel/plugin-proposal-class-properties',
-    '@babel/plugin-proposal-object-rest-spread',
     '@babel/plugin-transform-react-jsx',
     'babel-plugin-macros',
     'babel-plugin-styled-components',
+    'ts-loader',
+    'mini-css-extract-plugin',
+    'css-loader',
+    'less-loader',
+    'base64-inline-loader',
     'webpack-cli',
     'webpack-dev-server',
   ]);
@@ -34,8 +38,15 @@ test('Find dependencies in Webpack configuration', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['webpack.config.js']['babel-loader']);
-  assert(issues.unlisted['webpack.config.js']['copy-webpack-plugin']);
+  assert(issues.devDependencies['package.json']['@babel/plugin-proposal-object-rest-spread']);
+  assert(issues.unlisted['webpack.dev.js']['eslint-webpack-plugin']);
+  assert(issues.unlisted['webpack.prod.js']['terser-webpack-plugin']);
 
-  assert.deepEqual(counters, { ...baseCounters, unlisted: 10, processed: 1, total: 1 });
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unlisted: 2,
+    processed: 6,
+    total: 6,
+  });
 });

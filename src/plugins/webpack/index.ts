@@ -1,9 +1,10 @@
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
+import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
-import type { WebpackConfig } from './types.js';
+import type { WebpackConfig, Env, Argv } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { BabelConfig } from '../babel/types.js';
 import type { RuleSetRule, RuleSetUseItem } from 'webpack';
@@ -47,18 +48,22 @@ const resolveUseItemLoader = (use: RuleSetUseItem) => {
 };
 
 const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
-  let config: WebpackConfig = await _load(configFilePath);
-
-  if (typeof config === 'function') {
-    config = config({ production: isProduction }, { mode: isProduction ? 'production' : 'development' });
-  }
+  const config: WebpackConfig = await _load(configFilePath);
 
   if (!config) return [];
 
-  const dependencies = [config].flat().flatMap(config => {
-    return (config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? [])
-      .map(loader => loader.replace(/\?.*/, ''))
-      .filter(loader => !loader.startsWith('/'));
+  // Projects may use a single config function for both development and production modes, so resolve it twice
+  const passes = typeof config === 'function' ? [false, true] : [isProduction];
+
+  const dependencies = passes.flatMap(isProduction => {
+    const env: Env = { production: isProduction };
+    const argv: Argv = { mode: isProduction ? 'production' : 'development' };
+    const cfg = typeof config === 'function' ? config(env, argv) : config;
+
+    return [cfg].flat().flatMap(config => {
+      const dependencies = config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? [];
+      return dependencies.map(loader => loader.replace(/\?.*/, '')).map(getPackageName);
+    });
   });
 
   const scripts = Object.values(manifest.scripts ?? {});
