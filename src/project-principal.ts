@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { ts, Project, SourceFile } from 'ts-morph';
 import { debugLogSourceFiles } from './util/debug.js';
+import { ensurePosixPath } from './util/glob.js';
 import {
   _createProject,
   partitionSourceFiles,
@@ -54,7 +55,7 @@ export default class ProjectPrincipal {
   }
 
   public removeProjectPath(filePath: string) {
-    this.projectPaths.delete(filePath);
+    this.projectPaths.delete(ensurePosixPath(filePath));
   }
 
   public addTypeScriptPaths(workspaceDir: string, compilerOptions: TsConfigJson['compilerOptions']) {
