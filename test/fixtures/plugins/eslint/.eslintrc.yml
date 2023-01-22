@@ -1,8 +1,8 @@
 extends:
-  - "@sinonjs/eslint-config"
+  - '@sinonjs/eslint-config'
 
 plugins:
-  - "@sinonjs/no-prototype-methods"
+  - '@sinonjs/no-prototype-methods'
 
 rules:
-  "@sinonjs/no-prototype-methods/no-prototype-methods": error
+  '@sinonjs/no-prototype-methods/no-prototype-methods': error
