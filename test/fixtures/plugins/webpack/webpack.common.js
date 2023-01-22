@@ -1,3 +1,4 @@
+const { basename } = require('node:path');
 const esbuild = require('esbuild');
 const HtmlMinimizerPlugin = require('html-minimizer-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -32,7 +33,7 @@ module.exports = () => {
         },
         {
           test: /(\.ts)x|\.ts$/,
-          use: [
+          use: () => [
             {
               loader: 'ts-loader',
             },
@@ -55,6 +56,16 @@ module.exports = () => {
             },
           ],
         },
+        info => ({
+          loader: 'svgo-loader',
+          options: {
+            plugins: [
+              {
+                cleanupIDs: { prefix: basename(info.resource) },
+              },
+            ],
+          },
+        }),
       ],
     },
     plugins: [

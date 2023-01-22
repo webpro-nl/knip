@@ -28,19 +28,22 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
   use.loader === 'babel-loader' &&
   typeof use.options === 'object';
 
+const info = { compiler: '', issuer: '', realResource: '', resource: '', resourceQuery: '' };
+
 const resolveRuleSetDependencies = (rule: RuleSetRule | '...') => {
   if (!rule || typeof rule === 'string') return [];
   if (typeof rule.use === 'string') return [rule.use];
-  if (!rule.use || typeof rule.use === 'function') return [];
-  return [rule.use].flat().flatMap((use: RuleSetUseItem) => {
-    if (hasBabelOptions(use)) {
-      return [...resolveUseItemLoader(use), ...getDependenciesFromConfig((use as { options: BabelConfig }).options)];
+  let useItem = rule.use ?? rule.loader ?? rule;
+  if (typeof useItem === 'function') useItem = useItem(info);
+  return [useItem].flat().flatMap((useItem: RuleSetUseItem) => {
+    if (hasBabelOptions(useItem)) {
+      return [...resolveUseItem(useItem), ...getDependenciesFromConfig((useItem as { options: BabelConfig }).options)];
     }
-    return resolveUseItemLoader(use);
+    return resolveUseItem(useItem);
   });
 };
 
-const resolveUseItemLoader = (use: RuleSetUseItem) => {
+const resolveUseItem = (use: RuleSetUseItem) => {
   if (!use) return [];
   if (typeof use === 'string') return [use];
   if ('loader' in use && typeof use.loader === 'string') return [use.loader];

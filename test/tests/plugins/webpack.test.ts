@@ -23,9 +23,11 @@ test('Find dependencies in Webpack configuration (webpack.config.js)', async () 
     'babel-plugin-macros',
     'babel-plugin-styled-components',
     'ts-loader',
+    'esbuild-loader',
     'mini-css-extract-plugin',
     'css-loader',
     'less-loader',
+    'svgo-loader',
     'base64-inline-loader',
     'webpack-cli',
     'webpack-dev-server',
@@ -39,13 +41,14 @@ test('Find dependencies in Webpack configuration', async () => {
   });
 
   assert(issues.devDependencies['package.json']['@babel/plugin-proposal-object-rest-spread']);
+  assert(issues.unlisted['webpack.config.js']['svgo-loader']);
   assert(issues.unlisted['webpack.dev.js']['eslint-webpack-plugin']);
   assert(issues.unlisted['webpack.prod.js']['terser-webpack-plugin']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 2,
+    unlisted: 3,
     processed: 6,
     total: 6,
   });

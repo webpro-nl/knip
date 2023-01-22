@@ -18,6 +18,7 @@
     "copy-webpack-plugin": "*",
     "css-loader": "*",
     "esbuild": "*",
+    "esbuild-loader": "*",
     "html-minimizer-webpack-plugin": "*",
     "less-loader": "*",
     "mini-css-extract-plugin": "*",
