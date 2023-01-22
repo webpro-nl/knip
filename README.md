@@ -229,6 +229,10 @@ be part of the analysis. Here's an example:
 {
   "ignoreWorkspaces": ["packages/ignore-me"],
   "workspaces": {
+    ".": {
+      "entry": "src/index.ts",
+      "project": "src/**/*.ts"
+    },
     "packages/*": {
       "entry": "{index,cli}.ts",
       "project": "**/*.ts"
@@ -239,6 +243,8 @@ be part of the analysis. Here's an example:
   }
 }
 ```
+
+Note that if you have a root workspace, it must be under `workspaces` and have the `"."` key like in the example.
 
 Knip supports workspaces as defined in three possible locations:
 
