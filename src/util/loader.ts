@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-// eslint-disable-next-line import/order -- Somehow this order is an issue in Windows
+// eslint-disable-next-line import/order -- Modules in @types are handled differently
 import { load as esmLoad } from '@esbuild-kit/esm-loader';
 import yaml from 'js-yaml';
 import { require } from '../util/require.js';
