@@ -1,4 +1,4 @@
-import { getFirstPositionalArg } from '../index.js';
+import parseArgs from 'minimist';
 import type { PackageJson } from 'type-fest';
 
 // https://yarnpkg.com/cli
@@ -37,9 +37,10 @@ const commands = [
 
 export const resolve = (binary: string, args: string[], manifest: PackageJson) => {
   const scripts = manifest.scripts ? Object.keys(manifest.scripts) : [];
-  const [command, ...commandArgs] = args;
+  const parsed = parseArgs(args, {});
+  const [command, result] = parsed._;
   if (scripts.includes(command) || commands.includes(command)) return [];
-  if (command === 'run' && scripts.includes(commandArgs[0])) return [];
-  if (command === 'run' || command === 'exec') return getFirstPositionalArg(commandArgs);
-  return getFirstPositionalArg(args);
+  if (command === 'run' && scripts.includes(result)) return [];
+  if (command === 'run' || command === 'exec') return [result];
+  return command ? [command] : [];
 };

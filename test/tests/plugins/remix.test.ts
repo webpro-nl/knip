@@ -16,6 +16,7 @@ test('Find dependencies in Remix configuration', async () => {
   assert(issues.unlisted['package.json']['run-s']);
   assert(issues.unlisted['package.json']['run-p']);
   assert(issues.unlisted['package.json']['cross-env']);
+  assert(issues.unlisted['package.json']['dotenv']);
   assert(issues.unlisted['package.json']['tailwindcss']);
   assert(issues.unlisted['package.json']['prisma']);
 
@@ -38,7 +39,7 @@ test('Find dependencies in Remix configuration', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 16,
+    unlisted: 17,
     processed: 8,
     total: 8,
   });

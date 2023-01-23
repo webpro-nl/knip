@@ -25,6 +25,7 @@
   "files": [
     "./@types/github-codeowners/index.d.ts",
     "./@types/summary/index.d.ts",
+    "./@types/bash-parser/index.d.ts",
     "./@types/@esbuild-kit/esm-loader/index.d.ts"
   ]
 }

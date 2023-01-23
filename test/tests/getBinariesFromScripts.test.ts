@@ -1,65 +1,100 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getBinariesFromScripts as b } from '../../src/util/binaries/index.js';
-import type { PackageJson } from 'type-fest';
+import { _getBinariesFromScripts as b } from '../../src/util/binaries/index.js';
 
-const manifest: PackageJson = {};
-const ignore = [];
-const opts = { manifest, ignore };
-const scripts = { ...opts, manifest: { scripts: { program: '' } } };
+const scripts = { manifest: { scripts: { program: '' } } };
+const knownOnly = { knownGlobalsOnly: true };
 
 test('getBinariesFromScripts', async () => {
-  assert.deepEqual(b(['program'], opts), ['program']);
-  assert.deepEqual(b(['program', 'program'], opts), ['program']);
-  assert.deepEqual(b(['program -short --long args'], opts), ['program']);
-  assert.deepEqual(b(['program && program2'], opts), ['program', 'program2']);
-  assert.deepEqual(b(['program -x && exec -y -- program2 -z'], opts), ['program', 'exec', 'program2']);
-  assert.deepEqual(b(['program -s .'], opts), ['program']);
-  assert.deepEqual(b(['node -r script'], opts), ['script']);
-  assert.deepEqual(b(['node -r package/script'], opts), ['package']);
-  assert.deepEqual(b(['node -r ./script.js'], opts), []);
-  assert.deepEqual(b(['node --require=pkg1 --require pkg2'], opts), ['pkg1', 'pkg2']);
-  assert.deepEqual(b(['node --experimental-loader ts-node/esm/transpile-only'], opts), ['ts-node']);
-  assert.deepEqual(b(['node -r @scope/package/register src/index.ts'], opts), ['@scope/package']);
-  assert.deepEqual(b(['program --loader tsx --test "test/*.spec.ts"'], opts), ['program', 'tsx']);
-  assert.deepEqual(b(['program --loader ldr --loader tsx --test "test/*.spec.ts"'], opts), ['program', 'ldr', 'tsx']);
+  assert.deepEqual(b('program'), ['program']);
+  assert.deepEqual(b(['program', 'program']), ['program']);
+  assert.deepEqual(b('program -short --long args'), ['program']);
+  assert.deepEqual(b('program && program2'), ['program', 'program2']);
+  assert.deepEqual(b('program -x && exec -y -- program2 -z'), ['program', 'exec']);
+  assert.deepEqual(b('program -x; exec -y -- program2'), ['program', 'exec']);
+  assert.deepEqual(b("program '*.js' -- program2"), ['program']);
+  assert.deepEqual(b('program -s .'), ['program']);
+  assert.deepEqual(b('node -r script'), ['script']);
+  assert.deepEqual(b('node -r package/script'), ['package']);
+  assert.deepEqual(b('node -r ./script.js'), []);
+  assert.deepEqual(b('node --require=pkg1 --require pkg2'), ['pkg1', 'pkg2']);
+  assert.deepEqual(b('node --experimental-loader ts-node/esm/transpile-only'), ['ts-node']);
+  assert.deepEqual(b('node -r @scope/package/register src/index.ts'), ['@scope/package']);
+  assert.deepEqual(b('nodemon --require dotenv/config ./server.js --watch ./server.js'), ['nodemon', 'dotenv']);
+  assert.deepEqual(b('program --loader tsx --test "test/*.spec.ts"'), ['program', 'tsx']);
+  assert.deepEqual(b('program --loader ldr --loader tsx --test "test/*.spec.ts"'), ['program', 'ldr', 'tsx']);
+  assert.deepEqual(b('program command'), ['program']);
+});
 
-  assert.deepEqual(b(['./node_modules/.bin/tsc --noEmit'], opts), ['tsc']);
-  assert.deepEqual(b(['node_modules/.bin/tsc --noEmit'], opts), ['tsc']);
-  assert.deepEqual(b(['$(npm bin)/tsc --noEmit'], opts), ['tsc']);
-  assert.deepEqual(b(['../../../scripts/node_modules/.bin/tsc --noEmit'], opts), []);
+test('getBinariesFromScripts (.bin)', async () => {
+  assert.deepEqual(b('./node_modules/.bin/tsc --noEmit'), ['tsc']);
+  assert.deepEqual(b('node_modules/.bin/tsc --noEmit'), ['tsc']);
+  assert.deepEqual(b('$(npm bin)/tsc --noEmit'), ['tsc']);
+  assert.deepEqual(b('../../../scripts/node_modules/.bin/tsc --noEmit'), []);
+});
 
-  assert.deepEqual(b(['program command'], opts), ['program']);
+test('getBinariesFromScripts (dotenv)', async () => {
+  assert.deepEqual(b('dotenv program'), ['dotenv', 'program']);
+  assert.deepEqual(b('dotenv -- program'), ['dotenv', 'program']);
+  assert.deepEqual(b('dotenv -e .env3 -v VARIABLE=somevalue program -- exit'), ['dotenv', 'program']);
+  assert.deepEqual(b('dotenv -- mvn exec:java -Dexec.args="-g -f"'), ['dotenv', 'mvn']);
+});
 
-  assert.deepEqual(b(['dotenv program'], opts), ['dotenv', 'program']);
-  assert.deepEqual(b(['dotenv -- program'], opts), ['dotenv', 'program']);
+test('getBinariesFromScripts (knownGlobalsOnly)', async () => {
+  assert.deepEqual(b('dotenv', knownOnly), []);
+  assert.deepEqual(b('dotenv -- mvn exec:java -Dexec.args="-g -f"', knownOnly), []);
+});
 
-  assert.deepEqual(b(['cross-env VAR=true VAR=true node -r esm build.js'], opts), ['cross-env', 'esm']);
-  assert.deepEqual(b(['cross-env program'], opts), ['cross-env', 'program']);
-  assert.deepEqual(b(['cross-env NODE_ENV=production program'], opts), ['cross-env', 'program']);
-  assert.deepEqual(b(['cross-env NODE_OPTIONS=--max-size=3072 program subcommand'], opts), ['cross-env', 'program']);
-  assert.deepEqual(b(['A=1 B=2 cross-env -- program'], opts), ['cross-env', 'program']);
-  assert.deepEqual(b(['NODE_ENV=production cross-env -- program --cache'], opts), ['cross-env', 'program']);
+test('getBinariesFromScripts (cross-env)', async () => {
+  assert.deepEqual(b('cross-env program'), ['cross-env', 'program']);
+  assert.deepEqual(b('cross-env NODE_ENV=p program'), ['cross-env', 'program']);
+  assert.deepEqual(b('cross-env NODE_ENV=p program subcommand'), ['cross-env', 'program']);
+  assert.deepEqual(b('cross-env NODE_ENV=p node -r node_modules/dotenv/config ./s.js'), ['cross-env', 'dotenv']);
+  assert.deepEqual(b('cross-env NODE_ENV=p node -r esm build.js'), ['cross-env', 'esm']);
+  assert.deepEqual(b('cross-env NODE_OPTIONS=--max-size=3072 program subcommand'), ['cross-env', 'program']);
+  assert.deepEqual(b('cross-env NODE_ENV=p program -r pkg/config ./s.js -w ./s.js'), ['cross-env', 'program', 'pkg']);
+  assert.deepEqual(b('NODE_ENV=p cross-env -- program --cache'), ['cross-env', 'program']);
+});
 
-  assert.deepEqual(b(['npm run script'], opts), []);
-  assert.deepEqual(b(['npm run publish:latest -- --npm-tag=debug --no-push'], opts), []);
+test('getBinariesFromScripts (npm)', async () => {
+  assert.deepEqual(b('npm run script'), []);
+  assert.deepEqual(b('npm run publish:latest -- --npm-tag=debug --no-push'), []);
+});
 
-  assert.deepEqual(b(['npx -y pkg'], opts), []);
-  assert.deepEqual(b(['npx --yes pkg'], opts), []);
-  assert.deepEqual(b(['npx --no commitlint --edit ${1}'], opts), ['commitlint']);
-  assert.deepEqual(b(['npx --no -- commitlint --edit ${1}'], opts), ['commitlint']);
+test('getBinariesFromScripts (npx)', async () => {
+  assert.deepEqual(b('npx -y pkg'), []);
+  assert.deepEqual(b('npx --yes pkg'), []);
+  assert.deepEqual(b('npx --no commitlint --edit ${1}'), ['commitlint']);
+  assert.deepEqual(b('npx --no -- commitlint --edit ${1}'), ['commitlint']);
+});
 
-  assert.deepEqual(b(['pnpm exec program'], opts), ['program']);
-  assert.deepEqual(b(['pnpm run program'], opts), ['program']);
-  assert.deepEqual(b(['pnpm program'], opts), ['program']);
-  assert.deepEqual(b(['pnpm run program'], scripts), []);
-  assert.deepEqual(b(['pnpm program'], scripts), []);
+test('getBinariesFromScripts (pnpm)', async () => {
+  assert.deepEqual(b('pnpm exec program'), ['program']);
+  assert.deepEqual(b('pnpm run program'), ['program']);
+  assert.deepEqual(b('pnpm program'), ['program']);
+  assert.deepEqual(b('pnpm run program', scripts), []);
+  assert.deepEqual(b('pnpm program', scripts), []);
+});
 
-  assert.deepEqual(b(['yarn exec program'], opts), ['program']);
-  assert.deepEqual(b(['yarn run program'], opts), ['program']);
-  assert.deepEqual(b(['yarn program'], opts), ['program']);
-  assert.deepEqual(b(['yarn run program'], scripts), []);
-  assert.deepEqual(b(['yarn program'], scripts), []);
+test('getBinariesFromScripts (yarn)', async () => {
+  assert.deepEqual(b('yarn exec program'), ['program']);
+  assert.deepEqual(b('yarn run program'), ['program']);
+  assert.deepEqual(b('yarn program'), ['program']);
+  assert.deepEqual(b('yarn run program', scripts), []);
+  assert.deepEqual(b('yarn program', scripts), []);
+});
 
-  assert.deepEqual(b(['deno install --no-check -r -f https://deno.land/x/deploy/deployctl.ts'], opts), []);
+test('getBinariesFromScripts (misc)', async () => {
+  assert.deepEqual(b('deno install --no-check -r -f https://deno.land/x/deploy/deployctl.ts'), []);
+});
+
+test('getBinariesFromScripts (bash expressions)', async () => {
+  assert.deepEqual(b('if test "$NODE_ENV" = "production" ; then make install ; fi '), ['make']);
+  assert.deepEqual(b('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install'), ['make']);
+  assert.deepEqual(b('if ! npx program --verbose ; then exit 1 ; fi'), ['program']);
+});
+
+test('getBinariesFromScripts (multiline)', async () => {
+  assert.deepEqual(b('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged'), ['lint-staged']);
+  assert.deepEqual(b(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`), ['rc', '@scope/rc']);
 });

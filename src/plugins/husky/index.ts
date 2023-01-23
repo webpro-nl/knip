@@ -23,11 +23,8 @@ export const CONFIG_FILE_PATTERNS = [
 
 const findHuskyDependencies: GenericPluginCallback = async (configFilePath, { manifest, rootConfig }) => {
   const script = readFileSync(configFilePath);
-  const scripts = String(script)
-    .split('\n')
-    .map(script => script.trim());
 
-  const binaries = getBinariesFromScripts(scripts, {
+  const binaries = getBinariesFromScripts(String(script), {
     manifest,
     ignore: rootConfig.ignoreBinaries,
     knownGlobalsOnly: true,

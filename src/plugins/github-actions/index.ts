@@ -22,10 +22,7 @@ const findGithubActionsDependencies: GenericPluginCallback = async (configFilePa
 
   if (!config) return [];
 
-  const scripts = getValuesByKeyDeep(config, 'run')
-    .filter((value): value is string => typeof value === 'string')
-    .flatMap(script => script.split('\n'))
-    .map(script => script.trim());
+  const scripts = getValuesByKeyDeep(config, 'run').filter((value): value is string => typeof value === 'string');
 
   const binaries = getBinariesFromScripts(scripts, {
     manifest,

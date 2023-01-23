@@ -1,4 +1,4 @@
-import { getBinariesFromScripts } from '../../util/binaries/index.js';
+import { _getBinariesFromScripts } from '../../util/binaries/index.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -38,7 +38,7 @@ const findLintStagedDependencies: GenericPluginCallback = async (configFilePath,
 
   for (const entry of Object.values(config).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
-    getBinariesFromScripts(scripts, { manifest, ignore: rootConfig.ignoreBinaries }).forEach(bin => binaries.add(bin));
+    _getBinariesFromScripts(scripts, { manifest, ignore: rootConfig.ignoreBinaries }).forEach(bin => binaries.add(bin));
   }
 
   // Warning: binaries do not always have the same name as their package

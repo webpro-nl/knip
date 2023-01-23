@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import { getBinariesFromScripts } from '../../util/binaries/index.js';
+import { _getBinariesFromScripts } from '../../util/binaries/index.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -33,7 +33,7 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, { manif
       .flatMap(target => (target.options?.commands ?? target.options?.command ? [target.options.command] : []))
   );
 
-  const binaries = getBinariesFromScripts(scripts, { manifest, knownGlobalsOnly: true });
+  const binaries = _getBinariesFromScripts(scripts, { manifest, knownGlobalsOnly: true });
 
   return [...executors, ...binaries];
 };
