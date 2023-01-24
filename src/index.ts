@@ -52,6 +52,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const principal = new ProjectPrincipal();
 
+  const enabledPluginsStore: Map<string, string[]> = new Map();
+
   for (const { name, dir, config, ancestors } of workspaces) {
     const isRoot = name === ROOT_WORKSPACE_NAME;
 
@@ -95,20 +97,16 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       config,
       rootWorkspaceConfig: chief.getConfigForWorkspace(ROOT_WORKSPACE_NAME),
       manifest,
-      ancestorManifests: ancestors.map(name => deputy.getManifest(name)),
       rootConfig: chief.config,
       negatedWorkspacePatterns,
       rootWorkspaceDir: cwd,
       isProduction,
     });
 
-    await worker.init();
+    const enabledPluginsInAncestors = ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []);
+    await worker.setEnabledPlugins(enabledPluginsInAncestors);
 
-    // Add listed peer dependencies, as they're often not referenced anywhere, used to settle dependencies at the end
-    deputy.addPeerDependencies(name, worker.peerDependencies);
-
-    // Add installed binaries
-    deputy.setInstalledBinaries(name, worker.installedBinaries);
+    await worker.initReferencedDependencies();
 
     if (config?.entry && config?.project) {
       if (isProduction) {
@@ -229,13 +227,23 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         }
       }
 
+      // Wrapping up the workspace: fetch peer deps, binaries, entry files gathered through all plugins, and hand over
       if (report.dependencies || report.unlisted || report.files) {
-        const { referencedDependencyIssues } = await worker.findDependenciesByPlugins();
+        await worker.findDependenciesByPlugins();
+
+        const { referencedDependencyIssues, peerDependencies, installedBinaries, entryFiles, enabledPlugins } =
+          worker.getFinalDependencies();
+
         referencedDependencyIssues.forEach(issue => {
           const workspace = { name, dir, config, ancestors };
           const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, issue.symbol);
           if (unlistedDependency) collector.addIssue(issue);
         });
+
+        deputy.addPeerDependencies(name, peerDependencies);
+        deputy.setInstalledBinaries(name, installedBinaries);
+        principal.addEntryPaths(entryFiles);
+        enabledPluginsStore.set(name, enabledPlugins);
       }
     }
   }

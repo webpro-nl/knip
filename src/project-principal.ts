@@ -46,6 +46,10 @@ export default class ProjectPrincipal {
     this.entryPaths.add(filePath);
   }
 
+  public addEntryPaths(filePaths: Set<string>) {
+    filePaths.forEach(filePath => this.entryPaths.add(filePath));
+  }
+
   public addSourceFile(filePath: string) {
     this.entryWorkspace?.addSourceFileAtPath(filePath);
   }

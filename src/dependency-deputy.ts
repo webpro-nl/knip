@@ -28,7 +28,6 @@ type Options = {
 export default class DependencyDeputy {
   isStrict;
   _manifests: WorkspaceManifests = new Map();
-  manifests: Map<string, PackageJson> = new Map();
   ignoreDependencies;
   referencedDependencies: Map<string, Set<string>>;
   peerDependencies: Map<string, PeerDependencies>;
@@ -62,8 +61,6 @@ export default class DependencyDeputy {
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
 
-    this.manifests.set(name, manifest);
-
     this._manifests.set(name, {
       workspaceDir: dir,
       manifestPath,
@@ -74,10 +71,6 @@ export default class DependencyDeputy {
       devDependencies,
       allDependencies,
     });
-  }
-
-  getManifest(workspaceName: string) {
-    return this.manifests.get(workspaceName);
   }
 
   getWorkspaceManifest(workspaceName: string) {

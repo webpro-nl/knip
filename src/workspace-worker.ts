@@ -3,7 +3,7 @@ import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './manifest/index.js';
 import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
-import { debugLogFiles, debugLogIssues, debugLogObject } from './util/debug.js';
+import { debugLogFiles, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Issue } from './types/issues.js';
@@ -16,7 +16,6 @@ type WorkspaceManagerOptions = {
   dir: string;
   config: WorkspaceConfiguration;
   manifest: PackageJson;
-  ancestorManifests: (PackageJson | undefined)[];
   rootWorkspaceConfig: WorkspaceConfiguration;
   rootConfig: Configuration;
   negatedWorkspacePatterns: string[];
@@ -25,8 +24,6 @@ type WorkspaceManagerOptions = {
 };
 
 type ReferencedDependencyIssues = Set<Issue>;
-
-type ReferencedDependencies = Set<string>;
 
 const negatedTestFilePatterns = TEST_FILE_PATTERNS.map(negate);
 
@@ -41,7 +38,6 @@ export default class WorkspaceWorker {
   name: string;
   dir: string;
   config: WorkspaceConfiguration;
-  ancestorManifests: (PackageJson | undefined)[];
   rootWorkspaceConfig: WorkspaceConfiguration;
   rootConfig: Configuration;
   manifest: PackageJson;
@@ -54,6 +50,7 @@ export default class WorkspaceWorker {
 
   negatedWorkspacePatterns: string[] = [];
   enabled: Record<PluginName, boolean>;
+  enabledPlugins: PluginName[] = [];
   isRoot;
   isProduction;
 
@@ -61,7 +58,6 @@ export default class WorkspaceWorker {
     name,
     dir,
     config,
-    ancestorManifests,
     rootWorkspaceConfig,
     rootConfig,
     negatedWorkspacePatterns,
@@ -72,7 +68,6 @@ export default class WorkspaceWorker {
     this.name = name;
     this.dir = dir;
     this.config = config;
-    this.ancestorManifests = ancestorManifests;
 
     this.isRoot = name === ROOT_WORKSPACE_NAME;
     this.isProduction = isProduction;
@@ -93,17 +88,10 @@ export default class WorkspaceWorker {
     return this.config[pluginName] ?? { config: null, entry: null, project: null };
   }
 
-  async init() {
-    await this.setEnabledPlugins();
-    await this.initReferencedDependencies();
-  }
-
-  async setEnabledPlugins() {
-    // If a dependency is found its own or an ancestor workspace manifest, the plugin is enabled for this workspace too
+  async setEnabledPlugins(enabledPluginsInAncestors: string[]) {
+    const { manifest } = this;
     const dependencies = new Set(
-      [this.manifest, ...this.ancestorManifests]
-        .flatMap(manifest => [Object.keys(manifest?.dependencies ?? {}), Object.keys(manifest?.devDependencies ?? {})])
-        .flat()
+      [Object.keys(manifest?.dependencies ?? {}), Object.keys(manifest?.devDependencies ?? {})].flat()
     );
 
     const pluginEntries = Object.entries(plugins) as PluginNames;
@@ -112,12 +100,15 @@ export default class WorkspaceWorker {
       const hasIsEnabled = typeof plugin.isEnabled === 'function';
       this.enabled[pluginName] =
         this.config[pluginName] !== false &&
-        hasIsEnabled &&
-        (await plugin.isEnabled({ cwd: this.dir, manifest: this.manifest, dependencies }));
+        (enabledPluginsInAncestors.includes(pluginName) ||
+          (hasIsEnabled && (await plugin.isEnabled({ cwd: this.dir, manifest: this.manifest, dependencies }))));
     }
 
-    const enabledPlugins = pluginEntries.filter(([name]) => this.enabled[name]).map(([, plugin]) => plugin.NAME);
-    debugLogObject(`Enabled plugins (${this.name})`, enabledPlugins);
+    this.enabledPlugins = pluginEntries.filter(([name]) => this.enabled[name]).map(([name]) => name);
+
+    const enabledPluginNames = this.enabledPlugins.map(name => plugins[name].NAME);
+
+    debugLogObject(`Enabled plugins (${this.name})`, enabledPluginNames);
   }
 
   async initReferencedDependencies() {
@@ -320,5 +311,13 @@ export default class WorkspaceWorker {
     }
   }
 
+  public getFinalDependencies() {
+    return {
+      peerDependencies: this.peerDependencies,
+      installedBinaries: this.installedBinaries,
+      referencedDependencyIssues: this.referencedDependencyIssues,
+      entryFiles: this.entryFiles,
+      enabledPlugins: this.enabledPlugins,
+    };
   }
 }

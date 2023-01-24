@@ -1,6 +1,5 @@
 import util from 'node:util';
 import parsedArgs from './cli-arguments.js';
-import type { Issue } from '../types/issues.js';
 import type { SourceFile } from 'ts-morph';
 
 const { debug, 'debug-file-filter': debugFileFilter } = parsedArgs.values;
@@ -43,11 +42,4 @@ export const debugLogSourceFiles = (name: string, sourceFiles: Set<SourceFile> |
     const files = Array.from(sourceFiles).map(sourceFile => sourceFile.getFilePath());
     logArray(files);
   }
-};
-
-export const debugLogIssues = (name: string, issues: Issue[]) => {
-  if (!IS_ENABLED) return;
-  const symbols = Array.from(new Set(issues.map(issue => issue.symbol)));
-  console.debug(`[knip] ${name} (${symbols.length})`);
-  logArray(symbols);
 };
