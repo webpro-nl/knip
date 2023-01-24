@@ -14,7 +14,7 @@ const rootConfig = { ignoreBinaries: ['knip'] };
 test('Find dependencies in husky configuration (plugin)', async () => {
   const configFilePath = path.join(cwd, '.husky/pre-commit');
   const dependencies = await husky.findDependencies(configFilePath, { manifest, rootConfig });
-  assert.deepEqual(dependencies, ['lint-staged', 'commitlint']);
+  assert.deepEqual(dependencies, { dependencies: ['lint-staged', 'commitlint'], entryFiles: [] });
 });
 
 test('Find dependencies in husky configuration (main)', async () => {

@@ -7,6 +7,6 @@ const cwd = path.resolve('test/fixtures/plugins/release-it');
 
 test('Find dependencies in Release It configuration (json)', async () => {
   const configFilePath = path.join(cwd, '.release-it.json');
-  const dependencies = await releaseIt.findDependencies(configFilePath, {});
-  assert.deepEqual(dependencies, ['@release-it/bumper', '@release-it/conventional-changelog']);
+  const dependencies = await releaseIt.findDependencies(configFilePath, { cwd });
+  assert.deepEqual(dependencies, ['@release-it/bumper', '@release-it/conventional-changelog', 'from-hook']);
 });

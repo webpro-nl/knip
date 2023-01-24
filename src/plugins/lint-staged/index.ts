@@ -1,4 +1,4 @@
-import { _getBinariesFromScripts } from '../../util/binaries/index.js';
+import { _getReferencesFromScripts } from '../../util/binaries/index.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -23,7 +23,7 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, { manifest, rootConfig }) => {
+const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, rootConfig }) => {
   let config: LintStagedConfig = configFilePath.endsWith('package.json')
     ? manifest['lint-staged']
     : await _load(configFilePath);
@@ -38,7 +38,8 @@ const findLintStagedDependencies: GenericPluginCallback = async (configFilePath,
 
   for (const entry of Object.values(config).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
-    _getBinariesFromScripts(scripts, { manifest, ignore: rootConfig.ignoreBinaries }).forEach(bin => binaries.add(bin));
+    const options = { cwd, manifest, ignore: rootConfig.ignoreBinaries };
+    _getReferencesFromScripts(scripts, options).binaries.forEach(bin => binaries.add(bin));
   }
 
   // Warning: binaries do not always have the same name as their package

@@ -1,3 +1,4 @@
+import { _getReferencesFromScripts } from '../../util/binaries/index.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -20,11 +21,18 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
   const config: ReleaseItConfig = configFilePath.endsWith('package.json')
     ? manifest['release-it']
     : await _load(configFilePath);
-  return config?.plugins ? Object.keys(config.plugins) : [];
+
+  if (!config) return [];
+
+  const plugins = config.plugins ? Object.keys(config.plugins) : [];
+  const scripts = config.hooks ? Object.values(config.hooks).flat() : [];
+  const { binaries } = _getReferencesFromScripts(scripts, { cwd, manifest });
+
+  return [...plugins, ...binaries];
 };
 
 export const findDependencies = timerify(findReleaseItDependencies);

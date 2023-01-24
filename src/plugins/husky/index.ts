@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { getBinariesFromScripts } from '../../util/binaries/index.js';
+import { _getReferencesFromScripts } from '../../util/binaries/index.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -21,16 +21,17 @@ export const CONFIG_FILE_PATTERNS = [
   '.husky/post-{checkout,commit,merge,rewrite}',
 ];
 
-const findHuskyDependencies: GenericPluginCallback = async (configFilePath, { manifest, rootConfig }) => {
+const findHuskyDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, rootConfig }) => {
   const script = readFileSync(configFilePath);
 
-  const binaries = getBinariesFromScripts(String(script), {
+  const { binaries, entryFiles } = _getReferencesFromScripts(String(script), {
+    cwd,
     manifest,
     ignore: rootConfig.ignoreBinaries,
     knownGlobalsOnly: true,
   });
 
-  return binaries;
+  return { dependencies: binaries, entryFiles };
 };
 
 export const findDependencies = timerify(findHuskyDependencies);

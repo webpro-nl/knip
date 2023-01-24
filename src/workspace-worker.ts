@@ -7,7 +7,6 @@ import { debugLogFiles, debugLogIssues, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Issue } from './types/issues.js';
-import type { GenericPluginCallback } from './types/plugins.js';
 import type { Entries, PackageJson } from 'type-fest';
 
 type PluginNames = Entries<typeof plugins>;
@@ -45,11 +44,10 @@ export default class WorkspaceWorker {
   ancestorManifests: (PackageJson | undefined)[];
   rootWorkspaceConfig: WorkspaceConfiguration;
   rootConfig: Configuration;
-  referencedDependencyIssues: ReferencedDependencyIssues = new Set();
   manifest: PackageJson;
   rootWorkspaceDir: string;
 
-  referencedDependencies: ReferencedDependencies = new Set();
+  referencedDependencyIssues: ReferencedDependencyIssues = new Set();
   peerDependencies: PeerDependencies = new Map();
   installedBinaries: InstalledBinaries = new Map();
   entryFiles: Set<string> = new Set();
@@ -133,14 +131,10 @@ export default class WorkspaceWorker {
     });
 
     const filePath = path.join(this.dir, 'package.json');
-    dependencies.forEach(dependency =>
-      this.referencedDependencyIssues.add({ type: 'unlisted', filePath, symbol: dependency })
-    );
-    dependencies.forEach(dependency => this.referencedDependencies.add(dependency));
-
+    const issues = this.referencedDependencyIssues;
+    dependencies.forEach(dependency => issues.add({ type: 'unlisted', filePath, symbol: dependency }));
     entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
     this.peerDependencies = peerDependencies;
-
     this.installedBinaries = installedBinaries;
   }
 
@@ -282,55 +276,49 @@ export default class WorkspaceWorker {
       if (this.enabled[pluginName] && isIncludePlugin) {
         const hasDependencyFinder = 'findDependencies' in plugin && typeof plugin.findDependencies === 'function';
         if (hasDependencyFinder) {
-          const dependencies = await this.findDependenciesByPlugin(pluginName, plugin.NAME, plugin.findDependencies);
-          dependencies.forEach(dependency => this.referencedDependencyIssues.add(dependency));
-          dependencies.forEach(dependency => this.referencedDependencies.add(dependency.symbol));
+          const pluginConfig = this.getConfigForPlugin(pluginName);
+
+          if (!pluginConfig) continue;
+
+          const patterns = this.getConfigurationEntryFilePattern(pluginName);
+          const cwd = this.dir;
+          const ignore = this.getWorkspaceIgnorePatterns();
+          const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
+
+          debugLogFiles(`Globbed ${plugin.NAME} config file paths`, configFilePaths);
+
+          if (configFilePaths.length === 0) continue;
+
+          const pluginDependencies: Set<string> = new Set();
+          const pluginEntryFiles: Set<string> = new Set();
+
+          for (const configFilePath of configFilePaths) {
+            const results = await plugin.findDependencies(configFilePath, {
+              cwd,
+              manifest: this.manifest,
+              config: pluginConfig,
+              rootConfig: this.rootConfig,
+              workspaceConfig: this.config,
+              isProduction: this.isProduction,
+            });
+
+            const dependencies = Array.isArray(results) ? results : results.dependencies;
+            const entryFiles = !Array.isArray(results) && results.entryFiles ? results.entryFiles : [];
+
+            const issues = this.referencedDependencyIssues;
+            dependencies.forEach(symbol => issues.add({ type: 'unlisted', filePath: configFilePath, symbol } as Issue));
+            entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
+
+            dependencies.forEach(dependency => pluginDependencies.add(dependency));
+            entryFiles.forEach(entryFile => pluginEntryFiles.add(entryFile));
+          }
+
+          debugLogFiles(`Dependencies referenced in ${plugin.NAME}`, pluginDependencies);
+          if (pluginEntryFiles.size > 0) debugLogFiles(`Entry files referenced in ${plugin.NAME}`, pluginEntryFiles);
         }
       }
     }
-
-    return {
-      referencedDependencyIssues: this.referencedDependencyIssues,
-      referencedDependencies: this.referencedDependencies,
-    };
   }
 
-  private async findDependenciesByPlugin(
-    pluginName: PluginName,
-    pluginTitle: string,
-    pluginCallback: GenericPluginCallback
-  ) {
-    const pluginConfig = this.getConfigForPlugin(pluginName);
-
-    if (!pluginConfig) return [];
-
-    const patterns = this.getConfigurationEntryFilePattern(pluginName);
-    const cwd = this.dir;
-    const ignore = this.getWorkspaceIgnorePatterns();
-    const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
-
-    debugLogFiles(`Globbed ${pluginTitle} config file paths`, configFilePaths);
-
-    if (configFilePaths.length === 0) return [];
-
-    const referencedDependencyIssues = (
-      await Promise.all(
-        configFilePaths.map(async configFilePath => {
-          const dependencies = await pluginCallback(configFilePath, {
-            cwd,
-            manifest: this.manifest,
-            config: pluginConfig,
-            rootConfig: this.rootConfig,
-            workspaceConfig: this.config,
-            isProduction: this.isProduction,
-          });
-          return dependencies.map(symbol => ({ type: 'unlisted', filePath: configFilePath, symbol } as Issue));
-        })
-      )
-    ).flat();
-
-    debugLogIssues(`Dependencies used by ${pluginTitle} configuration`, referencedDependencyIssues);
-
-    return referencedDependencyIssues;
   }
 }

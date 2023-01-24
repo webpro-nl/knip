@@ -11,5 +11,9 @@
       "infile": "CHANGELOG.md",
       "preset": "angular"
     }
+  },
+  "hooks": {
+    "before:init": ["npm run lint", "npm test"],
+    "after:bump": "from-hook"
   }
 }

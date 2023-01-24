@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import { _getBinariesFromScripts } from '../../util/binaries/index.js';
+import { _getReferencesFromScripts } from '../../util/binaries/index.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -15,7 +15,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['{apps,libs}/**/project.json'];
 
-const findNxDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
   const config: NxProjectConfiguration = await _load(configFilePath);
   if (!config) return [];
   const targets = config.targets ? Object.values(config.targets) : [];
@@ -33,9 +33,9 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, { manif
       .flatMap(target => (target.options?.commands ?? target.options?.command ? [target.options.command] : []))
   );
 
-  const binaries = _getBinariesFromScripts(scripts, { manifest, knownGlobalsOnly: true });
+  const { binaries, entryFiles } = _getReferencesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true });
 
-  return [...executors, ...binaries];
+  return { dependencies: [...executors, ...binaries], entryFiles };
 };
 
 export const findDependencies = timerify(findNxDependencies);
