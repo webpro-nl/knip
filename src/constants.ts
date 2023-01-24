@@ -17,6 +17,7 @@ export const TEST_FILE_PATTERNS = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/__tes
 
 // Binaries that are expected to be globally installed (i.e. https://www.npmjs.com/package/[name] is NOT the expected dependency)
 export const IGNORED_GLOBAL_BINARIES = [
+  'bun',
   'deno',
   'git',
   'node',
@@ -32,6 +33,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'mkdir',
   'mv',
   'rm',
+  'sh',
   'sudo',
 ];
 
