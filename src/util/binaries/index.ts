@@ -5,17 +5,38 @@ import { timerify } from '../performance.js';
 import { getBinariesFromScript } from './bash-parser.js';
 import type { PackageJson } from 'type-fest';
 
-type Options = { manifest?: PackageJson; ignore?: string[]; knownGlobalsOnly?: boolean };
+type Options = { cwd?: string; manifest?: PackageJson; ignore?: string[]; knownGlobalsOnly?: boolean };
 
-type GetBinariesFromScripts = (npmScripts: string | string[], options?: Options) => string[];
+type GetBinariesFromScripts = (
+  npmScripts: string | string[],
+  options?: Options
+) => { entryFiles: string[]; binaries: string[] };
 
-export const getBinariesFromScripts: GetBinariesFromScripts = (npmScripts, options = {}) => {
-  const { manifest = {}, ignore = [], knownGlobalsOnly = false } = options;
-  return compact([npmScripts].flat().flatMap(script => getBinariesFromScript(script, { manifest, knownGlobalsOnly })))
-    .map(stripBinary)
-    .map(getPackageNameFromModuleSpecifier)
-    .filter(binary => !binary.startsWith('.'))
-    .filter(binaryName => !IGNORED_GLOBAL_BINARIES.includes(binaryName) && !ignore.includes(binaryName));
+const partition = (values: string[]) =>
+  values.reduce(
+    (acc, value) => {
+      acc[value.startsWith('/') ? 1 : 0].push(value);
+      return acc;
+    },
+    [[], []] as [string[], string[]]
+  );
+
+const getReferencesFromScripts: GetBinariesFromScripts = (npmScripts, options = {}) => {
+  const { cwd = process.cwd(), manifest = {}, ignore = [], knownGlobalsOnly = false } = options;
+  const results = [npmScripts]
+    .flat()
+    .flatMap(script => getBinariesFromScript(script, { cwd, manifest, knownGlobalsOnly }));
+
+  const [binaries, entryFiles] = partition(compact(results));
+
+  return {
+    entryFiles,
+    binaries: binaries
+      .map(stripBinary)
+      .filter(binary => !binary.startsWith('.')) // TODO Find better solution
+      .map(getPackageNameFromModuleSpecifier)
+      .filter(binaryName => !IGNORED_GLOBAL_BINARIES.includes(binaryName) && !ignore.includes(binaryName)),
+  };
 };
 
-export const _getBinariesFromScripts = timerify(getBinariesFromScripts);
+export const _getReferencesFromScripts = timerify(getReferencesFromScripts);

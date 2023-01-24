@@ -1,4 +1,4 @@
-import { getBinariesFromScripts } from '../util/binaries/index.js';
+import { _getReferencesFromScripts } from '../util/binaries/index.js';
 import { timerify } from '../util/performance.js';
 import { getPackageManifest } from './helpers.js';
 import type { Configuration } from '../types/config.js';
@@ -26,7 +26,11 @@ const findManifestDependencies = async ({ rootConfig, manifest, isRoot, isProduc
     }
     return scripts;
   }, [] as string[]);
-  const referencedBinaries = getBinariesFromScripts(scripts, { manifest, ignore: rootConfig.ignoreBinaries });
+  const { entryFiles, binaries: referencedBinaries } = _getReferencesFromScripts(scripts, {
+    cwd: dir,
+    manifest,
+    ignore: rootConfig.ignoreBinaries,
+  });
 
   // Find all binaries for each dependency
   const installedBinaries: InstalledBinaries = new Map();
@@ -75,6 +79,7 @@ const findManifestDependencies = async ({ rootConfig, manifest, isRoot, isProduc
     dependencies: Array.from(referencedDependencies),
     peerDependencies,
     installedBinaries,
+    entryFiles,
   };
 };
 

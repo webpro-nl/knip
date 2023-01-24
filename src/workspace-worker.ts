@@ -52,6 +52,7 @@ export default class WorkspaceWorker {
   referencedDependencies: ReferencedDependencies = new Set();
   peerDependencies: PeerDependencies = new Map();
   installedBinaries: InstalledBinaries = new Map();
+  entryFiles: Set<string> = new Set();
 
   negatedWorkspacePatterns: string[] = [];
   enabled: Record<PluginName, boolean>;
@@ -122,7 +123,7 @@ export default class WorkspaceWorker {
   }
 
   async initReferencedDependencies() {
-    const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies({
+    const { dependencies, peerDependencies, installedBinaries, entryFiles } = await npm.findDependencies({
       rootConfig: this.rootConfig,
       manifest: this.manifest,
       isRoot: this.isRoot,
@@ -137,6 +138,7 @@ export default class WorkspaceWorker {
     );
     dependencies.forEach(dependency => this.referencedDependencies.add(dependency));
 
+    entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
     this.peerDependencies = peerDependencies;
 
     this.installedBinaries = installedBinaries;

@@ -14,7 +14,7 @@ const spawningBinaries = ['cross-env', 'dotenv'];
 
 export const getBinariesFromScript = (
   script: string,
-  { manifest, knownGlobalsOnly = false }: { manifest: PackageJson; knownGlobalsOnly?: boolean }
+  { cwd, manifest, knownGlobalsOnly = false }: { cwd: string; manifest: PackageJson; knownGlobalsOnly?: boolean }
 ) => {
   const findBinaries = (items: Item[]): string[] =>
     items.flatMap(item => {
@@ -33,7 +33,7 @@ export const getBinariesFromScript = (
           if (['!', 'test'].includes(binary)) return findBinaries(parse(args.join(' ')).commands);
 
           if (binary in KnownResolvers) {
-            return KnownResolvers[binary as KnownResolver].resolve(binary, args, manifest);
+            return KnownResolvers[binary as KnownResolver].resolve(binary, args, cwd, manifest);
           }
 
           // We need a way to bail out for scripts in environments like GitHub Actions, which are provisioned with lots
@@ -52,7 +52,7 @@ export const getBinariesFromScript = (
           }
 
           // We simply apply the node resolver for packages that also support --require (e.g. nodemon, mocha)
-          return [binary, ...KnownResolvers.node.resolve(binary, args)];
+          return [binary, ...KnownResolvers.node.resolve(binary, args, cwd)];
         }
         case 'LogicalExpression':
           return findBinaries([item.left, item.right]);

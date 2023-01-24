@@ -35,7 +35,7 @@ const commands = [
   'workspaces',
 ];
 
-export const resolve = (binary: string, args: string[], manifest: PackageJson) => {
+export const resolve = (binary: string, args: string[], cwd: string, manifest: PackageJson) => {
   const scripts = manifest.scripts ? Object.keys(manifest.scripts) : [];
   const parsed = parseArgs(args, {});
   const [command, result] = parsed._;
