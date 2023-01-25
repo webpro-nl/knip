@@ -15,7 +15,7 @@ type GetBinariesFromScripts = (
 const partition = (values: string[]) =>
   values.reduce(
     (acc, value) => {
-      acc[value.startsWith('/') ? 1 : 0].push(value);
+      acc[/^(\/|[A-Z]:)/.test(value) ? 1 : 0].push(value);
       return acc;
     },
     [[], []] as [string[], string[]]
