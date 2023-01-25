@@ -32,11 +32,18 @@ test('getReferencesFromScripts', () => {
 test('getReferencesFromScripts (node)', () => {
   t('node -r script.js', [], [js]);
   t('node -r package/script', ['package']);
-  t('node -r ./require.js script.js', [], [req, js]);
-  t('node --require=pkg1 --require pkg2 script.js', ['pkg1', 'pkg2'], [js]);
+  t('node -r ./require.js script.js', [], [js, req]);
+  t('node --require=pkg1 --require pkg2 script', ['pkg1', 'pkg2'], [js]);
   t('node --experimental-loader ts-node/esm/transpile-only script.js', ['ts-node'], [js]);
-  t('node -r @scope/package/register ./dir/index.js', ['@scope/package'], [index]);
+  t('node -r @scope/package/register ./dir', ['@scope/package'], [index]);
+});
+
+test('getReferencesFromScripts (ts-node/tsx)', () => {
   t('ts-node --require pkg/register main.ts', ['ts-node', 'pkg'], [ts]);
+  t('tsx ./main.ts', ['tsx'], [ts]);
+  t('tsx watch ./main.ts', ['tsx'], [ts]);
+  t('node --loader tsx ./main.ts', ['tsx'], [ts]);
+  t('npx tsx main', ['tsx'], [ts]);
 });
 
 test('getReferencesFromScripts (--require)', () => {
@@ -61,16 +68,16 @@ test('getReferencesFromScripts (dotenv)', () => {
 
 test('getReferencesFromScripts (cross-env)', () => {
   t('cross-env program', ['cross-env', 'program']);
-  t('cross-env NODE_ENV=p program', ['cross-env', 'program']);
-  t('cross-env NODE_ENV=p program subcommand', ['cross-env', 'program']);
+  t('cross-env NODE_ENV=production program', ['cross-env', 'program']);
+  t('cross-env NODE_ENV=production program subcommand', ['cross-env', 'program']);
   t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', ['cross-env', 'program']);
-  t('cross-env NODE_ENV=p program -r pkg/config ./s.js -w ./s.js', ['cross-env', 'program', 'pkg']);
-  t('NODE_ENV=p cross-env -- program --cache', ['cross-env', 'program']);
+  t('cross-env NODE_ENV=production program -r pkg/config ./s.js -w ./s.js', ['cross-env', 'program', 'pkg']);
+  t('NODE_ENV=production cross-env -- program --cache', ['cross-env', 'program']);
 });
 
 test('getReferencesFromScripts (cross-env/node)', () => {
-  t('cross-env NODE_ENV=p node -r node_modules/dotenv/config ./script.js', ['cross-env', 'dotenv'], [js]);
-  t('cross-env NODE_ENV=p node -r esm script.js', ['cross-env', 'esm'], [js]);
+  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['cross-env', 'dotenv'], [js]);
+  t('cross-env NODE_ENV=production node -r esm script.js', ['cross-env', 'esm'], [js]);
 });
 
 test('getReferencesFromScripts (npm)', () => {
@@ -78,11 +85,19 @@ test('getReferencesFromScripts (npm)', () => {
   t('npm run publish:latest -- --npm-tag=debug --no-push', []);
 });
 
-test('getReferencesFromScripts (npx)', () => {
+test('getReferencesFromScripts (npx)', { only: true }, () => {
+  t('npx pkg', ['pkg']);
+  t('npx prisma migrate reset --force', ['prisma']);
+  t('npx @scope/pkg', ['@scope/pkg']);
+  t('npx tsx watch main', ['tsx'], [ts]);
   t('npx -y pkg', []);
   t('npx --yes pkg', []);
-  t('npx --no commitlint --edit ${1}', ['commitlint']);
-  t('npx --no -- commitlint --edit ${1}', ['commitlint']);
+  t('npx --no pkg --edit ${1}', ['pkg']);
+  t('npx --no -- pkg --edit ${1}', ['pkg']);
+  t('npx pkg install --with-deps', ['pkg']);
+  t('npx pkg migrate reset --force', ['pkg']);
+  t('npx pkg@0.6.0 -- curl --output /dev/null', ['pkg', 'curl']);
+  t('npx @scope/pkg@0.6.0 -- curl', ['@scope/pkg', 'curl']);
 });
 
 test('getReferencesFromScripts (pnpm)', () => {
