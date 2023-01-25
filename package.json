@@ -45,7 +45,7 @@
     "bash-parser": "^0.5.0",
     "chalk": "^5.2.0",
     "easy-table": "^1.2.0",
-    "esbuild": "^0.17.3",
+    "esbuild": "^0.17.4",
     "esbuild-register": "3.4.2",
     "eslint": "^8.32.0",
     "fast-glob": "^3.2.12",
@@ -64,7 +64,7 @@
     "zod": "^3.20.2"
   },
   "devDependencies": {
-    "@jest/types": "29.3.1",
+    "@jest/types": "^29.4.0",
     "@npmcli/package-json": "3.0.0",
     "@release-it/bumper": "^4.0.2",
     "@types/eslint": "8.4.10",
@@ -74,8 +74,8 @@
     "@types/node": "18.11.18",
     "@types/npmcli__map-workspaces": "3.0.0",
     "@types/webpack": "5.28.0",
-    "@typescript-eslint/eslint-plugin": "5.48.2",
-    "@typescript-eslint/parser": "5.48.2",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
     "eslint-import-resolver-typescript": "3.5.3",
     "eslint-plugin-import": "2.27.5",
     "globstar": "1.0.0",
@@ -84,7 +84,7 @@
     "remark-cli": "11.0.0",
     "remark-preset-webpro": "0.0.1",
     "tsx": "3.12.2",
-    "type-fest": "3.5.2",
+    "type-fest": "^3.5.3",
     "typescript": "4.9.4"
   },
   "engines": {
