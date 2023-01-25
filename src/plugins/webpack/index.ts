@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
@@ -50,10 +51,12 @@ const resolveUseItem = (use: RuleSetUseItem) => {
   return [];
 };
 
-const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
   const config: WebpackConfig = await _load(configFilePath);
 
   if (!config) return [];
+
+  const entryFiles: Set<string> = new Set();
 
   // Projects may use a single config function for both development and production modes, so resolve it twice
   const passes = typeof config === 'function' ? [false, true] : [isProduction];
@@ -64,8 +67,21 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
     const cfg = typeof config === 'function' ? config(env, argv) : config;
 
     return [cfg].flat().flatMap(config => {
-      const dependencies = config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? [];
-      return dependencies.map(loader => loader.replace(/\?.*/, '')).map(getPackageName);
+      const dependencies = (config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? [])
+        .map(loader => loader.replace(/\?.*/, ''))
+        .map(getPackageName);
+
+      if (cfg.entry) {
+        const entries =
+          typeof cfg.entry === 'string'
+            ? [cfg.entry]
+            : Array.isArray(cfg.entry)
+            ? cfg.entry
+            : Object.values(cfg.entry).map(entry => (typeof entry === 'string' ? entry : entry.filename));
+        entries.forEach(entry => entryFiles.add(path.join(cwd, entry)));
+      }
+
+      return dependencies;
     });
   });
 
@@ -73,7 +89,10 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
   const webpackCLI = scripts.some(script => script?.includes('webpack ')) ? ['webpack-cli'] : [];
   const webpackDevServer = scripts.some(script => script?.includes('webpack serve')) ? ['webpack-dev-server'] : [];
 
-  return compact([...dependencies, ...webpackCLI, ...webpackDevServer]);
+  return {
+    dependencies: compact([...dependencies, ...webpackCLI, ...webpackDevServer]),
+    entryFiles: Array.from(entryFiles),
+  };
 };
 
 export const findDependencies = timerify(findWebpackDependencies);

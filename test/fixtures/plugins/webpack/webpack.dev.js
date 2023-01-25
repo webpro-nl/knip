@@ -4,6 +4,10 @@ const common = require('./webpack.common.js');
 
 module.exports = () =>
   merge(common(), {
+    entry: {
+      main: './src/app.ts',
+      vendor: './src/vendor.ts',
+    },
     module: {
       rules: [
         {
