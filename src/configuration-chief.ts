@@ -17,15 +17,13 @@ import type { RawConfiguration, Configuration, PluginName, WorkspaceConfiguratio
 import type { PackageJson } from '@npmcli/package-json';
 
 const {
-  values: {
-    config: rawConfigArg,
-    workspace: rawWorkspaceArg,
-    include = [],
-    exclude = [],
-    dependencies = false,
-    exports = false,
-  },
-} = parsedArgs;
+  config: rawConfigArg,
+  workspace: rawWorkspaceArg,
+  include = [],
+  exclude = [],
+  dependencies = false,
+  exports = false,
+} = parsedArgs.values;
 
 const defaultWorkspaceConfig: WorkspaceConfiguration = DEFAULT_WORKSPACE_CONFIG;
 

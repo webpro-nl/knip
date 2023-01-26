@@ -13,23 +13,21 @@ import { main } from './index.js';
 import type { IssueType } from './types/issues.js';
 
 const {
-  values: {
-    debug: isDebug = false,
-    help: isHelp,
-    'include-entry-exports': isIncludeEntryExports = false,
-    'max-issues': maxIssues = '0',
-    'no-exit-code': noExitCode = false,
-    'no-gitignore': isNoGitIgnore = false,
-    'no-progress': isNoProgress = false,
-    performance: isObservePerf = false,
-    production: isProduction = false,
-    reporter = 'symbols',
-    'reporter-options': reporterOptions = '',
-    strict: isStrict = false,
-    tsConfig,
-    version: isVersion,
-  },
-} = parsedArgs;
+  debug: isDebug = false,
+  help: isHelp,
+  'include-entry-exports': isIncludeEntryExports = false,
+  'max-issues': maxIssues = '0',
+  'no-exit-code': noExitCode = false,
+  'no-gitignore': isNoGitIgnore = false,
+  'no-progress': isNoProgress = false,
+  performance: isObservePerf = false,
+  production: isProduction = false,
+  reporter = 'symbols',
+  'reporter-options': reporterOptions = '',
+  strict: isStrict = false,
+  tsConfig,
+  version: isVersion,
+} = parsedArgs.values;
 
 if (isHelp) {
   console.log(helpText);
