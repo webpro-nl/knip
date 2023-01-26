@@ -3,7 +3,7 @@ import parse from 'bash-parser';
 import parseArgs from 'minimist';
 import * as FallbackResolver from './resolvers/fallback.js';
 import * as KnownResolvers from './resolvers/index.js';
-import type { Item } from 'bash-parser';
+import type { Node } from 'bash-parser';
 import type { PackageJson } from 'type-fest';
 
 // https://vorpaljs.github.io/bash-parser-playground/
@@ -17,29 +17,29 @@ export const getBinariesFromScript = (
   script: string,
   { cwd, manifest, knownGlobalsOnly = false }: { cwd: string; manifest: PackageJson; knownGlobalsOnly?: boolean }
 ) => {
-  const findByArgs = (args: string[]) => (args.length > 0 ? findBinaries(parse(args.join(' ')).commands) : []);
+  if (!script) return [];
 
-  const findBinaries = (items: Item[]): string[] =>
-    items.flatMap(item => {
-      switch (item.type) {
+  // Helper for recursive calls
+  const fromArgs = (args: string[]) => getBinariesFromScript(args.join(' '), { cwd, manifest });
+
+  const getBinariesFromNodes = (nodes: Node[]): string[] =>
+    nodes.flatMap(node => {
+      switch (node.type) {
         case 'Command': {
-          const binary = item.name?.text;
+          const binary = node.name?.text;
 
           // Bunch of early bail outs for things we can't or don't want to resolve
           if (!binary || binary === '.' || binary === 'source') return [];
           if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
           if (['bun', 'deno'].includes(binary)) return [];
 
-          const args = item.suffix?.map(arg => arg.text) ?? [];
+          const args = node.suffix?.map(arg => arg.text) ?? [];
 
           // Commands that precede other commands, try again with the rest
-          if (['!', 'test'].includes(binary)) return findByArgs(args);
+          if (['!', 'test'].includes(binary)) return fromArgs(args);
 
           if (binary in KnownResolvers) {
-            return KnownResolvers[binary as KnownResolver].resolve(binary, args, cwd, manifest, (args: string[]) => {
-              const [binary, ...rest] = args;
-              return FallbackResolver.resolve(binary, rest, cwd);
-            });
+            return KnownResolvers[binary as KnownResolver].resolve(binary, args, { cwd, manifest, fromArgs });
           }
 
           // We need a way to bail out for scripts in environments like GitHub Actions, which are provisioned with lots
@@ -51,26 +51,26 @@ export const getBinariesFromScript = (
             const [spawnedBinary] = parsedArgs._;
             if (spawnedBinary) {
               const restArgs = args.slice(args.indexOf(spawnedBinary));
-              return [binary, ...findByArgs(restArgs)];
+              return [binary, ...fromArgs(restArgs)];
             } else {
               return [];
             }
           }
 
           // We apply a kitchen sink fallback resolver for everything else
-          return FallbackResolver.resolve(binary, args, cwd);
+          return FallbackResolver.resolve(binary, args, { cwd, manifest, fromArgs });
         }
         case 'LogicalExpression':
-          return findBinaries([item.left, item.right]);
+          return getBinariesFromNodes([node.left, node.right]);
         case 'If':
-          return findBinaries([...item.clause.commands, ...item.then.commands]);
+          return getBinariesFromNodes([...node.clause.commands, ...node.then.commands]);
         case 'For':
-          return findBinaries(item.do.commands);
+          return getBinariesFromNodes(node.do.commands);
         default:
           return [];
       }
     });
 
   const parsed = parse(script);
-  return parsed?.commands ? findBinaries(parsed.commands) : [];
+  return parsed?.commands ? getBinariesFromNodes(parsed.commands) : [];
 };

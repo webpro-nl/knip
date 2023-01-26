@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import type { PackageJson } from 'type-fest';
+import type { Resolver } from '../types.js';
 
 // https://pnpm.io/cli/add
 
@@ -36,7 +36,7 @@ const commands = [
   'tst',
 ];
 
-export const resolve = (binary: string, args: string[], cwd: string, manifest: PackageJson) => {
+export const resolve: Resolver = (binary, args, { manifest }) => {
   const scripts = manifest.scripts ? Object.keys(manifest.scripts) : [];
   const parsed = parseArgs(args, {});
   const [command, result] = parsed._;

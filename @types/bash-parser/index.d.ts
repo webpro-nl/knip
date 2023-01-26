@@ -12,9 +12,7 @@ declare module 'bash-parser' {
   type Command = {
     type: 'Command';
     name?: Name;
-    suffix: {
-      text: string;
-    }[];
+    suffix: Name[];
   };
 
   type LogicalExpression = {
@@ -46,11 +44,11 @@ declare module 'bash-parser' {
     body: CompoundList;
   };
 
-  export type Item = Command | LogicalExpression | If | For | Function_;
+  export type Node = Command | LogicalExpression | If | For | Function_;
 
   export type AST = {
     type: 'Script';
-    commands: Item[];
+    commands: Node[];
   };
 
   declare const parse: (s: string) => AST;

@@ -1,30 +1,19 @@
-import path from 'node:path';
 import parseArgs from 'minimist';
-import { tryResolve } from '../../require.js';
+import { tryResolveFilePath } from './node.js';
+import type { Resolver } from '../types.js';
 import type { ParsedArgs } from 'minimist';
 
-const resolveArguments = {
-  'ts-node': (parsed: ParsedArgs): string[] => [parsed._[0], parsed.require].flat(),
-  tsx: (parsed: ParsedArgs): string[] => parsed._.filter(p => p !== 'watch'),
-  default: (parsed: ParsedArgs): string[] => [parsed.require].flat(),
+type ArgResolvers = Record<string, (parsed: ParsedArgs) => string[]>;
+
+const argResolvers: ArgResolvers = {
+  'ts-node': parsed => [parsed._[0], parsed.require].flat(),
+  tsx: parsed => parsed._.filter(p => p !== 'watch'),
+  default: parsed => [parsed.require].flat(),
 };
 
-export const resolve = (binary: string, args: string[], cwd: string): string[] => {
+export const resolve: Resolver = (binary, args, { cwd }) => {
   const parsed = parseArgs(args, { string: ['r'], alias: { require: ['r', 'loader'] } });
-  const resolver = resolveArguments[binary as keyof typeof resolveArguments] ?? resolveArguments.default;
+  const resolver = argResolvers[binary as keyof typeof argResolvers] ?? argResolvers.default;
   const resolve = resolver(parsed);
-  return [
-    binary,
-    ...resolve.flatMap(specifier => {
-      if (specifier) {
-        const filePath = path.join(cwd, specifier);
-        if (filePath.startsWith(cwd)) {
-          const resolvedFilePath = tryResolve(filePath);
-          if (resolvedFilePath) return [resolvedFilePath];
-        }
-        return [specifier];
-      }
-      return [];
-    }),
-  ];
+  return [binary, ...resolve.flatMap(specifier => tryResolveFilePath(cwd, specifier))];
 };

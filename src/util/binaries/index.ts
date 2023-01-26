@@ -3,14 +3,7 @@ import { compact } from '../array.js';
 import { getPackageNameFromModuleSpecifier, stripBinary } from '../modules.js';
 import { timerify } from '../performance.js';
 import { getBinariesFromScript } from './bash-parser.js';
-import type { PackageJson } from 'type-fest';
-
-type Options = { cwd?: string; manifest?: PackageJson; ignore?: string[]; knownGlobalsOnly?: boolean };
-
-type GetBinariesFromScripts = (
-  npmScripts: string | string[],
-  options?: Options
-) => { entryFiles: string[]; binaries: string[] };
+import type { GetBinariesFromScripts } from './types.js';
 
 const partition = (values: string[]) =>
   values.reduce(

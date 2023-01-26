@@ -1,9 +1,7 @@
 import parseArgs from 'minimist';
-import type { PackageJson } from 'type-fest';
+import type { Resolver } from '../types.js';
 
-type FindByArgs = (args: string[]) => string[];
-
-export const resolve = (binary: string, args: string[], cwd: string, manifest: PackageJson, findByArgs: FindByArgs) => {
+export const resolve: Resolver = (binary, args, { fromArgs }) => {
   const parsed = parseArgs(args, { '--': true, stopEarly: true, boolean: ['yes', 'no'], alias: { yes: 'y', no: 'n' } });
-  return [...(parsed.yes ? [] : findByArgs(parsed._)), ...(parsed['--'] ? findByArgs(parsed['--']) : [])];
+  return [...(parsed.yes ? [] : fromArgs(parsed._)), ...(parsed['--'] ? fromArgs(parsed['--']) : [])];
 };
