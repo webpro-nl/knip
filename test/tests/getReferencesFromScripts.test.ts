@@ -85,7 +85,7 @@ test('getReferencesFromScripts (npm)', () => {
   t('npm run publish:latest -- --npm-tag=debug --no-push', []);
 });
 
-test('getReferencesFromScripts (npx)', { only: true }, () => {
+test('getReferencesFromScripts (npx)', () => {
   t('npx pkg', ['pkg']);
   t('npx prisma migrate reset --force', ['prisma']);
   t('npx @scope/pkg', ['@scope/pkg']);
@@ -102,10 +102,12 @@ test('getReferencesFromScripts (npx)', { only: true }, () => {
 
 test('getReferencesFromScripts (pnpm)', () => {
   t('pnpm exec program', ['program']);
-  t('pnpm run program', ['program']);
+  t('pnpm run program', []);
   t('pnpm program', ['program']);
   t('pnpm run program', [], [], pkgScripts);
   t('pnpm program', [], [], pkgScripts);
+  t('pnpm dlx pkg', []);
+  t('pnpm --package=pkg-a dlx pkg', []);
 });
 
 test('getReferencesFromScripts (yarn)', () => {
@@ -114,6 +116,9 @@ test('getReferencesFromScripts (yarn)', () => {
   t('yarn program', ['program']);
   t('yarn run program', [], [], pkgScripts);
   t('yarn program', [], [], pkgScripts);
+  t('yarn dlx pkg', []);
+  t('yarn --package=pkg-a -p pkg-b dlx pkg', []);
+  t('yarn node script.js', [], [js]);
 });
 
 test('getReferencesFromScripts (bash expressions)', () => {

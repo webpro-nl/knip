@@ -5,6 +5,8 @@ import type { Resolver } from '../types.js';
 
 const commands = [
   'add',
+  'dlx',
+  'run',
   'i',
   'install',
   'up',
@@ -41,7 +43,6 @@ export const resolve: Resolver = (binary, args, { manifest }) => {
   const parsed = parseArgs(args, {});
   const [command, result] = parsed._;
   if (scripts.includes(command) || commands.includes(command)) return [];
-  if (command === 'run' && scripts.includes(result)) return [];
-  if (command === 'exec' || command === 'run') return [result];
+  if (command === 'exec') return [result];
   return command ? [command] : [];
 };

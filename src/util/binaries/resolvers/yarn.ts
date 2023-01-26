@@ -42,5 +42,6 @@ export const resolve: Resolver = (binary, args, { manifest, fromArgs }) => {
   if (scripts.includes(command) || commands.includes(command)) return [];
   if (command === 'run' && scripts.includes(result)) return [];
   if (command === 'run' || command === 'exec') return [result];
+  if (command === 'node') return fromArgs(parsed._);
   return command ? [command] : [];
 };
