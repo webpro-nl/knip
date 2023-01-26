@@ -2,11 +2,12 @@
 
 import './util/register.js';
 import path from 'node:path';
+import prettyMilliseconds from 'pretty-ms';
 import reporters from './reporters/index.js';
 import parsedArgs, { helpText } from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
 import { _load } from './util/loader.js';
-import { measure } from './util/performance.js';
+import { Performance } from './util/performance.js';
 import { version } from './version.js';
 import { main } from './index.js';
 import type { IssueType } from './types/issues.js';
@@ -20,6 +21,7 @@ const {
     'no-exit-code': noExitCode = false,
     'no-gitignore': isNoGitIgnore = false,
     'no-progress': isNoProgress = false,
+    performance: isObservePerf = false,
     production: isProduction = false,
     reporter = 'symbols',
     'reporter-options': reporterOptions = '',
@@ -49,6 +51,8 @@ const printReport =
 
 const run = async () => {
   try {
+    const perfObserver = new Performance(isObservePerf);
+
     const { report, issues, counters } = await main({
       cwd,
       tsConfigFile: tsConfig,
@@ -65,7 +69,12 @@ const run = async () => {
       .filter(reportGroup => report[reportGroup])
       .reduce((errorCount: number, reportGroup) => errorCount + counters[reportGroup], 0);
 
-    await measure.print();
+    if (isObservePerf) {
+      await perfObserver.finalize();
+      console.log('\n' + perfObserver.getTable());
+      console.log('\nTotal running time:', prettyMilliseconds(perfObserver.getTotalTime()));
+      perfObserver.reset();
+    }
 
     if (!noExitCode && totalErrorCount > Number(maxIssues)) {
       process.exit(totalErrorCount);

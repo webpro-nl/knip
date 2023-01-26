@@ -1,28 +1,28 @@
 import { performance, PerformanceObserver, PerformanceEntry } from 'node:perf_hooks';
 import EasyTable from 'easy-table';
-import prettyMilliseconds from 'pretty-ms';
+// eslint-disable-next-line import/order -- Modules in @types are handled differently
+import Summary from 'summary';
 import parsedArgs from './cli-arguments.js';
 import type { TimerifyOptions } from 'node:perf_hooks';
-import Summary from 'summary';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Timerify = <T extends (...params: any[]) => any>(fn: T, options?: TimerifyOptions) => T;
 
-const { values } = parsedArgs;
-const { performance: isEnabled = false } = values;
+const { performance: isEnabled = false } = parsedArgs.values;
 
 // Naming convention: _wrapped() functions are prefixed with an underscore
 export const timerify: Timerify = fn => (isEnabled ? performance.timerify(fn) : fn);
 
-class Performance {
-  enabled: boolean;
+export class Performance {
+  isEnabled: boolean;
   startTime = 0;
+  endTime = 0;
   entries: PerformanceEntry[] = [];
   instanceId?: number;
   observer?: PerformanceObserver;
 
-  constructor(enabled: boolean) {
-    if (enabled) {
+  constructor(isEnabled: boolean) {
+    if (isEnabled) {
       this.startTime = performance.now();
       this.instanceId = Math.floor(performance.now() * 100);
       this.observer = new PerformanceObserver(items => {
@@ -30,19 +30,17 @@ class Performance {
           this.entries.push(entry);
         });
       });
-      this.observer.observe({ entryTypes: ['measure', 'function'] });
+      this.observer.observe({ entryTypes: ['function'] });
     }
-    this.enabled = enabled;
+    this.isEnabled = isEnabled;
   }
 
-  start(name: string) {
-    if (!this.enabled) return;
+  private setMark(name: string) {
     const id = `${this.instanceId}:${name}`;
     performance.mark(`${id}:start`);
   }
 
-  end(name: string) {
-    if (!this.enabled) return;
+  private clearMark(name: string) {
     const id = `${this.instanceId}:${name}`;
     performance.mark(`${id}:end`);
     performance.measure(id, `${id}:start`, `${id}:end`);
@@ -50,7 +48,13 @@ class Performance {
     performance.clearMarks(`${id}:end`);
   }
 
-  getEntriesByName() {
+  private async flush() {
+    this.setMark('_flush');
+    await new Promise(resolve => setTimeout(resolve, 1));
+    this.clearMark('_flush');
+  }
+
+  private getEntriesByName() {
     return this.entries.reduce((entries, entry) => {
       const name = entry.name.replace(`${this.instanceId}:`, '');
       entries[name] = entries[name] ?? [];
@@ -73,26 +77,22 @@ class Performance {
       table.newRow();
     });
     table.sort(['sum|des']);
-    return table;
+    return table.toString().trim();
   }
 
-  async flush() {
-    this.start('_flush');
-    await new Promise(resolve => setTimeout(resolve, 1));
-    this.end('_flush');
+  getTotalTime() {
+    return this.endTime - this.startTime;
   }
 
-  async print() {
-    if (!this.enabled) return;
+  public async finalize() {
+    if (!this.isEnabled) return;
+    this.endTime = performance.now();
+    // Workaround to get all entries
     await this.flush();
-    console.log('\n' + this.getTable().toString().trim());
-    console.log('\nTotal running time:', prettyMilliseconds(performance.now() - this.startTime));
   }
 
-  reset() {
+  public reset() {
     this.entries = [];
     this.observer?.disconnect();
   }
 }
-
-export const measure = new Performance(isEnabled);
