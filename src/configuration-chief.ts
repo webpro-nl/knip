@@ -8,8 +8,8 @@ import { arrayify } from './util/array.js';
 import parsedArgs from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
-import { ensurePosixPath } from './util/glob.js';
 import { _load } from './util/loader.js';
+import { relativePosix } from './util/path.js';
 import { toCamelCase } from './util/plugin.js';
 import { resolveIncludedIssueTypes } from './util/resolve-included-issue-types.js';
 import { byPathDepth } from './util/workspace.js';
@@ -182,9 +182,7 @@ export default class ConfigurationChief {
         ignore: this.config.ignoreWorkspaces,
         absolute: false,
       });
-      this.manifestWorkspaces = Array.from(workspaces.values())
-        .map(dir => path.relative(this.cwd, dir))
-        .map(ensurePosixPath);
+      this.manifestWorkspaces = Array.from(workspaces.values()).map(dir => relativePosix(this.cwd, dir));
       return this.manifestWorkspaces;
     }
     return [];

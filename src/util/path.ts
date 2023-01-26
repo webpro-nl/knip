@@ -1,6 +1,7 @@
 import path from 'node:path';
-import { ensurePosixPath } from './glob.js';
 
 const cwd = process.cwd();
 
-export const relative = (to: string) => ensurePosixPath(path.relative(cwd, to));
+export const toPosixPath = (value: string) => value.split(path.sep).join(path.posix.sep);
+
+export const relativePosix = (from: string, to?: string) => toPosixPath(path.relative(to ? from : cwd, to ?? from));

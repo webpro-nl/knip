@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import { isFile } from '../util/fs.js';
-import { relative } from '../util/path.js';
+import { relativePosix } from '../util/path.js';
 import type { Report, ReporterOptions, IssueSet, IssueRecords, SymbolIssueType, Issue } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
@@ -41,7 +41,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
   const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).map(Object.values).flat();
 
   const initRow = (filePath: string) => {
-    const file = relative(filePath);
+    const file = relativePosix(filePath);
     const row: Row = {
       file,
       ...(codeownersEngine && { owners: codeownersEngine.calcFileOwnership(file) }),

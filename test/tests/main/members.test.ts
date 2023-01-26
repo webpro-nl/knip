@@ -1,10 +1,11 @@
+import path from 'node:path';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../../src/index.js';
 import baseArguments from '../../helpers/baseArguments.js';
 import baseCounters from '../../helpers/baseCounters.js';
 
-const cwd = 'test/fixtures/members';
+const cwd = path.resolve('test/fixtures/members');
 
 test('Find unused enum and class members', async () => {
   const { issues, counters } = await main({

@@ -1,10 +1,9 @@
-import path from 'node:path';
 import { SourceFile } from 'ts-morph';
 import { ISSUE_TYPES } from './constants.js';
 import { initReport, initIssues, initCounters } from './issues/initializers.js';
 import { getTitle } from './reporters/util.js';
 import { getLine, LineRewriter } from './util/log.js';
-import { relative } from './util/path.js';
+import { relativePosix } from './util/path.js';
 import type { Issue, Report } from './types/issues.js';
 
 type IssueCollectorOptions = {
@@ -65,8 +64,7 @@ export default class IssueCollector {
   }
 
   addIssue(issue: Issue) {
-    issue.filePath = path.relative(this.cwd, issue.filePath);
-    const key = relative(issue.filePath);
+    const key = relativePosix(this.cwd, issue.filePath);
     this.issues[issue.type][key] = this.issues[issue.type][key] ?? {};
     if (!this.issues[issue.type][key][issue.symbol]) {
       this.issues[issue.type][key][issue.symbol] = issue;
@@ -97,7 +95,7 @@ export default class IssueCollector {
 
     if (issue && processed < total) {
       messages.push('');
-      messages.push(`Processing: ${relative(issue.filePath)}`);
+      messages.push(`Processing: ${relativePosix(issue.filePath)}`);
     }
 
     this.lineRewriter.update(messages);

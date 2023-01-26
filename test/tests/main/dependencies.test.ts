@@ -4,6 +4,7 @@ import test from 'node:test';
 import { main } from '../../../src/index.js';
 import baseArguments from '../../helpers/baseArguments.js';
 import baseCounters from '../../helpers/baseCounters.js';
+import { joinPosix } from '../../helpers/index.js';
 
 const cwd = path.resolve('test/fixtures/dependencies');
 
@@ -13,7 +14,7 @@ test('Find unused dependencies', async () => {
     cwd,
   });
 
-  assert(Array.from(issues.files)[0].endsWith('unused-module.ts'));
+  assert(issues.files.has(joinPosix(cwd, 'unused-module.ts')));
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 1);
   assert(issues.dependencies['package.json']['@tootallnate/once']);
@@ -44,7 +45,7 @@ test('Find unused dependencies (production/strict)', async () => {
     isStrict: true,
   });
 
-  assert(Array.from(issues.files)[0].endsWith('unused-module.ts'));
+  assert(issues.files.has(joinPosix(cwd, 'unused-module.ts')));
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 1);
   assert(issues.dependencies['package.json']['@tootallnate/once']);

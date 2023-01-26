@@ -1,4 +1,4 @@
-import { ensurePosixPath } from './glob.js';
+import { toPosixPath } from './path.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   const parts = moduleSpecifier.split('/').slice(0, 2);
@@ -6,7 +6,7 @@ export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
 };
 
 export const getPackageName = (value: string) => {
-  const match = ensurePosixPath(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g);
+  const match = toPosixPath(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g);
   if (match) return match[match.length - 1];
 
   if (value.startsWith('@')) {

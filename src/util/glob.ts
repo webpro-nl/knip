@@ -5,9 +5,8 @@ import memoize from 'nano-memoize';
 import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
+import { relativePosix } from './path.js';
 import { timerify } from './performance.js';
-
-export const ensurePosixPath = (value: string) => value.split(path.sep).join(path.posix.sep);
 
 const prependDirToPattern = (workingDir: string, pattern: string) => {
   if (pattern.startsWith('!')) return '!' + path.posix.join(workingDir, pattern.slice(1));
@@ -34,9 +33,7 @@ interface GlobOptions extends BaseGlobOptions {
 }
 
 const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = true }: GlobOptions) => {
-  const cwdPosix = ensurePosixPath(cwd);
-  const workingDirPosix = ensurePosixPath(workingDir);
-  const relativePath = path.posix.relative(cwdPosix, workingDirPosix);
+  const relativePath = relativePosix(cwd, workingDir);
 
   // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
   const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);

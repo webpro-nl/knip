@@ -5,6 +5,7 @@ import { main } from '../../../src/index.js';
 import * as webpack from '../../../src/plugins/webpack/index.js';
 import baseArguments from '../../helpers/baseArguments.js';
 import baseCounters from '../../helpers/baseCounters.js';
+import { joinPosix } from '../../helpers/index.js';
 import { getManifest } from '../../helpers/index.js';
 
 const cwd = path.resolve('test/fixtures/plugins/webpack');
@@ -43,7 +44,7 @@ test('Find dependencies in Webpack configuration', async () => {
     cwd,
   });
 
-  assert(issues.files.has(path.join(cwd, 'src/unused.ts')));
+  assert(issues.files.has(joinPosix(cwd, 'src/unused.ts')));
   assert(issues.devDependencies['package.json']['@babel/plugin-proposal-object-rest-spread']);
   assert(issues.unlisted['webpack.config.js']['svgo-loader']);
   assert(issues.unlisted['webpack.dev.js']['eslint-webpack-plugin']);
