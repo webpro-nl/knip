@@ -30,12 +30,14 @@ test('getReferencesFromScripts', () => {
 });
 
 test('getReferencesFromScripts (node)', () => {
+  t('node script.js', [], [js]);
   t('node -r script.js', [], [js]);
   t('node -r package/script', ['package']);
   t('node -r ./require.js script.js', [], [js, req]);
   t('node --require=pkg1 --require pkg2 script', ['pkg1', 'pkg2'], [js]);
   t('node --experimental-loader ts-node/esm/transpile-only script.js', ['ts-node'], [js]);
   t('node -r @scope/package/register ./dir', ['@scope/package'], [index]);
+  t('node dist/index.js', []);
 });
 
 test('getReferencesFromScripts (ts-node/tsx)', () => {

@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import { tryResolveFilePath } from './node.js';
+import { tryResolveFilePaths } from './node.js';
 import type { Resolver } from '../types.js';
 import type { ParsedArgs } from 'minimist';
 
@@ -15,5 +15,5 @@ export const resolve: Resolver = (binary, args, { cwd }) => {
   const parsed = parseArgs(args, { string: ['r'], alias: { require: ['r', 'loader'] } });
   const resolver = argResolvers[binary as keyof typeof argResolvers] ?? argResolvers.default;
   const resolve = resolver(parsed);
-  return [binary, ...resolve.flatMap(specifier => tryResolveFilePath(cwd, specifier))];
+  return [binary, ...tryResolveFilePaths(cwd, resolve)];
 };
