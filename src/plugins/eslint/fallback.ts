@@ -1,0 +1,26 @@
+import { ESLint } from 'eslint';
+import { compact } from '../../util/array.js';
+import { getPackageName } from '../../util/modules.js';
+import { resolvePluginPackageName, getDependenciesFromSettings } from './helpers.js';
+import type { ESLintConfig } from './types.js';
+
+type Options = { cwd: string };
+
+export const fallback = async (configFilePath: string, { cwd }: Options) => {
+  const engine = new ESLint({ cwd, overrideConfigFile: configFilePath, useEslintrc: false });
+
+  const jsConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.js');
+  const tsConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.ts');
+  const tsxConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.tsx');
+
+  const dependencies = [jsConfig, tsConfig, tsxConfig].map(config => {
+    if (!config) return [];
+    const plugins = config.plugins?.map(resolvePluginPackageName) ?? [];
+    const parsers = config.parser ? [config.parser] : [];
+    const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
+    const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
+    return [...parsers, ...extraParsers, ...plugins, ...settings].map(getPackageName);
+  });
+
+  return compact(dependencies.flat());
+};

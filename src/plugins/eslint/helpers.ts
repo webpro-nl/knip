@@ -1,6 +1,40 @@
+import path from 'node:path';
 import { compact } from '../../util/array.js';
+import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
+import { require } from '../../util/require.js';
 import type { ESLintConfig } from './types.js';
+
+const getDependencies = (config: ESLintConfig) => {
+  const extend = config.extends ? [config.extends].flat().map(customResolvePluginPackageNames) : [];
+  if (extend.includes('eslint-plugin-prettier')) extend.push('eslint-config-prettier');
+  const plugins = config.plugins ? config.plugins.map(resolvePluginPackageName) : [];
+  const parser = config.parser;
+  const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
+  const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
+  return compact([...extend, ...plugins, parser, ...extraParsers, ...settings]).map(getPackageName);
+};
+
+export const getDependenciesDeep = async (configFilePath: string, dependencies: Set<string> = new Set()) => {
+  const addAll = (deps: string[] | Set<string>) => deps.forEach(dependency => dependencies.add(dependency));
+
+  const config: ESLintConfig = await _load(configFilePath);
+
+  if (config.extends) {
+    for (const extend of [config.extends].flat()) {
+      if (extend.startsWith('.') || (extend.startsWith('/') && !extend.includes('/node_modules/'))) {
+        const extendConfigFilePath = require.resolve(path.join(path.dirname(configFilePath), extend));
+        addAll(await getDependenciesDeep(extendConfigFilePath));
+      }
+    }
+  }
+
+  if (config.overrides) for (const override of config.overrides) addAll(getDependencies(override));
+
+  addAll(getDependencies(config));
+
+  return dependencies;
+};
 
 const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', pluginName: string) => {
   return pluginName.startsWith('@')
@@ -12,7 +46,7 @@ const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', plugin
 
 export const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
 
-export const customResolvePluginPackageNames = (extend: string) => {
+const customResolvePluginPackageNames = (extend: string) => {
   if (extend.includes('/node_modules/')) return getPackageName(extend);
   if (extend.startsWith('/') || extend.startsWith('.')) return;
   if (extend.includes(':')) {

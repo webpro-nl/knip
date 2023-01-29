@@ -1,6 +1,7 @@
 {
   "name": "eslint",
-  "devDpendencies": {
+  "devDependencies": {
+    "eslint": "*",
     "@nrwl/eslint-plugin-nx": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
