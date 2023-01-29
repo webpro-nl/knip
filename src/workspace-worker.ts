@@ -97,11 +97,10 @@ export default class WorkspaceWorker {
     const pluginEntries = Object.entries(plugins) as PluginNames;
 
     for (const [pluginName, plugin] of pluginEntries) {
-      const hasIsEnabled = typeof plugin.isEnabled === 'function';
+      const isEnabled = this.config[pluginName] !== false;
+      const isEnabledInAncestor = enabledPluginsInAncestors.includes(pluginName);
       this.enabled[pluginName] =
-        this.config[pluginName] !== false &&
-        (enabledPluginsInAncestors.includes(pluginName) ||
-          (hasIsEnabled && (await plugin.isEnabled({ cwd: this.dir, manifest: this.manifest, dependencies }))));
+        isEnabled && (isEnabledInAncestor || (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies })));
     }
 
     this.enabledPlugins = pluginEntries.filter(([name]) => this.enabled[name]).map(([name]) => name);

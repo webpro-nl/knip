@@ -3,7 +3,7 @@ import { compact } from '../array.js';
 import { getPackageNameFromModuleSpecifier, stripBinary } from '../modules.js';
 import { timerify } from '../performance.js';
 import { getBinariesFromScript } from './bash-parser.js';
-import type { GetBinariesFromScripts } from './types.js';
+import type { GetReferencesFromScripts } from './types.js';
 
 const partition = (values: string[]) =>
   values.reduce(
@@ -14,7 +14,7 @@ const partition = (values: string[]) =>
     [[], []] as [string[], string[]]
   );
 
-const getReferencesFromScripts: GetBinariesFromScripts = (npmScripts, options = {}) => {
+const getReferencesFromScripts: GetReferencesFromScripts = (npmScripts, options = {}) => {
   const { cwd = process.cwd(), manifest = {}, ignore = [], knownGlobalsOnly = false } = options;
   const results = [npmScripts]
     .flat()

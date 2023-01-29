@@ -24,7 +24,7 @@ test('Resolve included issue types (exclude some)', async () => {
   assert.deepEqual(config, { ...all, duplicates: false, nsTypes: false });
 });
 
-test('Resolve included issue types (overlap)', { only: true }, async () => {
+test('Resolve included issue types (overlap)', async () => {
   const cliArgs = {
     include: ['exports', 'files', 'nsTypes'],
     exclude: ['files', 'duplicates'],
