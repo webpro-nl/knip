@@ -235,16 +235,16 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const { referencedDependencyIssues, peerDependencies, installedBinaries, entryFiles, enabledPlugins } =
           worker.getFinalDependencies();
 
+        deputy.addPeerDependencies(name, peerDependencies);
+        deputy.setInstalledBinaries(name, installedBinaries);
+        principal.addEntryPaths(entryFiles);
+        enabledPluginsStore.set(name, enabledPlugins);
+
         referencedDependencyIssues.forEach(issue => {
           const workspace = { name, dir, config, ancestors };
           const unlistedDependency = deputy.maybeAddListedReferencedDependency(workspace, issue.symbol);
           if (unlistedDependency) collector.addIssue(issue);
         });
-
-        deputy.addPeerDependencies(name, peerDependencies);
-        deputy.setInstalledBinaries(name, installedBinaries);
-        principal.addEntryPaths(entryFiles);
-        enabledPluginsStore.set(name, enabledPlugins);
       }
     }
   }
