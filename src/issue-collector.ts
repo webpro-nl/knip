@@ -1,10 +1,10 @@
-import { SourceFile } from 'ts-morph';
 import { ISSUE_TYPES } from './constants.js';
 import { initReport, initIssues, initCounters } from './issues/initializers.js';
 import { getTitle } from './reporters/util.js';
 import { getLine, LineRewriter } from './util/log.js';
 import { relativePosix } from './util/path.js';
 import type { Issue, Report } from './types/issues.js';
+import type { SourceFile } from 'ts-morph';
 
 type IssueCollectorOptions = {
   cwd: string;

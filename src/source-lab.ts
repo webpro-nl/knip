@@ -1,4 +1,4 @@
-import { ts, Node, SourceFile } from 'ts-morph';
+import { ts, Node } from 'ts-morph';
 import { findUnusedClassMembers, findUnusedEnumMembers } from './util/members.js';
 import {
   _hasReferencingDefaultImport,
@@ -9,7 +9,7 @@ import {
 } from './util/project.js';
 import { getType } from './util/type.js';
 import type { Report, Issue } from './types/issues.js';
-import type { Identifier } from 'ts-morph';
+import type { SourceFile, Identifier } from 'ts-morph';
 
 type FileLabOptions = {
   report: Report;

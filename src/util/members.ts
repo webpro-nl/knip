@@ -1,6 +1,6 @@
-import { MethodDeclaration, PropertyDeclaration, ts } from 'ts-morph';
+import { ts } from 'ts-morph';
 import { _findReferences, hasExternalReferences, hasInternalReferences } from './project.js';
-import type { ClassDeclaration, EnumDeclaration } from 'ts-morph';
+import type { ClassDeclaration, MethodDeclaration, PropertyDeclaration, EnumDeclaration } from 'ts-morph';
 
 export const findUnusedClassMembers = (declaration: ClassDeclaration, filePath: string) => {
   const members = declaration.getMembers();

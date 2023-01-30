@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { ts, Project, SourceFile } from 'ts-morph';
+import { ts } from 'ts-morph';
 import { debugLogSourceFiles } from './util/debug.js';
 import { toPosixPath } from './util/path.js';
 import {
@@ -8,7 +8,7 @@ import {
   _resolveSourceFileDependencies,
   _removeExternalSourceFiles,
 } from './util/project.js';
-import type { ProjectOptions } from 'ts-morph';
+import type { Project, ProjectOptions, SourceFile } from 'ts-morph';
 import type { TsConfigJson } from 'type-fest';
 
 // Kitchen sink TypeScript config
