@@ -4,6 +4,11 @@ const globSchema = z.union([z.string(), z.array(z.string())]);
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
+const syncCompilerSchema = z.function().args(z.string()).returns(z.string());
+const asyncCompilerSchema = z.function().args(z.string()).returns(z.promise(z.string()));
+const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
+const compilersSchema = z.record(z.string(), compilerSchema);
+
 const rootConfigurationSchema = z.object({
   entry: globSchema.optional(),
   project: globSchema.optional(),
@@ -12,6 +17,9 @@ const rootConfigurationSchema = z.object({
   ignoreBinaries: z.array(z.string()).optional(),
   ignoreDependencies: z.array(z.string()).optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
+  compilers: compilersSchema.optional(),
+  syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
+  asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
 });
 
 const reportConfigSchema = z.object({
@@ -67,6 +75,8 @@ const baseWorkspaceConfigurationSchema = z.object({
   project: globSchema.optional(),
   paths: pathsSchema.optional(),
   ignore: globSchema.optional(),
+  ignoreBinaries: z.array(z.string()).optional(),
+  ignoreDependencies: z.array(z.string()).optional(),
 });
 
 const workspaceConfigurationSchema = baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial());

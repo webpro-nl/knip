@@ -1,4 +1,4 @@
-import { toPosixPath } from './path.js';
+import { isAbsolute, toPosixPath } from './path.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   const parts = moduleSpecifier.split('/').slice(0, 2);
@@ -14,7 +14,7 @@ export const getPackageName = (value: string) => {
     return [scope, packageName].join('/');
   }
 
-  return value.startsWith('/') ? value : value.split('/')[0];
+  return isAbsolute(value) ? value : value.split('/')[0];
 };
 
 export const stripBinary = (command: string) =>

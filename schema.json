@@ -129,7 +129,17 @@
           "title": "Files to ignore in the analysis.",
           "example": ["**/fixtures", "mocks"],
           "default": [],
-          "$ref": "#/definitions/globPatterns"
+          "$ref": "#/definitions/globPatterns",
+          "ignoreBinaries": {
+            "title": "Binaries to ignore",
+            "examples": ["rm", "docker-compose", "curl"],
+            "$ref": "#/definitions/list"
+          },
+          "ignoreDependencies": {
+            "title": "Dependencies from package.json to ignore",
+            "examples": ["husky", "lint-staged"],
+            "$ref": "#/definitions/list"
+          }
         }
       }
     },

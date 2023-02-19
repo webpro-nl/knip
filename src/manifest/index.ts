@@ -1,12 +1,12 @@
 import { _getReferencesFromScripts } from '../util/binaries/index.js';
 import { timerify } from '../util/performance.js';
 import { getPackageManifest } from './helpers.js';
-import type { Configuration } from '../types/config.js';
+import type { WorkspaceConfiguration } from '../types/config.js';
 import type { InstalledBinaries, PeerDependencies } from '../types/workspace.js';
 import type { PackageJson } from 'type-fest';
 
 type Options = {
-  rootConfig: Configuration;
+  config: WorkspaceConfiguration;
   manifest: PackageJson;
   isRoot: boolean;
   isProduction: boolean;
@@ -14,8 +14,8 @@ type Options = {
   cwd: string;
 };
 
-const findManifestDependencies = async ({ rootConfig, manifest, isRoot, isProduction, dir, cwd }: Options) => {
-  const { ignoreBinaries } = rootConfig;
+const findManifestDependencies = async ({ config, manifest, isRoot, isProduction, dir, cwd }: Options) => {
+  const { ignoreBinaries } = config;
   const scriptFilter = isProduction ? ['start', 'postinstall'] : [];
   const referencedDependencies: Set<string> = new Set();
   const peerDependencies: PeerDependencies = new Map();
@@ -29,7 +29,7 @@ const findManifestDependencies = async ({ rootConfig, manifest, isRoot, isProduc
   const { entryFiles, binaries: referencedBinaries } = _getReferencesFromScripts(scripts, {
     cwd: dir,
     manifest,
-    ignore: rootConfig.ignoreBinaries,
+    ignore: ignoreBinaries,
   });
 
   // Find all binaries for each dependency

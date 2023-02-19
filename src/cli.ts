@@ -15,7 +15,6 @@ import type { IssueType } from './types/issues.js';
 const {
   debug: isDebug = false,
   help: isHelp,
-  'include-entry-exports': isIncludeEntryExports = false,
   'max-issues': maxIssues = '0',
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
@@ -58,7 +57,6 @@ const run = async () => {
       isStrict,
       isProduction,
       isShowProgress,
-      isIncludeEntryExports,
     });
 
     await printReport({ report, issues, cwd, isProduction, options: reporterOptions });

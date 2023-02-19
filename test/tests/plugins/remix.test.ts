@@ -13,6 +13,8 @@ test('Find dependencies in Remix configuration', async () => {
     cwd,
   });
 
+  assert(issues.unresolved['app/root.tsx']['./session.server']);
+
   assert(issues.unlisted['package.json']['run-s']);
   assert(issues.unlisted['package.json']['run-p']);
   assert(issues.unlisted['package.json']['cross-env']);
@@ -40,6 +42,7 @@ test('Find dependencies in Remix configuration', async () => {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 17,
+    unresolved: 1,
     processed: 8,
     total: 8,
   });

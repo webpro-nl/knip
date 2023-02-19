@@ -10,7 +10,6 @@ Options:
   --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
   --workspace              Analyze a single workspace (default: analyze all configured workspaces)
-  --include-entry-exports  Include unused exports in entry files (without \`@public\`)
   --ignore                 Ignore files matching this glob pattern, can be repeated
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
@@ -24,7 +23,7 @@ Options:
   --max-issues             Maximum number of issues before non-zero exit code (default: 0)
   --debug                  Show debug output
   --debug-file-filter      Filter for files in debug output (regex as string)
-  --performance            Measure running time of expensive functions and display stats table
+  --performance            Measure count and running time of expensive functions and display stats table
   --h, --help              Print this help text
   --V, version             Print version
 
@@ -51,7 +50,6 @@ export default parseArgs({
     exports: { type: 'boolean' },
     help: { type: 'boolean', short: 'h' },
     ignore: { type: 'string', multiple: true },
-    'include-entry-exports': { type: 'boolean' },
     include: { type: 'string', multiple: true },
     'max-issues': { type: 'string' },
     'no-exit-code': { type: 'boolean' },

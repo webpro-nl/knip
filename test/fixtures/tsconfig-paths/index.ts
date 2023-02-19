@@ -4,4 +4,6 @@ import * as Unknown from '@unknown';
 import { unprefixed } from 'unprefixed';
 import unresolved from 'unresolved/dir';
 
-console.log(a + pkg + unprefixed);
+a;
+pkg;
+unprefixed;

@@ -1,9 +1,9 @@
 import { performance, PerformanceObserver, PerformanceEntry } from 'node:perf_hooks';
 import EasyTable from 'easy-table';
-// eslint-disable-next-line import/order -- Modules in @types are handled differently
-import Summary from 'summary';
 import parsedArgs from './cli-arguments.js';
+// eslint-disable-next-line import/order -- Modules in @types are handled differently
 import type { TimerifyOptions } from 'node:perf_hooks';
+import Summary from 'summary';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Timerify = <T extends (...params: any[]) => any>(fn: T, options?: TimerifyOptions) => T;

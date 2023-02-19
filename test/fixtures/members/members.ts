@@ -12,6 +12,7 @@ export enum MyEnum {
   A_UsedExternal = 1,
   B_Unused = 1,
   C_UsedInternal = 1,
+  'D_Key' = 'D_Value',
 }
 
 export class MyClass {

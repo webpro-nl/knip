@@ -4,7 +4,7 @@ import { getPackageName } from '../../util/modules.js';
 import { isAbsolute } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
-import { require } from '../../util/require.js';
+import { _resolve } from '../../util/require.js';
 import type { StorybookConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -34,7 +34,7 @@ const findStorybookDependencies: GenericPluginCallback = async configFilePath =>
   config.addons?.forEach(addon => {
     const name = typeof addon === 'string' ? addon : addon.name;
     if (name.startsWith('.')) {
-      entryFiles.push(require.resolve(path.join(path.dirname(configFilePath), name)));
+      entryFiles.push(_resolve(path.join(path.dirname(configFilePath), name)));
     } else if (isAbsolute(name)) {
       entryFiles.push(configFilePath);
     } else {

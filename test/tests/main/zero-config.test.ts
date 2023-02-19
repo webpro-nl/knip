@@ -17,6 +17,7 @@ test('Find unused exports in zero-config mode', async () => {
 
   assert.equal(Object.values(issues.exports).length, 1);
   assert.equal(issues.exports['my-module.ts']['unused'].symbol, 'unused');
+  assert.equal(issues.exports['my-module.ts']['default'].symbol, 'default');
   assert(!issues.exports['index.ts']);
 
   assert.equal(Object.values(issues.types).length, 1);
@@ -34,7 +35,7 @@ test('Find unused exports in zero-config mode', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    exports: 1,
+    exports: 2,
     nsExports: 1,
     types: 1,
     nsTypes: 1,

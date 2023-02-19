@@ -1,0 +1,11 @@
+{
+  "name": "jsdoc",
+  "knip": {
+    "entry": [
+      "index.ts"
+    ],
+    "project": [
+      "**/*.ts"
+    ]
+  }
+}

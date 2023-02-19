@@ -32,8 +32,8 @@ test('Find unused dependencies', async () => {
     dependencies: 1,
     devDependencies: 1,
     unlisted: 4,
-    processed: 4,
-    total: 4,
+    processed: 3,
+    total: 3,
   });
 });
 

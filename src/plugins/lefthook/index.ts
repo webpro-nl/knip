@@ -16,7 +16,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['lefthook.yml'];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, rootConfig }) => {
+const findPluginDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
   const config = await _load(configFilePath);
 
   if (!config) return [];
@@ -26,7 +26,7 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, { c
   const { binaries, entryFiles } = _getReferencesFromScripts(scripts, {
     cwd,
     manifest,
-    ignore: rootConfig.ignoreBinaries,
+    ignore: workspaceConfig.ignoreBinaries,
     knownGlobalsOnly: true,
   });
 

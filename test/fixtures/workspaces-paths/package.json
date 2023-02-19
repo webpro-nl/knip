@@ -1,0 +1,22 @@
+{
+  "name": "workspaces-paths",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {},
+  "knip": {
+    "workspaces": {
+      "**": {
+        "entry": "src/index.ts",
+        "project": "src/**/*.ts"
+      },
+      "packages/lib-e": {
+        "paths": {
+          "@/*": [
+            "src/*"
+          ]
+        }
+      }
+    }
+  }
+}

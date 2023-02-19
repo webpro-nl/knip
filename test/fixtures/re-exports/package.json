@@ -1,0 +1,11 @@
+{
+  "name": "re-exports",
+  "knip": {
+    "entry": [
+      "entry.ts"
+    ],
+    "project": [
+      "*.ts"
+    ]
+  }
+}

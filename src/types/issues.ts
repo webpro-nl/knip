@@ -1,4 +1,4 @@
-type SymbolType = 'type' | 'interface' | 'enum';
+export type SymbolType = 'type' | 'interface' | 'enum' | 'function' | 'class' | 'unknown';
 
 export type Issue = {
   type: SymbolIssueType;
@@ -18,6 +18,7 @@ export type Issues = {
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
   unlisted: IssueRecords;
+  unresolved: IssueRecords;
   exports: IssueRecords;
   types: IssueRecords;
   nsExports: IssueRecords;

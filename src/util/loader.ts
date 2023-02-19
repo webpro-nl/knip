@@ -1,13 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-// eslint-disable-next-line import/order -- Modules in @types are handled differently
-import { load as esmLoad } from '@esbuild-kit/esm-loader';
 import yaml from 'js-yaml';
-import { require } from '../util/require.js';
 import { LoaderError } from './errors.js';
 import { loadJSON } from './fs.js';
 import { timerify } from './performance.js';
+import { jiti } from './register.js';
 
 const load = async (filePath: string) => {
   try {
@@ -26,8 +24,7 @@ const load = async (filePath: string) => {
       return imported.default ?? imported;
     }
 
-    const imported = await esmLoad(filePath, {}, require);
-    return imported.default ?? imported;
+    return jiti(filePath);
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }

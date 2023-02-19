@@ -55,7 +55,7 @@ test('Find dependencies in Webpack configuration', async () => {
     files: 1,
     devDependencies: 1,
     unlisted: 3,
-    processed: 11,
-    total: 11,
+    processed: 10,
+    total: 10,
   });
 });

@@ -8,7 +8,7 @@ import { debugLogObject } from './debug.js';
 import { relativePosix } from './path.js';
 import { timerify } from './performance.js';
 
-const prependDirToPattern = (workingDir: string, pattern: string) => {
+export const prependDirToPattern = (workingDir: string, pattern: string) => {
   if (pattern.startsWith('!')) return '!' + path.posix.join(workingDir, pattern.slice(1));
   return path.posix.join(workingDir, pattern);
 };
@@ -39,10 +39,7 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
   const globPatterns = compact([patterns].flat().map(prepend).map(removeProductionSuffix)).sort(negatedLast);
 
-  const ignorePatterns = compact([
-    ...ignore.map(pattern => prependDirToPattern(relativePath, pattern)),
-    '**/node_modules/**',
-  ]);
+  const ignorePatterns = compact([...ignore, '**/node_modules/**']);
 
   debugLogObject(`Globbing (${relativePath || ROOT_WORKSPACE_NAME})`, { cwd, globPatterns, ignorePatterns });
 
@@ -69,6 +66,12 @@ const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
   }
 };
 
+const dirGlob = async ({ cwd, patterns }: BaseGlobOptions) =>
+  globby(patterns, {
+    cwd,
+    onlyDirectories: true,
+  });
+
 const memoOptions = { serializer: JSON.stringify, callTimeout: 0 };
 
 const memoizedGlob = memoize(glob, memoOptions);
@@ -82,3 +85,5 @@ export const _glob = timerify(memoizedGlob);
 export const _pureGlob = timerify(pureGlob);
 
 export const _firstGlob = timerify(memoizedFirstGlob);
+
+export const _dirGlob = timerify(dirGlob);

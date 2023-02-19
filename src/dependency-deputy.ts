@@ -1,6 +1,5 @@
 import { isBuiltin } from 'node:module';
-import micromatch from 'micromatch';
-import { IGNORE_DEFINITELY_TYPED } from './constants.js';
+import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES } from './constants.js';
 import { WorkspaceConfiguration } from './types/config.js';
 import {
   getPackageNameFromModuleSpecifier,
@@ -8,6 +7,7 @@ import {
   getDefinitelyTypedFor,
   getPackageFromDefinitelyTyped,
 } from './util/modules.js';
+import { isAbsolute } from './util/path.js';
 import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
@@ -15,7 +15,6 @@ import type { PackageJson } from 'type-fest';
 
 type Options = {
   isStrict: boolean;
-  ignoreDependencies: string[];
 };
 
 /**
@@ -24,19 +23,15 @@ type Options = {
  * - Stores binaries and peer dependencies
  * - Settles dependency issues
  */
-export default class DependencyDeputy {
+export class DependencyDeputy {
   isStrict;
   _manifests: WorkspaceManifests = new Map();
-  ignoreDependencies;
   referencedDependencies: Map<string, Set<string>>;
   peerDependencies: Map<string, PeerDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
 
-  tsConfigPathGlobs: Map<string, string[]> = new Map();
-
-  constructor({ isStrict, ignoreDependencies }: Options) {
+  constructor({ isStrict }: Options) {
     this.isStrict = isStrict;
-    this.ignoreDependencies = ignoreDependencies;
     this.referencedDependencies = new Map();
     this.peerDependencies = new Map();
     this.installedBinaries = new Map();
@@ -47,11 +42,13 @@ export default class DependencyDeputy {
     dir,
     manifestPath,
     manifest,
+    ignoreDependencies,
   }: {
     name: string;
     dir: string;
     manifestPath: string;
     manifest: PackageJson;
+    ignoreDependencies: string[];
   }) {
     const scripts = Object.values(manifest.scripts ?? {}) as string[];
     const dependencies = Object.keys(manifest.dependencies ?? {});
@@ -63,6 +60,7 @@ export default class DependencyDeputy {
     this._manifests.set(name, {
       workspaceDir: dir,
       manifestPath,
+      ignoreDependencies,
       scripts,
       dependencies,
       peerDependencies,
@@ -92,12 +90,6 @@ export default class DependencyDeputy {
     return this.installedBinaries.get(workspaceName);
   }
 
-  addTypeScriptConfigPathGlobs(workspaceName: string, paths: Record<string, string[]>) {
-    const wsPaths = this.tsConfigPathGlobs.get(workspaceName) ?? [];
-    const addPaths = Object.keys(paths).map(value => value.replace(/\*/g, '**'));
-    this.tsConfigPathGlobs.set(workspaceName, [...wsPaths, ...addPaths]);
-  }
-
   addReferencedDependency(workspaceName: string, packageName: string) {
     if (!this.referencedDependencies.has(workspaceName)) {
       this.referencedDependencies.set(workspaceName, new Set());
@@ -113,15 +105,17 @@ export default class DependencyDeputy {
     return Array.from(this.peerDependencies.get(workspaceName)?.get(dependency) ?? []);
   }
 
-  public maybeAddListedReferencedDependency(
+  public maybeAddReferencedExternalDependency(
     workspace: { name: string; dir: string; config: WorkspaceConfiguration; ancestors: string[] },
     moduleSpecifier: string
-  ) {
-    if (this.isInternalDependency(workspace.name, moduleSpecifier)) return;
+  ): [boolean, string] | [boolean] {
+    if (this.isInternalDependency(moduleSpecifier)) return [false];
 
     const packageName = getPackageNameFromModuleSpecifier(moduleSpecifier);
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
+
+    if (this.getWorkspaceManifest(workspace.name)?.ignoreDependencies.includes(packageName)) return [false];
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
     const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedFor(packageName);
@@ -131,7 +125,7 @@ export default class DependencyDeputy {
     if (closestWorkspaceName || closestWorkspaceNameForTypes) {
       closestWorkspaceName && this.addReferencedDependency(closestWorkspaceName, packageName);
       closestWorkspaceNameForTypes && this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
-      return;
+      return [true, packageName];
     }
 
     // Handle binaries
@@ -141,26 +135,16 @@ export default class DependencyDeputy {
         const dependencies = binaries.get(moduleSpecifier);
         if (dependencies?.size) {
           dependencies.forEach(dependency => this.addReferencedDependency(name, dependency));
-          return;
+          return [true, packageName];
         }
       }
     }
 
-    return moduleSpecifier;
+    return [false, moduleSpecifier];
   }
 
-  isInternalDependency(workspaceName: string, moduleSpecifier: string) {
-    if (moduleSpecifier.startsWith('/') || moduleSpecifier.startsWith('.')) return true;
-    if (isBuiltin(moduleSpecifier)) return true;
-    const packageName = getPackageNameFromModuleSpecifier(moduleSpecifier);
-    return (
-      !this.isInDependencies(workspaceName, packageName) && this.isAliasedDependency(workspaceName, moduleSpecifier)
-    );
-  }
-
-  private isAliasedDependency(workspaceName: string, moduleSpecifier: string) {
-    const patterns = this.tsConfigPathGlobs.get(workspaceName);
-    return patterns && patterns.length > 0 && micromatch.isMatch(moduleSpecifier, patterns);
+  isInternalDependency(moduleSpecifier: string) {
+    return isAbsolute(moduleSpecifier) || moduleSpecifier.startsWith('.') || isBuiltin(moduleSpecifier);
   }
 
   private isInDependencies(workspaceName: string, packageName: string) {
@@ -173,7 +157,7 @@ export default class DependencyDeputy {
     const dependencyIssues: Issue[] = [];
     const devDependencyIssues: Issue[] = [];
 
-    for (const [workspaceName, { manifestPath }] of this._manifests.entries()) {
+    for (const [workspaceName, { manifestPath, ignoreDependencies }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspaceName);
 
       const isUnreferencedDependency = (dependency: string): boolean => {
@@ -205,12 +189,12 @@ export default class DependencyDeputy {
       };
 
       this.getProductionDependencies(workspaceName)
-        .filter(symbol => symbol !== 'knip' && !this.ignoreDependencies.includes(symbol))
+        .filter(symbol => !IGNORED_DEPENDENCIES.includes(symbol) && !ignoreDependencies.includes(symbol))
         .filter(isUnreferencedDependency)
         .forEach(symbol => dependencyIssues.push({ type: 'dependencies', filePath: manifestPath, symbol }));
 
       this.getDevDependencies(workspaceName)
-        .filter(symbol => symbol !== 'knip' && !this.ignoreDependencies.includes(symbol))
+        .filter(symbol => !IGNORED_DEPENDENCIES.includes(symbol) && !ignoreDependencies.includes(symbol))
         .filter(isUnreferencedDependency)
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
     }

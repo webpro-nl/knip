@@ -12,7 +12,7 @@ test('Find dependencies in lefthook configuration (json)', async () => {
   const dependencies = await lefthook.findDependencies(configFilePath, {
     manifest,
     cwd,
-    rootConfig: { ignoreBinaries: [] },
+    workspaceConfig: { ignoreBinaries: [] },
   });
   assert.deepEqual(dependencies, { dependencies: ['eslint'], entryFiles: [path.join(cwd, 'example.mjs')] });
 });

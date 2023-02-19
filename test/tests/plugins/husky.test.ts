@@ -9,11 +9,11 @@ import { getManifest } from '../../helpers/index.js';
 
 const cwd = path.resolve('test/fixtures/plugins/husky');
 const manifest = getManifest(cwd);
-const rootConfig = { ignoreBinaries: ['knip'] };
+const workspaceConfig = { ignoreBinaries: ['knip'] };
 
 test('Find dependencies in husky configuration (plugin)', async () => {
   const configFilePath = path.join(cwd, '.husky/pre-commit');
-  const dependencies = await husky.findDependencies(configFilePath, { manifest, rootConfig });
+  const dependencies = await husky.findDependencies(configFilePath, { manifest, workspaceConfig });
   assert.deepEqual(dependencies, { dependencies: ['lint-staged', 'commitlint'], entryFiles: [] });
 });
 
@@ -31,7 +31,7 @@ test('Find dependencies in husky configuration (main)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 4,
-    processed: 5,
-    total: 5,
+    processed: 0,
+    total: 0,
   });
 });

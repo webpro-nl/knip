@@ -1,0 +1,11 @@
+{
+  "name": "commonjs",
+  "knip": {
+    "entry": [
+      "index.js"
+    ],
+    "project": [
+      "**/*.js"
+    ]
+  }
+}

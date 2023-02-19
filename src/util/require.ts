@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
+import { timerify } from './performance.js';
 
-export const require = createRequire(process.cwd());
+const require = createRequire(process.cwd());
 
 export const tryResolve = (specifier: string) => {
   try {
@@ -9,3 +10,7 @@ export const tryResolve = (specifier: string) => {
     // Intentionally ignored, exceptions are thrown for specifiers being packages (e.g. `node --loader tsx index.ts`)
   }
 };
+
+export const _require = timerify(require);
+
+export const _resolve = timerify(require.resolve);

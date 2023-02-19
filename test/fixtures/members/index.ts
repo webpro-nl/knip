@@ -14,10 +14,10 @@ class Parent {
 
 const parent = new Parent();
 
-console.log(instance.bUsedExternal);
-console.log(instance.cUsedExternal);
-console.log(instance.dUsedExternal());
-console.log(MyClass.eUsedExternal);
-console.log(parent);
+instance.bUsedExternal;
+instance.cUsedExternal;
+instance.dUsedExternal();
+MyClass.eUsedExternal;
+parent;
 
 const a: MyEnum.A_UsedExternal = 1;

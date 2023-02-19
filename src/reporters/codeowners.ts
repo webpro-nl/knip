@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import chalk from 'chalk';
-import { relativePosix } from '../util/path.js';
+import { isAbsolute, relativePosix } from '../util/path.js';
 import { getTitle, logTitle, logIssueLine } from './util.js';
 import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types/issues.js';
 import type { Entries } from 'type-fest';
@@ -16,7 +16,7 @@ const logIssueSet = (issues: { symbol: string; owner: string }[]) => {
   issues
     .sort((a, b) => (a.owner < b.owner ? -1 : 1))
     .forEach(issue =>
-      console.log(chalk.cyan(issue.owner), issue.symbol.startsWith('/') ? relativePosix(issue.symbol) : issue.symbol)
+      console.log(chalk.cyan(issue.owner), isAbsolute(issue.symbol) ? relativePosix(issue.symbol) : issue.symbol)
     );
 };
 

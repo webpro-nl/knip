@@ -1,5 +1,5 @@
-import path from 'node:path';
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../../src/index.js';
 import baseArguments from '../../helpers/baseArguments.js';
@@ -13,8 +13,9 @@ test('Find unused enum and class members', async () => {
     cwd,
   });
 
-  assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 1);
+  assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
   assert(issues.enumMembers['members.ts']['B_Unused']);
+  assert(issues.enumMembers['members.ts']['D_Key']);
 
   assert.equal(Object.keys(issues.classMembers['members.ts']).length, 4);
   assert(issues.classMembers['members.ts']['bUnusedPublic']);
@@ -24,7 +25,7 @@ test('Find unused enum and class members', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    enumMembers: 1,
+    enumMembers: 2,
     classMembers: 4,
     processed: 2,
     total: 2,

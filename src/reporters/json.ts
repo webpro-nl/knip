@@ -16,6 +16,7 @@ type Row = {
   dependencies?: string[];
   devDependencies?: string[];
   unlisted?: string[];
+  unresolved?: string[];
   exports?: string[];
   types?: string[];
   duplicates?: string[][];
@@ -49,6 +50,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
       ...(report.dependencies && { dependencies: [] }),
       ...(report.devDependencies && { devDependencies: [] }),
       ...(report.unlisted && { unlisted: [] }),
+      ...(report.unresolved && { unresolved: [] }),
       ...((report.exports || report.nsExports) && { exports: [] }),
       ...((report.types || report.nsTypes) && { types: [] }),
       ...(report.enumMembers && { enumMembers: {} }),

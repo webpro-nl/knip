@@ -1,131 +1,248 @@
 import path from 'node:path';
-import { ts } from 'ts-morph';
-import { debugLogSourceFiles } from './util/debug.js';
-import { toPosixPath } from './util/path.js';
-import {
-  _createProject,
-  partitionSourceFiles,
-  _resolveSourceFileDependencies,
-  _removeExternalSourceFiles,
-} from './util/project.js';
-import type { Project, ProjectOptions, SourceFile } from 'ts-morph';
-import type { TsConfigJson } from 'type-fest';
+import ts from 'typescript';
+import { DEFAULT_EXTENSIONS } from './constants.js';
+import { IGNORED_FILE_EXTENSIONS } from './constants.js';
+import { getImportsAndExports } from './typescript/ast-walker.js';
+import { createHosts } from './typescript/createHosts.js';
+import { SourceFileManager } from './typescript/SourceFileManager.js';
+import { isInNodeModules } from './util/path.js';
+import { timerify } from './util/performance.js';
+import type { ExportItem, ExportItemMember } from './types/ast.js';
+import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
+import type { Report } from './types/issues.js';
 
-// Kitchen sink TypeScript config
+type ProjectPrincipalOptions = {
+  compilerOptions: ts.CompilerOptions;
+  cwd: string;
+  report: Report;
+  compilers: [SyncCompilers, AsyncCompilers];
+};
+
+// These compiler options override local options
 const baseCompilerOptions = {
   allowJs: true,
+  jsx: ts.JsxEmit.Preserve,
+  jsxImportSource: undefined,
   allowSyntheticDefaultImports: true,
-  jsx: ts.JsxEmit.ReactJSX,
   esModuleInterop: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
-  target: ts.ScriptTarget.ES2022,
+  lib: [],
+  target: ts.ScriptTarget.Latest,
   module: ts.ModuleKind.CommonJS,
-  moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  moduleResolution: ts.ModuleResolutionKind.NodeNext,
 };
 
-const skipAddFiles = { skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true };
+const tsCreateProgram = timerify(ts.createProgram);
 
 /**
+ * This class aims to abstract away TypeScript specific things from the main flow.
+ *
+ * - Provided by the principal factory
  * - Collects entry and project paths
- * - Collects and normalizes TS compilerOptions paths
- * - Creates two ts-morph projects for combined workspaces to settle un/used files
+ * - Installs TS backend: file manager, language and compiler hosts for the TS program
+ * - Creates TS program and typechecker
+ * - Run async compilers ahead of time since the TS machinery is fully sync
+ * - Bridge between main flow and TS AST walker
  */
-export default class ProjectPrincipal {
-  projectOptions?: ProjectOptions;
-  tsConfigFilePath?: string;
-
+export class ProjectPrincipal {
+  // Configured by user and returned from plugins
   entryPaths: Set<string> = new Set();
   projectPaths: Set<string> = new Set();
 
-  entryWorkspace?: Project;
-  projectWorkspace?: Project;
-  entryFiles?: SourceFile[];
+  // We don't want to report unused exports of entry files
+  skipExportsAnalysis: Set<string> = new Set();
+
+  cwd: string;
+  compilerOptions: ts.CompilerOptions;
+  isReportTypes: boolean;
+  extensions: Set<string>;
+  syncCompilers: SyncCompilers;
+  asyncCompilers: AsyncCompilers;
+
+  backend: {
+    fileManager: SourceFileManager;
+    compilerHost: ts.CompilerHost;
+    languageServiceHost: ts.LanguageServiceHost;
+    lsFindReferences: ts.LanguageService['findReferences'];
+    program?: ts.Program;
+  };
+
+  constructor({ compilerOptions, cwd, report, compilers }: ProjectPrincipalOptions) {
+    this.cwd = cwd;
+
+    this.compilerOptions = {
+      ...compilerOptions,
+      ...baseCompilerOptions,
+      allowNonTsExtensions: [...compilers].flat().length > 0,
+    };
+
+    const [syncCompilers, asyncCompilers] = compilers;
+    this.isReportTypes = report.types || report.nsTypes || report.enumMembers;
+    this.extensions = new Set([...DEFAULT_EXTENSIONS, ...syncCompilers.keys(), ...asyncCompilers.keys()]);
+    this.syncCompilers = syncCompilers;
+    this.asyncCompilers = asyncCompilers;
+
+    const { fileManager, compilerHost, languageServiceHost } = createHosts({
+      cwd: this.cwd,
+      compilerOptions: this.compilerOptions,
+      entryPaths: this.entryPaths,
+      compilers: [this.syncCompilers, this.asyncCompilers],
+    });
+
+    const languageService = ts.createLanguageService(languageServiceHost, ts.createDocumentRegistry());
+
+    const lsFindReferences = timerify(languageService?.findReferences);
+
+    this.backend = {
+      fileManager,
+      compilerHost,
+      languageServiceHost,
+      lsFindReferences,
+    };
+  }
+
+  /**
+   * `ts.createProgram()` resolves files starting from the provided entry/root files. Calling `program.getTypeChecker()`
+   * binds files and symbols (including symbols and maps like `sourceFile.resolvedModules` and `sourceFile.symbols`)
+   */
+  private createProgram() {
+    this.backend.program = tsCreateProgram(
+      Array.from(this.entryPaths),
+      this.compilerOptions,
+      this.backend.compilerHost,
+      this.backend.program
+    );
+
+    const typeChecker = timerify(this.backend.program.getTypeChecker);
+    typeChecker();
+  }
+
+  private hasAcceptedExtension(filePath: string) {
+    return this.extensions.has(path.extname(filePath));
+  }
 
   public addEntryPath(filePath: string) {
-    this.entryPaths.add(filePath);
+    if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
+      this.entryPaths.add(filePath);
+      this.projectPaths.add(filePath);
+    }
   }
 
-  public addEntryPaths(filePaths: Set<string>) {
-    filePaths.forEach(filePath => this.entryPaths.add(filePath));
-  }
-
-  public addSourceFile(filePath: string) {
-    this.entryWorkspace?.addSourceFileAtPath(filePath);
+  public addEntryPaths(filePaths: Set<string> | string[]) {
+    filePaths.forEach(filePath => this.addEntryPath(filePath));
   }
 
   public addProjectPath(filePath: string) {
-    this.projectPaths.add(filePath);
+    if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
+      this.projectPaths.add(filePath);
+    }
   }
 
-  public removeProjectPath(filePath: string) {
-    this.projectPaths.delete(toPosixPath(filePath));
+  public skipExportsAnalysisFor(filePaths: string[]) {
+    filePaths.forEach(filePath => this.skipExportsAnalysis.add(filePath));
   }
 
-  public addTypeScriptPaths(workspaceDir: string, compilerOptions: TsConfigJson['compilerOptions']) {
-    if (!compilerOptions || !compilerOptions.paths) return;
+  /**
+   * Compile files with async compilers _before_ `ts.createProgram()`, since the TypeScript hosts machinery is fully
+   * synchronous (eg. `ts.sys.readFile` and `host.resolveModuleNames`)
+   */
+  public async runAsyncCompilers() {
+    const add = timerify(this.backend.fileManager.compileAndAddSourceFile.bind(this.backend.fileManager));
+    const extensions = Array.from(this.asyncCompilers.keys());
+    const files = Array.from(this.projectPaths).filter(filePath => extensions.includes(path.extname(filePath)));
+    for (const filePath of files) {
+      await add(filePath);
+    }
+  }
 
-    if (!this.projectOptions) this.projectOptions = {};
-    if (!this.projectOptions.compilerOptions) this.projectOptions.compilerOptions = {};
-    if (!this.projectOptions.compilerOptions.paths) this.projectOptions.compilerOptions.paths = {};
+  public getUsedResolvedFiles() {
+    this.createProgram();
+    const sourceFiles = this.getProgramSourceFiles();
+    return Array.from(this.projectPaths).filter(filePath => sourceFiles.has(filePath));
+  }
 
-    const { baseUrl, paths } = compilerOptions;
-    for (const [key, entries] of Object.entries(paths)) {
-      const workspacePaths = entries.map(entry =>
-        baseUrl ? path.join(workspaceDir, baseUrl, entry) : path.join(workspaceDir, entry)
-      );
-      if (this.projectOptions.compilerOptions.paths[key]) {
-        this.projectOptions.compilerOptions.paths[key].push(...workspacePaths);
-      } else {
-        this.projectOptions.compilerOptions.paths[key] = workspacePaths;
+  private getProgramSourceFiles() {
+    const programSourceFiles = this.backend.program?.getSourceFiles().map(sourceFile => sourceFile.fileName);
+    return new Set(programSourceFiles);
+  }
+
+  public getUnreferencedFiles() {
+    const sourceFiles = this.getProgramSourceFiles();
+    return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
+  }
+
+  public analyzeSourceFile(filePath: string) {
+    const sourceFile = this.backend.program?.getSourceFile(filePath);
+    if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
+    const options = { skipTypeOnly: !this.isReportTypes, skipExports: this.skipExportsAnalysis.has(filePath) };
+    const { internalImports, unresolvedImports, externalImports, exports, duplicateExports } = getImportsAndExports(
+      sourceFile,
+      options
+    );
+
+    const finalUnresolvedImports: Set<string> = new Set();
+
+    unresolvedImports.forEach(specifier => {
+      if (specifier.startsWith('http')) {
+        // TODO Add to debug logs?
+        return;
       }
-    }
+      const resolvedModule = this.resolveModule(specifier, filePath);
+      if (resolvedModule) {
+        if (resolvedModule.isExternalLibraryImport) {
+          externalImports.add(specifier);
+        } else {
+          this.addEntryPath(resolvedModule.resolvedFileName);
+        }
+      } else {
+        if (/^(@|[a-z])/.test(specifier)) {
+          externalImports.add(specifier);
+        } else {
+          const ext = path.extname(specifier);
+          if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
+            finalUnresolvedImports.add(specifier);
+          } else {
+            // TODO Add to debug logs?
+          }
+        }
+      }
+    });
+
+    return { internalImports, unresolvedImports: finalUnresolvedImports, externalImports, exports, duplicateExports };
   }
 
-  public createProjects() {
-    const compilerOptions = { ...baseCompilerOptions, ...this.projectOptions?.compilerOptions };
-    this.projectOptions = this.tsConfigFilePath
-      ? { tsConfigFilePath: this.tsConfigFilePath, compilerOptions }
-      : { compilerOptions };
-
-    // Create workspace for entry + resolved files (but don't resolve yet)
-    this.entryWorkspace = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.entryPaths]);
-    this.entryFiles = this.entryWorkspace.getSourceFiles();
-    debugLogSourceFiles(`Included entry files`, this.entryFiles);
-
-    // Create workspace for the entire project
-    this.projectWorkspace = _createProject({ ...this.projectOptions, ...skipAddFiles }, [...this.projectPaths]);
-    const projectFiles = this.projectWorkspace.getSourceFiles();
-    debugLogSourceFiles('Included project files', projectFiles);
+  private resolveModule(specifier: string, filePath: string = specifier) {
+    const module = ts.resolveModuleName(specifier, filePath, this.compilerOptions, this.backend.languageServiceHost);
+    return module?.resolvedModule;
   }
 
-  public getResolvedFiles() {
-    if (!this.entryWorkspace) return [];
-    _resolveSourceFileDependencies(this.entryWorkspace);
-    return _removeExternalSourceFiles(this.entryWorkspace);
+  public hasExternalReferences(filePath: string, exportedItem: ExportItem) {
+    const referencedSymbols = this.findReferences(filePath, exportedItem.node);
+    const externalRefs = referencedSymbols.flatMap(f => f.references).filter(ref => ref.fileName !== filePath);
+    return externalRefs.length > 0;
   }
 
-  public settleFiles() {
-    const entryFiles = this.entryFiles;
-    const projectFiles = this.projectWorkspace?.getSourceFiles();
+  public findUnusedMembers(filePath: string, members: ExportItemMember[]) {
+    return members
+      .filter(member => {
+        const referencedSymbols = this.findReferences(filePath, member.node);
+        const files = referencedSymbols
+          .flatMap(refs => refs.references)
+          .filter(ref => !ref.isDefinition)
+          .map(ref => ref.fileName);
+        const internalRefs = files.filter(f => f === filePath);
+        const externalRefs = files.filter(f => f !== filePath);
+        return externalRefs.length === 0 && internalRefs.length === 0;
+      })
+      .map(member => member.identifier);
+  }
 
-    if (this.entryWorkspace && entryFiles && projectFiles) {
-      const resolvedFiles = this.getResolvedFiles();
-      debugLogSourceFiles(`Included files resolved from entry files`, resolvedFiles);
+  private findReferences(filePath: string, node: ts.Node) {
+    return this.backend.lsFindReferences(filePath, node.getStart()) ?? [];
+  }
 
-      const [usedResolvedFiles, unreferencedResolvedFiles] = partitionSourceFiles(projectFiles, resolvedFiles);
-      const [usedEntryFiles, usedNonEntryFiles] = partitionSourceFiles(usedResolvedFiles, entryFiles);
-
-      debugLogSourceFiles('Used files', usedResolvedFiles);
-      debugLogSourceFiles('Unreferenced files', unreferencedResolvedFiles);
-      debugLogSourceFiles('Used entry files', usedEntryFiles);
-      debugLogSourceFiles('Used non-entry files', usedNonEntryFiles);
-
-      return { usedResolvedFiles, unreferencedResolvedFiles };
-    }
-
-    const emptySet: Set<SourceFile> = new Set();
-
-    return { usedResolvedFiles: emptySet, unreferencedResolvedFiles: emptySet };
+  public isPublicExport(exportedItem: ExportItem) {
+    return ts.getJSDocPublicTag(exportedItem.node);
   }
 }

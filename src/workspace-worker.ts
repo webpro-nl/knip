@@ -3,10 +3,9 @@ import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './manifest/index.js';
 import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
-import { debugLogFiles, debugLogObject } from './util/debug.js';
-import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix } from './util/glob.js';
+import { debugLogArray, debugLogObject } from './util/debug.js';
+import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
-import type { Issue } from './types/issues.js';
 import type { Entries, PackageJson } from 'type-fest';
 
 type PluginNames = Entries<typeof plugins>;
@@ -23,7 +22,7 @@ type WorkspaceManagerOptions = {
   isProduction: boolean;
 };
 
-type ReferencedDependencyIssues = Set<Issue>;
+type ReferencedDependencies = Set<[string, string]>;
 
 const negatedTestFilePatterns = TEST_FILE_PATTERNS.map(negate);
 
@@ -32,9 +31,9 @@ const negatedTestFilePatterns = TEST_FILE_PATTERNS.map(negate);
  * - Finds referenced dependencies in npm scripts
  * - Collects peer dependencies
  * - Hands out workspace and plugin glob patterns
- * - Calls enabled plugins to find referenced dependencies
+ * - Calls enabled plugins to find referenced dependencies and entry files
  */
-export default class WorkspaceWorker {
+export class WorkspaceWorker {
   name: string;
   dir: string;
   config: WorkspaceConfiguration;
@@ -43,7 +42,7 @@ export default class WorkspaceWorker {
   manifest: PackageJson;
   rootWorkspaceDir: string;
 
-  referencedDependencyIssues: ReferencedDependencyIssues = new Set();
+  referencedDependencies: ReferencedDependencies = new Set();
   peerDependencies: PeerDependencies = new Map();
   installedBinaries: InstalledBinaries = new Map();
   entryFiles: Set<string> = new Set();
@@ -84,7 +83,7 @@ export default class WorkspaceWorker {
     );
   }
 
-  getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
+  private getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
     return this.config[pluginName] ?? { config: null, entry: null, project: null };
   }
 
@@ -112,7 +111,7 @@ export default class WorkspaceWorker {
 
   async initReferencedDependencies() {
     const { dependencies, peerDependencies, installedBinaries, entryFiles } = await npm.findDependencies({
-      rootConfig: this.rootConfig,
+      config: this.config,
       manifest: this.manifest,
       isRoot: this.isRoot,
       isProduction: this.isProduction,
@@ -121,8 +120,7 @@ export default class WorkspaceWorker {
     });
 
     const filePath = path.join(this.dir, 'package.json');
-    const issues = this.referencedDependencyIssues;
-    dependencies.forEach(dependency => issues.add({ type: 'unlisted', filePath, symbol: dependency }));
+    dependencies.forEach(dependency => this.referencedDependencies.add([filePath, dependency]));
     entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
     this.peerDependencies = peerDependencies;
     this.installedBinaries = installedBinaries;
@@ -246,7 +244,7 @@ export default class WorkspaceWorker {
     return [patterns.flat(), negatedTestFilePatterns].flat();
   }
 
-  getConfigurationEntryFilePattern(pluginName: PluginName) {
+  private getConfigurationEntryFilePattern(pluginName: PluginName) {
     const plugin = plugins[pluginName];
     const pluginConfig = this.getConfigForPlugin(pluginName);
     if (pluginConfig) {
@@ -256,8 +254,8 @@ export default class WorkspaceWorker {
     return [];
   }
 
-  getWorkspaceIgnorePatterns() {
-    return [...this.rootConfig.ignore, ...this.config.ignore];
+  public getWorkspaceIgnorePatterns() {
+    return [...this.rootConfig.ignore, ...this.config.ignore.map(pattern => prependDirToPattern(this.name, pattern))];
   }
 
   public async findDependenciesByPlugins() {
@@ -275,7 +273,7 @@ export default class WorkspaceWorker {
           const ignore = this.getWorkspaceIgnorePatterns();
           const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
 
-          debugLogFiles(`Globbed ${plugin.NAME} config file paths`, configFilePaths);
+          debugLogArray(`Found ${plugin.NAME} config file paths`, configFilePaths);
 
           if (configFilePaths.length === 0) continue;
 
@@ -287,7 +285,6 @@ export default class WorkspaceWorker {
               cwd,
               manifest: this.manifest,
               config: pluginConfig,
-              rootConfig: this.rootConfig,
               workspaceConfig: this.config,
               isProduction: this.isProduction,
             });
@@ -295,16 +292,15 @@ export default class WorkspaceWorker {
             const dependencies = Array.isArray(results) ? results : results.dependencies;
             const entryFiles = !Array.isArray(results) && results.entryFiles ? results.entryFiles : [];
 
-            const issues = this.referencedDependencyIssues;
-            dependencies.forEach(symbol => issues.add({ type: 'unlisted', filePath: configFilePath, symbol } as Issue));
+            dependencies.forEach(symbol => this.referencedDependencies.add([configFilePath, symbol]));
             entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
 
             dependencies.forEach(dependency => pluginDependencies.add(dependency));
             entryFiles.forEach(entryFile => pluginEntryFiles.add(entryFile));
           }
 
-          debugLogFiles(`Dependencies referenced in ${plugin.NAME}`, pluginDependencies);
-          if (pluginEntryFiles.size > 0) debugLogFiles(`Entry files referenced in ${plugin.NAME}`, pluginEntryFiles);
+          debugLogArray(`Dependencies referenced in ${plugin.NAME}`, pluginDependencies);
+          if (pluginEntryFiles.size > 0) debugLogArray(`Entry files referenced in ${plugin.NAME}`, pluginEntryFiles);
         }
       }
     }
@@ -314,7 +310,7 @@ export default class WorkspaceWorker {
     return {
       peerDependencies: this.peerDependencies,
       installedBinaries: this.installedBinaries,
-      referencedDependencyIssues: this.referencedDependencyIssues,
+      referencedDependencies: this.referencedDependencies,
       entryFiles: this.entryFiles,
       enabledPlugins: this.enabledPlugins,
     };

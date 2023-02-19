@@ -1,5 +1,3 @@
-export const getLine = (value: number | string, text: string) => `${String(value).padStart(5)} ${text}`;
-
 export class LineRewriter {
   private lines = 0;
 

@@ -6,4 +6,5 @@ const what = is(has);
 
 const match = typeof program === 'function';
 
-console.log(what, match);
+what;
+match;

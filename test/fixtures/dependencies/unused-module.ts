@@ -3,7 +3,7 @@ import once from '@tootallnate/once';
 
 const emitter = new EventEmitter();
 
-setTimeout(() => emitter.emit('foo', 'bar'), 1);
+setTimeout(() => emitter.emit('event', 'name'), 1);
 
-const result = await once(emitter, 'foo');
-console.log(result);
+const result = await once(emitter, 'event');
+result;

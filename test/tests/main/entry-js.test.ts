@@ -19,6 +19,7 @@ test('Find unused files and exports with JS entry file', async () => {
 
   assert.equal(Object.values(issues.exports).length, 1);
   assert.equal(issues.exports['my-module.js']['unused'].symbol, 'unused');
+  assert.equal(issues.exports['my-module.js']['default'].symbol, 'default');
 
   assert.equal(Object.values(issues.types).length, 1);
   assert.equal(issues.types['my-module.js']['AnyType'].symbolType, 'type');
@@ -36,7 +37,7 @@ test('Find unused files and exports with JS entry file', async () => {
     ...baseCounters,
     files: 1,
     unlisted: 0,
-    exports: 1,
+    exports: 2,
     nsExports: 1,
     nsTypes: 1,
     types: 1,

@@ -1,22 +1,18 @@
-import { ISSUE_TYPES } from './constants.js';
 import { initReport, initIssues, initCounters } from './issues/initializers.js';
-import { getTitle } from './reporters/util.js';
-import { getLine, LineRewriter } from './util/log.js';
+import { LineRewriter } from './util/log.js';
 import { relativePosix } from './util/path.js';
 import type { Issue, Report } from './types/issues.js';
-import type { SourceFile } from 'ts-morph';
 
 type IssueCollectorOptions = {
   cwd: string;
-  isShowProgress?: boolean;
   report?: Report;
 };
 
 /**
- * - Collects issues
- * - Updates progress/stats in console during the process
+ * - Collects issues and counts them
+ * - Hands them out, to be consumed by reporters
  */
-export default class IssueCollector {
+export class IssueCollector {
   report;
   issues;
   counters;
@@ -27,13 +23,10 @@ export default class IssueCollector {
   referencedFiles: Set<string>;
 
   cwd: string;
-  isShowProgress = false;
 
-  constructor({ cwd, isShowProgress = false, report }: IssueCollectorOptions) {
+  constructor({ cwd, report }: IssueCollectorOptions) {
     this.lineRewriter = new LineRewriter();
     this.cwd = cwd;
-
-    this.setIsShowProgress(isShowProgress);
 
     this.report = report ?? initReport();
     this.issues = initIssues();
@@ -44,17 +37,12 @@ export default class IssueCollector {
     this.referencedFiles = new Set();
   }
 
-  setIsShowProgress(isShowProgress: boolean) {
-    this.isShowProgress = isShowProgress;
-  }
-
   setTotalFileCount(count: number) {
     this.counters.total = count;
   }
 
-  addFilesIssues(sourceFiles: Set<SourceFile>) {
-    sourceFiles.forEach(sourceFile => {
-      const filePath = sourceFile.getFilePath();
+  addFilesIssues(filePaths: string[]) {
+    filePaths.forEach(filePath => {
       if (!this.referencedFiles.has(filePath)) {
         this.issues.files.add(filePath);
         this.counters.files++;
@@ -69,41 +57,11 @@ export default class IssueCollector {
     if (!this.issues[issue.type][key][issue.symbol]) {
       this.issues[issue.type][key][issue.symbol] = issue;
       this.counters[issue.type]++;
-      this.updateProgress(issue);
     }
   }
 
   setReport(report: Report) {
     this.report = report;
-  }
-
-  updateMessage(message: string) {
-    if (!this.isShowProgress) return;
-    this.lineRewriter.update([message]);
-  }
-
-  updateProgress(issue?: Issue) {
-    if (!this.isShowProgress) return;
-
-    const { processed, total } = this.counters;
-    const percentage = total === 0 ? 0 : Math.floor((processed / total) * 100);
-    const messages = [getLine(`${percentage}%`, `of files processed (${processed} of ${total})`)];
-
-    for (const type of ISSUE_TYPES) {
-      this.report[type] && this.counters[type] && messages.push(getLine(this.counters[type], getTitle(type)));
-    }
-
-    if (issue && processed < total) {
-      messages.push('');
-      messages.push(`Processing: ${relativePosix(issue.filePath)}`);
-    }
-
-    this.lineRewriter.update(messages);
-  }
-
-  removeProgress() {
-    if (!this.isShowProgress) return;
-    this.lineRewriter.resetLines();
   }
 
   getIssues() {

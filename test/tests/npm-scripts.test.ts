@@ -8,18 +8,16 @@ const cwd = path.resolve('test/fixtures/npm-scripts');
 const manifest = getManifest(cwd);
 
 test('Referenced dependencies in npm scripts', async () => {
-  const rootConfig = {
-    include: [],
-    exclude: [],
-    workspaces: {},
-    ignore: [],
-    ignoreBinaries: ['bash', 'rm'],
-    ignoreDependencies: [],
-    ignoreWorkspaces: [],
-  };
-
   const config = {
-    rootConfig,
+    config: {
+      include: [],
+      exclude: [],
+      workspaces: {},
+      ignore: [],
+      ignoreBinaries: ['bash', 'rm'],
+      ignoreDependencies: [],
+      ignoreWorkspaces: [],
+    },
     manifest,
     isRoot: true,
     isProduction: false,

@@ -6,11 +6,11 @@ import { getManifest } from '../../helpers/index.js';
 
 const cwd = path.resolve('test/fixtures/plugins/github-actions');
 const manifest = getManifest(cwd);
-const rootConfig = { ignoreBinaries: ['knip'] };
+const workspaceConfig = { ignoreBinaries: ['knip'] };
 
 test('Find dependencies in github-actions workflow configurations', async () => {
   const configFilePath = path.join(cwd, '.github/workflows/test.yml');
-  const dependencies = await GithubActions.findDependencies(configFilePath, { manifest, rootConfig });
+  const dependencies = await GithubActions.findDependencies(configFilePath, { manifest, workspaceConfig });
   assert.deepEqual(dependencies, {
     dependencies: [
       'esbuild-register',

@@ -1,8 +1,17 @@
 import module from 'node:module';
-import { register } from 'esbuild-register/dist/node.js';
+import createJITI from 'jiti';
+import { IGNORED_FILE_EXTENSIONS, DEFAULT_EXTENSIONS } from '../constants.js';
 
-// Register esbuild for CommonJS (esm-loader doesn't hook into require() calls or transform CommonJS files)
-register();
+// @ts-expect-error Undocumented and not typed (hacky, but common practice)
+const _extensions = module.Module._extensions;
+
+// @ts-expect-error Our package.json has type=module (for globby, chalk, etc), but here it confuses TypeScript
+export const jiti = createJITI(process.cwd(), { interopDefault: true, extensions: DEFAULT_EXTENSIONS });
+
+// Do not register when `--loader tsx` is already installed for tests
+if (!('.ts' in _extensions)) {
+  jiti.register();
+}
 
 /**
  * When loading foreign JS/TS from plugins (using `_load`), non-JS things like .svg or .css files might be imported.
@@ -13,32 +22,12 @@ register();
  * - https://github.com/danez/pirates/blob/main/src/index.js
  */
 
-// @ts-expect-error Undocumented and not typed (hacky, but common practice)
-const extensions = module.Module._extensions;
-
 // @ts-expect-error No type definition available for the `module argument` (it's CommonJS and not TypeScript)
 const exportFilePath = (module, filePath: string) => {
+  /** @public */
   module.exports = filePath;
 };
 
-// TODO This is awkward and incomplete. There must be a better way for "everything not JS/TS"?
-[
-  'avif',
-  'css',
-  'eot',
-  'gif',
-  'ico',
-  'jpeg',
-  'jpg',
-  'less',
-  'png',
-  'sass',
-  'scss',
-  'svg',
-  'ttf',
-  'webp',
-  'woff',
-  'woff2',
-].forEach(ext => {
-  extensions[`.${ext}`] = exportFilePath;
+IGNORED_FILE_EXTENSIONS.forEach(ext => {
+  _extensions[ext] = exportFilePath;
 });

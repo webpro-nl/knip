@@ -5,5 +5,4 @@ export interface CommandLineOptions {
   isStrict: boolean;
   isProduction: boolean;
   isShowProgress: boolean;
-  isIncludeEntryExports: boolean;
 }
