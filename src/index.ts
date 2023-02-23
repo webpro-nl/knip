@@ -76,6 +76,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (tsConfig?.compilerOptions?.paths) {
       deputy.addTypeScriptConfigPathGlobs(name, tsConfig.compilerOptions.paths);
+      // @ts-expect-error CompilerOptions types of ts-getconfig and type-fest differ slightly (plugin.name?: string)
       principal.addTypeScriptPaths(dir, tsConfig.compilerOptions);
     }
 
