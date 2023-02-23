@@ -13,7 +13,7 @@ export const ENABLERS = ['@stryker-mutator/core'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['?(.)stryker.{conf,config}.{js,mjs,json}'];
+export const CONFIG_FILE_PATTERNS = ['?(.)stryker.{conf,config}.{js,mjs,cjs,json}'];
 
 const findStrykerDependencies: GenericPluginCallback = async configFilePath => {
   const config: StrykerConfig = await _load(configFilePath);

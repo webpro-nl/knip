@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "stryker": {
-    "config": ["?(.)stryker.{conf,config}.{js,mjs,json}"]
+    "config": ["?(.)stryker.{conf,config}.{js,mjs,cjs,json}"]
   }
 }
 ```

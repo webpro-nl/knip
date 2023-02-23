@@ -16,6 +16,28 @@ test('Find dependencies in Stryker configuration (js)', async () => {
   ]);
 });
 
+test('Find dependencies in Stryker configuration (mjs)', async () => {
+  const configFilePath = path.join(cwd, 'stryker.conf.mjs');
+  const dependencies = await stryker.findDependencies(configFilePath);
+  assert.deepEqual(dependencies, [
+    '@stryker-mutator/mocha-runner',
+    '@stryker-mutator/typescript-checker',
+    '@stryker-mutator/jasmine-framework',
+    '@stryker-mutator/karma-runner',
+  ]);
+});
+
+test('Find dependencies in Stryker configuration (cjs)', async () => {
+  const configFilePath = path.join(cwd, 'stryker.conf.cjs');
+  const dependencies = await stryker.findDependencies(configFilePath);
+  assert.deepEqual(dependencies, [
+    '@stryker-mutator/mocha-runner',
+    '@stryker-mutator/typescript-checker',
+    '@stryker-mutator/jasmine-framework',
+    '@stryker-mutator/karma-runner',
+  ]);
+});
+
 test('Find dependencies in Stryker configuration (json)', async () => {
   const configFilePath = path.join(cwd, 'stryker.conf.json');
   const dependencies = await stryker.findDependencies(configFilePath);
