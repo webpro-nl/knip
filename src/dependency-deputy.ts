@@ -1,4 +1,3 @@
-// @ts-expect-error Member actually exists: https://nodejs.org/api/module.html#moduleisbuiltinmodulename
 import { isBuiltin } from 'node:module';
 import micromatch from 'micromatch';
 import { IGNORE_DEFINITELY_TYPED } from './constants.js';
