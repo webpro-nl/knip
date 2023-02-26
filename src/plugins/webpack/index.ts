@@ -78,7 +78,9 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
             : Array.isArray(cfg.entry)
             ? cfg.entry
             : Object.values(cfg.entry).map(entry => (typeof entry === 'string' ? entry : entry.filename));
-        entries.forEach(entry => entryFiles.add(path.join(cwd, entry)));
+        entries.forEach(entry => {
+          entryFiles.add(entry.startsWith('/') ? entry : path.join(cwd, entry));
+        });
       }
 
       return dependencies;
