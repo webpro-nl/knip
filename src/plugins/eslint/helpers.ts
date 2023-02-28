@@ -23,7 +23,9 @@ export const getDependenciesDeep = async (configFilePath: string, dependencies: 
   if (config.extends) {
     for (const extend of [config.extends].flat()) {
       if (extend.startsWith('.') || (extend.startsWith('/') && !extend.includes('/node_modules/'))) {
-        const extendConfigFilePath = require.resolve(path.join(path.dirname(configFilePath), extend));
+        const extendConfigFilePath = extend.startsWith('/')
+          ? extend
+          : require.resolve(path.join(path.dirname(configFilePath), extend));
         addAll(await getDependenciesDeep(extendConfigFilePath));
       }
     }
