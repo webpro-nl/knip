@@ -4,10 +4,14 @@ export const ROOT_WORKSPACE_NAME = '.';
 
 export const KNIP_CONFIG_LOCATIONS = ['knip.json', 'knip.jsonc', '.knip.json', '.knip.jsonc', 'knip.ts', 'knip.js'];
 
+const DEFAULT_FILE_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx'];
+
+const extsGlobStr = DEFAULT_FILE_EXTENSIONS.map(ext => ext.slice(1)).join(',');
+
 // Zero-config means the following defaults are applied (either for none at all, or for workspaces individually)
 export const DEFAULT_WORKSPACE_CONFIG = {
-  entry: ['index.{js,ts,tsx}!', 'src/index.{js,ts,tsx}!'],
-  project: ['**/*.{js,ts,tsx}!'],
+  entry: [`index.{${extsGlobStr}}!`, `src/index.{${extsGlobStr}}!`],
+  project: [`**/*.{${extsGlobStr}}!`],
   paths: {},
   ignore: [],
 };
