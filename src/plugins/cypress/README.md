@@ -15,7 +15,8 @@ or `devDependencies`:
     "entry": [
       "cypress.config.{js,ts,mjs,cjs}",
       "cypress/support/e2e.{js,jsx,ts,tsx}",
-      "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
+      "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
+      "cypress/plugins/index.js"
     ]
   }
 }

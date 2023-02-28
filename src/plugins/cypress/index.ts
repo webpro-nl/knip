@@ -14,4 +14,5 @@ export const ENTRY_FILE_PATTERNS = [
   'cypress.config.{js,ts,mjs,cjs}',
   'cypress/support/e2e.{js,jsx,ts,tsx}',
   'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+  'cypress/plugins/index.js', // Deprecated since Cypress v10
 ];
