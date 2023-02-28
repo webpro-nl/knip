@@ -1,0 +1,10 @@
+{
+  "name": "stryker",
+  "scripts": {
+    "stryker": "stryker"
+  },
+  "type": "module",
+  "dependencies": {
+    "@stryker-mutator/core": "*"
+  }
+}
