@@ -204,6 +204,10 @@
           "title": "Jest plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/jest/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "lefthook": {
+          "title": "lefthook plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/lefthook/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "lint-staged": {
           "title": "lint-staged plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/lint-staged/README.md)",
           "$ref": "#/definitions/plugin"

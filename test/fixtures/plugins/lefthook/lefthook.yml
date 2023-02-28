@@ -1,0 +1,12 @@
+post-merge:
+  commands:
+    example:
+      glob: .env.example
+      run: node example.mjs
+
+pre-push:
+  commands:
+    eslint:
+      files: git diff --name-only HEAD @{push}
+      glob: '*.{ts,tsx}'
+      run: npx eslint {files}

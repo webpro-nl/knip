@@ -8,6 +8,7 @@ export * as gatsby from './gatsby/index.js';
 export * as githubActions from './github-actions/index.js';
 export * as husky from './husky/index.js';
 export * as jest from './jest/index.js';
+export * as lefthook from './lefthook/index.js';
 export * as lintStaged from './lint-staged/index.js';
 export * as markdownlint from './markdownlint/index.js';
 export * as mocha from './mocha/index.js';
