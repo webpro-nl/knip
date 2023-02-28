@@ -1,4 +1,3 @@
-import { ESLint } from 'eslint';
 import { compact } from '../../util/array.js';
 import { getPackageName } from '../../util/modules.js';
 import { resolvePluginPackageName, getDependenciesFromSettings } from './helpers.js';
@@ -7,6 +6,9 @@ import type { ESLintConfig } from './types.js';
 type Options = { cwd: string };
 
 export const fallback = async (configFilePath: string, { cwd }: Options) => {
+  // No try/catch, since this plugin is only enabled when eslint itself was found in package.json
+  const { ESLint } = await import('eslint');
+
   const engine = new ESLint({ cwd, overrideConfigFile: configFilePath, useEslintrc: false });
 
   const jsConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.js');
