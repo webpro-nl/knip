@@ -5,6 +5,8 @@ import { timerify } from '../performance.js';
 import { getBinariesFromScript } from './bash-parser.js';
 import type { GetReferencesFromScripts } from './types.js';
 
+const defaultCwd = process.cwd();
+
 const partition = (values: string[]) =>
   values.reduce(
     (acc, value) => {
@@ -15,7 +17,7 @@ const partition = (values: string[]) =>
   );
 
 const getReferencesFromScripts: GetReferencesFromScripts = (npmScripts, options = {}) => {
-  const { cwd = process.cwd(), manifest = {}, ignore = [], knownGlobalsOnly = false } = options;
+  const { cwd = defaultCwd, manifest = {}, ignore = [], knownGlobalsOnly = false } = options;
   const results = [npmScripts]
     .flat()
     .flatMap(script => getBinariesFromScript(script, { cwd, manifest, knownGlobalsOnly }));

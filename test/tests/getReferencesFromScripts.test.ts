@@ -13,7 +13,8 @@ const index = path.join(cwd, 'dir', 'index.js');
 const pkgScripts = { cwd, manifest: { scripts: { program: '' } } };
 const knownOnly = { cwd, knownGlobalsOnly: true };
 
-const t = (script, binaries = [], entryFiles = [], options = { cwd }) =>
+type T = (script: string | string[], binaries: string[], entryFiles?: string[], options?: { cwd: string }) => void;
+const t: T = (script, binaries = [], entryFiles = [], options = { cwd }) =>
   assert.deepEqual(_getReferencesFromScripts(script, options), { binaries, entryFiles });
 
 test('getReferencesFromScripts', () => {

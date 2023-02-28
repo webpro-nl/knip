@@ -6,7 +6,7 @@ import type { Resolver } from '../types.js';
 const tryResolveFilePath = (cwd: string, specifier: string, fallback?: string) => {
   if (specifier) {
     const filePath = path.join(cwd, specifier);
-    if (filePath.startsWith(cwd)) {
+    if (!filePath.includes('node_modules')) {
       const resolvedFilePath = tryResolve(filePath);
       if (resolvedFilePath) return [resolvedFilePath];
     }
