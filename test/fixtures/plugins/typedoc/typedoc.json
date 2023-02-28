@@ -1,0 +1,3 @@
+{
+  "plugins": ["@appium/typedoc-plugin-appium", "typedoc-plugin-expand-object-like-types"]
+}

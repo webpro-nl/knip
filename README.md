@@ -293,9 +293,10 @@ Knip contains a growing list of plugins:
 - [Sentry][36]
 - [Storybook][37]
 - [Stryker][38]
-- [TypeScript][39]
-- [Vitest][40]
-- [Webpack][41]
+- [TypeDoc][39]
+- [TypeScript][40]
+- [Vitest][41]
+- [Webpack][42]
 
 Plugins are automatically activated. Each plugin is automatically enabled based on simple heuristics. Most of them check
 whether one or one of a few (dev) dependencies are listed in `package.json`. Once enabled, they add a set of
@@ -303,7 +304,7 @@ configuration and/or entry files for Knip to analyze. These defaults can be over
 
 Most plugins use one or both of the following file types:
 
-- `config` - custom dependency resolvers are applied to the [config files][42]
+- `config` - custom dependency resolvers are applied to the [config files][43]
 - `entry` - files to include with the analysis of the rest of the source code
 
 See each plugin's documentation for its default values.
@@ -404,10 +405,10 @@ Each workspace can also have its own `paths` configured. Note that Knip `paths` 
 
 Knip provides the following built-in reporters:
 
-- [`codeowners`][43]
-- [`compact`][44]
-- [`json`][45]
-- [`symbol`][46] (default)
+- [`codeowners`][44]
+- [`compact`][45]
+- [`json`][46]
+- [`symbol`][47] (default)
 
 The `compact` reporter shows the sorted files first, and then a list of symbols:
 
@@ -434,7 +435,7 @@ type ReporterOptions = {
 
 The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][47].
+Find more details and ideas in [custom reporters][48].
 
 ## Libraries and "unused" exports
 
@@ -492,7 +493,7 @@ When unused dependencies are related to dependencies having a Knip [plugin][1], 
 for that dependency are at custom locations. The default values are at the plugin's documentation, and can be overridden
 to match the custom location(s).
 
-When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][48].
+When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][49].
 
 #### Too many unused exports
 
@@ -500,7 +501,7 @@ When the project is a library and the exports are meant to be used by consumers 
 
 1.  By default, unused exports of `entry` files are not reported. You could re-export from an existing entry file, or
     add the containing file to the `entry` array in the configuration.
-2.  The exported values or types can be marked [using the JSDoc `@public` tag][49].
+2.  The exported values or types can be marked [using the JSDoc `@public` tag][50].
 
 ### How to start using Knip in CI while having too many issues to sort out?
 
@@ -520,7 +521,7 @@ All of this is hiding problems, so please make sure to plan for fixing them and/
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                            | **knip** | [depcheck][50] | [unimported][51] | [ts-unused-exports][52] | [ts-prune][53] |
+| Feature                            | **knip** | [depcheck][51] | [unimported][52] | [ts-unused-exports][53] | [ts-prune][54] |
 | :--------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files                       |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies                |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -555,7 +556,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][54].
+Also see [production mode][55].
 
 ### ts-unused-exports
 
@@ -623,19 +624,20 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [36]: ./src/plugins/sentry
 [37]: ./src/plugins/storybook
 [38]: ./src/plugins/stryker
-[39]: ./src/plugins/typescript
-[40]: ./src/plugins/vitest
-[41]: ./src/plugins/webpack
-[42]: #config
-[43]: #code-owners
-[44]: #compact
-[45]: #json
-[46]: #symbol-default
-[47]: ./docs/custom-reporters.md
-[48]: #create-a-new-plugin
-[49]: #libraries-and-unused-exports
-[50]: https://github.com/depcheck/depcheck
-[51]: https://github.com/smeijer/unimported
-[52]: https://github.com/pzavolinsky/ts-unused-exports
-[53]: https://github.com/nadeesha/ts-prune
-[54]: #production-mode
+[39]: ./src/plugins/typedoc
+[40]: ./src/plugins/typescript
+[41]: ./src/plugins/vitest
+[42]: ./src/plugins/webpack
+[43]: #config
+[44]: #code-owners
+[45]: #compact
+[46]: #json
+[47]: #symbol-default
+[48]: ./docs/custom-reporters.md
+[49]: #create-a-new-plugin
+[50]: #libraries-and-unused-exports
+[51]: https://github.com/depcheck/depcheck
+[52]: https://github.com/smeijer/unimported
+[53]: https://github.com/pzavolinsky/ts-unused-exports
+[54]: https://github.com/nadeesha/ts-prune
+[55]: #production-mode
