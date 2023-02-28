@@ -46,6 +46,7 @@ test('getReferencesFromScripts (ts-node/tsx)', () => {
   t('tsx watch ./main.ts', ['tsx'], [ts]);
   t('node --loader tsx ./main.ts', ['tsx'], [ts]);
   t('npx tsx main', ['tsx'], [ts]);
+  t('babel-node --inspect=0.0.0.0 ./main.ts', ['babel-node'], [ts]);
 });
 
 test('getReferencesFromScripts (--require)', () => {

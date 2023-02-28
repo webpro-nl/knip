@@ -6,6 +6,7 @@ import type { ParsedArgs } from 'minimist';
 type ArgResolvers = Record<string, (parsed: ParsedArgs) => string[]>;
 
 const argResolvers: ArgResolvers = {
+  'babel-node': parsed => [parsed._[0], parsed.require].flat(),
   'ts-node': parsed => [parsed._[0], parsed.require].flat(),
   tsx: parsed => parsed._.filter(p => p !== 'watch'),
   default: parsed => [parsed.require].flat(),
