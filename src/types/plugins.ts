@@ -16,5 +16,5 @@ type GenericPluginCallbackOptions = {
 
 export type GenericPluginCallback = (
   configFilePath: string,
-  { cwd, manifest, config, workspaceConfig, isProduction }: GenericPluginCallbackOptions
+  options: GenericPluginCallbackOptions
 ) => Promise<string[] | { dependencies: string[]; entryFiles?: string[] }> | string[];
