@@ -20,23 +20,34 @@ export const CONFIG_FILE_PATTERNS = ['.storybook/{main,manager}.{js,ts}'];
 
 export const ENTRY_FILE_PATTERNS = ['.storybook/preview.{js,jsx,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
 
-export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
+export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
 
 const findStorybookDependencies: GenericPluginCallback = async configFilePath => {
   const config: StorybookConfig = await _load(configFilePath);
 
   if (!config) return [];
 
-  const addons =
-    config.addons?.map(addon => {
-      const name = typeof addon === 'string' ? addon : addon.name;
-      return name.startsWith('.') ? require.resolve(path.join(path.dirname(configFilePath), name)) : name;
-    }) ?? [];
+  const addons: string[] = [];
+  const entryFiles: string[] = [];
+
+  config.addons?.forEach(addon => {
+    const name = typeof addon === 'string' ? addon : addon.name;
+    if (name.startsWith('.')) {
+      entryFiles.push(require.resolve(path.join(path.dirname(configFilePath), name)));
+    } else if (name.startsWith('/')) {
+      entryFiles.push(configFilePath);
+    } else {
+      addons.push(name);
+    }
+  }) ?? [];
   const builder = config?.core?.builder;
   const builderPackages =
     builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
 
-  return [...addons, ...builderPackages].map(getPackageName);
+  return {
+    dependencies: [...addons, ...builderPackages].map(getPackageName),
+    entryFiles,
+  };
 };
 
 export const findDependencies = timerify(findStorybookDependencies);

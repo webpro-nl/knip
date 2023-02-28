@@ -7,13 +7,16 @@ const cwd = path.resolve('test/fixtures/plugins/storybook');
 
 test('Find dependencies in Storybook configuration (main.js)', async () => {
   const configFilePath = path.join(cwd, 'main.js');
-  const dependencies = await storybook.findDependencies(configFilePath, { cwd });
-  assert.deepEqual(dependencies, [
-    '@storybook/addon-essentials',
-    '@storybook/addon-a11y',
-    '@storybook/addon-knobs',
-    'storybook-addon-export-to-codesandbox',
-    '@storybook/builder-webpack5',
-    '@storybook/manager-webpack5',
-  ]);
+  const dependencies = await storybook.findDependencies(configFilePath);
+  assert.deepEqual(dependencies, {
+    dependencies: [
+      '@storybook/addon-essentials',
+      '@storybook/addon-a11y',
+      '@storybook/addon-knobs',
+      'storybook-addon-export-to-codesandbox',
+      '@storybook/builder-webpack5',
+      '@storybook/manager-webpack5',
+    ],
+    entryFiles: [path.join(cwd, 'addon/register.js')],
+  });
 });

@@ -12,6 +12,7 @@ module.exports = {
     '@storybook/addon-a11y',
     '@storybook/addon-knobs/preset',
     'storybook-addon-export-to-codesandbox',
+    './addon/register',
   ],
   webpackFinal: config => {
     const tsPaths = new TsconfigPathsPlugin({

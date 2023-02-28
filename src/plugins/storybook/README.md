@@ -15,7 +15,7 @@ or `devDependencies`:
   "storybook": {
     "config": [".storybook/{main,manager}.{js,ts}"],
     "entry": [".storybook/preview.{js,jsx,ts,tsx}", "**/*.stories.{js,jsx,ts,tsx}"],
-    "project": [".storybook/**/*.{js,ts,tsx}", "**/*.stories.{js,jsx,ts,tsx}"]
+    "project": [".storybook/**/*.{js,jsx,ts,tsx}", "**/*.stories.{js,jsx,ts,tsx}"]
   }
 }
 ```
