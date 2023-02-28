@@ -9,6 +9,7 @@ module.exports = {
   transform: {
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nrwl/react/plugins/jest',
     '^.+\\.[tj]sx?$': ['babel-jest', { cwd: __dirname, configFile: './babel-jest.config.json' }],
+    '^.+\\.[jt]sx?$': '<rootDir>/jest.transform.js',
   },
   watchPlugins: [require.resolve('jest-watch-select-projects')],
 };

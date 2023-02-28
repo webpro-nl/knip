@@ -2,6 +2,6 @@
 module.exports = {
   ...require('./jest.config.shared'),
   displayName: 'dev',
-  setupFilesAfterEnv: ['<rootDir>/__tests__/setupAfterEnv.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   setupFiles: [],
 };
