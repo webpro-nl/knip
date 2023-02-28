@@ -28,6 +28,15 @@ export const getBinariesFromScript = (
         case 'Command': {
           const binary = node.name?.text;
 
+          const commandExpansions =
+            node.prefix?.flatMap(
+              prefix => prefix.expansion?.filter(expansion => expansion.type === 'CommandExpansion') ?? []
+            ) ?? [];
+
+          if (commandExpansions.length > 0) {
+            return commandExpansions.flatMap(expansion => getBinariesFromNodes(expansion.commandAST.commands)) ?? [];
+          }
+
           // Bunch of early bail outs for things we can't or don't want to resolve
           if (!binary || binary === '.' || binary === 'source') return [];
           if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];

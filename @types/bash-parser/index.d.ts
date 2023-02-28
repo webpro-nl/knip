@@ -13,6 +13,11 @@ declare module 'bash-parser' {
     type: 'Command';
     name?: Name;
     suffix: Name[];
+    prefix?: Prefix[];
+  };
+
+  type Prefix = {
+    expansion?: Expansion[];
   };
 
   type LogicalExpression = {
@@ -42,6 +47,11 @@ declare module 'bash-parser' {
     type: 'Function';
     name: Name;
     body: CompoundList;
+  };
+
+  type Expansion = {
+    type: 'CommandExpansion';
+    commandAST: AST;
   };
 
   export type Node = Command | LogicalExpression | If | For | Function_;

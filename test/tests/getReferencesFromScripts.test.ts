@@ -129,6 +129,11 @@ test('getReferencesFromScripts (bash expressions)', () => {
   t('if ! npx program --verbose ; then exit 1 ; fi', ['program']);
 });
 
+test('getReferencesFromScripts (bash expansion)', () => {
+  t('var=$(node ./script.js)', [], [js]);
+  t('var=`node ./script.js`;var=`node ./require.js`', [], [js, req]);
+});
+
 test('getReferencesFromScripts (multiline)', () => {
   t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', ['lint-staged']);
   t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, ['rc', '@scope/rc']);
