@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
+import { isAbsolute } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { require } from '../../util/require.js';
@@ -24,8 +25,8 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   const config: Config.InitialOptions = await _load(configFilePath);
   if (config?.preset) {
     const { preset } = config;
-    if (preset.startsWith('.') || preset.startsWith('/')) {
-      const presetConfigPath = preset.startsWith('/') ? preset : path.join(path.dirname(configFilePath), preset);
+    if (preset.startsWith('.') || isAbsolute(preset)) {
+      const presetConfigPath = isAbsolute(preset) ? preset : path.join(path.dirname(configFilePath), preset);
       const presetConfig = await resolveExtensibleConfig(presetConfigPath);
       Object.assign(config, presetConfig);
     }
@@ -45,7 +46,7 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
     name = name.includes('<rootDir>') ? path.join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
     if (name.startsWith('.')) {
       entryFiles.push(require.resolve(path.join(path.dirname(configFilePath), name)));
-    } else if (name.startsWith('/')) {
+    } else if (isAbsolute(name)) {
       entryFiles.push(name);
     } else {
       dependencies.push(name);

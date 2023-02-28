@@ -2,6 +2,7 @@ import path from 'node:path';
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
+import { isAbsolute } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
@@ -79,7 +80,7 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
             ? cfg.entry
             : Object.values(cfg.entry).map(entry => (typeof entry === 'string' ? entry : entry.filename));
         entries.forEach(entry => {
-          entryFiles.add(entry.startsWith('/') ? entry : path.join(cwd, entry));
+          entryFiles.add(isAbsolute(entry) ? entry : path.join(cwd, entry));
         });
       }
 

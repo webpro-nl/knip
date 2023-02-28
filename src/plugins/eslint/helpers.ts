@@ -2,6 +2,7 @@ import path from 'node:path';
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
+import { isAbsolute } from '../../util/path.js';
 import { require } from '../../util/require.js';
 import type { ESLintConfig } from './types.js';
 
@@ -22,8 +23,8 @@ export const getDependenciesDeep = async (configFilePath: string, dependencies: 
 
   if (config.extends) {
     for (const extend of [config.extends].flat()) {
-      if (extend.startsWith('.') || (extend.startsWith('/') && !extend.includes('/node_modules/'))) {
-        const extendConfigFilePath = extend.startsWith('/')
+      if (extend.startsWith('.') || (isAbsolute(extend) && !extend.includes('/node_modules/'))) {
+        const extendConfigFilePath = isAbsolute(extend)
           ? extend
           : require.resolve(path.join(path.dirname(configFilePath), extend));
         addAll(await getDependenciesDeep(extendConfigFilePath));
@@ -50,7 +51,7 @@ export const resolvePluginPackageName = (pluginName: string) => resolvePackageNa
 
 const customResolvePluginPackageNames = (extend: string) => {
   if (extend.includes('/node_modules/')) return getPackageName(extend);
-  if (extend.startsWith('/') || extend.startsWith('.')) return;
+  if (isAbsolute(extend) || extend.startsWith('.')) return;
   if (extend.includes(':')) {
     const pluginName = extend.replace(/^plugin:/, '').replace(/(\/|:).+$/, '');
     if (pluginName === 'eslint') return;
