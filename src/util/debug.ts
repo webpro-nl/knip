@@ -7,13 +7,15 @@ const { debug, 'debug-file-filter': debugFileFilter } = parsedArgs.values;
 const IS_ENABLED = debug ?? false;
 const FILE_FILTER = debugFileFilter;
 
+const inspectOptions = { maxArrayLength: null, depth: null, colors: true };
+
 // Inspect arrays, otherwise Node [will, knip, ...n-100 more items]
-const logArray = (collection: string[]) => console.log(util.inspect(collection.sort(), { maxArrayLength: null }));
+const logArray = (collection: string[]) => console.log(util.inspect(collection.sort(), inspectOptions));
 
 export const debugLogObject = (name: string, obj: unknown) => {
   if (!IS_ENABLED) return;
   console.log(`[knip] ${name}`);
-  console.log(util.inspect(obj, { depth: null, colors: true }));
+  console.log(util.inspect(obj, inspectOptions));
 };
 
 export const debugLogFiles = (name: string, filePaths: Set<string> | string[]) => {
