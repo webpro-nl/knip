@@ -34,7 +34,7 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
     'eslint-config-airbnb',
     'eslint-plugin-prettier',
     '@typescript-eslint/eslint-plugin',
-    '@scope/eslint-config',
+    '@scope/eslint-config/ts',
     'eslint-config-prettier',
     '@nrwl/eslint-plugin-nx',
   ]);

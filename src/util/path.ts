@@ -7,3 +7,5 @@ export const toPosixPath = (value: string) => value.split(path.sep).join(path.po
 export const relativePosix = (from: string, to?: string) => toPosixPath(path.relative(to ? from : cwd, to ?? from));
 
 export const isAbsolute = (value: string) => /^(\/|[A-Z]:)/.test(value);
+
+export const isInNodeModules = (filePath: string) => filePath.includes('/node_modules/');

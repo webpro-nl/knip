@@ -2,9 +2,13 @@ import path from 'node:path';
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
-import { isAbsolute } from '../../util/path.js';
+import { isAbsolute, isInNodeModules } from '../../util/path.js';
 import { require } from '../../util/require.js';
+import { fallback } from './fallback.js';
 import type { ESLintConfig } from './types.js';
+import type { PackageJson } from 'type-fest';
+
+type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
 
 const getDependencies = (config: ESLintConfig) => {
   const extend = config.extends ? [config.extends].flat().map(customResolvePluginPackageNames) : [];
@@ -13,28 +17,49 @@ const getDependencies = (config: ESLintConfig) => {
   const parser = config.parser;
   const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-  return compact([...extend, ...plugins, parser, ...extraParsers, ...settings]).map(getPackageName);
+  return compact([...extend, ...plugins, parser, ...extraParsers, ...settings]);
 };
 
-export const getDependenciesDeep = async (configFilePath: string, dependencies: Set<string> = new Set()) => {
+type GetDependenciesDeep = (
+  configFilePath: string,
+  dependencies: Set<string>,
+  options: { cwd: string; manifest: Manifest }
+) => Promise<Set<string>>;
+
+export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, dependencies = new Set(), options) => {
   const addAll = (deps: string[] | Set<string>) => deps.forEach(dependency => dependencies.add(dependency));
 
-  const config: ESLintConfig = await _load(configFilePath);
+  let config = configFilePath.endsWith('package.json') ? options.manifest.eslintConfig : undefined;
 
-  if (config.extends) {
-    for (const extend of [config.extends].flat()) {
-      if (extend.startsWith('.') || (isAbsolute(extend) && !extend.includes('/node_modules/'))) {
-        const extendConfigFilePath = isAbsolute(extend)
-          ? extend
-          : require.resolve(path.join(path.dirname(configFilePath), extend));
-        addAll(await getDependenciesDeep(extendConfigFilePath));
+  if (!config) {
+    try {
+      config = await _load(configFilePath);
+    } catch (err) {
+      if (err instanceof Error && err.cause instanceof Error && /Failed to patch ESLint/.test(err.cause.message)) {
+        // Fallback - or actually native - mechanism kicks in for @rushstack/eslint-patch/modern-module-resolution
+        const dependencies = await fallback(configFilePath, options);
+        addAll(dependencies);
+      } else {
+        throw err;
       }
     }
   }
 
-  if (config.overrides) for (const override of config.overrides) addAll(getDependencies(override));
+  if (config) {
+    if (config.extends) {
+      for (const extend of [config.extends].flat()) {
+        if (extend.startsWith('.') || (isAbsolute(extend) && !isInNodeModules(extend))) {
+          const filePath = isAbsolute(extend) ? extend : path.join(path.dirname(configFilePath), extend);
+          const extendConfigFilePath = require.resolve(filePath);
+          addAll(await getDependenciesDeep(extendConfigFilePath, dependencies, options));
+        }
+      }
+    }
 
-  addAll(getDependencies(config));
+    if (config.overrides) for (const override of [config.overrides].flat()) addAll(getDependencies(override));
+
+    addAll(getDependencies(config));
+  }
 
   return dependencies;
 };
@@ -50,7 +75,7 @@ const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', plugin
 export const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
 
 const customResolvePluginPackageNames = (extend: string) => {
-  if (extend.includes('/node_modules/')) return getPackageName(extend);
+  if (isInNodeModules(extend)) return getPackageName(extend);
   if (isAbsolute(extend) || extend.startsWith('.')) return;
   if (extend.includes(':')) {
     const pluginName = extend.replace(/^plugin:/, '').replace(/(\/|:).+$/, '');
@@ -58,7 +83,7 @@ const customResolvePluginPackageNames = (extend: string) => {
     return resolvePackageName('eslint-plugin', pluginName);
   }
   // TODO Slippery territory, not sure what we have here
-  return extend.includes('eslint') ? getPackageName(extend) : resolvePackageName('eslint-config', extend);
+  return extend.includes('eslint') ? extend : resolvePackageName('eslint-config', extend);
 };
 
 const getImportPluginDependencies = (settings: Record<string, unknown>) => {
