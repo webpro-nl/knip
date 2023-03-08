@@ -543,7 +543,7 @@ When the project is a library and the exports are meant to be used by consumers 
 
 1.  By default, unused exports of `entry` files are not reported. You could re-export from an existing entry file, or
     add the containing file to the `entry` array in the configuration.
-2.  The exported values or types can be marked [using the JSDoc `@public` tag](#public-exports)
+2.  The exported values or types can be marked [using the JSDoc `@public` tag][48]
 
 ### How to start using Knip in CI while having too many issues to sort out?
 
@@ -563,7 +563,7 @@ All of this is hiding problems, so please make sure to plan for fixing them and/
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                           | **knip** | [depcheck][48] | [unimported][49] | [ts-unused-exports][50] | [ts-prune][51] |
+| Feature                           | **knip** | [depcheck][49] | [unimported][50] | [ts-unused-exports][51] | [ts-prune][52] |
 | :-------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -599,7 +599,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][56].
+Also see [production mode][45].
 
 ### ts-unused-exports
 
@@ -669,7 +669,8 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [45]: #production-mode
 [46]: ./docs/custom-reporters.md
 [47]: #create-a-new-plugin
-[48]: https://github.com/depcheck/depcheck
-[49]: https://github.com/smeijer/unimported
-[50]: https://github.com/pzavolinsky/ts-unused-exports
-[51]: https://github.com/nadeesha/ts-prune
+[48]: #public-exports
+[49]: https://github.com/depcheck/depcheck
+[50]: https://github.com/smeijer/unimported
+[51]: https://github.com/pzavolinsky/ts-unused-exports
+[52]: https://github.com/nadeesha/ts-prune
