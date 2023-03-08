@@ -37,17 +37,17 @@ When coming from version v0.13.3 or before, please see [migration to v1][7].
 
 ## Announcement: Knip v2
 
-The next major release is upcoming. Please see https://github.com/webpro/knip/issues/73 for the full story. Use
+The next major release is upcoming. Please see [https://github.com/webpro/knip/issues/73][8] for the full story. Use
 `npm install knip@next` to try it out if you're curious! No changes in configuration necessary. Find the updated
-documentation at https://github.com/webpro/knip/blob/v2/README.md.
+documentation at [https://github.com/webpro/knip/blob/v2/README.md][9].
 
 ## Issues
 
-Are you seeing false positives? Please report them by [opening an issue in this repo][8]. Bonus points for linking to a
+Are you seeing false positives? Please report them by [opening an issue in this repo][10]. Bonus points for linking to a
 public repository using Knip, or even opening a pull request with a directory and example files in `test/fixtures`.
 Correctness and bug fixes have priority over performance and new features.
 
-Also see the [FAQ][9].
+Also see the [FAQ][11].
 
 ## Installation
 
@@ -196,7 +196,7 @@ Use `--exclude` to ignore reports you're not interested in:
 Use `--dependencies` or `--exports` as shortcuts to combine groups of related types.
 
 Still not happy with the results? Getting too much output/false positives? The [FAQ][9] may be useful. Feel free to open
-an issue and I'm happy to look into it. Also see the next section on how to [ignore][10] certain false positives:
+an issue and I'm happy to look into it. Also see the next section on how to [ignore][12] certain false positives:
 
 ## Ignore
 
@@ -271,38 +271,38 @@ Here's some example output when running Knip in a workspace:
 
 Knip contains a growing list of plugins:
 
-- [Babel][11]
-- [Capacitor][12]
-- [Changesets][13]
-- [commitlint][14]
-- [Cypress][15]
-- [ESLint][16]
-- [Gatsby][17]
-- [GitHub Actions][18]
-- [husky][19]
-- [Jest][20]
-- [Lefthook][21]
-- [lint-staged][22]
-- [markdownlint][23]
-- [Mocha][24]
-- [Next.js][25]
-- [npm-package-json-lint][26]
-- [Nx][27]
-- [nyc][28]
-- [Playwright][29]
-- [PostCSS][30]
-- [Prettier][31]
-- [Release It][32]
-- [Remark][33]
-- [Remix][34]
-- [Rollup][35]
-- [Sentry][36]
-- [Storybook][37]
-- [Stryker][38]
-- [TypeDoc][39]
-- [TypeScript][40]
-- [Vitest][41]
-- [Webpack][42]
+- [Babel][13]
+- [Capacitor][14]
+- [Changesets][15]
+- [commitlint][16]
+- [Cypress][17]
+- [ESLint][18]
+- [Gatsby][19]
+- [GitHub Actions][20]
+- [husky][21]
+- [Jest][22]
+- [Lefthook][23]
+- [lint-staged][24]
+- [markdownlint][25]
+- [Mocha][26]
+- [Next.js][27]
+- [npm-package-json-lint][28]
+- [Nx][29]
+- [nyc][30]
+- [Playwright][31]
+- [PostCSS][32]
+- [Prettier][33]
+- [Release It][34]
+- [Remark][35]
+- [Remix][36]
+- [Rollup][37]
+- [Sentry][38]
+- [Storybook][39]
+- [Stryker][40]
+- [TypeDoc][41]
+- [TypeScript][42]
+- [Vitest][43]
+- [Webpack][44]
 
 Plugins are automatically activated. Each plugin is automatically enabled based on simple heuristics. Most of them check
 whether one or one of a few (dev) dependencies are listed in `package.json`. Once enabled, they add a set of
@@ -310,7 +310,7 @@ configuration and/or entry files for Knip to analyze. These defaults can be over
 
 Most plugins use one or both of the following file types:
 
-- `config` - custom dependency resolvers are applied to the [config files][43]
+- `config` - custom dependency resolvers are applied to the [config files][45]
 - `entry` - files to include with the analysis of the rest of the source code
 
 See each plugin's documentation for its default values.
@@ -334,6 +334,13 @@ rest to find which of those dependencies are unused or missing.
 
 Other configuration files use `require` or `import` statements to use dependencies, so they can be analyzed like the
 rest of the source files. These configuration files are also considered `entry` files.
+
+For plugins related to test files, it's good to know that the following glob patterns are always included by default
+(see [TEST_FILE_PATTERNS in constants.ts][46]):
+
+- `**/*.{test,spec}.{js,jsx,ts,tsx,mjs,cjs}`
+- `**/__tests__/**/*.{js,jsx,ts,tsx,mjs,cjs}`
+- `test/**/*.{js,jsx,ts,tsx,mjs,cjs}`
 
 ### Disable a plugin
 
@@ -411,10 +418,10 @@ Each workspace can also have its own `paths` configured. Note that Knip `paths` 
 
 Knip provides the following built-in reporters:
 
-- [`codeowners`][44]
-- [`compact`][45]
-- [`json`][46]
-- [`symbol`][47] (default)
+- [`codeowners`][47]
+- [`compact`][48]
+- [`json`][49]
+- [`symbol`][50] (default)
 
 The `compact` reporter shows the sorted files first, and then a list of symbols:
 
@@ -441,7 +448,7 @@ type ReporterOptions = {
 
 The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][48].
+Find more details and ideas in [custom reporters][51].
 
 ## Libraries and "unused" exports
 
@@ -499,7 +506,7 @@ When unused dependencies are related to dependencies having a Knip [plugin][1], 
 for that dependency are at custom locations. The default values are at the plugin's documentation, and can be overridden
 to match the custom location(s).
 
-When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][49].
+When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][52].
 
 #### Too many unused exports
 
@@ -507,7 +514,7 @@ When the project is a library and the exports are meant to be used by consumers 
 
 1.  By default, unused exports of `entry` files are not reported. You could re-export from an existing entry file, or
     add the containing file to the `entry` array in the configuration.
-2.  The exported values or types can be marked [using the JSDoc `@public` tag][50].
+2.  The exported values or types can be marked [using the JSDoc `@public` tag][53].
 
 ### How to start using Knip in CI while having too many issues to sort out?
 
@@ -527,7 +534,7 @@ All of this is hiding problems, so please make sure to plan for fixing them and/
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                            | **knip** | [depcheck][51] | [unimported][52] | [ts-unused-exports][53] | [ts-prune][54] |
+| Feature                            | **knip** | [depcheck][54] | [unimported][55] | [ts-unused-exports][56] | [ts-prune][57] |
 | :--------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files                       |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies                |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -562,7 +569,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][55].
+Also see [production mode][58].
 
 ### ts-unused-exports
 
@@ -599,51 +606,54 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [5]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [6]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
 [7]: ./docs/migration-to-v1.md
-[8]: https://github.com/webpro/knip/issues
-[9]: #faq
-[10]: #ignore
-[11]: ./src/plugins/babel
-[12]: ./src/plugins/capacitor
-[13]: ./src/plugins/changesets
-[14]: ./src/plugins/commitlint
-[15]: ./src/plugins/cypress
-[16]: ./src/plugins/eslint
-[17]: ./src/plugins/gatsby
-[18]: ./src/plugins/github-actions
-[19]: ./src/plugins/husky
-[20]: ./src/plugins/jest
-[21]: ./src/plugins/lefthook
-[22]: ./src/plugins/lint-staged
-[23]: ./src/plugins/markdownlint
-[24]: ./src/plugins/mocha
-[25]: ./src/plugins/next
-[26]: ./src/plugins/npm-package-json-lint
-[27]: ./src/plugins/nx
-[28]: ./src/plugins/nyc
-[29]: ./src/plugins/playwright
-[30]: ./src/plugins/postcss
-[31]: ./src/plugins/prettier
-[32]: ./src/plugins/release-it
-[33]: ./src/plugins/remark
-[34]: ./src/plugins/remix
-[35]: ./src/plugins/rollup
-[36]: ./src/plugins/sentry
-[37]: ./src/plugins/storybook
-[38]: ./src/plugins/stryker
-[39]: ./src/plugins/typedoc
-[40]: ./src/plugins/typescript
-[41]: ./src/plugins/vitest
-[42]: ./src/plugins/webpack
-[43]: #config
-[44]: #code-owners
-[45]: #compact
-[46]: #json
-[47]: #symbol-default
-[48]: ./docs/custom-reporters.md
-[49]: #create-a-new-plugin
-[50]: #libraries-and-unused-exports
-[51]: https://github.com/depcheck/depcheck
-[52]: https://github.com/smeijer/unimported
-[53]: https://github.com/pzavolinsky/ts-unused-exports
-[54]: https://github.com/nadeesha/ts-prune
-[55]: #production-mode
+[8]: https://github.com/webpro/knip/issues/73
+[9]: https://github.com/webpro/knip/blob/v2/README.md
+[10]: https://github.com/webpro/knip/issues
+[11]: #faq
+[12]: #ignore
+[13]: ./src/plugins/babel
+[14]: ./src/plugins/capacitor
+[15]: ./src/plugins/changesets
+[16]: ./src/plugins/commitlint
+[17]: ./src/plugins/cypress
+[18]: ./src/plugins/eslint
+[19]: ./src/plugins/gatsby
+[20]: ./src/plugins/github-actions
+[21]: ./src/plugins/husky
+[22]: ./src/plugins/jest
+[23]: ./src/plugins/lefthook
+[24]: ./src/plugins/lint-staged
+[25]: ./src/plugins/markdownlint
+[26]: ./src/plugins/mocha
+[27]: ./src/plugins/next
+[28]: ./src/plugins/npm-package-json-lint
+[29]: ./src/plugins/nx
+[30]: ./src/plugins/nyc
+[31]: ./src/plugins/playwright
+[32]: ./src/plugins/postcss
+[33]: ./src/plugins/prettier
+[34]: ./src/plugins/release-it
+[35]: ./src/plugins/remark
+[36]: ./src/plugins/remix
+[37]: ./src/plugins/rollup
+[38]: ./src/plugins/sentry
+[39]: ./src/plugins/storybook
+[40]: ./src/plugins/stryker
+[41]: ./src/plugins/typedoc
+[42]: ./src/plugins/typescript
+[43]: ./src/plugins/vitest
+[44]: ./src/plugins/webpack
+[45]: #config
+[46]: https://github.com/webpro/knip/blob/main/src/constants.ts
+[47]: #code-owners
+[48]: #compact
+[49]: #json
+[50]: #symbol-default
+[51]: ./docs/custom-reporters.md
+[52]: #create-a-new-plugin
+[53]: #libraries-and-unused-exports
+[54]: https://github.com/depcheck/depcheck
+[55]: https://github.com/smeijer/unimported
+[56]: https://github.com/pzavolinsky/ts-unused-exports
+[57]: https://github.com/nadeesha/ts-prune
+[58]: #production-mode

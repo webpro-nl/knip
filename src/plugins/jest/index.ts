@@ -19,7 +19,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}'];
 
-export const ENTRY_FILE_PATTERNS = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
+// Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default, no additions necessary
+export const ENTRY_FILE_PATTERNS = [];
 
 const join = (base: string, id: string) => (isAbsolute(id) ? id : path.join(path.dirname(base), id));
 

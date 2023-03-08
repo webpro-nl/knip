@@ -10,4 +10,5 @@ export const ENABLERS = ['@playwright/test'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const ENTRY_FILE_PATTERNS = ['playwright.config.{js,ts}', '.*{test,spec}.{js,ts,mjs}'];
+// Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
+export const ENTRY_FILE_PATTERNS = ['playwright.config.{js,ts}'];
