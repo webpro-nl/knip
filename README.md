@@ -35,6 +35,12 @@ with OpenAI_</sup>
 
 When coming from version v0.13.3 or before, please see [migration to v1][7].
 
+## Announcement: Knip v2
+
+The next major release is upcoming. Please see https://github.com/webpro/knip/issues/73 for the full story. Use
+`npm install knip@alpha` to try it out if you're curious! No changes in configuration necessary. Find the updated
+documentation at https://github.com/webpro/knip/blob/v2/README.md.
+
 ## Issues
 
 Are you seeing false positives? Please report them by [opening an issue in this repo][8]. Bonus points for linking to a
