@@ -15,7 +15,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
 
-export const ENTRY_FILE_PATTERNS = ['test/**/*.{js,cjs,mjs}'];
+// Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default, no additions necessary
+export const ENTRY_FILE_PATTERNS = [];
 
 const findMochaDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config = configFilePath.endsWith('package.json') ? manifest.mocha : await _load(configFilePath);

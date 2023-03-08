@@ -6,8 +6,22 @@ export const KNIP_CONFIG_LOCATIONS = ['knip.json', 'knip.jsonc', '.knip.json', '
 
 export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx'];
 
-// This is what gets excluded in --production mode (apart from what plugins would add)
-export const TEST_FILE_PATTERNS = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/__tests__/**/*.{js,jsx,ts,tsx}'];
+const extsGlobStr = DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',');
+
+// Zero-config means the following defaults are applied (either for none at all, or for workspaces individually)
+export const DEFAULT_WORKSPACE_CONFIG = {
+  entry: [`index.{${extsGlobStr}}!`, `src/index.{${extsGlobStr}}!`],
+  project: [`**/*.{${extsGlobStr}}!`],
+  paths: {},
+  ignore: [],
+};
+
+// This is ignored in --production mode (apart from what plugins would add)
+export const TEST_FILE_PATTERNS = [
+  '**/*.{test,spec}.{js,jsx,ts,tsx,mjs,cjs}',
+  '**/__tests__/**/*.{js,jsx,ts,tsx,mjs,cjs}',
+  '**/test/**/*.{js,jsx,ts,tsx,mjs,cjs}',
+];
 
 // Binaries that are expected to be globally installed (i.e. https://www.npmjs.com/package/[name] is NOT the expected dependency)
 export const IGNORED_GLOBAL_BINARIES = [

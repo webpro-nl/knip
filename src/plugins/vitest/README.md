@@ -12,8 +12,7 @@ or `devDependencies`:
 ```json
 {
   "vitest": {
-    "config": ["vitest.config.ts", "vite.config.ts"],
-    "entry": ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"]
+    "config": ["vitest.config.ts", "vite.config.ts"]
   }
 }
 ```

@@ -1,3 +1,3 @@
 export type PluginConfig = {
-  plugins?: string[];
+  plugin?: string[];
 };

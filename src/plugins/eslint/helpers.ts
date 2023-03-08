@@ -56,6 +56,8 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
       }
     }
 
+
+
     if (config.overrides) for (const override of [config.overrides].flat()) addAll(getDependencies(override));
 
     addAll(getDependencies(config));

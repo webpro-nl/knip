@@ -22,7 +22,7 @@ export const CONFIG_FILE_PATTERNS = [
 
 const findPluginDependencies: GenericPluginCallback = async configFilePath => {
   const config: PluginConfig = await _load(configFilePath);
-  return config?.plugins ?? [];
+  return config?.plugin ?? [];
 };
 
 export const findDependencies = timerify(findPluginDependencies);
