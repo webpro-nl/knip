@@ -29,10 +29,11 @@ const {
 } = parsedArgs.values;
 
 const getDefaultWorkspaceConfig = (extensions?: string[]): WorkspaceConfiguration => {
-  const extsGlobStr = [...DEFAULT_EXTENSIONS, ...(extensions ?? [])].map(ext => ext.slice(1)).join(',');
+  const exts = [...DEFAULT_EXTENSIONS, ...(extensions ?? [])].map(ext => ext.slice(1)).join(',');
+
   return {
-    entry: [`index.{${extsGlobStr}}!`, `src/index.{${extsGlobStr}}!`],
-    project: [`**/*.{${extsGlobStr}}!`],
+    entry: [`index.{${exts}}!`, `src/index.{${exts}}!`],
+    project: [`**/*.{${exts}}!`],
     paths: {},
     ignore: [],
     ignoreBinaries: [],
