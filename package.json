@@ -22,7 +22,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier scripts src test --with-node-modules --write --config .prettierrc",
-    "test": "globstar -- node --loader tsx --test \"test/**/*.test.ts\"",
+    "test": "globstar -- node --loader tsx --test \"tests/**/*.test.ts\"",
     "watch": "tsc --watch",
     "prebuild": "rm -rf dist",
     "build": "tsc",

@@ -1,4 +1,4 @@
 /dist
 /node_modules
-!/test/**/node_modules
-!/test/**/node_modules/**/dist
+!/tests/**/node_modules
+!/tests/**/node_modules/**/dist
