@@ -34,8 +34,8 @@ with OpenAI_</sup>
 
 ## Migrating to v2.0.0
 
-Migrating from v1 to v2 requires no changes in configuration. Please see https://github.com/webpro/knip/issues/73 for
-the full story.
+Migrating from v1 to v2 requires no changes in configuration. Please see [https://github.com/webpro/knip/issues/73][8]
+for the full story.
 
 ## Issues
 
@@ -136,7 +136,7 @@ Use `npm run knip` to analyze the project and output unused files, dependencies 
       --h, --help              Print this help text
       --V, version             Print version
 
-    (1) Issue types: files, dependencies, unlisted, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
+    (1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
 
     Examples:
 
@@ -628,7 +628,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [5]: #custom-reporters
 [6]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [7]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[8]: ./docs/migration-to-v1.md
+[8]: https://github.com/webpro/knip/issues/73
 [9]: https://github.com/webpro/knip/issues
 [10]: #faq
 [11]: #ignore

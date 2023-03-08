@@ -27,7 +27,7 @@ Options:
   --h, --help              Print this help text
   --V, version             Print version
 
-(1) Issue types: files, dependencies, unlisted, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
+(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
 
 Examples:
 
