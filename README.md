@@ -38,7 +38,7 @@ When coming from version v0.13.3 or before, please see [migration to v1][7].
 ## Announcement: Knip v2
 
 The next major release is upcoming. Please see https://github.com/webpro/knip/issues/73 for the full story. Use
-`npm install knip@alpha` to try it out if you're curious! No changes in configuration necessary. Find the updated
+`npm install knip@next` to try it out if you're curious! No changes in configuration necessary. Find the updated
 documentation at https://github.com/webpro/knip/blob/v2/README.md.
 
 ## Issues
