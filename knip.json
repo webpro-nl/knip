@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@alpha/schema.json",
+  "$schema": "https://unpkg.com/knip@next/schema.json",
   "entry": ["src/{index,cli}.ts!"],
   "project": ["src/**/*.ts!"],
   "ignore": ["**/fixtures", "**/_template"]

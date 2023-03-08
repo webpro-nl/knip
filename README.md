@@ -58,7 +58,7 @@ with a configuration file (or a `knip` property in `package.json`). Here's a `kn
 
 ```json
 {
-  "$schema": "https://unpkg.com/knip@alpha/schema.json",
+  "$schema": "https://unpkg.com/knip@next/schema.json",
   "entry": ["index.{js,mjs,cjs,jsx,ts,tsx}", "src/index.{js,mjs,cjs,jsx,ts,tsx}"],
   "project": ["**/*.{js,mjs,cjs,jsx,ts,tsx}"]
 }
@@ -69,7 +69,7 @@ have all source files in the `lib` directory:
 
 ```json
 {
-  "$schema": "https://unpkg.com/knip@alpha/schema.json",
+  "$schema": "https://unpkg.com/knip@next/schema.json",
   "entry": ["lib/index.ts"],
   "project": ["lib/**/*.ts"]
 }
@@ -423,7 +423,7 @@ aliases. They can be configured manually:
 
 ```json
 {
-  "$schema": "https://unpkg.com/knip@alpha/schema.json",
+  "$schema": "https://unpkg.com/knip@next/schema.json",
   "paths": {
     "@lib": ["./lib/index.ts"],
     "@lib/*": ["./lib/*"]
