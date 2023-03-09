@@ -1,15 +1,15 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import yaml from 'js-yaml';
 import { LoaderError } from './errors.js';
 import { loadJSON } from './fs.js';
+import { extname } from './path.js';
 import { timerify } from './performance.js';
 import { jiti } from './register.js';
 
 const load = async (filePath: string) => {
   try {
-    const ext = path.extname(filePath);
+    const ext = extname(filePath);
     if (ext === '.json' || ext === '.jsonc' || /rc$/.test(filePath)) {
       return loadJSON(filePath);
     }

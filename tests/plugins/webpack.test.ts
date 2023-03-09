@@ -1,18 +1,17 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
 import * as webpack from '../../src/plugins/webpack/index.js';
+import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { joinPosix } from '../helpers/index.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = path.resolve('tests/fixtures/plugins/webpack');
+const cwd = resolve('tests/fixtures/plugins/webpack');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in Webpack configuration (webpack.config.js)', async () => {
-  const configFilePath = path.join(cwd, 'webpack.config.js');
+  const configFilePath = join(cwd, 'webpack.config.js');
   const dependencies = await webpack.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, {
     dependencies: [
@@ -34,7 +33,7 @@ test('Find dependencies in Webpack configuration (webpack.config.js)', async () 
       'webpack-cli',
       'webpack-dev-server',
     ],
-    entryFiles: [path.join(cwd, 'src/app.ts'), path.join(cwd, 'src/vendor.ts'), path.join(cwd, 'src/entry.js')],
+    entryFiles: [join(cwd, 'src/app.ts'), join(cwd, 'src/vendor.ts'), join(cwd, 'src/entry.js')],
   });
 });
 
@@ -44,7 +43,7 @@ test('Find dependencies in Webpack configuration', async () => {
     cwd,
   });
 
-  assert(issues.files.has(joinPosix(cwd, 'src/unused.ts')));
+  assert(issues.files.has(join(cwd, 'src/unused.ts')));
   assert(issues.devDependencies['package.json']['@babel/plugin-proposal-object-rest-spread']);
   assert(issues.unlisted['webpack.config.js']['svgo-loader']);
   assert(issues.unlisted['webpack.dev.js']['eslint-webpack-plugin']);

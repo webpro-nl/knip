@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import * as gatsby from '../../src/plugins/gatsby/index.js';
+import { resolve, join } from '../../src/util/path.js';
 
-const cwd = path.resolve('tests/fixtures/plugins/gatsby');
+const cwd = resolve('tests/fixtures/plugins/gatsby');
 
 test('Find dependencies in Gatsby configuration (gatsby-config.js)', async () => {
-  const configFilePath = path.join(cwd, 'gatsby-config.js');
+  const configFilePath = join(cwd, 'gatsby-config.js');
   const dependencies = await gatsby.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
     '@sentry/gatsby',
@@ -24,7 +24,7 @@ test('Find dependencies in Gatsby configuration (gatsby-config.js)', async () =>
 });
 
 test('Find dependencies in Gatsby configuration (gatsby-node.js)', async () => {
-  const configFilePath = path.join(cwd, 'gatsby-node.js');
+  const configFilePath = join(cwd, 'gatsby-node.js');
   const dependencies = await gatsby.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
     '@babel/plugin-proposal-function-bind',

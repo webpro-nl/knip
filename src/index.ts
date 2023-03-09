@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { ConfigurationChief } from './configuration-chief.js';
 import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS } from './constants.js';
 import { DependencyDeputy } from './dependency-deputy.js';
@@ -10,6 +9,7 @@ import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray } from './util/debug.js';
 import { findFile, loadJSON, findFileWithExtensions } from './util/fs.js';
 import { _glob } from './util/glob.js';
+import { join } from './util/path.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -65,7 +65,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies });
 
-    const tsConfigFilePath = path.join(dir, tsConfigFile ?? 'tsconfig.json');
+    const tsConfigFilePath = join(dir, tsConfigFile ?? 'tsconfig.json');
     const tsConfig = await loadTSConfig(tsConfigFilePath);
 
     const principal = factory.getPrincipal({

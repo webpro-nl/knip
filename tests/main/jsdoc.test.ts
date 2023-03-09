@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
 test('Find exports from jsdoc @type tags', async () => {
-  const cwd = path.resolve('tests/fixtures/jsdoc');
+  const cwd = resolve('tests/fixtures/jsdoc');
 
   const { issues, counters } = await main({
     ...baseArguments,

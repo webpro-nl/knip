@@ -1,4 +1,3 @@
-import path from 'node:path';
 import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
 import { ConfigurationValidator } from './configuration-validator.js';
@@ -11,7 +10,7 @@ import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
-import { relativePosix } from './util/path.js';
+import { join, relative } from './util/path.js';
 import { toCamelCase } from './util/plugin.js';
 import { resolveIncludedIssueTypes } from './util/resolve-included-issue-types.js';
 import { byPathDepth } from './util/workspace.js';
@@ -216,7 +215,7 @@ export class ConfigurationChief {
     this.workspaceDirs = this.getWorkspaces()
       .sort(byPathDepth)
       .reverse()
-      .map(dir => path.posix.join(this.cwd, dir));
+      .map(dir => join(this.cwd, dir));
   }
 
   private async getManifestWorkspaces() {
@@ -228,7 +227,7 @@ export class ConfigurationChief {
 
     const manifestWorkspaces = new Map();
     for (const [pkgName, dir] of workspaces.entries()) {
-      manifestWorkspaces.set(relativePosix(this.cwd, dir), pkgName);
+      manifestWorkspaces.set(relative(this.cwd, dir), pkgName);
     }
     return manifestWorkspaces;
   }
@@ -267,7 +266,7 @@ export class ConfigurationChief {
     return workspaces.sort(byPathDepth).map(name => ({
       name,
       pkgName: this.manifestWorkspaces.get(name),
-      dir: path.join(this.cwd, name),
+      dir: join(this.cwd, name),
       config: this.getConfigForWorkspace(name),
       ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
     }));

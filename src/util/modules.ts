@@ -1,4 +1,4 @@
-import { isAbsolute, toPosixPath } from './path.js';
+import { isAbsolute, toPosix } from './path.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   const parts = moduleSpecifier.split('/').slice(0, 2);
@@ -6,7 +6,7 @@ export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
 };
 
 export const getPackageName = (value: string) => {
-  const match = toPosixPath(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g);
+  const match = toPosix(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g);
   if (match) return match[match.length - 1];
 
   if (value.startsWith('@')) {

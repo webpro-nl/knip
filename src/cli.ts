@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 import './util/register.js';
-import path from 'node:path';
 import prettyMilliseconds from 'pretty-ms';
 import reporters from './reporters/index.js';
 import parsedArgs, { helpText } from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
 import { _load } from './util/loader.js';
+import { cwd, resolve } from './util/path.js';
 import { Performance } from './util/performance.js';
 import { version } from './version.js';
 import { main } from './index.js';
@@ -38,13 +38,11 @@ if (isVersion) {
   process.exit(0);
 }
 
-const cwd = process.cwd();
-
 const isShowProgress =
   !isDebug && isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
 
 const printReport =
-  reporter in reporters ? reporters[reporter as keyof typeof reporters] : await _load(path.join(cwd, reporter));
+  reporter in reporters ? reporters[reporter as keyof typeof reporters] : await _load(resolve(reporter));
 
 const run = async () => {
   try {

@@ -1,18 +1,18 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
 import * as husky from '../../src/plugins/husky/index.js';
+import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = path.resolve('tests/fixtures/plugins/husky');
+const cwd = resolve('tests/fixtures/plugins/husky');
 const manifest = getManifest(cwd);
 const workspaceConfig = { ignoreBinaries: ['knip'] };
 
 test('Find dependencies in husky configuration (plugin)', async () => {
-  const configFilePath = path.join(cwd, '.husky/pre-commit');
+  const configFilePath = join(cwd, '.husky/pre-commit');
   const dependencies = await husky.findDependencies(configFilePath, { manifest, workspaceConfig });
   assert.deepEqual(dependencies, { dependencies: ['lint-staged', 'commitlint'], entryFiles: [] });
 });

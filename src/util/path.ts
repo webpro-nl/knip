@@ -1,11 +1,21 @@
 import path from 'node:path';
 
-const cwd = process.cwd();
+export const toPosix = (value: string) => value.split(path.sep).join(path.posix.sep);
 
-export const toPosixPath = (value: string) => value.split(path.sep).join(path.posix.sep);
+export const cwd = toPosix(process.cwd());
 
-export const relativePosix = (from: string, to?: string) => toPosixPath(path.relative(to ? from : cwd, to ?? from));
+export const resolve = (...paths: string[]) =>
+  paths.length === 1 ? path.posix.join(cwd, paths[0]) : path.posix.resolve(...paths);
 
-export const isAbsolute = (value: string) => /^(\/|[A-Z]:)/.test(value);
+export const relative = (from: string, to?: string) =>
+  path.posix.relative(to ? toPosix(from) : cwd, toPosix(to ?? from));
+
+export const isAbsolute = (value: string) => value.startsWith('/') || /^[A-Z]:(\/|\\)/.test(value);
 
 export const isInNodeModules = (filePath: string) => filePath.includes('node_modules');
+
+export const join = path.posix.join;
+
+export const extname = path.posix.extname;
+
+export const dirname = path.posix.dirname;

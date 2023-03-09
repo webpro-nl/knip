@@ -1,7 +1,6 @@
-import path from 'node:path';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
-import { isAbsolute } from '../../util/path.js';
+import { dirname, isAbsolute, join } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
@@ -34,7 +33,7 @@ const findStorybookDependencies: GenericPluginCallback = async configFilePath =>
   config.addons?.forEach(addon => {
     const name = typeof addon === 'string' ? addon : addon.name;
     if (name.startsWith('.')) {
-      entryFiles.push(_resolve(path.join(path.dirname(configFilePath), name)));
+      entryFiles.push(_resolve(join(dirname(configFilePath), name)));
     } else if (isAbsolute(name)) {
       entryFiles.push(configFilePath);
     } else {

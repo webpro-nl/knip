@@ -1,6 +1,6 @@
-import path from 'node:path';
 import ts from 'typescript';
 import { debugLog } from '../util/debug.js';
+import { extname } from '../util/path.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 
 export class SourceFileManager {
@@ -24,7 +24,7 @@ export class SourceFileManager {
     if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const contents = ts.sys.readFile(filePath);
     if (typeof contents !== 'string') throw new Error(`Unable to read ${filePath}`);
-    const ext = path.extname(filePath);
+    const ext = extname(filePath);
     const compiler = this.syncCompilers?.get(ext);
     const compiled = compiler ? compiler(contents) : contents;
     if (compiler) debugLog(`Compiled ${filePath}`);
@@ -43,7 +43,7 @@ export class SourceFileManager {
   async compileAndAddSourceFile(filePath: string) {
     const contents = ts.sys.readFile(filePath);
     if (typeof contents !== 'string') throw new Error(`Unable to read ${filePath}`);
-    const ext = path.extname(filePath);
+    const ext = extname(filePath);
     const compiler = this.asyncCompilers?.get(ext);
     if (compiler) {
       const compiled = await compiler(contents);

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import path from 'path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 
-const cwd = path.resolve('tests/fixtures/gitignore');
+const cwd = resolve('tests/fixtures/gitignore');
 
 test('Obey gitignore', async () => {
   const { issues } = await main({

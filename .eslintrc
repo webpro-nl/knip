@@ -35,10 +35,10 @@
   },
   "overrides": [
     {
-      "files": ["./test/**/*.{js,ts,tsx}"],
+      "files": ["./tests/**/*.{js,ts,tsx}"],
       "parserOptions": {
         "sourceType": "module",
-        "project": "./test/tsconfig.json"
+        "project": "./tests/tsconfig.json"
       },
       "rules": {
         "@typescript-eslint/no-floating-promises": "off"

@@ -1,7 +1,6 @@
-import path from 'node:path';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
-import { isAbsolute } from '../../util/path.js';
+import { isAbsolute, join, dirname } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
@@ -22,14 +21,14 @@ export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}'];
 // Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default, no additions necessary
 export const ENTRY_FILE_PATTERNS = [];
 
-const join = (base: string, id: string) => (isAbsolute(id) ? id : path.join(path.dirname(base), id));
+const maybeJoin = (base: string, id: string) => (isAbsolute(id) ? id : join(dirname(base), id));
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const config: Config.InitialOptions = await _load(configFilePath);
   if (config?.preset) {
     const { preset } = config;
     if (preset.startsWith('.') || isAbsolute(preset)) {
-      const presetConfigPath = join(configFilePath, preset);
+      const presetConfigPath = maybeJoin(configFilePath, preset);
       const presetConfig = await resolveExtensibleConfig(presetConfigPath);
       delete config.preset;
       Object.assign(config, presetConfig);
@@ -47,9 +46,9 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
   const entryFiles: string[] = [];
 
   const handleEntries = (name: string) => {
-    name = name.includes('<rootDir>') ? path.join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
+    name = name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
     if (name.startsWith('.') || isAbsolute(name)) {
-      entryFiles.push(_resolve(join(configFilePath, name)));
+      entryFiles.push(_resolve(maybeJoin(configFilePath, name)));
     } else {
       dependencies.push(name);
     }

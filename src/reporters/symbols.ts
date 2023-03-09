@@ -1,5 +1,5 @@
 import EasyTable from 'easy-table';
-import { relativePosix } from '../util/path.js';
+import { relative } from '../util/path.js';
 import { getTitle, logTitle, logIssueSet } from './util.js';
 import type { Issue, ReporterOptions, IssueSet } from '../types/issues.js';
 import type { Entries } from 'type-fest';
@@ -13,7 +13,7 @@ const logIssueRecord = (issues: Issue[]) => {
     table.cell('symbol', issue.symbols ? truncate(issue.symbols.join(', ')) : issue.symbol);
     issue.parentSymbol && table.cell('parentSymbol', issue.parentSymbol);
     issue.symbolType && table.cell('symbolType', issue.symbolType);
-    table.cell('filePath', relativePosix(issue.filePath));
+    table.cell('filePath', relative(issue.filePath));
     table.newRow();
   });
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());

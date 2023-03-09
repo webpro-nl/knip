@@ -1,8 +1,8 @@
 import { statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
+import { join } from './path.js';
 
 export const isFile = (filePath: string) => {
   const stat = statSync(filePath, { throwIfNoEntry: false });
@@ -10,7 +10,7 @@ export const isFile = (filePath: string) => {
 };
 
 export const findFile = (workingDir: string, fileName: string) => {
-  const filePath = path.join(workingDir, fileName);
+  const filePath = join(workingDir, fileName);
   return isFile(filePath) ? filePath : undefined;
 };
 
@@ -24,10 +24,10 @@ export const loadJSON = async (filePath: string) => {
 };
 
 export const findFileWithExtensions = (cwd: string, specifier: string, extensions: string[]) => {
-  const filePath = path.join(cwd, specifier);
+  const filePath = join(cwd, specifier);
   if (isFile(filePath)) return filePath;
   for (const ext of extensions) {
-    const filePath = path.join(cwd, specifier + ext);
+    const filePath = join(cwd, specifier + ext);
     if (isFile(filePath)) return filePath;
   }
 };

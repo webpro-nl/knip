@@ -1,7 +1,6 @@
-import path from 'node:path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import { isFile } from '../util/fs.js';
-import { relativePosix } from '../util/path.js';
+import { relative, resolve } from '../util/path.js';
 import type { Report, ReporterOptions, IssueSet, IssueRecords, SymbolIssueType, Issue } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
@@ -36,13 +35,13 @@ export default async ({ report, issues, options }: ReporterOptions) => {
   }
 
   const json: Record<string, Row> = {};
-  const codeownersFilePath = path.resolve(opts.codeowners ?? '.github/CODEOWNERS');
+  const codeownersFilePath = resolve(opts.codeowners ?? '.github/CODEOWNERS');
   const codeownersEngine = isFile(codeownersFilePath) && OwnershipEngine.FromCodeownersFile(codeownersFilePath);
 
   const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).map(Object.values).flat();
 
   const initRow = (filePath: string) => {
-    const file = relativePosix(filePath);
+    const file = relative(filePath);
     const row: Row = {
       file,
       ...(codeownersEngine && { owners: codeownersEngine.calcFileOwnership(file) }),

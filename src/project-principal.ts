@@ -1,11 +1,10 @@
-import path from 'node:path';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
 import { getImportsAndExports } from './typescript/ast-walker.js';
 import { createHosts } from './typescript/createHosts.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
-import { isInNodeModules } from './util/path.js';
+import { extname, isInNodeModules } from './util/path.js';
 import { timerify } from './util/performance.js';
 import type { ExportItem, ExportItemMember } from './types/ast.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
@@ -119,7 +118,7 @@ export class ProjectPrincipal {
   }
 
   private hasAcceptedExtension(filePath: string) {
-    return this.extensions.has(path.extname(filePath));
+    return this.extensions.has(extname(filePath));
   }
 
   public addEntryPath(filePath: string) {
@@ -150,7 +149,7 @@ export class ProjectPrincipal {
   public async runAsyncCompilers() {
     const add = timerify(this.backend.fileManager.compileAndAddSourceFile.bind(this.backend.fileManager));
     const extensions = Array.from(this.asyncCompilers.keys());
-    const files = Array.from(this.projectPaths).filter(filePath => extensions.includes(path.extname(filePath)));
+    const files = Array.from(this.projectPaths).filter(filePath => extensions.includes(extname(filePath)));
     for (const filePath of files) {
       await add(filePath);
     }
@@ -199,7 +198,7 @@ export class ProjectPrincipal {
         if (/^(@|[a-z])/.test(specifier)) {
           externalImports.add(specifier);
         } else {
-          const ext = path.extname(specifier);
+          const ext = extname(specifier);
           if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
             finalUnresolvedImports.add(specifier);
           } else {

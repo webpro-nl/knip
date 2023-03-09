@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
+import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { joinPosix } from '../helpers/index.js';
 
-const cwd = path.resolve('tests/fixtures/exports');
+const cwd = resolve('tests/fixtures/exports');
 
 test('Find unused files and exports', async () => {
   const { issues, counters } = await main({
@@ -15,7 +14,7 @@ test('Find unused files and exports', async () => {
   });
 
   assert.equal(issues.files.size, 1);
-  assert(issues.files.has(joinPosix(cwd, 'dangling.ts')));
+  assert(issues.files.has(join(cwd, 'dangling.ts')));
 
   assert.equal(Object.values(issues.exports).length, 4);
   assert.equal(issues.exports['default.ts']['SomeExport'].symbol, 'SomeExport');

@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
 import * as postcss from '../../src/plugins/postcss/index.js';
+import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = path.resolve('tests/fixtures/plugins/postcss');
-const manifestFilePath = path.join(cwd, 'package.json');
+const cwd = resolve('tests/fixtures/plugins/postcss');
+const manifestFilePath = join(cwd, 'package.json');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in PostCSS configuration (package.json)', async () => {
@@ -17,7 +17,7 @@ test('Find dependencies in PostCSS configuration (package.json)', async () => {
 });
 
 test('Find dependencies in PostCSS configuration (postcss.config.js)', async () => {
-  const configFilePath = path.join(cwd, 'postcss.config.js');
+  const configFilePath = join(cwd, 'postcss.config.js');
   const dependencies = await postcss.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, []);
 });

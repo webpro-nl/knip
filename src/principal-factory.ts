@@ -1,7 +1,6 @@
-import path from 'node:path';
 import ts from 'typescript';
 import { ProjectPrincipal } from './project-principal.js';
-import { isAbsolute } from './util/path.js';
+import { join, isAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { Report } from './types/issues.js';
 
@@ -23,7 +22,7 @@ const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions = {}, paths
   const baseUrl = compilerOptions.baseUrl ?? '.';
   compilerOptions.paths = Object.keys(mergedPaths).reduce((paths, key) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    paths![key] = mergedPaths[key].map(entry => (isAbsolute(entry) ? entry : path.join(cwd, baseUrl, entry)));
+    paths![key] = mergedPaths[key].map(entry => (isAbsolute(entry) ? entry : join(cwd, baseUrl, entry)));
     return paths;
   }, {} as Paths);
   return compilerOptions;
@@ -75,7 +74,7 @@ export class PrincipalFactory {
     const principal = new ProjectPrincipal({ cwd, compilerOptions, report, compilers });
     const paths = new Set(Object.keys(compilerOptions?.paths ?? {}));
     const isDefaultBaseUrl = hasDefaultBaseUrl(compilerOptions);
-    compilerOptions.baseUrl = path.join(cwd, compilerOptions.baseUrl ?? '.');
+    compilerOptions.baseUrl = join(cwd, compilerOptions.baseUrl ?? '.');
     this.principals.add({ principal, cwds: new Set([cwd]), paths, isDefaultBaseUrl });
     return principal;
   }

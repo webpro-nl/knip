@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import * as stryker from '../../src/plugins/stryker/index.js';
+import { resolve, join } from '../../src/util/path.js';
 
-const cwd = path.resolve('tests/fixtures/plugins/stryker');
+const cwd = resolve('tests/fixtures/plugins/stryker');
 
 test('Find dependencies in Stryker configuration (js)', async () => {
-  const configFilePath = path.join(cwd, '.stryker.conf.js');
+  const configFilePath = join(cwd, '.stryker.conf.js');
   const dependencies = await stryker.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
     '@stryker-mutator/mocha-runner',
@@ -17,7 +17,7 @@ test('Find dependencies in Stryker configuration (js)', async () => {
 });
 
 test('Find dependencies in Stryker configuration (mjs)', async () => {
-  const configFilePath = path.join(cwd, 'stryker.conf.mjs');
+  const configFilePath = join(cwd, 'stryker.conf.mjs');
   const dependencies = await stryker.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
     '@stryker-mutator/mocha-runner',
@@ -28,7 +28,7 @@ test('Find dependencies in Stryker configuration (mjs)', async () => {
 });
 
 test('Find dependencies in Stryker configuration (cjs)', async () => {
-  const configFilePath = path.join(cwd, 'stryker.conf.cjs');
+  const configFilePath = join(cwd, 'stryker.conf.cjs');
   const dependencies = await stryker.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
     '@stryker-mutator/mocha-runner',
@@ -39,7 +39,7 @@ test('Find dependencies in Stryker configuration (cjs)', async () => {
 });
 
 test('Find dependencies in Stryker configuration (json)', async () => {
-  const configFilePath = path.join(cwd, 'stryker.conf.json');
+  const configFilePath = join(cwd, 'stryker.conf.json');
   const dependencies = await stryker.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
     '@stryker-mutator/karma-runner',

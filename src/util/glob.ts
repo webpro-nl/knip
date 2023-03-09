@@ -1,16 +1,15 @@
-import path from 'node:path';
 import fg from 'fast-glob';
 import { globby } from 'globby';
 import memoize from 'nano-memoize';
 import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
-import { relativePosix } from './path.js';
+import { join, relative } from './path.js';
 import { timerify } from './performance.js';
 
 export const prependDirToPattern = (workingDir: string, pattern: string) => {
-  if (pattern.startsWith('!')) return '!' + path.posix.join(workingDir, pattern.slice(1));
-  return path.posix.join(workingDir, pattern);
+  if (pattern.startsWith('!')) return '!' + join(workingDir, pattern.slice(1));
+  return join(workingDir, pattern);
 };
 
 export const negate = (pattern: string) => pattern.replace(/^!?/, '!');
@@ -33,7 +32,7 @@ interface GlobOptions extends BaseGlobOptions {
 }
 
 const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = true }: GlobOptions) => {
-  const relativePath = relativePosix(cwd, workingDir);
+  const relativePath = relative(cwd, workingDir);
 
   // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
   const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);

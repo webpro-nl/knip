@@ -1,6 +1,6 @@
 import { initReport, initIssues, initCounters } from './issues/initializers.js';
 import { LineRewriter } from './util/log.js';
-import { relativePosix } from './util/path.js';
+import { relative } from './util/path.js';
 import type { Issue, Report } from './types/issues.js';
 
 type IssueCollectorOptions = {
@@ -52,7 +52,7 @@ export class IssueCollector {
   }
 
   addIssue(issue: Issue) {
-    const key = relativePosix(this.cwd, issue.filePath);
+    const key = relative(this.cwd, issue.filePath);
     this.issues[issue.type][key] = this.issues[issue.type][key] ?? {};
     if (!this.issues[issue.type][key][issue.symbol]) {
       this.issues[issue.type][key][issue.symbol] = issue;

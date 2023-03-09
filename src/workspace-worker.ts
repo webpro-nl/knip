@@ -1,10 +1,10 @@
-import path from 'node:path';
 import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './manifest/index.js';
 import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
+import { join } from './util/path.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Entries, PackageJson } from 'type-fest';
 
@@ -119,7 +119,7 @@ export class WorkspaceWorker {
       cwd: this.rootWorkspaceDir,
     });
 
-    const filePath = path.join(this.dir, 'package.json');
+    const filePath = join(this.dir, 'package.json');
     dependencies.forEach(dependency => this.referencedDependencies.add([filePath, dependency]));
     entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
     this.peerDependencies = peerDependencies;

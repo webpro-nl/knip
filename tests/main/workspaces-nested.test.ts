@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = path.resolve('tests/fixtures/workspaces-nested');
+const cwd = resolve('tests/fixtures/workspaces-nested');
 
 test('Find unused dependencies in nested workspaces with default config in production mode (loose)', async () => {
   const { issues, counters } = await main({

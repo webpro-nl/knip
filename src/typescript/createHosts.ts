@@ -1,14 +1,14 @@
 import { EOL } from 'node:os';
 import path from 'node:path';
 import ts from 'typescript';
-import { _resolve } from '../util/require.js';
+import { _require } from '../util/require.js';
 import { createCustomModuleResolver } from './resolveModuleNames.js';
 import { SourceFileManager } from './SourceFileManager.js';
 import { createCustomSys } from './sys.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 
 const cwd = process.cwd();
-const libLocation = path.dirname(_resolve('typescript', { paths: [cwd] }));
+const libLocation = path.dirname(_require.resolve('typescript', { paths: [cwd] }));
 
 type CreateHostsOptions = {
   cwd: string;

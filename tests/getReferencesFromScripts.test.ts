@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { _getReferencesFromScripts } from '../src/util/binaries/index.js';
+import { join, resolve } from '../src/util/path.js';
 
-const cwd = path.resolve('tests/fixtures/binaries');
+const cwd = resolve('tests/fixtures/binaries');
 
-const js = path.join(cwd, 'script.js');
-const ts = path.join(cwd, 'main.ts');
-const req = path.join(cwd, 'require.js');
-const index = path.join(cwd, 'dir', 'index.js');
+const js = join(cwd, 'script.js');
+const ts = join(cwd, 'main.ts');
+const req = join(cwd, 'require.js');
+const index = join(cwd, 'dir', 'index.js');
 
 const pkgScripts = { cwd, manifest: { scripts: { program: '' } } };
 const knownOnly = { cwd, knownGlobalsOnly: true };

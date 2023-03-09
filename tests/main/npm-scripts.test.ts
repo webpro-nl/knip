@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 
-const cwd = path.resolve('tests/fixtures/npm-scripts');
+const cwd = resolve('tests/fixtures/npm-scripts');
 
 test('Unused dependencies in npm scripts', async () => {
   const { issues } = await main({

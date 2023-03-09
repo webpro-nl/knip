@@ -19,7 +19,6 @@ const logArray = (collection: string[]) => {
   }
 };
 
-
 export const debugLog = (message: string) => {
   if (!IS_ENABLED) return;
   console.log(`[knip] ${message}`);

@@ -1,7 +1,6 @@
-import path from 'node:path';
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import chalk from 'chalk';
-import { isAbsolute, relativePosix } from '../util/path.js';
+import { isAbsolute, relative, resolve } from '../util/path.js';
 import { getTitle, logTitle, logIssueLine } from './util.js';
 import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types/issues.js';
 import type { Entries } from 'type-fest';
@@ -16,7 +15,7 @@ const logIssueSet = (issues: { symbol: string; owner: string }[]) => {
   issues
     .sort((a, b) => (a.owner < b.owner ? -1 : 1))
     .forEach(issue =>
-      console.log(chalk.cyan(issue.owner), isAbsolute(issue.symbol) ? relativePosix(issue.symbol) : issue.symbol)
+      console.log(chalk.cyan(issue.owner), isAbsolute(issue.symbol) ? relative(issue.symbol) : issue.symbol)
     );
 };
 
@@ -34,7 +33,7 @@ export default ({ report, issues, options }: ReporterOptions) => {
   } catch (error) {
     console.error(error);
   }
-  const codeownersFilePath = path.resolve(opts.path ?? '.github/CODEOWNERS');
+  const codeownersFilePath = resolve(opts.path ?? '.github/CODEOWNERS');
   const codeownersEngine = OwnershipEngine.FromCodeownersFile(codeownersFilePath);
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   const [dependenciesOwner = '[no-owner]'] = codeownersEngine.calcFileOwnership('package.json');
@@ -42,7 +41,7 @@ export default ({ report, issues, options }: ReporterOptions) => {
   let totalIssues = 0;
 
   const calcFileOwnership = (filePath: string) =>
-    codeownersEngine.calcFileOwnership(relativePosix(filePath))[0] ?? fallbackOwner;
+    codeownersEngine.calcFileOwnership(relative(filePath))[0] ?? fallbackOwner;
   const addOwner = (issue: Issue) => ({ ...issue, owner: calcFileOwnership(issue.filePath) });
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {

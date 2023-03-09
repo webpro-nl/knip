@@ -1,13 +1,12 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
+import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { joinPosix } from '../helpers/index.js';
 
 test('Find unused files and exports with JS entry file', async () => {
-  const cwd = path.resolve('tests/fixtures/js-only');
+  const cwd = resolve('tests/fixtures/js-only');
 
   const { issues, counters } = await main({
     ...baseArguments,
@@ -15,7 +14,7 @@ test('Find unused files and exports with JS entry file', async () => {
   });
 
   assert.equal(issues.files.size, 1);
-  assert(issues.files.has(joinPosix(cwd, 'dangling.js')));
+  assert(issues.files.has(join(cwd, 'dangling.js')));
 
   assert.equal(Object.values(issues.exports).length, 0);
 

@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
 test('Find unused exports in zero-config mode', async () => {
-  const cwd = path.resolve('tests/fixtures/zero-config');
+  const cwd = resolve('tests/fixtures/zero-config');
 
   const { issues, counters } = await main({
     ...baseArguments,

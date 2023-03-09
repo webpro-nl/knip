@@ -1,8 +1,7 @@
-import path from 'node:path';
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
 import { getPackageName } from '../../util/modules.js';
-import { isAbsolute, isInNodeModules } from '../../util/path.js';
+import { isAbsolute, isInNodeModules, join, dirname } from '../../util/path.js';
 import { _resolve } from '../../util/require.js';
 import { fallback } from './fallback.js';
 import type { ESLintConfig } from './types.js';
@@ -49,14 +48,12 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
     if (config.extends) {
       for (const extend of [config.extends].flat()) {
         if (extend.startsWith('.') || (isAbsolute(extend) && !isInNodeModules(extend))) {
-          const filePath = isAbsolute(extend) ? extend : path.join(path.dirname(configFilePath), extend);
+          const filePath = isAbsolute(extend) ? extend : join(dirname(configFilePath), extend);
           const extendConfigFilePath = _resolve(filePath);
           addAll(await getDependenciesDeep(extendConfigFilePath, dependencies, options));
         }
       }
     }
-
-
 
     if (config.overrides) for (const override of [config.overrides].flat()) addAll(getDependencies(override));
 
