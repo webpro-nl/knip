@@ -1,11 +1,9 @@
-import { initReport, initIssues, initCounters } from './issues/initializers.js';
-import { LineRewriter } from './util/log.js';
+import { initIssues, initCounters } from './issues/initializers.js';
 import { relative } from './util/path.js';
-import type { Issue, Report } from './types/issues.js';
+import type { Issue } from './types/issues.js';
 
 type IssueCollectorOptions = {
   cwd: string;
-  report?: Report;
 };
 
 /**
@@ -13,28 +11,14 @@ type IssueCollectorOptions = {
  * - Hands them out, to be consumed by reporters
  */
 export class IssueCollector {
-  report;
-  issues;
-  counters;
-  lineRewriter: LineRewriter;
-
-  pluginEntryFile: Set<string>;
-
-  referencedFiles: Set<string>;
-
   cwd: string;
+  issues = initIssues();
+  counters = initCounters();
+  pluginEntryFile: Set<string> = new Set();
+  referencedFiles: Set<string> = new Set();
 
-  constructor({ cwd, report }: IssueCollectorOptions) {
-    this.lineRewriter = new LineRewriter();
+  constructor({ cwd }: IssueCollectorOptions) {
     this.cwd = cwd;
-
-    this.report = report ?? initReport();
-    this.issues = initIssues();
-    this.counters = initCounters();
-
-    this.pluginEntryFile = new Set();
-
-    this.referencedFiles = new Set();
   }
 
   setTotalFileCount(count: number) {
@@ -60,13 +44,8 @@ export class IssueCollector {
     }
   }
 
-  setReport(report: Report) {
-    this.report = report;
-  }
-
   getIssues() {
     return {
-      report: this.report,
       issues: this.issues,
       counters: this.counters,
     };
