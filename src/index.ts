@@ -22,87 +22,59 @@ export type { Reporter, ReporterOptions } from './types/issues.js';
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress } = unresolvedConfiguration;
 
-  const chief = new ConfigurationChief({ cwd, isProduction });
-
   debugLogObject('Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
+  const chief = new ConfigurationChief({ cwd, isProduction });
+  const deputy = new DependencyDeputy({ isStrict });
+  const factory = new PrincipalFactory();
   const collector = new IssueCollector({ cwd });
   const console = new ConsoleStreamer({ isEnabled: isShowProgress });
 
   console.cast('Reading workspace configuration(s)...');
 
-  await chief.loadLocalConfig();
+  await chief.init();
 
-  const deputy = new DependencyDeputy({ isStrict });
-
-  const workspaces = chief.getActiveWorkspaces();
+  const compilers = chief.getCompilers();
+  const workspaces = chief.getEnabledWorkspaces();
+  const report = chief.getIssueTypesToReport();
 
   debugLogObject('Included workspaces', workspaces);
 
-  const report = chief.resolveIncludedIssueTypes();
-
-  const compilers = chief.getCompilers();
-
   const enabledPluginsStore: Map<string, string[]> = new Map();
-
-  collector.setReport(report);
-
-  const factory = new PrincipalFactory();
 
   for (const workspace of workspaces) {
     const { name, dir, config, ancestors } = workspace;
+    const { paths, ignoreDependencies } = config;
 
     const isRoot = name === ROOT_WORKSPACE_NAME;
 
-    const suffix = isRoot ? '' : ` (${name})`;
+    console.cast(`Analyzing workspace (${name})...`);
 
     const manifestPath = isRoot ? chief.manifestPath : findFile(dir, 'package.json');
     const manifest = isRoot ? chief.manifest : manifestPath && _require(manifestPath);
 
-    if (!manifestPath || !manifest) continue;
-
-    const { ignoreDependencies } = chief.getConfigForWorkspace(name);
     if (!manifestPath || !manifest) throw new ConfigurationError(`Unable to load package.json for ${name}`);
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies });
 
-    const tsConfigFilePath = join(dir, tsConfigFile ?? 'tsconfig.json');
-    const tsConfig = await loadTSConfig(tsConfigFilePath);
+    const compilerOptions = await loadCompilerOptions(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
-    const principal = factory.getPrincipal({
-      cwd: dir,
-      compilerOptions: tsConfig?.compilerOptions,
-      paths: config.paths,
-      report,
-      compilers,
-    });
-
-    progress.updateMessage(`Resolving custom dependencies...${suffix}`);
-
-    const workspaceManifest = deputy.getWorkspaceManifest(name);
-
-    if (!workspaceManifest) continue;
-
-    const negatedWorkspacePatterns = await chief.getNegatedWorkspacePatterns(name);
+    const principal = factory.getPrincipal({ cwd: dir, report: report, paths, compilerOptions, compilers });
 
     const worker = new WorkspaceWorker({
       name,
       dir,
+      cwd,
       config,
-      rootWorkspaceConfig: chief.getConfigForWorkspace(ROOT_WORKSPACE_NAME),
       manifest,
-      rootConfig: chief.config,
-      negatedWorkspacePatterns,
-      rootWorkspaceDir: cwd,
       isProduction,
+      rootIgnore: chief.config.ignore,
+      negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
+      enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
     });
 
-    const enabledPluginsInAncestors = ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []);
-    await worker.setEnabledPlugins(enabledPluginsInAncestors);
+    await worker.init();
 
-    await worker.initReferencedDependencies();
-
-    progress.updateMessage(`Finding entry and project files${suffix}...`);
     const sharedGlobOptions = { cwd, workingDir: dir, gitignore, ignore: worker.getIgnorePatterns() };
 
     if (isProduction) {

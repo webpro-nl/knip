@@ -97,7 +97,7 @@ export class ConfigurationChief {
     this.config = defaultConfig;
   }
 
-  async loadLocalConfig() {
+  async init() {
     const manifestPath = findFile(this.cwd, 'package.json');
     const manifest = manifestPath && (await loadJSON(manifestPath));
 

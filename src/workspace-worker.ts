@@ -1,4 +1,4 @@
-import { ROOT_WORKSPACE_NAME, TEST_FILE_PATTERNS } from './constants.js';
+import { TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './manifest/index.js';
 import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
@@ -13,12 +13,12 @@ type PluginNames = Entries<typeof plugins>;
 type WorkspaceManagerOptions = {
   name: string;
   dir: string;
+  cwd: string;
   config: WorkspaceConfiguration;
   manifest: PackageJson;
-  rootWorkspaceConfig: WorkspaceConfiguration;
-  rootConfig: Configuration;
+  rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
-  rootWorkspaceDir: string;
+  enabledPluginsInAncestors: string[];
   isProduction: boolean;
 };
 
@@ -28,7 +28,7 @@ const negatedTestFilePatterns = TEST_FILE_PATTERNS.map(negate);
 
 /**
  * - Determines enabled plugins
- * - Finds referenced dependencies in npm scripts
+ * - Finds referenced dependencies, binaries and entry files in npm scripts
  * - Collects peer dependencies
  * - Hands out workspace and plugin glob patterns
  * - Calls enabled plugins to find referenced dependencies and entry files
@@ -36,44 +36,41 @@ const negatedTestFilePatterns = TEST_FILE_PATTERNS.map(negate);
 export class WorkspaceWorker {
   name: string;
   dir: string;
+  cwd: string;
   config: WorkspaceConfiguration;
-  rootWorkspaceConfig: WorkspaceConfiguration;
-  rootConfig: Configuration;
   manifest: PackageJson;
-  rootWorkspaceDir: string;
+  isProduction;
+  rootIgnore: Configuration['ignore'];
+  negatedWorkspacePatterns: string[] = [];
+  enabledPluginsInAncestors: string[];
 
+  enabled: Record<PluginName, boolean>;
+  enabledPlugins: PluginName[] = [];
   referencedDependencies: ReferencedDependencies = new Set();
   peerDependencies: PeerDependencies = new Map();
   installedBinaries: InstalledBinaries = new Map();
   entryFiles: Set<string> = new Set();
 
-  negatedWorkspacePatterns: string[] = [];
-  enabled: Record<PluginName, boolean>;
-  enabledPlugins: PluginName[] = [];
-  isProduction;
-
   constructor({
     name,
     dir,
+    cwd,
     config,
-    rootWorkspaceConfig,
-    rootConfig,
-    negatedWorkspacePatterns,
     manifest,
-    rootWorkspaceDir,
     isProduction,
+    rootIgnore,
+    negatedWorkspacePatterns,
+    enabledPluginsInAncestors,
   }: WorkspaceManagerOptions) {
     this.name = name;
     this.dir = dir;
+    this.cwd = cwd;
     this.config = config;
-
-    this.isProduction = isProduction;
-
-    this.rootConfig = rootConfig;
-    this.rootWorkspaceConfig = rootWorkspaceConfig;
-    this.rootWorkspaceDir = rootWorkspaceDir;
-    this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.manifest = manifest;
+    this.isProduction = isProduction;
+    this.rootIgnore = rootIgnore;
+    this.negatedWorkspacePatterns = negatedWorkspacePatterns;
+    this.enabledPluginsInAncestors = enabledPluginsInAncestors;
 
     this.enabled = Object.keys(plugins).reduce(
       (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
@@ -81,23 +78,25 @@ export class WorkspaceWorker {
     );
   }
 
-  private getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
-    return this.config[pluginName] ?? { config: null, entry: null, project: null };
+  public async init() {
+    await this.setEnabledPlugins();
+    await this.initReferencedDependencies();
   }
 
-  async setEnabledPlugins(enabledPluginsInAncestors: string[]) {
-    const { manifest } = this;
-    const dependencies = new Set(
-      [Object.keys(manifest?.dependencies ?? {}), Object.keys(manifest?.devDependencies ?? {})].flat()
-    );
+  private async setEnabledPlugins() {
+    const manifest = this.manifest;
+    const deps = Object.keys(manifest.dependencies ?? {});
+    const devDeps = Object.keys(manifest.devDependencies ?? {});
+    const dependencies = new Set([...deps, ...devDeps]);
 
     const pluginEntries = Object.entries(plugins) as PluginNames;
 
     for (const [pluginName, plugin] of pluginEntries) {
-      const isEnabled = this.config[pluginName] !== false;
-      const isEnabledInAncestor = enabledPluginsInAncestors.includes(pluginName);
-      this.enabled[pluginName] =
-        isEnabled && (isEnabledInAncestor || (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies })));
+      if (this.config[pluginName] === false) continue;
+      const isEnabledInAncestor = this.enabledPluginsInAncestors.includes(pluginName);
+      if (isEnabledInAncestor || (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies }))) {
+        this.enabled[pluginName] = true;
+      }
     }
 
     this.enabledPlugins = pluginEntries.filter(([name]) => this.enabled[name]).map(([name]) => name);
@@ -107,13 +106,13 @@ export class WorkspaceWorker {
     debugLogObject(`Enabled plugins (${this.name})`, enabledPluginNames);
   }
 
-  async initReferencedDependencies() {
+  private async initReferencedDependencies() {
     const { dependencies, peerDependencies, installedBinaries, entryFiles } = await npm.findDependencies({
       config: this.config,
       manifest: this.manifest,
       isProduction: this.isProduction,
       dir: this.dir,
-      cwd: this.rootWorkspaceDir,
+      cwd: this.cwd,
     });
 
     const filePath = join(this.dir, 'package.json');
@@ -121,6 +120,10 @@ export class WorkspaceWorker {
     entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
     this.peerDependencies = peerDependencies;
     this.installedBinaries = installedBinaries;
+  }
+
+  private getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
+    return this.config[pluginName] ?? { config: null, entry: null, project: null };
   }
 
   getEntryFilePatterns() {
@@ -251,8 +254,8 @@ export class WorkspaceWorker {
     return [];
   }
 
-  public getWorkspaceIgnorePatterns() {
-    return [...this.rootConfig.ignore, ...this.config.ignore.map(pattern => prependDirToPattern(this.name, pattern))];
+  public getIgnorePatterns() {
+    return [...this.rootIgnore, ...this.config.ignore.map(pattern => prependDirToPattern(this.name, pattern))];
   }
 
   private async findDependenciesByPlugins() {
