@@ -14,7 +14,6 @@ export class IssueCollector {
   cwd: string;
   issues = initIssues();
   counters = initCounters();
-  pluginEntryFile: Set<string> = new Set();
   referencedFiles: Set<string> = new Set();
 
   constructor({ cwd }: IssueCollectorOptions) {
