@@ -1,9 +1,9 @@
 import { ConfigurationChief } from './configuration-chief.js';
+import { ConsoleStreamer } from './console-streamer.js';
 import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS } from './constants.js';
 import { DependencyDeputy } from './dependency-deputy.js';
 import { IssueCollector } from './issue-collector.js';
 import { PrincipalFactory } from './principal-factory.js';
-import { ProgressUpdater } from './progress-updater.js';
 import { Exports, ImportedModule, Imports } from './types/ast.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray } from './util/debug.js';
@@ -25,9 +25,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   debugLogObject('Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
   const collector = new IssueCollector({ cwd });
+  const console = new ConsoleStreamer({ isEnabled: isShowProgress });
 
-  const progress = new ProgressUpdater({ isShowProgress });
-  progress.updateMessage('Reading configuration and manifest files...');
+  console.cast('Reading workspace configuration(s)...');
 
   await chief.loadLocalConfig();
 
@@ -44,8 +44,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const enabledPluginsStore: Map<string, string[]> = new Map();
 
   collector.setReport(report);
-
-  progress.updateMessage('Scanning workspaces...');
 
   const factory = new PrincipalFactory();
 
@@ -309,11 +307,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       return isReExported ? Array.from(isReExportedBy).some(hasFile) : false;
     };
 
-    progress.updateMessage('Running async compilers...');
+    console.cast('Running async compilers...');
 
     await principal.runAsyncCompilers();
 
-    progress.updateMessage('Connecting the dots...');
+    console.cast('Connecting the dots...');
 
     const analyzedFiles: Set<string> = new Set();
     let size = principal.entryPaths.size;
@@ -337,7 +335,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.setTotalFileCount(analyzedFiles.size + unusedFiles.length);
 
-    progress.updateMessage('Analyzing source files...');
+    console.cast('Analyzing source files...');
 
     for (const [filePath, exportItems] of exportedSymbols.entries()) {
       const importedModule = importedSymbols.get(filePath);
@@ -390,7 +388,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const { issues, counters } = collector.getIssues();
 
-  progress.removeProgress();
+  console.clear();
 
   return { report, issues, counters };
 };
