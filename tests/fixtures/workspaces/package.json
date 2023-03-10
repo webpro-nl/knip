@@ -16,14 +16,6 @@
   },
   "knip": {
     "workspaces": {
-      ".": {
-        "entry": [],
-        "project": []
-      },
-      "*": {
-        "entry": "index.ts!",
-        "project": "**/*.ts!"
-      },
       "apps/*": {
         "entry": "index.ts!",
         "project": "**/*.ts!"

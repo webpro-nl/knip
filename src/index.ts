@@ -7,10 +7,12 @@ import { PrincipalFactory } from './principal-factory.js';
 import { Exports, ImportedModule, Imports } from './types/ast.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray } from './util/debug.js';
-import { findFile, loadJSON, findFileWithExtensions } from './util/fs.js';
+import { ConfigurationError } from './util/errors.js';
+import { findFile, findFileWithExtensions } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { join } from './util/path.js';
-import { loadTSConfig } from './util/tsconfig-loader.js';
+import { _require } from './util/require.js';
+import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
 
@@ -55,11 +57,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const suffix = isRoot ? '' : ` (${name})`;
 
     const manifestPath = isRoot ? chief.manifestPath : findFile(dir, 'package.json');
-    const manifest = isRoot ? chief.manifest : manifestPath && (await loadJSON(manifestPath));
+    const manifest = isRoot ? chief.manifest : manifestPath && _require(manifestPath);
 
     if (!manifestPath || !manifest) continue;
 
     const { ignoreDependencies } = chief.getConfigForWorkspace(name);
+    if (!manifestPath || !manifest) throw new ConfigurationError(`Unable to load package.json for ${name}`);
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies });
 
