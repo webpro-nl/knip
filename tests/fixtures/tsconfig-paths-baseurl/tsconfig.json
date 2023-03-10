@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "baseUrl": "src",
-    "paths": {
-      // Implicit paths based on baseUrl are not supported (yet), so `paths` must be defined
-      "hello/*": ["hello/*"]
-    }
-  }
-}
