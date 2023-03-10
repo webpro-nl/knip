@@ -22,7 +22,9 @@ const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions = {}, paths
   const baseUrl = compilerOptions.baseUrl ?? '.';
   compilerOptions.paths = Object.keys(mergedPaths).reduce((paths, key) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    paths![key] = mergedPaths[key].map(entry => (isAbsolute(entry) ? entry : join(cwd, baseUrl, entry)));
+    paths![key] = mergedPaths[key].map(entry =>
+      isAbsolute(entry) ? entry : isAbsolute(baseUrl) ? join(baseUrl, entry) : join(cwd, baseUrl, entry)
+    );
     return paths;
   }, {} as Paths);
   return compilerOptions;

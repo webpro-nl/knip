@@ -1,0 +1,6 @@
+{
+  "name": "tsconfig-extends-paths",
+  "knip": {
+    "entry": "src/cli.ts"
+  }
+}
