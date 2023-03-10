@@ -50,7 +50,6 @@ export class WorkspaceWorker {
   negatedWorkspacePatterns: string[] = [];
   enabled: Record<PluginName, boolean>;
   enabledPlugins: PluginName[] = [];
-  isRoot;
   isProduction;
 
   constructor({
@@ -68,7 +67,6 @@ export class WorkspaceWorker {
     this.dir = dir;
     this.config = config;
 
-    this.isRoot = name === ROOT_WORKSPACE_NAME;
     this.isProduction = isProduction;
 
     this.rootConfig = rootConfig;
@@ -113,7 +111,6 @@ export class WorkspaceWorker {
     const { dependencies, peerDependencies, installedBinaries, entryFiles } = await npm.findDependencies({
       config: this.config,
       manifest: this.manifest,
-      isRoot: this.isRoot,
       isProduction: this.isProduction,
       dir: this.dir,
       cwd: this.rootWorkspaceDir,

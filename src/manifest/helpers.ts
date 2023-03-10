@@ -1,13 +1,15 @@
 import { join } from '../util/path.js';
 import { _require } from '../util/require.js';
 
-export const getPackageManifest = async (workingDir: string, packageName: string, isRoot: boolean, cwd: string) => {
+type Options = { dir: string; packageName: string; cwd: string };
+
+export const getPackageManifest = async ({ dir, packageName, cwd }: Options) => {
   // TODO Not sure what's the most efficient way to get a package.json, but this seems to do the job across package
   // managers (npm, Yarn, pnpm)
   try {
-    return _require(join(workingDir, 'node_modules', packageName, 'package.json'));
+    return _require(join(dir, 'node_modules', packageName, 'package.json'));
   } catch (error) {
-    if (!isRoot) {
+    if (dir !== cwd) {
       try {
         return _require(join(cwd, 'node_modules', packageName, 'package.json'));
       } catch (error) {
