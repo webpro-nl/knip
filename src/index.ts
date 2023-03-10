@@ -100,106 +100,67 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     await worker.initReferencedDependencies();
 
     progress.updateMessage(`Finding entry and project files${suffix}...`);
+    const sharedGlobOptions = { cwd, workingDir: dir, gitignore, ignore: worker.getIgnorePatterns() };
 
     if (isProduction) {
       {
-        const workspaceEntryPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getProductionEntryFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogArray(`Found entry paths${suffix}`, workspaceEntryPaths);
+        const patterns = worker.getProductionEntryFilePatterns();
+        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        debugLogArray(`Found entry paths (${name})`, workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
         principal.skipExportsAnalysisFor(workspaceEntryPaths);
       }
 
       {
-        const pluginWorkspaceEntryPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getProductionPluginEntryFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogArray(`Found production plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
+        const patterns = worker.getProductionPluginEntryFilePatterns();
+        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        debugLogArray(`Found production plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths);
         principal.skipExportsAnalysisFor(pluginWorkspaceEntryPaths);
       }
 
       {
-        const workspaceProjectPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getProductionProjectFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogArray(`Found project paths${suffix}`, workspaceProjectPaths);
+        const patterns = worker.getProductionProjectFilePatterns();
+        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
+        debugLogArray(`Found project paths (${name})`, workspaceProjectPaths);
         workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
       }
     } else {
       {
-        const workspaceEntryPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getEntryFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogArray(`Found entry paths${suffix}`, workspaceEntryPaths);
+        const patterns = worker.getEntryFilePatterns();
+        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        debugLogArray(`Found entry paths (${name})`, workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
         principal.skipExportsAnalysisFor(workspaceEntryPaths);
       }
 
       {
-        const workspaceProjectPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getProjectFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogArray(`Found project paths${suffix}`, workspaceProjectPaths);
+        const patterns = worker.getProjectFilePatterns();
+        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
+        debugLogArray(`Found project paths (${name})`, workspaceProjectPaths);
         workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
       }
 
       {
-        const pluginWorkspaceEntryPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getPluginEntryFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogArray(`Found plugin entry paths${suffix}`, pluginWorkspaceEntryPaths);
+        const patterns = worker.getPluginEntryFilePatterns();
+        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        debugLogArray(`Found plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths);
         principal.skipExportsAnalysisFor(pluginWorkspaceEntryPaths);
       }
 
       {
-        const pluginWorkspaceProjectPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: worker.getPluginProjectFilePatterns(),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogArray(`Found plugin project paths${suffix}`, pluginWorkspaceProjectPaths);
+        const patterns = worker.getPluginProjectFilePatterns();
+        const pluginWorkspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
+        debugLogArray(`Found plugin project paths (${name})`, pluginWorkspaceProjectPaths);
         pluginWorkspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
         principal.skipExportsAnalysisFor(pluginWorkspaceProjectPaths);
       }
 
       {
-        const configurationEntryPaths = await _glob({
-          cwd,
-          workingDir: dir,
-          patterns: compact(worker.getPluginConfigPatterns()),
-          ignore: worker.getWorkspaceIgnorePatterns(),
-          gitignore,
-        });
-        debugLogArray(`Found plugin configuration paths${suffix}`, configurationEntryPaths);
+        const patterns = compact(worker.getPluginConfigPatterns());
+        const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        debugLogArray(`Found plugin configuration paths (${name})`, configurationEntryPaths);
         principal.addEntryPaths(configurationEntryPaths);
         principal.skipExportsAnalysisFor(configurationEntryPaths);
       }
