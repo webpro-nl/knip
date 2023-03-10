@@ -16,7 +16,7 @@ type Options = {
   exports?: boolean;
 };
 
-export const resolveIncludedIssueTypes = (
+export const getIncludedIssueTypes = (
   cliArgs: CLIArguments,
   { include = [], exclude = [], isProduction = false }: Options = {}
 ) => {

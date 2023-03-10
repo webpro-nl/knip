@@ -8,11 +8,11 @@ import parsedArgs from './util/cli-arguments.js';
 import { partitionCompilers } from './util/compilers.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
+import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
 import { join, relative } from './util/path.js';
 import { toCamelCase } from './util/plugin.js';
-import { resolveIncludedIssueTypes } from './util/resolve-included-issue-types.js';
 import { byPathDepth } from './util/workspace.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { RawConfiguration, Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
@@ -316,14 +316,14 @@ export class ConfigurationChief {
     return getDefaultWorkspaceConfig();
   }
 
-  resolveIncludedIssueTypes() {
+  getIssueTypesToReport() {
     const cliArgs = { include, exclude, dependencies, exports };
     const config = {
       include: this.config.include ?? [],
       exclude: this.config.exclude ?? [],
       isProduction: this.isProduction,
     };
-    return resolveIncludedIssueTypes(cliArgs, config);
+    return getIncludedIssueTypes(cliArgs, config);
   }
 
   findWorkspace(filePath: string) {
