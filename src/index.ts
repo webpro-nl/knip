@@ -169,37 +169,34 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     // Add knip.ts (might import dependencies)
     if (chief.resolvedConfigFilePath) principal.addEntryPath(chief.resolvedConfigFilePath);
 
-    // Fetch peer deps, binaries, entry files gathered through all plugins, and hand over
-    if (report.dependencies || report.unlisted || report.files) {
-      await worker.findDependenciesByPlugins();
+    // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
+    // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.
+    const dependencies = await worker.findAllDependencies();
+    const { referencedDependencies, peerDependencies, installedBinaries, entryFiles, enabledPlugins } = dependencies;
 
-      const { referencedDependencies, peerDependencies, installedBinaries, entryFiles, enabledPlugins } =
-        worker.getFinalDependencies();
+    deputy.addPeerDependencies(name, peerDependencies);
+    deputy.setInstalledBinaries(name, installedBinaries);
+    principal.addEntryPaths(entryFiles);
+    enabledPluginsStore.set(name, enabledPlugins);
 
-      deputy.addPeerDependencies(name, peerDependencies);
-      deputy.setInstalledBinaries(name, installedBinaries);
-      principal.addEntryPaths(entryFiles);
-      enabledPluginsStore.set(name, enabledPlugins);
-
-      referencedDependencies.forEach(([filePath, specifier]) => {
-        const [isAdded, packageName] = deputy.maybeAddReferencedExternalDependency(workspace, specifier);
-        if (!isAdded) {
-          if (!ignoreDependencies.includes(specifier)) {
-            collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
-          }
-        } else if (packageName && packageName !== specifier) {
-          // A plugin's custom dependency resolver may return specifiers in the form of `@local/other-package/file`
-          const workspace = workspaces.find(workspace => workspace.pkgName === packageName);
-          if (workspace) {
-            const relativeSpecifier = specifier.replace(new RegExp(`^${packageName}`), '.');
-            const filePath = findFileWithExtensions(workspace.dir, relativeSpecifier, DEFAULT_EXTENSIONS);
-            if (filePath) {
-              principal.addEntryPath(filePath);
-            }
+    referencedDependencies.forEach(([filePath, specifier]) => {
+      const [isAdded, packageName] = deputy.maybeAddReferencedExternalDependency(workspace, specifier);
+      if (!isAdded) {
+        if (!ignoreDependencies.includes(specifier)) {
+          collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
+        }
+      } else if (packageName && packageName !== specifier) {
+        // A plugin's custom dependency resolver may return specifiers in the form of `@local/other-package/file`
+        const workspace = chief.findWorkspaceByPackageName(packageName);
+        if (workspace) {
+          const relativeSpecifier = specifier.replace(new RegExp(`^${packageName}`), '.');
+          const filePath = findFileWithExtensions(workspace.dir, relativeSpecifier, DEFAULT_EXTENSIONS);
+          if (filePath) {
+            principal.addEntryPath(filePath);
           }
         }
-      });
-    }
+      }
+    });
   }
 
   const principals = factory.getPrincipals();

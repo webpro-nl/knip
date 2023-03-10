@@ -255,7 +255,10 @@ export class WorkspaceWorker {
     return [...this.rootConfig.ignore, ...this.config.ignore.map(pattern => prependDirToPattern(this.name, pattern))];
   }
 
-  public async findDependenciesByPlugins() {
+  private async findDependenciesByPlugins() {
+    const cwd = this.dir;
+    const ignore = this.getIgnorePatterns();
+
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       const isIncludePlugin = this.isProduction ? `PRODUCTION_ENTRY_FILE_PATTERNS` in plugin : true;
       if (this.enabled[pluginName] && isIncludePlugin) {
@@ -266,8 +269,6 @@ export class WorkspaceWorker {
           if (!pluginConfig) continue;
 
           const patterns = this.getConfigurationEntryFilePattern(pluginName);
-          const cwd = this.dir;
-          const ignore = this.getWorkspaceIgnorePatterns();
           const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
 
           debugLogArray(`Found ${plugin.NAME} config file paths`, configFilePaths);
@@ -297,13 +298,17 @@ export class WorkspaceWorker {
           }
 
           debugLogArray(`Dependencies referenced in ${plugin.NAME}`, pluginDependencies);
-          if (pluginEntryFiles.size > 0) debugLogArray(`Entry files referenced in ${plugin.NAME}`, pluginEntryFiles);
+          if (pluginEntryFiles.size > 0) {
+            debugLogArray(`Entry files referenced in ${plugin.NAME}`, pluginEntryFiles);
+          }
         }
       }
     }
   }
 
-  public getFinalDependencies() {
+  public async findAllDependencies() {
+    await this.findDependenciesByPlugins();
+
     return {
       peerDependencies: this.peerDependencies,
       installedBinaries: this.installedBinaries,
