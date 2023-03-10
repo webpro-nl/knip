@@ -438,5 +438,13 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
   // TODO Remove duplicates from unused exports? This behavior is now different from v1 (yet more clear/actionable?)
   const duplicateExports = Object.values(aliasedExports);
 
-  return { internalImports, externalImports, unresolvedImports, exports, duplicateExports };
+  return {
+    imports: {
+      internal: internalImports,
+      external: externalImports,
+      unresolved: unresolvedImports,
+    },
+    exports,
+    duplicateExports,
+  };
 };

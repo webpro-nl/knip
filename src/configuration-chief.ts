@@ -326,8 +326,12 @@ export class ConfigurationChief {
     return getIncludedIssueTypes(cliArgs, config);
   }
 
-  findWorkspace(filePath: string) {
+  findWorkspaceByFilePath(filePath: string) {
     const workspaceDir = this.workspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir + '/'));
     return this.workspaces.find(workspace => workspace.dir === workspaceDir);
+  }
+
+  findWorkspaceByPackageName(packageName: string) {
+    return this.workspaces.find(workspace => workspace.pkgName === packageName);
   }
 }

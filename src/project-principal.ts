@@ -173,16 +173,19 @@ export class ProjectPrincipal {
 
   public analyzeSourceFile(filePath: string) {
     const sourceFile = this.backend.program?.getSourceFile(filePath);
+
     if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
-    const options = { skipTypeOnly: !this.isReportTypes, skipExports: this.skipExportsAnalysis.has(filePath) };
-    const { internalImports, unresolvedImports, externalImports, exports, duplicateExports } = getImportsAndExports(
-      sourceFile,
-      options
-    );
 
-    const finalUnresolvedImports: Set<string> = new Set();
+    const skipTypeOnly = !this.isReportTypes;
+    const skipExports = this.skipExportsAnalysis.has(filePath);
 
-    unresolvedImports.forEach(specifier => {
+    const { imports, exports, duplicateExports } = getImportsAndExports(sourceFile, { skipTypeOnly, skipExports });
+
+    const { internal, unresolved, external } = imports;
+
+    const unresolvedImports: Set<string> = new Set();
+
+    unresolved.forEach(specifier => {
       if (specifier.startsWith('http')) {
         // TODO Add to debug logs?
         return;
@@ -190,17 +193,17 @@ export class ProjectPrincipal {
       const resolvedModule = this.resolveModule(specifier, filePath);
       if (resolvedModule) {
         if (resolvedModule.isExternalLibraryImport) {
-          externalImports.add(specifier);
+          external.add(specifier);
         } else {
           this.addEntryPath(resolvedModule.resolvedFileName);
         }
       } else {
         if (/^(@|[a-z])/.test(specifier)) {
-          externalImports.add(specifier);
+          external.add(specifier);
         } else {
           const ext = extname(specifier);
           if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
-            finalUnresolvedImports.add(specifier);
+            unresolvedImports.add(specifier);
           } else {
             // TODO Add to debug logs?
           }
@@ -208,7 +211,15 @@ export class ProjectPrincipal {
       }
     });
 
-    return { internalImports, unresolvedImports: finalUnresolvedImports, externalImports, exports, duplicateExports };
+    return {
+      imports: {
+        internal,
+        unresolved: unresolvedImports,
+        external,
+      },
+      exports,
+      duplicateExports,
+    };
   }
 
   private resolveModule(specifier: string, filePath: string = specifier) {

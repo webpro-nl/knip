@@ -249,53 +249,49 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const analyzeSourceFile = (filePath: string) => {
       collector.counters.processed++;
-      if (report.files || report.dependencies || report.unlisted || report.unresolved) {
-        const workspace = chief.findWorkspace(filePath);
-        if (workspace) {
-          const { internalImports, unresolvedImports, externalImports, exports, duplicateExports } =
-            principal.analyzeSourceFile(filePath);
+      const workspace = chief.findWorkspaceByFilePath(filePath);
+      if (workspace) {
+        const { imports, exports, duplicateExports } = principal.analyzeSourceFile(filePath);
+        const { internal, external, unresolved } = imports;
 
-          if (exports.size > 0) {
-            exportedSymbols.set(filePath, exports);
+        if (exports.size > 0) exportedSymbols.set(filePath, exports);
+
+        for (const [specifierFilePath, importItems] of internal.entries()) {
+          const importedWorkspace = chief.findWorkspaceByFilePath(specifierFilePath);
+          if (importedWorkspace && importedWorkspace !== workspace) {
+            external.add(importItems.specifier);
           }
 
-          for (const [specifierFilePath, importItems] of internalImports.entries()) {
-            const importedWorkspace = chief.findWorkspace(specifierFilePath);
-            if (importedWorkspace && importedWorkspace !== workspace) {
-              externalImports.add(importItems.specifier);
+          if (!importedSymbols.has(specifierFilePath)) {
+            importedSymbols.set(specifierFilePath, importItems);
+          } else {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const importedModule = importedSymbols.get(specifierFilePath)!;
+            for (const identifier of importItems.symbols) {
+              importedModule.symbols.add(identifier);
             }
-
-            if (!importedSymbols.has(specifierFilePath)) {
-              importedSymbols.set(specifierFilePath, importItems);
-            } else {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              const importedModule = importedSymbols.get(specifierFilePath)!;
-              for (const identifier of importItems.symbols) {
-                importedModule.symbols.add(identifier);
-              }
-              if (importItems.isReExported) {
-                importedModule.isReExported = importItems.isReExported;
-                importedModule.isReExportedBy.add(filePath);
-              }
+            if (importItems.isReExported) {
+              importedModule.isReExported = importItems.isReExported;
+              importedModule.isReExportedBy.add(filePath);
             }
           }
-
-          duplicateExports.forEach(symbols => {
-            const symbol = symbols.join('|');
-            collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
-          });
-
-          externalImports.forEach(specifier => {
-            const [isAdded, packageName] = deputy.maybeAddReferencedExternalDependency(workspace, specifier);
-            if (!isAdded && packageName) {
-              collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
-            }
-          });
-
-          unresolvedImports.forEach(moduleSpecifier => {
-            collector.addIssue({ type: 'unresolved', filePath, symbol: moduleSpecifier });
-          });
         }
+
+        duplicateExports.forEach(symbols => {
+          const symbol = symbols.join('|');
+          collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
+        });
+
+        external.forEach(specifier => {
+          const [isAdded, packageName] = deputy.maybeAddReferencedExternalDependency(workspace, specifier);
+          if (!isAdded && packageName) {
+            collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
+          }
+        });
+
+        unresolved.forEach(moduleSpecifier => {
+          collector.addIssue({ type: 'unresolved', filePath, symbol: moduleSpecifier });
+        });
       }
     };
 
