@@ -12,7 +12,12 @@ or `devDependencies`:
 ```json
 {
   "commitlint": {
-    "config": ["commitlint.config.{js,ts}"]
+    "config": [
+      ".commitlintrc",
+      ".commitlintrc.{json,yaml,yml,js,cjs,ts,cts}",
+      "commitlint.config.{js,cjs,ts,cts}",
+      "package.json"
+    ]
   }
 }
 ```

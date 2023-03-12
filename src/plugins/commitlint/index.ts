@@ -16,10 +16,18 @@ export const ENABLERS = ['@commitlint/cli'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['commitlint.config.{js,ts}'];
+// https://github.com/conventional-changelog/commitlint#config
+export const CONFIG_FILE_PATTERNS = [
+  '.commitlintrc',
+  '.commitlintrc.{json,yaml,yml,js,cjs,ts,cts}',
+  'commitlint.config.{js,cjs,ts,cts}',
+  'package.json',
+];
 
-const findCommitLintDependencies: GenericPluginCallback = async configFilePath => {
-  const config: CommitLintConfig = await _load(configFilePath);
+const findCommitLintDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+  const config: CommitLintConfig = configFilePath.endsWith('package.json')
+    ? manifest.commitlint
+    : await _load(configFilePath);
   return config?.extends ? [config.extends].flat() : [];
 };
 
