@@ -1,6 +1,6 @@
 import { api } from './helpers.js';
 
-export type BabelConfigFn = (options: typeof api) => BabelConfigObj;
+type BabelConfigFn = (options: typeof api) => BabelConfigObj;
 
 export type BabelConfigObj = {
   plugins?: (string | [string, unknown])[];

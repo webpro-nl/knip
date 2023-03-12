@@ -22,12 +22,3 @@ export const loadJSON = async (filePath: string) => {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
 };
-
-export const findFileWithExtensions = (cwd: string, specifier: string, extensions: string[]) => {
-  const filePath = join(cwd, specifier);
-  if (isFile(filePath)) return filePath;
-  for (const ext of extensions) {
-    const filePath = join(cwd, specifier + ext);
-    if (isFile(filePath)) return filePath;
-  }
-};

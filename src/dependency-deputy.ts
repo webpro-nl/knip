@@ -1,13 +1,7 @@
 import { isBuiltin } from 'node:module';
 import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES } from './constants.js';
 import { WorkspaceConfiguration } from './types/config.js';
-import {
-  getPackageNameFromModuleSpecifier,
-  isDefinitelyTyped,
-  getDefinitelyTypedFor,
-  getPackageFromDefinitelyTyped,
-} from './util/modules.js';
-import { isAbsolute } from './util/path.js';
+import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
 import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';

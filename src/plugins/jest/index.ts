@@ -2,7 +2,6 @@ import { _load } from '../../util/loader.js';
 import { isAbsolute, join, dirname, isInternal } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
-import { _resolve } from '../../util/require.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { Config } from '@jest/types';
 

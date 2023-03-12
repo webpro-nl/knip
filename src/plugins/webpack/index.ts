@@ -52,7 +52,7 @@ const resolveUseItem = (use: RuleSetUseItem) => {
   return [];
 };
 
-const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   const config: WebpackConfig = await _load(configFilePath);
 
   if (!config) return [];
