@@ -1,9 +1,11 @@
 import { api } from './helpers.js';
 
-export type BabelConfigFn = (options: typeof api) => BabelConfig;
+export type BabelConfigFn = (options: typeof api) => BabelConfigObj;
 
-export type BabelConfig = {
+export type BabelConfigObj = {
   plugins?: (string | [string, unknown])[];
   presets?: (string | [string, unknown])[];
-  env?: Record<string, BabelConfig>;
+  env?: Record<string, BabelConfigObj>;
 };
+
+export type BabelConfig = BabelConfigObj | BabelConfigFn;

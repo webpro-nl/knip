@@ -5,7 +5,7 @@ import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { WebpackConfig, Env, Argv } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
-import type { BabelConfig } from '../babel/types.js';
+import type { BabelConfigObj } from '../babel/types.js';
 import type { RuleSetRule, RuleSetUseItem } from 'webpack';
 
 // https://webpack.js.org/configuration/
@@ -36,7 +36,10 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | '...') => {
   if (typeof useItem === 'function') useItem = useItem(info);
   return [useItem].flat().flatMap((useItem: RuleSetUseItem) => {
     if (hasBabelOptions(useItem)) {
-      return [...resolveUseItem(useItem), ...getDependenciesFromConfig((useItem as { options: BabelConfig }).options)];
+      return [
+        ...resolveUseItem(useItem),
+        ...getDependenciesFromConfig((useItem as { options: BabelConfigObj }).options),
+      ];
     }
     return resolveUseItem(useItem);
   });
