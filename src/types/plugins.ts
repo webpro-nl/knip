@@ -16,4 +16,4 @@ type GenericPluginCallbackOptions = {
 export type GenericPluginCallback = (
   configFilePath: string,
   options: GenericPluginCallbackOptions
-) => Promise<string[] | { dependencies: string[]; entryFiles?: string[] }> | string[];
+) => Promise<string[]> | string[];

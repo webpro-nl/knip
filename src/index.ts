@@ -1,6 +1,6 @@
 import { ConfigurationChief } from './configuration-chief.js';
 import { ConsoleStreamer } from './console-streamer.js';
-import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS } from './constants.js';
+import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { DependencyDeputy } from './dependency-deputy.js';
 import { IssueCollector } from './issue-collector.js';
 import { PrincipalFactory } from './principal-factory.js';
@@ -8,10 +8,11 @@ import { Exports, ImportedModule, Imports } from './types/ast.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray } from './util/debug.js';
 import { ConfigurationError } from './util/errors.js';
-import { findFile, findFileWithExtensions } from './util/fs.js';
+import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
-import { join } from './util/path.js';
-import { _require } from './util/require.js';
+import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './util/modules.js';
+import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/path.js';
+import { _require, _resolve } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -147,27 +148,35 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
     // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.
     const dependencies = await worker.findAllDependencies();
-    const { referencedDependencies, peerDependencies, installedBinaries, entryFiles, enabledPlugins } = dependencies;
+    const { referencedDependencies, peerDependencies, installedBinaries, enabledPlugins } = dependencies;
 
     deputy.addPeerDependencies(name, peerDependencies);
     deputy.setInstalledBinaries(name, installedBinaries);
-    principal.addEntryPaths(entryFiles);
     enabledPluginsStore.set(name, enabledPlugins);
 
-    referencedDependencies.forEach(([filePath, specifier]) => {
-      const [isAdded, packageName] = deputy.maybeAddReferencedExternalDependency(workspace, specifier);
-      if (!isAdded) {
-        if (!ignoreDependencies.includes(specifier)) {
-          collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
-        }
-      } else if (packageName && packageName !== specifier) {
-        // A plugin's custom dependency resolver may return specifiers in the form of `@local/other-package/file`
-        const workspace = chief.findWorkspaceByPackageName(packageName);
-        if (workspace) {
-          const relativeSpecifier = specifier.replace(new RegExp(`^${packageName}`), '.');
-          const filePath = findFileWithExtensions(workspace.dir, relativeSpecifier, DEFAULT_EXTENSIONS);
-          if (filePath) {
-            principal.addEntryPath(filePath);
+    referencedDependencies.forEach(([containingFilePath, specifier]) => {
+      if (isInternal(specifier)) {
+        // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js
+        const filePath = _resolve(isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier));
+        if (filePath) principal.addEntryPath(filePath);
+      } else {
+        if (isInNodeModules(specifier)) {
+          // Pattern: /abs/path/to/repo/node_modules/package/index.js
+          const packageName = getPackageNameFromFilePath(specifier);
+          const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+          if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
+        } else {
+          // Patterns: package, @any/package, @local/package
+          const packageName = getPackageNameFromModuleSpecifier(specifier);
+          const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+          if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
+
+          // Pattern: @local/package/file
+          const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
+          if (otherWorkspace && specifier !== packageName && workspace !== otherWorkspace) {
+            const relativeSpecifier = specifier.replace(new RegExp(`^${packageName}`), '.');
+            const filePath = _resolve(join(otherWorkspace.dir, relativeSpecifier));
+            if (filePath) principal.addEntryPath(filePath);
           }
         }
       }
@@ -216,10 +225,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         });
 
         external.forEach(specifier => {
-          const [isAdded, packageName] = deputy.maybeAddReferencedExternalDependency(workspace, specifier);
-          if (!isAdded && packageName) {
-            collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
-          }
+          const packageName = getPackageNameFromModuleSpecifier(specifier);
+          const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+          if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
         });
 
         unresolved.forEach(moduleSpecifier => {

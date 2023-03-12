@@ -1,5 +1,4 @@
 import { compact } from '../../util/array.js';
-import { getPackageName } from '../../util/modules.js';
 import { resolvePluginPackageName, getDependenciesFromSettings } from './helpers.js';
 import type { ESLintConfig } from './types.js';
 
@@ -21,7 +20,7 @@ export const fallback = async (configFilePath: string, { cwd }: Options) => {
     const parsers = config.parser ? [config.parser] : [];
     const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
     const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-    return [...parsers, ...extraParsers, ...plugins, ...settings].map(getPackageName);
+    return [...parsers, ...extraParsers, ...plugins, ...settings];
   });
 
   return compact(dependencies.flat());

@@ -1,6 +1,5 @@
 import { _load } from '../../util/loader.js';
-import { getPackageName } from '../../util/modules.js';
-import { isAbsolute, join, dirname } from '../../util/path.js';
+import { isAbsolute, join, dirname, isInternal } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
@@ -27,10 +26,9 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   const config: Config.InitialOptions = await _load(configFilePath);
   if (config?.preset) {
     const { preset } = config;
-    if (preset.startsWith('.') || isAbsolute(preset)) {
+    if (isInternal(preset)) {
       const presetConfigPath = maybeJoin(configFilePath, preset);
       const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-      delete config.preset;
       Object.assign(config, presetConfig);
     }
   }
@@ -42,36 +40,29 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
 
   if (!config) return [];
 
-  const dependencies: string[] = [];
-  const entryFiles: string[] = [];
-
-  const handleEntries = (name: string) => {
-    name = name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
-    if (name.startsWith('.') || isAbsolute(name)) {
-      entryFiles.push(_resolve(maybeJoin(configFilePath, name)));
-    } else {
-      dependencies.push(name);
-    }
-  };
-
-  if (config.setupFiles) config.setupFiles.forEach(handleEntries);
-  if (config.setupFilesAfterEnv) config.setupFilesAfterEnv.forEach(handleEntries);
-  if (config.transform) {
-    Object.values(config.transform)
-      .map(transform => (typeof transform === 'string' ? transform : transform[0]))
-      .forEach(handleEntries);
-  }
+  const replaceRootDir = (name: string) =>
+    name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
 
   const presets = config.preset ? [config.preset] : [];
   const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
   const resolvers = config.resolver ? [config.resolver] : [];
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
+  const setupFiles = config.setupFiles ?? [];
+  const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
+  const transform = config.transform
+    ? Object.values(config.transform).map(transform => (typeof transform === 'string' ? transform : transform[0]))
+    : [];
 
-  return {
-    dependencies: [...presets, ...environments, ...dependencies, ...resolvers, ...watchPlugins].map(getPackageName),
-    entryFiles,
-  };
+  return [
+    ...presets,
+    ...environments,
+    ...resolvers,
+    ...watchPlugins,
+    ...setupFiles,
+    ...setupFilesAfterEnv,
+    ...transform,
+  ].map(replaceRootDir);
 };
 
 export const findDependencies = timerify(findJestDependencies);

@@ -30,7 +30,7 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, { c
     knownGlobalsOnly: true,
   });
 
-  return { dependencies: binaries, entryFiles };
+  return [...binaries, ...entryFiles];
 };
 
 export const findDependencies = timerify(findPluginDependencies);

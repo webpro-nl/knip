@@ -1,9 +1,6 @@
 import { _load } from '../../util/loader.js';
-import { getPackageName } from '../../util/modules.js';
-import { dirname, isAbsolute, join } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
-import { _resolve } from '../../util/require.js';
 import type { StorybookConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -27,27 +24,12 @@ const findStorybookDependencies: GenericPluginCallback = async configFilePath =>
 
   if (!config) return [];
 
-  const addons: string[] = [];
-  const entryFiles: string[] = [];
-
-  config.addons?.forEach(addon => {
-    const name = typeof addon === 'string' ? addon : addon.name;
-    if (name.startsWith('.')) {
-      entryFiles.push(_resolve(join(dirname(configFilePath), name)));
-    } else if (isAbsolute(name)) {
-      entryFiles.push(configFilePath);
-    } else {
-      addons.push(name);
-    }
-  }) ?? [];
+  const addons = config.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
   const builder = config?.core?.builder;
   const builderPackages =
     builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
 
-  return {
-    dependencies: [...addons, ...builderPackages].map(getPackageName),
-    entryFiles,
-  };
+  return [...addons, ...builderPackages];
 };
 
 export const findDependencies = timerify(findStorybookDependencies);

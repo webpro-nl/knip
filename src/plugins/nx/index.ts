@@ -35,7 +35,7 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, 
 
   const { binaries, entryFiles } = _getReferencesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true });
 
-  return { dependencies: [...executors, ...binaries], entryFiles };
+  return [...executors, ...binaries, ...entryFiles];
 };
 
 export const findDependencies = timerify(findNxDependencies);

@@ -75,10 +75,9 @@ const findManifestDependencies = async ({ config, manifest, isProduction, dir, c
   });
 
   return {
-    dependencies: Array.from(referencedDependencies),
+    dependencies: [...referencedDependencies, ...entryFiles],
     peerDependencies,
     installedBinaries,
-    entryFiles,
   };
 };
 

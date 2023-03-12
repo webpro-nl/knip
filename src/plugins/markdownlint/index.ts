@@ -1,5 +1,4 @@
 import { _load } from '../../util/loader.js';
-import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency, getArgumentValues } from '../../util/plugin.js';
 import type { MarkdownlintConfig } from './types.js';
@@ -18,7 +17,7 @@ export const CONFIG_FILE_PATTERNS = ['.markdownlint.{json,jsonc}', '.markdownlin
 
 const findMarkdownlintConfigDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: MarkdownlintConfig = await _load(configFilePath);
-  const extend = config?.extends ? [getPackageName(config.extends)] : [];
+  const extend = config?.extends ? [config.extends] : [];
   const scripts = manifest.scripts
     ? Object.values(manifest.scripts).filter((script): script is string => typeof script === 'string')
     : [];

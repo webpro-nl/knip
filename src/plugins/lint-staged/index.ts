@@ -45,7 +45,6 @@ const findLintStagedDependencies: GenericPluginCallback = async (
     _getReferencesFromScripts(scripts, options).binaries.forEach(bin => binaries.add(bin));
   }
 
-  // Warning: binaries do not always have the same name as their package
   return Array.from(binaries);
 };
 

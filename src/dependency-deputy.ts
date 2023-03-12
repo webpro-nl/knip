@@ -105,17 +105,20 @@ export class DependencyDeputy {
     return Array.from(this.peerDependencies.get(workspaceName)?.get(dependency) ?? []);
   }
 
+  /**
+   * Returns `true` to indicate the external dependency has been handled properly. When `false`, the call-site probably
+   * wants to mark the dependency as "unlisted".
+   */
   public maybeAddReferencedExternalDependency(
     workspace: { name: string; dir: string; config: WorkspaceConfiguration; ancestors: string[] },
-    moduleSpecifier: string
-  ): [boolean, string] | [boolean] {
-    if (this.isInternalDependency(moduleSpecifier)) return [false];
+    packageName: string
+  ): boolean {
+    if (isBuiltin(packageName)) return true;
 
-    const packageName = getPackageNameFromModuleSpecifier(moduleSpecifier);
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
 
-    if (this.getWorkspaceManifest(workspace.name)?.ignoreDependencies.includes(packageName)) return [false];
+    if (this.getWorkspaceManifest(workspace.name)?.ignoreDependencies.includes(packageName)) return true;
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
     const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedFor(packageName);
@@ -125,26 +128,22 @@ export class DependencyDeputy {
     if (closestWorkspaceName || closestWorkspaceNameForTypes) {
       closestWorkspaceName && this.addReferencedDependency(closestWorkspaceName, packageName);
       closestWorkspaceNameForTypes && this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
-      return [true, packageName];
+      return true;
     }
 
     // Handle binaries
     for (const name of workspaceNames) {
       const binaries = this.getInstalledBinaries(name);
-      if (binaries?.has(moduleSpecifier)) {
-        const dependencies = binaries.get(moduleSpecifier);
+      if (binaries?.has(packageName)) {
+        const dependencies = binaries.get(packageName);
         if (dependencies?.size) {
           dependencies.forEach(dependency => this.addReferencedDependency(name, dependency));
-          return [true, packageName];
+          return true;
         }
       }
     }
 
-    return [false, moduleSpecifier];
-  }
-
-  isInternalDependency(moduleSpecifier: string) {
-    return isAbsolute(moduleSpecifier) || moduleSpecifier.startsWith('.') || isBuiltin(moduleSpecifier);
+    return false;
   }
 
   private isInDependencies(workspaceName: string, packageName: string) {

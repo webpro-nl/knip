@@ -34,7 +34,7 @@ const findGithubActionsDependencies: GenericPluginCallback = async (
     knownGlobalsOnly: true,
   });
 
-  return { dependencies: binaries, entryFiles };
+  return [...binaries, ...entryFiles];
 };
 
 export const findDependencies = timerify(findGithubActionsDependencies);

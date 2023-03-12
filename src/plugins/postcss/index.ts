@@ -1,5 +1,4 @@
 import { _load } from '../../util/loader.js';
-import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PostCSSConfig } from './types.js';
@@ -20,9 +19,9 @@ const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, { 
     : await _load(configFilePath);
 
   return config?.plugins
-    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins))
-        .filter(plugin => typeof plugin === 'string')
-        .map(getPackageName)
+    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).filter(
+        plugin => typeof plugin === 'string'
+      )
     : [];
 };
 

@@ -28,10 +28,10 @@ const negatedTestFilePatterns = TEST_FILE_PATTERNS.map(negate);
 
 /**
  * - Determines enabled plugins
- * - Finds referenced dependencies, binaries and entry files in npm scripts
+ * - Finds referenced dependencies and binaries in npm scripts
  * - Collects peer dependencies
  * - Hands out workspace and plugin glob patterns
- * - Calls enabled plugins to find referenced dependencies and entry files
+ * - Calls enabled plugins to find referenced dependencies
  */
 export class WorkspaceWorker {
   name: string;
@@ -49,7 +49,6 @@ export class WorkspaceWorker {
   referencedDependencies: ReferencedDependencies = new Set();
   peerDependencies: PeerDependencies = new Map();
   installedBinaries: InstalledBinaries = new Map();
-  entryFiles: Set<string> = new Set();
 
   constructor({
     name,
@@ -107,7 +106,7 @@ export class WorkspaceWorker {
   }
 
   private async initReferencedDependencies() {
-    const { dependencies, peerDependencies, installedBinaries, entryFiles } = await npm.findDependencies({
+    const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies({
       config: this.config,
       manifest: this.manifest,
       isProduction: this.isProduction,
@@ -117,7 +116,6 @@ export class WorkspaceWorker {
 
     const filePath = join(this.dir, 'package.json');
     dependencies.forEach(dependency => this.referencedDependencies.add([filePath, dependency]));
-    entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
     this.peerDependencies = peerDependencies;
     this.installedBinaries = installedBinaries;
   }
@@ -279,10 +277,9 @@ export class WorkspaceWorker {
           if (configFilePaths.length === 0) continue;
 
           const pluginDependencies: Set<string> = new Set();
-          const pluginEntryFiles: Set<string> = new Set();
 
           for (const configFilePath of configFilePaths) {
-            const results = await plugin.findDependencies(configFilePath, {
+            const dependencies = await plugin.findDependencies(configFilePath, {
               cwd,
               manifest: this.manifest,
               config: pluginConfig,
@@ -290,20 +287,15 @@ export class WorkspaceWorker {
               isProduction: this.isProduction,
             });
 
-            const dependencies = Array.isArray(results) ? results : results.dependencies;
-            const entryFiles = !Array.isArray(results) && results.entryFiles ? results.entryFiles : [];
-
-            dependencies.forEach(symbol => this.referencedDependencies.add([configFilePath, symbol]));
-            entryFiles.forEach(entryFile => this.entryFiles.add(entryFile));
+            dependencies.forEach(specifier => {
+              pluginDependencies.add(specifier);
+              this.referencedDependencies.add([configFilePath, specifier]);
+            });
 
             dependencies.forEach(dependency => pluginDependencies.add(dependency));
-            entryFiles.forEach(entryFile => pluginEntryFiles.add(entryFile));
           }
 
           debugLogArray(`Dependencies referenced in ${plugin.NAME}`, pluginDependencies);
-          if (pluginEntryFiles.size > 0) {
-            debugLogArray(`Entry files referenced in ${plugin.NAME}`, pluginEntryFiles);
-          }
         }
       }
     }
@@ -316,7 +308,6 @@ export class WorkspaceWorker {
       peerDependencies: this.peerDependencies,
       installedBinaries: this.installedBinaries,
       referencedDependencies: this.referencedDependencies,
-      entryFiles: this.entryFiles,
       enabledPlugins: this.enabledPlugins,
     };
   }

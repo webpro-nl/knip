@@ -1,7 +1,6 @@
 import { compact } from '../../util/array.js';
 import { _load } from '../../util/loader.js';
-import { getPackageName } from '../../util/modules.js';
-import { isAbsolute, isInNodeModules, join, dirname } from '../../util/path.js';
+import { isAbsolute, isInternal, join, dirname } from '../../util/path.js';
 import { _resolve } from '../../util/require.js';
 import { fallback } from './fallback.js';
 import type { ESLintConfig } from './types.js';
@@ -10,7 +9,7 @@ import type { PackageJson } from 'type-fest';
 type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
 
 const getDependencies = (config: ESLintConfig) => {
-  const extend = config.extends ? [config.extends].flat().map(customResolvePluginPackageNames) : [];
+  const extend = config.extends ? [config.extends].flat().map(resolveExtendedPackageName) : [];
   if (extend.includes('eslint-plugin-prettier')) extend.push('eslint-config-prettier');
   const plugins = config.plugins ? config.plugins.map(resolvePluginPackageName) : [];
   const parser = config.parser;
@@ -47,7 +46,7 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
   if (config) {
     if (config.extends) {
       for (const extend of [config.extends].flat()) {
-        if (extend.startsWith('.') || (isAbsolute(extend) && !isInNodeModules(extend))) {
+        if (isInternal(extend)) {
           const filePath = isAbsolute(extend) ? extend : join(dirname(configFilePath), extend);
           const extendConfigFilePath = _resolve(filePath);
           addAll(await getDependenciesDeep(extendConfigFilePath, dependencies, options));
@@ -73,9 +72,8 @@ const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', plugin
 
 export const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
 
-const customResolvePluginPackageNames = (extend: string) => {
-  if (isInNodeModules(extend)) return getPackageName(extend);
-  if (isAbsolute(extend) || extend.startsWith('.')) return;
+const resolveExtendedPackageName = (extend: string) => {
+  if (isInternal(extend)) return;
   if (extend.includes(':')) {
     const pluginName = extend.replace(/^plugin:/, '').replace(/(\/|:).+$/, '');
     if (pluginName === 'eslint') return;

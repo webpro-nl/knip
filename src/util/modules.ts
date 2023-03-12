@@ -1,20 +1,14 @@
-import { isAbsolute, toPosix } from './path.js';
+import { toPosix } from './path.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   const parts = moduleSpecifier.split('/').slice(0, 2);
   return moduleSpecifier.startsWith('@') ? parts.join('/') : parts[0];
 };
 
-export const getPackageName = (value: string) => {
+export const getPackageNameFromFilePath = (value: string) => {
   const match = toPosix(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g);
   if (match) return match[match.length - 1];
-
-  if (value.startsWith('@')) {
-    const [scope, packageName] = value.split('/');
-    return [scope, packageName].join('/');
-  }
-
-  return isAbsolute(value) ? value : value.split('/')[0];
+  return value;
 };
 
 export const stripBinary = (command: string) =>

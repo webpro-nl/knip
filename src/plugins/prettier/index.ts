@@ -1,5 +1,4 @@
 import { _load } from '../../util/loader.js';
-import { getPackageName } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -38,7 +37,7 @@ const findPrettierDependencies: GenericPluginCallback = async (configFilePath, {
     : await _load(configFilePath);
 
   return config && Array.isArray(config.plugins)
-    ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string').map(getPackageName)
+    ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string')
     : [];
 };
 

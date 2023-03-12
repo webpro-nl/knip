@@ -31,7 +31,7 @@ const findHuskyDependencies: GenericPluginCallback = async (configFilePath, { cw
     knownGlobalsOnly: true,
   });
 
-  return { dependencies: binaries, entryFiles };
+  return [...binaries, ...entryFiles];
 };
 
 export const findDependencies = timerify(findHuskyDependencies);
