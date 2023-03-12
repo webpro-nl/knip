@@ -1,0 +1,53 @@
+branches:
+  - main
+  - name: next
+    channel: next
+    prerelease: next
+plugins:
+  - - '@semantic-release/commit-analyzer'
+    - preset: angular
+      parserOpts:
+        headerPattern: '^(\w*)(?:\((.*)\))?!?: (.*)$'
+        breakingHeaderPattern: '^(\w*)(?:\((.*)\))?!: (.*)$'
+      releaseRules:
+        - breaking: true
+          release: major
+        - revert: true
+          release: patch
+        - type: feat
+          release: minor
+        - type: fix
+          release: patch
+        - type: perf
+          release: patch
+        - type: build
+          scope: deps
+          release: patch
+        - type: build
+          scope: peer-deps
+          release: patch
+        - type: build
+          scope: release-patch
+          release: patch
+        - type: build
+          scope: release-minor
+          release: minor
+        - type: build
+          scope: release-major
+          release: major
+  - - '@semantic-release/release-notes-generator'
+    - preset: angular
+      parserOpts:
+        headerPattern: '^(\w*)(?:\((.*)\))?!?: (.*)$'
+        breakingHeaderPattern: '^(\w*)(?:\((.*)\))?!: (.*)$'
+  - - '@semantic-release/changelog'
+    - changelogTitle: '# Changelog
+
+        All notable changes to this project will be documented in this file. Dates are displayed in UTC.'
+  - - '@semantic-release/git'
+    - assets:
+        - CHANGELOG.md
+  - '@semantic-release/npm'
+  - - '@semantic-release/github'
+    - releasedLabels:
+        - 'Status: Released'

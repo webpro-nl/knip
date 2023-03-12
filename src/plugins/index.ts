@@ -23,6 +23,7 @@ export * as releaseIt from './release-it/index.js';
 export * as remark from './remark/index.js';
 export * as remix from './remix/index.js';
 export * as rollup from './rollup/index.js';
+export * as semanticRelease from './semantic-release/index.js';
 export * as sentry from './sentry/index.js';
 export * as storybook from './storybook/index.js';
 export * as stryker from './stryker/index.js';
