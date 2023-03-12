@@ -1,5 +1,5 @@
 {
-  "name": "commonjs",
+  "name": "@fixtures/commonjs",
   "knip": {
     "entry": [
       "index.js"

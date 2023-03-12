@@ -1,5 +1,5 @@
 {
-  "name": "cypress",
+  "name": "@fixtures/cypress",
   "devDependencies": {
     "cypress": "*"
   }

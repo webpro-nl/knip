@@ -1,5 +1,5 @@
 {
-  "name": "js-only",
+  "name": "@fixtures/js-only",
   "knip": {
     "entry": [
       "index.js"

@@ -1,5 +1,5 @@
 {
-  "name": "peer-dependencies",
+  "name": "@fixtures/peer-dependencies",
   "dependencies": {
     "host": "*",
     "peer": "*",

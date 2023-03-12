@@ -1,5 +1,5 @@
 {
-  "name": "members",
+  "name": "@fixtures/members",
   "dependencies": {},
   "knip": {
     "entry": [

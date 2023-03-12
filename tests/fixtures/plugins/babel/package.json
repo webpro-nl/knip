@@ -1,5 +1,5 @@
 {
-  "name": "babel",
+  "name": "@fixtures/babel",
   "scripts": {},
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "*",

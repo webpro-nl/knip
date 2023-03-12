@@ -1,5 +1,5 @@
 {
-  "name": "storybook",
+  "name": "@fixtures/storybook",
   "scripts": {
     "storybook": "storybook"
   },

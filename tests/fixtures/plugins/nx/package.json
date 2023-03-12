@@ -1,5 +1,5 @@
 {
-  "name": "nx",
+  "name": "@fixtures/nx",
   "scripts": {
     "nx": "nx"
   },

@@ -1,5 +1,5 @@
 {
-  "name": "npm-scripts",
+  "name": "@fixtures/npm-scripts",
   "scripts": {
     "nodemon": "nodemon index.js",
     "build": "rm -rf && dotenv -- nx build npm-scripts",

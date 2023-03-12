@@ -1,5 +1,5 @@
 {
-  "name": "namespace",
+  "name": "@fixtures/namespace",
   "knip": {
     "entry": [
       "index.ts"

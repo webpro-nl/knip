@@ -1,5 +1,5 @@
 {
-  "name": "paths-workspaces",
+  "name": "@fixtures/paths-workspaces",
   "workspaces": [
     "ws"
   ]

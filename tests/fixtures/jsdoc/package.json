@@ -1,5 +1,5 @@
 {
-  "name": "jsdoc",
+  "name": "@fixtures/jsdoc",
   "knip": {
     "entry": [
       "index.ts"

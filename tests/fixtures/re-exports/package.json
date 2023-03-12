@@ -1,5 +1,5 @@
 {
-  "name": "re-exports",
+  "name": "@fixtures/re-exports",
   "knip": {
     "entry": [
       "entry.ts"

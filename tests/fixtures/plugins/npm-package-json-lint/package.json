@@ -1,5 +1,5 @@
 {
-  "name": "npm-package-json-lint",
+  "name": "@fixtures/npm-package-json-lint",
   "devDependencies": {
     "npm-package-json-lint": "*"
   }

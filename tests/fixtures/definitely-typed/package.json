@@ -1,5 +1,5 @@
 {
-  "name": "definitely-typed",
+  "name": "@fixtures/definitely-typed",
   "scripts": {
     "test": "mocha"
   },
