@@ -199,7 +199,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         if (exports.size > 0) exportedSymbols.set(filePath, exports);
 
         for (const [specifierFilePath, importItems] of internal.entries()) {
-          const importedWorkspace = chief.findWorkspaceByFilePath(specifierFilePath);
+          const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
+          const importedWorkspace = chief.findWorkspaceByPackageName(packageName);
           if (importedWorkspace && importedWorkspace !== workspace) {
             external.add(importItems.specifier);
           }
