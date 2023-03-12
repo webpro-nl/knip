@@ -3,8 +3,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "paths": {
-      "@scoped/lib-a": ["./packages/lib-a/index.ts"],
-      "@scoped/lib-b": ["./packages/lib-b/index.ts"]
+      "@workspaces/lib-a": ["./packages/lib-a/index.ts"],
+      "@workspaces/lib-b": ["./packages/lib-b/index.ts"]
     }
   }
 }

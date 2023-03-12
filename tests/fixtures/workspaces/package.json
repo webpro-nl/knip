@@ -1,8 +1,9 @@
 {
-  "name": "workspaces",
+  "name": "@workspaces/root",
   "workspaces": [
     "docs",
     "apps/*",
+    "local/tsconfig",
     "packages/*"
   ],
   "dependencies": {

@@ -1,5 +1,5 @@
 {
-  "name": "level-1-3",
+  "name": "@workspaces-nested/level-1-3",
   "scripts": {
     "dev": "pm2-dev",
     "lint": "eslint",

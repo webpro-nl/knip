@@ -1,9 +1,9 @@
 {
-  "name": "@scoped/a",
+  "name": "@workspaces/app-a",
   "main": "./index.js",
   "dependencies": {
-    "@scoped/lib-a": "*",
-    "@scoped/lib-b": "*",
+    "@workspaces/lib-a": "*",
+    "@workspaces/lib-b": "*",
     "used": "*",
     "unused-app-dependency": "*"
   }

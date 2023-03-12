@@ -1,5 +1,5 @@
 {
-  "name": "level-1-1",
+  "name": "@workspaces-nested/level-1-1",
   "dependencies": {
     "package-1-1": "*"
   },

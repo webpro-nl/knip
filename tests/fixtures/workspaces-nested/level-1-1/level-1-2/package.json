@@ -1,5 +1,5 @@
 {
-  "name": "level-1-2",
+  "name": "@workspaces-nested/level-1-2",
   "scripts": {
     "start": "ignored-binary-in-level-2",
     "global": "ignored-binary-global"

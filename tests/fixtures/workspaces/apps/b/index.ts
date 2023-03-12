@@ -1,5 +1,5 @@
-import a from '@scoped/lib-a';
-import b from '@scoped/lib-b';
+import a from '@workspaces/lib-a';
+import b from '@workspaces/lib-b';
 import { n } from 'not-listed';
 
 a;

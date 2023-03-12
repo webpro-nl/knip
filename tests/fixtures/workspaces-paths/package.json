@@ -1,12 +1,12 @@
 {
-  "name": "workspaces-paths",
+  "name": "@workspaces-paths/root",
   "workspaces": [
     "packages/*"
   ],
   "dependencies": {},
   "knip": {
     "workspaces": {
-      "**": {
+      "packages/*": {
         "entry": "src/index.ts",
         "project": "src/**/*.ts"
       },
