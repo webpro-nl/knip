@@ -8,11 +8,11 @@ const cwd = resolve('tests/fixtures/plugins/nx');
 test('Find dependencies in Nx configuration (project.json)', async () => {
   const configFilePath = join(cwd, 'apps/a/project.json');
   const dependencies = await nx.findDependencies(configFilePath, { cwd });
-  assert.deepEqual(dependencies, { dependencies: ['@nrwl/next', '@nrwl/linter', '@nrwl/cypress'], entryFiles: [] });
+  assert.deepEqual(dependencies, ['@nrwl/next', '@nrwl/linter', '@nrwl/cypress']);
 });
 
 test('Find dependencies in Nx configuration (project.json)', async () => {
   const configFilePath = join(cwd, 'libs/b/project.json');
   const dependencies = await nx.findDependencies(configFilePath, { cwd });
-  assert.deepEqual(dependencies, { dependencies: ['nx', '@nrwl/jest', 'compodoc'], entryFiles: [] });
+  assert.deepEqual(dependencies, ['nx', '@nrwl/jest', 'compodoc']);
 });

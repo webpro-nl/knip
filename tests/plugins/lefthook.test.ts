@@ -14,5 +14,5 @@ test('Find dependencies in lefthook configuration (json)', async () => {
     cwd,
     workspaceConfig: { ignoreBinaries: [] },
   });
-  assert.deepEqual(dependencies, { dependencies: ['eslint'], entryFiles: [join(cwd, 'example.mjs')] });
+  assert.deepEqual(dependencies, ['eslint', join(cwd, 'example.mjs')]);
 });

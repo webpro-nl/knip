@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
 import * as webpack from '../../src/plugins/webpack/index.js';
@@ -13,28 +14,28 @@ const manifest = getManifest(cwd);
 test('Find dependencies in Webpack configuration (webpack.config.js)', async () => {
   const configFilePath = join(cwd, 'webpack.config.js');
   const dependencies = await webpack.findDependencies(configFilePath, { cwd, manifest });
-  assert.deepEqual(dependencies, {
-    dependencies: [
-      'svg-url-loader',
-      'babel-loader',
-      '@babel/preset-env',
-      '@babel/preset-typescript',
-      '@babel/plugin-proposal-class-properties',
-      '@babel/plugin-transform-react-jsx',
-      'babel-plugin-macros',
-      'babel-plugin-styled-components',
-      'ts-loader',
-      'esbuild-loader',
-      'mini-css-extract-plugin',
-      'css-loader',
-      'less-loader',
-      'svgo-loader',
-      'base64-inline-loader',
-      'webpack-cli',
-      'webpack-dev-server',
-    ],
-    entryFiles: [join(cwd, 'src/app.ts'), join(cwd, 'src/vendor.ts'), join(cwd, 'src/entry.js')],
-  });
+  assert.deepEqual(dependencies, [
+    'svg-url-loader',
+    'babel-loader',
+    '@babel/preset-env',
+    '@babel/preset-typescript',
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-transform-react-jsx',
+    'babel-plugin-macros',
+    'babel-plugin-styled-components',
+    'ts-loader',
+    'esbuild-loader',
+    path.join(cwd, 'node_modules/mini-css-extract-plugin/loader.js'),
+    'css-loader',
+    'less-loader',
+    'svgo-loader',
+    'base64-inline-loader',
+    './src/app.ts',
+    './src/vendor.ts',
+    './src/entry.js',
+    'webpack-cli',
+    'webpack-dev-server',
+  ]);
 });
 
 test('Find dependencies in Webpack configuration', async () => {

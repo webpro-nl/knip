@@ -11,20 +11,17 @@ const workspaceConfig = { ignoreBinaries: ['knip'] };
 test('Find dependencies in github-actions workflow configurations', async () => {
   const configFilePath = join(cwd, '.github/workflows/test.yml');
   const dependencies = await GithubActions.findDependencies(configFilePath, { manifest, workspaceConfig });
-  assert.deepEqual(dependencies, {
-    dependencies: [
-      'esbuild-register',
-      'playwright',
-      'prisma',
-      'eslint',
-      'release-it',
-      'nyc',
-      'retry-cli',
-      'curl',
-      '@scope/retry-cli',
-      'changeset',
-      'wait-on',
-    ],
-    entryFiles: [],
-  });
+  assert.deepEqual(dependencies, [
+    'esbuild-register',
+    'playwright',
+    'prisma',
+    'eslint',
+    'release-it',
+    'nyc',
+    'retry-cli',
+    'curl',
+    '@scope/retry-cli',
+    'changeset',
+    'wait-on',
+  ]);
 });

@@ -10,5 +10,5 @@ const manifest = getManifest(cwd);
 test('Find dependencies in markdownlint configuration (json)', async () => {
   const configFilePath = join(cwd, '.markdownlint.json');
   const dependencies = await markdownlint.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['markdownlint', 'rule-package']);
+  assert.deepEqual(dependencies, ['markdownlint/style/prettier', 'rule-package']);
 });
