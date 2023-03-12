@@ -11,7 +11,12 @@ export const ENABLERS = ['eslint'];
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 // Current: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
-export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
+export const CONFIG_FILE_PATTERNS = [
+  '**/.eslintrc',
+  '**/.eslintrc.{js,json,cjs}',
+  '**/.eslintrc.{yml,yaml}',
+  'package.json',
+];
 
 // New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
 // We can handle eslint.config.js just like other source code (as dependencies are imported)

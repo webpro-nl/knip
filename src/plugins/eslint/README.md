@@ -12,7 +12,12 @@ or `devDependencies`:
 ```json
 {
   "eslint": {
-    "config": [".eslintrc", ".eslintrc.{js,json,cjs}", ".eslintrc.{yml,yaml}", "package.json"],
+    "config": [
+      "**/.eslintrc",
+      "**/.eslintrc.{js,json,cjs}",
+      "**/.eslintrc.{yml,yaml}",
+      "package.json"
+    ],
     "entry": ["eslint.config.js"]
   }
 }
