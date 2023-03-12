@@ -1,6 +1,7 @@
 import { statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import yaml from 'js-yaml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
 
@@ -18,6 +19,15 @@ export const loadJSON = async (filePath: string) => {
   try {
     const contents = await readFile(filePath);
     return JSON.parse(stripJsonComments(contents.toString()));
+  } catch (error) {
+    throw new LoaderError(`Error loading ${filePath}`, { cause: error });
+  }
+};
+
+export const loadYAML = async (filePath: string) => {
+  try {
+    const contents = await readFile(filePath);
+    return yaml.load(contents.toString());
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
