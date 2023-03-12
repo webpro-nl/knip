@@ -270,7 +270,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addFilesIssues(unusedFiles);
 
-    collector.setTotalFileCount(analyzedFiles.size + unusedFiles.length);
+    collector.addTotalFileCount(analyzedFiles.size + unusedFiles.length);
 
     console.cast('Analyzing source files...');
 

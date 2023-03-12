@@ -20,8 +20,8 @@ export class IssueCollector {
     this.cwd = cwd;
   }
 
-  setTotalFileCount(count: number) {
-    this.counters.total = count;
+  addTotalFileCount(count: number) {
+    this.counters.total += count;
   }
 
   addFilesIssues(filePaths: string[]) {
