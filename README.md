@@ -297,14 +297,14 @@ Knip contains a growing list of plugins:
 - [Remark][36]
 - [Remix][37]
 - [Rollup][38]
-- [Semantic Release][38]
-- [Sentry][39]
-- [Storybook][40]
-- [Stryker][41]
-- [TypeDoc][42]
-- [TypeScript][43]
-- [Vitest][44]
-- [Webpack][45]
+- [Semantic Release][39]
+- [Sentry][40]
+- [Storybook][41]
+- [Stryker][42]
+- [TypeDoc][43]
+- [TypeScript][44]
+- [Vitest][45]
+- [Webpack][46]
 
 Plugins are automatically activated. Each plugin is automatically enabled based on simple heuristics. Most of them check
 whether one or one of a few (dev) dependencies are listed in `package.json`. Once enabled, they add a set of
@@ -312,7 +312,7 @@ configuration and/or entry files for Knip to analyze. These defaults can be over
 
 Most plugins use one or both of the following file types:
 
-- `config` - custom dependency resolvers are applied to the [config files][46]
+- `config` - custom dependency resolvers are applied to the [config files][47]
 - `entry` - files to include with the analysis of the rest of the source code
 
 See each plugin's documentation for its default values.
@@ -338,7 +338,7 @@ Other configuration files use `require` or `import` statements to use dependenci
 rest of the source files. These configuration files are also considered `entry` files.
 
 For plugins related to test files, it's good to know that the following glob patterns are always included by default
-(see [TEST_FILE_PATTERNS in constants.ts][47]):
+(see [TEST_FILE_PATTERNS in constants.ts][48]):
 
 - `**/*.{test,spec}.{js,jsx,ts,tsx,mjs,cjs}`
 - `**/__tests__/**/*.{js,jsx,ts,tsx,mjs,cjs}`
@@ -420,10 +420,10 @@ Each workspace can also have its own `paths` configured. Note that Knip `paths` 
 
 Knip provides the following built-in reporters:
 
-- [`codeowners`][48]
-- [`compact`][49]
-- [`json`][50]
-- [`symbol`][51] (default)
+- [`codeowners`][49]
+- [`compact`][50]
+- [`json`][51]
+- [`symbol`][52] (default)
 
 The `compact` reporter shows the sorted files first, and then a list of symbols:
 
@@ -450,7 +450,7 @@ type ReporterOptions = {
 
 The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][52].
+Find more details and ideas in [custom reporters][53].
 
 ## Libraries and "unused" exports
 
@@ -504,11 +504,11 @@ instance by ignoring specific folders that are not related to the source code im
 Dependencies that are only imported in unused files are also marked as unused. So a long list of unused files would be
 good to remedy first.
 
-When unused dependencies are related to dependencies having a Knip [plugin][1], maybe the `config` and/or `entry` files
+When unused dependencies are related to dependencies having a Knip [plugin][2], maybe the `config` and/or `entry` files
 for that dependency are at custom locations. The default values are at the plugin's documentation, and can be overridden
 to match the custom location(s).
 
-When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][53].
+When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][54].
 
 #### Too many unused exports
 
@@ -516,7 +516,7 @@ When the project is a library and the exports are meant to be used by consumers 
 
 1.  By default, unused exports of `entry` files are not reported. You could re-export from an existing entry file, or
     add the containing file to the `entry` array in the configuration.
-2.  The exported values or types can be marked [using the JSDoc `@public` tag][54].
+2.  The exported values or types can be marked [using the JSDoc `@public` tag][55].
 
 ### How to start using Knip in CI while having too many issues to sort out?
 
@@ -536,22 +536,22 @@ All of this is hiding problems, so please make sure to plan for fixing them and/
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                            | **knip** | [depcheck][55] | [unimported][56] | [ts-unused-exports][57] | [ts-prune][58] |
-| :--------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
-| Unused files                       |    ✅    |       -        |        ✅        |            -            |       -        |
-| Unused dependencies                |    ✅    |       ✅       |        ✅        |            -            |       -        |
-| Unlisted dependencies              |    ✅    |       ✅       |        ✅        |            -            |       -        |
-| [Plugins][1]                       |    ✅    |       ✅       |        ❌        |            -            |       -        |
-| Unused exports                     |    ✅    |       -        |        -         |           ✅            |       ✅       |
-| Unused class members               |    ✅    |       -        |        -         |            -            |       -        |
-| Unused enum members                |    ✅    |       -        |        -         |            -            |       -        |
-| Duplicate exports                  |    ✅    |       -        |        -         |           ❌            |       ❌       |
-| Search namespaces                  |    ✅    |       -        |        -         |           ✅            |       ❌       |
-| Custom reporters                   |    ✅    |       -        |        -         |            -            |       -        |
-| JavaScript support                 |    ✅    |       ✅       |        ✅        |            -            |       -        |
-| Configure entry files              |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |
-| [Support workspaces/monorepos][52] |    ✅    |       ❌       |        ❌        |            -            |       -        |
-| ESLint plugin available            |    -     |       -        |        -         |           ✅            |       -        |
+| Feature                           | **knip** | [depcheck][56] | [unimported][57] | [ts-unused-exports][58] | [ts-prune][59] |
+| :-------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
+| Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |
+| Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |
+| Unlisted dependencies             |    ✅    |       ✅       |        ✅        |            -            |       -        |
+| [Plugins][2]                      |    ✅    |       ✅       |        ❌        |            -            |       -        |
+| Unused exports                    |    ✅    |       -        |        -         |           ✅            |       ✅       |
+| Unused class members              |    ✅    |       -        |        -         |            -            |       -        |
+| Unused enum members               |    ✅    |       -        |        -         |            -            |       -        |
+| Duplicate exports                 |    ✅    |       -        |        -         |           ❌            |       ❌       |
+| Search namespaces                 |    ✅    |       -        |        -         |           ✅            |       ❌       |
+| Custom reporters                  |    ✅    |       -        |        -         |            -            |       -        |
+| JavaScript support                |    ✅    |       ✅       |        ✅        |            -            |       -        |
+| Configure entry files             |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |
+| [Support workspaces/monorepos][1] |    ✅    |       ❌       |        ❌        |            -            |       -        |
+| ESLint plugin available           |    -     |       -        |        -         |           ✅            |       -        |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
 
@@ -571,7 +571,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][59].
+Also see [production mode][60].
 
 ### ts-unused-exports
 
@@ -605,7 +605,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 
 Special thanks to the wonderful people who have contributed to this project:
 
-[![Contributors][60]][61]
+[![Contributors][62]][61]
 
 [1]: #workspaces--monorepos
 [2]: #plugins
@@ -645,27 +645,27 @@ Special thanks to the wonderful people who have contributed to this project:
 [36]: ./src/plugins/remark
 [37]: ./src/plugins/remix
 [38]: ./src/plugins/rollup
-[38]: ./src/plugins/semantic-release
-[39]: ./src/plugins/sentry
-[40]: ./src/plugins/storybook
-[41]: ./src/plugins/stryker
-[42]: ./src/plugins/typedoc
-[43]: ./src/plugins/typescript
-[44]: ./src/plugins/vitest
-[45]: ./src/plugins/webpack
-[46]: #config
-[47]: https://github.com/webpro/knip/blob/main/src/constants.ts
-[48]: #code-owners
-[49]: #compact
-[50]: #json
-[51]: #symbol-default
-[52]: ./docs/custom-reporters.md
-[53]: #create-a-new-plugin
-[54]: #libraries-and-unused-exports
-[55]: https://github.com/depcheck/depcheck
-[56]: https://github.com/smeijer/unimported
-[57]: https://github.com/pzavolinsky/ts-unused-exports
-[58]: https://github.com/nadeesha/ts-prune
-[59]: #production-mode
-[60]: https://contrib.rocks/image?repo=webpro/knip
+[39]: ./src/plugins/semantic-release
+[40]: ./src/plugins/sentry
+[41]: ./src/plugins/storybook
+[42]: ./src/plugins/stryker
+[43]: ./src/plugins/typedoc
+[44]: ./src/plugins/typescript
+[45]: ./src/plugins/vitest
+[46]: ./src/plugins/webpack
+[47]: #config
+[48]: https://github.com/webpro/knip/blob/main/src/constants.ts
+[49]: #code-owners
+[50]: #compact
+[51]: #json
+[52]: #symbol-default
+[53]: ./docs/custom-reporters.md
+[54]: #create-a-new-plugin
+[55]: #libraries-and-unused-exports
+[56]: https://github.com/depcheck/depcheck
+[57]: https://github.com/smeijer/unimported
+[58]: https://github.com/pzavolinsky/ts-unused-exports
+[59]: https://github.com/nadeesha/ts-prune
+[60]: #production-mode
 [61]: https://github.com/webpro/knip/graphs/contributors
+[62]: https://contrib.rocks/image?repo=webpro/knip
