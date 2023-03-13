@@ -7,6 +7,9 @@ const cwd = path.resolve('test/fixtures/plugins/typedoc');
 
 test('Find dependencies in typedoc configuration (json)', async () => {
   const configFilePath = path.join(cwd, 'typedoc.json');
-  const dependencies = await typedoc.findDependencies(configFilePath);
-  assert.deepEqual(dependencies, ['@appium/typedoc-plugin-appium', 'typedoc-plugin-expand-object-like-types']);
+  const dependencies = await typedoc.findDependencies(configFilePath, { cwd });
+  assert.deepEqual(dependencies, {
+    dependencies: ['@appium/typedoc-plugin-appium', 'typedoc-plugin-expand-object-like-types'],
+    entryFiles: [path.join(cwd, 'dist/index.cjs')],
+  });
 });

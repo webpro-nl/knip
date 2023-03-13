@@ -275,27 +275,28 @@ Knip contains a growing list of plugins:
 - [Capacitor][14]
 - [Changesets][15]
 - [commitlint][16]
-- [Cypress][17]
-- [ESLint][18]
-- [Gatsby][19]
-- [GitHub Actions][20]
-- [husky][21]
-- [Jest][22]
-- [Lefthook][23]
-- [lint-staged][24]
-- [markdownlint][25]
-- [Mocha][26]
-- [Next.js][27]
-- [npm-package-json-lint][28]
-- [Nx][29]
-- [nyc][30]
-- [Playwright][31]
-- [PostCSS][32]
-- [Prettier][33]
-- [Release It][34]
-- [Remark][35]
-- [Remix][36]
-- [Rollup][37]
+- [cspell][17]
+- [Cypress][18]
+- [ESLint][19]
+- [Gatsby][20]
+- [GitHub Actions][21]
+- [husky][22]
+- [Jest][23]
+- [Lefthook][24]
+- [lint-staged][25]
+- [markdownlint][26]
+- [Mocha][27]
+- [Next.js][28]
+- [npm-package-json-lint][29]
+- [Nx][30]
+- [nyc][31]
+- [Playwright][32]
+- [PostCSS][33]
+- [Prettier][34]
+- [Release It][35]
+- [Remark][36]
+- [Remix][37]
+- [Rollup][38]
 - [Semantic Release][38]
 - [Sentry][39]
 - [Storybook][40]
@@ -600,6 +601,12 @@ userland territory, much like code linters.
 Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
 for the job. I'm motivated to make knip perfectly suited for the job of cutting projects to perfection! ✂️
 
+## Contributors
+
+Special thanks to the wonderful people who have contributed to this project:
+
+[![Contributors][60]][61]
+
 [1]: #workspaces--monorepos
 [2]: #plugins
 [3]: #reporters
@@ -616,27 +623,28 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [14]: ./src/plugins/capacitor
 [15]: ./src/plugins/changesets
 [16]: ./src/plugins/commitlint
-[17]: ./src/plugins/cypress
-[18]: ./src/plugins/eslint
-[19]: ./src/plugins/gatsby
-[20]: ./src/plugins/github-actions
-[21]: ./src/plugins/husky
-[22]: ./src/plugins/jest
-[23]: ./src/plugins/lefthook
-[24]: ./src/plugins/lint-staged
-[25]: ./src/plugins/markdownlint
-[26]: ./src/plugins/mocha
-[27]: ./src/plugins/next
-[28]: ./src/plugins/npm-package-json-lint
-[29]: ./src/plugins/nx
-[30]: ./src/plugins/nyc
-[31]: ./src/plugins/playwright
-[32]: ./src/plugins/postcss
-[33]: ./src/plugins/prettier
-[34]: ./src/plugins/release-it
-[35]: ./src/plugins/remark
-[36]: ./src/plugins/remix
-[37]: ./src/plugins/rollup
+[17]: ./src/plugins/cspell
+[18]: ./src/plugins/cypress
+[19]: ./src/plugins/eslint
+[20]: ./src/plugins/gatsby
+[21]: ./src/plugins/github-actions
+[22]: ./src/plugins/husky
+[23]: ./src/plugins/jest
+[24]: ./src/plugins/lefthook
+[25]: ./src/plugins/lint-staged
+[26]: ./src/plugins/markdownlint
+[27]: ./src/plugins/mocha
+[28]: ./src/plugins/next
+[29]: ./src/plugins/npm-package-json-lint
+[30]: ./src/plugins/nx
+[31]: ./src/plugins/nyc
+[32]: ./src/plugins/playwright
+[33]: ./src/plugins/postcss
+[34]: ./src/plugins/prettier
+[35]: ./src/plugins/release-it
+[36]: ./src/plugins/remark
+[37]: ./src/plugins/remix
+[38]: ./src/plugins/rollup
 [38]: ./src/plugins/semantic-release
 [39]: ./src/plugins/sentry
 [40]: ./src/plugins/storybook
@@ -659,3 +667,5 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [57]: https://github.com/pzavolinsky/ts-unused-exports
 [58]: https://github.com/nadeesha/ts-prune
 [59]: #production-mode
+[60]: https://contrib.rocks/image?repo=webpro/knip
+[61]: https://github.com/webpro/knip/graphs/contributors

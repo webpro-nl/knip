@@ -180,6 +180,10 @@
           "title": "commitlint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/commitlint/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "cspell": {
+          "title": "cspell plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/cspell/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "cypress": {
           "title": "Cypress plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/cypress/README.md)",
           "$ref": "#/definitions/plugin"
