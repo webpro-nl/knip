@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import { _getReferencesFromScripts } from '../../util/binaries/index.js';
+import { _getReferencesFromScripts } from '../../binaries/index.js';
 import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';

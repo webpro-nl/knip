@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from '../util/binaries/index.js';
+import { _getReferencesFromScripts } from '../binaries/index.js';
 import { timerify } from '../util/performance.js';
 import { getPackageManifest } from './helpers.js';
 import type { WorkspaceConfiguration } from '../types/config.js';

@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { _getReferencesFromScripts } from '../../util/binaries/index.js';
+import { _getReferencesFromScripts } from '../../binaries/index.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';

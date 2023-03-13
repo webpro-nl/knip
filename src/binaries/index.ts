@@ -1,9 +1,9 @@
-import { IGNORED_GLOBAL_BINARIES } from '../../constants.js';
-import { compact } from '../array.js';
-import { partition } from '../array.js';
-import { getPackageNameFromModuleSpecifier, stripBinary } from '../modules.js';
-import { isInternal } from '../path.js';
-import { timerify } from '../performance.js';
+import { IGNORED_GLOBAL_BINARIES } from '../constants.js';
+import { compact } from '../util/array.js';
+import { partition } from '../util/array.js';
+import { getPackageNameFromModuleSpecifier, stripBinary } from '../util/modules.js';
+import { isInternal } from '../util/path.js';
+import { timerify } from '../util/performance.js';
 import { getBinariesFromScript } from './bash-parser.js';
 import type { GetReferencesFromScripts } from './types.js';
 

@@ -1,6 +1,6 @@
 import parseArgs from 'minimist';
-import { isInNodeModules, join } from '../../path.js';
-import { tryResolve } from '../../require.js';
+import { isInNodeModules, join } from '../../util/path.js';
+import { tryResolve } from '../../util/require.js';
 import type { Resolver } from '../types.js';
 
 const tryResolveFilePath = (cwd: string, specifier: string, fallback?: string) => {

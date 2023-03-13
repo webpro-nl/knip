@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from '../../util/binaries/index.js';
+import { _getReferencesFromScripts } from '../../binaries/index.js';
 import { _firstGlob } from '../../util/glob.js';
 import { _load } from '../../util/loader.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
