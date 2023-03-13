@@ -10,7 +10,6 @@
   },
   "devDependencies": {
     "@fontsource/fira-mono": "*",
-    "@neoconfetti/svelte": "*",
     "@sveltejs/adapter-auto": "*",
     "@sveltejs/kit": "*",
     "@types/cookie": "*",
