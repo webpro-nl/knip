@@ -297,6 +297,7 @@ Knip contains a growing list of plugins:
 - [Remark][36]
 - [Remix][37]
 - [Rollup][38]
+- [Semantic Release][38]
 - [Sentry][39]
 - [Storybook][40]
 - [Stryker][41]
@@ -644,6 +645,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [36]: ./src/plugins/remark
 [37]: ./src/plugins/remix
 [38]: ./src/plugins/rollup
+[38]: ./src/plugins/semantic-release
 [39]: ./src/plugins/sentry
 [40]: ./src/plugins/storybook
 [41]: ./src/plugins/stryker
