@@ -69,7 +69,10 @@ export class DependencyDeputy {
   }
 
   getProductionDependencies(workspaceName: string) {
-    return this._manifests.get(workspaceName)?.dependencies ?? [];
+    const manifest = this._manifests.get(workspaceName);
+    if (!manifest) return [];
+    if (this.isStrict) return [...manifest.dependencies, ...manifest.peerDependencies];
+    return manifest.dependencies;
   }
 
   getDevDependencies(workspaceName: string) {

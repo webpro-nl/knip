@@ -6,10 +6,15 @@
     "pm2": "NODE_ENV=production pm2 start index.js",
     "dev": "pm2-dev start index.js",
     "lint": "eslint",
-    "test": "bash test/unit.sh && bash test/e2e.sh"
+    "test": "bash test/unit.sh && bash test/e2e.sh",
+    "start": "peer-dep"
   },
   "dependencies": {
     "express": "*"
+  },
+  "peerDependencies": {
+    "peer-dep": "*",
+    "unused-peer-dep": "*"
   },
   "devDependencies": {
     "pm2": "*",

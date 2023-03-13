@@ -36,12 +36,11 @@ test('Find unused dependencies', async () => {
   });
 });
 
-test('Find unused dependencies (production/strict)', async () => {
+test('Find unused dependencies (production)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isProduction: true,
-    isStrict: true,
   });
 
   assert(issues.files.has(join(cwd, 'unused-module.ts')));
@@ -61,6 +60,30 @@ test('Find unused dependencies (production/strict)', async () => {
     files: 1,
     dependencies: 1,
     devDependencies: 0,
+    unlisted: 3,
+    processed: 3,
+    total: 3,
+  });
+});
+
+test('Find unused dependencies (strict)', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    isProduction: true,
+    isStrict: true,
+  });
+
+  assert(issues.files.has(join(cwd, 'unused-module.ts')));
+
+  assert.equal(Object.keys(issues.dependencies['package.json']).length, 2);
+  assert(issues.dependencies['package.json']['@tootallnate/once']);
+  assert(issues.dependencies['package.json']['jquery']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    dependencies: 2,
     unlisted: 3,
     processed: 3,
     total: 3,

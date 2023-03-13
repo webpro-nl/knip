@@ -20,6 +20,7 @@ type WorkspaceManagerOptions = {
   negatedWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
   isProduction: boolean;
+  isStrict: boolean;
 };
 
 type ReferencedDependencies = Set<[string, string]>;
@@ -40,6 +41,7 @@ export class WorkspaceWorker {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   isProduction;
+  isStrict;
   rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[] = [];
   enabledPluginsInAncestors: string[];
@@ -57,6 +59,7 @@ export class WorkspaceWorker {
     config,
     manifest,
     isProduction,
+    isStrict,
     rootIgnore,
     negatedWorkspacePatterns,
     enabledPluginsInAncestors,
@@ -67,6 +70,7 @@ export class WorkspaceWorker {
     this.config = config;
     this.manifest = manifest;
     this.isProduction = isProduction;
+    this.isStrict = isStrict;
     this.rootIgnore = rootIgnore;
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
@@ -110,6 +114,7 @@ export class WorkspaceWorker {
       config: this.config,
       manifest: this.manifest,
       isProduction: this.isProduction,
+      isStrict: this.isStrict,
       dir: this.dir,
       cwd: this.cwd,
     });

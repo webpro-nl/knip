@@ -28,7 +28,7 @@ test('Referenced dependencies in npm scripts', async () => {
 
   const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies(config);
 
-  assert.deepEqual(dependencies, ['nodemon', 'dotenv', 'nx', 'pm2', 'eslint']);
+  assert.deepEqual(dependencies, ['nodemon', 'dotenv', 'nx', 'pm2', 'eslint', 'peer-dep']);
 
   const expectedPeerDependencies = new Map();
   expectedPeerDependencies.set('pm2-peer-dep', new Set(['pm2']));

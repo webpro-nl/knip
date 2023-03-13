@@ -9,11 +9,12 @@ type Options = {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   isProduction: boolean;
+  isStrict: boolean;
   dir: string;
   cwd: string;
 };
 
-const findManifestDependencies = async ({ config, manifest, isProduction, dir, cwd }: Options) => {
+const findManifestDependencies = async ({ config, manifest, isProduction, isStrict, dir, cwd }: Options) => {
   const { ignoreBinaries } = config;
   const scriptFilter = isProduction ? ['start', 'postinstall'] : [];
   const referencedDependencies: Set<string> = new Set();
@@ -33,7 +34,13 @@ const findManifestDependencies = async ({ config, manifest, isProduction, dir, c
 
   // Find all binaries for each dependency
   const installedBinaries: InstalledBinaries = new Map();
-  const packageNames = [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})];
+
+  const packageNames = [
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...(isStrict ? Object.keys(manifest.peerDependencies ?? {}) : []),
+    ...(isProduction ? [] : Object.keys(manifest.devDependencies ?? {})),
+  ];
+
   for (const packageName of packageNames) {
     const manifest = await getPackageManifest({ dir, packageName, cwd });
     if (manifest) {

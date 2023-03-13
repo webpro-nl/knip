@@ -69,6 +69,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       config,
       manifest,
       isProduction,
+      isStrict,
       rootIgnore: chief.config.ignore,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
