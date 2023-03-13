@@ -12,12 +12,7 @@ or `devDependencies`:
 ```json
 {
   "semantic-release": {
-    "config": [
-      ".releaserc",
-      ".releaserc.{yaml,yml,json,js,cjs}",
-      "release.config.{js,cjs}",
-      "package.json"
-    ]
+    "config": [".releaserc", ".releaserc.{yaml,yml,json,js,cjs}", "release.config.{js,cjs}", "package.json"]
   }
 }
 ```
