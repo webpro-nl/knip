@@ -11,14 +11,8 @@ or `devDependencies`:
 
 ```json
 {
-  "PLUGIN_NAME": {
-    "config": [
-      "cspell",
-      "cspell.config.{js,cjs,json,yaml,yml}",
-      "cspell.{json,yaml,yml}",
-      ".c{s,S}pell.json",
-      "cSpell.json",
-    ],
+  "cspell": {
+    "config": ["cspell.config.{js,cjs,json,yaml,yml}", "cspell.{json,yaml,yml}", ".c{s,S}pell.json", "cSpell.json"]
   }
 }
 ```
