@@ -2,5 +2,6 @@
   "$schema": "https://unpkg.com/knip@next/schema.json",
   "entry": ["src/{index,cli}.ts!"],
   "project": ["src/**/*.ts!"],
-  "ignore": ["**/fixtures", "**/_template"]
+  "ignore": ["**/fixtures", "**/_template"],
+  "ignoreDependencies": ["eslint"]
 }
