@@ -15,20 +15,29 @@ export const findFile = (workingDir: string, fileName: string) => {
   return isFile(filePath) ? filePath : undefined;
 };
 
-export const loadJSON = async (filePath: string) => {
+export const loadFile = async (filePath: string) => {
   try {
     const contents = await readFile(filePath);
-    return JSON.parse(stripJsonComments(contents.toString()));
+    return contents.toString();
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
 };
 
+export const loadJSON = async (filePath: string) => {
+  const contents = await loadFile(filePath);
+  return parseJSON(contents);
+};
+
 export const loadYAML = async (filePath: string) => {
-  try {
-    const contents = await readFile(filePath);
-    return yaml.load(contents.toString());
-  } catch (error) {
-    throw new LoaderError(`Error loading ${filePath}`, { cause: error });
-  }
+  const contents = await loadFile(filePath);
+  return parseYAML(contents);
+};
+
+export const parseJSON = async (contents: string) => {
+  return JSON.parse(stripJsonComments(contents));
+};
+
+export const parseYAML = async (contents: string) => {
+  return yaml.load(contents);
 };
