@@ -4,6 +4,7 @@ import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://commitlint.js.org
+// https://github.com/conventional-changelog/commitlint#config
 
 type CommitLintConfig = {
   extends: string[];
@@ -16,7 +17,6 @@ export const ENABLERS = ['@commitlint/cli'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-// https://github.com/conventional-changelog/commitlint#config
 export const CONFIG_FILE_PATTERNS = [
   '.commitlintrc',
   '.commitlintrc.{json,yaml,yml,js,cjs,ts,cts}',
