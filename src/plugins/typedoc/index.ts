@@ -1,4 +1,6 @@
+import path from 'node:path';
 import { _load } from '../../util/loader.js';
+import { isAbsolute } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
@@ -20,9 +22,23 @@ export const CONFIG_FILE_PATTERNS = [
   '.config/typedoc.config.{js,cjs}',
 ];
 
-const findPluginDependencies: GenericPluginCallback = async configFilePath => {
+const findPluginDependencies: GenericPluginCallback = async (configFilePath, { cwd }) => {
   const config: PluginConfig = await _load(configFilePath);
-  return config?.plugin ?? [];
+
+  const entryFiles: string[] = [];
+  const dependencies: string[] = [];
+
+  (config?.plugin ?? []).forEach(plugin => {
+    if (isAbsolute(plugin)) {
+      entryFiles.push(plugin);
+    } else if (plugin.startsWith('.')) {
+      entryFiles.push(path.join(cwd, plugin));
+    } else {
+      dependencies.push(plugin);
+    }
+  });
+
+  return { dependencies, entryFiles };
 };
 
 export const findDependencies = timerify(findPluginDependencies);
