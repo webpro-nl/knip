@@ -1,3 +1,4 @@
+export * as ava from './ava/index.js';
 export * as babel from './babel/index.js';
 export * as capacitor from './capacitor/index.js';
 export * as changesets from './changesets/index.js';
