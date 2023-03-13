@@ -4,19 +4,15 @@ import { pathToFileURL } from 'node:url';
 import { load as esmLoad } from '@esbuild-kit/esm-loader';
 import { require } from '../util/require.js';
 import { LoaderError } from './errors.js';
-import { loadJSON, loadYAML } from './fs.js';
+import { loadJSON, loadYAML, loadFile, parseJSON, parseYAML } from './fs.js';
 import { timerify } from './performance.js';
 
 const load = async (filePath: string) => {
   try {
     const ext = path.extname(filePath);
     if (/rc$/.test(filePath)) {
-      try {
-        // Note: `await` is needed for the try-catch to work.
-        return await loadYAML(filePath);
-      } catch {
-        return loadJSON(filePath);
-      }
+      const contents = await loadFile(filePath);
+      return parseYAML(contents).catch(() => parseJSON(contents));
     }
 
     if (ext === '.json' || ext === '.jsonc') {
