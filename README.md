@@ -600,6 +600,12 @@ userland territory, much like code linters.
 Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
 for the job. I'm motivated to make knip perfectly suited for the job of cutting projects to perfection! ✂️
 
+## Contributors
+
+Special thanks to the wonderful people who have contributed to this project:
+
+[![Contributors][60]][61]
+
 [1]: #workspaces--monorepos
 [2]: #plugins
 [3]: #reporters
@@ -659,3 +665,5 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [57]: https://github.com/pzavolinsky/ts-unused-exports
 [58]: https://github.com/nadeesha/ts-prune
 [59]: #production-mode
+[60]: https://contrib.rocks/image?repo=webpro/knip
+[61]: https://github.com/webpro/knip/graphs/contributors
