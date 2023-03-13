@@ -21,11 +21,12 @@ const findManifestDependencies = async ({ config, manifest, isProduction, isStri
   const peerDependencies: PeerDependencies = new Map();
 
   const scripts = Object.entries(manifest.scripts ?? {}).reduce((scripts, [scriptName, script]) => {
-    if (script && (scriptFilter.length === 0 || (scriptFilter.length > 0 && scriptFilter.includes(scriptName)))) {
+    if (script && (scriptFilter.length === 0 || scriptFilter.includes(scriptName))) {
       return [...scripts, script];
     }
     return scripts;
   }, [] as string[]);
+
   const { entryFiles, binaries: referencedBinaries } = _getReferencesFromScripts(scripts, {
     cwd: dir,
     manifest,
@@ -69,14 +70,16 @@ const findManifestDependencies = async ({ config, manifest, isProduction, isStri
   for (const binaryName of referencedBinaries) {
     if (installedBinaries.has(binaryName)) {
       const packageNames = Array.from(installedBinaries.get(binaryName) ?? []);
-      const packageName = packageNames.length === 1 ? packageNames[0] : undefined;
-      referencedDependencies.add(packageName ?? binaryName);
+      const packageName = packageNames.length === 1 ? packageNames[0] : binaryName;
+      referencedDependencies.add(packageName);
     } else {
+      // Pattern: probably a binary is referenced, but the dependency it belongs to is not installed (ie. unlisted)
       referencedDependencies.add(binaryName);
     }
   }
 
   ignoreBinaries.forEach(binaryName => {
+    // Edge case: mark dependencies with a `ignoreBinaries` entry as used, so they won't be reported as unused
     const packageNames = installedBinaries.get(binaryName);
     packageNames?.forEach(packageName => referencedDependencies.add(packageName));
   });

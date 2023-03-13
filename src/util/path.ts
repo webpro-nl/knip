@@ -20,4 +20,4 @@ export const extname = path.posix.extname;
 
 export const dirname = path.posix.dirname;
 
-export const isInternal = (id: string) => id.startsWith('.') || (isAbsolute(id) && !isInNodeModules(id));
+export const isInternal = (id: string) => (id.startsWith('.') || isAbsolute(id)) && !isInNodeModules(id);
