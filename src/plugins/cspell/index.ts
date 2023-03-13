@@ -4,7 +4,7 @@ import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-// link to docs
+// https://github.com/streetsidesoftware/cspell/tree/main/packages/cspell#customization
 
 export const NAME = 'cspell';
 
@@ -13,19 +13,12 @@ export const ENABLERS = ['cspell'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-// https://github.com/streetsidesoftware/cspell/tree/main/packages/cspell#customization
 export const CONFIG_FILE_PATTERNS = [
   'cspell.config.{js,cjs,json,yaml,yml}',
   'cspell.{json,yaml,yml}',
   '.c{s,S}pell.json',
   'cSpell.json',
 ];
-
-export const ENTRY_FILE_PATTERNS = [];
-
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [];
-
-export const PROJECT_FILE_PATTERNS = [];
 
 const findPluginDependencies: GenericPluginCallback = async configFilePath => {
   const config: PluginConfig = await _load(configFilePath);
