@@ -180,8 +180,8 @@ export class ConfigurationChief {
             project,
             paths,
             ignore: arrayify(workspaceConfig.ignore),
-            ignoreBinaries: [...ignoreBinaries, ...arrayify(workspaceConfig.ignoreBinaries)],
-            ignoreDependencies: [...ignoreDependencies, ...arrayify(workspaceConfig.ignoreDependencies)],
+            ignoreBinaries: compact([...ignoreBinaries, ...arrayify(workspaceConfig.ignoreBinaries)]),
+            ignoreDependencies: compact([...ignoreDependencies, ...arrayify(workspaceConfig.ignoreDependencies)]),
           };
 
           for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
