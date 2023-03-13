@@ -286,6 +286,10 @@
           "title": "Stryker plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/stryker/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "svelte": {
+          "title": "svelte plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/svelte/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "typedoc": {
           "title": "typedoc plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/typedoc/README.md)",
           "$ref": "#/definitions/plugin"

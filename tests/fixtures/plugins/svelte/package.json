@@ -1,0 +1,24 @@
+{
+  "name": "@fixtures/svelte",
+  "//": "Generated from `npm create svelte@latest my-app`",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+  },
+  "devDependencies": {
+    "@fontsource/fira-mono": "*",
+    "@neoconfetti/svelte": "*",
+    "@sveltejs/adapter-auto": "*",
+    "@sveltejs/kit": "*",
+    "@types/cookie": "*",
+    "svelte": "*",
+    "svelte-check": "*",
+    "tslib": "*",
+    "typescript": "*",
+    "vite": "*"
+  },
+  "type": "module"
+}
