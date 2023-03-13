@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { _getReferencesFromScripts } from '../src/util/binaries/index.js';
-import { join, resolve } from '../src/util/path.js';
+import { _getReferencesFromScripts } from '../../src/binaries/index.js';
+import { join, resolve } from '../../src/util/path.js';
 
 const cwd = resolve('tests/fixtures/binaries');
 

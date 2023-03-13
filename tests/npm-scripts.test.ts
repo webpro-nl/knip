@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import * as npm from '../../src/manifest/index.js';
-import { resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
-import baseCounters from '../helpers/baseCounters.js';
-import { getManifest } from '../helpers/index.js';
+import { main } from '../src/index.js';
+import * as npm from '../src/manifest/index.js';
+import { resolve } from '../src/util/path.js';
+import baseArguments from './helpers/baseArguments.js';
+import baseCounters from './helpers/baseCounters.js';
+import { getManifest } from './helpers/index.js';
 
 const cwd = resolve('tests/fixtures/npm-scripts');
 const manifest = getManifest(cwd);
