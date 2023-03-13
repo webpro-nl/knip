@@ -1,4 +1,5 @@
 import { _load } from '../../util/loader.js';
+import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
@@ -23,11 +24,7 @@ export const CONFIG_FILE_PATTERNS = [
 const findPluginDependencies: GenericPluginCallback = async configFilePath => {
   const config: PluginConfig = await _load(configFilePath);
   const imports = config?.import ?? [];
-  return imports.map(importPath => {
-    const firstSlashIndex = importPath.indexOf('/');
-    const endIndex = importPath.startsWith('@') ? importPath.indexOf('/', firstSlashIndex + 1) : firstSlashIndex;
-    return importPath.substring(0, endIndex);
-  });
+  return imports.map(getPackageNameFromModuleSpecifier);
 };
 
 export const findDependencies = timerify(findPluginDependencies);
