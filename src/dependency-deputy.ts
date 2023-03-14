@@ -145,7 +145,8 @@ export class DependencyDeputy {
 
   private isInDependencies(workspaceName: string, packageName: string) {
     const manifest = this._manifests.get(workspaceName);
-    const dependencies = manifest ? (this.isStrict ? manifest.dependencies : manifest.allDependencies) : [];
+    if (!manifest) return false;
+    const dependencies = this.isStrict ? this.getProductionDependencies(workspaceName) : manifest.allDependencies;
     return dependencies.includes(packageName);
   }
 
