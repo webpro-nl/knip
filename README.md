@@ -281,39 +281,42 @@ Use `--debug` to get more verbose output.
 
 Knip contains a growing list of plugins:
 
-- [Babel][12]
-- [Capacitor][13]
-- [Changesets][14]
-- [commitlint][15]
-- [Cypress][16]
-- [ESLint][17]
-- [Gatsby][18]
-- [GitHub Actions][19]
-- [husky][20]
-- [Jest][21]
-- [Lefthook][22]
-- [lint-staged][23]
-- [markdownlint][24]
-- [Mocha][25]
-- [Next.js][26]
-- [npm-package-json-lint][27]
-- [Nx][28]
-- [nyc][29]
-- [Playwright][30]
-- [PostCSS][31]
-- [Prettier][32]
-- [Release It][33]
-- [Remark][34]
-- [Remix][35]
-- [Rollup][36]
-- [Sentry][37]
-- [Storybook][38]
-- [Stryker][39]
-- [Svelte][40]
-- [TypeDoc][41]
-- [TypeScript][42]
-- [Vitest][43]
-- [Webpack][44]
+- [Ava][plugin-ava]
+- [Babel][plugin-babel]
+- [Capacitor][plugin-capacitor]
+- [Changesets][plugin-changesets]
+- [commitlint][plugin-commitlint]
+- [cspell][plugin-cspell]
+- [Cypress][plugin-cypress]
+- [ESLint][plugin-eslint]
+- [Gatsby][plugin-gatsby]
+- [GitHub Actions][plugin-github-actions]
+- [husky][plugin-husky]
+- [Jest][plugin-jest]
+- [Lefthook][plugin-lefthook]
+- [lint-staged][plugin-lint-staged]
+- [markdownlint][plugin-markdownlint]
+- [Mocha][plugin-mocha]
+- [Next.js][plugin-next]
+- [npm-package-json-lint][plugin-npm-package-json-lint]
+- [Nx][plugin-nx]
+- [nyc][plugin-nyc]
+- [Playwright][plugin-playwright]
+- [PostCSS][plugin-postcss]
+- [Prettier][plugin-prettier]
+- [Release It][plugin-release-it]
+- [Remark][plugin-remark]
+- [Remix][plugin-remix]
+- [Rollup][plugin-rollup]
+- [Semantic Release][plugin-semantic-release]
+- [Sentry][plugin-sentry]
+- [Storybook][plugin-storybook]
+- [Stryker][plugin-stryker]
+- [Svelte][plugin-svelte]
+- [TypeDoc][plugin-typedoc]
+- [TypeScript][plugin-typescript]
+- [Vitest][plugin-vitest]
+- [Webpack][plugin-webpack]
 
 Plugins are automatically activated. Each plugin is automatically enabled based on simple heuristics. Most of them check
 whether one or one of a few (dev) dependencies are listed in `package.json`. Once enabled, they add a set of
@@ -321,7 +324,7 @@ configuration and/or entry files for Knip to analyze. These defaults can be over
 
 Most plugins use one or both of the following file types:
 
-- `config` - custom dependency resolvers are applied to the [config files][45]
+- `config` - custom dependency resolvers are applied to the [config files][12]
 - `entry` - files to include with the analysis of the rest of the source code
 
 See each plugin's documentation for its default values.
@@ -352,7 +355,7 @@ For plugins related to test files, it's good to know that the following glob pat
 - `**/__tests__/**/*.{js,jsx,ts,tsx,mjs,cjs}`
 - `**/test/**/*.{js,jsx,ts,tsx,mjs,cjs}`
 
-Files matching these patterns are excluded in [production mode][46].
+Files matching these patterns are excluded in [production mode][13].
 
 ### Disable a plugin
 
@@ -479,7 +482,7 @@ type ReporterOptions = {
 
 The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][47].
+Find more details and ideas in [custom reporters][14].
 
 ## Public exports
 
@@ -536,7 +539,7 @@ When unused dependencies are related to dependencies having a Knip [plugin][1], 
 for that dependency are at custom locations. The default values are at the plugin's documentation, and can be overridden
 to match the custom location(s).
 
-When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][48].
+When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][15].
 
 #### Too many unused exports
 
@@ -544,7 +547,7 @@ When the project is a library and the exports are meant to be used by consumers 
 
 1.  By default, unused exports of `entry` files are not reported. You could re-export from an existing entry file, or
     add the containing file to the `entry` array in the configuration.
-2.  The exported values or types can be marked [using the JSDoc `@public` tag][49]
+2.  The exported values or types can be marked [using the JSDoc `@public` tag][16]
 
 ### How to start using Knip in CI while having too many issues to sort out?
 
@@ -564,7 +567,7 @@ All of this is hiding problems, so please make sure to plan for fixing them and/
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                           | **knip** | [depcheck][50] | [unimported][51] | [ts-unused-exports][52] | [ts-prune][53] |
+| Feature                           | **knip** | [depcheck][17] | [unimported][18] | [ts-unused-exports][19] | [ts-prune][20] |
 | :-------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -600,7 +603,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][45].
+Also see [production mode][12].
 
 ### ts-unused-exports
 
@@ -634,45 +637,48 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [9]: https://github.com/webpro/knip/issues
 [10]: #faq
 [11]: #ignore
-[12]: ./src/plugins/babel
-[13]: ./src/plugins/capacitor
-[14]: ./src/plugins/changesets
-[15]: ./src/plugins/commitlint
-[16]: ./src/plugins/cypress
-[17]: ./src/plugins/eslint
-[18]: ./src/plugins/gatsby
-[19]: ./src/plugins/github-actions
-[20]: ./src/plugins/husky
-[21]: ./src/plugins/jest
-[22]: ./src/plugins/lefthook
-[23]: ./src/plugins/lint-staged
-[24]: ./src/plugins/markdownlint
-[25]: ./src/plugins/mocha
-[26]: ./src/plugins/next
-[27]: ./src/plugins/npm-package-json-lint
-[28]: ./src/plugins/nx
-[29]: ./src/plugins/nyc
-[30]: ./src/plugins/playwright
-[31]: ./src/plugins/postcss
-[32]: ./src/plugins/prettier
-[33]: ./src/plugins/release-it
-[34]: ./src/plugins/remark
-[35]: ./src/plugins/remix
-[36]: ./src/plugins/rollup
-[37]: ./src/plugins/sentry
-[38]: ./src/plugins/storybook
-[39]: ./src/plugins/stryker
-[40]: ./src/plugins/svelte
-[41]: ./src/plugins/typedoc
-[42]: ./src/plugins/typescript
-[43]: ./src/plugins/vitest
-[44]: ./src/plugins/webpack
-[45]: #config
-[46]: #production-mode
-[47]: ./docs/custom-reporters.md
-[48]: #create-a-new-plugin
-[49]: #public-exports
-[50]: https://github.com/depcheck/depcheck
-[51]: https://github.com/smeijer/unimported
-[52]: https://github.com/pzavolinsky/ts-unused-exports
-[53]: https://github.com/nadeesha/ts-prune
+[12]: #config
+[13]: #production-mode
+[14]: ./docs/custom-reporters.md
+[15]: #create-a-new-plugin
+[16]: #public-exports
+[17]: https://github.com/depcheck/depcheck
+[18]: https://github.com/smeijer/unimported
+[19]: https://github.com/pzavolinsky/ts-unused-exports
+[20]: https://github.com/nadeesha/ts-prune
+[plugin-ava]: ./src/plugins/ava
+[plugin-babel]: ./src/plugins/babel
+[plugin-capacitor]: ./src/plugins/capacitor
+[plugin-changesets]: ./src/plugins/changesets
+[plugin-commitlint]: ./src/plugins/commitlint
+[plugin-cspell]: ./src/plugins/cspell
+[plugin-cypress]: ./src/plugins/cypress
+[plugin-eslint]: ./src/plugins/eslint
+[plugin-gatsby]: ./src/plugins/gatsby
+[plugin-github-actions]: ./src/plugins/github-actions
+[plugin-husky]: ./src/plugins/husky
+[plugin-jest]: ./src/plugins/jest
+[plugin-lefthook]: ./src/plugins/lefthook
+[plugin-lint-staged]: ./src/plugins/lint-staged
+[plugin-markdownlint]: ./src/plugins/markdownlint
+[plugin-mocha]: ./src/plugins/mocha
+[plugin-next]: ./src/plugins/next
+[plugin-npm-package-json-lint]: ./src/plugins/npm-package-json-lint
+[plugin-nx]: ./src/plugins/nx
+[plugin-nyc]: ./src/plugins/nyc
+[plugin-playwright]: ./src/plugins/playwright
+[plugin-postcss]: ./src/plugins/postcss
+[plugin-prettier]: ./src/plugins/prettier
+[plugin-release-it]: ./src/plugins/release-it
+[plugin-remark]: ./src/plugins/remark
+[plugin-remix]: ./src/plugins/remix
+[plugin-rollup]: ./src/plugins/rollup
+[plugin-semantic-release]: ./src/plugins/semantic-release
+[plugin-sentry]: ./src/plugins/sentry
+[plugin-storybook]: ./src/plugins/storybook
+[plugin-stryker]: ./src/plugins/stryker
+[plugin-svelte]: ./src/plugins/svelte
+[plugin-typedoc]: ./src/plugins/typedoc
+[plugin-typescript]: ./src/plugins/typescript
+[plugin-vitest]: ./src/plugins/vitest
+[plugin-webpack]: ./src/plugins/webpack
