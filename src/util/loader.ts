@@ -1,8 +1,6 @@
-import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import yaml from 'js-yaml';
 import { LoaderError } from './errors.js';
-import { loadJSON } from './fs.js';
+import { loadJSON, loadYAML, loadFile, parseJSON, parseYAML } from './fs.js';
 import { extname } from './path.js';
 import { timerify } from './performance.js';
 import { jiti } from './register.js';
@@ -10,12 +8,17 @@ import { jiti } from './register.js';
 const load = async (filePath: string) => {
   try {
     const ext = extname(filePath);
-    if (ext === '.json' || ext === '.jsonc' || /rc$/.test(filePath)) {
+    if (/rc$/.test(filePath)) {
+      const contents = await loadFile(filePath);
+      return parseYAML(contents).catch(() => parseJSON(contents));
+    }
+
+    if (ext === '.json' || ext === '.jsonc') {
       return loadJSON(filePath);
     }
 
     if (ext === '.yaml' || ext === '.yml') {
-      return yaml.load((await fs.readFile(filePath)).toString());
+      return loadYAML(filePath);
     }
 
     if (ext === '.mjs') {

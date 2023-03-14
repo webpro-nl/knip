@@ -1,23 +1,18 @@
-# commitlint
+# Ava
 
 ## Enabled
 
 This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies`
 or `devDependencies`:
 
-- `@commitlint/cli`
+- `ava`
 
 ## Default configuration
 
 ```json
 {
-  "commitlint": {
-    "config": [
-      ".commitlintrc",
-      ".commitlintrc.{json,yaml,yml,js,cjs,ts,cts}",
-      "commitlint.config.{js,cjs,ts,cts}",
-      "package.json"
-    ]
+  "ava": {
+    "config": ["ava.config.{js,cjs,mjs}", "package.json"]
   }
 }
 ```

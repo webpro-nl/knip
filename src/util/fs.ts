@@ -1,5 +1,6 @@
 import { statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import yaml from 'js-yaml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
 import { join } from './path.js';
@@ -14,11 +15,29 @@ export const findFile = (workingDir: string, fileName: string) => {
   return isFile(filePath) ? filePath : undefined;
 };
 
-export const loadJSON = async (filePath: string) => {
+export const loadFile = async (filePath: string) => {
   try {
     const contents = await readFile(filePath);
-    return JSON.parse(stripJsonComments(contents.toString()));
+    return contents.toString();
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
+};
+
+export const loadJSON = async (filePath: string) => {
+  const contents = await loadFile(filePath);
+  return parseJSON(contents);
+};
+
+export const loadYAML = async (filePath: string) => {
+  const contents = await loadFile(filePath);
+  return parseYAML(contents);
+};
+
+export const parseJSON = async (contents: string) => {
+  return JSON.parse(stripJsonComments(contents));
+};
+
+export const parseYAML = async (contents: string) => {
+  return yaml.load(contents);
 };

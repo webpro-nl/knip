@@ -1,23 +1,18 @@
-# commitlint
+# Semantic Release
 
 ## Enabled
 
 This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies`
 or `devDependencies`:
 
-- `@commitlint/cli`
+- `semantic-release`
 
 ## Default configuration
 
 ```json
 {
-  "commitlint": {
-    "config": [
-      ".commitlintrc",
-      ".commitlintrc.{json,yaml,yml,js,cjs,ts,cts}",
-      "commitlint.config.{js,cjs,ts,cts}",
-      "package.json"
-    ]
+  "semantic-release": {
+    "config": [".releaserc", ".releaserc.{yaml,yml,json,js,cjs}", "release.config.{js,cjs}", "package.json"]
   }
 }
 ```

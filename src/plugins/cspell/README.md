@@ -1,23 +1,18 @@
-# commitlint
+# cspell
 
 ## Enabled
 
 This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies`
 or `devDependencies`:
 
-- `@commitlint/cli`
+- `cspell`
 
 ## Default configuration
 
 ```json
 {
-  "commitlint": {
-    "config": [
-      ".commitlintrc",
-      ".commitlintrc.{json,yaml,yml,js,cjs,ts,cts}",
-      "commitlint.config.{js,cjs,ts,cts}",
-      "package.json"
-    ]
+  "cspell": {
+    "config": ["cspell.config.{js,cjs,json,yaml,yml}", "cspell.{json,yaml,yml}", ".c{s,S}pell.json", "cSpell.json"]
   }
 }
 ```
