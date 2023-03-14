@@ -1,6 +1,5 @@
+import { _getReferencesFromScripts } from '../../util/binaries/index.js';
 import { _load } from '../../util/loader.js';
-import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
-import { findNodeArgumentDependencies } from '../../util/node.js';
 import { timerify } from '../../util/performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
@@ -17,15 +16,21 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findPluginDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, rootConfig }) => {
   const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.ava : await _load(configFilePath);
 
-  const requires = (config?.require ?? []).map(getPackageNameFromModuleSpecifier);
-  const nodeArgs = findNodeArgumentDependencies(config?.nodeArguments ?? []);
+  const requireArgs = (config?.require ?? []).map(require => `--require ${require}`);
+  const otherArgs = config?.nodeArguments ?? [];
 
-  // TODO: Add support for modules specified node environment variables.
+  const cmd = `node ${otherArgs.join(' ') + ' '}${requireArgs.join(' ')}`;
+  const { binaries } = _getReferencesFromScripts([cmd], {
+    cwd,
+    manifest,
+    ignore: rootConfig.ignoreBinaries,
+    knownGlobalsOnly: true,
+  });
 
-  return [...requires, ...nodeArgs];
+  return binaries;
 };
 
 export const findDependencies = timerify(findPluginDependencies);
