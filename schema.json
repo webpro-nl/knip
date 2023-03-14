@@ -164,6 +164,10 @@
     },
     "plugins": {
       "properties": {
+        "ava": {
+          "title": "ava plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/ava/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "babel": {
           "title": "Babel plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/babel/README.md)",
           "$ref": "#/definitions/plugin"
