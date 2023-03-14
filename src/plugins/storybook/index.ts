@@ -1,6 +1,5 @@
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { StorybookConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -17,10 +16,10 @@ export const CONFIG_FILE_PATTERNS = ['.storybook/{main,manager}.{js,ts}'];
 
 export const ENTRY_FILE_PATTERNS = ['.storybook/preview.{js,jsx,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
 
-export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
+export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
 
 const findStorybookDependencies: GenericPluginCallback = async configFilePath => {
-  const config: StorybookConfig = await _load(configFilePath);
+  const config: StorybookConfig = await load(configFilePath);
 
   if (!config) return [];
 

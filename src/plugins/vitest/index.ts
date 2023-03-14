@@ -1,7 +1,6 @@
 import { compact } from '../../util/array.js';
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { VitestConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -17,11 +16,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vite.config.ts'];
 
-// Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default, no additions necessary
-export const ENTRY_FILE_PATTERNS = [];
-
 const findVitestDependencies: GenericPluginCallback = async configFilePath => {
-  const config: VitestConfig = await _load(configFilePath);
+  const config: VitestConfig = await load(configFilePath);
   if (!config || !config.test) return [];
   const cfg = config.test;
   const environments = cfg.environment ? [getEnvPackageName(cfg.environment)] : [];

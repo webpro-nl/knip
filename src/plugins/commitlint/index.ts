@@ -1,6 +1,5 @@
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://commitlint.js.org
@@ -27,7 +26,7 @@ export const CONFIG_FILE_PATTERNS = [
 const findCommitLintDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: CommitLintConfig = configFilePath.endsWith('package.json')
     ? manifest.commitlint
-    : await _load(configFilePath);
+    : await load(configFilePath);
   return config?.extends ? [config.extends].flat() : [];
 };
 

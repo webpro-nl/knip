@@ -1,11 +1,8 @@
+import { _load } from './loader.js';
+import { timerify } from './performance.js';
+
 export const toCamelCase = (name: string) =>
   name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
-
-export const getArgumentValues = (value: string, matcher: RegExp) => {
-  const match = value.match(matcher);
-  if (match) return match.map(value => value.trim().split(/[ =]/)[1].trim());
-  return [];
-};
 
 export const hasDependency = (dependencies: Set<string>, values: (string | RegExp)[]) =>
   values.some(value => {
@@ -18,3 +15,5 @@ export const hasDependency = (dependencies: Set<string>, values: (string | RegEx
     }
     return false;
   });
+
+export const load = timerify(_load);

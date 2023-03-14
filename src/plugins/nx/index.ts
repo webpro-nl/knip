@@ -1,8 +1,7 @@
 import { _getReferencesFromScripts } from '../../binaries/index.js';
 import { compact } from '../../util/array.js';
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { NxProjectConfiguration } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -16,7 +15,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const CONFIG_FILE_PATTERNS = ['{apps,libs}/**/project.json'];
 
 const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
-  const config: NxProjectConfiguration = await _load(configFilePath);
+  const config: NxProjectConfiguration = await load(configFilePath);
   if (!config) return [];
   const targets = config.targets ? Object.values(config.targets) : [];
 

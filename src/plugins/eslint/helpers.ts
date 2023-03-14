@@ -1,6 +1,6 @@
 import { compact } from '../../util/array.js';
-import { _load } from '../../util/loader.js';
 import { isAbsolute, isInternal, join, dirname } from '../../util/path.js';
+import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
 import { fallback } from './fallback.js';
 import type { ESLintConfig } from './types.js';
@@ -31,7 +31,7 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
 
   if (!config) {
     try {
-      config = await _load(configFilePath);
+      config = await load(configFilePath);
     } catch (err) {
       if (err instanceof Error && err.cause instanceof Error && /Failed to patch ESLint/.test(err.cause.message)) {
         // Fallback - or actually native - mechanism kicks in for @rushstack/eslint-patch/modern-module-resolution

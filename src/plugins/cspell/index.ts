@@ -1,6 +1,5 @@
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -20,10 +19,10 @@ export const CONFIG_FILE_PATTERNS = [
   'cSpell.json',
 ];
 
-const findPluginDependencies: GenericPluginCallback = async configFilePath => {
-  const config: PluginConfig = await _load(configFilePath);
+const findCspellDependencies: GenericPluginCallback = async configFilePath => {
+  const config: PluginConfig = await load(configFilePath);
   const imports = config?.import ?? [];
   return imports;
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+export const findDependencies = timerify(findCspellDependencies);

@@ -1,6 +1,5 @@
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://prettier.io/docs/en/configuration.html
@@ -34,7 +33,7 @@ export const CONFIG_FILE_PATTERNS = [
 const findPrettierDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: PrettierConfig = configFilePath.endsWith('package.json')
     ? manifest.prettier
-    : await _load(configFilePath);
+    : await load(configFilePath);
 
   return config && Array.isArray(config.plugins)
     ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string')
