@@ -56,13 +56,14 @@ for await (const dir of directories) {
 
 const indexContents = await fs.readFile(indexFilePath);
 
-const replacement = plugins
-  .sort((a, b) => (a[1] < b[1] ? -1 : 1))
-  .map(([pluginTitle, pluginDir]) => `- [${pluginTitle}](./src/plugins/${pluginDir})`)
-  .join(EOL);
+plugins.sort((a, b) => (a[1] < b[1] ? -1 : 1));
 
-const update = text => text.replace(/- \[Babel\][\s\S]*- \[Webpack\].*/m, replacement);
+const references = plugins.map(([pluginTitle, pluginDir]) => `- [${pluginTitle}][plugin-${pluginDir}]`).join(EOL);
+const updateReferences = text => text.replace(/(- \[[^\]]+\]\[plugin-[^\]]+\]\s)+/m, references + EOL + EOL);
+
+const definitions = plugins.map(([, pluginDir]) => `[plugin-${pluginDir}]: ./src/plugins/${pluginDir}`).join(EOL);
+const updateDefinitions = text => text.replace(/(\[plugin-[^\]]+\]: \.\/src\/plugins\/.+\s)+/m, definitions + EOL);
 
 console.log('Updating plugin index in README.md');
 
-await fs.writeFile(indexFilePath, update(indexContents.toString()));
+await fs.writeFile(indexFilePath, updateDefinitions(updateReferences(indexContents.toString())));

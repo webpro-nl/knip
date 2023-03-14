@@ -82,7 +82,7 @@
     "prettier": "2.8.4",
     "release-it": "^15.7.0",
     "remark-cli": "11.0.0",
-    "remark-preset-webpro": "0.0.1",
+    "remark-preset-webpro": "0.0.2",
     "tsx": "3.12.3",
     "type-fest": "3.6.1",
     "typescript": "4.9.5"
