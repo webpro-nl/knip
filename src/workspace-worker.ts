@@ -247,7 +247,7 @@ export class WorkspaceWorker {
     return [patterns.flat(), negatedTestFilePatterns].flat();
   }
 
-  private getConfigurationEntryFilePattern(pluginName: PluginName) {
+  private getConfigurationFilePatterns(pluginName: PluginName) {
     const plugin = plugins[pluginName];
     const pluginConfig = this.getConfigForPlugin(pluginName);
     if (pluginConfig) {
@@ -274,7 +274,7 @@ export class WorkspaceWorker {
 
           if (!pluginConfig) continue;
 
-          const patterns = this.getConfigurationEntryFilePattern(pluginName);
+          const patterns = this.getConfigurationFilePatterns(pluginName);
           const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
 
           debugLogArray(`Found ${plugin.NAME} config file paths`, configFilePaths);
