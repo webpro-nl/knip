@@ -40,7 +40,7 @@ for the full story.
 ## Issues
 
 Are you seeing false positives? Please report them by [opening an issue in this repo][9]. Bonus points for linking to a
-public repository using Knip, or even opening a pull request with a directory and example files in `test/fixtures`.
+public repository using Knip, or even opening a pull request with a directory and example files in `tests/fixtures`.
 Correctness and bug fixes have priority over performance and new features.
 
 Also see the [FAQ][10].
