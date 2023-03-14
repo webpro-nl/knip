@@ -8,5 +8,5 @@ const cwd = path.resolve('tests/fixtures/plugins/cspell');
 test('Find dependencies in cspell configuration (json)', async () => {
   const configFilePath = path.join(cwd, '.cspell.json');
   const dependencies = await cspell.findDependencies(configFilePath, {});
-  assert.deepEqual(dependencies, ['@cspell/dict-cryptocurrencies']);
+  assert.deepEqual(dependencies, ['@cspell/dict-cryptocurrencies/cspell-ext.json']);
 });
