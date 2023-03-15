@@ -9,6 +9,7 @@ import { timerify } from './util/performance.js';
 import type { ExportItem, ExportItemMember } from './types/ast.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { Report } from './types/issues.js';
+import { Workspace } from 'src/configuration-chief.js';
 
 type ProjectPrincipalOptions = {
   compilerOptions: ts.CompilerOptions;
@@ -171,7 +172,7 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(filePath: string) {
+  public analyzeSourceFile(filePath: string, workspace: Workspace) {
     const sourceFile = this.backend.program?.getSourceFile(filePath);
 
     if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
@@ -179,7 +180,10 @@ export class ProjectPrincipal {
     const skipTypeOnly = !this.isReportTypes;
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
-    const { imports, exports, duplicateExports } = getImportsAndExports(sourceFile, { skipTypeOnly, skipExports });
+    const { imports, exports, duplicateExports } = getImportsAndExports(sourceFile, workspace, {
+      skipTypeOnly,
+      skipExports,
+    });
 
     const { internal, unresolved, external } = imports;
 

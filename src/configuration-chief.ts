@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
 import { ConfigurationValidator } from './configuration-validator.js';
@@ -59,12 +60,13 @@ type ConfigurationManagerOptions = {
   isProduction: boolean;
 };
 
-type Workspace = {
+export type Workspace = {
   name: string;
   pkgName?: string;
   dir: string;
   ancestors: string[];
   config: WorkspaceConfiguration;
+  resolve: NodeRequire['resolve'];
 };
 
 /**
@@ -263,13 +265,16 @@ export class ConfigurationChief {
       ? [workspace, ...allWorkspaces.reduce(getAncestors(workspace), [] as string[])]
       : allWorkspaces;
 
-    return workspaces.sort(byPathDepth).map(name => ({
-      name,
-      pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
-      dir: join(this.cwd, name),
-      config: this.getConfigForWorkspace(name),
-      ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
-    }));
+    return workspaces.sort(byPathDepth).map(
+      (name): Workspace => ({
+        name,
+        pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
+        dir: join(this.cwd, name),
+        config: this.getConfigForWorkspace(name),
+        ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
+        resolve: createRequire(join(this.cwd, name, 'package.json')).resolve,
+      })
+    );
   }
 
   getDescendentWorkspaces(name: string) {

@@ -3,6 +3,7 @@ import ts from 'typescript';
 import * as ast from './ast-helpers.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import type { Imports, ExportItems, ExportItem } from '../types/ast.js';
+import { Workspace } from 'src/configuration-chief.js';
 
 type Options = {
   skipTypeOnly: boolean;
@@ -15,7 +16,7 @@ type AddImportOptions = {
   identifier?: string;
 };
 
-export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Options) => {
+export const getImportsAndExports = (sourceFile: BoundSourceFile, workspace: Workspace, options: Options) => {
   const internalImports: Imports = new Map();
   const externalImports: Set<string> = new Set();
   const unresolvedImports: Set<string> = new Set();
@@ -33,7 +34,18 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
       const filePath = module.resolvedModule.resolvedFileName;
       if (filePath) {
         if (module.resolvedModule.isExternalLibraryImport) {
-          if (module.resolvedModule.extension === '.d.ts') {
+          if (isSelfReferenceImport(workspace, specifier, filePath, module.resolvedModule.extension)) {
+            const isStar = identifier === '*';
+            const isReExported = Boolean(isStar && !symbol);
+
+            internalImports.set(filePath, {
+              specifier,
+              isStar,
+              isReExported,
+              isReExportedBy: new Set(),
+              symbols: new Set(),
+            });
+          } else if (module.resolvedModule.extension === '.d.ts') {
             // We use TypeScript's module resolution, but it returns @types/pkg. In the rest of the program we want the
             // package name based on the original specifier.
             externalImports.add(specifier);
@@ -448,3 +460,11 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
     duplicateExports,
   };
 };
+
+function isSelfReferenceImport(workspace: Workspace, specifier: string, filePath: string, extension: string) {
+  return (
+    workspace.pkgName !== undefined &&
+    specifier.startsWith(workspace.pkgName) &&
+    workspace.resolve(specifier).startsWith(filePath.slice(0, -extension.length))
+  );
+}

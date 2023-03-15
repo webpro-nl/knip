@@ -179,7 +179,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             workspace.dir === otherWorkspace.dir &&
             workspace.pkgName === otherWorkspace.pkgName
           ) {
-            const filePath = _resolve(specifier);
+            const filePath = otherWorkspace.resolve(specifier);
             if (filePath) principal.addEntryPath(filePath);
           }
           // Pattern: @local/package/file
@@ -203,7 +203,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       collector.counters.processed++;
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, duplicateExports } = principal.analyzeSourceFile(filePath);
+        const { imports, exports, duplicateExports } = principal.analyzeSourceFile(filePath, workspace);
         const { internal, external, unresolved } = imports;
 
         if (exports.size > 0) exportedSymbols.set(filePath, exports);
