@@ -59,19 +59,19 @@ with a configuration file (or a `knip` property in `package.json`). Here's a `kn
 ```json
 {
   "$schema": "https://unpkg.com/knip@next/schema.json",
-  "entry": ["index.{js,mjs,cjs,jsx,ts,tsx}", "src/index.{js,mjs,cjs,jsx,ts,tsx}"],
-  "project": ["**/*.{js,mjs,cjs,jsx,ts,tsx}"]
+  "entry": ["index.{js,mjs,cjs,jsx,ts,tsx,mts,cts}", "src/index.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"],
+  "project": ["**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"]
 }
 ```
 
 If this matches your project, you don't need any configuration. But let's say you are using `.ts` files excusively and
-have all source files in the `lib` directory:
+have all source files only in the `src` directory:
 
 ```json
 {
   "$schema": "https://unpkg.com/knip@next/schema.json",
-  "entry": ["lib/index.ts"],
-  "project": ["lib/**/*.ts"]
+  "entry": ["src/index.ts"],
+  "project": ["src/**/*.ts"]
 }
 ```
 
