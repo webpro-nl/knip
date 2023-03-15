@@ -59,7 +59,7 @@ const indexContents = await fs.readFile(indexFilePath);
 plugins.sort((a, b) => (a[1] < b[1] ? -1 : 1));
 
 const references = plugins.map(([pluginTitle, pluginDir]) => `- [${pluginTitle}][plugin-${pluginDir}]`).join(EOL);
-const updateReferences = text => text.replace(/(- \[[^\]]+\]\[plugin-[^\]]+\]\s)+/m, references + EOL + EOL);
+const updateReferences = text => text.replace(/(- \[[^\]]+\]\[plugin-[^\]]+\]\s)+/m, references + EOL);
 
 const definitions = plugins.map(([, pluginDir]) => `[plugin-${pluginDir}]: ./src/plugins/${pluginDir}`).join(EOL);
 const updateDefinitions = text => text.replace(/(\[plugin-[^\]]+\]: \.\/src\/plugins\/.+\s)+/m, definitions + EOL);
