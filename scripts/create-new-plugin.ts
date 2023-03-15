@@ -76,6 +76,6 @@ plugins.properties = Object.keys(properties)
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));
 
 console.log(`- Created new plugin in ${relative(newPluginDir)}`);
-console.log(`- Updated ${relative(pluginsBarrelFilePath)} and ${relative(schemaFilePath)}, please review the changes`);
+console.log(`- Updated ${relative(pluginsBarrelFilePath)} and ${relative(schemaFilePath)}`);
 console.log(`- Created a test file at ${relative(pluginTestFilePath)}`);
-console.log('- Documentation is at https://github.com/webpro/knip/blob/main/docs/writing-plugins.md');
+console.log('- Documentation is at https://github.com/webpro/knip/blob/main/docs/writing-a-plugin.md');

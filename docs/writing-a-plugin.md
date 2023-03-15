@@ -1,7 +1,7 @@
-# Writing Plugins
+# Writing a Plugin
 
-In this guide we are going to add a new plugin to Knip. We'll be using "Cool Linter" as our example tool we create the
-plugin for. You can also follow along to create a new plugin directly.
+In this guide we are going to write a new plugin for Knip. We'll be using "Cool Linter" as our example tool we create
+the plugin for. You can also follow along to create a new plugin directly.
 
 This document also serves as a reference to each of the exported values.
 

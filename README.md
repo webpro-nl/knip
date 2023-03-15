@@ -346,7 +346,7 @@ In case a plugin causes issues, it can be disabled by using `false` as its value
 
 ### Create a new plugin
 
-Getting false positives because a plugin is missing? Want to help out? Please read more at [writing plugins][13]. This
+Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][13]. This
 guide also contains more details if you want to learn more about plugins and why they are useful.
 
 ## Compilers
@@ -618,7 +618,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [10]: #faq
 [11]: #ignore
 [12]: #config
-[13]: ./docs/writing-plugins.md
+[13]: ./docs/writing-a-plugin.md
 [14]: ./docs/custom-reporters.md
 [15]: #create-a-new-plugin
 [16]: #public-exports
