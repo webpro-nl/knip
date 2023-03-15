@@ -352,7 +352,7 @@ guide also contains more details if you want to learn more about plugins and why
 ## Compilers
 
 Knip v2 introduces compilers which allows to include files that are not JavaScript or TypeScript in the process of
-finding unused or missing dependencies.
+finding unused or missing dependencies. For instance, `.mdx`, `.vue` and `.svelte` files come to mind.
 
 Currently this is only supported by using `knip.js` or `knip.ts`. Provide a `compilers` object in the configuration
 where each key represents the extension and the value is a function that takes the contents of these files as input and
@@ -367,6 +367,8 @@ export default {
   },
 };
 ```
+
+Read [Compilers](./docs/compilers.md) for more details and examples.
 
 ## Production Mode
 
