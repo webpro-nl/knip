@@ -331,31 +331,14 @@ See each plugin's documentation for its default values.
 
 ### `config`
 
-Plugins may include `config` files. They are parsed by the plugin's custom dependency resolver. Here are some examples
-to get an idea of how they work and why they are needed:
-
-- The `eslint` plugin tells Knip that the `"prettier"` entry in the array of `plugins` means that the
-  `eslint-plugin-prettier` dependency should be installed. Or that the `"airbnb"` entry in `extends` requires the
-  `eslint-config-airbnb` dependency.
-- The `storybook` plugin understands that `core.builder: 'webpack5'` in `main.js` means that the
-  `@storybook/builder-webpack5` and `@storybook/manager-webpack5` dependencies are required.
-- Static configuration files such as JSON and YAML always require a custom dependency resolver.
-
-Custom dependency resolvers return all referenced dependencies for the configuration files it is given. Knip handles the
-rest to find which of those dependencies are unused or missing.
+Plugins may include `config` files. They are parsed by the plugin's custom dependency finder. Custom dependency finders
+return all dependencies referenced in the configuration files it is given. Knip handles the rest to determine which of
+those dependencies are unused or missing.
 
 ### `entry`
 
 Other configuration files use `require` or `import` statements to use dependencies, so they can be analyzed like the
 rest of the source files. These configuration files are also considered `entry` files.
-
-For plugins related to test files, it's good to know that the following glob patterns are always included by default:
-
-- `**/*.{test,spec}.{js,jsx,ts,tsx,mjs,cjs}`
-- `**/__tests__/**/*.{js,jsx,ts,tsx,mjs,cjs}`
-- `**/test/**/*.{js,jsx,ts,tsx,mjs,cjs}`
-
-Files matching these patterns are excluded in [production mode][13].
 
 ### Disable a plugin
 
@@ -363,10 +346,8 @@ In case a plugin causes issues, it can be disabled by using `false` as its value
 
 ### Create a new plugin
 
-Getting false positives because a plugin is missing? Want to help out? Feel free to add your own plugin! Here's how to
-get started:
-
-    npm run create-plugin -- --name [myplugin]
+Getting false positives because a plugin is missing? Want to help out? Please read more at [writing plugins][13]. This
+guide also contains more details if you want to learn more about plugins and why they are useful.
 
 ## Compilers
 
@@ -423,9 +404,8 @@ Additionally, the `--strict` flag can be used to:
 ### Plugins
 
 Plugins also have this distinction. For instance, Next.js entry files for pages (`pages/**/*.tsx`) and Remix routes
-(`app/routes/**/*.tsx`) are production code, while Jest and Playwright entry files (e.g. `*.spec.ts`) are not. All of
-this is handled automatically by Knip and its plugins. You only need to point Knip to additional files or custom file
-locations. The more plugins Knip will have, the more projects can be analyzed out of the box!
+(`app/routes/**/*.tsx`) are production code, while Jest and Storybook entry files (e.g. `*.spec.ts` or `*.stories.js`)
+are not. All of this is handled automatically by Knip and its plugins.
 
 ## Paths
 
@@ -603,7 +583,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][12].
+Also see [production mode][21].
 
 ### ts-unused-exports
 
@@ -638,7 +618,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [10]: #faq
 [11]: #ignore
 [12]: #config
-[13]: #production-mode
+[13]: ./docs/writing-plugins.md
 [14]: ./docs/custom-reporters.md
 [15]: #create-a-new-plugin
 [16]: #public-exports
@@ -646,6 +626,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [18]: https://github.com/smeijer/unimported
 [19]: https://github.com/pzavolinsky/ts-unused-exports
 [20]: https://github.com/nadeesha/ts-prune
+[21]: #production-mode
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
