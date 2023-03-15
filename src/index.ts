@@ -172,9 +172,18 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
           if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
 
-          // Pattern: @local/package/file
+          // Pattern: self-reference/import
           const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
-          if (otherWorkspace && specifier !== packageName && workspace !== otherWorkspace) {
+          if (
+            otherWorkspace !== undefined &&
+            workspace.dir === otherWorkspace.dir &&
+            workspace.pkgName === otherWorkspace.pkgName
+          ) {
+            const filePath = _resolve(specifier);
+            if (filePath) principal.addEntryPath(filePath);
+          }
+          // Pattern: @local/package/file
+          else if (otherWorkspace && specifier !== packageName) {
             const relativeSpecifier = specifier.replace(new RegExp(`^${packageName}`), '.');
             const filePath = _resolve(join(otherWorkspace.dir, relativeSpecifier));
             if (filePath) principal.addEntryPath(filePath);
