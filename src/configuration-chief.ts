@@ -12,7 +12,8 @@ import { findFile, loadJSON } from './util/fs.js';
 import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
-import { join, relative } from './util/path.js';
+import { join, relative, toPosix } from './util/path.js';
+import { timerify } from './util/performance.js';
 import { toCamelCase } from './util/plugin.js';
 import { byPathDepth } from './util/workspace.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
@@ -66,7 +67,10 @@ export type Workspace = {
   dir: string;
   ancestors: string[];
   config: WorkspaceConfiguration;
-  resolve: NodeRequire['resolve'];
+  require: NodeRequire;
+  resolve: (specifier: string) => string;
+  tryResolve: (specifier: string) => string | undefined;
+  isSelfReferenceImport: (specifier: string) => boolean;
 };
 
 /**
@@ -265,16 +269,29 @@ export class ConfigurationChief {
       ? [workspace, ...allWorkspaces.reduce(getAncestors(workspace), [] as string[])]
       : allWorkspaces;
 
-    return workspaces.sort(byPathDepth).map(
-      (name): Workspace => ({
+    return workspaces.sort(byPathDepth).map((name): Workspace => {
+      const pkgName = this.manifestWorkspaces.get(name) ?? this.manifest?.name;
+      const dir = join(this.cwd, name);
+      const require = createRequire(join(dir, 'package.json'));
+      const resolve = (specifier: string) => toPosix(require.resolve(specifier));
+      return {
         name,
-        pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
-        dir: join(this.cwd, name),
+        pkgName,
+        dir,
         config: this.getConfigForWorkspace(name),
         ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
-        resolve: createRequire(join(this.cwd, name, 'package.json')).resolve,
-      })
-    );
+        require: timerify(require),
+        resolve: timerify(resolve),
+        tryResolve: (specifier: string) => {
+          try {
+            return resolve(specifier);
+          } catch {
+            // Intentionally ignored, exceptions are thrown for specifiers being packages (e.g. `node --loader tsx index.ts`)
+          }
+        },
+        isSelfReferenceImport: specifier => pkgName !== undefined && specifier.startsWith(pkgName),
+      };
+    });
   }
 
   getDescendentWorkspaces(name: string) {

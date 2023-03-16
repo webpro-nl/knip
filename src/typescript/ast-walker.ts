@@ -1,7 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { Workspace } from '../configuration-chief.js';
-import { isSelfReferenceImport } from '../util/require.js';
 import * as ast from './ast-helpers.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import type { Imports, ExportItems, ExportItem } from '../types/ast.js';
@@ -35,7 +34,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, workspace: Wor
       const filePath = module.resolvedModule.resolvedFileName;
       if (filePath) {
         if (module.resolvedModule.isExternalLibraryImport) {
-          if (isSelfReferenceImport(workspace, specifier)) {
+          if (workspace.isSelfReferenceImport(specifier)) {
             const isStar = identifier === '*';
             const isReExported = Boolean(isStar && !symbol);
 
