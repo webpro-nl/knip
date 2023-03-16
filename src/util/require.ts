@@ -1,10 +1,10 @@
 import { createRequire } from 'node:module';
-import { toPosix } from './path.js';
+import { pathToFileURL } from 'node:url';
+import { debugLog } from './debug.js';
+import { toPosix, join } from './path.js';
 import { timerify } from './performance.js';
 
-export const _createRequire = timerify(createRequire);
-
-const require = _createRequire(process.cwd());
+const require = createRequire(process.cwd());
 
 const resolve = (specifier: string) => toPosix(require.resolve(specifier));
 
@@ -19,3 +19,14 @@ export const tryResolve = (specifier: string) => {
 export const _require = timerify(require);
 
 export const _resolve = timerify(resolve);
+
+export const resolveSpecifier = (dir: string, specifier: string) => {
+  try {
+    const require = createRequire(pathToFileURL(join(dir, 'package.json')));
+    return toPosix(require.resolve(specifier));
+  } catch (err) {
+    debugLog(`Unable to resolve ${specifier} (from ${dir})`);
+  }
+};
+
+export const _resolveSpecifier = timerify(resolveSpecifier);

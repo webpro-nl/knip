@@ -6,13 +6,13 @@ import { IssueCollector } from './issue-collector.js';
 import { PrincipalFactory } from './principal-factory.js';
 import { Exports, ImportedModule, Imports } from './types/ast.js';
 import { compact } from './util/array.js';
-import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
+import { debugLogObject, debugLogArray } from './util/debug.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './util/modules.js';
-import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/path.js';
-import { _createRequire } from './util/require.js';
+import { dirname, isInNodeModules, join, isInternal, isAbsolute, toPosix } from './util/path.js';
+import { _resolveSpecifier } from './util/require.js';
 import { _require, _resolve } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './workspace-worker.js';
@@ -176,14 +176,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Patterns: @local/package/file, self-reference/file
           const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
           if (otherWorkspace && specifier !== packageName) {
-            try {
-              const require = _createRequire(join(otherWorkspace.dir, 'package.json'));
-              const filePath = require.resolve(specifier);
-              if (filePath) principal.addEntryPath(filePath);
-            } catch (err) {
-              // TODO Seems `require.resolve` (only) throws at .json (eg. @workspaces/tsconfig/tsconfig.base.json)
-              debugLog(`Unable to resolve ${specifier} (from ${containingFilePath})`);
-            }
+            const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
+            if (filePath) principal.addEntryPath(toPosix(filePath));
           }
         }
       }
