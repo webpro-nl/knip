@@ -16,6 +16,7 @@ test('Find dependencies in ESLint configuration (legacy json)', async () => {
   const configFilePath = join(cwd, '.eslintrc.json');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
   assert.deepEqual(dependencies, [
+    join(cwd, 'base.eslint.json'),
     'eslint-plugin-import',
     '@typescript-eslint/parser',
     'eslint-config-airbnb',
@@ -29,6 +30,7 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
   const configFilePath = join(cwd, '.eslintrc.js');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
   assert.deepEqual(dependencies, [
+    join(cwd, 'base.eslint.json'),
     'eslint-plugin-import',
     '@typescript-eslint/parser',
     'eslint-config-airbnb',
