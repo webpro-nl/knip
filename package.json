@@ -21,7 +21,7 @@
     "knip:production": "node ./dist/cli.js --production --strict",
     "lint": "eslint src tests --ignore",
     "lint:fix": "eslint src tests --fix",
-    "format": "prettier scripts src tests --with-node-modules --write --config .prettierrc",
+    "format": "prettier scripts src tests schema.json --with-node-modules --write --config .prettierrc",
     "test": "globstar -- node --loader tsx --test \"tests/**/*.test.ts\"",
     "watch": "tsc --watch",
     "_prebuild": "rm -rf dist",
@@ -32,7 +32,8 @@
     "docs:format": "remark README.md docs/*.md src/plugins/*/README.md -o",
     "qa": "npm run lint && npm run build && npm run knip && npm run knip:production && npm test",
     "release": "release-it",
-    "create-plugin": "tsx ./scripts/create-new-plugin.ts"
+    "create-plugin": "tsx ./scripts/create-new-plugin.ts",
+    "postcreate-plugin": "prettier schema.json --write --config .prettierrc --loglevel silent"
   },
   "files": [
     "dist",

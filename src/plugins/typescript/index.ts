@@ -1,7 +1,6 @@
 import { compact } from '../../util/array.js';
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { TsConfigJson } from 'type-fest';
 
@@ -15,7 +14,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const CONFIG_FILE_PATTERNS = ['tsconfig.json'];
 
 const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
-  const config: TsConfigJson = await _load(configFilePath);
+  const config: TsConfigJson = await load(configFilePath);
   const extend = config?.extends && !config.extends.startsWith('.') ? [config.extends] : [];
   const plugins = compact(config?.compilerOptions?.plugins?.map(plugin => plugin.name) ?? []);
   return [...extend, ...plugins];
