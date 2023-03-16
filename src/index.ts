@@ -182,6 +182,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (filePath) principal.addEntryPath(filePath);
             } catch (err) {
               // TODO Seems `require.resolve` (only) throws at .json (eg. @workspaces/tsconfig/tsconfig.base.json)
+              // TODO On Windows there's currently no way to resolve successfully
               debugLog(`Unable to resolve ${specifier} (from ${containingFilePath})`);
             }
           }
