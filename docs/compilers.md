@@ -23,7 +23,7 @@ This may also be an `async` function.
 
 ### MDX
 
-Here's an example using [@mdx-js/mdx](https://www.npmjs.com/package/@mdx-js/mdx) v1.6.22
+Here's an example using [@mdx-js/mdx][1] v1.6.22
 
 ```ts
 const compile = require('@mdx-js/mdx');
@@ -90,8 +90,8 @@ export default {
 ```
 
 The compiler for `.svelte` files in this example is the actual Svelte compiler, this is the recommended way whenever
-available. Knip has a [Svelte plugin](../src/plugins/svelte) to save you little bit of configuration. It's enabled
-automatically, so there's nothing to configure.
+available. Knip has a [Svelte plugin][2] to save you little bit of configuration. It's enabled automatically, so there's
+nothing to configure.
 
 Just for reference, this also seems to work pretty well (but may err on certain syntax or edge cases):
 
@@ -101,3 +101,6 @@ export default {
   css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
 };
 ```
+
+[1]: https://www.npmjs.com/package/@mdx-js/mdx
+[2]: ../src/plugins/svelte
