@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import { Workspace } from '../configuration-chief.js';
 import { toPosix } from './path.js';
 import { timerify } from './performance.js';
 
@@ -13,6 +14,10 @@ export const tryResolve = (specifier: string) => {
     // Intentionally ignored, exceptions are thrown for specifiers being packages (e.g. `node --loader tsx index.ts`)
   }
 };
+
+export function isSelfReferenceImport(workspace: Workspace, specifier: string) {
+  return workspace.pkgName !== undefined && specifier.startsWith(workspace.pkgName);
+}
 
 export const _require = timerify(require);
 

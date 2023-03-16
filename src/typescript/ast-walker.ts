@@ -1,9 +1,10 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
+import { Workspace } from '../configuration-chief.js';
+import { isSelfReferenceImport } from '../util/require.js';
 import * as ast from './ast-helpers.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import type { Imports, ExportItems, ExportItem } from '../types/ast.js';
-import { Workspace } from 'src/configuration-chief.js';
 
 type Options = {
   skipTypeOnly: boolean;
@@ -34,7 +35,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, workspace: Wor
       const filePath = module.resolvedModule.resolvedFileName;
       if (filePath) {
         if (module.resolvedModule.isExternalLibraryImport) {
-          if (isSelfReferenceImport(workspace, specifier, filePath, module.resolvedModule.extension)) {
+          if (isSelfReferenceImport(workspace, specifier)) {
             const isStar = identifier === '*';
             const isReExported = Boolean(isStar && !symbol);
 
@@ -460,11 +461,3 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, workspace: Wor
     duplicateExports,
   };
 };
-
-function isSelfReferenceImport(workspace: Workspace, specifier: string, filePath: string, extension: string) {
-  return (
-    workspace.pkgName !== undefined &&
-    specifier.startsWith(workspace.pkgName) &&
-    workspace.resolve(specifier).startsWith(filePath.slice(0, -extension.length))
-  );
-}

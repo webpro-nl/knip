@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/eslint-config-self-reference",
+  "exports": {
+    ".": {
+      "default": "./data.json"
+    }
+  },
+  "devDependencies": {
+    "eslint": "*"
+  }
+}

@@ -12,7 +12,7 @@ import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/path.js';
-import { _require, _resolve } from './util/require.js';
+import { isSelfReferenceImport, _require, _resolve } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -169,10 +169,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         } else {
           // Patterns: package, @any/package, @local/package
           const packageName = getPackageNameFromModuleSpecifier(specifier);
-          const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+          const isHandled =
+            isSelfReferenceImport(workspace, specifier) ||
+            deputy.maybeAddReferencedExternalDependency(workspace, packageName);
           if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
 
-          // Pattern: self-reference/import
+          // Patterns: self-reference, self-reference/import
           const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
           if (
             otherWorkspace !== undefined &&
