@@ -3,6 +3,9 @@
   "exports": {
     ".": {
       "default": "./data.json"
+    },
+    "./local": {
+      "require": "./dist/build.js"
     }
   },
   "devDependencies": {

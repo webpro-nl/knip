@@ -1,6 +1,4 @@
 {
   "root": true,
-  "extends": [
-    "@fixtures/eslint-config-self-reference"
-  ]
+  "extends": ["@fixtures/eslint-config-self-reference", "@fixtures/eslint-config-self-reference/local"]
 }

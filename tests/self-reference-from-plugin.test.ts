@@ -18,8 +18,8 @@ test('Allows self-references', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });
 
