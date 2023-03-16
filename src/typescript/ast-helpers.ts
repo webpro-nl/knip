@@ -132,3 +132,6 @@ export function findDescendants<T>(node: ts.Node | undefined, callback: (element
 
   return results;
 }
+
+export const isDeclarationFileExtension = (extension: string) =>
+  extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';

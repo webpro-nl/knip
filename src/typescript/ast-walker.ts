@@ -33,7 +33,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
       const filePath = module.resolvedModule.resolvedFileName;
       if (filePath) {
         if (module.resolvedModule.isExternalLibraryImport) {
-          if (isDeclarationFileExtension(module.resolvedModule.extension)) {
+          if (ast.isDeclarationFileExtension(module.resolvedModule.extension)) {
             // We use TypeScript's module resolution, but it returns @types/pkg. In the rest of the program we want the
             // package name based on the original specifier.
             externalImports.add(specifier);
@@ -448,12 +448,3 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
     duplicateExports,
   };
 };
-
-function isDeclarationFileExtension(extension: string) {
-  // return (
-  //   extension === ts.ScriptElementKindModifier.dtsModifier ||
-  //   extension === ts.ScriptElementKindModifier.dctsModifier ||
-  //   extension === ts.ScriptElementKindModifier.dmtsModifier
-  // );
-  return extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
-}
