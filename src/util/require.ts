@@ -20,7 +20,7 @@ export const _require = timerify(require);
 
 export const _resolve = timerify(resolve);
 
-export const resolveSpecifier = (dir: string, specifier: string) => {
+const resolveSpecifier = (dir: string, specifier: string) => {
   try {
     const require = createRequire(pathToFileURL(join(dir, 'package.json')));
     return toPosix(require.resolve(specifier));
