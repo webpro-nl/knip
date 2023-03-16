@@ -2,7 +2,9 @@ import { createRequire } from 'node:module';
 import { toPosix } from './path.js';
 import { timerify } from './performance.js';
 
-const require = createRequire(process.cwd());
+export const _createRequire = timerify(createRequire);
+
+const require = _createRequire(process.cwd());
 
 const resolve = (specifier: string) => toPosix(require.resolve(specifier));
 
