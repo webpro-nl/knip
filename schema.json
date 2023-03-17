@@ -146,7 +146,9 @@
     "plugin": {
       "description": "Knip plugin configuration. See https://github.com/webpro/knip#plugins",
       "anyOf": [
-        { "const": false },
+        {
+          "const": false
+        },
         {
           "$ref": "#/definitions/globPatterns"
         },

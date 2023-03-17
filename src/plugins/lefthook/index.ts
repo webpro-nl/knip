@@ -1,8 +1,7 @@
 import { _getReferencesFromScripts } from '../../binaries/index.js';
-import { _load } from '../../util/loader.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/evilmartians/lefthook
@@ -16,8 +15,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['lefthook.yml'];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
-  const config = await _load(configFilePath);
+const findLefthookDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
+  const config = await load(configFilePath);
 
   if (!config) return [];
 
@@ -33,4 +32,4 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, { c
   return [...binaries, ...entryFiles];
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+export const findDependencies = timerify(findLefthookDependencies);

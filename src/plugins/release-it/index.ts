@@ -1,7 +1,6 @@
 import { _getReferencesFromScripts } from '../../binaries/index.js';
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { ReleaseItConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -24,7 +23,7 @@ export const CONFIG_FILE_PATTERNS = [
 const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
   const config: ReleaseItConfig = configFilePath.endsWith('package.json')
     ? manifest['release-it']
-    : await _load(configFilePath);
+    : await load(configFilePath);
 
   if (!config) return [];
 

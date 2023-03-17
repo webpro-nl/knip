@@ -1,8 +1,8 @@
 import { _getReferencesFromScripts } from '../../binaries/index.js';
 import { _firstGlob } from '../../util/glob.js';
-import { _load } from '../../util/loader.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { timerify } from '../../util/performance.js';
+import { load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
@@ -21,7 +21,7 @@ const findGithubActionsDependencies: GenericPluginCallback = async (
   configFilePath,
   { cwd, manifest, workspaceConfig }
 ) => {
-  const config = await _load(configFilePath);
+  const config = await load(configFilePath);
 
   if (!config) return [];
 

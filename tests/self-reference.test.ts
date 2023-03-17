@@ -17,8 +17,8 @@ test('Allows self-references', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 4,
+    total: 4,
   });
 });
 
@@ -33,8 +33,8 @@ test('Allows self-references (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 4,
+    total: 4,
   });
 });
 
@@ -50,7 +50,7 @@ test('Allows self-references (strict)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 4,
+    total: 4,
   });
 });

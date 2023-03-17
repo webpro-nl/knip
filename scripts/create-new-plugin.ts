@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { toCamelCase } from '../src/util/plugin.js';
 
 const {
   values: { name },
@@ -20,6 +19,9 @@ if (/[^a-z_-]/.test(name)) {
   console.error('Name must contain only lowercased letters, dashes and underscores (you can adjust the title later)');
   process.exit(1);
 }
+
+const toCamelCase = (name: string) =>
+  name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
 
 const cwd = process.cwd();
 const pluginsDir = path.join(cwd, 'src/plugins');
@@ -43,10 +45,8 @@ await fs.cp(templateDir, newPluginDir, {
   force: false,
 });
 
-await fs.writeFile(
-  pluginsBarrelFilePath,
-  String(await fs.readFile(pluginsBarrelFilePath)) + `export * as ${camelCasedName} from './${name}/index.js';`
-);
+const barrelFile = String(await fs.readFile(pluginsBarrelFilePath));
+await fs.writeFile(pluginsBarrelFilePath, barrelFile + `export * as ${camelCasedName} from './${name}/index.js';`);
 
 await fs.cp(pluginTestFixtureTemplateDir, pluginTestFixturePluginDir, {
   recursive: true,
@@ -54,7 +54,11 @@ await fs.cp(pluginTestFixtureTemplateDir, pluginTestFixturePluginDir, {
   force: false,
 });
 
-await fs.copyFile(pluginTestTemplateFilePath, pluginTestFilePath);
+const testFileTemplate = String(await fs.readFile(pluginTestTemplateFilePath));
+await fs.writeFile(
+  pluginTestFilePath,
+  testFileTemplate.replaceAll('__PLUGIN_CAMELCASED_NAME__', camelCasedName).replaceAll('_template', name)
+);
 
 const { default: schema } = await import(schemaFilePath);
 const { plugins } = schema.definitions;
@@ -71,8 +75,7 @@ plugins.properties = Object.keys(properties)
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));
 
-console.log(`Created new plugin at ${relative(newPluginDir)}`);
-console.log(`Updated ${relative(pluginsBarrelFilePath)} and ${relative(schemaFilePath)}, please review the changes`);
-console.log(`Created a test file at ${relative(pluginTestFilePath)}`);
-console.log('Please review the changes, populate index.ts with config and implementation, and update the test(s)');
-console.log('See the other plugins for inspiration! The README.md can then be generated using `npm run docs:plugins`');
+console.log(`- Created new plugin in ${relative(newPluginDir)}`);
+console.log(`- Updated ${relative(pluginsBarrelFilePath)} and ${relative(schemaFilePath)}`);
+console.log(`- Created a test file at ${relative(pluginTestFilePath)}`);
+console.log('- Documentation is at https://github.com/webpro/knip/blob/main/docs/writing-a-plugin.md');

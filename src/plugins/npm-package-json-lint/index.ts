@@ -1,6 +1,5 @@
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { NpmPkgJsonLintConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -18,7 +17,7 @@ export const CONFIG_FILE_PATTERNS = ['.npmpackagejsonlintrc.json', 'npmpackagejs
 const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: NpmPkgJsonLintConfig = configFilePath.endsWith('package.json')
     ? manifest.npmpackagejsonlint
-    : await _load(configFilePath);
+    : await load(configFilePath);
   return config?.extends ? [config.extends] : [];
 };
 

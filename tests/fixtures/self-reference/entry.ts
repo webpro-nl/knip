@@ -1,5 +1,9 @@
 import index from 'my-package';
 import foo from 'my-package/foo';
+import mod from 'my-package/module';
 import bar from 'external-package';
 
-console.log(index + foo + bar);
+index;
+foo;
+mod;
+bar;

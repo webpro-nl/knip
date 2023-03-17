@@ -8,6 +8,10 @@
     "./foo": {
       "require": "./dist/foo.cjs",
       "import": "./dist/foo.mjs"
+    },
+    "./module": {
+      "require": "./lib/module.js",
+      "import": "./lib/module.js"
     }
   },
   "dependencies": {

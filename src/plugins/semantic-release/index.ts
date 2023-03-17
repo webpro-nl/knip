@@ -1,6 +1,5 @@
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -20,10 +19,10 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
-  const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.release : await _load(configFilePath);
+const findSemanticReleaseDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+  const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.release : await load(configFilePath);
   const plugins = config?.plugins ?? [];
   return plugins.map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+export const findDependencies = timerify(findSemanticReleaseDependencies);

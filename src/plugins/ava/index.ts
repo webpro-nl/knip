@@ -1,7 +1,6 @@
 import { _getReferencesFromScripts } from '../../binaries/index.js';
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -16,8 +15,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
-  const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.ava : await _load(configFilePath);
+const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
+  const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.ava : await load(configFilePath);
 
   const requireArgs = (config?.require ?? []).map(require => `--require ${require}`);
   const otherArgs = config?.nodeArguments ?? [];
@@ -33,4 +32,4 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, { c
   return binaries;
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+export const findDependencies = timerify(findAvaDependencies);

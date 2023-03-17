@@ -11,7 +11,9 @@ import { ConfigurationError } from './util/errors.js';
 import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './util/modules.js';
-import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/path.js';
+import { dirname, isInNodeModules, join, isInternal, isAbsolute, toPosix } from './util/path.js';
+import { _resolveSpecifier } from './util/require.js';
+import { _require, _resolve } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -51,7 +53,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     console.cast(`Analyzing workspace (${name})...`);
 
     const manifestPath = isRoot ? chief.manifestPath : findFile(dir, 'package.json');
-    const manifest = isRoot ? chief.manifest : manifestPath && workspace.require(manifestPath);
+    const manifest = isRoot ? chief.manifest : manifestPath && _require(manifestPath);
 
     if (!manifestPath || !manifest) throw new ConfigurationError(`Unable to load package.json for ${name}`);
 
@@ -157,9 +159,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     referencedDependencies.forEach(([containingFilePath, specifier]) => {
       if (isInternal(specifier)) {
         // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js
-        const filePath = workspace.resolve(
-          isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier)
-        );
+        const filePath = _resolve(isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier));
         if (filePath) principal.addEntryPath(filePath);
       } else {
         if (isInNodeModules(specifier)) {
@@ -168,28 +168,16 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
           if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
         } else {
-          // Patterns: package, @any/package, @local/package
+          // Patterns: package, @any/package, @local/package, self-reference
           const packageName = getPackageNameFromModuleSpecifier(specifier);
-          const isHandled =
-            workspace.isSelfReferenceImport(specifier) ||
-            deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+          const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
           if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
 
-          // Patterns: self-reference, self-reference/import
+          // Patterns: @local/package/file, self-reference/file
           const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
-          if (
-            otherWorkspace !== undefined &&
-            workspace.dir === otherWorkspace.dir &&
-            workspace.pkgName === otherWorkspace.pkgName
-          ) {
-            const filePath = otherWorkspace.resolve(specifier);
-            if (filePath) principal.addEntryPath(filePath);
-          }
-          // Pattern: @local/package/file
-          else if (otherWorkspace && specifier !== packageName) {
-            const relativeSpecifier = specifier.replace(new RegExp(`^${packageName}`), '.');
-            const filePath = workspace.resolve(join(otherWorkspace.dir, relativeSpecifier));
-            if (filePath) principal.addEntryPath(filePath);
+          if (otherWorkspace && specifier !== packageName) {
+            const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
+            if (filePath) principal.addEntryPath(toPosix(filePath));
           }
         }
       }
@@ -206,7 +194,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       collector.counters.processed++;
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, duplicateExports } = principal.analyzeSourceFile(filePath, workspace);
+        const { imports, exports, duplicateExports } = principal.analyzeSourceFile(filePath);
         const { internal, external, unresolved } = imports;
 
         if (exports.size > 0) exportedSymbols.set(filePath, exports);
@@ -214,8 +202,18 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         for (const [specifierFilePath, importItems] of internal.entries()) {
           const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
           const importedWorkspace = chief.findWorkspaceByPackageName(packageName);
-          if (importedWorkspace && importedWorkspace !== workspace) {
-            external.add(importItems.specifier);
+          if (importedWorkspace) {
+            // TODO Ideally this is handled in `principal.analyzeSourceFile`, but that's unaware of (other) workspaces
+            if (importedWorkspace === workspace) {
+              // Self-referencing imports are not part of the program (it sets `isExternalLibraryImport: true`). Here we
+              // patch this up by adding such internal file paths explicitly.
+              //
+              // TODO Imports may refer to modules that are not part of the program, causing potential false positives?
+              // A potential fix is to not add paths matching `ignore` config.
+              principal.addEntryPath(specifierFilePath);
+            } else {
+              external.add(importItems.specifier);
+            }
           }
 
           if (!importedSymbols.has(specifierFilePath)) {

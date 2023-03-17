@@ -1,6 +1,5 @@
-import { _load } from '../../util/loader.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { CapacitorConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -16,7 +15,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const CONFIG_FILE_PATTERNS = ['capacitor.config.ts'];
 
 const findCapacitorDependencies: GenericPluginCallback = async configFilePath => {
-  const config: CapacitorConfig = await _load(configFilePath);
+  const config: CapacitorConfig = await load(configFilePath);
   return config.includePlugins ?? [];
 };
 

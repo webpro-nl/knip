@@ -1,7 +1,6 @@
-import { _load } from '../../util/loader.js';
 import { isAbsolute, join, dirname, isInternal } from '../../util/path.js';
 import { timerify } from '../../util/performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { Config } from '@jest/types';
 
@@ -16,13 +15,10 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}'];
 
-// Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default, no additions necessary
-export const ENTRY_FILE_PATTERNS = [];
-
 const maybeJoin = (base: string, id: string) => (isAbsolute(id) ? id : join(dirname(base), id));
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
-  const config: Config.InitialOptions = await _load(configFilePath);
+  const config: Config.InitialOptions = await load(configFilePath);
   if (config?.preset) {
     const { preset } = config;
     if (isInternal(preset)) {

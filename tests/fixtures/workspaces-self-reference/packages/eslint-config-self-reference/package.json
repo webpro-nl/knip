@@ -1,0 +1,20 @@
+{
+  "name": "@workspaces-self-reference/eslint-config-self-reference",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    },
+    "./build": {
+      "require": "./dist/build.cjs",
+      "import": "./dist/build.mjs"
+    },
+    "./module": {
+      "require": "./lib/module.js",
+      "import": "./lib/module.js"
+    }
+  },
+  "dependencies": {
+    "@workspaces-self-reference/self-reference-from-plugin": "*"
+  }
+}
