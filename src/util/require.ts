@@ -1,6 +1,7 @@
 import { createRequire as nodeCreateRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { debugLog } from './debug.js';
+import { getPackageNameFromModuleSpecifier } from './modules.js';
 import { cwd, toPosix, join } from './path.js';
 import { timerify } from './performance.js';
 
@@ -23,7 +24,8 @@ const resolveSpecifier = (dir: string, specifier: string) => {
     const require = createRequire(join(dir, 'package.json'));
     return toPosix(require.resolve(specifier));
   } catch {
-    debugLog(`Unable to resolve ${specifier} (from ${dir})`);
+    const relativeSpecifier = specifier.replace(getPackageNameFromModuleSpecifier(specifier), '.');
+    return tryResolve(join(dir, relativeSpecifier), dir);
   }
 };
 

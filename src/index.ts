@@ -161,7 +161,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js
         const absSpecifier = isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier);
         const filePath = _tryResolve(absSpecifier, containingFilePath);
-        if (filePath) principal.addEntryPath(filePath);
+        if (filePath) {
+          principal.addEntryPath(filePath);
+        } else {
+          collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
+        }
       } else {
         if (isInNodeModules(specifier)) {
           // Pattern: /abs/path/to/repo/node_modules/package/index.js
@@ -178,7 +182,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
           if (otherWorkspace && specifier !== packageName) {
             const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
-            if (filePath) principal.addEntryPath(filePath);
+            if (filePath) {
+              principal.addEntryPath(filePath);
+            } else {
+              collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
+            }
           }
         }
       }
