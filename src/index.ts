@@ -6,7 +6,7 @@ import { IssueCollector } from './issue-collector.js';
 import { PrincipalFactory } from './principal-factory.js';
 import { Exports, ImportedModule, Imports } from './types/ast.js';
 import { compact } from './util/array.js';
-import { debugLogObject, debugLogArray } from './util/debug.js';
+import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
@@ -187,6 +187,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const principals = factory.getPrincipals();
 
+  debugLog(`Installed ${principals.length} principals for ${workspaces.length} workspaces`);
+
   for (const principal of principals) {
     const exportedSymbols: Exports = new Map();
     const importedSymbols: Imports = new Map();
@@ -272,7 +274,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const resolvedFiles = principal.getUsedResolvedFiles();
       const files = resolvedFiles.filter(filePath => !analyzedFiles.has(filePath));
 
-      debugLogArray(`Analyzing used resolved files [${++round}/${principals.indexOf(principal) + 1}]`, files);
+      debugLogArray(`Analyzing used resolved files [P${principals.indexOf(principal) + 1}/${++round}]`, files);
       files.forEach(filePath => {
         analyzeSourceFile(filePath);
         analyzedFiles.add(filePath);

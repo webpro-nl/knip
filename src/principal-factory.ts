@@ -6,7 +6,7 @@ import type { Report } from './types/issues.js';
 
 type Paths = ts.CompilerOptions['paths'];
 
-type Principal = { principal: ProjectPrincipal; cwds: Set<string>; paths: Set<string>; isDefaultBaseUrl: boolean };
+type Principal = { principal: ProjectPrincipal; cwds: Set<string>; paths: Set<string> };
 type Principals = Set<Principal>;
 
 type Options = {
@@ -30,9 +30,6 @@ const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions = {}, paths
   return compilerOptions;
 };
 
-const hasDefaultBaseUrl = (compilerOptions: ts.CompilerOptions) =>
-  !compilerOptions.baseUrl || /^\.\/?$/.test(compilerOptions.baseUrl);
-
 /**
  * The principal factory hands out ProjectPrincipals. It tries to reuse them, since they're expensive in terms of
  * performance. Time will tell if this is actually feasible or not.
@@ -52,17 +49,16 @@ export class PrincipalFactory {
   }
 
   /**
-   * Principals (or rather their `compilerOptions`) are considered reusable when:
-   *
-   * - It does not have any keys in compiler.paths in common
-   * - It does not have a (non-default) `baseUrl`
+   * Principals with shared `compilerOptions.baseUrl` and no `compilerOptions.paths` conflicts are reused.
    */
   private findReusablePrincipal(compilerOptions: ts.CompilerOptions) {
-    if (!hasDefaultBaseUrl(compilerOptions)) return;
     const workspacePaths = compilerOptions?.paths ? Object.keys(compilerOptions.paths) : [];
-    const principal = Array.from(this.principals).find(
-      principal => principal.isDefaultBaseUrl && workspacePaths.every(p => !principal.paths.has(p))
-    );
+    const principal = Array.from(this.principals).find(principal => {
+      if (compilerOptions.baseUrl === principal.principal.compilerOptions.baseUrl) {
+        return workspacePaths.every(p => !principal.paths.has(p));
+      }
+      return !compilerOptions.baseUrl;
+    });
     return principal;
   }
 
@@ -75,9 +71,8 @@ export class PrincipalFactory {
   private addNewPrincipal({ cwd, compilerOptions, report, compilers }: Options) {
     const principal = new ProjectPrincipal({ cwd, compilerOptions, report, compilers });
     const paths = new Set(Object.keys(compilerOptions?.paths ?? {}));
-    const isDefaultBaseUrl = hasDefaultBaseUrl(compilerOptions);
     compilerOptions.baseUrl = join(cwd, compilerOptions.baseUrl ?? '.');
-    this.principals.add({ principal, cwds: new Set([cwd]), paths, isDefaultBaseUrl });
+    this.principals.add({ principal, cwds: new Set([cwd]), paths });
     return principal;
   }
 
