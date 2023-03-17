@@ -59,7 +59,7 @@ type ConfigurationManagerOptions = {
   isProduction: boolean;
 };
 
-type Workspace = {
+export type Workspace = {
   name: string;
   pkgName?: string;
   dir: string;
@@ -263,13 +263,15 @@ export class ConfigurationChief {
       ? [workspace, ...allWorkspaces.reduce(getAncestors(workspace), [] as string[])]
       : allWorkspaces;
 
-    return workspaces.sort(byPathDepth).map(name => ({
-      name,
-      pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
-      dir: join(this.cwd, name),
-      config: this.getConfigForWorkspace(name),
-      ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
-    }));
+    return workspaces.sort(byPathDepth).map(
+      (name): Workspace => ({
+        name,
+        pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
+        dir: join(this.cwd, name),
+        config: this.getConfigForWorkspace(name),
+        ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
+      })
+    );
   }
 
   getDescendentWorkspaces(name: string) {

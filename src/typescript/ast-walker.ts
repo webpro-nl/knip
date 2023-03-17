@@ -1,5 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
+import { isInNodeModules } from '../util/path.js';
 import * as ast from './ast-helpers.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import type { Imports, ExportItems, ExportItem } from '../types/ast.js';
@@ -24,6 +25,47 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
 
   const importedInternalSymbols: Map<ts.Symbol, string> = new Map();
 
+  const addInternalImport = ({
+    identifier = '__anonymous',
+    specifier,
+    symbol,
+    filePath,
+  }: AddImportOptions & { filePath: string }) => {
+    const isStar = identifier === '*';
+    const isReExported = Boolean(isStar && !symbol);
+
+    if (!internalImports.has(filePath)) {
+      internalImports.set(filePath, {
+        specifier,
+        isStar,
+        isReExported,
+        isReExportedBy: new Set(),
+        symbols: new Set(),
+      });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const internalImport = internalImports.get(filePath)!;
+
+    if (isReExported) {
+      internalImport.isReExported = isReExported;
+      internalImport.isReExportedBy.add(sourceFile.fileName);
+    }
+
+    if (isStar) {
+      internalImport.isStar = isStar;
+    }
+
+    if (!isStar) {
+      internalImport.symbols.add(identifier);
+    }
+
+    if (isStar && symbol) {
+      // Store imported namespace symbol for reference in `maybeAddNamespaceAccessAsImport`
+      importedInternalSymbols.set(symbol, filePath);
+    }
+  };
+
   const addImport = ({ specifier, symbol, identifier = '__anonymous' }: AddImportOptions) => {
     if (isBuiltin(specifier)) return;
 
@@ -33,7 +75,11 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
       const filePath = module.resolvedModule.resolvedFileName;
       if (filePath) {
         if (module.resolvedModule.isExternalLibraryImport) {
-          if (ast.isDeclarationFileExtension(module.resolvedModule.extension)) {
+          if (!isInNodeModules(filePath)) {
+            // Self-referencing imports are resolved by `sourceFile.resolvedModules`, but not part of the program
+            // through `principal.createProgram`. Add as internal import, and follow up with `principal.addEntryPath`.
+            addInternalImport({ identifier, specifier, symbol, filePath });
+          } else if (ast.isDeclarationFileExtension(module.resolvedModule.extension)) {
             // We use TypeScript's module resolution, but it returns @types/pkg. In the rest of the program we want the
             // package name based on the original specifier.
             externalImports.add(specifier);
@@ -41,39 +87,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
             externalImports.add(module.resolvedModule.packageId?.name ?? specifier);
           }
         } else {
-          const isStar = identifier === '*';
-          const isReExported = Boolean(isStar && !symbol);
-
-          if (!internalImports.has(filePath)) {
-            internalImports.set(filePath, {
-              specifier,
-              isStar,
-              isReExported,
-              isReExportedBy: new Set(),
-              symbols: new Set(),
-            });
-          }
-
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          const internalImport = internalImports.get(filePath)!;
-
-          if (isReExported) {
-            internalImport.isReExported = isReExported;
-            internalImport.isReExportedBy.add(sourceFile.fileName);
-          }
-
-          if (isStar) {
-            internalImport.isStar = isStar;
-          }
-
-          if (!isStar) {
-            internalImport.symbols.add(identifier);
-          }
-
-          if (isStar && symbol) {
-            // Store imported namespace symbol for reference in `maybeAddNamespaceAccessAsImport`
-            importedInternalSymbols.set(symbol, filePath);
-          }
+          addInternalImport({ identifier, specifier, symbol, filePath });
         }
       }
     } else {

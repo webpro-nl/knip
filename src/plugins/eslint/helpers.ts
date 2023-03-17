@@ -49,6 +49,7 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
         if (isInternal(extend)) {
           const filePath = isAbsolute(extend) ? extend : join(dirname(configFilePath), extend);
           const extendConfigFilePath = _resolve(filePath);
+          dependencies.add(extendConfigFilePath);
           addAll(await getDependenciesDeep(extendConfigFilePath, dependencies, options));
         }
       }

@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
+import { Workspace } from './configuration-chief.js';
 import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES } from './constants.js';
-import { WorkspaceConfiguration } from './types/config.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
 import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
@@ -106,11 +106,11 @@ export class DependencyDeputy {
    * Returns `true` to indicate the external dependency has been handled properly. When `false`, the call-site probably
    * wants to mark the dependency as "unlisted".
    */
-  public maybeAddReferencedExternalDependency(
-    workspace: { name: string; dir: string; config: WorkspaceConfiguration; ancestors: string[] },
-    packageName: string
-  ): boolean {
+  public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string): boolean {
     if (isBuiltin(packageName)) return true;
+
+    // Ignore self-referenced imports
+    if (packageName === workspace.pkgName) return true;
 
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));

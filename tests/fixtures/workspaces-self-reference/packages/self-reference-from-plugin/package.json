@@ -1,0 +1,19 @@
+{
+  "name": "@workspaces-self-reference/self-reference-from-plugin",
+  "scripts": {
+    "lint": "eslint"
+  },
+  "exports": {
+    ".": {
+      "default": "./data.json"
+    },
+    "./local": {
+      "require": "./file.js",
+      "import": "./file.js"
+    }
+  },
+  "devDependencies": {
+    "eslint": "*",
+    "@workspaces-self-reference/eslint-config-self-reference": "*"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "my-package",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    },
+    "./foo": {
+      "require": "./dist/foo.cjs",
+      "import": "./dist/foo.mjs"
+    },
+    "./module": {
+      "require": "./lib/module.js",
+      "import": "./lib/module.js"
+    }
+  },
+  "dependencies": {
+    "external-package": "1.0.0"
+  }
+}
