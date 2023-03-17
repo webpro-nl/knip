@@ -1,18 +1,29 @@
-import { createRequire } from 'node:module';
+import { createRequire as nodeCreateRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { debugLog } from './debug.js';
-import { toPosix, join } from './path.js';
+import { cwd, toPosix, join } from './path.js';
 import { timerify } from './performance.js';
 
-const require = createRequire(pathToFileURL(process.cwd()));
+const createRequire = (path?: string) => nodeCreateRequire(pathToFileURL(path ?? cwd));
+
+const require = createRequire();
 
 const resolve = (specifier: string) => toPosix(require.resolve(specifier));
 
-export const tryResolve = (specifier: string) => {
+const tryResolve = (specifier: string, from: string) => {
   try {
     return resolve(specifier);
-  } catch (error) {
-    // Intentionally ignored, exceptions are thrown for specifiers being packages (e.g. `node --loader tsx index.ts`)
+  } catch {
+    debugLog(`Unable to resolve ${specifier} (from ${from})`);
+  }
+};
+
+const resolveSpecifier = (dir: string, specifier: string) => {
+  try {
+    const require = createRequire(join(dir, 'package.json'));
+    return toPosix(require.resolve(specifier));
+  } catch {
+    debugLog(`Unable to resolve ${specifier} (from ${dir})`);
   }
 };
 
@@ -20,13 +31,6 @@ export const _require = timerify(require);
 
 export const _resolve = timerify(resolve);
 
-const resolveSpecifier = (dir: string, specifier: string) => {
-  try {
-    const require = createRequire(pathToFileURL(join(dir, 'package.json')));
-    return toPosix(require.resolve(specifier));
-  } catch (err) {
-    debugLog(`Unable to resolve ${specifier} (from ${dir})`);
-  }
-};
+export const _tryResolve = timerify(tryResolve);
 
 export const _resolveSpecifier = timerify(resolveSpecifier);

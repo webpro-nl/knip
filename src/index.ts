@@ -12,8 +12,8 @@ import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/path.js';
-import { _resolveSpecifier } from './util/require.js';
-import { _require, _resolve } from './util/require.js';
+import { _resolveSpecifier, _tryResolve } from './util/require.js';
+import { _require } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './workspace-worker.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -159,7 +159,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     referencedDependencies.forEach(([containingFilePath, specifier]) => {
       if (isInternal(specifier)) {
         // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js
-        const filePath = _resolve(isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier));
+        const absSpecifier = isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier);
+        const filePath = _tryResolve(absSpecifier, containingFilePath);
         if (filePath) principal.addEntryPath(filePath);
       } else {
         if (isInNodeModules(specifier)) {

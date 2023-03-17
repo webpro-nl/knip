@@ -8,6 +8,7 @@ import { SourceFileManager } from './SourceFileManager.js';
 import { createCustomSys } from './sys.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 
+// By exception, explicitly not using path/require helpers here (gives issues when combined with timerify())
 const cwd = process.cwd();
 const require = createRequire(pathToFileURL(import.meta.url));
 const libLocation = path.dirname(require.resolve('typescript', { paths: [cwd] }));
