@@ -4,7 +4,7 @@ import { debugLog } from './debug.js';
 import { toPosix, join } from './path.js';
 import { timerify } from './performance.js';
 
-const require = createRequire(process.cwd());
+const require = createRequire(pathToFileURL(process.cwd()));
 
 const resolve = (specifier: string) => toPosix(require.resolve(specifier));
 

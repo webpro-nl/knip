@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import { EOL } from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
 import { createCustomModuleResolver } from './resolveModuleNames.js';
 import { SourceFileManager } from './SourceFileManager.js';
@@ -8,7 +9,7 @@ import { createCustomSys } from './sys.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 
 const cwd = process.cwd();
-const require = createRequire(import.meta.url);
+const require = createRequire(pathToFileURL(import.meta.url));
 const libLocation = path.dirname(require.resolve('typescript', { paths: [cwd] }));
 
 type CreateHostsOptions = {
