@@ -263,17 +263,15 @@ export class ConfigurationChief {
       ? [workspace, ...allWorkspaces.reduce(getAncestors(workspace), [] as string[])]
       : allWorkspaces;
 
-    return workspaces.sort(byPathDepth).map((name): Workspace => {
-      const pkgName = this.manifestWorkspaces.get(name) ?? this.manifest?.name;
-      const dir = join(this.cwd, name);
-      return {
+    return workspaces.sort(byPathDepth).map(
+      (name): Workspace => ({
         name,
-        pkgName,
-        dir,
+        pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
+        dir: join(this.cwd, name),
         config: this.getConfigForWorkspace(name),
         ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
-      };
-    });
+      })
+    );
   }
 
   getDescendentWorkspaces(name: string) {
