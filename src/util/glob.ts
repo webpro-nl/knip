@@ -1,6 +1,5 @@
 import fg from 'fast-glob';
 import { globby } from 'globby';
-import memoize from 'nano-memoize';
 import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
@@ -71,18 +70,10 @@ const dirGlob = async ({ cwd, patterns }: BaseGlobOptions) =>
     onlyDirectories: true,
   });
 
-const memoOptions = { serializer: JSON.stringify, callTimeout: 0 };
-
-const memoizedGlob = memoize(glob, memoOptions);
-Object.defineProperty(memoizedGlob, 'name', { value: 'glob' });
-
-const memoizedFirstGlob = memoize(firstGlob, memoOptions);
-Object.defineProperty(memoizedFirstGlob, 'name', { value: 'firstGlob' });
-
-export const _glob = timerify(memoizedGlob);
+export const _glob = timerify(glob);
 
 export const _pureGlob = timerify(pureGlob);
 
-export const _firstGlob = timerify(memoizedFirstGlob);
+export const _firstGlob = timerify(firstGlob);
 
 export const _dirGlob = timerify(dirGlob);

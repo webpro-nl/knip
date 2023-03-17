@@ -51,7 +51,6 @@
     "js-yaml": "^4.1.0",
     "micromatch": "^4.0.5",
     "minimist": "^1.2.8",
-    "nano-memoize": "^2.0.0",
     "pretty-ms": "^8.0.0",
     "strip-json-comments": "^5.0.0",
     "summary": "^2.1.0",
