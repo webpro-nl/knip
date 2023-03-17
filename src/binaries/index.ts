@@ -21,6 +21,7 @@ const getReferencesFromScripts: GetReferencesFromScripts = (npmScripts, options 
     binaries: binaries
       .map(stripBinary)
       .map(getPackageNameFromModuleSpecifier)
+      .filter(binaryName => !binaryName.startsWith('.')) // Filter out odd/invalid noise here (e.g. `../node_modules`)
       .filter(binaryName => !IGNORED_GLOBAL_BINARIES.includes(binaryName) && !ignore.includes(binaryName)),
   };
 };
