@@ -30,9 +30,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const deputy = new DependencyDeputy({ isStrict });
   const factory = new PrincipalFactory();
   const collector = new IssueCollector({ cwd });
-  const console = new ConsoleStreamer({ isEnabled: isShowProgress });
+  const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
-  console.cast('Reading workspace configuration(s)...');
+  streamer.cast('Reading workspace configuration(s)...');
 
   await chief.init();
 
@@ -50,7 +50,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const isRoot = name === ROOT_WORKSPACE_NAME;
 
-    console.cast(`Analyzing workspace (${name})...`);
+    streamer.cast(`Analyzing workspace (${name})...`);
 
     const manifestPath = isRoot ? chief.manifestPath : findFile(dir, 'package.json');
     const manifest = isRoot ? chief.manifest : manifestPath && _require(manifestPath);
@@ -256,11 +256,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       return isReExported ? Array.from(isReExportedBy).some(hasFile) : false;
     };
 
-    console.cast('Running async compilers...');
+    streamer.cast('Running async compilers...');
 
     await principal.runAsyncCompilers();
 
-    console.cast('Connecting the dots...');
+    streamer.cast('Connecting the dots...');
 
     const analyzedFiles: Set<string> = new Set();
     let size = principal.entryPaths.size;
@@ -284,7 +284,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addTotalFileCount(analyzedFiles.size + unusedFiles.length);
 
-    console.cast('Analyzing source files...');
+    streamer.cast('Analyzing source files...');
 
     for (const [filePath, exportItems] of exportedSymbols.entries()) {
       const importedModule = importedSymbols.get(filePath);
@@ -337,7 +337,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const { issues, counters } = collector.getIssues();
 
-  console.clear();
+  streamer.clear();
 
   return { report, issues, counters };
 };

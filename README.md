@@ -368,7 +368,7 @@ export default {
 };
 ```
 
-Read [Compilers](./docs/compilers.md) for more details and examples.
+Read [Compilers][14] for more details and examples.
 
 ## Production Mode
 
@@ -464,7 +464,7 @@ type ReporterOptions = {
 
 The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][14].
+Find more details and ideas in [custom reporters][15].
 
 ## Public exports
 
@@ -521,7 +521,7 @@ When unused dependencies are related to dependencies having a Knip [plugin][1], 
 for that dependency are at custom locations. The default values are at the plugin's documentation, and can be overridden
 to match the custom location(s).
 
-When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][15].
+When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][16].
 
 #### Too many unused exports
 
@@ -529,7 +529,7 @@ When the project is a library and the exports are meant to be used by consumers 
 
 1.  By default, unused exports of `entry` files are not reported. You could re-export from an existing entry file, or
     add the containing file to the `entry` array in the configuration.
-2.  The exported values or types can be marked [using the JSDoc `@public` tag][16]
+2.  The exported values or types can be marked [using the JSDoc `@public` tag][17]
 
 ### How to start using Knip in CI while having too many issues to sort out?
 
@@ -549,7 +549,7 @@ All of this is hiding problems, so please make sure to plan for fixing them and/
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                           | **knip** | [depcheck][17] | [unimported][18] | [ts-unused-exports][19] | [ts-prune][20] |
+| Feature                           | **knip** | [depcheck][18] | [unimported][19] | [ts-unused-exports][20] | [ts-prune][21] |
 | :-------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -585,7 +585,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][21].
+Also see [production mode][22].
 
 ### ts-unused-exports
 
@@ -621,14 +621,15 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [11]: #ignore
 [12]: #config
 [13]: ./docs/writing-a-plugin.md
-[14]: ./docs/custom-reporters.md
-[15]: #create-a-new-plugin
-[16]: #public-exports
-[17]: https://github.com/depcheck/depcheck
-[18]: https://github.com/smeijer/unimported
-[19]: https://github.com/pzavolinsky/ts-unused-exports
-[20]: https://github.com/nadeesha/ts-prune
-[21]: #production-mode
+[14]: ./docs/compilers.md
+[15]: ./docs/custom-reporters.md
+[16]: #create-a-new-plugin
+[17]: #public-exports
+[18]: https://github.com/depcheck/depcheck
+[19]: https://github.com/smeijer/unimported
+[20]: https://github.com/pzavolinsky/ts-unused-exports
+[21]: https://github.com/nadeesha/ts-prune
+[22]: #production-mode
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
