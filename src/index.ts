@@ -11,7 +11,7 @@ import { ConfigurationError } from './util/errors.js';
 import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './util/modules.js';
-import { dirname, isInNodeModules, join, isInternal, isAbsolute, toPosix } from './util/path.js';
+import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/path.js';
 import { _resolveSpecifier } from './util/require.js';
 import { _require, _resolve } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
@@ -177,7 +177,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
           if (otherWorkspace && specifier !== packageName) {
             const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
-            if (filePath) principal.addEntryPath(toPosix(filePath));
+            if (filePath) principal.addEntryPath(filePath);
           }
         }
       }
