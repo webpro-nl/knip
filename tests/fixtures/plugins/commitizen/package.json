@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/commitizen",
+  "version": "*",
+  "dependencies": {
+    "@commitlint/config-conventional": "*"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  }
+}
