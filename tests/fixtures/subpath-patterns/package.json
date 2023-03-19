@@ -1,0 +1,6 @@
+{
+  "name": "my-package",
+  "imports": {
+    "#internals/*": "./src/internals/*.ts"
+  }
+}
