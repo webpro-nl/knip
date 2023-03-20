@@ -1,19 +1,21 @@
 {
   "scripts": {
-    "start": "server",
+    "start": "start-server",
     "test": "jest"
   },
   "dependencies": {
     "@tootallnate/once": "*",
     "@sindresorhus/is": "*",
+    "fs-extra": "*",
     "has": "*",
     "stream": "*"
   },
   "peerDependencies": {
+    "ansi-regex": "*",
     "jquery": "*"
   },
   "optionalDependencies": {
-    "fs-extra": "*"
+    "fs-optional": "*"
   },
   "devDependencies": {
     "mocha": "*"

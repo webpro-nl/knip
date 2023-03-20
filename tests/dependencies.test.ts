@@ -15,22 +15,21 @@ test('Find unused dependencies', async () => {
 
   assert(issues.files.has(join(cwd, 'unused-module.ts')));
 
-  assert.equal(Object.keys(issues.dependencies['package.json']).length, 1);
+  assert.equal(Object.keys(issues.dependencies['package.json']).length, 2);
   assert(issues.dependencies['package.json']['@tootallnate/once']);
+  assert(issues.dependencies['package.json']['fs-extra']);
   assert(issues.devDependencies['package.json']['mocha']);
 
-  assert.equal(Object.keys(issues.unlisted).length, 3);
-  assert(issues.unlisted['my-module.ts']['ansi-regex']);
-  assert(issues.unlisted['entry.ts']['not-exist']);
-  assert(issues.unlisted['package.json']['server']);
+  assert.equal(Object.keys(issues.unlisted).length, 1);
+  assert(issues.unlisted['package.json']['start-server']);
   assert(issues.unlisted['package.json']['jest']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    dependencies: 1,
+    dependencies: 2,
     devDependencies: 1,
-    unlisted: 4,
+    unlisted: 2,
     processed: 3,
     total: 3,
   });
@@ -45,22 +44,21 @@ test('Find unused dependencies (production)', async () => {
 
   assert(issues.files.has(join(cwd, 'unused-module.ts')));
 
-  assert.equal(Object.keys(issues.dependencies['package.json']).length, 1);
+  assert.equal(Object.keys(issues.dependencies['package.json']).length, 2);
   assert(issues.dependencies['package.json']['@tootallnate/once']);
+  assert(issues.dependencies['package.json']['fs-extra']);
   assert.equal(Object.keys(issues.devDependencies).length, 0);
 
-  assert.equal(Object.keys(issues.unlisted).length, 3);
-  assert(issues.unlisted['my-module.ts']['ansi-regex']);
-  assert(issues.unlisted['entry.ts']['not-exist']);
-  assert(issues.unlisted['package.json']['server']);
+  assert.equal(Object.keys(issues.unlisted).length, 1);
+  assert(issues.unlisted['package.json']['start-server']);
   assert(!issues.unlisted['package.json']['jest']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    dependencies: 1,
+    dependencies: 2,
     devDependencies: 0,
-    unlisted: 3,
+    unlisted: 1,
     processed: 3,
     total: 3,
   });
@@ -76,15 +74,16 @@ test('Find unused dependencies (strict)', async () => {
 
   assert(issues.files.has(join(cwd, 'unused-module.ts')));
 
-  assert.equal(Object.keys(issues.dependencies['package.json']).length, 2);
+  assert.equal(Object.keys(issues.dependencies['package.json']).length, 3);
   assert(issues.dependencies['package.json']['@tootallnate/once']);
+  assert(issues.dependencies['package.json']['fs-extra']);
   assert(issues.dependencies['package.json']['jquery']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    dependencies: 2,
-    unlisted: 3,
+    dependencies: 3,
+    unlisted: 1,
     processed: 3,
     total: 3,
   });
