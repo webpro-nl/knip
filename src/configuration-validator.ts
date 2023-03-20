@@ -57,6 +57,7 @@ const pluginsSchema = z.object({
   sentry: pluginSchema,
   storybook: pluginSchema,
   stryker: pluginSchema,
+  tailwind: pluginSchema,
   typescript: pluginSchema,
   vitest: pluginSchema,
   webpack: pluginSchema,

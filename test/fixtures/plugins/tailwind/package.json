@@ -1,0 +1,12 @@
+{
+  "name": "tailwind",
+  "scripts": {
+    "css": "tailwindcss"
+  },
+  "devDependencies": {
+    "tailwindcss": "*",
+    "@tailwindcss/typography": "*",
+    "@tailwindcss/forms": "*",
+    "@acmecorp/tailwind-base": "*"
+  }
+}
