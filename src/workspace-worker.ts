@@ -130,8 +130,7 @@ export default class WorkspaceWorker {
 
   getEntryFilePatterns() {
     const { entry } = this.config;
-    if (entry.length === 0) return [];
-    return [entry, TEST_FILE_PATTERNS, this.negatedWorkspacePatterns].flat();
+    return [...entry, TEST_FILE_PATTERNS, this.negatedWorkspacePatterns].flat();
   }
 
   getProjectFilePatterns() {
