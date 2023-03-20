@@ -305,19 +305,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Leave exports with a JSDoc `@public` tag alone
           if (principal.isPublicExport(exportedItem)) continue;
 
-          if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
-            principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-              collector.addIssue({ type: 'enumMembers', filePath, symbol: member, parentSymbol: symbol });
-            });
-          }
+          if (importedModule.symbols.has(symbol)) {
+            if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
+              principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
+                collector.addIssue({ type: 'enumMembers', filePath, symbol: member, parentSymbol: symbol });
+              });
+            }
 
-          if (report.classMembers && exportedItem.type === 'class' && exportedItem.members) {
-            principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-              collector.addIssue({ type: 'classMembers', filePath, symbol: member, parentSymbol: symbol });
-            });
-          }
+            if (report.classMembers && exportedItem.type === 'class' && exportedItem.members) {
+              principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
+                collector.addIssue({ type: 'classMembers', filePath, symbol: member, parentSymbol: symbol });
+              });
+            }
 
-          if (importedModule.symbols.has(symbol)) continue;
+            continue;
+          }
 
           if (importedModule.isReExported || importedModule.isStar) {
             const isReExportedByEntryFile = isExportedInEntryFile(importedModule);
