@@ -180,6 +180,10 @@
           "title": "Changesets plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/changesets/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "commitizen": {
+          "title": "commitizen plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/commitizen/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "commitlint": {
           "title": "commitlint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/commitlint/README.md)",
           "$ref": "#/definitions/plugin"

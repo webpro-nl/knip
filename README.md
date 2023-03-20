@@ -275,6 +275,7 @@ Knip contains a growing list of plugins:
 - [Babel][plugin-babel]
 - [Capacitor][plugin-capacitor]
 - [Changesets][plugin-changesets]
+- [Commitizen][plugin-commitizen]
 - [commitlint][plugin-commitlint]
 - [cspell][plugin-cspell]
 - [Cypress][plugin-cypress]
@@ -637,6 +638,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
 [plugin-changesets]: ./src/plugins/changesets
+[plugin-commitizen]: ./src/plugins/commitizen
 [plugin-commitlint]: ./src/plugins/commitlint
 [plugin-cspell]: ./src/plugins/cspell
 [plugin-cypress]: ./src/plugins/cypress
