@@ -1,8 +1,0 @@
-{
-  "name": "@workspaces/app-b",
-  "main": "./index.js",
-  "dependencies": {
-    "@workspaces/lib-a": "*",
-    "@workspaces/lib-b": "*"
-  }
-}

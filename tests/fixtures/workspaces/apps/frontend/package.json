@@ -1,0 +1,8 @@
+{
+  "name": "@workspaces/frontend",
+  "main": "./index.js",
+  "dependencies": {
+    "@workspaces/shared": "*",
+    "@workspaces/tools": "*"
+  }
+}

@@ -8,9 +8,9 @@
   ],
   "dependencies": {
     "cypress": "*",
-    "root-dependency": "*",
-    "unused-dependency": "*",
-    "typescript": "*"
+    "minimist": "*",
+    "typescript": "*",
+    "zod": "*"
   },
   "scripts": {
     "build": "tsc"

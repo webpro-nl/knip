@@ -1,0 +1,10 @@
+{
+  "name": "@workspaces/backend",
+  "main": "./index.js",
+  "dependencies": {
+    "@workspaces/shared": "*",
+    "@workspaces/tools": "*",
+    "picomatch": "*",
+    "next": "*"
+  }
+}
