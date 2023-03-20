@@ -25,7 +25,7 @@
     "test": "globstar -- node --loader tsx --test \"tests/**/*.test.ts\"",
     "coverage": "c8 npm test",
     "watch": "tsc --watch",
-    "_prebuild": "rm -rf dist",
+    "prebuild": "node -e \"require('fs').rmSync('dist', { force: true, recursive: true })\"",
     "build": "tsc",
     "docs": "npm run docs:cli && npm run docs:plugins && npm run docs:format",
     "docs:cli": "tsx ./scripts/update-cli-usage-in-readme.ts",
