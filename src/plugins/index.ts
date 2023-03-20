@@ -31,6 +31,7 @@ export * as sentry from './sentry/index.js';
 export * as storybook from './storybook/index.js';
 export * as stryker from './stryker/index.js';
 export * as svelte from './svelte/index.js';
+export * as tailwind from './tailwind/index.js';
 export * as typedoc from './typedoc/index.js';
 export * as typescript from './typescript/index.js';
 export * as vitest from './vitest/index.js';

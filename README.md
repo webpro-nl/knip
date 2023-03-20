@@ -332,6 +332,7 @@ Knip contains a growing list of plugins:
 - [Storybook][plugin-storybook]
 - [Stryker][plugin-stryker]
 - [Svelte][plugin-svelte]
+- [Tailwind][plugin-tailwind]
 - [TypeDoc][plugin-typedoc]
 - [TypeScript][plugin-typescript]
 - [Vitest][plugin-vitest]
@@ -698,6 +699,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [plugin-storybook]: ./src/plugins/storybook
 [plugin-stryker]: ./src/plugins/stryker
 [plugin-svelte]: ./src/plugins/svelte
+[plugin-tailwind]: ./src/plugins/tailwind
 [plugin-typedoc]: ./src/plugins/typedoc
 [plugin-typescript]: ./src/plugins/typescript
 [plugin-vitest]: ./src/plugins/vitest
