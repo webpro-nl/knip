@@ -2,6 +2,7 @@ export * as ava from './ava/index.js';
 export * as babel from './babel/index.js';
 export * as capacitor from './capacitor/index.js';
 export * as changesets from './changesets/index.js';
+export * as commitizen from './commitizen/index.js';
 export * as commitlint from './commitlint/index.js';
 export * as cspell from './cspell/index.js';
 export * as cypress from './cypress/index.js';
