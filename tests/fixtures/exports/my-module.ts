@@ -8,14 +8,14 @@ import defaultNamedGenFn from './default-named-generator-function';
 import _default from './default.js';
 import * as MyNamespace from './my-namespace.js';
 
-const x = MyNamespace.x;
-const y = MyNamespace.y;
+const nsNumber = MyNamespace.nsNumber;
+const nsFunction = MyNamespace.nsFunction;
 
-export const unusedExportA = 1;
-export const unusedExportB = async <T>(arg: T) => arg;
+export const unusedNumber = 1;
+export const unusedFunction = async <T>(arg: T) => arg;
 
-export const exportedValue = y(x);
+export const exportedResult = nsFunction(nsNumber);
 
-export type MyType = any;
+export type MyAnyType = any;
 
-export default exportedValue;
+export default exportedResult;

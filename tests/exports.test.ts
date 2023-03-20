@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.js';
-import { resolve, join } from '../src/util/path.js';
+import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
@@ -13,45 +13,39 @@ test('Find unused files and exports', async () => {
     cwd,
   });
 
-  assert.equal(issues.files.size, 1);
-  assert(issues.files.has(join(cwd, 'dangling.ts')));
-
   assert.equal(Object.values(issues.exports).length, 4);
-  assert.equal(issues.exports['default.ts']['SomeExport'].symbol, 'SomeExport');
+  assert.equal(issues.exports['default.ts']['NamedExport'].symbol, 'NamedExport');
   assert.equal(issues.exports['my-module.ts']['default'].symbol, 'default');
-  assert.equal(issues.exports['my-module.ts']['unusedExportA'].symbol, 'unusedExportA');
-  assert.equal(issues.exports['my-module.ts']['unusedExportB'].symbol, 'unusedExportB');
-  assert.equal(issues.exports['named.ts']['renamed'].symbol, 'renamed');
-  assert.equal(issues.exports['named.ts']['name3'].symbol, 'name3');
-  assert.equal(issues.exports['dynamic-import.ts']['unusedExportedValue'].symbol, 'unusedExportedValue');
+  assert.equal(issues.exports['my-module.ts']['unusedNumber'].symbol, 'unusedNumber');
+  assert.equal(issues.exports['my-module.ts']['unusedFunction'].symbol, 'unusedFunction');
+  assert.equal(issues.exports['named-exports.ts']['renamedExport'].symbol, 'renamedExport');
+  assert.equal(issues.exports['named-exports.ts']['namedExport'].symbol, 'namedExport');
+  assert.equal(issues.exports['dynamic-import.ts']['unusedZero'].symbol, 'unusedZero');
   assert(!issues.exports['index.ts']);
 
   assert.equal(Object.values(issues.types).length, 2);
-  assert.equal(issues.types['my-module.ts']['MyType'].symbolType, 'type');
-  assert.equal(issues.types['types.ts']['Num'].symbolType, 'type');
-  assert.equal(issues.types['types.ts']['Key1'].symbolType, 'type');
-  assert.equal(issues.types['types.ts']['Key2'].symbolType, 'type');
+  assert.equal(issues.types['my-module.ts']['MyAnyType'].symbolType, 'type');
+  assert.equal(issues.types['types.ts']['MyEnum'].symbolType, 'enum');
+  assert.equal(issues.types['types.ts']['MyType'].symbolType, 'type');
   assert(!issues.types['index.ts']);
 
   assert.equal(Object.values(issues.nsExports).length, 1);
-  assert.equal(issues.nsExports['my-namespace.ts']['key'].symbol, 'key');
+  assert.equal(issues.nsExports['my-namespace.ts']['nsUnusedKey'].symbol, 'nsUnusedKey');
 
   assert.equal(Object.values(issues.nsTypes).length, 1);
   assert.equal(issues.nsTypes['my-namespace.ts']['MyNamespace'].symbol, 'MyNamespace');
 
   assert.equal(Object.values(issues.duplicates).length, 1);
-  assert.equal(issues.duplicates['my-module.ts']['exportedValue|default'].symbols?.[0], 'exportedValue');
+  assert.equal(issues.duplicates['my-module.ts']['exportedResult|default'].symbols?.[0], 'exportedResult');
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    unlisted: 0,
     exports: 7,
     nsExports: 1,
-    types: 4,
+    types: 3,
     nsTypes: 1,
     duplicates: 1,
-    processed: 15,
-    total: 15,
+    processed: 14,
+    total: 14,
   });
 });

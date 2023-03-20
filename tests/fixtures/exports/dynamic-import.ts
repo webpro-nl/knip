@@ -1,5 +1,5 @@
 export default () => {};
 
-export const unusedExportedValue = 0;
+export const unusedZero = 0;
 
 export const used = true;

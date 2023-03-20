@@ -1,2 +1,3 @@
-export const SomeExport = 1;
+export const NamedExport = 1;
+
 export default () => 1;
