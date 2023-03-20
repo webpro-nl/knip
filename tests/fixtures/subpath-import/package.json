@@ -1,0 +1,12 @@
+{
+  "name": "my-package",
+  "imports": {
+    "#dep": {
+      "node": "dep-node-native",
+      "default": "./lib/dep-polyfill.js"
+    }
+  },
+  "dependencies": {
+    "dep-node-native": "^1.0.0"
+  }
+}
