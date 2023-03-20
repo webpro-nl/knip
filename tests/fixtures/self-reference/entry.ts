@@ -1,9 +1,9 @@
+import external from 'external-package';
 import index from 'my-package';
-import foo from 'my-package/foo';
-import mod from 'my-package/module';
-import bar from 'external-package';
+import build from 'my-package/build';
+import local from 'my-package/local';
 
 index;
-foo;
-mod;
-bar;
+build;
+local;
+external;
