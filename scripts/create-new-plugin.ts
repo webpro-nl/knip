@@ -27,6 +27,7 @@ const templateDir = path.join(pluginsDir, '_template');
 const newPluginDir = path.join(pluginsDir, name);
 const pluginsBarrelFilePath = path.join(pluginsDir, 'index.ts');
 const schemaFilePath = path.join(cwd, 'schema.json');
+const validatorFilePath = path.join(cwd, 'src/configuration-validator.ts');
 const pluginTestsDir = path.join(cwd, 'test/tests/plugins');
 const pluginTestTemplateFilePath = path.join(pluginTestsDir, '_template.test.ts');
 const pluginTestFilePath = path.join(pluginTestsDir, `${name}.test.ts`);
@@ -47,6 +48,11 @@ await fs.writeFile(
   pluginsBarrelFilePath,
   String(await fs.readFile(pluginsBarrelFilePath)) + `export * as ${camelCasedName} from './${name}/index.js';`
 );
+
+const validatorContent = String(await fs.readFile(validatorFilePath));
+const pluginsPrefix = 'const pluginsSchema = z.object({';
+const pluginsReplacement = `${pluginsPrefix}\n'${name}': pluginSchema,\n`;
+await fs.writeFile(validatorFilePath, validatorContent.replace(pluginsPrefix, pluginsReplacement));
 
 await fs.cp(pluginTestFixtureTemplateDir, pluginTestFixturePluginDir, {
   recursive: true,
