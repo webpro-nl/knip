@@ -491,22 +491,8 @@ Knip provides the following built-in reporters:
 
 When the provided built-in reporters are not sufficient, a custom reporter can be implemented.
 
-Pass `--reporter ./my-reporter`, with the default export of that module having this interface:
-
-```ts
-type Reporter = (options: ReporterOptions) => void;
-
-type ReporterOptions = {
-  report: Report;
-  issues: Issues;
-  cwd: string;
-  workingDir: string;
-  isProduction: boolean;
-  options: string;
-};
-```
-
-The data can then be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
+Pass `--reporter ./my-reporter` from the command-line. The data can then be used to write issues to `stdout`, a JSON or
+CSV file, or sent to a service.
 
 Find more details and ideas in [custom reporters][14].
 
@@ -635,6 +621,18 @@ The following commands are similar:
     knip --include exports,types
     knip --exports  # Adds unused exports/types in namespaces and unused enum/class members
 
+## Projects using Knip
+
+Many thanks to some of the early adopters of Knip:
+
+- [Block Protocol][22]
+- [DeepmergeTS][23]
+- [eslint-plugin-functional][24]
+- [freeCodeCamp.org][25]
+- [is-immutable-type][26]
+- [release-it][27]
+- [Template TypeScript Node Package][28]
+
 ## Knip?!
 
 Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
@@ -661,6 +659,13 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [19]: https://github.com/pzavolinsky/ts-unused-exports
 [20]: https://github.com/nadeesha/ts-prune
 [21]: #production-mode
+[22]: https://github.com/blockprotocol/blockprotocol
+[23]: https://github.com/RebeccaStevens/deepmerge-ts
+[24]: https://github.com/eslint-functional/eslint-plugin-functional
+[25]: https://github.com/freeCodeCamp/freeCodeCamp
+[26]: https://github.com/RebeccaStevens/is-immutable-type
+[27]: https://github.com/release-it/release-it
+[28]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
