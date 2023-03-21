@@ -34,8 +34,8 @@ with OpenAI_</sup>
 
 ## Migrating to v2.0.0
 
-Migrating from v1 to v2 requires no changes in configuration. Please see [https://github.com/webpro/knip/issues/73][8]
-for the full story.
+Migrating from v1 to v2 requires no changes in configuration. Mostly it's just a whole lot faster! The [release notes
+for v2][8] provide more details.
 
 ## Installation
 
@@ -644,7 +644,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [5]: #custom-reporters
 [6]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [7]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[8]: https://github.com/webpro/knip/issues/73
+[8]: ./docs/release-notes-v2.md
 [9]: #faq
 [10]: #ignore
 [11]: https://nx.dev/concepts/integrated-vs-package-based
