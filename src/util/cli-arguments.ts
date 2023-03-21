@@ -10,11 +10,10 @@ Options:
   --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
   --workspace              Analyze a single workspace (default: analyze all configured workspaces)
-  --ignore                 Ignore files matching this glob pattern, can be repeated
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
-  --dependencies           Shortcut for --include dependencies,unlisted
+  --dependencies           Shortcut for --include dependencies,unlisted,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
   --no-progress            Don't show dynamic progress updates
   --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
@@ -49,7 +48,6 @@ export default parseArgs({
     exclude: { type: 'string', multiple: true },
     exports: { type: 'boolean' },
     help: { type: 'boolean', short: 'h' },
-    ignore: { type: 'string', multiple: true },
     include: { type: 'string', multiple: true },
     'max-issues': { type: 'string' },
     'no-exit-code': { type: 'boolean' },
