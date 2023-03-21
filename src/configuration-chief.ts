@@ -11,7 +11,7 @@ import { findFile, loadJSON } from './util/fs.js';
 import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
-import { join, relative } from './util/path.js';
+import { join, relative, toPosix } from './util/path.js';
 import { toCamelCase } from './util/plugin.js';
 import { byPathDepth } from './util/workspace.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
@@ -26,6 +26,8 @@ const {
   dependencies = false,
   exports = false,
 } = parsedArgs.values;
+
+const workspaceArg = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, '').replace(/\/$/, '') : undefined;
 
 const getDefaultWorkspaceConfig = (extensions?: string[]): WorkspaceConfiguration => {
   const exts = [...DEFAULT_EXTENSIONS, ...(extensions ?? [])].map(ext => ext.slice(1)).join(',');
@@ -251,7 +253,6 @@ export class ConfigurationChief {
 
   public getEnabledWorkspaces() {
     const allWorkspaces = this.getAllWorkspaces();
-    const workspace = (rawWorkspaceArg ?? '').replace(/\/$/, '');
 
     const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
       if (name === ancestorName) return ancestors;
@@ -259,9 +260,7 @@ export class ConfigurationChief {
       return ancestors;
     };
 
-    const workspaces = rawWorkspaceArg
-      ? [workspace, ...allWorkspaces.reduce(getAncestors(workspace), [] as string[])]
-      : allWorkspaces;
+    const workspaces = workspaceArg ? [workspaceArg] : allWorkspaces;
 
     return workspaces.sort(byPathDepth).map(
       (name): Workspace => ({
