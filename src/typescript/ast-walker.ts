@@ -180,7 +180,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
           }
 
           if (_node.parent && ts.isCallExpression(_node.parent)) {
-            // e.g. inside a call such as Promise.all()
+            // Pattern: e.g. inside a call expression such as Promise.all()
             addImport({ specifier, identifier: 'default' });
             break;
           }
@@ -257,12 +257,10 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
                 // Pattern: identifier = require('specifier')
                 addImport({ identifier: 'default', specifier });
               } else {
-                const binds = ast.findDescendants<ts.BindingElement>(variableDeclaration, _node =>
-                  ts.isBindingElement(_node)
-                );
-                if (binds.length > 0) {
+                const bindings = ast.findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
+                if (bindings.length > 0) {
                   // Pattern: { identifier } = require('specifier')
-                  binds.forEach(element => {
+                  bindings.forEach(element => {
                     const identifier = (element.propertyName ?? element.name).getText();
                     addImport({ identifier, specifier });
                   });
@@ -351,7 +349,12 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
             (member): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
               (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) && !ast.isPrivateMember(member)
           )
-          .map(n => ({ node: n, identifier: n.name.getText(), pos: n.name.getStart(), type: 'member' }));
+          .map(member => ({
+            node: member,
+            identifier: member.name.getText(),
+            pos: member.name.getStart(),
+            type: 'member',
+          }));
         addExport({ node, identifier, type: 'class', pos, members });
       }
 
@@ -366,10 +369,10 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
       if (ts.isEnumDeclaration(node)) {
         const identifier = modifierKinds.includes(ts.SyntaxKind.DefaultKeyword) ? 'default' : node.name.getText();
         const pos = node.name.getStart();
-        const members = node.members.map(n => ({
-          node: n,
-          identifier: ast.stripQuotes(n.name.getText()),
-          pos: n.name.getStart(),
+        const members = node.members.map(member => ({
+          node: member,
+          identifier: ast.stripQuotes(member.name.getText()),
+          pos: member.name.getStart(),
           type: 'member',
         }));
         addExport({ node, identifier, type: 'enum', pos, members });
