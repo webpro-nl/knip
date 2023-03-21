@@ -7,23 +7,23 @@ dependencies leads to improved performance, less maintenance and easier refactor
 export const myVar = true;
 ```
 
-ESLint handles files in isolation, so it does not know whether `myVar` is actually used somewhere else. Knip lints the
-project as a whole, and finds unused exports, files and dependencies.
+This is where ESLint stops: it handles files in isolation, so it does not know whether `myVar` is used somewhere else.
+This is where Knip starts: it lints the project as a whole, and finds unused exports, files and dependencies.
 
-It's only human to forget removing things that you no longer use. But how do you find out? Where to even start finding
+It's only human to forget removing things that you no longer use. But how do you find out? Where do you start finding
 things that can be removed?
 
 The dots don't connect themselves. This is where Knip comes in:
 
 - [x] Finds **unused files, dependencies and exports**
 - [x] Finds used dependencies not listed in `package.json`
-- [x] Finds duplicate exports
-- [x] Finds unused members of classes and enums
-- [x] Built-in support for [monorepos/workspaces][1]
+- [x] Built-in support for [workspaces (monorepos)][1]
 - [x] Growing list of [built-in plugins][2]
-- [x] Use [compilers][3] to include other file types (e.g. MDX, Vue, Svelte)
+- [x] Use [compilers][3] to include other file types (e.g. `.mdx`, `.vue`, `.svelte`)
 - [x] Checks npm scripts for used and unlisted dependencies
-- [x] Supports JavaScript (without `tsconfig.json`, or TypeScript `allowJs: true`)
+- [x] Finds unused members of classes and enums
+- [x] Finds duplicate exports
+- [x] Supports any combination of JavaScript and TypeScript
 - [x] Features multiple [reporters][4] and supports [custom reporters][5]
 - [x] Run Knip as part of your CI environment to detect issues and prevent regressions
 
@@ -107,7 +107,7 @@ Then run the checks with `npx knip`. Or first add this script to `package.json`:
 Use `npm run knip` to analyze the project and output unused files, dependencies and exports. Knip works just fine with
 `yarn` or `pnpm` as well.
 
-Using workspaces in a monorepo? Please see [workspaces & monorepos][1] for more details about configuring them.
+Using workspaces in a monorepo? Please see [workspaces][1] for more details about configuring them.
 
 ## Command-line options
 
@@ -233,7 +233,7 @@ As always, make sure to backup files or use Git before deleting files or making 
 
 🔁 Repeat the process to reveal new unused files and exports. Sometimes it's so liberating to remove things!
 
-## Workspaces & Monorepos
+## Workspaces (monorepos)
 
 Workspaces and monorepos are handled out-of-the-box by Knip. Every workspace is part of the analysis.
 
@@ -282,6 +282,22 @@ Use `--debug` to get more verbose output.
 
 ## Plugins
 
+Plugins tell Knip where to look for configuration and entry files, and if necessary have a custom dependency finder.
+Knip plugins are automatically activated, you don't need to install or configure anything.
+
+To explain what they do, here's a quick example from a `.eslintrc.json` configuration file (for ESLint):
+
+```json
+{
+  "extends": ["airbnb"],
+  "plugins": ["prettier"]
+}
+```
+
+Knip's ESLint plugin reads `.eslintrc.json` and will return `eslint-config-airbnb` and `eslint-plugin-prettier` from
+this example to Knip, so it can tell you whether `package.json` is out of sync. In a nutshell, this is how plugins work.
+This is especially useful over time when such configuration files change (and they will)!
+
 Knip contains a growing list of plugins:
 
 - [Ava][plugin-ava]
@@ -323,26 +339,53 @@ Knip contains a growing list of plugins:
 - [Webpack][plugin-webpack]
 
 Plugins are automatically activated. Each plugin is automatically enabled based on simple heuristics. Most of them check
-whether one or one of a few (dev) dependencies are listed in `package.json`. Once enabled, they add a set of
-configuration and/or entry files for Knip to analyze. These defaults can be overriden.
+whether one of a few dependencies are listed in `package.json`. Once enabled, they add a set of `config` files for
+itself and/or `entry` files for Knip to analyze.
 
-Most plugins use one or both of the following file types:
-
-- `config` - custom dependency resolvers are applied to the [config files][11]
-- `entry` - files to include with the analysis of the rest of the source code
+- `config` files are given to the plugin's dependency finder
+- `entry` files are given to Knip to include with the analysis of the rest of the source code
 
 See each plugin's documentation for its default values.
 
 ### `config`
 
-Plugins may include `config` files. They are parsed by the plugin's custom dependency finder. Custom dependency finders
-return all dependencies referenced in the configuration files it is given. Knip handles the rest to determine which of
-those dependencies are unused or missing.
+Plugins usually include `config` files. They are handled by the plugin's custom dependency finder, which returns all
+dependencies referenced in the files it is given. Knip handles the rest to determine which of those dependencies are
+unused or missing.
 
 ### `entry`
 
-Other configuration files use `require` or `import` statements to use dependencies, so they can be analyzed like the
-rest of the source files. These configuration files are also considered `entry` files.
+Other configuration files use `require` or `import` statements to use dependencies, so they don't need special handing
+and can be analyzed like any other source file. That's why these configuration files are also used as `entry` files.
+
+### Override plugin configuration
+
+Usually no custom configuration is required for plugins, but if your project uses custom file locations then Knip allows
+to override any defaults. Let's take Cypress for example. By default it uses `cypress.config.js`, but your project uses
+`config/cypress.js`. Also, the default pattern for test files is `cypress/e2e/**/*.cy.js`, but your project has them at
+`e2e-tests/*.spec.ts`. Here's how to configure this:
+
+```json
+{
+  "cypress": {
+    "entry": ["config/cypress.js", "e2e-tests/*.spec.js"]
+  }
+}
+```
+
+### Multi-project repositories
+
+Some repositories have a single `package.json`, but consist of multiple projects with potentially lots of configuration
+files (such as the [Nx "intregrated repo" style][11]). Let's assume some of these projects are apps and have their own
+Cypress configuration and test files. In that case, we could configure the Cypress plugin like this:
+
+```json
+{
+  "cypress": {
+    "entry": ["apps/**/cypress.config.ts", "apps/**/cypress/e2e/*.spec.ts"]
+  }
+}
+```
 
 ### Disable a plugin
 
@@ -360,7 +403,8 @@ finding unused or missing dependencies. For instance, `.mdx`, `.vue` and `.svelt
 
 Currently this is only supported by using `knip.js` or `knip.ts`. Provide a `compilers` object in the configuration
 where each key represents the extension and the value is a function that takes the contents of these files as input and
-returns JavaScript or TypeScript as output. For example:
+returns JavaScript or TypeScript as output. Here is an example that compiles `.mdx` files to JavaScript so these files
+and their imports and exports become part of the analyis:
 
 ```js
 import { compileSync } from 'mdx-js/mdx';
@@ -537,23 +581,23 @@ All of this is hiding problems, so please make sure to plan for fixing them and/
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                           | **knip** | [depcheck][17] | [unimported][18] | [ts-unused-exports][19] | [ts-prune][20] |
-| :-------------------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
-| Unused files                      |    ✅    |       -        |        ✅        |            -            |       -        |
-| Unused dependencies               |    ✅    |       ✅       |        ✅        |            -            |       -        |
-| Unlisted dependencies             |    ✅    |       ✅       |        ✅        |            -            |       -        |
-| [Plugins][2]                      |    ✅    |       ✅       |        ❌        |            -            |       -        |
-| [Compilers][3]                    |    ✅    |       -        |        -         |            -            |       -        |
-| Unused exports                    |    ✅    |       -        |        -         |           ✅            |       ✅       |
-| Unused class members              |    ✅    |       -        |        -         |            -            |       -        |
-| Unused enum members               |    ✅    |       -        |        -         |            -            |       -        |
-| Duplicate exports                 |    ✅    |       -        |        -         |           ❌            |       ❌       |
-| Search namespaces                 |    ✅    |       -        |        -         |           ✅            |       ❌       |
-| Custom reporters                  |    ✅    |       -        |        -         |            -            |       -        |
-| JavaScript support                |    ✅    |       ✅       |        ✅        |            -            |       -        |
-| Configure entry files             |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |
-| [Support workspaces/monorepos][1] |    ✅    |       ❌       |        ❌        |            -            |       -        |
-| ESLint plugin available           |    -     |       -        |        -         |           ✅            |       -        |
+| Feature                 | **knip** | [depcheck][17] | [unimported][18] | [ts-unused-exports][19] | [ts-prune][20] |
+| :---------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
+| Unused files            |    ✅    |       -        |        ✅        |            -            |       -        |
+| Unused dependencies     |    ✅    |       ✅       |        ✅        |            -            |       -        |
+| Unlisted dependencies   |    ✅    |       ✅       |        ✅        |            -            |       -        |
+| [Plugins][2]            |    ✅    |       ✅       |        ❌        |            -            |       -        |
+| [Compilers][3]          |    ✅    |       -        |        -         |            -            |       -        |
+| Unused exports          |    ✅    |       -        |        -         |           ✅            |       ✅       |
+| Unused class members    |    ✅    |       -        |        -         |            -            |       -        |
+| Unused enum members     |    ✅    |       -        |        -         |            -            |       -        |
+| Duplicate exports       |    ✅    |       -        |        -         |           ❌            |       ❌       |
+| Search namespaces       |    ✅    |       -        |        -         |           ✅            |       ❌       |
+| Custom reporters        |    ✅    |       -        |        -         |            -            |       -        |
+| JavaScript support      |    ✅    |       ✅       |        ✅        |            -            |       -        |
+| Configure entry files   |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |
+| [Support workspaces][1] |    ✅    |       ❌       |        ❌        |            -            |       -        |
+| ESLint plugin available |    -     |       -        |        -         |           ✅            |       -        |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
 
@@ -596,7 +640,7 @@ The following commands are similar:
 Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
 for the job. I'm motivated to make knip perfectly suited for the job of cutting projects to perfection! ✂️
 
-[1]: #workspaces--monorepos
+[1]: #workspaces-monorepos
 [2]: #plugins
 [3]: #compilers
 [4]: #reporters
@@ -606,7 +650,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [8]: https://github.com/webpro/knip/issues/73
 [9]: #faq
 [10]: #ignore
-[11]: #config
+[11]: https://nx.dev/concepts/integrated-vs-package-based
 [12]: ./docs/writing-a-plugin.md
 [13]: ./docs/compilers.md
 [14]: ./docs/custom-reporters.md
