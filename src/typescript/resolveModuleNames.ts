@@ -1,5 +1,4 @@
 import ts from 'typescript';
-import { isAbsolute, join } from '../util/path.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
 export function createCustomModuleResolver(
@@ -13,11 +12,6 @@ export function createCustomModuleResolver(
 
   function resolveModuleName(name: string, containingFile: string): ts.ResolvedModule | undefined {
     const tsResolvedModule = ts.resolveModuleName(name, containingFile, compilerOptions, ts.sys).resolvedModule;
-
-    if (tsResolvedModule && !isAbsolute(tsResolvedModule?.resolvedFileName)) {
-      // TODO Why is it necessary, and is this the place to monkey-patch import specifiers like 'src/local/module'?
-      tsResolvedModule.resolvedFileName = join(customSys.getCurrentDirectory(), tsResolvedModule.resolvedFileName);
-    }
 
     if (virtualFileExtensions.length === 0) return tsResolvedModule;
 
