@@ -187,7 +187,7 @@ export class ProjectPrincipal {
 
     unresolved.forEach(specifier => {
       if (specifier.startsWith('http')) {
-        // TODO Add to debug logs?
+        // Ignore Deno style http import specifiers.
         return;
       }
       const resolvedModule = this.resolveModule(specifier, filePath);
@@ -204,8 +204,6 @@ export class ProjectPrincipal {
           const ext = extname(specifier);
           if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
             unresolvedImports.add(specifier);
-          } else {
-            // TODO Add to debug logs?
           }
         }
       }
