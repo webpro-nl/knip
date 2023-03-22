@@ -453,7 +453,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
 
   visit(sourceFile);
 
-  // TODO Remove duplicates from unused exports? This behavior is now different from v1 (yet more clear/actionable?)
+  // Duplicates may also be reported as unused exports
   const duplicateExports = Object.values(aliasedExports);
 
   return {
