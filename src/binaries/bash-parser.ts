@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/order -- Modules in @types are handled differently
 import parse from 'bash-parser';
 import parseArgs from 'minimist';
 import * as FallbackResolver from './resolvers/fallback.js';

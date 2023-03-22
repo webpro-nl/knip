@@ -27,7 +27,7 @@
     "import/order": [
       "error",
       {
-        "groups": ["builtin", "external", "parent", "sibling", "index", "object", "unknown", "type"],
+        "groups": ["builtin", ["external", "internal"], "parent", "sibling", "index", "object", "unknown", "type"],
         "alphabetize": { "order": "asc", "caseInsensitive": true },
         "newlines-between": "never"
       }
