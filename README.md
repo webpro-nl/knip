@@ -63,7 +63,7 @@ file. Let's say you are using `.ts` files excusively and have all source files o
 
 ```json
 {
-  "$schema": "https://unpkg.com/knip@next/schema.json",
+  "$schema": "https://unpkg.com/knip@2/schema.json",
   "entry": ["src/index.ts"],
   "project": ["src/**/*.ts"]
 }
@@ -465,7 +465,7 @@ aliases. They can be configured manually:
 
 ```json
 {
-  "$schema": "https://unpkg.com/knip@next/schema.json",
+  "$schema": "https://unpkg.com/knip@2/schema.json",
   "paths": {
     "@lib": ["./lib/index.ts"],
     "@lib/*": ["./lib/*"]
