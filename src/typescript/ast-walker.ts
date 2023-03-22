@@ -1,5 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
+import { SymbolType } from '../types/issues.js';
 import { isInNodeModules } from '../util/path.js';
 import * as ast from './ast-helpers.js';
 import type { BoundSourceFile } from './SourceFile.js';
@@ -295,7 +296,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
       // Patterns:
       // export default 1;
       // export = identifier;
-      addExport({ node, identifier: 'default', type: 'unknown', pos: node.expression.getStart() });
+      addExport({ node, identifier: 'default', type: SymbolType.UNKNOWN, pos: node.expression.getStart() });
       maybeAddAliasedExport(node.expression, 'default');
     }
 
@@ -309,7 +310,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
                 addExport({
                   node: element,
                   identifier: element.name.escapedText.toString(),
-                  type: 'unknown',
+                  type: SymbolType.UNKNOWN,
                   pos: element.name.getStart(),
                 });
               }
@@ -321,7 +322,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
                 addExport({
                   node: element,
                   identifier: element.getText(),
-                  type: 'unknown',
+                  type: SymbolType.UNKNOWN,
                   pos: element.getStart(),
                 });
               }
@@ -329,7 +330,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
           } else {
             // Pattern: export const MyVar = 1;
             const identifier = declaration.name.getText();
-            addExport({ node: declaration, identifier, type: 'unknown', pos: declaration.name.getStart() });
+            addExport({ node: declaration, identifier, type: SymbolType.UNKNOWN, pos: declaration.name.getStart() });
             maybeAddAliasedExport(declaration.initializer, identifier);
           }
         });
@@ -338,7 +339,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
       if (ts.isFunctionDeclaration(node) && node.name) {
         const identifier = modifierKinds.includes(ts.SyntaxKind.DefaultKeyword) ? 'default' : node.name.getText();
         const pos = (node.name ?? node.body ?? node).getStart();
-        addExport({ node, identifier, pos, type: 'function' });
+        addExport({ node, identifier, pos, type: SymbolType.FUNCTION });
       }
 
       if (ts.isClassDeclaration(node) && node.name) {
@@ -353,17 +354,17 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
             node: member,
             identifier: member.name.getText(),
             pos: member.name.getStart(),
-            type: 'member',
+            type: SymbolType.MEMBER,
           }));
-        addExport({ node, identifier, type: 'class', pos, members });
+        addExport({ node, identifier, type: SymbolType.CLASS, pos, members });
       }
 
       if (ts.isTypeAliasDeclaration(node)) {
-        addExport({ node, identifier: node.name.getText(), type: 'type', pos: node.name.getStart() });
+        addExport({ node, identifier: node.name.getText(), type: SymbolType.TYPE, pos: node.name.getStart() });
       }
 
       if (ts.isInterfaceDeclaration(node)) {
-        addExport({ node, identifier: node.name.getText(), type: 'interface', pos: node.name.getStart() });
+        addExport({ node, identifier: node.name.getText(), type: SymbolType.INTERFACE, pos: node.name.getStart() });
       }
 
       if (ts.isEnumDeclaration(node)) {
@@ -373,9 +374,9 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
           node: member,
           identifier: ast.stripQuotes(member.name.getText()),
           pos: member.name.getStart(),
-          type: 'member',
+          type: SymbolType.MEMBER,
         }));
-        addExport({ node, identifier, type: 'enum', pos, members });
+        addExport({ node, identifier, type: SymbolType.ENUM, pos, members });
       }
     }
 
@@ -398,7 +399,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
         }
       } else if (node.exportClause && ts.isNamedExports(node.exportClause)) {
         // Pattern: export { identifier, identifier2 }; export type { Identifier, Identifier2 };
-        const type = node.isTypeOnly ? 'type' : 'unknown';
+        const type = node.isTypeOnly ? SymbolType.TYPE : SymbolType.UNKNOWN;
         node.exportClause.elements.forEach(element => {
           addExport({ node: element, identifier: element.name.getText(), type, pos: element.name.pos });
         });
@@ -412,22 +413,22 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: Optio
         // module.exports.NAME
         const identifier = parent.name.getText();
         const pos = parent.name.getStart();
-        addExport({ node, identifier, type: 'unknown', pos });
+        addExport({ node, identifier, type: SymbolType.UNKNOWN, pos });
       } else if (ts.isElementAccessExpression(parent)) {
         // module.exports['NAME']
         const identifier = ast.stripQuotes(parent.argumentExpression.getText());
         const pos = parent.argumentExpression.getStart();
-        addExport({ node, identifier, type: 'unknown', pos });
+        addExport({ node, identifier, type: SymbolType.UNKNOWN, pos });
       } else if (ts.isBinaryExpression(parent)) {
         const expr = parent.right;
         if (ts.isObjectLiteralExpression(expr) && expr.properties.every(ts.isShorthandPropertyAssignment)) {
           // Pattern: module.exports = { identifier, identifier2 }
           expr.properties.forEach(node => {
-            addExport({ node, identifier: node.getText(), type: 'unknown', pos: node.pos });
+            addExport({ node, identifier: node.getText(), type: SymbolType.UNKNOWN, pos: node.pos });
           });
         } else {
           // Pattern: module.exports = any
-          addExport({ node, identifier: 'default', type: 'unknown', pos: node.getStart() });
+          addExport({ node, identifier: 'default', type: SymbolType.UNKNOWN, pos: node.getStart() });
         }
       }
     }

@@ -28,7 +28,7 @@ export type ExportItemMember = {
   node: ts.Node;
   identifier: Identifier;
   pos: number;
-  type: string; // TODO: should be SymbolType
+  type: SymbolType;
 };
 
 export type ExportItems = Map<string, ExportItem>;

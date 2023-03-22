@@ -1,4 +1,12 @@
-export type SymbolType = 'type' | 'interface' | 'enum' | 'function' | 'class' | 'unknown';
+export enum SymbolType {
+  TYPE = 'type',
+  INTERFACE = 'interface',
+  ENUM = 'enum',
+  FUNCTION = 'function',
+  CLASS = 'class',
+  MEMBER = 'member',
+  UNKNOWN = 'unknown',
+}
 
 export type Issue = {
   type: SymbolIssueType;
