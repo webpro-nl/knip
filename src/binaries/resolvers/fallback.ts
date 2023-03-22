@@ -1,6 +1,6 @@
 import parseArgs from 'minimist';
 import { compact } from '../../util/array.js';
-import { tryResolveFilePaths } from './node.js';
+import { tryResolveFilePaths } from './util.js';
 import type { Resolver } from '../types.js';
 import type { ParsedArgs } from 'minimist';
 

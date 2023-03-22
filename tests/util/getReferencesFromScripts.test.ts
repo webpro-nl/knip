@@ -125,6 +125,13 @@ test('getReferencesFromScripts (yarn)', () => {
   t('yarn node script.js', [], [js]);
 });
 
+test('getReferencesFromScripts (rollup)', () => {
+  t('rollup --watch --watch.onEnd="node script.js"', ['rollup'], [js]);
+  t('rollup -p ./require.js', ['rollup'], [req]);
+  t('rollup --plugin @rollup/plugin-node-resolve', ['rollup', '@rollup/plugin-node-resolve'], []);
+  t('rollup --configPlugin @rollup/plugin-typescript', ['rollup', '@rollup/plugin-typescript'], []);
+});
+
 test('getReferencesFromScripts (bash expressions)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['make']);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['make']);
