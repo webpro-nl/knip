@@ -9,13 +9,13 @@ import type { PackageJson } from 'type-fest';
 type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
 
 const getDependencies = (config: ESLintConfig) => {
-  const extend = config.extends ? [config.extends].flat().map(resolveExtendedPackageName) : [];
-  if (extend.includes('eslint-plugin-prettier')) extend.push('eslint-config-prettier');
+  const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendsSpecifier) : [];
+  if (extendsSpecifiers.includes('eslint-plugin-prettier')) extendsSpecifiers.push('eslint-config-prettier');
   const plugins = config.plugins ? config.plugins.map(resolvePluginPackageName) : [];
   const parser = config.parser;
   const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-  return compact([...extend, ...plugins, parser, ...extraParsers, ...settings]);
+  return compact([...extendsSpecifiers, ...plugins, parser, ...extraParsers, ...settings]);
 };
 
 type GetDependenciesDeep = (
@@ -73,15 +73,16 @@ const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', plugin
 
 export const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
 
-const resolveExtendedPackageName = (extend: string) => {
-  if (isInternal(extend)) return;
-  if (extend.includes(':')) {
-    const pluginName = extend.replace(/^plugin:/, '').replace(/(\/|:).+$/, '');
+const resolveExtendsSpecifier = (specifier: string) => {
+  if (isInternal(specifier)) return;
+  if (specifier.includes(':')) {
+    const pluginName = specifier.replace(/^plugin:/, '').replace(/(\/|:).+$/, '');
     if (pluginName === 'eslint') return;
     return resolvePackageName('eslint-plugin', pluginName);
   }
-  // TODO Slippery territory, not sure what we have here
-  return extend.includes('eslint') ? extend : resolvePackageName('eslint-config', extend);
+
+  // If the specifier includes `eslint`, assume it's complete
+  return specifier.includes('eslint') ? specifier : resolvePackageName('eslint-config', specifier);
 };
 
 const getImportPluginDependencies = (settings: Record<string, unknown>) => {
