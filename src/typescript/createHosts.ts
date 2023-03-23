@@ -1,17 +1,12 @@
-import { createRequire } from 'node:module';
 import { EOL } from 'node:os';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
 import { createCustomModuleResolver } from './resolveModuleNames.js';
 import { SourceFileManager } from './SourceFileManager.js';
 import { createCustomSys } from './sys.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 
-// By exception, explicitly not using path/require helpers here (gives issues when combined with timerify())
-const cwd = process.cwd();
-const require = createRequire(pathToFileURL(import.meta.url));
-const libLocation = path.dirname(require.resolve('typescript', { paths: [cwd] }));
+const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 
 type CreateHostsOptions = {
   cwd: string;
