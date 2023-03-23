@@ -1,11 +1,11 @@
 const avaConfig = {
-  files: ["**/*.test.*"],
-  extensions: ["js"],
-  require: ["tsconfig-paths/register"],
+  files: ['**/*.test.*'],
+  extensions: ['js'],
+  require: ['tsconfig-paths/register'],
   typescript: {
     rewritePaths: {
-      "src/": "build/src/",
-      "tests/": "build/tests/",
+      'src/': 'build/src/',
+      'tests/': 'build/tests/',
     },
     compile: false,
   },

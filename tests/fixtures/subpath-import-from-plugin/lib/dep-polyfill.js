@@ -1,1 +1,1 @@
-export default "dep-polyfill";
+export default 'dep-polyfill';

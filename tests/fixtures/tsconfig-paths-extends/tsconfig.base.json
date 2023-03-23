@@ -4,7 +4,7 @@
     "paths": {
       "~/main": ["./index.ts"],
       "~/lib/*": ["./lib/*"],
-      "~/util/*": ["./util/*"],
+      "~/util/*": ["./util/*"]
     }
   }
 }

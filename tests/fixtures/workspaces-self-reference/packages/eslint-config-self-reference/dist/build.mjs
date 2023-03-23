@@ -1,1 +1,1 @@
-export default "build";
+export default 'build';

@@ -1,4 +1,4 @@
-import { main,util } from '~/main';
+import { main, util } from '~/main';
 
 main;
 util;

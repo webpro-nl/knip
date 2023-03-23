@@ -1,3 +1,3 @@
 module.exports = {
-  default: "build"
+  default: 'build',
 };
