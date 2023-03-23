@@ -4,7 +4,7 @@ import './util/register.js';
 import prettyMilliseconds from 'pretty-ms';
 import reporters from './reporters/index.js';
 import parsedArgs, { helpText } from './util/cli-arguments.js';
-import { ConfigurationError } from './util/errors.js';
+import { ConfigurationError, LoaderError } from './util/errors.js';
 import { _load } from './util/loader.js';
 import { cwd, resolve } from './util/path.js';
 import { Performance } from './util/performance.js';
@@ -77,6 +77,10 @@ const run = async () => {
     if (error instanceof ConfigurationError) {
       console.error(error.message + '\n');
       console.log(helpText);
+      process.exit(1);
+    } else if (error instanceof LoaderError) {
+      console.error(error.message);
+      if (error.cause instanceof Error) console.error('Reason:', error.cause.message);
       process.exit(1);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
