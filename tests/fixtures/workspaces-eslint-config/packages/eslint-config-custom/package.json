@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-eslint/eslint-config-custom",
+  "dependencies": {
+    "eslint-config-prettier": "*"
+  }
+}

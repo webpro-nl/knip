@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-eslint/root",
+  "workspaces": [
+    "packages/*"
+  ]
+}

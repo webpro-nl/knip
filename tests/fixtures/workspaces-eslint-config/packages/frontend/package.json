@@ -1,0 +1,10 @@
+{
+  "name": "@workspaces-eslint/frontend",
+  "scripts": {
+    "lint": "eslint"
+  },
+  "devDependencies": {
+    "eslint": "*",
+    "eslint-config-custom": "*"
+  }
+}

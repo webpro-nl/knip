@@ -1,0 +1,7 @@
+{
+  "workspaces": {
+    "packages/eslint-config-custom": {
+      "eslint": "index.js"
+    }
+  }
+}

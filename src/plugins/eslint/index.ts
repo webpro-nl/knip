@@ -8,7 +8,9 @@ export const NAME = 'ESLint';
 /** @public */
 export const ENABLERS = ['eslint'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =>
+  hasDependency(dependencies, ENABLERS) ||
+  Boolean(manifest.name && /(^eslint-config|\/eslint-config)/.test(manifest.name));
 
 // Current: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
 export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
