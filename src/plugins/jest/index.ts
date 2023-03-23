@@ -13,7 +13,7 @@ export const ENABLERS = ['jest'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}'];
+export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
 const maybeJoin = (base: string, id: string) => (isAbsolute(id) ? id : join(dirname(base), id));
 
@@ -30,8 +30,10 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   return config;
 };
 
-const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd }) => {
-  const config: Config.InitialOptions = await resolveExtensibleConfig(configFilePath);
+const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+  const config = configFilePath.endsWith('package.json')
+    ? (manifest.jest as Config.InitialOptions)
+    : await resolveExtensibleConfig(configFilePath);
 
   if (!config) return [];
 
