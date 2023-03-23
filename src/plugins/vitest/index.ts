@@ -14,7 +14,9 @@ export const ENABLERS = ['vitest'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vite.config.ts'];
+export const ENTRY_FILE_PATTERNS = ['vite.config.ts'];
+
+export const CONFIG_FILE_PATTERNS = ['vitest.config.ts'];
 
 const findVitestDependencies: GenericPluginCallback = async configFilePath => {
   const config: VitestConfig = await load(configFilePath);
