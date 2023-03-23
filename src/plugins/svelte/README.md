@@ -15,7 +15,7 @@ or `devDependencies`:
     "entry": [
       "svelte.config.js",
       "vite.config.ts",
-      "src/routes/**/+{page,page.server,error,layout,layout.server}.{js,ts,svelte}"
+      "src/routes/**/+{page,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}"
     ],
     "project": ["src/**/*.{js,ts,svelte}"]
   }
