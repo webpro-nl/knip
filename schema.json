@@ -320,6 +320,10 @@
           "title": "TypeScript plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/typescript/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "vite": {
+          "title": "vite plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/vite/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "vitest": {
           "title": "vitest plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/vitest/README.md)",
           "$ref": "#/definitions/plugin"

@@ -335,6 +335,7 @@ Knip contains a growing list of plugins:
 - [Tailwind][plugin-tailwind]
 - [TypeDoc][plugin-typedoc]
 - [TypeScript][plugin-typescript]
+- [Vite][plugin-vite]
 - [Vitest][plugin-vitest]
 - [Webpack][plugin-webpack]
 
@@ -702,5 +703,6 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [plugin-tailwind]: ./src/plugins/tailwind
 [plugin-typedoc]: ./src/plugins/typedoc
 [plugin-typescript]: ./src/plugins/typescript
+[plugin-vite]: ./src/plugins/vite
 [plugin-vitest]: ./src/plugins/vitest
 [plugin-webpack]: ./src/plugins/webpack

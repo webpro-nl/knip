@@ -73,6 +73,7 @@ const pluginsSchema = z.object({
   tailwind: pluginSchema,
   typedoc: pluginSchema,
   typescript: pluginSchema,
+  vite: pluginSchema,
   vitest: pluginSchema,
   webpack: pluginSchema,
 });
