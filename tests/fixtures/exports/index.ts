@@ -1,3 +1,4 @@
+import './odd';
 import { exportedResult } from './my-module.js';
 import {
   num,

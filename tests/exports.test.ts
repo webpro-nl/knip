@@ -45,7 +45,7 @@ test('Find unused files and exports', async () => {
     types: 3,
     nsTypes: 1,
     duplicates: 1,
-    processed: 14,
-    total: 14,
+    processed: 16,
+    total: 16,
   });
 });

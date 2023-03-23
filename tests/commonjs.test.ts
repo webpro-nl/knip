@@ -28,7 +28,7 @@ test('Find unused files and exports', async () => {
     ...baseCounters,
     exports: 1,
     unlisted: 8,
-    processed: 7,
-    total: 7,
+    processed: 6,
+    total: 6,
   });
 });

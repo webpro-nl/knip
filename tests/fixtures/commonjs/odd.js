@@ -1,5 +1,3 @@
-import one = require('./export-is');
-
 require(id);
 require('str' + id);
 require(`str${id}`);
