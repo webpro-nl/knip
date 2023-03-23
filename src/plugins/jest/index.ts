@@ -11,7 +11,8 @@ export const NAME = 'Jest';
 /** @public */
 export const ENABLERS = ['jest'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =>
+  hasDependency(dependencies, ENABLERS) || Boolean(manifest.name?.startsWith('jest-presets'));
 
 export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
