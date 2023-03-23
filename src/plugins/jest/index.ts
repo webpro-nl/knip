@@ -40,7 +40,9 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
   const replaceRootDir = (name: string) =>
     name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
 
-  const presets = config.preset ? [config.preset] : [];
+  const presets = (config.preset ? [config.preset] : []).map(preset =>
+    isInternal(preset) ? preset : join(preset, 'jest-preset')
+  );
   const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
   const resolvers = config.resolver ? [config.resolver] : [];
   const watchPlugins =
