@@ -66,7 +66,7 @@
     "@types/js-yaml": "4.0.5",
     "@types/micromatch": "4.0.2",
     "@types/minimist": "1.2.2",
-    "@types/node": "18.15.5",
+    "@types/node": "18.15.7",
     "@types/npmcli__map-workspaces": "3.0.0",
     "@types/webpack": "5.28.0",
     "@typescript-eslint/eslint-plugin": "5.56.0",
@@ -76,12 +76,12 @@
     "eslint-import-resolver-typescript": "3.5.3",
     "eslint-plugin-import": "2.27.5",
     "globstar": "1.0.0",
-    "prettier": "2.8.6",
+    "prettier": "2.8.7",
     "release-it": "15.9.1",
     "remark-cli": "11.0.0",
     "remark-preset-webpro": "0.0.2",
     "tsx": "3.12.6",
-    "type-fest": "3.6.1"
+    "type-fest": "3.7.0"
   },
   "engines": {
     "node": ">=16.17.0 <17 || >=18.6.0"
