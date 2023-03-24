@@ -7,7 +7,7 @@ import { PrincipalFactory } from './principal-factory.js';
 import { Exports, ImportedModule, Imports } from './types/ast.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
-import { ConfigurationError } from './util/errors.js';
+import { LoaderError } from './util/errors.js';
 import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './util/modules.js';
@@ -55,7 +55,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const manifestPath = isRoot ? chief.manifestPath : findFile(dir, 'package.json');
     const manifest = isRoot ? chief.manifest : manifestPath && _require(manifestPath);
 
-    if (!manifestPath || !manifest) throw new ConfigurationError(`Unable to load package.json for ${name}`);
+    if (!manifestPath || !manifest) throw new LoaderError(`Unable to load package.json for ${name}`);
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies });
 
