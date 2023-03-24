@@ -17,16 +17,13 @@ type Options = {
   compilers: [SyncCompilers, AsyncCompilers];
 };
 
-const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions = {}, paths: Paths = {}) => {
-  const mergedPaths = { ...compilerOptions.paths, ...paths };
-  const baseUrl = compilerOptions.baseUrl ?? '.';
-  compilerOptions.paths = Object.keys(mergedPaths).reduce((paths, key) => {
+const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Paths = {}) => {
+  const overridePaths = Object.keys(paths).reduce((overridePaths, key) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    paths![key] = mergedPaths[key].map(entry =>
-      isAbsolute(entry) ? entry : isAbsolute(baseUrl) ? join(baseUrl, entry) : join(cwd, baseUrl, entry)
-    );
-    return paths;
+    overridePaths![key] = paths[key].map(entry => (isAbsolute(entry) ? entry : join(cwd, entry)));
+    return overridePaths;
   }, {} as Paths);
+  compilerOptions.paths = { ...compilerOptions.paths, ...overridePaths };
   return compilerOptions;
 };
 
