@@ -1,5 +1,6 @@
 import parse from 'bash-parser';
 import parseArgs from 'minimist';
+import { debugLogObject } from '../util/debug.js';
 import * as FallbackResolver from './resolvers/fallback.js';
 import * as KnownResolvers from './resolvers/index.js';
 import type { Node } from 'bash-parser';
@@ -79,6 +80,11 @@ export const getBinariesFromScript = (
       }
     });
 
-  const parsed = parse(script);
-  return parsed?.commands ? getBinariesFromNodes(parsed.commands) : [];
+  try {
+    const parsed = parse(script);
+    return parsed?.commands ? getBinariesFromNodes(parsed.commands) : [];
+  } catch (error) {
+    debugLogObject('Bash parser error', error);
+    return [];
+  }
 };

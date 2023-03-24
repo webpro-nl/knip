@@ -153,3 +153,7 @@ test('getReferencesFromScripts (bail outs)', () => {
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [], [], knownOnly);
   t('deno install --no-check -r -f https://deno.land/x/deploy/deployctl.ts', []);
 });
+
+test('getReferencesFromScripts (ignore parse error)', () => {
+  t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', []); // unclosed '
+});
