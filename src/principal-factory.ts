@@ -6,7 +6,7 @@ import type { Report } from './types/issues.js';
 
 type Paths = ts.CompilerOptions['paths'];
 
-type Principal = { principal: ProjectPrincipal; cwds: Set<string>; paths: Set<string> };
+type Principal = { principal: ProjectPrincipal; cwds: Set<string>; pathKeys: Set<string> };
 type Principals = Set<Principal>;
 
 type Options = {
@@ -52,7 +52,7 @@ export class PrincipalFactory {
     const workspacePaths = compilerOptions?.paths ? Object.keys(compilerOptions.paths) : [];
     const principal = Array.from(this.principals).find(principal => {
       if (compilerOptions.baseUrl === principal.principal.compilerOptions.baseUrl) {
-        return workspacePaths.every(p => !principal.paths.has(p));
+        return workspacePaths.every(p => !principal.pathKeys.has(p));
       }
       return !compilerOptions.baseUrl;
     });
@@ -60,16 +60,16 @@ export class PrincipalFactory {
   }
 
   private linkPrincipal(principal: Principal, cwd: string, paths: Paths) {
-    Object.keys(paths ?? {}).forEach(p => principal.paths.add(p));
+    Object.keys(paths ?? {}).forEach(p => principal.pathKeys.add(p));
     principal.principal.compilerOptions.paths = { ...principal.principal.compilerOptions.paths, ...paths };
     principal.cwds.add(cwd);
   }
 
   private addNewPrincipal({ cwd, compilerOptions, report, compilers }: Options) {
     const principal = new ProjectPrincipal({ cwd, compilerOptions, report, compilers });
-    const paths = new Set(Object.keys(compilerOptions?.paths ?? {}));
+    const pathKeys = new Set(Object.keys(compilerOptions?.paths ?? {}));
     compilerOptions.baseUrl = join(cwd, compilerOptions.baseUrl ?? '.');
-    this.principals.add({ principal, cwds: new Set([cwd]), paths });
+    this.principals.add({ principal, cwds: new Set([cwd]), pathKeys });
     return principal;
   }
 
