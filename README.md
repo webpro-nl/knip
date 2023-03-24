@@ -72,14 +72,15 @@ file. Let's say you are using `.ts` files excusively and have all source files o
 The `entry` files target the starting point(s) to resolve the rest of the imported code. The `project` files should
 contain all files to match against the files resolved from the entry files, including potentially unused files.
 
-Places where Knip looks for configuration:
+Places where Knip looks for configuration (ordered by priority):
 
 - `knip.json`
 - `knip.jsonc`
 - `.knip.json`
 - `.knip.jsonc`
-- `knip.js`
 - `knip.ts`
+- `knip.js`
+- `package.json#knip`
 
 So you can use a dynamic `knip.ts` with TypeScript if you prefer:
 
@@ -510,6 +511,9 @@ Such variables and types can be marked with the JSDoc `@public` tag:
  */
 
 export const merge = function () {};
+
+/** @public */
+export const split = function () {};
 ```
 
 Knip does not report public exports and types as unused.
