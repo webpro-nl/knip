@@ -18,4 +18,6 @@ export interface BoundSourceFile extends ts.SourceFile {
 
   // Used in `maybeAddNamespaceAccessAsImport` (perf only)
   locals?: SymbolTable;
+
+  scriptKind?: ts.ScriptKind;
 }

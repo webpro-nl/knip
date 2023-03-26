@@ -2,20 +2,7 @@ import ts from 'typescript';
 import type { SymbolType } from './issues.js';
 
 type FilePath = string;
-type Specifier = string;
 type Identifier = string;
-
-type ImportItems = Set<Identifier>;
-
-export type ImportedModule = {
-  specifier: Specifier;
-  symbols: ImportItems;
-  isStar: boolean;
-  isReExported: boolean;
-  isReExportedBy: Set<string>;
-};
-
-export type Imports = Map<FilePath, ImportedModule>;
 
 export type ExportItem = {
   node: ts.Node;

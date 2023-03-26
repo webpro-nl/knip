@@ -1,13 +1,13 @@
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
-import { getImportsAndExports } from './typescript/ast-walker.js';
 import { createHosts } from './typescript/createHosts.js';
+import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { extname, isInNodeModules } from './util/path.js';
 import { timerify } from './util/Performance.js';
-import type { ExportItem, ExportItemMember } from './types/ast.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
+import type { ExportItem, ExportItemMember } from './types/exports.js';
 import type { Report } from './types/issues.js';
 
 type ProjectPrincipalOptions = {
