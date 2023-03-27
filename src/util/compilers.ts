@@ -24,8 +24,5 @@ export const partitionCompilers = (rawLocalConfig: RawConfiguration) => {
     asyncCompilers[ext] = rawLocalConfig.asyncCompilers[extension] as AsyncCompilerFn;
   }
 
-  rawLocalConfig.syncCompilers = syncCompilers;
-  rawLocalConfig.asyncCompilers = asyncCompilers;
-
-  return rawLocalConfig;
+  return { ...rawLocalConfig, syncCompilers, asyncCompilers };
 };
