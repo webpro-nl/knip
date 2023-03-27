@@ -10,4 +10,4 @@ export const ENABLERS = ['tailwindcss'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['tailwind.config.js'];
+export const CONFIG_FILE_PATTERNS = ['tailwind.config.{js,cjs}'];
