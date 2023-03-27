@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "tailwind": {
-    "config": ["tailwind.config.js"]
+    "config": ["tailwind.config.{js,cjs,mjs,ts}"]
   }
 }
 ```
