@@ -1,4 +1,4 @@
-import { timerify } from '../../util/performance.js';
+import { timerify } from '../../util/Performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesDeep } from './helpers.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';

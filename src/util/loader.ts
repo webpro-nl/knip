@@ -2,7 +2,7 @@ import { pathToFileURL } from 'node:url';
 import { LoaderError } from './errors.js';
 import { loadJSON, loadYAML, loadFile, parseJSON, parseYAML } from './fs.js';
 import { extname } from './path.js';
-import { timerify } from './performance.js';
+import { timerify } from './Performance.js';
 import { jiti } from './register.js';
 
 const load = async (filePath: string) => {

@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import { timerify } from '../../util/performance.js';
+import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { VitestConfig } from './types.js';

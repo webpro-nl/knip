@@ -5,7 +5,7 @@ import { getImportsAndExports } from './typescript/ast-walker.js';
 import { createHosts } from './typescript/createHosts.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { extname, isInNodeModules } from './util/path.js';
-import { timerify } from './util/performance.js';
+import { timerify } from './util/Performance.js';
 import type { ExportItem, ExportItemMember } from './types/ast.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { Report } from './types/issues.js';

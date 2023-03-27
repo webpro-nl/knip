@@ -7,7 +7,7 @@ import parsedArgs, { helpText } from './util/cli-arguments.js';
 import { isKnownError, ConfigurationError } from './util/errors.js';
 import { _load } from './util/loader.js';
 import { cwd, resolve } from './util/path.js';
-import { Performance } from './util/performance.js';
+import { Performance } from './util/Performance.js';
 import { version } from './version.js';
 import { main } from './index.js';
 import type { IssueType } from './types/issues.js';

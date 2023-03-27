@@ -1,6 +1,6 @@
 import { compact } from '../../util/array.js';
 import { isInternal } from '../../util/path.js';
-import { timerify } from '../../util/performance.js';
+import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { TsConfigJson } from 'type-fest';

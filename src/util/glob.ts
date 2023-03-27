@@ -4,7 +4,7 @@ import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
 import { join, relative } from './path.js';
-import { timerify } from './performance.js';
+import { timerify } from './Performance.js';
 
 export const prependDirToPattern = (workingDir: string, pattern: string) => {
   if (pattern.startsWith('!')) return '!' + join(workingDir, pattern.slice(1));

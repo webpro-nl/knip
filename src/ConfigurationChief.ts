@@ -1,6 +1,6 @@
 import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
-import { ConfigurationValidator } from './configuration-validator.js';
+import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS } from './constants.js';
 import * as plugins from './plugins/index.js';
 import { arrayify, compact } from './util/array.js';

@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import { timerify } from '../../util/performance.js';
+import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { resolvePresetName, resolvePluginName, api } from './helpers.js';
 import type { BabelConfig, BabelConfigObj } from './types.js';

@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import { timerify } from '../../util/performance.js';
+import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { WebpackConfig, Env, Argv } from './types.js';

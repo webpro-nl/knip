@@ -3,7 +3,7 @@ import { compact } from '../util/array.js';
 import { partition } from '../util/array.js';
 import { getPackageNameFromModuleSpecifier, stripBinary } from '../util/modules.js';
 import { isInternal } from '../util/path.js';
-import { timerify } from '../util/performance.js';
+import { timerify } from '../util/Performance.js';
 import { getBinariesFromScript } from './bash-parser.js';
 import type { GetReferencesFromScripts } from './types.js';
 

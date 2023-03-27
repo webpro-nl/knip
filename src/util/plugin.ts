@@ -1,5 +1,5 @@
 import { _load } from './loader.js';
-import { timerify } from './performance.js';
+import { timerify } from './Performance.js';
 
 export const toCamelCase = (name: string) =>
   name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));

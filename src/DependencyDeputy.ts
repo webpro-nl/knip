@@ -1,5 +1,5 @@
 import { isBuiltin } from 'node:module';
-import { Workspace } from './configuration-chief.js';
+import { Workspace } from './ConfigurationChief.js';
 import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES } from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
 import type { Issue } from './types/issues.js';

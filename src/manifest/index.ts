@@ -1,5 +1,5 @@
 import { _getReferencesFromScripts } from '../binaries/index.js';
-import { timerify } from '../util/performance.js';
+import { timerify } from '../util/Performance.js';
 import { getPackageManifest } from './helpers.js';
 import type { WorkspaceConfiguration } from '../types/config.js';
 import type { InstalledBinaries, PeerDependencies } from '../types/workspace.js';

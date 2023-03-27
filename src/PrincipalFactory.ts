@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { ProjectPrincipal } from './project-principal.js';
+import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { join, isAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { Report } from './types/issues.js';

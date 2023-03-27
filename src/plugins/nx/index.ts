@@ -1,6 +1,6 @@
 import { _getReferencesFromScripts } from '../../binaries/index.js';
 import { compact } from '../../util/array.js';
-import { timerify } from '../../util/performance.js';
+import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { NxProjectConfiguration } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';

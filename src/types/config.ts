@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ConfigurationValidator } from '../configuration-validator.js';
+import { ConfigurationValidator } from '../ConfigurationValidator.js';
 import * as Plugins from '../plugins/index.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 

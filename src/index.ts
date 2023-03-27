@@ -1,9 +1,9 @@
-import { ConfigurationChief } from './configuration-chief.js';
-import { ConsoleStreamer } from './console-streamer.js';
+import { ConfigurationChief } from './ConfigurationChief.js';
+import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
-import { DependencyDeputy } from './dependency-deputy.js';
-import { IssueCollector } from './issue-collector.js';
-import { PrincipalFactory } from './principal-factory.js';
+import { DependencyDeputy } from './DependencyDeputy.js';
+import { IssueCollector } from './IssueCollector.js';
+import { PrincipalFactory } from './PrincipalFactory.js';
 import { Exports, ImportedModule, Imports } from './types/ast.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
@@ -15,7 +15,7 @@ import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/p
 import { _resolveSpecifier, _tryResolve } from './util/require.js';
 import { _require } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
-import { WorkspaceWorker } from './workspace-worker.js';
+import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { CommandLineOptions } from './types/cli.js';
 
 export type { RawConfiguration as KnipConfig } from './types/config.js';

@@ -3,7 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { debugLog } from './debug.js';
 import { getPackageNameFromModuleSpecifier } from './modules.js';
 import { cwd, toPosix, join } from './path.js';
-import { timerify } from './performance.js';
+import { timerify } from './Performance.js';
 
 const createRequire = (path?: string) => nodeCreateRequire(pathToFileURL(path ?? cwd));
 
