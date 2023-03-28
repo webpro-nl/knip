@@ -51,7 +51,7 @@ test('getReferencesFromScripts (ts-node/tsx)', () => {
 });
 
 test('getReferencesFromScripts (--require)', () => {
-  t('nodemon --require dotenv/config ./server.js --watch ./server.js', ['nodemon', 'dotenv']);
+  t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['nodemon', 'dotenv'], [js]);
   t('program --loader tsx --test "test/*.spec.ts"', ['program', 'tsx']);
   t('program --loader ldr --loader tsx --test "test/*.spec.ts"', ['program', 'ldr', 'tsx']);
 });

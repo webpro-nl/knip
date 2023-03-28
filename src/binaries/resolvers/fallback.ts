@@ -12,6 +12,7 @@ const withoutPositional: ArgResolver = parsed => [parsed.require].flat();
 
 const argFilters: ArgResolvers = {
   'babel-node': withPositional,
+  nodemon: withPositional,
   'ts-node': withPositional,
   tsx: parsed => parsed._.filter(p => p !== 'watch'),
   default: withoutPositional,

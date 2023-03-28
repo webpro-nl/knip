@@ -1,7 +1,7 @@
 {
   "name": "@fixtures/npm-scripts",
   "scripts": {
-    "nodemon": "nodemon index.js",
+    "nodemon": "nodemon script.js",
     "build": "rm -rf && dotenv -- nx build npm-scripts",
     "pm2": "NODE_ENV=production pm2 start index.js",
     "dev": "pm2-dev start index.js",
