@@ -1,9 +1,11 @@
-import { ConfigurationChief } from './ConfigurationChief.js';
+import { _getReferencesFromScripts } from './binaries/index.js';
+import { ConfigurationChief, Workspace } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
+import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { Exports } from './types/exports.js';
 import { ImportedModule, Imports } from './types/imports.js';
 import { compact } from './util/array.js';
@@ -18,6 +20,13 @@ import { _require } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { CommandLineOptions } from './types/cli.js';
+
+type HandleReferencedDependencyOptions = {
+  specifier: string;
+  containingFilePath: string;
+  principal: ProjectPrincipal;
+  workspace: Workspace;
+};
 
 export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Reporter, ReporterOptions } from './types/issues.js';
@@ -42,6 +51,49 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const report = chief.getIssueTypesToReport();
 
   debugLogObject('Included workspaces', workspaces);
+
+  const handleReferencedDependency = ({
+    specifier,
+    containingFilePath,
+    principal,
+    workspace,
+  }: HandleReferencedDependencyOptions) => {
+    if (isInternal(specifier)) {
+      // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js
+      const absSpecifier = isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier);
+      const filePath = _tryResolve(absSpecifier, containingFilePath);
+      if (filePath) {
+        principal.addEntryPath(filePath);
+      } else {
+        collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
+      }
+    } else {
+      if (isInNodeModules(specifier)) {
+        // Pattern: /abs/path/to/repo/node_modules/package/index.js
+        const packageName = getPackageNameFromFilePath(specifier);
+        const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+        if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
+      } else {
+        // Patterns: package, @any/package, @local/package, self-reference
+        const packageName = getPackageNameFromModuleSpecifier(specifier);
+        const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+        if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
+
+        // Patterns: @local/package/file, self-reference/file
+        if (specifier !== packageName) {
+          const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
+          if (otherWorkspace) {
+            const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
+            if (filePath) {
+              principal.addEntryPath(filePath);
+            } else {
+              collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
+            }
+          }
+        }
+      }
+    }
+  };
 
   const enabledPluginsStore: Map<string, string[]> = new Map();
 
@@ -158,39 +210,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     enabledPluginsStore.set(name, enabledPlugins);
 
     referencedDependencies.forEach(([containingFilePath, specifier]) => {
-      if (isInternal(specifier)) {
-        // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js
-        const absSpecifier = isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier);
-        const filePath = _tryResolve(absSpecifier, containingFilePath);
-        if (filePath) {
-          principal.addEntryPath(filePath);
-        } else {
-          collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
-        }
-      } else {
-        if (isInNodeModules(specifier)) {
-          // Pattern: /abs/path/to/repo/node_modules/package/index.js
-          const packageName = getPackageNameFromFilePath(specifier);
-          const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
-          if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
-        } else {
-          // Patterns: package, @any/package, @local/package, self-reference
-          const packageName = getPackageNameFromModuleSpecifier(specifier);
-          const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
-          if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
-
-          // Patterns: @local/package/file, self-reference/file
-          const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
-          if (otherWorkspace && specifier !== packageName) {
-            const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
-            if (filePath) {
-              principal.addEntryPath(filePath);
-            } else {
-              collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
-            }
-          }
-        }
-      }
+      handleReferencedDependency({ specifier, containingFilePath, principal, workspace });
     });
   }
 
@@ -206,10 +226,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       collector.counters.processed++;
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, duplicateExports } = principal.analyzeSourceFile(filePath);
+        const { imports, exports, scripts } = principal.analyzeSourceFile(filePath);
         const { internal, external, unresolved } = imports;
+        const { exported, duplicate } = exports;
 
-        if (exports.size > 0) exportedSymbols.set(filePath, exports);
+        if (exported.size > 0) exportedSymbols.set(filePath, exported);
 
         for (const [specifierFilePath, importItems] of internal.entries()) {
           const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
@@ -243,7 +264,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           }
         }
 
-        duplicateExports.forEach(symbols => {
+        duplicate.forEach(symbols => {
           const symbol = symbols.join('|');
           collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
         });
@@ -256,6 +277,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
         unresolved.forEach(moduleSpecifier => {
           collector.addIssue({ type: 'unresolved', filePath, symbol: moduleSpecifier });
+        });
+
+        const { binaries, entryFiles } = _getReferencesFromScripts(scripts);
+        [...binaries, ...entryFiles].forEach(specifier => {
+          handleReferencedDependency({ specifier, containingFilePath: filePath, principal, workspace });
         });
       }
     };

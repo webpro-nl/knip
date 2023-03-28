@@ -17,3 +17,9 @@ export const exportVisitor: VisitorFactory<AddExportOptions> = (fileCondition, v
     return (node, options) => visitorFn(node, options);
   }
 };
+
+export const scriptVisitor: VisitorFactory<string> = (fileCondition, visitorFn) => sourceFile => {
+  if (fileCondition(sourceFile)) {
+    return (node, options) => visitorFn(node, options);
+  }
+};

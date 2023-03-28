@@ -1,0 +1,21 @@
+{
+  "name": "@fixtures/custom-visitors",
+  "scripts": {
+    "zx1": "zx ./zx-docs.mjs",
+    "zx2": "zx --quiet ./script.js",
+    "zx3": "npx --yes zx --quiet ./node.mjs"
+  },
+  "dependencies": {
+    "dep": "*"
+  },
+  "devDependencies": {
+    "all-contributors": "*",
+    "octokit": "*",
+    "zx": "*"
+  },
+  "knip": {
+    "ignoreBinaries": [
+      "sleep"
+    ]
+  }
+}

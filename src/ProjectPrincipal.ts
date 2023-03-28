@@ -179,7 +179,7 @@ export class ProjectPrincipal {
     const skipTypeOnly = !this.isReportTypes;
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
-    const { imports, exports, duplicateExports } = getImportsAndExports(sourceFile, { skipTypeOnly, skipExports });
+    const { imports, exports, scripts } = getImportsAndExports(sourceFile, { skipTypeOnly, skipExports });
 
     const { internal, unresolved, external } = imports;
 
@@ -216,7 +216,7 @@ export class ProjectPrincipal {
         external,
       },
       exports,
-      duplicateExports,
+      scripts,
     };
   }
 

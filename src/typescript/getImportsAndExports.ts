@@ -1,9 +1,10 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { isInNodeModules } from '../util/path.js';
-import * as ast from './ast-helpers.js';
+import { isDeclarationFileExtension, isAccessExpression, getAccessExpressionName } from './ast-helpers.js';
 import getExportVisitors from './visitors/exports/index.js';
 import getImportVisitors from './visitors/imports/index.js';
+import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import type { ExportItems as Exports, ExportItem } from '../types/exports.js';
 import type { Imports } from '../types/imports.js';
@@ -11,6 +12,7 @@ import type { Imports } from '../types/imports.js';
 const getVisitors = (sourceFile: ts.SourceFile) => ({
   export: getExportVisitors(sourceFile),
   import: getImportVisitors(sourceFile),
+  script: getScriptVisitors(sourceFile),
 });
 
 export type GetImportsAndExportsOptions = {
@@ -32,6 +34,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
   const unresolvedImports: Set<string> = new Set();
   const exports: Exports = new Map();
   const aliasedExports: Record<string, string[]> = {};
+  const scripts: Set<string> = new Set();
 
   const importedInternalSymbols: Map<ts.Symbol, string> = new Map();
 
@@ -91,7 +94,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
             // Self-referencing imports are resolved by `sourceFile.resolvedModules`, but not part of the program
             // through `principal.createProgram`. Add as internal import, and follow up with `principal.addEntryPath`.
             addInternalImport({ identifier, specifier, symbol, filePath });
-          } else if (ast.isDeclarationFileExtension(module.resolvedModule.extension)) {
+          } else if (isDeclarationFileExtension(module.resolvedModule.extension)) {
             // We use TypeScript's module resolution, but it returns @types/pkg. In the rest of the program we want the
             // package name based on the original specifier.
             externalImports.add(specifier);
@@ -166,10 +169,20 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
       }
     }
 
-    if (ast.isAccessExpression(node)) {
+    for (const visitor of visitors.script) {
+      if (visitor) {
+        const results = visitor(node, options);
+        if (results) {
+          [results].flat().forEach(script => scripts.add(script));
+          return;
+        }
+      }
+    }
+
+    if (isAccessExpression(node)) {
       maybeAddNamespaceAccessAsImport({
         namespace: node.expression.getText(),
-        member: ast.getAccessExpressionName(node),
+        member: getAccessExpressionName(node),
       });
     }
 
@@ -184,7 +197,10 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
       external: externalImports,
       unresolved: unresolvedImports,
     },
-    exports,
-    duplicateExports: Object.values(aliasedExports),
+    exports: {
+      exported: exports,
+      duplicate: Object.values(aliasedExports),
+    },
+    scripts,
   };
 };
