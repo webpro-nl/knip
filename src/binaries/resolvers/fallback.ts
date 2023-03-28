@@ -4,13 +4,17 @@ import { tryResolveFilePaths } from './util.js';
 import type { Resolver } from '../types.js';
 import type { ParsedArgs } from 'minimist';
 
-type ArgResolvers = Record<string, (parsed: ParsedArgs) => string[]>;
+type ArgResolver = (parsed: ParsedArgs) => string[];
+type ArgResolvers = Record<string, ArgResolver>;
+
+const withPositional: ArgResolver = parsed => [parsed._[0], parsed.require].flat();
+const withoutPositional: ArgResolver = parsed => [parsed.require].flat();
 
 const argFilters: ArgResolvers = {
-  'babel-node': parsed => [parsed._[0], parsed.require].flat(),
-  'ts-node': parsed => [parsed._[0], parsed.require].flat(),
+  'babel-node': withPositional,
+  'ts-node': withPositional,
   tsx: parsed => parsed._.filter(p => p !== 'watch'),
-  default: parsed => [parsed.require].flat(),
+  default: withoutPositional,
 };
 
 export const resolve: Resolver = (binary, args, { cwd }) => {
