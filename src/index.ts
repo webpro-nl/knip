@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from './binaries/index.js';
+import { _getDependenciesFromScripts } from './binaries/index.js';
 import { ConfigurationChief, Workspace } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
@@ -279,8 +279,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           collector.addIssue({ type: 'unresolved', filePath, symbol: moduleSpecifier });
         });
 
-        const { binaries, entryFiles } = _getReferencesFromScripts(scripts);
-        [...binaries, ...entryFiles].forEach(specifier => {
+        _getDependenciesFromScripts(scripts, { cwd: dirname(filePath) }).forEach(specifier => {
           handleReferencedDependency({ specifier, containingFilePath: filePath, principal, workspace });
         });
       }

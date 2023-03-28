@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from '../../binaries/index.js';
+import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { LintStagedConfig } from './types.js';
@@ -33,15 +33,15 @@ const findLintStagedDependencies: GenericPluginCallback = async (configFilePath,
     config = config();
   }
 
-  const binaries: Set<string> = new Set();
+  const dependencies: Set<string> = new Set();
 
   for (const entry of Object.values(config).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
     const options = { cwd, manifest };
-    _getReferencesFromScripts(scripts, options).binaries.forEach(bin => binaries.add(bin));
+    _getDependenciesFromScripts(scripts, options).forEach(identifier => dependencies.add(identifier));
   }
 
-  return Array.from(binaries);
+  return Array.from(dependencies);
 };
 
 export const findDependencies = timerify(findLintStagedDependencies);

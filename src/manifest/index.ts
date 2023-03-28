@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from '../binaries/index.js';
+import { _getDependenciesFromScripts } from '../binaries/index.js';
 import { timerify } from '../util/Performance.js';
 import { getPackageManifest } from './helpers.js';
 import type { InstalledBinaries, PeerDependencies } from '../types/workspace.js';
@@ -23,10 +23,7 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
     return scripts;
   }, [] as string[]);
 
-  const { entryFiles, binaries: referencedBinaries } = _getReferencesFromScripts(scripts, {
-    cwd: dir,
-    manifest,
-  });
+  const dependencies = _getDependenciesFromScripts(scripts, { cwd: dir, manifest });
 
   // Find all binaries for each dependency
   const installedBinaries: InstalledBinaries = new Map();
@@ -68,7 +65,7 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
   }
 
   return {
-    dependencies: [...referencedBinaries, ...entryFiles],
+    dependencies,
     peerDependencies,
     installedBinaries,
   };

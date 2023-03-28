@@ -2,10 +2,7 @@ import type { PackageJson } from 'type-fest';
 
 type Options = { cwd?: string; manifest?: PackageJson; knownGlobalsOnly?: boolean };
 
-export type GetReferencesFromScripts = (
-  npmScripts: string | string[] | Set<string>,
-  options?: Options
-) => { entryFiles: string[]; binaries: string[] };
+export type GetDependenciesFromScripts = (npmScripts: string | string[] | Set<string>, options?: Options) => string[];
 
 type FromArgs = (args: string[]) => string[];
 

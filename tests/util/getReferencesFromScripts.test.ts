@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { _getReferencesFromScripts } from '../../src/binaries/index.js';
+import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
 import { join, resolve } from '../../src/util/path.js';
 
 const cwd = resolve('tests/fixtures/binaries');
@@ -13,9 +13,9 @@ const index = join(cwd, 'dir', 'index.js');
 const pkgScripts = { cwd, manifest: { scripts: { program: '' } } };
 const knownOnly = { cwd, knownGlobalsOnly: true };
 
-type T = (script: string | string[], binaries: string[], entryFiles?: string[], options?: { cwd: string }) => void;
-const t: T = (script, binaries = [], entryFiles = [], options = { cwd }) =>
-  assert.deepEqual(_getReferencesFromScripts(script, options), { binaries, entryFiles });
+type T = (script: string | string[], dependencies: string[], options?: { cwd: string }) => void;
+const t: T = (script, dependencies = [], options = { cwd }) =>
+  assert.deepEqual(_getDependenciesFromScripts(script, options), dependencies);
 
 test('getReferencesFromScripts', () => {
   t('program', ['program']);
@@ -31,27 +31,27 @@ test('getReferencesFromScripts', () => {
 });
 
 test('getReferencesFromScripts (node)', () => {
-  t('node script.js', [], [js]);
-  t('node -r script.js', [], [js]);
+  t('node script.js', [js]);
+  t('node -r script.js', [js]);
   t('node -r package/script', ['package']);
-  t('node -r ./require.js script.js', [], [js, req]);
-  t('node --require=pkg1 --require pkg2 script', ['pkg1', 'pkg2'], [js]);
-  t('node --experimental-loader ts-node/esm/transpile-only script.js', ['ts-node'], [js]);
-  t('node -r @scope/package/register ./dir', ['@scope/package'], [index]);
+  t('node -r ./require.js script.js', [js, req]);
+  t('node --require=pkg1 --require pkg2 script', [js, 'pkg1', 'pkg2']);
+  t('node --experimental-loader ts-node/esm/transpile-only script.js', [js, 'ts-node']);
+  t('node -r @scope/package/register ./dir', [index, '@scope/package']);
   t('node dist/index.js', []);
 });
 
 test('getReferencesFromScripts (ts-node/tsx)', () => {
-  t('ts-node --require pkg/register main.ts', ['ts-node', 'pkg'], [ts]);
-  t('tsx ./main.ts', ['tsx'], [ts]);
-  t('tsx watch ./main.ts', ['tsx'], [ts]);
-  t('node --loader tsx ./main.ts', ['tsx'], [ts]);
-  t('npx tsx main', ['tsx'], [ts]);
-  t('babel-node --inspect=0.0.0.0 ./main.ts', ['babel-node'], [ts]);
+  t('ts-node --require pkg/register main.ts', ['ts-node', ts, 'pkg']);
+  t('tsx ./main.ts', ['tsx', ts]);
+  t('tsx watch ./main.ts', ['tsx', ts]);
+  t('node --loader tsx ./main.ts', [ts, 'tsx']);
+  t('npx tsx main', ['tsx', ts]);
+  t('babel-node --inspect=0.0.0.0 ./main.ts', ['babel-node', ts]);
 });
 
 test('getReferencesFromScripts (--require)', () => {
-  t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['nodemon', 'dotenv'], [js]);
+  t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['nodemon', js, 'dotenv']);
   t('program --loader tsx --test "test/*.spec.ts"', ['program', 'tsx']);
   t('program --loader ldr --loader tsx --test "test/*.spec.ts"', ['program', 'ldr', 'tsx']);
 });
@@ -80,8 +80,8 @@ test('getReferencesFromScripts (cross-env)', () => {
 });
 
 test('getReferencesFromScripts (cross-env/node)', () => {
-  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['cross-env', 'dotenv'], [js]);
-  t('cross-env NODE_ENV=production node -r esm script.js', ['cross-env', 'esm'], [js]);
+  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['cross-env', js, 'dotenv']);
+  t('cross-env NODE_ENV=production node -r esm script.js', ['cross-env', js, 'esm']);
 });
 
 test('getReferencesFromScripts (npm)', () => {
@@ -93,7 +93,7 @@ test('getReferencesFromScripts (npx)', () => {
   t('npx pkg', ['pkg']);
   t('npx prisma migrate reset --force', ['prisma']);
   t('npx @scope/pkg', ['@scope/pkg']);
-  t('npx tsx watch main', ['tsx'], [ts]);
+  t('npx tsx watch main', ['tsx', ts]);
   t('npx -y pkg', []);
   t('npx --yes pkg', []);
   t('npx --no pkg --edit ${1}', ['pkg']);
@@ -108,8 +108,8 @@ test('getReferencesFromScripts (pnpm)', () => {
   t('pnpm exec program', ['program']);
   t('pnpm run program', []);
   t('pnpm program', ['program']);
-  t('pnpm run program', [], [], pkgScripts);
-  t('pnpm program', [], [], pkgScripts);
+  t('pnpm run program', [], pkgScripts);
+  t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', []);
   t('pnpm --package=pkg-a dlx pkg', []);
 });
@@ -118,23 +118,23 @@ test('getReferencesFromScripts (yarn)', () => {
   t('yarn exec program', ['program']);
   t('yarn run program', ['program']);
   t('yarn program', ['program']);
-  t('yarn run program', [], [], pkgScripts);
-  t('yarn program', [], [], pkgScripts);
+  t('yarn run program', [], pkgScripts);
+  t('yarn program', [], pkgScripts);
   t('yarn dlx pkg', []);
   t('yarn --package=pkg-a -p pkg-b dlx pkg', []);
-  t('yarn node script.js', [], [js]);
+  t('yarn node script.js', [js]);
 });
 
 test('getReferencesFromScripts (rollup)', () => {
-  t('rollup --watch --watch.onEnd="node script.js"', ['rollup'], [js]);
-  t('rollup -p ./require.js', ['rollup'], [req]);
-  t('rollup --plugin @rollup/plugin-node-resolve', ['rollup', '@rollup/plugin-node-resolve'], []);
-  t('rollup --configPlugin @rollup/plugin-typescript', ['rollup', '@rollup/plugin-typescript'], []);
+  t('rollup --watch --watch.onEnd="node script.js"', ['rollup', js]);
+  t('rollup -p ./require.js', ['rollup', req]);
+  t('rollup --plugin @rollup/plugin-node-resolve', ['rollup', '@rollup/plugin-node-resolve']);
+  t('rollup --configPlugin @rollup/plugin-typescript', ['rollup', '@rollup/plugin-typescript']);
 });
 
 test('getReferencesFromScripts (zx)', () => {
-  t('zx --quiet script.js', ['zx'], [js]);
-  t('npx --yes zx --quiet script.js', [], [js]);
+  t('zx --quiet script.js', ['zx', js]);
+  t('npx --yes zx --quiet script.js', [js]);
 });
 
 test('getReferencesFromScripts (bash expressions)', () => {
@@ -144,8 +144,8 @@ test('getReferencesFromScripts (bash expressions)', () => {
 });
 
 test('getReferencesFromScripts (bash expansion)', () => {
-  t('var=$(node ./script.js)', [], [js]);
-  t('var=`node ./script.js`;var=`node ./require.js`', [], [js, req]);
+  t('var=$(node ./script.js)', [js]);
+  t('var=`node ./script.js`;var=`node ./require.js`', [js, req]);
 });
 
 test('getReferencesFromScripts (multiline)', () => {
@@ -154,8 +154,8 @@ test('getReferencesFromScripts (multiline)', () => {
 });
 
 test('getReferencesFromScripts (bail outs)', () => {
-  t('dotenv', [], [], knownOnly);
-  t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [], [], knownOnly);
+  t('dotenv', [], knownOnly);
+  t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [], knownOnly);
   t('deno install --no-check -r -f https://deno.land/x/deploy/deployctl.ts', []);
 });
 

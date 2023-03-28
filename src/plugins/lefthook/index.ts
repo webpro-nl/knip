@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from '../../binaries/index.js';
+import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
@@ -22,13 +22,11 @@ const findLefthookDependencies: GenericPluginCallback = async (configFilePath, {
 
   const scripts = getValuesByKeyDeep(config, 'run').filter((value): value is string => typeof value === 'string');
 
-  const { binaries, entryFiles } = _getReferencesFromScripts(scripts, {
+  return _getDependenciesFromScripts(scripts, {
     cwd,
     manifest,
     knownGlobalsOnly: true,
   });
-
-  return [...binaries, ...entryFiles];
 };
 
 export const findDependencies = timerify(findLefthookDependencies);

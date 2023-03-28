@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from '../../binaries/index.js';
+import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { compact } from '../../util/array.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
@@ -32,9 +32,9 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, 
       .flatMap(target => (target.options?.commands ?? target.options?.command ? [target.options.command] : []))
   );
 
-  const { binaries, entryFiles } = _getReferencesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true });
+  const dependencies = _getDependenciesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true });
 
-  return [...executors, ...binaries, ...entryFiles];
+  return [...executors, ...dependencies];
 };
 
 export const findDependencies = timerify(findNxDependencies);

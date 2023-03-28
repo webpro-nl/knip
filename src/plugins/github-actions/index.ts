@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from '../../binaries/index.js';
+import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { _firstGlob } from '../../util/glob.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { timerify } from '../../util/Performance.js';
@@ -24,13 +24,11 @@ const findGithubActionsDependencies: GenericPluginCallback = async (configFilePa
 
   const scripts = getValuesByKeyDeep(config, 'run').filter((value): value is string => typeof value === 'string');
 
-  const { binaries, entryFiles } = _getReferencesFromScripts(scripts, {
+  return _getDependenciesFromScripts(scripts, {
     cwd,
     manifest,
     knownGlobalsOnly: true,
   });
-
-  return [...binaries, ...entryFiles];
 };
 
 export const findDependencies = timerify(findGithubActionsDependencies);

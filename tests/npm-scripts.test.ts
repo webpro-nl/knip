@@ -33,6 +33,7 @@ test('Referenced dependencies in npm scripts', async () => {
 
   assert.deepEqual(dependencies, [
     'nodemon',
+    join(cwd, 'script.js'),
     'rm',
     'dotenv',
     'nx',
@@ -41,7 +42,6 @@ test('Referenced dependencies in npm scripts', async () => {
     'eslint',
     'bash',
     'peer-dep',
-    join(cwd, 'script.js'),
   ]);
 
   const expectedPeerDependencies = new Map();

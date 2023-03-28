@@ -10,5 +10,5 @@ const manifest = getManifest(cwd);
 test('Find dependencies in lefthook configuration (json)', async () => {
   const configFilePath = join(cwd, 'lefthook.yml');
   const dependencies = await lefthook.findDependencies(configFilePath, { manifest, cwd });
-  assert.deepEqual(dependencies, ['eslint', join(cwd, 'example.mjs')]);
+  assert.deepEqual(dependencies, [join(cwd, 'example.mjs'), 'eslint']);
 });

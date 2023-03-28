@@ -1,4 +1,4 @@
-import { _getReferencesFromScripts } from '../../binaries/index.js';
+import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
@@ -22,13 +22,12 @@ const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd,
   const otherArgs = config?.nodeArguments ?? [];
 
   const cmd = `node ${otherArgs.join(' ') + ' '}${requireArgs.join(' ')}`;
-  const { binaries } = _getReferencesFromScripts([cmd], {
+
+  return _getDependenciesFromScripts([cmd], {
     cwd,
     manifest,
     knownGlobalsOnly: true,
   });
-
-  return binaries;
 };
 
 export const findDependencies = timerify(findAvaDependencies);
