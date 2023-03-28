@@ -132,6 +132,11 @@ test('getReferencesFromScripts (rollup)', () => {
   t('rollup --configPlugin @rollup/plugin-typescript', ['rollup', '@rollup/plugin-typescript'], []);
 });
 
+test('getReferencesFromScripts (zx)', () => {
+  t('zx --quiet script.js', ['zx'], [js]);
+  t('npx --yes zx --quiet script.js', [], [js]);
+});
+
 test('getReferencesFromScripts (bash expressions)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['make']);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['make']);
