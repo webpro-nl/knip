@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import { Workspace } from './ConfigurationChief.js';
-import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES } from './constants.js';
+import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES, IGNORED_GLOBAL_BINARIES } from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
 import type { Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
@@ -37,12 +37,14 @@ export class DependencyDeputy {
     manifestPath,
     manifest,
     ignoreDependencies,
+    ignoreBinaries,
   }: {
     name: string;
     dir: string;
     manifestPath: string;
     manifest: PackageJson;
     ignoreDependencies: string[];
+    ignoreBinaries: string[];
   }) {
     const scripts = Object.values(manifest.scripts ?? {}) as string[];
     const dependencies = Object.keys(manifest.dependencies ?? {});
@@ -55,6 +57,7 @@ export class DependencyDeputy {
       workspaceDir: dir,
       manifestPath,
       ignoreDependencies,
+      ignoreBinaries,
       scripts,
       dependencies,
       peerDependencies,
@@ -129,6 +132,8 @@ export class DependencyDeputy {
     }
 
     // Handle binaries
+    if (IGNORED_GLOBAL_BINARIES.includes(packageName)) return true;
+    if (this.getWorkspaceManifest(workspace.name)?.ignoreBinaries.includes(packageName)) return true;
     for (const name of workspaceNames) {
       const binaries = this.getInstalledBinaries(name);
       if (binaries?.has(packageName)) {
@@ -154,10 +159,23 @@ export class DependencyDeputy {
     const dependencyIssues: Issue[] = [];
     const devDependencyIssues: Issue[] = [];
 
-    for (const [workspaceName, { manifestPath, ignoreDependencies }] of this._manifests.entries()) {
+    for (const [workspaceName, { manifestPath, ignoreDependencies, ignoreBinaries }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspaceName);
+      const installedBinaries = this.getInstalledBinaries(workspaceName);
+      const ignoreBins = [...IGNORED_GLOBAL_BINARIES, ...ignoreBinaries];
+      const ignoreDeps = [...IGNORED_DEPENDENCIES, ...ignoreDependencies];
 
-      const isUnreferencedDependency = (dependency: string): boolean => {
+      const isNotIgnoredDependency = (packageName: string) => !ignoreDeps.includes(packageName);
+
+      const isNotIgnoredBinary = (packageName: string) => {
+        if (installedBinaries?.has(packageName)) {
+          const binaryNames = installedBinaries.get(packageName);
+          if (binaryNames && ignoreBins.some(ignoredBinary => binaryNames.has(ignoredBinary))) return false;
+        }
+        return true;
+      };
+
+      const isNotReferencedDependency = (dependency: string): boolean => {
         // Is referenced, ignore
         if (referencedDependencies?.has(dependency)) return false;
 
@@ -171,7 +189,7 @@ export class DependencyDeputy {
           // Example: `next` has `react-dom` as peer dependency, so when `@types/react-dom` is listed it can be ignored
           const peerDependencies = this.getPeerDependencies(workspaceName, typedPackageName);
           if (peerDependencies.length) {
-            return !peerDependencies.find(peerDependency => !isUnreferencedDependency(peerDependency));
+            return !peerDependencies.find(peerDependency => !isNotReferencedDependency(peerDependency));
           }
 
           return !referencedDependencies?.has(typedPackageName);
@@ -179,20 +197,22 @@ export class DependencyDeputy {
 
         if (!referencedDependencies?.has(dependency)) {
           const peerDependencies = this.getPeerDependencies(workspaceName, dependency);
-          return !peerDependencies.find(peerDependency => !isUnreferencedDependency(peerDependency));
+          return !peerDependencies.find(peerDependency => !isNotReferencedDependency(peerDependency));
         }
 
         return false;
       };
 
       this.getProductionDependencies(workspaceName)
-        .filter(symbol => !IGNORED_DEPENDENCIES.includes(symbol) && !ignoreDependencies.includes(symbol))
-        .filter(isUnreferencedDependency)
+        .filter(isNotIgnoredDependency)
+        .filter(isNotIgnoredBinary)
+        .filter(isNotReferencedDependency)
         .forEach(symbol => dependencyIssues.push({ type: 'dependencies', filePath: manifestPath, symbol }));
 
       this.getDevDependencies(workspaceName)
-        .filter(symbol => !IGNORED_DEPENDENCIES.includes(symbol) && !ignoreDependencies.includes(symbol))
-        .filter(isUnreferencedDependency)
+        .filter(isNotIgnoredDependency)
+        .filter(isNotIgnoredBinary)
+        .filter(isNotReferencedDependency)
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
     }
 

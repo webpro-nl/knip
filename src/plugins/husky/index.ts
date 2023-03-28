@@ -21,13 +21,12 @@ export const CONFIG_FILE_PATTERNS = [
   '.husky/post-{checkout,commit,merge,rewrite}',
 ];
 
-const findHuskyDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
+const findHuskyDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
   const script = readFileSync(configFilePath);
 
   const { binaries, entryFiles } = _getReferencesFromScripts(String(script), {
     cwd,
     manifest,
-    ignore: workspaceConfig.ignoreBinaries,
     knownGlobalsOnly: true,
   });
 

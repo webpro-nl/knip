@@ -1,12 +1,10 @@
 import { _getReferencesFromScripts } from '../binaries/index.js';
 import { timerify } from '../util/Performance.js';
 import { getPackageManifest } from './helpers.js';
-import type { WorkspaceConfiguration } from '../types/config.js';
 import type { InstalledBinaries, PeerDependencies } from '../types/workspace.js';
 import type { PackageJson } from 'type-fest';
 
 type Options = {
-  config: WorkspaceConfiguration;
   manifest: PackageJson;
   isProduction: boolean;
   isStrict: boolean;
@@ -14,10 +12,8 @@ type Options = {
   cwd: string;
 };
 
-const findManifestDependencies = async ({ config, manifest, isProduction, isStrict, dir, cwd }: Options) => {
-  const { ignoreBinaries } = config;
+const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir, cwd }: Options) => {
   const scriptFilter = isProduction ? ['start', 'postinstall'] : [];
-  const referencedDependencies: Set<string> = new Set();
   const peerDependencies: PeerDependencies = new Map();
 
   const scripts = Object.entries(manifest.scripts ?? {}).reduce((scripts, [scriptName, script]) => {
@@ -30,7 +26,6 @@ const findManifestDependencies = async ({ config, manifest, isProduction, isStri
   const { entryFiles, binaries: referencedBinaries } = _getReferencesFromScripts(scripts, {
     cwd: dir,
     manifest,
-    ignore: ignoreBinaries,
   });
 
   // Find all binaries for each dependency
@@ -53,6 +48,11 @@ const findManifestDependencies = async ({ config, manifest, isProduction, isStri
         } else {
           installedBinaries.set(binaryName, new Set([packageName]));
         }
+        if (installedBinaries.has(packageName)) {
+          installedBinaries.get(packageName)?.add(binaryName);
+        } else {
+          installedBinaries.set(packageName, new Set([binaryName]));
+        }
       });
 
       // Read and store peer dependencies
@@ -67,25 +67,8 @@ const findManifestDependencies = async ({ config, manifest, isProduction, isStri
     }
   }
 
-  for (const binaryName of referencedBinaries) {
-    if (installedBinaries.has(binaryName)) {
-      const packageNames = Array.from(installedBinaries.get(binaryName) ?? []);
-      const packageName = packageNames.length === 1 ? packageNames[0] : binaryName;
-      referencedDependencies.add(packageName);
-    } else {
-      // Pattern: probably a binary is referenced, but the dependency it belongs to is not installed (ie. unlisted)
-      referencedDependencies.add(binaryName);
-    }
-  }
-
-  ignoreBinaries.forEach(binaryName => {
-    // Edge case: mark dependencies with a `ignoreBinaries` entry as used, so they won't be reported as unused
-    const packageNames = installedBinaries.get(binaryName);
-    packageNames?.forEach(packageName => referencedDependencies.add(packageName));
-  });
-
   return {
-    dependencies: [...referencedDependencies, ...entryFiles],
+    dependencies: [...referencedBinaries, ...entryFiles],
     peerDependencies,
     installedBinaries,
   };

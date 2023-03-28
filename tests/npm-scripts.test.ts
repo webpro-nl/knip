@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.js';
 import * as npm from '../src/manifest/index.js';
-import { resolve } from '../src/util/path.js';
+import { resolve, join } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 import { getManifest } from './helpers/index.js';
@@ -31,7 +31,18 @@ test('Referenced dependencies in npm scripts', async () => {
 
   const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies(config);
 
-  assert.deepEqual(dependencies, ['nodemon', 'dotenv', 'nx', 'pm2', 'eslint', 'peer-dep']);
+  assert.deepEqual(dependencies, [
+    'nodemon',
+    'rm',
+    'dotenv',
+    'nx',
+    'pm2',
+    'pm2-dev',
+    'eslint',
+    'bash',
+    'peer-dep',
+    join(cwd, 'script.js'),
+  ]);
 
   const expectedPeerDependencies = new Map();
   expectedPeerDependencies.set('pm2-peer-dep', new Set(['pm2']));
@@ -41,13 +52,16 @@ test('Referenced dependencies in npm scripts', async () => {
   assert.deepEqual(
     installedBinaries,
     new Map([
-      ['pm2', new Set(['pm2'])],
+      ['pm2', new Set(['pm2', 'pm2-dev', 'pm2-docker', 'pm2-runtime'])],
       ['pm2-dev', new Set(['pm2'])],
       ['pm2-docker', new Set(['pm2'])],
       ['pm2-runtime', new Set(['pm2'])],
       ['nx', new Set(['nx'])],
       ['unused', new Set(['unused'])],
       ['eslint', new Set(['eslint', 'eslint-v6', 'eslint-v7', 'eslint-v8'])],
+      ['eslint-v6', new Set(['eslint'])],
+      ['eslint-v7', new Set(['eslint'])],
+      ['eslint-v8', new Set(['eslint'])],
     ])
   );
 });
@@ -75,6 +89,8 @@ test('Unused dependencies in npm scripts', async () => {
     dependencies: 1,
     devDependencies: 1,
     unlisted: 2,
+    processed: 1,
+    total: 1,
   });
 });
 
@@ -91,6 +107,9 @@ test('Unused dependencies in npm scripts (strict)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     dependencies: 2,
+    processed: 1,
+    total: 1,
   });
 });

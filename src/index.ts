@@ -99,7 +99,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   for (const workspace of workspaces) {
     const { name, dir, config, ancestors } = workspace;
-    const { paths, ignoreDependencies } = config;
+    const { paths, ignoreDependencies, ignoreBinaries } = config;
 
     const isRoot = name === ROOT_WORKSPACE_NAME;
 
@@ -110,7 +110,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (!manifestPath || !manifest) throw new LoaderError(`Unable to load package.json for ${name}`);
 
-    deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies });
+    deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies, ignoreBinaries });
 
     const compilerOptions = await loadCompilerOptions(join(dir, tsConfigFile ?? 'tsconfig.json'));
 

@@ -6,17 +6,17 @@ import { getManifest } from '../helpers/index.js';
 
 const cwd = resolve('tests/fixtures/plugins/github-actions');
 const manifest = getManifest(cwd);
-const workspaceConfig = { ignoreBinaries: ['knip'] };
 
 test('Find dependencies in github-actions workflow configurations', async () => {
   const configFilePath = join(cwd, '.github/workflows/test.yml');
-  const dependencies = await GithubActions.findDependencies(configFilePath, { manifest, workspaceConfig });
+  const dependencies = await GithubActions.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
     'esbuild-register',
     'playwright',
     'prisma',
     'eslint',
     'release-it',
+    'knip',
     'nyc',
     'retry-cli',
     'curl',

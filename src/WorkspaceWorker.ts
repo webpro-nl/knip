@@ -111,7 +111,6 @@ export class WorkspaceWorker {
 
   private async initReferencedDependencies() {
     const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies({
-      config: this.config,
       manifest: this.manifest,
       isProduction: this.isProduction,
       isStrict: this.isStrict,
@@ -288,7 +287,6 @@ export class WorkspaceWorker {
               cwd,
               manifest: this.manifest,
               config: pluginConfig,
-              workspaceConfig: this.config,
               isProduction: this.isProduction,
             });
 

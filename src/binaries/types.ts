@@ -1,6 +1,6 @@
 import type { PackageJson } from 'type-fest';
 
-type Options = { cwd?: string; manifest?: PackageJson; ignore?: string[]; knownGlobalsOnly?: boolean };
+type Options = { cwd?: string; manifest?: PackageJson; knownGlobalsOnly?: boolean };
 
 export type GetReferencesFromScripts = (
   npmScripts: string | string[] | Set<string>,

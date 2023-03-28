@@ -1,4 +1,4 @@
-import type { PluginConfiguration, WorkspaceConfiguration } from './config.js';
+import type { PluginConfiguration } from './config.js';
 import type { PackageJson } from 'type-fest';
 
 type IsPluginEnabledCallbackOptions = { cwd: string; manifest: PackageJson; dependencies: Set<string> };
@@ -9,7 +9,6 @@ type GenericPluginCallbackOptions = {
   cwd: string;
   manifest: PackageJson;
   config: PluginConfiguration;
-  workspaceConfig: WorkspaceConfiguration;
   isProduction: boolean;
 };
 

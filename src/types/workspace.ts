@@ -8,6 +8,7 @@ type WorkspaceManifest = {
   devDependencies: string[];
   allDependencies: string[];
   ignoreDependencies: string[];
+  ignoreBinaries: string[];
 };
 
 export type WorkspaceManifests = Map<string, WorkspaceManifest>;

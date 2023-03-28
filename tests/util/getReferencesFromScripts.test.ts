@@ -85,8 +85,8 @@ test('getReferencesFromScripts (cross-env/node)', () => {
 });
 
 test('getReferencesFromScripts (npm)', () => {
-  t('npm run script', []);
-  t('npm run publish:latest -- --npm-tag=debug --no-push', []);
+  t('npm run script', ['npm']);
+  t('npm run publish:latest -- --npm-tag=debug --no-push', ['npm']);
 });
 
 test('getReferencesFromScripts (npx)', () => {
@@ -140,7 +140,7 @@ test('getReferencesFromScripts (zx)', () => {
 test('getReferencesFromScripts (bash expressions)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['make']);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['make']);
-  t('if ! npx program --verbose ; then exit 1 ; fi', ['program']);
+  t('if ! npx program --verbose ; then exit 1 ; fi', ['program', 'exit']);
 });
 
 test('getReferencesFromScripts (bash expansion)', () => {

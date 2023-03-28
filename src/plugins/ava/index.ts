@@ -15,7 +15,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
 
-const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, workspaceConfig }) => {
+const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
   const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.ava : await load(configFilePath);
 
   const requireArgs = (config?.require ?? []).map(require => `--require ${require}`);
@@ -25,7 +25,6 @@ const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd,
   const { binaries } = _getReferencesFromScripts([cmd], {
     cwd,
     manifest,
-    ignore: workspaceConfig.ignoreBinaries,
     knownGlobalsOnly: true,
   });
 

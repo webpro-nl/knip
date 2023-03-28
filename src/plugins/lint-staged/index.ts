@@ -22,10 +22,7 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findLintStagedDependencies: GenericPluginCallback = async (
-  configFilePath,
-  { cwd, manifest, workspaceConfig }
-) => {
+const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
   let config: LintStagedConfig = configFilePath.endsWith('package.json')
     ? manifest['lint-staged']
     : await load(configFilePath);
@@ -40,7 +37,7 @@ const findLintStagedDependencies: GenericPluginCallback = async (
 
   for (const entry of Object.values(config).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
-    const options = { cwd, manifest, ignore: workspaceConfig.ignoreBinaries };
+    const options = { cwd, manifest };
     _getReferencesFromScripts(scripts, options).binaries.forEach(bin => binaries.add(bin));
   }
 

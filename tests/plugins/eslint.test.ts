@@ -6,15 +6,10 @@ import { getManifest } from '../helpers/index.js';
 
 const cwd = resolve('tests/fixtures/plugins/eslint');
 const manifest = getManifest(cwd);
-const workspaceConfig = {
-  entry: ['index.{js,ts,tsx}', 'src/index.{js,ts,tsx}'],
-  project: ['**/*.{js,ts,tsx}'],
-  ignore: [],
-};
 
 test('Find dependencies in ESLint configuration (legacy json)', async () => {
   const configFilePath = join(cwd, '.eslintrc.json');
-  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
+  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, [
     join(cwd, 'base.eslint.json'),
     'eslint-plugin-import',
@@ -28,7 +23,7 @@ test('Find dependencies in ESLint configuration (legacy json)', async () => {
 
 test('Find dependencies in ESLint configuration (legacy js)', async () => {
   const configFilePath = join(cwd, '.eslintrc.js');
-  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
+  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, [
     join(cwd, 'base.eslint.json'),
     'eslint-plugin-import',
@@ -44,6 +39,6 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
 
 test('Find dependencies in ESLint configuration (legacy yaml)', async () => {
   const configFilePath = join(cwd, '.eslintrc.yml');
-  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest, workspaceConfig });
+  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, ['@sinonjs/eslint-config', '@sinonjs/eslint-plugin-no-prototype-methods']);
 });

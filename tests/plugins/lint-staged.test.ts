@@ -6,16 +6,15 @@ import { getManifest } from '../helpers/index.js';
 
 const cwd = resolve('tests/fixtures/plugins/lint-staged');
 const manifest = getManifest(cwd);
-const workspaceConfig = { ignoreBinaries: [] };
 
 test('Find dependencies in lint-staged configuration (json)', async () => {
   const configFilePath = join(cwd, 'package.json');
-  const dependencies = await lintStaged.findDependencies(configFilePath, { manifest, workspaceConfig });
+  const dependencies = await lintStaged.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, ['eslint', 'prettier']);
 });
 
 test('Find dependencies in lint-staged configuration (js)', async () => {
   const configFilePath = join(cwd, '.lintstagedrc.js');
-  const dependencies = await lintStaged.findDependencies(configFilePath, { manifest, workspaceConfig });
+  const dependencies = await lintStaged.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, ['eslint', 'prettier']);
 });
