@@ -20,7 +20,7 @@ const argFilters: ArgResolvers = {
 };
 
 export const resolve: Resolver = (binary, args, { cwd }) => {
-  const parsed = parseArgs(args, { string: ['r'], alias: { require: ['r', 'loader'] } });
+  const parsed = parseArgs(args, { string: ['r'], alias: { require: ['r', 'loader'] }, boolean: ['quiet', 'verbose'] });
   const argFilter = argFilters[binary as keyof typeof argFilters] ?? argFilters.default;
   const filteredArgs = compact(argFilter(parsed));
   return [binary, ...tryResolveFilePaths(cwd, filteredArgs)];
