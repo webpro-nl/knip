@@ -20,7 +20,7 @@ The dots don't connect themselves. This is where Knip comes in:
 - [x] Built-in support for [workspaces (monorepos)][1]
 - [x] Growing list of [built-in plugins][2]
 - [x] Use [compilers][3] to include other file types (e.g. `.mdx`, `.vue`, `.svelte`)
-- [x] Checks npm scripts for used and unlisted dependencies
+- [x] Finds binaries and dependencies in npm scripts, and a lot more locations
 - [x] Finds unused members of classes and enums
 - [x] Finds duplicate exports
 - [x] Supports any combination of JavaScript and TypeScript
@@ -237,9 +237,9 @@ As always, make sure to backup files or use Git before deleting files or making 
 
 Workspaces and monorepos are handled out-of-the-box by Knip. Every workspace is part of the analysis.
 
-Here's an example configuration with some custom `entry` and `project` patterns:
+Here's an example `knip.json` configuration with some custom `entry` and `project` patterns:
 
-```jsonc
+```json
 {
   "workspaces": {
     ".": {
@@ -279,6 +279,9 @@ Here's some example output when running Knip in a workspace:
 <img src="./assets/screenshot-workspaces.png" alt="example output in workspaces" width="578">
 
 Use `--debug` to get more verbose output.
+
+Use `ignoreBinaries` and `ignoreDependencies` at the root of `knip.json` for global effect, or inside any workspace
+config for local effect.
 
 ## Plugins
 
@@ -439,10 +442,9 @@ use the `--production` flag. Here's an example:
 Here's what's included in production mode analysis:
 
 - Only `entry` and `project` patterns suffixed with `!`.
-- Only `entry` patterns from plugins exported as `PRODUCTION_ENTRY_FILE_PATTERNS` (such as Next.js and Gatsby).
-- Only the `postinstall` and `start` script (e.g. not the `test` or other npm scripts in `package.json`).
-- Only `exports`, `nsExports` and `classMembers` are included in the report (`types`, `nsTypes`, `enumMembers` are
-  ignored).
+- Only production `entry` file patterns exported for plugins (such as Next.js and Gatsby).
+- Only the `start` and `postinstall` scripts (e.g. not the `test` or other npm scripts in `package.json`).
+- Only unused `exports`, `nsExports` and `classMembers` are reported (not `types`, `nsTypes`, `enumMembers`).
 
 ### Strict
 
@@ -587,7 +589,7 @@ This table is an ongoing comparison. Based on their docs (please report any mist
 | Custom reporters        |    ✅    |       -        |        -         |            -            |       -        |
 | JavaScript support      |    ✅    |       ✅       |        ✅        |            -            |       -        |
 | Configure entry files   |    ✅    |       ❌       |        ✅        |           ❌            |       ❌       |
-| [Support workspaces][1] |    ✅    |       ❌       |        ❌        |            -            |       -        |
+| [Workspaces][1]         |    ✅    |       ❌       |        ❌        |            -            |       -        |
 | ESLint plugin available |    -     |       -        |        -         |           ✅            |       -        |
 
 ✅ = Supported, ❌ = Not supported, - = Out of scope
