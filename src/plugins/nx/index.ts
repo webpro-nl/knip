@@ -8,11 +8,11 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 export const NAME = 'Nx';
 
 /** @public */
-export const ENABLERS = [/^@nrwl\//];
+export const ENABLERS = ['nx', /^@nrwl\//];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['{apps,libs}/**/project.json'];
+export const CONFIG_FILE_PATTERNS = ['project.json', '{apps,libs}/**/project.json'];
 
 const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
   const config: NxProjectConfiguration = await load(configFilePath);
@@ -29,10 +29,10 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, 
   const scripts = compact(
     targets
       .filter(target => target.executor === 'nx:run-commands')
-      .flatMap(target => (target.options?.commands ?? target.options?.command ? [target.options.command] : []))
+      .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []))
   );
 
-  const dependencies = _getDependenciesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true });
+  const dependencies = _getDependenciesFromScripts(scripts, { cwd, manifest });
 
   return [...executors, ...dependencies];
 };

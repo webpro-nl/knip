@@ -5,6 +5,7 @@
 This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies`
 or `devDependencies`:
 
+- `nx`
 - `/^@nrwl\//`
 
 ## Default configuration
@@ -12,7 +13,7 @@ or `devDependencies`:
 ```json
 {
   "nx": {
-    "config": ["{apps,libs}/**/project.json"]
+    "config": ["project.json", "{apps,libs}/**/project.json"]
   }
 }
 ```
