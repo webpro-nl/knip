@@ -24,6 +24,13 @@ export type AddImportOptions = {
   specifier: string;
   symbol?: ts.Symbol;
   identifier?: string;
+  isDynamic?: boolean;
+};
+
+type AddInternalImportOptions = AddImportOptions & {
+  identifier: string;
+  isDynamic: boolean;
+  filePath: string;
 };
 
 export type AddExportOptions = ExportItem & { identifier: string };
@@ -40,12 +47,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
 
   const visitors = getVisitors(sourceFile);
 
-  const addInternalImport = ({
-    identifier = '__anonymous',
-    specifier,
-    symbol,
-    filePath,
-  }: AddImportOptions & { filePath: string }) => {
+  const addInternalImport = ({ identifier, specifier, symbol, filePath, isDynamic }: AddInternalImportOptions) => {
     const isStar = identifier === '*';
     const isReExported = Boolean(isStar && !symbol);
 
@@ -56,6 +58,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
         isReExported,
         isReExportedBy: new Set(),
         symbols: new Set(),
+        isDynamic,
       });
     }
 
@@ -67,21 +70,20 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
       internalImport.isReExportedBy.add(sourceFile.fileName);
     }
 
-    if (isStar) {
-      internalImport.isStar = isStar;
-    }
+    if (isStar) internalImport.isStar = isStar;
 
-    if (!isStar) {
-      internalImport.symbols.add(identifier);
-    }
+    if (!isStar) internalImport.symbols.add(identifier);
 
     if (isStar && symbol) {
       // Store imported namespace symbol for reference in `maybeAddNamespaceAccessAsImport`
       importedInternalSymbols.set(symbol, filePath);
     }
+
+    // Defer dynamic imports to findReferences
+    if (isDynamic) internalImport.isDynamic = isDynamic;
   };
 
-  const addImport = ({ specifier, symbol, identifier = '__anonymous' }: AddImportOptions) => {
+  const addImport = ({ specifier, symbol, identifier = '__anonymous', isDynamic = false }: AddImportOptions) => {
     if (isBuiltin(specifier)) return;
 
     const module = sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
@@ -93,7 +95,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
           if (!isInNodeModules(filePath)) {
             // Self-referencing imports are resolved by `sourceFile.resolvedModules`, but not part of the program
             // through `principal.createProgram`. Add as internal import, and follow up with `principal.addEntryPath`.
-            addInternalImport({ identifier, specifier, symbol, filePath });
+            addInternalImport({ identifier, specifier, symbol, filePath, isDynamic });
           } else if (isDeclarationFileExtension(module.resolvedModule.extension)) {
             // We use TypeScript's module resolution, but it returns @types/pkg. In the rest of the program we want the
             // package name based on the original specifier.
@@ -102,7 +104,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
             externalImports.add(module.resolvedModule.packageId?.name ?? specifier);
           }
         } else {
-          addInternalImport({ identifier, specifier, symbol, filePath });
+          addInternalImport({ identifier, specifier, symbol, filePath, isDynamic });
         }
       }
     } else {

@@ -359,7 +359,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           } else {
             if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
               collector.addIssue({ type: 'types', filePath, symbol, symbolType: exportedItem.type });
-            } else {
+            } else if (!importedModule.isDynamic || !principal.hasExternalReferences(filePath, exportedItem)) {
               collector.addIssue({ type: 'exports', filePath, symbol });
             }
           }

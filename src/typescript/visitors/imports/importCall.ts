@@ -1,11 +1,5 @@
 import ts from 'typescript';
-import {
-  isImportCall,
-  isAccessExpression,
-  getAccessExpressionName,
-  isVariableDeclarationList,
-  findDescendants,
-} from '../../ast-helpers.js';
+import { isImportCall, isAccessExpression, isVariableDeclarationList, findDescendants } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -15,36 +9,35 @@ export default visit(
       if (node.arguments[0] && ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
 
-        // Try some patterns that require node.parent first for more specific import identifiers
-        let _node = node.parent;
-        while (_node) {
-          if (_node.parent && ts.isCallExpression(_node.parent)) {
-            // Pattern: e.g. inside a call expression such as Promise.all()
-            return { specifier, identifier: 'default' };
-          }
+        // Pattern: import('specifier').then();
+        if (isAccessExpression(node.parent)) {
+          return { specifier, isDynamic: true };
+        }
 
-          if (isAccessExpression(_node)) {
-            // Patterns:
-            // import('specifier').then()
-            // (import('specifier')).identifier
-            // (import('specifier'))['identifier']
-            const identifier = getAccessExpressionName(_node);
-            const isPromiseLike = identifier === 'then';
-            const symbol = isPromiseLike ? 'default' : identifier;
-            return { identifier: symbol, specifier };
-          }
+        let _ancestor = node.parent?.parent?.parent;
 
-          if (isVariableDeclarationList(_node)) {
-            // Pattern: const { identifier } = import('specifier')
-            return findDescendants<ts.VariableDeclaration>(_node, ts.isVariableDeclaration).flatMap(
+        // Pattern: (import('specifier')).identifier;
+        if (_ancestor && isAccessExpression(_ancestor)) {
+          return { specifier, isDynamic: true };
+        }
+
+        // Patterns:
+        // const { identifier } = await import('specifier')
+        // const [identifier, identifier] = await Promise.all[import('specifier'), import('specifier')];
+        // Could be deferred to LS.findReferences but that won't stitch it back together properly
+        while (_ancestor) {
+          if (_ancestor && isVariableDeclarationList(_ancestor)) {
+            return findDescendants<ts.VariableDeclaration>(_ancestor, ts.isVariableDeclaration).flatMap(
               variableDeclaration => {
                 if (ts.isIdentifier(variableDeclaration.name)) {
                   return { identifier: 'default', specifier };
                 } else {
-                  const binds = findDescendants<ts.BindingElement>(variableDeclaration, _node =>
-                    ts.isBindingElement(_node)
+                  const binds = findDescendants<ts.BindingElement>(
+                    variableDeclaration,
+                    _node => ts.isBindingElement(_node) && ts.isIdentifier(_node.name)
                   );
                   return binds.flatMap(element => {
+                    // TODO Duplicate imports added here when inside Promise.all array (harmless but could be optimized)
                     const symbol = element.propertyName?.getText() || element.name.getText();
                     return { identifier: symbol, specifier };
                   });
@@ -53,7 +46,7 @@ export default visit(
             );
           }
 
-          _node = _node.parent;
+          _ancestor = _ancestor.parent;
         }
 
         // Patterns:

@@ -13,7 +13,7 @@ import {
 } from './named-exports';
 import type { MyNum, MyString, MyInterface } from './types';
 
-const dynamic = import('./dynamic-import');
+const dynamic = await import('./dynamic-import');
 
 async function main() {
   const { used } = await import('./dynamic-import');

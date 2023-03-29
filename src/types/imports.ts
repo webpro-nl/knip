@@ -10,6 +10,7 @@ export type ImportedModule = {
   isStar: boolean;
   isReExported: boolean;
   isReExportedBy: Set<string>;
+  isDynamic: boolean;
 };
 
 export type Imports = Map<FilePath, ImportedModule>;

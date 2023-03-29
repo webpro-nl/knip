@@ -31,7 +31,6 @@ test('Find unused files and exports', async () => {
 
   assert(issues.unlisted['index.ts']['import-a']);
   assert(issues.unlisted['index.ts']['prop-access']);
-  assert(issues.unlisted['index.ts']['prop-access-over-bindings']);
   assert(issues.unlisted['index.ts']['default-prop-access']);
 
   assert(issues.unlisted['index.ts']['promise-like']);
@@ -42,7 +41,7 @@ test('Find unused files and exports', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 20,
+    unlisted: 19,
     processed: 3,
     total: 3,
   });

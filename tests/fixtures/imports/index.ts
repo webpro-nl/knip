@@ -7,6 +7,8 @@ import { named as renamed3 } from 'named-object-binding';
 
 const { top } = await import('top-level-await-import');
 
+const dynamic = () => import('./dir/import-b').then(m => m.dynamic);
+
 import('top-level-side-effects-call');
 
 async function main() {
@@ -41,11 +43,7 @@ function promiseAll() {
 
 (await import('prop-access')).named;
 
-const {
-  default: defaultName3,
-  identifier: renamedIdentifier,
-  identifier2,
-} = (await import('prop-access-over-bindings'))['named'];
+const { default: defaultName3, identifier: renamedIdentifier, identifier2 } = (await import('./dir/import-b'))['named'];
 
 const defaultName4 = (await import('default-prop-access')).default;
 
