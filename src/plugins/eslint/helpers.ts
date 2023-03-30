@@ -1,21 +1,23 @@
 import { compact } from '../../util/array.js';
+import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { isAbsolute, isInternal, join, dirname } from '../../util/path.js';
 import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
 import { fallback } from './fallback.js';
-import type { ESLintConfig } from './types.js';
+import type { ESLintConfig, OverrideConfig } from './types.js';
 import type { PackageJson } from 'type-fest';
 
 type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
 
-const getDependencies = (config: ESLintConfig) => {
+const getDependencies = (config: ESLintConfig | OverrideConfig) => {
   const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendsSpecifier) : [];
   if (extendsSpecifiers.includes('eslint-plugin-prettier')) extendsSpecifiers.push('eslint-config-prettier');
   const plugins = config.plugins ? config.plugins.map(resolvePluginPackageName) : [];
   const parser = config.parser;
   const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-  return compact([...extendsSpecifiers, ...plugins, parser, ...extraParsers, ...settings]);
+  const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependencies) : [];
+  return compact([...extendsSpecifiers, ...plugins, parser, ...extraParsers, ...settings, ...overrides]);
 };
 
 type GetDependenciesDeep = (
@@ -54,8 +56,6 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
         }
       }
     }
-
-    if (config.overrides) for (const override of [config.overrides].flat()) addAll(getDependencies(override));
 
     addAll(getDependencies(config));
   }

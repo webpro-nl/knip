@@ -19,7 +19,7 @@ type BaseConfig = {
   rules?: Rules;
 };
 
-type OverrideConfig = BaseConfig & { files: string[] };
+export type OverrideConfig = BaseConfig & { files: string[]; overrides: OverrideConfig };
 
 export type ESLintConfig = BaseConfig & {
   env?: Record<string, boolean>;
