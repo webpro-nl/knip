@@ -12,17 +12,7 @@ const manifest = getManifest(cwd);
 
 test('Referenced dependencies in npm scripts', async () => {
   const config = {
-    config: {
-      include: [],
-      exclude: [],
-      workspaces: {},
-      ignore: [],
-      ignoreBinaries: ['bash', 'rm'],
-      ignoreDependencies: [],
-      ignoreWorkspaces: [],
-    },
     manifest,
-    isRoot: true,
     isProduction: false,
     isStrict: false,
     dir: cwd,
