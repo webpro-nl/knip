@@ -118,6 +118,24 @@ export class DependencyDeputy {
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
 
+    // Handle binaries
+    if (packageName.startsWith('bin:')) {
+      const pkg = packageName.replace(/^bin:/, '');
+      if (IGNORED_GLOBAL_BINARIES.includes(pkg)) return true;
+      if (this.getWorkspaceManifest(workspace.name)?.ignoreBinaries.includes(pkg)) return true;
+      for (const name of workspaceNames) {
+        const binaries = this.getInstalledBinaries(name);
+        if (binaries?.has(pkg)) {
+          const dependencies = binaries.get(pkg);
+          if (dependencies?.size) {
+            dependencies.forEach(dependency => this.addReferencedDependency(name, dependency));
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
     if (this.getWorkspaceManifest(workspace.name)?.ignoreDependencies.includes(packageName)) return true;
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
@@ -129,20 +147,6 @@ export class DependencyDeputy {
       closestWorkspaceName && this.addReferencedDependency(closestWorkspaceName, packageName);
       closestWorkspaceNameForTypes && this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
       return true;
-    }
-
-    // Handle binaries
-    if (IGNORED_GLOBAL_BINARIES.includes(packageName)) return true;
-    if (this.getWorkspaceManifest(workspace.name)?.ignoreBinaries.includes(packageName)) return true;
-    for (const name of workspaceNames) {
-      const binaries = this.getInstalledBinaries(name);
-      if (binaries?.has(packageName)) {
-        const dependencies = binaries.get(packageName);
-        if (dependencies?.size) {
-          dependencies.forEach(dependency => this.addReferencedDependency(name, dependency));
-          return true;
-        }
-      }
     }
 
     return false;

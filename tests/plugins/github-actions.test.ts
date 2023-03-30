@@ -11,17 +11,17 @@ test('Find dependencies in github-actions workflow configurations', async () => 
   const configFilePath = join(cwd, '.github/workflows/test.yml');
   const dependencies = await GithubActions.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
-    'esbuild-register',
-    'playwright',
-    'prisma',
-    'eslint',
-    'release-it',
-    'knip',
-    'nyc',
-    'retry-cli',
-    'curl',
-    '@scope/retry-cli',
-    'changeset',
-    'wait-on',
+    'bin:esbuild-register',
+    'bin:playwright',
+    'bin:prisma',
+    'bin:eslint',
+    'bin:release-it',
+    'bin:knip',
+    'bin:nyc',
+    'bin:retry-cli',
+    'bin:curl',
+    'bin:@scope/retry-cli',
+    'bin:changeset',
+    'bin:wait-on',
   ]);
 });

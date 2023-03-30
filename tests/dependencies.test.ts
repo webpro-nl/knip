@@ -21,8 +21,8 @@ test('Find unused dependencies', async () => {
   assert(issues.devDependencies['package.json']['mocha']);
 
   assert.equal(Object.keys(issues.unlisted).length, 1);
-  assert(issues.unlisted['package.json']['start-server']);
-  assert(issues.unlisted['package.json']['jest']);
+  assert(issues.unlisted['package.json']['bin:start-server']);
+  assert(issues.unlisted['package.json']['bin:jest']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -50,8 +50,8 @@ test('Find unused dependencies (production)', async () => {
   assert.equal(Object.keys(issues.devDependencies).length, 0);
 
   assert.equal(Object.keys(issues.unlisted).length, 1);
-  assert(issues.unlisted['package.json']['start-server']);
-  assert(!issues.unlisted['package.json']['jest']);
+  assert(issues.unlisted['package.json']['bin:start-server']);
+  assert(!issues.unlisted['package.json']['bin:jest']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

@@ -10,11 +10,11 @@ const manifest = getManifest(cwd);
 test('Find dependencies in lint-staged configuration (json)', async () => {
   const configFilePath = join(cwd, 'package.json');
   const dependencies = await lintStaged.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['eslint', 'prettier']);
+  assert.deepEqual(dependencies, ['bin:eslint', 'bin:prettier']);
 });
 
 test('Find dependencies in lint-staged configuration (js)', async () => {
   const configFilePath = join(cwd, '.lintstagedrc.js');
   const dependencies = await lintStaged.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['eslint', 'prettier']);
+  assert.deepEqual(dependencies, ['bin:eslint', 'bin:prettier']);
 });

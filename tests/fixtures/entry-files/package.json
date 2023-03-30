@@ -1,7 +1,7 @@
 {
   "name": "@fixtures/entry-files",
   "main": "main.js",
-  "bin": "bin.js",
+  "bin": "./cli.js",
   "exports": {
     ".": "./export-index.js",
     "./local": {

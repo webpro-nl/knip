@@ -22,16 +22,16 @@ test('Referenced dependencies in npm scripts', async () => {
   const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies(config);
 
   assert.deepEqual(dependencies, [
-    'nodemon',
+    'bin:nodemon',
     join(cwd, 'script.js'),
-    'rm',
-    'dotenv',
-    'nx',
-    'pm2',
-    'pm2-dev',
-    'eslint',
-    'bash',
-    'peer-dep',
+    'bin:rm',
+    'bin:dotenv',
+    'bin:nx',
+    'bin:pm2',
+    'bin:pm2-dev',
+    'bin:eslint',
+    'bin:bash',
+    'bin:package',
   ]);
 
   const expectedPeerDependencies = new Map();
@@ -47,6 +47,8 @@ test('Referenced dependencies in npm scripts', async () => {
       ['pm2-docker', new Set(['pm2'])],
       ['pm2-runtime', new Set(['pm2'])],
       ['nx', new Set(['nx'])],
+      ['package', new Set(['package-cli'])],
+      ['package-cli', new Set(['package'])],
       ['unused', new Set(['unused'])],
       ['eslint', new Set(['eslint', 'eslint-v6', 'eslint-v7', 'eslint-v8'])],
       ['eslint-v6', new Set(['eslint'])],
@@ -69,10 +71,10 @@ test('Unused dependencies in npm scripts', async () => {
   assert(!issues.devDependencies['package.json']['eslint-v7']);
   assert(!issues.devDependencies['package.json']['eslint-v8']);
 
-  assert(issues.unlisted['package.json']['nodemon']);
-  assert(issues.unlisted['package.json']['dotenv']);
-  assert(!issues.unlisted['package.json']['rm']);
-  assert(!issues.unlisted['package.json']['bash']);
+  assert(issues.unlisted['package.json']['bin:nodemon']);
+  assert(issues.unlisted['package.json']['bin:dotenv']);
+  assert(!issues.unlisted['package.json']['bin:rm']);
+  assert(!issues.unlisted['package.json']['bin:bash']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

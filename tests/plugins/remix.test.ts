@@ -15,12 +15,12 @@ test('Find dependencies in Remix configuration', async () => {
 
   assert(issues.unresolved['app/root.tsx']['./session.server']);
 
-  assert(issues.unlisted['package.json']['run-s']);
-  assert(issues.unlisted['package.json']['run-p']);
-  assert(issues.unlisted['package.json']['cross-env']);
-  assert(issues.unlisted['package.json']['dotenv']);
-  assert(issues.unlisted['package.json']['tailwindcss']);
-  assert(issues.unlisted['package.json']['prisma']);
+  assert(issues.unlisted['package.json']['bin:run-s']);
+  assert(issues.unlisted['package.json']['bin:run-p']);
+  assert(issues.unlisted['package.json']['bin:cross-env']);
+  assert(issues.unlisted['package.json']['bin:dotenv']);
+  assert(issues.unlisted['package.json']['bin:tailwindcss']);
+  assert(issues.unlisted['package.json']['bin:prisma']);
 
   assert(issues.unlisted['app/entry.client.tsx']['@remix-run/react']);
   assert(issues.unlisted['app/entry.client.tsx']['react']);

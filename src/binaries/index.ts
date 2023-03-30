@@ -16,7 +16,7 @@ const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, opti
     results.map(identifier => {
       if (isInternal(identifier)) return identifier;
       const packageName = getPackageNameFromModuleSpecifier(stripBinary(identifier));
-      if (!packageName.startsWith('.')) return packageName;
+      if (!packageName.startsWith('.')) return `bin:${packageName}`;
     })
   );
 };

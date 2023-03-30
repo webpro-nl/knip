@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
-import { join, resolve } from '../../src/util/path.js';
+import { isAbsolute, join, resolve } from '../../src/util/path.js';
 
 const cwd = resolve('tests/fixtures/binaries');
 
@@ -15,7 +15,10 @@ const knownOnly = { cwd, knownGlobalsOnly: true };
 
 type T = (script: string | string[], dependencies: string[], options?: { cwd: string }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
-  assert.deepEqual(_getDependenciesFromScripts(script, options), dependencies);
+  assert.deepEqual(
+    _getDependenciesFromScripts(script, options),
+    dependencies.map(specifier => (isAbsolute(specifier) ? specifier : 'bin:' + specifier))
+  );
 
 test('getReferencesFromScripts', () => {
   t('program', ['program']);
