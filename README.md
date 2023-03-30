@@ -645,6 +645,12 @@ Many thanks to some of the early adopters of Knip:
 Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
 for the job. I'm motivated to make knip perfectly suited for the job of cutting projects to perfection! ✂️
 
+## Contributors
+
+Special thanks to the wonderful people who have contributed to this project:
+
+[![Contributors][29]][30]
+
 [1]: #workspaces-monorepos
 [2]: #plugins
 [3]: #compilers
@@ -673,6 +679,8 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 [26]: https://github.com/RebeccaStevens/is-immutable-type
 [27]: https://github.com/release-it/release-it
 [28]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
+[29]: https://contrib.rocks/image?repo=webpro/knip
+[30]: https://github.com/webpro/knip/graphs/contributors
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
