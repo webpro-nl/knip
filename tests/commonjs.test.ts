@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused files and exports', async () => {
+test('Support CommonJS-style imports and exports', async () => {
   const cwd = resolve('tests/fixtures/commonjs');
 
   const { issues, counters } = await main({

@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused files and exports with JS entry file', async () => {
+test('Use main, bin and exports fields in package.json to find entry files', async () => {
   const cwd = resolve('tests/fixtures/entry-files');
 
   const { counters } = await main({

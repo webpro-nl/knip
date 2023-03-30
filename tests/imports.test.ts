@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused files and exports', async () => {
+test('Support various ways to import modules', async () => {
   const cwd = resolve('tests/fixtures/imports');
 
   const { issues, counters } = await main({

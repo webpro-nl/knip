@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('tests/fixtures/exports');
 
-test('Find unused files and exports', async () => {
+test('Find unused exports', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

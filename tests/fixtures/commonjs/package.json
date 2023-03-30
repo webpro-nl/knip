@@ -1,11 +1,3 @@
 {
-  "name": "@fixtures/commonjs",
-  "knip": {
-    "entry": [
-      "index.js"
-    ],
-    "project": [
-      "**/*.js"
-    ]
-  }
+  "name": "@fixtures/commonjs"
 }
