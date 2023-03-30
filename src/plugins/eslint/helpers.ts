@@ -76,8 +76,11 @@ export const resolvePluginPackageName = (pluginName: string) => resolvePackageNa
 const resolveExtendsSpecifier = (specifier: string) => {
   if (isInternal(specifier)) return;
   if (specifier.includes(':')) {
-    const pluginName = specifier.replace(/^plugin:/, '').replace(/(\/|:).+$/, '');
+    // TODO Understand how this should actually work
+    const strippedSpecifier = specifier.replace(/(^plugin:|:.+$)/, '').replace(/\/(eslint-)?recommended$/, '');
+    const pluginName = getPackageNameFromModuleSpecifier(strippedSpecifier);
     if (pluginName === 'eslint') return;
+    if (pluginName.includes('eslint-')) return pluginName;
     return resolvePackageName('eslint-plugin', pluginName);
   }
 
