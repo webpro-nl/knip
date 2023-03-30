@@ -61,9 +61,9 @@ To be honest, here's the full list of default extensions: `js`, `mjs`, `cjs`, `j
 Knip looks for entry files at the default locations above, but also in other places:
 
 - The `main`, `bin` and `exports` fields of `package.json`.
-- [Plugins](#plugins) such as for Next.js, Remix, Gatsby or Svelte define entry files so you don't have to.
+- [Plugins][2] such as for Next.js, Remix, Gatsby or Svelte define entry files so you don't have to.
 - The `scripts` in package.json may also provide entry files that Knip can use.
-- Knip does this for each [workspace](#workspaces-monorepos) it finds.
+- Knip does this for each [workspace][1] it finds.
 
 In other words, Knip looks in many places and you may not need much configuration. When everything is according to
 defaults you don't even need a `knip.json` file.
@@ -659,7 +659,7 @@ for the job. I'm motivated to make knip perfectly suited for the job of cutting 
 
 Special thanks to the wonderful people who have contributed to this project:
 
-[![Contributors][29]][30]
+[![Contributors][30]][29]
 
 [1]: #workspaces-monorepos
 [2]: #plugins
@@ -689,8 +689,8 @@ Special thanks to the wonderful people who have contributed to this project:
 [26]: https://github.com/RebeccaStevens/is-immutable-type
 [27]: https://github.com/release-it/release-it
 [28]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
-[29]: https://contrib.rocks/image?repo=webpro/knip
-[30]: https://github.com/webpro/knip/graphs/contributors
+[29]: https://github.com/webpro/knip/graphs/contributors
+[30]: https://contrib.rocks/image?repo=webpro/knip
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
