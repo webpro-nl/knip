@@ -211,7 +211,7 @@ There are a few ways to tell Knip to ignore certain packages, binaries, dependen
   "ignore": ["**/*.d.ts", "**/fixtures"],
   "ignoreBinaries": ["zip", "docker-compose"],
   "ignoreDependencies": ["hidden-package"],
-  "ignoreWorkspaces": ["packages/deno-lib"]
+  "ignoreWorkspaces": ["packages/ignore", "packages/examples/**"]
 }
 ```
 
