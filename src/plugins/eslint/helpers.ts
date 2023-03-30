@@ -64,7 +64,7 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
 };
 
 const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', pluginName: string) => {
-  return pluginName.includes(namespace)
+  return pluginName.includes(namespace + '-')
     ? pluginName
     : pluginName.startsWith('@')
     ? pluginName.includes('/')
@@ -75,19 +75,19 @@ const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', plugin
 
 export const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
 
+// TODO Understand how this should actually work, eg:
+// plugin:@typescript-eslint/recommended → @typescript-eslint/eslint-plugin
+// plugin:@next/next/core-web-vitals → @next/eslint-plugin-next
 const resolveExtendsSpecifier = (specifier: string) => {
   if (isInternal(specifier)) return;
-  if (specifier.includes(':')) {
-    // TODO Understand how this should actually work
-    const strippedSpecifier = specifier.replace(/(^plugin:|:.+$)/, '').replace(/\/(eslint-)?recommended$/, '');
-    const pluginName = getPackageNameFromModuleSpecifier(strippedSpecifier);
-    if (pluginName === 'eslint') return;
-    if (pluginName.includes('eslint-')) return pluginName;
-    return resolvePackageName('eslint-plugin', pluginName);
-  }
-
-  // If the specifier includes `eslint`, assume it's complete
-  return specifier.includes('eslint') ? specifier : resolvePackageName('eslint-config', specifier);
+  if (/\/eslint-(config|plugin)/.test(specifier)) return specifier;
+  const strippedSpecifier = specifier
+    .replace(/(^plugin:|:.+$)/, '')
+    .replace(/\/(eslint-)?(recommended.*|strict|all)$/, '');
+  if (/eslint-(config|plugin)-/.test(strippedSpecifier)) return strippedSpecifier;
+  const pluginName = getPackageNameFromModuleSpecifier(strippedSpecifier);
+  if (pluginName === 'eslint') return;
+  return resolvePackageName(specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config', pluginName);
 };
 
 const getImportPluginDependencies = (settings: Record<string, unknown>) => {
