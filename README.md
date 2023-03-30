@@ -54,9 +54,19 @@ Knip has good defaults and you can run it without any configuration. Here's the 
 }
 ```
 
-_Actually_, here's the full list of default extensions: `js`, `mjs`, `cjs`, `jsx`, `ts`, `mts`, `cts` and `tsx`.
+To be honest, here's the full list of default extensions: `js`, `mjs`, `cjs`, `jsx`, `ts`, `mts`, `cts` and `tsx`.
 
-If this matches your project, you don't need any configuration. Not even a `knip.json` file.
+### Entry Files
+
+Knip looks for entry files at the default locations above, but also in other places:
+
+- The `main`, `bin` and `exports` fields of `package.json`.
+- [Plugins](#plugins) such as for Next.js, Remix, Gatsby or Svelte define entry files so you don't have to.
+- The `scripts` in package.json may also provide entry files that Knip can use.
+- Knip does this for each [workspace](#workspaces-monorepos) it finds.
+
+In other words, Knip looks in many places and you may not need much configuration. When everything is according to
+defaults you don't even need a `knip.json` file.
 
 Larger projects tend to have more things customized, and therefore probably get more out of Knip with a configuration
 file. Let's say you are using `.ts` files excusively and have all source files only in the `src` directory:

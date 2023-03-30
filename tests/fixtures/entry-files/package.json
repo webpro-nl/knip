@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/entry-files",
+  "main": "main.js",
+  "bin": "bin.js",
+  "exports": {
+    ".": "./export-index.js",
+    "./local": {
+      "default": "./local-default.js",
+      "import": "./local-import.js",
+      "node": "./local-node.js",
+      "require": "./local-require.js"
+    }
+  }
+}
