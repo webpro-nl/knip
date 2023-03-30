@@ -261,6 +261,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               importedModule.isReExported = importItems.isReExported;
               importedModule.isReExportedBy.add(filePath);
             }
+            if(importItems.isDynamic) {
+              importedModule.isDynamic = importItems.isDynamic;
+            }
           }
         }
 
