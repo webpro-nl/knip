@@ -13,3 +13,18 @@ export const getValuesByKeyDeep = (obj: any, key: string): unknown[] => {
   }
   return objects;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getStringValues = (obj: any): string[] => {
+  let values: string[] = [];
+  for (const prop in obj) {
+    if (obj[prop]) {
+      if (typeof obj[prop] === 'string') {
+        values.push(obj[prop]);
+      } else if (typeof obj[prop] === 'object') {
+        values = values.concat(getStringValues(obj[prop]));
+      }
+    }
+  }
+  return values;
+};

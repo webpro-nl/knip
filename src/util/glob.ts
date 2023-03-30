@@ -23,11 +23,11 @@ interface BaseGlobOptions {
   cwd: string;
   patterns: string[];
   ignore?: string[];
+  gitignore?: boolean;
 }
 
 interface GlobOptions extends BaseGlobOptions {
   workingDir?: string;
-  gitignore?: boolean;
 }
 
 const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = true }: GlobOptions) => {
@@ -50,10 +50,11 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   });
 };
 
-const pureGlob = async ({ cwd, patterns, ignore = [] }: BaseGlobOptions) =>
+const pureGlob = async ({ cwd, patterns, ignore = [], gitignore = true }: BaseGlobOptions) =>
   globby(patterns, {
     cwd,
     ignore: [...ignore, '**/node_modules/**'],
+    gitignore,
     absolute: true,
   });
 

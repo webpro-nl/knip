@@ -13,7 +13,11 @@ import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
 import { LoaderError } from './util/errors.js';
 import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
-import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './util/modules.js';
+import {
+  getEntryPathFromManifest,
+  getPackageNameFromFilePath,
+  getPackageNameFromModuleSpecifier,
+} from './util/modules.js';
 import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/path.js';
 import { _resolveSpecifier, _tryResolve } from './util/require.js';
 import { _require } from './util/require.js';
@@ -132,6 +136,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     await worker.init();
 
     const sharedGlobOptions = { cwd, workingDir: dir, gitignore, ignore: worker.getIgnorePatterns() };
+
+    const entryPathsFromManifest = await getEntryPathFromManifest(dir, manifest);
+    debugLogArray(`Found entry paths from manifest (${name})`, entryPathsFromManifest);
+    principal.addEntryPaths(entryPathsFromManifest);
 
     if (isProduction) {
       {
