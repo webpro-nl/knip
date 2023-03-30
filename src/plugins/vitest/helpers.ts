@@ -29,5 +29,5 @@ export const getEnvPackageName = (env: VitestEnvironment) => {
 
 const builtInReporters = ['default', 'verbose', 'dot', 'json', 'tap', 'tap-flat', 'junit', 'hanging-process'];
 
-export const getExternalReporters = (reporters?: string[]) =>
-  reporters ? reporters.filter(reporter => !builtInReporters.includes(reporter)) : [];
+export const getExternalReporters = (reporters?: string | string[]) =>
+  reporters ? [reporters].flat().filter(reporter => !builtInReporters.includes(reporter)) : [];
