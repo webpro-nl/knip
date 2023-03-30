@@ -9,5 +9,5 @@ module.exports = {
     'plugin:@next/next/core-web-vitals',
     '@scope/eslint-config/file',
   ],
-  plugins: ['@typescript-eslint', '@nrwl/nx', 'prettier'],
+  plugins: ['@typescript-eslint', '@nrwl/nx', 'prettier', 'eslint-plugin-cypress'],
 };
