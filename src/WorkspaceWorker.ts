@@ -274,7 +274,7 @@ export class WorkspaceWorker {
           if (!pluginConfig) continue;
 
           const patterns = this.getConfigurationFilePatterns(pluginName);
-          const configFilePaths = await _pureGlob({ patterns, cwd, ignore });
+          const configFilePaths = await _pureGlob({ patterns, cwd, ignore, gitignore: false });
 
           debugLogArray(`Found ${plugin.NAME} config file paths`, configFilePaths);
 
