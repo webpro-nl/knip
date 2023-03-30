@@ -62,7 +62,7 @@
     "@jest/types": "29.5.0",
     "@npmcli/package-json": "3.0.0",
     "@release-it/bumper": "4.0.2",
-    "@types/eslint": "8.21.3",
+    "@types/eslint": "8.37.0",
     "@types/js-yaml": "4.0.5",
     "@types/micromatch": "4.0.2",
     "@types/minimist": "1.2.2",
