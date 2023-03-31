@@ -55,7 +55,7 @@
     "pretty-ms": "^8.0.0",
     "strip-json-comments": "^5.0.0",
     "summary": "^2.1.0",
-    "typescript": "5.0.2",
+    "typescript": "^5.0.2",
     "zod": "^3.20.6"
   },
   "devDependencies": {
