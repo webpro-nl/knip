@@ -132,6 +132,11 @@ test('getReferencesFromScripts (rollup)', () => {
   t('rollup --configPlugin @rollup/plugin-typescript', ['bin:rollup', '@rollup/plugin-typescript']);
 });
 
+test('getReferencesFromScripts (execa)', () => {
+  t('execa --quiet script.js', ['bin:execa', js]);
+  t('npx --yes execa --quiet script.js', [js]);
+});
+
 test('getReferencesFromScripts (zx)', () => {
   t('zx --quiet script.js', ['bin:zx', js]);
   t('npx --yes zx --quiet script.js', [js]);
