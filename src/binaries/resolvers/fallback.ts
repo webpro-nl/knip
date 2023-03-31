@@ -13,6 +13,7 @@ const withoutPositional: ArgResolver = parsed => [parsed.require].flat();
 const argFilters: ArgResolvers = {
   'babel-node': withPositional,
   esbuild: withPositional,
+  execa: withPositional,
   nodemon: withPositional,
   'ts-node': withPositional,
   zx: withPositional,
