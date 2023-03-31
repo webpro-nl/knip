@@ -77,7 +77,7 @@
     "eslint-plugin-import": "2.27.5",
     "globstar": "1.0.0",
     "prettier": "2.8.7",
-    "release-it": "15.9.3",
+    "release-it": "15.10.0",
     "remark-cli": "11.0.0",
     "remark-preset-webpro": "0.0.2",
     "tsx": "3.12.6",
@@ -99,7 +99,10 @@
       ]
     },
     "github": {
-      "release": true
+      "release": true,
+      "comments": {
+        "submit": true
+      }
     },
     "plugins": {
       "@release-it/bumper": {
