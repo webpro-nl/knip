@@ -10,6 +10,13 @@
       "name": "Test Current File",
       "skipFiles": ["<node_internals>/**"],
       "runtimeArgs": ["--loader", "tsx", "--test", "${file}"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Test Current File (--test-only)",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeArgs": ["--loader", "tsx", "--test-only", "${file}"]
     }
   ]
 }
