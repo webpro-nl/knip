@@ -90,6 +90,7 @@ export class ConfigurationChief {
   additionalWorkspaces: Set<string> = new Set();
   workspaceDirs: string[] = [];
   workspaces: Workspace[] = [];
+  localWorkspaces: Set<string> = new Set();
 
   resolvedConfigFilePath?: string;
 
@@ -215,6 +216,7 @@ export class ConfigurationChief {
     this.ignoreWorkspaces = this.getIgnoredWorkspaces();
     this.manifestWorkspaces = await this.getManifestWorkspaces();
     this.additionalWorkspaces = await this.getAdditionalWorkspaces();
+    this.localWorkspaces = new Set(compact(this.getEnabledWorkspaces().map(w => w.pkgName)));
     this.workspaces = this.getEnabledWorkspaces();
     this.workspaceDirs = this.getAllWorkspaces()
       .sort(byPathDepth)

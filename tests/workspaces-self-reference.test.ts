@@ -15,7 +15,7 @@ test('Find unused files, dependencies and exports in workspaces with cross self-
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    processed: 3,
+    total: 3,
   });
 });

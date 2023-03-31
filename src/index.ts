@@ -241,21 +241,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         if (exported.size > 0) exportedSymbols.set(filePath, exported);
 
         for (const [specifierFilePath, importItems] of internal.entries()) {
+          // Mark "external" imports from other local workspaces as used dependency
           const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
-          const importedWorkspace = chief.findWorkspaceByPackageName(packageName);
-          if (importedWorkspace) {
-            // TODO Ideally this is handled in `principal.analyzeSourceFile`, but that's unaware of (other) workspaces
-            if (importedWorkspace === workspace) {
-              // Self-referencing imports are not part of the program (it sets `isExternalLibraryImport: true`). Here we
-              // patch this up by adding such internal file paths explicitly.
-              //
-              // TODO Imports may refer to modules that are not part of the program, causing potential false positives?
-              // A potential fix is to not add paths matching `ignore` config.
-              principal.addEntryPath(specifierFilePath);
-            } else {
-              external.add(importItems.specifier);
-            }
-          }
+          if (chief.localWorkspaces.has(packageName)) external.add(packageName);
 
           if (!importedSymbols.has(specifierFilePath)) {
             importedSymbols.set(specifierFilePath, importItems);

@@ -93,12 +93,10 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
       if (filePath) {
         if (module.resolvedModule.isExternalLibraryImport) {
           if (!isInNodeModules(filePath)) {
-            // Self-referencing imports are resolved by `sourceFile.resolvedModules`, but not part of the program
-            // through `principal.createProgram`. Add as internal import, and follow up with `principal.addEntryPath`.
             addInternalImport({ identifier, specifier, symbol, filePath, isDynamic });
           } else if (isDeclarationFileExtension(module.resolvedModule.extension)) {
-            // We use TypeScript's module resolution, but it returns @types/pkg. In the rest of the program we want the
-            // package name based on the original specifier.
+            // We use TypeScript's module resolution, but it returns DTS references. In the rest of the program we want
+            // the package name based on the original specifier.
             externalImports.add(specifier);
           } else {
             externalImports.add(module.resolvedModule.packageId?.name ?? specifier);
