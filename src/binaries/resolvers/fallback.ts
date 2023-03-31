@@ -1,6 +1,6 @@
 import parseArgs from 'minimist';
 import { compact } from '../../util/array.js';
-import { tryResolveFilePaths } from './util.js';
+import { toBinary, tryResolveFilePaths } from '../util.js';
 import type { Resolver } from '../types.js';
 import type { ParsedArgs } from 'minimist';
 
@@ -24,5 +24,5 @@ export const resolve: Resolver = (binary, args, { cwd }) => {
   const parsed = parseArgs(args, { string: ['r'], alias: { require: ['r', 'loader'] }, boolean: ['quiet', 'verbose'] });
   const argFilter = argFilters[binary as keyof typeof argFilters] ?? argFilters.default;
   const filteredArgs = compact(argFilter(parsed));
-  return [binary, ...tryResolveFilePaths(cwd, filteredArgs)];
+  return [toBinary(binary), ...tryResolveFilePaths(cwd, filteredArgs)];
 };

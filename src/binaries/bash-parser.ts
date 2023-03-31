@@ -3,6 +3,7 @@ import parseArgs from 'minimist';
 import { debugLogObject } from '../util/debug.js';
 import * as FallbackResolver from './resolvers/fallback.js';
 import * as KnownResolvers from './resolvers/index.js';
+import { stripBinaryPath, toBinary } from './util.js';
 import type { Node } from 'bash-parser';
 import type { PackageJson } from 'type-fest';
 
@@ -26,7 +27,7 @@ export const getBinariesFromScript = (
     nodes.flatMap(node => {
       switch (node.type) {
         case 'Command': {
-          const binary = node.name?.text;
+          const binary = node.name?.text ? stripBinaryPath(node.name.text) : node.name?.text;
 
           const commandExpansions =
             node.prefix?.flatMap(
@@ -60,7 +61,7 @@ export const getBinariesFromScript = (
             const [spawnedBinary] = parsedArgs._;
             if (spawnedBinary) {
               const restArgs = args.slice(args.indexOf(spawnedBinary));
-              return [binary, ...fromArgs(restArgs)];
+              return [toBinary(binary), ...fromArgs(restArgs)];
             } else {
               return [];
             }

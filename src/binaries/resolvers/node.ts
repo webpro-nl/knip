@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import { tryResolveFilePath, tryResolveFilePaths } from './util.js';
+import { tryResolveFilePath, tryResolveFilePaths } from '../util.js';
 import type { Resolver } from '../types.js';
 
 export const resolve: Resolver = (binary, args, { cwd }) => {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
-import { isAbsolute, join, resolve } from '../../src/util/path.js';
+import { join, resolve } from '../../src/util/path.js';
 
 const cwd = resolve('tests/fixtures/binaries');
 
@@ -15,22 +15,19 @@ const knownOnly = { cwd, knownGlobalsOnly: true };
 
 type T = (script: string | string[], dependencies: string[], options?: { cwd: string }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
-  assert.deepEqual(
-    _getDependenciesFromScripts(script, options),
-    dependencies.map(specifier => (isAbsolute(specifier) ? specifier : 'bin:' + specifier))
-  );
+  assert.deepEqual(_getDependenciesFromScripts(script, options), dependencies);
 
 test('getReferencesFromScripts', () => {
-  t('program', ['program']);
-  t(['program', 'program'], ['program']);
-  t('program -short --long args', ['program']);
-  t('program && program2', ['program', 'program2']);
-  t('program -x && exec -y -- program2 -z', ['program', 'exec']);
-  t('program -x; exec -y -- program2', ['program', 'exec']);
-  t('program script.js -- program2', ['program']);
-  t("program '*.js' -- program2", ['program']);
-  t('program -s .', ['program']);
-  t('program command', ['program']);
+  t('program', ['bin:program']);
+  t(['program', 'program'], ['bin:program']);
+  t('program -short --long args', ['bin:program']);
+  t('program && program2', ['bin:program', 'bin:program2']);
+  t('program -x && exec -y -- program2 -z', ['bin:program', 'bin:exec']);
+  t('program -x; exec -y -- program2', ['bin:program', 'bin:exec']);
+  t('program script.js -- program2', ['bin:program']);
+  t("program '*.js' -- program2", ['bin:program']);
+  t('program -s .', ['bin:program']);
+  t('program command', ['bin:program']);
 });
 
 test('getReferencesFromScripts (node)', () => {
@@ -45,51 +42,51 @@ test('getReferencesFromScripts (node)', () => {
 });
 
 test('getReferencesFromScripts (ts-node/tsx)', () => {
-  t('ts-node --require pkg/register main.ts', ['ts-node', ts, 'pkg']);
-  t('tsx ./main.ts', ['tsx', ts]);
-  t('tsx watch ./main.ts', ['tsx', ts]);
+  t('ts-node --require pkg/register main.ts', ['bin:ts-node', ts, 'pkg']);
+  t('tsx ./main.ts', ['bin:tsx', ts]);
+  t('tsx watch ./main.ts', ['bin:tsx', ts]);
   t('node --loader tsx ./main.ts', [ts, 'tsx']);
   t('npx tsx main', ['tsx', ts]);
-  t('babel-node --inspect=0.0.0.0 ./main.ts', ['babel-node', ts]);
+  t('babel-node --inspect=0.0.0.0 ./main.ts', ['bin:babel-node', ts]);
 });
 
 test('getReferencesFromScripts (--require)', () => {
-  t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['nodemon', js, 'dotenv']);
-  t('program --loader tsx --test "test/*.spec.ts"', ['program', 'tsx']);
-  t('program --loader ldr --loader tsx --test "test/*.spec.ts"', ['program', 'ldr', 'tsx']);
+  t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['bin:nodemon', js, 'dotenv']);
+  t('program --loader tsx --test "test/*.spec.ts"', ['bin:program', 'tsx']);
+  t('program --loader ldr --loader tsx --test "test/*.spec.ts"', ['bin:program', 'ldr', 'tsx']);
 });
 
 test('getReferencesFromScripts (.bin)', () => {
-  t('./node_modules/.bin/tsc --noEmit', ['tsc']);
-  t('node_modules/.bin/tsc --noEmit', ['tsc']);
-  t('$(npm bin)/tsc --noEmit', ['tsc']);
+  t('./node_modules/.bin/tsc --noEmit', ['bin:tsc']);
+  t('node_modules/.bin/tsc --noEmit', ['bin:tsc']);
+  t('$(npm bin)/tsc --noEmit', ['bin:tsc']);
   t('../../../scripts/node_modules/.bin/tsc --noEmit', []);
 });
 
 test('getReferencesFromScripts (dotenv)', () => {
-  t('dotenv program', ['dotenv', 'program']);
-  t('dotenv -- program', ['dotenv', 'program']);
-  t('dotenv -e .env3 -v VARIABLE=somevalue program -- exit', ['dotenv', 'program']);
-  t('dotenv -- mvn exec:java -Dexec.args="-g -f"', ['dotenv', 'mvn']);
+  t('dotenv program', ['bin:dotenv', 'bin:program']);
+  t('dotenv -- program', ['bin:dotenv', 'bin:program']);
+  t('dotenv -e .env3 -v VARIABLE=somevalue program -- exit', ['bin:dotenv', 'bin:program']);
+  t('dotenv -- mvn exec:java -Dexec.args="-g -f"', ['bin:dotenv', 'bin:mvn']);
 });
 
 test('getReferencesFromScripts (cross-env)', () => {
-  t('cross-env program', ['cross-env', 'program']);
-  t('cross-env NODE_ENV=production program', ['cross-env', 'program']);
-  t('cross-env NODE_ENV=production program subcommand', ['cross-env', 'program']);
-  t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', ['cross-env', 'program']);
-  t('cross-env NODE_ENV=production program -r pkg/config ./s.js -w ./s.js', ['cross-env', 'program', 'pkg']);
-  t('NODE_ENV=production cross-env -- program --cache', ['cross-env', 'program']);
+  t('cross-env program', ['bin:cross-env', 'bin:program']);
+  t('cross-env NODE_ENV=production program', ['bin:cross-env', 'bin:program']);
+  t('cross-env NODE_ENV=production program subcommand', ['bin:cross-env', 'bin:program']);
+  t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', ['bin:cross-env', 'bin:program']);
+  t('cross-env NODE_ENV=production program -r pkg/config ./s.js -w ./s.js', ['bin:cross-env', 'bin:program', 'pkg']);
+  t('NODE_ENV=production cross-env -- program --cache', ['bin:cross-env', 'bin:program']);
 });
 
 test('getReferencesFromScripts (cross-env/node)', () => {
-  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['cross-env', js, 'dotenv']);
-  t('cross-env NODE_ENV=production node -r esm script.js', ['cross-env', js, 'esm']);
+  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['bin:cross-env', js, 'dotenv']);
+  t('cross-env NODE_ENV=production node -r esm script.js', ['bin:cross-env', js, 'esm']);
 });
 
 test('getReferencesFromScripts (npm)', () => {
-  t('npm run script', ['npm']);
-  t('npm run publish:latest -- --npm-tag=debug --no-push', ['npm']);
+  t('npm run script', ['bin:npm']);
+  t('npm run publish:latest -- --npm-tag=debug --no-push', ['bin:npm']);
 });
 
 test('getReferencesFromScripts (npx)', () => {
@@ -100,17 +97,17 @@ test('getReferencesFromScripts (npx)', () => {
   t('npx -y pkg', []);
   t('npx --yes pkg', []);
   t('npx --no pkg --edit ${1}', ['pkg']);
-  t('npx --no -- pkg --edit ${1}', ['pkg']);
+  t('npx --no -- pkg --edit ${1}', ['bin:pkg']);
   t('npx pkg install --with-deps', ['pkg']);
   t('npx pkg migrate reset --force', ['pkg']);
-  t('npx pkg@0.6.0 -- curl --output /dev/null', ['pkg', 'curl']);
-  t('npx @scope/pkg@0.6.0 -- curl', ['@scope/pkg', 'curl']);
+  t('npx pkg@0.6.0 -- curl --output /dev/null', ['pkg', 'bin:curl']);
+  t('npx @scope/pkg@0.6.0 -- curl', ['@scope/pkg', 'bin:curl']);
 });
 
 test('getReferencesFromScripts (pnpm)', () => {
-  t('pnpm exec program', ['program']);
+  t('pnpm exec program', ['bin:program']);
   t('pnpm run program', []);
-  t('pnpm program', ['program']);
+  t('pnpm program', ['bin:program']);
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', []);
@@ -118,9 +115,9 @@ test('getReferencesFromScripts (pnpm)', () => {
 });
 
 test('getReferencesFromScripts (yarn)', () => {
-  t('yarn exec program', ['program']);
-  t('yarn run program', ['program']);
-  t('yarn program', ['program']);
+  t('yarn exec program', ['bin:program']);
+  t('yarn run program', ['bin:program']);
+  t('yarn program', ['bin:program']);
   t('yarn run program', [], pkgScripts);
   t('yarn program', [], pkgScripts);
   t('yarn dlx pkg', []);
@@ -129,21 +126,21 @@ test('getReferencesFromScripts (yarn)', () => {
 });
 
 test('getReferencesFromScripts (rollup)', () => {
-  t('rollup --watch --watch.onEnd="node script.js"', ['rollup', js]);
-  t('rollup -p ./require.js', ['rollup', req]);
-  t('rollup --plugin @rollup/plugin-node-resolve', ['rollup', '@rollup/plugin-node-resolve']);
-  t('rollup --configPlugin @rollup/plugin-typescript', ['rollup', '@rollup/plugin-typescript']);
+  t('rollup --watch --watch.onEnd="node script.js"', ['bin:rollup', js]);
+  t('rollup -p ./require.js', ['bin:rollup', req]);
+  t('rollup --plugin @rollup/plugin-node-resolve', ['bin:rollup', '@rollup/plugin-node-resolve']);
+  t('rollup --configPlugin @rollup/plugin-typescript', ['bin:rollup', '@rollup/plugin-typescript']);
 });
 
 test('getReferencesFromScripts (zx)', () => {
-  t('zx --quiet script.js', ['zx', js]);
+  t('zx --quiet script.js', ['bin:zx', js]);
   t('npx --yes zx --quiet script.js', [js]);
 });
 
 test('getReferencesFromScripts (bash expressions)', () => {
-  t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['make']);
-  t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['make']);
-  t('if ! npx program --verbose ; then exit 1 ; fi', ['program', 'exit']);
+  t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['bin:make']);
+  t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['bin:make']);
+  t('if ! npx pkg --verbose ; then exit 1 ; fi', ['pkg', 'bin:exit']);
 });
 
 test('getReferencesFromScripts (bash expansion)', () => {

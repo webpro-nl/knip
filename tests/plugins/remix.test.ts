@@ -18,7 +18,7 @@ test('Find dependencies in Remix configuration', async () => {
   assert(issues.unlisted['package.json']['bin:run-s']);
   assert(issues.unlisted['package.json']['bin:run-p']);
   assert(issues.unlisted['package.json']['bin:cross-env']);
-  assert(issues.unlisted['package.json']['bin:dotenv']);
+  assert(issues.unlisted['package.json']['dotenv']);
   assert(issues.unlisted['package.json']['bin:tailwindcss']);
   assert(issues.unlisted['package.json']['bin:prisma']);
 

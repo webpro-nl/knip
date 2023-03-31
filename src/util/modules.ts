@@ -14,12 +14,6 @@ export const getPackageNameFromFilePath = (value: string) => {
   return value;
 };
 
-export const stripBinary = (command: string) =>
-  command
-    .replace(/(\.\/)?node_modules\/(\.bin\/)?(\w+)/, '$3')
-    .replace(/\$\(npm bin\)\/(\w+)/, '$1')
-    .replace(/(\S+)@.*/, '$1');
-
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith('@types/');
 
 export const getDefinitelyTypedFor = (packageName: string) => {
