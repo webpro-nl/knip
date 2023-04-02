@@ -1,16 +1,16 @@
 # ✂️ Knip
 
 Knip finds **unused files, dependencies and exports** in your JavaScript and TypeScript projects. Less code and
-dependencies leads to improved performance, less maintenance and easier refactorings.
+dependencies lead to improved performance, less maintenance and easier refactorings.
 
 ```ts
 export const myVar = true;
 ```
 
 This is where ESLint stops: it handles files in isolation, so it does not know whether `myVar` is used somewhere else.
-This is where Knip starts: it lints the project as a whole, and finds unused exports, files and dependencies.
+This is where Knip starts: it lints the project as a whole and finds unused exports, files and dependencies.
 
-It's only human to forget removing things that you no longer use. But how do you find out? Where do you start finding
+It's only human to forget to remove things that you no longer use. But how do you find out? Where do you start finding
 things that can be removed?
 
 The dots don't connect themselves. This is where Knip comes in:
@@ -53,18 +53,18 @@ Well, almost, this is the full list of default extensions: `js`, `mjs`, `cjs`, `
 
 ### Entry Files
 
-Knip looks for entry files at the default locations above, but also in other places:
+Knip looks for entry files at those default locations, but also in other places:
 
 - The `main`, `bin` and `exports` fields of `package.json`.
-- [Plugins][2] such as for Next.js, Remix, Gatsby or Svelte define entry files so you don't have to.
-- The `scripts` in package.json may also provide entry files that Knip can use.
+- [Plugins][2] such as for Next.js, Remix, Gatsby or Svelte add entry files.
+- The `scripts` in package.json or other scripts may provide entry files.
 - Knip does this for each [workspace][1] it finds.
 
 In other words, Knip looks in many places and you may not need much configuration. In a perfectly boring world where
 everything is according to defaults you don't even need a `knip.json` file.
 
 Larger projects tend to have more things customized, and therefore probably get more out of Knip with a configuration
-file. Let's say you are using `.ts` files excusively and have all source files only in the `src` directory:
+file. Let's say you are using `.ts` files exclusively and have all source files only in the `src` directory:
 
 ```json
 {
@@ -186,16 +186,18 @@ The report contains the following types of issues:
 
 When an issue type has zero issues, it is not shown.
 
+Getting too many reported issues and false positives? Read more about [handling issues][8].
+
 _(1)_ If an unlisted dependency is prefixed with `bin:` it means a binary is missing. This often equals the package
 name, but not always (e.g. `tsc` of `typescript` or `webpack` from `webpack-cli`).
 
-_(2)_ The variable or type is not referenced directly, and has become a member of a namespace. Knip can't find a
+_(2)_ The variable or type is not referenced directly and has become a member of a namespace. Knip can't find a
 reference to it, so you can _probably_ remove it.
 
-### Output filters
+## Output filters
 
-You can `--include` or `--exclude` any of the types to slice & dice the report to your needs. Alternatively, they can be
-added to the configuration (e.g. `"exclude": ["dependencies"]`).
+You can `--include` or `--exclude` any of the reported issue types to slice & dice the report to your needs.
+Alternatively, they can be added to the configuration (e.g. `"exclude": ["dependencies"]`).
 
 Use `--include` to report only specific issue types (the following example commands do the same):
 
@@ -207,9 +209,6 @@ Use `--exclude` to ignore reports you're not interested in:
     knip --include files --exclude classMembers,enumMembers
 
 Use `--dependencies` or `--exports` as shortcuts to combine groups of related types.
-
-Still not happy with the results? Getting too much output/false positives? The [FAQ][8] may be useful. Feel free to open
-an issue and I'm happy to look into it. Also see the next section on how to [ignore][9] certain false positives:
 
 ## Ignore
 
@@ -226,11 +225,11 @@ There are a few ways to tell Knip to ignore certain packages, binaries, dependen
 
 These can also be configured per workspace (except for `ignoreWorkspaces`).
 
-## Now what?
+## What's next?
 
 This is the fun part! Knip, knip, knip ✂️
 
-As always, make sure to backup files or use Git before deleting files or making changes. Run tests to verify results.
+As always, make sure to back up files or use Git before deleting files or making changes. Run tests to verify results.
 
 - Unused files can be removed.
 - Unused dependencies can be removed from `package.json`.
@@ -242,9 +241,14 @@ As always, make sure to backup files or use Git before deleting files or making 
 
 🔁 Repeat the process to reveal new unused files and exports. Sometimes it's so liberating to remove things!
 
-## Workspaces (monorepos)
+Getting too many reported issues and false positives? Read more about [handling issues][8].
 
-Workspaces and monorepos are handled out-of-the-box by Knip. Every workspace is part of the analysis.
+## Workspaces
+
+Workspaces are handled out-of-the-box by Knip. Every workspace is part of the analysis.
+
+Workspaces are sometimes also referred to as package-based monorepos, or as packages in a monorepo. Knip uses the term
+workspace exclusively to indicate a directory that has a `package.json`.
 
 Here's an example `knip.json` configuration with some custom `entry` and `project` patterns:
 
@@ -267,12 +271,9 @@ Here's an example `knip.json` configuration with some custom `entry` and `projec
 ```
 
 It might be useful to run Knip first with no or little configuration to see where it needs custom `entry` and/or
-`project` files. The default configuration of each workspace is the same as for a regular project.
+`project` files. Each workspace has the same [default configuration][9].
 
-Workspaces are sometimes also referred to as packages in a monorepo. Knip uses the term workspaces exclusively to
-indicate the directories that have a `package.json`.
-
-Root workspaces must be named `"."` under `workspaces` (like in the example).
+The root workspace is named `"."` under `workspaces` (like in the example).
 
 Knip supports workspaces as defined in three possible locations:
 
@@ -283,14 +284,13 @@ Knip supports workspaces as defined in three possible locations:
 Extra "workspaces" not configured as a workspace in the root `package.json` can be configured as well, Knip is happy to
 analyze unused dependencies and exports from any directory with a `package.json`.
 
+The `ignore`, `ignoreBinaries` and `ignoreDependencies` options are available inside workspace configurations.
+
 Here's some example output when running Knip in a workspace:
 
 <img src="./assets/screenshot-workspaces.png" alt="example output in workspaces" width="578">
 
 Use `--debug` to get more verbose output.
-
-Use `ignoreBinaries` and `ignoreDependencies` at the root of `knip.json` for global effect, or inside any workspace
-config for local effect.
 
 ## Plugins
 
@@ -353,8 +353,8 @@ Knip contains a growing list of plugins:
 - [Webpack][plugin-webpack]
 
 Plugins are automatically activated. Each plugin is automatically enabled based on simple heuristics. Most of them check
-whether one of a few dependencies are listed in `package.json`. Once enabled, they add a set of `config` files for
-itself and/or `entry` files for Knip to analyze.
+whether one of a few dependencies is listed in `package.json`. Once enabled, they add a set of `config` files for
+themselves and/or `entry` files for Knip to analyze.
 
 - `config` files are given to the plugin's dependency finder
 - `entry` files are given to Knip to include with the analysis of the rest of the source code
@@ -374,10 +374,10 @@ and can be analyzed like any other source file. That's why these configuration f
 
 ### Override plugin configuration
 
-Usually no custom configuration is required for plugins, but if your project uses custom file locations then Knip allows
-to override any defaults. Let's take Cypress for example. By default it uses `cypress.config.js`, but your project uses
-`config/cypress.js`. Also, the default pattern for test files is `cypress/e2e/**/*.cy.js`, but your project has them at
-`e2e-tests/*.spec.ts`. Here's how to configure this:
+Usually, no custom configuration is required for plugins, but if your project uses custom file locations then Knip
+allows you to override any defaults. Let's take Cypress for example. By default it uses `cypress.config.js`, but your
+project uses `config/cypress.js`. Also, the default pattern for test files is `cypress/e2e/**/*.cy.js`, but your project
+has them at `e2e-tests/*.spec.ts`. Here's how to configure this:
 
 ```json
 {
@@ -389,9 +389,9 @@ to override any defaults. Let's take Cypress for example. By default it uses `cy
 
 ### Multi-project repositories
 
-Some repositories have a single `package.json`, but consist of multiple projects with potentially lots of configuration
-files (such as the [Nx "intregrated repo" style][10]). Let's assume some of these projects are apps and have their own
-Cypress configuration and test files. In that case, we could configure the Cypress plugin like this:
+Some repositories have a single `package.json`, but consist of multiple projects with configuration files across the
+repository (such as the [Nx "intregrated repo" style][10]). Let's assume some of these projects are apps and have their
+own Cypress configuration and test files. In that case, we could configure the Cypress plugin like this:
 
 ```json
 {
@@ -412,13 +412,13 @@ guide also contains more details if you want to learn more about plugins and why
 
 ## Compilers
 
-Knip v2 introduces compilers which allows to include files that are not JavaScript or TypeScript in the process of
-finding unused or missing dependencies. For instance, `.mdx`, `.vue` and `.svelte` files come to mind.
+Knip v2 introduces compilers that allow to include files that are not JavaScript or TypeScript in the process of finding
+unused or missing dependencies. For instance, `.mdx`, `.vue` and `.svelte` files come to mind.
 
-Currently this is only supported by using `knip.js` or `knip.ts`. Provide a `compilers` object in the configuration
+Currently, this is only supported by using `knip.js` or `knip.ts`. Provide a `compilers` object in the configuration
 where each key represents the extension and the value is a function that takes the contents of these files as input and
 returns JavaScript or TypeScript as output. Here is an example that compiles `.mdx` files to JavaScript so these files
-and their imports and exports become part of the analyis:
+and their imports and exports become part of the analysis:
 
 ```js
 import { compileSync } from 'mdx-js/mdx';
@@ -435,8 +435,8 @@ Read [Compilers][12] for more details and examples.
 ## Production Mode
 
 The default mode for Knip is holistic and targets all project code, including configuration files and tests. Test files
-usually import production files. This prevents the production files or its exports from being reported as unused, while
-sometimes both of them can be removed. This is why Knip has a "production mode".
+usually import production files. This prevents the production files or their exports from being reported as unused,
+while sometimes both of them can be removed. This is why Knip has a "production mode".
 
 To tell Knip what is production code, add an exclamation mark behind each `pattern!` that is meant for production and
 use the `--production` flag. Here's an example:
@@ -451,7 +451,7 @@ use the `--production` flag. Here's an example:
 Here's what's included in production mode analysis:
 
 - Only `entry` and `project` patterns suffixed with `!`.
-- Only production `entry` file patterns exported for plugins (such as Next.js and Gatsby).
+- Only production `entry` file patterns exported by plugins (such as Next.js and Gatsby).
 - Only the `start` and `postinstall` scripts (e.g. not the `test` or other npm scripts in `package.json`).
 - Only unused `exports`, `nsExports` and `classMembers` are reported (not `types`, `nsTypes`, `enumMembers`).
 
@@ -488,7 +488,7 @@ aliases. They can be configured manually:
 
 Each workspace can also have its own `paths` configured. Note that Knip `paths` follow the TypeScript semantics:
 
-- Path values is an array of relative paths.
+- Path values are an array of relative paths.
 - Paths without an `*` are exact matches.
 
 ## Reporters
@@ -504,14 +504,14 @@ Knip provides the following built-in reporters:
 
 When the provided built-in reporters are not sufficient, a custom reporter can be implemented.
 
-Pass `--reporter ./my-reporter` from the command-line. The data can then be used to write issues to `stdout`, a JSON or
+Pass `--reporter ./my-reporter` from the command line. The data can then be used to write issues to `stdout`, a JSON or
 CSV file, or sent to a service.
 
 Find more details and ideas in [custom reporters][13].
 
 ## Public exports
 
-Sometimes a file that's not an entry file has one or more exports that are public, and should not be reported as unused.
+Sometimes a file that's not an entry file has one or more exports that are public and should not be reported as unused.
 Such variables and types can be marked with the JSDoc `@public` tag:
 
 ```js
@@ -529,60 +529,16 @@ export const split = function () {};
 
 Knip does not report public exports and types as unused.
 
-## FAQ
+## Handling Issues
 
-### Really, another unused file/dependency/export finder?
-
-There are already some great packages available if you want to find unused dependencies OR unused exports.
-
-I love the Unix philosophy ("do one thing well"). But in this case I believe it's efficient to handle multiple concerns
-in a single tool. When building a dependency graph of the project, an abstract syntax tree for each file, and traversing
-all of this, why not collect the various issues in one go?
-
-### How do I handle too many output/false positives?
-
-#### Too many unused files
-
-When the list of unused files is too long, this means the gap between the set of `entry` and the set of `project` files
-needs tweaking. The gap can be narrowed down by increasing the `entry` files or reducing the `project` files, for
-instance by ignoring specific directories that are not related to the source code imported by the `entry` files.
-
-#### Too many unused dependencies
-
-Dependencies that are only imported in unused files are also marked as unused. So a long list of unused files would be
-good to remedy first.
-
-When unused dependencies are related to dependencies having a Knip [plugin][1], maybe the `config` and/or `entry` files
-for that dependency are at custom locations. The default values are at the plugin's documentation, and can be overridden
-to match the custom location(s).
-
-When the dependencies don't have a Knip plugin yet, please file an issue or [create a new plugin][14].
-
-#### Too many unused exports
-
-Unused exports of `entry` files are not reported. When exports of other files are marked as unused, because they are
-meant to be used by consumers of the library, there are a few options:
-
-1.  Add the containing file to the `entry` array in the configuration.
-2.  Re-export from an existing entry file.
-3.  Mark the exported value or type [using the JSDoc `@public` tag][15].
-
-### How to start using Knip in CI while having too many issues to sort out?
-
-Eventually this type of QA only really works when it's tied to an automated workflow. But with too many issues to
-resolve this might not be feasible right away, especially in existing larger codebase. Here are a few options that may
-help in the meantime:
-
-- Use `--no-exit-code` for exit code 0 in CI.
-- Use `--include` (or `--exclude`) to report only the issue types that have little or no errors.
-- Use separate Knip commands to analyze e.g. only `--dependencies` or `--exports`.
-- Use [ignore patterns][9] to filter out the most problematic areas.
+How to handle a long list of reported issues? Seeing too many false positives? Read more about [handling issues][14]
+describing potential causes for false positives, and how to handle them.
 
 ## Comparison
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                 | **knip** | [depcheck][16] | [unimported][17] | [ts-unused-exports][18] | [ts-prune][19] |
+| Feature                 | **knip** | [depcheck][15] | [unimported][16] | [ts-unused-exports][17] | [ts-prune][18] |
 | :---------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files            |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies     |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -618,7 +574,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][20].
+Also see [production mode][19].
 
 ### ts-unused-exports
 
@@ -640,7 +596,8 @@ The following commands are similar:
 
 Many thanks to some of the early adopters of Knip:
 
-- [Block Protocol][21]
+- [Block Protocol][20]
+- [Cursor][21]
 - [DeepmergeTS][22]
 - [eslint-plugin-functional][23]
 - [freeCodeCamp.org][24]
@@ -651,7 +608,14 @@ Many thanks to some of the early adopters of Knip:
 ## Knip?!
 
 Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
-for the job. I'm motivated to make knip perfectly suited for the job of cutting projects to perfection! ✂️
+for the job. I'm motivated to make Knip perfectly suited for the job of cutting projects to perfection! ✂️
+
+## Really, another unused file/dependency/export finder?
+
+As listed above, there are already some great packages available if you want to find unused dependencies OR unused
+exports. I love the Unix philosophy ("do one thing well"). But looking at what Knip does, I believe it's efficient to
+handle multiple concerns in a single tool. When building a dependency graph of the project, an abstract syntax tree for
+each file, and traversing all of this, why not collect the various issues in one go?
 
 ## Contributors
 
@@ -659,27 +623,27 @@ Special thanks to the wonderful people who have contributed to this project:
 
 [![Contributors][29]][28]
 
-[1]: #workspaces-monorepos
+[1]: #workspaces
 [2]: #plugins
 [3]: #compilers
 [4]: #reporters
 [5]: #custom-reporters
 [6]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [7]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[8]: #faq
-[9]: #ignore
+[8]: #handling-issues
+[9]: #configuration
 [10]: https://nx.dev/concepts/integrated-vs-package-based
 [11]: ./docs/writing-a-plugin.md
 [12]: ./docs/compilers.md
 [13]: ./docs/custom-reporters.md
-[14]: #create-a-new-plugin
-[15]: #public-exports
-[16]: https://github.com/depcheck/depcheck
-[17]: https://github.com/smeijer/unimported
-[18]: https://github.com/pzavolinsky/ts-unused-exports
-[19]: https://github.com/nadeesha/ts-prune
-[20]: #production-mode
-[21]: https://github.com/blockprotocol/blockprotocol
+[14]: ./docs/handling-issues.md
+[15]: https://github.com/depcheck/depcheck
+[16]: https://github.com/smeijer/unimported
+[17]: https://github.com/pzavolinsky/ts-unused-exports
+[18]: https://github.com/nadeesha/ts-prune
+[19]: #production-mode
+[20]: https://github.com/blockprotocol/blockprotocol
+[21]: https://github.com/getcursor/cursor
 [22]: https://github.com/RebeccaStevens/deepmerge-ts
 [23]: https://github.com/eslint-functional/eslint-plugin-functional
 [24]: https://github.com/freeCodeCamp/freeCodeCamp
