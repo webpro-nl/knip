@@ -29,6 +29,7 @@ const commands = [
   'unlink',
   'unplug',
   'up',
+  'upgrade',
   'upgrade-interactive',
   'version',
   'why',
