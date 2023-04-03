@@ -120,7 +120,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const compilerOptions = await loadCompilerOptions(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
-    const principal = factory.getPrincipal({ cwd: dir, report: report, paths, compilerOptions, compilers });
+    const principal = factory.getPrincipal({ cwd: dir, paths, compilerOptions, compilers });
 
     const worker = new WorkspaceWorker({
       name,
@@ -235,7 +235,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const analyzeSourceFile = (filePath: string) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, scripts } = principal.analyzeSourceFile(filePath);
+        const { imports, exports, scripts } = principal.analyzeSourceFile(filePath, { skipTypeOnly: !isReportTypes });
         const { internal, external, unresolved } = imports;
         const { exported, duplicate } = exports;
 

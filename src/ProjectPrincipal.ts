@@ -8,12 +8,10 @@ import { extname, isInNodeModules } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { ExportItem, ExportItemMember } from './types/exports.js';
-import type { Report } from './types/issues.js';
 
 type ProjectPrincipalOptions = {
   compilerOptions: ts.CompilerOptions;
   cwd: string;
-  report: Report;
   compilers: [SyncCompilers, AsyncCompilers];
 };
 
@@ -54,7 +52,6 @@ export class ProjectPrincipal {
 
   cwd: string;
   compilerOptions: ts.CompilerOptions;
-  isReportTypes: boolean;
   extensions: Set<string>;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
@@ -67,7 +64,7 @@ export class ProjectPrincipal {
     program?: ts.Program;
   };
 
-  constructor({ compilerOptions, cwd, report, compilers }: ProjectPrincipalOptions) {
+  constructor({ compilerOptions, cwd, compilers }: ProjectPrincipalOptions) {
     this.cwd = cwd;
 
     this.compilerOptions = {
@@ -77,7 +74,6 @@ export class ProjectPrincipal {
     };
 
     const [syncCompilers, asyncCompilers] = compilers;
-    this.isReportTypes = report.types || report.nsTypes || report.enumMembers;
     this.extensions = new Set([...DEFAULT_EXTENSIONS, ...syncCompilers.keys(), ...asyncCompilers.keys()]);
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
@@ -171,12 +167,11 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(filePath: string) {
+  public analyzeSourceFile(filePath: string, { skipTypeOnly }: { skipTypeOnly: boolean }) {
     const sourceFile = this.backend.program?.getSourceFile(filePath);
 
     if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
 
-    const skipTypeOnly = !this.isReportTypes;
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
     const { imports, exports, scripts } = getImportsAndExports(sourceFile, { skipTypeOnly, skipExports });

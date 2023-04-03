@@ -2,7 +2,6 @@ import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { join, toAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
-import type { Report } from './types/issues.js';
 
 type Paths = ts.CompilerOptions['paths'];
 
@@ -12,7 +11,6 @@ type Principals = Set<Principal>;
 type Options = {
   cwd: string;
   compilerOptions: ts.CompilerOptions;
-  report: Report;
   paths: Paths;
   compilers: [SyncCompilers, AsyncCompilers];
 };
@@ -34,14 +32,14 @@ const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Pat
 export class PrincipalFactory {
   principals: Principals = new Set();
 
-  public getPrincipal({ cwd, compilerOptions, report, paths, compilers }: Options) {
+  public getPrincipal({ cwd, compilerOptions, paths, compilers }: Options) {
     compilerOptions = mergePaths(cwd, compilerOptions, paths);
     const principal = this.findReusablePrincipal(compilerOptions);
     if (principal) {
       this.linkPrincipal(principal, cwd, compilerOptions.paths);
       return principal.principal;
     } else {
-      return this.addNewPrincipal({ cwd, compilerOptions, report, paths, compilers });
+      return this.addNewPrincipal({ cwd, compilerOptions, paths, compilers });
     }
   }
 
@@ -65,8 +63,8 @@ export class PrincipalFactory {
     principal.cwds.add(cwd);
   }
 
-  private addNewPrincipal({ cwd, compilerOptions, report, compilers }: Options) {
-    const principal = new ProjectPrincipal({ cwd, compilerOptions, report, compilers });
+  private addNewPrincipal({ cwd, compilerOptions, compilers }: Options) {
+    const principal = new ProjectPrincipal({ cwd, compilerOptions, compilers });
     const pathKeys = new Set(Object.keys(compilerOptions?.paths ?? {}));
     compilerOptions.baseUrl = join(cwd, compilerOptions.baseUrl ?? '.');
     this.principals.add({ principal, cwds: new Set([cwd]), pathKeys });
