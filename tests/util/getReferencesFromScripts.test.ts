@@ -39,6 +39,7 @@ test('getReferencesFromScripts (node)', () => {
   t('node --experimental-loader ts-node/esm/transpile-only script.js', [js, 'ts-node']);
   t('node -r @scope/package/register ./dir', [index, '@scope/package']);
   t('node dist/index.js', []);
+  t('./script.js', [js]);
 });
 
 test('getReferencesFromScripts (ts-node/tsx)', () => {
