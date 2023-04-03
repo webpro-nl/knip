@@ -18,7 +18,7 @@ import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
 } from './util/modules.js';
-import { dirname, isInNodeModules, join, isInternal, isAbsolute } from './util/path.js';
+import { dirname, isInNodeModules, join, isInternal, toAbsolute } from './util/path.js';
 import { _resolveSpecifier, _tryResolve } from './util/require.js';
 import { _require } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
@@ -64,7 +64,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   }: HandleReferencedDependencyOptions) => {
     if (isInternal(specifier)) {
       // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js
-      const absSpecifier = isAbsolute(specifier) ? specifier : join(dirname(containingFilePath), specifier);
+      const absSpecifier = toAbsolute(specifier, dirname(containingFilePath));
       const filePath = _tryResolve(absSpecifier, containingFilePath);
       if (filePath) {
         principal.addEntryPath(filePath);

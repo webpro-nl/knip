@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { join, isAbsolute } from './util/path.js';
+import { join, toAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { Report } from './types/issues.js';
 
@@ -20,7 +20,7 @@ type Options = {
 const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Paths = {}) => {
   const overridePaths = Object.keys(paths).reduce((overridePaths, key) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    overridePaths![key] = paths[key].map(entry => (isAbsolute(entry) ? entry : join(cwd, entry)));
+    overridePaths![key] = paths[key].map(entry => toAbsolute(entry, cwd));
     return overridePaths;
   }, {} as Paths);
   compilerOptions.paths = { ...compilerOptions.paths, ...overridePaths };

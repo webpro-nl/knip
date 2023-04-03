@@ -1,4 +1,4 @@
-import { isAbsolute, join, dirname, isInternal } from '../../util/path.js';
+import { join, isInternal, toAbsolute, dirname } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -16,14 +16,12 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =
 
 export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
-const maybeJoin = (base: string, id: string) => (isAbsolute(id) ? id : join(dirname(base), id));
-
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const config: Config.InitialOptions = await load(configFilePath);
   if (config?.preset) {
     const { preset } = config;
     if (isInternal(preset)) {
-      const presetConfigPath = maybeJoin(configFilePath, preset);
+      const presetConfigPath = toAbsolute(preset, dirname(configFilePath));
       const presetConfig = await resolveExtensibleConfig(presetConfigPath);
       Object.assign(config, presetConfig);
     }

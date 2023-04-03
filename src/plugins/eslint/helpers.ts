@@ -1,6 +1,6 @@
 import { compact } from '../../util/array.js';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
-import { isAbsolute, isInternal, join, dirname } from '../../util/path.js';
+import { isInternal, dirname, toAbsolute } from '../../util/path.js';
 import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
 import { fallback } from './fallback.js';
@@ -49,7 +49,7 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
     if (config.extends) {
       for (const extend of [config.extends].flat()) {
         if (isInternal(extend)) {
-          const filePath = isAbsolute(extend) ? extend : join(dirname(configFilePath), extend);
+          const filePath = toAbsolute(extend, dirname(configFilePath));
           const extendConfigFilePath = _resolve(filePath);
           dependencies.add(extendConfigFilePath);
           addAll(await getDependenciesDeep(extendConfigFilePath, dependencies, options));

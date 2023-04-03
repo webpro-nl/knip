@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { ISSUE_TYPE_TITLE } from '../constants.js';
-import { isAbsolute, relative } from '../util/path.js';
+import { toRelative, relative } from '../util/path.js';
 
 export const getTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => {
   return ISSUE_TYPE_TITLE[reportType];
@@ -23,5 +23,5 @@ export const logIssueLine = ({ owner, filePath, symbols, parentSymbol }: LogIssu
 };
 
 export const logIssueSet = (issues: string[]) => {
-  issues.sort().forEach(value => console.log(isAbsolute(value) ? relative(value) : value));
+  issues.sort().forEach(value => console.log(toRelative(value)));
 };

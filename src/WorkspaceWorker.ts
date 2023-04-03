@@ -4,7 +4,7 @@ import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
-import { join } from './util/path.js';
+import { join, toPosix } from './util/path.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Entries, PackageJson } from 'type-fest';
 
@@ -290,7 +290,7 @@ export class WorkspaceWorker {
               isProduction: this.isProduction,
             });
 
-            dependencies.forEach(specifier => {
+            dependencies.map(toPosix).forEach(specifier => {
               pluginDependencies.add(specifier);
               this.referencedDependencies.add([configFilePath, specifier]);
             });
