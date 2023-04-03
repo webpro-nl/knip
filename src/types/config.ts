@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ConfigurationValidator } from '../ConfigurationValidator.js';
 import * as Plugins from '../plugins/index.js';
+import { Rules } from './issues.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 
 export type RawConfiguration = z.infer<typeof ConfigurationValidator>;
@@ -31,6 +32,7 @@ interface BaseWorkspaceConfiguration {
 export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Partial<PluginsConfiguration> {}
 
 export interface Configuration {
+  rules: Rules;
   include: string[];
   exclude: string[];
   ignore: NormalizedGlob;

@@ -48,7 +48,7 @@ const run = async () => {
   try {
     const perfObserver = new Performance(isObservePerf);
 
-    const { report, issues, counters } = await main({
+    const { report, issues, counters, rules } = await main({
       cwd,
       tsConfigFile: tsConfig,
       gitignore: !isNoGitIgnore,
@@ -60,7 +60,7 @@ const run = async () => {
     await printReport({ report, issues, cwd, isProduction, options: reporterOptions });
 
     const totalErrorCount = (Object.keys(report) as IssueType[])
-      .filter(reportGroup => report[reportGroup])
+      .filter(reportGroup => report[reportGroup] && rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + counters[reportGroup], 0);
 
     if (isObservePerf) {

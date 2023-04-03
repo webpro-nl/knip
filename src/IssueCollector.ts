@@ -1,9 +1,10 @@
 import { initIssues, initCounters } from './issues/initializers.js';
 import { relative } from './util/path.js';
-import type { Issue } from './types/issues.js';
+import type { Issue, Rules } from './types/issues.js';
 
 type IssueCollectorOptions = {
   cwd: string;
+  rules: Rules;
 };
 
 /**
@@ -12,12 +13,14 @@ type IssueCollectorOptions = {
  */
 export class IssueCollector {
   private cwd: string;
+  private rules: Rules;
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles: Set<string> = new Set();
 
-  constructor({ cwd }: IssueCollectorOptions) {
+  constructor({ cwd, rules }: IssueCollectorOptions) {
     this.cwd = cwd;
+    this.rules = rules;
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
@@ -37,6 +40,7 @@ export class IssueCollector {
 
   addIssue(issue: Issue) {
     const key = relative(this.cwd, issue.filePath);
+    issue.severity = this.rules[issue.type];
     this.issues[issue.type][key] = this.issues[issue.type][key] ?? {};
     if (!this.issues[issue.type][key][issue.symbol]) {
       this.issues[issue.type][key][issue.symbol] = issue;

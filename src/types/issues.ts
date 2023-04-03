@@ -15,6 +15,7 @@ export type Issue = {
   symbols?: string[];
   symbolType?: SymbolType;
   parentSymbol?: string;
+  severity?: IssueSeverity;
 };
 
 export type IssueSet = Set<string>;
@@ -56,3 +57,7 @@ export type ReporterOptions = {
 };
 
 export type Reporter = (options: ReporterOptions) => void;
+
+export type IssueSeverity = 'error' | 'warning' | 'off';
+
+export type Rules = Record<IssueType, IssueSeverity>;

@@ -28,3 +28,11 @@ export const getStringValues = (obj: any): string[] => {
   }
   return values;
 };
+
+export const getKeysByValue = <T>(obj: T, value: unknown): (keyof T)[] => {
+  const keys = [];
+  for (const key in obj) {
+    if (obj[key] === value) keys.push(key);
+  }
+  return keys;
+};

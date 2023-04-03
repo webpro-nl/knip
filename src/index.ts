@@ -43,7 +43,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const chief = new ConfigurationChief({ cwd, isProduction });
   const deputy = new DependencyDeputy({ isStrict });
   const factory = new PrincipalFactory();
-  const collector = new IssueCollector({ cwd });
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
   streamer.cast('Reading workspace configuration(s)...');
@@ -53,6 +52,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const compilers = chief.getCompilers();
   const workspaces = chief.getEnabledWorkspaces();
   const report = chief.getIssueTypesToReport();
+  const rules = chief.getRules();
+
+  const collector = new IssueCollector({ cwd, rules });
 
   debugLogObject('Included workspaces', workspaces);
 
@@ -376,5 +378,5 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   streamer.clear();
 
-  return { report, issues, counters };
+  return { report, issues, counters, rules };
 };

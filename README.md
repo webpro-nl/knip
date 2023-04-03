@@ -171,30 +171,60 @@ This example shows more output related to unused and unlisted dependencies:
 
 The report contains the following types of issues:
 
-- **Unused files**: did not find references to this file
-- **Unused dependencies**: did not find references to this dependency
-- **Unused devDependencies**: did not find references to this dependency
-- **Unlisted dependencies**: used dependencies, but not listed in package.json _(1)_
-- **Unresolved imports**: import specifiers that could not be resolved
-- **Unused exports**: did not find references to this exported variable
-- **Unused exports in namespaces**: did not find direct references to this exported variable _(2)_
-- **Unused exported types**: did not find references to this exported type
-- **Unused exported types in namespaces**: did not find direct references to this exported variable _(2)_
-- **Unused exported enum members**: did not find references to this member of the exported enum
-- **Unused exported class members**: did not find references to this member of the exported class
-- **Duplicate exports**: the same thing is exported more than once
+| Title          | Key                                 | Description                                           |
+| :------------- | :---------------------------------- | :---------------------------------------------------- |
+| `files`        | Unused files                        | unable to find references to this file                |
+| `dependencies` | Unused dependencies                 | unable to find references to this dependency          |
+| `dependencies` | Unused devDependencies              | unable to find references to this dependency          |
+| `unlisted`     | Unlisted dependencies               | used dependencies not listed in package.json _(1)_    |
+| `unresolved`   | Unresolved imports                  | unable to resolve this (import) specifier             |
+| `exports`      | Unused exports                      | unable to find references to this export              |
+| `nsExports`    | Unused exports in namespaces        | unable to find direct references to this export _(2)_ |
+| `types`        | Unused exported types               | unable to find references to this exported type       |
+| `nsTypes`      | Unused exported types in namespaces | unable to find direct references to this export _(2)_ |
+| `enumMembers`  | Unused exported enum members        | unable to find references to this enum member         |
+| `classMembers` | Unused exported class members       | unable to find references to this class member        |
+| `duplicates`   | Duplicate exports                   | the same thing is exported more than once             |
 
 When an issue type has zero issues, it is not shown.
 
 Getting too many reported issues and false positives? Read more about [handling issues][8].
 
-_(1)_ If an unlisted dependency is prefixed with `bin:` it means a binary is missing. This often equals the package
-name, but not always (e.g. `tsc` of `typescript` or `webpack` from `webpack-cli`).
+_(1)_ If an unlisted dependency is prefixed with `bin:` it means the dependency containing that binary is unlisted. This
+often equals the package name, but not always (e.g. `tsc` of `typescript` or `webpack` from `webpack-cli`).
 
 _(2)_ The variable or type is not referenced directly and has become a member of a namespace. Knip can't find a
 reference to it, so you can _probably_ remove it.
 
-## Output filters
+## Output
+
+### Rules
+
+Use `rules` in the configuration to customize the issue types that count towards the total error count, or to exclude
+them altogether.
+
+- `error` (default): printed, adds to total error count (similar to the `--include` filter)
+- `warning`: printed in faded/grey color, does not add to error count (i.e. the exit code)
+- `off`: not printed, does not add to error count (similar to the `--exclude` filter)
+
+Example:
+
+```json
+{
+  "rules": {
+    "files": "warning",
+    "classMembers": "off",
+    "duplicates": "off"
+  }
+}
+```
+
+See [reading the report][9] for the list of issue types.
+
+The rules are modeled after the ESLint `rules` configuration, and could be extended in the future. For instance, to
+apply filters or configurations only to a specific issue type.
+
+### Filters
 
 You can `--include` or `--exclude` any of the reported issue types to slice & dice the report to your needs.
 Alternatively, they can be added to the configuration (e.g. `"exclude": ["dependencies"]`).
@@ -209,6 +239,17 @@ Use `--exclude` to ignore reports you're not interested in:
     knip --include files --exclude classMembers,enumMembers
 
 Use `--dependencies` or `--exports` as shortcuts to combine groups of related types.
+
+See [reading the report][9] for the list of issue types.
+
+### When to use rules or filters
+
+Filters are meant to be used as command-line flags, rules allow for more fine-grained configuration.
+
+- Rules are more fine-grained since they also have "warning".
+- Rules could be extended in the future.
+- Filters can be set in configuration and from CLI, rules only in configuration.
+- Filters have two groups (`--dependencies` and `--types`), rules don't have any grouping.
 
 ## Ignore
 
@@ -271,7 +312,7 @@ Here's an example `knip.json` configuration with some custom `entry` and `projec
 ```
 
 It might be useful to run Knip first with no or little configuration to see where it needs custom `entry` and/or
-`project` files. Each workspace has the same [default configuration][9].
+`project` files. Each workspace has the same [default configuration][10].
 
 The root workspace is named `"."` under `workspaces` (like in the example).
 
@@ -390,7 +431,7 @@ has them at `e2e-tests/*.spec.ts`. Here's how to configure this:
 ### Multi-project repositories
 
 Some repositories have a single `package.json`, but consist of multiple projects with configuration files across the
-repository (such as the [Nx "intregrated repo" style][10]). Let's assume some of these projects are apps and have their
+repository (such as the [Nx "intregrated repo" style][11]). Let's assume some of these projects are apps and have their
 own Cypress configuration and test files. In that case, we could configure the Cypress plugin like this:
 
 ```json
@@ -407,7 +448,7 @@ In case a plugin causes issues, it can be disabled by using `false` as its value
 
 ### Create a new plugin
 
-Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][11]. This
+Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][12]. This
 guide also contains more details if you want to learn more about plugins and why they are useful.
 
 ## Compilers
@@ -430,7 +471,7 @@ export default {
 };
 ```
 
-Read [Compilers][12] for more details and examples.
+Read [Compilers][13] for more details and examples.
 
 ## Production Mode
 
@@ -507,7 +548,7 @@ When the provided built-in reporters are not sufficient, a custom reporter can b
 Pass `--reporter ./my-reporter` from the command line. The data can then be used to write issues to `stdout`, a JSON or
 CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][13].
+Find more details and ideas in [custom reporters][14].
 
 ## Public exports
 
@@ -531,14 +572,14 @@ Knip does not report public exports and types as unused.
 
 ## Handling Issues
 
-How to handle a long list of reported issues? Seeing too many false positives? Read more about [handling issues][14]
+How to handle a long list of reported issues? Seeing too many false positives? Read more about [handling issues][15]
 describing potential causes for false positives, and how to handle them.
 
 ## Comparison
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                 | **knip** | [depcheck][15] | [unimported][16] | [ts-unused-exports][17] | [ts-prune][18] |
+| Feature                 | **knip** | [depcheck][16] | [unimported][17] | [ts-unused-exports][18] | [ts-prune][19] |
 | :---------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files            |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies     |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -574,7 +615,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][19].
+Also see [production mode][20].
 
 ### ts-unused-exports
 
@@ -596,14 +637,14 @@ The following commands are similar:
 
 Many thanks to some of the early adopters of Knip:
 
-- [Block Protocol][20]
-- [Cursor][21]
-- [DeepmergeTS][22]
-- [eslint-plugin-functional][23]
-- [freeCodeCamp.org][24]
-- [is-immutable-type][25]
-- [release-it][26]
-- [Template TypeScript Node Package][27]
+- [Block Protocol][21]
+- [Cursor][22]
+- [DeepmergeTS][23]
+- [eslint-plugin-functional][24]
+- [freeCodeCamp.org][25]
+- [is-immutable-type][26]
+- [release-it][27]
+- [Template TypeScript Node Package][28]
 
 ## Knip?!
 
@@ -621,7 +662,7 @@ each file, and traversing all of this, why not collect the various issues in one
 
 Special thanks to the wonderful people who have contributed to this project:
 
-[![Contributors][29]][28]
+[![Contributors][30]][29]
 
 [1]: #workspaces
 [2]: #plugins
@@ -631,27 +672,28 @@ Special thanks to the wonderful people who have contributed to this project:
 [6]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [7]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
 [8]: #handling-issues
-[9]: #configuration
-[10]: https://nx.dev/concepts/integrated-vs-package-based
-[11]: ./docs/writing-a-plugin.md
-[12]: ./docs/compilers.md
-[13]: ./docs/custom-reporters.md
-[14]: ./docs/handling-issues.md
-[15]: https://github.com/depcheck/depcheck
-[16]: https://github.com/smeijer/unimported
-[17]: https://github.com/pzavolinsky/ts-unused-exports
-[18]: https://github.com/nadeesha/ts-prune
-[19]: #production-mode
-[20]: https://github.com/blockprotocol/blockprotocol
-[21]: https://github.com/getcursor/cursor
-[22]: https://github.com/RebeccaStevens/deepmerge-ts
-[23]: https://github.com/eslint-functional/eslint-plugin-functional
-[24]: https://github.com/freeCodeCamp/freeCodeCamp
-[25]: https://github.com/RebeccaStevens/is-immutable-type
-[26]: https://github.com/release-it/release-it
-[27]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
-[28]: https://github.com/webpro/knip/graphs/contributors
-[29]: https://contrib.rocks/image?repo=webpro/knip
+[9]: #reading-the-report
+[10]: #configuration
+[11]: https://nx.dev/concepts/integrated-vs-package-based
+[12]: ./docs/writing-a-plugin.md
+[13]: ./docs/compilers.md
+[14]: ./docs/custom-reporters.md
+[15]: ./docs/handling-issues.md
+[16]: https://github.com/depcheck/depcheck
+[17]: https://github.com/smeijer/unimported
+[18]: https://github.com/pzavolinsky/ts-unused-exports
+[19]: https://github.com/nadeesha/ts-prune
+[20]: #production-mode
+[21]: https://github.com/blockprotocol/blockprotocol
+[22]: https://github.com/getcursor/cursor
+[23]: https://github.com/RebeccaStevens/deepmerge-ts
+[24]: https://github.com/eslint-functional/eslint-plugin-functional
+[25]: https://github.com/freeCodeCamp/freeCodeCamp
+[26]: https://github.com/RebeccaStevens/is-immutable-type
+[27]: https://github.com/release-it/release-it
+[28]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
+[29]: https://github.com/webpro/knip/graphs/contributors
+[30]: https://contrib.rocks/image?repo=webpro/knip
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor

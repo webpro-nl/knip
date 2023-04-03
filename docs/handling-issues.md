@@ -79,9 +79,10 @@ resolve this might not be feasible right away, especially in existing larger cod
 help in the meantime:
 
 - Use `--no-exit-code` for exit code 0 in CI.
-- Use `--include` (or `--exclude`) to report only the issue types that have little or no errors.
+- Use `--include` (or `--exclude`) [output filters][7] to report only the issue types that have little or no errors.
+- Use [`rules`][8] configuration to report only the issue types that have little or no errors.
 - Use separate Knip commands to analyze e.g. only `--dependencies` or `--exports`.
-- Use [ignore patterns][7] to filter out the most problematic areas.
+- Use [ignore patterns][9] to filter out the most problematic areas.
 
 [1]: ../README.md#override-plugin-configuration
 [2]: ./writing-a-plugin.md
@@ -89,4 +90,6 @@ help in the meantime:
 [4]: ../README.md#plugins
 [5]: ./compilers.md
 [6]: ../README.md#public-exports
-[7]: ../README.md#ignore
+[7]: ../README.md#filters
+[8]: ../README.md#rules
+[9]: ../README.md#ignore

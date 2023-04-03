@@ -2,6 +2,7 @@ import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS } from './constants.js';
+import { defaultRules } from './issues/initializers.js';
 import * as plugins from './plugins/index.js';
 import { arrayify, compact } from './util/array.js';
 import parsedArgs from './util/cli-arguments.js';
@@ -11,6 +12,7 @@ import { findFile, loadJSON } from './util/fs.js';
 import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
+import { getKeysByValue } from './util/object.js';
 import { join, relative, toPosix } from './util/path.js';
 import { toCamelCase } from './util/plugin.js';
 import { byPathDepth } from './util/workspace.js';
@@ -43,6 +45,7 @@ const getDefaultWorkspaceConfig = (extensions?: string[]): WorkspaceConfiguratio
 };
 
 const defaultConfig: Configuration = {
+  rules: defaultRules,
   include: [],
   exclude: [],
   ignore: [],
@@ -142,6 +145,10 @@ export class ConfigurationChief {
     return [this.config.syncCompilers, this.config.asyncCompilers];
   }
 
+  getRules() {
+    return this.config.rules;
+  }
+
   normalize(rawLocalConfig: RawConfiguration) {
     const initialWorkspaces = rawLocalConfig.workspaces ?? {
       [ROOT_WORKSPACE_NAME]: {
@@ -149,6 +156,7 @@ export class ConfigurationChief {
       },
     };
 
+    const rules = { ...defaultRules, ...rawLocalConfig.rules };
     const include = rawLocalConfig.include ?? defaultConfig.include;
     const exclude = rawLocalConfig.exclude ?? defaultConfig.exclude;
     const ignore = arrayify(rawLocalConfig.ignore ?? defaultConfig.ignore);
@@ -202,6 +210,7 @@ export class ConfigurationChief {
       }, {} as Record<string, WorkspaceConfiguration>);
 
     return {
+      rules,
       include,
       exclude,
       ignore,
@@ -323,9 +332,10 @@ export class ConfigurationChief {
 
   getIssueTypesToReport() {
     const cliArgs = { include, exclude, dependencies, exports };
+    const excludesFromRules = getKeysByValue(this.config.rules, 'off');
     const config = {
       include: this.config.include ?? [],
-      exclude: this.config.exclude ?? [],
+      exclude: [...excludesFromRules, ...this.config.exclude],
       isProduction: this.isProduction,
     };
     return getIncludedIssueTypes(cliArgs, config);

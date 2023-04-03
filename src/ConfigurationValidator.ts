@@ -9,7 +9,25 @@ const asyncCompilerSchema = z.function().args(z.string()).returns(z.promise(z.st
 const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
 const compilersSchema = z.record(z.string(), compilerSchema);
 
+const issueTypeSchema = z.union([
+  z.literal('files'),
+  z.literal('dependencies'),
+  z.literal('devDependencies'),
+  z.literal('unlisted'),
+  z.literal('unresolved'),
+  z.literal('exports'),
+  z.literal('types'),
+  z.literal('nsExports'),
+  z.literal('nsTypes'),
+  z.literal('duplicates'),
+  z.literal('enumMembers'),
+  z.literal('classMembers'),
+]);
+
+const rulesSchema = z.record(issueTypeSchema, z.enum(['error', 'warning', 'off']));
+
 const rootConfigurationSchema = z.object({
+  rules: rulesSchema.optional(),
   entry: globSchema.optional(),
   project: globSchema.optional(),
   paths: pathsSchema.optional(),

@@ -60,6 +60,22 @@
         ],
         "unevaluatedProperties": false
       }
+    },
+    "rules": {
+      "type": "object",
+      "properties": {
+        "files": { "$ref": "#/definitions/ruleValue" },
+        "dependencies": { "$ref": "#/definitions/ruleValue" },
+        "unlisted": { "$ref": "#/definitions/ruleValue" },
+        "unresolved": { "$ref": "#/definitions/ruleValue" },
+        "exports": { "$ref": "#/definitions/ruleValue" },
+        "nsExports": { "$ref": "#/definitions/ruleValue" },
+        "classMembers": { "$ref": "#/definitions/ruleValue" },
+        "types": { "$ref": "#/definitions/ruleValue" },
+        "nsTypes": { "$ref": "#/definitions/ruleValue" },
+        "enumMembers": { "$ref": "#/definitions/ruleValue" },
+        "duplicates": { "$ref": "#/definitions/ruleValue" }
+      }
     }
   },
   "unevaluatedProperties": false,
@@ -342,6 +358,10 @@
           "type": "string"
         }
       }
+    },
+    "ruleValue": {
+      "type": "string",
+      "enum": ["error", "warning", "off"]
     }
   }
 }
