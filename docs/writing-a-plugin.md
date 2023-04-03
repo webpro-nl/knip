@@ -1,30 +1,31 @@
 # Writing a Plugin
 
-In this guide we are going to write a new plugin for Knip. We'll be using "Cool Linter" as our example tool we create
+In this guide we are going to write a new plugin for Knip. We'll be using "Cool Linter" as the example tool we create
 the plugin for. You can also follow along to create a new plugin directly.
 
 This document also serves as a reference to each of the exported values.
 
-If you want to know [how to use or configure plugins][1], the front page has you covered.
+- If you want to know [how to use or configure plugins][1], the front page has you covered.
+- There's documentation aimed at [contributing][2] or [development][3] in general as well.
 
 ## Contents
 
-- [Scaffold a new plugin][2]
-- [Exports][3]
-  - [`NAME`][4]
-  - [`ENABLERS`][5]
-  - [`isEnabled`][6]
-  - [`CONFIG_FILE_PATTERNS`][7]
-  - [`findDependencies`][8]
-  - [`ENTRY_FILE_PATTERNS`][9]
-  - [`PRODUCTION_ENTRY_FILE_PATTERNS`][10]
-  - [`PROJECT_FILE_PATTERNS`][11]
-- [Tests][12]
-- [Documentation][13]
+- [Scaffold a new plugin][4]
+- [Exports][5]
+  - [`NAME`][6]
+  - [`ENABLERS`][7]
+  - [`isEnabled`][8]
+  - [`CONFIG_FILE_PATTERNS`][9]
+  - [`findDependencies`][10]
+  - [`ENTRY_FILE_PATTERNS`][11]
+  - [`PRODUCTION_ENTRY_FILE_PATTERNS`][12]
+  - [`PROJECT_FILE_PATTERNS`][13]
+- [Tests][14]
+- [Documentation][15]
 
 ## Scaffold a new plugin
 
-The easiest way to ceate a new plugin is to run this command:
+The easiest way to create a new plugin is to run this command:
 
 ```sh
 npm run create-plugin -- --name cool-linter
@@ -40,7 +41,7 @@ or empty can be removed.
 
 ### `NAME`
 
-The name of the plugin to display in the [docs][14] and debug output (ie. when running `knip --debug`).
+The name of the plugin to display in the [docs][16] and debug output (ie. when running `knip --debug`).
 
 ```ts
 export const NAME = 'Cool Linter';
@@ -68,8 +69,8 @@ This will check whether a match is found in the `dependencies` or `devDependenci
 
 #### Note
 
-In some occasions you might want to check for something else, such as the presence of a file. You can implement any
-(`async`) function and return a boolean. Here is the full [function signature for `IsPluginEnabledCallback`][15].
+In some cases, you might want to check for something else, such as the presence of a file. You can implement any
+(`async`) function and return a boolean. Here is the full [function signature for `IsPluginEnabledCallback`][17].
 
 ### `CONFIG_FILE_PATTERNS`
 
@@ -99,7 +100,7 @@ the file path as the first argument.
 
 Configuration files are sometimes `.js` or `.ts` files such as `cool-linter.config.js`. The **exported configuration**
 will be handled by `findDependencies`. But these files may also **require/import** dependencies. That's why they're also
-automatically added to [`ENTRY_FILE_PATTERNS`][9].
+automatically added to [`ENTRY_FILE_PATTERNS`][11].
 
 ### `findDependencies`
 
@@ -150,7 +151,7 @@ imports and exports will be resolved, recursively. Plugins include various types
 
 - Plugins related to test frameworks should include files such as `*.spec.js`.
 - Plugins for frameworks such as Next.js or Svelte should include files like `pages/**/*.ts` or `routes/**/*.svelte`.
-- Another example is Storybook that includes entry files like `**/*.stories.js`.
+- Another example is Storybook which includes entry files like `**/*.stories.js`.
 - The Next.js plugin does not need `CONFIG_FILE_PATTERNS` with `findPluginDependencies`. Yet it does have
   `next.config.{js,ts}` in `ENTRY_FILE_PATTERNS`, since that file may import all kinds of dependencies.
 
@@ -158,7 +159,7 @@ Cool Linter does not require such files, so we can remove them from our plugin.
 
 #### Note
 
-Knip's default patterns for test files probably cover enough for most test related tools, these don't need to be added
+Knip's default patterns for test files probably cover enough for most test-related tools, these don't need to be added
 in the plugin anymore:
 
 - `**/*.{test,spec}.{js,jsx,ts,tsx,mjs,cjs}`
@@ -180,7 +181,7 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
 ];
 ```
 
-When running the [production mode][16] of Knip, these files are included in the analysis. They're also included in the
+When running the [production mode][18] of Knip, these files are included in the analysis. They're also included in the
 default mode.
 
 Cool Linter does not require such files, so we can remove them from our plugin.
@@ -204,7 +205,7 @@ Let's update the tests to verify our plugin implementation is working correctly.
 1.  Let's save the example `cool-linter.config.json` in the fixtures directory. Create the file in your IDE, and save it
     at `tests/fixtures/plugins/cool-linter/cool-linter.config.json`.
 
-2.  Update the test at [tests/plugins/cool-linter.test.ts][17]:
+2.  Update the test at [tests/plugins/cool-linter.test.ts][19]:
 
 ```ts
 test('Find dependencies in cool-linter configuration (json)', async () => {
@@ -232,32 +233,34 @@ The `README.md` file for each plugin is 100% generated by running this npm scrip
 npm run docs
 ```
 
-This command also formats the generated Markdown files, and updates the [list of plugins in the docs][1].
+This command also formats the generated Markdown files and updates the [list of plugins in the docs][1].
 
 ## Wrapping Up
 
 Thanks for reading this far. If you have been following this guide to create a new plugin, this might be the right time
 to open a pull request!
 
-[![An orange cow with scissors, Van Gogh style][19]][18] <sup>_“An orange cow with scissors, Van Gogh style” - generated
+[![An orange cow with scissors, Van Gogh style][21]][20] <sup>_“An orange cow with scissors, Van Gogh style” - generated
 with OpenAI_</sup>
 
 [1]: ../README.md#plugins
-[2]: #scaffold-a-new-plugin
-[3]: #exports
-[4]: #name
-[5]: #enablers
-[6]: #isenabled
-[7]: #config_file_patterns
-[8]: #finddependencies
-[9]: #entry_file_patterns
-[10]: #production_entry_file_patterns
-[11]: #project_file_patterns
-[12]: #tests
-[13]: #documentation
-[14]: ../README.md
-[15]: ../src/types//plugins.ts
-[16]: ../README.md#production-mode
-[17]: ../tests/plugins/cool-linter.test.ts
-[18]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
-[19]: ../assets/cow-with-orange-scissors-van-gogh-style.webp
+[2]: ../.github/CONTRIBUTING.md
+[3]: ../.github/DEVELOPMENT.md
+[4]: #scaffold-a-new-plugin
+[5]: #exports
+[6]: #name
+[7]: #enablers
+[8]: #isenabled
+[9]: #config_file_patterns
+[10]: #finddependencies
+[11]: #entry_file_patterns
+[12]: #production_entry_file_patterns
+[13]: #project_file_patterns
+[14]: #tests
+[15]: #documentation
+[16]: ../README.md
+[17]: ../src/types//plugins.ts
+[18]: ../README.md#production-mode
+[19]: ../tests/plugins/cool-linter.test.ts
+[20]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
+[21]: ../assets/cow-with-orange-scissors-van-gogh-style.webp
