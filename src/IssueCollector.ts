@@ -11,17 +11,18 @@ type IssueCollectorOptions = {
  * - Hands them out, to be consumed by reporters
  */
 export class IssueCollector {
-  cwd: string;
-  issues = initIssues();
-  counters = initCounters();
-  referencedFiles: Set<string> = new Set();
+  private cwd: string;
+  private issues = initIssues();
+  private counters = initCounters();
+  private referencedFiles: Set<string> = new Set();
 
   constructor({ cwd }: IssueCollectorOptions) {
     this.cwd = cwd;
   }
 
-  addTotalFileCount(count: number) {
-    this.counters.total += count;
+  addFileCounts({ processed, unused }: { processed: number; unused: number }) {
+    this.counters.processed += processed;
+    this.counters.total += processed + unused;
   }
 
   addFilesIssues(filePaths: string[]) {

@@ -231,7 +231,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const importedSymbols: Imports = new Map();
 
     const analyzeSourceFile = (filePath: string) => {
-      collector.counters.processed++;
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
         const { imports, exports, scripts } = principal.analyzeSourceFile(filePath);
@@ -318,7 +317,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addFilesIssues(unusedFiles);
 
-    collector.addTotalFileCount(analyzedFiles.size + unusedFiles.length);
+    collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
     streamer.cast('Analyzing source files...');
 
