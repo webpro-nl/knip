@@ -54,7 +54,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const report = chief.getIssueTypesToReport();
   const rules = chief.getRules();
 
+  const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
+  const isReportValues = report.exports || report.nsExports || report.classMembers;
+  const isReportTypes = report.types || report.nsTypes || report.enumMembers;
+
   const collector = new IssueCollector({ cwd, rules });
+
+  const enabledPluginsStore: Map<string, string[]> = new Map();
 
   debugLogObject('Included workspaces', workspaces);
 
@@ -100,8 +106,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
     }
   };
-
-  const enabledPluginsStore: Map<string, string[]> = new Map();
 
   for (const workspace of workspaces) {
     const { name, dir, config, ancestors } = workspace;
@@ -321,46 +325,48 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
-    streamer.cast('Analyzing source files...');
+    if (isReportValues || isReportTypes) {
+      streamer.cast('Analyzing source files...');
 
-    for (const [filePath, exportItems] of exportedSymbols.entries()) {
-      const importedModule = importedSymbols.get(filePath);
+      for (const [filePath, exportItems] of exportedSymbols.entries()) {
+        const importedModule = importedSymbols.get(filePath);
 
-      if (importedModule) {
-        for (const [symbol, exportedItem] of exportItems.entries()) {
-          // Leave exports with a JSDoc `@public` tag alone
-          if (principal.isPublicExport(exportedItem)) continue;
+        if (importedModule) {
+          for (const [symbol, exportedItem] of exportItems.entries()) {
+            // Leave exports with a JSDoc `@public` tag alone
+            if (principal.isPublicExport(exportedItem)) continue;
 
-          if (importedModule.symbols.has(symbol)) {
-            if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
-              principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-                collector.addIssue({ type: 'enumMembers', filePath, symbol: member, parentSymbol: symbol });
-              });
-            }
-
-            if (report.classMembers && exportedItem.type === 'class' && exportedItem.members) {
-              principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-                collector.addIssue({ type: 'classMembers', filePath, symbol: member, parentSymbol: symbol });
-              });
-            }
-
-            continue;
-          }
-
-          if (importedModule.isReExported || importedModule.isStar) {
-            const isReExportedByEntryFile = isExportedInEntryFile(importedModule);
-            if (!isReExportedByEntryFile && !principal.hasExternalReferences(filePath, exportedItem)) {
-              if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
-                collector.addIssue({ type: 'nsTypes', filePath, symbol, symbolType: exportedItem.type });
-              } else {
-                collector.addIssue({ type: 'nsExports', filePath, symbol });
+            if (importedModule.symbols.has(symbol)) {
+              if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
+                principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
+                  collector.addIssue({ type: 'enumMembers', filePath, symbol: member, parentSymbol: symbol });
+                });
               }
+
+              if (report.classMembers && exportedItem.type === 'class' && exportedItem.members) {
+                principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
+                  collector.addIssue({ type: 'classMembers', filePath, symbol: member, parentSymbol: symbol });
+                });
+              }
+
+              continue;
             }
-          } else {
-            if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
-              collector.addIssue({ type: 'types', filePath, symbol, symbolType: exportedItem.type });
-            } else if (!importedModule.isDynamic || !principal.hasExternalReferences(filePath, exportedItem)) {
-              collector.addIssue({ type: 'exports', filePath, symbol });
+
+            if (importedModule.isReExported || importedModule.isStar) {
+              const isReExportedByEntryFile = isExportedInEntryFile(importedModule);
+              if (!isReExportedByEntryFile && !principal.hasExternalReferences(filePath, exportedItem)) {
+                if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
+                  collector.addIssue({ type: 'nsTypes', filePath, symbol, symbolType: exportedItem.type });
+                } else {
+                  collector.addIssue({ type: 'nsExports', filePath, symbol });
+                }
+              }
+            } else {
+              if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
+                collector.addIssue({ type: 'types', filePath, symbol, symbolType: exportedItem.type });
+              } else if (!importedModule.isDynamic || !principal.hasExternalReferences(filePath, exportedItem)) {
+                collector.addIssue({ type: 'exports', filePath, symbol });
+              }
             }
           }
         }
@@ -368,7 +374,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
   }
 
-  if (report.dependencies) {
+  if (isReportDependencies) {
     const { dependencyIssues, devDependencyIssues } = deputy.settleDependencyIssues();
     dependencyIssues.forEach(issue => collector.addIssue(issue));
     if (!isProduction) devDependencyIssues.forEach(issue => collector.addIssue(issue));
