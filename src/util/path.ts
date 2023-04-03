@@ -11,7 +11,7 @@ export const resolve = (...paths: string[]) =>
 export const relative = (from: string, to?: string) =>
   path.posix.relative(to ? toPosix(from) : cwd, toPosix(to ?? from));
 
-export const isAbsolute = (value: string) => value.startsWith('/') || /^[A-Z]:(\/|\\)/.test(value);
+export const isAbsolute = path.isAbsolute;
 
 export const isInNodeModules = (filePath: string) => filePath.includes('node_modules');
 
