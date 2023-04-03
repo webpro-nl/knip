@@ -1,4 +1,4 @@
-// eslint-disable-next-line node/no-restricted-import
+// eslint-disable-next-line n/no-restricted-import
 import path from 'node:path';
 
 const isAbsolute = path.isAbsolute;
