@@ -1,4 +1,5 @@
 import { EOL } from 'node:os';
+// eslint-disable-next-line node/no-restricted-import
 import path from 'node:path';
 import ts from 'typescript';
 import { createCustomModuleResolver } from './resolveModuleNames.js';

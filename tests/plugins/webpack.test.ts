@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';
 import * as webpack from '../../src/plugins/webpack/index.js';
@@ -25,7 +24,7 @@ test('Find dependencies in Webpack configuration (webpack.config.js)', async () 
     'babel-plugin-styled-components',
     'ts-loader',
     'esbuild-loader',
-    path.join(cwd, 'node_modules/mini-css-extract-plugin/loader.js'),
+    join(cwd, 'node_modules/mini-css-extract-plugin/loader.js'),
     'css-loader',
     'less-loader',
     'svgo-loader',

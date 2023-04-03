@@ -7,7 +7,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:import/typescript"
   ],
-  "plugins": ["@typescript-eslint", "import"],
+  "plugins": ["@typescript-eslint", "import", "node"],
   "env": {
     "node": true
   },
@@ -21,6 +21,15 @@
     }
   },
   "rules": {
+    "node/no-restricted-import": [
+      "error",
+      [
+        {
+          "name": ["path", "node:path"],
+          "message": "Please use src/util/path.js instead."
+        }
+      ]
+    ],
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/no-unused-vars": "error",
     "import/no-unresolved": "error",

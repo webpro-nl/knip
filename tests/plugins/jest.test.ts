@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import * as jest from '../../src/plugins/jest/index.js';
 import { resolve, join } from '../../src/util/path.js';
@@ -11,7 +10,7 @@ test('Find dependencies in Jest configuration (jest.config.js)', async () => {
   const dependencies = await jest.findDependencies(configFilePath, { cwd });
   assert.deepEqual(dependencies, [
     'jest-environment-jsdom',
-    path.join(cwd, 'node_modules/jest-watch-select-projects/index.js'),
+    join(cwd, 'node_modules/jest-watch-select-projects/index.js'),
     join(cwd, 'jest.setup.js'),
     '@nrwl/react/plugins/jest',
     'babel-jest',

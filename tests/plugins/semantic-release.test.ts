@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
 import test from 'node:test';
 import * as semanticRelease from '../../src/plugins/semantic-release/index.js';
+import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = path.resolve('tests/fixtures/plugins/semantic-release');
+const cwd = resolve('tests/fixtures/plugins/semantic-release');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in semantic-release package.json configuration (json)', async () => {
-  const configFilePath = path.join(cwd, 'package.json');
+  const configFilePath = join(cwd, 'package.json');
   const dependencies = await semanticRelease.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
     '@semantic-release/commit-analyzer',
@@ -21,7 +21,7 @@ test('Find dependencies in semantic-release package.json configuration (json)', 
 });
 
 test('Find dependencies in semantic-release .releaserc configuration (yaml)', async () => {
-  const configFilePath = path.join(cwd, '.releaserc');
+  const configFilePath = join(cwd, '.releaserc');
   const dependencies = await semanticRelease.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, [
     '@semantic-release/commit-analyzer',

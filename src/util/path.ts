@@ -1,3 +1,4 @@
+// eslint-disable-next-line node/no-restricted-import
 import path from 'node:path';
 
 export const toPosix = (value: string) => value.split(path.sep).join(path.posix.sep);
