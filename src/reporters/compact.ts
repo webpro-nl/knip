@@ -4,7 +4,7 @@ import type { Entries } from 'type-fest';
 
 const logIssueRecord = (issues: Issue[]) => {
   const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
-  sortedByFilePath.forEach(({ filePath, symbols, parentSymbol }) => logIssueLine({ filePath, symbols, parentSymbol }));
+  sortedByFilePath.forEach(logIssueLine);
 };
 
 export default ({ report, issues }: ReporterOptions) => {

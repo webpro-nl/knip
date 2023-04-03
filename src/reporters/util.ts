@@ -1,6 +1,9 @@
 import chalk from 'chalk';
 import { ISSUE_TYPE_TITLE } from '../constants.js';
+import { IssueSeverity } from '../types/issues.js';
 import { toRelative, relative } from '../util/path.js';
+
+export const identity = (text: string) => text;
 
 export const getTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => {
   return ISSUE_TYPE_TITLE[reportType];
@@ -14,12 +17,14 @@ type LogIssueLine = {
   filePath: string;
   symbols?: string[];
   parentSymbol?: string;
+  severity?: IssueSeverity;
 };
 
-export const logIssueLine = ({ owner, filePath, symbols, parentSymbol }: LogIssueLine) => {
+export const logIssueLine = ({ owner, filePath, symbols, parentSymbol, severity }: LogIssueLine) => {
   const symbol = symbols ? `: ${symbols.join(', ')}` : '';
   const parent = parentSymbol ? ` (${parentSymbol})` : '';
-  console.log(`${owner ? `${chalk.cyan(owner)} ` : ''}${relative(filePath)}${symbol}${parent}`);
+  const print = severity === 'warning' ? chalk.grey : identity;
+  console.log(`${owner ? `${chalk.cyan(owner)} ` : ''}${print(`${relative(filePath)}${symbol}${parent}`)}`);
 };
 
 export const logIssueSet = (issues: string[]) => {

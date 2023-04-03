@@ -1,6 +1,7 @@
+import chalk from 'chalk';
 import EasyTable from 'easy-table';
 import { relative } from '../util/path.js';
-import { getTitle, logTitle, logIssueSet } from './util.js';
+import { getTitle, logTitle, logIssueSet, identity } from './util.js';
 import type { Issue, ReporterOptions, IssueSet } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
@@ -10,10 +11,11 @@ const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? text.slice(0,
 const logIssueRecord = (issues: Issue[]) => {
   const table = new EasyTable();
   issues.forEach(issue => {
-    table.cell('symbol', issue.symbols ? truncate(issue.symbols.join(', ')) : issue.symbol);
-    issue.parentSymbol && table.cell('parentSymbol', issue.parentSymbol);
-    issue.symbolType && table.cell('symbolType', issue.symbolType);
-    table.cell('filePath', relative(issue.filePath));
+    const print = issue.severity === 'warning' ? chalk.grey : identity;
+    table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.join(', ')) : issue.symbol));
+    issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
+    issue.symbolType && table.cell('symbolType', print(issue.symbolType));
+    table.cell('filePath', print(relative(issue.filePath)));
     table.newRow();
   });
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
