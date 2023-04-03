@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-// eslint-disable-next-line node/no-restricted-import
+// eslint-disable-next-line n/no-restricted-import
 import path from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.js';

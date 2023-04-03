@@ -7,7 +7,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:import/typescript"
   ],
-  "plugins": ["@typescript-eslint", "import", "node"],
+  "plugins": ["@typescript-eslint", "import", "n"],
   "env": {
     "node": true
   },
@@ -21,7 +21,7 @@
     }
   },
   "rules": {
-    "node/no-restricted-import": [
+    "n/no-restricted-import": [
       "error",
       [
         {
