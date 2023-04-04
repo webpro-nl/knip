@@ -102,7 +102,7 @@ const getImportPluginDependencies = (settings: Record<string, unknown>) => {
 export const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) => {
   return compact(
     Object.entries(settings).reduce((packageNames, [settingKey, settings]) => {
-      if (/^import\/(parsers|resolvers)?/.test(settingKey)) {
+      if (/^import\/(parsers|resolvers)?/.test(settingKey) && typeof settings !== 'string') {
         return [...packageNames, ...getImportPluginDependencies(settings)];
       }
       return packageNames;

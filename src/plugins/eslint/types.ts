@@ -5,7 +5,7 @@ type ParserOptions = {
   };
 };
 
-type Settings = Record<string, Record<string, unknown>>;
+type Settings = Record<string, Record<string, unknown> | string>;
 
 type Rules = Record<string, string | number>;
 
