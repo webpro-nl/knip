@@ -4,6 +4,7 @@ import * as plugins from './plugins/index.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
+import { getKeysByValue } from './util/object.js';
 import { join, toPosix } from './util/path.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { Entries, PackageJson } from 'type-fest';
@@ -102,7 +103,7 @@ export class WorkspaceWorker {
       }
     }
 
-    this.enabledPlugins = pluginEntries.filter(([name]) => this.enabled[name]).map(([name]) => name);
+    this.enabledPlugins = getKeysByValue(this.enabled, true);
 
     const enabledPluginNames = this.enabledPlugins.map(name => plugins[name].NAME);
 
