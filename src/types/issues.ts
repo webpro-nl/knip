@@ -58,6 +58,6 @@ export type ReporterOptions = {
 
 export type Reporter = (options: ReporterOptions) => void;
 
-export type IssueSeverity = 'error' | 'warning' | 'off';
+export type IssueSeverity = 'error' | 'warn' | 'off';
 
 export type Rules = Record<IssueType, IssueSeverity>;

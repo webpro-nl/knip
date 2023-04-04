@@ -23,7 +23,7 @@ type LogIssueLine = {
 export const logIssueLine = ({ owner, filePath, symbols, parentSymbol, severity }: LogIssueLine) => {
   const symbol = symbols ? `: ${symbols.join(', ')}` : '';
   const parent = parentSymbol ? ` (${parentSymbol})` : '';
-  const print = severity === 'warning' ? chalk.grey : identity;
+  const print = severity === 'warn' ? chalk.grey : identity;
   console.log(`${owner ? `${chalk.cyan(owner)} ` : ''}${print(`${relative(filePath)}${symbol}${parent}`)}`);
 };
 

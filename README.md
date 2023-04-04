@@ -204,7 +204,7 @@ Use `rules` in the configuration to customize the issue types that count towards
 them altogether.
 
 - `error` (default): printed, adds to total error count (similar to the `--include` filter)
-- `warning`: printed in faded/grey color, does not add to error count (i.e. the exit code)
+- `warn`: printed in faded/grey color, does not add to error count (i.e. the exit code)
 - `off`: not printed, does not add to error count (similar to the `--exclude` filter)
 
 Example:
@@ -212,7 +212,7 @@ Example:
 ```json
 {
   "rules": {
-    "files": "warning",
+    "files": "warn",
     "classMembers": "off",
     "duplicates": "off"
   }
@@ -246,7 +246,7 @@ See [reading the report][9] for the list of issue types.
 
 Filters are meant to be used as command-line flags, rules allow for more fine-grained configuration.
 
-- Rules are more fine-grained since they also have "warning".
+- Rules are more fine-grained since they also have "warn".
 - Rules could be extended in the future.
 - Filters can be set in configuration and from CLI, rules only in configuration.
 - Filters have two groups (`--dependencies` and `--types`), rules don't have any grouping.

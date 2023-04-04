@@ -11,7 +11,7 @@ const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? text.slice(0,
 const logIssueRecord = (issues: Issue[]) => {
   const table = new EasyTable();
   issues.forEach(issue => {
-    const print = issue.severity === 'warning' ? chalk.grey : identity;
+    const print = issue.severity === 'warn' ? chalk.grey : identity;
     table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.join(', ')) : issue.symbol));
     issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
     issue.symbolType && table.cell('symbolType', print(issue.symbolType));

@@ -361,7 +361,7 @@
     },
     "ruleValue": {
       "type": "string",
-      "enum": ["error", "warning", "off"]
+      "enum": ["error", "warn", "off"]
     }
   }
 }

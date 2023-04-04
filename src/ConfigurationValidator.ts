@@ -24,7 +24,7 @@ const issueTypeSchema = z.union([
   z.literal('classMembers'),
 ]);
 
-const rulesSchema = z.record(issueTypeSchema, z.enum(['error', 'warning', 'off']));
+const rulesSchema = z.record(issueTypeSchema, z.enum(['error', 'warn', 'off']));
 
 const rootConfigurationSchema = z.object({
   rules: rulesSchema.optional(),
