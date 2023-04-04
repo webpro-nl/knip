@@ -84,7 +84,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         // Pattern: /abs/path/to/repo/node_modules/package/index.js
         const packageName = getPackageNameFromFilePath(specifier);
         const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
-        if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
+        if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: packageName });
       } else {
         // Patterns: package, @any/package, @local/package, self-reference
         const packageName = getPackageNameFromModuleSpecifier(specifier);
