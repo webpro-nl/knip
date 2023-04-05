@@ -64,7 +64,7 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
 };
 
 const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', pluginName: string) => {
-  return pluginName.includes(namespace + '-')
+  return pluginName.includes(namespace + '-') || pluginName.endsWith(`/${namespace}`)
     ? pluginName
     : pluginName.startsWith('@')
     ? pluginName.includes('/')

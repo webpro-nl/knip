@@ -14,5 +14,5 @@ module.exports = {
     'plugin:eslint-plugin/all',
     '@scope/eslint-config/file',
   ],
-  plugins: ['@typescript-eslint', '@nrwl/nx', 'prettier', 'eslint-plugin-cypress'],
+  plugins: ['@typescript-eslint', '@nrwl/nx', 'prettier', 'eslint-plugin-cypress', '@scope/eslint-plugin'],
 };

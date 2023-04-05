@@ -39,6 +39,7 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
     'eslint-config-prettier',
     '@nrwl/eslint-plugin-nx',
     'eslint-plugin-cypress',
+    '@scope/eslint-plugin',
   ]);
 });
 
