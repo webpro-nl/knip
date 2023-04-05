@@ -4,7 +4,7 @@ import './util/register.js';
 import prettyMilliseconds from 'pretty-ms';
 import reporters from './reporters/index.js';
 import parsedArgs, { helpText } from './util/cli-arguments.js';
-import { isKnownError, ConfigurationError } from './util/errors.js';
+import { isKnownError, getKnownError, isConfigurationError, hasCause } from './util/errors.js';
 import { _load } from './util/loader.js';
 import { cwd, resolve } from './util/path.js';
 import { Performance } from './util/Performance.js';
@@ -75,9 +75,10 @@ const run = async () => {
     }
   } catch (error: unknown) {
     if (error instanceof Error && isKnownError(error)) {
-      console.error(error.message);
-      if (error.cause instanceof Error) console.error('Reason:', error.cause.message);
-      if (error instanceof ConfigurationError) console.log('\n' + helpText);
+      const knownError = getKnownError(error);
+      console.error(knownError.message);
+      if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
+      if (isConfigurationError(knownError)) console.log('\n' + helpText);
       process.exit(1);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
