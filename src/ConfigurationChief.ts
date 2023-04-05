@@ -5,7 +5,7 @@ import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS } from '
 import { defaultRules } from './issues/initializers.js';
 import * as plugins from './plugins/index.js';
 import { arrayify, compact } from './util/array.js';
-import parsedArgs from './util/cli-arguments.js';
+import parsedArgValues from './util/cli-arguments.js';
 import { partitionCompilers } from './util/compilers.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
@@ -27,7 +27,7 @@ const {
   exclude = [],
   dependencies = false,
   exports = false,
-} = parsedArgs.values;
+} = parsedArgValues;
 
 const workspaceArg = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, '').replace(/\/$/, '') : undefined;
 

@@ -39,27 +39,39 @@ $ knip --debug --debug-file-filter '(specific|particular)-module'
 
 More documentation and bug reports: https://github.com/webpro/knip`;
 
-export default parseArgs({
-  options: {
-    config: { type: 'string', short: 'c' },
-    debug: { type: 'boolean' },
-    'debug-file-filter': { type: 'string' },
-    dependencies: { type: 'boolean' },
-    exclude: { type: 'string', multiple: true },
-    exports: { type: 'boolean' },
-    help: { type: 'boolean', short: 'h' },
-    include: { type: 'string', multiple: true },
-    'max-issues': { type: 'string' },
-    'no-exit-code': { type: 'boolean' },
-    'no-gitignore': { type: 'boolean' },
-    'no-progress': { type: 'boolean' },
-    performance: { type: 'boolean' },
-    production: { type: 'boolean' },
-    reporter: { type: 'string' },
-    'reporter-options': { type: 'string' },
-    strict: { type: 'boolean' },
-    tsConfig: { type: 'string', short: 't' },
-    version: { type: 'boolean', short: 'V' },
-    workspace: { type: 'string' },
-  },
-});
+let parsedArgs;
+try {
+  parsedArgs = parseArgs({
+    options: {
+      config: { type: 'string', short: 'c' },
+      debug: { type: 'boolean' },
+      'debug-file-filter': { type: 'string' },
+      dependencies: { type: 'boolean' },
+      exclude: { type: 'string', multiple: true },
+      exports: { type: 'boolean' },
+      help: { type: 'boolean', short: 'h' },
+      include: { type: 'string', multiple: true },
+      'max-issues': { type: 'string' },
+      'no-exit-code': { type: 'boolean' },
+      'no-gitignore': { type: 'boolean' },
+      'no-progress': { type: 'boolean' },
+      performance: { type: 'boolean' },
+      production: { type: 'boolean' },
+      reporter: { type: 'string' },
+      'reporter-options': { type: 'string' },
+      strict: { type: 'boolean' },
+      tsConfig: { type: 'string', short: 't' },
+      version: { type: 'boolean', short: 'V' },
+      workspace: { type: 'string' },
+    },
+  });
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error(error.message);
+    console.log('\n' + helpText);
+    process.exit(1);
+  }
+  throw error;
+}
+
+export default parsedArgs.values;

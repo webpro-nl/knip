@@ -1,7 +1,7 @@
 import util from 'node:util';
-import parsedArgs from './cli-arguments.js';
+import parsedArgValues from './cli-arguments.js';
 
-const { debug, 'debug-file-filter': debugFileFilter } = parsedArgs.values;
+const { debug, 'debug-file-filter': debugFileFilter } = parsedArgValues;
 
 const IS_ENABLED = debug ?? false;
 const FILE_FILTER = debugFileFilter;

@@ -3,7 +3,7 @@
 import './util/register.js';
 import prettyMilliseconds from 'pretty-ms';
 import reporters from './reporters/index.js';
-import parsedArgs, { helpText } from './util/cli-arguments.js';
+import parsedArgValues, { helpText } from './util/cli-arguments.js';
 import { isKnownError, getKnownError, isConfigurationError, hasCause } from './util/errors.js';
 import { _load } from './util/loader.js';
 import { cwd, resolve } from './util/path.js';
@@ -26,7 +26,7 @@ const {
   strict: isStrict = false,
   tsConfig,
   version: isVersion,
-} = parsedArgs.values;
+} = parsedArgValues;
 
 if (isHelp) {
   console.log(helpText);

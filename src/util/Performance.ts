@@ -1,13 +1,13 @@
 import { performance, PerformanceObserver, PerformanceEntry } from 'node:perf_hooks';
 import EasyTable from 'easy-table';
 import Summary from 'summary';
-import parsedArgs from './cli-arguments.js';
+import parsedArgValues from './cli-arguments.js';
 import type { TimerifyOptions } from 'node:perf_hooks';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Timerify = <T extends (...params: any[]) => any>(fn: T, options?: TimerifyOptions) => T;
 
-const { performance: isEnabled = false } = parsedArgs.values;
+const { performance: isEnabled = false } = parsedArgValues;
 
 // Naming convention: _wrapped() functions are prefixed with an underscore
 export const timerify: Timerify = fn => (isEnabled ? performance.timerify(fn) : fn);
