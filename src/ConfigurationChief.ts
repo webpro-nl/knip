@@ -289,7 +289,7 @@ export class ConfigurationChief {
   getDescendentWorkspaces(name: string) {
     return this.getAllWorkspaces()
       .filter(workspaceName => workspaceName !== name)
-      .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name));
+      .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name + '/'));
   }
 
   getIgnoredWorkspaces() {
