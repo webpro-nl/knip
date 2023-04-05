@@ -1,27 +1,28 @@
-import { compact } from '../../util/array.js';
-import { resolvePluginPackageName, getDependenciesFromSettings } from './helpers.js';
-import type { ESLintConfig } from './types.js';
+import createJITI from 'jiti';
+import transform from 'jiti/dist/babel.js';
+import { timerify } from '../../util/Performance.js';
+import type { TransformOptions } from 'jiti/dist/types.js';
 
-type Options = { cwd: string };
+const rushstackMatch = /require\(("|')@rushstack\/(eslint-config\/patch|eslint-patch)\/modern-module-resolution("|')\)/;
 
-export const fallback = async (configFilePath: string, { cwd }: Options) => {
-  // No try/catch, since this plugin is only enabled when eslint itself was found in package.json
-  const { ESLint } = await import('eslint');
+// @ts-expect-error Our package.json has type=module (for globby, chalk, etc), but here it confuses TypeScript
+const jiti = createJITI(process.cwd(), {
+  cache: false,
+  transform: (opts: TransformOptions) => {
+    opts.source = opts.source.replace(rushstackMatch, '');
+    // @ts-expect-error Same as above
+    return transform(opts);
+  },
+});
 
-  const engine = new ESLint({ cwd, overrideConfigFile: configFilePath, useEslintrc: false });
+/**
+ * Special ESLint config loader to strip problematic lines from source:
+ *
+ * ```js
+ * require('@rushstack/eslint-config/patch/modern-module-resolution');
+ * require("@rushstack/eslint-patch/modern-module-resolution");
+ * ```
+ */
+const load = (configFilePath: string) => jiti(configFilePath);
 
-  const jsConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.js');
-  const tsConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.ts');
-  const tsxConfig: ESLintConfig = await engine.calculateConfigForFile('__placeholder__.tsx');
-
-  const dependencies = [jsConfig, tsConfig, tsxConfig].map(config => {
-    if (!config) return [];
-    const plugins = config.plugins?.map(resolvePluginPackageName) ?? [];
-    const parsers = config.parser ? [config.parser] : [];
-    const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
-    const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-    return [...parsers, ...extraParsers, ...plugins, ...settings];
-  });
-
-  return compact(dependencies.flat());
-};
+export const fallback = timerify(load);

@@ -11,7 +11,6 @@ type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
 
 const getDependencies = (config: ESLintConfig | OverrideConfig) => {
   const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendsSpecifier) : [];
-  if (extendsSpecifiers.includes('eslint-plugin-prettier')) extendsSpecifiers.push('eslint-config-prettier');
   const plugins = config.plugins ? config.plugins.map(resolvePluginPackageName) : [];
   const parser = config.parser;
   const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
@@ -29,21 +28,11 @@ type GetDependenciesDeep = (
 export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, dependencies = new Set(), options) => {
   const addAll = (deps: string[] | Set<string>) => deps.forEach(dependency => dependencies.add(dependency));
 
-  let config = configFilePath.endsWith('package.json') ? options.manifest.eslintConfig : undefined;
-
-  if (!config) {
-    try {
-      config = await load(configFilePath);
-    } catch (err) {
-      if (err instanceof Error && err.cause instanceof Error && /Failed to patch ESLint/.test(err.cause.message)) {
-        // Fallback - or actually native - mechanism kicks in for @rushstack/eslint-patch/modern-module-resolution
-        const dependencies = await fallback(configFilePath, options);
-        addAll(dependencies);
-      } else {
-        throw err;
-      }
-    }
-  }
+  const config = configFilePath.endsWith('package.json')
+    ? options.manifest.eslintConfig
+    : /(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
+    ? await load(configFilePath)
+    : await fallback(configFilePath);
 
   if (config) {
     if (config.extends) {
@@ -73,7 +62,7 @@ const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', plugin
     : `${namespace}-${pluginName}`;
 };
 
-export const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
+const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
 
 // TODO Understand how this should actually work, eg:
 // plugin:@typescript-eslint/recommended → @typescript-eslint/eslint-plugin
@@ -99,7 +88,7 @@ const getImportPluginDependencies = (settings: Record<string, unknown>) => {
 };
 
 // Super custom: find dependencies of specific ESLint plugins through settings
-export const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) => {
+const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) => {
   return compact(
     Object.entries(settings).reduce((packageNames, [settingKey, settings]) => {
       if (/^import\/(parsers|resolvers)?/.test(settingKey) && typeof settings !== 'string') {

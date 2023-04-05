@@ -36,7 +36,6 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
     'eslint-plugin-eslint-comments',
     'eslint-plugin-eslint-plugin',
     '@scope/eslint-config/file',
-    'eslint-config-prettier',
     '@nrwl/eslint-plugin-nx',
     'eslint-plugin-cypress',
     '@scope/eslint-plugin',
