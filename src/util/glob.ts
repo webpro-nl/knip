@@ -31,11 +31,16 @@ interface GlobOptions extends BaseGlobOptions {
 }
 
 const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = true }: GlobOptions) => {
+  if (patterns.length === 0) return [];
+
   const relativePath = relative(cwd, workingDir);
 
   // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
   const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
   const globPatterns = compact([patterns].flat().map(prepend).map(removeProductionSuffix)).sort(negatedLast);
+
+  // Only negated patterns? Bail out.
+  if (globPatterns[0].startsWith('!')) return [];
 
   const ignorePatterns = compact([...ignore, '**/node_modules/**']);
 
@@ -50,13 +55,15 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   });
 };
 
-const pureGlob = async ({ cwd, patterns, ignore = [], gitignore = true }: BaseGlobOptions) =>
-  globby(patterns, {
+const pureGlob = async ({ cwd, patterns, ignore = [], gitignore = true }: BaseGlobOptions) => {
+  if (patterns.length === 0) return [];
+  return globby(patterns, {
     cwd,
     ignore: [...ignore, '**/node_modules/**'],
     gitignore,
     absolute: true,
   });
+};
 
 const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
   const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd, ignore: ['**/node_modules/**'] });
