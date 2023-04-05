@@ -133,12 +133,12 @@ Using workspaces in a monorepo? Please see [workspaces][1] for more details abou
       --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
       --dependencies           Shortcut for --include dependencies,unlisted,unresolved
       --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
-      --no-progress            Don't show dynamic progress updates
+      -n, --no-progress        Don't show dynamic progress updates
       --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
       --no-exit-code           Always exit with code zero (0)
       --max-issues             Maximum number of issues before non-zero exit code (default: 0)
-      --debug                  Show debug output
+      -d, --debug              Show debug output
       --debug-file-filter      Filter for files in debug output (regex as string)
       --performance            Measure count and running time of expensive functions and display stats table
       --h, --help              Print this help text

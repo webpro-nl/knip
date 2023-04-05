@@ -15,12 +15,12 @@ Options:
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
   --dependencies           Shortcut for --include dependencies,unlisted,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
-  --no-progress            Don't show dynamic progress updates
+  -n, --no-progress        Don't show dynamic progress updates
   --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
   --no-exit-code           Always exit with code zero (0)
   --max-issues             Maximum number of issues before non-zero exit code (default: 0)
-  --debug                  Show debug output
+  -d, --debug              Show debug output
   --debug-file-filter      Filter for files in debug output (regex as string)
   --performance            Measure count and running time of expensive functions and display stats table
   --h, --help              Print this help text
@@ -44,7 +44,7 @@ try {
   parsedArgs = parseArgs({
     options: {
       config: { type: 'string', short: 'c' },
-      debug: { type: 'boolean' },
+      debug: { type: 'boolean', short: 'd' },
       'debug-file-filter': { type: 'string' },
       dependencies: { type: 'boolean' },
       exclude: { type: 'string', multiple: true },
@@ -54,7 +54,7 @@ try {
       'max-issues': { type: 'string' },
       'no-exit-code': { type: 'boolean' },
       'no-gitignore': { type: 'boolean' },
-      'no-progress': { type: 'boolean' },
+      'no-progress': { type: 'boolean', short: 'n' },
       performance: { type: 'boolean' },
       production: { type: 'boolean' },
       reporter: { type: 'string' },
