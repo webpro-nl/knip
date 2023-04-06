@@ -1,6 +1,6 @@
 import { initIssues, initCounters } from './issues/initializers.js';
 import { relative } from './util/path.js';
-import type { Issue, Rules } from './types/issues.js';
+import type { ConfigurationHint, Issue, Rules } from './types/issues.js';
 
 type IssueCollectorOptions = {
   cwd: string;
@@ -17,6 +17,7 @@ export class IssueCollector {
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles: Set<string> = new Set();
+  private configurationHints = new Set();
 
   constructor({ cwd, rules }: IssueCollectorOptions) {
     this.cwd = cwd;
@@ -48,10 +49,15 @@ export class IssueCollector {
     }
   }
 
+  addConfigurationHint(issue: ConfigurationHint) {
+    this.configurationHints.add(issue);
+  }
+
   getIssues() {
     return {
       issues: this.issues,
       counters: this.counters,
+      configurationHints: this.configurationHints,
     };
   }
 }

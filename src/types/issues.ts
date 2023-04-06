@@ -51,6 +51,7 @@ export type Counters = Record<IssueType | 'processed' | 'total', number>;
 export type ReporterOptions = {
   report: Report;
   issues: Issues;
+  configurationHints: ConfigurationHints;
   cwd: string;
   workingDir: string;
   isProduction: boolean;
@@ -62,3 +63,11 @@ export type Reporter = (options: ReporterOptions) => void;
 export type IssueSeverity = 'error' | 'warn' | 'off';
 
 export type Rules = Record<IssueType, IssueSeverity>;
+
+export type ConfigurationHints = Set<ConfigurationHint>;
+
+export type ConfigurationHint = {
+  type: 'ignoreBinaries' | 'ignoreDependencies' | 'ignoreWorkspaces';
+  identifier: string;
+  workspaceName?: string;
+};

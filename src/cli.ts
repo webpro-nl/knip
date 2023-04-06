@@ -48,7 +48,7 @@ const run = async () => {
   try {
     const perfObserver = new Performance(isObservePerf);
 
-    const { report, issues, counters, rules } = await main({
+    const { report, issues, counters, rules, configurationHints } = await main({
       cwd,
       tsConfigFile: tsConfig,
       gitignore: !isNoGitIgnore,
@@ -57,7 +57,7 @@ const run = async () => {
       isShowProgress,
     });
 
-    await printReport({ report, issues, cwd, isProduction, options: reporterOptions });
+    await printReport({ report, issues, configurationHints, cwd, isProduction, options: reporterOptions });
 
     const totalErrorCount = (Object.keys(report) as IssueType[])
       .filter(reportGroup => report[reportGroup] && rules[reportGroup] === 'error')

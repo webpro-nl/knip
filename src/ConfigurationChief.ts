@@ -349,4 +349,10 @@ export class ConfigurationChief {
   findWorkspaceByPackageName(packageName: string) {
     return this.workspaces.find(workspace => workspace.pkgName === packageName);
   }
+
+  public getUnusedIgnoredWorkspaces() {
+    const ignoredWorkspaceNames = this.config.ignoreWorkspaces;
+    const workspaceNames = this.getAllWorkspaces();
+    return ignoredWorkspaceNames.filter(workspaceName => !workspaceNames.includes(workspaceName));
+  }
 }

@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import EasyTable from 'easy-table';
+import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { relative } from '../util/path.js';
 import { getTitle, logTitle, logIssueSet, identity } from './util.js';
 import type { Issue, ReporterOptions, IssueSet } from '../types/issues.js';
@@ -21,7 +22,7 @@ const logIssueRecord = (issues: Issue[]) => {
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
 };
 
-export default ({ report, issues }: ReporterOptions) => {
+export default ({ report, issues, configurationHints }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
@@ -44,6 +45,16 @@ export default ({ report, issues }: ReporterOptions) => {
 
       totalIssues = totalIssues + issuesForType.length;
     }
+  }
+
+  if (configurationHints.size > 0) {
+    logTitle('Configuration issues', configurationHints.size);
+    configurationHints.forEach(hint => {
+      const { type, workspaceName, identifier } = hint;
+      const message = `Unused item in ${type}`;
+      const workspace = workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : ``;
+      console.warn(chalk.grey(`${message}${workspace}:`), identifier);
+    });
   }
 
   if (totalIssues === 0) {

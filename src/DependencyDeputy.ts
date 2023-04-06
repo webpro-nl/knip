@@ -2,7 +2,7 @@ import { isBuiltin } from 'node:module';
 import { Workspace } from './ConfigurationChief.js';
 import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES, IGNORED_GLOBAL_BINARIES } from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
-import type { Issue } from './types/issues.js';
+import type { ConfigurationHints, Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
 import type { PackageJson } from 'type-fest';
@@ -99,6 +99,13 @@ export class DependencyDeputy {
     this.referencedDependencies.get(workspaceName)?.add(packageName);
   }
 
+  addReferencedBinary(workspaceName: string, binaryName: string) {
+    if (!this.referencedBinaries.has(workspaceName)) {
+      this.referencedBinaries.set(workspaceName, new Set());
+    }
+    this.referencedBinaries.get(workspaceName)?.add(binaryName);
+  }
+
   addPeerDependencies(workspaceName: string, peerDependencies: Map<string, Set<string>>) {
     this.peerDependencies.set(workspaceName, peerDependencies);
   }
@@ -139,6 +146,8 @@ export class DependencyDeputy {
   public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): boolean {
     if (IGNORED_GLOBAL_BINARIES.includes(binaryName)) return true;
 
+    this.addReferencedBinary(workspace.name, binaryName);
+
     if (this.getWorkspaceManifest(workspace.name)?.ignoreBinaries.includes(binaryName)) return true;
 
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
@@ -166,9 +175,11 @@ export class DependencyDeputy {
   public settleDependencyIssues() {
     const dependencyIssues: Issue[] = [];
     const devDependencyIssues: Issue[] = [];
+    const configurationHints: ConfigurationHints = new Set();
 
     for (const [workspaceName, { manifestPath, ignoreDependencies, ignoreBinaries }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspaceName);
+      const referencedBinaries = this.referencedBinaries.get(workspaceName);
       const installedBinaries = this.getInstalledBinaries(workspaceName);
       const ignoreBins = [...IGNORED_GLOBAL_BINARIES, ...ignoreBinaries];
       const ignoreDeps = [...IGNORED_DEPENDENCIES, ...ignoreDependencies];
@@ -211,19 +222,31 @@ export class DependencyDeputy {
         return false;
       };
 
-      this.getProductionDependencies(workspaceName)
-        .filter(isNotIgnoredDependency)
+      const pd = this.getProductionDependencies(workspaceName);
+      const dd = this.getDevDependencies(workspaceName);
+
+      pd.filter(isNotIgnoredDependency)
         .filter(isNotIgnoredBinary)
         .filter(isNotReferencedDependency)
         .forEach(symbol => dependencyIssues.push({ type: 'dependencies', filePath: manifestPath, symbol }));
 
-      this.getDevDependencies(workspaceName)
-        .filter(isNotIgnoredDependency)
+      dd.filter(isNotIgnoredDependency)
         .filter(isNotIgnoredBinary)
         .filter(isNotReferencedDependency)
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
+
+      const isReferencedDep = (name: string) => ![...pd, ...dd].includes(name) && referencedDependencies?.has(name);
+      const isReferencedBin = (name: string) => !installedBinaries?.has(name) && referencedBinaries?.has(name);
+
+      ignoreDependencies
+        .filter(packageName => IGNORED_DEPENDENCIES.includes(packageName) || !isReferencedDep(packageName))
+        .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' }));
+
+      ignoreBinaries
+        .filter(binaryName => IGNORED_GLOBAL_BINARIES.includes(binaryName) || !isReferencedBin(binaryName))
+        .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' }));
     }
 
-    return { dependencyIssues, devDependencyIssues };
+    return { dependencyIssues, devDependencyIssues, configurationHints };
   }
 }

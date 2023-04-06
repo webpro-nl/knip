@@ -377,14 +377,20 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   }
 
   if (isReportDependencies) {
-    const { dependencyIssues, devDependencyIssues } = deputy.settleDependencyIssues();
+    const { dependencyIssues, devDependencyIssues, configurationHints } = deputy.settleDependencyIssues();
     dependencyIssues.forEach(issue => collector.addIssue(issue));
     if (!isProduction) devDependencyIssues.forEach(issue => collector.addIssue(issue));
+    configurationHints.forEach(hint => collector.addConfigurationHint(hint));
   }
 
-  const { issues, counters } = collector.getIssues();
+  const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
+  unusedIgnoredWorkspaces.forEach(identifier =>
+    collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier })
+  );
+
+  const { issues, counters, configurationHints } = collector.getIssues();
 
   streamer.clear();
 
-  return { report, issues, counters, rules };
+  return { report, issues, counters, rules, configurationHints };
 };
