@@ -23,13 +23,14 @@ test('Find dependencies in husky configuration (main)', async () => {
   });
 
   assert(issues.unlisted['.husky/pre-commit']['commitlint']);
-  assert(issues.unlisted['.husky/pre-push']['bin:jest']);
-  assert(issues.unlisted['.husky/pre-push']['bin:pretty-quick']);
-  assert(issues.unlisted['.husky/pre-rebase']['bin:eslint']);
+  assert(issues.binaries['.husky/pre-push']['jest']);
+  assert(issues.binaries['.husky/pre-push']['pretty-quick']);
+  assert(issues.binaries['.husky/pre-rebase']['eslint']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 4,
+    unlisted: 1,
+    binaries: 3,
     processed: 0,
     total: 0,
   });

@@ -71,16 +71,16 @@ test('Unused dependencies in npm scripts', async () => {
   assert(!issues.devDependencies['package.json']['eslint-v7']);
   assert(!issues.devDependencies['package.json']['eslint-v8']);
 
-  assert(issues.unlisted['package.json']['bin:nodemon']);
-  assert(issues.unlisted['package.json']['bin:dotenv']);
-  assert(!issues.unlisted['package.json']['bin:rm']);
-  assert(!issues.unlisted['package.json']['bin:bash']);
+  assert(issues.binaries['package.json']['nodemon']);
+  assert(issues.binaries['package.json']['dotenv']);
+  assert(!issues.binaries['package.json']['rm']);
+  assert(!issues.binaries['package.json']['bash']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
     devDependencies: 1,
-    unlisted: 2,
+    binaries: 2,
     processed: 1,
     total: 1,
   });

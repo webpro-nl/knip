@@ -20,16 +20,16 @@ test('Find unused dependencies', async () => {
   assert(issues.dependencies['package.json']['fs-extra']);
   assert(issues.devDependencies['package.json']['mocha']);
 
-  assert.equal(Object.keys(issues.unlisted).length, 1);
-  assert(issues.unlisted['package.json']['bin:start-server']);
-  assert(issues.unlisted['package.json']['bin:jest']);
+  assert.equal(Object.keys(issues.binaries).length, 1);
+  assert(issues.binaries['package.json']['start-server']);
+  assert(issues.binaries['package.json']['jest']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
     dependencies: 2,
     devDependencies: 1,
-    unlisted: 2,
+    binaries: 2,
     processed: 3,
     total: 3,
   });
@@ -49,16 +49,16 @@ test('Find unused dependencies (production)', async () => {
   assert(issues.dependencies['package.json']['fs-extra']);
   assert.equal(Object.keys(issues.devDependencies).length, 0);
 
-  assert.equal(Object.keys(issues.unlisted).length, 1);
-  assert(issues.unlisted['package.json']['bin:start-server']);
-  assert(!issues.unlisted['package.json']['bin:jest']);
+  assert.equal(Object.keys(issues.binaries).length, 1);
+  assert(issues.binaries['package.json']['start-server']);
+  assert(!issues.binaries['package.json']['jest']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
     dependencies: 2,
     devDependencies: 0,
-    unlisted: 1,
+    binaries: 1,
     processed: 3,
     total: 3,
   });
@@ -83,7 +83,7 @@ test('Find unused dependencies (strict)', async () => {
     ...baseCounters,
     files: 1,
     dependencies: 3,
-    unlisted: 1,
+    binaries: 1,
     processed: 3,
     total: 3,
   });

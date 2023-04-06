@@ -27,6 +27,7 @@ export type Issues = {
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
   unlisted: IssueRecords;
+  binaries: IssueRecords;
   unresolved: IssueRecords;
   exports: IssueRecords;
   types: IssueRecords;

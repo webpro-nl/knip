@@ -1,5 +1,4 @@
 import { isBuiltin } from 'node:module';
-import { fromBinary, isBinary } from './binaries/util.js';
 import { Workspace } from './ConfigurationChief.js';
 import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES, IGNORED_GLOBAL_BINARIES } from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
@@ -22,12 +21,14 @@ export class DependencyDeputy {
   isStrict;
   _manifests: WorkspaceManifests = new Map();
   referencedDependencies: Map<string, Set<string>>;
+  referencedBinaries: Map<string, Set<string>>;
   peerDependencies: Map<string, PeerDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
 
   constructor({ isStrict }: Options) {
     this.isStrict = isStrict;
     this.referencedDependencies = new Map();
+    this.referencedBinaries = new Map();
     this.peerDependencies = new Map();
     this.installedBinaries = new Map();
   }
@@ -119,24 +120,6 @@ export class DependencyDeputy {
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
 
-    // Handle binaries
-    if (isBinary(packageName)) {
-      const binaryName = fromBinary(packageName);
-      if (IGNORED_GLOBAL_BINARIES.includes(binaryName)) return true;
-      if (this.getWorkspaceManifest(workspace.name)?.ignoreBinaries.includes(binaryName)) return true;
-      for (const name of workspaceNames) {
-        const binaries = this.getInstalledBinaries(name);
-        if (binaries?.has(binaryName)) {
-          const dependencies = binaries.get(binaryName);
-          if (dependencies?.size) {
-            dependencies.forEach(dependency => this.addReferencedDependency(name, dependency));
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
     if (this.getWorkspaceManifest(workspace.name)?.ignoreDependencies.includes(packageName)) return true;
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
@@ -150,6 +133,26 @@ export class DependencyDeputy {
       return true;
     }
 
+    return false;
+  }
+
+  public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): boolean {
+    if (IGNORED_GLOBAL_BINARIES.includes(binaryName)) return true;
+
+    if (this.getWorkspaceManifest(workspace.name)?.ignoreBinaries.includes(binaryName)) return true;
+
+    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
+
+    for (const name of workspaceNames) {
+      const binaries = this.getInstalledBinaries(name);
+      if (binaries?.has(binaryName)) {
+        const dependencies = binaries.get(binaryName);
+        if (dependencies?.size) {
+          dependencies.forEach(dependency => this.addReferencedDependency(name, dependency));
+          return true;
+        }
+      }
+    }
     return false;
   }
 

@@ -15,12 +15,12 @@ test('Find dependencies in Remix configuration', async () => {
 
   assert(issues.unresolved['app/root.tsx']['./session.server']);
 
-  assert(issues.unlisted['package.json']['bin:run-s']);
-  assert(issues.unlisted['package.json']['bin:run-p']);
-  assert(issues.unlisted['package.json']['bin:cross-env']);
   assert(issues.unlisted['package.json']['dotenv']);
-  assert(issues.unlisted['package.json']['bin:tailwindcss']);
-  assert(issues.unlisted['package.json']['bin:prisma']);
+  assert(issues.binaries['package.json']['run-s']);
+  assert(issues.binaries['package.json']['run-p']);
+  assert(issues.binaries['package.json']['cross-env']);
+  assert(issues.binaries['package.json']['tailwindcss']);
+  assert(issues.binaries['package.json']['prisma']);
 
   assert(issues.unlisted['app/entry.client.tsx']['@remix-run/react']);
   assert(issues.unlisted['app/entry.client.tsx']['react']);
@@ -41,7 +41,8 @@ test('Find dependencies in Remix configuration', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 17,
+    unlisted: 12,
+    binaries: 5,
     unresolved: 1,
     processed: 8,
     total: 8,

@@ -15,6 +15,7 @@ type Row = {
   dependencies?: string[];
   devDependencies?: string[];
   unlisted?: string[];
+  binaries?: string[];
   unresolved?: string[];
   exports?: string[];
   types?: string[];

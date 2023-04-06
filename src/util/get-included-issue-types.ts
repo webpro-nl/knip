@@ -21,7 +21,7 @@ export const getIncludedIssueTypes = (
   { include = [], exclude = [], isProduction = false }: Options = {}
 ) => {
   if (cliArgs.dependencies) {
-    cliArgs.include = [...cliArgs.include, 'dependencies', 'unlisted', 'unresolved'];
+    cliArgs.include = [...cliArgs.include, 'dependencies', 'unlisted', 'binaries', 'unresolved'];
   }
   if (cliArgs.exports) {
     const exports = ['exports', 'nsExports', 'classMembers', 'types', 'nsTypes', 'enumMembers', 'duplicates'];

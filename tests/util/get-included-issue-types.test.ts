@@ -56,7 +56,14 @@ test('Resolve included issue types (exclude dependencies)', async () => {
 test('Resolve included issue types (--dependencies)', async () => {
   const cliArgs = { include: [], exclude: [], dependencies: true, exports: false };
   const config = getIncludedIssueTypes(cliArgs);
-  assert.deepEqual(config, { ...none, dependencies: true, devDependencies: true, unlisted: true, unresolved: true });
+  assert.deepEqual(config, {
+    ...none,
+    dependencies: true,
+    devDependencies: true,
+    unlisted: true,
+    binaries: true,
+    unresolved: true,
+  });
 });
 
 test('Resolve included issue types (--exports)', async () => {

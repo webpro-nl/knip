@@ -1,4 +1,5 @@
 import { _getDependenciesFromScripts } from './binaries/index.js';
+import { fromBinary, isBinary } from './binaries/util.js';
 import { ConfigurationChief, Workspace } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
@@ -80,14 +81,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
       }
     } else {
-      if (isInNodeModules(specifier)) {
-        // Pattern: /abs/path/to/repo/node_modules/package/index.js
-        const packageName = getPackageNameFromFilePath(specifier);
-        const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
-        if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: packageName });
+      if (isBinary(specifier)) {
+        const binaryName = fromBinary(specifier);
+        const isHandled = deputy.maybeAddReferencedBinary(workspace, binaryName);
+        if (!isHandled) collector.addIssue({ type: 'binaries', filePath: containingFilePath, symbol: binaryName });
       } else {
-        // Patterns: package, @any/package, @local/package, self-reference
-        const packageName = getPackageNameFromModuleSpecifier(specifier);
+        const packageName = isInNodeModules(specifier)
+          ? getPackageNameFromFilePath(specifier) // Pattern: /abs/path/to/repo/node_modules/package/index.js
+          : getPackageNameFromModuleSpecifier(specifier); // Patterns: package, @any/package, @local/package, self-ref
+
         const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
         if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
 
