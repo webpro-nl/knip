@@ -52,6 +52,7 @@ export type ReporterOptions = {
   report: Report;
   issues: Issues;
   configurationHints: ConfigurationHints;
+  noConfigHints: boolean;
   cwd: string;
   workingDir: string;
   isProduction: boolean;

@@ -136,6 +136,7 @@ Using workspaces in a monorepo? Please see [workspaces][1] for more details abou
       -n, --no-progress        Don't show dynamic progress updates
       --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
+      --no-config-hints        Suppress configuration hints
       --no-exit-code           Always exit with code zero (0)
       --max-issues             Maximum number of issues before non-zero exit code (default: 0)
       -d, --debug              Show debug output

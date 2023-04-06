@@ -16,6 +16,7 @@ const {
   debug: isDebug = false,
   help: isHelp,
   'max-issues': maxIssues = '0',
+  'no-config-hints': noConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
   'no-progress': isNoProgress = false,
@@ -57,7 +58,15 @@ const run = async () => {
       isShowProgress,
     });
 
-    await printReport({ report, issues, configurationHints, cwd, isProduction, options: reporterOptions });
+    await printReport({
+      report,
+      issues,
+      configurationHints,
+      noConfigHints,
+      cwd,
+      isProduction,
+      options: reporterOptions,
+    });
 
     const totalErrorCount = (Object.keys(report) as IssueType[])
       .filter(reportGroup => report[reportGroup] && rules[reportGroup] === 'error')

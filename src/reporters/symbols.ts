@@ -22,7 +22,7 @@ const logIssueRecord = (issues: Issue[]) => {
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
 };
 
-export default ({ report, issues, configurationHints }: ReporterOptions) => {
+export default ({ report, issues, configurationHints, noConfigHints }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
@@ -47,7 +47,7 @@ export default ({ report, issues, configurationHints }: ReporterOptions) => {
     }
   }
 
-  if (configurationHints.size > 0) {
+  if (!noConfigHints && configurationHints.size > 0) {
     logTitle('Configuration issues', configurationHints.size);
     configurationHints.forEach(hint => {
       const { type, workspaceName, identifier } = hint;

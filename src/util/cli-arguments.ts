@@ -18,6 +18,7 @@ Options:
   -n, --no-progress        Don't show dynamic progress updates
   --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
+  --no-config-hints        Suppress configuration hints
   --no-exit-code           Always exit with code zero (0)
   --max-issues             Maximum number of issues before non-zero exit code (default: 0)
   -d, --debug              Show debug output
@@ -52,6 +53,7 @@ try {
       help: { type: 'boolean', short: 'h' },
       include: { type: 'string', multiple: true },
       'max-issues': { type: 'string' },
+      'no-config-hints': { type: 'boolean' },
       'no-exit-code': { type: 'boolean' },
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
