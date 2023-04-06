@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Resolve files without a path', { skip: true }, async () => {
+test('Resolve local modules without a relative path', async () => {
   const cwd = resolve('tests/fixtures/pathless');
 
   const { counters } = await main({
@@ -13,5 +13,9 @@ test('Resolve files without a path', { skip: true }, async () => {
     cwd,
   });
 
-  assert.deepEqual(counters, baseCounters);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 3,
+    total: 3,
+  });
 });
