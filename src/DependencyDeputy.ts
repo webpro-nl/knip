@@ -235,7 +235,7 @@ export class DependencyDeputy {
         .filter(isNotReferencedDependency)
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
 
-      const isReferencedDep = (name: string) => ![...pd, ...dd].includes(name) && referencedDependencies?.has(name);
+      const isReferencedDep = (name: string) => !([...pd, ...dd].includes(name) && referencedDependencies?.has(name));
       const isReferencedBin = (name: string) => !installedBinaries?.has(name) && referencedBinaries?.has(name);
 
       ignoreDependencies
