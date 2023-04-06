@@ -15,6 +15,7 @@ export const TEST_FILE_PATTERNS = [
 
 // Binaries that are expected to be globally installed (i.e. https://www.npmjs.com/package/[name] is NOT the expected dependency)
 export const IGNORED_GLOBAL_BINARIES = [
+  'bash',
   'bun',
   'deno',
   'git',
@@ -24,6 +25,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'pnpm',
   'yarn',
   // Packages exist, but are at least 6 years old:
+  'cat',
   'cd',
   'cp',
   'echo',
