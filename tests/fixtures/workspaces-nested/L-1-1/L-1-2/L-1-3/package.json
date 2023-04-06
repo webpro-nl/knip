@@ -1,10 +1,10 @@
 {
-  "name": "@workspaces-nested/level-1-3",
+  "name": "@workspaces-nested/L-1-3",
   "scripts": {
     "dev": "pm2-dev",
     "lint": "eslint",
-    "start": "ignored-binary-in-level-2",
-    "global": "ignored-binary-global"
+    "start": "ignored-bin-L-2",
+    "global": "ignored-bin-global"
   },
   "dependencies": {
     "package-1-3": "*",

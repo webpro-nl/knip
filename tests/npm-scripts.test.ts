@@ -59,7 +59,7 @@ test('Referenced dependencies in npm scripts', async () => {
 });
 
 test('Unused dependencies in npm scripts', async () => {
-  const { issues, counters } = await main({
+  const { issues, counters, configurationHints } = await main({
     ...baseArguments,
     cwd,
   });
@@ -84,10 +84,19 @@ test('Unused dependencies in npm scripts', async () => {
     processed: 1,
     total: 1,
   });
+
+  assert.deepEqual(
+    configurationHints,
+    new Set([
+      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
+      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
+      { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
+    ])
+  );
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {
-  const { issues, counters } = await main({
+  const { issues, counters, configurationHints } = await main({
     ...baseArguments,
     cwd,
     isProduction: true,
@@ -104,4 +113,13 @@ test('Unused dependencies in npm scripts (strict)', async () => {
     processed: 1,
     total: 1,
   });
+
+  assert.deepEqual(
+    configurationHints,
+    new Set([
+      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
+      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
+      { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
+    ])
+  );
 });

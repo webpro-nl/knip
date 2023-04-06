@@ -1,9 +1,9 @@
 {
   "name": "@workspaces-nested/root",
   "workspaces": [
-    "level-1-1",
-    "level-1-1/level-1-2",
-    "level-1-1/level-1-2/level-1-3"
+    "L-1-1",
+    "L-1-1/L-1-2",
+    "L-1-1/L-1-2/L-1-3"
   ],
   "devDependencies": {
     "pm2": "*",
@@ -11,22 +11,25 @@
   },
   "knip": {
     "ignoreBinaries": [
-      "ignored-binary-global"
+      "ignored-bin-global"
     ],
     "ignoreDependencies": [
-      "ignored-dependency-global"
+      "ignored-dep-global"
+    ],
+    "ignoreWorkspaces": [
+      "ignored-workspace"
     ],
     "workspaces": {
       ".": {},
-      "level-1-1": {},
-      "level-1-1/level-1-2": {
+      "L-1-1": {},
+      "L-1-1/L-1-2": {
         "ignoreBinaries": [
-          "ignored-binary-in-level-2"
+          "ignored-bin-L-2"
         ]
       },
-      "level-1-1/level-1-2/level-1-3": {
+      "L-1-1/L-1-2/L-1-3": {
         "ignoreDependencies": [
-          "ignored-dependency-in-level-3"
+          "ignored-dep-L-3"
         ]
       }
     }
