@@ -172,17 +172,18 @@ This example shows more output related to unused and unlisted dependencies:
 
 The report contains the following types of issues:
 
-| Title          | Key                                 | Description                                           |
+| Key            | Title                               | Description                                           |
 | :------------- | :---------------------------------- | :---------------------------------------------------- |
 | `files`        | Unused files                        | unable to find references to this file                |
 | `dependencies` | Unused dependencies                 | unable to find references to this dependency          |
 | `dependencies` | Unused devDependencies              | unable to find references to this dependency          |
-| `unlisted`     | Unlisted dependencies               | used dependencies not listed in package.json _(1)_    |
+| `unlisted`     | Unlisted dependencies               | used dependencies not listed in package.json          |
+| `binaries`     | Unlisted binaries                   | binaries from dependencies not in package.json        |
 | `unresolved`   | Unresolved imports                  | unable to resolve this (import) specifier             |
 | `exports`      | Unused exports                      | unable to find references to this export              |
-| `nsExports`    | Unused exports in namespaces        | unable to find direct references to this export _(2)_ |
+| `nsExports`    | Unused exports in namespaces        | unable to find direct references to this export _(1)_ |
 | `types`        | Unused exported types               | unable to find references to this exported type       |
-| `nsTypes`      | Unused exported types in namespaces | unable to find direct references to this export _(2)_ |
+| `nsTypes`      | Unused exported types in namespaces | unable to find direct references to this export _(1)_ |
 | `enumMembers`  | Unused exported enum members        | unable to find references to this enum member         |
 | `classMembers` | Unused exported class members       | unable to find references to this class member        |
 | `duplicates`   | Duplicate exports                   | the same thing is exported more than once             |
@@ -191,10 +192,7 @@ When an issue type has zero issues, it is not shown.
 
 Getting too many reported issues and false positives? Read more about [handling issues][8].
 
-_(1)_ If an unlisted dependency is prefixed with `bin:` it means the dependency containing that binary is unlisted. This
-often equals the package name, but not always (e.g. `tsc` of `typescript` or `webpack` from `webpack-cli`).
-
-_(2)_ The variable or type is not referenced directly and has become a member of a namespace. Knip can't find a
+_(1)_ The variable or type is not referenced directly and has become a member of a namespace. Knip can't find a
 reference to it, so you can _probably_ remove it.
 
 ## Output
