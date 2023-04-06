@@ -82,7 +82,7 @@ export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   dependencies: 'Unused dependencies',
   devDependencies: 'Unused devDependencies',
   unlisted: 'Unlisted dependencies',
-  binaries: 'Unresolved binaries',
+  binaries: 'Unlisted binaries',
   unresolved: 'Unresolved imports',
   exports: 'Unused exports',
   nsExports: 'Unused exports in namespaces',
