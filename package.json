@@ -74,7 +74,7 @@
     "@typescript-eslint/parser": "5.57.1",
     "c8": "7.13.0",
     "eslint": "8.37.0",
-    "eslint-import-resolver-typescript": "3.5.4",
+    "eslint-import-resolver-typescript": "3.5.5",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-n": "15.7.0",
     "globstar": "1.0.0",
@@ -83,7 +83,7 @@
     "remark-cli": "11.0.0",
     "remark-preset-webpro": "0.0.2",
     "tsx": "3.12.6",
-    "type-fest": "3.7.2"
+    "type-fest": "3.8.0"
   },
   "engines": {
     "node": ">=16.17.0 <17 || >=18.6.0"
