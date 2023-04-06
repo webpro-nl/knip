@@ -1,5 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
+import { getOrSet } from '../util/map.js';
 import { isInNodeModules } from '../util/path.js';
 import { isDeclarationFileExtension, isAccessExpression, getAccessExpressionName } from './ast-helpers.js';
 import getExportVisitors from './visitors/exports/index.js';
@@ -51,19 +52,14 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     const isStar = identifier === '*';
     const isReExported = Boolean(isStar && !symbol);
 
-    if (!internalImports.has(filePath)) {
-      internalImports.set(filePath, {
-        specifier,
-        isStar,
-        isReExported,
-        isReExportedBy: new Set(),
-        symbols: new Set(),
-        isDynamic,
-      });
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const internalImport = internalImports.get(filePath)!;
+    const internalImport = getOrSet(internalImports, filePath, {
+      specifier,
+      isStar,
+      isReExported,
+      isReExportedBy: new Set(),
+      symbols: new Set(),
+      isDynamic,
+    });
 
     if (isReExported) {
       internalImport.isReExported = isReExported;
