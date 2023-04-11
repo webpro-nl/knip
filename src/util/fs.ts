@@ -35,7 +35,7 @@ export const loadYAML = async (filePath: string) => {
 };
 
 export const parseJSON = async (contents: string) => {
-  return JSON.parse(stripJsonComments(contents));
+  return JSON.parse(stripJsonComments(contents, { trailingCommas: true }));
 };
 
 export const parseYAML = async (contents: string) => {
