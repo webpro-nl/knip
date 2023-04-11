@@ -30,6 +30,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'cp',
   'echo',
   'exit',
+  'grep',
   'mkdir',
   'mv',
   'rm',
