@@ -1,0 +1,19 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@": ["../trailing"],
+      "~": ["../comma"],
+    },
+    "plugins": [
+      {
+        "name": "typescript-eslint-language-service"
+      },
+      {
+        "name": "ts-graphql-plugin",
+        "schema": "path-or-url-to-your-schema.graphql",
+        "tag": "gql"
+      },
+    ]
+  }
+}
