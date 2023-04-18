@@ -79,22 +79,18 @@ const resolveExtendsSpecifier = (specifier: string) => {
   return resolvePackageName(specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config', pluginName);
 };
 
-const getImportPluginDependencies = (settings: Record<string, unknown>) => {
-  const knownKeys = ['typescript'];
-  if (Array.isArray(settings)) return [];
-  return Object.keys(settings)
-    .filter(key => key !== 'node') // eslint-import-resolver-node is a direct dep of eslint-plugin-import
-    .map(key => (knownKeys.includes(key) ? `eslint-import-resolver-${key}` : key));
-};
-
 // Super custom: find dependencies of specific ESLint plugins through settings
 const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) => {
   return compact(
-    Object.entries(settings).reduce((packageNames, [settingKey, settings]) => {
-      if (/^import\/(parsers|resolvers)?/.test(settingKey) && typeof settings !== 'string') {
-        return [...packageNames, ...getImportPluginDependencies(settings)];
+    Object.entries(settings).flatMap(([settingKey, settings]) => {
+      if (settingKey === 'import/resolver') {
+        return (typeof settings === 'string' ? [settings] : Object.keys(settings))
+          .filter(key => key !== 'node')
+          .map(key => `eslint-import-resolver-${key}`);
       }
-      return packageNames;
-    }, [] as string[])
+      if (settingKey === 'import/parsers') {
+        return typeof settings === 'string' ? [settings] : Object.keys(settings);
+      }
+    })
   );
 };

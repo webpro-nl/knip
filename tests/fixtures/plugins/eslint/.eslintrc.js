@@ -15,4 +15,13 @@ module.exports = {
     '@scope/eslint-config/file',
   ],
   plugins: ['@typescript-eslint', '@nrwl/nx', 'prettier', 'eslint-plugin-cypress', '@scope/eslint-plugin'],
+  settings: {
+    'import/resolver': {
+      typescript: true,
+      exports: true,
+    },
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
+    },
+  },
 };

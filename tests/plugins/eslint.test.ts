@@ -39,6 +39,8 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
     '@nrwl/eslint-plugin-nx',
     'eslint-plugin-cypress',
     '@scope/eslint-plugin',
+    'eslint-import-resolver-typescript',
+    'eslint-import-resolver-exports',
   ]);
 });
 
