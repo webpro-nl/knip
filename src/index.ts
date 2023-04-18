@@ -260,8 +260,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             for (const identifier of importItems.symbols) {
               importedModule.symbols.add(identifier);
             }
-            if (importItems.isReExported) {
-              importedModule.isReExported = importItems.isReExported;
+            if (importItems.isReExport) {
+              importedModule.isReExport = importItems.isReExport;
               importedModule.isReExportedBy.add(filePath);
             }
             if (importItems.isDynamic) {
@@ -293,10 +293,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const isExportedInEntryFile = (importedModule?: ImportedModule): boolean => {
       if (!importedModule) return false;
-      const { isReExported, isReExportedBy } = importedModule;
+      const { isReExport, isReExportedBy } = importedModule;
       const { entryPaths } = principal;
       const hasFile = (file: string) => entryPaths.has(file) || isExportedInEntryFile(importedSymbols.get(file));
-      return isReExported ? Array.from(isReExportedBy).some(hasFile) : false;
+      return isReExport ? Array.from(isReExportedBy).some(hasFile) : false;
     };
 
     streamer.cast('Running async compilers...');
@@ -339,6 +339,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (principal.isPublicExport(exportedItem)) continue;
 
             if (importedModule.symbols.has(symbol)) {
+              // Skip members of classes/enums that are eventually exported by entry files
+              if (importedModule.isReExport && isExportedInEntryFile(importedModule)) continue;
+
               if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
                 principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
                   collector.addIssue({ type: 'enumMembers', filePath, symbol: member, parentSymbol: symbol });
@@ -354,7 +357,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               continue;
             }
 
-            if (importedModule.isReExported || importedModule.isStar) {
+            if (importedModule.isReExport || importedModule.isStar) {
               const isReExportedByEntryFile = isExportedInEntryFile(importedModule);
               if (!isReExportedByEntryFile && !principal.hasExternalReferences(filePath, exportedItem)) {
                 if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
