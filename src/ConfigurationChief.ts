@@ -35,7 +35,7 @@ const getDefaultWorkspaceConfig = (extensions?: string[]): WorkspaceConfiguratio
   const exts = [...DEFAULT_EXTENSIONS, ...(extensions ?? [])].map(ext => ext.slice(1)).join(',');
 
   return {
-    entry: [`index.{${exts}}!`, `src/index.{${exts}}!`],
+    entry: [`{index,cli,main}.{${exts}}!`, `src/{index,cli,main}.{${exts}}!`],
     project: [`**/*.{${exts}}!`],
     paths: {},
     ignore: [],
