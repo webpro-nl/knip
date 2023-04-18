@@ -145,7 +145,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const sharedGlobOptions = { cwd, workingDir: dir, gitignore, ignore: worker.getIgnorePatterns() };
 
-    const entryPathsFromManifest = await getEntryPathFromManifest(dir, manifest);
+    const entryPathsFromManifest = await getEntryPathFromManifest(cwd, dir, manifest);
     debugLogArray(`Found entry paths from manifest (${name})`, entryPathsFromManifest);
     principal.addEntryPaths(entryPathsFromManifest);
 

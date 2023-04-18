@@ -1,4 +1,4 @@
-import { _pureGlob } from './glob.js';
+import { _glob } from './glob.js';
 import { getStringValues } from './object.js';
 import { toPosix } from './path.js';
 import type { PackageJson } from '@npmcli/package-json';
@@ -30,7 +30,7 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
   return typedDependency;
 };
 
-export const getEntryPathFromManifest = (dir: string, manifest: PackageJson) => {
+export const getEntryPathFromManifest = (cwd: string, dir: string, manifest: PackageJson) => {
   const { main, bin, exports } = manifest;
 
   const entryPaths: Set<string> = new Set();
@@ -51,5 +51,5 @@ export const getEntryPathFromManifest = (dir: string, manifest: PackageJson) => 
   }
 
   // Glob, as we only want files that exist, and also we don't want "dist" files, which should be .gitignore'd
-  return _pureGlob({ cwd: dir, patterns: Array.from(entryPaths) });
+  return _glob({ cwd, workingDir: dir, patterns: Array.from(entryPaths) });
 };
