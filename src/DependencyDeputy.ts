@@ -194,9 +194,15 @@ export class DependencyDeputy {
         return true;
       };
 
-      const isNotReferencedDependency = (dependency: string): boolean => {
+      // Keeping track of peer dependency recursions to prevent infinite loops for circularly referenced peer deps
+      const peerDepRecs: Record<string, number> = {};
+
+      const isNotReferencedDependency = (dependency: string, isPeerDep?: boolean): boolean => {
         // Is referenced, ignore
         if (referencedDependencies?.has(dependency)) return false;
+
+        // Returning peer dependency, ignore
+        if (isPeerDep && peerDepRecs[dependency]) return true;
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === '@types') {
@@ -208,18 +214,17 @@ export class DependencyDeputy {
           // Example: `next` has `react-dom` as peer dependency, so when `@types/react-dom` is listed it can be ignored
           const peerDependencies = this.getPeerDependencies(workspaceName, typedPackageName);
           if (peerDependencies.length) {
-            return !peerDependencies.find(peerDependency => !isNotReferencedDependency(peerDependency));
+            return !peerDependencies.find(peerDependency => !isNotReferencedDependency(peerDependency, true));
           }
 
           return !referencedDependencies?.has(typedPackageName);
         }
 
-        if (!referencedDependencies?.has(dependency)) {
-          const peerDependencies = this.getPeerDependencies(workspaceName, dependency);
-          return !peerDependencies.find(peerDependency => !isNotReferencedDependency(peerDependency));
-        }
-
-        return false;
+        // A dependency may not be referenced, but it may be a peerDependency of another.
+        // If that peerDependency is also not referenced we'll report it as unused.
+        const peerDependencies = this.getPeerDependencies(workspaceName, dependency);
+        peerDependencies.forEach(dep => (!peerDepRecs[dep] ? (peerDepRecs[dep] = 1) : peerDepRecs[dep]++));
+        return !peerDependencies.find(peerDependency => !isNotReferencedDependency(peerDependency, true));
       };
 
       const pd = this.getProductionDependencies(workspaceName);
@@ -227,12 +232,12 @@ export class DependencyDeputy {
 
       pd.filter(isNotIgnoredDependency)
         .filter(isNotIgnoredBinary)
-        .filter(isNotReferencedDependency)
+        .filter(d => isNotReferencedDependency(d))
         .forEach(symbol => dependencyIssues.push({ type: 'dependencies', filePath: manifestPath, symbol }));
 
       dd.filter(isNotIgnoredDependency)
         .filter(isNotIgnoredBinary)
-        .filter(isNotReferencedDependency)
+        .filter(d => isNotReferencedDependency(d))
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
 
       const isReferencedDep = (name: string) => !([...pd, ...dd].includes(name) && referencedDependencies?.has(name));

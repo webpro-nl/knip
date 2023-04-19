@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/peer-dependencies-circular",
+  "dependencies": {
+    "core": "*",
+    "peer-1": "*",
+    "peer-2": "*"
+  }
+}
