@@ -49,6 +49,8 @@ const defaultConfig: Configuration = {
   include: [],
   exclude: [],
   ignore: [],
+  ignoreBinaries: [],
+  ignoreDependencies: [],
   ignoreWorkspaces: [],
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
@@ -184,8 +186,8 @@ export class ConfigurationChief {
           project,
           paths,
           ignore: arrayify(workspaceConfig.ignore),
-          ignoreBinaries: compact([...ignoreBinaries, ...arrayify(workspaceConfig.ignoreBinaries)]),
-          ignoreDependencies: compact([...ignoreDependencies, ...arrayify(workspaceConfig.ignoreDependencies)]),
+          ignoreBinaries: arrayify(workspaceConfig.ignoreBinaries),
+          ignoreDependencies: arrayify(workspaceConfig.ignoreDependencies),
         };
 
         for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
@@ -214,6 +216,8 @@ export class ConfigurationChief {
       include,
       exclude,
       ignore,
+      ignoreBinaries,
+      ignoreDependencies,
       ignoreWorkspaces,
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})),
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
@@ -237,7 +241,6 @@ export class ConfigurationChief {
     const workspaces = await mapWorkspaces({
       pkg: this.manifest ?? {},
       cwd: this.cwd,
-      ignore: this.config.ignoreWorkspaces,
     });
 
     const manifestWorkspaces = new Map();

@@ -63,6 +63,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const enabledPluginsStore: Map<string, string[]> = new Map();
 
+  // TODO Organize better
+  deputy.addIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
+
   debugLogObject('Included workspaces', workspaces);
 
   const handleReferencedDependency = ({

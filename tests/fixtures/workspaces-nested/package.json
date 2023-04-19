@@ -11,10 +11,12 @@
   },
   "knip": {
     "ignoreBinaries": [
-      "ignored-bin-global"
+      "ignored-bin-global",
+      "unused-ignored-bin-global"
     ],
     "ignoreDependencies": [
-      "ignored-dep-global"
+      "ignored-dep-global",
+      "unused-ignored-dep-global"
     ],
     "ignoreWorkspaces": [
       "ignored-workspace"
@@ -24,12 +26,14 @@
       "L-1-1": {},
       "L-1-1/L-1-2": {
         "ignoreBinaries": [
-          "ignored-bin-L-2"
+          "ignored-bin-L-2",
+          "unused-ignored-bin-L-2"
         ]
       },
       "L-1-1/L-1-2/L-1-3": {
         "ignoreDependencies": [
-          "ignored-dep-L-3"
+          "ignored-dep-L-3",
+          "unused-ignored-dep-L-3"
         ]
       }
     }

@@ -7,6 +7,12 @@ type IssueCollectorOptions = {
   rules: Rules;
 };
 
+// TODO Fix dirty check
+function objectInSet(set: Set<ConfigurationHint>, obj: ConfigurationHint) {
+  const objJSON = JSON.stringify(obj);
+  return Array.from(set).some(item => JSON.stringify(item) === objJSON);
+}
+
 /**
  * - Collects issues and counts them
  * - Hands them out, to be consumed by reporters
@@ -17,7 +23,7 @@ export class IssueCollector {
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles: Set<string> = new Set();
-  private configurationHints = new Set();
+  private configurationHints: Set<ConfigurationHint> = new Set();
 
   constructor({ cwd, rules }: IssueCollectorOptions) {
     this.cwd = cwd;
@@ -50,7 +56,9 @@ export class IssueCollector {
   }
 
   addConfigurationHint(issue: ConfigurationHint) {
-    this.configurationHints.add(issue);
+    if (!objectInSet(this.configurationHints, issue)) {
+      this.configurationHints.add(issue);
+    }
   }
 
   getIssues() {
