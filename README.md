@@ -44,12 +44,17 @@ Knip has good defaults and you can run it without any configuration. Here's the 
 
 ```json
 {
-  "entry": ["index.{js,ts}", "src/index.{js,ts}"],
-  "project": ["**/*.{js,ts}"]
+  "entry": ["index.js", "src/index.js"],
+  "project": ["**/*.js"]
 }
 ```
 
-Well, almost, this is the full list of default extensions: `js`, `mjs`, `cjs`, `jsx`, `ts`, `mts`, `cts` and `tsx`.
+In addition to `index.js`, the following file names and extensions are also considered entry files:
+
+- `index`, `main` and `cli`
+- `js`, `mjs`, `cjs`, `jsx`, `ts`, `mts`, `cts` and `tsx`
+
+This means files like `main.cjs` and `src/cli.ts` are automatically added as entry files.
 
 ### Entry Files
 
@@ -58,10 +63,9 @@ Knip looks for entry files at those default locations, but also in other places:
 - The `main`, `bin` and `exports` fields of `package.json`.
 - [Plugins][2] such as for Next.js, Remix, Gatsby or Svelte add entry files.
 - The `scripts` in package.json or other scripts may provide entry files.
-- Knip does this for each [workspace][1] it finds.
 
-In other words, Knip looks in many places and you may not need much configuration. In a perfectly boring world where
-everything is according to defaults you don't even need a `knip.json` file.
+Knip does this for each [workspace][1] it finds, trying to minimize the configuration to suit your project. In a
+perfectly boring world where everything is according to defaults you wouldn't even need a `knip.json` file at all.
 
 Larger projects tend to have more things customized, and therefore probably get more out of Knip with a configuration
 file. Let's say you are using `.ts` files exclusively and have all source files only in the `src` directory:
