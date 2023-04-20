@@ -187,27 +187,19 @@ export class DependencyDeputy {
   public settleDependencyIssues() {
     const dependencyIssues: Issue[] = [];
     const devDependencyIssues: Issue[] = [];
-    const configurationHints: ConfigurationHints = new Set();
-    const rootIgnoreBinaries = Object.fromEntries(this.ignoreBinaries.map(key => [key, 0]));
-    const rootIgnoreDependencies = Object.fromEntries(this.ignoreDependencies.map(key => [key, 0]));
 
     for (const [workspaceName, { manifestPath, ignoreDependencies, ignoreBinaries }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspaceName);
-      const referencedBinaries = this.referencedBinaries.get(workspaceName);
       const installedBinaries = this.getInstalledBinaries(workspaceName);
       const ignoreBins = [...IGNORED_GLOBAL_BINARIES, ...this.ignoreBinaries, ...ignoreBinaries];
       const ignoreDeps = [...IGNORED_DEPENDENCIES, ...this.ignoreDependencies, ...ignoreDependencies];
 
-      const isNotIgnoredDependency = (packageName: string) => {
-        if (packageName in rootIgnoreDependencies) rootIgnoreDependencies[packageName]++;
-        return !ignoreDeps.includes(packageName);
-      };
+      const isNotIgnoredDependency = (packageName: string) => !ignoreDeps.includes(packageName);
 
       const isNotIgnoredBinary = (packageName: string) => {
         if (installedBinaries?.has(packageName)) {
           const binaryNames = installedBinaries.get(packageName);
           if (binaryNames) {
-            binaryNames.forEach(binaryName => binaryName in rootIgnoreBinaries && rootIgnoreBinaries[binaryName]++);
             if (ignoreBins.some(ignoredBinary => binaryNames.has(ignoredBinary))) return false;
           }
         }
@@ -259,16 +251,35 @@ export class DependencyDeputy {
         .filter(isNotIgnoredBinary)
         .filter(d => isNotReferencedDependency(d))
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
+    }
+
+    return { dependencyIssues, devDependencyIssues };
+  }
+
+  public getConfigurationHints() {
+    const configurationHints: ConfigurationHints = new Set();
+
+    const rootIgnoreBinaries = Object.fromEntries(this.ignoreBinaries.map(key => [key, 0]));
+    const rootIgnoreDependencies = Object.fromEntries(this.ignoreDependencies.map(key => [key, 0]));
+
+    for (const [workspaceName, { ignoreDependencies, ignoreBinaries }] of this._manifests.entries()) {
+      const referencedDependencies = this.referencedDependencies.get(workspaceName);
+      const referencedBinaries = this.referencedBinaries.get(workspaceName);
+      const installedBinaries = this.getInstalledBinaries(workspaceName);
+
+      referencedBinaries?.forEach(binaryName => binaryName in rootIgnoreBinaries && rootIgnoreBinaries[binaryName]++);
+
+      const allDeps = [...this.getProductionDependencies(workspaceName), ...this.getDevDependencies(workspaceName)];
 
       const isReferencedDep = (name: string) =>
-        referencedDependencies?.has(name) || ([...pd, ...dd].includes(name) && !referencedDependencies?.has(name));
-      const isReferencedBin = (name: string) => referencedBinaries?.has(name);
+        referencedDependencies?.has(name) || (allDeps.includes(name) && !referencedDependencies?.has(name));
+      const isReferencedBin = (name: string) => !installedBinaries?.has(name) && referencedBinaries?.has(name);
 
       ignoreDependencies
         .filter(
           packageName =>
             IGNORED_DEPENDENCIES.includes(packageName) ||
-            this.ignoreDependencies.includes(packageName) ||
+            (workspaceName !== '.' && this.ignoreDependencies.includes(packageName)) ||
             !isReferencedDep(packageName)
         )
         .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' }));
@@ -277,7 +288,7 @@ export class DependencyDeputy {
         .filter(
           binaryName =>
             IGNORED_GLOBAL_BINARIES.includes(binaryName) ||
-            this.ignoreBinaries.includes(binaryName) ||
+            (workspaceName !== '.' && this.ignoreBinaries.includes(binaryName)) ||
             !isReferencedBin(binaryName)
         )
         .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' }));
@@ -291,6 +302,6 @@ export class DependencyDeputy {
       .filter(key => rootIgnoreDependencies[key] === 0)
       .forEach(identifier => configurationHints.add({ workspaceName: '.', identifier, type: 'ignoreDependencies' }));
 
-    return { dependencyIssues, devDependencyIssues, configurationHints };
+    return { configurationHints };
   }
 }
