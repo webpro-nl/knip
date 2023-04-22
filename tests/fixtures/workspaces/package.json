@@ -16,6 +16,9 @@
     "build": "tsc"
   },
   "knip": {
+    "ignoreWorkspaces": [
+      "apps/ignored-workspace"
+    ],
     "workspaces": {
       "apps/*": {
         "entry": "index.ts!",

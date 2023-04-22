@@ -269,6 +269,7 @@ export class ConfigurationChief {
 
   public getEnabledWorkspaces() {
     const allWorkspaces = this.getAllWorkspaces();
+    const ignoredWorkspaces = this.getIgnoredWorkspaces();
 
     const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
       if (name === ancestorName) return ancestors;
@@ -278,15 +279,18 @@ export class ConfigurationChief {
 
     const workspaces = workspaceArg ? [workspaceArg] : allWorkspaces;
 
-    return workspaces.sort(byPathDepth).map(
-      (name): Workspace => ({
-        name,
-        pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
-        dir: join(this.cwd, name),
-        config: this.getConfigForWorkspace(name),
-        ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
-      })
-    );
+    return workspaces
+      .filter(w => !ignoredWorkspaces.includes(w))
+      .sort(byPathDepth)
+      .map(
+        (name): Workspace => ({
+          name,
+          pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
+          dir: join(this.cwd, name),
+          config: this.getConfigForWorkspace(name),
+          ancestors: allWorkspaces.reduce(getAncestors(name), [] as string[]),
+        })
+      );
   }
 
   getDescendentWorkspaces(name: string) {
