@@ -1,6 +1,11 @@
 import { isBuiltin } from 'node:module';
 import { Workspace } from './ConfigurationChief.js';
-import { IGNORE_DEFINITELY_TYPED, IGNORED_DEPENDENCIES, IGNORED_GLOBAL_BINARIES } from './constants.js';
+import {
+  IGNORE_DEFINITELY_TYPED,
+  IGNORED_DEPENDENCIES,
+  IGNORED_GLOBAL_BINARIES,
+  ROOT_WORKSPACE_NAME,
+} from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
 import type { ConfigurationHints, Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
@@ -267,20 +272,23 @@ export class DependencyDeputy {
       const referencedBinaries = this.referencedBinaries.get(workspaceName);
       const installedBinaries = this.getInstalledBinaries(workspaceName);
 
+      referencedDependencies?.forEach(pkg => pkg in rootIgnoreDependencies && rootIgnoreDependencies[pkg]++);
       referencedBinaries?.forEach(binaryName => binaryName in rootIgnoreBinaries && rootIgnoreBinaries[binaryName]++);
 
-      const allDeps = [...this.getProductionDependencies(workspaceName), ...this.getDevDependencies(workspaceName)];
+      const dependencies = this.isStrict
+        ? this.getProductionDependencies(workspaceName)
+        : [...this.getProductionDependencies(workspaceName), ...this.getDevDependencies(workspaceName)];
 
-      const isReferencedDep = (name: string) =>
-        referencedDependencies?.has(name) || (allDeps.includes(name) && !referencedDependencies?.has(name));
-      const isReferencedBin = (name: string) => !installedBinaries?.has(name) && referencedBinaries?.has(name);
+      const isReferencedDep = (name: string) => referencedDependencies?.has(name) && dependencies.includes(name);
+      const isReferencedBin = (name: string) => referencedBinaries?.has(name) && installedBinaries?.has(name);
 
+      // Add configuration hint for dependencies/binaries in global/top-level ignores or when referenced + listed
       ignoreDependencies
         .filter(
           packageName =>
             IGNORED_DEPENDENCIES.includes(packageName) ||
-            (workspaceName !== '.' && this.ignoreDependencies.includes(packageName)) ||
-            !isReferencedDep(packageName)
+            (workspaceName !== ROOT_WORKSPACE_NAME && this.ignoreDependencies.includes(packageName)) ||
+            isReferencedDep(packageName)
         )
         .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' }));
 
@@ -288,19 +296,33 @@ export class DependencyDeputy {
         .filter(
           binaryName =>
             IGNORED_GLOBAL_BINARIES.includes(binaryName) ||
-            (workspaceName !== '.' && this.ignoreBinaries.includes(binaryName)) ||
-            !isReferencedBin(binaryName)
+            (workspaceName !== ROOT_WORKSPACE_NAME && this.ignoreBinaries.includes(binaryName)) ||
+            isReferencedBin(binaryName)
         )
         .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' }));
     }
 
+    const installedBinaries = this.getInstalledBinaries(ROOT_WORKSPACE_NAME);
+    const dependencies = this.isStrict
+      ? this.getProductionDependencies(ROOT_WORKSPACE_NAME)
+      : [...this.getProductionDependencies(ROOT_WORKSPACE_NAME), ...this.getDevDependencies(ROOT_WORKSPACE_NAME)];
+
+    // Add configuration hint for dependencies/binaries in global ignores or when referenced + listed
     Object.keys(rootIgnoreBinaries)
-      .filter(key => rootIgnoreBinaries[key] === 0)
-      .forEach(identifier => configurationHints.add({ workspaceName: '.', identifier, type: 'ignoreBinaries' }));
+      .filter(
+        key => IGNORED_GLOBAL_BINARIES.includes(key) || (rootIgnoreBinaries[key] !== 0 && installedBinaries?.has(key))
+      )
+      .forEach(identifier =>
+        configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreBinaries' })
+      );
 
     Object.keys(rootIgnoreDependencies)
-      .filter(key => rootIgnoreDependencies[key] === 0)
-      .forEach(identifier => configurationHints.add({ workspaceName: '.', identifier, type: 'ignoreDependencies' }));
+      .filter(
+        key => IGNORED_DEPENDENCIES.includes(key) || (rootIgnoreDependencies[key] !== 0 && dependencies.includes(key))
+      )
+      .forEach(identifier =>
+        configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreDependencies' })
+      );
 
     return { configurationHints };
   }

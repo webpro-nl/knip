@@ -8,12 +8,7 @@ import baseCounters from './helpers/baseCounters.js';
 const cwd = resolve('tests/fixtures/workspaces-nested');
 
 const expectedConfigurationHints = new Set([
-  { type: 'ignoreBinaries', workspaceName: '.', identifier: 'ignored-bin-global' },
-  { type: 'ignoreBinaries', workspaceName: '.', identifier: 'unused-ignored-bin-global' },
-  { type: 'ignoreBinaries', workspaceName: 'L-1-1/L-1-2', identifier: 'unused-ignored-bin-L-2' },
   { type: 'ignoreDependencies', workspaceName: '.', identifier: 'ignored-dep-global' },
-  { type: 'ignoreDependencies', workspaceName: '.', identifier: 'unused-ignored-dep-global' },
-  { type: 'ignoreDependencies', workspaceName: 'L-1-1/L-1-2/L-1-3', identifier: 'unused-ignored-dep-L-3' },
   { type: 'ignoreWorkspaces', identifier: 'ignored-workspace' },
 ]);
 

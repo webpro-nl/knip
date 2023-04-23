@@ -120,7 +120,6 @@ test('Unused dependencies in npm scripts (strict)', async () => {
     new Set([
       { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
       { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
     ])
   );
 });
