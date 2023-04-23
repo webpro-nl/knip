@@ -31,6 +31,7 @@ test('Referenced dependencies in npm scripts', async () => {
     'bin:pm2-dev',
     'bin:eslint',
     'bin:bash',
+    join(cwd, 'ignore.js'),
     'bin:package',
   ]);
 

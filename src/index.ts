@@ -1,3 +1,4 @@
+import micromatch from 'micromatch';
 import { _getDependenciesFromScripts } from './binaries/index.js';
 import { fromBinary, isBinary } from './binaries/util.js';
 import { ConfigurationChief, Workspace } from './ConfigurationChief.js';
@@ -79,7 +80,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const absSpecifier = toAbsolute(specifier, dirname(containingFilePath));
       const filePath = _tryResolve(absSpecifier, containingFilePath);
       if (filePath) {
-        principal.addEntryPath(filePath);
+        const ignorePatterns = workspace.config.ignore.map(pattern => join(dirname(containingFilePath), pattern));
+        const isIgnored = micromatch.isMatch(filePath, ignorePatterns);
+        if (!isIgnored) principal.addEntryPath(filePath);
       } else {
         collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
       }
