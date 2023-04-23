@@ -44,6 +44,12 @@
   },
   "overrides": [
     {
+      "files": "./scripts/**",
+      "rules": {
+        "n/no-restricted-import": "off"
+      }
+    },
+    {
       "files": ["./tests/**/*.{js,ts,tsx}"],
       "parserOptions": {
         "sourceType": "module",
