@@ -13,11 +13,12 @@ test('Find unused exports', async () => {
     cwd,
   });
 
-  assert.equal(Object.values(issues.exports).length, 4);
+  assert.equal(Object.values(issues.exports).length, 5);
   assert.equal(issues.exports['default.ts']['NamedExport'].symbol, 'NamedExport');
   assert.equal(issues.exports['my-module.ts']['default'].symbol, 'default');
   assert.equal(issues.exports['my-module.ts']['unusedNumber'].symbol, 'unusedNumber');
   assert.equal(issues.exports['my-module.ts']['unusedFunction'].symbol, 'unusedFunction');
+  assert.equal(issues.exports['my-mix.ts']['unusedInMix'].symbol, 'unusedInMix');
   assert.equal(issues.exports['named-exports.ts']['renamedExport'].symbol, 'renamedExport');
   assert.equal(issues.exports['named-exports.ts']['namedExport'].symbol, 'namedExport');
   assert.equal(issues.exports['dynamic-import.ts']['unusedZero'].symbol, 'unusedZero');
@@ -40,12 +41,12 @@ test('Find unused exports', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 7,
+    exports: 8,
     nsExports: 1,
     types: 3,
     nsTypes: 1,
     duplicates: 1,
-    processed: 16,
-    total: 16,
+    processed: 17,
+    total: 17,
   });
 });

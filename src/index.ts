@@ -363,7 +363,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               continue;
             }
 
-            if (importedModule.isReExport || importedModule.isStar) {
+            if (importedModule.isStar) {
               const isReExportedByEntryFile = isExportedInEntryFile(importedModule);
               if (!isReExportedByEntryFile && !principal.hasExternalReferences(filePath, exportedItem)) {
                 if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
@@ -375,8 +375,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             } else {
               if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
                 collector.addIssue({ type: 'types', filePath, symbol, symbolType: exportedItem.type });
-              } else if (!importedModule.isDynamic || !principal.hasExternalReferences(filePath, exportedItem)) {
-                collector.addIssue({ type: 'exports', filePath, symbol });
+              } else {
+                // This may not look optimal logic-wise, but `principal.hasExternalReferences` is expensive
+                if (importedModule.isReExport && !principal.hasExternalReferences(filePath, exportedItem)) {
+                  collector.addIssue({ type: 'exports', filePath, symbol });
+                } else if (!importedModule.isDynamic || !principal.hasExternalReferences(filePath, exportedItem)) {
+                  collector.addIssue({ type: 'exports', filePath, symbol });
+                }
               }
             }
           }

@@ -22,3 +22,7 @@ async function main() {
 export const entryFileExport = exportedResult;
 
 export type EntryFileExportType = any;
+
+export type { MixType } from './my-mix';
+
+export { MixClass } from './my-mix';
