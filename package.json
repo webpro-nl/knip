@@ -22,7 +22,7 @@
     "lint": "eslint src tests",
     "lint:fix": "eslint src tests --fix",
     "format": "prettier scripts src tests schema.json --with-node-modules --write --config .prettierrc",
-    "test": "globstar -- node --loader tsx --test \"tests/**/*.test.ts\"",
+    "test": "globstar -- node --no-warnings --loader tsx --test \"tests/**/*.test.ts\"",
     "coverage": "c8 npm test",
     "watch": "tsc --watch",
     "prebuild": "node -e \"require('fs').rmSync('dist', { force: true, recursive: true })\"",
