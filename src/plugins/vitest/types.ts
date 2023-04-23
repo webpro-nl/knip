@@ -1,9 +1,11 @@
 export type VitestConfig = {
   test: {
-    environment?: string;
-    reporters?: string[];
     coverage?: {
       provider: string;
     };
+    environment?: string;
+    globalSetup?: string | string[];
+    reporters?: string[];
+    setupFiles?: string | string[];
   };
 };
