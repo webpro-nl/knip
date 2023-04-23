@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import { toBinary, tryResolveFilePaths } from '../util.js';
+import { toBinary, tryResolveSpecifiers } from '../util.js';
 import type { Resolver } from '../types.js';
 
 export const resolve: Resolver = (binary, args, { cwd, fromArgs }) => {
@@ -7,7 +7,7 @@ export const resolve: Resolver = (binary, args, { cwd, fromArgs }) => {
   const safeArgs = args.filter(arg => arg !== '--watch');
   const parsed = parseArgs(safeArgs, { alias: { plugin: 'p' } });
   const watchers = parsed.watch ? fromArgs(Object.values(parsed.watch)) : [];
-  const plugins = parsed.plugin ? tryResolveFilePaths(cwd, [parsed.plugin].flat()) : [];
-  const configPlugins = parsed.configPlugin ? tryResolveFilePaths(cwd, [parsed.configPlugin].flat()) : [];
+  const plugins = parsed.plugin ? tryResolveSpecifiers(cwd, [parsed.plugin].flat()) : [];
+  const configPlugins = parsed.configPlugin ? tryResolveSpecifiers(cwd, [parsed.configPlugin].flat()) : [];
   return [toBinary(binary), ...watchers, ...plugins, ...configPlugins];
 };

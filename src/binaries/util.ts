@@ -1,20 +1,23 @@
+import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { isInNodeModules, join } from '../util/path.js';
 import { _tryResolve } from '../util/require.js';
 
-export const tryResolveFilePath = (cwd: string, specifier: string, fallback?: string) => {
+export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleSpecifier?: boolean) => {
   if (specifier) {
     const filePath = join(cwd, specifier);
     if (!isInNodeModules(filePath)) {
       const resolvedFilePath = _tryResolve(filePath, cwd);
       if (resolvedFilePath) return [resolvedFilePath];
+      else if (acceptModuleSpecifier) return [getPackageNameFromModuleSpecifier(specifier)];
+    } else {
+      return [getPackageNameFromFilePath(specifier)];
     }
-    return fallback ? [stripNodeModulesFromPath(fallback)] : [];
   }
   return [];
 };
 
-export const tryResolveFilePaths = (cwd: string, specifiers: string[]) =>
-  specifiers.flatMap(specifier => tryResolveFilePath(cwd, specifier, specifier));
+export const tryResolveSpecifiers = (cwd: string, specifiers: string[]) =>
+  specifiers.flatMap(specifier => tryResolveFilePath(cwd, specifier, true));
 
 export const toBinary = (specifier: string) => specifier.replace(/^(bin:)?/, 'bin:');
 
@@ -27,5 +30,5 @@ const stripNodeModulesFromPath = (command: string) => command.replace(/^(\.\/)?n
 export const stripBinaryPath = (command: string) =>
   stripNodeModulesFromPath(command)
     .replace(/^(\.bin\/)/, '')
-    .replace(/\$\(npm bin\)\/(\w+)/, '$1')
+    .replace(/\$\(npm bin\)\/(\w+)/, '$1') // Removed in npm v9
     .replace(/(\S+)@.*/, '$1');
