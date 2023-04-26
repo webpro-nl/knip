@@ -38,6 +38,11 @@ with OpenAI_</sup>
 
 Knip supports LTS versions of Node.js, and currently requires at least Node.js v16.17 or v18.6.
 
+## Experimental: knowledge base
+
+You might want to ask your questions in the [Knip knowledge base][8] (powered by OpenAI and [7-docs][9]). This is an
+experimental knowledge base, answers may be incorrect.
+
 ## Configuration
 
 Knip has good defaults and you can run it without any configuration. Here's the default:
@@ -194,7 +199,7 @@ The report contains the following types of issues:
 
 When an issue type has zero issues, it is not shown.
 
-Getting too many reported issues and false positives? Read more about [handling issues][8].
+Getting too many reported issues and false positives? Read more about [handling issues][10].
 
 _(1)_ The variable or type is not referenced directly and has become a member of a namespace. Knip can't find a
 reference to it, so you can _probably_ remove it.
@@ -222,7 +227,7 @@ Example:
 }
 ```
 
-See [reading the report][9] for the list of issue types.
+See [reading the report][11] for the list of issue types.
 
 The rules are modeled after the ESLint `rules` configuration, and could be extended in the future. For instance, to
 apply filters or configurations only to a specific issue type.
@@ -243,7 +248,7 @@ Use `--exclude` to ignore reports you're not interested in:
 
 Use `--dependencies` or `--exports` as shortcuts to combine groups of related types.
 
-See [reading the report][9] for the list of issue types.
+See [reading the report][11] for the list of issue types.
 
 ### When to use rules or filters
 
@@ -285,7 +290,7 @@ As always, make sure to back up files or use Git before deleting files or making
 
 🔁 Repeat the process to reveal new unused files and exports. Sometimes it's so liberating to remove things!
 
-Getting too many reported issues and false positives? Read more about [handling issues][8].
+Getting too many reported issues and false positives? Read more about [handling issues][10].
 
 ## Workspaces
 
@@ -315,7 +320,7 @@ Here's an example `knip.json` configuration with some custom `entry` and `projec
 ```
 
 It might be useful to run Knip first with no or little configuration to see where it needs custom `entry` and/or
-`project` files. Each workspace has the same [default configuration][10].
+`project` files. Each workspace has the same [default configuration][12].
 
 The root workspace is named `"."` under `workspaces` (like in the example).
 
@@ -434,7 +439,7 @@ has them at `e2e-tests/*.spec.ts`. Here's how to configure this:
 ### Multi-project repositories
 
 Some repositories have a single `package.json`, but consist of multiple projects with configuration files across the
-repository (such as the [Nx "intregrated repo" style][11]). Let's assume some of these projects are apps and have their
+repository (such as the [Nx "intregrated repo" style][13]). Let's assume some of these projects are apps and have their
 own Cypress configuration and test files. In that case, we could configure the Cypress plugin like this:
 
 ```json
@@ -451,7 +456,7 @@ In case a plugin causes issues, it can be disabled by using `false` as its value
 
 ### Create a new plugin
 
-Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][12]. This
+Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][14]. This
 guide also contains more details if you want to learn more about plugins and why they are useful.
 
 ## Compilers
@@ -474,7 +479,7 @@ export default {
 };
 ```
 
-Read [Compilers][13] for more details and examples.
+Read [Compilers][15] for more details and examples.
 
 ## Production Mode
 
@@ -551,7 +556,7 @@ When the provided built-in reporters are not sufficient, a custom reporter can b
 Pass `--reporter ./my-reporter` from the command line. The data can then be used to write issues to `stdout`, a JSON or
 CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][14].
+Find more details and ideas in [custom reporters][16].
 
 ## Public exports
 
@@ -575,14 +580,14 @@ Knip does not report public exports and types as unused.
 
 ## Handling Issues
 
-How to handle a long list of reported issues? Seeing too many false positives? Read more about [handling issues][15]
+How to handle a long list of reported issues? Seeing too many false positives? Read more about [handling issues][17]
 describing potential causes for false positives, and how to handle them.
 
 ## Comparison
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                 | **knip** | [depcheck][16] | [unimported][17] | [ts-unused-exports][18] | [ts-prune][19] |
+| Feature                 | **knip** | [depcheck][18] | [unimported][19] | [ts-unused-exports][20] | [ts-prune][21] |
 | :---------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files            |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies     |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -618,7 +623,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][20].
+Also see [production mode][22].
 
 ### ts-unused-exports
 
@@ -640,16 +645,17 @@ The following commands are similar:
 
 Many thanks to some of the early adopters of Knip:
 
-- [Block Protocol][21]
-- [Cursor][22]
-- [DeepmergeTS][23]
-- [eslint-plugin-functional][24]
-- [freeCodeCamp.org][25]
-- [is-immutable-type][26]
-- [release-it][27]
-- [Template TypeScript Node Package][28]
+- [Abracabra][23]
+- [Block Protocol][24]
+- [Cursor][25]
+- [DeepmergeTS][26]
+- [eslint-plugin-functional][27]
+- [freeCodeCamp.org][28]
+- [is-immutable-type][29]
+- [release-it][30]
+- [Template TypeScript Node Package][31]
 
-## 🐣 Super Secret Easter Egg Boost 🚀
+## Potential boost with `--no-gitignore`
 
 Running Knip on large workspaces with many packages may feel a bit sluggish. Knip looks up `.gitignore` files and uses
 them to filter out matching entry and project files. This increases correctness. However, you might want to disable that
@@ -667,7 +673,7 @@ And to measure the difference of this flag in seconds:
 SECONDS=0; knip > /dev/null; t1=$SECONDS; SECONDS=0; knip --no-gitignore > /dev/null; t2=$SECONDS; echo "Difference: $((t1 - t2)) seconds"
 ```
 
-⏲️ Analysis on a large project went from 33 down to 9 seconds (that's >70% faster). Happy Easter! 🐣
+⏲️ Analysis on a large project went from 33 down to 9 seconds (that's >70% faster).
 
 ## Knip
 
@@ -685,7 +691,7 @@ each file, and traversing all of this, why not collect the various issues in one
 
 Special thanks to the wonderful people who have contributed to this project:
 
-[![Contributors][30]][29]
+[![Contributors][33]][32]
 
 [1]: #workspaces
 [2]: #plugins
@@ -694,29 +700,32 @@ Special thanks to the wonderful people who have contributed to this project:
 [5]: #custom-reporters
 [6]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [7]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[8]: #handling-issues
-[9]: #reading-the-report
-[10]: #configuration
-[11]: https://nx.dev/concepts/integrated-vs-package-based
-[12]: ./docs/writing-a-plugin.md
-[13]: ./docs/compilers.md
-[14]: ./docs/custom-reporters.md
-[15]: ./docs/handling-issues.md
-[16]: https://github.com/depcheck/depcheck
-[17]: https://github.com/smeijer/unimported
-[18]: https://github.com/pzavolinsky/ts-unused-exports
-[19]: https://github.com/nadeesha/ts-prune
-[20]: #production-mode
-[21]: https://github.com/blockprotocol/blockprotocol
-[22]: https://github.com/getcursor/cursor
-[23]: https://github.com/RebeccaStevens/deepmerge-ts
-[24]: https://github.com/eslint-functional/eslint-plugin-functional
-[25]: https://github.com/freeCodeCamp/freeCodeCamp
-[26]: https://github.com/RebeccaStevens/is-immutable-type
-[27]: https://github.com/release-it/release-it
-[28]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
-[29]: https://github.com/webpro/knip/graphs/contributors
-[30]: https://contrib.rocks/image?repo=webpro/knip
+[8]: https://knip.deno.dev
+[9]: https://github.com/7-docs/7-docs
+[10]: #handling-issues
+[11]: #reading-the-report
+[12]: #configuration
+[13]: https://nx.dev/concepts/integrated-vs-package-based
+[14]: ./docs/writing-a-plugin.md
+[15]: ./docs/compilers.md
+[16]: ./docs/custom-reporters.md
+[17]: ./docs/handling-issues.md
+[18]: https://github.com/depcheck/depcheck
+[19]: https://github.com/smeijer/unimported
+[20]: https://github.com/pzavolinsky/ts-unused-exports
+[21]: https://github.com/nadeesha/ts-prune
+[22]: #production-mode
+[23]: https://github.com/nicoespeon/abracadabra
+[24]: https://github.com/blockprotocol/blockprotocol
+[25]: https://github.com/getcursor/cursor
+[26]: https://github.com/RebeccaStevens/deepmerge-ts
+[27]: https://github.com/eslint-functional/eslint-plugin-functional
+[28]: https://github.com/freeCodeCamp/freeCodeCamp
+[29]: https://github.com/RebeccaStevens/is-immutable-type
+[30]: https://github.com/release-it/release-it
+[31]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
+[32]: https://github.com/webpro/knip/graphs/contributors
+[33]: https://contrib.rocks/image?repo=webpro/knip
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
