@@ -6,6 +6,7 @@ import type { Resolver } from '../types.js';
 
 const commands = [
   'add',
+  'dedupe',
   'dlx',
   'run',
   'i',
