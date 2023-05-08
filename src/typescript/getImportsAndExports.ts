@@ -160,10 +160,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     for (const visitor of visitors.export) {
       if (visitor) {
         const results = visitor(node, options);
-        if (results) {
-          [results].flat().forEach(addExport);
-          return;
-        }
+        if (results) [results].flat().forEach(addExport);
       }
     }
 
