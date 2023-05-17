@@ -1,0 +1,8 @@
+{
+  "name": "typedoc",
+  "typedocOptions": {
+    "plugin": [
+      "typedoc-plugin-umami"
+    ]
+  }
+}

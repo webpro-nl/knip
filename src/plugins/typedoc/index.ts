@@ -17,10 +17,16 @@ export const CONFIG_FILE_PATTERNS = [
   'typedoc.config.{js,cjs}',
   '.config/typedoc.{js,cjs,json,jsonc}',
   '.config/typedoc.config.{js,cjs}',
+  'package.json',
+  'tsconfig.json',
 ];
 
-const findTypeDocDependencies: GenericPluginCallback = async configFilePath => {
-  const config: PluginConfig = await load(configFilePath);
+const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+  const config: PluginConfig = configFilePath.endsWith('package.json')
+    ? manifest.typedocOptions
+    : configFilePath.endsWith('tsconfig.json')
+    ? (await load(configFilePath)).typedocOptions
+    : await load(configFilePath);
   return config?.plugin ?? [];
 };
 

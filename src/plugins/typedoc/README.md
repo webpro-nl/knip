@@ -16,7 +16,9 @@ or `devDependencies`:
       "typedoc.{js,cjs,json,jsonc}",
       "typedoc.config.{js,cjs}",
       ".config/typedoc.{js,cjs,json,jsonc}",
-      ".config/typedoc.config.{js,cjs}"
+      ".config/typedoc.config.{js,cjs}",
+      "package.json",
+      "tsconfig.json"
     ]
   }
 }

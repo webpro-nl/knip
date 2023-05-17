@@ -1,0 +1,5 @@
+{
+  "typedocOptions": {
+    "plugin": ["typedoc-plugin-zod"]
+  }
+}
