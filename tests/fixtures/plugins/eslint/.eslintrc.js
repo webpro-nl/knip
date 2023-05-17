@@ -3,7 +3,6 @@ module.exports = {
   extends: [
     require.resolve('./base.eslint.json'),
     'airbnb',
-    'plugin:prettier/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
@@ -13,8 +12,9 @@ module.exports = {
     'plugin:eslint-comments/recommended',
     'plugin:eslint-plugin/all',
     '@scope/eslint-config/file',
+    'plugin:prettier/recommended',
   ],
-  plugins: ['@typescript-eslint', '@nrwl/nx', 'prettier', 'eslint-plugin-cypress', '@scope/eslint-plugin'],
+  plugins: ['@typescript-eslint', '@nrwl/nx', 'eslint-plugin-cypress', '@scope/eslint-plugin'],
   settings: {
     'import/resolver': {
       typescript: true,

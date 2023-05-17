@@ -12,6 +12,8 @@ type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
 const getDependencies = (config: ESLintConfig | OverrideConfig) => {
   const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendsSpecifier) : [];
   const plugins = config.plugins ? config.plugins.map(resolvePluginPackageName) : [];
+  // https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
+  if (extendsSpecifiers.includes('eslint-plugin-prettier')) extendsSpecifiers.push('eslint-config-prettier');
   const parser = config.parser;
   const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
