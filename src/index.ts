@@ -270,9 +270,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               importedModule.isReExport = importItems.isReExport;
               importedModule.isReExportedBy.add(filePath);
             }
-            if (importItems.isDynamic) {
-              importedModule.isDynamic = importItems.isDynamic;
-            }
+            if (importItems.isDynamic) importedModule.isDynamic = importItems.isDynamic;
+            if (importItems.isStar) importedModule.isStar = importItems.isStar;
           }
         }
 
