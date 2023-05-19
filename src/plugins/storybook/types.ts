@@ -3,4 +3,7 @@ export type StorybookConfig = {
   core?: {
     builder?: string;
   };
+  framework?: {
+    name?: string;
+  }
 };

@@ -27,8 +27,9 @@ const findStorybookDependencies: GenericPluginCallback = async configFilePath =>
   const builder = config?.core?.builder;
   const builderPackages =
     builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
+  const frameworks = config.framework?.name ? [config.framework.name] : [];
 
-  return [...addons, ...builderPackages];
+  return [...addons, ...builderPackages, ...frameworks];
 };
 
 export const findDependencies = timerify(findStorybookDependencies);
