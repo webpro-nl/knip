@@ -5,5 +5,5 @@ export type StorybookConfig = {
   };
   framework?: {
     name?: string;
-  }
+  };
 };
