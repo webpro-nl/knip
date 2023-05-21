@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/postcss-next",
+  "scripts": {
+    "start": "next"
+  },
+  "dependencies": {
+    "next": "*"
+  },
+  "postcss": {
+    "plugins": [
+      "autoprefixer"
+    ]
+  }
+}

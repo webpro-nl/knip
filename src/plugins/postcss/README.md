@@ -6,6 +6,7 @@ This plugin is enabled when any of the following package names and/or regular ex
 or `devDependencies`:
 
 - `postcss`
+- `next`
 
 ## Default configuration
 
