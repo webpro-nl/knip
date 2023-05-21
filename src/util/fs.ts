@@ -26,7 +26,7 @@ export const loadFile = async (filePath: string) => {
 
 export const loadJSON = async (filePath: string) => {
   const contents = await loadFile(filePath);
-  return parseJSON(contents);
+  return parseJSON(filePath, contents);
 };
 
 export const loadYAML = async (filePath: string) => {
@@ -34,8 +34,12 @@ export const loadYAML = async (filePath: string) => {
   return parseYAML(contents);
 };
 
-export const parseJSON = async (contents: string) => {
-  return JSON.parse(stripJsonComments(contents, { trailingCommas: true }));
+export const parseJSON = async (filePath: string, contents: string) => {
+  try {
+    return JSON.parse(stripJsonComments(contents, { trailingCommas: true }));
+  } catch (error) {
+    throw new LoaderError(`Error loading ${filePath}`, { cause: error });
+  }
 };
 
 export const parseYAML = async (contents: string) => {

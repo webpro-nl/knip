@@ -10,7 +10,7 @@ const load = async (filePath: string) => {
     const ext = extname(filePath);
     if (/rc$/.test(filePath)) {
       const contents = await loadFile(filePath);
-      return parseYAML(contents).catch(() => parseJSON(contents));
+      return parseYAML(contents).catch(() => parseJSON(filePath, contents));
     }
 
     if (ext === '.json' || ext === '.jsonc') {

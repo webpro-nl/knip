@@ -1,5 +1,4 @@
-import { _load } from './loader.js';
-import { timerify } from './Performance.js';
+export { _load as load } from './loader.js';
 
 export const toCamelCase = (name: string) =>
   name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
@@ -15,5 +14,3 @@ export const hasDependency = (dependencies: Set<string>, values: (string | RegEx
     }
     return false;
   });
-
-export const load = timerify(_load);
