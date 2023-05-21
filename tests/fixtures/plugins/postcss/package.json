@@ -10,11 +10,5 @@
     "plugins": [
       "autoprefixer"
     ]
-  },
-  "knip": {
-    "postcss": {
-      "config": [],
-      "entry": "postcss.config.js"
-    }
   }
 }

@@ -28,11 +28,12 @@ test('Find dependencies in PostCSS configuration (postcss.config.js function)', 
     cwd,
   });
 
+  assert(issues.unlisted['package.json']['autoprefixer']);
   assert(issues.unlisted['postcss.config.js']['autoprefixer']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
+    unlisted: 2,
     processed: 1,
     total: 1,
   });
