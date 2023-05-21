@@ -41,4 +41,7 @@ module.exports = {
     builder: 'webpack5',
     lazyCompilation: true,
   },
+  framework: {
+    name: '@storybook/react-webpack5',
+  },
 };

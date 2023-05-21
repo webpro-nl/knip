@@ -16,5 +16,6 @@ test('Find dependencies in Storybook configuration (main.js)', async () => {
     './addon/register',
     '@storybook/builder-webpack5',
     '@storybook/manager-webpack5',
+    '@storybook/react-webpack5',
   ]);
 });
