@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "postcss": {
-    "config": ["postcss.config.js", "package.json"]
+    "config": ["postcss.config.js", "postcss.config.json", "package.json"]
   }
 }
 ```
