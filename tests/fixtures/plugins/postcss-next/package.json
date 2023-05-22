@@ -4,7 +4,8 @@
     "start": "next"
   },
   "dependencies": {
-    "next": "*"
+    "next": "*",
+    "postcss-rtlcss": "*"
   },
   "postcss": {
     "plugins": [

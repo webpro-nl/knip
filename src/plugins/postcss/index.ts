@@ -18,9 +18,17 @@ const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, { 
     : await load(configFilePath);
 
   return config?.plugins
-    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).filter(
-        plugin => typeof plugin === 'string'
-      )
+    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).flatMap(plugin => {
+        if (typeof plugin === 'string') {
+          return plugin;
+        }
+
+        if (Array.isArray(plugin) && typeof plugin[0] === 'string') {
+          return plugin[0];
+        }
+
+        return [];
+      })
     : [];
 };
 
