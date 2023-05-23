@@ -1,3 +1,3 @@
 export type PostCSSConfig = {
-  plugins?: string[] | Record<string, unknown>;
+  plugins?: string[] | [string, unknown][] | Record<string, unknown>;
 };
