@@ -51,6 +51,7 @@ const defaultConfig: Configuration = {
   ignore: [],
   ignoreBinaries: [],
   ignoreDependencies: [],
+  ignoreExportsUsedInFile: false,
   ignoreWorkspaces: [],
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
@@ -163,6 +164,7 @@ export class ConfigurationChief {
     const exclude = rawLocalConfig.exclude ?? defaultConfig.exclude;
     const ignore = arrayify(rawLocalConfig.ignore ?? defaultConfig.ignore);
     const ignoreBinaries = rawLocalConfig.ignoreBinaries ?? [];
+    const ignoreExportsUsedInFile = rawLocalConfig.ignoreExportsUsedInFile ?? false;
     const ignoreDependencies = rawLocalConfig.ignoreDependencies ?? [];
     const ignoreWorkspaces = rawLocalConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
 
@@ -218,6 +220,7 @@ export class ConfigurationChief {
       ignore,
       ignoreBinaries,
       ignoreDependencies,
+      ignoreExportsUsedInFile,
       ignoreWorkspaces,
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})),
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),

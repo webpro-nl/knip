@@ -220,10 +220,21 @@ export class ProjectPrincipal {
     return module?.resolvedModule;
   }
 
-  public hasExternalReferences(filePath: string, exportedItem: ExportItem) {
-    const referencedSymbols = this.findReferences(filePath, exportedItem.node);
-    const externalRefs = referencedSymbols.flatMap(f => f.references).filter(ref => ref.fileName !== filePath);
-    return externalRefs.length > 0;
+  public getHasReferences(filePath: string, exportedItem: ExportItem) {
+    const hasReferences = { external: false, internal: false };
+    const symbolReferences = this.findReferences(filePath, exportedItem.node).flatMap(f => f.references);
+
+    for (const reference of symbolReferences) {
+      if (reference.fileName === filePath) {
+        if (!reference.isDefinition) {
+          hasReferences.internal = true;
+        }
+      } else {
+        hasReferences.external = true;
+      }
+    }
+
+    return hasReferences;
   }
 
   public findUnusedMembers(filePath: string, members: ExportItemMember[]) {

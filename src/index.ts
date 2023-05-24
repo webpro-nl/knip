@@ -362,9 +362,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               continue;
             }
 
+            const isExportedItemReferenced = () => {
+              const hasReferences = principal.getHasReferences(filePath, exportedItem);
+
+              return hasReferences.external || (chief.config.ignoreExportsUsedInFile && hasReferences.internal);
+            };
+
             if (importedModule.isStar) {
               const isReExportedByEntryFile = isExportedInEntryFile(importedModule);
-              if (!isReExportedByEntryFile && !principal.hasExternalReferences(filePath, exportedItem)) {
+              if (!isReExportedByEntryFile && !isExportedItemReferenced()) {
                 if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
                   collector.addIssue({ type: 'nsTypes', filePath, symbol, symbolType: exportedItem.type });
                 } else {
@@ -375,10 +381,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
                 collector.addIssue({ type: 'types', filePath, symbol, symbolType: exportedItem.type });
               } else {
-                // This may not look optimal logic-wise, but `principal.hasExternalReferences` is expensive
-                if (importedModule.isReExport && !principal.hasExternalReferences(filePath, exportedItem)) {
+                // This may not look optimal logic-wise, but `isExportedItemReferenced` (`principal.getHasReferences`) is expensive
+                if (importedModule.isReExport && !isExportedItemReferenced()) {
                   collector.addIssue({ type: 'exports', filePath, symbol });
-                } else if (!importedModule.isDynamic || !principal.hasExternalReferences(filePath, exportedItem)) {
+                } else if (!importedModule.isDynamic || !isExportedItemReferenced()) {
                   collector.addIssue({ type: 'exports', filePath, symbol });
                 }
               }

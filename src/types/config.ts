@@ -38,6 +38,7 @@ export interface Configuration {
   ignore: NormalizedGlob;
   ignoreBinaries: string[];
   ignoreDependencies: string[];
+  ignoreExportsUsedInFile: boolean;
   ignoreWorkspaces: string[];
   workspaces: Record<string, WorkspaceConfiguration>;
   syncCompilers: SyncCompilers;

@@ -34,6 +34,7 @@ const rootConfigurationSchema = z.object({
   paths: pathsSchema.optional(),
   ignore: globSchema.optional(),
   ignoreBinaries: z.array(z.string()).optional(),
+  ignoreExportsUsedInFile: z.boolean().optional(),
   ignoreDependencies: z.array(z.string()).optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
   compilers: compilersSchema.optional(),
