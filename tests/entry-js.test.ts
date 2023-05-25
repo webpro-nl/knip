@@ -17,7 +17,6 @@ test('Find unused files and exports with JS entry file', async () => {
   assert(issues.files.has(join(cwd, 'dangling.js')));
 
   assert.equal(Object.values(issues.exports).length, 1);
-  console.log(issues.exports);
   assert.equal(issues.exports['my-module.js']['unused'].symbol, 'unused');
   assert.equal(issues.exports['my-module.js']['default'].symbol, 'default');
 
