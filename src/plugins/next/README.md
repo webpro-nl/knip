@@ -12,7 +12,8 @@ or `devDependencies`:
 ```json
 {
   "next": {
-    "entry": ["next.config.{js,ts}", "pages/**/*.{js,jsx,ts,tsx}", "src/pages/**/*.{js,jsx,ts,tsx}"]
+    "config": ["next.config.{js,ts}"],
+    "entry": ["pages/**/*.{js,jsx,ts,tsx}", "src/pages/**/*.{js,jsx,ts,tsx}"]
   }
 }
 ```

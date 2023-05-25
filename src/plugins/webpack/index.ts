@@ -51,6 +51,26 @@ const resolveUseItem = (use: RuleSetUseItem) => {
   return [];
 };
 
+export const getWebpackDependencies = (config: WebpackConfig, isProduction: boolean) => {
+  const env: Env = { production: isProduction };
+  const argv: Argv = { mode: isProduction ? 'production' : 'development' };
+  const cfg = typeof config === 'function' ? config(env, argv) : config;
+
+  return [cfg].flat().flatMap(config => {
+    const dependencies = (config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []).map(loader =>
+      loader.replace(/\?.*/, '')
+    );
+    const entries = cfg.entry
+      ? typeof cfg.entry === 'string'
+        ? [cfg.entry]
+        : Array.isArray(cfg.entry)
+        ? cfg.entry
+        : Object.values(cfg.entry).map(entry => (typeof entry === 'string' ? entry : entry.filename))
+      : [];
+    return [...dependencies, ...entries];
+  });
+};
+
 const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   const config: WebpackConfig = await load(configFilePath);
 
@@ -60,23 +80,7 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
   const passes = typeof config === 'function' ? [false, true] : [isProduction];
 
   const dependencies = passes.flatMap(isProduction => {
-    const env: Env = { production: isProduction };
-    const argv: Argv = { mode: isProduction ? 'production' : 'development' };
-    const cfg = typeof config === 'function' ? config(env, argv) : config;
-
-    return [cfg].flat().flatMap(config => {
-      const dependencies = (config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []).map(loader =>
-        loader.replace(/\?.*/, '')
-      );
-      const entries = cfg.entry
-        ? typeof cfg.entry === 'string'
-          ? [cfg.entry]
-          : Array.isArray(cfg.entry)
-          ? cfg.entry
-          : Object.values(cfg.entry).map(entry => (typeof entry === 'string' ? entry : entry.filename))
-        : [];
-      return [...dependencies, ...entries];
-    });
+    return getWebpackDependencies(config, isProduction);
   });
 
   const scripts = Object.values(manifest.scripts ?? {});

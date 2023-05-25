@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/next-webpack",
+  "scripts": {
+    "dev": "next dev"
+  },
+  "devDependencies": {
+    "next": "*"
+  }
+}
