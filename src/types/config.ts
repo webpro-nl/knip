@@ -31,7 +31,7 @@ interface BaseWorkspaceConfiguration {
 
 export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Partial<PluginsConfiguration> {}
 
-export type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
+type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
 
 export interface Configuration {
   rules: Rules;
