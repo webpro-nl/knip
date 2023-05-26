@@ -1,6 +1,7 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { getOrSet } from '../util/map.js';
+import { isMaybePackageName } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
 import { isDeclarationFileExtension, isAccessExpression, getAccessExpressionName } from './ast-helpers.js';
 import getExportVisitors from './visitors/exports/index.js';
@@ -92,7 +93,11 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
         if (module.resolvedModule.isExternalLibraryImport) {
           if (!isInNodeModules(filePath)) {
             addInternalImport({ identifier, specifier, symbol, filePath, isDynamic, isReExport });
-          } else if (isDeclarationFileExtension(module.resolvedModule.extension)) {
+          }
+
+          if (!isMaybePackageName(specifier)) return;
+
+          if (isDeclarationFileExtension(module.resolvedModule.extension)) {
             // We use TypeScript's module resolution, but it returns DTS references. In the rest of the program we want
             // the package name based on the original specifier.
             externalImports.add(specifier);
