@@ -1,3 +1,4 @@
+import '../../src/util/register.js'; // to resolve .ts files
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
