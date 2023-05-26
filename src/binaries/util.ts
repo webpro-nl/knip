@@ -7,8 +7,12 @@ export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleS
     const filePath = join(cwd, specifier);
     if (!isInNodeModules(filePath)) {
       const resolvedFilePath = _tryResolve(filePath, cwd);
-      if (resolvedFilePath) return [resolvedFilePath];
-      else if (acceptModuleSpecifier) return [getPackageNameFromModuleSpecifier(specifier)];
+      if (resolvedFilePath) {
+        return [resolvedFilePath];
+      } else if (acceptModuleSpecifier) {
+        const packageName = getPackageNameFromModuleSpecifier(specifier);
+        return packageName ? [packageName] : [];
+      }
     } else {
       return [getPackageNameFromFilePath(specifier)];
     }

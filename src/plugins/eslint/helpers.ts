@@ -76,9 +76,10 @@ const resolveExtendsSpecifier = (specifier: string) => {
     .replace(/(^plugin:|:.+$)/, '')
     .replace(/\/(eslint-)?(recommended.*|strict|all)$/, '');
   if (/eslint-(config|plugin)-/.test(strippedSpecifier)) return strippedSpecifier;
-  const pluginName = getPackageNameFromModuleSpecifier(strippedSpecifier);
-  if (pluginName === 'eslint') return;
-  return resolvePackageName(specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config', pluginName);
+  const packageName = getPackageNameFromModuleSpecifier(strippedSpecifier);
+  if (!packageName) return;
+  if (packageName === 'eslint') return;
+  return resolvePackageName(specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config', packageName);
 };
 
 // Super custom: find dependencies of specific ESLint plugins through settings

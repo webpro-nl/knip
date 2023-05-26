@@ -96,11 +96,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           ? getPackageNameFromFilePath(specifier) // Pattern: /abs/path/to/repo/node_modules/package/index.js
           : getPackageNameFromModuleSpecifier(specifier); // Patterns: package, @any/package, @local/package, self-ref
 
-        const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+        const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
         if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
 
         // Patterns: @local/package/file, self-reference/file
-        if (specifier !== packageName) {
+        if (packageName && specifier !== packageName) {
           const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
           if (otherWorkspace) {
             const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
@@ -256,7 +256,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         for (const [specifierFilePath, importItems] of internal.entries()) {
           // Mark "external" imports from other local workspaces as used dependency
           const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
-          if (chief.localWorkspaces.has(packageName)) external.add(packageName);
+          if (packageName && chief.localWorkspaces.has(packageName)) external.add(packageName);
 
           if (!importedSymbols.has(specifierFilePath)) {
             importedSymbols.set(specifierFilePath, importItems);
@@ -282,7 +282,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
         external.forEach(specifier => {
           const packageName = getPackageNameFromModuleSpecifier(specifier);
-          const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+          const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
           if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
         });
 

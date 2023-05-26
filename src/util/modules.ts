@@ -4,6 +4,7 @@ import { toPosix } from './path.js';
 import type { PackageJson } from '@npmcli/package-json';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
+  if (!isMaybePackageName(moduleSpecifier)) return;
   const parts = moduleSpecifier.split('/').slice(0, 2);
   return moduleSpecifier.startsWith('@') ? parts.join('/') : parts[0];
 };
@@ -13,6 +14,8 @@ export const getPackageNameFromFilePath = (value: string) => {
   if (match) return match[match.length - 1];
   return value;
 };
+
+export const isMaybePackageName = (specifier: string) => /^@?[a-z0-9]/.test(specifier);
 
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith('@types/');
 

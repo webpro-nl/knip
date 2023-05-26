@@ -16,8 +16,7 @@ const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, opti
   return compact(
     results.map(identifier => {
       if (isBinary(identifier) || isInternal(identifier)) return identifier;
-      const packageName = getPackageNameFromModuleSpecifier(identifier);
-      if (!packageName.startsWith('.')) return packageName;
+      return getPackageNameFromModuleSpecifier(identifier);
     })
   );
 };

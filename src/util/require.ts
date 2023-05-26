@@ -24,8 +24,11 @@ const resolveSpecifier = (dir: string, specifier: string) => {
     const require = createRequire(join(dir, 'package.json'));
     return toPosix(require.resolve(specifier));
   } catch {
-    const relativeSpecifier = specifier.replace(getPackageNameFromModuleSpecifier(specifier), '.');
-    return tryResolve(join(dir, relativeSpecifier), dir);
+    const packageName = getPackageNameFromModuleSpecifier(specifier);
+    if (packageName) {
+      const relativeSpecifier = specifier.replace(packageName, '.');
+      return tryResolve(join(dir, relativeSpecifier), dir);
+    }
   }
 };
 
