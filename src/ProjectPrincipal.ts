@@ -222,7 +222,11 @@ export class ProjectPrincipal {
 
   public getHasReferences(filePath: string, exportedItem: ExportItem) {
     const hasReferences = { external: false, internal: false };
-    const symbolReferences = this.findReferences(filePath, exportedItem.node).flatMap(f => f.references);
+    const symbolReferences = this.findReferences(
+      filePath,
+      // `export default myValue` references should look at the `default`, not `myValue`
+      (ts.isExportAssignment(exportedItem.node) && exportedItem.node.getChildAt(1)) || exportedItem.node
+    ).flatMap(f => f.references);
 
     for (const reference of symbolReferences) {
       if (reference.fileName === filePath) {

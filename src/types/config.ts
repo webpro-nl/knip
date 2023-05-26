@@ -31,6 +31,8 @@ interface BaseWorkspaceConfiguration {
 
 export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Partial<PluginsConfiguration> {}
 
+export type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
+
 export interface Configuration {
   rules: Rules;
   include: string[];
@@ -38,7 +40,7 @@ export interface Configuration {
   ignore: NormalizedGlob;
   ignoreBinaries: string[];
   ignoreDependencies: string[];
-  ignoreExportsUsedInFile: boolean;
+  ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
   ignoreWorkspaces: string[];
   workspaces: Record<string, WorkspaceConfiguration>;
   syncCompilers: SyncCompilers;
