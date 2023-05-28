@@ -34,6 +34,22 @@ const rootConfigurationSchema = z.object({
   paths: pathsSchema.optional(),
   ignore: globSchema.optional(),
   ignoreBinaries: z.array(z.string()).optional(),
+  ignoreExportsUsedInFile: z
+    .union([
+      z.boolean(),
+      z.record(
+        z.union([
+          z.literal('class'),
+          z.literal('enum'),
+          z.literal('function'),
+          z.literal('interface'),
+          z.literal('member'),
+          z.literal('type'),
+        ]),
+        z.boolean()
+      ),
+    ])
+    .optional(),
   ignoreDependencies: z.array(z.string()).optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
   compilers: compilersSchema.optional(),

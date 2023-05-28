@@ -1,0 +1,6 @@
+{
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  }
+}

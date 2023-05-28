@@ -362,9 +362,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               continue;
             }
 
+            const exportedItemAllowsInternalReferences =
+              typeof chief.config.ignoreExportsUsedInFile === 'object'
+                ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
+                : chief.config.ignoreExportsUsedInFile;
+
+            const isExportedItemReferenced = () => {
+              const hasReferences = principal.getHasReferences(filePath, exportedItem);
+
+              return hasReferences.external || (exportedItemAllowsInternalReferences && hasReferences.internal);
+            };
+
+            // This may not look optimal logic-wise, but `isExportedItemReferenced` (`principal.getHasReferences`) is expensive
             if (importedModule.isStar) {
               const isReExportedByEntryFile = isExportedInEntryFile(importedModule);
-              if (!isReExportedByEntryFile && !principal.hasExternalReferences(filePath, exportedItem)) {
+              if (!isReExportedByEntryFile && !isExportedItemReferenced()) {
                 if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
                   collector.addIssue({ type: 'nsTypes', filePath, symbol, symbolType: exportedItem.type });
                 } else {
@@ -373,12 +385,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               }
             } else {
               if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
-                collector.addIssue({ type: 'types', filePath, symbol, symbolType: exportedItem.type });
+                if (!isExportedItemReferenced()) {
+                  collector.addIssue({ type: 'types', filePath, symbol, symbolType: exportedItem.type });
+                }
               } else {
-                // This may not look optimal logic-wise, but `principal.hasExternalReferences` is expensive
-                if (importedModule.isReExport && !principal.hasExternalReferences(filePath, exportedItem)) {
-                  collector.addIssue({ type: 'exports', filePath, symbol });
-                } else if (!importedModule.isDynamic || !principal.hasExternalReferences(filePath, exportedItem)) {
+                if ((importedModule.isReExport || !importedModule.isDynamic) && !isExportedItemReferenced()) {
                   collector.addIssue({ type: 'exports', filePath, symbol });
                 }
               }
