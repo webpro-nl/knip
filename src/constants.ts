@@ -23,6 +23,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'npm',
   'npx',
   'pnpm',
+  'pnpx',
   'yarn',
   // Packages exist, but are at least 6 years old:
   'cat',
