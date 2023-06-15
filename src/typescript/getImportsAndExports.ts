@@ -19,6 +19,7 @@ const getVisitors = (sourceFile: ts.SourceFile) => ({
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
+  skipExports: boolean;
 };
 
 export type AddImportOptions = {
@@ -130,6 +131,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
   };
 
   const addExport = ({ node, identifier, type, pos, members }: AddExportOptions) => {
+    if (options.skipExports) return;
     if (exports.has(identifier)) {
       const item = exports.get(identifier);
       exports.set(identifier, { ...item, node, type, pos, members });

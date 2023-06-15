@@ -47,6 +47,9 @@ export class ProjectPrincipal {
   entryPaths: Set<string> = new Set();
   projectPaths: Set<string> = new Set();
 
+  // We don't want to report unused exports of config/plugin entry files
+  skipExportsAnalysis: Set<string> = new Set();
+
   cwd: string;
   compilerOptions: ts.CompilerOptions;
   extensions: Set<string>;
@@ -114,15 +117,16 @@ export class ProjectPrincipal {
     return this.extensions.has(extname(filePath));
   }
 
-  public addEntryPath(filePath: string) {
+  public addEntryPath(filePath: string, skipExportsAnalysis = false) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
       this.entryPaths.add(filePath);
       this.projectPaths.add(filePath);
+      if (skipExportsAnalysis) this.skipExportsAnalysis.add(filePath);
     }
   }
 
-  public addEntryPaths(filePaths: Set<string> | string[]) {
-    filePaths.forEach(filePath => this.addEntryPath(filePath));
+  public addEntryPaths(filePaths: Set<string> | string[], skipExportsAnalysis = false) {
+    filePaths.forEach(filePath => this.addEntryPath(filePath, skipExportsAnalysis));
   }
 
   public addProjectPath(filePath: string) {
@@ -165,7 +169,9 @@ export class ProjectPrincipal {
 
     if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
 
-    const { imports, exports, scripts } = getImportsAndExports(sourceFile, { skipTypeOnly });
+    const skipExports = this.skipExportsAnalysis.has(filePath);
+
+    const { imports, exports, scripts } = getImportsAndExports(sourceFile, { skipTypeOnly, skipExports });
 
     const { internal, unresolved, external } = imports;
 
