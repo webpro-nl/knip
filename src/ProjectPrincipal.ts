@@ -47,9 +47,6 @@ export class ProjectPrincipal {
   entryPaths: Set<string> = new Set();
   projectPaths: Set<string> = new Set();
 
-  // We don't want to report unused exports of entry files
-  skipExportsAnalysis: Set<string> = new Set();
-
   cwd: string;
   compilerOptions: ts.CompilerOptions;
   extensions: Set<string>;
@@ -134,10 +131,6 @@ export class ProjectPrincipal {
     }
   }
 
-  public skipExportsAnalysisFor(filePaths: string[]) {
-    filePaths.forEach(filePath => this.skipExportsAnalysis.add(filePath));
-  }
-
   /**
    * Compile files with async compilers _before_ `ts.createProgram()`, since the TypeScript hosts machinery is fully
    * synchronous (eg. `ts.sys.readFile` and `host.resolveModuleNames`)
@@ -172,9 +165,7 @@ export class ProjectPrincipal {
 
     if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
 
-    const skipExports = this.skipExportsAnalysis.has(filePath);
-
-    const { imports, exports, scripts } = getImportsAndExports(sourceFile, { skipTypeOnly, skipExports });
+    const { imports, exports, scripts } = getImportsAndExports(sourceFile, { skipTypeOnly });
 
     const { internal, unresolved, external } = imports;
 
@@ -222,11 +213,11 @@ export class ProjectPrincipal {
 
   public getHasReferences(filePath: string, exportedItem: ExportItem) {
     const hasReferences = { external: false, internal: false };
-    const symbolReferences = this.findReferences(
-      filePath,
-      // `export default myValue` references should look at the `default`, not `myValue`
-      (ts.isExportAssignment(exportedItem.node) && exportedItem.node.getChildAt(1)) || exportedItem.node
-    ).flatMap(f => f.references);
+
+    // `export default myValue` references should look at the `default`, not `myValue`
+    const node = ts.isExportAssignment(exportedItem.node) ? exportedItem.node.getChildAt(1) : exportedItem.node;
+
+    const symbolReferences = this.findReferences(filePath, node).flatMap(f => f.references);
 
     for (const reference of symbolReferences) {
       if (reference.fileName === filePath) {

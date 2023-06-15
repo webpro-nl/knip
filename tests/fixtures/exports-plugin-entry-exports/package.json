@@ -1,0 +1,20 @@
+{
+  "name": "@fixtures/exports-report-all",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "module1": "tsx src/module1/index.ts",
+    "module2": "tsx src/module2/index.ts",
+    "module3": "tsx src/module3/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "knip": "2.13.0",
+    "tsx": "3.12.7",
+    "typescript": "5.1.3"
+  }
+}

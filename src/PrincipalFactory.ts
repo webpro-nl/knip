@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { join, toAbsolute } from './util/path.js';
+import { toAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 
 type Paths = ts.CompilerOptions['paths'];
@@ -32,14 +32,15 @@ const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Pat
 export class PrincipalFactory {
   principals: Principals = new Set();
 
-  public getPrincipal({ cwd, compilerOptions, paths, compilers }: Options) {
-    compilerOptions = mergePaths(cwd, compilerOptions, paths);
+  public getPrincipal(options: Options) {
+    const { cwd, compilerOptions, paths } = options;
+    options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
     const principal = this.findReusablePrincipal(compilerOptions);
     if (principal) {
       this.linkPrincipal(principal, cwd, compilerOptions.paths);
       return principal.principal;
     } else {
-      return this.addNewPrincipal({ cwd, compilerOptions, paths, compilers });
+      return this.addNewPrincipal(options);
     }
   }
 
@@ -63,10 +64,10 @@ export class PrincipalFactory {
     principal.cwds.add(cwd);
   }
 
-  private addNewPrincipal({ cwd, compilerOptions, compilers }: Options) {
-    const principal = new ProjectPrincipal({ cwd, compilerOptions, compilers });
+  private addNewPrincipal(options: Options) {
+    const { cwd, compilerOptions } = options;
     const pathKeys = new Set(Object.keys(compilerOptions?.paths ?? {}));
-    compilerOptions.baseUrl = join(cwd, compilerOptions.baseUrl ?? '.');
+    const principal = new ProjectPrincipal(options);
     this.principals.add({ principal, cwds: new Set([cwd]), pathKeys });
     return principal;
   }

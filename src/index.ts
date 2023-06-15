@@ -8,7 +8,7 @@ import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { Exports } from './types/exports.js';
+import { ExportItem, Exports } from './types/exports.js';
 import { ImportedModule, Imports } from './types/imports.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
@@ -38,7 +38,8 @@ export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Reporter, ReporterOptions } from './types/issues.js';
 
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
-  const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress } = unresolvedConfiguration;
+  const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress, isIncludeEntryExports } =
+    unresolvedConfiguration;
 
   debugLogObject('Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
@@ -161,7 +162,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found entry paths (${name})`, workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
-        principal.skipExportsAnalysisFor(workspaceEntryPaths);
       }
 
       {
@@ -169,7 +169,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found production plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths);
-        principal.skipExportsAnalysisFor(pluginWorkspaceEntryPaths);
       }
 
       {
@@ -184,7 +183,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found entry paths (${name})`, workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
-        principal.skipExportsAnalysisFor(workspaceEntryPaths);
       }
 
       {
@@ -199,7 +197,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths);
-        principal.skipExportsAnalysisFor(pluginWorkspaceEntryPaths);
       }
 
       {
@@ -207,7 +204,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const pluginWorkspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found plugin project paths (${name})`, pluginWorkspaceProjectPaths);
         pluginWorkspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
-        principal.skipExportsAnalysisFor(pluginWorkspaceProjectPaths);
       }
 
       {
@@ -215,7 +211,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found plugin configuration paths (${name})`, configurationEntryPaths);
         principal.addEntryPaths(configurationEntryPaths);
-        principal.skipExportsAnalysisFor(configurationEntryPaths);
       }
     }
 
@@ -296,14 +291,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
     };
 
-    const isExportedInEntryFile = (importedModule?: ImportedModule): boolean => {
-      if (!importedModule) return false;
-      const { isReExport, isReExportedBy } = importedModule;
-      const { entryPaths } = principal;
-      const hasFile = (file: string) => entryPaths.has(file) || isExportedInEntryFile(importedSymbols.get(file));
-      return isReExport ? Array.from(isReExportedBy).some(hasFile) : false;
-    };
-
     streamer.cast('Running async compilers...');
 
     await principal.runAsyncCompilers();
@@ -332,67 +319,70 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
+    const isExportedInEntryFile = (importedModule?: ImportedModule): boolean => {
+      if (!importedModule) return false;
+      const { isReExport, isReExportedBy } = importedModule;
+      const { entryPaths } = principal;
+      const hasFile = (file: string) => entryPaths.has(file) || isExportedInEntryFile(importedSymbols.get(file));
+      return isReExport ? Array.from(isReExportedBy).some(hasFile) : false;
+    };
+
+    const isExportedItemReferenced = (exportedItem: ExportItem, filePath: string) => {
+      const hasReferences = principal.getHasReferences(filePath, exportedItem);
+      return (
+        hasReferences.external ||
+        (hasReferences.internal &&
+          (typeof chief.config.ignoreExportsUsedInFile === 'object'
+            ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
+            : chief.config.ignoreExportsUsedInFile))
+      );
+    };
+
     if (isReportValues || isReportTypes) {
       streamer.cast('Analyzing source files...');
 
       for (const [filePath, exportItems] of exportedSymbols.entries()) {
+        // Bail out when in entry file (unless --include-entry-exports)
+        if (!isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
+
         const importedModule = importedSymbols.get(filePath);
 
-        if (importedModule) {
-          for (const [symbol, exportedItem] of exportItems.entries()) {
-            // Leave exports with a JSDoc `@public` tag alone
-            if (principal.isPublicExport(exportedItem)) continue;
+        for (const [symbol, exportedItem] of exportItems.entries()) {
+          // Skip exports with a JSDoc `@public` tag
+          if (principal.isPublicExport(exportedItem)) continue;
 
-            if (importedModule.symbols.has(symbol)) {
-              // Skip members of classes/enums that are eventually exported by entry files
-              if (importedModule.isReExport && isExportedInEntryFile(importedModule)) continue;
+          if (importedModule?.symbols.has(symbol)) {
+            // Skip members of classes/enums that are eventually exported by entry files
+            if (importedModule.isReExport && isExportedInEntryFile(importedModule)) continue;
 
-              if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
-                principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-                  collector.addIssue({ type: 'enumMembers', filePath, symbol: member, parentSymbol: symbol });
-                });
-              }
-
-              if (report.classMembers && exportedItem.type === 'class' && exportedItem.members) {
-                principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-                  collector.addIssue({ type: 'classMembers', filePath, symbol: member, parentSymbol: symbol });
-                });
-              }
-
-              continue;
+            if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
+              if (isProduction) continue;
+              principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
+                collector.addIssue({ type: 'enumMembers', filePath, symbol: member, parentSymbol: symbol });
+              });
             }
 
-            const exportedItemAllowsInternalReferences =
-              typeof chief.config.ignoreExportsUsedInFile === 'object'
-                ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
-                : chief.config.ignoreExportsUsedInFile;
+            if (report.classMembers && exportedItem.type === 'class' && exportedItem.members) {
+              principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
+                collector.addIssue({ type: 'classMembers', filePath, symbol: member, parentSymbol: symbol });
+              });
+            }
 
-            const isExportedItemReferenced = () => {
-              const hasReferences = principal.getHasReferences(filePath, exportedItem);
+            // This symbol was imported, so we bail out early
+            continue;
+          }
 
-              return hasReferences.external || (exportedItemAllowsInternalReferences && hasReferences.internal);
-            };
+          const isStar = Boolean(importedModule?.isStar);
+          const isReExportedByEntryFile = isStar && isExportedInEntryFile(importedModule);
 
-            // This may not look optimal logic-wise, but `isExportedItemReferenced` (`principal.getHasReferences`) is expensive
-            if (importedModule.isStar) {
-              const isReExportedByEntryFile = isExportedInEntryFile(importedModule);
-              if (!isReExportedByEntryFile && !isExportedItemReferenced()) {
-                if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
-                  collector.addIssue({ type: 'nsTypes', filePath, symbol, symbolType: exportedItem.type });
-                } else {
-                  collector.addIssue({ type: 'nsExports', filePath, symbol });
-                }
-              }
+          if (!isReExportedByEntryFile && !isExportedItemReferenced(exportedItem, filePath)) {
+            if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
+              if (isProduction) continue;
+              const type = isStar ? 'nsTypes' : 'types';
+              collector.addIssue({ type, filePath, symbol, symbolType: exportedItem.type });
             } else {
-              if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
-                if (!isExportedItemReferenced()) {
-                  collector.addIssue({ type: 'types', filePath, symbol, symbolType: exportedItem.type });
-                }
-              } else {
-                if ((importedModule.isReExport || !importedModule.isDynamic) && !isExportedItemReferenced()) {
-                  collector.addIssue({ type: 'exports', filePath, symbol });
-                }
-              }
+              const type = isStar ? 'nsExports' : 'exports';
+              collector.addIssue({ type, filePath, symbol });
             }
           }
         }

@@ -20,6 +20,7 @@ const {
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
   'no-progress': isNoProgress = false,
+  'include-entry-exports': isIncludeEntryExports = false,
   performance: isObservePerf = false,
   production: isProduction = false,
   reporter = 'symbols',
@@ -56,6 +57,7 @@ const run = async () => {
       isStrict,
       isProduction,
       isShowProgress,
+      isIncludeEntryExports,
     });
 
     await printReport({
