@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/custom-visitors",
+  "name": "@fixtures/script-visitors-execa",
   "scripts": {
     "execa1": "execa ./execa-docs.mjs",
     "execa2": "execa --quiet ./script.js",

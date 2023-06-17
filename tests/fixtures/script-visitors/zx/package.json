@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/custom-visitors",
+  "name": "@fixtures/script-visitors-zx",
   "scripts": {
     "zx1": "zx ./zx-docs.mjs",
     "zx2": "zx --quiet ./script.js",
