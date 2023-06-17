@@ -28,12 +28,13 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
 
 const info = { compiler: '', issuer: '', realResource: '', resource: '', resourceQuery: '' };
 
-const resolveRuleSetDependencies = (rule: RuleSetRule | '...') => {
+const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | '') => {
   if (!rule || typeof rule === 'string') return [];
   if (typeof rule.use === 'string') return [rule.use];
   let useItem = rule.use ?? rule.loader ?? rule;
   if (typeof useItem === 'function') useItem = useItem(info);
-  return [useItem].flat().flatMap((useItem: RuleSetUseItem) => {
+  return [useItem].flat().flatMap((useItem: RuleSetUseItem | undefined | null | false | 0) => {
+    if (!useItem) return [];
     if (hasBabelOptions(useItem)) {
       return [
         ...resolveUseItem(useItem),
