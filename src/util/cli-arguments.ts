@@ -15,7 +15,7 @@ Options:
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
   --dependencies           Shortcut for --include dependencies,unlisted,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
-  --include-entry-exports    Include entry files when reporting unused exports
+  --include-entry-exports  Include entry files when reporting unused exports
   -n, --no-progress        Don't show dynamic progress updates
   --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)

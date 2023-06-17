@@ -117,16 +117,16 @@ export class ProjectPrincipal {
     return this.extensions.has(extname(filePath));
   }
 
-  public addEntryPath(filePath: string, skipExportsAnalysis = false) {
+  public addEntryPath(filePath: string, options?: { skipExportsAnalysis: boolean }) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
       this.entryPaths.add(filePath);
       this.projectPaths.add(filePath);
-      if (skipExportsAnalysis) this.skipExportsAnalysis.add(filePath);
+      if (options?.skipExportsAnalysis) this.skipExportsAnalysis.add(filePath);
     }
   }
 
-  public addEntryPaths(filePaths: Set<string> | string[], skipExportsAnalysis = false) {
-    filePaths.forEach(filePath => this.addEntryPath(filePath, skipExportsAnalysis));
+  public addEntryPaths(filePaths: Set<string> | string[], options?: { skipExportsAnalysis: boolean }) {
+    filePaths.forEach(filePath => this.addEntryPath(filePath, options));
   }
 
   public addProjectPath(filePath: string) {
@@ -187,7 +187,7 @@ export class ProjectPrincipal {
         if (resolvedModule.isExternalLibraryImport) {
           external.add(specifier);
         } else {
-          this.addEntryPath(resolvedModule.resolvedFileName);
+          this.addEntryPath(resolvedModule.resolvedFileName, { skipExportsAnalysis: true });
         }
       } else {
         if (/^(@|[a-z])/.test(specifier)) {

@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/include-entry-exports');
+const cwd = resolve('tests/fixtures/include-entry-exports-scripts');
 
-test('Skip unused exports in entry source files', async () => {
+test('Skip unused exports in entry source files and scripts', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -16,27 +16,22 @@ test('Skip unused exports in entry source files', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
 
-test('Report unused exports in entry source files', async () => {
-  const { issues, counters } = await main({
+test('Report unused exports in source files and scripts (skip for plugin entry files)', async () => {
+  const { counters } = await main({
     ...baseArguments,
     cwd,
     isIncludeEntryExports: true,
   });
 
-  assert(issues.exports['cli.js']['a']);
-  assert(issues.exports['index.ts']['default']);
-  assert(issues.exports['main.ts']['x']);
-
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 3,
-    types: 3,
-    processed: 4,
-    total: 4,
+    exports: 5,
+    processed: 5,
+    total: 5,
   });
 });

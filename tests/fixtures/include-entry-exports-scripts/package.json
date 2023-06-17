@@ -5,13 +5,16 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "module1": "tsx src/module1/index.ts",
-    "module2": "tsx src/module2/index.ts",
-    "module3": "tsx src/module3/index.ts"
+    "module1": "tsx ./src/script1.ts",
+    "module2": "tsx ./src/script2.ts",
+    "module3": "tsx ./src/script3.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "next": "*"
+  },
   "devDependencies": {
     "knip": "2.13.0",
     "tsx": "3.12.7",

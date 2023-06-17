@@ -83,7 +83,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       if (filePath) {
         const ignorePatterns = workspace.config.ignore.map(pattern => join(dirname(containingFilePath), pattern));
         const isIgnored = micromatch.isMatch(filePath, ignorePatterns);
-        if (!isIgnored) principal.addEntryPath(filePath, true);
+        if (!isIgnored) principal.addEntryPath(filePath);
       } else {
         collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
       }
@@ -106,7 +106,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (otherWorkspace) {
             const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
             if (filePath) {
-              principal.addEntryPath(filePath);
+              principal.addEntryPath(filePath, { skipExportsAnalysis: true });
             } else {
               collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
             }
@@ -168,7 +168,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const patterns = worker.getProductionPluginEntryFilePatterns();
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found production plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
-        principal.addEntryPaths(pluginWorkspaceEntryPaths, true);
+        principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
@@ -196,7 +196,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const patterns = worker.getPluginEntryFilePatterns();
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
-        principal.addEntryPaths(pluginWorkspaceEntryPaths, true);
+        principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
@@ -210,12 +210,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const patterns = compact(worker.getPluginConfigPatterns());
         const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found plugin configuration paths (${name})`, configurationEntryPaths);
-        principal.addEntryPaths(configurationEntryPaths, true);
+        principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
       }
     }
 
     // Add knip.ts (might import dependencies)
-    if (chief.resolvedConfigFilePath) principal.addEntryPath(chief.resolvedConfigFilePath, true);
+    if (chief.resolvedConfigFilePath)
+      principal.addEntryPath(chief.resolvedConfigFilePath, { skipExportsAnalysis: true });
 
     // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
     // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.

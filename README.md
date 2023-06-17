@@ -142,7 +142,7 @@ Using workspaces in a monorepo? Please see [workspaces][1] for more details abou
       --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
       --dependencies           Shortcut for --include dependencies,unlisted,unresolved
       --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
-      --include-entry-exports    Include entry files when reporting unused exports
+      --include-entry-exports  Include entry files when reporting unused exports
       -n, --no-progress        Don't show dynamic progress updates
       --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
@@ -578,6 +578,15 @@ export const split = function () {};
 ```
 
 Knip does not report public exports and types as unused.
+
+## Include exports in entry files
+
+When a repository is self-contained or private, you may want to include entry files when reporting unused exports:
+
+    knip --include-entry-exports
+
+Knip will also report unused exports in entry source files and scripts (such as those referenced in `package.json`). But
+not in entry and configuration files from plugins, such as `next.config.js` or `src/routes/+page.svelte`.
 
 ## Handling Issues
 
