@@ -374,7 +374,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           }
 
           const isStar = Boolean(importedModule?.isStar);
-          const isReExportedByEntryFile = isStar && isExportedInEntryFile(importedModule);
+          const isReExportedByEntryFile = !isIncludeEntryExports && isStar && isExportedInEntryFile(importedModule);
 
           if (!isReExportedByEntryFile && !isExportedItemReferenced(exportedItem, filePath)) {
             if (['enum', 'type', 'interface'].includes(exportedItem.type)) {

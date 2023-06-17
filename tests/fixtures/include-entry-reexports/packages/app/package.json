@@ -1,0 +1,10 @@
+{
+  "name": "@kp/app",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.mjs",
+  "type": "module",
+  "dependencies": {
+    "@kp/shared": "*"
+  }
+}
