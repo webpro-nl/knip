@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "sentry": {
-    "entry": ["sentry.{client,server}.config.{js,ts}"]
+    "entry": ["sentry.{client,server,edge}.config.{js,ts}"]
   }
 }
 ```

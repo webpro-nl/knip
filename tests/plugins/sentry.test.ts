@@ -13,5 +13,5 @@ test('Find dependencies in Sentry configuration', async () => {
     cwd,
   });
 
-  assert.deepEqual(counters, { ...baseCounters, processed: 2, total: 2 });
+  assert.deepEqual(counters, { ...baseCounters, processed: 3, total: 3 });
 });
