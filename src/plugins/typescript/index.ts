@@ -16,9 +16,13 @@ export const CONFIG_FILE_PATTERNS = ['tsconfig.json'];
 
 const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
   const config: TsConfigJson = await load(configFilePath);
-  const extend = config?.extends ? [config.extends].flat().filter(extend => !isInternal(extend)) : [];
-  const plugins = compact(config?.compilerOptions?.plugins?.map(plugin => plugin.name) ?? []);
-  return [...extend, ...plugins];
+
+  if (!config) return [];
+
+  const extend = config.extends ? [config.extends].flat().filter(extend => !isInternal(extend)) : [];
+  const plugins = compact(config.compilerOptions?.plugins?.map(plugin => plugin.name) ?? []);
+  const importHelpers = config.compilerOptions?.importHelpers ? ['tslib'] : [];
+  return [...extend, ...plugins, ...importHelpers];
 };
 
 export const findDependencies = timerify(findTypeScriptDependencies);

@@ -12,5 +12,6 @@ test('Find dependencies in typescript configuration (json)', async () => {
     '@tsconfig/node16/tsconfig.json',
     'typescript-eslint-language-service',
     'ts-graphql-plugin',
+    'tslib',
   ]);
 });
