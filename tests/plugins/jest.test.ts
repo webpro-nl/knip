@@ -17,5 +17,7 @@ test('Find dependencies in Jest configuration (jest.config.js)', async () => {
     '@nrwl/react/plugins/jest',
     'babel-jest',
     join(cwd, 'jest.transform.js'),
+    join(cwd, '__mocks__/fileMock.js'),
+    'identity-obj-proxy',
   ]);
 });
