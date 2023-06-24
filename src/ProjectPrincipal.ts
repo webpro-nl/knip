@@ -4,6 +4,7 @@ import { IGNORED_FILE_EXTENSIONS } from './constants.js';
 import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
+import { isMaybePackageName } from './util/modules.js';
 import { extname, isInNodeModules } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
@@ -190,7 +191,7 @@ export class ProjectPrincipal {
           this.addEntryPath(resolvedModule.resolvedFileName, { skipExportsAnalysis: true });
         }
       } else {
-        if (/^(@|[a-z])/.test(specifier)) {
+        if (isMaybePackageName(specifier)) {
           external.add(specifier);
         } else {
           const ext = extname(specifier);
