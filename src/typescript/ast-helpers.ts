@@ -135,3 +135,12 @@ export function findDescendants<T>(node: ts.Node | undefined, callback: (element
 
 export const isDeclarationFileExtension = (extension: string) =>
   extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
+
+export const isInModuleBlock = (node: ts.Node) => {
+  node = node?.parent;
+  while (node) {
+    if (ts.isModuleBlock(node)) return true;
+    node = node.parent;
+  }
+  return false;
+};

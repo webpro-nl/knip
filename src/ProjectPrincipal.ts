@@ -1,6 +1,7 @@
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
+import { isInModuleBlock } from './typescript/ast-helpers.js';
 import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
@@ -234,6 +235,12 @@ export class ProjectPrincipal {
       } else {
         hasReferences.external = true;
       }
+    }
+
+    if (!hasReferences.external && hasReferences.internal) {
+      // Consider exports in module blocks (namespaces) referenced in the same file as external refs
+      // Pattern: namespace NS { export type T }; type U = NS.T;
+      hasReferences.external = isInModuleBlock(exportedItem.node);
     }
 
     return hasReferences;
