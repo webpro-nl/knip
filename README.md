@@ -394,6 +394,7 @@ Knip contains a growing list of plugins:
 - [Sentry][plugin-sentry]
 - [Storybook][plugin-storybook]
 - [Stryker][plugin-stryker]
+- [Stylelint][plugin-stylelint]
 - [Svelte][plugin-svelte]
 - [Tailwind][plugin-tailwind]
 - [TypeDoc][plugin-typedoc]
@@ -791,6 +792,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [plugin-sentry]: ./src/plugins/sentry
 [plugin-storybook]: ./src/plugins/storybook
 [plugin-stryker]: ./src/plugins/stryker
+[plugin-stylelint]: ./src/plugins/stylelint
 [plugin-svelte]: ./src/plugins/svelte
 [plugin-tailwind]: ./src/plugins/tailwind
 [plugin-typedoc]: ./src/plugins/typedoc

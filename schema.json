@@ -320,6 +320,10 @@
           "title": "Stryker plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/stryker/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "stylelint": {
+          "title": "stylelint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/stylelint/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "svelte": {
           "title": "svelte plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/svelte/README.md)",
           "$ref": "#/definitions/plugin"

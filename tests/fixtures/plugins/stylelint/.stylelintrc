@@ -1,0 +1,7 @@
+{
+  "extends": ["stylelint-config-standard", "./myExtendableConfig"],
+  "plugins": ["stylelint-order"],
+  "rules": {
+    "alpha-value-notation": "number"
+  }
+}

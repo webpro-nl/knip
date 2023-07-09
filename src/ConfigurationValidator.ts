@@ -105,6 +105,7 @@ const pluginsSchema = z.object({
   sentry: pluginSchema,
   storybook: pluginSchema,
   stryker: pluginSchema,
+  stylelint: pluginSchema,
   tailwind: pluginSchema,
   typedoc: pluginSchema,
   typescript: pluginSchema,
