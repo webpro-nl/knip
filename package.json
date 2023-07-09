@@ -33,7 +33,7 @@
     "docs:format": "remark README.md docs/*.md .github/*.md src/plugins/*/README.md -o",
     "qa": "npm run lint && npm run build && npm run knip && npm run knip:production && npm test",
     "release": "release-it",
-    "create-plugin": "tsx ./scripts/create-new-plugin.ts",
+    "create-plugin": "tsx --no-warnings ./scripts/create-new-plugin.ts",
     "postcreate-plugin": "prettier schema.json src/ConfigurationValidator.ts --write --config .prettierrc --loglevel silent"
   },
   "files": [
