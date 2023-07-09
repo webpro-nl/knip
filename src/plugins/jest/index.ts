@@ -17,7 +17,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =
 export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
-  const config: Config.InitialOptions = await load(configFilePath);
+  const config = await load(configFilePath);
   if (config?.preset) {
     const { preset } = config;
     if (isInternal(preset)) {
@@ -29,10 +29,14 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   return config;
 };
 
+type JestOptions = Config.InitialOptions | (() => Config.InitialOptions) | (() => Promise<Config.InitialOptions>);
+
 const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
-  const config = configFilePath.endsWith('package.json')
-    ? (manifest.jest as Config.InitialOptions)
+  let config: JestOptions = configFilePath.endsWith('package.json')
+    ? manifest.jest
     : await resolveExtensibleConfig(configFilePath);
+
+  if (typeof config === 'function') config = await config();
 
   if (!config) return [];
 
