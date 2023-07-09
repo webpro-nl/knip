@@ -579,6 +579,29 @@ export const split = function () {};
 
 Knip does not report public exports and types as unused.
 
+## Ignore exports used in file
+
+In files with multiple exports, some of them might be used only internally. If these exports should not be reported,
+there is a `ignoreExportsUsedInFile` option available. With this option enabled, you don't need to mark everything
+`@public` separately and when something is no longer used internally, it will still be reported.
+
+```json
+{
+  "ignoreExportsUsedInFile": true
+}
+```
+
+In a more fine-grained manner, you can also ignore only specific issue types:
+
+```json
+{
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  }
+}
+```
+
 ## Include exports in entry files
 
 When a repository is self-contained or private, you may want to include entry files when reporting unused exports:

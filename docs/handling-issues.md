@@ -90,6 +90,7 @@ consider in this case:
 - Add the containing file to the `entry` array in the configuration.
 - Re-export the export(s) from an existing entry file.
 - Mark the export(s) [using the JSDoc `@public` tag][6].
+- [Ignore exports used in file][7].
 
 Note that entries in the `exports` map in `package.json` are automatically added as entry files by Knip (except when
 they are ignored by a `.gitignore` entry).
@@ -101,10 +102,10 @@ resolve this might not be feasible right away, especially in existing larger cod
 help in the meantime:
 
 - Use `--no-exit-code` for exit code 0 in CI.
-- Use `--include` (or `--exclude`) [output filters][7] to report only the issue types that have little or no errors.
-- Use [`rules`][8] configuration to report only the issue types that have little or no errors.
+- Use `--include` (or `--exclude`) [output filters][8] to report only the issue types that have little or no errors.
+- Use [`rules`][9] configuration to report only the issue types that have little or no errors.
 - Use separate Knip commands to analyze e.g. only `--dependencies` or `--exports`.
-- Use [ignore patterns][9] to filter out the most problematic areas.
+- Use [ignore patterns][10] to filter out the most problematic areas.
 
 [1]: ../README.md#override-plugin-configuration
 [2]: ./writing-a-plugin.md
@@ -112,6 +113,7 @@ help in the meantime:
 [4]: ../README.md#multi-project-repositories
 [5]: ./compilers.md
 [6]: ../README.md#public-exports
-[7]: ../README.md#filters
-[8]: ../README.md#rules
-[9]: ../README.md#ignore
+[7]: ../README.md#ignore-exports-used-in-file
+[8]: ../README.md#filters
+[9]: ../README.md#rules
+[10]: ../README.md#ignore
