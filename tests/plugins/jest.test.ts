@@ -12,6 +12,8 @@ test('Find dependencies in Jest configuration (jest.config.js)', async () => {
   const dependencies = await jest.findDependencies(configFilePath, { cwd });
   assert.deepEqual(dependencies, [
     'jest-environment-jsdom',
+    'jest-silent-reporter',
+    'jest-junit',
     path.join(cwd, 'node_modules/jest-watch-select-projects/index.js'),
     join(cwd, 'jest.setup.js'),
     '@nrwl/react/plugins/jest',

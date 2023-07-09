@@ -48,6 +48,11 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
   );
   const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
   const resolvers = config.resolver ? [config.resolver] : [];
+  const reporters = config.reporters
+    ? config.reporters
+        .map(reporter => (typeof reporter === 'string' ? reporter : reporter[0]))
+        .filter(reporter => !['default', 'github-actions', 'summary'].includes(reporter))
+    : [];
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
   const setupFiles = config.setupFiles ?? [];
@@ -63,6 +68,7 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
     ...presets,
     ...environments,
     ...resolvers,
+    ...reporters,
     ...watchPlugins,
     ...setupFiles,
     ...setupFilesAfterEnv,

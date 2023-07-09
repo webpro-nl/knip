@@ -8,4 +8,11 @@ module.exports = {
     '\\.(jpg|jpeg|...|aac|oga)$': '<rootDir>/__mocks__/fileMock.js',
     '\\.(css|less)$': 'identity-obj-proxy',
   },
+  reporters: [
+    'default',
+    'jest-silent-reporter',
+    ['jest-junit', { outputDirectory: 'reports', outputName: 'report.xml' }],
+    ['github-actions', { silent: false }],
+    'summary',
+  ],
 };
