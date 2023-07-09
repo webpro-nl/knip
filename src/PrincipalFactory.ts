@@ -37,7 +37,7 @@ export class PrincipalFactory {
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
     const principal = this.findReusablePrincipal(compilerOptions);
     if (principal) {
-      this.linkPrincipal(principal, cwd, compilerOptions.paths);
+      this.linkPrincipal(principal, cwd, compilerOptions);
       return principal.principal;
     } else {
       return this.addNewPrincipal(options);
@@ -50,6 +50,7 @@ export class PrincipalFactory {
   private findReusablePrincipal(compilerOptions: ts.CompilerOptions) {
     const workspacePaths = compilerOptions?.paths ? Object.keys(compilerOptions.paths) : [];
     const principal = Array.from(this.principals).find(principal => {
+      if (compilerOptions.pathsBasePath && principal.principal.compilerOptions.pathsBasePath) return false;
       if (compilerOptions.baseUrl === principal.principal.compilerOptions.baseUrl) {
         return workspacePaths.every(p => !principal.pathKeys.has(p));
       }
@@ -58,7 +59,9 @@ export class PrincipalFactory {
     return principal;
   }
 
-  private linkPrincipal(principal: Principal, cwd: string, paths: Paths) {
+  private linkPrincipal(principal: Principal, cwd: string, compilerOptions: ts.CompilerOptions) {
+    const { pathsBasePath, paths } = compilerOptions;
+    if (pathsBasePath) principal.principal.compilerOptions.pathsBasePath = pathsBasePath;
     Object.keys(paths ?? {}).forEach(p => principal.pathKeys.add(p));
     principal.principal.compilerOptions.paths = { ...principal.principal.compilerOptions.paths, ...paths };
     principal.cwds.add(cwd);

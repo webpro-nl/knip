@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-baseurl/root",
+  "workspaces": [
+    "packages/*"
+  ]
+}
