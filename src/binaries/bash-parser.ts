@@ -1,10 +1,10 @@
-import parse from 'bash-parser';
+import parse from '@ericcornelissen/bash-parser';
 import parseArgs from 'minimist';
 import { debugLogObject } from '../util/debug.js';
 import * as FallbackResolver from './resolvers/fallback.js';
 import * as KnownResolvers from './resolvers/index.js';
 import { stripBinaryPath, toBinary } from './util.js';
-import type { Node } from 'bash-parser';
+import type { Node } from '@ericcornelissen/bash-parser';
 import type { PackageJson } from 'type-fest';
 
 // https://vorpaljs.github.io/bash-parser-playground/

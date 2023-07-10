@@ -1,4 +1,4 @@
-declare module 'bash-parser' {
+declare module '@ericcornelissen/bash-parser' {
   type Name = {
     type: string;
     text: string;
