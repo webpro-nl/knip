@@ -10,7 +10,7 @@ import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped
 import type { ConfigurationHints, Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
-import type { PackageJson } from 'type-fest';
+import type { PackageJson } from '@npmcli/package-json';
 
 type Options = {
   isStrict: boolean;

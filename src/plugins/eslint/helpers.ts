@@ -5,7 +5,7 @@ import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
 import { fallback } from './fallback.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
-import type { PackageJson } from 'type-fest';
+import type { PackageJson } from '@npmcli/package-json';
 
 type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
 

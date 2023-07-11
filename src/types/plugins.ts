@@ -1,5 +1,7 @@
 import type { PluginConfiguration } from './config.js';
-import type { PackageJson } from 'type-fest';
+import type { PackageJson } from '@npmcli/package-json';
+
+export type PackageJsonWithPlugins = PackageJson & Record<string, unknown>;
 
 type IsPluginEnabledCallbackOptions = { cwd: string; manifest: PackageJson; dependencies: Set<string> };
 
@@ -7,7 +9,7 @@ export type IsPluginEnabledCallback = (options: IsPluginEnabledCallbackOptions) 
 
 type GenericPluginCallbackOptions = {
   cwd: string;
-  manifest: PackageJson;
+  manifest: PackageJsonWithPlugins;
   config: PluginConfiguration;
   isProduction: boolean;
 };

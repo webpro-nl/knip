@@ -2,7 +2,7 @@ import { _getDependenciesFromScripts } from '../binaries/index.js';
 import { timerify } from '../util/Performance.js';
 import { getPackageManifest } from './helpers.js';
 import type { InstalledBinaries, PeerDependencies } from '../types/workspace.js';
-import type { PackageJson } from 'type-fest';
+import type { PackageJson } from '@npmcli/package-json';
 
 type Options = {
   manifest: PackageJson;

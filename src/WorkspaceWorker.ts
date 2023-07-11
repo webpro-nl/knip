@@ -1,13 +1,14 @@
 import { TEST_FILE_PATTERNS } from './constants.js';
 import * as npm from './manifest/index.js';
 import * as plugins from './plugins/index.js';
+import { PackageJsonWithPlugins } from './types/plugins.js';
 import { InstalledBinaries, PeerDependencies } from './types/workspace.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
 import { getKeysByValue } from './util/object.js';
 import { join, toPosix } from './util/path.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
-import type { Entries, PackageJson } from 'type-fest';
+import type { Entries } from 'type-fest';
 
 type PluginNames = Entries<typeof plugins>;
 
@@ -16,7 +17,7 @@ type WorkspaceManagerOptions = {
   dir: string;
   cwd: string;
   config: WorkspaceConfiguration;
-  manifest: PackageJson;
+  manifest: PackageJsonWithPlugins;
   rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -40,7 +41,7 @@ export class WorkspaceWorker {
   dir: string;
   cwd: string;
   config: WorkspaceConfiguration;
-  manifest: PackageJson;
+  manifest: PackageJsonWithPlugins;
   isProduction;
   isStrict;
   rootIgnore: Configuration['ignore'];

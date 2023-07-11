@@ -5,7 +5,7 @@ import * as FallbackResolver from './resolvers/fallback.js';
 import * as KnownResolvers from './resolvers/index.js';
 import { stripBinaryPath, toBinary } from './util.js';
 import type { Node } from '@ericcornelissen/bash-parser';
-import type { PackageJson } from 'type-fest';
+import type { PackageJson } from '@npmcli/package-json';
 
 // https://vorpaljs.github.io/bash-parser-playground/
 
