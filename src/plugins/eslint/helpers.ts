@@ -74,7 +74,7 @@ const resolveExtendsSpecifier = (specifier: string) => {
   if (/\/eslint-(config|plugin)/.test(specifier)) return specifier;
   const strippedSpecifier = specifier
     .replace(/(^plugin:|:.+$)/, '')
-    .replace(/\/(eslint-)?(recommended.*|strict|all)$/, '');
+    .replace(/\/(eslint-)?(recommended.*|stylistic.*|strict.*|all)$/, '');
   if (/eslint-(config|plugin)-/.test(strippedSpecifier)) return strippedSpecifier;
   const packageName = getPackageNameFromModuleSpecifier(strippedSpecifier);
   if (!packageName) return;
