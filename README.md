@@ -103,7 +103,7 @@ import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
   entry: ['src/index.ts'],
-  project: ['src/**/*.ts'],
+  project: ['src/**/*.ts']
 };
 
 export default config;
@@ -476,8 +476,8 @@ import { compileSync } from 'mdx-js/mdx';
 
 export default {
   compilers: {
-    mdx: compileSync,
-  },
+    mdx: compileSync
+  }
 };
 ```
 

@@ -4,7 +4,7 @@ import {
   IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
   IGNORED_GLOBAL_BINARIES,
-  ROOT_WORKSPACE_NAME,
+  ROOT_WORKSPACE_NAME
 } from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
 import type { ConfigurationHints, Issue } from './types/issues.js';
@@ -46,7 +46,7 @@ export class DependencyDeputy {
     manifestPath,
     manifest,
     ignoreDependencies,
-    ignoreBinaries,
+    ignoreBinaries
   }: {
     name: string;
     dir: string;
@@ -72,7 +72,7 @@ export class DependencyDeputy {
       peerDependencies,
       optionalDependencies,
       devDependencies,
-      allDependencies,
+      allDependencies
     });
   }
 
