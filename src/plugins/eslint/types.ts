@@ -1,6 +1,7 @@
 type ParserOptions = {
   project?: string;
   babelOptions?: {
+    plugins: string[];
     presets: string[];
   };
 };

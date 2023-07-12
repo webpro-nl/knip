@@ -18,6 +18,7 @@ test('Find dependencies in ESLint configuration (legacy json)', async () => {
     '@typescript-eslint/eslint-plugin',
     'eslint-plugin-prettier',
     'eslint-config-prettier',
+    '@babel/plugin-syntax-import-assertions',
   ]);
 });
 
