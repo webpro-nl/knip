@@ -46,6 +46,34 @@
       "examples": ["classMembers", "enumMembers"],
       "$ref": "#/definitions/issueTypes"
     },
+    "ignoreExportsUsedInFile": {
+      "title": "Ignore exports used in file",
+      "examples": [
+        { "ignoreExportsUsedInFile": true },
+        {
+          "ignoreExportsUsedInFile": {
+            "interface": true,
+            "type": true
+          }
+        }
+      ],
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "class": { "type": "boolean" },
+            "enum": { "type": "boolean" },
+            "function": { "type": "boolean" },
+            "interface": { "type": "boolean" },
+            "member": { "type": "boolean" },
+            "type": { "type": "boolean" }
+          }
+        }
+      ]
+    },
     "workspaces": {
       "title": "Configuration for workspaces",
       "type": "object",
