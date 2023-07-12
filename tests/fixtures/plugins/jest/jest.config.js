@@ -7,6 +7,8 @@ module.exports = {
   moduleNameMapper: {
     '\\.(jpg|jpeg|...|aac|oga)$': '<rootDir>/__mocks__/fileMock.js',
     '\\.(css|less)$': 'identity-obj-proxy',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^src/(.*)$': '<rootDir>/../src/$1',
   },
   reporters: [
     'default',
