@@ -60,9 +60,10 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
   const transform = config.transform
     ? Object.values(config.transform).map(transform => (typeof transform === 'string' ? transform : transform[0]))
     : [];
-  const moduleNameMapper = config.moduleNameMapper
+  const moduleNameMapper = (config.moduleNameMapper
     ? Object.values(config.moduleNameMapper).map(mapper => (typeof mapper === 'string' ? mapper : mapper[0]))
-    : [];
+    : [])
+    .filter(value => !value.startsWith("$"));
 
   return [
     ...presets,
