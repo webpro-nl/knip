@@ -3,5 +3,5 @@
   "singleQuote": true,
   "arrowParens": "avoid",
   "proseWrap": "always",
-  "trailingComma": "none"
+  "trailingComma": "es5"
 }

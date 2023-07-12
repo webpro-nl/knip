@@ -1,3 +1,3 @@
-import { foo } from '@kp/shared'
+import { foo } from '@kp/shared';
 
-console.log(foo())
+console.log(foo());

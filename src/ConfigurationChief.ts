@@ -176,42 +176,45 @@ export class ConfigurationChief {
 
     const workspaces = Object.entries(initialWorkspaces)
       .filter(([workspaceName]) => !ignoreWorkspaces.includes(workspaceName))
-      .reduce((workspaces, workspace) => {
-        const [workspaceName, workspaceConfig] = workspace;
+      .reduce(
+        (workspaces, workspace) => {
+          const [workspaceName, workspaceConfig] = workspace;
 
-        const entry = workspaceConfig.entry ? arrayify(workspaceConfig.entry) : defaultWorkspaceConfig.entry;
-        const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : defaultWorkspaceConfig.project;
-        const paths = workspaceConfig.paths ?? defaultWorkspaceConfig.paths;
+          const entry = workspaceConfig.entry ? arrayify(workspaceConfig.entry) : defaultWorkspaceConfig.entry;
+          const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : defaultWorkspaceConfig.project;
+          const paths = workspaceConfig.paths ?? defaultWorkspaceConfig.paths;
 
-        workspaces[workspaceName] = {
-          entry,
-          project,
-          paths,
-          ignore: arrayify(workspaceConfig.ignore),
-          ignoreBinaries: arrayify(workspaceConfig.ignoreBinaries),
-          ignoreDependencies: arrayify(workspaceConfig.ignoreDependencies),
-        };
+          workspaces[workspaceName] = {
+            entry,
+            project,
+            paths,
+            ignore: arrayify(workspaceConfig.ignore),
+            ignoreBinaries: arrayify(workspaceConfig.ignoreBinaries),
+            ignoreDependencies: arrayify(workspaceConfig.ignoreDependencies),
+          };
 
-        for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
-          const pluginName = toCamelCase(name) as PluginName;
-          if (PLUGIN_NAMES.includes(pluginName)) {
-            if (pluginConfig === false) {
-              workspaces[workspaceName][pluginName] = false;
-            } else {
-              const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
-              const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;
-              const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
-              const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
-              workspaces[workspaceName][pluginName] = {
-                config,
-                entry,
-                project,
-              };
+          for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
+            const pluginName = toCamelCase(name) as PluginName;
+            if (PLUGIN_NAMES.includes(pluginName)) {
+              if (pluginConfig === false) {
+                workspaces[workspaceName][pluginName] = false;
+              } else {
+                const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
+                const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;
+                const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
+                const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
+                workspaces[workspaceName][pluginName] = {
+                  config,
+                  entry,
+                  project,
+                };
+              }
             }
           }
-        }
-        return workspaces;
-      }, {} as Record<string, WorkspaceConfiguration>);
+          return workspaces;
+        },
+        {} as Record<string, WorkspaceConfiguration>
+      );
 
     return {
       rules,

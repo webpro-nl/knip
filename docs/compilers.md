@@ -32,8 +32,8 @@ module.exports = {
   entry: ['src/index.ts', '**/*.stories.mdx'],
   project: 'src/*.{ts,mdx}',
   compilers: {
-    mdx: compile
-  }
+    mdx: compile,
+  },
 };
 ```
 
@@ -54,8 +54,8 @@ export default {
       let match;
       while ((match = compiler.exec(text))) scripts.push(match[1]);
       return scripts.join(';');
-    }
-  }
+    },
+  },
 };
 ```
 
@@ -77,7 +77,7 @@ export default {
   paths: {
     // This ain't pretty, but Svelte basically does the same
     '$app/*': ['node_modules/@sveltejs/kit/src/runtime/app/*'],
-    '$env/*': ['.svelte-kit/ambient.d.ts']
+    '$env/*': ['.svelte-kit/ambient.d.ts'],
   },
   compilers: {
     svelte: async (text: string) => {
@@ -85,8 +85,8 @@ export default {
       const compiled = compile(processed.code);
       return compiled.js.code;
     },
-    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n')
-  }
+    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
+  },
 };
 ```
 
@@ -99,7 +99,7 @@ Just for reference, this also seems to work pretty well (but may err on certain 
 ```ts
 export default {
   svelte: (text: string) => [...text.matchAll(/import[^;]+/g)].join('\n'),
-  css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n')
+  css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
 };
 ```
 

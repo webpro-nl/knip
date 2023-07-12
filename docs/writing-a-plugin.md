@@ -177,7 +177,7 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'app/root.tsx',
   'app/entry.{client,server}.{js,jsx,ts,tsx}',
   'app/routes/**/*.{js,ts,tsx}',
-  'server.{js,ts}'
+  'server.{js,ts}',
 ];
 ```
 

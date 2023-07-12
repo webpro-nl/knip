@@ -64,7 +64,7 @@ export class WorkspaceWorker {
     isStrict,
     rootIgnore,
     negatedWorkspacePatterns,
-    enabledPluginsInAncestors
+    enabledPluginsInAncestors,
   }: WorkspaceManagerOptions) {
     this.name = name;
     this.dir = dir;
@@ -117,7 +117,7 @@ export class WorkspaceWorker {
       isProduction: this.isProduction,
       isStrict: this.isStrict,
       dir: this.dir,
-      cwd: this.cwd
+      cwd: this.cwd,
     });
 
     const filePath = join(this.dir, 'package.json');
@@ -150,7 +150,7 @@ export class WorkspaceWorker {
       negatedPluginEntryFilePatterns,
       negatedPluginProjectFilePatterns,
       TEST_FILE_PATTERNS,
-      this.negatedWorkspacePatterns
+      this.negatedWorkspacePatterns,
     ].flat();
   }
 
@@ -230,7 +230,7 @@ export class WorkspaceWorker {
       negatedPluginEntryFilePatterns,
       negatedPluginProjectFilePatterns,
       negatedTestFilePatterns,
-      this.negatedWorkspacePatterns
+      this.negatedWorkspacePatterns,
     ].flat();
   }
 
@@ -289,7 +289,7 @@ export class WorkspaceWorker {
               cwd,
               manifest: this.manifest,
               config: pluginConfig,
-              isProduction: this.isProduction
+              isProduction: this.isProduction,
             });
 
             dependencies.map(toPosix).forEach(specifier => {
@@ -313,7 +313,7 @@ export class WorkspaceWorker {
       peerDependencies: this.peerDependencies,
       installedBinaries: this.installedBinaries,
       referencedDependencies: this.referencedDependencies,
-      enabledPlugins: this.enabledPlugins
+      enabledPlugins: this.enabledPlugins,
     };
   }
 }

@@ -5,7 +5,7 @@ import { resolve, join } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused files and exports with JS entry file', async () => {
+test('Find unused files and exports with only JS files', async () => {
   const cwd = resolve('tests/fixtures/js-only');
 
   const { issues, counters } = await main({

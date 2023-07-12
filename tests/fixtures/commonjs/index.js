@@ -7,24 +7,24 @@ const { named } = require('named-object-binding');
 const all = require('./dir/mod');
 const { staticResolve } = require('./dir/mod');
 
-const dynamicRequire = (value: string) => {
+const dynamicRequire = value => {
   return require(`./dir/${value}`);
 };
 
-const templateStringExternal = (value: string) => {
+const templateStringExternal = value => {
   return require(`no-substitution-tpl-literal`);
 };
 
-const templateStringInternal = (value: string) => {
+const templateStringInternal = value => {
   const baz = require(`./dir/mod1`);
   const { identifier } = require(`./dir/mod1`);
 };
 
-const requireResolve = (value: string) => {
+const requireResolve = value => {
   return require.resolve('./dir/mod2');
 };
 
-const requireExportedShorthandsHeuristic = (value: string) => {
+const requireExportedShorthandsHeuristic = value => {
   const { identifier, identifier2 } = require('./dir/mod3');
 };
 

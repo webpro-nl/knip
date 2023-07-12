@@ -54,12 +54,15 @@ export class Performance {
   }
 
   private getEntriesByName() {
-    return this.entries.reduce((entries, entry) => {
-      const name = entry.name.replace(`${this.instanceId}:`, '');
-      entries[name] = entries[name] ?? [];
-      entries[name].push(entry.duration);
-      return entries;
-    }, {} as Record<string, number[]>);
+    return this.entries.reduce(
+      (entries, entry) => {
+        const name = entry.name.replace(`${this.instanceId}:`, '');
+        entries[name] = entries[name] ?? [];
+        entries[name].push(entry.duration);
+        return entries;
+      },
+      {} as Record<string, number[]>
+    );
   }
 
   getTable() {

@@ -46,7 +46,7 @@ export default ({ report, issues, options }: ReporterOptions) => {
     if (isReportType) {
       const title = reportMultipleGroups && getTitle(reportType);
       const isSet = issues[reportType] instanceof Set;
-      const toIssue = (filePath: string) => ({ type: reportType, filePath, symbol: filePath } as Issue);
+      const toIssue = (filePath: string) => ({ type: reportType, filePath, symbol: filePath }) as Issue;
 
       const issuesForType =
         issues[reportType] instanceof Set
