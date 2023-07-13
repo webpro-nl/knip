@@ -12,4 +12,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const ENTRY_FILE_PATTERNS = ['next.config.{js,ts,cjs,mjs}'];
 
-export const PRODUCTION_ENTRY_FILE_PATTERNS = ['pages/**/*.{js,jsx,ts,tsx}', 'src/pages/**/*.{js,jsx,ts,tsx}'];
+export const PRODUCTION_ENTRY_FILE_PATTERNS = [
+  '{app,pages}/**/*.{js,jsx,ts,tsx}',
+  'src/{app,pages}/**/*.{js,jsx,ts,tsx}',
+];
