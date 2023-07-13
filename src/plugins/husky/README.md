@@ -13,6 +13,7 @@ or `devDependencies`:
 {
   "husky": {
     "config": [
+      ".husky/prepare-commit-msg",
       ".husky/commit-msg",
       ".husky/pre-{applypatch,commit,merge-commit,push,rebase,receive}",
       ".husky/post-{checkout,commit,merge,rewrite}"

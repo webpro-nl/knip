@@ -16,6 +16,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 // TODO More hooks exists, but is it worth adding all of them?
 export const CONFIG_FILE_PATTERNS = [
+  '.husky/prepare-commit-msg',
   '.husky/commit-msg',
   '.husky/pre-{applypatch,commit,merge-commit,push,rebase,receive}',
   '.husky/post-{checkout,commit,merge,rewrite}',
