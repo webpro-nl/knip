@@ -25,6 +25,6 @@ export const resolve: Resolver = (binary, args, { cwd }) => {
   const parsed = parseArgs(args, { string: ['r'], alias: { require: ['r', 'loader'] }, boolean: ['quiet', 'verbose'] });
   const argFilter = argFilters[binary as keyof typeof argFilters] ?? argFilters.default;
   const filteredArgs = compact(argFilter(parsed));
-  const bin = binary.startsWith('.') ? tryResolveFilePath(cwd, binary) : [toBinary(binary)];
-  return [...bin, ...tryResolveSpecifiers(cwd, filteredArgs)];
+  const bin = binary.startsWith('.') ? tryResolveFilePath(cwd, binary) : toBinary(binary);
+  return compact([bin, ...tryResolveSpecifiers(cwd, filteredArgs)]);
 };

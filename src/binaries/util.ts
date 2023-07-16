@@ -8,20 +8,18 @@ export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleS
     if (!isInNodeModules(filePath)) {
       const resolvedFilePath = _tryResolve(filePath, cwd);
       if (resolvedFilePath) {
-        return [resolvedFilePath];
+        return resolvedFilePath;
       } else if (acceptModuleSpecifier) {
-        const packageName = getPackageNameFromModuleSpecifier(specifier);
-        return packageName ? [packageName] : [];
+        return getPackageNameFromModuleSpecifier(specifier);
       }
     } else {
-      return [getPackageNameFromFilePath(specifier)];
+      return getPackageNameFromFilePath(specifier);
     }
   }
-  return [];
 };
 
 export const tryResolveSpecifiers = (cwd: string, specifiers: string[]) =>
-  specifiers.flatMap(specifier => tryResolveFilePath(cwd, specifier, true));
+  specifiers.map(specifier => tryResolveFilePath(cwd, specifier, true));
 
 export const toBinary = (specifier: string) => specifier.replace(/^(bin:)?/, 'bin:');
 
