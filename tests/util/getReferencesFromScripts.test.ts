@@ -40,6 +40,7 @@ test('getReferencesFromScripts (node)', () => {
   t('node --loader ts-node/esm node_modules/webpack-cli/bin/cli.js -c ./webpack.config.ts', ['webpack-cli', 'ts-node']);
   t('node --experimental-loader ts-node/esm/transpile-only script.js', [js, 'ts-node']);
   t('node -r @scope/package/register ./dir', [index, '@scope/package']);
+  t('node --inspect-brk -r tsconfig-paths/register node_modules/.bin/jest --runInBand', ['bin:jest', 'tsconfig-paths']);
   t('node dist/index.js', []);
   t('./script.js', [js]);
 });

@@ -12,6 +12,8 @@ export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleS
       } else if (acceptModuleSpecifier) {
         return getPackageNameFromModuleSpecifier(specifier);
       }
+    } else if (specifier.includes('node_modules/.bin')) {
+      return toBinary(stripBinaryPath(specifier));
     } else {
       return getPackageNameFromFilePath(specifier);
     }
