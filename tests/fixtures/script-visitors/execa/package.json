@@ -1,9 +1,9 @@
 {
   "name": "@fixtures/script-visitors-execa",
   "scripts": {
-    "execa1": "execa ./execa-docs.mjs",
-    "execa2": "execa --quiet ./script.js",
-    "execa3": "npx --yes execa --quiet ./node.mjs"
+    "execa1": "node ./execa-docs.mjs",
+    "execa2": "node ./script.js",
+    "execa3": "node ./node.mjs"
   },
   "dependencies": {
     "dep": "*"
