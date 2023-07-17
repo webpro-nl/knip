@@ -43,6 +43,10 @@ Knip supports LTS versions of Node.js, and currently requires at least Node.js v
 You might want to ask your questions in the [Knip knowledge base][8] (powered by OpenAI and [7-docs][9]). This is an
 experimental knowledge base, answers may be incorrect.
 
+## Handling Issues
+
+See [Handling Issues](https://github.com/webpro/knip/blob/main/docs/handling-issues.md)
+
 ## Configuration
 
 Knip has good defaults and you can run it without any configuration. Here's the default:
