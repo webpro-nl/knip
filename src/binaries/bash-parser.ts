@@ -73,9 +73,11 @@ export const getBinariesFromScript = (
         case 'LogicalExpression':
           return getBinariesFromNodes([node.left, node.right]);
         case 'If':
-          return getBinariesFromNodes([...node.clause.commands, ...node.then.commands]);
+          return getBinariesFromNodes([...node.clause.commands, ...node.then.commands, ...(node.else?.commands ?? [])]);
         case 'For':
           return getBinariesFromNodes(node.do.commands);
+        case 'CompoundList':
+          return getBinariesFromNodes(node.commands);
         default:
           return [];
       }

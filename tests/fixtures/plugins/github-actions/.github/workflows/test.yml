@@ -75,3 +75,16 @@ jobs:
             -H 'Accept: application/vnd.github.v3+json' \
             -u ${{ secrets.SECRET }} \
             --data '{"event_type": "request-create-frontpage-branch" }}'
+      - run: |
+          VERSION="v$(jq -r '.version' < package.json)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if [ "$(git tag --list "$VERSION")" ]; then
+            echo 'released=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'released=false' >> "$GITHUB_OUTPUT"
+            {
+              echo 'release_notes<<EOF'
+              node scripts/get-release-notes.js
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+          fi

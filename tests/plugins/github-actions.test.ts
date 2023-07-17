@@ -24,5 +24,6 @@ test('Find dependencies in github-actions workflow configurations', async () => 
     '@scope/retry-cli',
     'bin:changeset',
     'bin:wait-on',
+    join(cwd, 'scripts/get-release-notes.js'),
   ]);
 });

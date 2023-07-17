@@ -34,6 +34,9 @@ declare module '@ericcornelissen/bash-parser' {
     then: {
       commands: Command[];
     };
+    else?: {
+      commands: Command[];
+    };
   };
 
   type For = {
@@ -54,7 +57,7 @@ declare module '@ericcornelissen/bash-parser' {
     commandAST: AST;
   };
 
-  export type Node = Command | LogicalExpression | If | For | Function_;
+  export type Node = CompoundList | Command | LogicalExpression | If | For | Function_;
 
   export type AST = {
     type: 'Script';
