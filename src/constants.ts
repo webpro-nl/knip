@@ -14,30 +14,31 @@ export const TEST_FILE_PATTERNS = [
 ];
 
 // Binaries that are expected to be globally installed (i.e. https://www.npmjs.com/package/[name] is NOT the expected dependency)
+// Package may exist in npm registry, but last publish is at least 6 years ago.
 export const IGNORED_GLOBAL_BINARIES = [
   'bash',
   'bun',
+  'cat',
+  'cd',
+  'cp',
   'deno',
+  'echo',
+  'exec',
+  'exit',
   'git',
+  'grep',
+  'mkdir',
+  'mv',
   'node',
   'npm',
   'npx',
   'pnpm',
   'pnpx',
-  'true',
-  'yarn',
-  // Packages exist, but are at least 6 years old:
-  'cat',
-  'cd',
-  'cp',
-  'echo',
-  'exit',
-  'grep',
-  'mkdir',
-  'mv',
   'rm',
   'sh',
   'sudo',
+  'true',
+  'yarn',
 ];
 
 export const IGNORED_DEPENDENCIES = ['knip', 'typescript'];
