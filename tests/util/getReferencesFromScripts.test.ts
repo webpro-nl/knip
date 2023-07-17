@@ -158,6 +158,7 @@ test('getReferencesFromScripts (bash expressions)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['bin:make']);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['bin:make']);
   t('if ! npx pkg --verbose ; then exit 1 ; fi', ['pkg', 'bin:exit']);
+  t('exec < /dev/tty && node_modules/.bin/cz --hook || true', ['bin:exec', 'bin:cz', 'bin:true']);
 });
 
 test('getReferencesFromScripts (bash expansion)', () => {
