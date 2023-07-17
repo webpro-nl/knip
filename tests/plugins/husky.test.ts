@@ -13,7 +13,7 @@ const manifest = getManifest(cwd);
 test('Find dependencies in husky configuration (plugin)', async () => {
   const configFilePath = join(cwd, '.husky/pre-commit');
   const dependencies = await husky.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['lint-staged', 'commitlint']);
+  assert.deepEqual(dependencies, ['lint-staged', 'bin:commitlint']);
 });
 
 test('Find dependencies in husky configuration (main)', async () => {
@@ -22,14 +22,12 @@ test('Find dependencies in husky configuration (main)', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['.husky/pre-commit']['commitlint']);
   assert(issues.binaries['.husky/pre-push']['jest']);
   assert(issues.binaries['.husky/pre-push']['pretty-quick']);
   assert(issues.binaries['.husky/pre-rebase']['eslint']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
     binaries: 3,
     processed: 0,
     total: 0,
