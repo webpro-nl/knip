@@ -14,5 +14,5 @@ test('Find dependencies in Nx configuration (project.json)', async () => {
 test('Find dependencies in Nx configuration (project.json)', async () => {
   const configFilePath = join(cwd, 'libs/b/project.json');
   const dependencies = await nx.findDependencies(configFilePath, { cwd });
-  assert.deepEqual(dependencies, ['nx', '@nrwl/jest', 'bin:ls', 'bin:webpack', 'compodoc']);
+  assert.deepEqual(dependencies, ['nx', '@nrwl/jest', 'bin:ls', 'bin:webpack', 'bin:compodoc']);
 });

@@ -30,6 +30,7 @@ test('Referenced dependencies in npm scripts', async () => {
     'bin:pm2',
     'bin:pm2-dev',
     'bin:eslint',
+    'bin:commitlint',
     'bin:bash',
     join(cwd, 'ignore.js'),
     'bin:package',
@@ -55,6 +56,8 @@ test('Referenced dependencies in npm scripts', async () => {
       ['eslint-v6', new Set(['eslint'])],
       ['eslint-v7', new Set(['eslint'])],
       ['eslint-v8', new Set(['eslint'])],
+      ['@commitlint/cli', new Set(['commitlint'])],
+      ['commitlint', new Set(['@commitlint/cli'])],
     ])
   );
 });

@@ -50,7 +50,7 @@ test('getReferencesFromScripts (ts-node/tsx)', () => {
   t('tsx ./main.ts', ['bin:tsx', ts]);
   t('tsx watch ./main.ts', ['bin:tsx', ts]);
   t('node --loader tsx ./main.ts', [ts, 'tsx']);
-  t('npx tsx main', ['tsx', ts]);
+  t('npx tsx main', ['bin:tsx', ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', ['bin:babel-node', ts]);
 });
 
@@ -95,17 +95,17 @@ test('getReferencesFromScripts (npm)', () => {
 });
 
 test('getReferencesFromScripts (npx)', () => {
-  t('npx pkg', ['pkg']);
-  t('npx prisma migrate reset --force', ['prisma']);
+  t('npx pkg', ['bin:pkg']);
+  t('npx prisma migrate reset --force', ['bin:prisma']);
   t('npx @scope/pkg', ['@scope/pkg']);
-  t('npx tsx watch main', ['tsx', ts]);
+  t('npx tsx watch main', ['bin:tsx', ts]);
   t('npx -y pkg', []);
   t('npx --yes pkg', []);
-  t('npx --no pkg --edit ${1}', ['pkg']);
+  t('npx --no pkg --edit ${1}', ['bin:pkg']);
   t('npx --no -- pkg --edit ${1}', ['bin:pkg']);
-  t('npx pkg install --with-deps', ['pkg']);
-  t('npx pkg migrate reset --force', ['pkg']);
-  t('npx pkg@0.6.0 -- curl --output /dev/null', ['pkg', 'bin:curl']);
+  t('npx pkg install --with-deps', ['bin:pkg']);
+  t('npx pkg migrate reset --force', ['bin:pkg']);
+  t('npx pkg@0.6.0 -- curl --output /dev/null', ['bin:pkg', 'bin:curl']);
   t('npx @scope/pkg@0.6.0 -- curl', ['@scope/pkg', 'bin:curl']);
 });
 
@@ -157,7 +157,7 @@ test('getReferencesFromScripts (c8)', () => {
 test('getReferencesFromScripts (bash expressions)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['bin:make']);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['bin:make']);
-  t('if ! npx pkg --verbose ; then exit 1 ; fi', ['pkg', 'bin:exit']);
+  t('if ! npx pkg --verbose ; then exit 1 ; fi', ['bin:pkg', 'bin:exit']);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', ['bin:exec', 'bin:cz', 'bin:true']);
 });
 
@@ -167,8 +167,8 @@ test('getReferencesFromScripts (bash expansion)', () => {
 });
 
 test('getReferencesFromScripts (multiline)', () => {
-  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', ['lint-staged']);
-  t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, ['rc', '@scope/rc']);
+  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', ['bin:lint-staged']);
+  t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, ['bin:rc', '@scope/rc']);
 });
 
 test('getReferencesFromScripts (bail outs)', () => {

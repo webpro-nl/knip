@@ -6,6 +6,7 @@
     "pm2": "NODE_ENV=production pm2 start index.js",
     "dev": "pm2-dev start index.js",
     "lint": "eslint",
+    "commitlint": "npx commitlint",
     "test": "bash test/unit.sh && bash test/e2e.sh",
     "ignore": "node ignore.js",
     "ignore-artifact": "node dist/ignore.js",
@@ -25,7 +26,8 @@
     "eslint": "8.28.0",
     "eslint-v6": "npm:eslint@6.0.1",
     "eslint-v7": "npm:eslint@7.0.0",
-    "eslint-v8": "npm:eslint@8.0.2"
+    "eslint-v8": "npm:eslint@8.0.2",
+    "@commitlint/cli": "*"
   },
   "knip": {
     "ignore": "ignore.js",
