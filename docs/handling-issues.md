@@ -79,6 +79,8 @@ which in turn has `micromatch` as a (transitive) dependency. Knip uses both `fas
 `micromatch` being reported as unlisted. The solution is to make sure `micromatch` itself is also listed in
 `package.json`.
 
+- For npx, use `--yes` or `--no`. Knip behaves according to your intention. See [#160](https://github.com/webpro/knip/issues/160)
+
 ## Unused exports
 
 Unused exports of `entry` files are not reported.
