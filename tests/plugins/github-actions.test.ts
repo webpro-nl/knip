@@ -9,9 +9,11 @@ const manifest = getManifest(cwd);
 
 test('Find dependencies in github-actions workflow configurations', async () => {
   const configFilePath = join(cwd, '.github/workflows/test.yml');
-  const dependencies = await GithubActions.findDependencies(configFilePath, { manifest });
+  const dependencies = await GithubActions.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, [
+    join(cwd, 'comment.ts'),
     'esbuild-register',
+    join(cwd, 'scripts/check-dependencies.js'),
     'playwright',
     'prisma',
     'bin:eslint',
