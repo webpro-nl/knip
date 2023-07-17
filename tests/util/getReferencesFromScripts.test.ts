@@ -147,6 +147,13 @@ test('getReferencesFromScripts (zx)', () => {
   t('npx --yes zx --quiet script.js', [js]);
 });
 
+test('getReferencesFromScripts (c8)', () => {
+  t('c8 node script.js', ['bin:c8', js]);
+  t('c8 npm test', ['bin:c8', 'bin:npm']);
+  t('c8 check-coverage --lines 95 --per-file npm test', ['bin:c8', 'bin:npm']);
+  t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", ['bin:c8', 'bin:mocha']);
+});
+
 test('getReferencesFromScripts (bash expressions)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['bin:make']);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['bin:make']);
