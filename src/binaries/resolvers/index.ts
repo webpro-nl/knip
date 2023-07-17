@@ -1,3 +1,4 @@
+export * as dotenv from './dotenv.js';
 export * as node from './node.js';
 export * as npx from './npx.js';
 export * as pnpm from './pnpm.js';

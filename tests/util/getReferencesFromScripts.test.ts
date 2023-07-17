@@ -70,6 +70,7 @@ test('getReferencesFromScripts (.bin)', () => {
 test('getReferencesFromScripts (dotenv)', () => {
   t('dotenv program', ['bin:dotenv', 'bin:program']);
   t('dotenv -- program', ['bin:dotenv', 'bin:program']);
+  t('dotenv -e .env3 -v VARIABLE=somevalue -- program', ['bin:dotenv', 'bin:program']);
   t('dotenv -e .env3 -v VARIABLE=somevalue program -- exit', ['bin:dotenv', 'bin:program']);
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', ['bin:dotenv', 'bin:mvn']);
 });
@@ -79,13 +80,13 @@ test('getReferencesFromScripts (cross-env)', () => {
   t('cross-env NODE_ENV=production program', ['bin:cross-env', 'bin:program']);
   t('cross-env NODE_ENV=production program subcommand', ['bin:cross-env', 'bin:program']);
   t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', ['bin:cross-env', 'bin:program']);
-  t('cross-env NODE_ENV=production program -r pkg/config ./s.js -w ./s.js', ['bin:cross-env', 'bin:program', 'pkg']);
+  t('cross-env NODE_ENV=production node -r pkg/config ./script.js', ['bin:cross-env', 'pkg', js]);
   t('NODE_ENV=production cross-env -- program --cache', ['bin:cross-env', 'bin:program']);
 });
 
 test('getReferencesFromScripts (cross-env/node)', () => {
-  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['bin:cross-env', js, 'dotenv']);
-  t('cross-env NODE_ENV=production node -r esm script.js', ['bin:cross-env', js, 'esm']);
+  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['bin:cross-env', 'dotenv', js]);
+  t('cross-env NODE_ENV=production node -r esm script.js', ['bin:cross-env', 'esm', js]);
 });
 
 test('getReferencesFromScripts (npm)', () => {
@@ -163,8 +164,8 @@ test('getReferencesFromScripts (multiline)', () => {
 });
 
 test('getReferencesFromScripts (bail outs)', () => {
-  t('dotenv', [], knownOnly);
-  t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [], knownOnly);
+  t('curl', [], knownOnly);
+  t('program -- mvn exec:java -Dexec.args="-g -f"', [], knownOnly);
   t('deno install --no-check -r -f https://deno.land/x/deploy/deployctl.ts', []);
 });
 

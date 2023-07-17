@@ -1,18 +1,14 @@
 import parse from '@ericcornelissen/bash-parser';
-import parseArgs from 'minimist';
 import { debugLogObject } from '../util/debug.js';
 import * as FallbackResolver from './resolvers/fallback.js';
 import * as KnownResolvers from './resolvers/index.js';
-import { stripBinaryPath, toBinary } from './util.js';
+import { stripBinaryPath } from './util.js';
 import type { Node } from '@ericcornelissen/bash-parser';
 import type { PackageJson } from '@npmcli/package-json';
 
 // https://vorpaljs.github.io/bash-parser-playground/
 
 type KnownResolver = keyof typeof KnownResolvers;
-
-// Local binaries that spawn a child process for another binary
-const spawningBinaries = ['cross-env', 'dotenv'];
 
 export const getBinariesFromScript = (
   script: string,
@@ -21,7 +17,8 @@ export const getBinariesFromScript = (
   if (!script) return [];
 
   // Helper for recursive calls
-  const fromArgs = (args: string[]) => getBinariesFromScript(args.join(' '), { cwd, manifest });
+  const fromArgs = (args: string[]) =>
+    getBinariesFromScript(args.filter(arg => arg !== '--').join(' '), { cwd, manifest });
 
   const getBinariesFromNodes = (nodes: Node[]): string[] =>
     nodes.flatMap(node => {
@@ -52,20 +49,9 @@ export const getBinariesFromScript = (
             return KnownResolvers[binary as KnownResolver].resolve(binary, args, { cwd, manifest, fromArgs });
           }
 
-          // We need a way to bail out for scripts in environments like GitHub Actions, which are provisioned with lots
-          // of unknown global binaries.
+          // Before using the fallback resolver, we need a way to bail out for scripts in environments like GitHub
+          // Actions, which are provisioned with lots of unknown global binaries.
           if (knownGlobalsOnly) return [];
-
-          if (spawningBinaries.includes(binary)) {
-            const parsedArgs = parseArgs(args);
-            const [spawnedBinary] = parsedArgs._;
-            if (spawnedBinary) {
-              const restArgs = args.slice(args.indexOf(spawnedBinary));
-              return [toBinary(binary), ...fromArgs(restArgs)];
-            } else {
-              return [];
-            }
-          }
 
           // We apply a kitchen sink fallback resolver for everything else
           return FallbackResolver.resolve(binary, args, { cwd, manifest, fromArgs });

@@ -21,10 +21,13 @@ const argFilters: ArgResolvers = {
   default: withoutPositional,
 };
 
-export const resolve: Resolver = (binary, args, { cwd }) => {
+// Binaries that spawn a child process for the binary at first positional arg (and don't have custom resolver already)
+const spawningBinaries = ['cross-env'];
+
+export const resolve: Resolver = (binary, args, { cwd, fromArgs }) => {
   const parsed = parseArgs(args, { string: ['r'], alias: { require: ['r', 'loader'] }, boolean: ['quiet', 'verbose'] });
-  const argFilter = argFilters[binary as keyof typeof argFilters] ?? argFilters.default;
-  const filteredArgs = compact(argFilter(parsed));
   const bin = binary.startsWith('.') ? tryResolveFilePath(cwd, binary) : toBinary(binary);
-  return compact([bin, ...tryResolveSpecifiers(cwd, filteredArgs)]);
+  const filteredArgs = binary in argFilters ? argFilters[binary](parsed) : argFilters.default(parsed);
+  const shiftedArgs = spawningBinaries.includes(binary) ? fromArgs(args) : [];
+  return compact([bin, ...tryResolveSpecifiers(cwd, filteredArgs), ...shiftedArgs]);
 };
