@@ -37,11 +37,15 @@ test('Support various ways to import modules', async () => {
   assert(issues.unlisted['index.ts']['ignore-bindings']);
   assert(issues.unlisted['index.ts']['inside-expression']);
 
+  assert(issues.unlisted['index.ts']['import-c']);
+  assert(issues.unlisted['index.ts']['import-d']);
+  assert(issues.unlisted['index.ts']['import-e']);
+
   assert(issues.unlisted['dir/mod.ts']['another-unlisted']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 19,
+    unlisted: 22,
     processed: 3,
     total: 3,
   });

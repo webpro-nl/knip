@@ -53,3 +53,11 @@ const [defaultName5, { identifier: renamedIdentifier2 }] = await Promise.all([
   import('ignore-bindings'),
   import('inside-expression'),
 ]);
+
+export default defineComponent({
+  components: {
+    child1: defineAsyncComponent(() => import('import-c')),
+    child2: () => import('import-d'),
+    child3: import('import-e'),
+  },
+});

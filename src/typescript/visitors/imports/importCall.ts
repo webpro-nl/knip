@@ -21,29 +21,37 @@ export default visit(
           return { specifier, isDynamic: true };
         }
 
-        // Patterns:
-        // const { identifier } = await import('specifier')
-        // const [identifier, identifier] = await Promise.all[import('specifier'), import('specifier')];
-        // Could be deferred to LS.findReferences but that won't stitch it back together properly
         while (_ancestor) {
-          if (_ancestor && isVariableDeclarationList(_ancestor)) {
-            return findDescendants<ts.VariableDeclaration>(_ancestor, ts.isVariableDeclaration).flatMap(
-              variableDeclaration => {
-                if (ts.isIdentifier(variableDeclaration.name)) {
-                  return { identifier: 'default', specifier };
-                } else {
-                  const binds = findDescendants<ts.BindingElement>(
-                    variableDeclaration,
-                    _node => ts.isBindingElement(_node) && ts.isIdentifier(_node.name)
-                  );
-                  return binds.flatMap(element => {
-                    // TODO Duplicate imports added here when inside Promise.all array (harmless but could be optimized)
-                    const symbol = element.propertyName?.getText() || element.name.getText();
-                    return { identifier: symbol, specifier };
-                  });
+          if (_ancestor) {
+            // Patterns:
+            // const { identifier } = await import('specifier')
+            // const [identifier, identifier] = await Promise.all[import('specifier'), import('specifier')];
+            // Could be deferred to LS.findReferences but that won't stitch it back together properly
+            if (isVariableDeclarationList(_ancestor)) {
+              return findDescendants<ts.VariableDeclaration>(_ancestor, ts.isVariableDeclaration).flatMap(
+                variableDeclaration => {
+                  if (ts.isIdentifier(variableDeclaration.name)) {
+                    return { identifier: 'default', specifier };
+                  } else {
+                    const binds = findDescendants<ts.BindingElement>(
+                      variableDeclaration,
+                      _node => ts.isBindingElement(_node) && ts.isIdentifier(_node.name)
+                    );
+                    return binds.flatMap(element => {
+                      // TODO Duplicate imports added here when inside Promise.all array (harmless but could be optimized)
+                      const symbol = element.propertyName?.getText() || element.name.getText();
+                      return { identifier: symbol, specifier };
+                    });
+                  }
                 }
-              }
-            );
+              );
+            }
+
+            // Pattern:
+            // const components = { identifier: defineComponent(() => import('specifier')) };
+            if (ts.isPropertyAssignment(_ancestor)) {
+              return { identifier: 'default', specifier };
+            }
           }
 
           _ancestor = _ancestor.parent;
