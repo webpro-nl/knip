@@ -1,4 +1,4 @@
-import type { KnipConfig } from '../../../src/index';
+import type { KnipConfig } from '../../src/index';
 
 const config: KnipConfig = {
   paths: {

@@ -2,5 +2,4 @@
 /dist
 /tmp
 /node_modules
-!/tests/**/node_modules
-!/tests/**/node_modules/**/dist
+!/fixtures/**
