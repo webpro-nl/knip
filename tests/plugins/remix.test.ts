@@ -5,7 +5,7 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/plugins/remix');
+const cwd = resolve('fixtures/plugins/remix');
 
 test('Find dependencies in Remix configuration', async () => {
   const { issues, counters } = await main({

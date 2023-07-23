@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as typescript from '../../src/plugins/typescript/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/typescript');
+const cwd = resolve('fixtures/plugins/typescript');
 
 test('Find dependencies in typescript configuration (json)', async () => {
   const configFilePath = join(cwd, 'tsconfig.json');

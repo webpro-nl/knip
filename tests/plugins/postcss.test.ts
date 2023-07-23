@@ -7,7 +7,7 @@ import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/postcss');
+const cwd = resolve('fixtures/plugins/postcss');
 const manifestFilePath = join(cwd, 'package.json');
 const manifest = getManifest(cwd);
 

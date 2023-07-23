@@ -6,7 +6,7 @@ import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/babel');
+const cwd = resolve('fixtures/plugins/babel');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in Babel configuration (.babelrc)', async () => {

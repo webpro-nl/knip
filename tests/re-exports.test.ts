@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/re-exports');
+const cwd = resolve('fixtures/re-exports');
 
 test('Ignore re-exports from entry files', async () => {
   const { counters } = await main({

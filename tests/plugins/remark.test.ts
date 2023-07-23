@@ -4,7 +4,7 @@ import * as remark from '../../src/plugins/remark/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/remark');
+const cwd = resolve('fixtures/plugins/remark');
 const manifestFilePath = join(cwd, 'package.json');
 const manifest = getManifest(cwd);
 

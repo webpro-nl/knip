@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/module-block');
+const cwd = resolve('fixtures/module-block');
 
 test('Ignore export in module block used in same file', async () => {
   const { counters } = await main({

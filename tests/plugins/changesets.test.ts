@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as changesets from '../../src/plugins/changesets/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/changesets');
+const cwd = resolve('fixtures/plugins/changesets');
 
 test('Find dependencies in Changesets configuration', async () => {
   const configFilePaths = changesets.CONFIG_FILE_PATTERNS.map(filePath => join(cwd, filePath));

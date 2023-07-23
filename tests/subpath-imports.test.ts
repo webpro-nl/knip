@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/subpath-import');
+const cwd = resolve('fixtures/subpath-import');
 
 test('Allows subpath-imports', async () => {
   const { issues, counters } = await main({

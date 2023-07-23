@@ -4,7 +4,7 @@ import * as eslint from '../../src/plugins/eslint/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/eslint');
+const cwd = resolve('fixtures/plugins/eslint');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in ESLint configuration (legacy json)', async () => {

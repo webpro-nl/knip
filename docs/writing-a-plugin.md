@@ -203,7 +203,7 @@ Cool Linter does not require such files, so we can remove them from our plugin.
 Let's update the tests to verify our plugin implementation is working correctly.
 
 1.  Let's save the example `cool-linter.config.json` in the fixtures directory. Create the file in your IDE, and save it
-    at `tests/fixtures/plugins/cool-linter/cool-linter.config.json`.
+    at `fixtures/plugins/cool-linter/cool-linter.config.json`.
 
 2.  Update the test at [tests/plugins/cool-linter.test.ts][19]:
 

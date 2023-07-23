@@ -4,7 +4,7 @@ import * as markdownlint from '../../src/plugins/markdownlint/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/markdownlint');
+const cwd = resolve('fixtures/plugins/markdownlint');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in markdownlint configuration (json)', async () => {

@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/include-entry-exports');
+const cwd = resolve('fixtures/include-entry-exports');
 
 test('Skip unused exports in entry source files', async () => {
   const { counters } = await main({

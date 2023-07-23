@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as gatsby from '../../src/plugins/gatsby/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/gatsby');
+const cwd = resolve('fixtures/plugins/gatsby');
 
 test('Find dependencies in Gatsby configuration (gatsby-config.js)', async () => {
   const configFilePath = join(cwd, 'gatsby-config.js');

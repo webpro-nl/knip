@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Support JSX/TSX files', async () => {
-  const cwd = resolve('tests/fixtures/react');
+  const cwd = resolve('fixtures/react');
 
   const { counters } = await main({
     ...baseArguments,

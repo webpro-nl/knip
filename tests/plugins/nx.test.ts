@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as nx from '../../src/plugins/nx/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/nx');
+const cwd = resolve('fixtures/plugins/nx');
 
 test('Find dependencies in Nx configuration (project.json)', async () => {
   const configFilePath = join(cwd, 'apps/a/project.json');

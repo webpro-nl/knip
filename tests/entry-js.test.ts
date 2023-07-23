@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Find unused files and exports with JS entry file', async () => {
-  const cwd = resolve('tests/fixtures/entry-js');
+  const cwd = resolve('fixtures/entry-js');
 
   const { issues, counters } = await main({
     ...baseArguments,

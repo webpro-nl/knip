@@ -4,7 +4,7 @@ import * as mocha from '../../src/plugins/mocha/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/mocha');
+const cwd = resolve('fixtures/plugins/mocha');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in Mocha configuration (.mocharc.json)', async () => {

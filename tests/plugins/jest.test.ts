@@ -5,7 +5,7 @@ import test from 'node:test';
 import * as jest from '../../src/plugins/jest/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/jest');
+const cwd = resolve('fixtures/plugins/jest');
 
 test('Find dependencies in Jest configuration (jest.config.js)', async () => {
   const configFilePath = join(cwd, 'jest.config.js');

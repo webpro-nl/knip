@@ -4,7 +4,7 @@ import * as commitlint from '../../src/plugins/commitlint/index.js';
 import { join, resolve } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/commitlint');
+const cwd = resolve('fixtures/plugins/commitlint');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in commitlint configuration (js)', async () => {

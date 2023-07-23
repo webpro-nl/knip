@@ -4,7 +4,7 @@ import * as vitest from '../../src/plugins/vitest/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/vitest');
+const cwd = resolve('fixtures/plugins/vitest');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in vitest configuration (vitest)', async () => {

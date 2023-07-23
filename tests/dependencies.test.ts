@@ -5,7 +5,7 @@ import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/dependencies');
+const cwd = resolve('fixtures/dependencies');
 
 test('Find unused dependencies', async () => {
   const { issues, counters } = await main({

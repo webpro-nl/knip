@@ -9,7 +9,7 @@ import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/webpack');
+const cwd = resolve('fixtures/plugins/webpack');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in Webpack configuration (webpack.config.js)', async () => {

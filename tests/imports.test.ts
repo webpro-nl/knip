@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Support various ways to import modules', async () => {
-  const cwd = resolve('tests/fixtures/imports');
+  const cwd = resolve('fixtures/imports');
 
   const { issues, counters } = await main({
     ...baseArguments,

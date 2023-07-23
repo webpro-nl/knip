@@ -4,7 +4,7 @@ import * as lintStaged from '../../src/plugins/lint-staged/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/lint-staged');
+const cwd = resolve('fixtures/plugins/lint-staged');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in lint-staged configuration (json)', async () => {

@@ -4,7 +4,7 @@ import * as NpmPkgJsonLintConfig from '../../src/plugins/npm-package-json-lint/i
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/npm-package-json-lint');
+const cwd = resolve('fixtures/plugins/npm-package-json-lint');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in npm-package-json-lint configuration (json)', async () => {

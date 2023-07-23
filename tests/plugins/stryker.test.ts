@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as stryker from '../../src/plugins/stryker/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/stryker');
+const cwd = resolve('fixtures/plugins/stryker');
 
 test('Find dependencies in Stryker configuration (js)', async () => {
   const configFilePath = join(cwd, '.stryker.conf.js');

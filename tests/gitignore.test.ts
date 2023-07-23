@@ -4,7 +4,7 @@ import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 
-const cwd = resolve('tests/fixtures/gitignore');
+const cwd = resolve('fixtures/gitignore');
 
 test('Obey gitignore', async () => {
   const { issues } = await main({

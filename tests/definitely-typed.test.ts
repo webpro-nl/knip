@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/definitely-typed');
+const cwd = resolve('fixtures/definitely-typed');
 
 test('Find unused DT @types', async () => {
   const { issues, counters } = await main({

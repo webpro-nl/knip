@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Resolve import path aliases', async () => {
-  const cwd = resolve('tests/fixtures/paths-knip-config');
+  const cwd = resolve('fixtures/paths-knip-config');
 
   const { counters } = await main({
     ...baseArguments,

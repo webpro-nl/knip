@@ -4,7 +4,7 @@ import * as ava from '../../src/plugins/ava/index.js';
 import { join, resolve } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/ava');
+const cwd = resolve('fixtures/plugins/ava');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in ava configuration (package.json)', async () => {

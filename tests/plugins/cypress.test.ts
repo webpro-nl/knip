@@ -5,7 +5,7 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/plugins/cypress');
+const cwd = resolve('fixtures/plugins/cypress');
 
 test('Find dependencies in Cypress configuration', async () => {
   const { issues, counters } = await main({

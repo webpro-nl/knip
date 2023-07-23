@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/include-entry-reexports');
+const cwd = resolve('fixtures/include-entry-reexports');
 
 test('Skip unused nsExports in entry source files', async () => {
   const { counters } = await main({

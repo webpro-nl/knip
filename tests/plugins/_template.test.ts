@@ -4,7 +4,7 @@ import * as __PLUGIN_CAMELCASED_NAME__ from '../../src/plugins/_template/index.j
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/_template');
+const cwd = resolve('fixtures/plugins/_template');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in _template configuration (json)', async () => {

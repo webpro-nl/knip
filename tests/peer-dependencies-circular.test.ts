@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/peer-dependencies-circular');
+const cwd = resolve('fixtures/peer-dependencies-circular');
 
 test('Prevent infinite recursion with ciricular peer dependencies', async () => {
   const { counters } = await main({

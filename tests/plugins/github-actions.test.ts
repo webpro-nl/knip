@@ -4,7 +4,7 @@ import * as GithubActions from '../../src/plugins/github-actions/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/github-actions');
+const cwd = resolve('fixtures/plugins/github-actions');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in github-actions workflow configurations', async () => {

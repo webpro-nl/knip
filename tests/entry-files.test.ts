@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Use main, bin and exports fields in package.json to find entry files', async () => {
-  const cwd = resolve('tests/fixtures/entry-files');
+  const cwd = resolve('fixtures/entry-files');
 
   const { counters } = await main({
     ...baseArguments,

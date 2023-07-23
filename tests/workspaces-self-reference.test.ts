@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Find unused files, dependencies and exports in workspaces with cross self-references', async () => {
-  const cwd = resolve('tests/fixtures/workspaces-self-reference');
+  const cwd = resolve('fixtures/workspaces-self-reference');
 
   const { counters } = await main({
     ...baseArguments,

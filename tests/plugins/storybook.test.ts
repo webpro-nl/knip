@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as storybook from '../../src/plugins/storybook/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/storybook');
+const cwd = resolve('fixtures/plugins/storybook');
 
 test('Find dependencies in Storybook configuration (main.js)', async () => {
   const configFilePath = join(cwd, 'main.js');

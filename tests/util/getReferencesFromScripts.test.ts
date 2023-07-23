@@ -4,7 +4,7 @@ import test from 'node:test';
 import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
 import { join, resolve } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/binaries');
+const cwd = resolve('fixtures/binaries');
 
 const js = join(cwd, 'script.js');
 const ts = join(cwd, 'main.ts');

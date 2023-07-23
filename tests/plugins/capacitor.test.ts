@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as capacitor from '../../src/plugins/capacitor/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/capacitor');
+const cwd = resolve('fixtures/plugins/capacitor');
 
 test('Find dependencies in Capacitor configuration (ts)', async () => {
   const configFilePath = join(cwd, 'capacitor.config.ts');

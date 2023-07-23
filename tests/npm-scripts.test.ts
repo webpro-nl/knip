@@ -7,7 +7,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 import { getManifest } from './helpers/index.js';
 
-const cwd = resolve('tests/fixtures/npm-scripts');
+const cwd = resolve('fixtures/npm-scripts');
 const manifest = getManifest(cwd);
 
 test('Referenced dependencies in npm scripts', async () => {

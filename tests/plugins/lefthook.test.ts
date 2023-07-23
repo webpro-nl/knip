@@ -4,7 +4,7 @@ import * as lefthook from '../../src/plugins/lefthook/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/lefthook');
+const cwd = resolve('fixtures/plugins/lefthook');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in lefthook configuration (json)', async () => {

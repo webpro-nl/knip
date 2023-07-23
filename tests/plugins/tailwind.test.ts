@@ -5,7 +5,7 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/plugins/tailwind');
+const cwd = resolve('fixtures/plugins/tailwind');
 
 test('Find dependencies in tailwind configuration', async () => {
   const { counters } = await main({

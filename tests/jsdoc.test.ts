@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Find exports from jsdoc @type tags', async () => {
-  const cwd = resolve('tests/fixtures/jsdoc');
+  const cwd = resolve('fixtures/jsdoc');
 
   const { issues, counters } = await main({
     ...baseArguments,

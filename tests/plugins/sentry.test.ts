@@ -5,7 +5,7 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/plugins/sentry');
+const cwd = resolve('fixtures/plugins/sentry');
 
 test('Find dependencies in Sentry configuration', async () => {
   const { counters } = await main({

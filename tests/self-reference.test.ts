@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/self-reference');
+const cwd = resolve('fixtures/self-reference');
 
 test('Allows self-references', async () => {
   const { issues, counters } = await main({

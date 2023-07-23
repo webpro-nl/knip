@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/workspaces-nested');
+const cwd = resolve('fixtures/workspaces-nested');
 
 const expectedConfigurationHints = new Set([
   { type: 'ignoreDependencies', workspaceName: '.', identifier: 'ignored-dep-global' },

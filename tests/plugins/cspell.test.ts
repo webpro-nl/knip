@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as cspell from '../../src/plugins/cspell/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
-const cwd = resolve('tests/fixtures/plugins/cspell');
+const cwd = resolve('fixtures/plugins/cspell');
 
 test('Find dependencies in cspell configuration (json)', async () => {
   const configFilePath = join(cwd, '.cspell.json');

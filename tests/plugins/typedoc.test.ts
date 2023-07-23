@@ -4,7 +4,7 @@ import * as typedoc from '../../src/plugins/typedoc/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/typedoc');
+const cwd = resolve('fixtures/plugins/typedoc');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in typedoc configuration (json)', async () => {

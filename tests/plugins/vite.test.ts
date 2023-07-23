@@ -5,7 +5,7 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('tests/fixtures/plugins/vite');
+const cwd = resolve('fixtures/plugins/vite');
 
 test('Find dependencies in Vite configuration', async () => {
   const { counters } = await main({

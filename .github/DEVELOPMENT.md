@@ -44,12 +44,12 @@ You can then also run `npm link knip` from another repository to use the linked 
 Pull requests should include one or more tests. See the `tests` and `tests/fixtures` directories to find relevant files
 that you may want to borrow or copy from.
 
-Let's assume you created `tests/fixtures/feature` and `tests/feature.test.ts`. There are a few ways to run it:
+Let's assume you created `fixtures/feature` and `tests/feature.test.ts`. There are a few ways to run it:
 
 - `node loader --tsx tests/feature.test.ts`
 - `npx tsx tests/feature.test.ts`
 - Use [launch configurations][6] in VS Code and start debugging from `tests/feature.test.ts`.
-- Go to `cd tests/fixtures/feature` and run `knip` (or `knip --debug`)
+- Go to `cd fixtures/feature` and run `knip` (or `knip --debug`)
 
 ## QA
 

@@ -7,7 +7,7 @@ import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/husky');
+const cwd = resolve('fixtures/plugins/husky');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in husky configuration (plugin)', async () => {

@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Find unused exports in zero-config mode', async () => {
-  const cwd = resolve('tests/fixtures/zero-config');
+  const cwd = resolve('fixtures/zero-config');
 
   const { issues, counters } = await main({
     ...baseArguments,

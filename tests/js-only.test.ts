@@ -6,7 +6,7 @@ import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 test('Find unused files and exports with only JS files', async () => {
-  const cwd = resolve('tests/fixtures/js-only');
+  const cwd = resolve('fixtures/js-only');
 
   const { issues, counters } = await main({
     ...baseArguments,

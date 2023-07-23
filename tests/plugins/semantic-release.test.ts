@@ -4,7 +4,7 @@ import * as semanticRelease from '../../src/plugins/semantic-release/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 
-const cwd = resolve('tests/fixtures/plugins/semantic-release');
+const cwd = resolve('fixtures/plugins/semantic-release');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in semantic-release package.json configuration (json)', async () => {
