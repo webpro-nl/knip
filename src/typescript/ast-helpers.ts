@@ -18,10 +18,6 @@ export function isDefaultImport(
   return node.kind === ts.SyntaxKind.ImportDeclaration && !!node.importClause && !!node.importClause.name;
 }
 
-export function isVariableDeclarationList(node: ts.Node): node is ts.VariableDeclarationList {
-  return node.kind === ts.SyntaxKind.VariableDeclarationList;
-}
-
 export function isAccessExpression(node: ts.Node): node is ts.PropertyAccessExpression | ts.ElementAccessExpression {
   return ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node);
 }
