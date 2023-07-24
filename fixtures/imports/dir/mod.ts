@@ -1,1 +1,1 @@
-import 'another-unlisted';
+export default 1;

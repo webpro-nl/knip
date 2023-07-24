@@ -1,3 +1,4 @@
 {
-  "name": "imports"
+  "name": "imports",
+  "type": "module"
 }
