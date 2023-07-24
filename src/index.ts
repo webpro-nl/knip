@@ -243,7 +243,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const analyzeSourceFile = (filePath: string) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, scripts } = principal.analyzeSourceFile(filePath, { skipTypeOnly: !isReportTypes });
+        const { imports, exports, scripts } = principal.analyzeSourceFile(filePath, { skipTypeOnly: isProduction });
         const { internal, external, unresolved } = imports;
         const { exported, duplicate } = exports;
 
