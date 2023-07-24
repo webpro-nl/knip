@@ -1,4 +1,5 @@
 import { compact } from '../../util/array.js';
+import { join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
@@ -69,13 +70,15 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
       const dependencies = (config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []).map(loader =>
         loader.replace(/\?.*/, '')
       );
-      const entries = cfg.entry
-        ? typeof cfg.entry === 'string'
-          ? [cfg.entry]
-          : Array.isArray(cfg.entry)
-          ? cfg.entry
-          : Object.values(cfg.entry).map(entry => (typeof entry === 'string' ? entry : entry.filename))
-        : [];
+      const entries = (
+        cfg.entry
+          ? typeof cfg.entry === 'string'
+            ? [cfg.entry]
+            : Array.isArray(cfg.entry)
+            ? cfg.entry
+            : Object.values(cfg.entry).map(entry => (typeof entry === 'string' ? entry : entry.filename))
+          : []
+      ).map(entry => (config.context ? join(config.context, entry) : entry));
       return [...dependencies, ...entries];
     });
   });
