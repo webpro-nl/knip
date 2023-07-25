@@ -26,7 +26,7 @@ export class SourceFileManager {
     if (typeof contents !== 'string') throw new Error(`Unable to read ${filePath}`);
     const ext = extname(filePath);
     const compiler = this.syncCompilers?.get(ext);
-    const compiled = compiler ? compiler(contents) : contents;
+    const compiled = compiler ? compiler(contents, filePath) : contents;
     if (compiler) debugLog(`Compiled ${filePath}`);
     return this.createSourceFile(filePath, compiled);
   }
@@ -46,7 +46,7 @@ export class SourceFileManager {
     const ext = extname(filePath);
     const compiler = this.asyncCompilers?.get(ext);
     if (compiler) {
-      const compiled = await compiler(contents);
+      const compiled = await compiler(contents, filePath);
       debugLog(`Compiled ${filePath}`);
       this.createSourceFile(filePath, compiled);
     }
