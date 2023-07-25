@@ -24,7 +24,7 @@
     "format": "prettier scripts src tests schema.json --with-node-modules --write --config .prettierrc",
     "pretest": "node rmdir.js tmp && swc src -d tmp/src && swc tests -d tmp/tests",
     "test": "node --no-warnings --test tmp",
-    "coverage": "c8 npm test",
+    "coverage": "c8 --reporter html node --no-warnings --loader tsx --test tests/*.test.ts tests/*/*.test.ts",
     "watch": "tsc --watch",
     "prebuild": "node rmdir.js dist",
     "build": "tsc",
