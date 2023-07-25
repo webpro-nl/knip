@@ -26,13 +26,11 @@ export type AddImportOptions = {
   specifier: string;
   symbol?: ts.Symbol;
   identifier?: string;
-  isDynamic?: boolean;
   isReExport?: boolean;
 };
 
 type AddInternalImportOptions = AddImportOptions & {
   identifier: string;
-  isDynamic: boolean;
   filePath: string;
   isReExport: boolean;
 };
@@ -52,7 +50,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
   const visitors = getVisitors(sourceFile);
 
   const addInternalImport = (options: AddInternalImportOptions) => {
-    const { identifier, specifier, symbol, filePath, isDynamic, isReExport } = options;
+    const { identifier, specifier, symbol, filePath, isReExport } = options;
 
     const isStar = identifier === '*';
 
@@ -62,7 +60,6 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
       isReExport,
       isReExportedBy: new Set(),
       symbols: new Set(),
-      isDynamic,
     });
 
     if (isReExport) {
@@ -76,13 +73,10 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
 
     // Store imported namespace symbol for reference in `maybeAddNamespaceAccessAsImport`
     if (isStar && symbol) importedInternalSymbols.set(symbol, filePath);
-
-    // Defer dynamic imports to findReferences
-    if (isDynamic) internalImport.isDynamic = isDynamic;
   };
 
   const addImport = (options: AddImportOptions) => {
-    const { specifier, symbol, identifier = '__anonymous', isDynamic = false, isReExport = false } = options;
+    const { specifier, symbol, identifier = '__anonymous', isReExport = false } = options;
     if (isBuiltin(specifier)) return;
 
     const module = sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
@@ -92,7 +86,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
       if (filePath) {
         if (module.resolvedModule.isExternalLibraryImport) {
           if (!isInNodeModules(filePath)) {
-            addInternalImport({ identifier, specifier, symbol, filePath, isDynamic, isReExport });
+            addInternalImport({ identifier, specifier, symbol, filePath, isReExport });
           }
 
           if (!isMaybePackageName(specifier)) return;
@@ -105,7 +99,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
             externalImports.add(module.resolvedModule.packageId?.name ?? specifier);
           }
         } else {
-          addInternalImport({ identifier, specifier, symbol, filePath, isDynamic, isReExport });
+          addInternalImport({ identifier, specifier, symbol, filePath, isReExport });
         }
       }
     } else {
