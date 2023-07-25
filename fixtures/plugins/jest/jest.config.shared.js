@@ -1,7 +1,7 @@
 const ignorePatterns = ['\\/build\\/', '\\/coverage\\/', '\\/\\.vscode\\/', '\\/\\.tmp\\/', '\\/\\.cache\\/'];
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
-  testEnvironment: 'jsdom',
+  preset: './local-preset/jest-preset.js',
   modulePathIgnorePatterns: ignorePatterns,
   watchPathIgnorePatterns: [...ignorePatterns, '\\/node_modules\\/'],
   testMatch: ['<rootDir>/**/*-test.[jt]s?(x)'],
