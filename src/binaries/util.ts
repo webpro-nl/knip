@@ -36,3 +36,5 @@ export const stripBinaryPath = (command: string) =>
     .replace(/^(\.bin\/)/, '')
     .replace(/\$\(npm bin\)\/(\w+)/, '$1') // Removed in npm v9
     .replace(/(\S+)@.*/, '$1');
+
+export const argsFrom = (args: string[], from: string) => args.slice(args.indexOf(from));

@@ -152,6 +152,7 @@ test('getReferencesFromScripts (c8)', () => {
   t('c8 npm test', ['bin:c8', 'bin:npm']);
   t('c8 check-coverage --lines 95 --per-file npm test', ['bin:c8', 'bin:npm']);
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", ['bin:c8', 'bin:mocha']);
+  t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/reporter', ['bin:c8', '@org/reporter']);
 });
 
 test('getReferencesFromScripts (bash expressions)', () => {
