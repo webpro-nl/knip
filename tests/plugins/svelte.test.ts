@@ -19,7 +19,7 @@ test('Use compilers', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 2,
-    processed: 9, // This includes .svelte and .css files
-    total: 9,
+    processed: 10, // This includes .svelte and .css files
+    total: 10,
   });
 });
