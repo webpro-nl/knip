@@ -25,8 +25,8 @@ Options:
   -d, --debug              Show debug output
   --debug-file-filter      Filter for files in debug output (regex as string)
   --performance            Measure count and running time of expensive functions and display stats table
-  --h, --help              Print this help text
-  --V, version             Print version
+  -h, --help               Print this help text
+  -V, --version            Print version
 
 (1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
 
