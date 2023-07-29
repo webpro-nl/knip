@@ -1,77 +1,77 @@
-import parse from '@ericcornelissen/bash-parser';
+import Parser from 'tree-sitter';
+import Bash from 'tree-sitter-bash';
 import { debugLogObject } from '../util/debug.js';
 import * as FallbackResolver from './resolvers/fallback.js';
 import * as KnownResolvers from './resolvers/index.js';
 import { stripBinaryPath } from './util.js';
-import type { Node } from '@ericcornelissen/bash-parser';
 import type { PackageJson } from '@npmcli/package-json';
-
-// https://vorpaljs.github.io/bash-parser-playground/
+import type { SyntaxNode } from 'tree-sitter';
 
 type KnownResolver = keyof typeof KnownResolvers;
+
+const parser = new Parser();
+parser.setLanguage(Bash);
+
+const getCommandsFromScript = (script: string) => {
+  const tree = parser.parse(script);
+  const commands: string[][] = [];
+
+  const traverse = (node: SyntaxNode) => {
+    switch (node.type) {
+      case 'command': {
+        const commandNameIndex = node.children.findIndex(node => node.type === 'command_name');
+        const command = node.children.slice(commandNameIndex).map(node => node.text);
+        commands.push(command);
+        break;
+      }
+      default:
+        break;
+    }
+
+    for (const child of node.children) {
+      traverse(child);
+    }
+  };
+
+  traverse(tree.rootNode);
+
+  return commands;
+};
 
 export const getBinariesFromScript = (
   script: string,
   { cwd, manifest, knownGlobalsOnly = false }: { cwd: string; manifest: PackageJson; knownGlobalsOnly?: boolean }
-) => {
+): string[] => {
   if (!script) return [];
 
   // Helper for recursive calls
   const fromArgs = (args: string[]) =>
     getBinariesFromScript(args.filter(arg => arg !== '--').join(' '), { cwd, manifest });
 
-  const getBinariesFromNodes = (nodes: Node[]): string[] =>
-    nodes.flatMap(node => {
-      switch (node.type) {
-        case 'Command': {
-          const binary = node.name?.text ? stripBinaryPath(node.name.text) : node.name?.text;
+  const commands = getCommandsFromScript(script);
 
-          const commandExpansions =
-            node.prefix?.flatMap(
-              prefix => prefix.expansion?.filter(expansion => expansion.type === 'CommandExpansion') ?? []
-            ) ?? [];
+  const getBinariesFromCommand = (command: string[]) => {
+    const [bin, ...args] = command;
+    const binary = stripBinaryPath(bin);
 
-          if (commandExpansions.length > 0) {
-            return commandExpansions.flatMap(expansion => getBinariesFromNodes(expansion.commandAST.commands)) ?? [];
-          }
+    if (!binary || binary === '.' || binary === 'source') return [];
+    if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
+    if (['bun', 'deno'].includes(binary)) return [];
 
-          // Bunch of early bail outs for things we can't or don't want to resolve
-          if (!binary || binary === '.' || binary === 'source') return [];
-          if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
-          if (['bun', 'deno'].includes(binary)) return [];
+    if (binary in KnownResolvers) {
+      return KnownResolvers[binary as KnownResolver].resolve(binary, args, { cwd, manifest, fromArgs });
+    }
 
-          const args = node.suffix?.map(arg => arg.text) ?? [];
+    // Before using the fallback resolver, we need a way to bail out for scripts in environments like GitHub
+    // Actions, which are provisioned with lots of unknown global binaries.
+    if (knownGlobalsOnly) return [];
 
-          // Commands that precede other commands, try again with the rest
-          if (['!', 'test'].includes(binary)) return fromArgs(args);
-
-          if (binary in KnownResolvers) {
-            return KnownResolvers[binary as KnownResolver].resolve(binary, args, { cwd, manifest, fromArgs });
-          }
-
-          // Before using the fallback resolver, we need a way to bail out for scripts in environments like GitHub
-          // Actions, which are provisioned with lots of unknown global binaries.
-          if (knownGlobalsOnly) return [];
-
-          // We apply a kitchen sink fallback resolver for everything else
-          return FallbackResolver.resolve(binary, args, { cwd, manifest, fromArgs });
-        }
-        case 'LogicalExpression':
-          return getBinariesFromNodes([node.left, node.right]);
-        case 'If':
-          return getBinariesFromNodes([...node.clause.commands, ...node.then.commands, ...(node.else?.commands ?? [])]);
-        case 'For':
-          return getBinariesFromNodes(node.do.commands);
-        case 'CompoundList':
-          return getBinariesFromNodes(node.commands);
-        default:
-          return [];
-      }
-    });
+    // We apply a kitchen sink fallback resolver for everything else
+    return FallbackResolver.resolve(binary, args, { cwd, manifest, fromArgs });
+  };
 
   try {
-    const parsed = parse(script);
-    return parsed?.commands ? getBinariesFromNodes(parsed.commands) : [];
+    return commands.map(getBinariesFromCommand).flat();
   } catch (error) {
     debugLogObject('Bash parser error', error);
     return [];

@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { stripQuotes } from '../../ast-helpers.js';
+import { stripQuotes } from '../../../util/string.js';
 import { scriptVisitor as visit } from '../index.js';
 
 export default visit(

@@ -24,6 +24,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'cd',
   'cp',
   'deno',
+  'dirname',
   'echo',
   'exec',
   'exit',
@@ -39,6 +40,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'rm',
   'sh',
   'sudo',
+  'test', // exception
   'true',
   'yarn',
 ];
