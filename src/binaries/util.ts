@@ -29,12 +29,15 @@ export const fromBinary = (specifier: string) => specifier.replace(/^(bin:)?/, '
 
 export const isBinary = (specifier: string) => specifier.startsWith('bin:');
 
+export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
+
 const stripNodeModulesFromPath = (command: string) => command.replace(/^(\.\/)?node_modules\//, '');
 
 export const stripBinaryPath = (command: string) =>
-  stripNodeModulesFromPath(command)
-    .replace(/^(\.bin\/)/, '')
-    .replace(/\$\(npm bin\)\/(\w+)/, '$1') // Removed in npm v9
-    .replace(/(\S+)@.*/, '$1');
+  stripVersionFromSpecifier(
+    stripNodeModulesFromPath(command)
+      .replace(/^(\.bin\/)/, '')
+      .replace(/\$\(npm bin\)\/(\w+)/, '$1') // Removed in npm v9
+  );
 
 export const argsFrom = (args: string[], from: string) => args.slice(args.indexOf(from));

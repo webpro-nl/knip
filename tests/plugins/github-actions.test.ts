@@ -20,7 +20,7 @@ test('Find dependencies in github-actions workflow configurations', async () => 
     'bin:release-it',
     'bin:knip',
     'bin:nyc',
-    'bin:retry-cli',
+    'retry-cli',
     'bin:curl',
     '@scope/retry-cli',
     'bin:changeset',

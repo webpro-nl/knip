@@ -105,8 +105,14 @@ test('getReferencesFromScripts (npx)', () => {
   t('npx --no -- pkg --edit ${1}', ['bin:pkg']);
   t('npx pkg install --with-deps', ['bin:pkg']);
   t('npx pkg migrate reset --force', ['bin:pkg']);
-  t('npx pkg@0.6.0 -- curl --output /dev/null', ['bin:pkg', 'bin:curl']);
-  t('npx @scope/pkg@0.6.0 -- curl', ['@scope/pkg', 'bin:curl']);
+  t('npx pkg@1.0.0 migrate reset --force', ['pkg']);
+  t('npx @scope/cli migrate reset --force', ['@scope/cli']);
+  t('npx -- pkg', ['bin:pkg']);
+  t('npx -- @scope/cli@1.0.0 migrate reset --force', ['@scope/cli']);
+  t('npx retry-cli@0.6.0 -- curl --output /dev/null ', ['retry-cli', 'bin:curl']);
+  t('npx --package pkg@0.6.0 -- curl --output /dev/null', ['bin:curl', 'pkg']);
+  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', ['bin:curl', '@scope/pkg', 'pkg']);
+  t("npx --package=foo -c 'curl --output /dev/null'", ['foo', 'bin:curl']);
 });
 
 test('getReferencesFromScripts (pnpm)', () => {
@@ -169,7 +175,7 @@ test('getReferencesFromScripts (bash expansion)', () => {
 
 test('getReferencesFromScripts (multiline)', () => {
   t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', ['bin:lint-staged']);
-  t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, ['bin:rc', '@scope/rc']);
+  t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, ['rc', '@scope/rc']);
 });
 
 test('getReferencesFromScripts (bail outs)', () => {

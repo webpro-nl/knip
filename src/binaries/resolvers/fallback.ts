@@ -22,7 +22,7 @@ const argFilters: ArgResolvers = {
 };
 
 // Binaries that spawn a child process for the binary at first positional arg (and don't have custom resolver already)
-const spawningBinaries = ['cross-env'];
+const spawningBinaries = ['cross-env', 'retry-cli'];
 
 export const resolve: Resolver = (binary, args, { cwd, fromArgs }) => {
   const parsed = parseArgs(args, { string: ['r'], alias: { require: ['r', 'loader'] }, boolean: ['quiet', 'verbose'] });

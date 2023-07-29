@@ -17,7 +17,7 @@
     "generate-docs": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx compodoc -p apps/frontend/tsconfig.app.json"
+        "command": "npx -- compodoc -p apps/frontend/tsconfig.app.json"
       }
     },
     "test": {
