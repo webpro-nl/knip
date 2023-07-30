@@ -22,5 +22,9 @@
   },
   "include": ["./src/**/*.ts"],
   "exclude": [],
-  "files": ["./@types/github-codeowners/index.d.ts", "./@types/summary/index.d.ts", "./@types/bash-parser/index.d.ts"]
+  "files": [
+    "./@types/github-codeowners/index.d.ts",
+    "./@types/summary/index.d.ts",
+    "./@types/tree-sitter-bash/index.d.ts"
+  ]
 }
