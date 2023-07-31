@@ -1,3 +1,5 @@
+import type { VitestConfig } from './types.js';
+
 /**
  * Sources:
  * - https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/integrations/env/index.ts
@@ -29,5 +31,7 @@ export const getEnvPackageName = (env: VitestEnvironment) => {
 
 const builtInReporters = ['default', 'verbose', 'dot', 'json', 'tap', 'tap-flat', 'junit', 'hanging-process'];
 
-export const getExternalReporters = (reporters?: string | string[]) =>
-  reporters ? [reporters].flat().filter(reporter => !builtInReporters.includes(reporter)) : [];
+export const getExternalReporters = (reporters?: VitestConfig['test']['reporters']) =>
+  reporters
+    ? [reporters].flat().filter(reporter => typeof reporter === 'string' && !builtInReporters.includes(reporter))
+    : [];

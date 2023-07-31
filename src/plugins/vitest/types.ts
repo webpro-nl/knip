@@ -5,7 +5,7 @@ export type VitestConfig = {
     };
     environment?: string;
     globalSetup?: string | string[];
-    reporters?: string[];
+    reporters?: (string | unknown)[];
     setupFiles?: string | string[];
   };
 };
