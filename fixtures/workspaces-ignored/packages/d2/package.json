@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-ignored/d2",
+  "scripts": {
+    "start": "ignored"
+  }
+}

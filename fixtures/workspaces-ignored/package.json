@@ -1,0 +1,10 @@
+{
+  "name": "@workspaces-ignored/root",
+  "knip": {
+    "ignoreWorkspaces": [
+      "packages/c",
+      "packages/d*",
+      "packages/f"
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-ignored/c",
+  "scripts": {
+    "start": "ignored"
+  }
+}

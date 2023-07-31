@@ -91,11 +91,12 @@ export class ConfigurationChief {
   manifestPath?: string;
   manifest?: PackageJson;
 
-  ignoreWorkspaces: string[] = [];
+  ignoredWorkspacePatterns: string[] = [];
   manifestWorkspaces: Map<string, string> = new Map();
-  additionalWorkspaces: Set<string> = new Set();
-  workspaceDirs: string[] = [];
-  workspaces: Workspace[] = [];
+  additionalWorkspaceNames: Set<string> = new Set();
+  enabledWorkspaceNames: string[] = [];
+  enabledWorkspaceDirs: string[] = [];
+  enabledWorkspaces: Workspace[] = [];
   localWorkspaces: Set<string> = new Set();
 
   resolvedConfigFilePath?: string;
@@ -106,7 +107,7 @@ export class ConfigurationChief {
     this.config = defaultConfig;
   }
 
-  async init() {
+  public async init() {
     const manifestPath = findFile(this.cwd, 'package.json');
     const manifest = manifestPath && (await loadJSON(manifestPath));
 
@@ -144,15 +145,15 @@ export class ConfigurationChief {
     await this.setWorkspaces();
   }
 
-  getCompilers(): [SyncCompilers, AsyncCompilers] {
+  public getCompilers(): [SyncCompilers, AsyncCompilers] {
     return [this.config.syncCompilers, this.config.asyncCompilers];
   }
 
-  getRules() {
+  public getRules() {
     return this.config.rules;
   }
 
-  normalize(rawLocalConfig: RawConfiguration) {
+  private normalize(rawLocalConfig: RawConfiguration) {
     const initialWorkspaces = rawLocalConfig.workspaces ?? {
       [ROOT_WORKSPACE_NAME]: {
         ...rawLocalConfig,
@@ -231,16 +232,32 @@ export class ConfigurationChief {
     };
   }
 
-  async setWorkspaces() {
-    this.ignoreWorkspaces = this.getIgnoredWorkspaces();
+  private async setWorkspaces() {
+    this.ignoredWorkspacePatterns = this.getIgnoredWorkspacePatterns();
     this.manifestWorkspaces = await this.getManifestWorkspaces();
-    this.additionalWorkspaces = await this.getAdditionalWorkspaces();
-    this.localWorkspaces = new Set(compact(this.getAllWorkspaces().map(w => w.pkgName)));
-    this.workspaces = this.getEnabledWorkspaces();
-    this.workspaceDirs = this.getAllWorkspaceNames()
+    this.additionalWorkspaceNames = await this.getAdditionalWorkspaceNames();
+    this.enabledWorkspaceNames = this.getEnabledWorkspaceNames();
+    this.enabledWorkspaces = this.getEnabledWorkspaces();
+    this.enabledWorkspaceDirs = this.enabledWorkspaceNames
       .sort(byPathDepth)
       .reverse()
       .map(dir => join(this.cwd, dir));
+    this.localWorkspaces = new Set(compact(this.enabledWorkspaces.map(w => w.pkgName)));
+  }
+
+  private getListedWorkspaces() {
+    return this.manifest?.workspaces
+      ? Array.isArray(this.manifest.workspaces)
+        ? this.manifest.workspaces
+        : this.manifest.workspaces.packages ?? []
+      : [];
+  }
+
+  private getIgnoredWorkspacePatterns() {
+    const ignoredWorkspaces = this.getListedWorkspaces()
+      .filter(name => name.startsWith('!'))
+      .map(name => name.replace(/^!/, ''));
+    return [...ignoredWorkspaces, ...this.config.ignoreWorkspaces];
   }
 
   private async getManifestWorkspaces() {
@@ -256,7 +273,7 @@ export class ConfigurationChief {
     return manifestWorkspaces;
   }
 
-  private async getAdditionalWorkspaces() {
+  private async getAdditionalWorkspaceNames() {
     const additionalWorkspaceKeys = Object.keys(this.config.workspaces);
     const patterns = additionalWorkspaceKeys.filter(key => key.includes('*'));
     const dirs = additionalWorkspaceKeys.filter(key => !key.includes('*'));
@@ -264,17 +281,23 @@ export class ConfigurationChief {
     return new Set(
       [...dirs, ...globbedDirs].filter(
         name =>
-          name !== ROOT_WORKSPACE_NAME && !this.manifestWorkspaces.has(name) && !this.ignoreWorkspaces.includes(name)
+          name !== ROOT_WORKSPACE_NAME &&
+          !this.manifestWorkspaces.has(name) &&
+          !micromatch.isMatch(name, this.ignoredWorkspacePatterns)
       )
     );
   }
 
-  private getAllWorkspaceNames() {
-    return compact([ROOT_WORKSPACE_NAME, ...this.manifestWorkspaces.keys(), ...this.additionalWorkspaces]);
+  private getEnabledWorkspaceNames() {
+    return [ROOT_WORKSPACE_NAME, ...this.manifestWorkspaces.keys(), ...this.additionalWorkspaceNames].filter(
+      name => !micromatch.isMatch(name, this.ignoredWorkspacePatterns)
+    );
   }
 
-  private getAllWorkspaces() {
-    const workspaceDirs = this.getAllWorkspaceNames();
+  private getEnabledWorkspaces() {
+    const workspaceNames = workspaceArg
+      ? this.enabledWorkspaceNames.filter(name => name === workspaceArg)
+      : this.enabledWorkspaceNames;
 
     const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
       if (name === ancestorName) return ancestors;
@@ -282,47 +305,34 @@ export class ConfigurationChief {
       return ancestors;
     };
 
-    return workspaceDirs.sort(byPathDepth).map(
+    return workspaceNames.sort(byPathDepth).map(
       (name): Workspace => ({
         name,
         pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
         dir: join(this.cwd, name),
         config: this.getConfigForWorkspace(name),
-        ancestors: workspaceDirs.reduce(getAncestors(name), [] as string[]),
+        ancestors: workspaceNames.reduce(getAncestors(name), [] as string[]),
       })
     );
   }
 
-  public getEnabledWorkspaces() {
-    const allWorkspaces = this.getAllWorkspaces();
-    const ignoredWorkspaces = this.getIgnoredWorkspaces();
-    const workspaces = workspaceArg ? allWorkspaces.filter(w => w.name === workspaceArg) : allWorkspaces;
-    return workspaces.filter(w => !ignoredWorkspaces.includes(w.name));
+  public getWorkspaces() {
+    return this.enabledWorkspaces;
   }
 
-  getDescendentWorkspaces(name: string) {
-    return this.getAllWorkspaceNames()
+  private getDescendentWorkspaces(name: string) {
+    return this.enabledWorkspaceNames
       .filter(workspaceName => workspaceName !== name)
       .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name + '/'));
   }
 
-  getIgnoredWorkspaces() {
-    const ignored = this.config.ignoreWorkspaces;
-    const workspaces = this.manifest?.workspaces
-      ? Array.isArray(this.manifest.workspaces)
-        ? this.manifest.workspaces
-        : this.manifest.workspaces.packages ?? []
-      : [];
-    return [...ignored, ...workspaces.filter(name => name.startsWith('!'))].map(name => name.replace(/^!/, ''));
-  }
-
-  getIgnoredWorkspacesFor(name: string) {
-    return this.getIgnoredWorkspaces()
+  private getIgnoredWorkspacesFor(name: string) {
+    return this.ignoredWorkspacePatterns
       .filter(workspaceName => workspaceName !== name)
       .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name));
   }
 
-  getNegatedWorkspacePatterns(name: string) {
+  public getNegatedWorkspacePatterns(name: string) {
     const descendentWorkspaces = this.getDescendentWorkspaces(name);
     const matchName = new RegExp(`^${name}/`);
     const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name);
@@ -338,13 +348,13 @@ export class ConfigurationChief {
       .find(pattern => micromatch.isMatch(workspaceName, pattern));
   }
 
-  getConfigForWorkspace(workspaceName: string) {
+  private getConfigForWorkspace(workspaceName: string) {
     const key = this.getConfigKeyForWorkspace(workspaceName);
     if (key && this.config?.workspaces?.[key]) return this.config.workspaces[key];
     return getDefaultWorkspaceConfig();
   }
 
-  getIssueTypesToReport() {
+  public getIssueTypesToReport() {
     const cliArgs = { include, exclude, dependencies, exports };
     const excludesFromRules = getKeysByValue(this.config.rules, 'off');
     const config = {
@@ -355,18 +365,20 @@ export class ConfigurationChief {
     return getIncludedIssueTypes(cliArgs, config);
   }
 
-  findWorkspaceByFilePath(filePath: string) {
-    const workspaceDir = this.workspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir + '/'));
-    return this.workspaces.find(workspace => workspace.dir === workspaceDir);
+  public findWorkspaceByFilePath(filePath: string) {
+    const workspaceDir = this.enabledWorkspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir + '/'));
+    return this.enabledWorkspaces.find(workspace => workspace.dir === workspaceDir);
   }
 
-  findWorkspaceByPackageName(packageName: string) {
-    return this.workspaces.find(workspace => workspace.pkgName === packageName);
+  public findWorkspaceByPackageName(packageName: string) {
+    return this.enabledWorkspaces.find(workspace => workspace.pkgName === packageName);
   }
 
   public getUnusedIgnoredWorkspaces() {
     const ignoredWorkspaceNames = this.config.ignoreWorkspaces;
-    const workspaceNames = this.getAllWorkspaceNames();
-    return ignoredWorkspaceNames.filter(workspaceName => !workspaceNames.includes(workspaceName));
+    const workspaceNames = [...this.manifestWorkspaces.keys(), ...this.additionalWorkspaceNames];
+    return ignoredWorkspaceNames.filter(
+      ignoredWorkspaceName => !workspaceNames.some(name => micromatch.isMatch(name, ignoredWorkspaceName))
+    );
   }
 }

@@ -53,7 +53,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   await chief.init();
 
   const compilers = chief.getCompilers();
-  const workspaces = chief.getEnabledWorkspaces();
+  const workspaces = chief.getWorkspaces();
   const report = chief.getIssueTypesToReport();
   const rules = chief.getRules();
 
