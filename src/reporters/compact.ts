@@ -7,7 +7,7 @@ const logIssueRecord = (issues: Issue[]) => {
   sortedByFilePath.forEach(logIssueLine);
 };
 
-export default ({ report, issues }: ReporterOptions) => {
+export default ({ report, issues, isShowProgress }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
@@ -37,7 +37,7 @@ export default ({ report, issues }: ReporterOptions) => {
     }
   }
 
-  if (totalIssues === 0) {
+  if (totalIssues === 0 && isShowProgress) {
     console.log('✂️  Excellent, Knip found no issues.');
   }
 };

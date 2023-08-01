@@ -56,6 +56,7 @@ export type ReporterOptions = {
   cwd: string;
   workingDir: string;
   isProduction: boolean;
+  isShowProgress: boolean;
   options: string;
 };
 
