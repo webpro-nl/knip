@@ -16,7 +16,7 @@ Options:
   --dependencies           Shortcut for --include dependencies,unlisted,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
   --include-entry-exports  Include entry files when reporting unused exports
-  -n, --no-progress        Don't show dynamic progress updates
+  -n, --no-progress        Don't show dynamic progress updates (this is automatically enabled in CI environments)
   --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
   --no-config-hints        Suppress configuration hints
