@@ -60,6 +60,8 @@ export const IGNORED_FILE_EXTENSIONS = [
   '.webp',
   '.woff',
   '.woff2',
+  '.yaml',
+  '.yml',
 ];
 
 // The `@types/node` dependency does not require the `node` dependency
