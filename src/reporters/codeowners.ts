@@ -24,7 +24,7 @@ const logIssueRecord = (issues: OwnedIssue[]) => {
   );
 };
 
-export default ({ report, issues, options }: ReporterOptions) => {
+export default ({ report, issues, isShowProgress, options }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;
@@ -74,7 +74,7 @@ export default ({ report, issues, options }: ReporterOptions) => {
     }
   }
 
-  if (totalIssues === 0) {
+  if (totalIssues === 0 && isShowProgress) {
     console.log('✂️  Excellent, Knip found no issues.');
   }
 };

@@ -67,6 +67,7 @@ const run = async () => {
       noConfigHints,
       cwd,
       isProduction,
+      isShowProgress,
       options: reporterOptions,
     });
 

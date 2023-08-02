@@ -22,7 +22,7 @@ const logIssueRecord = (issues: Issue[]) => {
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
 };
 
-export default ({ report, issues, configurationHints, noConfigHints }: ReporterOptions) => {
+export default ({ report, issues, configurationHints, noConfigHints, isShowProgress }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
@@ -57,7 +57,7 @@ export default ({ report, issues, configurationHints, noConfigHints }: ReporterO
     });
   }
 
-  if (totalIssues === 0) {
+  if (totalIssues === 0 && isShowProgress) {
     console.log('✂️  Excellent, Knip found no issues.');
   }
 };
