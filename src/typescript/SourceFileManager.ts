@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { debugLog } from '../util/debug.js';
-import { extname } from '../util/path.js';
+import { extname, isInternal } from '../util/path.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 
 export class SourceFileManager {
@@ -15,7 +15,8 @@ export class SourceFileManager {
   }
 
   createSourceFile(filePath: string, contents: string) {
-    const sourceFile = ts.createSourceFile(filePath, contents, ts.ScriptTarget.Latest, true);
+    const setParentNodes = isInternal(filePath);
+    const sourceFile = ts.createSourceFile(filePath, contents, ts.ScriptTarget.Latest, setParentNodes);
     this.sourceFileCache.set(filePath, sourceFile);
     return sourceFile;
   }
