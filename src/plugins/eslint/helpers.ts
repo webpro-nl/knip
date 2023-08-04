@@ -77,9 +77,6 @@ const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', plugin
 
 const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
 
-// TODO Understand how this should actually work, eg:
-// plugin:@typescript-eslint/recommended → @typescript-eslint/eslint-plugin
-// plugin:@next/next/core-web-vitals → @next/eslint-plugin-next
 /** @public */
 export const resolveExtendsSpecifier = (specifier: string) => {
   if (isInternal(specifier)) return;
@@ -90,12 +87,9 @@ export const resolveExtendsSpecifier = (specifier: string) => {
   // Bail out for @typescript-eslint/eslint-plugin
   if (noProtocolSpecifier.startsWith('@typescript-eslint/')) return '@typescript-eslint/eslint-plugin';
 
-  // Try to make something of it
-  const strippedSpecifier = noProtocolSpecifier.replace(/\/(eslint-)?(recommended|all)$/, '');
-  if (/eslint-(config|plugin)-/.test(strippedSpecifier)) return strippedSpecifier;
-  const packageName = getPackageNameFromModuleSpecifier(strippedSpecifier);
-  if (!packageName) return;
-  if (packageName === 'eslint') return;
+  if (noProtocolSpecifier === 'eslint') return;
+
+  const packageName = getPackageNameFromModuleSpecifier(noProtocolSpecifier) ?? noProtocolSpecifier;
   return resolvePackageName(specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config', packageName);
 };
 
