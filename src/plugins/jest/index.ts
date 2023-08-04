@@ -31,21 +31,14 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
 
 type JestOptions = Config.InitialOptions | (() => Config.InitialOptions) | (() => Promise<Config.InitialOptions>);
 
-const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
-  let config: JestOptions = configFilePath.endsWith('package.json')
-    ? manifest.jest
-    : await resolveExtensibleConfig(configFilePath);
-
-  if (typeof config === 'function') config = await config();
-
-  if (!config) return [];
-
-  const replaceRootDir = (name: string) =>
-    name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
-
+const resolveDependencies = (config: Config.InitialOptions): string[] => {
   const presets = (config.preset ? [config.preset] : []).map(preset =>
     isInternal(preset) ? preset : join(preset, 'jest-preset')
   );
+  const projects = Array.isArray(config.projects)
+    ? config.projects.map(config => (typeof config === 'string' ? config : resolveDependencies(config))).flat()
+    : [];
+  const runner = config.runner ? [config.runner] : [];
   const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
   const resolvers = config.resolver ? [config.resolver] : [];
   const reporters = config.reporters
@@ -68,6 +61,8 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
 
   return [
     ...presets,
+    ...projects,
+    ...runner,
     ...environments,
     ...resolvers,
     ...reporters,
@@ -76,7 +71,22 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
     ...setupFilesAfterEnv,
     ...transform,
     ...moduleNameMapper,
-  ].map(replaceRootDir);
+  ];
+};
+
+const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+  let config: JestOptions = configFilePath.endsWith('package.json')
+    ? manifest.jest
+    : await resolveExtensibleConfig(configFilePath);
+
+  if (typeof config === 'function') config = await config();
+
+  if (!config) return [];
+
+  const replaceRootDir = (name: string) =>
+    name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
+
+  return resolveDependencies(config).map(replaceRootDir);
 };
 
 export const findDependencies = timerify(findJestDependencies);

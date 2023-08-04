@@ -17,4 +17,11 @@ module.exports = {
     ['github-actions', { silent: false }],
     'summary',
   ],
+  projects: [
+    {
+      displayName: 'lint',
+      runner: 'jest-runner-eslint',
+      testMatch: ['<rootDir>/**/*.js'],
+    },
+  ],
 };
