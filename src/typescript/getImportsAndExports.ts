@@ -5,6 +5,7 @@ import { isMaybePackageName } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
 import { isDeclarationFileExtension, isAccessExpression, getAccessExpressionName } from './ast-helpers.js';
 import getExportVisitors from './visitors/exports/index.js';
+import { getJSXImplicitImportBase } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
@@ -46,6 +47,10 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
   const scripts: Set<string> = new Set();
 
   const importedInternalSymbols: Map<ts.Symbol, string> = new Map();
+
+  // No file-level visitors yet, so let's keep it simple
+  const jsxImport = getJSXImplicitImportBase(sourceFile);
+  if (jsxImport) externalImports.add(jsxImport);
 
   const visitors = getVisitors(sourceFile);
 

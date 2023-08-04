@@ -1,7 +1,8 @@
 {
   "name": "@fixtures/react",
   "dependencies": {
-    "react": "*"
+    "react": "*",
+    "preact": "*"
   },
   "knip": {
     "entry": [

@@ -5,6 +5,8 @@ import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { TsConfigJson } from 'type-fest';
 
+// https://www.typescriptlang.org/tsconfig
+
 export const NAME = 'TypeScript';
 
 /** @public */
@@ -22,7 +24,12 @@ const findTypeScriptDependencies: GenericPluginCallback = async configFilePath =
   const extend = config.extends ? [config.extends].flat().filter(extend => !isInternal(extend)) : [];
   const plugins = compact(config.compilerOptions?.plugins?.map(plugin => plugin.name) ?? []);
   const importHelpers = config.compilerOptions?.importHelpers ? ['tslib'] : [];
-  return [...extend, ...plugins, ...importHelpers];
+  const jsx = config.compilerOptions?.jsxImportSource
+    ? [config.compilerOptions.jsxImportSource]
+    : config.compilerOptions?.jsx
+    ? ['react']
+    : [];
+  return [...extend, ...plugins, ...importHelpers, ...jsx];
 };
 
 export const findDependencies = timerify(findTypeScriptDependencies);

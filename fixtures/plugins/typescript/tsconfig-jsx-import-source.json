@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "types": ["preact"]
+  }
+}

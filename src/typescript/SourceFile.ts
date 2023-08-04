@@ -9,6 +9,8 @@ type SymbolWithExports = ts.Symbol & {
   exports?: SymbolTable;
 };
 
+type PragmaMap = { arguments: { factory: string } };
+
 export interface BoundSourceFile extends ts.SourceFile {
   // Used in `maybeAddAliasedExport`
   symbol?: SymbolWithExports;
@@ -20,4 +22,6 @@ export interface BoundSourceFile extends ts.SourceFile {
   locals?: SymbolTable;
 
   scriptKind?: ts.ScriptKind;
+
+  pragmas?: Map<string, PragmaMap | PragmaMap[]>;
 }

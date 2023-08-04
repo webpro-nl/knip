@@ -5,7 +5,7 @@ import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/typescript');
 
-test('Find dependencies in typescript configuration (json)', async () => {
+test('Find dependencies in typescript configuration', async () => {
   const configFilePath = join(cwd, 'tsconfig.json');
   const dependencies = await typescript.findDependencies(configFilePath);
   assert.deepEqual(dependencies, [
@@ -14,4 +14,16 @@ test('Find dependencies in typescript configuration (json)', async () => {
     'ts-graphql-plugin',
     'tslib',
   ]);
+});
+
+test('Find dependencies in typescript configuration (jsx)', async () => {
+  const configFilePath = join(cwd, 'tsconfig-jsx.json');
+  const dependencies = await typescript.findDependencies(configFilePath);
+  assert.deepEqual(dependencies, ['react']);
+});
+
+test('Find dependencies in typescript configuration (jsx-import-source)', async () => {
+  const configFilePath = join(cwd, 'tsconfig-jsx-import-source.json');
+  const dependencies = await typescript.findDependencies(configFilePath);
+  assert.deepEqual(dependencies, ['preact']);
 });
