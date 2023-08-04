@@ -27,3 +27,9 @@ test('Find dependencies in typescript configuration (jsx-import-source)', async 
   const dependencies = await typescript.findDependencies(configFilePath);
   assert.deepEqual(dependencies, ['preact']);
 });
+
+test('Find dependencies in typescript configuration (extends)', async () => {
+  const configFilePath = join(cwd, 'tsconfig.base.json');
+  const dependencies = await typescript.findDependencies(configFilePath);
+  assert.deepEqual(dependencies, ['@tsconfig/node20/tsconfig.json']);
+});
