@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import mapWorkspaces from '@npmcli/map-workspaces';
 import micromatch from 'micromatch';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
@@ -295,6 +296,10 @@ export class ConfigurationChief {
   }
 
   private getEnabledWorkspaces() {
+    if (workspaceArg && !existsSync(workspaceArg)) {
+      throw new ConfigurationError(`Directory does not exist: ${workspaceArg}`);
+    }
+
     const workspaceNames = workspaceArg
       ? this.enabledWorkspaceNames.filter(name => name === workspaceArg)
       : this.enabledWorkspaceNames;
