@@ -136,14 +136,14 @@ Using workspaces in a monorepo? Please see [workspaces][1] for more details abou
       -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
       --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
       --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
-      --workspace              Analyze a single workspace (default: analyze all configured workspaces)
+      --workspace [dir]        Analyze a single workspace (default: analyze all configured workspaces)
       --no-gitignore           Don't use .gitignore
       --include                Report only provided issue type(s), can be comma-separated or repeated (1)
       --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
       --dependencies           Shortcut for --include dependencies,unlisted,unresolved
       --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
       --include-entry-exports  Include entry files when reporting unused exports
-      -n, --no-progress        Don't show dynamic progress updates (this is automatically enabled in CI environments)
+      -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
       --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
       --no-config-hints        Suppress configuration hints
@@ -330,9 +330,10 @@ Knip supports workspaces as defined in three possible locations:
 - In the `workspaces` array in `package.json` (npm, Yarn, Lerna).
 - In the `workspaces.packages` array in `package.json` (legacy).
 - In the `packages` array in `pnpm-workspace.yaml` (pnpm).
+- In the `workspaces` object in Knip configuration.
 
-Extra "workspaces" not configured as a workspace in the root `package.json` can be configured as well, Knip is happy to
-analyze unused dependencies and exports from any directory with a `package.json`.
+The `workspaces` in Knip configuration not already defined in the root `package.json` or `pnpm-workspace.yaml` are
+added. Knip requires a `package.json` file in each workspace directory.
 
 The `ignore`, `ignoreBinaries` and `ignoreDependencies` options are available inside workspace configurations.
 
@@ -341,6 +342,8 @@ Here's some example output when running Knip in a workspace:
 <img src="./assets/screenshot-workspaces.png" alt="example output in workspaces" width="578">
 
 Use `--debug` to get more verbose output.
+
+Use `--workspace [dir]` to analyze a single workspace (including its ancestors).
 
 ## Plugins
 
