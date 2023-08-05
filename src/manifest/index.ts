@@ -38,7 +38,8 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
     const manifest = await getPackageManifest({ dir, packageName, cwd });
     if (manifest) {
       // Read and store installed binaries
-      const binaries = typeof manifest.bin === 'string' ? [packageName] : Object.keys(manifest.bin ?? {});
+      const binaryName = packageName.replace(/^@[^/]+\//, '');
+      const binaries = typeof manifest.bin === 'string' ? [binaryName] : Object.keys(manifest.bin ?? {});
       binaries.forEach(binaryName => {
         if (installedBinaries.has(binaryName)) {
           installedBinaries.get(binaryName)?.add(packageName);

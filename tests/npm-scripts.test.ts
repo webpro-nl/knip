@@ -34,6 +34,7 @@ test('Referenced dependencies in npm scripts', async () => {
     'bin:bash',
     join(cwd, 'ignore.js'),
     'bin:package',
+    'bin:runnable',
   ]);
 
   const expectedPeerDependencies = new Map();
@@ -48,6 +49,7 @@ test('Referenced dependencies in npm scripts', async () => {
       ['pm2-dev', new Set(['pm2'])],
       ['pm2-docker', new Set(['pm2'])],
       ['pm2-runtime', new Set(['pm2'])],
+      ['runnable', new Set(['@org/runnable'])],
       ['nx', new Set(['nx'])],
       ['package', new Set(['package-cli'])],
       ['package-cli', new Set(['package'])],
@@ -57,6 +59,7 @@ test('Referenced dependencies in npm scripts', async () => {
       ['eslint-v7', new Set(['eslint'])],
       ['eslint-v8', new Set(['eslint'])],
       ['@commitlint/cli', new Set(['commitlint'])],
+      ['@org/runnable', new Set(['runnable'])],
       ['commitlint', new Set(['@commitlint/cli'])],
     ])
   );
