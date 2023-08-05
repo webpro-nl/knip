@@ -1,5 +1,4 @@
 import { isBuiltin } from 'node:module';
-import { Workspace } from './ConfigurationChief.js';
 import {
   IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
@@ -7,6 +6,7 @@ import {
   ROOT_WORKSPACE_NAME,
 } from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
+import type { Workspace } from './ConfigurationChief.js';
 import type { ConfigurationHints, Issue } from './types/issues.js';
 import type { WorkspaceManifests } from './types/workspace.js';
 import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';

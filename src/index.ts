@@ -1,15 +1,13 @@
 import micromatch from 'micromatch';
 import { _getDependenciesFromScripts } from './binaries/index.js';
 import { fromBinary, isBinary } from './binaries/util.js';
-import { ConfigurationChief, Workspace } from './ConfigurationChief.js';
+import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { ExportItem, Exports } from './types/exports.js';
-import { ImportedModule, Imports } from './types/imports.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
 import { LoaderError } from './util/errors.js';
@@ -25,7 +23,10 @@ import { _resolveSpecifier, _tryResolve } from './util/require.js';
 import { _require } from './util/require.js';
 import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
+import type { Workspace } from './ConfigurationChief.js';
 import type { CommandLineOptions } from './types/cli.js';
+import type { ExportItem, Exports } from './types/exports.js';
+import type { ImportedModule, Imports } from './types/imports.js';
 
 type HandleReferencedDependencyOptions = {
   specifier: string;

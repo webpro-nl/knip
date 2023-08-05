@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { ISSUE_TYPE_TITLE } from '../constants.js';
-import { IssueSeverity } from '../types/issues.js';
 import { toRelative, relative } from '../util/path.js';
+import type { IssueSeverity } from '../types/issues.js';
 
 export const identity = (text: string) => text;
 

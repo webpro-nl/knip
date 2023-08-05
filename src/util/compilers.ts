@@ -1,5 +1,5 @@
-import { AsyncCompilerFn, SyncCompilerFn } from '../types/compilers.js';
-import { RawConfiguration } from '../types/config.js';
+import type { AsyncCompilerFn, SyncCompilerFn } from '../types/compilers.js';
+import type { RawConfiguration } from '../types/config.js';
 
 // TODO This does not detect functions returning a promise (just the async keyword)
 const isAsync = (fn?: SyncCompilerFn | AsyncCompilerFn) => (fn ? fn.constructor.name === 'AsyncFunction' : false);
