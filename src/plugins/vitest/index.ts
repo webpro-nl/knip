@@ -24,7 +24,7 @@ const findVitestDependencies: GenericPluginCallback = async configFilePath => {
   const cfg = config.test;
   const environments = cfg.environment ? [getEnvPackageName(cfg.environment)] : [];
   const reporters = getExternalReporters(cfg.reporters);
-  const coverage = cfg.coverage?.provider ? [`@vitest/coverage-${cfg.coverage.provider}`] : [];
+  const coverage = cfg.coverage ? [`@vitest/coverage-${cfg.coverage.provider ?? "v8"}`] : [];
   const setupFiles = cfg.setupFiles ? [cfg.setupFiles].flat() : [];
   const globalSetup = cfg.globalSetup ? [cfg.globalSetup].flat() : [];
   return compact([...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup]);

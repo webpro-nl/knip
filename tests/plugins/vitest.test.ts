@@ -13,6 +13,12 @@ test('Find dependencies in vitest configuration (vitest)', async () => {
   assert.deepEqual(dependencies, ['happy-dom', '@vitest/coverage-istanbul']);
 });
 
+test('Find dependencies in vitest configuration without coverage providers (vitest)', async () => {
+  const configFilePath = join(cwd, 'vitest2.config.ts');
+  const dependencies = await vitest.findDependencies(configFilePath, { manifest });
+  assert.deepEqual(dependencies, ['jsdom', '@vitest/coverage-v8']);
+});
+
 test('Find dependencies in vitest configuration (vite)', async () => {
   const configFilePath = join(cwd, 'vite.config.ts');
   const dependencies = await vitest.findDependencies(configFilePath, { manifest });
