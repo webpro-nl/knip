@@ -1,6 +1,6 @@
 import fg from 'fast-glob';
 import { globby } from 'globby';
-import { ROOT_WORKSPACE_NAME } from '../constants.js';
+import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
 import { join, relative } from './path.js';
@@ -42,7 +42,7 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   // Only negated patterns? Bail out.
   if (globPatterns[0].startsWith('!')) return [];
 
-  const ignorePatterns = compact([...ignore, '**/node_modules/**']);
+  const ignorePatterns = compact([...ignore, ...GLOBAL_IGNORE_PATTERNS]);
 
   debugLogObject(`Globbing (${relativePath || ROOT_WORKSPACE_NAME})`, { cwd, globPatterns, ignorePatterns });
 
@@ -59,14 +59,14 @@ const pureGlob = async ({ cwd, patterns, ignore = [], gitignore = true }: BaseGl
   if (patterns.length === 0) return [];
   return globby(patterns, {
     cwd,
-    ignore: [...ignore, '**/node_modules/**'],
+    ignore: [...ignore, ...GLOBAL_IGNORE_PATTERNS],
     gitignore,
     absolute: true,
   });
 };
 
 const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
-  const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd, ignore: ['**/node_modules/**'] });
+  const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd, ignore: GLOBAL_IGNORE_PATTERNS });
   for await (const entry of stream) {
     return entry;
   }
