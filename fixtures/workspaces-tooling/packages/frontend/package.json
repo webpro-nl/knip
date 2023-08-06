@@ -1,10 +1,12 @@
 {
   "name": "@workspaces-tooling/frontend",
   "scripts": {
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "jest"
   },
   "devDependencies": {
     "eslint": "*",
-    "eslint-config-custom": "*"
+    "eslint-config-custom": "*",
+    "jest": "*"
   }
 }
