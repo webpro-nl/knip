@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/workspaces-eslint-config');
+const cwd = resolve('fixtures/workspaces-tooling');
 
 test('Find unused files, dependencies and exports in workspaces with eslint-config package', async () => {
   const { counters } = await main({

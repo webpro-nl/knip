@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-eslint/frontend",
+  "name": "@workspaces-tooling/backend",
   "scripts": {
     "lint": "eslint"
   },

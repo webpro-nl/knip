@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-eslint/eslint-config-custom",
+  "name": "@workspaces-tooling/eslint-config-custom",
   "dependencies": {
     "eslint-config-prettier": "*"
   }
