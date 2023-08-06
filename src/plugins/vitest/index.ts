@@ -14,9 +14,10 @@ export const ENABLERS = ['vitest'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const ENTRY_FILE_PATTERNS = ['vite.config.ts'];
-
 export const CONFIG_FILE_PATTERNS = ['vitest.config.ts'];
+
+// Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
+export const ENTRY_FILE_PATTERNS = ['vite.config.ts'];
 
 const findVitestDependencies: GenericPluginCallback = async configFilePath => {
   const config: VitestConfig = await load(configFilePath);
@@ -24,7 +25,7 @@ const findVitestDependencies: GenericPluginCallback = async configFilePath => {
   const cfg = config.test;
   const environments = cfg.environment ? [getEnvPackageName(cfg.environment)] : [];
   const reporters = getExternalReporters(cfg.reporters);
-  const coverage = cfg.coverage ? [`@vitest/coverage-${cfg.coverage.provider ?? "v8"}`] : [];
+  const coverage = cfg.coverage ? [`@vitest/coverage-${cfg.coverage.provider ?? 'v8'}`] : [];
   const setupFiles = cfg.setupFiles ? [cfg.setupFiles].flat() : [];
   const globalSetup = cfg.globalSetup ? [cfg.globalSetup].flat() : [];
   return compact([...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup]);

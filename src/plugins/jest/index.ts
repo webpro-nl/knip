@@ -16,6 +16,9 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =
 
 export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
+// Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
+export const ENTRY_FILE_PATTERNS = [];
+
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const config = await load(configFilePath);
   if (config?.preset) {
