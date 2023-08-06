@@ -17,12 +17,14 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const CONFIG_FILE_PATTERNS = ['tsconfig.json'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
-  const config = await load(configFilePath);
+  const config: TsConfigJson = await load(configFilePath);
   if (config?.extends) {
-    if (isInternal(config.extends)) {
-      const presetConfigPath = toAbsolute(config.extends, dirname(configFilePath));
-      const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-      Object.assign(config, presetConfig);
+    for (const extend of [config.extends].flat()) {
+      if (isInternal(extend)) {
+        const presetConfigPath = toAbsolute(extend, dirname(configFilePath));
+        const presetConfig = await resolveExtensibleConfig(presetConfigPath);
+        Object.assign(config, presetConfig);
+      }
     }
   }
   return config;
