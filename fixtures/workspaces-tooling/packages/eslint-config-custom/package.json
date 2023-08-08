@@ -1,6 +1,7 @@
 {
   "name": "@workspaces-tooling/eslint-config-custom",
   "dependencies": {
+    "eslint": "*",
     "eslint-config-prettier": "*"
   }
 }
