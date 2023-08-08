@@ -1,5 +1,4 @@
 import { compact } from '../../util/array.js';
-import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { isInternal, dirname, toAbsolute } from '../../util/path.js';
 import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
@@ -10,11 +9,11 @@ import type { PackageJson } from '@npmcli/package-json';
 type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
 
 const getDependencies = (config: ESLintConfig | OverrideConfig) => {
-  const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendsSpecifier) : [];
+  const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendSpecifier) : [];
   // https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
   if (extendsSpecifiers.includes('eslint-plugin-prettier')) extendsSpecifiers.push('eslint-config-prettier');
 
-  const plugins = config.plugins ? config.plugins.map(resolvePluginPackageName) : [];
+  const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
   const parser = config.parser;
   const extraPlugins = config.parserOptions?.babelOptions?.plugins ?? [];
   const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
@@ -65,32 +64,33 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
   return dependencies;
 };
 
-const resolvePackageName = (namespace: 'eslint-plugin' | 'eslint-config', pluginName: string) => {
-  return pluginName.includes(namespace + '-') || pluginName.endsWith(`/${namespace}`)
-    ? pluginName
-    : pluginName.startsWith('@')
-    ? pluginName.includes('/')
-      ? pluginName.replace(/\//, `/${namespace}-`)
-      : `${pluginName}/${namespace}`
-    : `${namespace}-${pluginName}`;
+const isQualifiedSpecifier = (specifier: string) =>
+  specifier === 'eslint' ||
+  /\/eslint-(config|plugin)$/.test(specifier) ||
+  /.+eslint-(config|plugin)\//.test(specifier) ||
+  /eslint-(config|plugin)-/.test(specifier);
+
+const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config', rawSpecifier: string) => {
+  const specifier = rawSpecifier.replace(/(^plugin:|:.+$)/, '');
+  if (isQualifiedSpecifier(specifier)) return specifier;
+  if (!specifier.startsWith('@')) return `${namespace}-${specifier}`;
+  const [scope, name, ...rest] = specifier.split('/');
+  if (rawSpecifier.startsWith('plugin:') && rest.length === 0) return [scope, namespace, name].join('/');
+  return [scope, name ? `${namespace}-${name}` : namespace, ...rest].join('/');
 };
 
-const resolvePluginPackageName = (pluginName: string) => resolvePackageName('eslint-plugin', pluginName);
+/** @public */
+export const resolvePluginSpecifier = (specifier: string) => resolveSpecifier('eslint-plugin', specifier);
 
 /** @public */
-export const resolveExtendsSpecifier = (specifier: string) => {
+export const resolveExtendSpecifier = (specifier: string) => {
   if (isInternal(specifier)) return;
-  if (/\/eslint-(config|plugin)/.test(specifier)) return specifier;
 
-  const noProtocolSpecifier = specifier.replace(/(^plugin:|:.+$)/, '');
+  // Exception: eslint-config-next → next
+  if (/^next(\/.+)?$/.test(specifier)) return specifier;
 
-  // Bail out for @typescript-eslint/eslint-plugin
-  if (noProtocolSpecifier.startsWith('@typescript-eslint/')) return '@typescript-eslint/eslint-plugin';
-
-  if (noProtocolSpecifier === 'eslint') return;
-
-  const packageName = getPackageNameFromModuleSpecifier(noProtocolSpecifier) ?? noProtocolSpecifier;
-  return resolvePackageName(specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config', packageName);
+  const namespace = specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config';
+  return resolveSpecifier(namespace, specifier);
 };
 
 // Super custom: find dependencies of specific ESLint plugins through settings
