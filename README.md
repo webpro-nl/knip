@@ -682,13 +682,13 @@ The following commands are similar:
 
 Many thanks to some of the early adopters of Knip:
 
-- [Abracabra][23]
-- [Block Protocol][24]
-- [Cursor][25]
-- [DeepmergeTS][26]
-- [eslint-plugin-functional][27]
-- [freeCodeCamp.org][28]
-- [is-immutable-type][29]
+- [Block Protocol][23]
+- [DeepmergeTS][24]
+- [eslint-plugin-functional][25]
+- [freeCodeCamp.org][26]
+- [is-immutable-type][27]
+- [IsaacScript][28]
+- [Owncast][29]
 - [release-it][30]
 - [Template TypeScript Node Package][31]
 
@@ -752,13 +752,13 @@ Special thanks to the wonderful people who have contributed to this project:
 [20]: https://github.com/pzavolinsky/ts-unused-exports
 [21]: https://github.com/nadeesha/ts-prune
 [22]: #production-mode
-[23]: https://github.com/nicoespeon/abracadabra
-[24]: https://github.com/blockprotocol/blockprotocol
-[25]: https://github.com/getcursor/cursor
-[26]: https://github.com/RebeccaStevens/deepmerge-ts
-[27]: https://github.com/eslint-functional/eslint-plugin-functional
-[28]: https://github.com/freeCodeCamp/freeCodeCamp
-[29]: https://github.com/RebeccaStevens/is-immutable-type
+[23]: https://github.com/blockprotocol/blockprotocol
+[24]: https://github.com/RebeccaStevens/deepmerge-ts
+[25]: https://github.com/eslint-functional/eslint-plugin-functional
+[26]: https://github.com/freeCodeCamp/freeCodeCamp
+[27]: https://github.com/RebeccaStevens/is-immutable-type
+[28]: https://github.com/IsaacScript/isaacscript
+[29]: https://github.com/owncast/owncast
 [30]: https://github.com/release-it/release-it
 [31]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
 [32]: https://github.com/webpro/knip/graphs/contributors
