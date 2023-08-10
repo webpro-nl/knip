@@ -1,0 +1,6 @@
+{
+  "extends": ["@tsconfig/esm/tsconfig.json"],
+  "compilerOptions": {
+    "sourceMap": true
+  }
+}

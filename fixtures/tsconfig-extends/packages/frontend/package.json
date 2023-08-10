@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "hastscript": "*"
+  },
+  "devDependencies": {
+    "@types/hast": "*",
+    "typescript": "*"
+  }
+}

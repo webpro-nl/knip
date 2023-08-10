@@ -1,0 +1,7 @@
+{
+  "extends": "../../boilerplate/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "hastscript/svg"
+  }
+}
