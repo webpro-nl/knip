@@ -80,12 +80,7 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
           else if (Array.isArray(entry)) entries.push(...entry);
           else if (typeof entry === 'function') entries.push((entry as () => string)());
           else if (entry && typeof entry === 'object' && 'filename' in entry) entries.push(entry['filename'] as string);
-          else {
-            // TODO: warn about unrecognized single entry in object
-          }
         });
-      } else {
-        // TODO: warn about unrecognized entry structure
       }
 
       entries = entries.map(entry => (config.context ? join(config.context, entry) : entry));
