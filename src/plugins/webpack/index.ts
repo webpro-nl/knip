@@ -70,15 +70,25 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
       const dependencies = (config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []).map(loader =>
         loader.replace(/\?.*/, '')
       );
-      const entries = (
-        cfg.entry
-          ? typeof cfg.entry === 'string'
-            ? [cfg.entry]
-            : Array.isArray(cfg.entry)
-            ? cfg.entry
-            : Object.values(cfg.entry).map(entry => (typeof entry === 'string' ? entry : entry.filename))
-          : []
-      ).map(entry => (config.context ? join(config.context, entry) : entry));
+      let entries: string[] = [];
+
+      if (typeof cfg.entry === "string") entries.push(cfg.entry);
+      else if (Array.isArray(cfg.entry)) entries.push(...cfg.entry);
+      else if (typeof cfg.entry === "object") {
+        Object.values(cfg.entry).map(entry => {
+          if (typeof entry === "string") entries.push(entry);
+          else if (Array.isArray(entry)) entries.push(...entry);
+          else if (entry && typeof entry === "object" && "filename" in entry) entries.push(entry["filename"] as string);
+          else {
+            // TODO: warn about unrecognized single entry in object
+          }
+        });
+      } else {
+        // TODO: warn about unrecognized entry structure
+      }
+
+      entries = entries.map(entry => (config.context ? join(config.context, entry) : entry));
+
       return [...dependencies, ...entries];
     });
   });
