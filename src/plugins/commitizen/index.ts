@@ -12,7 +12,7 @@ export const ENABLERS = ['commitizen'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['.czrc', 'package.json'];
+export const CONFIG_FILE_PATTERNS = ['.czrc', '.cz.json', 'package.json'];
 
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
   const config: PluginConfig = configFilePath.endsWith('package.json')

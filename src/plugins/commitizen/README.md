@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "commitizen": {
-    "config": [".czrc", "package.json"]
+    "config": [".czrc", ".cz.json", "package.json"]
   }
 }
 ```
