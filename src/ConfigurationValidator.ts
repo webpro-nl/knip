@@ -27,6 +27,21 @@ const issueTypeSchema = z.union([
 
 const rulesSchema = z.record(issueTypeSchema, z.enum(['error', 'warn', 'off']));
 
+const ignoreExportsUsedInFileSchema = z.union([
+  z.boolean(),
+  z.record(
+    z.union([
+      z.literal('class'),
+      z.literal('enum'),
+      z.literal('function'),
+      z.literal('interface'),
+      z.literal('member'),
+      z.literal('type'),
+    ]),
+    z.boolean()
+  ),
+]);
+
 const rootConfigurationSchema = z.object({
   rules: rulesSchema.optional(),
   entry: globSchema.optional(),
@@ -34,22 +49,7 @@ const rootConfigurationSchema = z.object({
   paths: pathsSchema.optional(),
   ignore: globSchema.optional(),
   ignoreBinaries: z.array(z.string()).optional(),
-  ignoreExportsUsedInFile: z
-    .union([
-      z.boolean(),
-      z.record(
-        z.union([
-          z.literal('class'),
-          z.literal('enum'),
-          z.literal('function'),
-          z.literal('interface'),
-          z.literal('member'),
-          z.literal('type'),
-        ]),
-        z.boolean()
-      ),
-    ])
-    .optional(),
+  ignoreExportsUsedInFile: ignoreExportsUsedInFileSchema.optional(),
   ignoreDependencies: z.array(z.string()).optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
   compilers: compilersSchema.optional(),
