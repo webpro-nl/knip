@@ -79,6 +79,17 @@ which in turn has `micromatch` as a (transitive) dependency. Knip uses both `fas
 `micromatch` being reported as unlisted. The solution is to make sure `micromatch` itself is also listed in
 `package.json`.
 
+## Unlisted binaries
+
+Binaries are supposed to come from listed (dev) dependencies. Binaries not in the `bin` field of any those
+`package.json` files will be reported as unlisted binaries, except for those listed as `IGNORED_GLOBAL_BINARIES` in
+[constants.ts][6].
+
+Sometimes binaries are used like `commitlint`, but listed as `@commitlint/cli` in `devDependencies`. When the command
+looks like `npx commitlint` or `commitlint`, `@commitlint/cli` might be reported as unused and `commitlint` as unlisted
+(as it's technically a transitive dependency). This can usually be prevented by using the same package name in both
+locations.
+
 ### npx
 
 For `npx` scripts, Knip assumes with `--yes` (as in `npx --yes package`) that the package is not listed. Knip expects
@@ -94,31 +105,31 @@ consider in this case:
 - Move the export(s) to an entry file.
 - Add the containing file to the `entry` array in the configuration.
 - Re-export the export(s) from an existing entry file.
-- Mark the export(s) [using the JSDoc `@public` tag][6].
-- [Ignore exports used in file][7].
+- Mark the export(s) [using the JSDoc `@public` tag][7].
+- [Ignore exports used in file][8].
 
 Note that entries in the `exports` map in `package.json` are automatically added as entry files by Knip (except when
 they are ignored by a `.gitignore` entry).
 
-## Start using Knip in CI with too many reported issues
+## Start using Knip in CI with lots of reported issues
 
-Eventually, this type of QA only really works when it's tied to an automated workflow. But with too many issues to
-resolve this might not be feasible right away, especially in existing larger codebase. Here are a few options that may
-help in the meantime:
+This type of QA only really works when it's tied to an automated workflow. But with too many issues to resolve in a
+large codebase this might not be feasible right away. Here are a few options that may help in the meantime:
 
 - Use `--no-exit-code` for exit code 0 in CI.
-- Use `--include` (or `--exclude`) [output filters][8] to report only the issue types that have little or no errors.
-- Use [`rules`][9] configuration to report only the issue types that have little or no errors.
+- Use `--include` (or `--exclude`) [output filters][9] to report only the issue types that have little or no errors.
+- Use [`rules`][10] configuration to report only the issue types that have little or no errors.
 - Use separate Knip commands to analyze e.g. only `--dependencies` or `--exports`.
-- Use [ignore patterns][10] to filter out the most problematic areas.
+- Use [ignore patterns][11] to filter out the most problematic areas.
 
 [1]: ../README.md#override-plugin-configuration
 [2]: ./writing-a-plugin.md
 [3]: ../README.md#plugins
 [4]: ../README.md#multi-project-repositories
 [5]: ./compilers.md
-[6]: ../README.md#public-exports
-[7]: ../README.md#ignore-exports-used-in-file
-[8]: ../README.md#filters
-[9]: ../README.md#rules
-[10]: ../README.md#ignore
+[6]: ../src/constants.ts
+[7]: ../README.md#public-exports
+[8]: ../README.md#ignore-exports-used-in-file
+[9]: ../README.md#filters
+[10]: ../README.md#rules
+[11]: ../README.md#ignore
