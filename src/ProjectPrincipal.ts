@@ -192,10 +192,12 @@ export class ProjectPrincipal {
           this.addEntryPath(resolvedModule.resolvedFileName, { skipExportsAnalysis: true });
         }
       } else {
-        if (isMaybePackageName(specifier)) {
-          external.add(specifier);
+        // Strip special Webpack stuff (https://webpack.js.org/concepts/loaders/)
+        const sanitizedSpecifier = specifier.replace(/^([?!|-]+)?([^!?]+).*/, '$2');
+        if (isMaybePackageName(sanitizedSpecifier)) {
+          external.add(sanitizedSpecifier);
         } else {
-          const ext = extname(specifier);
+          const ext = extname(sanitizedSpecifier);
           if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
             unresolvedImports.add(specifier);
           }
