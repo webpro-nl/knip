@@ -1,3 +1,4 @@
+import { isGitIgnoredSync } from 'globby';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
@@ -6,7 +7,7 @@ import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { isMaybePackageName } from './util/modules.js';
-import { extname, isInNodeModules } from './util/path.js';
+import { extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { ExportItem, ExportItemMember } from './types/exports.js';
@@ -33,6 +34,8 @@ const baseCompilerOptions = {
 };
 
 const tsCreateProgram = timerify(ts.createProgram);
+
+const isGitIgnored = isGitIgnoredSync();
 
 /**
  * This class aims to abstract away TypeScript specific things from the main flow.
@@ -197,9 +200,12 @@ export class ProjectPrincipal {
         if (isMaybePackageName(sanitizedSpecifier)) {
           external.add(sanitizedSpecifier);
         } else {
-          const ext = extname(sanitizedSpecifier);
-          if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
-            unresolvedImports.add(specifier);
+          const isIgnored = isGitIgnored(join(filePath, sanitizedSpecifier));
+          if (!isIgnored) {
+            const ext = extname(sanitizedSpecifier);
+            if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
+              unresolvedImports.add(specifier);
+            }
           }
         }
       }
