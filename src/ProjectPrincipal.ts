@@ -27,7 +27,6 @@ const baseCompilerOptions = {
   esModuleInterop: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
-  lib: [],
   target: ts.ScriptTarget.Latest,
   module: ts.ModuleKind.CommonJS,
   moduleResolution: ts.ModuleResolutionKind.NodeNext,

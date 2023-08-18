@@ -16,6 +16,7 @@ export class SourceFileManager {
 
   createSourceFile(filePath: string, contents: string) {
     const setParentNodes = isInternal(filePath);
+    // When added explicitly, declaration files are created properly with `.isDeclarationFile: true`
     const sourceFile = ts.createSourceFile(filePath, contents, ts.ScriptTarget.Latest, setParentNodes);
     this.sourceFileCache.set(filePath, sourceFile);
     return sourceFile;

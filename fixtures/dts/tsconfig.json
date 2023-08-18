@@ -1,0 +1,6 @@
+{
+  "include": ["./src/assets.d.ts", "./src"],
+  "compilerOptions": {
+    "skipLibCheck": true
+  }
+}

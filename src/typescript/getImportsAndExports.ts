@@ -84,6 +84,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     const { specifier, symbol, identifier = '__anonymous', isReExport = false } = options;
     if (isBuiltin(specifier)) return;
 
+    // The specifier exists, but no resolved module
     const module = sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
 
     if (module?.resolvedModule) {

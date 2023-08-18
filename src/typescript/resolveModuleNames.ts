@@ -11,6 +11,7 @@ export function createCustomModuleResolver(
   }
 
   function resolveModuleName(name: string, containingFile: string): ts.ResolvedModule | undefined {
+    // How to let TypeScript know about the declaration files to resolve e.g. the `*.html?raw` import specifier?
     const tsResolvedModule = ts.resolveModuleName(name, containingFile, compilerOptions, ts.sys).resolvedModule;
 
     if (virtualFileExtensions.length === 0) return tsResolvedModule;

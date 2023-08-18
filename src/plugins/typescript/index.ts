@@ -5,7 +5,6 @@ import { hasDependency, load } from '../../util/plugin.js';
 import { loadTSConfig } from '../../util/tsconfig-loader.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { TsConfigJson } from 'type-fest';
-import type { CompilerOptions } from 'typescript';
 
 // https://www.typescriptlang.org/tsconfig
 
@@ -34,7 +33,7 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
 };
 
 const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
-  const compilerOptions: CompilerOptions = await loadTSConfig(configFilePath);
+  const { compilerOptions } = await loadTSConfig(configFilePath);
   const config: TsConfigJson = await resolveExtensibleConfig(configFilePath); // Dual loader to get external `extends` dependencies
 
   if (!compilerOptions || !config) return [];

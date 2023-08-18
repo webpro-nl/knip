@@ -132,9 +132,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies, ignoreBinaries });
 
-    const compilerOptions = await loadCompilerOptions(join(dir, tsConfigFile ?? 'tsconfig.json'));
+    const { compilerOptions, definitionPaths } = await loadCompilerOptions(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
     const principal = factory.getPrincipal({ cwd: dir, paths, compilerOptions, compilers });
+
+    // Pushing declaration files to the program as source files seems not enough
+    principal.addEntryPaths(definitionPaths);
 
     const worker = new WorkspaceWorker({
       name,
