@@ -275,6 +275,11 @@ export class ProjectPrincipal {
   }
 
   public isPublicExport(exportedItem: ExportItem) {
-    return ts.getJSDocPublicTag(exportedItem.node);
+    const tags = this.getJSDocTags(exportedItem);
+    return tags.includes('@public');
+  }
+
+  public getJSDocTags(exportedItem: ExportItem) {
+    return ts.getJSDocTags(exportedItem.node).map(node => node.getText().match(/@\S+/)![0]);
   }
 }

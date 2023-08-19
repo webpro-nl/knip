@@ -349,8 +349,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const importedModule = importedSymbols.get(filePath);
 
         for (const [symbol, exportedItem] of exportItems.entries()) {
-          // Skip exports with a JSDoc `@public` tag
-          if (principal.isPublicExport(exportedItem)) continue;
+          const jsDocTags = principal.getJSDocTags(exportedItem);
+
+          // Skip exports tagged `@public` or `@beta`
+          if (jsDocTags.includes('@public') || jsDocTags.includes('@beta')) continue;
 
           if (importedModule?.symbols.has(symbol)) {
             // Skip members of classes/enums that are eventually exported by entry files

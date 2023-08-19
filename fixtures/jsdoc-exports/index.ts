@@ -1,0 +1,1 @@
+export { publicFn } from './module';
