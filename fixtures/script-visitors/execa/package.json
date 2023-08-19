@@ -3,13 +3,15 @@
   "scripts": {
     "execa1": "node ./execa-docs.mjs",
     "execa2": "node ./script.js",
-    "execa3": "node ./node.mjs"
+    "execa3": "node ./node.mjs",
+    "execa4": "node ./options.mjs"
   },
   "dependencies": {
     "dep": "*"
   },
   "devDependencies": {
     "all-contributors-cli": "*",
+    "c8": "*",
     "octokit": "*",
     "execa": "*"
   },

@@ -5,8 +5,10 @@ import { scriptVisitor as visit } from '../index.js';
 export default visit(
   sourceFile => sourceFile.statements.some(statementImportsExeca$),
   node => {
-    if (ts.isTaggedTemplateExpression(node) && node.tag.getText() === '$') {
-      return stripQuotes(node.template.getText());
+    if (ts.isTaggedTemplateExpression(node)) {
+      if (node.tag.getText() === '$' || (ts.isCallExpression(node.tag) && node.tag.expression.getText() === '$')) {
+        return stripQuotes(node.template.getText());
+      }
     }
   }
 );

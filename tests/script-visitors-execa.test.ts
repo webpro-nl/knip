@@ -15,7 +15,7 @@ test('Find dependencies with custom script visitors (execa)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
