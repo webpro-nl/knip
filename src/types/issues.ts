@@ -54,13 +54,14 @@ export type ReporterOptions = {
   configurationHints: ConfigurationHints;
   noConfigHints: boolean;
   cwd: string;
-  workingDir: string;
   isProduction: boolean;
   isShowProgress: boolean;
   options: string;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
+
+export type Preprocessor = (options: ReporterOptions) => ReporterOptions;
 
 export type IssueSeverity = 'error' | 'warn' | 'off';
 

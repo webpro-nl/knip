@@ -17,7 +17,8 @@ Options:
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
   --include-entry-exports  Include entry files when reporting unused exports
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
-  --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
+  --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
+  --reporter               Select reporter: symbols, compact, codeowners, json, can be repeated (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
   --no-config-hints        Suppress configuration hints
   --no-exit-code           Always exit with code zero (0)
@@ -61,7 +62,8 @@ try {
       'no-progress': { type: 'boolean', short: 'n' },
       performance: { type: 'boolean' },
       production: { type: 'boolean' },
-      reporter: { type: 'string' },
+      preprocessor: { type: 'string', multiple: true },
+      reporter: { type: 'string', multiple: true },
       'reporter-options': { type: 'string' },
       strict: { type: 'boolean' },
       tsConfig: { type: 'string', short: 't' },
