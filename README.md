@@ -747,7 +747,7 @@ Many thanks to some of the early adopters of Knip:
 
 ## Why "Knip"?
 
-Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
+Knip is Dutch for a "cut". A Dutch expression is "to be get **knip** for something", which means to be perfectly suited
 for the job. I'm motivated to make Knip perfectly suited for the job of cutting projects to perfection! ✂️
 
 ## Really, another unused file/dependency/export finder?
