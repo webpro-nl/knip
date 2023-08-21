@@ -56,7 +56,7 @@
     "strip-json-comments": "^5.0.0",
     "summary": "^2.1.0",
     "tree-sitter": "0.20.5",
-    "tree-sitter-bash": "0.20.0",
+    "tree-sitter-bash": "0.19.0",
     "typescript": "^5.0.2",
     "zod": "^3.22.2",
     "zod-validation-error": "^1.5.0"
