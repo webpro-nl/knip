@@ -32,45 +32,46 @@ Knip shines in both small and large projects. It's a fresh take on keeping your 
 [![An orange cow with scissors, Van Gogh style][7]][6] <sup>_“An orange cow with scissors, Van Gogh style” - generated
 with OpenAI_</sup>
 
-📡 For updates, watch this repository or follow [@webprolific (Twitter)][8] or [@webpro (fosstodon.org)][9].
+For updates or questions, come hang out in [The Knip Barn (Discord)][8], or follow [@webprolific (Twitter)][9] or
+[@webpro (fosstodon.org)][10]. Please use GitHub to [report issues][11].
 
 ## Contents
 
-- [Getting Started][10]
-  - [Installation][11]
-  - [Default Configuration][12]
-  - [Let's Go!][13]
-- [Configuration][14]
-  - [Entry Files][15]
+- [Getting Started][12]
+  - [Installation][13]
+  - [Default Configuration][14]
+  - [Let's Go!][15]
+- [Configuration][16]
+  - [Entry Files][17]
   - [Workspaces][1]
   - [Plugins][2]
   - [Compilers][3]
-  - [Ignore files, binaries, dependencies and workspaces][16]
-  - [Public exports][17]
-  - [Ignore exports used in file][18]
-  - [Include exports in entry files][19]
-  - [Paths][20]
-- [Production Mode][21]
-  - [Strict][22]
-  - [Plugins][23]
-- [Output][24]
-  - [Screenshots][25]
-  - [Reading the report][26]
-  - [Rules & Filters][27]
+  - [Ignore files, binaries, dependencies and workspaces][18]
+  - [Public exports][19]
+  - [Ignore exports used in file][20]
+  - [Include exports in entry files][21]
+  - [Paths][22]
+- [Production Mode][23]
+  - [Strict][24]
+  - [Plugins][25]
+- [Output][26]
+  - [Screenshots][27]
+  - [Reading the report][28]
+  - [Rules & Filters][29]
   - [Reporters][4]
-- [Fixing Issues][28]
-- [Command Line Options][29]
-- [Potential boost with `--no-gitignore`][30]
-- [Comparison & Migration][31]
-  - [depcheck][32]
-  - [unimported][33]
-  - [ts-unused-exports][34]
-  - [ts-prune][35]
-- [Projects using Knip][36]
-- [Articles, etc.][37]
-- [Why "Knip"?][38]
-- [Really, another unused file/dependency/export finder?][39]
-- [Contributors][40]
+- [Fixing Issues][30]
+- [Command Line Options][31]
+- [Potential boost with `--no-gitignore`][32]
+- [Comparison & Migration][33]
+  - [depcheck][34]
+  - [unimported][35]
+  - [ts-unused-exports][36]
+  - [ts-prune][37]
+- [Projects using Knip][38]
+- [Articles, etc.][39]
+- [Why "Knip"?][40]
+- [Really, another unused file/dependency/export finder?][41]
+- [Contributors][42]
 
 ## Getting Started
 
@@ -91,7 +92,7 @@ Knip has good defaults and you can run it without any configuration. The (simpli
 }
 ```
 
-There's more, jump to [Entry Files][15] for details.
+There's more, jump to [Entry Files][17] for details.
 
 Places where Knip looks for configuration (ordered by priority):
 
@@ -133,7 +134,7 @@ Run the checks with `npx knip`. Or first add this script to `package.json`:
 Then use `npm run knip` to analyze the project and output unused files, dependencies and exports. Knip works just fine
 with `yarn` or `pnpm` as well.
 
-See [Command Line Options][29] for an overview of available CLI options.
+See [Command Line Options][31] for an overview of available CLI options.
 
 ## Configuration
 
@@ -196,7 +197,7 @@ Here's an example `knip.json` configuration with some custom `entry` and `projec
 ```
 
 It might be useful to run Knip first with no or little configuration to see where it needs custom `entry` and/or
-`project` files. Each workspace has the same [default configuration][14].
+`project` files. Each workspace has the same [default configuration][16].
 
 The root workspace is named `"."` under `workspaces` (like in the example).
 
@@ -319,7 +320,7 @@ has them at `e2e-tests/*.spec.ts`. Here's how to configure this:
 #### Multi-project repositories
 
 Some repositories have a single `package.json`, but consist of multiple projects with configuration files across the
-repository (such as the [Nx "intregrated repo" style][41]). Let's assume some of these projects are apps and have their
+repository (such as the [Nx "intregrated repo" style][43]). Let's assume some of these projects are apps and have their
 own Cypress configuration and test files. In that case, we could configure the Cypress plugin like this:
 
 ```json
@@ -336,7 +337,7 @@ In case a plugin causes issues, it can be disabled by using `false` as its value
 
 #### Create a new plugin
 
-Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][42]. This
+Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][44]. This
 guide also contains more details if you want to learn more about plugins and why they are useful.
 
 ### Compilers
@@ -359,7 +360,7 @@ export default {
 };
 ```
 
-Read [Compilers][43] for more details and examples.
+Read [Compilers][45] for more details and examples.
 
 ### Ignore files, binaries, dependencies and workspaces
 
@@ -521,7 +522,7 @@ The report contains the following types of issues:
 
 When an issue type has zero issues, it is not shown.
 
-Getting too many reported issues and false positives? Read more about [handling issues][44].
+Getting too many reported issues and false positives? Read more about [handling issues][46].
 
 ### Rules & Filters
 
@@ -548,7 +549,7 @@ Example:
 }
 ```
 
-See [reading the report][26] for the list of issue types.
+See [reading the report][28] for the list of issue types.
 
 The rules are modeled after the ESLint `rules` configuration, and could be extended in the future. For instance, to
 apply filters or configurations only to a specific issue type.
@@ -569,7 +570,7 @@ Use `--exclude` to ignore reports you're not interested in:
 
 Use `--dependencies` or `--exports` as shortcuts to combine groups of related types.
 
-See [reading the report][26] for the list of issue types.
+See [reading the report][28] for the list of issue types.
 
 #### When to use rules or filters
 
@@ -596,7 +597,7 @@ When the provided built-in reporters are not sufficient, a custom reporter can b
 Pass something like `--reporter ./my-reporter` from the command line. The results are passed to the function from its
 default export and can be used to write issues to `stdout`, a JSON or CSV file, or sent to a service.
 
-Find more details and ideas in [custom reporters][45].
+Find more details and ideas in [custom reporters][47].
 
 ## Fixing Issues
 
@@ -614,7 +615,7 @@ Tip: back up files or use an VCS like Git before deleting files or making change
 
 Repeat the process to reveal new unused files and exports. It's so liberating to remove unused things!
 
-Getting too many reported issues and false positives? Read more about [handling issues][46] describing potential causes
+Getting too many reported issues and false positives? Read more about [handling issues][48] describing potential causes
 for false positives, and how to handle them.
 
 ## Command Line Options
@@ -663,13 +664,13 @@ for false positives, and how to handle them.
 
 ## Potential boost with `--no-gitignore`
 
-To increase performance in a large monorepo, check out [Potential boost with `--no-gitignore`][47].
+To increase performance in a large monorepo, check out [Potential boost with `--no-gitignore`][49].
 
 ## Comparison & Migration
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                 | **knip** | [depcheck][48] | [unimported][49] | [ts-unused-exports][50] | [ts-prune][51] |
+| Feature                 | **knip** | [depcheck][50] | [unimported][51] | [ts-unused-exports][52] | [ts-prune][53] |
 | :---------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files            |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies     |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -705,7 +706,7 @@ The following commands are similar:
     unimported
     knip --production --dependencies --include files
 
-Also see [production mode][21].
+Also see [production mode][23].
 
 ### ts-unused-exports
 
@@ -727,28 +728,29 @@ The following commands are similar:
 
 Many thanks to some of the early adopters of Knip:
 
-- [Block Protocol][52]
-- [DeepmergeTS][53]
-- [eslint-plugin-functional][54]
-- [freeCodeCamp.org][55]
-- [is-immutable-type][56]
-- [IsaacScript][57]
-- [Nuxt][58]
-- [Owncast][59]
-- [release-it][60]
-- [Template TypeScript Node Package][61]
-- [Tipi][62]
+- [Block Protocol][54]
+- [DeepmergeTS][55]
+- [eslint-plugin-functional][56]
+- [freeCodeCamp.org][57]
+- [is-immutable-type][58]
+- [IsaacScript][59]
+- [Nuxt][60]
+- [Owncast][61]
+- [release-it][62]
+- [Template TypeScript Node Package][63]
+- [Tipi][64]
 
 ## Articles, etc.
 
-- Ask your questions in the [Knip knowledge base][63] (powered by OpenAI and [7-docs][64], experimental!)
-- Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports, And Dependencies][65]
-- Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code and types][66]
+- Discord: hang out in [The Knip Barn][8]
+- Ask your questions in the [Knip knowledge base][65] (powered by OpenAI and [7-docs][66], experimental!)
+- Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports, And Dependencies][67]
+- Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code and types][68]
 
 ## Why "Knip"?
 
-Knip is Dutch for a "cut". A Dutch expression is "to be ge**knip**t for something", which means to be perfectly suited
-for the job. I'm motivated to make Knip perfectly suited for the job of cutting projects to perfection! ✂️
+Knip is Dutch for a "cut". A Dutch expression is "ergens ge**knip**t voor zijn", which means to be perfectly suited for
+the job. I'm motivated to make Knip perfectly suited for the job of cutting projects to perfection! ✂️
 
 ## Really, another unused file/dependency/export finder?
 
@@ -761,7 +763,7 @@ each file, and traversing all of this, why not collect the various issues in one
 
 Special thanks to the wonderful people who have contributed to this project:
 
-[![Contributors][68]][67]
+[![Contributors][70]][69]
 
 [1]: #workspaces
 [2]: #plugins
@@ -770,67 +772,69 @@ Special thanks to the wonderful people who have contributed to this project:
 [5]: #custom-reporters
 [6]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [7]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[8]: https://twitter.com/webprolific
-[9]: https://fosstodon.org/@webpro
-[10]: #getting-started
-[11]: #installation
-[12]: #default-configuration
-[13]: #lets-go
-[14]: #configuration
-[15]: #entry-files
-[16]: #ignore-files-binaries-dependencies-and-workspaces
-[17]: #public-exports
-[18]: #ignore-exports-used-in-file
-[19]: #include-exports-in-entry-files
-[20]: #paths
-[21]: #production-mode
-[22]: #strict
-[23]: #plugins-1
-[24]: #output
-[25]: #screenshots
-[26]: #reading-the-report
-[27]: #rules--filters
-[28]: #fixing-issues
-[29]: #command-line-options
-[30]: #potential-boost-with---no-gitignore
-[31]: #comparison--migration
-[32]: #depcheck
-[33]: #unimported
-[34]: #ts-unused-exports
-[35]: #ts-prune
-[36]: #projects-using-knip
-[37]: #articles-etc
-[38]: #why-knip
-[39]: #really-another-unused-filedependencyexport-finder
-[40]: #contributors
-[41]: https://nx.dev/concepts/integrated-vs-package-based
-[42]: ./docs/writing-a-plugin.md
-[43]: ./docs/compilers.md
-[44]: #handling-issues
-[45]: ./docs/custom-reporters.md
-[46]: ./docs/handling-issues.md
-[47]: ./docs/perf-boost-with-no-gitignore.md
-[48]: https://github.com/depcheck/depcheck
-[49]: https://github.com/smeijer/unimported
-[50]: https://github.com/pzavolinsky/ts-unused-exports
-[51]: https://github.com/nadeesha/ts-prune
-[52]: https://github.com/blockprotocol/blockprotocol
-[53]: https://github.com/RebeccaStevens/deepmerge-ts
-[54]: https://github.com/eslint-functional/eslint-plugin-functional
-[55]: https://github.com/freeCodeCamp/freeCodeCamp
-[56]: https://github.com/RebeccaStevens/is-immutable-type
-[57]: https://github.com/IsaacScript/isaacscript
-[58]: https://github.com/nuxt/nuxt
-[59]: https://github.com/owncast/owncast
-[60]: https://github.com/release-it/release-it
-[61]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
-[62]: https://github.com/meienberger/runtipi
-[63]: https://knip.deno.dev
-[64]: https://github.com/7-docs/7-docs
-[65]: https://www.smashingmagazine.com/2023/08/knip-automated-tool-find-unused-files-exports-dependencies/
-[66]: https://effectivetypescript.com/2023/07/29/knip/
-[67]: https://github.com/webpro/knip/graphs/contributors
-[68]: https://contrib.rocks/image?repo=webpro/knip
+[8]: https://discord.gg/ya5yktTq
+[9]: https://twitter.com/webprolific
+[10]: https://fosstodon.org/@webpro
+[11]: https://github.com/webpro/knip/issues
+[12]: #getting-started
+[13]: #installation
+[14]: #default-configuration
+[15]: #lets-go
+[16]: #configuration
+[17]: #entry-files
+[18]: #ignore-files-binaries-dependencies-and-workspaces
+[19]: #public-exports
+[20]: #ignore-exports-used-in-file
+[21]: #include-exports-in-entry-files
+[22]: #paths
+[23]: #production-mode
+[24]: #strict
+[25]: #plugins-1
+[26]: #output
+[27]: #screenshots
+[28]: #reading-the-report
+[29]: #rules--filters
+[30]: #fixing-issues
+[31]: #command-line-options
+[32]: #potential-boost-with---no-gitignore
+[33]: #comparison--migration
+[34]: #depcheck
+[35]: #unimported
+[36]: #ts-unused-exports
+[37]: #ts-prune
+[38]: #projects-using-knip
+[39]: #articles-etc
+[40]: #why-knip
+[41]: #really-another-unused-filedependencyexport-finder
+[42]: #contributors
+[43]: https://nx.dev/concepts/integrated-vs-package-based
+[44]: ./docs/writing-a-plugin.md
+[45]: ./docs/compilers.md
+[46]: #handling-issues
+[47]: ./docs/custom-reporters.md
+[48]: ./docs/handling-issues.md
+[49]: ./docs/perf-boost-with-no-gitignore.md
+[50]: https://github.com/depcheck/depcheck
+[51]: https://github.com/smeijer/unimported
+[52]: https://github.com/pzavolinsky/ts-unused-exports
+[53]: https://github.com/nadeesha/ts-prune
+[54]: https://github.com/blockprotocol/blockprotocol
+[55]: https://github.com/RebeccaStevens/deepmerge-ts
+[56]: https://github.com/eslint-functional/eslint-plugin-functional
+[57]: https://github.com/freeCodeCamp/freeCodeCamp
+[58]: https://github.com/RebeccaStevens/is-immutable-type
+[59]: https://github.com/IsaacScript/isaacscript
+[60]: https://github.com/nuxt/nuxt
+[61]: https://github.com/owncast/owncast
+[62]: https://github.com/release-it/release-it
+[63]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
+[64]: https://github.com/meienberger/runtipi
+[65]: https://knip.deno.dev
+[66]: https://github.com/7-docs/7-docs
+[67]: https://www.smashingmagazine.com/2023/08/knip-automated-tool-find-unused-files-exports-dependencies/
+[68]: https://effectivetypescript.com/2023/07/29/knip/
+[69]: https://github.com/webpro/knip/graphs/contributors
+[70]: https://contrib.rocks/image?repo=webpro/knip
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
