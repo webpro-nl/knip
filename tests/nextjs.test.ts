@@ -13,11 +13,8 @@ test('Support NextJS files', async () => {
     cwd,
   });
 
-  console.log({ counters });
-
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 0,
     processed: 3,
     total: 3,
   });
