@@ -12,7 +12,13 @@ or `devDependencies`:
 ```json
 {
   "next": {
-    "entry": ["next.config.{js,ts,cjs,mjs}", "{app,pages}/**/*.{js,jsx,ts,tsx}", "src/{app,pages}/**/*.{js,jsx,ts,tsx}"]
+    "entry": [
+      "next.config.{js,ts,cjs,mjs}",
+      "{app,pages}/**/*.{js,jsx,ts,tsx}",
+      "src/{app,pages}/**/*.{js,jsx,ts,tsx}",
+      "middleware.{js,ts}",
+      "src/middleware.{js,ts}"
+    ]
   }
 }
 ```
