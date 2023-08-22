@@ -122,7 +122,7 @@ export class DependencyDeputy {
     this.peerDependencies.set(workspaceName, peerDependencies);
   }
 
-  getPeerDependencies(workspaceName: string, dependency: string) {
+  getPeerDependenciesOf(workspaceName: string, dependency: string) {
     return Array.from(this.peerDependencies.get(workspaceName)?.get(dependency) ?? []);
   }
 
@@ -229,7 +229,7 @@ export class DependencyDeputy {
 
           // Ignore typed dependencies that have a peer dependency that's referenced
           // Example: `next` has `react-dom` as peer dependency, so when `@types/react-dom` is listed it can be ignored
-          const peerDependencies = this.getPeerDependencies(workspaceName, typedPackageName);
+          const peerDependencies = this.getPeerDependenciesOf(workspaceName, typedPackageName);
           if (peerDependencies.length) {
             return !peerDependencies.find(peerDependency => !isNotReferencedDependency(peerDependency, true));
           }
@@ -239,7 +239,7 @@ export class DependencyDeputy {
 
         // A dependency may not be referenced, but it may be a peerDependency of another.
         // If that peerDependency is also not referenced we'll report it as unused.
-        const peerDependencies = this.getPeerDependencies(workspaceName, dependency);
+        const peerDependencies = this.getPeerDependenciesOf(workspaceName, dependency);
         peerDependencies.forEach(dep => (!peerDepRecs[dep] ? (peerDepRecs[dep] = 1) : peerDepRecs[dep]++));
         return !peerDependencies.find(peerDependency => !isNotReferencedDependency(peerDependency, true));
       };
