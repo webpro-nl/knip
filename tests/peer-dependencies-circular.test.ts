@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/peer-dependencies-circular');
 
-test('Prevent infinite recursion with ciricular peer dependencies', async () => {
+test('Prevent infinite recursion with circular peer dependencies', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
