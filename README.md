@@ -746,6 +746,7 @@ Many thanks to some of the early adopters of Knip:
 - Ask your questions in the [Knip knowledge base][65] (powered by OpenAI and [7-docs][66], experimental!)
 - Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports, And Dependencies][67]
 - Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code and types][68]
+- Josh Goldberg: [Speeding Up Centered Part 4: Unused Code Bloat][69]
 
 ## Why "Knip"?
 
@@ -763,7 +764,7 @@ each file, and traversing all of this, why not collect the various issues in one
 
 Special thanks to the wonderful people who have contributed to this project:
 
-[![Contributors][70]][69]
+[![Contributors][71]][70]
 
 [1]: #workspaces
 [2]: #plugins
@@ -833,8 +834,9 @@ Special thanks to the wonderful people who have contributed to this project:
 [66]: https://github.com/7-docs/7-docs
 [67]: https://www.smashingmagazine.com/2023/08/knip-automated-tool-find-unused-files-exports-dependencies/
 [68]: https://effectivetypescript.com/2023/07/29/knip/
-[69]: https://github.com/webpro/knip/graphs/contributors
-[70]: https://contrib.rocks/image?repo=webpro/knip
+[69]: https://www.joshuakgoldberg.com/blog/speeding-up-centered-part-4-unused-code-bloat/
+[70]: https://github.com/webpro/knip/graphs/contributors
+[71]: https://contrib.rocks/image?repo=webpro/knip
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
