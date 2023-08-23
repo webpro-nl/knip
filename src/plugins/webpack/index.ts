@@ -59,6 +59,7 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
   if (!config) return [];
 
   // Projects may use a single config function for both development and production modes, so resolve it twice
+  // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
   const passes = typeof config === 'function' ? [false, true] : [isProduction];
 
   const dependencies = passes.flatMap(isProduction => {
