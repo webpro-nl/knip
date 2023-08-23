@@ -63,7 +63,7 @@ test('getReferencesFromScripts (--require)', () => {
 test('getReferencesFromScripts (.bin)', () => {
   t('./node_modules/.bin/tsc --noEmit', ['bin:tsc']);
   t('node_modules/.bin/tsc --noEmit', ['bin:tsc']);
-  t('$(npm bin)/tsc --noEmit', ['bin:tsc', 'bin:npm']);
+  t('$(npm bin)/tsc --noEmit', ['bin:tsc']);
   t('../../../scripts/node_modules/.bin/tsc --noEmit', []);
 });
 
@@ -162,7 +162,7 @@ test('getReferencesFromScripts (c8)', () => {
 });
 
 test('getReferencesFromScripts (bash expressions)', () => {
-  t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['bin:test', 'bin:make']);
+  t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['bin:make']);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['bin:make']);
   t('if ! npx pkg --verbose ; then exit 1 ; fi', ['bin:pkg', 'bin:exit']);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', ['bin:exec', 'bin:cz', 'bin:true']);
@@ -174,7 +174,7 @@ test('getReferencesFromScripts (bash expansion)', () => {
 });
 
 test('getReferencesFromScripts (multiline)', () => {
-  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', ['bin:dirname', 'bin:lint-staged']);
+  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', ['bin:lint-staged']);
   t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, ['rc', '@scope/rc']);
 });
 

@@ -1,6 +1,5 @@
 import parseArgs from 'minimist';
 import { isInternal } from '../../util/path.js';
-import { stripQuotes } from '../../util/string.js';
 import { getBinariesFromScript } from '../bash-parser.js';
 import { argsFrom, stripVersionFromSpecifier, toBinary } from '../util.js';
 import type { Resolver } from '../types.js';
@@ -15,7 +14,7 @@ export const resolve: Resolver = (binary, args, { cwd, fromArgs, manifest }) => 
   const specifier = packageSpecifier ? stripVersionFromSpecifier(packageSpecifier) : '';
 
   const packages = parsed.package ? [parsed.package].flat().map(stripVersionFromSpecifier) : [];
-  const command = parsed.call ? getBinariesFromScript(stripQuotes(parsed.call), { cwd, manifest }) : [];
+  const command = parsed.call ? getBinariesFromScript(parsed.call, { cwd, manifest }) : [];
   const restArgs = argsFrom(args, packageSpecifier);
 
   const dependencies = manifest ? Object.keys({ ...manifest.dependencies, ...manifest.devDependencies }) : [];

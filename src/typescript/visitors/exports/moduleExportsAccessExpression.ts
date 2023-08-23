@@ -1,7 +1,6 @@
 import ts from 'typescript';
 import { SymbolType } from '../../../types/issues.js';
-import { stripQuotes } from '../../../util/string.js';
-import { isModuleExportsAccessExpression } from '../../ast-helpers.js';
+import { isModuleExportsAccessExpression, stripQuotes } from '../../ast-helpers.js';
 import { isJS } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
 
