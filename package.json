@@ -42,6 +42,7 @@
     "schema.json"
   ],
   "dependencies": {
+    "@ericcornelissen/bash-parser": "^0.5.2",
     "@npmcli/map-workspaces": "^3.0.4",
     "@snyk/github-codeowners": "^1.1.0",
     "chalk": "^5.2.0",
@@ -55,8 +56,6 @@
     "pretty-ms": "^8.0.0",
     "strip-json-comments": "^5.0.0",
     "summary": "^2.1.0",
-    "tree-sitter": "0.20.5",
-    "tree-sitter-bash": "0.19.0",
     "typescript": "^5.0.2",
     "zod": "^3.22.2",
     "zod-validation-error": "^1.5.0"
