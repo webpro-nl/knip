@@ -9,7 +9,8 @@ export default visit(
       // Patterns:
       // export default 1;
       // export = identifier;
-      return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos: node.expression.getStart() };
+      const pos = node.getChildAt(1).getStart();
+      return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos };
     }
   }
 );

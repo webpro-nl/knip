@@ -230,10 +230,7 @@ export class ProjectPrincipal {
   public getHasReferences(filePath: string, exportedItem: ExportItem) {
     const hasReferences = { external: false, internal: false };
 
-    // `export default myValue` references should look at the `default`, not `myValue`
-    const node = ts.isExportAssignment(exportedItem.node) ? exportedItem.node.getChildAt(1) : exportedItem.node;
-
-    const symbolReferences = this.findReferences(filePath, node).flatMap(f => f.references);
+    const symbolReferences = this.findReferences(filePath, exportedItem.pos).flatMap(f => f.references);
 
     for (const reference of symbolReferences) {
       if (reference.fileName === filePath) {
@@ -258,7 +255,7 @@ export class ProjectPrincipal {
     return members
       .filter(member => {
         if (this.isPublicExport(member)) return false;
-        const referencedSymbols = this.findReferences(filePath, member.node);
+        const referencedSymbols = this.findReferences(filePath, member.pos);
         const files = referencedSymbols
           .flatMap(refs => refs.references)
           .filter(ref => !ref.isDefinition)
@@ -270,8 +267,8 @@ export class ProjectPrincipal {
       .map(member => member.identifier);
   }
 
-  private findReferences(filePath: string, node: ts.Node) {
-    return this.backend.lsFindReferences(filePath, node.getStart()) ?? [];
+  private findReferences(filePath: string, pos: number) {
+    return this.backend.lsFindReferences(filePath, pos) ?? [];
   }
 
   public isPublicExport(exportedItem: ExportItem) {
