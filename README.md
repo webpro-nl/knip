@@ -508,7 +508,7 @@ The report contains the following types of issues:
 | :---------------------------------- | :---------------------------------------------- | :------------- |
 | Unused files                        | unable to find references to this file          | `files`        |
 | Unused dependencies                 | unable to find references to this dependency    | `dependencies` |
-| Unused devDependencies              | unable to find references to this devDependency | `dependencies` |
+| Unused devDependencies              | unable to find references to this devDependency | `devDependencies` |
 | Unlisted dependencies               | used dependencies not listed in package.json    | `unlisted`     |
 | Unlisted binaries                   | binaries from deps not listed in package.json   | `binaries`     |
 | Unresolved imports                  | unable to resolve this (import) specifier       | `unresolved`   |
