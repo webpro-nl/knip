@@ -24,7 +24,7 @@ const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd,
   const requireArgs = (config?.require ?? []).map(require => `--require ${require}`);
   const otherArgs = config?.nodeArguments ?? [];
 
-  const cmd = `node ${otherArgs.join(' ') + ' '}${requireArgs.join(' ')}`;
+  const cmd = `node ${otherArgs.join(' ')} ${requireArgs.join(' ')}`;
 
   return _getDependenciesFromScripts([cmd], {
     cwd,
