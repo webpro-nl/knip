@@ -15,7 +15,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
 
-// Note that `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
+// `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
 export const ENTRY_FILE_PATTERNS = [];
 
 const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
