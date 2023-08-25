@@ -7,7 +7,7 @@ import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { isMaybePackageName } from './util/modules.js';
-import { extname, isInNodeModules, join } from './util/path.js';
+import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { ExportItem, ExportItemMember } from './types/exports.js';
@@ -35,8 +35,6 @@ const baseCompilerOptions = {
 
 const tsCreateProgram = timerify(ts.createProgram);
 
-const isGitIgnored = isGitIgnoredSync();
-
 /**
  * This class aims to abstract away TypeScript specific things from the main flow.
  *
@@ -55,6 +53,7 @@ export class ProjectPrincipal {
   // We don't want to report unused exports of config/plugin entry files
   skipExportsAnalysis: Set<string> = new Set();
 
+  isGitIgnored: ReturnType<typeof isGitIgnoredSync>;
   cwd: string;
   compilerOptions: ts.CompilerOptions;
   extensions: Set<string>;
@@ -71,6 +70,9 @@ export class ProjectPrincipal {
 
   constructor({ compilerOptions, cwd, compilers }: ProjectPrincipalOptions) {
     this.cwd = cwd;
+
+    // Provide `cwd`, otherwise defaults to process.cwd() w/ incompatible slashes in Windows
+    this.isGitIgnored = isGitIgnoredSync({ cwd });
 
     this.compilerOptions = {
       ...compilerOptions,
@@ -200,7 +202,7 @@ export class ProjectPrincipal {
         if (isMaybePackageName(sanitizedSpecifier)) {
           external.add(sanitizedSpecifier);
         } else {
-          const isIgnored = isGitIgnored(join(filePath, sanitizedSpecifier));
+          const isIgnored = this.isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
           if (!isIgnored) {
             const ext = extname(sanitizedSpecifier);
             if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
