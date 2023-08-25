@@ -9,18 +9,23 @@ const manifest = getManifest(cwd);
 
 test('Find dependencies in vitest configuration (vitest)', async () => {
   const configFilePath = join(cwd, 'vitest.config.ts');
-  const dependencies = await vitest.findDependencies(configFilePath, { manifest });
+  const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, ['happy-dom', '@vitest/coverage-istanbul']);
 });
 
 test('Find dependencies in vitest configuration without coverage providers (vitest)', async () => {
-  const configFilePath = join(cwd, 'vitest2.config.ts');
-  const dependencies = await vitest.findDependencies(configFilePath, { manifest });
+  const configFilePath = join(cwd, 'vitest-default-coverage.config');
+  const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, ['jsdom', '@vitest/coverage-v8']);
 });
 
 test('Find dependencies in vitest configuration (vite)', async () => {
   const configFilePath = join(cwd, 'vite.config.ts');
-  const dependencies = await vitest.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['@edge-runtime/vm', '@vitest/coverage-c8']);
+  const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest });
+  assert.deepEqual(dependencies, [
+    '@edge-runtime/vm',
+    '@vitest/coverage-c8',
+    join(cwd, 'setup.js'),
+    join(cwd, 'global.ts'),
+  ]);
 });
