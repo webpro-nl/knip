@@ -59,6 +59,14 @@ export class DependencyDeputy {
     const dependencies = Object.keys(manifest.dependencies ?? {});
     const peerDependencies = Object.keys(manifest.peerDependencies ?? {});
     const optionalDependencies = Object.keys(manifest.optionalDependencies ?? {});
+    const optionalPeerDependencies = manifest.peerDependenciesMeta
+      ? peerDependencies.filter(
+          peerDependency =>
+            manifest.peerDependenciesMeta &&
+            peerDependency in manifest.peerDependenciesMeta &&
+            manifest.peerDependenciesMeta[peerDependency].optional
+        )
+      : [];
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
 
@@ -70,6 +78,7 @@ export class DependencyDeputy {
       scripts,
       dependencies,
       peerDependencies,
+      optionalPeerDependencies,
       optionalDependencies,
       devDependencies,
       allDependencies,
@@ -124,6 +133,12 @@ export class DependencyDeputy {
 
   getPeerDependenciesOf(workspaceName: string, dependency: string) {
     return Array.from(this.peerDependencies.get(workspaceName)?.get(dependency) ?? []);
+  }
+
+  getOptionalPeerDependencies(workspaceName: string) {
+    const manifest = this._manifests.get(workspaceName);
+    if (!manifest) return [];
+    return manifest.optionalPeerDependencies;
   }
 
   /**
@@ -192,6 +207,7 @@ export class DependencyDeputy {
   public settleDependencyIssues() {
     const dependencyIssues: Issue[] = [];
     const devDependencyIssues: Issue[] = [];
+    const optionalPeerDependencyIssues: Issue[] = [];
 
     for (const [workspaceName, { manifestPath, ignoreDependencies, ignoreBinaries }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspaceName);
@@ -250,6 +266,7 @@ export class DependencyDeputy {
 
       const pd = this.getProductionDependencies(workspaceName);
       const dd = this.getDevDependencies(workspaceName);
+      const od = this.getOptionalPeerDependencies(workspaceName);
 
       pd.filter(isNotIgnoredDependency)
         .filter(isNotIgnoredBinary)
@@ -260,9 +277,16 @@ export class DependencyDeputy {
         .filter(isNotIgnoredBinary)
         .filter(isNotReferencedDependency)
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
+
+      od.filter(isNotIgnoredDependency)
+        .filter(isNotIgnoredBinary)
+        .filter(p => isReferencedDependency(p))
+        .forEach(symbol =>
+          optionalPeerDependencyIssues.push({ type: 'optionalPeerDependencies', filePath: manifestPath, symbol })
+        );
     }
 
-    return { dependencyIssues, devDependencyIssues };
+    return { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues };
   }
 
   public getConfigurationHints() {
