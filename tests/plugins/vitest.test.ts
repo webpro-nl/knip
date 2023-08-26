@@ -22,10 +22,5 @@ test('Find dependencies in vitest configuration without coverage providers (vite
 test('Find dependencies in vitest configuration (vite)', async () => {
   const configFilePath = join(cwd, 'vite.config.ts');
   const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest });
-  assert.deepEqual(dependencies, [
-    '@edge-runtime/vm',
-    '@vitest/coverage-c8',
-    join(cwd, 'setup.js'),
-    join(cwd, 'global.ts'),
-  ]);
+  assert.deepEqual(dependencies, ['@edge-runtime/vm', '@vitest/coverage-c8', './setup.js', './global.ts']);
 });

@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     environment: 'edge-runtime',
     setupFiles: ['./setup.js'],
-    globalSetup: ['global.ts'],
+    globalSetup: ['./global.ts'],
     coverage: {
       reporter: ['html', 'lcov'],
       provider: 'c8',
