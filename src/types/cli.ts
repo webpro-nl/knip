@@ -4,6 +4,7 @@ export interface CommandLineOptions {
   gitignore: boolean;
   isStrict: boolean;
   isProduction: boolean;
+  isIgnoreInternal: boolean;
   isShowProgress: boolean;
   isIncludeEntryExports: boolean;
 }

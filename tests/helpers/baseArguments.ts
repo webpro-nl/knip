@@ -3,6 +3,7 @@ const baseArguments = {
   gitignore: false,
   isStrict: false,
   isProduction: false,
+  isIgnoreInternal: false,
   isShowProgress: false,
   isIncludeEntryExports: false,
 };

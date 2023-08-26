@@ -39,8 +39,16 @@ export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Reporter, ReporterOptions } from './types/issues.js';
 
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
-  const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress, isIncludeEntryExports } =
-    unresolvedConfiguration;
+  const {
+    cwd,
+    tsConfigFile,
+    gitignore,
+    isStrict,
+    isProduction,
+    isIgnoreInternal,
+    isShowProgress,
+    isIncludeEntryExports,
+  } = unresolvedConfiguration;
 
   debugLogObject('Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
@@ -353,6 +361,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           // Skip exports tagged `@public` or `@beta`
           if (jsDocTags.includes('@public') || jsDocTags.includes('@beta')) continue;
+
+          // Skip exports tagged `@internal` in --production --ignore-internal mode
+          if (isIgnoreInternal && jsDocTags.includes('@internal')) continue;
 
           if (importedModule?.symbols.has(symbol)) {
             // Skip members of classes/enums that are eventually exported by entry files

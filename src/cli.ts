@@ -20,6 +20,7 @@ const {
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
   'no-progress': isNoProgress = false,
+  'ignore-internal': isIgnoreInternal = false,
   'include-entry-exports': isIncludeEntryExports = false,
   performance: isObservePerf = false,
   production: isProduction = false,
@@ -54,8 +55,9 @@ const run = async () => {
       cwd,
       tsConfigFile: tsConfig,
       gitignore: !isNoGitIgnore,
-      isStrict,
       isProduction,
+      isStrict,
+      isIgnoreInternal,
       isShowProgress,
       isIncludeEntryExports,
     });

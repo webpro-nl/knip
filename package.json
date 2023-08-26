@@ -18,7 +18,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "knip": "node ./dist/cli.js",
-    "knip:production": "node ./dist/cli.js --production --strict",
+    "knip:production": "node ./dist/cli.js --production --strict --ignore-internal",
     "lint": "eslint scripts src tests",
     "lint:fix": "eslint scripts src tests --fix",
     "format": "prettier scripts src tests schema.json --with-node-modules --write --config .prettierrc",

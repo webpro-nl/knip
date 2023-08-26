@@ -9,6 +9,7 @@ Options:
   -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
   --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
+  --ignore-internal        Ignore exports with tag @internal (JSDoc/TSDoc)
   --workspace [dir]        Analyze a single workspace (default: analyze all configured workspaces)
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
@@ -52,6 +53,7 @@ try {
       exclude: { type: 'string', multiple: true },
       exports: { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
+      'ignore-internal': { type: 'boolean' },
       include: { type: 'string', multiple: true },
       'include-entry-exports': { type: 'boolean' },
       'max-issues': { type: 'string' },

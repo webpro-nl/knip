@@ -79,10 +79,10 @@ const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config', rawSpeci
   return [scope, name ? `${namespace}-${name}` : namespace, ...rest].join('/');
 };
 
-/** @public */
+/** @internal */
 export const resolvePluginSpecifier = (specifier: string) => resolveSpecifier('eslint-plugin', specifier);
 
-/** @public */
+/** @internal */
 export const resolveExtendSpecifier = (specifier: string) => {
   if (isInternal(specifier)) return;
 
