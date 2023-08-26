@@ -8,9 +8,9 @@ export default visit(
   () => true,
   node => {
     // @ts-expect-error TODO Property 'modifiers' does not exist on type 'Node'.
-    const modifierKinds = (node.modifiers as ts.Modifier[])?.map(modifier => modifier.kind) ?? [];
+    const exportKeyword = (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.ExportKeyword);
 
-    if (modifierKinds.includes(ts.SyntaxKind.ExportKeyword)) {
+    if (exportKeyword) {
       if (ts.isVariableStatement(node)) {
         // @ts-expect-error TODO Issue seems caused by mismatch between returned `node` types (but all ts.Node)
         return node.declarationList.declarations.flatMap(declaration => {
@@ -24,6 +24,7 @@ export default visit(
                     identifier: element.name.escapedText.toString(),
                     type: SymbolType.UNKNOWN,
                     pos: element.name.getStart(),
+                    fix: [element],
                   };
                 }
               })
@@ -38,6 +39,7 @@ export default visit(
                     identifier: element.getText(),
                     type: SymbolType.UNKNOWN,
                     pos: element.getStart(),
+                    fix: [element],
                   };
                 }
               })
@@ -45,19 +47,34 @@ export default visit(
           } else {
             // Pattern: export const MyVar = 1;
             const identifier = declaration.name.getText();
-            return { node: declaration, identifier, type: SymbolType.UNKNOWN, pos: declaration.name.getStart() };
+            return {
+              node: declaration,
+              identifier,
+              type: SymbolType.UNKNOWN,
+              pos: declaration.name.getStart(),
+              fix: [exportKeyword],
+            };
           }
         });
       }
 
+      // @ts-expect-error TODO Property 'modifiers' does not exist on type 'Node'.
+      const defaultKeyword = (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);
+
       if (ts.isFunctionDeclaration(node) && node.name) {
-        const identifier = modifierKinds.includes(ts.SyntaxKind.DefaultKeyword) ? 'default' : node.name.getText();
+        const identifier = defaultKeyword ? 'default' : node.name.getText();
         const pos = (node.name ?? node.body ?? node).getStart();
-        return { node, identifier, pos, type: SymbolType.FUNCTION };
+        return {
+          node,
+          identifier,
+          pos,
+          type: SymbolType.FUNCTION,
+          fix: defaultKeyword ? [exportKeyword, defaultKeyword] : [exportKeyword],
+        };
       }
 
       if (ts.isClassDeclaration(node) && node.name) {
-        const identifier = modifierKinds.includes(ts.SyntaxKind.DefaultKeyword) ? 'default' : node.name.getText();
+        const identifier = defaultKeyword ? 'default' : node.name.getText();
         const pos = (node.name ?? node).getStart();
         const members = node.members
           .filter(
@@ -69,28 +86,56 @@ export default visit(
             identifier: member.name.getText(),
             pos: member.name.getStart(),
             type: SymbolType.MEMBER,
+            fix: [],
           }));
-        return { node, identifier, type: SymbolType.CLASS, pos, members };
+        return {
+          node,
+          identifier,
+          type: SymbolType.CLASS,
+          pos,
+          members,
+          fix: defaultKeyword ? [exportKeyword, defaultKeyword] : [exportKeyword],
+        };
       }
 
       if (ts.isTypeAliasDeclaration(node)) {
-        return { node, identifier: node.name.getText(), type: SymbolType.TYPE, pos: node.name.getStart() };
+        return {
+          node,
+          identifier: node.name.getText(),
+          type: SymbolType.TYPE,
+          pos: node.name.getStart(),
+          fix: [exportKeyword],
+        };
       }
 
       if (ts.isInterfaceDeclaration(node)) {
-        return { node, identifier: node.name.getText(), type: SymbolType.INTERFACE, pos: node.name.getStart() };
+        return {
+          node,
+          identifier: node.name.getText(),
+          type: SymbolType.INTERFACE,
+          pos: node.name.getStart(),
+          fix: [exportKeyword],
+        };
       }
 
       if (ts.isEnumDeclaration(node)) {
-        const identifier = modifierKinds.includes(ts.SyntaxKind.DefaultKeyword) ? 'default' : node.name.getText();
+        const identifier = defaultKeyword ? 'default' : node.name.getText();
         const pos = node.name.getStart();
         const members = node.members.map(member => ({
           node: member,
           identifier: stripQuotes(member.name.getText()),
           pos: member.name.getStart(),
           type: SymbolType.MEMBER,
+          fix: [],
         }));
-        return { node, identifier, type: SymbolType.ENUM, pos, members };
+        return {
+          node,
+          identifier,
+          type: SymbolType.ENUM,
+          pos,
+          members,
+          fix: defaultKeyword ? [exportKeyword, defaultKeyword] : [exportKeyword],
+        };
       }
     }
   }

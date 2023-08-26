@@ -6,6 +6,8 @@ const baseArguments = {
   isIgnoreInternal: false,
   isShowProgress: false,
   isIncludeEntryExports: false,
+  isFix: false,
+  fixTypes: [],
 };
 
 export default baseArguments;

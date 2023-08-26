@@ -7,4 +7,6 @@ export interface CommandLineOptions {
   isIgnoreInternal: boolean;
   isShowProgress: boolean;
   isIncludeEntryExports: boolean;
+  isFix: boolean;
+  fixTypes: string[];
 }

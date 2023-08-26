@@ -9,6 +9,7 @@ export type ExportItem = {
   pos: number;
   type: SymbolType;
   members?: ExportItemMember[];
+  fix: ts.Node[];
 };
 
 export type ExportItemMember = {
@@ -16,6 +17,7 @@ export type ExportItemMember = {
   identifier: Identifier;
   pos: number;
   type: SymbolType;
+  fix: ts.Node[];
 };
 
 export type ExportItems = Map<string, ExportItem>;

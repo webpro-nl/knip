@@ -27,6 +27,8 @@ const {
   reporter = 'symbols',
   'reporter-options': reporterOptions = '',
   strict: isStrict = false,
+  fix: isFix = false,
+  'fix-type': fixTypes = [],
   tsConfig,
   version: isVersion,
 } = parsedArgValues;
@@ -60,6 +62,8 @@ const run = async () => {
       isIgnoreInternal,
       isShowProgress,
       isIncludeEntryExports,
+      isFix,
+      fixTypes: fixTypes.map(type => type.split(',')).flat(),
     });
 
     await printReport({

@@ -6,6 +6,7 @@ import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
+import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { compact } from './util/array.js';
@@ -48,6 +49,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isIgnoreInternal,
     isShowProgress,
     isIncludeEntryExports,
+    isFix,
+    fixTypes,
   } = unresolvedConfiguration;
 
   debugLogObject('Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
@@ -65,6 +68,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const workspaces = chief.getWorkspaces();
   const report = chief.getIssueTypesToReport();
   const rules = chief.getRules();
+  const fixer = new IssueFixer({ isEnabled: true, cwd, fixTypes });
 
   const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
@@ -394,9 +398,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (isProduction) continue;
               const type = isStar ? 'nsTypes' : 'types';
               collector.addIssue({ type, filePath, symbol, symbolType: exportedItem.type });
+              if (type === 'types') fixer.addUnusedTypeNode(filePath, exportedItem.fix);
             } else {
               const type = isStar ? 'nsExports' : 'exports';
               collector.addIssue({ type, filePath, symbol });
+              if (type === 'exports') fixer.addUnusedExportNode(filePath, exportedItem.fix);
             }
           }
         }
@@ -418,6 +424,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   );
 
   const { issues, counters, configurationHints } = collector.getIssues();
+
+  if (isFix) {
+    await fixer.fixIssues(issues);
+  }
 
   streamer.clear();
 

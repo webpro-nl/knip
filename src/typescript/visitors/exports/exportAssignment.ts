@@ -10,7 +10,7 @@ export default visit(
       // export default 1;
       // export = identifier;
       const pos = node.getChildAt(1).getStart();
-      return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos };
+      return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos, fix: [node] };
     }
   }
 );

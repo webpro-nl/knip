@@ -17,6 +17,8 @@ Options:
   --dependencies           Shortcut for --include dependencies,unlisted,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
   --include-entry-exports  Include entry files when reporting unused exports
+  --fix                    Fix issues
+  --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
@@ -30,6 +32,7 @@ Options:
   -V, --version            Print version
 
 (1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
+(2) Fixable issue types: dependencies, exports, types
 
 Examples:
 
@@ -52,6 +55,8 @@ try {
       dependencies: { type: 'boolean' },
       exclude: { type: 'string', multiple: true },
       exports: { type: 'boolean' },
+      fix: { type: 'boolean' },
+      'fix-type': { type: 'string', multiple: true },
       help: { type: 'boolean', short: 'h' },
       'ignore-internal': { type: 'boolean' },
       include: { type: 'string', multiple: true },

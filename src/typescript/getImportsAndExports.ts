@@ -36,7 +36,7 @@ type AddInternalImportOptions = AddImportOptions & {
   isReExport: boolean;
 };
 
-export type AddExportOptions = ExportItem & { identifier: string };
+export type AddExportOptions = ExportItem & { identifier: string; fix: (ts.Node | ts.Modifier)[] };
 
 export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetImportsAndExportsOptions) => {
   const internalImports: Imports = new Map();
@@ -129,13 +129,13 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     }
   };
 
-  const addExport = ({ node, identifier, type, pos, members }: AddExportOptions) => {
+  const addExport = ({ node, identifier, type, pos, members, fix }: AddExportOptions) => {
     if (options.skipExports) return;
     if (exports.has(identifier)) {
       const item = exports.get(identifier);
-      exports.set(identifier, { ...item, node, type, pos, members });
+      exports.set(identifier, { ...item, node, type, pos, members, fix });
     } else {
-      exports.set(identifier, { node, type, pos, members });
+      exports.set(identifier, { node, type, pos, members, fix });
     }
 
     if (ts.isExportAssignment(node)) maybeAddAliasedExport(node.expression, 'default');
