@@ -240,10 +240,10 @@ export class DependencyDeputy {
         }
 
         // A dependency may not be referenced, but it may be a peerDependency of another.
-        // If that peerDependency is also not referenced we'll report it as unused.
-        const peerDependencies = this.getPeerDependenciesOf(workspaceName, dependency);
-        peerDependencies.forEach(dep => (!peerDepRecs[dep] ? (peerDepRecs[dep] = 1) : peerDepRecs[dep]++));
-        return !!peerDependencies.find(peerDependency => isReferencedDependency(peerDependency, true));
+        // If that "host" dependency is also not referenced we'll report this dependency as unused.
+        const peerDependenciesOf = this.getPeerDependenciesOf(workspaceName, dependency);
+        peerDependenciesOf.forEach(dep => (!peerDepRecs[dep] ? (peerDepRecs[dep] = 1) : peerDepRecs[dep]++));
+        return peerDependenciesOf.some(peerDependency => isReferencedDependency(peerDependency, true));
       };
 
       const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency);
