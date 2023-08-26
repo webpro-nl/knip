@@ -21,7 +21,14 @@ export const getIncludedIssueTypes = (
   { include = [], exclude = [], isProduction = false }: Options = {}
 ) => {
   if (cliArgs.dependencies) {
-    cliArgs.include = [...cliArgs.include, 'dependencies', 'unlisted', 'binaries', 'unresolved'];
+    cliArgs.include = [
+      ...cliArgs.include,
+      'dependencies',
+      'optionalPeerDependencies',
+      'unlisted',
+      'binaries',
+      'unresolved',
+    ];
   }
   if (cliArgs.exports) {
     const exports = ['exports', 'nsExports', 'classMembers', 'types', 'nsTypes', 'enumMembers', 'duplicates'];
@@ -47,8 +54,8 @@ export const getIncludedIssueTypes = (
     _exclude.push('devDependencies');
   } else {
     // Auto-add (or remove) `devDependencies` when `dependencies` are included (or excluded)
-    if (_include.includes('dependencies')) _include.push('devDependencies');
-    if (_exclude.includes('dependencies')) _exclude.push('devDependencies');
+    if (_include.includes('dependencies')) _include.push('devDependencies', 'optionalPeerDependencies');
+    if (_exclude.includes('dependencies')) _exclude.push('devDependencies', 'optionalPeerDependencies');
   }
 
   const included = (_include.length > 0 ? _include : ISSUE_TYPES).filter(group => !_exclude.includes(group));

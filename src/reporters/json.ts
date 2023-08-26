@@ -14,6 +14,7 @@ type Row = {
   files?: boolean;
   dependencies?: string[];
   devDependencies?: string[];
+  optionalPeerDependencies?: string[];
   unlisted?: string[];
   binaries?: string[];
   unresolved?: string[];
@@ -49,6 +50,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
       ...(report.files && { files: false }),
       ...(report.dependencies && { dependencies: [] }),
       ...(report.devDependencies && { devDependencies: [] }),
+      ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),
       ...(report.unlisted && { unlisted: [] }),
       ...(report.unresolved && { unresolved: [] }),
       ...((report.exports || report.nsExports) && { exports: [] }),

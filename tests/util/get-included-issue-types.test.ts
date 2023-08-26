@@ -38,7 +38,7 @@ test('Resolve included issue types (overlap)', async () => {
 test('Resolve included issue types (include devDependencies)', async () => {
   const cliArgs = { include: ['dependencies'], exclude: [], dependencies: false, exports: false };
   const config = getIncludedIssueTypes(cliArgs);
-  assert.deepEqual(config, { ...none, dependencies: true, devDependencies: true });
+  assert.deepEqual(config, { ...none, dependencies: true, devDependencies: true, optionalPeerDependencies: true });
 });
 
 test('Resolve included issue types (include dependencies)', async () => {
@@ -50,7 +50,7 @@ test('Resolve included issue types (include dependencies)', async () => {
 test('Resolve included issue types (exclude dependencies)', async () => {
   const cliArgs = { include: [], exclude: ['dependencies'], dependencies: false, exports: false };
   const config = getIncludedIssueTypes(cliArgs);
-  assert.deepEqual(config, { ...all, dependencies: false, devDependencies: false });
+  assert.deepEqual(config, { ...all, dependencies: false, devDependencies: false, optionalPeerDependencies: false });
 });
 
 test('Resolve included issue types (--dependencies)', async () => {
@@ -60,6 +60,7 @@ test('Resolve included issue types (--dependencies)', async () => {
     ...none,
     dependencies: true,
     devDependencies: true,
+    optionalPeerDependencies: true,
     unlisted: true,
     binaries: true,
     unresolved: true,

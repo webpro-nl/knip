@@ -26,6 +26,7 @@ export type Issues = {
   files: IssueSet;
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
+  optionalPeerDependencies: IssueRecords;
   unlisted: IssueRecords;
   binaries: IssueRecords;
   unresolved: IssueRecords;

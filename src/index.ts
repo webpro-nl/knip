@@ -413,10 +413,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   }
 
   if (isReportDependencies) {
-    const { dependencyIssues, devDependencyIssues } = deputy.settleDependencyIssues();
+    const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
     const { configurationHints } = deputy.getConfigurationHints();
     dependencyIssues.forEach(issue => collector.addIssue(issue));
     if (!isProduction) devDependencyIssues.forEach(issue => collector.addIssue(issue));
+    optionalPeerDependencyIssues.forEach(issue => collector.addIssue(issue));
     configurationHints.forEach(hint => collector.addConfigurationHint(hint));
   }
 
