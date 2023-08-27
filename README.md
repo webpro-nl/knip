@@ -664,6 +664,8 @@ Use `--fix-type` to only fix specific type(s) of issues (`exports`, `types` and/
       --dependencies           Shortcut for --include dependencies,unlisted,unresolved
       --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
       --include-entry-exports  Include entry files when reporting unused exports
+      --fix                    Fix issues
+      --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
       -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
       --reporter               Select reporter: symbols, compact, codeowners, json (default: symbols)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
@@ -677,6 +679,7 @@ Use `--fix-type` to only fix specific type(s) of issues (`exports`, `types` and/
       -V, --version            Print version
 
     (1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
+    (2) Fixable issue types: dependencies, exports, types
 
     Examples:
 
