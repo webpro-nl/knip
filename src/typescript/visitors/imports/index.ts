@@ -17,4 +17,4 @@ const visitors = [
   requireResolveCall,
 ];
 
-export default (sourceFile: ts.SourceFile) => visitors.map(v => v(sourceFile)).filter(v => v);
+export default (sourceFile: ts.SourceFile) => visitors.map(v => v(sourceFile));

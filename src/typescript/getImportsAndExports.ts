@@ -154,10 +154,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     for (const visitor of visitors.import) {
       if (visitor) {
         const results = visitor(node, options);
-        if (results) {
-          [results].flat().forEach(addImport);
-          return;
-        }
+        if (results) [results].flat().forEach(addImport);
       }
     }
 
@@ -171,10 +168,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     for (const visitor of visitors.script) {
       if (visitor) {
         const results = visitor(node, options);
-        if (results) {
-          [results].flat().forEach(script => scripts.add(script));
-          return;
-        }
+        if (results) [results].flat().forEach(script => scripts.add(script));
       }
     }
 

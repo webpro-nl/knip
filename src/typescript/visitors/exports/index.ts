@@ -6,4 +6,4 @@ import moduleExportsAccessExpression from './moduleExportsAccessExpression.js';
 
 const visitors = [exportAssignment, exportDeclaration, exportKeyword, moduleExportsAccessExpression];
 
-export default (sourceFile: ts.SourceFile) => visitors.map(v => v(sourceFile)).filter(v => v);
+export default (sourceFile: ts.SourceFile) => visitors.map(v => v(sourceFile));
