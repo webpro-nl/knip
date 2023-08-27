@@ -8,8 +8,9 @@ export const NAME = 'ESLint';
 /** @public */
 export const ENABLERS = ['eslint'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =>
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest, config }) =>
   hasDependency(dependencies, ENABLERS) ||
+  'eslint' in config ||
   Boolean(manifest.name && /(^eslint-config|\/eslint-config)/.test(manifest.name));
 
 // Current: https://eslint.org/docs/latest/user-guide/configuring/configuration-files

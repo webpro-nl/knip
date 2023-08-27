@@ -1,9 +1,14 @@
-import type { PluginConfiguration } from './config.js';
+import type { PluginConfiguration, WorkspaceConfiguration } from './config.js';
 import type { PackageJson } from '@npmcli/package-json';
 
 export type PackageJsonWithPlugins = PackageJson & Record<string, unknown>;
 
-type IsPluginEnabledCallbackOptions = { cwd: string; manifest: PackageJson; dependencies: Set<string> };
+type IsPluginEnabledCallbackOptions = {
+  cwd: string;
+  manifest: PackageJson;
+  dependencies: Set<string>;
+  config: WorkspaceConfiguration;
+};
 
 export type IsPluginEnabledCallback = (options: IsPluginEnabledCallbackOptions) => boolean | Promise<boolean>;
 

@@ -99,7 +99,10 @@ export class WorkspaceWorker {
     for (const [pluginName, plugin] of pluginEntries) {
       if (this.config[pluginName] === false) continue;
       const isEnabledInAncestor = this.enabledPluginsInAncestors.includes(pluginName);
-      if (isEnabledInAncestor || (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies }))) {
+      if (
+        isEnabledInAncestor ||
+        (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies, config: this.config }))
+      ) {
         this.enabled[pluginName] = true;
       }
     }

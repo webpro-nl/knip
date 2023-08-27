@@ -21,7 +21,8 @@ export const NAME = 'Prettier';
 /** @public */
 export const ENABLERS = ['prettier'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+export const isEnabled: IsPluginEnabledCallback = ({ dependencies, config }) =>
+  hasDependency(dependencies, ENABLERS) || 'prettier' in config;
 
 export const CONFIG_FILE_PATTERNS = [
   '.prettierrc',
