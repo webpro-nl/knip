@@ -102,7 +102,9 @@ Places where Knip looks for configuration (ordered by priority):
 - `.knip.json`
 - `.knip.jsonc`
 - `knip.ts`
+- `knip.config.ts` 
 - `knip.js`
+- `knip.config.js` 
 - `package.json#knip`
 
 You can use a dynamic `knip.ts` with TypeScript if you prefer:
