@@ -55,7 +55,6 @@ test('getReferencesFromScripts (ts-node/tsx)', () => {
 });
 
 test('getReferencesFromScripts (--require)', () => {
-  t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['bin:nodemon', js, 'dotenv']);
   t('program --loader tsx --test "test/*.spec.ts"', ['bin:program', 'tsx']);
   t('program --loader ldr --loader tsx --test "test/*.spec.ts"', ['bin:program', 'ldr', 'tsx']);
 });
@@ -159,6 +158,12 @@ test('getReferencesFromScripts (c8)', () => {
   t('c8 check-coverage --lines 95 --per-file npm test', ['bin:c8', 'bin:npm']);
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", ['bin:c8', 'bin:mocha']);
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/reporter', ['bin:c8', '@org/reporter']);
+});
+
+test('getReferencesFromScripts (nodemon', () => {
+  t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['bin:nodemon', js, 'dotenv']);
+  t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", ['bin:nodemon', ts, 'bin:ts-node', 'bin:pino-pretty']);
+  t('nodemon script.js', ['bin:nodemon', js]);
 });
 
 test('getReferencesFromScripts (bash expressions)', () => {
