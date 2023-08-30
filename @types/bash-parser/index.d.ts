@@ -57,7 +57,12 @@ declare module '@ericcornelissen/bash-parser' {
     commandAST: AST;
   };
 
-  export type Node = CompoundList | Command | LogicalExpression | If | For | Function_;
+  type Pipeline = {
+    type: 'Pipeline';
+    commands: Command[];
+  };
+
+  export type Node = CompoundList | Command | LogicalExpression | If | For | Function_ | Pipeline;
 
   export type AST = {
     type: 'Script';

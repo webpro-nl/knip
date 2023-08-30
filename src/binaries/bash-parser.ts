@@ -64,6 +64,8 @@ export const getBinariesFromScript = (
           return getBinariesFromNodes(node.do.commands);
         case 'CompoundList':
           return getBinariesFromNodes(node.commands);
+        case 'Pipeline':
+          return getBinariesFromNodes(node.commands);
         default:
           return [];
       }
