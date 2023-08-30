@@ -2,12 +2,11 @@
 
 import './util/register.js';
 import prettyMilliseconds from 'pretty-ms';
-import internalReporters from './reporters/index.js';
 import parsedArgValues, { helpText } from './util/cli-arguments.js';
 import { isKnownError, getKnownError, isConfigurationError, hasCause } from './util/errors.js';
-import { _load } from './util/loader.js';
-import { cwd, resolve } from './util/path.js';
+import { cwd } from './util/path.js';
 import { Performance } from './util/Performance.js';
+import { runPreprocessors, runReporters } from './util/reporter.js';
 import { version } from './version.js';
 import { main } from './index.js';
 import type { ReporterOptions, IssueType } from './types/issues.js';
@@ -24,8 +23,6 @@ const {
   'include-entry-exports': isIncludeEntryExports = false,
   performance: isObservePerf = false,
   production: isProduction = false,
-  preprocessor = [],
-  reporter = ['symbols'],
   'reporter-options': reporterOptions = '',
   strict: isStrict = false,
   tsConfig,
@@ -44,19 +41,6 @@ if (isVersion) {
 
 const isShowProgress =
   !isDebug && isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
-
-const preprocessors = await Promise.all(preprocessor.map(processor => _load(resolve(processor))));
-
-const processAsync = (data: ReporterOptions, processors: typeof preprocessors): Promise<ReporterOptions> =>
-  processors.length === 0 ? Promise.resolve(data) : processAsync(processors[0](data), processors.slice(1));
-
-const reporters = await Promise.all(
-  reporter.map(async reporter => {
-    return reporter in internalReporters
-      ? internalReporters[reporter as keyof typeof internalReporters]
-      : await _load(resolve(reporter));
-  })
-);
 
 const run = async () => {
   try {
@@ -84,9 +68,9 @@ const run = async () => {
       options: reporterOptions,
     };
 
-    const finalData = await processAsync(initialData, preprocessors);
+    const finalData = await runPreprocessors(initialData);
 
-    for (const reporter of reporters) await reporter(finalData);
+    await runReporters(finalData);
 
     const totalErrorCount = (Object.keys(report) as IssueType[])
       .filter(reportGroup => report[reportGroup] && rules[reportGroup] === 'error')
