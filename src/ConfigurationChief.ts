@@ -95,8 +95,8 @@ export class ConfigurationChief {
   ignoredWorkspacePatterns: string[] = [];
   manifestWorkspaces: Map<string, string> = new Map();
   additionalWorkspaceNames: Set<string> = new Set();
-  enabledWorkspaceNames: string[] = [];
-  enabledWorkspaceDirs: string[] = [];
+  availableWorkspaceNames: string[] = [];
+  availableWorkspaceDirs: string[] = [];
   enabledWorkspaces: Workspace[] = [];
   localWorkspaces: Set<string> = new Set();
 
@@ -237,12 +237,12 @@ export class ConfigurationChief {
     this.ignoredWorkspacePatterns = this.getIgnoredWorkspacePatterns();
     this.manifestWorkspaces = await this.getManifestWorkspaces();
     this.additionalWorkspaceNames = await this.getAdditionalWorkspaceNames();
-    this.enabledWorkspaceNames = this.getEnabledWorkspaceNames();
-    this.enabledWorkspaces = this.getEnabledWorkspaces();
-    this.enabledWorkspaceDirs = this.enabledWorkspaceNames
+    this.availableWorkspaceNames = this.getAvailableWorkspaceNames();
+    this.availableWorkspaceDirs = this.availableWorkspaceNames
       .sort(byPathDepth)
       .reverse()
       .map(dir => join(this.cwd, dir));
+    this.enabledWorkspaces = this.getEnabledWorkspaces();
     this.localWorkspaces = new Set(compact(this.enabledWorkspaces.map(w => w.pkgName)));
   }
 
@@ -289,7 +289,7 @@ export class ConfigurationChief {
     );
   }
 
-  private getEnabledWorkspaceNames() {
+  private getAvailableWorkspaceNames() {
     return [ROOT_WORKSPACE_NAME, ...this.manifestWorkspaces.keys(), ...this.additionalWorkspaceNames].filter(
       name => !micromatch.isMatch(name, this.ignoredWorkspacePatterns)
     );
@@ -300,15 +300,18 @@ export class ConfigurationChief {
       throw new ConfigurationError(`Directory does not exist: ${workspaceArg}`);
     }
 
-    const workspaceNames = workspaceArg
-      ? this.enabledWorkspaceNames.filter(name => name === workspaceArg)
-      : this.enabledWorkspaceNames;
-
     const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
       if (name === ancestorName) return ancestors;
       if (ancestorName === ROOT_WORKSPACE_NAME || name.startsWith(ancestorName + '/')) ancestors.push(ancestorName);
       return ancestors;
     };
+
+    const workspaceNames = workspaceArg
+      ? [
+          ...this.availableWorkspaceNames.reduce(getAncestors(workspaceArg), []),
+          ...this.availableWorkspaceNames.filter(name => name === workspaceArg),
+        ]
+      : this.availableWorkspaceNames;
 
     return workspaceNames.sort(byPathDepth).map(
       (name): Workspace => ({
@@ -316,7 +319,7 @@ export class ConfigurationChief {
         pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
         dir: join(this.cwd, name),
         config: this.getConfigForWorkspace(name),
-        ancestors: workspaceNames.reduce(getAncestors(name), [] as string[]),
+        ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
       })
     );
   }
@@ -326,7 +329,7 @@ export class ConfigurationChief {
   }
 
   private getDescendentWorkspaces(name: string) {
-    return this.enabledWorkspaceNames
+    return this.availableWorkspaceNames
       .filter(workspaceName => workspaceName !== name)
       .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name + '/'));
   }
@@ -371,7 +374,7 @@ export class ConfigurationChief {
   }
 
   public findWorkspaceByFilePath(filePath: string) {
-    const workspaceDir = this.enabledWorkspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir + '/'));
+    const workspaceDir = this.availableWorkspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir + '/'));
     return this.enabledWorkspaces.find(workspace => workspace.dir === workspaceDir);
   }
 
