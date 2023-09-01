@@ -118,7 +118,7 @@ const config: KnipConfig = {
 export default config;
 ```
 
-Use `--config path/to/knip.json` to use a different location.
+Use `--config path/to/knip.ts` to use a different location.
 
 ### Let's Go!
 
