@@ -328,6 +328,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
+    const isSymbolImported = (symbol: string, importingModule?: ImportedModule): boolean => {
+      if (!importingModule) return false;
+      if (importingModule.symbols.has(symbol)) return true;
+      const { isReExport, isReExportedBy } = importingModule;
+      const hasSymbol = (file: string) => isSymbolImported(symbol, importedSymbols.get(file));
+      return isReExport ? Array.from(isReExportedBy).some(hasSymbol) : false;
+    };
+
     const isExportedInEntryFile = (importedModule?: ImportedModule): boolean => {
       if (!importedModule) return false;
       const { isReExport, isReExportedBy } = importedModule;
@@ -354,7 +362,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         // Bail out when in entry file (unless --include-entry-exports)
         if (!isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
 
-        const importedModule = importedSymbols.get(filePath);
+        const importingModule = importedSymbols.get(filePath);
 
         for (const [symbol, exportedItem] of exportItems.entries()) {
           const jsDocTags = principal.getJSDocTags(exportedItem);
@@ -365,9 +373,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Skip exports tagged `@internal` in --production --ignore-internal mode
           if (isIgnoreInternal && jsDocTags.includes('@internal')) continue;
 
-          if (importedModule?.symbols.has(symbol)) {
+          if (importingModule && isSymbolImported(symbol, importingModule)) {
             // Skip members of classes/enums that are eventually exported by entry files
-            if (importedModule.isReExport && isExportedInEntryFile(importedModule)) continue;
+            if (importingModule.isReExport && isExportedInEntryFile(importingModule)) continue;
 
             if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
               if (isProduction) continue;
@@ -386,8 +394,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             continue;
           }
 
-          const isStar = Boolean(importedModule?.isStar);
-          const isReExportedByEntryFile = !isIncludeEntryExports && isStar && isExportedInEntryFile(importedModule);
+          const isStar = Boolean(importingModule?.isStar);
+          const isReExportedByEntryFile = !isIncludeEntryExports && isStar && isExportedInEntryFile(importingModule);
 
           if (!isReExportedByEntryFile && !isExportedItemReferenced(exportedItem, filePath)) {
             if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
