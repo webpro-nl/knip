@@ -624,7 +624,7 @@ Tip: back up files or use an VCS like Git before deleting files or making change
 
 Repeat the process to reveal new unused files and exports. It's so liberating to remove unused things!
 
-Getting too many reported issues and false positives? Read more about [handling issues][50] describing potential causes
+Getting too many reported issues and false positives? Read more about [handling issues][48] describing potential causes
 for false positives, and how to handle them.
 
 ## Command Line Options
@@ -675,13 +675,13 @@ for false positives, and how to handle them.
 
 ## Potential boost with `--no-gitignore`
 
-To increase performance in a large monorepo, check out [Potential boost with `--no-gitignore`][51].
+To increase performance in a large monorepo, check out [Potential boost with `--no-gitignore`][50].
 
 ## Comparison & Migration
 
 This table is an ongoing comparison. Based on their docs (please report any mistakes):
 
-| Feature                 | **knip** | [depcheck][52] | [unimported][53] | [ts-unused-exports][54] | [ts-prune][55] |
+| Feature                 | **knip** | [depcheck][51] | [unimported][52] | [ts-unused-exports][53] | [ts-prune][54] |
 | :---------------------- | :------: | :------------: | :--------------: | :---------------------: | :------------: |
 | Unused files            |    ✅    |       -        |        ✅        |            -            |       -        |
 | Unused dependencies     |    ✅    |       ✅       |        ✅        |            -            |       -        |
@@ -739,25 +739,25 @@ The following commands are similar:
 
 Many thanks to some of the early adopters of Knip:
 
-- [Block Protocol][56]
-- [DeepmergeTS][57]
-- [eslint-plugin-functional][58]
-- [freeCodeCamp.org][59]
-- [is-immutable-type][60]
-- [IsaacScript][61]
-- [Nuxt][62]
-- [Owncast][63]
-- [release-it][64]
-- [Template TypeScript Node Package][65]
-- [Tipi][66]
+- [Block Protocol][55]
+- [DeepmergeTS][56]
+- [eslint-plugin-functional][57]
+- [freeCodeCamp.org][58]
+- [is-immutable-type][59]
+- [IsaacScript][60]
+- [Nuxt][61]
+- [Owncast][62]
+- [release-it][63]
+- [Template TypeScript Node Package][64]
+- [Tipi][65]
 
 ## Articles, etc.
 
 - Discord: hang out in [The Knip Barn][9]
-- Ask your questions in the [Knip knowledge base][67] (powered by OpenAI and [7-docs][68], experimental!)
-- Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports, And Dependencies][69]
-- Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code and types][70]
-- Josh Goldberg: [Speeding Up Centered Part 4: Unused Code Bloat][71]
+- Ask your questions in the [Knip knowledge base][66] (powered by OpenAI and [7-docs][67], experimental!)
+- Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports, And Dependencies][68]
+- Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code and types][69]
+- Josh Goldberg: [Speeding Up Centered Part 4: Unused Code Bloat][70]
 
 ## Why "Knip"?
 
@@ -775,7 +775,7 @@ each file, and traversing all of this, why not collect the various issues in one
 
 Special thanks to the wonderful people who have contributed to this project:
 
-[![Contributors][73]][72]
+[![Contributors][72]][71]
 
 [1]: #workspaces
 [2]: #plugins
@@ -824,32 +824,31 @@ Special thanks to the wonderful people who have contributed to this project:
 [45]: https://nx.dev/concepts/integrated-vs-package-based
 [46]: ./docs/writing-a-plugin.md
 [47]: ./docs/compilers.md
-[48]: #handling-issues
+[48]: ./docs/handling-issues.md
 [49]: ./docs/reporters-and-preprocessors.md
-[50]: ./docs/handling-issues.md
-[51]: ./docs/perf-boost-with-no-gitignore.md
-[52]: https://github.com/depcheck/depcheck
-[53]: https://github.com/smeijer/unimported
-[54]: https://github.com/pzavolinsky/ts-unused-exports
-[55]: https://github.com/nadeesha/ts-prune
-[56]: https://github.com/blockprotocol/blockprotocol
-[57]: https://github.com/RebeccaStevens/deepmerge-ts
-[58]: https://github.com/eslint-functional/eslint-plugin-functional
-[59]: https://github.com/freeCodeCamp/freeCodeCamp
-[60]: https://github.com/RebeccaStevens/is-immutable-type
-[61]: https://github.com/IsaacScript/isaacscript
-[62]: https://github.com/nuxt/nuxt
-[63]: https://github.com/owncast/owncast
-[64]: https://github.com/release-it/release-it
-[65]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
-[66]: https://github.com/meienberger/runtipi
-[67]: https://knip.deno.dev
-[68]: https://github.com/7-docs/7-docs
-[69]: https://www.smashingmagazine.com/2023/08/knip-automated-tool-find-unused-files-exports-dependencies/
-[70]: https://effectivetypescript.com/2023/07/29/knip/
-[71]: https://www.joshuakgoldberg.com/blog/speeding-up-centered-part-4-unused-code-bloat/
-[72]: https://github.com/webpro/knip/graphs/contributors
-[73]: https://contrib.rocks/image?repo=webpro/knip
+[50]: ./docs/perf-boost-with-no-gitignore.md
+[51]: https://github.com/depcheck/depcheck
+[52]: https://github.com/smeijer/unimported
+[53]: https://github.com/pzavolinsky/ts-unused-exports
+[54]: https://github.com/nadeesha/ts-prune
+[55]: https://github.com/blockprotocol/blockprotocol
+[56]: https://github.com/RebeccaStevens/deepmerge-ts
+[57]: https://github.com/eslint-functional/eslint-plugin-functional
+[58]: https://github.com/freeCodeCamp/freeCodeCamp
+[59]: https://github.com/RebeccaStevens/is-immutable-type
+[60]: https://github.com/IsaacScript/isaacscript
+[61]: https://github.com/nuxt/nuxt
+[62]: https://github.com/owncast/owncast
+[63]: https://github.com/release-it/release-it
+[64]: https://github.com/JoshuaKGoldberg/template-typescript-node-package
+[65]: https://github.com/meienberger/runtipi
+[66]: https://knip.deno.dev
+[67]: https://github.com/7-docs/7-docs
+[68]: https://www.smashingmagazine.com/2023/08/knip-automated-tool-find-unused-files-exports-dependencies/
+[69]: https://effectivetypescript.com/2023/07/29/knip/
+[70]: https://www.joshuakgoldberg.com/blog/speeding-up-centered-part-4-unused-code-bloat/
+[71]: https://github.com/webpro/knip/graphs/contributors
+[72]: https://contrib.rocks/image?repo=webpro/knip
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
