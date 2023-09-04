@@ -17,11 +17,13 @@ This document also serves as a reference to each of the exported values.
   - [`isEnabled`][8]
   - [`CONFIG_FILE_PATTERNS`][9]
   - [`findDependencies`][10]
-  - [`ENTRY_FILE_PATTERNS`][11]
-  - [`PRODUCTION_ENTRY_FILE_PATTERNS`][12]
-  - [`PROJECT_FILE_PATTERNS`][13]
-- [Tests][14]
-- [Documentation][15]
+  - [Notes][11]
+  - [`ENTRY_FILE_PATTERNS`][12]
+  - [`PRODUCTION_ENTRY_FILE_PATTERNS`][13]
+  - [`PROJECT_FILE_PATTERNS`][14]
+- [Tests][15]
+- [Documentation][16]
+- [Wrapping Up][17]
 
 ## Scaffold a new plugin
 
@@ -41,7 +43,7 @@ or empty can be removed.
 
 ### `NAME`
 
-The name of the plugin to display in the [docs][16] and debug output (ie. when running `knip --debug`).
+The name of the plugin to display in the [docs][18] and debug output (ie. when running `knip --debug`).
 
 ```ts
 export const NAME = 'Cool Linter';
@@ -70,7 +72,7 @@ This will check whether a match is found in the `dependencies` or `devDependenci
 #### Note
 
 In some cases, you might want to check for something else, such as the presence of a file. You can implement any
-(`async`) function and return a boolean. Here is the full [function signature for `IsPluginEnabledCallback`][17].
+(`async`) function and return a boolean. Here is the full [function signature for `IsPluginEnabledCallback`][19].
 
 ### `CONFIG_FILE_PATTERNS`
 
@@ -100,7 +102,7 @@ the file path as the first argument.
 
 Configuration files are sometimes `.js` or `.ts` files such as `cool-linter.config.js`. The **exported configuration**
 will be handled by `findDependencies`. But these files may also **require/import** dependencies. That's why they're also
-automatically added to [`ENTRY_FILE_PATTERNS`][11].
+automatically added to [`ENTRY_FILE_PATTERNS`][12].
 
 ### `findDependencies`
 
@@ -181,7 +183,7 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
 ];
 ```
 
-When running the [production mode][18] of Knip, these files are included in the analysis. They're also included in the
+When running the [production mode][20] of Knip, these files are included in the analysis. They're also included in the
 default mode.
 
 Cool Linter does not require such files, so we can remove them from our plugin.
@@ -205,7 +207,7 @@ Let's update the tests to verify our plugin implementation is working correctly.
 1.  Let's save the example `cool-linter.config.json` in the fixtures directory. Create the file in your IDE, and save it
     at `fixtures/plugins/cool-linter/cool-linter.config.json`.
 
-2.  Update the test at [tests/plugins/cool-linter.test.ts][19]:
+2.  Update the test at `tests/plugins/cool-linter.test.ts`:
 
 ```ts
 test('Find dependencies in cool-linter configuration (json)', async () => {
@@ -240,7 +242,7 @@ This command also formats the generated Markdown files and updates the [list of 
 Thanks for reading this far. If you have been following this guide to create a new plugin, this might be the right time
 to open a pull request!
 
-[![An orange cow with scissors, Van Gogh style][21]][20] <sup>_“An orange cow with scissors, Van Gogh style” - generated
+[![An orange cow with scissors, Van Gogh style][22]][21] <sup>_“An orange cow with scissors, Van Gogh style” - generated
 with OpenAI_</sup>
 
 [1]: ../README.md#plugins
@@ -253,14 +255,15 @@ with OpenAI_</sup>
 [8]: #isenabled
 [9]: #config_file_patterns
 [10]: #finddependencies
-[11]: #entry_file_patterns
-[12]: #production_entry_file_patterns
-[13]: #project_file_patterns
-[14]: #tests
-[15]: #documentation
-[16]: ../README.md
-[17]: ../src/types//plugins.ts
-[18]: ../README.md#production-mode
-[19]: ../tests/plugins/cool-linter.test.ts
-[20]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
-[21]: ../assets/cow-with-orange-scissors-van-gogh-style.webp
+[11]: #notes
+[12]: #entry_file_patterns
+[13]: #production_entry_file_patterns
+[14]: #project_file_patterns
+[15]: #tests
+[16]: #documentation
+[17]: #wrapping-up
+[18]: ../README.md
+[19]: ../src/types//plugins.ts
+[20]: ../README.md#production-mode
+[21]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
+[22]: ../assets/cow-with-orange-scissors-van-gogh-style.webp
