@@ -28,15 +28,9 @@ declare module '@ericcornelissen/bash-parser' {
 
   type If = {
     type: 'If';
-    clause: {
-      commands: Command[];
-    };
-    then: {
-      commands: Command[];
-    };
-    else?: {
-      commands: Command[];
-    };
+    clause: Node;
+    then: Node;
+    else?: Node;
   };
 
   type For = {

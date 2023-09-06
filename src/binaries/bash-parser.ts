@@ -36,7 +36,7 @@ export const getBinariesFromScript = (
           }
 
           // Bunch of early bail outs for things we can't or don't want to resolve
-          if (!binary || binary === '.' || binary === 'source') return [];
+          if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
           if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
           if (['bun', 'deno'].includes(binary)) return [];
 
@@ -59,13 +59,15 @@ export const getBinariesFromScript = (
         case 'LogicalExpression':
           return getBinariesFromNodes([node.left, node.right]);
         case 'If':
-          return getBinariesFromNodes([...node.clause.commands, ...node.then.commands, ...(node.else?.commands ?? [])]);
+          return getBinariesFromNodes([node.clause, node.then, ...(node.else ? [node.else] : [])]);
         case 'For':
           return getBinariesFromNodes(node.do.commands);
         case 'CompoundList':
           return getBinariesFromNodes(node.commands);
         case 'Pipeline':
           return getBinariesFromNodes(node.commands);
+        case 'Function':
+          return getBinariesFromNodes(node.body.commands);
         default:
           return [];
       }
