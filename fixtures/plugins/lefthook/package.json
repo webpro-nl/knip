@@ -1,1 +1,9 @@
-{}
+{
+  "name": "@fixtures/lefthook",
+  "scripts": {
+    "postinstall": "lefthook install"
+  },
+  "devDependencies": {
+    "@arkweid/lefthook": "*"
+  }
+}
