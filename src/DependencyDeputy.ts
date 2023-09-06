@@ -135,6 +135,12 @@ export class DependencyDeputy {
     return Array.from(this.peerDependencies.get(workspaceName)?.get(dependency) ?? []);
   }
 
+  getPeerDependencies(workspaceName: string) {
+    const manifest = this._manifests.get(workspaceName);
+    if (!manifest) return [];
+    return manifest.peerDependencies;
+  }
+
   getOptionalPeerDependencies(workspaceName: string) {
     const manifest = this._manifests.get(workspaceName);
     if (!manifest) return [];
@@ -306,6 +312,7 @@ export class DependencyDeputy {
       const dependencies = this.isStrict
         ? this.getProductionDependencies(workspaceName)
         : [...this.getProductionDependencies(workspaceName), ...this.getDevDependencies(workspaceName)];
+      const peerDependencies = this.getPeerDependencies(workspaceName);
 
       const isReferencedDep = (name: string) => referencedDependencies?.has(name) && dependencies.includes(name);
       const isReferencedBin = (name: string) => referencedBinaries?.has(name) && installedBinaries?.has(name);
@@ -316,7 +323,7 @@ export class DependencyDeputy {
           packageName =>
             IGNORED_DEPENDENCIES.includes(packageName) ||
             (workspaceName !== ROOT_WORKSPACE_NAME && this.ignoreDependencies.includes(packageName)) ||
-            isReferencedDep(packageName)
+            (!peerDependencies.includes(packageName) && isReferencedDep(packageName))
         )
         .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' }));
 
@@ -334,6 +341,7 @@ export class DependencyDeputy {
     const dependencies = this.isStrict
       ? this.getProductionDependencies(ROOT_WORKSPACE_NAME)
       : [...this.getProductionDependencies(ROOT_WORKSPACE_NAME), ...this.getDevDependencies(ROOT_WORKSPACE_NAME)];
+    const peerDependencies = this.getPeerDependencies(ROOT_WORKSPACE_NAME);
 
     // Add configuration hint for dependencies/binaries in global ignores or when referenced + listed
     Object.keys(rootIgnoreBinaries)
@@ -346,7 +354,9 @@ export class DependencyDeputy {
 
     Object.keys(rootIgnoreDependencies)
       .filter(
-        key => IGNORED_DEPENDENCIES.includes(key) || (rootIgnoreDependencies[key] !== 0 && dependencies.includes(key))
+        key =>
+          IGNORED_DEPENDENCIES.includes(key) ||
+          (rootIgnoreDependencies[key] !== 0 && !peerDependencies.includes(key) && dependencies.includes(key))
       )
       .forEach(identifier =>
         configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreDependencies' })

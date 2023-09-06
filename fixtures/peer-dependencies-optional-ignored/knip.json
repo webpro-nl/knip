@@ -1,0 +1,3 @@
+{
+  "ignoreDependencies": ["@types/pg", "pg"]
+}
