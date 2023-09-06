@@ -19,10 +19,8 @@ test('Find dependencies in ESLint configuration (legacy json)', async () => {
     'eslint-config-airbnb',
     '@typescript-eslint/eslint-plugin/eslint-recommended',
     '@typescript-eslint/eslint-plugin/recommended',
-    'eslint-plugin-prettier/recommended',
     'eslint-config-prettier',
     '@typescript-eslint/eslint-plugin',
-    'eslint-plugin-prettier',
     '@babel/plugin-syntax-import-assertions',
   ]);
 });
@@ -45,6 +43,7 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
     'eslint-plugin-eslint-plugin/all',
     '@scope/eslint-config/file',
     'eslint-plugin-prettier/recommended',
+    'eslint-config-prettier',
     '@typescript-eslint/eslint-plugin',
     '@nrwl/eslint-plugin-nx',
     'eslint-plugin-cypress',
@@ -59,6 +58,12 @@ test('Find dependencies in ESLint configuration (legacy yaml)', async () => {
   const configFilePath = join(cwd, '.eslintrc.yml');
   const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, ['@sinonjs/eslint-config', '@sinonjs/eslint-plugin-no-prototype-methods']);
+});
+
+test('Find dependencies in ESLint configuration (custom prettier config)', async () => {
+  const configFilePath = join(cwd, '.eslintrc.cjs');
+  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
+  assert.deepEqual(dependencies, ['eslint', 'eslint-plugin-prettier/recommended', 'eslint-config-prettier']);
 });
 
 test('ESLint configuration resolvePluginSpecifier helper', () => {
