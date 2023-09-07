@@ -2,7 +2,7 @@ import { isGitIgnoredSync } from 'globby';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
-import { isInModuleBlock } from './typescript/ast-helpers.js';
+import { getJSDocTags, isInModuleBlock } from './typescript/ast-helpers.js';
 import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
@@ -256,7 +256,7 @@ export class ProjectPrincipal {
   public findUnusedMembers(filePath: string, members: ExportItemMember[]) {
     return members
       .filter(member => {
-        if (this.isPublicExport(member)) return false;
+        if (getJSDocTags(member.node).includes('@public')) return false;
         const referencedSymbols = this.findReferences(filePath, member.pos);
         const files = referencedSymbols
           .flatMap(refs => refs.references)
@@ -271,14 +271,5 @@ export class ProjectPrincipal {
 
   private findReferences(filePath: string, pos: number) {
     return this.backend.lsFindReferences(filePath, pos) ?? [];
-  }
-
-  public isPublicExport(exportedItem: ExportItem) {
-    const tags = this.getJSDocTags(exportedItem);
-    return tags.includes('@public');
-  }
-
-  public getJSDocTags(exportedItem: ExportItem) {
-    return ts.getJSDocTags(exportedItem.node).map(node => node.getText().match(/@\S+/)![0]);
   }
 }

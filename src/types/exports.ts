@@ -9,6 +9,7 @@ export type ExportItem = {
   pos: number;
   type: SymbolType;
   members?: ExportItemMember[];
+  jsDocTags: string[];
 };
 
 export type ExportItemMember = {

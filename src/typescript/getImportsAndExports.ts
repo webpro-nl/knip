@@ -3,7 +3,12 @@ import ts from 'typescript';
 import { getOrSet } from '../util/map.js';
 import { isMaybePackageName } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
-import { isDeclarationFileExtension, isAccessExpression, getAccessExpressionName } from './ast-helpers.js';
+import {
+  isDeclarationFileExtension,
+  isAccessExpression,
+  getAccessExpressionName,
+  getJSDocTags,
+} from './ast-helpers.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getJSXImplicitImportBase } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
@@ -131,11 +136,16 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
 
   const addExport = ({ node, identifier, type, pos, members }: AddExportOptions) => {
     if (options.skipExports) return;
+
+    const jsDocTags = getJSDocTags(node);
+
     if (exports.has(identifier)) {
-      const item = exports.get(identifier);
-      exports.set(identifier, { ...item, node, type, pos, members });
+      const item = exports.get(identifier)!;
+      const crew = [...(item.members ?? []), ...(members ?? [])];
+      const tags = [...item.jsDocTags, ...jsDocTags];
+      exports.set(identifier, { ...item, node, type, pos, members: crew, jsDocTags: tags });
     } else {
-      exports.set(identifier, { node, type, pos, members });
+      exports.set(identifier, { node, type, pos, members, jsDocTags });
     }
 
     if (ts.isExportAssignment(node)) maybeAddAliasedExport(node.expression, 'default');

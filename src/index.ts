@@ -365,13 +365,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const importingModule = importedSymbols.get(filePath);
 
         for (const [symbol, exportedItem] of exportItems.entries()) {
-          const jsDocTags = principal.getJSDocTags(exportedItem);
-
           // Skip exports tagged `@public` or `@beta`
-          if (jsDocTags.includes('@public') || jsDocTags.includes('@beta')) continue;
+          if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
 
           // Skip exports tagged `@internal` in --production --ignore-internal mode
-          if (isIgnoreInternal && jsDocTags.includes('@internal')) continue;
+          if (isIgnoreInternal && exportedItem.jsDocTags.includes('@internal')) continue;
 
           if (importingModule && isSymbolImported(symbol, importingModule)) {
             // Skip members of classes/enums that are eventually exported by entry files
