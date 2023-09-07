@@ -13,7 +13,13 @@ or `devDependencies`:
 ```json
 {
   "lefthook": {
-    "config": ["lefthook.yml"]
+    "config": [
+      "lefthook.yml",
+      ".git/hooks/prepare-commit-msg",
+      ".git/hooks/commit-msg",
+      ".git/hooks/pre-{applypatch,commit,merge-commit,push,rebase,receive}",
+      ".git/hooks/post-{checkout,commit,merge,rewrite}"
+    ]
   }
 }
 ```
