@@ -134,22 +134,24 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     }
   };
 
-  const addExport = ({ node, identifier, type, pos, members }: AddExportOptions) => {
+  const addExport = ({ node, identifier, type, pos, members = [] }: AddExportOptions) => {
     if (options.skipExports) return;
 
     const jsDocTags = getJSDocTags(node);
 
     if (exports.has(identifier)) {
       const item = exports.get(identifier)!;
-      const crew = [...(item.members ?? []), ...(members ?? [])];
+      const crew = [...item.members, ...members];
       const tags = [...item.jsDocTags, ...jsDocTags];
       exports.set(identifier, { ...item, node, type, pos, members: crew, jsDocTags: tags });
     } else {
       exports.set(identifier, { node, type, pos, members, jsDocTags });
     }
 
-    if (ts.isExportAssignment(node)) maybeAddAliasedExport(node.expression, 'default');
-    if (ts.isVariableDeclaration(node)) maybeAddAliasedExport(node.initializer, identifier);
+    if (!jsDocTags.includes('@alias')) {
+      if (ts.isExportAssignment(node)) maybeAddAliasedExport(node.expression, 'default');
+      if (ts.isVariableDeclaration(node)) maybeAddAliasedExport(node.initializer, identifier);
+    }
   };
 
   const maybeAddAliasedExport = (node: ts.Expression | undefined, alias: string) => {

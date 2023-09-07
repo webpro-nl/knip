@@ -280,8 +280,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         }
 
         duplicate.forEach(symbols => {
-          const symbol = symbols.join('|');
-          collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
+          if (symbols.length > 1) {
+            const symbol = symbols.join('|');
+            collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
+          }
         });
 
         external.forEach(specifier => {
