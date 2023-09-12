@@ -17,10 +17,9 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const CONFIG_FILE_PATTERNS = ['vitest.config.ts'];
 
 // `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
-export const ENTRY_FILE_PATTERNS = ['vite.config.ts'];
+export const ENTRY_FILE_PATTERNS = [];
 
-const findVitestDependencies: GenericPluginCallback = async configFilePath => {
-  const config: VitestConfig = await load(configFilePath);
+export const findVitestDeps = (config: VitestConfig) => {
   if (!config || !config.test) return [];
   const cfg = config.test;
   const environments = cfg.environment ? [getEnvPackageName(cfg.environment)] : [];
@@ -29,6 +28,11 @@ const findVitestDependencies: GenericPluginCallback = async configFilePath => {
   const setupFiles = cfg.setupFiles ? [cfg.setupFiles].flat() : [];
   const globalSetup = cfg.globalSetup ? [cfg.globalSetup].flat() : [];
   return compact([...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup]);
+};
+
+const findVitestDependencies: GenericPluginCallback = async configFilePath => {
+  const config: VitestConfig = await load(configFilePath);
+  return findVitestDeps(config);
 };
 
 export const findDependencies = timerify(findVitestDependencies);

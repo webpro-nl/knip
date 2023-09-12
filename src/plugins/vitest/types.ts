@@ -1,4 +1,4 @@
-export type VitestConfig = {
+export interface VitestConfig {
   test: {
     coverage?: {
       provider: string;
@@ -8,4 +8,4 @@ export type VitestConfig = {
     reporters?: (string | unknown)[];
     setupFiles?: string | string[];
   };
-};
+}

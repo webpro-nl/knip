@@ -1,6 +1,6 @@
 {
   "name": "@fixtures/vitest",
   "devDependencies": {
-    "vitest": "0.27.2"
+    "vitest": "*"
   }
 }

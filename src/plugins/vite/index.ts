@@ -1,7 +1,10 @@
-import { hasDependency } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback } from '../../types/plugins.js';
+import { timerify } from '../../util/Performance.js';
+import { hasDependency, load } from '../../util/plugin.js';
+import { findVitestDeps } from '../vitest/index.js';
+import type { ViteConfig } from './types.js';
+import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-// link to docs
+// https://vitejs.dev/config/
 
 export const NAME = 'Vite';
 
@@ -10,4 +13,11 @@ export const ENABLERS = ['vite'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const ENTRY_FILE_PATTERNS = ['vite.config.{js,ts}'];
+export const CONFIG_FILE_PATTERNS = ['vite.config.{js,ts}'];
+
+const findViteDependencies: GenericPluginCallback = async configFilePath => {
+  const config: ViteConfig = await load(configFilePath);
+  return findVitestDeps(config);
+};
+
+export const findDependencies = timerify(findViteDependencies);
