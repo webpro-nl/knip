@@ -1,6 +1,7 @@
 {
   "github": {
-    "release": true
+    "release": true,
+    "releaseNotes": "node ./bin/release-notes.js ${version}"
   },
   "npm": {
     "publish": true
