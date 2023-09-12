@@ -13,11 +13,24 @@ or `devDependencies`:
 {
   "next": {
     "entry": [
-      "next.config.{js,ts,cjs,mjs}",
-      "{app,pages}/**/*.{js,jsx,ts,tsx}",
-      "src/{app,pages}/**/*.{js,jsx,ts,tsx}",
+      "next-env.d.ts",
       "middleware.{js,ts}",
-      "src/middleware.{js,ts}"
+      "app/**/route.{js,ts}",
+      "app/**/{error,layout,loading,not-found,page,template}.{jsx,tsx}",
+      "instrumentation.{js,ts}",
+      "app/{manifest,sitemap,robots}.{js,ts}",
+      "app/**/{icon,apple-icon}-image.{js,ts,tsx}",
+      "app/**/{opengraph,twitter}-image.{js,ts,tsx}",
+      "pages/**/*.{js,jsx,ts,tsx}",
+      "src/next-env.d.ts",
+      "src/middleware.{js,ts}",
+      "src/app/**/route.{js,ts}",
+      "src/app/**/{error,layout,loading,not-found,page,template}.{jsx,tsx}",
+      "src/instrumentation.{js,ts}",
+      "src/app/{manifest,sitemap,robots}.{js,ts}",
+      "src/app/**/{icon,apple-icon}-image.{js,ts,tsx}",
+      "src/app/**/{opengraph,twitter}-image.{js,ts,tsx}",
+      "src/pages/**/*.{js,jsx,ts,tsx}"
     ]
   }
 }
