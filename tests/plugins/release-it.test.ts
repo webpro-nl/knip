@@ -13,5 +13,6 @@ test('Find dependencies in Release It configuration (json)', async () => {
     '@release-it/conventional-changelog',
     'bin:npm',
     'bin:from-hook',
+    join(cwd, 'bin/release-notes.js'),
   ]);
 });

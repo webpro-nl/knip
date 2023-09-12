@@ -29,6 +29,12 @@ const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, 
 
   const plugins = config.plugins ? Object.keys(config.plugins) : [];
   const scripts = config.hooks ? Object.values(config.hooks).flat() : [];
+  if (typeof config.github?.releaseNotes === 'string') {
+    scripts.push(config.github.releaseNotes);
+  }
+  if (typeof config.gitlab?.releaseNotes === 'string') {
+    scripts.push(config.gitlab.releaseNotes);
+  }
   const dependencies = _getDependenciesFromScripts(scripts, { cwd, manifest });
 
   return [...plugins, ...dependencies];
