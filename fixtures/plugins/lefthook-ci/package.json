@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/lefthook-ci",
+  "scripts": {},
+  "devDependencies": {
+    "@evilmartians/lefthook": "*",
+    "eslint": "*",
+    "prettier": "*",
+    "stylelint": "*"
+  }
+}

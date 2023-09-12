@@ -12,7 +12,7 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 export const NAME = 'Lefthook';
 
 /** @public */
-export const ENABLERS = ['lefthook', '@arkweid/lefthook'];
+export const ENABLERS = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 

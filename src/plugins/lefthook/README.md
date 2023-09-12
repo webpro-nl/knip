@@ -7,6 +7,7 @@ or `devDependencies`:
 
 - `lefthook`
 - `@arkweid/lefthook`
+- `@evilmartians/lefthook`
 
 ## Default configuration
 
