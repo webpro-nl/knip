@@ -8,7 +8,10 @@ const cwd = resolve('fixtures/plugins/lefthook');
 const manifest = getManifest(cwd);
 
 test('Find dependencies in lefthook configuration (json)', async () => {
+  const CI = process.env.CI;
+  process.env.CI = '';
   const configFilePath = join(cwd, 'lefthook.yml');
   const dependencies = await lefthook.findDependencies(configFilePath, { manifest, cwd });
   assert.deepEqual(dependencies, [join(cwd, 'example.mjs'), 'bin:eslint']);
+  process.env.CI = CI;
 });
