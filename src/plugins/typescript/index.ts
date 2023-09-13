@@ -40,6 +40,7 @@ const findTypeScriptDependencies: GenericPluginCallback = async configFilePath =
   if (!compilerOptions || !config) return [];
 
   const extend = config.extends ? [config.extends].flat().filter(extend => !isInternal(extend)) : [];
+  const types = compilerOptions.types ?? [];
   const plugins = Array.isArray(compilerOptions?.plugins)
     ? compilerOptions.plugins.map(plugin => (typeof plugin === 'object' && 'name' in plugin ? plugin.name : ''))
     : [];
@@ -49,7 +50,7 @@ const findTypeScriptDependencies: GenericPluginCallback = async configFilePath =
     : compilerOptions?.jsx
     ? ['react']
     : [];
-  return compact([...extend, ...plugins, ...importHelpers, ...jsx]);
+  return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
 };
 
 export const findDependencies = timerify(findTypeScriptDependencies);
