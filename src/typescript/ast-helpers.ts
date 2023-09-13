@@ -42,11 +42,11 @@ export function isRequireCall(callExpression: ts.Node): callExpression is ts.Cal
   return args.length === 1;
 }
 
-export function isRequireResolveCall(node: ts.Node): node is ts.CallExpression {
+export function isPropertyAccessCall(node: ts.Node, identifier: string): node is ts.CallExpression {
   return (
     ts.isCallExpression(node) &&
     ts.isPropertyAccessExpression(node.expression) &&
-    node.expression.getText() === 'require.resolve'
+    node.expression.getText() === identifier
   );
 }
 
