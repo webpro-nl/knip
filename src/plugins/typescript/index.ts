@@ -36,7 +36,7 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
 
 const jsxWithReact = [ts.JsxEmit.React, ts.JsxEmit.ReactJSX, ts.JsxEmit.ReactJSXDev, ts.JsxEmit.ReactNative];
 
-const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
+export const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
   const compilerOptions: CompilerOptions = await loadTSConfig(configFilePath);
   const config: TsConfigJson = await resolveExtensibleConfig(configFilePath); // Dual loader to get external `extends` dependencies
 

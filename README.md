@@ -244,6 +244,7 @@ This is especially useful over time when such configuration files change (and th
 
 Knip contains a growing list of plugins:
 
+- [Angular][plugin-angular]
 - [Ava][plugin-ava]
 - [Babel][plugin-babel]
 - [Capacitor][plugin-capacitor]
@@ -864,6 +865,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [71]: https://www.joshuakgoldberg.com/blog/speeding-up-centered-part-4-unused-code-bloat/
 [72]: https://github.com/webpro/knip/graphs/contributors
 [73]: https://contrib.rocks/image?repo=webpro/knip
+[plugin-angular]: ./src/plugins/angular
 [plugin-ava]: ./src/plugins/ava
 [plugin-babel]: ./src/plugins/babel
 [plugin-capacitor]: ./src/plugins/capacitor
