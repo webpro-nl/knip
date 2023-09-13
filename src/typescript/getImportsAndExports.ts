@@ -1,4 +1,7 @@
+import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
+// eslint-disable-next-line n/no-restricted-import
+import { resolve, dirname } from 'node:path';
 import ts from 'typescript';
 import { getOrSet } from '../util/map.js';
 import { isMaybePackageName } from '../util/modules.js';
@@ -113,7 +116,12 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
         }
       }
     } else {
-      unresolvedImports.add(specifier);
+      const filePath = resolve(dirname(sourceFile.fileName), specifier);
+      if (existsSync(filePath)) {
+        unresolvedImports.add(filePath); // TODO Optimize (it's not unresolved)
+      } else {
+        unresolvedImports.add(specifier);
+      }
     }
   };
 
