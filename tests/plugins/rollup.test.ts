@@ -21,8 +21,9 @@ test('Find dependencies in Rollup configuration', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 0,
+    files: 1,
     unlisted: 4,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });
