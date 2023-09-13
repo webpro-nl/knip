@@ -73,6 +73,7 @@ const pluginSchema = z.union([
 ]);
 
 const pluginsSchema = z.object({
+  angular: pluginSchema,
   ava: pluginSchema,
   babel: pluginSchema,
   capacitor: pluginSchema,
