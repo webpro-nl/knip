@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import constructorCall from './constructorCall.js';
 import importCall from './importCall.js';
 import importDeclaration from './importDeclaration.js';
 import importEqualsDeclaration from './importEqualsDeclaration.js';
@@ -8,6 +9,7 @@ import reExportDeclaration from './reExportDeclaration.js';
 import requireCall from './requireCall.js';
 
 const visitors = [
+  constructorCall,
   importCall,
   importDeclaration,
   importEqualsDeclaration,

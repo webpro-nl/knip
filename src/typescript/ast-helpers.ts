@@ -50,6 +50,10 @@ export function isPropertyAccessCall(node: ts.Node, identifier: string): node is
   );
 }
 
+export function isConstructorCall(node: ts.Node, identifier: string): node is ts.CallExpression {
+  return ts.isNewExpression(node) && node.expression.getText() === identifier;
+}
+
 export function getAccessExpressionName(node: ts.PropertyAccessExpression | ts.ElementAccessExpression) {
   return 'argumentExpression' in node ? stripQuotes(node.argumentExpression.getText()) : node.name.getText();
 }
