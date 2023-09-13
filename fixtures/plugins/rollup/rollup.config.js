@@ -8,7 +8,7 @@ export default {
   input: 'main.js',
   external: [
     'some-externally-required-library',
-    fileURLToPath(new URL('src/some-local-file-that-should-not-be-bundled.js', import.meta.url)),
+    fileURLToPath(new URL('do-not-bundle.js', import.meta.url)),
     /node_modules/,
   ],
   plugins: [resolve(), commonjs()],
