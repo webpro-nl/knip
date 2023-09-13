@@ -1,1 +1,1 @@
-export const version = '2.24.0';
+export const version = '0.0.0-angular.0';
