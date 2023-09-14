@@ -1,8 +1,6 @@
 import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
-// https://nextjs.org/docs/basic-features/pages
-
 export const NAME = 'Next.js';
 
 /** @public */
@@ -12,9 +10,23 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const ENTRY_FILE_PATTERNS = ['next.config.{js,ts,cjs,mjs}'];
 
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [
-  '{app,pages}/**/*.{js,jsx,ts,tsx}',
-  'src/{app,pages}/**/*.{js,jsx,ts,tsx}',
+const productionEntryFilePatternsWithoutSrc = [
+  'next-env.d.ts',
   'middleware.{js,ts}',
-  'src/middleware.{js,ts}',
+
+  // https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts
+  'app/**/route.{js,ts}',
+  'app/**/{error,layout,loading,not-found,page,template}.{jsx,tsx}',
+  'instrumentation.{js,ts}',
+  'app/{manifest,sitemap,robots}.{js,ts}',
+  'app/**/{icon,apple-icon}-image.{js,ts,tsx}',
+  'app/**/{opengraph,twitter}-image.{js,ts,tsx}',
+
+  // https://nextjs.org/docs/pages/building-your-application/routing/pages-and-layouts
+  'pages/**/*.{js,jsx,ts,tsx}',
+];
+
+export const PRODUCTION_ENTRY_FILE_PATTERNS = [
+  ...productionEntryFilePatternsWithoutSrc,
+  ...productionEntryFilePatternsWithoutSrc.map(pattern => `src/${pattern}`),
 ];

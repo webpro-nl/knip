@@ -17,12 +17,15 @@ test('Find dependencies in Next.js configuration', async () => {
   assert(issues.unlisted['pages/[[...route]].tsx']['react']);
   assert(issues.unlisted['pages/[[...route]].tsx']['react-helmet']);
   assert(issues.unlisted['pages/page.tsx']['react']);
+  assert(issues.unlisted['app/layout.tsx']['react']);
+  assert(issues.unlisted['app/home/page.tsx']['react']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     devDependencies: 0,
-    unlisted: 4,
-    processed: 3,
-    total: 3,
+    unlisted: 6,
+    processed: 10,
+    total: 10,
   });
 });
