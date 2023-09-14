@@ -799,7 +799,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [7]: #jsdoc-tags
 [8]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
 [9]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[10]: https://discord.gg/ya5yktTq
+[10]: https://discord.gg/r5uXTtbTpc
 [11]: https://twitter.com/webprolific
 [12]: https://fosstodon.org/@webpro
 [13]: https://github.com/webpro/knip/issues
