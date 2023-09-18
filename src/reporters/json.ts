@@ -40,7 +40,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
   const codeownersFilePath = resolve(opts.codeowners ?? '.github/CODEOWNERS');
   const codeownersEngine = isFile(codeownersFilePath) && OwnershipEngine.FromCodeownersFile(codeownersFilePath);
 
-  const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).map(Object.values).flat();
+  const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
 
   const initRow = (filePath: string) => {
     const file = relative(filePath);

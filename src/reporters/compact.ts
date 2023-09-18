@@ -18,7 +18,7 @@ export default ({ report, issues, isShowProgress }: ReporterOptions) => {
       const issuesForType = isSet
         ? Array.from(issues[reportType] as IssueSet)
         : reportType === 'duplicates'
-        ? Object.values(issues[reportType]).map(Object.values).flat()
+        ? Object.values(issues[reportType]).flatMap(Object.values)
         : Object.values(issues[reportType] as IssueRecords).map(issues => {
             const items = Object.values(issues);
             return { ...items[0], symbols: items.map(issue => issue.symbol) };
