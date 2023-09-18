@@ -3,6 +3,7 @@ export * as dotenv from './dotenv.js';
 export * as node from './node.js';
 export * as nodemon from './nodemon.js';
 export * as npx from './npx.js';
+export * as nx from './nx.js';
 export * as pnpm from './pnpm.js';
 export * as rollup from './rollup.js';
 export * as yarn from './yarn.js';

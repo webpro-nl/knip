@@ -83,6 +83,12 @@ test('getReferencesFromScripts (cross-env)', () => {
   t('NODE_ENV=production cross-env -- program --cache', ['bin:cross-env', 'bin:program']);
 });
 
+test('getReferencesFromScripts (nx)', () => {
+  t('nx run myapp:build:production', ['bin:nx']);
+  t('nx run-many -t build', ['bin:nx']);
+  t('nx exec -- esbuild main.ts --outdir=build', ['bin:nx', 'bin:esbuild', ts]);
+});
+
 test('getReferencesFromScripts (cross-env/node)', () => {
   t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['bin:cross-env', 'dotenv', js]);
   t('cross-env NODE_ENV=production node -r esm script.js', ['bin:cross-env', 'esm', js]);
