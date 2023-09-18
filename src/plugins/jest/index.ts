@@ -86,8 +86,10 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
 
   if (!config) return [];
 
+  const rootDir = config.rootDir ?? '';
+
   const replaceRootDir = (name: string) =>
-    name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, '')) : name;
+    name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, rootDir)) : name;
 
   return resolveDependencies(config).map(replaceRootDir);
 };
