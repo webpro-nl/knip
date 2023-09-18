@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import { toBinary } from '../util.js';
+import { toBinary } from '../../util/protocols.js';
 import type { Resolver } from '../types.js';
 
 // https://yarnpkg.com/cli

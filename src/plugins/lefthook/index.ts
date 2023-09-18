@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
+import { fromBinary } from '../../util/protocols.js';
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
-import { fromBinary } from '../../binaries/util.js';
 import { getGitHookPaths } from '../../util/git.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { timerify } from '../../util/Performance.js';

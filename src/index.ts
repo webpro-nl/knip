@@ -1,6 +1,5 @@
 import micromatch from 'micromatch';
 import { _getDependenciesFromScripts } from './binaries/index.js';
-import { fromBinary, isBinary } from './binaries/util.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
@@ -19,6 +18,7 @@ import {
   getPackageNameFromModuleSpecifier,
 } from './util/modules.js';
 import { dirname, isInNodeModules, join, isInternal, toAbsolute } from './util/path.js';
+import { fromBinary, isBinary } from './util/protocols.js';
 import { _resolveSpecifier, _tryResolve } from './util/require.js';
 import { _require } from './util/require.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';

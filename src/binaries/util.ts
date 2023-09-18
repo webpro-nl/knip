@@ -1,5 +1,6 @@
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { isInNodeModules, join } from '../util/path.js';
+import { toBinary } from '../util/protocols.js';
 import { _tryResolve } from '../util/require.js';
 
 export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleSpecifier?: boolean) => {
@@ -22,12 +23,6 @@ export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleS
 
 export const tryResolveSpecifiers = (cwd: string, specifiers: string[]) =>
   specifiers.map(specifier => tryResolveFilePath(cwd, specifier, true));
-
-export const toBinary = (specifier: string) => specifier.replace(/^(bin:)?/, 'bin:');
-
-export const fromBinary = (specifier: string) => specifier.replace(/^(bin:)?/, '');
-
-export const isBinary = (specifier: string) => specifier.startsWith('bin:');
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
 
