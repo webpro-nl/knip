@@ -76,6 +76,6 @@ export class PrincipalFactory {
   }
 
   public getPrincipals() {
-    return Array.from(this.principals).map(p => p.principal);
+    return Array.from(this.principals, p => p.principal);
   }
 }
