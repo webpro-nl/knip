@@ -16,6 +16,12 @@ test('Find dependencies in typescript configuration', async () => {
   ]);
 });
 
+test('Find dependencies in typescript configuration (jsx-preserve)', async () => {
+  const configFilePath = join(cwd, 'tsconfig-jsx-preserve.json');
+  const dependencies = await typescript.findDependencies(configFilePath);
+  assert.deepEqual(dependencies, []);
+});
+
 test('Find dependencies in typescript configuration (jsx)', async () => {
   const configFilePath = join(cwd, 'tsconfig-jsx.json');
   const dependencies = await typescript.findDependencies(configFilePath);
