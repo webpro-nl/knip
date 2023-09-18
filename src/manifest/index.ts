@@ -18,7 +18,7 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
 
   const scripts = Object.entries(manifest.scripts ?? {}).reduce((scripts, [scriptName, script]) => {
     if (script && (scriptFilter.length === 0 || scriptFilter.includes(scriptName))) {
-      return [...scripts, script];
+      return scripts.push(script);
     }
     return scripts;
   }, [] as string[]);
