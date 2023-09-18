@@ -19,7 +19,7 @@ test('Referenced dependencies in npm scripts', async () => {
     cwd,
   };
 
-  const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies(config);
+  const { dependencies, hostDependencies, installedBinaries } = await npm.findDependencies(config);
 
   assert.deepEqual(dependencies, [
     'bin:nodemon',
@@ -37,10 +37,10 @@ test('Referenced dependencies in npm scripts', async () => {
     'bin:runnable',
   ]);
 
-  const expectedPeerDependencies = new Map();
-  expectedPeerDependencies.set('pm2-peer-dep', new Set(['pm2']));
+  const expectedHostDependencies = new Map();
+  expectedHostDependencies.set('pm2-peer-dep', new Set(['pm2']));
 
-  assert.deepEqual(peerDependencies, expectedPeerDependencies);
+  assert.deepEqual(hostDependencies, expectedHostDependencies);
 
   assert.deepEqual(
     installedBinaries,

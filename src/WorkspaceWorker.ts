@@ -7,7 +7,7 @@ import { getKeysByValue } from './util/object.js';
 import { join, toPosix } from './util/path.js';
 import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJsonWithPlugins } from './types/plugins.js';
-import type { InstalledBinaries, PeerDependencies } from './types/workspace.js';
+import type { InstalledBinaries, HostDependencies } from './types/workspace.js';
 import type { Entries } from 'type-fest';
 
 type PluginNames = Entries<typeof plugins>;
@@ -51,7 +51,7 @@ export class WorkspaceWorker {
   enabled: Record<PluginName, boolean>;
   enabledPlugins: PluginName[] = [];
   referencedDependencies: ReferencedDependencies = new Set();
-  peerDependencies: PeerDependencies = new Map();
+  hostDependencies: HostDependencies = new Map();
   installedBinaries: InstalledBinaries = new Map();
 
   constructor({
@@ -115,7 +115,7 @@ export class WorkspaceWorker {
   }
 
   private async initReferencedDependencies() {
-    const { dependencies, peerDependencies, installedBinaries } = await npm.findDependencies({
+    const { dependencies, hostDependencies, installedBinaries } = await npm.findDependencies({
       manifest: this.manifest,
       isProduction: this.isProduction,
       isStrict: this.isStrict,
@@ -125,7 +125,7 @@ export class WorkspaceWorker {
 
     const filePath = join(this.dir, 'package.json');
     dependencies.forEach(dependency => this.referencedDependencies.add([filePath, dependency]));
-    this.peerDependencies = peerDependencies;
+    this.hostDependencies = hostDependencies;
     this.installedBinaries = installedBinaries;
   }
 
@@ -313,7 +313,7 @@ export class WorkspaceWorker {
     await this.findDependenciesByPlugins();
 
     return {
-      peerDependencies: this.peerDependencies,
+      hostDependencies: this.hostDependencies,
       installedBinaries: this.installedBinaries,
       referencedDependencies: this.referencedDependencies,
       enabledPlugins: this.enabledPlugins,

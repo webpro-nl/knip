@@ -1,7 +1,7 @@
 import { _getDependenciesFromScripts } from '../binaries/index.js';
 import { timerify } from '../util/Performance.js';
 import { getPackageManifest } from './helpers.js';
-import type { InstalledBinaries, PeerDependencies } from '../types/workspace.js';
+import type { InstalledBinaries, HostDependencies } from '../types/workspace.js';
 import type { PackageJson } from '@npmcli/package-json';
 
 type Options = {
@@ -14,7 +14,7 @@ type Options = {
 
 const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir, cwd }: Options) => {
   const scriptFilter = isProduction ? ['start', 'postinstall'] : [];
-  const peerDependencies: PeerDependencies = new Map();
+  const hostDependencies: HostDependencies = new Map();
 
   const scripts = Object.entries(manifest.scripts ?? {}).reduce((scripts, [scriptName, script]) => {
     if (script && (scriptFilter.length === 0 || scriptFilter.includes(scriptName))) {
@@ -56,10 +56,10 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
       // Read and store peer dependencies
       const packagePeerDependencies = Object.keys(manifest.peerDependencies ?? {});
       packagePeerDependencies.forEach(packagePeerDependency => {
-        if (peerDependencies.has(packagePeerDependency)) {
-          peerDependencies.get(packagePeerDependency)?.add(packageName);
+        if (hostDependencies.has(packagePeerDependency)) {
+          hostDependencies.get(packagePeerDependency)?.add(packageName);
         } else {
-          peerDependencies.set(packagePeerDependency, new Set([packageName]));
+          hostDependencies.set(packagePeerDependency, new Set([packageName]));
         }
       });
     }
@@ -67,7 +67,7 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
 
   return {
     dependencies,
-    peerDependencies,
+    hostDependencies,
     installedBinaries,
   };
 };

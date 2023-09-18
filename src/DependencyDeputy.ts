@@ -8,8 +8,7 @@ import {
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { ConfigurationHints, Issue } from './types/issues.js';
-import type { WorkspaceManifests } from './types/workspace.js';
-import type { PeerDependencies, InstalledBinaries } from './types/workspace.js';
+import type { WorkspaceManifests, HostDependencies, InstalledBinaries } from './types/workspace.js';
 import type { PackageJson } from '@npmcli/package-json';
 
 type Options = {
@@ -27,7 +26,7 @@ export class DependencyDeputy {
   _manifests: WorkspaceManifests = new Map();
   referencedDependencies: Map<string, Set<string>>;
   referencedBinaries: Map<string, Set<string>>;
-  peerDependencies: Map<string, PeerDependencies>;
+  hostDependencies: Map<string, HostDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
   ignoreBinaries: string[] = [];
   ignoreDependencies: string[] = [];
@@ -36,7 +35,7 @@ export class DependencyDeputy {
     this.isStrict = isStrict;
     this.referencedDependencies = new Map();
     this.referencedBinaries = new Map();
-    this.peerDependencies = new Map();
+    this.hostDependencies = new Map();
     this.installedBinaries = new Map();
   }
 
@@ -127,12 +126,12 @@ export class DependencyDeputy {
     this.referencedBinaries.get(workspaceName)?.add(binaryName);
   }
 
-  addPeerDependencies(workspaceName: string, peerDependencies: Map<string, Set<string>>) {
-    this.peerDependencies.set(workspaceName, peerDependencies);
+  addHostDependencies(workspaceName: string, hostDependencies: HostDependencies) {
+    this.hostDependencies.set(workspaceName, hostDependencies);
   }
 
-  getPeerDependenciesOf(workspaceName: string, dependency: string) {
-    return Array.from(this.peerDependencies.get(workspaceName)?.get(dependency) ?? []);
+  getHostDependenciesFor(workspaceName: string, dependency: string) {
+    return Array.from(this.hostDependencies.get(workspaceName)?.get(dependency) ?? []);
   }
 
   getPeerDependencies(workspaceName: string) {
@@ -249,23 +248,25 @@ export class DependencyDeputy {
           // Ignore `@types/*` packages that don't have a related dependency (e.g. `@types/node`)
           if (IGNORE_DEFINITELY_TYPED.includes(typedPackageName)) return true;
 
-          // Ignore typed dependencies that have a peer dependency that's referenced
-          // Example: `next` has `react-dom` as peer dependency, so when `@types/react-dom` is listed it can be ignored
-          const peerDependencies = this.getPeerDependenciesOf(workspaceName, typedPackageName);
-          if (peerDependencies.length) {
-            return !!peerDependencies.find(peerDependency => isReferencedDependency(peerDependency, true));
-          }
+          // Ignore typed dependencies that have a host dependency that's referenced
+          // Example: `next` (host) has `react-dom` and/or `@types/react-dom` (peer), peers can be ignored if host `next` is referenced
+          const hostDependencies = [
+            ...this.getHostDependenciesFor(workspaceName, dependency),
+            ...this.getHostDependenciesFor(workspaceName, typedPackageName),
+          ];
+          if (hostDependencies.length) return !!hostDependencies.find(host => isReferencedDependency(host, true));
 
           if (!referencedDependencies) return false;
 
           return referencedDependencies.has(typedPackageName);
         }
 
-        // A dependency may not be referenced, but it may be a peerDependency of another.
-        // If that "host" dependency is also not referenced we'll report this dependency as unused.
-        const peerDependenciesOf = this.getPeerDependenciesOf(workspaceName, dependency);
-        peerDependenciesOf.forEach(dep => (!peerDepRecs[dep] ? (peerDepRecs[dep] = 1) : peerDepRecs[dep]++));
-        return peerDependenciesOf.some(peerDependency => isReferencedDependency(peerDependency, true));
+        // A dependency may not be referenced, but it may be a peer dep of another.
+        // If that host is also not referenced we'll report this dependency as unused.
+        const hostDependencies = this.getHostDependenciesFor(workspaceName, dependency);
+
+        hostDependencies.forEach(dep => (!peerDepRecs[dep] ? (peerDepRecs[dep] = 1) : peerDepRecs[dep]++));
+        return hostDependencies.some(peerDependency => isReferencedDependency(peerDependency, true));
       };
 
       const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency);

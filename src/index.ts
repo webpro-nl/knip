@@ -230,9 +230,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
     // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.
     const dependencies = await worker.findAllDependencies();
-    const { referencedDependencies, peerDependencies, installedBinaries, enabledPlugins } = dependencies;
+    const { referencedDependencies, hostDependencies, installedBinaries, enabledPlugins } = dependencies;
 
-    deputy.addPeerDependencies(name, peerDependencies);
+    deputy.addHostDependencies(name, hostDependencies);
     deputy.setInstalledBinaries(name, installedBinaries);
     enabledPluginsStore.set(name, enabledPlugins);
 
