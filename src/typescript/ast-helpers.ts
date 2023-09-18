@@ -141,4 +141,11 @@ export const isInModuleBlock = (node: ts.Node) => {
   return false;
 };
 
-export const getJSDocTags = (node: ts.Node) => ts.getJSDocTags(node).map(node => node.getText().match(/@\S+/)![0]);
+export const getJSDocTags = (node: ts.Node) => {
+  const tags = new Set<string>();
+  for (const tagNode of ts.getJSDocTags(node)) {
+    const match = tagNode.getText()?.match(/@\S+/);
+    if (match) tags.add(match[0]);
+  }
+  return tags;
+};

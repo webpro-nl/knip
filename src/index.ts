@@ -368,10 +368,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
         for (const [symbol, exportedItem] of exportItems.entries()) {
           // Skip exports tagged `@public` or `@beta`
-          if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
+          if (exportedItem.jsDocTags.has('@public') || exportedItem.jsDocTags.has('@beta')) continue;
 
           // Skip exports tagged `@internal` in --production --ignore-internal mode
-          if (isIgnoreInternal && exportedItem.jsDocTags.includes('@internal')) continue;
+          if (isIgnoreInternal && exportedItem.jsDocTags.has('@internal')) continue;
 
           if (importingModule && isSymbolImported(symbol, importingModule)) {
             // Skip members of classes/enums that are eventually exported by entry files

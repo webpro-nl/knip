@@ -256,7 +256,7 @@ export class ProjectPrincipal {
   public findUnusedMembers(filePath: string, members: ExportItemMember[]) {
     return members
       .filter(member => {
-        if (getJSDocTags(member.node).includes('@public')) return false;
+        if (getJSDocTags(member.node).has('@public')) return false;
         const referencedSymbols = this.findReferences(filePath, member.pos);
         const files = referencedSymbols
           .flatMap(refs => refs.references)
