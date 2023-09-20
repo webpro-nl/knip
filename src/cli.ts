@@ -24,6 +24,7 @@ const {
   performance: isObservePerf = false,
   production: isProduction = false,
   'reporter-options': reporterOptions = '',
+  'preprocessor-options': preprocessorOptions = '',
   strict: isStrict = false,
   tsConfig,
   version: isVersion,
@@ -66,6 +67,7 @@ const run = async () => {
       isProduction,
       isShowProgress,
       options: reporterOptions,
+      preprocessorOptions,
     };
 
     const finalData = await runPreprocessors(initialData);

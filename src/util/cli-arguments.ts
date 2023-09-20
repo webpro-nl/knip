@@ -19,6 +19,7 @@ Options:
   --include-entry-exports  Include entry files when reporting unused exports
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
+  --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
   --reporter               Select reporter: symbols, compact, codeowners, json, can be repeated (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
   --no-config-hints        Suppress configuration hints
@@ -65,6 +66,7 @@ try {
       performance: { type: 'boolean' },
       production: { type: 'boolean' },
       preprocessor: { type: 'string', multiple: true },
+      'preprocessor-options': { type: 'string' },
       reporter: { type: 'string', multiple: true },
       'reporter-options': { type: 'string' },
       strict: { type: 'boolean' },

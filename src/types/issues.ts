@@ -58,6 +58,7 @@ export type ReporterOptions = {
   isProduction: boolean;
   isShowProgress: boolean;
   options: string;
+  preprocessorOptions: string;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
