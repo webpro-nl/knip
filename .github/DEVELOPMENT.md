@@ -32,7 +32,6 @@ There's a separate guide for [writing a plugin][5].
 ## Watcher
 
 ```shell
-npm link
 npm run watch
 ```
 
@@ -41,8 +40,8 @@ You can then also run `npm link knip` from another repository to use the linked 
 
 ## Fixtures & Tests
 
-Pull requests should include one or more tests. See the `tests` and `tests/fixtures` directories to find relevant files
-that you may want to borrow or copy from.
+Pull requests should include one or more tests. See the `tests` and `fixtures` directories to find relevant files that
+you may want to borrow or copy from.
 
 Let's assume you created `fixtures/feature` and `tests/feature.test.ts`. There are a few ways to run it:
 
