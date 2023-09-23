@@ -18,8 +18,8 @@ const productionEntryFilePatternsWithoutSrc = [
   'app/**/{error,layout,loading,not-found,page,template}.{js,jsx,ts,tsx}',
   'instrumentation.{js,ts}',
   'app/{manifest,sitemap,robots}.{js,ts}',
-  'app/**/{icon,apple-icon}-image.{js,jsx,ts,tsx}',
-  'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
+  'app/**/{icon,apple-icon}-image.{js,ts,tsx}',
+  'app/**/{opengraph,twitter}-image.{js,ts,tsx}',
   'pages/**/*.{js,jsx,ts,tsx}',
 ];
 
