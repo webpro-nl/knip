@@ -51,8 +51,8 @@ const findTypeScriptDependencies: GenericPluginCallback = async configFilePath =
   const jsx = compilerOptions?.jsxImportSource
     ? [compilerOptions.jsxImportSource]
     : compilerOptions?.jsx && jsxWithReact.includes(compilerOptions.jsx)
-      ? ['react']
-      : [];
+    ? ['react']
+    : [];
   return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
 };
 
