@@ -17,7 +17,7 @@ export const ENABLERS = ['typescript'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['tsconfig.json'];
+export const CONFIG_FILE_PATTERNS = ['tsconfig.json', 'tsconfig.*.json'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const config: TsConfigJson = await load(configFilePath);
@@ -51,8 +51,8 @@ const findTypeScriptDependencies: GenericPluginCallback = async configFilePath =
   const jsx = compilerOptions?.jsxImportSource
     ? [compilerOptions.jsxImportSource]
     : compilerOptions?.jsx && jsxWithReact.includes(compilerOptions.jsx)
-    ? ['react']
-    : [];
+      ? ['react']
+      : [];
   return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
 };
 
