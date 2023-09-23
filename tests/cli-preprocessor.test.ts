@@ -25,3 +25,10 @@ test('knip --preprocessor knip-preprocessor', () => {
 test('knip --preprocessor @org/preprocessor', () => {
   assert.equal(exec('knip --preprocessor @org/preprocessor'), 'hi from scoped preprocessor');
 });
+
+test(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake"}`, () => {
+  assert.equal(
+    exec(`knip --preprocessor with-args --preprocessor-options {\\"food\\":\\"cupcake\\"}`),
+    'hi from with-args preprocessor, you gave me: cupcake'
+  );
+});
