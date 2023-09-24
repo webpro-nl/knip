@@ -7,7 +7,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "lib": ["esnext"],
-    "module": "esnext",
+    "module": "nodenext",
     "moduleResolution": "nodenext",
     "noEmit": false,
     "outDir": "./dist",
