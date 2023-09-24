@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/playwright-ct",
+  "scripts": {
+    "test-ct": "playwright test -c playwright-ct.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/experimental-ct-react": "*"
+  }
+}

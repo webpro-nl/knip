@@ -267,6 +267,7 @@ Knip contains a growing list of plugins:
 - [Nx][plugin-nx]
 - [nyc][plugin-nyc]
 - [Playwright][plugin-playwright]
+- [Playwright for components][plugin-playwright-ct]
 - [PostCSS][plugin-postcss]
 - [Prettier][plugin-prettier]
 - [Release It][plugin-release-it]
@@ -888,6 +889,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [plugin-nx]: ./src/plugins/nx
 [plugin-nyc]: ./src/plugins/nyc
 [plugin-playwright]: ./src/plugins/playwright
+[plugin-playwright-ct]: ./src/plugins/playwright-ct
 [plugin-postcss]: ./src/plugins/postcss
 [plugin-prettier]: ./src/plugins/prettier
 [plugin-release-it]: ./src/plugins/release-it
