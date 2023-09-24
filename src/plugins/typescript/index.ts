@@ -1,4 +1,3 @@
-import ts from 'typescript';
 import { compact } from '../../util/array.js';
 import { dirname, isInternal, toAbsolute } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
@@ -33,8 +32,6 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   }
   return config;
 };
-
-const jsxWithReact = [ts.JsxEmit.React, ts.JsxEmit.ReactJSX, ts.JsxEmit.ReactJSXDev, ts.JsxEmit.ReactNative];
 
 export const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
   const compilerOptions: CompilerOptions = await loadTSConfig(configFilePath);
