@@ -18,7 +18,7 @@ test('Find unused files, dependencies and exports in workspaces (w/ paths)', asy
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 1,
-    processed: 11,
-    total: 11,
+    processed: 15,
+    total: 15,
   });
 });
