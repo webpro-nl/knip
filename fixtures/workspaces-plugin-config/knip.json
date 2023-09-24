@@ -1,0 +1,6 @@
+{
+  "vitest": { "entry": ["**/*.vitest.ts"] },
+  "workspaces": {
+    "packages/*": {}
+  }
+}

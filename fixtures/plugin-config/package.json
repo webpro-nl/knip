@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/plugin-config",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

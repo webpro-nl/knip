@@ -15,10 +15,17 @@ import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
 import { getKeysByValue } from './util/object.js';
 import { join, relative, toPosix } from './util/path.js';
-import { toCamelCase } from './util/plugin.js';
+import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
 import { byPathDepth } from './util/workspace.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
-import type { RawConfiguration, Configuration, PluginName, WorkspaceConfiguration } from './types/config.js';
+import type {
+  RawConfiguration,
+  RawPluginConfiguration,
+  Configuration,
+  PluginName,
+  PluginsConfiguration,
+  WorkspaceConfiguration,
+} from './types/config.js';
 import type { PackageJson } from '@npmcli/package-json';
 
 const {
@@ -176,6 +183,15 @@ export class ConfigurationChief {
 
     const defaultWorkspaceConfig = getDefaultWorkspaceConfig(extensions);
 
+    const rootPluginConfigs: Partial<PluginsConfiguration> = {};
+
+    for (const [name, pluginConfig] of Object.entries(rawLocalConfig)) {
+      const pluginName = toCamelCase(name) as PluginName;
+      if (PLUGIN_NAMES.includes(pluginName)) {
+        rootPluginConfigs[pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
+      }
+    }
+
     const workspaces = Object.entries(initialWorkspaces)
       .filter(([workspaceName]) => !ignoreWorkspaces.includes(workspaceName))
       .reduce(
@@ -195,22 +211,15 @@ export class ConfigurationChief {
             ignoreDependencies: arrayify(workspaceConfig.ignoreDependencies),
           };
 
+          for (const [name, pluginConfig] of Object.entries(rootPluginConfigs)) {
+            const pluginName = toCamelCase(name) as PluginName;
+            if (pluginConfig) workspaces[workspaceName][pluginName] = pluginConfig;
+          }
+
           for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
             const pluginName = toCamelCase(name) as PluginName;
             if (PLUGIN_NAMES.includes(pluginName)) {
-              if (pluginConfig === false) {
-                workspaces[workspaceName][pluginName] = false;
-              } else {
-                const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
-                const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;
-                const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
-                const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
-                workspaces[workspaceName][pluginName] = {
-                  config,
-                  entry,
-                  project,
-                };
-              }
+              workspaces[workspaceName][pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
             }
           }
           return workspaces;

@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-plugin-config/root",
+  "workspaces": [
+    "packages/*"
+  ]
+}

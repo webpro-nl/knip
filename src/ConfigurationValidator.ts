@@ -62,7 +62,7 @@ const reportConfigSchema = z.object({
   exclude: z.array(z.string()).optional(),
 });
 
-const pluginSchema = z.union([
+export const pluginSchema = z.union([
   z.literal(false),
   globSchema,
   z.object({

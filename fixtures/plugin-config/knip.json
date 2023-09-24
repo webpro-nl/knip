@@ -1,0 +1,3 @@
+{
+  "vitest": { "entry": ["**/*.vitest.ts"] }
+}

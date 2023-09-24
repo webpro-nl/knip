@@ -1,0 +1,9 @@
+{
+  "name": "@workspaces-plugin-config/frontend",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  }
+}
