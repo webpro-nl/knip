@@ -12,7 +12,7 @@ export const ENABLERS = [/^@storybook\//, '@nrwl/storybook'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['.storybook/{main,manager}.{js,ts}'];
+export const CONFIG_FILE_PATTERNS = ['.storybook/{main,manager,test-runner}.{js,ts}'];
 
 export const ENTRY_FILE_PATTERNS = ['.storybook/preview.{js,jsx,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
 
