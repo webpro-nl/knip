@@ -1,3 +1,4 @@
+import ts from 'typescript';
 import { compact } from '../../util/array.js';
 import { dirname, isInternal, toAbsolute } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
@@ -33,6 +34,8 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   return config;
 };
 
+const jsxWithReact = [ts.JsxEmit.React, ts.JsxEmit.ReactJSX, ts.JsxEmit.ReactJSXDev, ts.JsxEmit.ReactNative];
+
 export const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
   const compilerOptions: CompilerOptions = await loadTSConfig(configFilePath);
   const config: TsConfigJson = await resolveExtensibleConfig(configFilePath); // Dual loader to get external `extends` dependencies
@@ -45,8 +48,8 @@ export const findTypeScriptDependencies: GenericPluginCallback = async configFil
     ? compilerOptions.plugins.map(plugin => (typeof plugin === 'object' && 'name' in plugin ? plugin.name : ''))
     : [];
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
-
-  return compact([...extend, ...types, ...plugins, ...importHelpers]);
+  const jsx = compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : [];
+  return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
 };
 
 export const findDependencies = timerify(findTypeScriptDependencies);

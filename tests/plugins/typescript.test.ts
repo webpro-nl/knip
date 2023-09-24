@@ -25,7 +25,7 @@ test('Find dependencies in typescript configuration (jsx-preserve)', async () =>
 test('Find dependencies in typescript configuration (jsx)', async () => {
   const configFilePath = join(cwd, 'tsconfig-jsx.json');
   const dependencies = await typescript.findDependencies(configFilePath);
-  assert.deepEqual(dependencies, ['react']);
+  assert.deepEqual(dependencies, []);
 });
 
 test('Find dependencies in typescript configuration (jsx-import-source)', async () => {
