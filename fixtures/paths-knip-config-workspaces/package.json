@@ -1,6 +1,0 @@
-{
-  "name": "@fixtures/paths-knip-config-workspaces",
-  "workspaces": [
-    "ws"
-  ]
-}

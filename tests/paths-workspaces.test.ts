@@ -5,8 +5,8 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Resolve import path aliases', async () => {
-  const cwd = resolve('fixtures/paths-knip-config');
+test('Resolve import path aliases (workspaces)', async () => {
+  const cwd = resolve('fixtures/paths-workspaces');
 
   const { counters } = await main({
     ...baseArguments,
@@ -15,7 +15,7 @@ test('Resolve import path aliases', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    processed: 7,
+    total: 7,
   });
 });
