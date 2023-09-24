@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-cross-reference/root",
+  "workspaces": [
+    "packages/*"
+  ]
+}

@@ -172,7 +172,8 @@ export class ProjectPrincipal {
   }
 
   public analyzeSourceFile(filePath: string, { skipTypeOnly }: { skipTypeOnly: boolean }) {
-    const sourceFile = this.backend.program?.getSourceFile(filePath);
+    // We request it from `fileManager` directly as `program` does not contain cross-referenced files
+    const sourceFile = this.backend.fileManager.getSourceFile(filePath);
 
     if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
 
@@ -270,6 +271,11 @@ export class ProjectPrincipal {
   }
 
   private findReferences(filePath: string, pos: number) {
-    return this.backend.lsFindReferences(filePath, pos) ?? [];
+    try {
+      return this.backend.lsFindReferences(filePath, pos) ?? [];
+    } catch {
+      // TS throws for (cross-referenced) files not in the program
+      return [];
+    }
   }
 }

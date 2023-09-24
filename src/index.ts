@@ -126,7 +126,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   for (const workspace of workspaces) {
-    const { name, dir, config, ancestors } = workspace;
+    const { name, dir, config, ancestors, pkgName } = workspace;
     const { paths, ignoreDependencies, ignoreBinaries } = config;
 
     const isRoot = name === ROOT_WORKSPACE_NAME;
@@ -142,7 +142,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const compilerOptions = await loadCompilerOptions(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
-    const principal = factory.getPrincipal({ cwd: dir, paths, compilerOptions, compilers });
+    const principal = factory.getPrincipal({ cwd: dir, paths, compilerOptions, compilers, pkgName });
 
     const worker = new WorkspaceWorker({
       name,
@@ -245,23 +245,36 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLog(`Installed ${principals.length} principals for ${workspaces.length} workspaces`);
 
-  for (const principal of principals) {
-    const exportedSymbols: Exports = new Map();
-    const importedSymbols: Imports = new Map();
+  const analyzedFiles: Set<string> = new Set();
+  const exportedSymbols: Exports = new Map();
+  const importedSymbols: Imports = new Map();
 
-    const analyzeSourceFile = (filePath: string) => {
+  for (const principal of principals) {
+    const analyzeSourceFile = (filePath: string, _principal: ProjectPrincipal = principal) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, scripts } = principal.analyzeSourceFile(filePath, { skipTypeOnly: isProduction });
+        const { imports, exports, scripts } = _principal.analyzeSourceFile(filePath, { skipTypeOnly: isProduction });
         const { internal, external, unresolved } = imports;
         const { exported, duplicate } = exports;
 
         if (exported.size > 0) exportedSymbols.set(filePath, exported);
 
         for (const [specifierFilePath, importItems] of internal.entries()) {
-          // Mark "external" imports from other local workspaces as used dependency
           const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
-          if (packageName && chief.localWorkspaces.has(packageName)) external.add(packageName);
+          if (packageName && chief.localWorkspaces.has(packageName)) {
+            // Mark "external" imports from other local workspaces as used dependency
+            external.add(packageName);
+            if (_principal === principal) {
+              const workspace = chief.findWorkspaceByFilePath(specifierFilePath);
+              if (workspace) {
+                const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+                if (principal && !principal.isGitIgnored(specifierFilePath)) {
+                  analyzeSourceFile(specifierFilePath, principal);
+                  analyzedFiles.add(specifierFilePath);
+                }
+              }
+            }
+          }
 
           if (!importedSymbols.has(specifierFilePath)) {
             importedSymbols.set(specifierFilePath, importItems);
@@ -297,7 +310,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         });
 
         _getDependenciesFromScripts(scripts, { cwd: dirname(filePath) }).forEach(specifier => {
-          handleReferencedDependency({ specifier, containingFilePath: filePath, principal, workspace });
+          handleReferencedDependency({ specifier, containingFilePath: filePath, principal: _principal, workspace });
         });
       }
     };
@@ -308,7 +321,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     streamer.cast('Connecting the dots...');
 
-    const analyzedFiles: Set<string> = new Set();
     let size = principal.entryPaths.size;
     let round = 0;
 
@@ -323,44 +335,44 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         analyzedFiles.add(filePath);
       });
     } while (size !== principal.entryPaths.size);
+  }
 
-    const unusedFiles = principal.getUnreferencedFiles();
+  const isSymbolImported = (symbol: string, importingModule?: ImportedModule): boolean => {
+    if (!importingModule) return false;
+    if (importingModule.symbols.has(symbol)) return true;
+    const { isReExport, isReExportedBy } = importingModule;
+    const hasSymbol = (file: string) => isSymbolImported(symbol, importedSymbols.get(file));
+    return isReExport ? Array.from(isReExportedBy).some(hasSymbol) : false;
+  };
 
-    collector.addFilesIssues(unusedFiles);
+  const isExportedInEntryFile = (principal: ProjectPrincipal, importedModule?: ImportedModule): boolean => {
+    if (!importedModule) return false;
+    const { isReExport, isReExportedBy } = importedModule;
+    const { entryPaths } = principal;
+    const hasFile = (file: string) =>
+      entryPaths.has(file) || isExportedInEntryFile(principal, importedSymbols.get(file));
+    return isReExport ? Array.from(isReExportedBy).some(hasFile) : false;
+  };
 
-    collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
+  const isExportedItemReferenced = (principal: ProjectPrincipal, exportedItem: ExportItem, filePath: string) => {
+    const hasReferences = principal.getHasReferences(filePath, exportedItem);
+    return (
+      hasReferences.external ||
+      (hasReferences.internal &&
+        (typeof chief.config.ignoreExportsUsedInFile === 'object'
+          ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
+          : chief.config.ignoreExportsUsedInFile))
+    );
+  };
 
-    const isSymbolImported = (symbol: string, importingModule?: ImportedModule): boolean => {
-      if (!importingModule) return false;
-      if (importingModule.symbols.has(symbol)) return true;
-      const { isReExport, isReExportedBy } = importingModule;
-      const hasSymbol = (file: string) => isSymbolImported(symbol, importedSymbols.get(file));
-      return isReExport ? Array.from(isReExportedBy).some(hasSymbol) : false;
-    };
+  if (isReportValues || isReportTypes) {
+    streamer.cast('Analyzing source files...');
 
-    const isExportedInEntryFile = (importedModule?: ImportedModule): boolean => {
-      if (!importedModule) return false;
-      const { isReExport, isReExportedBy } = importedModule;
-      const { entryPaths } = principal;
-      const hasFile = (file: string) => entryPaths.has(file) || isExportedInEntryFile(importedSymbols.get(file));
-      return isReExport ? Array.from(isReExportedBy).some(hasFile) : false;
-    };
+    for (const [filePath, exportItems] of exportedSymbols.entries()) {
+      const workspace = chief.findWorkspaceByFilePath(filePath);
+      const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
 
-    const isExportedItemReferenced = (exportedItem: ExportItem, filePath: string) => {
-      const hasReferences = principal.getHasReferences(filePath, exportedItem);
-      return (
-        hasReferences.external ||
-        (hasReferences.internal &&
-          (typeof chief.config.ignoreExportsUsedInFile === 'object'
-            ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
-            : chief.config.ignoreExportsUsedInFile))
-      );
-    };
-
-    if (isReportValues || isReportTypes) {
-      streamer.cast('Analyzing source files...');
-
-      for (const [filePath, exportItems] of exportedSymbols.entries()) {
+      if (principal) {
         // Bail out when in entry file (unless --include-entry-exports)
         if (!isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
 
@@ -375,7 +387,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           if (importingModule && isSymbolImported(symbol, importingModule)) {
             // Skip members of classes/enums that are eventually exported by entry files
-            if (importingModule.isReExport && isExportedInEntryFile(importingModule)) continue;
+            if (importingModule.isReExport && isExportedInEntryFile(principal, importingModule)) continue;
 
             if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
               if (isProduction) continue;
@@ -395,9 +407,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           }
 
           const isStar = Boolean(importingModule?.isStar);
-          const isReExportedByEntryFile = !isIncludeEntryExports && isStar && isExportedInEntryFile(importingModule);
+          const isReExportedByEntryFile =
+            !isIncludeEntryExports && isStar && isExportedInEntryFile(principal, importingModule);
 
-          if (!isReExportedByEntryFile && !isExportedItemReferenced(exportedItem, filePath)) {
+          if (!isReExportedByEntryFile && !isExportedItemReferenced(principal, exportedItem, filePath)) {
             if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
               if (isProduction) continue;
               const type = isStar ? 'nsTypes' : 'types';
@@ -411,6 +424,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
     }
   }
+
+  const unusedFiles = factory
+    .getPrincipals()
+    .flatMap(principal => principal.getUnreferencedFiles())
+    .filter(filePath => !analyzedFiles.has(filePath));
+
+  collector.addFilesIssues(unusedFiles);
+
+  collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
   if (isReportDependencies) {
     const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();

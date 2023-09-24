@@ -5,7 +5,7 @@ import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 
 type Paths = ts.CompilerOptions['paths'];
 
-type Principal = { principal: ProjectPrincipal; cwds: Set<string>; pathKeys: Set<string> };
+type Principal = { principal: ProjectPrincipal; cwds: Set<string>; pathKeys: Set<string>; pkgNames: Set<string> };
 type Principals = Set<Principal>;
 
 type Options = {
@@ -13,6 +13,7 @@ type Options = {
   compilerOptions: ts.CompilerOptions;
   paths: Paths;
   compilers: [SyncCompilers, AsyncCompilers];
+  pkgName: string;
 };
 
 const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Paths = {}) => {
@@ -33,11 +34,11 @@ export class PrincipalFactory {
   principals: Principals = new Set();
 
   public getPrincipal(options: Options) {
-    const { cwd, compilerOptions, paths } = options;
+    const { cwd, compilerOptions, paths, pkgName } = options;
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
     const principal = this.findReusablePrincipal(compilerOptions);
     if (principal) {
-      this.linkPrincipal(principal, cwd, compilerOptions);
+      this.linkPrincipal(principal, cwd, compilerOptions, pkgName);
       return principal.principal;
     } else {
       return this.addNewPrincipal(options);
@@ -59,23 +60,28 @@ export class PrincipalFactory {
     return principal;
   }
 
-  private linkPrincipal(principal: Principal, cwd: string, compilerOptions: ts.CompilerOptions) {
+  private linkPrincipal(principal: Principal, cwd: string, compilerOptions: ts.CompilerOptions, pkgName: string) {
     const { pathsBasePath, paths } = compilerOptions;
     if (pathsBasePath) principal.principal.compilerOptions.pathsBasePath = pathsBasePath;
     Object.keys(paths ?? {}).forEach(p => principal.pathKeys.add(p));
     principal.principal.compilerOptions.paths = { ...principal.principal.compilerOptions.paths, ...paths };
     principal.cwds.add(cwd);
+    principal.pkgNames.add(pkgName);
   }
 
   private addNewPrincipal(options: Options) {
-    const { cwd, compilerOptions } = options;
+    const { cwd, compilerOptions, pkgName } = options;
     const pathKeys = new Set(Object.keys(compilerOptions?.paths ?? {}));
     const principal = new ProjectPrincipal(options);
-    this.principals.add({ principal, cwds: new Set([cwd]), pathKeys });
+    this.principals.add({ principal, cwds: new Set([cwd]), pathKeys, pkgNames: new Set([pkgName]) });
     return principal;
   }
 
   public getPrincipals() {
-    return Array.from(this.principals, p => p.principal);
+    return Array.from(this.principals, p => p.principal).reverse();
+  }
+
+  public getPrincipalByPackageName(packageName: string) {
+    return Array.from(this.principals).find(principal => principal.pkgNames.has(packageName))?.principal;
   }
 }

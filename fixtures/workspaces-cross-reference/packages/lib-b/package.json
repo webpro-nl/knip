@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-cross-reference/lib-b",
+  "dependencies": {
+    "@workspaces-cross-reference/lib-a": "*"
+  }
+}

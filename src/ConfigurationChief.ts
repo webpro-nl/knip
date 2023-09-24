@@ -70,7 +70,7 @@ type ConfigurationManagerOptions = {
 
 export type Workspace = {
   name: string;
-  pkgName?: string;
+  pkgName: string;
   dir: string;
   ancestors: string[];
   config: WorkspaceConfiguration;
@@ -316,7 +316,7 @@ export class ConfigurationChief {
     return workspaceNames.sort(byPathDepth).map(
       (name): Workspace => ({
         name,
-        pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name,
+        pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name ?? `NOT_FOUND_${name}`,
         dir: join(this.cwd, name),
         config: this.getConfigForWorkspace(name),
         ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
