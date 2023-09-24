@@ -15,7 +15,7 @@ export const ENTRY_FILE_PATTERNS = ['next.config.{js,ts,cjs,mjs}'];
 const productionEntryFilePatternsWithoutSrc = [
   'middleware.{js,ts}',
   'app/**/route.{js,ts}',
-  'app/**/{error,layout,loading,not-found,page,template}.{js,jsx,tsx}',
+  'app/**/{error,layout,loading,not-found,page,template}.{js,jsx,ts,tsx}',
   'instrumentation.{js,ts}',
   'app/{manifest,sitemap,robots}.{js,ts}',
   'app/**/{icon,apple-icon}-image.{js,ts,tsx}',
