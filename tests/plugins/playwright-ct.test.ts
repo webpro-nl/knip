@@ -17,7 +17,7 @@ test('Find dependencies in Playwright for components configuration', async () =>
     ...baseCounters,
     devDependencies: 0,
     unlisted: 0,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

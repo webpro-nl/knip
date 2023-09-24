@@ -21,6 +21,7 @@ export * as npmPackageJsonLint from './npm-package-json-lint/index.js';
 export * as nx from './nx/index.js';
 export * as nyc from './nyc/index.js';
 export * as playwright from './playwright/index.js';
+export * as playwrightCt from './playwright-ct/index.js';
 export * as postcss from './postcss/index.js';
 export * as prettier from './prettier/index.js';
 export * as releaseIt from './release-it/index.js';
