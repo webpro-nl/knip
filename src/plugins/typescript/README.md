@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "typescript": {
-    "config": ["tsconfig.json"]
+    "config": ["tsconfig.json", "tsconfig.*.json"]
   }
 }
 ```

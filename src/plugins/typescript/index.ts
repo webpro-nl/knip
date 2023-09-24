@@ -17,7 +17,7 @@ export const ENABLERS = ['typescript'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['tsconfig.json'];
+export const CONFIG_FILE_PATTERNS = ['tsconfig.json', 'tsconfig.*.json'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const config: TsConfigJson = await load(configFilePath);
