@@ -1,7 +1,6 @@
 {
   "vitest": {
-    "config": ["vitest.config.ts"],
-    "entry": ["**/*.vitest.ts"]
+    "config": ["config/vitest.config.ts"]
   },
   "workspaces": {
     "packages/*": {}

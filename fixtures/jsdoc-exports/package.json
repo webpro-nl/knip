@@ -1,3 +1,6 @@
 {
-  "name": "@fixtures/production-strict-test"
+  "name": "@fixtures/production-strict-test",
+  "scripts": {
+    "test": "node --test"
+  }
 }
