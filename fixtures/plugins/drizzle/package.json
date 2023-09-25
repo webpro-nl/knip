@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/drizzle",
+  "scripts": {
+    "migrate": "drizzle-kit push:pg"
+  },
+  "devDependencies": {
+    "drizzle-kit": "*"
+  }
+}
