@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/svelte');
 
-test('Use compilers', async () => {
+test('Use compilers (svelte)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -19,7 +19,7 @@ test('Use compilers', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 2,
-    processed: 10, // This includes .svelte and .css files
-    total: 10,
+    processed: 11, // This includes .svelte and .css files
+    total: 11,
   });
 });
