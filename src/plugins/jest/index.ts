@@ -61,6 +61,7 @@ const resolveDependencies = (config: Config.InitialOptions): string[] => {
       ? Object.values(config.moduleNameMapper).map(mapper => (typeof mapper === 'string' ? mapper : mapper[0]))
       : []
   ).filter(value => !/\$[0-9]/.test(value));
+  const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
 
   return [
     ...presets,
@@ -74,6 +75,7 @@ const resolveDependencies = (config: Config.InitialOptions): string[] => {
     ...setupFilesAfterEnv,
     ...transform,
     ...moduleNameMapper,
+    ...testResultsProcessor,
   ];
 };
 

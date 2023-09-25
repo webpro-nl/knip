@@ -23,5 +23,6 @@ test('Find dependencies in Jest configuration (jest.config.js)', async () => {
     join(cwd, 'jest.transform.js'),
     join(cwd, '__mocks__/fileMock.js'),
     'identity-obj-proxy',
+    'jest-result-processor',
   ]);
 });
