@@ -6,8 +6,12 @@ import { resolve } from '../src/util/path.js';
 const cwd = resolve('fixtures/cli-preprocessor');
 
 const exec = (command: string) => {
-  const output = execSync(command.replace(/^knip/, 'node ../../dist/cli.js'), { cwd });
-  return output.toString().trim();
+  try {
+    const output = execSync(command.replace(/^knip/, 'node ../../dist/cli.js'), { cwd });
+    return output.toString().trim();
+  } catch {
+    console.error(`Error during execution of command: ${command}`);
+  }
 };
 
 test('knip --preprocessor ./index.js', () => {
