@@ -4,6 +4,7 @@
     "migrate": "drizzle-kit push:pg"
   },
   "devDependencies": {
+    "drizzle-orm": "*",
     "drizzle-kit": "*"
   }
 }

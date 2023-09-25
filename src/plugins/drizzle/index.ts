@@ -1,5 +1,7 @@
+import { globby } from 'globby';
 import { timerify } from '../../util/Performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
+import type { DrizzleConfig } from './types.js';
 import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://orm.drizzle.team/kit-docs/overview
@@ -13,8 +15,12 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['drizzle.config.{ts,js,json}'];
 
-const findDrizzleDependencies: GenericPluginCallback = async () => {
-  return [];
+const findDrizzleDependencies: GenericPluginCallback = async (configFilePath, { cwd }) => {
+  const config: DrizzleConfig = await load(configFilePath);
+  if (!config || !config.schema) return [];
+  const schemas = Array.isArray(config.schema) ? config.schema : [config.schema];
+  const paths = await globby(schemas, { cwd });
+  return paths;
 };
 
 export const findDependencies = timerify(findDrizzleDependencies);
