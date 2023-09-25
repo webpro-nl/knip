@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
-import { fromBinary } from '../../util/protocols.js';
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { getGitHookPaths } from '../../util/git.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import { fromBinary } from '../../util/protocols.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/evilmartians/lefthook
@@ -20,7 +20,9 @@ const gitHookPaths = getGitHookPaths();
 
 export const CONFIG_FILE_PATTERNS = ['lefthook.yml', ...gitHookPaths];
 
-const findLefthookDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+const findLefthookDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+  if (isProduction) return [];
+
   const dependencies = manifest.devDependencies ? Object.keys(manifest.devDependencies) : [];
 
   if (configFilePath.endsWith('.yml')) {

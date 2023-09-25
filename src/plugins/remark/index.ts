@@ -23,9 +23,16 @@ export const CONFIG_FILE_PATTERNS = [
   '.remarkrc.{yml,yaml}',
 ];
 
-const findRemarkDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
-  const config = configFilePath.endsWith('package.json') ? manifest.remarkConfig : await load(configFilePath);
-  const plugins = (config as RemarkConfig)?.plugins?.map(plugin => `remark-${plugin}`) ?? [];
+const findRemarkDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+  if (isProduction) return [];
+
+  const config: RemarkConfig = configFilePath.endsWith('package.json')
+    ? manifest.remarkConfig
+    : await load(configFilePath);
+
+  if (!config) return [];
+
+  const plugins = config.plugins?.map(plugin => `remark-${plugin}`) ?? [];
   return [...plugins];
 };
 

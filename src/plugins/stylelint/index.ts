@@ -19,7 +19,9 @@ export const CONFIG_FILE_PATTERNS = [
   'stylelint.config.{cjs,mjs,js}',
 ];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+  if (isProduction) return [];
+
   const config: PluginConfig = configFilePath.endsWith('package.json')
     ? manifest.stylelint
     : await load(configFilePath);

@@ -17,7 +17,12 @@ export const isEnabled: IsPluginEnabledCallback = async ({ cwd }) =>
 
 export const CONFIG_FILE_PATTERNS = ['.github/workflows/*.yml', '.github/**/action.{yml,yaml}'];
 
-const findGithubActionsDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+const findGithubActionsDependencies: GenericPluginCallback = async (
+  configFilePath,
+  { cwd, manifest, isProduction }
+) => {
+  if (isProduction) return [];
+
   const config = await load(configFilePath);
 
   if (!config) return [];

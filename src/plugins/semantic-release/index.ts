@@ -19,7 +19,9 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findSemanticReleaseDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findSemanticReleaseDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+  if (isProduction) return [];
+
   const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.release : await load(configFilePath);
   const plugins = config?.plugins ?? [];
   return plugins.map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));

@@ -1,5 +1,7 @@
+import { timerify } from '../../util/Performance.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback } from '../../types/plugins.js';
+import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
+import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://kit.svelte.dev/docs
 
@@ -17,3 +19,9 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
 ];
 
 export const PROJECT_FILE_PATTERNS = ['src/**/*.{js,ts,svelte}'];
+
+const findSvelteDependencies: GenericPluginCallback = async () => {
+  return [...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern), ...ENTRY_FILE_PATTERNS.map(toEntryPattern)];
+};
+
+export const findDependencies = timerify(findSvelteDependencies);

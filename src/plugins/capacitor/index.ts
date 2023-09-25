@@ -14,7 +14,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['capacitor.config.ts'];
 
-const findCapacitorDependencies: GenericPluginCallback = async configFilePath => {
+const findCapacitorDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+  if (isProduction) return [];
   const config: CapacitorConfig = await load(configFilePath);
   return config.includePlugins ?? [];
 };

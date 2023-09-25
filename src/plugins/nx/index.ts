@@ -14,7 +14,9 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['project.json', '{apps,libs}/**/project.json'];
 
-const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+  if (isProduction) return [];
+
   const config: NxProjectConfiguration = await load(configFilePath);
   if (!config) return [];
   const targets = config.targets ? Object.values(config.targets) : [];

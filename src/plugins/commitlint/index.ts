@@ -23,7 +23,8 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findCommitLintDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findCommitLintDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+  if (isProduction) return [];
   const config: CommitLintConfig = configFilePath.endsWith('package.json')
     ? manifest.commitlint
     : await load(configFilePath);

@@ -14,7 +14,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.czrc', '.cz.json', 'package.json'];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+  if (isProduction) return [];
   const config: PluginConfig = configFilePath.endsWith('package.json')
     ? manifest.config?.commitizen
     : await load(configFilePath);

@@ -1,5 +1,6 @@
 import { hasDependency } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback } from '../../types/plugins.js';
+import { toEntryPattern } from '../../util/protocols.js';
+import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://docs.cypress.io/guides/references/configuration
 
@@ -16,3 +17,8 @@ export const ENTRY_FILE_PATTERNS = [
   'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
   'cypress/plugins/index.js', // Deprecated since Cypress v10
 ];
+
+export const findDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+  if (isProduction) return [];
+  return ENTRY_FILE_PATTERNS.map(toEntryPattern);
+};

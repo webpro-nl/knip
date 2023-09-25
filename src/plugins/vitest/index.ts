@@ -1,9 +1,14 @@
 import { compact } from '../../util/array.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import { toEntryPattern } from '../../util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { VitestConfig, VitestWorkspaceConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import type {
+  IsPluginEnabledCallback,
+  GenericPluginCallback,
+  GenericPluginCallbackOptions,
+} from '../../types/plugins.js';
 
 // https://vitest.dev/config/
 
@@ -16,35 +21,41 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vitest.{workspace,projects}.{ts,js,json}'];
 
-// `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
-export const ENTRY_FILE_PATTERNS = [];
+export const ENTRY_FILE_PATTERNS = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 
-export const findVitestDeps = (config: VitestConfig) => {
+export const findVitestDeps = (config: VitestConfig, options: GenericPluginCallbackOptions) => {
+  const { isProduction } = options;
+
   if (!config || !config.test) return [];
-  const cfg = config.test;
-  const environments = cfg.environment ? [getEnvPackageName(cfg.environment)] : [];
-  const reporters = getExternalReporters(cfg.reporters);
-  const coverage = cfg.coverage ? [`@vitest/coverage-${cfg.coverage.provider ?? 'v8'}`] : [];
-  const setupFiles = cfg.setupFiles ? [cfg.setupFiles].flat() : [];
-  const globalSetup = cfg.globalSetup ? [cfg.globalSetup].flat() : [];
-  return compact([...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup]);
+
+  const testConfig = config.test;
+
+  const entryPatterns = (testConfig.include ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
+  if (isProduction) return entryPatterns;
+
+  const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
+  const reporters = getExternalReporters(testConfig.reporters);
+  const coverage = testConfig.coverage ? [`@vitest/coverage-${testConfig.coverage.provider ?? 'v8'}`] : [];
+  const setupFiles = testConfig.setupFiles ? [testConfig.setupFiles].flat() : [];
+  const globalSetup = testConfig.globalSetup ? [testConfig.globalSetup].flat() : [];
+  return compact([...entryPatterns, ...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup]);
 };
 
-const findVitestWorkspaceDeps = (config: VitestWorkspaceConfig) => {
+const findVitestWorkspaceDeps = (config: VitestWorkspaceConfig, options: GenericPluginCallbackOptions) => {
   let deps: string[] = [];
   for (const cfg of config) {
     if (typeof cfg === 'string') continue;
-    deps = [...deps, ...findVitestDeps(cfg)];
+    deps = [...deps, ...findVitestDeps(cfg, options)];
   }
   return compact(deps);
 };
 
-const findVitestDependencies: GenericPluginCallback = async configFilePath => {
+const findVitestDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const config: VitestConfig | VitestWorkspaceConfig = await load(configFilePath);
   if (Array.isArray(config)) {
-    return findVitestWorkspaceDeps(config);
+    return findVitestWorkspaceDeps(config, options);
   }
-  return findVitestDeps(config);
+  return findVitestDeps(config, options);
 };
 
 export const findDependencies = timerify(findVitestDependencies);

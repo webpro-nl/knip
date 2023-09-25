@@ -14,7 +14,11 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.npmpackagejsonlintrc.json', 'npmpackagejsonlint.config.js', 'package.json'];
 
-const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (
+  configFilePath,
+  { manifest, isProduction }
+) => {
+  if (isProduction) return [];
   const config: NpmPkgJsonLintConfig = configFilePath.endsWith('package.json')
     ? manifest.npmpackagejsonlint
     : await load(configFilePath);

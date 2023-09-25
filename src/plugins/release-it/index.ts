@@ -20,7 +20,9 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+  if (isProduction) return [];
+
   const config: ReleaseItConfig = configFilePath.endsWith('package.json')
     ? manifest['release-it']
     : await load(configFilePath);

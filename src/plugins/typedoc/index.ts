@@ -21,7 +21,9 @@ export const CONFIG_FILE_PATTERNS = [
   'tsconfig.json',
 ];
 
-const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+  if (isProduction) return [];
+
   const config: PluginConfig = configFilePath.endsWith('package.json')
     ? manifest.typedocOptions
     : configFilePath.endsWith('tsconfig.json')

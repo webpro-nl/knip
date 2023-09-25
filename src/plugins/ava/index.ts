@@ -1,6 +1,7 @@
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import { toEntryPattern } from '../../util/protocols.js';
 import type { PluginConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -15,22 +16,39 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
 
-// `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
-export const ENTRY_FILE_PATTERNS = [];
+export const ENTRY_FILE_PATTERNS = [
+  `test.{js,cjs,mjs}`,
+  `{src,source}/test.{js,cjs,mjs}`,
+  `**/__tests__/**/*.{js,cjs,mjs}`,
+  `**/*.spec.{js,cjs,mjs}`,
+  `**/*.test.{js,cjs,mjs}`,
+  `**/test-*.{js,cjs,mjs}`,
+  `**/test/**/*.{js,cjs,mjs}`,
+  `**/tests/**/*.{js,cjs,mjs}`,
+  '!**/__tests__/**/__{helper,fixture}?(s)__/**/*',
+  '!**/test?(s)/**/{helper,fixture}?(s)/**/*',
+];
 
-const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
   const config: PluginConfig = configFilePath.endsWith('package.json') ? manifest.ava : await load(configFilePath);
 
-  const requireArgs = (config?.require ?? []).map(require => `--require ${require}`);
-  const otherArgs = config?.nodeArguments ?? [];
+  const entryPatterns = (config?.files ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
+  if (isProduction) return entryPatterns;
+
+  if (!config) return [];
+
+  const requireArgs = (config.require ?? []).map(require => `--require ${require}`);
+  const otherArgs = config.nodeArguments ?? [];
 
   const cmd = `node ${otherArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  return _getDependenciesFromScripts([cmd], {
+  const dependencies = _getDependenciesFromScripts([cmd], {
     cwd,
     manifest,
     knownGlobalsOnly: true,
   });
+
+  return [...entryPatterns, ...dependencies];
 };
 
 export const findDependencies = timerify(findAvaDependencies);

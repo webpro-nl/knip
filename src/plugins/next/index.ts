@@ -1,5 +1,6 @@
 import { hasDependency } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback } from '../../types/plugins.js';
+import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
+import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -27,3 +28,7 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   ...productionEntryFilePatternsWithoutSrc,
   ...productionEntryFilePatternsWithoutSrc.map(pattern => `src/${pattern}`),
 ];
+
+export const findDependencies: GenericPluginCallback = async () => {
+  return [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
+};

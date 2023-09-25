@@ -15,9 +15,9 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['vite.config.{js,ts}'];
 
-const findViteDependencies: GenericPluginCallback = async configFilePath => {
+const findViteDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const config: ViteConfig = await load(configFilePath);
-  return findVitestDeps(config);
+  return findVitestDeps(config, options);
 };
 
 export const findDependencies = timerify(findViteDependencies);
