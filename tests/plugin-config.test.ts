@@ -15,7 +15,7 @@ test('Use root plugin config', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    total: 2,
-    processed: 2,
+    total: 3,
+    processed: 3,
   });
 });

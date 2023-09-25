@@ -4,6 +4,7 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "vitest": "*"
+    "vitest": "*",
+    "jsdom": "*"
   }
 }

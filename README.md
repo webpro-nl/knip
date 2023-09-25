@@ -322,6 +322,21 @@ has them at `e2e-tests/*.spec.ts`. Here's how to configure this:
 }
 ```
 
+When overriding any plugin's configuration, the options object is fully replaced. Look at the plugin's page to find the
+default configuration and use that as a basis. Here's another example to override the test file pattern for Vitest:
+
+```json
+{
+  "vitest": {
+    "config": ["vitest.config.ts"],
+    "entry": ["**/*.vitest.ts"]
+  }
+}
+```
+
+This plugin configuration can be set on root and workspace level. If set on root level, it can be disabled on workspace
+level by setting it to `false` there.
+
 #### Multi-project repositories
 
 Some repositories have a single `package.json`, but consist of multiple projects with configuration files across the

@@ -4,7 +4,8 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "vitest": "*"
+    "vitest": "*",
+    "happy-dom": "*"
   },
   "workspaces": [
     "packages/*"
