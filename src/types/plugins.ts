@@ -12,7 +12,7 @@ type IsPluginEnabledCallbackOptions = {
 
 export type IsPluginEnabledCallback = (options: IsPluginEnabledCallbackOptions) => boolean | Promise<boolean>;
 
-type GenericPluginCallbackOptions = {
+export type GenericPluginCallbackOptions = {
   cwd: string;
   manifest: PackageJsonWithPlugins;
   config: PluginConfiguration;

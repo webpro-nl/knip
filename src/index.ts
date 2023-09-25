@@ -11,7 +11,7 @@ import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
 import { LoaderError } from './util/errors.js';
 import { findFile } from './util/fs.js';
-import { _glob } from './util/glob.js';
+import { _glob, negate } from './util/glob.js';
 import {
   getEntryPathFromManifest,
   getPackageNameFromFilePath,
@@ -168,23 +168,44 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     debugLogArray(`Found entry paths in package.json (${name})`, entryPathsFromManifest);
     principal.addEntryPaths(entryPathsFromManifest);
 
+    // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
+    // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.
+    const dependencies = await worker.findAllDependencies();
+    const {
+      referencedDependencies,
+      hostDependencies,
+      installedBinaries,
+      enabledPlugins,
+      entryFilePatterns,
+      productionEntryFilePatterns,
+    } = dependencies;
+
+    deputy.addHostDependencies(name, hostDependencies);
+    deputy.setInstalledBinaries(name, installedBinaries);
+    enabledPluginsStore.set(name, enabledPlugins);
+
+    referencedDependencies.forEach(([containingFilePath, specifier]) => {
+      handleReferencedDependency({ specifier, containingFilePath, principal, workspace });
+    });
+
     if (isProduction) {
+      const negatedEntryPatterns: string[] = entryFilePatterns.map(negate);
+
       {
-        const patterns = worker.getProductionEntryFilePatterns();
+        const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
         const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found entry paths (${name})`, workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
       }
 
       {
-        const patterns = worker.getProductionPluginEntryFilePatterns();
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns: productionEntryFilePatterns });
         debugLogArray(`Found production plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
-        const patterns = worker.getProductionProjectFilePatterns();
+        const patterns = worker.getProductionProjectFilePatterns(negatedEntryPatterns);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found project paths (${name})`, workspaceProjectPaths);
         workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
@@ -198,14 +219,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
 
       {
-        const patterns = worker.getProjectFilePatterns();
+        const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns]);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found project paths (${name})`, workspaceProjectPaths);
         workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
       }
 
       {
-        const patterns = worker.getPluginEntryFilePatterns();
+        const patterns = [...entryFilePatterns, ...productionEntryFilePatterns];
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
@@ -227,21 +248,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
 
     // Add knip.ts (might import dependencies)
-    if (chief.resolvedConfigFilePath)
+    if (chief.resolvedConfigFilePath) {
       principal.addEntryPath(chief.resolvedConfigFilePath, { skipExportsAnalysis: true });
-
-    // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
-    // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.
-    const dependencies = await worker.findAllDependencies();
-    const { referencedDependencies, hostDependencies, installedBinaries, enabledPlugins } = dependencies;
-
-    deputy.addHostDependencies(name, hostDependencies);
-    deputy.setInstalledBinaries(name, installedBinaries);
-    enabledPluginsStore.set(name, enabledPlugins);
-
-    referencedDependencies.forEach(([containingFilePath, specifier]) => {
-      handleReferencedDependency({ specifier, containingFilePath, principal, workspace });
-    });
+    }
   }
 
   const principals = factory.getPrincipals();

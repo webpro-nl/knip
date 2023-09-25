@@ -1,6 +1,6 @@
 export { _load as load } from './loader.js';
 import { arrayify } from './array.js';
-import type { RawPluginConfiguration } from 'src/types/config.js';
+import type { RawPluginConfiguration } from '../types/config.js';
 
 export const toCamelCase = (name: string) =>
   name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
