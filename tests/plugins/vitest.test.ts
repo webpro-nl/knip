@@ -43,7 +43,7 @@ test('Find dependencies in vitest configuration', async () => {
     files: 2,
     unlisted: 2,
     unresolved: 1,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });

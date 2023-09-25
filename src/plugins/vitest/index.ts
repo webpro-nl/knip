@@ -14,13 +14,13 @@ export const ENABLERS = ['vitest'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['vitest.config.ts'];
+export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vitest.{workspace,projects}.{ts,js,json}'];
 
 // `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
 export const ENTRY_FILE_PATTERNS = [];
 
 export const findVitestDeps = (config: VitestConfig) => {
-  if (!config || !config.test) return [];
+  if (!config || Array.isArray(config) || !config.test) return [];
   const cfg = config.test;
   const environments = cfg.environment ? [getEnvPackageName(cfg.environment)] : [];
   const reporters = getExternalReporters(cfg.reporters);
