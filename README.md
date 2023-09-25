@@ -264,6 +264,7 @@ Knip contains a growing list of plugins:
 - [markdownlint][plugin-markdownlint]
 - [Mocha][plugin-mocha]
 - [Next.js][plugin-next]
+- [Node.js Test Runner][plugin-node-test-runner]
 - [npm-package-json-lint][plugin-npm-package-json-lint]
 - [Nx][plugin-nx]
 - [nyc][plugin-nyc]
@@ -902,6 +903,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [plugin-markdownlint]: ./src/plugins/markdownlint
 [plugin-mocha]: ./src/plugins/mocha
 [plugin-next]: ./src/plugins/next
+[plugin-node-test-runner]: ./src/plugins/node-test-runner
 [plugin-npm-package-json-lint]: ./src/plugins/npm-package-json-lint
 [plugin-nx]: ./src/plugins/nx
 [plugin-nyc]: ./src/plugins/nyc
