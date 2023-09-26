@@ -6,7 +6,7 @@ import { getJSDocTags, isInModuleBlock } from './typescript/ast-helpers.js';
 import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
-import { isMaybePackageName } from './util/modules.js';
+import { isMaybePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
@@ -198,8 +198,7 @@ export class ProjectPrincipal {
           this.addEntryPath(resolvedModule.resolvedFileName, { skipExportsAnalysis: true });
         }
       } else {
-        // Strip special Webpack stuff (https://webpack.js.org/concepts/loaders/)
-        const sanitizedSpecifier = specifier.replace(/^([?!|-]+)?([^!?]+).*/, '$2');
+        const sanitizedSpecifier = sanitizeSpecifier(specifier);
         if (isMaybePackageName(sanitizedSpecifier)) {
           external.add(sanitizedSpecifier);
         } else {

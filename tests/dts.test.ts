@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/מסמכים');
+const cwd = resolve('fixtures/dts');
 
-test('Report unresolved imports (rtl)', async () => {
+test('Include declaration files and allow unknown extensions', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -15,7 +15,7 @@ test('Report unresolved imports (rtl)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

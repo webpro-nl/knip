@@ -56,3 +56,6 @@ export const getEntryPathFromManifest = (cwd: string, dir: string, manifest: Pac
   // Glob, as we only want source files that exist and not (generated) files that are .gitignore'd
   return _glob({ cwd, workingDir: dir, patterns: Array.from(entryPaths) });
 };
+
+// Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
+export const sanitizeSpecifier = (specifier: string) => specifier.replace(/^([?!|-]+)?([^!?]+).*/, '$2');

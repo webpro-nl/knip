@@ -1,10 +1,7 @@
-import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
-// eslint-disable-next-line n/no-restricted-import
-import { resolve, dirname } from 'node:path';
 import ts from 'typescript';
 import { getOrSet } from '../util/map.js';
-import { isMaybePackageName } from '../util/modules.js';
+import { isMaybePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
 import {
   isDeclarationFileExtension,
@@ -102,26 +99,22 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
             addInternalImport({ identifier, specifier, symbol, filePath, isReExport });
           }
 
-          if (!isMaybePackageName(specifier)) return;
+          const sanitizedSpecifier = sanitizeSpecifier(specifier);
+          if (!isMaybePackageName(sanitizedSpecifier)) return;
 
           if (isDeclarationFileExtension(module.resolvedModule.extension)) {
             // We use TypeScript's module resolution, but it returns DTS references. In the rest of the program we want
             // the package name based on the original specifier.
-            externalImports.add(specifier);
+            externalImports.add(sanitizedSpecifier);
           } else {
-            externalImports.add(module.resolvedModule.packageId?.name ?? specifier);
+            externalImports.add(module.resolvedModule.packageId?.name ?? sanitizedSpecifier);
           }
         } else {
           addInternalImport({ identifier, specifier, symbol, filePath, isReExport });
         }
       }
     } else {
-      const filePath = resolve(dirname(sourceFile.fileName), specifier);
-      if (existsSync(filePath)) {
-        unresolvedImports.add(filePath); // TODO Optimize (it's not unresolved)
-      } else {
-        unresolvedImports.add(specifier);
-      }
+      unresolvedImports.add(specifier);
     }
   };
 
