@@ -9,3 +9,5 @@ export interface VitestConfig {
     setupFiles?: string | string[];
   };
 }
+
+export type VitestWorkspaceConfig = (string | VitestConfig)[];
