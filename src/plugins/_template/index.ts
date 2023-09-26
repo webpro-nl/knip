@@ -14,8 +14,10 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = [];
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = [];
 
+/** @public */
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [];
 
 export const PROJECT_FILE_PATTERNS = [];

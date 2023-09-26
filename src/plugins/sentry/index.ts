@@ -12,6 +12,7 @@ export const ENABLERS = [/^@sentry\//];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['sentry.{client,server,edge}.config.{js,ts}'];
 
 const findSentryDependencies: GenericPluginCallback = async () => {

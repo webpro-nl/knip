@@ -175,7 +175,8 @@ usually they depend on `devDependencies`. However, some plugins target productio
 Here's an example from the latter:
 
 ```ts
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [
+/** @public */
+const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'app/root.tsx',
   'app/entry.{client,server}.{js,jsx,ts,tsx}',
   'app/routes/**/*.{js,ts,tsx}',

@@ -18,6 +18,7 @@ export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.e
 
 // New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
 // We can handle eslint.config.js just like other source code (as dependencies are imported)
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['eslint.config.js'];
 
 // Note: shareable configs should use `peerDependencies` for plugins

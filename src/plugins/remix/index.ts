@@ -12,8 +12,10 @@ export const ENABLERS = [/^@remix-run\//];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['remix.config.js', 'remix.init/index.js'];
 
+/** @public */
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'app/root.tsx',
   'app/entry.{client,server}.{js,jsx,ts,tsx}',

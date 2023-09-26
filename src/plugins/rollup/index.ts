@@ -12,6 +12,7 @@ export const ENABLERS = ['rollup'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['rollup.config.{js,mjs,ts}'];
 
 const findRollupDependencies: GenericPluginCallback = async () => {

@@ -16,6 +16,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = [
   `test.{js,cjs,mjs}`,
   `{src,source}/test.{js,cjs,mjs}`,

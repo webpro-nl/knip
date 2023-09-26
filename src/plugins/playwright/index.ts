@@ -13,6 +13,7 @@ export const ENABLERS = ['@playwright/test'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
 export const CONFIG_FILE_PATTERNS = ['playwright.config.{js,ts}'];

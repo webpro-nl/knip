@@ -11,6 +11,7 @@ export const ENABLERS = ['cypress'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = [
   'cypress.config.{js,ts,mjs,cjs}',
   'cypress/support/e2e.{js,jsx,ts,tsx}',

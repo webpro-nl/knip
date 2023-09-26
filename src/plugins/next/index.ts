@@ -11,6 +11,7 @@ export const ENABLERS = ['next'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['next.config.{js,ts,cjs,mjs}'];
 
 const productionEntryFilePatternsWithoutSrc = [
@@ -24,6 +25,7 @@ const productionEntryFilePatternsWithoutSrc = [
   'pages/**/*.{js,jsx,ts,tsx}',
 ];
 
+/** @public */
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   ...productionEntryFilePatternsWithoutSrc,
   ...productionEntryFilePatternsWithoutSrc.map(pattern => `src/${pattern}`),

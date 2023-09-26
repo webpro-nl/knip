@@ -14,6 +14,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['**/test/*.{js,cjs,mjs}'];
 
 const findMochaDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {

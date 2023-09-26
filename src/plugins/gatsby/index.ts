@@ -16,6 +16,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['gatsby-{config,node}.{js,jsx,ts,tsx}'];
 
+/** @public */
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'gatsby-{browser,ssr}.{js,jsx,ts,tsx}',
   'src/api/**/*.{js,ts}',

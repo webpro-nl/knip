@@ -14,6 +14,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ manifest }) => {
   return Boolean(manifest.scripts?.test && /node.+--test/.test(manifest.scripts?.test));
 };
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = [
   '**/test.{js,cjs,mjs}',
   '**/test-*.{js,cjs,mjs}',
