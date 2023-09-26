@@ -9,8 +9,8 @@ test('Find dependencies in Storybook configuration (main.js)', async () => {
   const configFilePath = join(cwd, 'main.js');
   const dependencies = await storybook.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, [
-    'e:.storybook/preview.{js,jsx,ts,tsx}',
-    'e:**/*.stories.{js,jsx,ts,tsx}',
+    'entry:.storybook/preview.{js,jsx,ts,tsx}',
+    'entry:**/*.stories.{js,jsx,ts,tsx}',
     '@storybook/addon-essentials',
     '@storybook/addon-a11y',
     '@storybook/addon-knobs/preset',

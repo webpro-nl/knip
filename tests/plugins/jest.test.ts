@@ -11,9 +11,9 @@ test('Find dependencies in Jest configuration (jest.config.js)', async () => {
   const configFilePath = join(cwd, 'jest.config.js');
   const dependencies = await jest.findDependencies(configFilePath, { cwd });
   assert.deepEqual(dependencies, [
-    `e:${join(cwd, '**/*-test.[jt]s?(x)')}`,
+    'entry:**/*-test.[jt]s?(x)',
     './local-preset/jest-preset.js',
-    `e:${join(cwd, '**/*.js')}`,
+    'entry:**/*.js',
     'jest-runner-eslint',
     'jest-environment-jsdom',
     'jest-silent-reporter',

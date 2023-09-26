@@ -10,11 +10,11 @@ const manifest = getManifest(cwd);
 test('Find dependencies in ava configuration (package.json)', async () => {
   const configFilePath = join(cwd, 'package.json');
   const dependencies = await ava.findDependencies(configFilePath, { cwd, manifest });
-  assert.deepEqual(dependencies, ['e:**/*.test.*', 'ts-node']);
+  assert.deepEqual(dependencies, ['entry:**/*.test.*', 'ts-node']);
 });
 
 test('Find dependencies in ava configuration (ava.config.mjs)', async () => {
   const configFilePath = join(cwd, 'ava.config.mjs');
   const dependencies = await ava.findDependencies(configFilePath, { cwd, manifest });
-  assert.deepEqual(dependencies, ['e:**/*.test.*', 'tsconfig-paths']);
+  assert.deepEqual(dependencies, ['entry:**/*.test.*', 'tsconfig-paths']);
 });
