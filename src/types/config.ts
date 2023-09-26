@@ -12,13 +12,13 @@ type NormalizedGlob = string[];
 
 export type PluginName = keyof typeof Plugins;
 
-export type PluginConfiguration =
-  | {
-      config: NormalizedGlob | null;
-      entry: NormalizedGlob | null;
-      project: NormalizedGlob | null;
-    }
-  | false;
+export type EnsuredPluginConfiguration = {
+  config: NormalizedGlob | null;
+  entry: NormalizedGlob | null;
+  project: NormalizedGlob | null;
+};
+
+export type PluginConfiguration = EnsuredPluginConfiguration | false;
 
 export type PluginsConfiguration = Record<PluginName, PluginConfiguration>;
 
