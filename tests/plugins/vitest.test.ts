@@ -34,6 +34,7 @@ test('Find dependencies in vitest configuration', async () => {
     cwd,
   });
 
+  assert(issues.unlisted['vitest.workspace.ts']['@edge-runtime/vm']);
   assert(issues.unlisted['vitest.config.ts']['happy-dom']);
   assert(issues.unlisted['vitest.config.ts']['@vitest/coverage-istanbul']);
   assert(issues.unresolved['vitest.config.ts']['./setup.js']);
@@ -41,9 +42,9 @@ test('Find dependencies in vitest configuration', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
-    unlisted: 2,
+    unlisted: 3,
     unresolved: 1,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });

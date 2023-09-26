@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "vitest": {
-    "config": ["vitest.config.ts"]
+    "config": ["vitest.config.ts", "vitest.{workspace,projects}.{ts,js,json}"]
   }
 }
 ```

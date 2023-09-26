@@ -2,7 +2,7 @@ import { compact } from '../../util/array.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
-import type { VitestConfig } from './types.js';
+import type { VitestConfig, VitestWorkspaceConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://vitest.dev/config/
@@ -14,7 +14,7 @@ export const ENABLERS = ['vitest'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['vitest.config.ts'];
+export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vitest.{workspace,projects}.{ts,js,json}'];
 
 // `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
 export const ENTRY_FILE_PATTERNS = [];
@@ -30,8 +30,20 @@ export const findVitestDeps = (config: VitestConfig) => {
   return compact([...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup]);
 };
 
+const findVitestWorkspaceDeps = (config: VitestWorkspaceConfig) => {
+  let deps: string[] = [];
+  for (const cfg of config) {
+    if (typeof cfg === 'string') continue;
+    deps = [...deps, ...findVitestDeps(cfg)];
+  }
+  return compact(deps);
+};
+
 const findVitestDependencies: GenericPluginCallback = async configFilePath => {
-  const config: VitestConfig = await load(configFilePath);
+  const config: VitestConfig | VitestWorkspaceConfig = await load(configFilePath);
+  if (Array.isArray(config)) {
+    return findVitestWorkspaceDeps(config);
+  }
   return findVitestDeps(config);
 };
 
