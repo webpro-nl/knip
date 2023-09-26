@@ -3,7 +3,7 @@
   "entry": ["src/{index,cli}.ts!"],
   "project": ["src/**/*.ts!"],
   "ignore": ["**/fixtures", "**/_template"],
-  "nodeTestRunner": {
+  "node-test-runner": {
     "entry": ["tests/**/*.test.ts"],
     "project": ["tests/**/*.ts"]
   }

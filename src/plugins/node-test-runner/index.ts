@@ -21,8 +21,8 @@ export const ENTRY_FILE_PATTERNS = [
   '**/test/**/*.{js,cjs,mjs}',
 ];
 
-const findNodeTestRunnerDependencies: GenericPluginCallback = async () => {
-  return ENTRY_FILE_PATTERNS.map(toEntryPattern);
+const findNodeTestRunnerDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  return (options.config?.entry ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
 };
 
 export const findDependencies = timerify(findNodeTestRunnerDependencies);
