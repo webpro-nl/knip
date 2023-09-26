@@ -19,7 +19,7 @@ or `devDependencies`:
       "app/**/{error,layout,loading,not-found,page,template}.{js,jsx,ts,tsx}",
       "instrumentation.{js,ts}",
       "app/{manifest,sitemap,robots}.{js,ts}",
-      "app/**/{icon,apple-icon}-image.{js,ts,tsx}",
+      "app/**/{icon,apple-icon}.{js,ts,tsx}",
       "app/**/{opengraph,twitter}-image.{js,ts,tsx}",
       "pages/**/*.{js,jsx,ts,tsx}",
       "src/middleware.{js,ts}",
@@ -27,7 +27,7 @@ or `devDependencies`:
       "src/app/**/{error,layout,loading,not-found,page,template}.{js,jsx,ts,tsx}",
       "src/instrumentation.{js,ts}",
       "src/app/{manifest,sitemap,robots}.{js,ts}",
-      "src/app/**/{icon,apple-icon}-image.{js,ts,tsx}",
+      "src/app/**/{icon,apple-icon}.{js,ts,tsx}",
       "src/app/**/{opengraph,twitter}-image.{js,ts,tsx}",
       "src/pages/**/*.{js,jsx,ts,tsx}"
     ]
