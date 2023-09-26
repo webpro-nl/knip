@@ -21,7 +21,7 @@ import {
 import { dirname, isInNodeModules, join, isInternal, toAbsolute } from './util/path.js';
 import { _resolveSpecifier, _tryResolve } from './util/require.js';
 import { _require } from './util/require.js';
-import { loadTSConfig as loadCompilerOptions } from './util/tsconfig-loader.js';
+import { loadTSConfig } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -140,7 +140,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies, ignoreBinaries });
 
-    const compilerOptions = await loadCompilerOptions(join(dir, tsConfigFile ?? 'tsconfig.json'));
+    const { compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
     const principal = factory.getPrincipal({ cwd: dir, paths, compilerOptions, compilers, pkgName });
 
@@ -158,6 +158,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     });
 
     await worker.init();
+
+    principal.addEntryPaths(definitionPaths);
+    debugLogArray(`Found definition paths (${name})`, definitionPaths);
 
     const sharedGlobOptions = { cwd, workingDir: dir, gitignore, ignore: worker.getIgnorePatterns() };
 

@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/subpath-import-from-plugin');
 
-test('Allows subpath-imports', async () => {
+test('Allows subpath-imports from plugin', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -18,12 +18,12 @@ test('Allows subpath-imports', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });
 
-test('Allows subpath-imports (production)', async () => {
+test('Allows subpath-imports from plugin (production)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -35,12 +35,12 @@ test('Allows subpath-imports (production)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });
 
-test('Allows subpath-imports (strict)', async () => {
+test('Allows subpath-imports from plugin (strict)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -53,7 +53,7 @@ test('Allows subpath-imports (strict)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });

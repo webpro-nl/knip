@@ -256,6 +256,10 @@
           "title": "Cypress plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/cypress/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "drizzle": {
+          "title": "Drizzle plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/drizzle/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "eslint": {
           "title": "ESLint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/eslint/README.md)",
           "$ref": "#/definitions/plugin"
@@ -310,6 +314,10 @@
         },
         "playwright": {
           "title": "Playwright plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/playwright/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
+        "playwright-ct": {
+          "title": "Playwright for components plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/playwright-ct/README.md)",
           "$ref": "#/definitions/plugin"
         },
         "postcss": {

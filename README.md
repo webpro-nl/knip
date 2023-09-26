@@ -253,6 +253,7 @@ Knip contains a growing list of plugins:
 - [commitlint][plugin-commitlint]
 - [cspell][plugin-cspell]
 - [Cypress][plugin-cypress]
+- [Drizzle][plugin-drizzle]
 - [ESLint][plugin-eslint]
 - [Gatsby][plugin-gatsby]
 - [GitHub Actions][plugin-github-actions]
@@ -890,6 +891,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [plugin-commitlint]: ./src/plugins/commitlint
 [plugin-cspell]: ./src/plugins/cspell
 [plugin-cypress]: ./src/plugins/cypress
+[plugin-drizzle]: ./src/plugins/drizzle
 [plugin-eslint]: ./src/plugins/eslint
 [plugin-gatsby]: ./src/plugins/gatsby
 [plugin-github-actions]: ./src/plugins/github-actions
