@@ -8,6 +8,8 @@ export const NAME = 'ESLint';
 /** @public */
 export const ENABLERS = ['eslint'];
 
+export const PACKAGE_JSON_PATH = 'eslintConfig';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest, config }) =>
   hasDependency(dependencies, ENABLERS) ||
   'eslint' in config ||

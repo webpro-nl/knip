@@ -10,6 +10,8 @@ export const NAME = 'npm-package-json-lint';
 /** @public */
 export const ENABLERS = ['npm-package-json-lint'];
 
+export const PACKAGE_JSON_PATH = 'npmpackagejsonlint';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = ['.npmpackagejsonlintrc.json', 'npmpackagejsonlint.config.js', 'package.json'];
@@ -20,7 +22,7 @@ const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (
 ) => {
   if (isProduction) return [];
   const config: NpmPkgJsonLintConfig = configFilePath.endsWith('package.json')
-    ? manifest.npmpackagejsonlint
+    ? manifest[PACKAGE_JSON_PATH]
     : await load(configFilePath);
   return config?.extends ? [config.extends] : [];
 };

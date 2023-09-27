@@ -10,6 +10,8 @@ export const NAME = 'TypeDoc';
 /** @public */
 export const ENABLERS = ['typedoc'];
 
+export const PACKAGE_JSON_PATH = 'typedocOptions';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [
@@ -25,7 +27,7 @@ const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, { 
   if (isProduction) return [];
 
   const config: PluginConfig = configFilePath.endsWith('package.json')
-    ? manifest.typedocOptions
+    ? manifest[PACKAGE_JSON_PATH]
     : configFilePath.endsWith('tsconfig.json')
     ? (await load(configFilePath)).typedocOptions
     : await load(configFilePath);

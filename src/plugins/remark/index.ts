@@ -13,6 +13,8 @@ export const NAME = 'Remark';
 /** @public */
 export const ENABLERS = ['remark-cli'];
 
+export const PACKAGE_JSON_PATH = 'remarkConfig';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [
@@ -27,7 +29,7 @@ const findRemarkDependencies: GenericPluginCallback = async (configFilePath, { m
   if (isProduction) return [];
 
   const config: RemarkConfig = configFilePath.endsWith('package.json')
-    ? manifest.remarkConfig
+    ? manifest[PACKAGE_JSON_PATH]
     : await load(configFilePath);
 
   if (!config) return [];

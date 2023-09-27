@@ -10,6 +10,8 @@ export const NAME = 'Commitizen';
 /** @public */
 export const ENABLERS = ['commitizen'];
 
+export const PACKAGE_JSON_PATH = 'config.commitizen';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = ['.czrc', '.cz.json', 'package.json'];

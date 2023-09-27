@@ -2,7 +2,7 @@ import * as npm from './manifest/index.js';
 import * as plugins from './plugins/index.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
-import { getKeysByValue } from './util/object.js';
+import { get, getKeysByValue } from './util/object.js';
 import { join, toPosix } from './util/path.js';
 import {
   fromEntryPattern,
@@ -240,13 +240,21 @@ export class WorkspaceWorker {
           if (!pluginConfig) continue;
 
           const patterns = this.getConfigurationFilePatterns(pluginName);
-          const configFilePaths = await _pureGlob({ patterns, cwd, ignore, gitignore: false });
+          const allConfigFilePaths = await _pureGlob({ patterns, cwd, ignore, gitignore: false });
+
+          const configFilePaths = allConfigFilePaths.filter(
+            filePath =>
+              !filePath.endsWith('package.json') ||
+              get(this.manifest, 'PACKAGE_JSON_PATH' in plugin ? plugin.PACKAGE_JSON_PATH : pluginName)
+          );
 
           debugLogArray(`Found ${plugin.NAME} config file paths`, configFilePaths);
 
-          // TODO Fix up
+          // Bail out, no config files found for this plugin
           if (patterns.length > 0 && configFilePaths.length === 0) continue;
-          if (patterns.length === 0 && configFilePaths.length === 0) configFilePaths.push('fake');
+
+          // Plugin has no config files configured, call it once to still get the entry:/production: patterns
+          if (patterns.length === 0) configFilePaths.push('__FAKE__');
 
           const pluginDependencies: Set<string> = new Set();
 
