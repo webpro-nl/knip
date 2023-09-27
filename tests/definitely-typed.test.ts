@@ -17,7 +17,7 @@ test('Find unused DT @types', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
+    devDependencies: 2,
     processed: 1,
     total: 1,
   });

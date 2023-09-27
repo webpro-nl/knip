@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/types",
+  "scripts": {
+    "pack": "webpack"
+  },
+  "devDependencies": {
+    "micromatch": "*",
+    "webpack": "*",
+    "@types/micromatch": "*",
+    "@types/webpack": "*"
+  }
+}
