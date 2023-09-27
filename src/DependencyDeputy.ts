@@ -28,6 +28,7 @@ export class DependencyDeputy {
   referencedBinaries: Map<string, Set<string>>;
   hostDependencies: Map<string, HostDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
+  hasTypesIncluded: Map<string, Set<string>>;
   ignoreBinaries: string[] = [];
   ignoreDependencies: string[] = [];
 
@@ -37,6 +38,7 @@ export class DependencyDeputy {
     this.referencedBinaries = new Map();
     this.hostDependencies = new Map();
     this.installedBinaries = new Map();
+    this.hasTypesIncluded = new Map();
   }
 
   public addWorkspace({
@@ -109,6 +111,14 @@ export class DependencyDeputy {
   }
 
   getInstalledBinaries(workspaceName: string) {
+    return this.installedBinaries.get(workspaceName);
+  }
+
+  setHasTypesIncluded(workspaceName: string, hasTypesIncluded: Set<string>) {
+    this.hasTypesIncluded.set(workspaceName, hasTypesIncluded);
+  }
+
+  getHasTypesIncluded(workspaceName: string) {
     return this.installedBinaries.get(workspaceName);
   }
 
@@ -217,6 +227,7 @@ export class DependencyDeputy {
     for (const [workspaceName, { manifestPath, ignoreDependencies, ignoreBinaries }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspaceName);
       const installedBinaries = this.getInstalledBinaries(workspaceName);
+      const hasTypesIncluded = this.getHasTypesIncluded(workspaceName);
       const ignoreBins = [...IGNORED_GLOBAL_BINARIES, ...this.ignoreBinaries, ...ignoreBinaries];
       const ignoreDeps = [...IGNORED_DEPENDENCIES, ...this.ignoreDependencies, ...ignoreDependencies];
 
@@ -244,6 +255,9 @@ export class DependencyDeputy {
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === '@types') {
+          // The `pkg` dependency already has types included, i.e. this `@types/pkg` is obsolete
+          if (hasTypesIncluded?.has(typedDependency)) return false;
+
           const typedPackageName = getPackageFromDefinitelyTyped(typedDependency);
           // Ignore `@types/*` packages that don't have a related dependency (e.g. `@types/node`)
           if (IGNORE_DEFINITELY_TYPED.includes(typedPackageName)) return true;

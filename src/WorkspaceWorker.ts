@@ -56,6 +56,7 @@ export class WorkspaceWorker {
   referencedDependencies: ReferencedDependencies = new Set();
   hostDependencies: HostDependencies = new Map();
   installedBinaries: InstalledBinaries = new Map();
+  hasTypesIncluded: Set<string> = new Set();
   entryFilePatterns: Set<string> = new Set();
   productionEntryFilePatterns: Set<string> = new Set();
 
@@ -120,7 +121,7 @@ export class WorkspaceWorker {
   }
 
   private async initReferencedDependencies() {
-    const { dependencies, hostDependencies, installedBinaries } = await npm.findDependencies({
+    const { dependencies, hostDependencies, installedBinaries, hasTypesIncluded } = await npm.findDependencies({
       manifest: this.manifest,
       isProduction: this.isProduction,
       isStrict: this.isStrict,
@@ -132,6 +133,7 @@ export class WorkspaceWorker {
     dependencies.forEach(dependency => this.referencedDependencies.add([filePath, dependency]));
     this.hostDependencies = hostDependencies;
     this.installedBinaries = installedBinaries;
+    this.hasTypesIncluded = hasTypesIncluded;
   }
 
   private getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
@@ -291,6 +293,7 @@ export class WorkspaceWorker {
       hostDependencies: this.hostDependencies,
       installedBinaries: this.installedBinaries,
       referencedDependencies: this.referencedDependencies,
+      hasTypesIncluded: this.hasTypesIncluded,
       enabledPlugins: this.enabledPlugins,
       entryFilePatterns: Array.from(this.entryFilePatterns),
       productionEntryFilePatterns: Array.from(this.productionEntryFilePatterns),

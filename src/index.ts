@@ -175,6 +175,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       referencedDependencies,
       hostDependencies,
       installedBinaries,
+      hasTypesIncluded,
       enabledPlugins,
       entryFilePatterns,
       productionEntryFilePatterns,
@@ -182,6 +183,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     deputy.addHostDependencies(name, hostDependencies);
     deputy.setInstalledBinaries(name, installedBinaries);
+    deputy.setHasTypesIncluded(name, hasTypesIncluded);
     enabledPluginsStore.set(name, enabledPlugins);
 
     referencedDependencies.forEach(([containingFilePath, specifier]) => {

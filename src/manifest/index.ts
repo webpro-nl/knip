@@ -1,4 +1,5 @@
 import { _getDependenciesFromScripts } from '../binaries/index.js';
+import { isDefinitelyTyped } from '../util/modules.js';
 import { timerify } from '../util/Performance.js';
 import { getPackageManifest } from './helpers.js';
 import type { InstalledBinaries, HostDependencies } from '../types/workspace.js';
@@ -27,6 +28,8 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
 
   // Find all binaries for each dependency
   const installedBinaries: InstalledBinaries = new Map();
+
+  const hasTypesIncluded = new Set<string>();
 
   const packageNames = [
     ...Object.keys(manifest.dependencies ?? {}),
@@ -62,6 +65,8 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
           hostDependencies.set(packagePeerDependency, new Set([packageName]));
         }
       });
+
+      if (!isDefinitelyTyped(packageName) && (manifest.types || manifest.typings)) hasTypesIncluded.add(packageName);
     }
   }
 
@@ -69,6 +74,7 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
     dependencies,
     hostDependencies,
     installedBinaries,
+    hasTypesIncluded,
   };
 };
 
