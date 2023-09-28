@@ -24,6 +24,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'cd',
   'chmod',
   'cp',
+  'curl',
   'deno',
   'dirname',
   'echo',
