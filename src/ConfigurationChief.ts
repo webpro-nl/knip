@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import mapWorkspaces from '@npmcli/map-workspaces';
+import { createPkgGraph } from '@pnpm/workspace.pkgs-graph';
 import micromatch from 'micromatch';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS } from './constants.js';
@@ -8,7 +9,7 @@ import * as plugins from './plugins/index.js';
 import { arrayify, compact } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { partitionCompilers } from './util/compilers.js';
-import { ConfigurationError } from './util/errors.js';
+import { ConfigurationError, LoaderError } from './util/errors.js';
 import { findFile, loadJSON } from './util/fs.js';
 import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
@@ -16,6 +17,7 @@ import { _load } from './util/loader.js';
 import { getKeysByValue } from './util/object.js';
 import { join, relative, toPosix } from './util/path.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
+import { _require } from './util/require.js';
 import { byPathDepth } from './util/workspace.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type {
@@ -26,7 +28,7 @@ import type {
   PluginsConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { PackageJson } from '@npmcli/package-json';
+import type { PackageJsonWithPlugins } from './types/plugins.js';
 
 const {
   config: rawConfigArg,
@@ -81,6 +83,8 @@ export type Workspace = {
   dir: string;
   ancestors: string[];
   config: WorkspaceConfiguration;
+  manifestPath: string;
+  manifest: PackageJsonWithPlugins;
 };
 
 /**
@@ -97,13 +101,15 @@ export class ConfigurationChief {
   config: Configuration;
 
   manifestPath?: string;
-  manifest?: PackageJson;
+  manifest?: PackageJsonWithPlugins;
 
   ignoredWorkspacePatterns: string[] = [];
   manifestWorkspaces: Map<string, string> = new Map();
   additionalWorkspaceNames: Set<string> = new Set();
   availableWorkspaceNames: string[] = [];
   availableWorkspaceDirs: string[] = [];
+  availableWorkspaceManifests: { dir: string; manifest: PackageJsonWithPlugins }[] = [];
+  workspacesGraph: ReturnType<typeof createPkgGraph> | undefined;
   enabledWorkspaces: Workspace[] = [];
   localWorkspaces: Set<string> = new Set();
 
@@ -251,6 +257,9 @@ export class ConfigurationChief {
       .sort(byPathDepth)
       .reverse()
       .map(dir => join(this.cwd, dir));
+
+    this.availableWorkspaceManifests = this.getAvailableWorkspaceManifests(this.availableWorkspaceDirs);
+    this.workspacesGraph = createPkgGraph(this.availableWorkspaceManifests);
     this.enabledWorkspaces = this.getEnabledWorkspaces();
     this.localWorkspaces = new Set(compact(this.enabledWorkspaces.map(w => w.pkgName)));
   }
@@ -304,6 +313,14 @@ export class ConfigurationChief {
     );
   }
 
+  private getAvailableWorkspaceManifests(availableWorkspaceDirs: string[]) {
+    return availableWorkspaceDirs.map(dir => {
+      const manifest: PackageJsonWithPlugins = _require(join(dir, 'package.json'));
+      if (!manifest) throw new LoaderError(`Unable to load package.json for ${dir}`);
+      return { dir, manifest };
+    });
+  }
+
   private getEnabledWorkspaces() {
     if (workspaceArg && !existsSync(workspaceArg)) {
       throw new ConfigurationError(`Directory does not exist: ${workspaceArg}`);
@@ -322,15 +339,34 @@ export class ConfigurationChief {
         ]
       : this.availableWorkspaceNames;
 
-    return workspaceNames.sort(byPathDepth).map(
-      (name): Workspace => ({
+    const graph = this.workspacesGraph;
+
+    function getDeps(dir: string): string[] {
+      const node = graph?.graph[dir];
+      return [dir, ...(node?.dependencies ?? []), ...(node?.dependencies.flatMap(getDeps) ?? [])];
+    }
+
+    const workspaceNamesWithDependencies = workspaceArg
+      ? compact(
+          workspaceNames
+            .map(name => join(this.cwd, name))
+            .flatMap(getDeps)
+            .map(dir => relative(this.cwd, dir))
+        )
+      : workspaceNames;
+
+    return workspaceNamesWithDependencies.sort(byPathDepth).map((name): Workspace => {
+      const dir = join(this.cwd, name);
+      return {
         name,
         pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name ?? `NOT_FOUND_${name}`,
-        dir: join(this.cwd, name),
+        dir,
         config: this.getConfigForWorkspace(name),
         ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
-      })
-    );
+        manifestPath: join(dir, 'package.json'),
+        manifest: this.availableWorkspaceManifests?.find(item => item.dir === dir)?.manifest ?? {},
+      };
+    });
   }
 
   public getWorkspaces() {

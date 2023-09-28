@@ -3,15 +3,12 @@ import { _getDependenciesFromScripts } from './binaries/index.js';
 import { fromBinary, isBinary } from './binaries/util.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
-import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
-import { LoaderError } from './util/errors.js';
-import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
 import {
   getEntryPathFromManifest,
@@ -20,7 +17,6 @@ import {
 } from './util/modules.js';
 import { dirname, isInNodeModules, join, isInternal, toAbsolute } from './util/path.js';
 import { _resolveSpecifier, _tryResolve } from './util/require.js';
-import { _require } from './util/require.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { Workspace } from './ConfigurationChief.js';
@@ -126,17 +122,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   for (const workspace of workspaces) {
-    const { name, dir, config, ancestors, pkgName } = workspace;
+    const { name, dir, config, ancestors, pkgName, manifestPath, manifest } = workspace;
     const { paths, ignoreDependencies, ignoreBinaries } = config;
 
-    const isRoot = name === ROOT_WORKSPACE_NAME;
-
     streamer.cast(`Analyzing workspace (${name})...`);
-
-    const manifestPath = isRoot ? chief.manifestPath : findFile(dir, 'package.json');
-    const manifest = isRoot ? chief.manifest : manifestPath && _require(manifestPath);
-
-    if (!manifestPath || !manifest) throw new LoaderError(`Unable to load package.json for ${name}`);
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies, ignoreBinaries });
 

@@ -1,10 +1,11 @@
 {
   "name": "@workspaces/shared",
+  "version": "1.0.0",
   "main": "./index.js",
   "scripts": {
     "e2e": "cypress"
   },
   "devDependencies": {
-    "@workspaces/tsconfig": "*"
+    "@workspaces/tsconfig": "1.0.0"
   }
 }

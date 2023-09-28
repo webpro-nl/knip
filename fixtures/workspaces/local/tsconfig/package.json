@@ -1,3 +1,4 @@
 {
-  "name": "@workspaces/tsconfig"
+  "name": "@workspaces/tsconfig",
+  "version": "1.0.0"
 }
