@@ -11,6 +11,8 @@ export const NAME = 'lint-staged';
 /** @public */
 export const ENABLERS = ['lint-staged'];
 
+export const PACKAGE_JSON_PATH = 'lint-staged';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [
