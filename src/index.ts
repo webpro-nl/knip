@@ -1,15 +1,20 @@
 import micromatch from 'micromatch';
-import { _getDependenciesFromScripts } from './binaries/index.js';
-import { fromBinary, isBinary } from './binaries/util.js';
+import type { Workspace } from './ConfigurationChief.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
-import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
+import { WorkspaceWorker } from './WorkspaceWorker.js';
+import { _getDependenciesFromScripts } from './binaries/index.js';
+import { fromBinary, isBinary } from './binaries/util.js';
+import { ROOT_WORKSPACE_NAME } from './constants.js';
+import type { CommandLineOptions } from './types/cli.js';
+import type { ExportItem, Exports } from './types/exports.js';
+import type { ImportedModule, Imports } from './types/imports.js';
 import { compact } from './util/array.js';
-import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
+import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { LoaderError } from './util/errors.js';
 import { findFile } from './util/fs.js';
 import { _glob } from './util/glob.js';
@@ -18,15 +23,9 @@ import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
 } from './util/modules.js';
-import { dirname, isInNodeModules, join, isInternal, toAbsolute } from './util/path.js';
-import { _resolveSpecifier, _tryResolve } from './util/require.js';
-import { _require } from './util/require.js';
+import { dirname, isInNodeModules, isInternal, join, toAbsolute } from './util/path.js';
+import { _require, _resolveSpecifier, _tryResolve } from './util/require.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
-import { WorkspaceWorker } from './WorkspaceWorker.js';
-import type { Workspace } from './ConfigurationChief.js';
-import type { CommandLineOptions } from './types/cli.js';
-import type { ExportItem, Exports } from './types/exports.js';
-import type { ImportedModule, Imports } from './types/imports.js';
 
 type HandleReferencedDependencyOptions = {
   specifier: string;
@@ -370,6 +369,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     );
   };
 
+  const isInternallyReferenced = (principal: ProjectPrincipal, exportedItem: ExportItem, filePath: string) => {
+    const hasReferences = principal.getHasReferences(filePath, exportedItem);
+    return hasReferences.internal;
+  };
+
+
   if (isReportValues || isReportTypes) {
     streamer.cast('Analyzing source files...');
 
@@ -414,15 +419,16 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           const isStar = Boolean(importingModule?.isStar);
           const isReExportedByEntryFile =
             !isIncludeEntryExports && isStar && isExportedInEntryFile(principal, importingModule);
+          const isInternal = isInternallyReferenced(principal, exportedItem, filePath);
 
           if (!isReExportedByEntryFile && !isExportedItemReferenced(principal, exportedItem, filePath)) {
             if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
               if (isProduction) continue;
               const type = isStar ? 'nsTypes' : 'types';
-              collector.addIssue({ type, filePath, symbol, symbolType: exportedItem.type });
+              collector.addIssue({ type, filePath, symbol, symbolType: exportedItem.type, usedInModule: isInternal });
             } else {
               const type = isStar ? 'nsExports' : 'exports';
-              collector.addIssue({ type, filePath, symbol });
+              collector.addIssue({ type, filePath, symbol, usedInModule: isInternal });
             }
           }
         }

@@ -16,6 +16,7 @@ export type Issue = {
   symbolType?: SymbolType;
   parentSymbol?: string;
   severity?: IssueSeverity;
+  usedInModule?: boolean
 };
 
 export type IssueSet = Set<string>;
