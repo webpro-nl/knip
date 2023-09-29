@@ -13,7 +13,10 @@ export const ENABLERS = ['gatsby', 'gatsby-cli'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['gatsby-{config,node}.{js,jsx,ts,tsx}'];
+export const CONFIG_FILE_PATTERNS = [
+  'gatsby-{config,node}.{js,jsx,ts,tsx}',
+  'plugins/**/gatsby-node.{js,jsx,ts,tsx}',
+];
 
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'gatsby-{browser,ssr}.{js,jsx,ts,tsx}',
@@ -21,6 +24,7 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'src/pages/**/*.{js,jsx,ts,tsx}',
   'src/templates/**/*.{js,jsx,ts,tsx}',
   'src/html.{js,jsx,ts,tsx}',
+  'plugins/**/gatsby-{browser,ssr}.{js,jsx,ts,tsx}',
 ];
 
 const findGatsbyDependencies: GenericPluginCallback = async configFilePath => {
