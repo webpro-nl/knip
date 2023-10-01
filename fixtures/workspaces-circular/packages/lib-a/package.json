@@ -1,0 +1,8 @@
+{
+  "name": "@workspaces-circular/lib-a",
+  "version": "1.0.0",
+  "dependencies": {
+    "@workspaces-circular/lib-b": "1.0.0",
+    "@workspaces-circular/lib-c": "1.0.0"
+  }
+}

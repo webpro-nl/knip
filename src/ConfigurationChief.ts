@@ -333,40 +333,43 @@ export class ConfigurationChief {
     };
 
     const workspaceNames = workspaceArg
-      ? [
-          ...this.availableWorkspaceNames.reduce(getAncestors(workspaceArg), []),
-          ...this.availableWorkspaceNames.filter(name => name === workspaceArg),
-        ]
+      ? [...this.availableWorkspaceNames.reduce(getAncestors(workspaceArg), []), workspaceArg]
       : this.availableWorkspaceNames;
 
-    const graph = this.workspacesGraph;
+    const graph = this.workspacesGraph?.graph;
+    const ws = new Set<string>();
 
-    function getDeps(dir: string): string[] {
-      const node = graph?.graph[dir];
-      return [dir, ...(node?.dependencies ?? []), ...(node?.dependencies.flatMap(getDeps) ?? [])];
+    if (graph && workspaceArg) {
+      const seen = new Set<string>();
+      const workspaceDirsWithDependants = new Set(workspaceNames.map(name => join(this.cwd, name)));
+      const addDependents = (dir: string) => {
+        seen.add(dir);
+        const deps = graph[dir]?.dependencies ?? [];
+        if (deps.length > 0 && Array.from(workspaceDirsWithDependants).some(dir => deps.includes(dir))) {
+          workspaceDirsWithDependants.add(dir);
+          deps.filter(dir => !seen.has(dir)).forEach(addDependents);
+        }
+      };
+      this.availableWorkspaceNames.map(name => join(this.cwd, name)).forEach(addDependents);
+      workspaceDirsWithDependants.forEach(dir => ws.add(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME));
+    } else {
+      workspaceNames.forEach(name => ws.add(name));
     }
 
-    const workspaceNamesWithDependencies = workspaceArg
-      ? compact(
-          workspaceNames
-            .map(name => join(this.cwd, name))
-            .flatMap(getDeps)
-            .map(dir => relative(this.cwd, dir))
-        )
-      : workspaceNames;
-
-    return workspaceNamesWithDependencies.sort(byPathDepth).map((name): Workspace => {
-      const dir = join(this.cwd, name);
-      return {
-        name,
-        pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name ?? `NOT_FOUND_${name}`,
-        dir,
-        config: this.getConfigForWorkspace(name),
-        ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
-        manifestPath: join(dir, 'package.json'),
-        manifest: this.availableWorkspaceManifests?.find(item => item.dir === dir)?.manifest ?? {},
-      };
-    });
+    return Array.from(ws)
+      .sort(byPathDepth)
+      .map((name): Workspace => {
+        const dir = join(this.cwd, name);
+        return {
+          name,
+          pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name ?? `NOT_FOUND_${name}`,
+          dir,
+          config: this.getConfigForWorkspace(name),
+          ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
+          manifestPath: join(dir, 'package.json'),
+          manifest: this.availableWorkspaceManifests?.find(item => item.dir === dir)?.manifest ?? {},
+        };
+      });
   }
 
   public getWorkspaces() {
