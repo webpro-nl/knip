@@ -2,5 +2,6 @@
   "$schema": "https://unpkg.com/knip@2/schema.json",
   "entry": ["src/{index,cli}.ts!"],
   "project": ["src/**/*.ts!"],
-  "ignore": ["**/fixtures", "**/_template"]
+  "ignore": ["**/fixtures", "**/_template"],
+  "ignoreDependencies": ["@pnpm/logger"]
 }
