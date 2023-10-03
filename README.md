@@ -530,21 +530,21 @@ This example shows more output related to unused and unlisted dependencies:
 
 The report contains the following types of issues:
 
-| Title                               | Description                                     | Key            |
-| :---------------------------------- | :---------------------------------------------- | :------------- |
-| Unused files                        | unable to find references to this file          | `files`        |
-| Unused dependencies                 | unable to find references to this dependency    | `dependencies` |
-| Unused devDependencies              | unable to find references to this devDependency | `dependencies` |
-| Unlisted dependencies               | used dependencies not listed in package.json    | `unlisted`     |
-| Unlisted binaries                   | binaries from deps not listed in package.json   | `binaries`     |
-| Unresolved imports                  | unable to resolve this (import) specifier       | `unresolved`   |
-| Unused exports                      | unable to find references to this export        | `exports`      |
-| Unused exports in namespaces        | unable to find direct references to this export | `nsExports`    |
-| Unused exported types               | unable to find references to this exported type | `types`        |
-| Unused exported types in namespaces | unable to find direct references to this export | `nsTypes`      |
-| Unused exported enum members        | unable to find references to this enum member   | `enumMembers`  |
-| Unused exported class members       | unable to find references to this class member  | `classMembers` |
-| Duplicate exports                   | the same thing is exported more than once       | `duplicates`   |
+| Title                               | Description                                     | Key               |
+| :---------------------------------- | :---------------------------------------------- | :---------------- |
+| Unused files                        | unable to find references to this file          | `files`           |
+| Unused dependencies                 | unable to find references to this dependency    | `dependencies`    |
+| Unused devDependencies              | unable to find references to this devDependency | `devDependencies` |
+| Unlisted dependencies               | used dependencies not listed in package.json    | `unlisted`        |
+| Unlisted binaries                   | binaries from deps not listed in package.json   | `binaries`        |
+| Unresolved imports                  | unable to resolve this (import) specifier       | `unresolved`      |
+| Unused exports                      | unable to find references to this export        | `exports`         |
+| Unused exports in namespaces        | unable to find direct references to this export | `nsExports`       |
+| Unused exported types               | unable to find references to this exported type | `types`           |
+| Unused exported types in namespaces | unable to find direct references to this export | `nsTypes`         |
+| Unused exported enum members        | unable to find references to this enum member   | `enumMembers`     |
+| Unused exported class members       | unable to find references to this class member  | `classMembers`    |
+| Duplicate exports                   | the same thing is exported more than once       | `duplicates`      |
 
 When an issue type has zero issues, it is not shown.
 
