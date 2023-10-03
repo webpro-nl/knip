@@ -80,7 +80,9 @@ For updates or questions, come hang out in [The Knip Barn (Discord)][10], or fol
 
 ### Installation
 
-    npm install -D knip
+```
+npm install -D knip
+```
 
 Knip supports LTS versions of Node.js, and currently requires at least Node.js v16.17 or v18.6.
 
@@ -445,7 +447,9 @@ In a more fine-grained manner, you can also ignore only specific issue types:
 
 When a repository is self-contained or private, you may want to include entry files when reporting unused exports:
 
-    knip --include-entry-exports
+```
+knip --include-entry-exports
+```
 
 Knip will also report unused exports in entry source files and scripts (such as those referenced in `package.json`). But
 not in entry and configuration files from plugins, such as `next.config.js` or `src/routes/+page.svelte`.
@@ -587,12 +591,16 @@ Alternatively, they can be added to the configuration (e.g. `"exclude": ["depend
 
 Use `--include` to report only specific issue types (the following example commands do the same):
 
-    knip --include files --include dependencies
-    knip --include files,dependencies
+```
+knip --include files --include dependencies
+knip --include files,dependencies
+```
 
 Use `--exclude` to ignore reports you're not interested in:
 
-    knip --include files --exclude classMembers,enumMembers
+```
+knip --include files --exclude classMembers,enumMembers
+```
 
 Use `--dependencies` or `--exports` as shortcuts to combine groups of related types.
 
@@ -660,7 +668,8 @@ Knip takes the following JSDoc/TSDoc tags into account:
 
 ## Command Line Options
 
-    $ npx knip --help
+```
+$ npx knip --help
     ✂️  Find unused files, dependencies and exports in your JavaScript and TypeScript projects
 
     Usage: knip [options]
@@ -704,6 +713,7 @@ Knip takes the following JSDoc/TSDoc tags into account:
     $ knip --debug --debug-file-filter '(specific|particular)-module'
 
     More documentation and bug reports: https://github.com/webpro/knip
+```
 
 ## Potential boost with `--no-gitignore`
 
@@ -739,15 +749,19 @@ Below some similar commands to get another idea of what Knip does in comparison:
 
 The following commands are similar:
 
-    depcheck
-    knip --dependencies
+```
+depcheck
+knip --dependencies
+```
 
 ### unimported
 
 The following commands are similar:
 
-    unimported
-    knip --production --dependencies --include files
+```
+unimported
+knip --production --dependencies --include files
+```
 
 Also see [production mode][25].
 
@@ -755,17 +769,21 @@ Also see [production mode][25].
 
 The following commands are similar:
 
-    ts-unused-exports
-    knip --include exports,types,nsExports,nsTypes
-    knip --exports  # Adds unused enum and class members
+```
+ts-unused-exports
+knip --include exports,types,nsExports,nsTypes
+knip --exports  # Adds unused enum and class members
+```
 
 ### ts-prune
 
 The following commands are similar:
 
-    ts-prune
-    knip --include exports,types
-    knip --exports  # Adds unused exports/types in namespaces and unused enum/class members
+```
+ts-prune
+knip --include exports,types
+knip --exports  # Adds unused exports/types in namespaces and unused enum/class members
+```
 
 ## Projects using Knip
 
