@@ -61,19 +61,27 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const workspaces = chief.getWorkspaces();
   const report = chief.getIssueTypesToReport();
   const rules = chief.getRules();
+  const filters = chief.getFilters();
 
   const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
 
-  const collector = new IssueCollector({ cwd, rules });
+  const collector = new IssueCollector({ cwd, rules, filters });
 
   const enabledPluginsStore: Map<string, string[]> = new Map();
 
   // TODO Organize better
   deputy.addIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
 
-  debugLogObject('Included workspaces', workspaces);
+  debugLogObject(
+    'Included workspaces',
+    workspaces.map(w => w.pkgName)
+  );
+  debugLogObject(
+    'Included workspace configs',
+    workspaces.map(w => ({ name: w.name, pkgName: w.pkgName, config: w.config, ancestors: w.ancestors }))
+  );
 
   const handleReferencedDependency = ({
     specifier,

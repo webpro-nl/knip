@@ -167,6 +167,11 @@ export class ConfigurationChief {
     return this.config.rules;
   }
 
+  public getFilters() {
+    if (this.workspacesGraph?.graph && workspaceArg) return { dir: join(this.cwd, workspaceArg) };
+    return {};
+  }
+
   private normalize(rawLocalConfig: RawConfiguration) {
     const initialWorkspaces = rawLocalConfig.workspaces ?? {
       [ROOT_WORKSPACE_NAME]: {
@@ -341,14 +346,15 @@ export class ConfigurationChief {
 
     if (graph && workspaceArg) {
       const seen = new Set<string>();
-      const workspaceDirsWithDependants = new Set(workspaceNames.map(name => join(this.cwd, name)));
+      const initialWorkspaces = new Set(workspaceNames.map(name => join(this.cwd, name)));
+      const workspaceDirsWithDependants = new Set(initialWorkspaces);
       const addDependents = (dir: string) => {
         seen.add(dir);
         const deps = graph[dir]?.dependencies ?? [];
-        if (deps.length > 0 && Array.from(workspaceDirsWithDependants).some(dir => deps.includes(dir))) {
+        if (deps.length > 0 && Array.from(initialWorkspaces).some(dir => deps.includes(dir))) {
           workspaceDirsWithDependants.add(dir);
-          deps.filter(dir => !seen.has(dir)).forEach(addDependents);
         }
+        deps.filter(dir => !seen.has(dir)).forEach(addDependents);
       };
       this.availableWorkspaceNames.map(name => join(this.cwd, name)).forEach(addDependents);
       workspaceDirsWithDependants.forEach(dir => ws.add(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME));
