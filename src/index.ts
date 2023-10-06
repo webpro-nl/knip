@@ -263,7 +263,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
         for (const [specifierFilePath, importItems] of internal.entries()) {
           const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
-          if (packageName && chief.localWorkspaces.has(packageName)) {
+          if (packageName && chief.availableWorkspacePkgNames.has(packageName)) {
             // Mark "external" imports from other local workspaces as used dependency
             external.add(packageName);
             if (_principal === principal) {

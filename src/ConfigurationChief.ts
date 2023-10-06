@@ -6,7 +6,7 @@ import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS } from './constants.js';
 import { defaultRules } from './issues/initializers.js';
 import * as plugins from './plugins/index.js';
-import { arrayify, compact } from './util/array.js';
+import { arrayify } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { partitionCompilers } from './util/compilers.js';
 import { ConfigurationError, LoaderError } from './util/errors.js';
@@ -107,11 +107,11 @@ export class ConfigurationChief {
   manifestWorkspaces: Map<string, string> = new Map();
   additionalWorkspaceNames: Set<string> = new Set();
   availableWorkspaceNames: string[] = [];
+  availableWorkspacePkgNames: Set<string | undefined> = new Set();
   availableWorkspaceDirs: string[] = [];
   availableWorkspaceManifests: { dir: string; manifest: PackageJsonWithPlugins }[] = [];
   workspacesGraph: ReturnType<typeof createPkgGraph> | undefined;
   enabledWorkspaces: Workspace[] = [];
-  localWorkspaces: Set<string> = new Set();
 
   resolvedConfigFilePath?: string;
 
@@ -264,9 +264,9 @@ export class ConfigurationChief {
       .map(dir => join(this.cwd, dir));
 
     this.availableWorkspaceManifests = this.getAvailableWorkspaceManifests(this.availableWorkspaceDirs);
+    this.availableWorkspacePkgNames = new Set(this.availableWorkspaceManifests.map(w => w.manifest.name));
     this.workspacesGraph = createPkgGraph(this.availableWorkspaceManifests);
     this.enabledWorkspaces = this.getEnabledWorkspaces();
-    this.localWorkspaces = new Set(compact(this.enabledWorkspaces.map(w => w.pkgName)));
   }
 
   private getListedWorkspaces() {
