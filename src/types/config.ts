@@ -44,7 +44,8 @@ export interface Configuration {
   ignoreDependencies: string[];
   ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
   ignoreWorkspaces: string[];
-  workspaces: Record<string, WorkspaceConfiguration>;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
+  defaultWorkspaceConfig: WorkspaceConfiguration;
+  rootPluginConfigs: Partial<PluginsConfiguration>;
 }
