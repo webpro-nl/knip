@@ -38,7 +38,7 @@ type WorkspaceManagerOptions = {
 
 type ReferencedDependencies = Set<[string, string]>;
 
-const nullConfig = { config: null, entry: null, project: null };
+const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
 /**
  * - Determines enabled plugins
@@ -150,7 +150,7 @@ export class WorkspaceWorker {
   }
 
   private getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
-    return this.config[pluginName] ?? nullConfig;
+    return this.config[pluginName] !== true ? this.config[pluginName] ?? nullConfig : nullConfig;
   }
 
   getEntryFilePatterns() {
@@ -277,7 +277,7 @@ export class WorkspaceWorker {
             const dependencies = await plugin.findDependencies(configFilePath, {
               cwd,
               manifest: this.manifest,
-              config: pluginConfig,
+              config: pluginConfig === true ? nullConfig : pluginConfig,
               isProduction: this.isProduction,
             });
 
