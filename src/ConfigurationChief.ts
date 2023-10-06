@@ -108,6 +108,7 @@ export class ConfigurationChief {
 
   resolvedConfigFilePath?: string;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rawConfig?: any;
 
   constructor({ cwd, isProduction }: ConfigurationManagerOptions) {
