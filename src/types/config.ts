@@ -18,7 +18,7 @@ export type PluginConfiguration =
       entry: NormalizedGlob | null;
       project: NormalizedGlob | null;
     }
-  | false;
+  | boolean;
 
 export type PluginsConfiguration = Record<PluginName, PluginConfiguration>;
 

@@ -3,6 +3,9 @@
     "config": ["vitest.config.ts"],
     "entry": ["**/*.vitest.ts"]
   },
+  "eslint": true,
+  "jest": "jest.config.js",
+  "babel": { "config": "rollup.config.ts" },
   "workspaces": {
     "packages/*": {}
   }

@@ -63,7 +63,7 @@ const reportConfigSchema = z.object({
 });
 
 export const pluginSchema = z.union([
-  z.literal(false),
+  z.boolean(),
   globSchema,
   z.object({
     config: globSchema.optional(),
