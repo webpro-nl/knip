@@ -237,7 +237,7 @@ export class ConfigurationChief {
 
     const manifestWorkspaces = new Map();
     for (const [pkgName, dir] of workspaces.entries()) {
-      manifestWorkspaces.set(relative(this.cwd, dir), pkgName);
+      manifestWorkspaces.set(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME, pkgName);
     }
     return manifestWorkspaces;
   }
