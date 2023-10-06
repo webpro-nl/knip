@@ -264,6 +264,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const importedSymbols: Imports = new Map();
 
   for (const principal of principals) {
+    const specifierFilePaths = new Set<string>();
+
     const analyzeSourceFile = (filePath: string, _principal: ProjectPrincipal = principal) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
@@ -283,8 +285,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (workspace) {
                 const principal = factory.getPrincipalByPackageName(workspace.pkgName);
                 if (principal && !principal.isGitIgnored(specifierFilePath)) {
-                  analyzeSourceFile(specifierFilePath, principal);
-                  analyzedFiles.add(specifierFilePath);
+                  // Defer to outside loop to prevent potential duplicate analysis and/or infinite recursion
+                  specifierFilePaths.add(specifierFilePath);
                 }
               }
             }
@@ -349,6 +351,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         analyzedFiles.add(filePath);
       });
     } while (size !== principal.entryPaths.size);
+
+    specifierFilePaths.forEach(specifierFilePath => {
+      if (!analyzedFiles.has(specifierFilePath)) {
+        analyzedFiles.add(specifierFilePath);
+        analyzeSourceFile(specifierFilePath, principal);
+      }
+    });
   }
 
   const isSymbolImported = (symbol: string, importingModule?: ImportedModule): boolean => {

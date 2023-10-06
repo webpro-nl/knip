@@ -2,6 +2,9 @@
   "vitest": {
     "config": ["config/vitest.config.ts"]
   },
+  "eslint": true,
+  "jest": "jest.config.js",
+  "babel": { "config": "rollup.config.ts" },
   "workspaces": {
     "packages/*": {}
   }

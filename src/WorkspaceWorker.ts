@@ -10,7 +10,13 @@ import {
   isEntryPattern,
   isProductionEntryPattern,
 } from './util/protocols.js';
-import type { Configuration, PluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
+import type {
+  Configuration,
+  EnsuredPluginConfiguration,
+  PluginConfiguration,
+  PluginName,
+  WorkspaceConfiguration,
+} from './types/config.js';
 import type { PackageJsonWithPlugins } from './types/plugins.js';
 import type { InstalledBinaries, HostDependencies } from './types/workspace.js';
 import type { Entries } from 'type-fest';
@@ -31,6 +37,8 @@ type WorkspaceManagerOptions = {
 };
 
 type ReferencedDependencies = Set<[string, string]>;
+
+const nullConfig = { config: null, entry: null, project: null };
 
 /**
  * - Determines enabled plugins
@@ -104,6 +112,10 @@ export class WorkspaceWorker {
 
     for (const [pluginName, plugin] of pluginEntries) {
       if (this.config[pluginName] === false) continue;
+      if (this.config[pluginName]) {
+        this.enabled[pluginName] = true;
+        continue;
+      }
       const isEnabledInAncestor = this.enabledPluginsInAncestors.includes(pluginName);
       if (
         isEnabledInAncestor ||
@@ -134,10 +146,11 @@ export class WorkspaceWorker {
     this.hostDependencies = hostDependencies;
     this.installedBinaries = installedBinaries;
     this.hasTypesIncluded = hasTypesIncluded;
+    this.hasTypesIncluded = hasTypesIncluded;
   }
 
   private getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
-    return this.config[pluginName] ?? { config: null, entry: null, project: null };
+    return this.config[pluginName] ?? nullConfig;
   }
 
   getEntryFilePatterns() {
@@ -167,7 +180,7 @@ export class WorkspaceWorker {
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       const pluginConfig = this.getConfigForPlugin(pluginName);
       if (this.enabled[pluginName] && pluginConfig) {
-        const { entry, project } = pluginConfig;
+        const { entry, project } = pluginConfig === true ? nullConfig : pluginConfig;
         patterns.push(...(project ?? entry ?? ('PROJECT_FILE_PATTERNS' in plugin ? plugin.PROJECT_FILE_PATTERNS : [])));
       }
     }
@@ -179,7 +192,7 @@ export class WorkspaceWorker {
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       const pluginConfig = this.getConfigForPlugin(pluginName);
       if (this.enabled[pluginName] && pluginConfig) {
-        const { config } = pluginConfig;
+        const { config } = pluginConfig === true ? nullConfig : pluginConfig;
         const defaultConfigFiles = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
         patterns.push(...(config ?? defaultConfigFiles));
       }
@@ -220,7 +233,7 @@ export class WorkspaceWorker {
     const pluginConfig = this.getConfigForPlugin(pluginName);
     if (pluginConfig) {
       const defaultConfig = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
-      return pluginConfig.config ?? defaultConfig;
+      return (pluginConfig === true ? null : pluginConfig.config) ?? defaultConfig;
     }
     return [];
   }

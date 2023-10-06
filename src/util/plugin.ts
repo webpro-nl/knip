@@ -18,8 +18,8 @@ export const hasDependency = (dependencies: Set<string>, values: (string | RegEx
   });
 
 export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
-  if (pluginConfig === false) {
-    return false;
+  if (typeof pluginConfig === 'boolean') {
+    return pluginConfig;
   } else {
     const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
     const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;

@@ -108,15 +108,17 @@ automatically added to [`ENTRY_FILE_PATTERNS`][12].
 
 The `findDependencies` function should do three things:
 
-1.  Load and execute the provided configuration file.
-2.  Find dependencies referenced in this configuration.
-3.  Return an array of the dependencies.
+1. Load and execute the provided configuration file.
+2. Find dependencies referenced in this configuration.
+3. Return an array of the dependencies.
 
 For example, you are using Cool Linter in your project, and running Knip results in some false positives:
 
-    Unused dependencies (2)
-    @cool-linter/awesome-addon
-    @cool-linter/priority-plugin
+```
+Unused dependencies (2)
+@cool-linter/awesome-addon
+@cool-linter/priority-plugin
+```
 
 This is incorrect, since you have `cool-linter.config.json` that references those dependencies!
 
@@ -205,10 +207,10 @@ Cool Linter does not require such files, so we can remove them from our plugin.
 
 Let's update the tests to verify our plugin implementation is working correctly.
 
-1.  Let's save the example `cool-linter.config.json` in the fixtures directory. Create the file in your IDE, and save it
-    at `fixtures/plugins/cool-linter/cool-linter.config.json`.
+1. Let's save the example `cool-linter.config.json` in the fixtures directory. Create the file in your IDE, and save it
+   at `fixtures/plugins/cool-linter/cool-linter.config.json`.
 
-2.  Update the test at `tests/plugins/cool-linter.test.ts`:
+2. Update the test at `tests/plugins/cool-linter.test.ts`:
 
 ```ts
 test('Find dependencies in cool-linter configuration (json)', async () => {
@@ -220,7 +222,7 @@ test('Find dependencies in cool-linter configuration (json)', async () => {
 
 This verifies the dependencies in `cool-linter.config.json` are correctly returned to the Knip program.
 
-3.  Run the test:
+3. Run the test:
 
 ```sh
 npx tsx tests/plugins/cool-linter.test.ts
