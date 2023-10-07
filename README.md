@@ -311,35 +311,28 @@ unused or missing.
 Other configuration files use `require` or `import` statements to use dependencies, so they don't need special handing
 and can be analyzed like any other source file. That's why these configuration files are also used as `entry` files.
 
-#### Override plugin configuration
+#### Plugin configuration
 
-Usually, no custom configuration is required for plugins, but if your project uses custom file locations then Knip
-allows you to override any defaults. Let's take Cypress for example. By default it uses `cypress.config.js`, but your
-project uses `config/cypress.js`. Also, the default pattern for test files is `cypress/e2e/**/*.cy.js`, but your project
-has them at `e2e-tests/*.spec.ts`. Here's how to configure this:
+Is a plugin not behaving as expected? There are a few options to modify its behavior:
+
+- Disable a plugin by setting its value to `false` (.e.g `"webpack": false`)
+- Force-enable a plugin by setting its value to `true`
+- Override a plugin's `config` or `entry` location, for example:
 
 ```json
 {
-  "cypress": {
-    "entry": ["config/cypress.js", "e2e-tests/*.spec.js"]
+  "mocha": {
+    "config": "config/mocha.config.js",
+    "entry": ["**/*.spec.js"]
   }
 }
 ```
 
-When overriding any plugin's configuration, the options object is fully replaced. Look at the plugin's page to find the
-default configuration and use that as a basis. Here's another example to override the test file pattern for Vitest:
+It's rarely necessary to override the `entry` patterns, since plugins also read custom test file patterns from the
+tooling configuration (e.g. from the `include` option for Vitest or `testMatch` for Playwright).
 
-```json
-{
-  "vitest": {
-    "config": ["vitest.config.ts"],
-    "entry": ["**/*.vitest.ts"]
-  }
-}
-```
-
-This plugin configuration can be set on root and workspace level. If set on root level, it can be disabled on workspace
-level by setting it to `false` there.
+Plugin configuration can be set on root and workspace level. If enabled on root level, it can be disabled on workspace
+level by setting it to `false` there, and vice versa.
 
 #### Multi-project repositories
 
@@ -354,10 +347,6 @@ own Cypress configuration and test files. In that case, we could configure the C
   }
 }
 ```
-
-#### Disable a plugin
-
-In case a plugin causes issues, it can be disabled by using `false` as its value (e.g. `"webpack": false`).
 
 #### Create a new plugin
 
