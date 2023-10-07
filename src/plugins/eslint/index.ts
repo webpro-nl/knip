@@ -16,17 +16,27 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest, con
   Boolean(manifest.name && /(^eslint-config|\/eslint-config)/.test(manifest.name));
 
 // Current: https://eslint.org/docs/latest/user-guide/configuring/configuration-files
-export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
+export const CONFIG_FILE_PATTERNS = [
+  'eslint.config.js',
+  '.eslintrc',
+  '.eslintrc.{js,json,cjs}',
+  '.eslintrc.{yml,yaml}',
+  'package.json',
+];
 
 // New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
 // We can handle eslint.config.js just like other source code (as dependencies are imported)
 /** @public */
-export const ENTRY_FILE_PATTERNS = ['eslint.config.js'];
+export const ENTRY_FILE_PATTERNS = [];
+
+// TODO Handle better. Make separate plugin?
+// export const ENTRY_FILE_PATTERNS = ['eslint.config.js'];
 
 // Note: shareable configs should use `peerDependencies` for plugins
 // https://eslint.org/docs/latest/developer-guide/shareable-configs#publishing-a-shareable-config
 
 const findESLintDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+  if (configFilePath.endsWith('eslint.config.js')) return [];
   if (isProduction) return [];
   const dependencies = await getDependenciesDeep(configFilePath, new Set(), { cwd, manifest });
   return Array.from(dependencies);
