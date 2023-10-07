@@ -1,10 +1,10 @@
 import chalk from 'chalk';
 import EasyTable from 'easy-table';
-import type { Entries } from 'type-fest';
 import { ROOT_WORKSPACE_NAME } from '../constants.js';
-import type { Issue, IssueSet, ReporterOptions } from '../types/issues.js';
 import { relative } from '../util/path.js';
-import { getTitle, identity, logIssueSet, logTitle } from './util.js';
+import { getTitle, logTitle, logIssueSet, identity } from './util.js';
+import type { Issue, ReporterOptions, IssueSet } from '../types/issues.js';
+import type { Entries } from 'type-fest';
 
 const TRUNCATE_WIDTH = 40;
 const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? text.slice(0, TRUNCATE_WIDTH - 3) + '...' : text);
