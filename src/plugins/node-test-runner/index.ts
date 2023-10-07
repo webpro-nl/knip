@@ -11,7 +11,9 @@ export const ENABLERS = [''];
 
 export const isEnabled: IsPluginEnabledCallback = ({ manifest }) => {
   // TODO Better to scan the entry files until the first `node:test` import, but that's expensive
-  return Boolean(manifest.scripts?.test && /node.+--test/.test(manifest.scripts?.test));
+  return Object.keys(manifest.scripts ?? {})
+    .filter(s => /test/.test(s)) // TODO Checking all script may return false positives to match `node --test`?
+    .some(s => manifest.scripts && /node (.*)--test/.test(manifest.scripts[s]));
 };
 
 /** @public */
