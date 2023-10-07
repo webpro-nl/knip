@@ -1,31 +1,32 @@
 import micromatch from 'micromatch';
-import type { Workspace } from './ConfigurationChief.js';
+import { _getDependenciesFromScripts } from './binaries/index.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
+import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { WorkspaceWorker } from './WorkspaceWorker.js';
-import { _getDependenciesFromScripts } from './binaries/index.js';
-import { fromBinary, isBinary } from './binaries/util.js';
-import { ROOT_WORKSPACE_NAME } from './constants.js';
-import type { CommandLineOptions } from './types/cli.js';
-import type { ExportItem, Exports } from './types/exports.js';
-import type { ImportedModule, Imports } from './types/imports.js';
 import { compact } from './util/array.js';
-import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
+import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
 import { LoaderError } from './util/errors.js';
 import { findFile } from './util/fs.js';
-import { _glob } from './util/glob.js';
+import { _glob, negate } from './util/glob.js';
 import {
   getEntryPathFromManifest,
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
 } from './util/modules.js';
-import { dirname, isInNodeModules, isInternal, join, toAbsolute } from './util/path.js';
-import { _require, _resolveSpecifier, _tryResolve } from './util/require.js';
+import { dirname, isInNodeModules, join, isInternal, toAbsolute } from './util/path.js';
+import { fromBinary, isBinary } from './util/protocols.js';
+import { _resolveSpecifier, _tryResolve } from './util/require.js';
+import { _require } from './util/require.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
+import { WorkspaceWorker } from './WorkspaceWorker.js';
+import type { Workspace } from './ConfigurationChief.js';
+import type { CommandLineOptions } from './types/cli.js';
+import type { ExportItem, Exports } from './types/exports.js';
+import type { ImportedModule, Imports } from './types/imports.js';
 
 type HandleReferencedDependencyOptions = {
   specifier: string;
@@ -167,23 +168,46 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     debugLogArray(`Found entry paths in package.json (${name})`, entryPathsFromManifest);
     principal.addEntryPaths(entryPathsFromManifest);
 
+    // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
+    // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.
+    const dependencies = await worker.findAllDependencies();
+    const {
+      referencedDependencies,
+      hostDependencies,
+      installedBinaries,
+      hasTypesIncluded,
+      enabledPlugins,
+      entryFilePatterns,
+      productionEntryFilePatterns,
+    } = dependencies;
+
+    deputy.addHostDependencies(name, hostDependencies);
+    deputy.setInstalledBinaries(name, installedBinaries);
+    deputy.setHasTypesIncluded(name, hasTypesIncluded);
+    enabledPluginsStore.set(name, enabledPlugins);
+
+    referencedDependencies.forEach(([containingFilePath, specifier]) => {
+      handleReferencedDependency({ specifier, containingFilePath, principal, workspace });
+    });
+
     if (isProduction) {
+      const negatedEntryPatterns: string[] = entryFilePatterns.map(negate);
+
       {
-        const patterns = worker.getProductionEntryFilePatterns();
+        const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
         const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found entry paths (${name})`, workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
       }
 
       {
-        const patterns = worker.getProductionPluginEntryFilePatterns();
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns: productionEntryFilePatterns });
         debugLogArray(`Found production plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
-        const patterns = worker.getProductionProjectFilePatterns();
+        const patterns = worker.getProductionProjectFilePatterns(negatedEntryPatterns);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found project paths (${name})`, workspaceProjectPaths);
         workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
@@ -197,14 +221,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
 
       {
-        const patterns = worker.getProjectFilePatterns();
+        const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns]);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found project paths (${name})`, workspaceProjectPaths);
         workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
       }
 
       {
-        const patterns = worker.getPluginEntryFilePatterns();
+        const patterns = [...entryFilePatterns, ...productionEntryFilePatterns];
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(`Found plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
@@ -226,23 +250,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
 
     // Add knip.ts (might import dependencies)
-    if (chief.resolvedConfigFilePath)
+    if (chief.resolvedConfigFilePath) {
       principal.addEntryPath(chief.resolvedConfigFilePath, { skipExportsAnalysis: true });
-
-    // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
-    // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.
-    const dependencies = await worker.findAllDependencies();
-    const { referencedDependencies, hostDependencies, installedBinaries, enabledPlugins, hasTypesIncluded } =
-      dependencies;
-
-    deputy.addHostDependencies(name, hostDependencies);
-    deputy.setInstalledBinaries(name, installedBinaries);
-    deputy.setHasTypesIncluded(name, hasTypesIncluded);
-    enabledPluginsStore.set(name, enabledPlugins);
-
-    referencedDependencies.forEach(([containingFilePath, specifier]) => {
-      handleReferencedDependency({ specifier, containingFilePath, principal, workspace });
-    });
+    }
   }
 
   const principals = factory.getPrincipals();
@@ -254,6 +264,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const importedSymbols: Imports = new Map();
 
   for (const principal of principals) {
+    const specifierFilePaths = new Set<string>();
+
     const analyzeSourceFile = (filePath: string, _principal: ProjectPrincipal = principal) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
@@ -273,8 +285,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (workspace) {
                 const principal = factory.getPrincipalByPackageName(workspace.pkgName);
                 if (principal && !principal.isGitIgnored(specifierFilePath)) {
-                  analyzeSourceFile(specifierFilePath, principal);
-                  analyzedFiles.add(specifierFilePath);
+                  // Defer to outside loop to prevent potential duplicate analysis and/or infinite recursion
+                  specifierFilePaths.add(specifierFilePath);
                 }
               }
             }
@@ -339,6 +351,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         analyzedFiles.add(filePath);
       });
     } while (size !== principal.entryPaths.size);
+
+    specifierFilePaths.forEach(specifierFilePath => {
+      if (!analyzedFiles.has(specifierFilePath)) {
+        analyzedFiles.add(specifierFilePath);
+        analyzeSourceFile(specifierFilePath, principal);
+      }
+    });
   }
 
   const isSymbolImported = (symbol: string, importingModule?: ImportedModule): boolean => {
@@ -373,7 +392,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const hasReferences = principal.getHasReferences(filePath, exportedItem);
     return hasReferences.internal;
   };
-
 
   if (isReportValues || isReportTypes) {
     streamer.cast('Analyzing source files...');

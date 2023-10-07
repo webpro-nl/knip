@@ -2,5 +2,9 @@
   "name": "@workspaces-plugin-config/root",
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "jest-result-processor": "*",
+    "eslint-config-airbnb": "*"
+  }
 }

@@ -1,5 +1,6 @@
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import { toEntryPattern } from '../../util/protocols.js';
 import type { StorybookConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -14,11 +15,15 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.storybook/{main,manager,test-runner}.{js,ts}'];
 
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['.storybook/preview.{js,jsx,ts,tsx}', '**/*.stories.{js,jsx,ts,tsx}'];
 
 export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
 
-const findStorybookDependencies: GenericPluginCallback = async configFilePath => {
+const findStorybookDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+  const entryPatterns = ENTRY_FILE_PATTERNS.map(toEntryPattern);
+  if (isProduction) return entryPatterns;
+
   const config: StorybookConfig = await load(configFilePath);
 
   if (!config) return [];
@@ -29,7 +34,7 @@ const findStorybookDependencies: GenericPluginCallback = async configFilePath =>
     builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
   const frameworks = config.framework?.name ? [config.framework.name] : [];
 
-  return [...addons, ...builderPackages, ...frameworks];
+  return [...entryPatterns, ...addons, ...builderPackages, ...frameworks];
 };
 
 export const findDependencies = timerify(findStorybookDependencies);

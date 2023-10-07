@@ -1,6 +1,6 @@
 export { _load as load } from './loader.js';
 import { arrayify } from './array.js';
-import type { RawPluginConfiguration } from 'src/types/config.js';
+import type { RawPluginConfiguration } from '../types/config.js';
 
 export const toCamelCase = (name: string) =>
   name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
@@ -18,8 +18,8 @@ export const hasDependency = (dependencies: Set<string>, values: (string | RegEx
   });
 
 export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
-  if (pluginConfig === false) {
-    return false;
+  if (typeof pluginConfig === 'boolean') {
+    return pluginConfig;
   } else {
     const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
     const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;

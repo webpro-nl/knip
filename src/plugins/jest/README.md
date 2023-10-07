@@ -12,7 +12,8 @@ or `devDependencies`:
 ```json
 {
   "jest": {
-    "config": ["jest.config.{js,ts,mjs,cjs,json}", "package.json"]
+    "config": ["jest.config.{js,ts,mjs,cjs,json}", "package.json"],
+    "entry": ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"]
   }
 }
 ```

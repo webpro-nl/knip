@@ -7,7 +7,7 @@ const cwd = resolve('fixtures/plugins/gatsby');
 
 test('Find dependencies in Gatsby configuration (gatsby-config.js)', async () => {
   const configFilePath = join(cwd, 'gatsby-config.js');
-  const dependencies = await gatsby.findDependencies(configFilePath);
+  const dependencies = await gatsby.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, [
     '@sentry/gatsby',
     'gatsby-plugin-webpack-bundle-analyser-v2',
@@ -25,7 +25,7 @@ test('Find dependencies in Gatsby configuration (gatsby-config.js)', async () =>
 
 test('Find dependencies in Gatsby configuration (gatsby-node.js)', async () => {
   const configFilePath = join(cwd, 'gatsby-node.js');
-  const dependencies = await gatsby.findDependencies(configFilePath);
+  const dependencies = await gatsby.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, [
     '@babel/plugin-proposal-function-bind',
     '@babel/plugin-proposal-export-default-from',

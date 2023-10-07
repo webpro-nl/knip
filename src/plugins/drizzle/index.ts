@@ -1,6 +1,6 @@
-import { _glob } from '../../util/glob.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import { toEntryPattern } from '../../util/protocols.js';
 import type { DrizzleConfig } from './types.js';
 import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
@@ -15,12 +15,10 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['drizzle.config.{ts,js,json}'];
 
-const findDrizzleDependencies: GenericPluginCallback = async (configFilePath, { cwd }) => {
+const findDrizzleDependencies: GenericPluginCallback = async configFilePath => {
   const config: DrizzleConfig = await load(configFilePath);
   if (!config || !config.schema) return [];
-  const patterns = Array.isArray(config.schema) ? config.schema : [config.schema];
-  const paths = await _glob({ cwd, patterns });
-  return paths;
+  return [config.schema].flat().map(toEntryPattern);
 };
 
 export const findDependencies = timerify(findDrizzleDependencies);

@@ -11,6 +11,8 @@ export const NAME = 'lint-staged';
 /** @public */
 export const ENABLERS = ['lint-staged'];
 
+export const PACKAGE_JSON_PATH = 'lint-staged';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [
@@ -22,7 +24,9 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+  if (isProduction) return [];
+
   let config: LintStagedConfig = configFilePath.endsWith('package.json')
     ? manifest['lint-staged']
     : await load(configFilePath);

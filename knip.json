@@ -2,5 +2,9 @@
   "$schema": "https://unpkg.com/knip@2/schema.json",
   "entry": ["src/{index,cli}.ts!"],
   "project": ["src/**/*.ts!"],
-  "ignore": ["**/fixtures", "**/_template"]
+  "ignore": ["**/fixtures", "**/_template"],
+  "node-test-runner": {
+    "entry": ["tests/**/*.test.ts"],
+    "project": ["tests/**/*.ts"]
+  }
 }

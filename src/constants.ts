@@ -7,12 +7,6 @@ export const KNIP_CONFIG_LOCATIONS = ['knip.json', 'knip.jsonc', '.knip.json', '
 // TS extensions: https://github.com/microsoft/TypeScript/blob/da8dfbf0ff6a94df65568fd048aec0d763c65811/src/compiler/types.ts#L7637-L7651
 export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'];
 
-// This is ignored in --production mode (apart from what plugins would add)
-export const TEST_FILE_PATTERNS = [
-  '**/*{.,-}{test,spec}.{js,jsx,ts,tsx,mjs,cjs}',
-  '**/{test,__tests__}/**/*.{js,jsx,ts,tsx,mjs,cjs}',
-];
-
 export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 
 // Binaries that are expected to be globally installed (i.e. https://www.npmjs.com/package/[name] is NOT the expected dependency)
@@ -24,6 +18,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'cd',
   'chmod',
   'cp',
+  'curl',
   'deno',
   'dirname',
   'echo',

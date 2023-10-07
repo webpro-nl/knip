@@ -13,10 +13,10 @@ test('Find exports from jsdoc @type tags', async () => {
     cwd,
   });
 
-  assert(issues.exports['module.ts']['alphaFn']);
-  assert(issues.exports['module.ts']['internalUnusedFn']);
-  assert(issues.exports['module.ts']['invalidTaggedFn']);
-  assert(issues.exports['module.ts']['unusedFn']);
+  assert(issues.exports['module.js']['alphaFn']);
+  assert(issues.exports['module.js']['internalUnusedFn']);
+  assert(issues.exports['module.js']['invalidTaggedFn']);
+  assert(issues.exports['module.js']['unusedFn']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -33,11 +33,11 @@ test('Find exports from jsdoc @type tags (production)', async () => {
     isProduction: true,
   });
 
-  assert(issues.exports['module.ts']['alphaFn']);
-  assert(issues.exports['module.ts']['internalFn']);
-  assert(issues.exports['module.ts']['internalUnusedFn']);
-  assert(issues.exports['module.ts']['invalidTaggedFn']);
-  assert(issues.exports['module.ts']['unusedFn']);
+  assert(issues.exports['module.js']['alphaFn']);
+  assert(issues.exports['module.js']['internalFn']);
+  assert(issues.exports['module.js']['internalUnusedFn']);
+  assert(issues.exports['module.js']['invalidTaggedFn']);
+  assert(issues.exports['module.js']['unusedFn']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

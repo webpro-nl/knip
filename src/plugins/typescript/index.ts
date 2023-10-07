@@ -32,7 +32,9 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   return config;
 };
 
-export const findTypeScriptDependencies: GenericPluginCallback = async configFilePath => {
+export const findTypeScriptDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+  if (isProduction) return [];
+
   const { compilerOptions } = await loadTSConfig(configFilePath);
   const config: TsConfigJson = await resolveExtensibleConfig(configFilePath); // Dual loader to get external `extends` dependencies
 

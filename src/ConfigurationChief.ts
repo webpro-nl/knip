@@ -63,9 +63,8 @@ const defaultConfig: Configuration = {
   ignoreWorkspaces: [],
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
-  workspaces: {
-    [ROOT_WORKSPACE_NAME]: getDefaultWorkspaceConfig(),
-  },
+  defaultWorkspaceConfig: getDefaultWorkspaceConfig(),
+  rootPluginConfigs: {},
 };
 
 const PLUGIN_NAMES = Object.keys(plugins);
@@ -109,6 +108,9 @@ export class ConfigurationChief {
 
   resolvedConfigFilePath?: string;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rawConfig?: any;
+
   constructor({ cwd, isProduction }: ConfigurationManagerOptions) {
     this.cwd = cwd;
     this.isProduction = isProduction;
@@ -142,13 +144,11 @@ export class ConfigurationChief {
       throw new ConfigurationError(`Unable to find ${rawConfigArg} or package.json#knip`);
     }
 
-    const rawLocalConfig = this.resolvedConfigFilePath ? await _load(this.resolvedConfigFilePath) : manifest.knip;
+    this.rawConfig = this.resolvedConfigFilePath ? await _load(this.resolvedConfigFilePath) : manifest.knip;
 
-    if (rawLocalConfig) {
-      // Have to partition compiler functions before Zod touches them
-      const parsedConfig = ConfigurationValidator.parse(partitionCompilers(rawLocalConfig));
-      this.config = this.normalize(parsedConfig);
-    }
+    // Have to partition compiler functions before Zod touches them
+    const parsedConfig = this.rawConfig ? ConfigurationValidator.parse(partitionCompilers(this.rawConfig)) : {};
+    this.config = this.normalize(parsedConfig);
 
     await this.setWorkspaces();
   }
@@ -161,23 +161,17 @@ export class ConfigurationChief {
     return this.config.rules;
   }
 
-  private normalize(rawLocalConfig: RawConfiguration) {
-    const initialWorkspaces = rawLocalConfig.workspaces ?? {
-      [ROOT_WORKSPACE_NAME]: {
-        ...rawLocalConfig,
-      },
-    };
+  private normalize(rawConfig: RawConfiguration) {
+    const rules = { ...defaultRules, ...rawConfig.rules };
+    const include = rawConfig.include ?? defaultConfig.include;
+    const exclude = rawConfig.exclude ?? defaultConfig.exclude;
+    const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
+    const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
+    const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
+    const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
+    const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
 
-    const rules = { ...defaultRules, ...rawLocalConfig.rules };
-    const include = rawLocalConfig.include ?? defaultConfig.include;
-    const exclude = rawLocalConfig.exclude ?? defaultConfig.exclude;
-    const ignore = arrayify(rawLocalConfig.ignore ?? defaultConfig.ignore);
-    const ignoreBinaries = rawLocalConfig.ignoreBinaries ?? [];
-    const ignoreExportsUsedInFile = rawLocalConfig.ignoreExportsUsedInFile ?? false;
-    const ignoreDependencies = rawLocalConfig.ignoreDependencies ?? [];
-    const ignoreWorkspaces = rawLocalConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
-
-    const { syncCompilers, asyncCompilers } = rawLocalConfig;
+    const { syncCompilers, asyncCompilers } = rawConfig;
 
     const extensions = [...Object.keys(syncCompilers ?? {}), ...Object.keys(asyncCompilers ?? {})];
 
@@ -185,47 +179,12 @@ export class ConfigurationChief {
 
     const rootPluginConfigs: Partial<PluginsConfiguration> = {};
 
-    for (const [name, pluginConfig] of Object.entries(rawLocalConfig)) {
+    for (const [name, pluginConfig] of Object.entries(rawConfig)) {
       const pluginName = toCamelCase(name) as PluginName;
       if (PLUGIN_NAMES.includes(pluginName)) {
         rootPluginConfigs[pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
       }
     }
-
-    const workspaces = Object.entries(initialWorkspaces)
-      .filter(([workspaceName]) => !ignoreWorkspaces.includes(workspaceName))
-      .reduce(
-        (workspaces, workspace) => {
-          const [workspaceName, workspaceConfig] = workspace;
-
-          const entry = workspaceConfig.entry ? arrayify(workspaceConfig.entry) : defaultWorkspaceConfig.entry;
-          const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : defaultWorkspaceConfig.project;
-          const paths = workspaceConfig.paths ?? defaultWorkspaceConfig.paths;
-
-          workspaces[workspaceName] = {
-            entry,
-            project,
-            paths,
-            ignore: arrayify(workspaceConfig.ignore),
-            ignoreBinaries: arrayify(workspaceConfig.ignoreBinaries),
-            ignoreDependencies: arrayify(workspaceConfig.ignoreDependencies),
-          };
-
-          for (const [name, pluginConfig] of Object.entries(rootPluginConfigs)) {
-            const pluginName = toCamelCase(name) as PluginName;
-            if (pluginConfig) workspaces[workspaceName][pluginName] = pluginConfig;
-          }
-
-          for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
-            const pluginName = toCamelCase(name) as PluginName;
-            if (PLUGIN_NAMES.includes(pluginName)) {
-              workspaces[workspaceName][pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
-            }
-          }
-          return workspaces;
-        },
-        {} as Record<string, WorkspaceConfiguration>
-      );
 
     return {
       rules,
@@ -238,7 +197,8 @@ export class ConfigurationChief {
       ignoreWorkspaces,
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})),
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
-      workspaces,
+      rootPluginConfigs,
+      defaultWorkspaceConfig,
     };
   }
 
@@ -278,15 +238,23 @@ export class ConfigurationChief {
 
     const manifestWorkspaces = new Map();
     for (const [pkgName, dir] of workspaces.entries()) {
-      manifestWorkspaces.set(relative(this.cwd, dir), pkgName);
+      manifestWorkspaces.set(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME, pkgName);
     }
     return manifestWorkspaces;
   }
 
+  private getConfiguredWorkspaceKeys() {
+    const initialWorkspaces = this.rawConfig?.workspaces
+      ? Object.keys(this.rawConfig.workspaces)
+      : [ROOT_WORKSPACE_NAME];
+    const ignoreWorkspaces = this.rawConfig?.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
+    return initialWorkspaces.filter(workspaceName => !ignoreWorkspaces.includes(workspaceName));
+  }
+
   private async getAdditionalWorkspaceNames() {
-    const additionalWorkspaceKeys = Object.keys(this.config.workspaces);
-    const patterns = additionalWorkspaceKeys.filter(key => key.includes('*'));
-    const dirs = additionalWorkspaceKeys.filter(key => !key.includes('*'));
+    const workspaceKeys = this.getConfiguredWorkspaceKeys();
+    const patterns = workspaceKeys.filter(key => key.includes('*'));
+    const dirs = workspaceKeys.filter(key => !key.includes('*'));
     const globbedDirs = await _dirGlob({ patterns, cwd: this.cwd });
     return new Set(
       [...dirs, ...globbedDirs].filter(
@@ -359,7 +327,7 @@ export class ConfigurationChief {
   }
 
   private getConfigKeyForWorkspace(workspaceName: string) {
-    return Object.keys(this.config.workspaces)
+    return this.getConfiguredWorkspaceKeys()
       .sort(byPathDepth)
       .reverse()
       .find(pattern => micromatch.isMatch(workspaceName, pattern));
@@ -367,8 +335,37 @@ export class ConfigurationChief {
 
   private getConfigForWorkspace(workspaceName: string) {
     const key = this.getConfigKeyForWorkspace(workspaceName);
-    if (key && this.config?.workspaces?.[key]) return this.config.workspaces[key];
-    return getDefaultWorkspaceConfig();
+    const defaultConfig = this.config.defaultWorkspaceConfig;
+    const workspaces = this.rawConfig?.workspaces ?? {};
+    const workspaceConfig =
+      (key
+        ? key === ROOT_WORKSPACE_NAME && !(ROOT_WORKSPACE_NAME in workspaces)
+          ? this.rawConfig
+          : workspaces[key]
+        : {}) ?? {};
+
+    const entry = workspaceConfig.entry ? arrayify(workspaceConfig.entry) : defaultConfig.entry;
+    const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : defaultConfig.project;
+    const paths = workspaceConfig.paths ?? defaultConfig.paths;
+    const ignore = arrayify(workspaceConfig.ignore);
+    const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries);
+    const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies);
+
+    const plugins: Partial<PluginsConfiguration> = {};
+
+    for (const [name, pluginConfig] of Object.entries(this.config.rootPluginConfigs)) {
+      const pluginName = toCamelCase(name) as PluginName;
+      if (typeof pluginConfig !== 'undefined') plugins[pluginName] = pluginConfig;
+    }
+
+    for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
+      const pluginName = toCamelCase(name) as PluginName;
+      if (PLUGIN_NAMES.includes(pluginName)) {
+        plugins[pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
+      }
+    }
+
+    return { entry, project, paths, ignore, ignoreBinaries, ignoreDependencies, ...plugins };
   }
 
   public getIssueTypesToReport() {

@@ -1,6 +1,7 @@
 import parseArgs from 'minimist';
 import { compact } from '../../util/array.js';
-import { toBinary, tryResolveSpecifiers } from '../util.js';
+import { toBinary } from '../../util/protocols.js';
+import { tryResolveSpecifiers } from '../util.js';
 import type { Resolver } from '../types.js';
 
 export const resolve: Resolver = (binary, args, { cwd, fromArgs }) => {

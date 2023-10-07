@@ -15,7 +15,12 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.markdownlint.{json,jsonc}', '.markdownlint.{yml,yaml}'];
 
-const findMarkdownlintConfigDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findMarkdownlintConfigDependencies: GenericPluginCallback = async (
+  configFilePath,
+  { manifest, isProduction }
+) => {
+  if (isProduction) return [];
+
   const config: MarkdownlintConfig = await load(configFilePath);
   const extend = config?.extends ? [config.extends] : [];
   const scripts = manifest.scripts

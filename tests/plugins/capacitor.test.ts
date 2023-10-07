@@ -7,7 +7,7 @@ const cwd = resolve('fixtures/plugins/capacitor');
 
 test('Find dependencies in Capacitor configuration (ts)', async () => {
   const configFilePath = join(cwd, 'capacitor.config.ts');
-  const dependencies = await capacitor.findDependencies(configFilePath);
+  const dependencies = await capacitor.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, [
     '@capacitor-community/http',
     '@capacitor/app',
@@ -21,7 +21,7 @@ test('Find dependencies in Capacitor configuration (ts)', async () => {
 
 test('Find dependencies in Capacitor configuration (json)', async () => {
   const configFilePath = join(cwd, 'capacitor.config.json');
-  const dependencies = await capacitor.findDependencies(configFilePath);
+  const dependencies = await capacitor.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, [
     '@capacitor-community/http',
     '@capacitor/android',

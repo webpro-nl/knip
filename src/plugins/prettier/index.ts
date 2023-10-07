@@ -31,7 +31,9 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findPrettierDependencies: GenericPluginCallback = async (configFilePath, { manifest }) => {
+const findPrettierDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+  if (isProduction) return [];
+
   const config: PrettierConfig = configFilePath.endsWith('package.json')
     ? manifest.prettier
     : await load(configFilePath);

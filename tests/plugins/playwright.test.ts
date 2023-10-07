@@ -15,8 +15,6 @@ test('Find dependencies in Playwright configuration', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 0,
-    unlisted: 0,
     processed: 2,
     total: 2,
   });

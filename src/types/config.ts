@@ -12,13 +12,13 @@ type NormalizedGlob = string[];
 
 export type PluginName = keyof typeof Plugins;
 
-export type PluginConfiguration =
-  | {
-      config: NormalizedGlob | null;
-      entry: NormalizedGlob | null;
-      project: NormalizedGlob | null;
-    }
-  | false;
+export type EnsuredPluginConfiguration = {
+  config: NormalizedGlob | null;
+  entry: NormalizedGlob | null;
+  project: NormalizedGlob | null;
+};
+
+export type PluginConfiguration = EnsuredPluginConfiguration | boolean;
 
 export type PluginsConfiguration = Record<PluginName, PluginConfiguration>;
 
@@ -44,7 +44,8 @@ export interface Configuration {
   ignoreDependencies: string[];
   ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
   ignoreWorkspaces: string[];
-  workspaces: Record<string, WorkspaceConfiguration>;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
+  defaultWorkspaceConfig: WorkspaceConfiguration;
+  rootPluginConfigs: Partial<PluginsConfiguration>;
 }

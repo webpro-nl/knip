@@ -2,8 +2,8 @@ import { compact } from '../util/array.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { isInternal } from '../util/path.js';
 import { timerify } from '../util/Performance.js';
+import { isBinary } from '../util/protocols.js';
 import { getBinariesFromScript } from './bash-parser.js';
-import { isBinary } from './util.js';
 import type { GetDependenciesFromScripts } from './types.js';
 
 const defaultCwd = process.cwd();

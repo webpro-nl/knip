@@ -63,7 +63,7 @@ const reportConfigSchema = z.object({
 });
 
 export const pluginSchema = z.union([
-  z.literal(false),
+  z.boolean(),
   globSchema,
   z.object({
     config: globSchema.optional(),
@@ -92,6 +92,7 @@ const pluginsSchema = z.object({
   markdownlint: pluginSchema,
   mocha: pluginSchema,
   next: pluginSchema,
+  'node-test-runner': pluginSchema,
   'npm-package-json-lint': pluginSchema,
   nx: pluginSchema,
   nyc: pluginSchema,

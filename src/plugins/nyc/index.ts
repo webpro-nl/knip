@@ -17,7 +17,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
 
-const findNycDependencies: GenericPluginCallback = async configFilePath => {
+const findNycDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+  if (isProduction) return [];
   const config: NycConfig = await load(configFilePath);
   return config.extends ? [config.extends].flat() : [];
 };

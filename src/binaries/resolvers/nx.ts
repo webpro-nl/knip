@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import { toBinary } from '../util.js';
+import { toBinary } from '../../util/protocols.js';
 import type { Resolver } from '../types.js';
 
 export const resolve: Resolver = (binary, args, { fromArgs }) => {

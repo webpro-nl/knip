@@ -8,6 +8,8 @@ export const NAME = 'ESLint';
 /** @public */
 export const ENABLERS = ['eslint'];
 
+export const PACKAGE_JSON_PATH = 'eslintConfig';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest, config }) =>
   hasDependency(dependencies, ENABLERS) ||
   'eslint' in config ||
@@ -18,12 +20,14 @@ export const CONFIG_FILE_PATTERNS = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.e
 
 // New: https://eslint.org/docs/latest/user-guide/configuring/configuration-files-new
 // We can handle eslint.config.js just like other source code (as dependencies are imported)
+/** @public */
 export const ENTRY_FILE_PATTERNS = ['eslint.config.js'];
 
 // Note: shareable configs should use `peerDependencies` for plugins
 // https://eslint.org/docs/latest/developer-guide/shareable-configs#publishing-a-shareable-config
 
-const findESLintDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+const findESLintDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+  if (isProduction) return [];
   const dependencies = await getDependenciesDeep(configFilePath, new Set(), { cwd, manifest });
   return Array.from(dependencies);
 };

@@ -8,7 +8,7 @@ const cwd = resolve('fixtures/plugins/changesets');
 test('Find dependencies in Changesets configuration', async () => {
   const configFilePaths = changesets.CONFIG_FILE_PATTERNS.map(filePath => join(cwd, filePath));
   for (const configFilePath of configFilePaths) {
-    const dependencies = await changesets.findDependencies(configFilePath);
+    const dependencies = await changesets.findDependencies(configFilePath, {});
     assert.deepEqual(dependencies, ['@changesets/changelog-github']);
   }
 });

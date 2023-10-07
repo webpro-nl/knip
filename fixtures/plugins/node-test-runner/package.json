@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/node-test-runner",
+  "scripts": {
+    "test": "node --test"
+  }
+}

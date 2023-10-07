@@ -14,15 +14,17 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['?(.)stryker.{conf,config}.{js,mjs,cjs,json}'];
 
-const findStrykerDependencies: GenericPluginCallback = async configFilePath => {
+const findStrykerDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+  if (isProduction) return [];
+
   const config: StrykerConfig = await load(configFilePath);
-  if (config) {
-    const runners = config.testRunner ? [`@stryker-mutator/${config.testRunner}-runner`] : [];
-    const checkers = config.checkers ? config.checkers.map(checker => `@stryker-mutator/${checker}-checker`) : [];
-    const plugins = config.plugins ?? [];
-    return [...runners, ...checkers, ...plugins];
-  }
-  return [];
+
+  if (!config) return [];
+
+  const runners = config.testRunner ? [`@stryker-mutator/${config.testRunner}-runner`] : [];
+  const checkers = config.checkers ? config.checkers.map(checker => `@stryker-mutator/${checker}-checker`) : [];
+  const plugins = config.plugins ?? [];
+  return [...runners, ...checkers, ...plugins];
 };
 
 export const findDependencies = timerify(findStrykerDependencies);
