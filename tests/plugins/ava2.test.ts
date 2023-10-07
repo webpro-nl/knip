@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/ava2');
 
-test('Find dependencies in ava configuration', async () => {
+test('Find dependencies in ava configuration (2)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
