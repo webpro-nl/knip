@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/playwright2",
+  "knip": {
+    "playwright": true
+  },
+  "devDependencies": {
+    "@playwright/test": "*"
+  }
+}
