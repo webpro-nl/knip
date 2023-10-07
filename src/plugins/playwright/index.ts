@@ -19,7 +19,7 @@ export const ENTRY_FILE_PATTERNS = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
 export const CONFIG_FILE_PATTERNS = ['playwright.config.{js,ts}'];
 
-const toEntryPatterns = (
+export const toEntryPatterns = (
   testMatch: string | RegExp | Array<string | RegExp> | undefined,
   cwd: string,
   configFilePath: string,

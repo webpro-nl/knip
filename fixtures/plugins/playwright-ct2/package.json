@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/playwright-ct2",
+  "knip": {
+    "playwright-ct": true
+  },
+  "devDependencies": {
+    "@playwright/experimental-ct-vue": "*"
+  }
+}
