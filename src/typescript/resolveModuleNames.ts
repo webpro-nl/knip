@@ -2,7 +2,20 @@ import { existsSync } from 'node:fs';
 import ts from 'typescript';
 import { sanitizeSpecifier } from '../util/modules.js';
 import { dirname, extname, isInternal, join } from '../util/path.js';
+import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
+
+const simpleResolver = (name: string, containingFile: string) => {
+  const resolvedFileName = join(dirname(containingFile), name);
+  if (existsSync(resolvedFileName)) {
+    return {
+      resolvedFileName,
+      extension: extname(resolvedFileName),
+      isExternalLibraryImport: false,
+      resolvedUsingTsExtension: false,
+    };
+  }
+};
 
 export function createCustomModuleResolver(
   customSys: typeof ts.sys,
@@ -27,17 +40,20 @@ export function createCustomModuleResolver(
     if (!tsResolvedModule) {
       const extension = extname(sanitizedSpecifier);
       if (extension && isInternal(sanitizedSpecifier) && !virtualFileExtensions.includes(extension)) {
-        const resolvedFileName = join(dirname(containingFile), sanitizedSpecifier);
-        if (existsSync(resolvedFileName)) {
-          return {
-            resolvedFileName,
-            // @ts-expect-error Without this, TS throws for "unknown extension"
-            extension,
-            isExternalLibraryImport: false,
-            resolvedUsingTsExtension: false,
-          };
-        }
+        const module = simpleResolver(sanitizedSpecifier, containingFile);
+        if (module) return module;
       }
+    }
+
+    // This turns resolved local `.d.ts` filenames into `.js` (if specifier has the extension and file exists),
+    // because there can be both module.d.ts and module.js and we want the latter.
+    if (
+      tsResolvedModule &&
+      isDeclarationFileExtension(tsResolvedModule?.extension) &&
+      isInternal(tsResolvedModule.resolvedFileName)
+    ) {
+      const module = simpleResolver(sanitizedSpecifier, containingFile);
+      if (module) return module;
     }
 
     if (virtualFileExtensions.length === 0) return tsResolvedModule;
