@@ -224,7 +224,7 @@ export class ProjectPrincipal {
     };
   }
 
-  private resolveModule(specifier: string, filePath: string = specifier) {
+  public resolveModule(specifier: string, filePath: string = specifier) {
     const module = ts.resolveModuleName(specifier, filePath, this.compilerOptions, this.backend.languageServiceHost);
     return module?.resolvedModule;
   }

@@ -14,9 +14,9 @@ import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
 } from './util/modules.js';
-import { dirname, isInNodeModules, join, isInternal, toAbsolute } from './util/path.js';
+import { dirname, isInNodeModules, join, isInternal } from './util/path.js';
 import { fromBinary, isBinary } from './util/protocols.js';
-import { _resolveSpecifier, _tryResolve } from './util/require.js';
+import { _resolveSpecifier } from './util/require.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { Workspace } from './ConfigurationChief.js';
@@ -90,9 +90,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     workspace,
   }: HandleReferencedDependencyOptions) => {
     if (isInternal(specifier)) {
-      // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js
-      const absSpecifier = toAbsolute(specifier, dirname(containingFilePath));
-      const filePath = _tryResolve(absSpecifier, containingFilePath);
+      // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js, ./module.ts, ./module.d.ts
+      const filePath = principal.resolveModule(specifier, containingFilePath)?.resolvedFileName;
       if (filePath) {
         const ignorePatterns = workspace.config.ignore.map(pattern => join(dirname(containingFilePath), pattern));
         const isIgnored = micromatch.isMatch(filePath, ignorePatterns);
