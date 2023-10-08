@@ -1,0 +1,26 @@
+name: Run Knip in external projects
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - run: git apply bun-compat.diff
+      - run: bun install
+      - run: bun run build
+      - run: bun link
+
+      - name: Test Knip against create-typescript-app
+        uses: actions/checkout@v3
+        with:
+          repository: JoshuaKGoldberg/create-typescript-app
+          path: create-typescript-app
+      - run: bun install
+      - run: bun link knip
+      - run: bun knip
