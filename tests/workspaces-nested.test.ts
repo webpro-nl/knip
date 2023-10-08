@@ -8,8 +8,8 @@ import baseCounters from './helpers/baseCounters.js';
 const cwd = resolve('fixtures/workspaces-nested');
 
 const expectedConfigurationHints = new Set([
-  { type: 'ignoreDependencies', workspaceName: '.', identifier: 'ignored-dep-global' },
-  { type: 'ignoreWorkspaces', identifier: 'ignored-workspace' },
+  { type: 'ignoreDependencies', workspaceName: '.', identifier: 'unused-ignored-dep-global' },
+  { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
 ]);
 
 test('Find unused dependencies in nested workspaces with default config in production mode (loose)', async () => {

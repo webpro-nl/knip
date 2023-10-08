@@ -24,7 +24,7 @@
       "unused-ignored-dep-global"
     ],
     "ignoreWorkspaces": [
-      "ignored-workspace"
+      "unused-ignored-workspace"
     ],
     "workspaces": {
       ".": {},

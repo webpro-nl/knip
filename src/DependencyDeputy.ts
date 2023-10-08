@@ -324,9 +324,10 @@ export class DependencyDeputy {
       referencedDependencies?.forEach(pkg => pkg in rootIgnoreDependencies && rootIgnoreDependencies[pkg]++);
       referencedBinaries?.forEach(binaryName => binaryName in rootIgnoreBinaries && rootIgnoreBinaries[binaryName]++);
 
-      const dependencies = this.isStrict
-        ? this.getProductionDependencies(workspaceName)
-        : [...this.getProductionDependencies(workspaceName), ...this.getDevDependencies(workspaceName)];
+      const dependencies = [
+        ...this.getProductionDependencies(workspaceName),
+        ...this.getDevDependencies(workspaceName),
+      ];
       const peerDependencies = this.getPeerDependencies(workspaceName);
 
       const isReferencedDep = (name: string) => referencedDependencies?.has(name) && dependencies.includes(name);
@@ -353,9 +354,10 @@ export class DependencyDeputy {
     }
 
     const installedBinaries = this.getInstalledBinaries(ROOT_WORKSPACE_NAME);
-    const dependencies = this.isStrict
-      ? this.getProductionDependencies(ROOT_WORKSPACE_NAME)
-      : [...this.getProductionDependencies(ROOT_WORKSPACE_NAME), ...this.getDevDependencies(ROOT_WORKSPACE_NAME)];
+    const dependencies = [
+      ...this.getProductionDependencies(ROOT_WORKSPACE_NAME),
+      ...this.getDevDependencies(ROOT_WORKSPACE_NAME),
+    ];
     const peerDependencies = this.getPeerDependencies(ROOT_WORKSPACE_NAME);
 
     // Add configuration hint for dependencies/binaries in global ignores or when referenced + listed
@@ -371,7 +373,7 @@ export class DependencyDeputy {
       .filter(
         key =>
           IGNORED_DEPENDENCIES.includes(key) ||
-          (rootIgnoreDependencies[key] !== 0 && !peerDependencies.includes(key) && dependencies.includes(key))
+          (rootIgnoreDependencies[key] === 0 && !peerDependencies.includes(key) && !dependencies.includes(key))
       )
       .forEach(identifier =>
         configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreDependencies' })
