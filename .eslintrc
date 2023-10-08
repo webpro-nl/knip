@@ -50,10 +50,10 @@
       }
     },
     {
-      "files": ["./tests/**/*.{js,ts,tsx}"],
+      "files": ["./test/**/*.{js,ts,tsx}"],
       "parserOptions": {
         "sourceType": "module",
-        "project": "./tests/tsconfig.json"
+        "project": "./test/tsconfig.json"
       },
       "rules": {
         "@typescript-eslint/no-floating-promises": "off"

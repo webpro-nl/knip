@@ -5,7 +5,7 @@
   "ignore": ["**/fixtures", "**/_template"],
   "ignoreDependencies": ["@pnpm/logger"],
   "node-test-runner": {
-    "entry": ["tests/**/*.test.ts"],
-    "project": ["tests/**/*.ts"]
+    "entry": ["test/**/*.test.ts"],
+    "project": ["test/**/*.ts"]
   }
 }
