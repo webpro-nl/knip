@@ -14,14 +14,14 @@ or `devDependencies`:
   "ava": {
     "config": ["ava.config.{js,cjs,mjs}", "package.json"],
     "entry": [
-      "test.{js,cjs,mjs}",
-      "{src,source}/test.{js,cjs,mjs}",
-      "**/__tests__/**/*.{js,cjs,mjs}",
-      "**/*.spec.{js,cjs,mjs}",
-      "**/*.test.{js,cjs,mjs}",
-      "**/test-*.{js,cjs,mjs}",
-      "**/test/**/*.{js,cjs,mjs}",
-      "**/tests/**/*.{js,cjs,mjs}",
+      "test.{js,cjs,mjs,ts}",
+      "{src,source}/test.{js,cjs,mjs,ts}",
+      "**/__tests__/**/*.{js,cjs,mjs,ts}",
+      "**/*.spec.{js,cjs,mjs,ts}",
+      "**/*.test.{js,cjs,mjs,ts}",
+      "**/test-*.{js,cjs,mjs,ts}",
+      "**/test/**/*.{js,cjs,mjs,ts}",
+      "**/tests/**/*.{js,cjs,mjs,ts}",
       "!**/__tests__/**/__{helper,fixture}?(s)__/**/*",
       "!**/test?(s)/**/{helper,fixture}?(s)/**/*"
     ]
