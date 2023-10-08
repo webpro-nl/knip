@@ -429,10 +429,6 @@ export class ConfigurationChief {
     return this.enabledWorkspaces.find(workspace => workspace.dir === workspaceDir);
   }
 
-  public findWorkspaceByPackageName(packageName: string) {
-    return this.enabledWorkspaces.find(workspace => workspace.pkgName === packageName);
-  }
-
   public getUnusedIgnoredWorkspaces() {
     const ignoredWorkspaceNames = this.config.ignoreWorkspaces;
     const workspaceNames = [...this.manifestWorkspaces.keys(), ...this.additionalWorkspaceNames];

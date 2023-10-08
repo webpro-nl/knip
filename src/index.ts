@@ -114,7 +114,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
         // Patterns: @local/package/file, self-reference/file
         if (packageName && specifier !== packageName) {
-          const otherWorkspace = chief.findWorkspaceByPackageName(packageName);
+          const otherWorkspace = chief.availableWorkspaceManifests.find(w => w.manifest.name === packageName);
           if (otherWorkspace) {
             const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
             if (filePath) {
