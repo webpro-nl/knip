@@ -89,7 +89,7 @@ const run = async () => {
       process.exit(totalErrorCount);
     }
   } catch (error: unknown) {
-    if (error instanceof Error && isKnownError(error)) {
+    if (!isDebug && error instanceof Error && isKnownError(error)) {
       const knownError = getKnownError(error);
       console.error(knownError.message);
       if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);

@@ -12,7 +12,8 @@ or `devDependencies`:
 ```json
 {
   "mocha": {
-    "config": [".mocharc.{js,cjs,json,jsonc,yml,yaml}", "package.json"]
+    "config": [".mocharc.{js,cjs,json,jsonc,yml,yaml}", "package.json"],
+    "entry": ["**/test/*.{js,cjs,mjs}"]
   }
 }
 ```

@@ -1,5 +1,6 @@
 export interface VitestConfig {
   test: {
+    include: string[];
     coverage?: {
       provider: string;
     };

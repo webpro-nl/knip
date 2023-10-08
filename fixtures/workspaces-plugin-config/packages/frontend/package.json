@@ -5,6 +5,7 @@
   },
   "devDependencies": {
     "vitest": "*",
-    "jsdom": "*"
+    "jsdom": "*",
+    "@rollup/plugin-commonjs": "*"
   }
 }

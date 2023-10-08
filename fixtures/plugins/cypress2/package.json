@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/cypress2",
+  "devDependencies": {
+    "cypress": "*"
+  }
+}

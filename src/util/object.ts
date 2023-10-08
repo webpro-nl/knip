@@ -36,3 +36,6 @@ export const getKeysByValue = <T>(obj: T, value: unknown): (keyof T)[] => {
   }
   return keys;
 };
+
+// @ts-expect-error just pass good objects alright
+export const get = (obj: unknown, path: string) => path.split('.').reduce((o, p) => o && o[p], obj);

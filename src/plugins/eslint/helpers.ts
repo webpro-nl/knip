@@ -3,6 +3,7 @@ import { isInternal, dirname, toAbsolute } from '../../util/path.js';
 import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
 import { fallback } from './fallback.js';
+import { PACKAGE_JSON_PATH } from './index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
 import type { PackageJson } from '@npmcli/package-json';
 
@@ -42,7 +43,7 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, d
   const addAll = (deps: string[] | Set<string>) => deps.forEach(dependency => dependencies.add(dependency));
 
   const config = configFilePath.endsWith('package.json')
-    ? options.manifest.eslintConfig
+    ? options.manifest[PACKAGE_JSON_PATH]
     : /(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
     ? await load(configFilePath)
     : await fallback(configFilePath);

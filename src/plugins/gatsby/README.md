@@ -13,13 +13,14 @@ or `devDependencies`:
 ```json
 {
   "gatsby": {
-    "config": ["gatsby-{config,node}.{js,jsx,ts,tsx}"],
+    "config": ["gatsby-{config,node}.{js,jsx,ts,tsx}", "plugins/**/gatsby-node.{js,jsx,ts,tsx}"],
     "entry": [
       "gatsby-{browser,ssr}.{js,jsx,ts,tsx}",
       "src/api/**/*.{js,ts}",
       "src/pages/**/*.{js,jsx,ts,tsx}",
       "src/templates/**/*.{js,jsx,ts,tsx}",
-      "src/html.{js,jsx,ts,tsx}"
+      "src/html.{js,jsx,ts,tsx}",
+      "plugins/**/gatsby-{browser,ssr}.{js,jsx,ts,tsx}"
     ]
   }
 }

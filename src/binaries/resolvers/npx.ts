@@ -1,7 +1,8 @@
 import parseArgs from 'minimist';
 import { isInternal } from '../../util/path.js';
+import { toBinary } from '../../util/protocols.js';
 import { getBinariesFromScript } from '../bash-parser.js';
-import { argsFrom, stripVersionFromSpecifier, toBinary } from '../util.js';
+import { argsFrom, stripVersionFromSpecifier } from '../util.js';
 import type { Resolver } from '../types.js';
 
 export const resolve: Resolver = (binary, args, { cwd, fromArgs, manifest }) => {

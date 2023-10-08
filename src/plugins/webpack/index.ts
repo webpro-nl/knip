@@ -54,13 +54,15 @@ const resolveUseItem = (use: RuleSetUseItem) => {
 };
 
 const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+  if (isProduction) return [];
+
   const config: WebpackConfig = await load(configFilePath);
 
   if (!config) return [];
 
   // Projects may use a single config function for both development and production modes, so resolve it twice
   // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
-  const passes = typeof config === 'function' ? [false, true] : [isProduction];
+  const passes = typeof config === 'function' ? [false, true] : [false];
 
   const dependencies = passes.flatMap(isProduction => {
     const env: Env = { production: isProduction };

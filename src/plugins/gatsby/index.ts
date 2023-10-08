@@ -1,5 +1,6 @@
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import { toProductionEntryPattern } from '../../util/protocols.js';
 import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -13,18 +14,26 @@ export const ENABLERS = ['gatsby', 'gatsby-cli'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['gatsby-{config,node}.{js,jsx,ts,tsx}'];
+export const CONFIG_FILE_PATTERNS = [
+  'gatsby-{config,node}.{js,jsx,ts,tsx}',
+  'plugins/**/gatsby-node.{js,jsx,ts,tsx}',
+];
 
+/** @public */
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'gatsby-{browser,ssr}.{js,jsx,ts,tsx}',
   'src/api/**/*.{js,ts}',
   'src/pages/**/*.{js,jsx,ts,tsx}',
   'src/templates/**/*.{js,jsx,ts,tsx}',
   'src/html.{js,jsx,ts,tsx}',
+  'plugins/**/gatsby-{browser,ssr}.{js,jsx,ts,tsx}',
 ];
 
-const findGatsbyDependencies: GenericPluginCallback = async configFilePath => {
+const findGatsbyDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
   const config: GatsbyConfig | GatsbyNode = await load(configFilePath);
+
+  const entryPatterns = PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern);
+  if (isProduction) return entryPatterns;
 
   if (/gatsby-config/.test(configFilePath)) {
     return (config as GatsbyConfig).plugins.map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve));

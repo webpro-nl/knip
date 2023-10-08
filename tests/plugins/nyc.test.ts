@@ -7,6 +7,6 @@ const cwd = resolve('fixtures/plugins/nyc');
 
 test('Find dependencies in nyc configuration', async () => {
   const configFilePath = join(cwd, '.nycrc.json');
-  const dependencies = await nyc.findDependencies(configFilePath);
+  const dependencies = await nyc.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, ['@istanbuljs/nyc-config-typescript']);
 });

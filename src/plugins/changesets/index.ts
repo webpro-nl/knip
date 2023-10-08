@@ -17,7 +17,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.changeset/config.json'];
 
-const findChangesetsDependencies: GenericPluginCallback = async configFilePath => {
+const findChangesetsDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+  if (isProduction) return [];
   const config: ChangesetsConfig = await load(configFilePath);
   return Array.isArray(config.changelog)
     ? [config.changelog[0]]

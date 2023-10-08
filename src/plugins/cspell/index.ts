@@ -19,7 +19,8 @@ export const CONFIG_FILE_PATTERNS = [
   'cSpell.json',
 ];
 
-const findCspellDependencies: GenericPluginCallback = async configFilePath => {
+const findCspellDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+  if (isProduction) return [];
   const config: PluginConfig = await load(configFilePath);
   const imports = config?.import ?? [];
   return imports;

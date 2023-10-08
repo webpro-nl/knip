@@ -27,7 +27,7 @@ test('Report internal exports (production)', async () => {
     isProduction: true,
   });
 
-  assert(issues.exports['helpers.ts']['internalHelper']);
+  assert(issues.exports['helpers.js']['internalHelper']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

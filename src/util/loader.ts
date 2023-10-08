@@ -5,7 +5,11 @@ import { extname } from './path.js';
 import { timerify } from './Performance.js';
 import { jiti } from './register.js';
 
+export const FAKE_PATH = '__FAKE__';
+
 const load = async (filePath: string) => {
+  // TODO: Turn into a config issue warning
+  if (filePath === FAKE_PATH) return;
   try {
     const ext = extname(filePath);
     if (/rc$/.test(filePath)) {

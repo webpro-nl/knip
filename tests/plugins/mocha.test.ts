@@ -10,17 +10,17 @@ const manifest = getManifest(cwd);
 test('Find dependencies in Mocha configuration (.mocharc.json)', async () => {
   const configFilePath = join(cwd, '.mocharc.json');
   const dependencies = await mocha.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['ts-node/register']);
+  assert.deepEqual(dependencies, ['ts-node/register', 'entry:**/test/*.{js,cjs,mjs}']);
 });
 
 test('Find dependencies in Mocha configuration (package.json)', async () => {
   const configFilePath = join(cwd, 'package.json');
   const dependencies = await mocha.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['ts-node/register']);
+  assert.deepEqual(dependencies, ['ts-node/register', 'entry:**/test/*.{js,cjs,mjs}']);
 });
 
 test('Find dependencies in Mocha configuration (.mocharc.yml)', async () => {
   const configFilePath = join(cwd, '.mocharc.yml');
   const dependencies = await mocha.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['ts-node/register']);
+  assert.deepEqual(dependencies, ['ts-node/register', 'entry:**/test/*.{js,cjs,mjs}']);
 });

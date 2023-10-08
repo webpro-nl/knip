@@ -1,7 +1,12 @@
 import { join, isInternal, toAbsolute, dirname } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { toEntryPattern } from '../../util/protocols.js';
+import type {
+  IsPluginEnabledCallback,
+  GenericPluginCallback,
+  GenericPluginCallbackOptions,
+} from '../../types/plugins.js';
 import type { Config } from '@jest/types';
 
 // https://jestjs.io/docs/configuration
@@ -16,8 +21,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =
 
 export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
-// `TEST_FILE_PATTERNS` in src/constants.ts are already included by default
-export const ENTRY_FILE_PATTERNS = [];
+/** @public */
+export const ENTRY_FILE_PATTERNS = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const config = await load(configFilePath);
@@ -34,12 +39,16 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
 
 type JestOptions = Config.InitialOptions | (() => Config.InitialOptions) | (() => Promise<Config.InitialOptions>);
 
-const resolveDependencies = (config: Config.InitialOptions): string[] => {
+const resolveDependencies = (config: Config.InitialOptions, options: GenericPluginCallbackOptions): string[] => {
+  const { isProduction } = options;
+  const entryPatterns = (config.testMatch ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
+  if (isProduction) return entryPatterns;
+
   const presets = (config.preset ? [config.preset] : []).map(preset =>
     isInternal(preset) ? preset : join(preset, 'jest-preset')
   );
   const projects = Array.isArray(config.projects)
-    ? config.projects.map(config => (typeof config === 'string' ? config : resolveDependencies(config))).flat()
+    ? config.projects.map(config => (typeof config === 'string' ? config : resolveDependencies(config, options))).flat()
     : [];
   const runner = config.runner ? [config.runner] : [];
   const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
@@ -64,6 +73,7 @@ const resolveDependencies = (config: Config.InitialOptions): string[] => {
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
 
   return [
+    ...entryPatterns,
     ...presets,
     ...projects,
     ...runner,
@@ -79,7 +89,9 @@ const resolveDependencies = (config: Config.InitialOptions): string[] => {
   ];
 };
 
-const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest }) => {
+const findJestDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { manifest, cwd } = options;
+
   let config: JestOptions = configFilePath.endsWith('package.json')
     ? manifest.jest
     : await resolveExtensibleConfig(configFilePath);
@@ -88,12 +100,14 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, { cwd
 
   if (!config) return [];
 
-  const rootDir = config.rootDir ?? '';
+  const rootDir = config.rootDir ? join(dirname(configFilePath), config.rootDir) : dirname(configFilePath);
 
-  const replaceRootDir = (name: string) =>
-    name.includes('<rootDir>') ? join(cwd, name.replace(/^.*<rootDir>/, rootDir)) : name;
+  const replaceRootDir = (name: string) => (name.includes('<rootDir>') ? name.replace(/<rootDir>/, rootDir) : name);
 
-  return resolveDependencies(config).map(replaceRootDir);
+  const dependencies = resolveDependencies(config, options);
+
+  const matchCwd = new RegExp('^' + toEntryPattern(cwd) + '/');
+  return dependencies.map(replaceRootDir).map(dependency => dependency.replace(matchCwd, toEntryPattern('')));
 };
 
 export const findDependencies = timerify(findJestDependencies);

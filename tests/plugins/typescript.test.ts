@@ -7,7 +7,7 @@ const cwd = resolve('fixtures/plugins/typescript');
 
 test('Find dependencies in typescript configuration', async () => {
   const configFilePath = join(cwd, 'tsconfig.json');
-  const dependencies = await typescript.findDependencies(configFilePath);
+  const dependencies = await typescript.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, [
     '@tsconfig/node16/tsconfig.json',
     'typescript-eslint-language-service',
@@ -18,24 +18,24 @@ test('Find dependencies in typescript configuration', async () => {
 
 test('Find dependencies in typescript configuration (jsx-preserve)', async () => {
   const configFilePath = join(cwd, 'tsconfig-jsx-preserve.json');
-  const dependencies = await typescript.findDependencies(configFilePath);
+  const dependencies = await typescript.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, []);
 });
 
 test('Find dependencies in typescript configuration (jsx)', async () => {
   const configFilePath = join(cwd, 'tsconfig-jsx.json');
-  const dependencies = await typescript.findDependencies(configFilePath);
+  const dependencies = await typescript.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, []);
 });
 
 test('Find dependencies in typescript configuration (jsx-import-source)', async () => {
   const configFilePath = join(cwd, 'tsconfig-jsx-import-source.json');
-  const dependencies = await typescript.findDependencies(configFilePath);
+  const dependencies = await typescript.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, ['preact']);
 });
 
 test('Find dependencies in typescript configuration (extends)', async () => {
   const configFilePath = join(cwd, 'tsconfig.base.json');
-  const dependencies = await typescript.findDependencies(configFilePath);
+  const dependencies = await typescript.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, ['@tsconfig/node20/tsconfig.json']);
 });

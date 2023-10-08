@@ -12,7 +12,8 @@ or `devDependencies`:
 ```json
 {
   "playwright": {
-    "entry": ["playwright.config.{js,ts}"]
+    "config": ["playwright.config.{js,ts}"],
+    "entry": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"]
   }
 }
 ```

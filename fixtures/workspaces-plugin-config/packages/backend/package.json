@@ -5,6 +5,8 @@
   },
   "devDependencies": {
     "vitest": "*",
-    "happy-dom": "*"
+    "happy-dom": "*",
+    "eslint-plugin-no-secrets": "*",
+    "eslint-plugin-prettier": "*"
   }
 }

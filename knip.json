@@ -3,5 +3,9 @@
   "entry": ["src/{index,cli}.ts!"],
   "project": ["src/**/*.ts!"],
   "ignore": ["**/fixtures", "**/_template"],
-  "ignoreDependencies": ["@pnpm/logger"]
+  "ignoreDependencies": ["@pnpm/logger"],
+  "node-test-runner": {
+    "entry": ["tests/**/*.test.ts"],
+    "project": ["tests/**/*.ts"]
+  }
 }
