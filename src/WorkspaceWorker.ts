@@ -2,6 +2,7 @@ import * as npm from './manifest/index.js';
 import * as plugins from './plugins/index.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
+import { FAKE_PATH } from './util/loader.js';
 import { get, getKeysByValue } from './util/object.js';
 import { join, toPosix } from './util/path.js';
 import {
@@ -269,7 +270,7 @@ export class WorkspaceWorker {
           if (patterns.length > 0 && configFilePaths.length === 0) continue;
 
           // Plugin has no config files configured, call it once to still get the entry:/production: patterns
-          if (patterns.length === 0) configFilePaths.push('__FAKE__');
+          if (patterns.length === 0) configFilePaths.push(FAKE_PATH);
 
           const pluginDependencies: Set<string> = new Set();
 
