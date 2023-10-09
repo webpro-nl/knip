@@ -25,7 +25,7 @@ export class SourceFileManager {
     if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const contents = ts.sys.readFile(filePath);
     if (typeof contents !== 'string') {
-      if (isInternal(filePath)) throw new Error(`Unable to read ${filePath}`);
+      if (isInternal(filePath)) debugLog(`Unable to read ${filePath}`);
       return this.createSourceFile(filePath, '');
     }
     const ext = extname(filePath);
