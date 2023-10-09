@@ -45,7 +45,7 @@
     "@ericcornelissen/bash-parser": "^0.5.2",
     "@npmcli/map-workspaces": "^3.0.4",
     "@pnpm/logger": "5.0.0",
-    "@pnpm/workspace.pkgs-graph": "2.0.6",
+    "@pnpm/workspace.pkgs-graph": "2.0.7",
     "@snyk/github-codeowners": "^1.1.0",
     "chalk": "^5.2.0",
     "easy-table": "^1.2.0",
