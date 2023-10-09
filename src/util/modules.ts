@@ -46,11 +46,7 @@ export const getEntryPathFromManifest = (cwd: string, dir: string, manifest: Pac
   }
 
   if (exports) {
-    if (typeof exports === 'string') {
-      entryPaths.add(exports);
-    } else {
-      getStringValues(exports).forEach(item => entryPaths.add(item));
-    }
+    getStringValues(exports).forEach(item => entryPaths.add(item));
   }
 
   // Glob, as we only want source files that exist and not (generated) files that are .gitignore'd

@@ -16,6 +16,7 @@ export const getValuesByKeyDeep = (obj: any, key: string): unknown[] => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getStringValues = (obj: any): string[] => {
+  if (typeof obj === 'string') return [obj];
   let values: string[] = [];
   for (const prop in obj) {
     if (obj[prop]) {
