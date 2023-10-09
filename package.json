@@ -44,6 +44,7 @@
   "dependencies": {
     "@ericcornelissen/bash-parser": "^0.5.2",
     "@npmcli/map-workspaces": "^3.0.4",
+    "@pkgjs/parseargs": "0.11.0",
     "@pnpm/logger": "5.0.0",
     "@pnpm/workspace.pkgs-graph": "2.0.7",
     "@snyk/github-codeowners": "^1.1.0",
@@ -74,6 +75,7 @@
     "@types/minimist": "1.2.3",
     "@types/node": "20.8.3",
     "@types/npmcli__map-workspaces": "3.0.2",
+    "@types/pkgjs__parseargs": "0.10.1",
     "@types/webpack": "5.28.3",
     "@typescript-eslint/eslint-plugin": "6.7.4",
     "@typescript-eslint/parser": "6.7.4",

@@ -11,7 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v1
-      - run: git apply bun-compat.diff
       - run: bun install
       - run: bun run build
       - run: bun link
