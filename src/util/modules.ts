@@ -15,6 +15,12 @@ export const getPackageNameFromFilePath = (value: string) => {
   return value;
 };
 
+export const normalizeSpecifierFromFilePath = (value: string) => {
+  const match = toPosix(value).match(/.*\/node_modules\/(.+)/);
+  if (match) return match[match.length - 1];
+  return value;
+};
+
 export const isMaybePackageName = (specifier: string) => /^@?[a-z0-9]/.test(specifier);
 
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith('@types/');

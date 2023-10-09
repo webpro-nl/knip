@@ -13,6 +13,7 @@ import {
   getEntryPathFromManifest,
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
+  normalizeSpecifierFromFilePath,
 } from './util/modules.js';
 import { dirname, isInNodeModules, join, isInternal } from './util/path.js';
 import { fromBinary, isBinary } from './util/protocols.js';
@@ -112,11 +113,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
         if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
 
-        // Patterns: @local/package/file, self-reference/file
+        // Patterns: @local/package/file, self-reference/file, ./node_modules/@scope/pkg/tsconfig.json
         if (packageName && specifier !== packageName) {
           const otherWorkspace = chief.availableWorkspaceManifests.find(w => w.manifest.name === packageName);
           if (otherWorkspace) {
-            const filePath = _resolveSpecifier(otherWorkspace.dir, specifier);
+            const filePath = _resolveSpecifier(otherWorkspace.dir, normalizeSpecifierFromFilePath(specifier));
             if (filePath) {
               principal.addEntryPath(filePath, { skipExportsAnalysis: true });
             } else {
