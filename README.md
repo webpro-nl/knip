@@ -23,36 +23,37 @@ The dots don't connect themselves. This is where Knip comes in:
 - [x] Finds binaries and dependencies in npm scripts, and a lot more locations
 - [x] Finds unused members of classes and enums
 - [x] Finds duplicate exports
+- [x] Use [production and strict mode][4] to focus on isolated production code
 - [x] Supports any combination of JavaScript and TypeScript
-- [x] Multiple built-in [reporters][4] (or use [custom reporters][5] and [preprocessors][6])
-- [x] Understands [JSDoc/TSDoc tags][7] (e.g. `@public` and `@internal`)
+- [x] Multiple built-in [reporters][5] (or use [custom reporters][6] and [preprocessors][7])
+- [x] Understands [JSDoc/TSDoc tags][8] (e.g. `@public` and `@internal`)
 - [x] Run Knip as part of your CI environment to detect issues and prevent regressions
 
 Knip shines in both small and large projects. It's a fresh take on keeping your projects clean & tidy!
 
-[![An orange cow with scissors, Van Gogh style][9]][8] <sup>_“An orange cow with scissors, Van Gogh style” - generated
+[![An orange cow with scissors, Van Gogh style][10]][9] <sup>_“An orange cow with scissors, Van Gogh style” - generated
 with OpenAI_</sup>
 
-For updates or questions, come hang out in [The Knip Barn (Discord)][10], or follow [@webprolific (Twitter)][11] or
-[@webpro (fosstodon.org)][12]. Please use GitHub to [report issues][13].
+For updates or questions, come hang out in [The Knip Barn (Discord)][11], or follow [@webprolific (Twitter)][12] or
+[@webpro (fosstodon.org)][13]. Please use GitHub to [report issues][14].
 
 ## Contents
 
-- [Getting Started][14]
-  - [Installation][15]
-  - [Default Configuration][16]
-  - [Let's Go!][17]
-- [Configuration][18]
-  - [Entry Files][19]
+- [Getting Started][15]
+  - [Installation][16]
+  - [Default Configuration][17]
+  - [Let's Go!][18]
+- [Configuration][19]
+  - [Entry Files][20]
   - [Workspaces][1]
   - [Plugins][2]
   - [Compilers][3]
-  - [Ignore files, binaries, dependencies and workspaces][20]
-  - [Public exports][21]
-  - [Ignore exports used in file][22]
-  - [Include exports in entry files][23]
-  - [Paths][24]
-- [Production Mode][25]
+  - [Ignore files, binaries, dependencies and workspaces][21]
+  - [Public exports][22]
+  - [Ignore exports used in file][23]
+  - [Include exports in entry files][24]
+  - [Paths][25]
+- [Production Mode][4]
   - [Strict][26]
   - [Ignore `@internal` exports][27]
   - [Plugins][28]
@@ -60,9 +61,9 @@ For updates or questions, come hang out in [The Knip Barn (Discord)][10], or fol
   - [Screenshots][30]
   - [Reading the report][31]
   - [Rules & Filters][32]
-  - [Reporters][4]
+  - [Reporters][5]
 - [Fixing Issues][33]
-- [JSDoc tags][7]
+- [JSDoc tags][8]
 - [Command Line Options][34]
 - [Potential boost with `--no-gitignore`][35]
 - [Comparison & Migration][36]
@@ -88,7 +89,7 @@ Knip supports LTS versions of Node.js, and currently requires at least Node.js v
 
 ### Default Configuration
 
-Knip has good defaults and you can run it without any configuration. The (simplified) default config:
+Knip has good defaults and aims for no or little configuration. The (simplified) default config:
 
 ```json
 {
@@ -97,9 +98,9 @@ Knip has good defaults and you can run it without any configuration. The (simpli
 }
 ```
 
-There's more, jump to [Entry Files][19] for details.
+There's more, jump to [Entry Files][20] for details.
 
-Places where Knip looks for configuration (ordered by priority):
+Knip looks for this configuration file (ordered by priority):
 
 - `knip.json`
 - `knip.jsonc`
@@ -122,7 +123,7 @@ const config: KnipConfig = {
 export default config;
 ```
 
-Use `--config path/to/knip.json` to use a different location.
+Use `--config path/to/knip.config.json` for a different path.
 
 ### Let's Go!
 
@@ -136,8 +137,9 @@ Run the checks with `npx knip`. Or first add this script to `package.json`:
 }
 ```
 
-Then use `npm run knip` to analyze the project and output unused files, dependencies and exports. Knip works just fine
-with `yarn` or `pnpm` as well.
+Then use `npm run knip` to analyze the project and output unused files, dependencies and exports.
+
+Knip works just fine with `yarn` or `pnpm` or `bun`.
 
 See [Command Line Options][34] for an overview of available CLI options.
 
@@ -150,15 +152,15 @@ In addition to `index.js`, the following file names and extensions are also cons
 - `index`, `main` and `cli`
 - `js`, `mjs`, `cjs`, `jsx`, `ts`, `mts`, `cts` and `tsx`
 
-This means files like `main.cjs` and `src/cli.ts` are automatically added as entry files. Knip looks for entry files at
-those default locations, but also in other places:
+This means files like `main.cjs` and `src/cli.ts` are automatically added as entry files. Knip also looks for `entry`
+files in other places:
 
 - The `main`, `bin` and `exports` fields of `package.json`.
-- [Plugins][2] such as for Next.js, Remix, Gatsby or Svelte add entry files.
-- The `scripts` in package.json or other scripts may provide entry files.
+- [Plugins][2] such as for Jest, Next.js, Svelte or Vitest etc. add entry files.
+- The `scripts` in package.json and other scripts may provide entry files.
 
-Knip does this for each [workspace][1] it finds, trying to minimize the configuration to suit your project. In a
-perfectly boring world where everything is according to defaults you wouldn't even need a `knip.json` file at all.
+Knip does this for each [workspace][1] it finds. In a perfectly boring world where everything is according to defaults
+you wouldn't even need a `knip.json` file at all.
 
 Larger projects tend to have more things customized, and therefore probably get more out of Knip with a configuration
 file. Let's say you are using `.ts` files exclusively and have all source files only in the `src` directory:
@@ -202,7 +204,7 @@ Here's an example `knip.json` configuration with some custom `entry` and `projec
 ```
 
 It might be useful to run Knip first with no or little configuration to see where it needs custom `entry` and/or
-`project` files. Each workspace has the same [default configuration][18].
+`project` files. Each workspace has the same [default configuration][19].
 
 The root workspace is named `"."` under `workspaces` (like in the example).
 
@@ -540,6 +542,9 @@ The report contains the following types of issues:
 | Unused exported class members       | unable to find references to this class member  | `classMembers` |
 | Duplicate exports                   | the same thing is exported more than once       | `duplicates`   |
 
+Note that `devDependencies` is covered within a single key for all `dependencies`. In [strict production mode][4],
+`devDependencies` are not included.
+
 When an issue type has zero issues, it is not shown.
 
 Getting too many reported issues and false positives? Read more about [handling issues][49].
@@ -753,7 +758,7 @@ unimported
 knip --production --dependencies --include files
 ```
 
-Also see [production mode][25].
+Also see [production mode][4].
 
 ### ts-unused-exports
 
@@ -793,7 +798,7 @@ Many thanks to some of the early adopters of Knip:
 
 ## Articles, etc.
 
-- Discord: hang out in [The Knip Barn][10]
+- Discord: hang out in [The Knip Barn][11]
 - Ask your questions in the [Knip knowledge base][67] (powered by OpenAI and [7-docs][68], experimental!)
 - Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports, And Dependencies][69]
 - Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code and types][70]
@@ -820,28 +825,28 @@ Special thanks to the wonderful people who have contributed to this project:
 [1]: #workspaces
 [2]: #plugins
 [3]: #compilers
-[4]: #reporters
-[5]: #custom-reporters
-[6]: #preprocessers
-[7]: #jsdoc-tags
-[8]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
-[9]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
-[10]: https://discord.gg/r5uXTtbTpc
-[11]: https://twitter.com/webprolific
-[12]: https://fosstodon.org/@webpro
-[13]: https://github.com/webpro/knip/issues
-[14]: #getting-started
-[15]: #installation
-[16]: #default-configuration
-[17]: #lets-go
-[18]: #configuration
-[19]: #entry-files
-[20]: #ignore-files-binaries-dependencies-and-workspaces
-[21]: #public-exports
-[22]: #ignore-exports-used-in-file
-[23]: #include-exports-in-entry-files
-[24]: #paths
-[25]: #production-mode
+[4]: #production-mode
+[5]: #reporters
+[6]: #custom-reporters
+[7]: #preprocessers
+[8]: #jsdoc-tags
+[9]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
+[10]: ./assets/cow-with-orange-scissors-van-gogh-style.webp
+[11]: https://discord.gg/r5uXTtbTpc
+[12]: https://twitter.com/webprolific
+[13]: https://fosstodon.org/@webpro
+[14]: https://github.com/webpro/knip/issues
+[15]: #getting-started
+[16]: #installation
+[17]: #default-configuration
+[18]: #lets-go
+[19]: #configuration
+[20]: #entry-files
+[21]: #ignore-files-binaries-dependencies-and-workspaces
+[22]: #public-exports
+[23]: #ignore-exports-used-in-file
+[24]: #include-exports-in-entry-files
+[25]: #paths
 [26]: #strict
 [27]: #ignore-internal-exports
 [28]: #plugins-1
