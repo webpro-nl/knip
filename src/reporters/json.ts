@@ -52,6 +52,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
       ...(report.devDependencies && { devDependencies: [] }),
       ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),
       ...(report.unlisted && { unlisted: [] }),
+      ...(report.binaries && { binaries: [] }),
       ...(report.unresolved && { unresolved: [] }),
       ...((report.exports || report.nsExports) && { exports: [] }),
       ...((report.types || report.nsTypes) && { types: [] }),
