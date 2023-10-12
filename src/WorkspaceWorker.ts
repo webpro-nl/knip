@@ -267,7 +267,13 @@ export class WorkspaceWorker {
           debugLogArray(`Found ${plugin.NAME} config file paths`, configFilePaths);
 
           // Bail out, no config files found for this plugin
-          if (patterns.length > 0 && configFilePaths.length === 0) continue;
+          if (patterns.length > 0 && configFilePaths.length === 0) {
+            if (typeof pluginConfig !== 'boolean' && pluginConfig.entry !== null && pluginConfig.entry.length > 0) {
+              // ...but only if no entry files are set
+            } else {
+              continue;
+            }
+          }
 
           // Plugin has no config files configured, call it once to still get the entry:/production: patterns
           if (patterns.length === 0) configFilePaths.push(FAKE_PATH);
