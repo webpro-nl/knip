@@ -3,7 +3,7 @@ import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
-import type { VitestConfig, VitestWorkspaceConfig } from './types.js';
+import type { VitestConfigOrFn, VitestWorkspaceConfig } from './types.js';
 import type {
   IsPluginEnabledCallback,
   GenericPluginCallback,
@@ -24,10 +24,14 @@ export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vitest.{workspace,proj
 /** @public */
 export const ENTRY_FILE_PATTERNS = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 
-export const findVitestDeps = (config: VitestConfig, options: GenericPluginCallbackOptions) => {
+export const findVitestDeps = (config: VitestConfigOrFn, options: GenericPluginCallbackOptions) => {
   const { isProduction } = options;
 
-  if (!config || !config.test) return [];
+  if (!config) return [];
+
+  config = typeof config === 'function' ? config() : config;
+
+  if (!config.test) return [];
 
   const testConfig = config.test;
 
@@ -43,7 +47,7 @@ export const findVitestDeps = (config: VitestConfig, options: GenericPluginCallb
 };
 
 const findVitestDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const config: VitestConfig | VitestWorkspaceConfig = await load(configFilePath);
+  const config: VitestConfigOrFn | VitestWorkspaceConfig = await load(configFilePath);
   return compact([config].flat().flatMap(cfg => (!cfg || typeof cfg === 'string' ? [] : findVitestDeps(cfg, options))));
 };
 

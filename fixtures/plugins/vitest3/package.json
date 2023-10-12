@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/vitest3",
+  "devDependencies": {
+    "@swc/plugin-styled-components": "*",
+    "@vitejs/plugin-react-swc": "*",
+    "vite": "*",
+    "vite-plugin-checker": "*",
+    "vite-plugin-svgr": "*",
+    "vitest": "^0.34.6"
+  }
+}

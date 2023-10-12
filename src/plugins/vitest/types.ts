@@ -11,4 +11,6 @@ export interface VitestConfig {
   };
 }
 
+export type VitestConfigOrFn = VitestConfig | (() => VitestConfig);
+
 export type VitestWorkspaceConfig = (string | VitestConfig)[];
