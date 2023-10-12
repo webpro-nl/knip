@@ -56,6 +56,7 @@ export const IGNORED_FILE_EXTENSIONS = [
   '.sass',
   '.scss',
   '.svg',
+  '.sh',
   '.ttf',
   '.webp',
   '.woff',
