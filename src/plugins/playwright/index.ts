@@ -31,12 +31,14 @@ export const toEntryPatterns = (
   return patterns.map(pattern => toEntryPattern(join(dir, pattern)));
 };
 
-const findPlaywrightDependencies: GenericPluginCallback = async (configFilePath, { cwd }) => {
-  const config: PlaywrightTestConfig = await load(configFilePath);
-  const projects = config.projects ? [config, ...config.projects] : [config];
-  const patterns = projects.flatMap(config => toEntryPatterns(config.testMatch, cwd, configFilePath, config));
-  if (patterns.length > 0) return patterns;
-  return toEntryPatterns(ENTRY_FILE_PATTERNS, cwd, configFilePath, config);
+const findPlaywrightDependencies: GenericPluginCallback = async (configFilePath, { cwd, config }) => {
+  const cfg: PlaywrightTestConfig | undefined = await load(configFilePath);
+  if (cfg) {
+    const projects = cfg.projects ? [cfg, ...cfg.projects] : [cfg];
+    const patterns = projects.flatMap(config => toEntryPatterns(config.testMatch, cwd, configFilePath, config));
+    if (patterns.length > 0) return patterns;
+  }
+  return toEntryPatterns(config?.entry ?? ENTRY_FILE_PATTERNS, cwd, configFilePath, cfg ?? {});
 };
 
 export const findDependencies = timerify(findPlaywrightDependencies);
