@@ -67,18 +67,18 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
   const dependencies = passes.flatMap(isProduction => {
     const env: Env = { production: isProduction };
     const argv: Argv = { mode: isProduction ? 'production' : 'development' };
-    const cfg = typeof config === 'function' ? config(env, argv) : config;
+    const resolvedConfig = typeof config === 'function' ? config(env, argv) : config;
 
-    return [cfg].flat().flatMap(config => {
-      const dependencies = (config.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []).map(loader =>
+    return [resolvedConfig].flat().flatMap(options => {
+      const dependencies = (options.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []).map(loader =>
         loader.replace(/\?.*/, '')
       );
       const entries: string[] = [];
 
-      if (typeof cfg.entry === 'string') entries.push(cfg.entry);
-      else if (Array.isArray(cfg.entry)) entries.push(...cfg.entry);
-      else if (typeof cfg.entry === 'object') {
-        Object.values(cfg.entry).map(entry => {
+      if (typeof options.entry === 'string') entries.push(options.entry);
+      else if (Array.isArray(options.entry)) entries.push(...options.entry);
+      else if (typeof options.entry === 'object') {
+        Object.values(options.entry).map(entry => {
           if (typeof entry === 'string') entries.push(entry);
           else if (Array.isArray(entry)) entries.push(...entry);
           else if (typeof entry === 'function') entries.push((entry as () => string)());
@@ -86,7 +86,7 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
         });
       }
 
-      return [...dependencies, ...entries.map(entry => (config.context ? join(config.context, entry) : entry))];
+      return [...dependencies, ...entries.map(entry => (options.context ? join(options.context, entry) : entry))];
     });
   });
 
