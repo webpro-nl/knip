@@ -37,3 +37,12 @@ jobs:
       - run: bun install
       - run: bun link knip
       - run: bun knip
+
+      - name: Test Knip against 10ten-ja-reader
+        uses: actions/checkout@v3
+        with:
+          repository: birchill/10ten-ja-reader
+          path: 10ten-ja-reader
+      - run: bun install
+      - run: bun link knip
+      - run: bun knip
