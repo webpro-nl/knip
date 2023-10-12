@@ -13,8 +13,8 @@ or `devDependencies`:
 ```json
 {
   "storybook": {
-    "config": [".storybook/{main,manager,test-runner}.{js,ts}"],
-    "entry": [".storybook/preview.{js,jsx,ts,tsx}", "**/*.stories.{js,jsx,ts,tsx}"],
+    "config": [".storybook/{main,test-runner}.{js,ts}"],
+    "entry": [".storybook/{manager,preview}.{js,jsx,ts,tsx}", "**/*.stories.{js,jsx,ts,tsx}"],
     "project": [".storybook/**/*.{js,jsx,ts,tsx}"]
   }
 }
