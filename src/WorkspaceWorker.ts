@@ -130,7 +130,7 @@ export class WorkspaceWorker {
 
     const enabledPluginNames = this.enabledPlugins.map(name => plugins[name].NAME);
 
-    debugLogObject(`Enabled plugins (${this.name})`, enabledPluginNames);
+    debugLogObject(this.name, `Enabled plugins (${this.name})`, enabledPluginNames);
   }
 
   private async initReferencedDependencies() {
@@ -244,6 +244,7 @@ export class WorkspaceWorker {
   }
 
   private async findDependenciesByPlugins() {
+    const name = this.name;
     const cwd = this.dir;
     const ignore = this.getIgnorePatterns();
 
@@ -264,7 +265,7 @@ export class WorkspaceWorker {
               get(this.manifest, 'PACKAGE_JSON_PATH' in plugin ? plugin.PACKAGE_JSON_PATH : pluginName)
           );
 
-          debugLogArray(`Found ${plugin.NAME} config file paths`, configFilePaths);
+          debugLogArray([name, plugin.NAME], 'config file paths', configFilePaths);
 
           // Bail out, no config files found for this plugin
           if (patterns.length > 0 && configFilePaths.length === 0) {
@@ -300,7 +301,7 @@ export class WorkspaceWorker {
             });
           }
 
-          debugLogArray(`Dependencies referenced in ${plugin.NAME}`, pluginDependencies);
+          debugLogArray([name, plugin.NAME], 'dependencies', pluginDependencies);
         }
       }
     }

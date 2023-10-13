@@ -25,13 +25,13 @@ export class SourceFileManager {
     if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const contents = ts.sys.readFile(filePath);
     if (typeof contents !== 'string') {
-      if (isInternal(filePath)) debugLog(`Unable to read ${filePath}`);
+      if (isInternal(filePath)) debugLog('*', `Unable to read ${filePath}`);
       return this.createSourceFile(filePath, '');
     }
     const ext = extname(filePath);
     const compiler = this.syncCompilers?.get(ext);
     const compiled = compiler ? compiler(contents, filePath) : contents;
-    if (compiler) debugLog(`Compiled ${filePath}`);
+    if (compiler) debugLog('*', `Compiled ${filePath}`);
     return this.createSourceFile(filePath, compiled);
   }
 
@@ -51,7 +51,7 @@ export class SourceFileManager {
     const compiler = this.asyncCompilers?.get(ext);
     if (compiler) {
       const compiled = await compiler(contents, filePath);
-      debugLog(`Compiled ${filePath}`);
+      debugLog('*', `Compiled ${filePath}`);
       this.createSourceFile(filePath, compiled);
     }
   }
