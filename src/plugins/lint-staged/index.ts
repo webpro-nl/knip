@@ -24,22 +24,22 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { cwd, manifest, isProduction } = options;
+
   if (isProduction) return [];
 
-  let config: LintStagedConfig = configFilePath.endsWith('package.json')
+  let localConfig: LintStagedConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest['lint-staged']
     : await load(configFilePath);
 
-  if (!config) return [];
+  if (typeof localConfig === 'function') localConfig = localConfig();
 
-  if (typeof config === 'function') {
-    config = config();
-  }
+  if (!localConfig) return [];
 
-  const dependencies: Set<string> = new Set();
+  const dependencies = new Set<string>();
 
-  for (const entry of Object.values(config).flat()) {
+  for (const entry of Object.values(localConfig).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
     const options = { cwd, manifest };
     _getDependenciesFromScripts(scripts, options).forEach(identifier => dependencies.add(identifier));

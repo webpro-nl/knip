@@ -14,12 +14,16 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['project.json', '{apps,libs}/**/project.json'];
 
-const findNxDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+const findNxDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { cwd, manifest, isProduction } = options;
+
   if (isProduction) return [];
 
-  const config: NxProjectConfiguration = await load(configFilePath);
-  if (!config) return [];
-  const targets = config.targets ? Object.values(config.targets) : [];
+  const localConfig: NxProjectConfiguration | undefined = await load(configFilePath);
+
+  if (!localConfig) return [];
+
+  const targets = localConfig.targets ? Object.values(localConfig.targets) : [];
 
   const executors = compact(
     targets

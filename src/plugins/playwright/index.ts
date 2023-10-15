@@ -14,10 +14,10 @@ export const ENABLERS = ['@playwright/test'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
+export const CONFIG_FILE_PATTERNS = ['playwright.config.{js,ts}'];
+
 /** @public */
 export const ENTRY_FILE_PATTERNS = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
-
-export const CONFIG_FILE_PATTERNS = ['playwright.config.{js,ts}'];
 
 export const toEntryPatterns = (
   testMatch: string | RegExp | Array<string | RegExp> | undefined,
@@ -31,14 +31,18 @@ export const toEntryPatterns = (
   return patterns.map(pattern => toEntryPattern(join(dir, pattern)));
 };
 
-const findPlaywrightDependencies: GenericPluginCallback = async (configFilePath, { cwd, config }) => {
-  const cfg: PlaywrightTestConfig | undefined = await load(configFilePath);
-  if (cfg) {
-    const projects = cfg.projects ? [cfg, ...cfg.projects] : [cfg];
+const findPlaywrightDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { cwd, config } = options;
+
+  const localConfig: PlaywrightTestConfig | undefined = await load(configFilePath);
+
+  if (localConfig) {
+    const projects = localConfig.projects ? [localConfig, ...localConfig.projects] : [localConfig];
     const patterns = projects.flatMap(config => toEntryPatterns(config.testMatch, cwd, configFilePath, config));
     if (patterns.length > 0) return patterns;
   }
-  return toEntryPatterns(config?.entry ?? ENTRY_FILE_PATTERNS, cwd, configFilePath, cfg ?? {});
+
+  return (config?.entry ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
 };
 
 export const findDependencies = timerify(findPlaywrightDependencies);

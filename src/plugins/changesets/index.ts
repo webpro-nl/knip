@@ -19,11 +19,15 @@ export const CONFIG_FILE_PATTERNS = ['.changeset/config.json'];
 
 const findChangesetsDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
   if (isProduction) return [];
-  const config: ChangesetsConfig = await load(configFilePath);
-  return Array.isArray(config.changelog)
-    ? [config.changelog[0]]
-    : typeof config.changelog === 'string'
-    ? [config.changelog]
+
+  const localConfig: ChangesetsConfig | undefined = await load(configFilePath);
+
+  if (!localConfig) return [];
+
+  return Array.isArray(localConfig.changelog)
+    ? [localConfig.changelog[0]]
+    : typeof localConfig.changelog === 'string'
+    ? [localConfig.changelog]
     : [];
 };
 

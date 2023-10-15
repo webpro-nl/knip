@@ -15,15 +15,15 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.markdownlint.{json,jsonc}', '.markdownlint.{yml,yaml}'];
 
-const findMarkdownlintConfigDependencies: GenericPluginCallback = async (
-  configFilePath,
-  { manifest, isProduction }
-) => {
+const findMarkdownlintConfigDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { manifest, isProduction } = options;
+
   if (isProduction) return [];
 
-  const config: MarkdownlintConfig = await load(configFilePath);
-  const extend = config?.extends ? [config.extends] : [];
-  const scripts = manifest.scripts
+  const localConfig: MarkdownlintConfig | undefined = await load(configFilePath);
+
+  const extend = localConfig?.extends ? [localConfig.extends] : [];
+  const scripts = manifest?.scripts
     ? Object.values(manifest.scripts).filter((script): script is string => typeof script === 'string')
     : [];
   const uses = scripts

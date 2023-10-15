@@ -10,17 +10,17 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 export const NAME = 'GitHub Actions';
 
 /** @public */
-export const ENABLERS = 'This plugin is enabled when a `.yml` file is found in the `.github/workflows` folder.';
+export const ENABLERS =
+  'This plugin is enabled when a `.yml` or `.yaml` file is found in the `.github/workflows` folder.';
 
 export const isEnabled: IsPluginEnabledCallback = async ({ cwd }) =>
-  Boolean(await _firstGlob({ cwd, patterns: ['.github/workflows/*.yml'] }));
+  Boolean(await _firstGlob({ cwd, patterns: ['.github/workflows/*.{yml,yaml}'] }));
 
-export const CONFIG_FILE_PATTERNS = ['.github/workflows/*.yml', '.github/**/action.{yml,yaml}'];
+export const CONFIG_FILE_PATTERNS = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'];
 
-const findGithubActionsDependencies: GenericPluginCallback = async (
-  configFilePath,
-  { cwd, manifest, isProduction }
-) => {
+const findGithubActionsDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { cwd, manifest, isProduction } = options;
+
   if (isProduction) return [];
 
   const config = await load(configFilePath);

@@ -1,9 +1,15 @@
 {
   "name": "@workspaces-plugin-config/frontend",
   "scripts": {
+    "dev": "next dev",
+    "start": "next start",
     "test": "vitest"
   },
+  "dependencies": {
+    "next": "*"
+  },
   "devDependencies": {
+    "next": "*",
     "vitest": "*",
     "jsdom": "*",
     "@rollup/plugin-commonjs": "*"

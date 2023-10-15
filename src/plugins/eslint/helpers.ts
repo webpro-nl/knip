@@ -35,32 +35,32 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
 
 type GetDependenciesDeep = (
   configFilePath: string,
-  dependencies: Set<string>,
-  options: { cwd: string; manifest: Manifest }
+  options: { cwd: string; manifest: Manifest },
+  dependencies?: Set<string>
 ) => Promise<Set<string>>;
 
-export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, dependencies = new Set(), options) => {
+export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, options, dependencies = new Set()) => {
   const addAll = (deps: string[] | Set<string>) => deps.forEach(dependency => dependencies.add(dependency));
 
-  const config = configFilePath.endsWith('package.json')
+  const localConfig: ESLintConfig | undefined = configFilePath.endsWith('package.json')
     ? options.manifest[PACKAGE_JSON_PATH]
     : /(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
     ? await load(configFilePath)
     : await fallback(configFilePath);
 
-  if (config) {
-    if (config.extends) {
-      for (const extend of [config.extends].flat()) {
+  if (localConfig) {
+    if (localConfig.extends) {
+      for (const extend of [localConfig.extends].flat()) {
         if (isInternal(extend)) {
           const filePath = toAbsolute(extend, dirname(configFilePath));
           const extendConfigFilePath = _resolve(filePath);
           dependencies.add(extendConfigFilePath);
-          addAll(await getDependenciesDeep(extendConfigFilePath, dependencies, options));
+          addAll(await getDependenciesDeep(extendConfigFilePath, options, dependencies));
         }
       }
     }
 
-    addAll(getDependencies(config));
+    addAll(getDependencies(localConfig));
   }
 
   return dependencies;

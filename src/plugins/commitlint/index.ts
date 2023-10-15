@@ -25,10 +25,14 @@ export const CONFIG_FILE_PATTERNS = [
 
 const findCommitLintDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   if (isProduction) return [];
-  const config: CommitLintConfig = configFilePath.endsWith('package.json')
+
+  const localConfig: CommitLintConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest.commitlint
     : await load(configFilePath);
-  return config?.extends ? [config.extends].flat() : [];
+
+  if (!localConfig) return [];
+
+  return localConfig.extends ? [localConfig.extends].flat() : [];
 };
 
 export const findDependencies = timerify(findCommitLintDependencies);

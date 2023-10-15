@@ -14,10 +14,7 @@ export const ENABLERS = ['gatsby', 'gatsby-cli'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = [
-  'gatsby-{config,node}.{js,jsx,ts,tsx}',
-  'plugins/**/gatsby-node.{js,jsx,ts,tsx}',
-];
+export const CONFIG_FILE_PATTERNS = ['gatsby-{config,node}.{js,jsx,ts,tsx}', 'plugins/**/gatsby-node.{js,jsx,ts,tsx}'];
 
 /** @public */
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [
@@ -30,19 +27,20 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
 ];
 
 const findGatsbyDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
-  const config: GatsbyConfig | GatsbyNode = await load(configFilePath);
+  const localConfig: GatsbyConfig | GatsbyNode | undefined = await load(configFilePath);
 
   const entryPatterns = PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern);
-  if (isProduction) return entryPatterns;
+
+  if (isProduction || !localConfig) return entryPatterns;
 
   if (/gatsby-config/.test(configFilePath)) {
-    return (config as GatsbyConfig).plugins.map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve));
+    return (localConfig as GatsbyConfig).plugins.map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve));
   }
 
   if (/gatsby-node/.test(configFilePath)) {
-    const plugins: Set<string> = new Set();
+    const plugins = new Set<string>();
     const actions: GatsbyActions['actions'] = { setBabelPlugin: plugin => plugins.add(plugin.name) };
-    const _config = config as GatsbyNode;
+    const _config = localConfig as GatsbyNode;
     if (typeof _config.onCreateBabelConfig === 'function') {
       _config.onCreateBabelConfig({ actions });
     }

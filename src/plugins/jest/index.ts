@@ -2,12 +2,12 @@ import { join, isInternal, toAbsolute, dirname } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
+import type { JestConfig, JestInitialOptions } from './types.js';
 import type {
   IsPluginEnabledCallback,
   GenericPluginCallback,
   GenericPluginCallbackOptions,
 } from '../../types/plugins.js';
-import type { Config } from '@jest/types';
 
 // https://jestjs.io/docs/configuration
 
@@ -37,11 +37,11 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   return config;
 };
 
-type JestOptions = Config.InitialOptions | (() => Config.InitialOptions) | (() => Promise<Config.InitialOptions>);
-
-const resolveDependencies = (config: Config.InitialOptions, options: GenericPluginCallbackOptions): string[] => {
+const resolveDependencies = (config: JestInitialOptions, options: GenericPluginCallbackOptions): string[] => {
   const { isProduction } = options;
-  const entryPatterns = (config.testMatch ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
+
+  const entryPatterns = (options.config?.entry ?? config.testMatch ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
+
   if (isProduction) return entryPatterns;
 
   const presets = (config.preset ? [config.preset] : []).map(preset =>
@@ -92,19 +92,20 @@ const resolveDependencies = (config: Config.InitialOptions, options: GenericPlug
 const findJestDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { manifest, cwd } = options;
 
-  let config: JestOptions = configFilePath.endsWith('package.json')
+  let localConfig: JestConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest.jest
     : await resolveExtensibleConfig(configFilePath);
 
-  if (typeof config === 'function') config = await config();
+  if (typeof localConfig === 'function') localConfig = await localConfig();
 
-  if (!config) return [];
+  // Normally we should bail out here, but to avoid duplication and keep it easy we carry on with fake local config
+  if (!localConfig) localConfig = {};
 
-  const rootDir = config.rootDir ? join(dirname(configFilePath), config.rootDir) : dirname(configFilePath);
+  const rootDir = localConfig.rootDir ? join(dirname(configFilePath), localConfig.rootDir) : dirname(configFilePath);
 
   const replaceRootDir = (name: string) => (name.includes('<rootDir>') ? name.replace(/<rootDir>/, rootDir) : name);
 
-  const dependencies = resolveDependencies(config, options);
+  const dependencies = resolveDependencies(localConfig, options);
 
   const matchCwd = new RegExp('^' + toEntryPattern(cwd) + '/');
   return dependencies.map(replaceRootDir).map(dependency => dependency.replace(matchCwd, toEntryPattern('')));

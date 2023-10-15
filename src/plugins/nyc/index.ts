@@ -1,12 +1,9 @@
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import type { NycConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://www.npmjs.com/package/nyc
-
-type NycConfig = {
-  extends: string;
-};
 
 export const NAME = 'nyc';
 
@@ -17,10 +14,14 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
 
-const findNycDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+const findNycDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { isProduction } = options;
+
   if (isProduction) return [];
-  const config: NycConfig = await load(configFilePath);
-  return config.extends ? [config.extends].flat() : [];
+
+  const localConfig: NycConfig | undefined = await load(configFilePath);
+
+  return localConfig?.extends ? [localConfig.extends].flat() : [];
 };
 
 export const findDependencies = timerify(findNycDependencies);

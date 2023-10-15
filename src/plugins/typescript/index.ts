@@ -18,35 +18,41 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const CONFIG_FILE_PATTERNS = ['tsconfig.json', 'tsconfig.*.json'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
-  const config: TsConfigJson = await load(configFilePath);
-  config.extends = config.extends ? [config.extends].flat() : [];
-  if (config?.extends) {
-    for (const extend of [config.extends].flat()) {
+  const localConfig: TsConfigJson | undefined = await load(configFilePath);
+
+  if (!localConfig) return;
+
+  localConfig.extends = localConfig.extends ? [localConfig.extends].flat() : [];
+  if (localConfig?.extends) {
+    for (const extend of [localConfig.extends].flat()) {
       if (isInternal(extend)) {
         const presetConfigPath = toAbsolute(extend, dirname(configFilePath));
         const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-        config.extends.push(...(presetConfig.extends ? [presetConfig.extends].flat() : []));
+        localConfig.extends.push(...(presetConfig?.extends ? [presetConfig.extends].flat() : []));
       }
     }
   }
-  return config;
+  return localConfig;
 };
 
-export const findTypeScriptDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+export const findTypeScriptDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { isProduction } = options;
+
   if (isProduction) return [];
 
   const { compilerOptions } = await loadTSConfig(configFilePath);
-  const config: TsConfigJson = await resolveExtensibleConfig(configFilePath); // Dual loader to get external `extends` dependencies
+  const localConfig: TsConfigJson | undefined = await resolveExtensibleConfig(configFilePath); // Dual loader to get external `extends` dependencies
 
-  if (!compilerOptions || !config) return [];
+  if (!compilerOptions || !localConfig) return [];
 
-  const extend = config.extends ? [config.extends].flat().filter(extend => !isInternal(extend)) : [];
+  const extend = localConfig.extends ? [localConfig.extends].flat().filter(extend => !isInternal(extend)) : [];
   const types = compilerOptions.types ?? [];
   const plugins = Array.isArray(compilerOptions?.plugins)
     ? compilerOptions.plugins.map(plugin => (typeof plugin === 'object' && 'name' in plugin ? plugin.name : ''))
     : [];
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
   const jsx = compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : [];
+
   return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
 };
 

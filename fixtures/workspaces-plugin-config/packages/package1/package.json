@@ -1,0 +1,10 @@
+{
+  "name": "@workspaces-plugin-config/package-using-ava",
+  "scripts": {
+    "test": "ava"
+  },
+  "devDependencies": {
+    "ava": "*",
+    "webpack": "*"
+  }
+}

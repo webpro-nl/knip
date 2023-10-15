@@ -16,6 +16,9 @@ test('Find dependencies in Webpack configuration (webpack.config.js)', async () 
   const configFilePath = join(cwd, 'webpack.config.js');
   const dependencies = await webpack.findDependencies(configFilePath, { cwd, manifest });
   assert.deepEqual(dependencies, [
+    'entry:src/app.ts',
+    'entry:src/vendor.ts',
+    'production:src/entry.js',
     'svg-url-loader',
     'babel-loader',
     '@babel/preset-env',
@@ -31,9 +34,6 @@ test('Find dependencies in Webpack configuration (webpack.config.js)', async () 
     'less-loader',
     'svgo-loader',
     'base64-inline-loader',
-    './src/app.ts',
-    './src/vendor.ts',
-    './src/entry.js',
     'webpack-cli',
     'webpack-dev-server',
   ]);

@@ -1,6 +1,6 @@
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
+import type { CSpellConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/streetsidesoftware/cspell/tree/main/packages/cspell#customization
@@ -21,8 +21,12 @@ export const CONFIG_FILE_PATTERNS = [
 
 const findCspellDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
   if (isProduction) return [];
-  const config: PluginConfig = await load(configFilePath);
-  const imports = config?.import ?? [];
+
+  const localConfig: CSpellConfig | undefined = await load(configFilePath);
+
+  if (!localConfig) return [];
+
+  const imports = localConfig.import ?? [];
   return imports;
 };
 

@@ -2,8 +2,9 @@ const EslintPlugin = require('eslint-webpack-plugin');
 const merge = require('./merge.js');
 const common = require('./webpack.common.js');
 
-module.exports = () =>
+module.exports = env =>
   merge(common(), {
+    mode: env.production ? 'production' : 'development',
     entry: {
       main: './src/app.ts',
       vendor: './src/vendor.ts',

@@ -35,11 +35,16 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): string[] => {
 
 const findBabelDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   if (isProduction) return [];
-  let config: BabelConfig = configFilePath.endsWith('package.json') ? manifest.babel : await load(configFilePath);
-  if (typeof config === 'function') {
-    config = config(api);
-  }
-  return config ? getDependenciesFromConfig(config) : [];
+
+  let localConfig: BabelConfig | undefined = configFilePath.endsWith('package.json')
+    ? manifest.babel
+    : await load(configFilePath);
+
+  if (typeof localConfig === 'function') localConfig = localConfig(api);
+
+  if (!localConfig) return [];
+
+  return getDependenciesFromConfig(localConfig);
 };
 
 export const findDependencies = timerify(findBabelDependencies);

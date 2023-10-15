@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { getGitHookPaths } from '../../util/git.js';
+import { FAKE_PATH } from '../../util/loader.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -19,8 +20,10 @@ const gitHookPaths = getGitHookPaths('.husky');
 
 export const CONFIG_FILE_PATTERNS = [...gitHookPaths];
 
-const findHuskyDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
-  if (isProduction) return [];
+const findHuskyDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { cwd, manifest, isProduction } = options;
+
+  if (isProduction || configFilePath === FAKE_PATH) return [];
 
   const script = readFileSync(configFilePath);
 

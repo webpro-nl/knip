@@ -15,7 +15,7 @@ export type IsPluginEnabledCallback = (options: IsPluginEnabledCallbackOptions) 
 export type GenericPluginCallbackOptions = {
   cwd: string;
   manifest: PackageJsonWithPlugins;
-  config?: EnsuredPluginConfiguration;
+  config: EnsuredPluginConfiguration;
   isProduction: boolean;
 };
 
