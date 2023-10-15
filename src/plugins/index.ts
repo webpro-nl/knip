@@ -1,4 +1,5 @@
 export * as angular from './angular/index.js';
+export * as astro from './astro/index.js';
 export * as ava from './ava/index.js';
 export * as babel from './babel/index.js';
 export * as capacitor from './capacitor/index.js';

@@ -224,6 +224,10 @@
           "title": "angular plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/angular/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "astro": {
+          "title": "astro plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/astro/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "ava": {
           "title": "ava plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/ava/README.md)",
           "$ref": "#/definitions/plugin"
