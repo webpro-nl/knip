@@ -87,6 +87,8 @@ npm install -D knip
 
 Knip supports LTS versions of Node.js, and currently requires at least Node.js v16.17 or v18.6.
 
+Since v2.33.0, the Bun runtime is also supported.
+
 ### Default Configuration
 
 Knip has good defaults and aims for no or little configuration. The (simplified) default config:
