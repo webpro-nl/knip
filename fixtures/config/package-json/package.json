@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/cli",
+  "knip": {
+    "ignore": ["dangling.js"]
+  }
+}
