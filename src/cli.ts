@@ -74,7 +74,7 @@ const run = async () => {
 
     await runReporters(finalData);
 
-    const totalErrorCount = (Object.keys(report) as IssueType[])
+    const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
       .filter(reportGroup => report[reportGroup] && rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + counters[reportGroup], 0);
 
