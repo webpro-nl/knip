@@ -1,17 +1,23 @@
-# PLUGIN_TITLE
+# astro
 
 ## Enabled
 
-PLUGIN_ENABLER
+This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies`
+or `devDependencies`:
+
+- `astro`
 
 ## Default configuration
 
 ```json
 {
-  "PLUGIN_NAME": {
-    "config": [],
-    "entry": [],
-    "project": []
+  "astro": {
+    "entry": [
+      "astro.config.{js,cjs,mjs,ts}",
+      "src/content/config.ts",
+      "src/pages/**/*.{astro,mdx,js,ts}",
+      "src/content/**/*.mdx"
+    ]
   }
 }
 ```
