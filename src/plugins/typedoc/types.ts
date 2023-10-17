@@ -1,3 +1,3 @@
-export type PluginConfig = {
+export type TypeDocConfig = {
   plugin?: string[];
 };

@@ -20,15 +20,17 @@ const gitHookPaths = getGitHookPaths();
 
 export const CONFIG_FILE_PATTERNS = ['lefthook.yml', ...gitHookPaths];
 
-const findLefthookDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+const findLefthookDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { cwd, manifest, isProduction } = options;
+
   if (isProduction) return [];
 
   const dependencies = manifest.devDependencies ? Object.keys(manifest.devDependencies) : [];
 
   if (configFilePath.endsWith('.yml')) {
-    const config = await load(configFilePath);
-    if (!config) return [];
-    const scripts = getValuesByKeyDeep(config, 'run').filter((value): value is string => typeof value === 'string');
+    const localConfig = await load(configFilePath);
+    if (!localConfig) return [];
+    const scripts = getValuesByKeyDeep(localConfig, 'run').filter((run): run is string => typeof run === 'string');
     const lefthook = process.env.CI ? ENABLERS.filter(dependency => dependencies.includes(dependency)) : [];
     return [...lefthook, ..._getDependenciesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true })];
   }

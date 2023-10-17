@@ -23,10 +23,16 @@ const SUPPORT_FILE_PATTERNS = [
 /** @public */
 export const ENTRY_FILE_PATTERNS = [...TEST_FILE_PATTERNS, ...SUPPORT_FILE_PATTERNS];
 
-export const findDependencies: GenericPluginCallback = async configFilePath => {
-  const config = await load(configFilePath);
-  if (!config) return [];
-  const patterns = [config.e2e?.specPattern ?? [], config.component?.specPattern ?? []].flat();
+export const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { config } = options;
+
+  const localConfig = await load(configFilePath);
+
+  if (!localConfig) return [];
+
+  if (config.entry) return config.entry.map(toEntryPattern);
+
+  const patterns = [localConfig.e2e?.specPattern ?? [], localConfig.component?.specPattern ?? []].flat();
   const entryPatterns = (patterns.length > 0 ? patterns : TEST_FILE_PATTERNS).map(toEntryPattern);
   return [...entryPatterns, ...SUPPORT_FILE_PATTERNS.map(toEntryPattern)];
 };

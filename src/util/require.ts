@@ -15,7 +15,7 @@ const tryResolve = (specifier: string, from: string) => {
   try {
     return resolve(specifier);
   } catch {
-    debugLog(`Unable to resolve ${specifier} (from ${from})`);
+    debugLog('*', `Unable to resolve ${specifier} (from ${from})`);
   }
 };
 

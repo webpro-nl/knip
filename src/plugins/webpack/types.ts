@@ -4,4 +4,9 @@ type Mode = 'none' | 'development' | 'production';
 export type Env = { production: boolean };
 export type Argv = { mode: Mode };
 
-export type WebpackConfig = Configuration | ((env: Env, argv: Argv) => Configuration);
+type Configurations = Configuration | Configuration[];
+
+export type WebpackConfig =
+  | Configurations
+  | ((env: Env, argv: Argv) => Configurations)
+  | (() => Promise<Configuration>);

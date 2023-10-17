@@ -4,6 +4,9 @@
     "nx": "nx"
   },
   "devDependencies": {
+    "@nx/next": "*",
+    "@nx/linter": "*",
+    "@nx/cypress": "*",
     "@nrwl/cypress": "*",
     "@nrwl/devkit": "*",
     "@nrwl/jest": "*",

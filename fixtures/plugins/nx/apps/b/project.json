@@ -1,0 +1,18 @@
+{
+  "sourceRoot": "apps/b",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build"
+    },
+    "serve": {
+      "executor": "@nx/next:server"
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint"
+    },
+    "test": {
+      "executor": "@js/cypress:cypress"
+    }
+  }
+}

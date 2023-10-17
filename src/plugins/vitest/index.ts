@@ -24,18 +24,17 @@ export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vitest.{workspace,proj
 /** @public */
 export const ENTRY_FILE_PATTERNS = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 
-export const findVitestDeps = (config: VitestConfigOrFn, options: GenericPluginCallbackOptions) => {
+export const findVitestDeps = (localConfig: VitestConfigOrFn, options: GenericPluginCallbackOptions) => {
   const { isProduction } = options;
 
-  if (!config) return [];
+  localConfig = typeof localConfig === 'function' ? localConfig() : localConfig;
 
-  config = typeof config === 'function' ? config() : config;
+  if (!localConfig || !localConfig.test) return [];
 
-  if (!config.test) return [];
-
-  const testConfig = config.test;
+  const testConfig = localConfig.test;
 
   const entryPatterns = (options.config?.entry ?? testConfig.include ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
+
   if (isProduction) return entryPatterns;
 
   const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
@@ -47,8 +46,13 @@ export const findVitestDeps = (config: VitestConfigOrFn, options: GenericPluginC
 };
 
 const findVitestDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const config: VitestConfigOrFn | VitestWorkspaceConfig = await load(configFilePath);
-  return compact([config].flat().flatMap(cfg => (!cfg || typeof cfg === 'string' ? [] : findVitestDeps(cfg, options))));
+  const localConfig: VitestConfigOrFn | VitestWorkspaceConfig | undefined = await load(configFilePath);
+
+  return compact(
+    [localConfig]
+      .flat()
+      .flatMap(config => (!config || typeof config === 'string' ? [] : findVitestDeps(config, options)))
+  );
 };
 
 export const findDependencies = timerify(findVitestDependencies);

@@ -11,13 +11,7 @@ import {
   isEntryPattern,
   isProductionEntryPattern,
 } from './util/protocols.js';
-import type {
-  Configuration,
-  EnsuredPluginConfiguration,
-  PluginConfiguration,
-  PluginName,
-  WorkspaceConfiguration,
-} from './types/config.js';
+import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJsonWithPlugins } from './types/plugins.js';
 import type { InstalledBinaries, HostDependencies } from './types/workspace.js';
 import type { Entries } from 'type-fest';
@@ -130,7 +124,7 @@ export class WorkspaceWorker {
 
     const enabledPluginNames = this.enabledPlugins.map(name => plugins[name].NAME);
 
-    debugLogObject(`Enabled plugins (${this.name})`, enabledPluginNames);
+    debugLogObject(this.name, `Enabled plugins (${this.name})`, enabledPluginNames);
   }
 
   private async initReferencedDependencies() {
@@ -150,8 +144,9 @@ export class WorkspaceWorker {
     this.hasTypesIncluded = hasTypesIncluded;
   }
 
-  private getConfigForPlugin(pluginName: PluginName): PluginConfiguration {
-    return this.config[pluginName] !== true ? this.config[pluginName] ?? nullConfig : nullConfig;
+  private getConfigForPlugin(pluginName: PluginName): EnsuredPluginConfiguration {
+    const config = this.config[pluginName];
+    return typeof config === 'undefined' || typeof config === 'boolean' ? nullConfig : config;
   }
 
   getEntryFilePatterns() {
@@ -180,8 +175,8 @@ export class WorkspaceWorker {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       const pluginConfig = this.getConfigForPlugin(pluginName);
-      if (this.enabled[pluginName] && pluginConfig) {
-        const { entry, project } = pluginConfig === true ? nullConfig : pluginConfig;
+      if (this.enabled[pluginName]) {
+        const { entry, project } = pluginConfig;
         patterns.push(...(project ?? entry ?? ('PROJECT_FILE_PATTERNS' in plugin ? plugin.PROJECT_FILE_PATTERNS : [])));
       }
     }
@@ -193,7 +188,7 @@ export class WorkspaceWorker {
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       const pluginConfig = this.getConfigForPlugin(pluginName);
       if (this.enabled[pluginName] && pluginConfig) {
-        const { config } = pluginConfig === true ? nullConfig : pluginConfig;
+        const { config } = pluginConfig;
         const defaultConfigFiles = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
         patterns.push(...(config ?? defaultConfigFiles));
       }
@@ -234,7 +229,7 @@ export class WorkspaceWorker {
     const pluginConfig = this.getConfigForPlugin(pluginName);
     if (pluginConfig) {
       const defaultConfig = 'CONFIG_FILE_PATTERNS' in plugin ? plugin.CONFIG_FILE_PATTERNS : [];
-      return (pluginConfig === true ? null : pluginConfig.config) ?? defaultConfig;
+      return pluginConfig.config ?? defaultConfig;
     }
     return [];
   }
@@ -244,6 +239,7 @@ export class WorkspaceWorker {
   }
 
   private async findDependenciesByPlugins() {
+    const name = this.name;
     const cwd = this.dir;
     const ignore = this.getIgnorePatterns();
 
@@ -264,19 +260,10 @@ export class WorkspaceWorker {
               get(this.manifest, 'PACKAGE_JSON_PATH' in plugin ? plugin.PACKAGE_JSON_PATH : pluginName)
           );
 
-          debugLogArray(`Found ${plugin.NAME} config file paths`, configFilePaths);
+          debugLogArray([name, plugin.NAME], 'config file paths', configFilePaths);
 
-          // Bail out, no config files found for this plugin
-          if (patterns.length > 0 && configFilePaths.length === 0) {
-            if (typeof pluginConfig !== 'boolean' && pluginConfig.entry !== null && pluginConfig.entry.length > 0) {
-              // ...but only if no entry files are set
-            } else {
-              continue;
-            }
-          }
-
-          // Plugin has no config files configured, call it once to still get the entry:/production: patterns
-          if (patterns.length === 0) configFilePaths.push(FAKE_PATH);
+          // Plugin has no config files configured, add one to still invoke it and get the entry:/production: patterns
+          if (configFilePaths.length === 0) configFilePaths.push(FAKE_PATH);
 
           const pluginDependencies: Set<string> = new Set();
 
@@ -284,7 +271,7 @@ export class WorkspaceWorker {
             const dependencies = await plugin.findDependencies(configFilePath, {
               cwd,
               manifest: this.manifest,
-              config: pluginConfig === true ? nullConfig : pluginConfig,
+              config: pluginConfig,
               isProduction: this.isProduction,
             });
 
@@ -300,7 +287,7 @@ export class WorkspaceWorker {
             });
           }
 
-          debugLogArray(`Dependencies referenced in ${plugin.NAME}`, pluginDependencies);
+          debugLogArray([name, plugin.NAME], 'dependencies', pluginDependencies);
         }
       }
     }

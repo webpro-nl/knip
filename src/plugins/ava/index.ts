@@ -30,22 +30,24 @@ export const ENTRY_FILE_PATTERNS = [
   '!**/test?(s)/**/{helper,fixture}?(s)/**/*',
 ];
 
-const findAvaDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
-  let config: AvaConfig = configFilePath.endsWith('package.json') ? manifest.ava : await load(configFilePath);
+const findAvaDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { cwd, manifest, isProduction, config } = options;
 
-  if (typeof config === 'function') config = config();
+  let localConfig: AvaConfig | undefined = configFilePath.endsWith('package.json')
+    ? manifest.ava
+    : await load(configFilePath);
 
-  const entryPatterns = (config?.files ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
-  if (isProduction) return entryPatterns;
+  if (typeof localConfig === 'function') localConfig = localConfig();
 
-  if (!config) return [];
+  const entryPatterns = (config.entry ?? localConfig?.files ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
 
-  const requireArgs = (config.require ?? []).map(require => `--require ${require}`);
-  const otherArgs = config.nodeArguments ?? [];
+  if (isProduction || !localConfig) return entryPatterns;
 
-  const cmd = `node ${otherArgs.join(' ')} ${requireArgs.join(' ')}`;
+  const nodeArgs = localConfig.nodeArguments ?? [];
+  const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
+  const fakeCommand = `node ${nodeArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  const dependencies = _getDependenciesFromScripts([cmd], {
+  const dependencies = _getDependenciesFromScripts([fakeCommand], {
     cwd,
     manifest,
     knownGlobalsOnly: true,

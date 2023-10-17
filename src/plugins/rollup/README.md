@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "rollup": {
-    "entry": ["rollup.config.{js,mjs,ts}"]
+    "entry": ["rollup.config.{js,cjs,mjs,ts}"]
   }
 }
 ```

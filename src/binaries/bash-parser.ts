@@ -77,7 +77,7 @@ export const getBinariesFromScript = (
     const parsed = parse(script);
     return parsed?.commands ? getBinariesFromNodes(parsed.commands) : [];
   } catch (error) {
-    debugLogObject('Bash parser error', error);
+    debugLogObject('*', 'Bash parser error', error);
     return [];
   }
 };

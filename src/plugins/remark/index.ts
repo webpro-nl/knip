@@ -25,17 +25,19 @@ export const CONFIG_FILE_PATTERNS = [
   '.remarkrc.{yml,yaml}',
 ];
 
-const findRemarkDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+const findRemarkDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { manifest, isProduction } = options;
+
   if (isProduction) return [];
 
-  const config: RemarkConfig = configFilePath.endsWith('package.json')
+  const localConfig: RemarkConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest[PACKAGE_JSON_PATH]
     : await load(configFilePath);
 
-  if (!config) return [];
+  if (!localConfig) return [];
 
-  const plugins = config.plugins?.map(plugin => `remark-${plugin}`) ?? [];
-  return [...plugins];
+  const plugins = localConfig.plugins?.map(plugin => `remark-${plugin}`) ?? [];
+  return plugins;
 };
 
 export const findDependencies = timerify(findRemarkDependencies);

@@ -19,17 +19,19 @@ export const CONFIG_FILE_PATTERNS = [
   'stylelint.config.{cjs,mjs,js}',
 ];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
+const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { manifest, isProduction } = options;
+
   if (isProduction) return [];
 
-  const config: PluginConfig = configFilePath.endsWith('package.json')
+  const localConfig: PluginConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest.stylelint
     : await load(configFilePath);
 
-  if (!config) return [];
+  if (!localConfig) return [];
 
-  const extend = config.extends ? [config.extends].flat().filter(extend => !isInternal(extend)) : [];
-  const plugins = config.plugins ? [config.plugins].flat().filter(plugin => !isInternal(plugin)) : [];
+  const extend = localConfig.extends ? [localConfig.extends].flat().filter(extend => !isInternal(extend)) : [];
+  const plugins = localConfig.plugins ? [localConfig.plugins].flat().filter(plugin => !isInternal(plugin)) : [];
 
   return [...extend, ...plugins];
 };

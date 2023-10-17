@@ -24,11 +24,7 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
 ];
 
 const findRemixDependencies: GenericPluginCallback = async () => {
-  const entryPatterns = [
-    ...ENTRY_FILE_PATTERNS.map(toEntryPattern),
-    ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern),
-  ];
-  return entryPatterns;
+  return [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
 };
 
 export const findDependencies = timerify(findRemixDependencies);

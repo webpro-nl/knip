@@ -47,7 +47,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isIncludeEntryExports,
   } = unresolvedConfiguration;
 
-  debugLogObject('Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
+  debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
   const chief = new ConfigurationChief({ cwd, isProduction });
   const deputy = new DependencyDeputy({ isStrict });
@@ -75,14 +75,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   // TODO Organize better
   deputy.addIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
 
-  debugLogObject(
-    'Included workspaces',
-    workspaces.map(w => w.pkgName)
-  );
-  debugLogObject(
-    'Included workspace configs',
-    workspaces.map(w => ({ name: w.name, pkgName: w.pkgName, config: w.config, ancestors: w.ancestors }))
-  );
+  const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
+  debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
+  debugLogObject('*', 'Included workspace configs', o);
 
   const handleReferencedDependency = ({
     specifier,
@@ -133,7 +128,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const { name, dir, config, ancestors, pkgName, manifestPath, manifest } = workspace;
     const { paths, ignoreDependencies, ignoreBinaries } = config;
 
-    streamer.cast(`Analyzing workspace (${name})...`);
+    streamer.cast(`Analyzing workspace ${name}...`);
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies, ignoreBinaries });
 
@@ -157,12 +152,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     await worker.init();
 
     principal.addEntryPaths(definitionPaths);
-    debugLogArray(`Found definition paths (${name})`, definitionPaths);
+    debugLogArray(name, `Definition paths`, definitionPaths);
 
     const sharedGlobOptions = { cwd, workingDir: dir, gitignore, ignore: worker.getIgnorePatterns() };
 
     const entryPathsFromManifest = await getEntryPathFromManifest(cwd, dir, manifest);
-    debugLogArray(`Found entry paths in package.json (${name})`, entryPathsFromManifest);
+    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
     principal.addEntryPaths(entryPathsFromManifest);
 
     // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
@@ -193,55 +188,55 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       {
         const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
         const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(`Found entry paths (${name})`, workspaceEntryPaths);
+        debugLogArray(name, `Entry paths`, workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
       }
 
       {
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns: productionEntryFilePatterns });
-        debugLogArray(`Found production plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
+        debugLogArray(name, `Production plugin entry paths`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
         const patterns = worker.getProductionProjectFilePatterns(negatedEntryPatterns);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(`Found project paths (${name})`, workspaceProjectPaths);
+        debugLogArray(name, `Project paths`, workspaceProjectPaths);
         workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
       }
     } else {
       {
         const patterns = worker.getEntryFilePatterns();
         const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(`Found entry paths (${name})`, workspaceEntryPaths);
+        debugLogArray(name, `Entry paths`, workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
       }
 
       {
         const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns]);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(`Found project paths (${name})`, workspaceProjectPaths);
+        debugLogArray(name, `Project paths`, workspaceProjectPaths);
         workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
       }
 
       {
         const patterns = [...entryFilePatterns, ...productionEntryFilePatterns];
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(`Found plugin entry paths (${name})`, pluginWorkspaceEntryPaths);
+        debugLogArray(name, `Plugin entry paths`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
         const patterns = worker.getPluginProjectFilePatterns();
         const pluginWorkspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(`Found plugin project paths (${name})`, pluginWorkspaceProjectPaths);
+        debugLogArray(name, `Plugin project paths`, pluginWorkspaceProjectPaths);
         pluginWorkspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
       }
 
       {
         const patterns = compact(worker.getPluginConfigPatterns());
         const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(`Found plugin configuration paths (${name})`, configurationEntryPaths);
+        debugLogArray(name, `Plugin configuration paths`, configurationEntryPaths);
         principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
       }
     }
@@ -254,7 +249,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const principals = factory.getPrincipals();
 
-  debugLog(`Installed ${principals.length} principals for ${workspaces.length} workspaces`);
+  debugLog('*', `Installed ${principals.length} principals for ${workspaces.length} workspaces`);
 
   const analyzedFiles: Set<string> = new Set();
   const exportedSymbols: Exports = new Map();
@@ -342,7 +337,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const resolvedFiles = principal.getUsedResolvedFiles();
       const files = resolvedFiles.filter(filePath => !analyzedFiles.has(filePath));
 
-      debugLogArray(`Analyzing used resolved files [P${principals.indexOf(principal) + 1}/${++round}]`, files);
+      debugLogArray('*', `Analyzing used resolved files [P${principals.indexOf(principal) + 1}/${++round}]`, files);
       files.forEach(filePath => {
         analyzeSourceFile(filePath);
         analyzedFiles.add(filePath);

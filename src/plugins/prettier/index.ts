@@ -1,20 +1,9 @@
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import type { PrettierConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://prettier.io/docs/en/configuration.html
-
-type PrettierConfig = {
-  plugins?: (
-    | string
-    | {
-        parsers?: Record<string, unknown>;
-        printers?: Record<string, unknown>;
-        languages?: unknown[];
-        options?: Record<string, unknown>;
-      }
-  )[];
-};
 
 export const NAME = 'Prettier';
 
@@ -34,12 +23,12 @@ export const CONFIG_FILE_PATTERNS = [
 const findPrettierDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   if (isProduction) return [];
 
-  const config: PrettierConfig = configFilePath.endsWith('package.json')
+  const localConfig: PrettierConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest.prettier
     : await load(configFilePath);
 
-  return config && Array.isArray(config.plugins)
-    ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string')
+  return localConfig && Array.isArray(localConfig.plugins)
+    ? localConfig.plugins.filter((plugin): plugin is string => typeof plugin === 'string')
     : [];
 };
 

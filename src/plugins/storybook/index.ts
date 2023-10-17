@@ -24,24 +24,26 @@ export const ENTRY_FILE_PATTERNS = ['.storybook/{manager,preview}.{js,jsx,ts,tsx
 
 export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
 
-const findStorybookDependencies: GenericPluginCallback = async (configFilePath, { isProduction, config }) => {
-  const cfg: StorybookConfig = await load(configFilePath);
+const findStorybookDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { isProduction, cwd, config } = options;
 
-  const stories = (typeof cfg.stories === 'function' ? await cfg.stories(STORIES_FILE_PATTERNS) : cfg.stories)?.map(
-    pattern => relative(join(dirname(configFilePath), pattern))
-  );
-  const cfgPatterns = [...(config?.entry ?? []), ...(stories ?? [])];
-  const entryPatterns = (cfgPatterns.length > 0 ? cfgPatterns : ENTRY_FILE_PATTERNS).map(toEntryPattern);
+  const localConfig: StorybookConfig | undefined = await load(configFilePath);
 
-  if (isProduction) return entryPatterns;
+  const stories =
+    typeof localConfig?.stories === 'function'
+      ? await localConfig.stories(STORIES_FILE_PATTERNS)
+      : localConfig?.stories;
+  const relativePatterns = stories?.map(pattern => relative(cwd, join(dirname(configFilePath), pattern)));
+  const patterns = [...(config?.entry ?? []), ...(relativePatterns ?? [])];
+  const entryPatterns = (patterns.length > 0 ? patterns : ENTRY_FILE_PATTERNS).map(toEntryPattern);
 
-  if (!cfg) return [];
+  if (!localConfig || isProduction) return entryPatterns;
 
-  const addons = cfg.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
-  const builder = cfg?.core?.builder;
+  const addons = localConfig.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
+  const builder = localConfig?.core?.builder;
   const builderPackages =
     builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
-  const frameworks = cfg.framework?.name ? [cfg.framework.name] : [];
+  const frameworks = localConfig.framework?.name ? [localConfig.framework.name] : [];
 
   return [...entryPatterns, ...addons, ...builderPackages, ...frameworks];
 };

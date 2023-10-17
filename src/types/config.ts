@@ -18,7 +18,7 @@ export type EnsuredPluginConfiguration = {
   project: NormalizedGlob | null;
 };
 
-export type PluginConfiguration = EnsuredPluginConfiguration | boolean;
+type PluginConfiguration = EnsuredPluginConfiguration | boolean;
 
 export type PluginsConfiguration = Record<PluginName, PluginConfiguration>;
 

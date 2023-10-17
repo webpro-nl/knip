@@ -22,7 +22,13 @@ export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
     return pluginConfig;
   } else {
     const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
-    const config = isObject ? arrayify(pluginConfig.config) : pluginConfig ? arrayify(pluginConfig) : null;
+    const config = isObject
+      ? 'config' in pluginConfig
+        ? arrayify(pluginConfig.config)
+        : null
+      : pluginConfig
+      ? arrayify(pluginConfig)
+      : null;
     const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
     const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
     return { config, entry, project };

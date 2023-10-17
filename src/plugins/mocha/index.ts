@@ -1,6 +1,7 @@
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
+import type { MochaConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://mochajs.org/#configuring-mocha-nodejs
@@ -17,15 +18,20 @@ export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'p
 /** @public */
 export const ENTRY_FILE_PATTERNS = ['**/test/*.{js,cjs,mjs}'];
 
-const findMochaDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
-  const entryPatterns = ENTRY_FILE_PATTERNS.map(toEntryPattern);
-  if (isProduction) return entryPatterns;
+const findMochaDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { config, manifest, isProduction } = options;
 
-  const config = configFilePath.endsWith('package.json') ? manifest.mocha : await load(configFilePath);
+  const localConfig: MochaConfig | undefined = configFilePath.endsWith('package.json')
+    ? manifest.mocha
+    : await load(configFilePath);
 
-  if (!config) return [];
+  const entryPatterns = (config.entry ?? (localConfig?.spec ? [localConfig.spec].flat() : ENTRY_FILE_PATTERNS)).map(
+    toEntryPattern
+  );
 
-  const require = config.require ? [config.require].flat() : [];
+  if (isProduction || !localConfig) return entryPatterns;
+
+  const require = localConfig.require ? [localConfig.require].flat() : [];
 
   return [...require, ...entryPatterns];
 };

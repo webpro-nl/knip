@@ -22,22 +22,24 @@ export const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, { cwd, manifest, isProduction }) => {
+const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { cwd, manifest, isProduction } = options;
+
   if (isProduction) return [];
 
-  const config: ReleaseItConfig = configFilePath.endsWith('package.json')
+  const localConfig: ReleaseItConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest[PACKAGE_JSON_PATH]
     : await load(configFilePath);
 
-  if (!config) return [];
+  if (!localConfig) return [];
 
-  const plugins = config.plugins ? Object.keys(config.plugins) : [];
-  const scripts = config.hooks ? Object.values(config.hooks).flat() : [];
-  if (typeof config.github?.releaseNotes === 'string') {
-    scripts.push(config.github.releaseNotes);
+  const plugins = localConfig.plugins ? Object.keys(localConfig.plugins) : [];
+  const scripts = localConfig.hooks ? Object.values(localConfig.hooks).flat() : [];
+  if (typeof localConfig.github?.releaseNotes === 'string') {
+    scripts.push(localConfig.github.releaseNotes);
   }
-  if (typeof config.gitlab?.releaseNotes === 'string') {
-    scripts.push(config.gitlab.releaseNotes);
+  if (typeof localConfig.gitlab?.releaseNotes === 'string') {
+    scripts.push(localConfig.gitlab.releaseNotes);
   }
   const dependencies = _getDependenciesFromScripts(scripts, { cwd, manifest });
 

@@ -16,15 +16,16 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['.npmpackagejsonlintrc.json', 'npmpackagejsonlint.config.js', 'package.json'];
 
-const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (
-  configFilePath,
-  { manifest, isProduction }
-) => {
+const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { manifest, isProduction } = options;
+
   if (isProduction) return [];
-  const config: NpmPkgJsonLintConfig = configFilePath.endsWith('package.json')
+
+  const localConfig: NpmPkgJsonLintConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest[PACKAGE_JSON_PATH]
     : await load(configFilePath);
-  return config?.extends ? [config.extends] : [];
+
+  return localConfig?.extends ? [localConfig.extends] : [];
 };
 
 export const findDependencies = timerify(findNpmPkgJsonLintConfigDependencies);

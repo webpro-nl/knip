@@ -1,7 +1,8 @@
 import { compact } from '../../util/array.js';
-import { join } from '../../util/path.js';
+import { join, relative } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { WebpackConfig, Env, Argv } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -53,27 +54,31 @@ const resolveUseItem = (use: RuleSetUseItem) => {
   return [];
 };
 
-const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
-  if (isProduction) return [];
+const findWebpackDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { manifest, isProduction, cwd } = options;
 
-  const config: WebpackConfig = await load(configFilePath);
+  const localConfig: WebpackConfig | undefined = await load(configFilePath);
 
-  if (!config) return [];
+  if (!localConfig) return [];
 
   // Projects may use a single config function for both development and production modes, so resolve it twice
   // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
-  const passes = typeof config === 'function' ? [false, true] : [false];
+  const passes = typeof localConfig === 'function' ? [false, true] : [false];
 
-  const dependencies = passes.flatMap(isProduction => {
+  const dependencies = new Set<string>();
+  const entryPatterns = new Set<string>();
+
+  for (const isProduction of passes) {
     const env: Env = { production: isProduction };
     const argv: Argv = { mode: isProduction ? 'production' : 'development' };
-    const resolvedConfig = typeof config === 'function' ? config(env, argv) : config;
+    const resolvedConfig = typeof localConfig === 'function' ? await localConfig(env, argv) : localConfig;
 
-    return [resolvedConfig].flat().flatMap(options => {
-      const dependencies = (options.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []).map(loader =>
-        loader.replace(/\?.*/, '')
-      );
-      const entries: string[] = [];
+    for (const options of [resolvedConfig].flat()) {
+      const entries = [];
+
+      for (const loader of options.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
+        dependencies.add(loader.replace(/\?.*/, ''));
+      }
 
       if (typeof options.entry === 'string') entries.push(options.entry);
       else if (Array.isArray(options.entry)) entries.push(...options.entry);
@@ -86,15 +91,21 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, { 
         });
       }
 
-      return [...dependencies, ...entries.map(entry => (options.context ? join(options.context, entry) : entry))];
-    });
-  });
+      entries.forEach(entry => {
+        const item = relative(cwd, join(options.context ? options.context : cwd, entry));
+        const value = options.mode === 'development' ? toEntryPattern(item) : toProductionEntryPattern(item);
+        entryPatterns.add(value);
+      });
+    }
+  }
+
+  if (isProduction) return [...entryPatterns];
 
   const scripts = Object.values(manifest.scripts ?? {});
   const webpackCLI = scripts.some(script => script?.includes('webpack ')) ? ['webpack-cli'] : [];
   const webpackDevServer = scripts.some(script => script?.includes('webpack serve')) ? ['webpack-dev-server'] : [];
 
-  return compact([...dependencies, ...webpackCLI, ...webpackDevServer]);
+  return compact([...entryPatterns, ...dependencies, ...webpackCLI, ...webpackDevServer]);
 };
 
 export const findDependencies = timerify(findWebpackDependencies);
