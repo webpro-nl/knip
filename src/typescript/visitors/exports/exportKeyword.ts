@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { SymbolType } from '../../../types/issues.js';
 import { compact } from '../../../util/array.js';
-import { isPrivateMember, stripQuotes } from '../../ast-helpers.js';
+import { isGetOrSetAccessorDeclaration, isPrivateMember, stripQuotes } from '../../ast-helpers.js';
 import { exportVisitor as visit } from '../index.js';
 
 export default visit(
@@ -62,7 +62,10 @@ export default visit(
         const members = node.members
           .filter(
             (member): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
-              (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) && !isPrivateMember(member)
+              (ts.isPropertyDeclaration(member) ||
+                ts.isMethodDeclaration(member) ||
+                isGetOrSetAccessorDeclaration(member)) &&
+              !isPrivateMember(member)
           )
           .map(member => ({
             node: member,

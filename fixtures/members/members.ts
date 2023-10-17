@@ -38,10 +38,29 @@ export class MyClass {
   };
 
   dUnusedMember() {}
-  dUsedExternal() {}
+  dUsedExternal() {
+    const value = this.usedGetter;
+    this.usedSetter = value;
+  }
 
   static eUnusedStatic = 1;
   static eUsedExternal = 1;
+
+  public get usedGetter(): string {
+    return 'usedGetter';
+  }
+
+  public set usedSetter(value: string) {
+    console.log(value);
+  }
+
+  public get unusedGetter(): string {
+    return 'unusedGetter';
+  }
+
+  public set unusedSetter(value: string) {
+    console.log(value);
+  }
 }
 
 MyClass.displayName = 'My Class';

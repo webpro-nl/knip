@@ -8,7 +8,13 @@ export function isValidImportTypeNode(node: ts.Node): node is ValidImportTypeNod
   return ts.isImportTypeNode(node);
 }
 
-export function isPrivateMember(node: ts.MethodDeclaration | ts.PropertyDeclaration): boolean {
+export function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
+  return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
+}
+
+export function isPrivateMember(
+  node: ts.MethodDeclaration | ts.PropertyDeclaration | ts.SetAccessorDeclaration | ts.GetAccessorDeclaration
+): boolean {
   return node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.PrivateKeyword) ?? false;
 }
 
