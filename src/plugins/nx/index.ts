@@ -8,7 +8,7 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 export const NAME = 'Nx';
 
 /** @public */
-export const ENABLERS = ['nx', /^@nrwl\//];
+export const ENABLERS = ['nx', /^@nrwl\//, /^@nx\//];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
