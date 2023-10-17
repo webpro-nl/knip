@@ -1,7 +1,6 @@
 const compiler = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
 
 export default {
-  ignore: '*.d.ts',
   entry: ['parent.vue'],
   project: '**/*.{ts,vue}',
   compilers: {

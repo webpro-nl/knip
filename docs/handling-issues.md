@@ -38,7 +38,7 @@ Here are a few things to consider when Knip reports unused files:
 
   ```json
   {
-    "ignore": ["**/*.d.ts", "**/__mocks__", "**/__fixtures__"]
+    "ignore": ["**/__mocks__", "**/__fixtures__"]
   }
   ```
 

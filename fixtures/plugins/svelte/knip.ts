@@ -1,5 +1,5 @@
 export default {
-  ignore: ['.svelte-kit', '**/*.d.ts'],
+  ignore: ['.svelte-kit'],
   paths: {
     '$app/*': ['node_modules/@sveltejs/kit/src/runtime/app/*'],
   },

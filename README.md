@@ -318,6 +318,8 @@ themselves and/or `entry` files for Knip to analyze.
 
 See each plugin's documentation for its default values.
 
+In an Astro, Svelte or Vue project? Make sure to see [compilers][46] and add some extra configuration.
+
 #### `config`
 
 Plugins usually include `config` files. They are handled by the plugin's custom dependency finder, which returns all
@@ -355,7 +357,7 @@ level by setting it to `false` there, and vice versa.
 #### Multi-project repositories
 
 Some repositories have a single `package.json`, but consist of multiple projects with configuration files across the
-repository (such as the [Nx "intregrated repo" style][46]). Let's assume some of these projects are apps and have their
+repository (such as the [Nx "intregrated repo" style][47]). Let's assume some of these projects are apps and have their
 own Cypress configuration and test files. In that case, we could configure the Cypress plugin like this:
 
 ```json
@@ -368,7 +370,7 @@ own Cypress configuration and test files. In that case, we could configure the C
 
 #### Create a new plugin
 
-Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][47]. This
+Getting false positives because a plugin is missing? Want to help out? Please read more at [writing a plugin][48]. This
 guide also contains more details if you want to learn more about plugins and why they are useful.
 
 ### Compilers
@@ -391,7 +393,7 @@ export default {
 };
 ```
 
-Read [Compilers][48] for more details and examples.
+Read [Compilers][46] for more details and examples.
 
 ### Ignore files, binaries, dependencies and workspaces
 
@@ -399,7 +401,7 @@ There are a few ways to tell Knip to ignore certain files, binaries, dependencie
 
 ```json
 {
-  "ignore": ["**/*.d.ts", "**/fixtures"],
+  "ignore": ["**/fixtures"],
   "ignoreBinaries": ["zip", "docker-compose"],
   "ignoreDependencies": ["hidden-package"],
   "ignoreWorkspaces": ["packages/ignore", "packages/examples/**"]
@@ -883,9 +885,9 @@ Special thanks to the wonderful people who have contributed to this project:
 [43]: #why-knip
 [44]: #really-another-unused-filedependencyexport-finder
 [45]: #contributors
-[46]: https://nx.dev/concepts/integrated-vs-package-based
-[47]: ./docs/writing-a-plugin.md
-[48]: ./docs/compilers.md
+[46]: ./docs/compilers.md
+[47]: https://nx.dev/concepts/integrated-vs-package-based
+[48]: ./docs/writing-a-plugin.md
 [49]: ./docs/handling-issues.md
 [50]: ./docs/reporters-and-preprocessors.md
 [51]: ./docs/perf-boost-with-no-gitignore.md
