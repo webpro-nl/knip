@@ -60,4 +60,4 @@ export const getEntryPathFromManifest = (cwd: string, dir: string, manifest: Pac
 };
 
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
-export const sanitizeSpecifier = (specifier: string) => specifier.replace(/^([?!|-]+)?([^!?]+).*/, '$2');
+export const sanitizeSpecifier = (specifier: string) => specifier.replace(/^([?!|-]+)?([^!?:]+).*/, '$2');
