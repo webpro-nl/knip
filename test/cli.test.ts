@@ -7,7 +7,7 @@ import { execFactory } from './helpers/execKnip.js';
 
 const cwd = resolve('fixtures/cli');
 
-const exec = execFactory(cwd, '../../dist/cli.js');
+const exec = execFactory(cwd);
 
 test('knip --version', () => {
   assert.equal(exec('knip --version'), version);

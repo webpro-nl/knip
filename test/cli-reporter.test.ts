@@ -5,7 +5,7 @@ import { execFactory } from './helpers/execKnip.js';
 
 const cwd = resolve('fixtures/cli-reporter');
 
-const exec = execFactory(cwd, '../../dist/cli.js');
+const exec = execFactory(cwd);
 
 test('knip --reporter ./index.js', () => {
   assert.equal(exec('knip --reporter ./index.js'), 'hi from js reporter');

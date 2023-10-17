@@ -5,7 +5,7 @@ import { execFactory } from '../helpers/execKnip.js';
 
 const cwd = resolve('fixtures/config/mjs-async');
 
-const exec = execFactory(cwd, '../../../dist/cli.js');
+const exec = execFactory(cwd);
 
 test('Support loading mjs async function files for configuration', async () => {
   assert.equal(exec('knip -c knip.mjs'), '');

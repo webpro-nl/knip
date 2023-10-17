@@ -5,7 +5,7 @@ import { execFactory } from '../helpers/execKnip.js';
 
 const cwd = resolve('fixtures/config/package-json');
 
-const exec = execFactory(cwd, '../../../dist/cli.js');
+const exec = execFactory(cwd);
 
 test('Support loading package.json for configuration', async () => {
   assert.equal(exec('knip'), '');

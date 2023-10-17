@@ -5,7 +5,7 @@ import { execFactory } from '../helpers/execKnip.js';
 
 const cwd = resolve('fixtures/config/ts-flat');
 
-const exec = execFactory(cwd, '../../../dist/cli.js');
+const exec = execFactory(cwd);
 
 test('Support loading ts object files for configuration', async () => {
   assert.equal(exec('knip'), '');

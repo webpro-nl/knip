@@ -5,7 +5,7 @@ import { execFactory } from './helpers/execKnip.js';
 
 const cwd = resolve('fixtures/cli-preprocessor');
 
-const exec = execFactory(cwd, '../../dist/cli.js');
+const exec = execFactory(cwd);
 
 test('knip --preprocessor ./index.js', () => {
   assert.equal(exec('knip --preprocessor ./index.js'), 'hi from js preprocessor');
