@@ -1,18 +1,11 @@
 import assert from 'node:assert/strict';
-import { execSync } from 'node:child_process';
 import test from 'node:test';
 import { resolve } from '../src/util/path.js';
+import { execFactory } from './helpers/execKnip.js';
 
 const cwd = resolve('fixtures/cli-preprocessor');
 
-const exec = (command: string) => {
-  try {
-    const output = execSync(command.replace(/^knip/, 'node ../../dist/cli.js'), { cwd });
-    return output.toString().trim();
-  } catch {
-    console.error(`Error during execution of command: ${command}`);
-  }
-};
+const exec = execFactory(cwd);
 
 test('knip --preprocessor ./index.js', () => {
   assert.equal(exec('knip --preprocessor ./index.js'), 'hi from js preprocessor');

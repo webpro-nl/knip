@@ -1,14 +1,11 @@
 import assert from 'node:assert/strict';
-import { execSync } from 'node:child_process';
 import test from 'node:test';
 import { resolve } from '../src/util/path.js';
+import { execFactory } from './helpers/execKnip.js';
 
 const cwd = resolve('fixtures/cli-reporter');
 
-const exec = (command: string) => {
-  const output = execSync(command.replace(/^knip/, 'node ../../dist/cli.js'), { cwd });
-  return output.toString().trim();
-};
+const exec = execFactory(cwd);
 
 test('knip --reporter ./index.js', () => {
   assert.equal(exec('knip --reporter ./index.js'), 'hi from js reporter');

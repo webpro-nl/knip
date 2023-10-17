@@ -125,6 +125,19 @@ const config: KnipConfig = {
 export default config;
 ```
 
+And if you need, you can also expose an (async) function if you need, like so:
+
+```ts
+import type { KnipConfig } from 'knip';
+
+const config = async (): Promise<KnipConfig> => ({
+  entry: ['src/index.ts'],
+  project: ['src/**/*.ts'],
+});
+
+export default config;
+```
+
 Use `--config path/to/knip.config.json` for a different path.
 
 ### Let's Go!

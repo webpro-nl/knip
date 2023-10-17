@@ -18,6 +18,7 @@ import { getKeysByValue } from './util/object.js';
 import { join, relative, toPosix } from './util/path.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
 import { _require } from './util/require.js';
+import { unwrapFunction } from './util/unwrapFunction.js';
 import { byPathDepth } from './util/workspace.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type {
@@ -150,13 +151,24 @@ export class ConfigurationChief {
       throw new ConfigurationError(`Unable to find ${rawConfigArg} or package.json#knip`);
     }
 
-    this.rawConfig = this.resolvedConfigFilePath ? await _load(this.resolvedConfigFilePath) : manifest.knip;
+    this.rawConfig = this.resolvedConfigFilePath
+      ? await this.loadResolvedConfigurationFile(this.resolvedConfigFilePath)
+      : manifest.knip;
 
     // Have to partition compiler functions before Zod touches them
     const parsedConfig = this.rawConfig ? ConfigurationValidator.parse(partitionCompilers(this.rawConfig)) : {};
     this.config = this.normalize(parsedConfig);
 
     await this.setWorkspaces();
+  }
+
+  private async loadResolvedConfigurationFile(configPath: string) {
+    const loadedValue = await _load(configPath);
+    try {
+      return await unwrapFunction(loadedValue);
+    } catch (e) {
+      throw new ConfigurationError(`Error running the function from ${configPath}`);
+    }
   }
 
   public getCompilers(): [SyncCompilers, AsyncCompilers] {
