@@ -5,7 +5,7 @@ export const unwrapFunction = async (possibleFunction: unknown) => {
     try {
       return await possibleFunction();
     } catch (error) {
-      debugLogObject('Error executing function:', error);
+      debugLogObject('*', 'Error executing function:', error);
       throw error;
     }
   }

@@ -125,7 +125,7 @@ const config: KnipConfig = {
 export default config;
 ```
 
-And if you need, you can also expose a function or an async function if you need, like so :
+And if you need, you can also expose an (async) function if you need, like so:
 
 ```ts
 import type { KnipConfig } from 'knip';

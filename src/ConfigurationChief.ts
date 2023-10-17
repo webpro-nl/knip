@@ -167,7 +167,7 @@ export class ConfigurationChief {
     try {
       return await unwrapFunction(loadedValue);
     } catch (e) {
-      throw new ConfigurationError(`Unable to run the function from the knip config file`);
+      throw new ConfigurationError(`Error running the function from ${configPath}`);
     }
   }
 
