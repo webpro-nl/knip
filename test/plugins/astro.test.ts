@@ -8,21 +8,14 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/astro');
 
 test('Find dependencies in Astro configuration', async () => {
-  const { issues, counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(issues.unlisted['src/content/config.ts']['astro:content']);
-  assert(issues.unlisted['src/pages/rss.xml.js']['astro:content']);
-  assert(issues.unlisted['src/pages/blog/[...slug].astro']['astro:content']);
-  assert(issues.unlisted['src/pages/blog/index.astro']['astro:content']);
-  assert(issues.unlisted['src/layouts/BlogPost.astro']['astro:content']);
-
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 5,
-    processed: 17,
-    total: 17,
+    processed: 18,
+    total: 18,
   });
 });
