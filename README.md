@@ -264,7 +264,7 @@ This is especially useful over time when such configuration files change (and th
 Knip contains a growing list of plugins:
 
 - [Angular][plugin-angular]
-- [astro][plugin-astro]
+- [Astro][plugin-astro]
 - [Ava][plugin-ava]
 - [Babel][plugin-babel]
 - [Capacitor][plugin-capacitor]

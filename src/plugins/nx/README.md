@@ -7,6 +7,7 @@ or `devDependencies`:
 
 - `nx`
 - `/^@nrwl\//`
+- `/^@nx\//`
 
 ## Default configuration
 
