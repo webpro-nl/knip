@@ -1,15 +1,8 @@
 import { execSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { resolve } from '../../src/util/path.js';
+// eslint-disable-next-line n/no-restricted-import
+import { resolve } from 'node:path';
 
-const thisFileUrl = fileURLToPath(import.meta.url);
-
-const cliPath = resolve(
-  thisFileUrl,
-  // Needed if run in the /tmp (like in the npm test script) to find the correct dist folder
-  thisFileUrl.endsWith('tmp/test/helpers/execKnip.js') ? '..' : '.',
-  '../../../dist/cli.js'
-);
+const cliPath = resolve('dist/cli.js');
 
 export const execFactory = (cwd: string) => {
   return (command: string) => {
