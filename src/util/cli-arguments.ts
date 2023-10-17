@@ -11,6 +11,7 @@ Options:
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
   --ignore-internal        Ignore exports with tag @internal (JSDoc/TSDoc)
   -W, --workspace [dir]    Analyze a single workspace (default: analyze all configured workspaces)
+  --directory [dir]        Run process from a different directory (default: cwd)
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
@@ -52,6 +53,7 @@ try {
       debug: { type: 'boolean', short: 'd' },
       'debug-file-filter': { type: 'string' },
       dependencies: { type: 'boolean' },
+      directory: { type: 'string' },
       exclude: { type: 'string', multiple: true },
       exports: { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },

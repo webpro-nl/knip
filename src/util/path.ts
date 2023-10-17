@@ -1,5 +1,8 @@
 // eslint-disable-next-line n/no-restricted-import
 import path from 'node:path';
+import parsedArgValues from './cli-arguments.js';
+
+const { directory } = parsedArgValues;
 
 const isAbsolute = path.isAbsolute;
 
@@ -11,7 +14,7 @@ export const join = path.posix.join;
 
 export const toPosix = (value: string) => value.split(path.sep).join(path.posix.sep);
 
-export const cwd = toPosix(process.cwd());
+export const cwd = directory ? path.posix.resolve(directory) : toPosix(process.cwd());
 
 export const resolve = (...paths: string[]) =>
   paths.length === 1 ? path.posix.join(cwd, paths[0]) : path.posix.resolve(...paths);
