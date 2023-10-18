@@ -26,10 +26,12 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'plugins/**/gatsby-{browser,ssr}.{js,jsx,ts,tsx}',
 ];
 
-const findGatsbyDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
+const findGatsbyDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { isProduction, config } = options;
+
   const localConfig: GatsbyConfig | GatsbyNode | undefined = await load(configFilePath);
 
-  const entryPatterns = PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern);
+  const entryPatterns = (config.entry ?? PRODUCTION_ENTRY_FILE_PATTERNS).map(toProductionEntryPattern);
 
   if (isProduction || !localConfig) return entryPatterns;
 

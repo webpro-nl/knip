@@ -23,8 +23,12 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'server.{js,ts}',
 ];
 
-const findRemixDependencies: GenericPluginCallback = async () => {
-  return [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
+const findRemixDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { config } = options;
+
+  return config.entry
+    ? config.entry.map(toProductionEntryPattern)
+    : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
 };
 
 export const findDependencies = timerify(findRemixDependencies);

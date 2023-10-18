@@ -17,6 +17,10 @@ export const ENTRY_FILE_PATTERNS = ['astro.config.{js,cjs,mjs,ts}', 'src/content
 /** @public */
 export const PRODUCTION_ENTRY_FILE_PATTERNS = ['src/pages/**/*.{astro,mdx,js,ts}', 'src/content/**/*.mdx'];
 
-export const findDependencies: GenericPluginCallback = async () => {
-  return [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
+export const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { config } = options;
+
+  return config.entry
+    ? config.entry.map(toProductionEntryPattern)
+    : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
 };
