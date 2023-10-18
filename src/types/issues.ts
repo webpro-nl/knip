@@ -52,6 +52,7 @@ export type Counters = Record<IssueType | 'processed' | 'total', number>;
 export type ReporterOptions = {
   report: Report;
   issues: Issues;
+  counters: Counters;
   configurationHints: ConfigurationHints;
   noConfigHints: boolean;
   cwd: string;

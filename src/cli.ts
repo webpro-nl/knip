@@ -61,6 +61,7 @@ const run = async () => {
     const initialData: ReporterOptions = {
       report,
       issues,
+      counters,
       configurationHints,
       noConfigHints,
       cwd,
@@ -75,8 +76,8 @@ const run = async () => {
     await runReporters(finalData);
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
-      .filter(reportGroup => report[reportGroup] && rules[reportGroup] === 'error')
-      .reduce((errorCount: number, reportGroup) => errorCount + counters[reportGroup], 0);
+      .filter(reportGroup => finalData.report[reportGroup] && rules[reportGroup] === 'error')
+      .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
     if (isObservePerf) {
       await perfObserver.finalize();
