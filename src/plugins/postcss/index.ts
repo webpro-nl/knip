@@ -10,7 +10,7 @@ export const ENABLERS = ['postcss', 'next'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['postcss.config.js', 'postcss.config.json', 'package.json'];
+export const CONFIG_FILE_PATTERNS = ['postcss.config.{cjs,js}', 'postcss.config.json', 'package.json'];
 
 const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { manifest, isProduction } = options;

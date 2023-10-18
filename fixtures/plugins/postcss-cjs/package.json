@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/postcss-cjs",
+  "scripts": {
+    "postcss": "postcss"
+  },
+  "devDependencies": {
+    "postcss": "*"
+  },
+  "postcss": {
+    "plugins": [
+      "autoprefixer"
+    ]
+  }
+}
