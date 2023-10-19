@@ -43,3 +43,4 @@ export * as typescript from './typescript/index.js';
 export * as vite from './vite/index.js';
 export * as vitest from './vitest/index.js';
 export * as webpack from './webpack/index.js';
+export * as graphqlCodegen from './graphql-codegen/index.js';
