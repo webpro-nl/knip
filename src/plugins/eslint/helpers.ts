@@ -5,9 +5,7 @@ import { _resolve } from '../../util/require.js';
 import { fallback } from './fallback.js';
 import { PACKAGE_JSON_PATH } from './index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
-import type { PackageJson } from '@npmcli/package-json';
-
-type Manifest = PackageJson & { eslintConfig?: ESLintConfig };
+import type { PackageJsonWithPlugins } from '../../types/package-json.js';
 
 const getDependencies = (config: ESLintConfig | OverrideConfig) => {
   const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendSpecifier) : [];
@@ -35,7 +33,7 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
 
 type GetDependenciesDeep = (
   configFilePath: string,
-  options: { cwd: string; manifest: Manifest },
+  options: { cwd: string; manifest: PackageJsonWithPlugins },
   dependencies?: Set<string>
 ) => Promise<Set<string>>;
 

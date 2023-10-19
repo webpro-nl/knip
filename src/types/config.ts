@@ -12,6 +12,8 @@ type NormalizedGlob = string[];
 
 export type PluginName = keyof typeof Plugins;
 
+export type PluginMap = typeof Plugins;
+
 export type EnsuredPluginConfiguration = {
   config: NormalizedGlob | null;
   entry: NormalizedGlob | null;

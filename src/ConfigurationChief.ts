@@ -29,7 +29,7 @@ import type {
   PluginsConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { PackageJsonWithPlugins } from './types/plugins.js';
+import type { PackageJson } from '@npmcli/package-json';
 
 const {
   config: rawConfigArg,
@@ -84,7 +84,7 @@ export type Workspace = {
   ancestors: string[];
   config: WorkspaceConfiguration;
   manifestPath: string;
-  manifest: PackageJsonWithPlugins;
+  manifest: PackageJson;
 };
 
 /**
@@ -101,7 +101,7 @@ export class ConfigurationChief {
   config: Configuration;
 
   manifestPath?: string;
-  manifest?: PackageJsonWithPlugins;
+  manifest?: PackageJson;
 
   ignoredWorkspacePatterns: string[] = [];
   manifestWorkspaces: Map<string, string> = new Map();
@@ -109,7 +109,7 @@ export class ConfigurationChief {
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames: Set<string | undefined> = new Set();
   availableWorkspaceDirs: string[] = [];
-  availableWorkspaceManifests: { dir: string; manifest: PackageJsonWithPlugins }[] = [];
+  availableWorkspaceManifests: { dir: string; manifest: PackageJson }[] = [];
   workspacesGraph: ReturnType<typeof createPkgGraph> | undefined;
   enabledWorkspaces: Workspace[] = [];
 
@@ -300,7 +300,7 @@ export class ConfigurationChief {
 
   private getAvailableWorkspaceManifests(availableWorkspaceDirs: string[]) {
     return availableWorkspaceDirs.map(dir => {
-      const manifest: PackageJsonWithPlugins = _require(join(dir, 'package.json'));
+      const manifest: PackageJson = _require(join(dir, 'package.json'));
       if (!manifest) throw new LoaderError(`Unable to load package.json for ${dir}`);
       return { dir, manifest };
     });

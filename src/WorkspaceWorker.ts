@@ -12,7 +12,7 @@ import {
   isProductionEntryPattern,
 } from './util/protocols.js';
 import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
-import type { PackageJsonWithPlugins } from './types/plugins.js';
+import type { PackageJsonWithPlugins } from './types/package-json.js';
 import type { InstalledBinaries, HostDependencies } from './types/workspace.js';
 import type { Entries } from 'type-fest';
 

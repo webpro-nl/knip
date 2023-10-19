@@ -1,11 +1,9 @@
 import type { EnsuredPluginConfiguration, WorkspaceConfiguration } from './config.js';
-import type { PackageJson } from '@npmcli/package-json';
-
-export type PackageJsonWithPlugins = PackageJson & Record<string, unknown>;
+import type { PackageJsonWithPlugins } from './package-json.js';
 
 type IsPluginEnabledCallbackOptions = {
   cwd: string;
-  manifest: PackageJson;
+  manifest: PackageJsonWithPlugins;
   dependencies: Set<string>;
   config: WorkspaceConfiguration;
 };
