@@ -33,10 +33,10 @@ test('Find dependencies in vitest configuration (vite)', async () => {
   const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest, config });
   assert.deepEqual(dependencies, [
     'entry:**/*.{test,spec}.?(c|m)[jt]s?(x)',
-    '@edge-runtime/vm',
     '@vitest/coverage-c8',
     './setup.js',
     './global.ts',
+    '@edge-runtime/vm',
   ]);
 });
 

@@ -1,9 +1,8 @@
-import { compact } from '../../util/array.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
-import type { VitestConfigOrFn, VitestWorkspaceConfig } from './types.js';
+import type { ViteConfigOrFn, VitestWorkspaceConfig, ViteConfig, MODE, COMMAND } from './types.js';
 import type {
   IsPluginEnabledCallback,
   GenericPluginCallback,
@@ -24,18 +23,13 @@ export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vitest.{workspace,proj
 /** @public */
 export const ENTRY_FILE_PATTERNS = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 
-export const findVitestDeps = (localConfig: VitestConfigOrFn, options: GenericPluginCallbackOptions) => {
-  const { isProduction } = options;
-
-  localConfig = typeof localConfig === 'function' ? localConfig() : localConfig;
-
-  if (!localConfig || !localConfig.test) return [];
-
+const findConfigDependencies = (localConfig: ViteConfig, options: GenericPluginCallbackOptions) => {
+  const { isProduction, config } = options;
   const testConfig = localConfig.test;
 
-  const entryPatterns = (options.config?.entry ?? testConfig.include ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
+  const entryPatterns = (config?.entry ?? testConfig?.include ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
 
-  if (isProduction) return entryPatterns;
+  if (!testConfig || isProduction) return entryPatterns;
 
   const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
   const reporters = getExternalReporters(testConfig.reporters);
@@ -45,14 +39,35 @@ export const findVitestDeps = (localConfig: VitestConfigOrFn, options: GenericPl
   return [...entryPatterns, ...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup];
 };
 
-const findVitestDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const localConfig: VitestConfigOrFn | VitestWorkspaceConfig | undefined = await load(configFilePath);
+export const findVitestDependencies = async (localConfig: ViteConfigOrFn, options: GenericPluginCallbackOptions) => {
+  if (!localConfig) return [];
 
-  return compact(
-    [localConfig]
-      .flat()
-      .flatMap(config => (!config || typeof config === 'string' ? [] : findVitestDeps(config, options)))
-  );
+  if (typeof localConfig === 'function') {
+    const dependencies = new Set<string>();
+    for (const command of ['dev', 'serve', 'build'] as COMMAND[]) {
+      for (const mode of ['development', 'production'] as MODE[]) {
+        const config = await localConfig({ command, mode, ssrBuild: undefined });
+        findConfigDependencies(config, options).forEach(dependency => dependencies.add(dependency));
+      }
+    }
+    return Array.from(dependencies);
+  }
+
+  if (!localConfig.test) return [];
+
+  return findConfigDependencies(localConfig, options);
 };
 
-export const findDependencies = timerify(findVitestDependencies);
+const findVitestWorkspaceDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const localConfig: ViteConfigOrFn | VitestWorkspaceConfig | undefined = await load(configFilePath);
+
+  const dependencies = new Set<string>();
+  for (const config of [localConfig].flat()) {
+    if (config && typeof config !== 'string') {
+      (await findVitestDependencies(config, options)).forEach(dependency => dependencies.add(dependency));
+    }
+  }
+  return Array.from(dependencies);
+};
+
+export const findDependencies = timerify(findVitestWorkspaceDependencies);
