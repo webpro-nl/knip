@@ -38,12 +38,14 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
 export const findTypeScriptDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { isProduction } = options;
 
-  if (isProduction) return [];
-
   const { compilerOptions } = await loadTSConfig(configFilePath);
   const localConfig: TsConfigJson | undefined = await resolveExtensibleConfig(configFilePath); // Dual loader to get external `extends` dependencies
 
   if (!compilerOptions || !localConfig) return [];
+
+  const jsx = compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : [];
+
+  if (isProduction) return [...jsx];
 
   const extend = localConfig.extends ? [localConfig.extends].flat().filter(extend => !isInternal(extend)) : [];
   const types = compilerOptions.types ?? [];
@@ -51,7 +53,6 @@ export const findTypeScriptDependencies: GenericPluginCallback = async (configFi
     ? compilerOptions.plugins.map(plugin => (typeof plugin === 'object' && 'name' in plugin ? plugin.name : ''))
     : [];
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
-  const jsx = compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : [];
 
   return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
 };

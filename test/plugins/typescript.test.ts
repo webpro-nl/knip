@@ -39,3 +39,15 @@ test('Find dependencies in typescript configuration (extends)', async () => {
   const dependencies = await typescript.findDependencies(configFilePath, {});
   assert.deepEqual(dependencies, ['@tsconfig/node20/tsconfig.json']);
 });
+
+test('Find dependencies in typescript configuration (jsxImportSource)', async () => {
+  const configFilePath = join(cwd, 'tsconfig-jsxImportSource.json');
+  const dependencies = await typescript.findDependencies(configFilePath, {});
+  assert.deepEqual(dependencies, ['vitest/globals', 'hastscript/svg']);
+});
+
+test('Find dependencies in typescript configuration (jsxImportSource/production)', async () => {
+  const configFilePath = join(cwd, 'tsconfig-jsxImportSource.json');
+  const dependencies = await typescript.findDependencies(configFilePath, { isProduction: true });
+  assert.deepEqual(dependencies, ['hastscript/svg']);
+});
