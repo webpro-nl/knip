@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "prettier": {
-    "config": [".prettierrc", ".prettierrc.{json,js,cjs,yml,yaml}", "prettier.config.{js,cjs}", "package.json"]
+    "config": [".prettierrc", ".prettierrc.{json,js,cjs,mjs,yml,yaml}", "prettier.config.{js,cjs,mjs}", "package.json"]
   }
 }
 ```

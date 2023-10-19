@@ -15,8 +15,8 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies, config }) =>
 
 export const CONFIG_FILE_PATTERNS = [
   '.prettierrc',
-  '.prettierrc.{json,js,cjs,yml,yaml}',
-  'prettier.config.{js,cjs}',
+  '.prettierrc.{json,js,cjs,mjs,yml,yaml}',
+  'prettier.config.{js,cjs,mjs}',
   'package.json',
 ];
 
