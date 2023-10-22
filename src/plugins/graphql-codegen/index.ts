@@ -9,6 +9,8 @@ export const NAME = 'Graphql Codegen';
 /** @public */
 export const ENABLERS = [/^@graphql-codegen\//];
 
+export const PACKAGE_JSON_PATH = 'codegen';
+
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = ['codegen.{ts,js,json,yml,mjs,cts}', 'package.json'];
@@ -21,7 +23,7 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   // load configuration file from `configFilePath` (or grab `manifest` for package.json)
   // load(FAKE_PATH) will return `undefined`
   const localConfig: GraphqlCodegenTypes | undefined = configFilePath.endsWith('package.json')
-    ? manifest.codegen
+    ? manifest[PACKAGE_JSON_PATH]
     : await load(configFilePath);
 
   if (!localConfig) return [];
