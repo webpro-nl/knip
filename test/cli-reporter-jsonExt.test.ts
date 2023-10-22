@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { EOL } from 'node:os';
+import { platform } from 'node:os';
 import test from 'node:test';
 import { resolve } from '../src/util/path.js';
 import { execFactory } from './helpers/execKnip.js';
@@ -127,5 +127,21 @@ test('knip --reporter jsonext', () => {
     },
   ];
 
-  assert.equal(exec('knip --reporter jsonExt'), JSON.stringify(json) + EOL);
+  if (platform() === 'win32') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatePos = (obj: any) => {
+      if (Array.isArray(obj)) {
+        obj.forEach(item => updatePos(item));
+      } else if (obj && typeof obj === 'object') {
+        for (const key in obj) {
+          if (key === 'pos' && 'line' in obj) obj[key] += obj['line'] - 1;
+          else updatePos(obj[key]);
+        }
+      }
+    };
+    // Add line - 1 to every pos (each EOL is one more char)
+    updatePos(json);
+  }
+
+  assert.equal(exec('knip --reporter jsonExt'), JSON.stringify(json) + '\n');
 });
