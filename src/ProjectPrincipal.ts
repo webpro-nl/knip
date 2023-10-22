@@ -2,7 +2,7 @@ import { isGitIgnoredSync } from 'globby';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
-import { getJSDocTags, isInModuleBlock } from './typescript/ast-helpers.js';
+import { getJSDocTags, getLineAndCharacterOfPosition, isInModuleBlock } from './typescript/ast-helpers.js';
 import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
@@ -254,19 +254,17 @@ export class ProjectPrincipal {
   }
 
   public findUnusedMembers(filePath: string, members: ExportItemMember[]) {
-    return members
-      .filter(member => {
-        if (getJSDocTags(member.node).has('@public')) return false;
-        const referencedSymbols = this.findReferences(filePath, member.pos);
-        const files = referencedSymbols
-          .flatMap(refs => refs.references)
-          .filter(ref => !ref.isDefinition)
-          .map(ref => ref.fileName);
-        const internalRefs = files.filter(f => f === filePath);
-        const externalRefs = files.filter(f => f !== filePath);
-        return externalRefs.length === 0 && internalRefs.length === 0;
-      })
-      .map(member => member.identifier);
+    return members.filter(member => {
+      if (getJSDocTags(member.node).has('@public')) return false;
+      const referencedSymbols = this.findReferences(filePath, member.pos);
+      const files = referencedSymbols
+        .flatMap(refs => refs.references)
+        .filter(ref => !ref.isDefinition)
+        .map(ref => ref.fileName);
+      const internalRefs = files.filter(f => f === filePath);
+      const externalRefs = files.filter(f => f !== filePath);
+      return externalRefs.length === 0 && internalRefs.length === 0;
+    });
   }
 
   private findReferences(filePath: string, pos: number) {
@@ -276,5 +274,10 @@ export class ProjectPrincipal {
       // TS throws for (cross-referenced) files not in the program
       return [];
     }
+  }
+
+  public getPos(node: ts.Node, pos: number) {
+    const { line, character } = getLineAndCharacterOfPosition(node, pos);
+    return { pos, line: line + 1, col: character + 1 };
   }
 }

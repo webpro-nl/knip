@@ -39,6 +39,22 @@ test('Find unused exports', async () => {
   assert.equal(Object.values(issues.duplicates).length, 1);
   assert.equal(issues.duplicates['my-module.ts']['exportedResult|default'].symbols?.[0], 'exportedResult');
 
+  assert.equal(issues.exports['default.ts']['NamedExport'].line, 1);
+  assert.equal(issues.exports['default.ts']['NamedExport'].col, 14);
+  assert.equal(issues.exports['default.ts']['NamedExport'].pos, 13);
+
+  assert.equal(issues.types['my-module.ts']['MyAnyType'].line, 19);
+  assert.equal(issues.types['my-module.ts']['MyAnyType'].col, 13);
+  assert.equal(issues.types['my-module.ts']['MyAnyType'].pos, 702);
+
+  assert.equal(issues.nsExports['my-namespace.ts']['nsUnusedKey'].line, 3);
+  assert.equal(issues.nsExports['my-namespace.ts']['nsUnusedKey'].col, 14);
+  assert.equal(issues.nsExports['my-namespace.ts']['nsUnusedKey'].pos, 84);
+
+  assert.equal(issues.nsTypes['my-namespace.ts']['MyNamespace'].line, 5);
+  assert.equal(issues.nsTypes['my-namespace.ts']['MyNamespace'].col, 18);
+  assert.equal(issues.nsTypes['my-namespace.ts']['MyNamespace'].pos, 119);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 8,

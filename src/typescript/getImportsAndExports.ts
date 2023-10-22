@@ -144,9 +144,9 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
       const item = exports.get(identifier)!;
       const crew = [...item.members, ...members];
       const tags = new Set([...item.jsDocTags, ...jsDocTags]);
-      exports.set(identifier, { ...item, node, type, pos, members: crew, jsDocTags: tags });
+      exports.set(identifier, { ...item, members: crew, jsDocTags: tags });
     } else {
-      exports.set(identifier, { node, type, pos, members, jsDocTags });
+      exports.set(identifier, { node, type, members, jsDocTags, pos });
     }
 
     if (!jsDocTags.has('@alias')) {

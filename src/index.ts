@@ -407,13 +407,25 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
               if (isProduction) continue;
               principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-                collector.addIssue({ type: 'enumMembers', filePath, symbol: member, parentSymbol: symbol });
+                collector.addIssue({
+                  type: 'enumMembers',
+                  filePath,
+                  symbol: member.identifier,
+                  parentSymbol: symbol,
+                  ...principal.getPos(member.node, member.pos),
+                });
               });
             }
 
             if (report.classMembers && exportedItem.type === 'class' && exportedItem.members) {
               principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-                collector.addIssue({ type: 'classMembers', filePath, symbol: member, parentSymbol: symbol });
+                collector.addIssue({
+                  type: 'classMembers',
+                  filePath,
+                  symbol: member.identifier,
+                  parentSymbol: symbol,
+                  ...principal.getPos(member.node, member.pos),
+                });
               });
             }
 
@@ -429,10 +441,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
               if (isProduction) continue;
               const type = isStar ? 'nsTypes' : 'types';
-              collector.addIssue({ type, filePath, symbol, symbolType: exportedItem.type });
+              collector.addIssue({
+                type,
+                filePath,
+                symbol,
+                symbolType: exportedItem.type,
+                ...principal.getPos(exportedItem.node, exportedItem.pos),
+              });
             } else {
               const type = isStar ? 'nsExports' : 'exports';
-              collector.addIssue({ type, filePath, symbol });
+              collector.addIssue({
+                type,
+                filePath,
+                symbol,
+                ...principal.getPos(exportedItem.node, exportedItem.pos),
+              });
             }
           }
         }
