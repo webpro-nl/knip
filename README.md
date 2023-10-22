@@ -704,7 +704,7 @@ $ npx knip --help
       -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
       --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
       --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
-      --reporter               Select reporter: symbols, compact, codeowners, json, can be repeated (default: symbols)
+      --reporter               Select reporter: symbols, compact, codeowners, json, jsonExt, can be repeated (default: symbols)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
       --no-config-hints        Suppress configuration hints
       --no-exit-code           Always exit with code zero (0)
