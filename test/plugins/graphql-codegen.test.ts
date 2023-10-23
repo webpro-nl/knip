@@ -37,9 +37,6 @@ test('Find dependencies in graphql-codegen configuration (codegen.ts function)',
     cwd,
   });
 
-  console.log(issues);
-  console.log(counters);
-
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/near-operation-file-preset']);
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/schema-ast']);
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/introspection']);
@@ -51,7 +48,8 @@ test('Find dependencies in graphql-codegen configuration (codegen.ts function)',
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 7,
+    unlisted: 8,
+    devDependencies: 1,
     processed: 1,
     total: 1,
   });
