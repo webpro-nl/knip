@@ -73,6 +73,7 @@ export const pluginSchema = z.union([
 ]);
 
 const pluginsSchema = z.object({
+  'graphql-codegen': pluginSchema,
   astro: pluginSchema,
   angular: pluginSchema,
   ava: pluginSchema,
