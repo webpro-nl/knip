@@ -17,7 +17,6 @@ const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, op
 
   if (isProduction) return [];
 
-  console.log('POSTCSS : CONFIG PATH :', configFilePath);
   const localConfig: PostCSSConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest?.postcss
     : await load(configFilePath);
