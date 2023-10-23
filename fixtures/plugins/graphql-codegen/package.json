@@ -1,12 +1,15 @@
 {
-  "name": "@fixtures/_template",
+  "name": "@fixtures/graphql-codegen",
   "version": "*",
   "devDependencies": {
     "@graphql-codegen/cli": "*"
   },
   "codegen": {
     "schema": "schema.graphql",
-    "documents": ["src/**/*.tsx", "!src/gql/**/*"],
+    "documents": [
+      "src/**/*.tsx",
+      "!src/gql/**/*"
+    ],
     "generates": {
       "./src/gql/": {
         "preset": "client"

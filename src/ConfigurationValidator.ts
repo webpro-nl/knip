@@ -73,7 +73,6 @@ export const pluginSchema = z.union([
 ]);
 
 const pluginsSchema = z.object({
-  'graphql-codegen': pluginSchema,
   astro: pluginSchema,
   angular: pluginSchema,
   ava: pluginSchema,
@@ -87,6 +86,7 @@ const pluginsSchema = z.object({
   eslint: pluginSchema,
   gatsby: pluginSchema,
   'github-actions': pluginSchema,
+  'graphql-codegen': pluginSchema,
   husky: pluginSchema,
   jest: pluginSchema,
   lefthook: pluginSchema,
