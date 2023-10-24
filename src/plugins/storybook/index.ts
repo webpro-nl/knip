@@ -17,7 +17,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const CONFIG_FILE_PATTERNS = ['.storybook/{main,test-runner}.{js,ts}'];
 
 /** @public */
-export const STORIES_FILE_PATTERNS = ['**/*.stories.{js,jsx,ts,tsx}'];
+export const STORIES_FILE_PATTERNS = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
 
 /** @public */
 export const ENTRY_FILE_PATTERNS = ['.storybook/{manager,preview}.{js,jsx,ts,tsx}', ...STORIES_FILE_PATTERNS];
@@ -33,7 +33,10 @@ const findStorybookDependencies: GenericPluginCallback = async (configFilePath, 
     typeof localConfig?.stories === 'function'
       ? await localConfig.stories(STORIES_FILE_PATTERNS)
       : localConfig?.stories;
-  const relativePatterns = stories?.map(pattern => relative(cwd, join(dirname(configFilePath), pattern)));
+  const relativePatterns = stories?.map(pattern => {
+    if (typeof pattern === 'string') return relative(cwd, join(dirname(configFilePath), pattern));
+    return relative(cwd, join(dirname(configFilePath), pattern.directory, pattern.files ?? STORIES_FILE_PATTERNS[0]));
+  });
   const patterns = [...(config?.entry ?? []), ...(relativePatterns ?? [])];
   const entryPatterns = (patterns.length > 0 ? patterns : ENTRY_FILE_PATTERNS).map(toEntryPattern);
 
