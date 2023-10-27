@@ -199,13 +199,17 @@ export class ProjectPrincipal {
         }
       } else {
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
-        if (isMaybePackageName(sanitizedSpecifier)) {
+        const ext = extname(sanitizedSpecifier);
+        const hasIgnoredExtension = IGNORED_FILE_EXTENSIONS.includes(ext);
+        if (!hasIgnoredExtension && isMaybePackageName(sanitizedSpecifier)) {
+          // Should never end up here; maybe a dependency that was not installed.
+          // Package name may contain such extensions, but any external dependency should be resolved by TS.
           external.add(sanitizedSpecifier);
         } else {
           const isIgnored = this.isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
           if (!isIgnored) {
             const ext = extname(sanitizedSpecifier);
-            if (!ext || (ext !== '.json' && !IGNORED_FILE_EXTENSIONS.includes(ext))) {
+            if (!ext || (ext !== '.json' && !hasIgnoredExtension)) {
               unresolvedImports.add(specifier);
             }
           }
