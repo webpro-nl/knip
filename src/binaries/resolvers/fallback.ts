@@ -10,8 +10,10 @@ type ArgResolvers = Record<string, ArgResolver>;
 
 const withPositional: ArgResolver = parsed => [parsed._[0], parsed.require].flat();
 const withoutPositional: ArgResolver = parsed => [parsed.require].flat();
+const withoutRequire: ArgResolver = () => [];
 
 const argFilters: ArgResolvers = {
+  adb: withoutRequire,
   'babel-node': withPositional,
   esbuild: withPositional,
   execa: withPositional,

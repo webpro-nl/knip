@@ -168,10 +168,14 @@ test('getReferencesFromScripts (c8)', () => {
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/reporter', ['bin:c8', '@org/reporter']);
 });
 
-test('getReferencesFromScripts (nodemon', () => {
+test('getReferencesFromScripts (nodemon)', () => {
   t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['bin:nodemon', js, 'dotenv']);
   t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", ['bin:nodemon', ts, 'bin:ts-node', 'bin:pino-pretty']);
   t('nodemon script.js', ['bin:nodemon', js]);
+});
+
+test('getReferencesFromScripts (fallback resolver)', () => {
+  t('adb install -r android/app/app-dev-debug.apk', ['bin:adb']);
 });
 
 test('getReferencesFromScripts (bash expressions)', () => {
