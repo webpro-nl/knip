@@ -73,7 +73,7 @@
     "@types/js-yaml": "4.0.8",
     "@types/micromatch": "4.0.4",
     "@types/minimist": "1.2.4",
-    "@types/node": "20.8.8",
+    "@types/node": "20.8.9",
     "@types/npmcli__map-workspaces": "3.0.3",
     "@types/pkgjs__parseargs": "0.10.2",
     "@types/webpack": "5.28.4",
@@ -90,7 +90,7 @@
     "remark-cli": "12.0.0",
     "remark-preset-webpro": "1.0.0",
     "tsx": "3.14.0",
-    "type-fest": "4.5.0"
+    "type-fest": "4.6.0"
   },
   "engines": {
     "node": ">=16.17.0 <17 || >=18.6.0"
