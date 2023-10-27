@@ -16,6 +16,7 @@ const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, opti
 
   return compact(
     results.map(identifier => {
+      if (identifier.startsWith('http')) return;
       if (isBinary(identifier)) return identifier;
       if (isInternal(identifier)) {
         const ext = extname(identifier);

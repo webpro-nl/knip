@@ -118,6 +118,8 @@ test('getReferencesFromScripts (npx)', () => {
   t('npx --package pkg@0.6.0 -- curl --output /dev/null', ['bin:curl', 'pkg']);
   t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', ['bin:curl', '@scope/pkg', 'pkg']);
   t("npx --package=foo -c 'curl --output /dev/null'", ['foo', 'bin:curl']);
+  t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', ['bin:swagger-typescript-api']);
+  t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', ['bin:swagger-typescript-api']);
 });
 
 test('getReferencesFromScripts (pnpm)', () => {
