@@ -4,7 +4,9 @@ import { isConfigurationOutput } from './types.js';
 import type { ConfiguredPlugin, GraphqlCodegenTypes, PresetNames } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-export const NAME = 'Graphql Codegen';
+// https://the-guild.dev/graphql/codegen/docs/config-reference/codegen-config
+
+export const NAME = 'GraphQL Codegen';
 
 /** @public */
 export const ENABLERS = [/^@graphql-codegen\//];
@@ -20,8 +22,6 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
 
   if (isProduction) return [];
 
-  // load configuration file from `configFilePath` (or grab `manifest` for package.json)
-  // load(FAKE_PATH) will return `undefined`
   const localConfig: GraphqlCodegenTypes | undefined = configFilePath.endsWith('package.json')
     ? manifest[PACKAGE_JSON_PATH]
     : await load(configFilePath);
@@ -39,13 +39,11 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
 
   const flatPlugins = generateSet
     .filter((config): config is ConfiguredPlugin => !isConfigurationOutput(config))
-    .map(item => Object.keys(item))
-    .flat()
+    .flatMap(item => Object.keys(item))
     .map(plugin => `@graphql-codegen/${plugin}`);
 
   const nestedPlugins = configurationOutput
-    .map(configOutput => (configOutput.plugins ? configOutput.plugins : []))
-    .flat()
+    .flatMap(configOutput => (configOutput.plugins ? configOutput.plugins : []))
     .map(plugin => `@graphql-codegen/${plugin}`);
 
   return [...presets, ...flatPlugins, ...nestedPlugins];
