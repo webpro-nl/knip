@@ -1,12 +1,9 @@
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import type { RemarkConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/remarkjs/remark/blob/main/packages/remark-cli/readme.md
-
-type RemarkConfig = {
-  plugins: string[];
-};
 
 export const NAME = 'Remark';
 
@@ -36,7 +33,14 @@ const findRemarkDependencies: GenericPluginCallback = async (configFilePath, opt
 
   if (!localConfig) return [];
 
-  const plugins = localConfig.plugins?.map(plugin => `remark-${plugin}`) ?? [];
+  const plugins =
+    localConfig.plugins
+      ?.flatMap(plugin => {
+        if (typeof plugin === 'string') return plugin;
+        if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
+        return [];
+      })
+      .map(plugin => (plugin.startsWith('remark-') ? plugin : `remark-${plugin}`)) ?? [];
   return plugins;
 };
 
