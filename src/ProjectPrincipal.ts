@@ -5,6 +5,7 @@ import { IGNORED_FILE_EXTENSIONS } from './constants.js';
 import { getJSDocTags, getLineAndCharacterOfPosition, isInModuleBlock } from './typescript/ast-helpers.js';
 import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
+import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { isMaybePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
@@ -63,7 +64,7 @@ export class ProjectPrincipal {
   backend: {
     fileManager: SourceFileManager;
     compilerHost: ts.CompilerHost;
-    languageServiceHost: ts.LanguageServiceHost;
+    resolveModuleNames: ReturnType<typeof createCustomModuleResolver>;
     lsFindReferences: ts.LanguageService['findReferences'];
     program?: ts.Program;
   };
@@ -85,7 +86,7 @@ export class ProjectPrincipal {
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
 
-    const { fileManager, compilerHost, languageServiceHost } = createHosts({
+    const { fileManager, compilerHost, languageServiceHost, resolveModuleNames } = createHosts({
       cwd: this.cwd,
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
@@ -99,7 +100,7 @@ export class ProjectPrincipal {
     this.backend = {
       fileManager,
       compilerHost,
-      languageServiceHost,
+      resolveModuleNames,
       lsFindReferences,
     };
   }
@@ -229,8 +230,7 @@ export class ProjectPrincipal {
   }
 
   public resolveModule(specifier: string, filePath: string = specifier) {
-    const module = ts.resolveModuleName(specifier, filePath, this.compilerOptions, this.backend.languageServiceHost);
-    return module?.resolvedModule;
+    return this.backend.resolveModuleNames([specifier], filePath)[0];
   }
 
   public getHasReferences(filePath: string, exportedItem: ExportItem) {

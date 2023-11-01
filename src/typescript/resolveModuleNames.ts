@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs';
 import ts from 'typescript';
 import { sanitizeSpecifier } from '../util/modules.js';
-import { dirname, extname, isInternal, join } from '../util/path.js';
+import { dirname, extname, isAbsolute, isInternal, join } from '../util/path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
 const simpleResolver = (name: string, containingFile: string) => {
-  const resolvedFileName = join(dirname(containingFile), name);
+  const resolvedFileName = isAbsolute(name) ? name : join(dirname(containingFile), name);
   if (existsSync(resolvedFileName)) {
     return {
       resolvedFileName,

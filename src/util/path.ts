@@ -4,7 +4,7 @@ import parsedArgValues from './cli-arguments.js';
 
 const { directory } = parsedArgValues;
 
-const isAbsolute = path.isAbsolute;
+export const isAbsolute = path.isAbsolute;
 
 export const dirname = path.posix.dirname;
 
