@@ -346,9 +346,10 @@ export class ConfigurationChief {
       .sort(byPathDepth)
       .map((name): Workspace => {
         const dir = join(this.cwd, name);
+        const pkgName = this.availableWorkspaceManifests.find(p => p.dir === dir)?.manifest.name ?? `NOT_FOUND_${name}`;
         return {
           name,
-          pkgName: this.manifestWorkspaces.get(name) ?? this.manifest?.name ?? `NOT_FOUND_${name}`,
+          pkgName,
           dir,
           config: this.getConfigForWorkspace(name),
           ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
