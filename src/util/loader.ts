@@ -31,10 +31,21 @@ const load = async (filePath: string) => {
       return imported.default ?? imported;
     }
 
-    return jiti(filePath);
+    return await jiti(filePath);
+  } catch (error) {
+    throw new LoaderError(`Error loading ${filePath}`, { cause: error });
+  }
+};
+
+const loadFileAsync = async (filePath: string) => {
+  // TODO: Turn into a config issue warning
+  if (filePath === FAKE_PATH) return;
+  try {
+    return await loadFile(filePath);
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
 };
 
 export const _load = timerify(load);
+export const _loadFile = timerify(loadFileAsync);

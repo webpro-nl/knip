@@ -1,4 +1,4 @@
-export { _load as load } from './loader.js';
+export { _load as load, _loadFile as loadFile } from './loader.js';
 import { arrayify } from './array.js';
 import type { RawPluginConfiguration } from '../types/config.js';
 

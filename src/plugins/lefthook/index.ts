@@ -1,9 +1,8 @@
-import { readFileSync } from 'fs';
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { getGitHookPaths } from '../../util/git.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency, load, loadFile } from '../../util/plugin.js';
 import { fromBinary } from '../../util/protocols.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -35,7 +34,10 @@ const findLefthookDependencies: GenericPluginCallback = async (configFilePath, o
     return [...lefthook, ..._getDependenciesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true })];
   }
 
-  const script = readFileSync(configFilePath, 'utf8');
+  const script = await loadFile(configFilePath);
+
+  if (!script) return [];
+
   const scriptDependencies = _getDependenciesFromScripts([script], { cwd, manifest, knownGlobalsOnly: false });
   const matches = scriptDependencies.find(dep => dependencies.includes(fromBinary(dep)));
   return matches ? [matches] : [];
