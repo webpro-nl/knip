@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/import-errors');
 
-test('Support various ways to import modules', async () => {
+test('Support various ways to import modules (not-a-file.d.ts)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
