@@ -46,3 +46,12 @@ jobs:
       - run: bun install
       - run: bun link knip
       - run: bun knip
+
+      - name: Test Knip against DefinitelyTyped-tools
+        uses: actions/checkout@v3
+        with:
+          repository: microsoft/DefinitelyTyped-tools
+          path: DefinitelyTyped-tools
+      - run: bun install
+      - run: bun link knip
+      - run: bun knip
