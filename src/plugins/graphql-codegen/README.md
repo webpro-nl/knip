@@ -1,4 +1,4 @@
-# Graphql Codegen
+# GraphQL Codegen
 
 ## Enabled
 

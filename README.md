@@ -277,7 +277,7 @@ Knip contains a growing list of plugins:
 - [ESLint][plugin-eslint]
 - [Gatsby][plugin-gatsby]
 - [GitHub Actions][plugin-github-actions]
-- [Graphql Codegen][plugin-graphql-codegen]
+- [GraphQL Codegen][plugin-graphql-codegen]
 - [husky][plugin-husky]
 - [Jest][plugin-jest]
 - [Lefthook][plugin-lefthook]
