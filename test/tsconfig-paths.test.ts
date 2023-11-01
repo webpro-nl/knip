@@ -26,7 +26,7 @@ test('Resolve modules properly using tsconfig paths and globs', async () => {
     dependencies: 1,
     unlisted: 2,
     exports: 2,
-    processed: 4,
-    total: 4,
+    processed: 6,
+    total: 6,
   });
 });

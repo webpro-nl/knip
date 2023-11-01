@@ -3,7 +3,9 @@
   "exclude": ["exclude.ts"],
   "compilerOptions": {
     "baseUrl": ".",
+    "types": ["node"],
     "paths": {
+      "@/*": ["./*"],
       "@alias/*": ["aliased-dir/*"],
       "@internal": ["internal-package/index.ts"],
       "unprefixed": ["unprefixed/module.ts"]
