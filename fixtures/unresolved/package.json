@@ -1,5 +1,9 @@
 {
   "name": "@fixtures/unresolved",
+  "dependencies": {
+    "@svg-icons/fa-brands": "*",
+    "@svg-icons/heroicons-outline": "*"
+  },
   "devDependencies": {
     "style-loader": "*"
   }
