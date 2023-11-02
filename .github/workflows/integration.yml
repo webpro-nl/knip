@@ -16,9 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v1
+      - run: rm package-lock.json
       - run: bun install
-      - run: bun run build
-      - run: bun link
+      - run: cd packages/knip && bun run build && cd -
 
       - name: Test Knip against create-typescript-app
         uses: actions/checkout@v3
