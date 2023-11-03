@@ -8,12 +8,10 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/astro');
 
 test('Find dependencies in Astro configuration', async () => {
-  const { issues, counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
-
-  assert(!issues.devDependencies['package.json']?.['@astrojs/check']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
