@@ -13,7 +13,7 @@ test('Find dependencies in Astro configuration', async () => {
     cwd,
   });
 
-  assert(!issues.devDependencies['package.json']['@astrojs/check']);
+  assert(!issues.devDependencies['package.json']?.['@astrojs/check']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
