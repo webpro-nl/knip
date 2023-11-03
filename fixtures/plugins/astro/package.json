@@ -7,12 +7,16 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check"
   },
   "dependencies": {
     "@astrojs/mdx": "*",
     "@astrojs/rss": "*",
     "@astrojs/sitemap": "*",
     "astro": "*"
+  },
+  "devDependencies": {
+    "@astrojs/check": "*"
   }
 }
