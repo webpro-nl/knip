@@ -14,6 +14,7 @@ export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 export const IGNORED_GLOBAL_BINARIES = [
   'bash',
   'bun',
+  'bunx',
   'cat',
   'cd',
   'chmod',
