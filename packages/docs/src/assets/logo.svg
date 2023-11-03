@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 424.14 424.14">
+  <defs>
+    <style>
+      .grip {
+        stroke-width: 20px;
+      }
+
+      .grip, .blade {
+        fill: none;
+        opacity: .7;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+      }
+
+      .blade {
+        stroke-width: 30px;
+      }
+
+      .bg {
+        fill: #f68923;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <g>
+    <rect class="bg" x="0" y="0" width="424.14" height="424.14" rx="80.78" ry="80.78"/>
+    <path class="grip" d="m231.46,369.24c67.48-.78,64.82-94.87-.97-94.16"/>
+    <line class="blade" x1="213.07" y1="44.26" x2="216.54" y2="379.36"/>
+    <line class="blade" x1="343.44" y1="94.58" x2="104.02" y2="329.07"/>
+    <path class="grip" d="m167.97,245.42c-47.28-48.16-113.33,18.91-67.28,65.89"/>
+  </g>
+</svg>

@@ -1,0 +1,67 @@
+---
+title: Production Mode
+sidebar:
+  order: 1
+---
+
+## Introduction
+
+The default mode for Knip is comprehensive and targets all project code,
+including configuration files, test files, Storybook stories, and so on. Test
+files usually import production files. This prevents production files or their
+exports from being reported as unused, while sometimes both of them can be
+deleted. Knip features a "production mode" to focus only on the code that you
+ship.
+
+## Configuration
+
+To tell Knip what is production code, add an exclamation mark behind each
+`pattern!` that represents production code:
+
+```json
+{
+  "entry": ["src/index.ts!", "build/script.js"],
+  "project": ["src/**/*.ts!", "build/*.js"]
+}
+```
+
+Depending on file structure and enabled plugins, it's possible that you don't
+need to modify your configuration at all.
+
+Then run Knip with the `--production` flag:
+
+```sh
+knip --production
+```
+
+Here's what's included in production mode:
+
+- Only `entry` and `project` patterns suffixed with `!`
+- Only production `entry` file patterns exported by plugins (such as Next.js and
+  Remix)
+- Only the `start` and `postinstall` scripts
+- Ignore exports with the [`@internal` tag][1]
+
+## Strict Mode
+
+Additionally, the `--strict` flag can be added to:
+
+- Consider `dependencies` (not `devDependencies`) when finding unused or
+  unlisted dependencies
+- Verify isolation: workspaces should use strictly their own `dependencies`
+- Include `peerDependencies` when finding unused or unlisted dependencies
+- Type-only imports should be in `devDependencies`
+
+```sh
+knip --production --strict
+```
+
+## Types
+
+Add `--exclude types` if you don't want to include types in the report:
+
+```sh
+knip --production --exclude types
+```
+
+[1]: ../reference/jsdoc-tsdoc-tags.mdx#internal

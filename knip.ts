@@ -2,6 +2,9 @@ import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
   workspaces: {
+    '.': {
+      ignoreBinaries: ['knip']
+    },
     'packages/knip': {
       entry: ['src/{index,cli}.ts!'],
       project: ['src/**/*.ts!'],
@@ -12,12 +15,13 @@ const config: KnipConfig = {
         project: ['test/**/*.ts']
       }
     },
-    'packages/knip.dev': {
-      entry: ['scripts/*.ts'],
-      ignoreBinaries: ['rg']
+    'packages/docs': {
+      entry: ['scripts/*.ts', 'src/components/{Head,Footer}.astro!'],
+      ignoreBinaries: ['rg', 'xargs']
     }
   },
   compilers: {
+    astro: (text: string) => [...text.replace(/```[\s\S]*?```/g, '').matchAll(/import\s[^;]+;/g)].join('\n'),
     mdx: (text: string) => [...text.replace(/```[\s\S]*?```/g, '').matchAll(/import\s[^;]+;/g)].join('\n')
   }
 };

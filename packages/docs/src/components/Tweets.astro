@@ -1,0 +1,91 @@
+---
+import { readFile } from 'node:fs/promises';
+import Tweet from './Tweet.astro';
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import { type TweetsResponse, formatTimestamp } from '../util/tweet.js';
+
+const ENVIRONMENT = import.meta.env.ENVIRONMENT;
+const BEARER_TOKEN = import.meta.env.BEARER_TOKEN;
+
+const isFetch = ENVIRONMENT !== 'development' && Boolean(BEARER_TOKEN);
+
+const tweetIds = [
+  '1714023231689031941',
+  '1696221274039595363',
+  '1693944495472046382',
+  '1691460974518353920',
+  '1691120132901240832',
+  '1685298103094554625',
+  '1581910299846012928',
+  '1693502146128281657',
+  '1692942539614028086',
+];
+
+const tweet_url = new URL(`/2/tweets`, 'https://api.twitter.com');
+tweet_url.searchParams.set('ids', tweetIds.join(','));
+tweet_url.searchParams.set('expansions', ['author_id'].join(','));
+tweet_url.searchParams.set(
+  'user.fields',
+  ['name', 'username', 'profile_image_url'].join(',')
+);
+tweet_url.searchParams.set(
+  'tweet.fields',
+  ['created_at', 'public_metrics', 'entities'].join(',')
+);
+
+const tweets: TweetsResponse = isFetch
+  ? await fetch(tweet_url.href, {
+      headers: {
+        Authorization: `Bearer ${BEARER_TOKEN}`,
+      },
+    }).then(res => res.json())
+  : JSON.parse(await readFile('mock/tweets.json', 'utf-8'));
+
+if (!tweets.data) console.log(tweets);
+
+interface Testimonial {
+  name: string;
+  text: string;
+  timestamp: string;
+  url: string;
+}
+
+const testimonials: Testimonial[] = JSON.parse(
+  await readFile('mock/testimonials.json', 'utf-8')
+);
+---
+
+<style>
+  .text {
+    color: var(--sl-color-text-accent);
+  }
+</style>
+
+<CardGrid stagger>
+  {
+    (tweets?.data ?? []).map(data => (
+      <Card title="">
+        <Tweet
+          data={{
+            ...data,
+            user: tweets.includes.users.find(
+              user => user.id === data.author_id
+            ),
+          }}
+        />
+      </Card>
+    ))
+  }
+  {
+    testimonials.map(testimonial => {
+      const date = formatTimestamp(testimonial.timestamp);
+      return (
+        <Card title={testimonial.name}>
+          <p class="text">{testimonial.text}</p>
+          <p>{testimonial.url ? <a href={testimonial.url}>{date}</a> : date}</p>
+        </Card>
+      );
+    })
+  }
+  <CardGrid />
+</CardGrid>

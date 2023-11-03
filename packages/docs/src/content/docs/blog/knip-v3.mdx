@@ -1,0 +1,92 @@
+---
+title: Announcing Knip v3 canary
+date: 2023-10-15
+sidebar:
+  order: 1
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+_Published: 2023-10-15_
+
+Lots of new users got introduced to Knip, coming with clear bug reports, helpful
+insights, superb reproductions and great suggestions this year. You're all a
+friendly and helpful bunch! Recently I've opened a Discord channel where more
+communication, collaboration, ideas and updates are happening: feel free to join
+[The Knip Barn][1]!
+
+Today, Knip has [over 140k weekly downloads on npm][2], [almost 4000 stars on
+GitHub][3], and [over 500 repositories][4] using it. While numbers are just
+numbers, they do add to the positive feedback I'm receiving daily. Everything
+combined makes me think I'm on the right track which is very motivating to keep
+working on Knip.
+
+## So... What's Been Cooking Lately?
+
+- Migration to a monorepo setup
+- This very website built with Starlight 🌟
+- Extended documentation for just about everything
+- Improved JSON reporter for external integrations (e.g. [GitHub Action][5])
+- Some breaking changes, but you probably don't need to make any changes
+
+## Breaking Changes
+
+A major bump comes with breaking changes, but most likely no changes necessary
+on your end:
+
+- Removed support for Node.js v16, Knip v3 requires at least Node.js v18.6
+- Simplified [exit codes][6]
+- [Production mode][7] now includes types by default (add `--exclude types` for
+  previous behavior)
+- Removed `--ignore-internal` flag; [`@internal`][8] exports ignored in
+  production mode now
+- The `--debug-file-filter` flag is removed
+- The `jsonExt` reporter is now the default [JSON reporter][9] (the previous one
+  is gone)
+
+## Installation
+
+Try out the latest Knip v3 canary release today!
+
+<Tabs>
+  <TabItem label="npm">
+
+    ```shell
+    npm install -D knip@canary
+    ```
+
+  </TabItem>
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm add -D knip@canary
+    ```
+
+  </TabItem>
+  <TabItem label="bun">
+
+    ```shell
+    bun add -D knip@canary
+    ```
+
+  </TabItem>
+  <TabItem label="yarn">
+
+    ```shell
+    yarn add -D knip@canary
+    ```
+
+  </TabItem>
+</Tabs>
+
+Remember, Knip it before you ship it! Have a great day ☀️
+
+[1]: https://discord.gg/r5uXTtbTpc
+[2]: https://www.npmjs.com/package/knip
+[3]: https://github.com/webpro/knip/stargazers
+[4]: https://github.com/webpro/knip/network/dependents
+[5]: https://github.com/marketplace/actions/knip-reporter
+[6]: ../reference/cli.md#exit-code
+[7]: ../features/production-mode.md
+[8]: ../reference/jsdoc-tsdoc-tags.mdx#internal
+[9]: ../features/reporters.md#json

@@ -1,4 +1,4 @@
 {
   "eslint.experimental.useFlatConfig": true,
-  "eslint.workingDirectories": ["./packages/knip", "./packages/knip.dev"]
+  "eslint.workingDirectories": ["./packages/knip", "./packages/docs"]
 }

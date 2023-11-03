@@ -1,0 +1,171 @@
+---
+title: Reporters & Preprocessors
+---
+
+## Built-in Reporters
+
+Knip provides the following built-in reporters:
+
+- `codeowners`
+- `compact`
+- `json`
+- `symbol` (default)
+
+Example usage:
+
+```sh
+knip --reporter compact
+```
+
+## JSON
+
+The built-in `json` reporter output is meant to be consumed by other tools. It
+reports in JSON format with unused `files` and `issues` as an array with one
+object per file structured like this:
+
+```json
+{
+  "files": ["src/unused.ts"],
+  "issues": [
+    {
+      "file": "package.json",
+      "owners": ["@org/admin"],
+      "dependencies": ["jquery", "moment"],
+      "devDependencies": [],
+      "unlisted": [{ "name": "react" }, { "name": "@org/unresolved" }],
+      "exports": [],
+      "types": [],
+      "duplicates": []
+    },
+    {
+      "file": "src/Registration.tsx",
+      "owners": ["@org/owner"],
+      "dependencies": [],
+      "devDependencies": [],
+      "binaries": [],
+      "unresolved": [
+        { "name": "./unresolved", "line": 8, "col": 23, "pos": 403 }
+      ],
+      "exports": [{ "name": "unusedExport", "line": 1, "col": 14, "pos": 13 }],
+      "types": [
+        { "name": "unusedEnum", "line": 3, "col": 13, "pos": 71 },
+        { "name": "unusedType", "line": 8, "col": 14, "pos": 145 }
+      ],
+      "enumMembers": {
+        "MyEnum": [
+          { "name": "unusedMember", "line": 13, "col": 3, "pos": 167 },
+          { "name": "unusedKey", "line": 15, "col": 3, "pos": 205 }
+        ]
+      },
+      "classMembers": {
+        "MyClass": [
+          { "name": "unusedMember", "line": 40, "col": 3, "pos": 687 },
+          { "name": "unusedSetter", "line": 61, "col": 14, "pos": 1071 }
+        ]
+      },
+      "duplicates": ["Registration", "default"]
+    }
+  ]
+}
+```
+
+The keys match the [reported issue types][1]. Example usage:
+
+```sh
+knip --reporter json
+```
+
+## Custom Reporters
+
+When the provided built-in reporters are not quite sufficient, a custom local
+reporter can be implemented or an external reporter can be used. Multiple
+reporters can be used at once by repeating the `--reporter` argument.
+
+The results are passed to the function from its default export and can be used
+to write issues to `stdout`, a JSON or CSV file, or sent to a service. It
+supports a local JavaScript or TypeScript file or an external dependency.
+
+### Local
+
+Pass `--reporter ./my-reporter`, with the default export of that module having
+this interface:
+
+```ts
+type Reporter = async (options: ReporterOptions) => void;
+
+type ReporterOptions = {
+  report: Report;
+  issues: Issues;
+  configurationHints: ConfigurationHints;
+  noConfigHints: boolean;
+  cwd: string;
+  isProduction: boolean;
+  isShowProgress: boolean;
+  options: string;
+};
+```
+
+The data can then be used to write issues to `stdout`, a JSON or CSV file, or
+sent to a service.
+
+Here's a most minimal reporter example:
+
+```ts
+import type { Reporter } from 'knip';
+
+const reporter: Reporter = function (options) {
+  console.log(options.issues);
+  console.log(options.counters);
+};
+
+export default reporter;
+```
+
+Example usage:
+
+```sh
+knip --reporter ./my-reporter.ts
+```
+
+### External
+
+Pass `--reporter [pkg-name]` to use an external reporter. The default exported
+function of the `main` script (default: `index.js`) will be invoked with the
+`ReporterOptions`, just like a local reporter.
+
+## Preprocessors
+
+A preprocessor is a function that receives the results and should return data in
+the same shape/structure (unless you pass it to only your own reporter). Just
+like reporters, use e.g. `--preprocessor ./my-preprocessor` from the command
+line (can be repeated).
+
+The default export of that module having this interface:
+
+```ts
+type Preprocessor = async (options: ReporterOptions) => ReporterOptions;
+```
+
+Like reporters, you can use local JavaScript or TypeScript files and external
+npm packages as preprocessors.
+
+Example preprocessor:
+
+```ts
+import type { Preprocessor } from 'knip';
+
+const preprocess: Preprocessor = function (options) {
+  // modify options.issues and options.counters
+  return options;
+};
+
+export default preprocess;
+```
+
+Example usage:
+
+```sh
+knip --preprocessor ./preprocess.ts
+```
+
+[1]: ../reference/issue-types.md

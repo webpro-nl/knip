@@ -19,7 +19,7 @@
     "knip": "knip",
     "knip:production": "knip --production --strict"
   },
-  "devDependencies": {
+  "peerDependencies": {
     "knip": "file:packages/knip"
   }
 }

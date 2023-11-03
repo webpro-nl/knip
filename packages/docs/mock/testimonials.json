@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Дмитрий Латышев",
+    "text": "I am now exploring your great instrument Knip. As far as I can tell it is best instrument for finding dead code.",
+    "timestamp": "2023-11-14T15:35"
+  },
+  {
+    "name": "Jake Bailey",
+    "text": "This tool is super useful to note unused code / dependencies.",
+    "timestamp": "2023-11-14T15:35",
+    "url": "https://github.com/microsoft/DefinitelyTyped-tools/pull/792#issue-1967083080"
+  }
+]

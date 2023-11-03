@@ -1,0 +1,74 @@
+---
+title: Dynamic Configuration
+---
+
+## TypeScript
+
+Instead of `knip.json`, you can use a TypeScript file (`knip.ts`) for a dynamic
+configuration and type annotations:
+
+<Tabs>
+  <TabItem label="TypeScript">
+
+```ts
+import type { KnipConfig } from 'knip';
+
+const config: KnipConfig = {
+  entry: ['src/index.ts'],
+  project: ['src/**/*.ts'],
+};
+
+export default config;
+```
+
+  </TabItem>
+  <TabItem label="JavaScript">
+
+```js
+const config = {
+  entry: ['src/index.ts'],
+  project: ['src/**/*.ts'],
+};
+
+export default config;
+```
+
+  </TabItem>
+</Tabs>
+
+## Function
+
+For special cases you can export an async function:
+
+<Tabs>
+  <TabItem label="TypeScript">
+
+```ts
+import type { KnipConfig } from 'knip';
+
+const config = async (): Promise<KnipConfig> => {
+  const items = await fetchRepoInfo();
+
+  return {
+    entry: ['src/index.ts', ...items],
+    project: ['src/**/*.ts'],
+  };
+};
+
+export default config;
+```
+
+  </TabItem>
+  <TabItem label="JavaScript">
+
+```ts
+const config = async () => ({
+  entry: ['src/index.ts'],
+  project: ['src/**/*.ts'],
+});
+
+export default config;
+```
+
+  </TabItem>
+</Tabs>

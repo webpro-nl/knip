@@ -1,0 +1,57 @@
+---
+import { readFile } from 'node:fs/promises';
+
+const ENVIRONMENT = import.meta.env.ENVIRONMENT;
+const GITHUB_TOKEN = import.meta.env.GITHUB_TOKEN;
+
+const isFetch = ENVIRONMENT !== 'development' && Boolean(GITHUB_TOKEN);
+
+interface Contributor {
+  html_url: string;
+  avatar_url: string;
+  login: string;
+}
+
+const url = new URL(
+  `/repos/webpro/knip/contributors`,
+  'https://api.github.com'
+);
+
+const contributors: Contributor[] = isFetch
+  ? await fetch(url.href, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+      },
+    }).then(res => res.json())
+  : JSON.parse(await readFile('mock/contributors.json', 'utf-8'));
+---
+
+<style>
+  .contributors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .contributors a {
+    border: none !important;
+    opacity: 0.8;
+  }
+  .contributors a:hover {
+    opacity: 1;
+  }
+</style>
+
+<div class="contributors">
+  {
+    contributors.map(contributor => (
+      <a href={contributor.html_url}>
+        <img
+          src={contributor.avatar_url}
+          alt={contributor.login}
+          width="100"
+          height="100"
+        />
+      </a>
+    ))
+  }
+</div>

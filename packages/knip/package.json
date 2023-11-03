@@ -32,9 +32,6 @@
     "watch": "rm $(which knip); npm link && tsc --watch",
     "prebuild": "node rmdir.js dist",
     "build": "tsc",
-    "docs": "npm run docs:cli && npm run docs:plugins && npm run docs:format",
-    "docs:cli": "tsx ./scripts/update-cli-usage-in-readme.ts",
-    "docs:format": "remark README.md docs/*.md .github/*.md src/plugins/*/README.md -o",
     "qa": "npm run lint && npm run build && npm run knip && npm run knip:production && npm test",
     "release": "release-it",
     "create-plugin": "tsx --no-warnings ./scripts/create-new-plugin.ts",
@@ -100,7 +97,6 @@
         "npm run build",
         "npm run knip",
         "npm run knip:production",
-        "npm run docs",
         "npm test"
       ]
     },
@@ -115,11 +111,6 @@
         "out": "{dist,src}/version.*"
       }
     }
-  },
-  "remarkConfig": {
-    "plugins": [
-      "preset-webpro"
-    ]
   },
   "keywords": [
     "find",

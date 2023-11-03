@@ -8,8 +8,6 @@ import nPlugin from 'eslint-plugin-n';
 import globals from 'globals';
 import { resolve as tsResolver } from 'eslint-import-resolver-typescript';
 
-// console.log(importPlugin);
-
 /**
  * @type {import("@knip/eslint-config").FlatConfig[]}
  */

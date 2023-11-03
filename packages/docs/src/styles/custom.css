@@ -1,0 +1,193 @@
+:root {
+  --sl-font: 'Source Sans Pro', sans-serif;
+
+  /*
+  --sl-color-orange: oklch(73.64% 0.167 57.38);
+  --sl-color-bright-orange: oklch(76.18% 0.205 57.38);
+  --sl-color-dark-orange: oklch(52.65% 0.136 57.38);
+  */
+
+  --sl-color-orange: #f68a22;
+  --sl-color-bright-orange: #ff922e;
+  --sl-color-dark-orange: #a05400;
+
+  --sl-color-white: #ededed;
+  --sl-color-gray-1: #b0b0b0;
+  --sl-color-gray-2: #b0b0b0;
+  --sl-color-gray-3: #b0b0b0;
+  --sl-color-gray-4: #353841;
+  --sl-color-gray-5: #24272f;
+  --sl-color-gray-6: rgb(42, 42, 42);
+  --sl-color-black: rgb(24, 24, 24);
+
+  --sl-color-accent-low: var(--sl-color-orange);
+  --sl-color-text-accent: var(--sl-color-white);
+
+  /* --sl-color-accent-transparent: oklch(76.18% 0.205 57.38); */
+
+  --sl-color-bg: var(--sl-color-gray-6);
+  --sl-color-bg-nav: var(--sl-color-black);
+  --sl-color-bg-sidebar: var(--sl-color-black);
+  --sl-color-bg-inline-code: rgb(30, 30, 30);
+  --astro-code-color-background: var(--sl-color-black);
+
+  --sl-color-hairline-light: var(--sl-color-gray-5);
+  --sl-color-hairline: var(--sl-color-gray-5);
+
+  .header {
+    border-bottom-color: var(--sl-color-dark-orange);
+  }
+
+  .action.primary {
+    background-color: var(--sl-color-orange);
+    color: var(--sl-color-white);
+    border: 1px solid var(--sl-color-white);
+  }
+
+  .action.primary:hover {
+    background-color: var(--sl-color-bright-orange);
+  }
+
+  .content a {
+    color: var(--sl-color-gray-1);
+    text-decoration: none;
+    padding-bottom: 0.0675rem;
+    border-bottom: 1px solid var(--sl-color-gray-1);
+  }
+
+  .content .starlight-aside a {
+    color: var(--sl-color-white);
+  }
+
+  .content a:hover {
+    border-bottom-color: var(--sl-color-orange);
+  }
+
+  .card .title .icon {
+    border: unset;
+    background-color: var(--sl-color-orange);
+  }
+
+  .right-sidebar a,
+  .right-sidebar a:hover,
+  .sidebar-content a,
+  .sidebar-content a:hover {
+    background-color: unset;
+  }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+.hero img {
+  border: 4px solid transparent;
+  border-radius: 80px;
+  background: linear-gradient(var(--angle), #fff 66%, #f68a22) border-box;
+  animation: 4s rotate linear infinite;
+}
+
+.content table th,
+.content table td {
+  white-space: nowrap;
+  padding: 0.3rem 1rem 0.3rem 0;
+  border: none;
+}
+
+.content table thead {
+  border-bottom: 1px solid var(--sl-color-gray-1);
+}
+
+footer .pagination-links a {
+  border-color: var(--sl-color-black);
+  box-shadow: var(--sl-shadow-lg);
+}
+
+footer .pagination-links a:hover {
+  border-color: var(--sl-color-gray-3);
+  box-shadow: var(--sl-shadow-md);
+}
+
+h2 code,
+h3 code {
+  color: var(--sl-color-gray-1);
+}
+
+:root[data-theme='light'] {
+  --sl-color-orange: #f68a22;
+  --sl-color-bright-orange: #ff922e;
+  --sl-color-dark-orange: #a05400;
+
+  --sl-color-text-accent: var(--sl-color-white);
+  --sl-color-text-invert: var(--sl-color-orange);
+  --sl-color-accent: var(--sl-color-orange);
+  --sl-color-accent-low: var(--sl-color-orange);
+  --sl-icon-color: var(--sl-color-white);
+  --sl-color-bg-inline-code: var(--sl-color-gray-5);
+
+  .header {
+    border-bottom-color: var(--sl-color-orange);
+  }
+  .content a {
+    color: var(--sl-color-white);
+  }
+  .action.primary {
+    background-color: var(--sl-color-orange);
+    color: var(--sl-color-black);
+    border: 2px solid var(--sl-color-black);
+  }
+  .action.primary:hover {
+    background-color: var(--sl-color-bright-orange);
+  }
+  .action.primary svg {
+    color: var(--sl-color-black);
+  }
+  .card .title .icon {
+    border: none;
+    color: var(--sl-color-black);
+  }
+
+  .right-sidebar a,
+  .right-sidebar a:hover,
+  .sidebar-content a,
+  .sidebar-content a:hover {
+    background-color: transparent;
+  }
+  .right-sidebar a[aria-current='true'],
+  .sidebar-content a[aria-current='page'] {
+    color: var(--sl-color-accent-low);
+  }
+
+  .card article .text {
+    color: var(--sl-color-white);
+  }
+  .tab a[role='tab'] {
+    border-color: var(--sl-color-gray-5);
+  }
+  .tab a[role='tab']:hover {
+    border-color: var(--sl-color-white);
+  }
+  .tab a[role='tab'][aria-selected] {
+    border-color: var(--sl-color-white);
+  }
+}
+
+.content blockquote {
+  border-inline-start-color: var(--sl-color-gray-1);
+}
+
+.tagline {
+  font-size: var(--sl-text-3xl);
+}
+
+.main-pane .content-panel {
+  border: none;
+}

@@ -21,6 +21,7 @@ Example terminal commands:
 gh repo fork webpro/knip --clone
 cd knip
 npm install
+cd packages/knip
 ```
 
 Depending on the goals and the way you like to work, below are a few things that might help during development:
@@ -58,31 +59,23 @@ Knip has a few tools set up to verify code quality and to format code and docume
 npm run build
 npm run format
 npm run knip
+npm run knip:production
 npm run lint
 npm test
 ```
 
 To run all commands in sequence: `npm run qa`
 
-## Documentation
-
-When making changes to documentation or plugins, the Markdown files should be generated and formatted:
-
-```shell
-npm run docs
-```
-
-Note that all `README.md` files inside the plugin directories are 100% generated, manual changes will be overwritten.
-
 ## GitHub Action
 
 The [Cross-OS Tests][7] GitHub Action runs the tests in Ubuntu, macOS and Windows. Tests must pass before pull requests
-can be merged.
+can be merged. Another workflow acts as [integration test][8] against repositories using Knip.
 
 [1]: https://docs.github.com/get-started/quickstart/fork-a-repo
 [2]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
 [3]: https://github.com/webpro/knip
 [4]: https://cli.github.com/
-[5]: ../docs/writing-a-plugin.md
+[5]: https://knip.dev/guides/writing-a-plugin/
 [6]: ../.vscode/launch.json
 [7]: https://github.com/webpro/knip/actions/workflows/test.yml
+[8]: https://github.com/webpro/knip/actions/workflows/integration.yml
