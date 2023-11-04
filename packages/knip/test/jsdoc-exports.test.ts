@@ -34,14 +34,12 @@ test('Find exports from jsdoc @type tags (production)', async () => {
   });
 
   assert(issues.exports['module.js']['alphaFn']);
-  assert(issues.exports['module.js']['internalFn']);
-  assert(issues.exports['module.js']['internalUnusedFn']);
   assert(issues.exports['module.js']['invalidTaggedFn']);
   assert(issues.exports['module.js']['unusedFn']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 5,
+    exports: 3,
     processed: 2,
     total: 2,
   });

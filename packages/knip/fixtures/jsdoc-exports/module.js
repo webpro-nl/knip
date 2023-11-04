@@ -1,7 +1,7 @@
 export const unusedFn = () => {};
 
 /** @internal */
-export const internalFn = () => {};
+export const internalTestedFn = () => {};
 
 /** @internal */
 export const internalUnusedFn = () => {};

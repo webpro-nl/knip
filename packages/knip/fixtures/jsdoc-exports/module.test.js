@@ -1,11 +1,11 @@
 import test from 'node:test';
 
-import { publicFn, internalFn } from './module';
+import { publicFn, internalTestedFn } from './module';
 
 test('public fn', () => {
   publicFn();
 });
 
 test('internal fn', () => {
-  internalFn();
+  internalTestedFn();
 });

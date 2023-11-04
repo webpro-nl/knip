@@ -1,1 +1,0 @@
-import { isHelp } from './helpers';

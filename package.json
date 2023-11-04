@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "knip": "knip",
-    "knip:production": "knip --production --strict --ignore-internal"
+    "knip:production": "knip --production --strict"
   },
   "devDependencies": {
     "knip": "file:packages/knip"

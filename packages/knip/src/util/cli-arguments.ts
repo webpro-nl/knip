@@ -9,7 +9,6 @@ Options:
   -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
   --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
-  --ignore-internal        Ignore exports with tag @internal (JSDoc/TSDoc)
   -W, --workspace [dir]    Analyze a single workspace (default: analyze all configured workspaces)
   --directory [dir]        Run process from a different directory (default: cwd)
   --no-gitignore           Don't use .gitignore

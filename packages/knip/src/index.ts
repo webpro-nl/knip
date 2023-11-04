@@ -36,16 +36,8 @@ export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
 
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
-  const {
-    cwd,
-    tsConfigFile,
-    gitignore,
-    isStrict,
-    isProduction,
-    isIgnoreInternal,
-    isShowProgress,
-    isIncludeEntryExports,
-  } = unresolvedConfiguration;
+  const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress, isIncludeEntryExports } =
+    unresolvedConfiguration;
 
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
@@ -401,8 +393,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Skip exports tagged `@public` or `@beta`
           if (exportedItem.jsDocTags.has('@public') || exportedItem.jsDocTags.has('@beta')) continue;
 
-          // Skip exports tagged `@internal` in --production --ignore-internal mode
-          if (isIgnoreInternal && exportedItem.jsDocTags.has('@internal')) continue;
+          // Skip exports tagged `@internal` in --production mode
+          if (isProduction && exportedItem.jsDocTags.has('@internal')) continue;
 
           if (importingModule && isSymbolImported(symbol, importingModule)) {
             // Skip members of classes/enums that are eventually exported by entry files

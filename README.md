@@ -519,11 +519,6 @@ Additionally, the `--strict` flag can be used to:
 - Ignore type-only imports (`import type {}`).
 - Verify each workspace is self-contained: have their own `dependencies` (and not use packages of ancestor workspaces).
 
-### Ignore `@internal` exports
-
-In addition to the flags above, the `--ignore-internal` flag can be used to ignore exports tagged with `@internal`. This
-can be useful in production mode, since `@internal` exports might be only imported from non-production code.
-
 ### Plugins
 
 Plugins also have this distinction. For instance, Next.js entry files for pages (`pages/**/*.tsx`) and Remix routes
@@ -694,7 +689,6 @@ $ npx knip --help
       -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
       --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
       --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
-      --ignore-internal        Ignore exports with tag @internal (JSDoc/TSDoc)
       -W, --workspace [dir]    Analyze a single workspace (default: analyze all configured workspaces)
       --directory [dir]        Run process from a different directory (default: cwd)
       --no-gitignore           Don't use .gitignore

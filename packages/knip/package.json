@@ -22,7 +22,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "knip": "node ./dist/cli.js --directory ../..",
-    "knip:production": "node ./dist/cli.js --directory ../.. --production --strict --ignore-internal",
+    "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
     "lint": "eslint scripts src test",
     "lint:fix": "eslint scripts src test --fix",
     "format": "prettier scripts src test schema.json --with-node-modules --write",
