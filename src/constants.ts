@@ -22,6 +22,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'curl',
   'deno',
   'dirname',
+  'docker',
   'echo',
   'exec',
   'exit',
