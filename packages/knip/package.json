@@ -92,7 +92,7 @@
     "type-fest": "4.6.0"
   },
   "engines": {
-    "node": ">=16.17.0 <17 || >=18.6.0"
+    "node": ">=18.6.0"
   },
   "engineStrict": true,
   "release-it": {
