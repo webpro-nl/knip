@@ -2,10 +2,9 @@ import util from 'node:util';
 import chalk from 'chalk';
 import parsedArgValues from './cli-arguments.js';
 
-const { debug, 'debug-file-filter': debugFileFilter } = parsedArgValues;
+const { debug } = parsedArgValues;
 
 const IS_ENABLED = debug ?? false;
-const FILE_FILTER = debugFileFilter;
 
 const inspectOptions = { maxArrayLength: null, depth: null, colors: true };
 
@@ -14,13 +13,7 @@ const ctx = (text: string | [string, string]) =>
 
 // Inspect arrays, otherwise Node [will, knip, ...n-100 more items]
 const logArray = (collection: string[]) => {
-  if (FILE_FILTER) {
-    const fileFilter = new RegExp(FILE_FILTER);
-    const files = collection.filter(filePath => fileFilter.test(filePath));
-    console.log(util.inspect(files.sort(), inspectOptions));
-  } else {
-    console.log(util.inspect(collection.sort(), inspectOptions));
-  }
+  console.log(util.inspect(collection.sort(), inspectOptions));
 };
 
 export const debugLog = (context: string, message: string) => {

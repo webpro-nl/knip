@@ -27,7 +27,6 @@ Options:
   --no-exit-code           Always exit with code zero (0)
   --max-issues             Maximum number of issues before non-zero exit code (default: 0)
   -d, --debug              Show debug output
-  --debug-file-filter      Filter for files in debug output (regex as string)
   --performance            Measure count and running time of expensive functions and display stats table
   -h, --help               Print this help text
   -V, --version            Print version
@@ -41,7 +40,6 @@ $ knip --production
 $ knip --workspace packages/client --include files,dependencies
 $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
-$ knip --debug --debug-file-filter '(specific|particular)-module'
 
 More documentation and bug reports: https://github.com/webpro/knip`;
 
@@ -51,7 +49,6 @@ try {
     options: {
       config: { type: 'string', short: 'c' },
       debug: { type: 'boolean', short: 'd' },
-      'debug-file-filter': { type: 'string' },
       dependencies: { type: 'boolean' },
       directory: { type: 'string' },
       exclude: { type: 'string', multiple: true },
