@@ -257,7 +257,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const analyzeSourceFile = (filePath: string, _principal: ProjectPrincipal = principal) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, scripts } = _principal.analyzeSourceFile(filePath, { skipTypeOnly: isProduction });
+        const { imports, exports, scripts } = _principal.analyzeSourceFile(filePath, { skipTypeOnly: isStrict });
         const { internal, external, unresolved } = imports;
         const { exported, duplicate } = exports;
 

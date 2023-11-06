@@ -6,7 +6,7 @@
   "dependencies": {
     "next": "*",
     "micromatch": "*",
-    "incorrect-production-types": "*"
+    "type-only-production-types": "*"
   },
   "devDependencies": {
     "@types/estree": "*",

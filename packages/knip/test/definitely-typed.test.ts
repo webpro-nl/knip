@@ -31,7 +31,7 @@ test('Find type imports in production dependencies (strict)', async () => {
     cwd,
   });
 
-  assert(issues.dependencies['package.json']['incorrect-production-types']);
+  assert(issues.dependencies['package.json']['type-only-production-types']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
