@@ -1,5 +1,5 @@
-export type SharedInt = number;
+export type UsedInt = number;
 
-export enum SharedEnum {
+export enum UnusedEnum {
   KEY,
 }

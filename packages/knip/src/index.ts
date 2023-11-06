@@ -401,7 +401,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (importingModule.isReExport && isExportedInEntryFile(principal, importingModule)) continue;
 
             if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
-              if (isProduction) continue;
               principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
                 collector.addIssue({
                   type: 'enumMembers',
@@ -435,7 +434,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           if (!isReExportedByEntryFile && !isExportedItemReferenced(principal, exportedItem, filePath)) {
             if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
-              if (isProduction) continue;
               const type = isStar ? 'nsTypes' : 'types';
               collector.addIssue({
                 type,

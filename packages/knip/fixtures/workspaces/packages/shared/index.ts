@@ -1,7 +1,7 @@
-import type { SharedInt } from './types';
+import type { UsedInt } from './types';
 
 export default 1;
 
-export const usedExportFromLibA: SharedInt = 2;
+export const usedExportFromLibA: UsedInt = 2;
 
-export const unusedExportFromLibA: SharedInt = 3;
+export const unusedExportFromLibA: UsedInt = 3;

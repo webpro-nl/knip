@@ -31,8 +31,7 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
   assert(issues.unlisted['apps/frontend/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
   assert(issues.unlisted['packages/tools/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
 
-  assert.equal(Object.keys(issues.types).length, 1);
-  assert(issues.types['packages/shared/types.ts']['SharedEnum']);
+  assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -46,12 +45,11 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
   });
 });
 
-test('Find unused files, dependencies and exports in workspaces (strict)', async () => {
+test('Find unused files, dependencies and exports in workspaces (production)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isProduction: true,
-    isStrict: true,
   });
 
   assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
@@ -70,10 +68,13 @@ test('Find unused files, dependencies and exports in workspaces (strict)', async
   assert(issues.unlisted['apps/backend/index.ts']['globby']);
   assert(issues.unlisted['apps/backend/index.ts']['js-yaml']);
 
+  assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
     exports: 1,
+    types: 1,
     dependencies: 5,
     unlisted: 3,
     processed: 7,
