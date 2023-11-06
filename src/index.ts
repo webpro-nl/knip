@@ -6,7 +6,6 @@ import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { compact } from './util/array.js';
 import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
 import { _glob, negate } from './util/glob.js';
 import {
@@ -234,7 +233,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
 
       {
-        const patterns = compact(worker.getPluginConfigPatterns());
+        const patterns = worker.getPluginConfigPatterns();
         const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(name, `Plugin configuration paths`, configurationEntryPaths);
         principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });

@@ -25,22 +25,16 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, options
 
   const targets = localConfig.targets ? Object.values(localConfig.targets) : [];
 
-  const executors = compact(
-    targets
-      .map(target => target?.executor)
-      .filter(executor => executor && !executor.startsWith('.'))
-      .map(executor => executor?.split(':')[0])
-  );
-
-  const scripts = compact(
-    targets
-      .filter(target => target.executor === 'nx:run-commands')
-      .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []))
-  );
-
+  const executors = targets
+    .map(target => target?.executor)
+    .filter(executor => executor && !executor.startsWith('.'))
+    .map(executor => executor?.split(':')[0]);
+  const scripts = targets
+    .filter(target => target.executor === 'nx:run-commands')
+    .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []));
   const dependencies = _getDependenciesFromScripts(scripts, { cwd, manifest });
 
-  return [...executors, ...dependencies];
+  return compact([...executors, ...dependencies]);
 };
 
 export const findDependencies = timerify(findNxDependencies);

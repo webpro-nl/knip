@@ -95,16 +95,14 @@ export const resolveExtendSpecifier = (specifier: string) => {
 
 // Super custom: find dependencies of specific ESLint plugins through settings
 const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) => {
-  return compact(
-    Object.entries(settings).flatMap(([settingKey, settings]) => {
-      if (settingKey === 'import/resolver') {
-        return (typeof settings === 'string' ? [settings] : Object.keys(settings))
-          .filter(key => key !== 'node')
-          .map(key => `eslint-import-resolver-${key}`);
-      }
-      if (settingKey === 'import/parsers') {
-        return typeof settings === 'string' ? [settings] : Object.keys(settings);
-      }
-    })
-  );
+  return Object.entries(settings).flatMap(([settingKey, settings]) => {
+    if (settingKey === 'import/resolver') {
+      return (typeof settings === 'string' ? [settings] : Object.keys(settings))
+        .filter(key => key !== 'node')
+        .map(key => `eslint-import-resolver-${key}`);
+    }
+    if (settingKey === 'import/parsers') {
+      return typeof settings === 'string' ? [settings] : Object.keys(settings);
+    }
+  });
 };

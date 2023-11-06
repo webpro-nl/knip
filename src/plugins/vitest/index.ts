@@ -1,3 +1,4 @@
+import { compact } from '../../util/array.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
@@ -67,7 +68,7 @@ const findVitestWorkspaceDependencies: GenericPluginCallback = async (configFile
       (await findVitestDependencies(config, options)).forEach(dependency => dependencies.add(dependency));
     }
   }
-  return Array.from(dependencies);
+  return compact(dependencies);
 };
 
 export const findDependencies = timerify(findVitestWorkspaceDependencies);
