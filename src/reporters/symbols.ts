@@ -16,7 +16,12 @@ const logIssueRecord = (issues: Issue[]) => {
     table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.join(', ')) : issue.symbol));
     issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
     issue.symbolType && table.cell('symbolType', print(issue.symbolType));
-    table.cell('filePath', print(relative(issue.filePath)));
+    const filePath = `${relative(issue.filePath)}${
+      issue.line === undefined
+        ? ""
+        : `:${issue.line}${issue.col === undefined ? "" : `:${issue.col}`}`
+    }`;
+    table.cell('filePath', print(filePath));
     table.newRow();
   });
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
