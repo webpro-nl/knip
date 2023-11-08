@@ -19,6 +19,7 @@ test('Report unresolved imports', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     unlisted: 2,
     unresolved: 1,
     processed: 2,

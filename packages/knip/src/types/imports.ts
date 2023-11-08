@@ -13,3 +13,5 @@ export type ImportedModule = {
 };
 
 export type Imports = Map<FilePath, ImportedModule>;
+
+export type UnresolvedImport = { specifier: string; pos?: number; line?: number; col?: number };

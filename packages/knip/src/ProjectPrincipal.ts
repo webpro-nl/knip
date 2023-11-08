@@ -12,6 +12,7 @@ import { timerify } from './util/Performance.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { ExportItem, ExportItemMember } from './types/exports.js';
+import type { UnresolvedImport } from './types/imports.js';
 import type { GlobbyFilterFunction } from 'globby';
 
 // These compiler options override local options
@@ -178,9 +179,10 @@ export class ProjectPrincipal {
 
     const { internal, unresolved, external } = imports;
 
-    const unresolvedImports: Set<string> = new Set();
+    const unresolvedImports: Set<UnresolvedImport> = new Set();
 
-    unresolved.forEach(specifier => {
+    unresolved.forEach(unresolvedImport => {
+      const { specifier } = unresolvedImport;
       if (specifier.startsWith('http')) {
         // Ignore Deno style http import specifiers.
         return;
@@ -205,7 +207,7 @@ export class ProjectPrincipal {
             const ext = extname(sanitizedSpecifier);
             const hasIgnoredExtension = IGNORED_FILE_EXTENSIONS.includes(ext);
             if (!ext || (ext !== '.json' && !hasIgnoredExtension)) {
-              unresolvedImports.add(specifier);
+              unresolvedImports.add(unresolvedImport);
             }
           }
         }

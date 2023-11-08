@@ -18,7 +18,7 @@ export default visit(
           if (propertyAccessExpression) {
             // Pattern: require('side-effects').identifier
             const identifier = String(propertyAccessExpression.name.escapedText);
-            return { identifier, specifier };
+            return { identifier, specifier, pos: propertyAccessExpression.name.pos };
           } else {
             const variableDeclaration = node.parent;
             if (
@@ -27,23 +27,23 @@ export default visit(
             ) {
               if (ts.isIdentifier(variableDeclaration.name)) {
                 // Pattern: identifier = require('specifier')
-                return { identifier: 'default', specifier };
+                return { identifier: 'default', specifier, pos: node.arguments[0].pos };
               } else {
                 const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
                 if (bindings.length > 0) {
                   // Pattern: { identifier } = require('specifier')
                   return bindings.map(element => {
                     const identifier = (element.propertyName ?? element.name).getText();
-                    return { identifier, specifier };
+                    return { identifier, specifier, pos: element.pos };
                   });
                 } else {
                   // Pattern: require('specifier')
-                  return { identifier: 'default', specifier };
+                  return { identifier: 'default', specifier, pos: node.arguments[0].pos };
                 }
               }
             } else {
               // Pattern: require('side-effects')
-              return { identifier: 'default', specifier };
+              return { identifier: 'default', specifier, pos: node.arguments[0].pos };
             }
           }
         }

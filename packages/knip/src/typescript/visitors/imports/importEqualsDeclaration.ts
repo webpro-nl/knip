@@ -10,6 +10,6 @@ export default visit(isNotJS, node => {
   ) {
     // Pattern: import identifier = require('specifier')
     const specifier = node.moduleReference.expression.text;
-    return { specifier, identifier: 'default' };
+    return { specifier, identifier: 'default', pos: node.moduleReference.expression.pos };
   }
 });

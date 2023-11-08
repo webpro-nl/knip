@@ -15,7 +15,7 @@ import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import type { ExportItems as Exports, ExportItem } from '../types/exports.js';
-import type { Imports } from '../types/imports.js';
+import type { Imports, UnresolvedImport } from '../types/imports.js';
 
 const getVisitors = (sourceFile: ts.SourceFile) => ({
   export: getExportVisitors(sourceFile),
@@ -33,6 +33,7 @@ export type AddImportOptions = {
   symbol?: ts.Symbol;
   identifier?: string;
   isReExport?: boolean;
+  pos?: number;
 };
 
 type AddInternalImportOptions = AddImportOptions & {
@@ -46,7 +47,7 @@ export type AddExportOptions = ExportItem & { identifier: string };
 export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetImportsAndExportsOptions) => {
   const internalImports: Imports = new Map();
   const externalImports: Set<string> = new Set();
-  const unresolvedImports: Set<string> = new Set();
+  const unresolvedImports: Set<UnresolvedImport> = new Set();
   const exports: Exports = new Map();
   const aliasedExports: Record<string, string[]> = {};
   const scripts: Set<string> = new Set();
@@ -86,7 +87,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
   };
 
   const addImport = (options: AddImportOptions) => {
-    const { specifier, symbol, identifier = '__anonymous', isReExport = false } = options;
+    const { specifier, symbol, identifier = '__anonymous', isReExport = false, pos } = options;
     if (isBuiltin(specifier)) return;
 
     const module = sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
@@ -114,7 +115,12 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
         }
       }
     } else {
-      unresolvedImports.add(specifier);
+      if (typeof pos === 'number') {
+        const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
+        unresolvedImports.add({ specifier, pos, line: line + 1, col: character + 1 });
+      } else {
+        unresolvedImports.add({ specifier });
+      }
     }
   };
 

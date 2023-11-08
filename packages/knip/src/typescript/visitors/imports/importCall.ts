@@ -6,9 +6,10 @@ export default visit(
   () => true,
   node => {
     if (isImportCall(node)) {
+      // Pattern: import('specifier')
       if (node.arguments[0] && ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
-        return { specifier, identifier: 'default' };
+        return { specifier, identifier: 'default', pos: node.arguments[0].pos };
       }
     }
   }

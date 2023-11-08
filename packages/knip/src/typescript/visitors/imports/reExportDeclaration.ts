@@ -9,16 +9,21 @@ export default visit(
         // Re-exports
         if (!node.exportClause) {
           // Pattern: export * from 'specifier';
-          return { identifier: '*', specifier: node.moduleSpecifier.text, isReExport: true };
+          return { identifier: '*', specifier: node.moduleSpecifier.text, isReExport: true, pos: node.pos };
         } else if (node.exportClause.kind === ts.SyntaxKind.NamespaceExport) {
           // Pattern: export * as namespace from 'specifier';
-          return { identifier: '*', specifier: node.moduleSpecifier.text, isReExport: true };
+          return {
+            identifier: '*',
+            specifier: node.moduleSpecifier.text,
+            isReExport: true,
+            pos: node.exportClause.name.pos,
+          };
         } else {
           // Pattern: export { identifier, identifier2 } from 'specifier';
           const specifier = node.moduleSpecifier; // Assign to satisfy TS
           return node.exportClause.elements.map(element => {
             const identifier = (element.propertyName ?? element.name).getText();
-            return { identifier, specifier: specifier.text, isReExport: true };
+            return { identifier, specifier: specifier.text, isReExport: true, pos: element.pos };
           });
         }
       }

@@ -309,8 +309,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
         });
 
-        unresolved.forEach(moduleSpecifier => {
-          collector.addIssue({ type: 'unresolved', filePath, symbol: moduleSpecifier });
+        unresolved.forEach(unresolvedImport => {
+          const { specifier, pos, line, col } = unresolvedImport;
+          collector.addIssue({ type: 'unresolved', filePath, symbol: specifier, pos, line, col });
         });
 
         _getDependenciesFromScripts(scripts, { cwd: dirname(filePath) }).forEach(specifier => {
