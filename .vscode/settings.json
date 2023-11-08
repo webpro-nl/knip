@@ -1,10 +1,4 @@
 {
-  "prettier.withNodeModules": true,
-  "markdown.extension.toc.levels": "2..3",
-  "markdown.extension.toc.omittedFromToc": {
-    "README.md": ["## Contents"],
-    "docs/handling-issues.md": ["## Contents"],
-    "docs/reporters-and-preprocessors.md": ["## Contents"],
-    "docs/writing-a-plugin.md": ["## Contents"]
-  }
+  "eslint.experimental.useFlatConfig": true,
+  "eslint.workingDirectories": ["./packages/knip", "./packages/knip.dev"]
 }
