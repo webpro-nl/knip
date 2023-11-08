@@ -83,15 +83,16 @@ const run = async () => {
     }
 
     if (!noExitCode && totalErrorCount > Number(maxIssues)) {
-      process.exit(totalErrorCount);
+      process.exit(1);
     }
   } catch (error: unknown) {
+    process.exitCode = 2;
     if (!isDebug && error instanceof Error && isKnownError(error)) {
       const knownError = getKnownError(error);
       console.error(knownError.message);
       if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
       if (isConfigurationError(knownError)) console.log('\n' + helpText);
-      process.exit(1);
+      process.exit(2);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
     throw error;
