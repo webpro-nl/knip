@@ -194,7 +194,8 @@ export class ProjectPrincipal {
       const resolvedModule = this.resolveModule(specifier, filePath);
       if (resolvedModule) {
         if (resolvedModule.isExternalLibraryImport) {
-          external.add(specifier);
+          const sanitizedSpecifier = sanitizeSpecifier(specifier);
+          external.add(sanitizedSpecifier);
         } else {
           this.addEntryPath(resolvedModule.resolvedFileName, { skipExportsAnalysis: true });
         }
