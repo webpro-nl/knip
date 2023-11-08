@@ -47,10 +47,7 @@ export const getIncludedIssueTypes = (
   const _exclude = [normalizedExcludesArg, excludes].flat();
 
   if (isProduction) {
-    // Ignore exported types and devDependencies when analyzing production code
-    _exclude.push('types');
-    _exclude.push('nsTypes');
-    _exclude.push('enumMembers');
+    // Ignore devDependencies when analyzing production code
     _exclude.push('devDependencies');
   } else {
     // Auto-add (or remove) `devDependencies` when `dependencies` are included (or excluded)
