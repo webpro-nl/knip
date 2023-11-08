@@ -75,6 +75,7 @@ const PLUGIN_NAMES = Object.keys(plugins);
 type ConfigurationManagerOptions = {
   cwd: string;
   isProduction: boolean;
+  isStrict: boolean;
 };
 
 export type Workspace = {
@@ -98,6 +99,7 @@ export type Workspace = {
 export class ConfigurationChief {
   cwd: string;
   isProduction = false;
+  isStrict = false;
   config: Configuration;
 
   manifestPath?: string;
@@ -118,9 +120,10 @@ export class ConfigurationChief {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rawConfig?: any;
 
-  constructor({ cwd, isProduction }: ConfigurationManagerOptions) {
+  constructor({ cwd, isProduction, isStrict }: ConfigurationManagerOptions) {
     this.cwd = cwd;
     this.isProduction = isProduction;
+    this.isStrict = isStrict;
     this.config = defaultConfig;
   }
 
@@ -324,7 +327,9 @@ export class ConfigurationChief {
     const graph = this.workspacesGraph?.graph;
     const ws = new Set<string>();
 
-    if (graph && workspaceArg) {
+    if (workspaceArg && this.isStrict) {
+      ws.add(workspaceArg);
+    } else if (graph && workspaceArg) {
       const seen = new Set<string>();
       const initialWorkspaces = new Set(workspaceNames.map(name => join(this.cwd, name)));
       const workspaceDirsWithDependants = new Set(initialWorkspaces);
