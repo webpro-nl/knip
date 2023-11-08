@@ -8,21 +8,22 @@ type ExtraReporterOptions = {
   codeowners?: string;
 };
 
+type Item = { name: string; pos?: number; line?: number; col?: number };
+
 type Row = {
   file: string;
-  owners: string[];
-  files?: boolean;
-  dependencies?: string[];
-  devDependencies?: string[];
-  optionalPeerDependencies?: string[];
-  unlisted?: string[];
-  binaries?: string[];
-  unresolved?: string[];
-  exports?: string[];
-  types?: string[];
-  duplicates?: string[][];
-  enumMembers?: Record<string, string[]>;
-  classMembers?: Record<string, string[]>;
+  owners: Array<{ name: string }>;
+  dependencies?: Array<{ name: string }>;
+  devDependencies?: Array<{ name: string }>;
+  optionalPeerDependencies?: Array<{ name: string }>;
+  unlisted?: Array<{ name: string }>;
+  binaries?: Array<{ name: string }>;
+  unresolved?: Array<{ name: string }>;
+  exports?: Array<Item>;
+  types?: Array<Item>;
+  duplicates?: Array<Item[]>;
+  enumMembers?: Record<string, Array<Item>>;
+  classMembers?: Record<string, Array<Item>>;
 };
 
 const mergeTypes = (type: SymbolIssueType) =>
@@ -47,7 +48,6 @@ export default async ({ report, issues, options }: ReporterOptions) => {
     const row: Row = {
       file,
       ...(codeownersEngine && { owners: codeownersEngine.calcFileOwnership(file) }),
-      ...(report.files && { files: false }),
       ...(report.dependencies && { dependencies: [] }),
       ...(report.devDependencies && { devDependencies: [] }),
       ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),
@@ -66,30 +66,36 @@ export default async ({ report, issues, options }: ReporterOptions) => {
   for (const [reportType, isReportType] of Object.entries(report) as Entries<Report>) {
     if (isReportType) {
       if (reportType === 'files') {
-        Array.from(issues[reportType] as IssueSet).forEach(filePath => {
-          json[filePath] = json[filePath] ?? initRow(filePath);
-          json[filePath][reportType] = true;
-        });
+        // Ignore
       } else {
         const type = mergeTypes(reportType);
         flatten(issues[reportType] as IssueRecords).forEach(issue => {
           const { filePath, symbol, symbols, parentSymbol } = issue;
           json[filePath] = json[filePath] ?? initRow(filePath);
           if (type === 'duplicates') {
-            symbols && json[filePath][type]?.push(symbols);
+            symbols && json[filePath][type]?.push(symbols.map(symbol => ({ name: symbol })));
           } else if (type === 'enumMembers' || type === 'classMembers') {
             const item = json[filePath][type];
             if (parentSymbol && item) {
               item[parentSymbol] = item[parentSymbol] ?? [];
-              item[parentSymbol].push(symbol);
+              item[parentSymbol].push({ name: issue.symbol, line: issue.line, col: issue.col, pos: issue.pos });
             }
           } else {
-            json[filePath][type]?.push(symbol);
+            if (type === 'exports' || type === 'types' || type === 'unresolved') {
+              json[filePath][type]?.push({ name: issue.symbol, line: issue.line, col: issue.col, pos: issue.pos });
+            } else {
+              json[filePath][type]?.push({ name: symbol });
+            }
           }
         });
       }
     }
   }
 
-  console.log(JSON.stringify(Object.values(json)));
+  console.log(
+    JSON.stringify({
+      files: Array.from(issues.files).map(filePath => relative(filePath)),
+      issues: Object.values(json),
+    })
+  );
 };
