@@ -7,7 +7,7 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 export const NAME = 'Node.js Test Runner';
 
 /** @public */
-export const ENABLERS = [''];
+export const ENABLERS = 'This plugin is enabled when any script in `package.json` includes `node --test`';
 
 export const isEnabled: IsPluginEnabledCallback = ({ manifest }) => {
   // TODO Better to scan the entry files until the first `node:test` import, but that's expensive

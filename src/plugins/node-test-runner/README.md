@@ -2,10 +2,7 @@
 
 ## Enabled
 
-This plugin is enabled when any of the following package names and/or regular expressions has a match in `dependencies`
-or `devDependencies`:
-
-- \`\`
+This plugin is enabled when any script in `package.json` includes `node --test`
 
 ## Default configuration
 
