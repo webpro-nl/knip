@@ -5,6 +5,8 @@ import { dirname, extname, isAbsolute, isInternal, join } from '../util/path.js'
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
+const resolutionCache = new Map<string, ts.ResolvedModuleFull | undefined>();
+
 const simpleResolver = (name: string, containingFile: string) => {
   const resolvedFileName = isAbsolute(name) ? name : join(dirname(containingFile), name);
   if (existsSync(resolvedFileName)) {
@@ -22,11 +24,17 @@ export function createCustomModuleResolver(
   compilerOptions: ts.CompilerOptions,
   virtualFileExtensions: string[]
 ) {
-  function resolveModuleNames(moduleNames: string[], containingFile: string): Array<ts.ResolvedModule | undefined> {
-    return moduleNames.map(moduleName => resolveModuleName(moduleName, containingFile));
+  function resolveModuleNames(moduleNames: string[], containingFile: string): Array<ts.ResolvedModuleFull | undefined> {
+    return moduleNames.map(moduleName => {
+      const key = `${containingFile}:${moduleName}`;
+      if (resolutionCache.has(key)) return resolutionCache.get(key)!;
+      const resolvedModule = resolveModuleName(moduleName, containingFile);
+      resolutionCache.set(key, resolvedModule);
+      return resolvedModule;
+    });
   }
 
-  function resolveModuleName(name: string, containingFile: string): ts.ResolvedModule | undefined {
+  function resolveModuleName(name: string, containingFile: string): ts.ResolvedModuleFull | undefined {
     const sanitizedSpecifier = sanitizeSpecifier(name);
 
     const tsResolvedModule = ts.resolveModuleName(
