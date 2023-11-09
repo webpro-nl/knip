@@ -24,5 +24,5 @@ module.exports = {
       testMatch: ['<rootDir>/**/*.js'],
     },
   ],
-  testResultsProcessor: 'jest-result-processor'
+  testResultsProcessor: 'jest-phabricator',
 };

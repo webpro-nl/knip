@@ -6,12 +6,12 @@
     "test": "vitest"
   },
   "dependencies": {
-    "next": "*"
+    "next": "^14.0.1"
   },
   "devDependencies": {
-    "next": "*",
-    "vitest": "*",
+    "@internal/tailwind": "*",
+    "@rollup/plugin-commonjs": "*",
     "jsdom": "*",
-    "@rollup/plugin-commonjs": "*"
+    "vitest": "*"
   }
 }

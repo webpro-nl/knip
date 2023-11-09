@@ -4,9 +4,9 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "vitest": "*",
-    "happy-dom": "*",
     "eslint-plugin-no-secrets": "*",
-    "eslint-plugin-prettier": "*"
+    "eslint-plugin-prettier": "*",
+    "happy-dom": "*",
+    "vitest": "^0.34.6"
   }
 }

@@ -7,8 +7,8 @@
     "packages/*"
   ],
   "devDependencies": {
-    "jest": "*",
-    "jest-result-processor": "*",
-    "eslint-config-airbnb": "*"
+    "eslint-config-airbnb": "*",
+    "jest": "^29.7.0",
+    "jest-phabricator": "^29.7.0"
   }
 }

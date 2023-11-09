@@ -1,3 +1,3 @@
 module.exports = {
-  testResultsProcessor: 'jest-result-processor',
+  testResultsProcessor: 'jest-phabricator',
 };
