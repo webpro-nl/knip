@@ -133,7 +133,8 @@ export const isInModuleBlock = (node: ts.Node) => {
 
 export const getJSDocTags = (node: ts.Node) => {
   const tags = new Set<string>();
-  for (const tagNode of ts.getJSDocTags(node)) {
+  const declaration = ts.isExportSpecifier(node) || ts.isBindingElement(node) ? node.parent.parent : node;
+  for (const tagNode of ts.getJSDocTags(declaration)) {
     const match = tagNode.getText()?.match(/@\S+/);
     if (match) tags.add(match[0]);
   }
