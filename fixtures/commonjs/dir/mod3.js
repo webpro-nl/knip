@@ -1,4 +1,4 @@
-function identifier() {}
-function identifier2() {}
+function identifier9() {}
+function identifier10() {}
 
-module.exports = { identifier, identifier2 };
+module.exports = { identifier9, identifier10 };

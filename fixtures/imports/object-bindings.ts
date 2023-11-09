@@ -1,3 +1,3 @@
 export default 'default';
-export const identifier = 'identifier';
-export const identifier2 = 'identfier2';
+export const identifier11 = 'identifier11';
+export const identifier12 = 'identifier12';

@@ -1,3 +1,3 @@
-export const identifier = 1;
-export const identifier2 = 1;
-export const identifier3 = () => 1;
+export const identifier18 = 1;
+export const identifier19 = 1;
+export const identifier20 = () => 1;

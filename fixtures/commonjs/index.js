@@ -25,7 +25,7 @@ const requireResolve = value => {
 };
 
 const requireExportedShorthandsHeuristic = value => {
-  const { identifier, identifier2 } = require('./dir/mod3');
+  const { identifier9, identifier10 } = require('./dir/mod3');
 };
 
 const staticResolve = () => {

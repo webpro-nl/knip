@@ -16,7 +16,7 @@ import('./top-level-side-effects-call');
 async function main() {
   import('./side-effects-call');
   await import('./await-import-call');
-  const { default: defaultName, identifier: renamedIdentifier, identifier2 } = await import('./object-bindings');
+  const { default: defaultName, identifier11: renamedIdentifier, identifier12 } = await import('./object-bindings');
 }
 
 const dynamicImport = (value: string) => {
@@ -48,7 +48,11 @@ function promiseAll() {
 
 (await import('./prop-access')).propAccess;
 
-const { default: defaultName3, identifier: renamedIdentifier, identifier2 } = (await import('./dir/import-b'))['named'];
+const {
+  default: defaultName3,
+  identifier13: renamedIdentifier,
+  identifier14,
+} = (await import('./dir/import-b'))['named'];
 
 const defaultName4 = (await import('./default-prop-access')).default;
 
