@@ -1,7 +1,7 @@
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import { isFile } from '../util/fs.js';
 import { relative, resolve } from '../util/path.js';
-import type { Report, ReporterOptions, IssueSet, IssueRecords, SymbolIssueType, Issue } from '../types/issues.js';
+import type { Report, ReporterOptions, IssueRecords, SymbolIssueType, Issue } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
 type ExtraReporterOptions = {
