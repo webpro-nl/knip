@@ -171,10 +171,16 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
       }
     }
 
-    for (const visitor of visitors.export) {
-      if (visitor) {
-        const results = visitor(node, options);
-        if (results) [results].flat().forEach(addExport);
+    // Skip exports in module blocks
+    // const isModuleBlockTopLevel = node.parent?.parent && ts.isModuleDeclaration(node.parent.parent);
+    const isTopLevel = node.parent === sourceFile || node.parent?.parent === sourceFile;
+
+    if (isTopLevel) {
+      for (const visitor of visitors.export) {
+        if (visitor) {
+          const results = visitor(node, options);
+          if (results) [results].flat().forEach(addExport);
+        }
       }
     }
 

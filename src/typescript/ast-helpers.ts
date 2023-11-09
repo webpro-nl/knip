@@ -60,22 +60,6 @@ export function getAccessExpressionName(node: ts.PropertyAccessExpression | ts.E
   return 'argumentExpression' in node ? stripQuotes(node.argumentExpression.getText()) : node.name.getText();
 }
 
-type LiteralLikeElementAccessExpression = ts.ElementAccessExpression &
-  ts.Declaration & {
-    readonly argumentExpression: ts.StringLiteralLike | ts.NumericLiteral;
-  };
-
-export function isModuleExportsAccessExpression(
-  node: ts.Node
-): node is LiteralLikeElementAccessExpression & { expression: ts.Identifier } {
-  return (
-    (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
-    ts.isIdentifier(node.expression) &&
-    node.expression.escapedText === 'module' &&
-    getAccessExpressionName(node) === 'exports'
-  );
-}
-
 export function stripQuotes(name: string) {
   const length = name.length;
   if (length >= 2 && name.charCodeAt(0) === name.charCodeAt(length - 1) && isQuoteOrBacktick(name.charCodeAt(0))) {
