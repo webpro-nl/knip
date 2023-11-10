@@ -1,1 +1,1 @@
-export { something } from './4-my-module';
+export { something, somethingToIgnore, somethingNotToIgnore } from './4-my-module';
