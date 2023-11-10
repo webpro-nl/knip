@@ -1,4 +1,3 @@
-import { isGitIgnoredSync } from 'globby';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
@@ -10,14 +9,10 @@ import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { isMaybePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
+import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { ExportItem, ExportItemMember } from './types/exports.js';
-
-type ProjectPrincipalOptions = {
-  compilerOptions: ts.CompilerOptions;
-  cwd: string;
-  compilers: [SyncCompilers, AsyncCompilers];
-};
+import type { GlobbyFilterFunction } from 'globby';
 
 // These compiler options override local options
 const baseCompilerOptions = {
@@ -54,7 +49,7 @@ export class ProjectPrincipal {
   // We don't want to report unused exports of config/plugin entry files
   skipExportsAnalysis: Set<string> = new Set();
 
-  isGitIgnored: ReturnType<typeof isGitIgnoredSync>;
+  isGitIgnored: GlobbyFilterFunction;
   cwd: string;
   compilerOptions: ts.CompilerOptions;
   extensions: Set<string>;
@@ -69,11 +64,10 @@ export class ProjectPrincipal {
     program?: ts.Program;
   };
 
-  constructor({ compilerOptions, cwd, compilers }: ProjectPrincipalOptions) {
+  constructor({ compilerOptions, cwd, compilers, isGitIgnored }: PrincipalOptions) {
     this.cwd = cwd;
 
-    // Provide `cwd`, otherwise defaults to process.cwd() w/ incompatible slashes in Windows
-    this.isGitIgnored = isGitIgnoredSync({ cwd });
+    this.isGitIgnored = isGitIgnored;
 
     this.compilerOptions = {
       ...compilerOptions,

@@ -1,3 +1,4 @@
+import { isGitIgnoredSync } from 'globby';
 import micromatch from 'micromatch';
 import { _getDependenciesFromScripts } from './binaries/index.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
@@ -52,6 +53,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const deputy = new DependencyDeputy({ isStrict });
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
+
+  // Central function, to prevent `Path is not in cwd` errors from `globby`
+  // Provide `cwd`, otherwise defaults to `process.cwd()` w/ incompatible slashes in Windows
+  const isGitIgnored = gitignore ? isGitIgnoredSync({ cwd }) : () => false;
 
   streamer.cast('Reading workspace configuration(s)...');
 
@@ -133,7 +138,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const { compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
-    const principal = factory.getPrincipal({ cwd: dir, paths, compilerOptions, compilers, pkgName });
+    const principal = factory.getPrincipal({ cwd: dir, paths, compilerOptions, compilers, pkgName, isGitIgnored });
 
     const worker = new WorkspaceWorker({
       name,

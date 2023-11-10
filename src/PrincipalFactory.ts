@@ -2,18 +2,20 @@ import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { toAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
+import type { GlobbyFilterFunction } from 'globby';
 
 type Paths = ts.CompilerOptions['paths'];
 
 type Principal = { principal: ProjectPrincipal; cwds: Set<string>; pathKeys: Set<string>; pkgNames: Set<string> };
 type Principals = Set<Principal>;
 
-type Options = {
+export type PrincipalOptions = {
   cwd: string;
   compilerOptions: ts.CompilerOptions;
   paths: Paths;
   compilers: [SyncCompilers, AsyncCompilers];
   pkgName: string;
+  isGitIgnored: GlobbyFilterFunction;
 };
 
 const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Paths = {}) => {
@@ -33,7 +35,7 @@ const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Pat
 export class PrincipalFactory {
   principals: Principals = new Set();
 
-  public getPrincipal(options: Options) {
+  public getPrincipal(options: PrincipalOptions) {
     const { cwd, compilerOptions, paths, pkgName } = options;
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
     const principal = this.findReusablePrincipal(compilerOptions);
@@ -69,7 +71,7 @@ export class PrincipalFactory {
     principal.pkgNames.add(pkgName);
   }
 
-  private addNewPrincipal(options: Options) {
+  private addNewPrincipal(options: PrincipalOptions) {
     const { cwd, compilerOptions, pkgName } = options;
     const pathKeys = new Set(Object.keys(compilerOptions?.paths ?? {}));
     const principal = new ProjectPrincipal(options);
