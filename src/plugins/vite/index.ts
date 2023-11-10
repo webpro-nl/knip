@@ -20,7 +20,7 @@ const findViteDependencies: GenericPluginCallback = async (configFilePath, optio
 
   if (!localConfig) return [];
 
-  return findVitestDependencies(localConfig, options);
+  return findVitestDependencies(configFilePath, localConfig, options);
 };
 
 export const findDependencies = timerify(findViteDependencies);

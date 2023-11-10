@@ -1,4 +1,5 @@
 export { _load as load, _loadFile as loadFile } from './loader.js';
+export { _tryResolve as tryResolve } from './require.js';
 import { arrayify } from './array.js';
 import type { RawPluginConfiguration } from '../types/config.js';
 

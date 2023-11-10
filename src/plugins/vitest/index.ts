@@ -1,6 +1,7 @@
 import { compact } from '../../util/array.js';
+import { dirname, join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency, load, tryResolve } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { ViteConfigOrFn, VitestWorkspaceConfig, ViteConfig, MODE, COMMAND } from './types.js';
@@ -24,7 +25,11 @@ export const CONFIG_FILE_PATTERNS = ['vitest.config.ts', 'vitest.{workspace,proj
 /** @public */
 export const ENTRY_FILE_PATTERNS = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 
-const findConfigDependencies = (localConfig: ViteConfig, options: GenericPluginCallbackOptions) => {
+const findConfigDependencies = (
+  configFilePath: string,
+  localConfig: ViteConfig,
+  options: GenericPluginCallbackOptions
+) => {
   const { isProduction, config } = options;
   const testConfig = localConfig.test;
 
@@ -35,12 +40,17 @@ const findConfigDependencies = (localConfig: ViteConfig, options: GenericPluginC
   const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
   const reporters = getExternalReporters(testConfig.reporters);
   const coverage = testConfig.coverage ? [`@vitest/coverage-${testConfig.coverage.provider ?? 'v8'}`] : [];
-  const setupFiles = testConfig.setupFiles ? [testConfig.setupFiles].flat() : [];
-  const globalSetup = testConfig.globalSetup ? [testConfig.globalSetup].flat() : [];
+  const toPath = (v: string) => tryResolve(join(dirname(configFilePath), v), configFilePath) ?? v;
+  const setupFiles = (testConfig.setupFiles ? [testConfig.setupFiles].flat() : []).map(toPath);
+  const globalSetup = (testConfig.globalSetup ? [testConfig.globalSetup].flat() : []).map(toPath);
   return [...entryPatterns, ...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup];
 };
 
-export const findVitestDependencies = async (localConfig: ViteConfigOrFn, options: GenericPluginCallbackOptions) => {
+export const findVitestDependencies = async (
+  configFilePath: string,
+  localConfig: ViteConfigOrFn,
+  options: GenericPluginCallbackOptions
+) => {
   if (!localConfig) return [];
 
   if (typeof localConfig === 'function') {
@@ -48,7 +58,7 @@ export const findVitestDependencies = async (localConfig: ViteConfigOrFn, option
     for (const command of ['dev', 'serve', 'build'] as COMMAND[]) {
       for (const mode of ['development', 'production'] as MODE[]) {
         const config = await localConfig({ command, mode, ssrBuild: undefined });
-        findConfigDependencies(config, options).forEach(dependency => dependencies.add(dependency));
+        findConfigDependencies(configFilePath, config, options).forEach(dependency => dependencies.add(dependency));
       }
     }
     return Array.from(dependencies);
@@ -56,7 +66,7 @@ export const findVitestDependencies = async (localConfig: ViteConfigOrFn, option
 
   if (!localConfig.test) return [];
 
-  return findConfigDependencies(localConfig, options);
+  return findConfigDependencies(configFilePath, localConfig, options);
 };
 
 const findVitestWorkspaceDependencies: GenericPluginCallback = async (configFilePath, options) => {
@@ -65,7 +75,9 @@ const findVitestWorkspaceDependencies: GenericPluginCallback = async (configFile
   const dependencies = new Set<string>();
   for (const config of [localConfig].flat()) {
     if (config && typeof config !== 'string') {
-      (await findVitestDependencies(config, options)).forEach(dependency => dependencies.add(dependency));
+      (await findVitestDependencies(configFilePath, config, options)).forEach(dependency =>
+        dependencies.add(dependency)
+      );
     }
   }
   return compact(dependencies);
