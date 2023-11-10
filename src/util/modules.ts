@@ -39,7 +39,10 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
   return typedDependency;
 };
 
-export const getEntryPathFromManifest = (cwd: string, dir: string, manifest: PackageJson) => {
+export const getEntryPathFromManifest = (
+  manifest: PackageJson,
+  sharedGlobOptions: { cwd: string; workingDir: string; gitignore: boolean; ignore: string[] }
+) => {
   const { main, bin, exports } = manifest;
 
   const entryPaths: Set<string> = new Set();
@@ -55,8 +58,11 @@ export const getEntryPathFromManifest = (cwd: string, dir: string, manifest: Pac
     getStringValues(exports).forEach(item => entryPaths.add(item));
   }
 
-  // Glob, as we only want source files that exist and not (generated) files that are .gitignore'd
-  return _glob({ cwd, workingDir: dir, patterns: Array.from(entryPaths) });
+  // Use glob, as we only want source files that:
+  // - exist
+  // - are not (generated) files that are .gitignore'd
+  // - do not match configured `ignore` patterns
+  return _glob({ ...sharedGlobOptions, patterns: Array.from(entryPaths) });
 };
 
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)

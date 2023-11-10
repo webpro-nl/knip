@@ -1,6 +1,6 @@
 const baseArguments = {
   cwd: '.',
-  gitignore: false,
+  gitignore: true,
   isStrict: false,
   isProduction: false,
   isIgnoreInternal: false,

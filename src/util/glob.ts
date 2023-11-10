@@ -44,7 +44,7 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
 
   const ignorePatterns = compact([...ignore, ...GLOBAL_IGNORE_PATTERNS]);
 
-  debugLogObject(relativePath || ROOT_WORKSPACE_NAME, `Glob options`, { cwd, globPatterns, ignorePatterns });
+  debugLogObject(relativePath || ROOT_WORKSPACE_NAME, `Glob options`, { cwd, globPatterns, ignorePatterns, gitignore });
 
   return globby(globPatterns, {
     cwd,

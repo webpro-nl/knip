@@ -15,7 +15,7 @@ test('Report unresolved imports (rtl)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 1,
+    total: 1,
   });
 });
