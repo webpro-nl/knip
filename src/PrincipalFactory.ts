@@ -18,13 +18,19 @@ export type PrincipalOptions = {
   isGitIgnored: GlobbyFilterFunction;
 };
 
+const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>
+  Object.keys(paths).reduce((result, key) => {
+    result[key] = paths[key].map(entry => toAbsolute(entry, cwd));
+    return result;
+  }, {} as NonNullable<Paths>);
+
 const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Paths = {}) => {
-  const overridePaths = Object.keys(paths).reduce((overridePaths, key) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    overridePaths![key] = paths[key].map(entry => toAbsolute(entry, cwd));
-    return overridePaths;
-  }, {} as Paths);
-  compilerOptions.paths = { ...compilerOptions.paths, ...overridePaths };
+  const compilerPaths =
+    !compilerOptions.baseUrl && compilerOptions.paths
+      ? mapToAbsolutePaths(compilerOptions.paths, cwd)
+      : compilerOptions.paths;
+  const extraPaths = mapToAbsolutePaths(paths, cwd);
+  compilerOptions.paths = { ...compilerPaths, ...extraPaths };
   return compilerOptions;
 };
 
