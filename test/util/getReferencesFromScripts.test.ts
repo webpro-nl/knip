@@ -43,6 +43,7 @@ test('getReferencesFromScripts (node)', () => {
   t('node --inspect-brk -r tsconfig-paths/register node_modules/.bin/jest --runInBand', ['bin:jest', 'tsconfig-paths']);
   t('node dist/index.js', []);
   t('./script.js', [js]);
+  t('node --watch ./script.js', [js]);
 });
 
 test('getReferencesFromScripts (ts-node/tsx)', () => {
