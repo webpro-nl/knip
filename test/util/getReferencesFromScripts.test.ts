@@ -44,15 +44,20 @@ test('getReferencesFromScripts (node)', () => {
   t('node dist/index.js', []);
   t('./script.js', [js]);
   t('node --watch ./script.js', [js]);
+  t('node ./script.js build', [js]);
 });
 
-test('getReferencesFromScripts (ts-node/tsx)', () => {
+test('getReferencesFromScripts (ts-node)', () => {
   t('ts-node --require pkg/register main.ts', ['bin:ts-node', ts, 'pkg']);
+  t('babel-node --inspect=0.0.0.0 ./main.ts', ['bin:babel-node', ts]);
+});
+
+test('getReferencesFromScripts (tsx)', () => {
   t('tsx ./main.ts', ['bin:tsx', ts]);
   t('tsx watch ./main.ts', ['bin:tsx', ts]);
   t('node --loader tsx ./main.ts', [ts, 'tsx']);
-  t('npx tsx main', ['bin:tsx', ts]);
-  t('babel-node --inspect=0.0.0.0 ./main.ts', ['bin:babel-node', ts]);
+  t('tsx main', ['bin:tsx', ts]);
+  t('tsx ./main.ts build', ['bin:tsx', ts]);
 });
 
 test('getReferencesFromScripts (--require)', () => {
@@ -121,6 +126,9 @@ test('getReferencesFromScripts (npx)', () => {
   t("npx --package=foo -c 'curl --output /dev/null'", ['foo', 'bin:curl']);
   t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', ['bin:swagger-typescript-api']);
   t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', ['bin:swagger-typescript-api']);
+  t('npx tsx main', ['bin:tsx', ts]);
+  t('npx tsx ./main.ts build', ['bin:tsx', ts]);
+  t('npx tsx ./main.ts -- build', ['bin:tsx', ts]);
 });
 
 test('getReferencesFromScripts (pnpm)', () => {

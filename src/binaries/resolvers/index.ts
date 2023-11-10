@@ -6,4 +6,5 @@ export * as npx from './npx.js';
 export * as nx from './nx.js';
 export * as pnpm from './pnpm.js';
 export * as rollup from './rollup.js';
+export * as tsx from './tsx.js';
 export * as yarn from './yarn.js';
