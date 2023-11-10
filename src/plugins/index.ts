@@ -39,6 +39,7 @@ export * as stryker from './stryker/index.js';
 export * as stylelint from './stylelint/index.js';
 export * as svelte from './svelte/index.js';
 export * as tailwind from './tailwind/index.js';
+export * as tsup from './tsup/index.js';
 export * as typedoc from './typedoc/index.js';
 export * as typescript from './typescript/index.js';
 export * as vite from './vite/index.js';

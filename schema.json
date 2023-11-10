@@ -384,6 +384,10 @@
           "title": "tailwind plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/tailwind/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "tsup": {
+          "title": "tsup plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/tsup/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "typedoc": {
           "title": "typedoc plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/typedoc/README.md)",
           "$ref": "#/definitions/plugin"

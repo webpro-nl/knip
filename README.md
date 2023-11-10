@@ -304,6 +304,7 @@ Knip contains a growing list of plugins:
 - [Stylelint][plugin-stylelint]
 - [Svelte][plugin-svelte]
 - [Tailwind][plugin-tailwind]
+- [tsup][plugin-tsup]
 - [TypeDoc][plugin-typedoc]
 - [TypeScript][plugin-typescript]
 - [Vite][plugin-vite]
@@ -956,6 +957,7 @@ Special thanks to the wonderful people who have contributed to this project:
 [plugin-stylelint]: ./src/plugins/stylelint
 [plugin-svelte]: ./src/plugins/svelte
 [plugin-tailwind]: ./src/plugins/tailwind
+[plugin-tsup]: ./src/plugins/tsup
 [plugin-typedoc]: ./src/plugins/typedoc
 [plugin-typescript]: ./src/plugins/typescript
 [plugin-vite]: ./src/plugins/vite
