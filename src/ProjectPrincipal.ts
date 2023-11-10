@@ -203,7 +203,6 @@ export class ProjectPrincipal {
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
         if (isMaybePackageName(sanitizedSpecifier)) {
           // Should never end up here; maybe a dependency that was not installed.
-          // Package name may contain such extensions, but any external dependency should be resolved by TS.
           external.add(sanitizedSpecifier);
         } else {
           const isIgnored = this.isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
