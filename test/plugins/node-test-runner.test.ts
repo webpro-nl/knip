@@ -11,9 +11,9 @@ test('Find dependencies in node-test-runner configuration (json)', async () => {
   const configFilePath = join(cwd, 'package.json');
   const dependencies = await nodeTestRunner.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, [
-    'entry:**/test.{js,cjs,mjs}',
-    'entry:**/test-*.{js,cjs,mjs}',
-    'entry:**/*{.,-,_}test.{js,cjs,mjs}',
-    'entry:**/test/**/*.{js,cjs,mjs}',
+    'entry:**/*{.,-,_}test.?(c|m)js',
+    'entry:**/test-*.?(c|m)js',
+    'entry:**/test.?(c|m)js',
+    'entry:**/test/**/*.?(c|m)js',
   ]);
 });

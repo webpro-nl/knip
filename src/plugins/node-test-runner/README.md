@@ -9,12 +9,7 @@ This plugin is enabled when any script in `package.json` includes `node --test`
 ```json
 {
   "node-test-runner": {
-    "entry": [
-      "**/test.{js,cjs,mjs}",
-      "**/test-*.{js,cjs,mjs}",
-      "**/*{.,-,_}test.{js,cjs,mjs}",
-      "**/test/**/*.{js,cjs,mjs}"
-    ]
+    "entry": ["**/*{.,-,_}test.?(c|m)js", "**/test-*.?(c|m)js", "**/test.?(c|m)js", "**/test/**/*.?(c|m)js"]
   }
 }
 ```

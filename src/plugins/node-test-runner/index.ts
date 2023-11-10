@@ -18,10 +18,10 @@ export const isEnabled: IsPluginEnabledCallback = ({ manifest }) => {
 
 /** @public */
 export const ENTRY_FILE_PATTERNS = [
-  '**/test.{js,cjs,mjs}',
-  '**/test-*.{js,cjs,mjs}',
-  '**/*{.,-,_}test.{js,cjs,mjs}',
-  '**/test/**/*.{js,cjs,mjs}',
+  '**/*{.,-,_}test.?(c|m)js',
+  '**/test-*.?(c|m)js',
+  '**/test.?(c|m)js',
+  '**/test/**/*.?(c|m)js',
 ];
 
 const findNodeTestRunnerDependencies: GenericPluginCallback = async (configFilePath, options) => {
