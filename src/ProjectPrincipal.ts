@@ -191,7 +191,8 @@ export class ProjectPrincipal {
           const sanitizedSpecifier = sanitizeSpecifier(specifier);
           external.add(sanitizedSpecifier);
         } else {
-          this.addEntryPath(resolvedModule.resolvedFileName, { skipExportsAnalysis: true });
+          const isIgnored = this.isGitIgnored(resolvedModule.resolvedFileName);
+          if (!isIgnored) this.addEntryPath(resolvedModule.resolvedFileName, { skipExportsAnalysis: true });
         }
       } else {
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
