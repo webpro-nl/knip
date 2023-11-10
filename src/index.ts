@@ -93,7 +93,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js, ./module.ts, ./module.d.ts
       const filePath = principal.resolveModule(specifier, containingFilePath)?.resolvedFileName;
       if (filePath) {
-        const ignorePatterns = workspace.config.ignore.map(pattern => join(dirname(containingFilePath), pattern));
+        const ignorePatterns = workspace.config.ignore.map(pattern => join(workspace.dir, pattern));
         const isIgnored = micromatch.isMatch(filePath, ignorePatterns);
         if (!isIgnored) principal.addEntryPath(filePath);
       } else {
