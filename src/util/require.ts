@@ -1,15 +1,17 @@
 import { createRequire as nodeCreateRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import createJITI from 'jiti';
 import { debugLog } from './debug.js';
 import { getPackageNameFromModuleSpecifier } from './modules.js';
 import { cwd, toPosix, join } from './path.js';
 import { timerify } from './Performance.js';
+import { jiti } from './register.js';
 
 const createRequire = (path?: string) => nodeCreateRequire(pathToFileURL(path ?? cwd));
-
 const require = createRequire();
+export const _require = timerify(require);
 
-const resolve = (specifier: string) => toPosix(require.resolve(specifier));
+const resolve = (specifier: string) => toPosix(jiti.resolve(specifier));
 
 const tryResolve = (specifier: string, from: string) => {
   try {
@@ -21,8 +23,9 @@ const tryResolve = (specifier: string, from: string) => {
 
 const resolveSpecifier = (dir: string, specifier: string) => {
   try {
-    const require = createRequire(join(dir, 'package.json'));
-    return toPosix(require.resolve(specifier));
+    // @ts-expect-error Our package.json has type=module (for globby, chalk, etc), but here it confuses TypeScript
+    const jiti = createJITI(dir);
+    return toPosix(jiti.resolve(specifier));
   } catch {
     const packageName = getPackageNameFromModuleSpecifier(specifier);
     if (packageName) {
@@ -31,8 +34,6 @@ const resolveSpecifier = (dir: string, specifier: string) => {
     }
   }
 };
-
-export const _require = timerify(require);
 
 export const _resolve = timerify(resolve);
 
