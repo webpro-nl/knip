@@ -18,7 +18,7 @@ test('Find dependencies in vitest configuration (vitest)', async () => {
     'happy-dom',
     '@vitest/coverage-istanbul',
     'setup.js',
-    join(cwd, 'src/setupTests.ts'),
+    'entry:src/setupTests.ts',
   ]);
 });
 
