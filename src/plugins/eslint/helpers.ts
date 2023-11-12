@@ -1,4 +1,5 @@
 import { compact } from '../../util/array.js';
+import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { isInternal, dirname, toAbsolute } from '../../util/path.js';
 import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
@@ -73,17 +74,18 @@ const isQualifiedSpecifier = (specifier: string) =>
 const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config', rawSpecifier: string) => {
   const specifier = rawSpecifier.replace(/(^plugin:|:.+$)/, '');
   if (isQualifiedSpecifier(specifier)) return specifier;
-  if (!specifier.startsWith('@')) return `${namespace}-${specifier}`;
+  if (!specifier.startsWith('@')) {
+    const id = rawSpecifier.startsWith('plugin:') ? getPackageNameFromModuleSpecifier(specifier) : specifier;
+    return `${namespace}-${id}`;
+  }
   const [scope, name, ...rest] = specifier.split('/');
-  if (rawSpecifier.startsWith('plugin:') && rest.length === 0) return [scope, namespace, name].join('/');
+  if (rawSpecifier.startsWith('plugin:') && rest.length === 0) return [scope, namespace].join('/');
   return [scope, name ? `${namespace}-${name}` : namespace, ...rest].join('/');
 };
 
-/** @internal */
-export const resolvePluginSpecifier = (specifier: string) => resolveSpecifier('eslint-plugin', specifier);
+const resolvePluginSpecifier = (specifier: string) => resolveSpecifier('eslint-plugin', specifier);
 
-/** @internal */
-export const resolveExtendSpecifier = (specifier: string) => {
+const resolveExtendSpecifier = (specifier: string) => {
   if (isInternal(specifier)) return;
 
   // Exception: eslint-config-next → next
