@@ -5,13 +5,13 @@ import { debugLog } from './debug.js';
 import { getPackageNameFromModuleSpecifier } from './modules.js';
 import { cwd, toPosix, join } from './path.js';
 import { timerify } from './Performance.js';
-import { jiti } from './register.js';
+import { jitiCJS } from './register.js';
 
 const createRequire = (path?: string) => nodeCreateRequire(pathToFileURL(path ?? cwd));
 const require = createRequire();
 export const _require = timerify(require);
 
-const resolve = (specifier: string) => toPosix(jiti.resolve(specifier));
+const resolve = (specifier: string) => toPosix(jitiCJS.resolve(specifier));
 
 const tryResolve = (specifier: string, from: string) => {
   try {

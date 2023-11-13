@@ -4,7 +4,7 @@ import { loadJSON, loadYAML, loadFile, parseJSON, parseYAML } from './fs.js';
 import { isTypeModule } from './fs.js';
 import { extname } from './path.js';
 import { timerify } from './Performance.js';
-import { jiti } from './register.js';
+import { jitiCJS, jitiESM } from './register.js';
 
 export const FAKE_PATH = '__FAKE__';
 
@@ -32,7 +32,11 @@ const load = async (filePath: string) => {
       return imported.default ?? imported;
     }
 
-    return await jiti(filePath);
+    if (isTypeModule(filePath)) {
+      return await jitiESM(filePath);
+    } else {
+      return await jitiCJS(filePath);
+    }
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
