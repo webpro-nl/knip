@@ -245,8 +245,8 @@ This command also formats the generated Markdown files and updates the [list of 
 Thanks for reading this far. If you have been following this guide to create a new plugin, this might be the right time
 to open a pull request!
 
-[![An orange cow with scissors, Van Gogh style][22]][21] <sup>_“An orange cow with scissors, Van Gogh style” - generated
-with OpenAI_</sup>
+![An orange cow with scissors, Van Gogh style][21]] <sup>_“An orange cow with scissors, Van Gogh style” - generated with
+OpenAI_</sup>
 
 [1]: ../README.md#plugins
 [2]: ../.github/CONTRIBUTING.md
@@ -268,5 +268,4 @@ with OpenAI_</sup>
 [18]: ../README.md
 [19]: ../src/types//plugins.ts
 [20]: ../README.md#production-mode
-[21]: https://labs.openai.com/s/xZQACaLepaKya0PRUPtIN5dC
-[22]: ../assets/cow-with-orange-scissors-van-gogh-style.webp
+[21]: ../assets/cow-with-orange-scissors-van-gogh-style.webp
