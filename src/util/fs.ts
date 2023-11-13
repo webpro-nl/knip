@@ -46,23 +46,18 @@ export const parseYAML = async (contents: string) => {
   return yaml.load(contents);
 };
 
-export function isTypeModule(filePath: string) {
-  if (!filePath.endsWith('.js')) return false;
-  try {
-    let currentDir = dirname(filePath);
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const packagePath = join(currentDir, 'package.json');
+export function isTypeModule(path: string) {
+  while (path && path !== '.' && path !== '/') {
+    path = dirname(path);
+    try {
+      const pkg = readFileSync(join(path, 'package.json'), 'utf-8');
       try {
-        const data = JSON.parse(readFileSync(packagePath, 'utf-8'));
-        return data.type === 'module';
+        return JSON.parse(pkg).type === 'module';
         // eslint-disable-next-line no-empty
       } catch {}
-      const parentDir = dirname(currentDir);
-      if (parentDir === currentDir) return false;
-      currentDir = parentDir;
-    }
-  } catch (error) {
-    return false;
+      break;
+      // eslint-disable-next-line no-empty
+    } catch {}
   }
+  return false;
 }
