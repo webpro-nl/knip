@@ -1,6 +1,7 @@
 import { pathToFileURL } from 'node:url';
 import { LoaderError } from './errors.js';
 import { loadJSON, loadYAML, loadFile, parseJSON, parseYAML } from './fs.js';
+import { isTypeModule } from './fs.js';
 import { extname } from './path.js';
 import { timerify } from './Performance.js';
 import { jiti } from './register.js';
@@ -25,7 +26,7 @@ const load = async (filePath: string) => {
       return loadYAML(filePath);
     }
 
-    if (ext === '.mjs') {
+    if (ext === '.mjs' || (ext === '.js' && isTypeModule(filePath))) {
       const fileUrl = pathToFileURL(filePath);
       const imported = await import(fileUrl.href);
       return imported.default ?? imported;
