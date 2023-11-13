@@ -18,6 +18,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'cat',
   'cd',
   'chmod',
+  'corepack',
   'cp',
   'curl',
   'deno',
