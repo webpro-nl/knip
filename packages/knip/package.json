@@ -59,9 +59,11 @@
     "pretty-ms": "8.0.0",
     "strip-json-comments": "5.0.1",
     "summary": "2.1.0",
-    "typescript": "5.2.2",
     "zod": "3.22.4",
     "zod-validation-error": "2.1.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.4"
   },
   "devDependencies": {
     "@jest/types": "29.6.3",
@@ -84,7 +86,8 @@
     "prettier": "^3.1.0",
     "release-it": "^17.0.0",
     "tsx": "^4.1.2",
-    "type-fest": "^4.7.1"
+    "type-fest": "^4.7.1",
+    "typescript": "5.0.4"
   },
   "engines": {
     "node": ">=18.6.0"
