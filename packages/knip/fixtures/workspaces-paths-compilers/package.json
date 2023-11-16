@@ -1,0 +1,10 @@
+{
+  "name": "@workspaces-paths-compilers/root",
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "vue": "*"
+  }
+}
