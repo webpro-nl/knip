@@ -20,10 +20,14 @@ const url = new URL(
 const contributors: Contributor[] = isFetch
   ? await fetch(url.href, {
       headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        'X-GitHub-Api-Version': '2022-11-28',
       },
     }).then(res => res.json())
   : JSON.parse(await readFile('mock/contributors.json', 'utf-8'));
+
+if (!Array.isArray(contributors)) console.log(contributors);
 ---
 
 <style>
@@ -43,7 +47,7 @@ const contributors: Contributor[] = isFetch
 
 <div class="contributors">
   {
-    contributors.map(contributor => (
+    (Array.isArray(contributors) ? contributors : []).map(contributor => (
       <a href={contributor.html_url}>
         <img
           src={contributor.avatar_url}
