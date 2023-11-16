@@ -74,6 +74,9 @@
         }
       ]
     },
+    "isIncludeEntryExports": {
+      "type": "boolean"
+    },
     "workspaces": {
       "title": "Configuration for workspaces",
       "type": "object",

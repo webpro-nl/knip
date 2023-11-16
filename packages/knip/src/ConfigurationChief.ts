@@ -52,6 +52,7 @@ const getDefaultWorkspaceConfig = (extensions?: string[]): WorkspaceConfiguratio
     ignore: [],
     ignoreBinaries: [],
     ignoreDependencies: [],
+    isIncludeEntryExports: false,
   };
 };
 
@@ -64,6 +65,7 @@ const defaultConfig: Configuration = {
   ignoreDependencies: [],
   ignoreExportsUsedInFile: false,
   ignoreWorkspaces: [],
+  isIncludeEntryExports: false,
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
   defaultWorkspaceConfig: getDefaultWorkspaceConfig(),
@@ -76,6 +78,7 @@ type ConfigurationManagerOptions = {
   cwd: string;
   isProduction: boolean;
   isStrict: boolean;
+  isIncludeEntryExports: boolean;
 };
 
 export type Workspace = {
@@ -100,6 +103,7 @@ export class ConfigurationChief {
   cwd: string;
   isProduction = false;
   isStrict = false;
+  isIncludeEntryExports = false;
   config: Configuration;
 
   manifestPath?: string;
@@ -120,10 +124,11 @@ export class ConfigurationChief {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rawConfig?: any;
 
-  constructor({ cwd, isProduction, isStrict }: ConfigurationManagerOptions) {
+  constructor({ cwd, isProduction, isStrict, isIncludeEntryExports }: ConfigurationManagerOptions) {
     this.cwd = cwd;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
+    this.isIncludeEntryExports = isIncludeEntryExports;
     this.config = defaultConfig;
   }
 
@@ -196,6 +201,7 @@ export class ConfigurationChief {
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
     const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
+    const isIncludeEntryExports = rawConfig.isIncludeEntryExports ?? this.isIncludeEntryExports;
 
     const { syncCompilers, asyncCompilers } = rawConfig;
 
@@ -221,6 +227,7 @@ export class ConfigurationChief {
       ignoreDependencies,
       ignoreExportsUsedInFile,
       ignoreWorkspaces,
+      isIncludeEntryExports,
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})),
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
       rootPluginConfigs,
@@ -413,6 +420,7 @@ export class ConfigurationChief {
     const ignore = arrayify(workspaceConfig.ignore);
     const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries);
     const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies);
+    const isIncludeEntryExports = workspaceConfig.isIncludeEntryExports ?? this.config.isIncludeEntryExports;
 
     const plugins: Partial<PluginsConfiguration> = {};
 
@@ -428,7 +436,7 @@ export class ConfigurationChief {
       }
     }
 
-    return { entry, project, paths, ignore, ignoreBinaries, ignoreDependencies, ...plugins };
+    return { entry, project, paths, ignore, ignoreBinaries, ignoreDependencies, isIncludeEntryExports, ...plugins };
   }
 
   public getIssueTypesToReport() {

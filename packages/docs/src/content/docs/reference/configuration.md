@@ -101,6 +101,11 @@ Array of workspaces to ignore, globs allowed. Example:
 
 See [Rules & Filters][3].
 
+## `isIncludeEntryExports`
+
+By default, Knip does not report unused exports in entry files. Use this option
+to enable this globally, or per workspace.
+
 ## `paths`
 
 Tools like TypeScript, webpack and Babel support import aliases in various ways.

@@ -41,7 +41,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
-  const chief = new ConfigurationChief({ cwd, isProduction, isStrict });
+  const chief = new ConfigurationChief({ cwd, isProduction, isStrict, isIncludeEntryExports });
   const deputy = new DependencyDeputy({ isStrict });
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
@@ -386,7 +386,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       if (principal) {
         // Bail out when in entry file (unless --include-entry-exports)
-        if (!isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
+        if (!workspace.config.isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
 
         const importingModule = importedSymbols.get(filePath);
 
@@ -431,7 +431,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           const isStar = Boolean(importingModule?.isStar);
           const isReExportedByEntryFile =
-            !isIncludeEntryExports && isStar && isExportedInEntryFile(principal, importingModule);
+            !workspace.config.isIncludeEntryExports && isStar && isExportedInEntryFile(principal, importingModule);
 
           if (!isReExportedByEntryFile && !isExportedItemReferenced(principal, exportedItem, filePath)) {
             if (['enum', 'type', 'interface'].includes(exportedItem.type)) {

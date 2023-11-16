@@ -52,6 +52,7 @@ const rootConfigurationSchema = z.object({
   ignoreExportsUsedInFile: ignoreExportsUsedInFileSchema.optional(),
   ignoreDependencies: z.array(z.string()).optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
+  isIncludeEntryExports: z.boolean().optional(),
   compilers: compilersSchema.optional(),
   syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
   asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),

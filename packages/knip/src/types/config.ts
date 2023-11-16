@@ -31,6 +31,7 @@ interface BaseWorkspaceConfiguration {
   ignore: NormalizedGlob;
   ignoreBinaries: string[];
   ignoreDependencies: string[];
+  isIncludeEntryExports: boolean;
 }
 
 export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Partial<PluginsConfiguration> {}
@@ -46,6 +47,7 @@ export interface Configuration {
   ignoreDependencies: string[];
   ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
   ignoreWorkspaces: string[];
+  isIncludeEntryExports: boolean;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
   defaultWorkspaceConfig: WorkspaceConfiguration;
