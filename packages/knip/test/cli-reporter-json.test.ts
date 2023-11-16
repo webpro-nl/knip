@@ -70,7 +70,12 @@ test('knip --reporter json', () => {
         types: [{ name: 'MyAnyType', line: 19, col: 13, pos: 702 }],
         enumMembers: {},
         classMembers: {},
-        duplicates: [[{ name: 'exportedResult' }, { name: 'default' }]],
+        duplicates: [
+          [
+            { name: 'exportedResult', line: 17, col: 13, pos: 649 },
+            { name: 'default', line: 21, col: 15, pos: 734 },
+          ],
+        ],
       },
       {
         file: 'named-exports.ts',

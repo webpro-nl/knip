@@ -277,7 +277,6 @@ export class ProjectPrincipal {
   }
 
   public getPos(node: ts.Node, pos: number) {
-    const { line, character } = getLineAndCharacterOfPosition(node, pos);
-    return { pos, line: line + 1, col: character + 1 };
+    return getLineAndCharacterOfPosition(node, pos);
   }
 }

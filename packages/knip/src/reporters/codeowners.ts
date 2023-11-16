@@ -54,11 +54,11 @@ export default ({ report, issues, isShowProgress, options }: ReporterOptions) =>
               .map(toIssue)
               .map(addOwner)
           : reportType === 'duplicates'
-          ? Object.values(issues[reportType]).map(Object.values).flat().map(addOwner)
-          : Object.values(issues[reportType] as IssueRecords).map(issues => {
-              const items = Object.values(issues);
-              return addOwner({ ...items[0], symbols: items.map(issue => issue.symbol) });
-            });
+            ? Object.values(issues[reportType]).map(Object.values).flat().map(addOwner)
+            : Object.values(issues[reportType] as IssueRecords).map(issues => {
+                const symbols = Object.values(issues);
+                return addOwner({ ...symbols[0], symbols });
+              });
 
       if (issuesForType.length > 0) {
         if (totalIssues) console.log();

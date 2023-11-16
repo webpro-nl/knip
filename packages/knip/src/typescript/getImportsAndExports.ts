@@ -8,6 +8,7 @@ import {
   isAccessExpression,
   getAccessExpressionName,
   getJSDocTags,
+  getLineAndCharacterOfPosition,
 } from './ast-helpers.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getJSXImplicitImportBase } from './visitors/helpers.js';
@@ -16,6 +17,7 @@ import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import type { ExportItems as Exports, ExportItem } from '../types/exports.js';
 import type { Imports, UnresolvedImport } from '../types/imports.js';
+import type { IssueSymbol } from '../types/issues.js';
 
 const getVisitors = (sourceFile: ts.SourceFile) => ({
   export: getExportVisitors(sourceFile),
@@ -49,7 +51,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
   const externalImports: Set<string> = new Set();
   const unresolvedImports: Set<UnresolvedImport> = new Set();
   const exports: Exports = new Map();
-  const aliasedExports: Record<string, string[]> = {};
+  const aliasedExports: Map<string, IssueSymbol[]> = new Map();
   const scripts: Set<string> = new Set();
 
   const importedInternalSymbols: Map<ts.Symbol, string> = new Map();
@@ -163,9 +165,17 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
 
   const maybeAddAliasedExport = (node: ts.Expression | undefined, alias: string) => {
     const identifier = node?.getText();
-    if (identifier && sourceFile.symbol?.exports?.has(identifier)) {
-      aliasedExports[identifier] = aliasedExports[identifier] ?? [identifier];
-      aliasedExports[identifier].push(alias);
+    if (node && identifier) {
+      const exprt = sourceFile.symbol?.exports?.get(identifier);
+      if (exprt && exprt.valueDeclaration) {
+        if (!aliasedExports.has(identifier)) {
+          const pos = getLineAndCharacterOfPosition(exprt.valueDeclaration, exprt.valueDeclaration.pos);
+          aliasedExports.set(identifier, [{ symbol: identifier, ...pos }]);
+        }
+        const i = aliasedExports.get(identifier);
+        const pos = getLineAndCharacterOfPosition(node, node.pos);
+        i?.push({ symbol: alias, ...pos });
+      }
     }
   };
 
@@ -217,7 +227,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     },
     exports: {
       exported: exports,
-      duplicate: Object.values(aliasedExports),
+      duplicate: [...aliasedExports.values()],
     },
     scripts,
   };

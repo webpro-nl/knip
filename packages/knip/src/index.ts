@@ -298,7 +298,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
         duplicate.forEach(symbols => {
           if (symbols.length > 1) {
-            const symbol = symbols.join('|');
+            const symbol = symbols.map(s => s.symbol).join('|');
             collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
           }
         });

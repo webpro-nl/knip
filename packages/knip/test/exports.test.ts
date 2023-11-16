@@ -37,7 +37,7 @@ test('Find unused exports', async () => {
   assert.equal(issues.nsTypes['my-namespace.ts']['MyNamespace'].symbol, 'MyNamespace');
 
   assert.equal(Object.values(issues.duplicates).length, 1);
-  assert.equal(issues.duplicates['my-module.ts']['exportedResult|default'].symbols?.[0], 'exportedResult');
+  assert.equal(issues.duplicates['my-module.ts']['exportedResult|default'].symbols?.length, 2);
 
   assert.equal(issues.exports['default.ts']['NamedExport'].line, 1);
   assert.equal(issues.exports['default.ts']['NamedExport'].col, 14);

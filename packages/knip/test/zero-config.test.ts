@@ -30,7 +30,7 @@ test('Find unused exports in zero-config mode', async () => {
   assert.equal(issues.nsTypes['my-namespace.ts']['NS'].symbol, 'NS');
 
   assert.equal(Object.values(issues.duplicates).length, 1);
-  assert.equal(issues.duplicates['my-module.ts']['myExport|default'].symbols?.[0], 'myExport');
+  assert.equal(issues.duplicates['my-module.ts']['myExport|default'].symbols?.length, 2);
 
   assert.deepEqual(counters, {
     ...baseCounters,

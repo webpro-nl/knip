@@ -30,7 +30,7 @@ test('Find unused files and exports with JS entry file', async () => {
   assert.equal(issues.nsTypes['my-namespace.ts']['MyNamespace'].symbol, 'MyNamespace');
 
   assert.equal(Object.values(issues.duplicates).length, 1);
-  assert.equal(issues.duplicates['my-module.ts']['myExport|default'].symbols?.[0], 'myExport');
+  assert.equal(issues.duplicates['my-module.ts']['myExport|default'].symbols?.length, 2);
 
   assert.deepEqual(counters, {
     ...baseCounters,

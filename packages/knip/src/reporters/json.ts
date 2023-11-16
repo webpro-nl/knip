@@ -1,6 +1,7 @@
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import { isFile } from '../util/fs.js';
 import { relative, resolve } from '../util/path.js';
+import { convert } from './util.js';
 import type { Report, ReporterOptions, IssueRecords, SymbolIssueType, Issue } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
@@ -73,16 +74,16 @@ export default async ({ report, issues, options }: ReporterOptions) => {
           const { filePath, symbol, symbols, parentSymbol } = issue;
           json[filePath] = json[filePath] ?? initRow(filePath);
           if (type === 'duplicates') {
-            symbols && json[filePath][type]?.push(symbols.map(symbol => ({ name: symbol })));
+            symbols && json[filePath][type]?.push(symbols.map(convert));
           } else if (type === 'enumMembers' || type === 'classMembers') {
             const item = json[filePath][type];
             if (parentSymbol && item) {
               item[parentSymbol] = item[parentSymbol] ?? [];
-              item[parentSymbol].push({ name: issue.symbol, line: issue.line, col: issue.col, pos: issue.pos });
+              item[parentSymbol].push(convert(issue));
             }
           } else {
             if (type === 'exports' || type === 'types' || type === 'unresolved') {
-              json[filePath][type]?.push({ name: issue.symbol, line: issue.line, col: issue.col, pos: issue.pos });
+              json[filePath][type]?.push(convert(issue));
             } else {
               json[filePath][type]?.push({ name: symbol });
             }

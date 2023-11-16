@@ -145,5 +145,6 @@ export const getJSDocTags = (node: ts.Node) => {
 };
 
 export const getLineAndCharacterOfPosition = (node: ts.Node, pos: number) => {
-  return node.getSourceFile().getLineAndCharacterOfPosition(pos);
+  const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
+  return { line: line + 1, col: character + 1, pos };
 };
