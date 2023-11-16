@@ -12,7 +12,12 @@ or `devDependencies`:
 ```json
 {
   "graphql-codegen": {
-    "config": ["codegen.{ts,js,json,yml,mjs,cts}", "package.json"]
+    "config": [
+      "codegen.{json,yml,yaml,js,ts,mjs,cts}",
+      ".codegenrc.{json,yml,yaml,js,ts}",
+      "codegen.config.js",
+      "package.json"
+    ]
   }
 }
 ```

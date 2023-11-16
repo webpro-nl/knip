@@ -5,6 +5,7 @@ import type { ConfiguredPlugin, GraphqlCodegenTypes, PresetNames } from './types
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://the-guild.dev/graphql/codegen/docs/config-reference/codegen-config
+// https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/config.ts
 
 export const NAME = 'GraphQL Codegen';
 
@@ -15,7 +16,12 @@ export const PACKAGE_JSON_PATH = 'codegen';
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['codegen.{ts,js,json,yml,mjs,cts}', 'package.json'];
+export const CONFIG_FILE_PATTERNS = [
+  'codegen.{json,yml,yaml,js,ts,mjs,cts}',
+  '.codegenrc.{json,yml,yaml,js,ts}',
+  'codegen.config.js',
+  'package.json',
+];
 
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { manifest, isProduction } = options;
