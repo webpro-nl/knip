@@ -1,5 +1,7 @@
+import { isInternal } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
+import { toEntryPattern } from '../../util/protocols.js';
 import { isConfigurationOutput } from './types.js';
 import type { ConfiguredPlugin, GraphqlCodegenTypes, PresetNames } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -50,7 +52,11 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
 
   const nestedPlugins = configurationOutput
     .flatMap(configOutput => (configOutput.plugins ? configOutput.plugins : []))
-    .map(plugin => `@graphql-codegen/${plugin}`);
+    .flatMap(plugin => {
+      if (typeof plugin !== 'string') return [];
+      if (isInternal(plugin)) return [toEntryPattern(plugin)];
+      return [`@graphql-codegen/${plugin}`];
+    });
 
   return [...presets, ...flatPlugins, ...nestedPlugins];
 };
