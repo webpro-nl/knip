@@ -17,7 +17,9 @@
   ],
   "scripts": {
     "knip": "knip",
-    "knip:production": "knip --production --strict"
+    "knip:production": "knip --production --strict",
+    "watch": "npm run watch --workspace packages/knip",
+    "docs": "npm run dev --workspace packages/docs"
   },
   "peerDependencies": {
     "knip": "file:packages/knip"

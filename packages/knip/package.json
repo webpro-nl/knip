@@ -29,7 +29,7 @@
     "pretest": "node rmdir.js tmp && swc src -d tmp/src && swc test -d tmp/test",
     "test": "node --no-warnings --test tmp",
     "coverage": "c8 --reporter html node --no-warnings --loader tsx --test test/*.test.ts test/*/*.test.ts",
-    "watch": "rm $(which knip); npm link && tsc --watch",
+    "watch": "npm link && tsc --watch",
     "prebuild": "node rmdir.js dist",
     "build": "tsc",
     "qa": "npm run lint && npm run build && npm run knip && npm run knip:production && npm test",
