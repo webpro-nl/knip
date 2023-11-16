@@ -2,6 +2,7 @@ interface VitestConfig {
   test: {
     include: string[];
     coverage?: {
+      enabled?: boolean;
       provider: string;
     };
     environment?: string;

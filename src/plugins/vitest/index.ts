@@ -47,7 +47,10 @@ const findConfigDependencies = (
 
   const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
   const reporters = getExternalReporters(testConfig.reporters);
-  const coverage = testConfig.coverage ? [`@vitest/coverage-${testConfig.coverage.provider ?? 'v8'}`] : [];
+  const coverage =
+    testConfig.coverage && testConfig.coverage.enabled !== false
+      ? [`@vitest/coverage-${testConfig.coverage.provider ?? 'v8'}`]
+      : [];
   const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(configFilePath, v));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(v => resolveEntry(configFilePath, v));
   return [...entryPatterns, ...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup];
