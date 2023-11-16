@@ -71,15 +71,19 @@ Any workspace must have a `package.json` file. Projects with only a root
 
 :::
 
-## Debug and more options
+## Additional options
+
+The following options are available inside workspace configurations:
+
+- [ignore][3]
+- [ignoreBinaries][4]
+- [ignoreDependencies][5]
+- [isIncludeEntryExports][6]
+
+[Plugins][7] can be configured separately per workspace.
 
 Use `--debug` for verbose output and see the workspaces Knip includes, their
 configurations, enabled plugins, glob options and resolved files.
-
-The [ignore][3], [ignoreBinaries][4] and [ignoreDependencies][5] options are
-available inside workspace configurations.
-
-[Plugins][6] can be configured separately per workspace.
 
 ## Lint a single workspace
 
@@ -96,12 +100,13 @@ This mode includes ancestor and dependent workspaces, for two reasons:
 - Dependent workspaces may reference exports from the linted workspace.
 
 To lint the workspace in isolation, you can combine this with [strict production
-mode][7].
+mode][8].
 
 [1]: ../overview/configuration.md#defaults
 [2]: ./integrated-monorepos.md
 [3]: ../reference/configuration.md#ignore-files
 [4]: ../reference/configuration.md#ignore-binaries
 [5]: ../reference/configuration.md#ignore-dependencies
-[6]: ../reference/configuration.md#plugins
-[7]: ./production-mode.md#strict-mode
+[6]: ../reference/configuration.md#isincludeentryexports
+[7]: ../reference/configuration.md#plugins
+[8]: ./production-mode.md#strict-mode
