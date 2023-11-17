@@ -74,7 +74,7 @@
         }
       ]
     },
-    "isIncludeEntryExports": {
+    "includeEntryExports": {
       "type": "boolean"
     },
     "workspaces": {

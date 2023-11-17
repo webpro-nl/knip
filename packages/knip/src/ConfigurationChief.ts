@@ -201,7 +201,7 @@ export class ConfigurationChief {
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
     const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
-    const isIncludeEntryExports = rawConfig.isIncludeEntryExports ?? this.isIncludeEntryExports;
+    const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
 
     const { syncCompilers, asyncCompilers } = rawConfig;
 
@@ -420,7 +420,7 @@ export class ConfigurationChief {
     const ignore = arrayify(workspaceConfig.ignore);
     const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries);
     const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies);
-    const isIncludeEntryExports = workspaceConfig.isIncludeEntryExports ?? this.config.isIncludeEntryExports;
+    const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
     const plugins: Partial<PluginsConfiguration> = {};
 

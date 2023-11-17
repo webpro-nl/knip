@@ -77,7 +77,7 @@ The following options are available inside workspace configurations:
 - [ignore][3]
 - [ignoreBinaries][4]
 - [ignoreDependencies][5]
-- [isIncludeEntryExports][6]
+- [includeEntryExports][6]
 
 [Plugins][7] can be configured separately per workspace.
 
@@ -106,6 +106,6 @@ mode][8].
 [3]: ../reference/configuration.md#ignore-files
 [4]: ../reference/configuration.md#ignore-binaries
 [5]: ../reference/configuration.md#ignore-dependencies
-[6]: ../reference/configuration.md#isincludeentryexports
+[6]: ../reference/configuration.md#includeentryexports
 [7]: ../reference/configuration.md#plugins
 [8]: ./production-mode.md#strict-mode

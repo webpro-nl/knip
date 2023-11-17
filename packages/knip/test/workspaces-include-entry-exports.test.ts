@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/workspaces-include-entry-exports');
 
-test('Respect isIncludeEntryExports per workspace', async () => {
+test('Respect includeEntryExports per workspace', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
