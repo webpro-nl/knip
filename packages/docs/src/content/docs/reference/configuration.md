@@ -4,7 +4,10 @@ title: Configuration File
 
 This page lists all configuration options (in alphabetical order).
 
-## `$schema` and types
+Also see [dynamic configurations](../reference/dynamic-configuration.mdx) in
+case you need more flexibility to configure Knip.
+
+## JSON Schema
 
 In JSON, you can use the provided JSON Schema:
 
@@ -13,6 +16,8 @@ In JSON, you can use the provided JSON Schema:
   "$schema": "https://unpkg.com/knip@canary/schema.json"
 }
 ```
+
+## Types
 
 In TypeScript, you can use the `KnipConfig` type:
 

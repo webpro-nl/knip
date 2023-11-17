@@ -2,10 +2,15 @@
 title: Handling Issues
 ---
 
-A long list of unused items can be frustrating, especially if you believe
-they're mostly false positives. Let's see how we can deal with this situation.
+A long list of unused items can be frustrating. The list may contain many false
+positives and/or it shows a lot of things that can be removed from the codebase.
+
+This pages guides you in dealing with false positives, and wraps up with a few
+things you can do if there's still a lot of work ahead of you.
+
 It makes sense to go over the issue types one by one. For instance, reducing the
-number of unused files should also reduce the number of unused dependencies.
+number of unused files will also reduce the number of unused dependencies. It's
+recommended to work this list from top to bottom.
 
 ## Unused files
 
@@ -22,6 +27,17 @@ Knip looks for entry files.
 In this section we'll look into common patterns that cause unused files and how
 to handle them.
 
+:::tip
+
+Use `--include files` to [filter](../features/rules-and-filters.md#filters) the
+report by unused files:
+
+```sh
+knip --include files
+```
+
+:::
+
 ### Mocks and other magic imports
 
 Some files are magically imported by other tooling, such as fixtures, mocks or
@@ -29,7 +45,7 @@ templates. Usually you'll want to ignore those, with patterns like this:
 
 ```json
 {
-  "ignore": ["**/__mocks__", "**/__fixtures__"]
+  "ignore": ["**/__mocks__/**", "**/__fixtures__/**"]
 }
 ```
 
@@ -77,6 +93,17 @@ Dependencies imported in unused files are reported as unused dependencies.
 That's why it's strongly recommended to try and remedy [unused files][7] first.
 This solves many cases of reported unused dependencies.
 
+:::tip
+
+Use the `--dependencies` flag to
+[filter](../features/rules-and-filters.md#filters) dependency related issues:
+
+```sh
+knip --dependencies
+```
+
+:::
+
 ### Plugins
 
 If a plugin exists and the dependency is referenced in the configuration file,
@@ -90,8 +117,8 @@ an existing one.
 ### Non-standard Files
 
 Dependencies might be imported from files with non-standard extensions like
-`.mdx`, `.vue` or `.svelte`. See [compilers][8] for more details on how to
-include them.
+`.mdx`, `.vue` or `.svelte`. These files are not included by default. See
+[compilers][8] for more details on how to include them.
 
 ### Unreachable Code
 
@@ -117,7 +144,8 @@ dependency) and lives in `node_modules`, but it's not listed explicitly in
 `package.json`.
 
 You should not rely on transitive dependencies for various reasons, including
-control, security and stability.
+control, security and stability. The solution is to install and list the
+dependency in `dependencies` or `devDependencies`.
 
 ## Unlisted binaries
 
@@ -200,8 +228,22 @@ For unused exports in the other used files, there are a few options to consider:
 - Mark the export(s) [using the JSDoc `@public` tag][11]
 - [Ignore exports used in file][12]
 
-Use [--include-entry-exports][13] to make Knip also report unused exports in
-entry files.
+:::tip
+
+Use the `--exports` flag to [filter](../features/rules-and-filters.md#filters)
+exports related issues:
+
+```sh
+knip --exports
+```
+
+:::
+
+### Missing Exports?
+
+Do you expect certain exports in the report, but are they missing? They might be
+exported from an entry file. Use [--include-entry-exports][13] to make Knip also
+report unused exports in entry files.
 
 ## Start using Knip in CI with lots of reported issues
 
@@ -228,7 +270,7 @@ away. Here are a few options that may help the process in the meantime:
 [10]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [11]: ../reference/jsdoc-tsdoc-tags.mdx
 [12]: ../reference/configuration.md#ignore-exports-used-in-file
-[13]: ../reference/configuration.md#include-exports-in-entry-files
+[13]: ../reference/configuration.md#includeentryexports
 [14]: ../features/rules-and-filters.md
 [15]: ../features/rules-and-filters.md#rules
 [16]: ../reference/configuration.md#ignore
