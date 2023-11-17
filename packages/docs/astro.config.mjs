@@ -18,14 +18,20 @@ export default defineConfig({
   integrations: [
     expressiveCode({
       emitExternalStylesheet: true,
+      styleOverrides: {
+        'frm-tooltipSuccessBg': 'var(--sl-color-orange)',
+        'frm-tooltipSuccessFg': 'var(--sl-color-white)',
+      },
       frames: {
         showCopyToClipboardButton: true,
       },
       themes: ['min-dark'],
       theme: 'min-dark',
       customizeTheme: theme => {
+        theme.settings[0].foreground = '#ededed';
         setForeground(theme, 'entity.name.tag', '#f68a22');
-        setForeground(theme, 'entity.name.type', '#9DB1C5');
+        setForeground(theme, 'entity.name.type', '#ededed');
+        setForeground(theme, 'string', '#ededed');
         return theme;
       },
     }),

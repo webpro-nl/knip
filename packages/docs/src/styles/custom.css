@@ -122,6 +122,15 @@ footer .pagination-links a:hover {
   letter-spacing: -1px;
 }
 
+.card-grid .card {
+  gap: unset;
+}
+
+.hero h1 {
+  text-indent: -0.0666em;
+  font-size: 9rem;
+}
+
 h2 code,
 h3 code {
   color: var(--sl-color-gray-1);
