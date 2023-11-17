@@ -35,7 +35,7 @@ filling in the blanks. Everything that is not used or empty can be removed.
 The name of the plugin to display in the [list of plugins][1] and in debug
 output.
 
-```ts
+```ts title="src/plugins/cool-linter/index.ts"
 export const NAME = 'Cool Linter';
 ```
 
@@ -45,7 +45,7 @@ An array of strings and/or regular expressions that should match one or more
 dependencies so the `isEnabled` function can determine whether the plugin should
 be enabled or not. This is often a single package name, for example:
 
-```ts
+```ts title="src/plugins/cool-linter/index.ts"
 export const ENABLERS = ['cool-linter'];
 ```
 
@@ -53,7 +53,7 @@ export const ENABLERS = ['cool-linter'];
 
 This function can be fairly straightforward with the `hasDependency` helper:
 
-```ts
+```ts title="src/plugins/cool-linter/index.ts"
 export const isEnabled = ({ dependencies }) =>
   hasDependency(dependencies, ENABLERS);
 ```
@@ -83,10 +83,10 @@ statements.
 
 :::
 
-This means we need to define and export this variable, so Knip can find our
-`cool-linter.config.json` file:
+This means we need to define and export this variable, so Knip can find the
+configuration file:
 
-```json
+```json title="cool-linter.config.json"
 {
   "addons": ["@cool-linter/awesome-addon"],
   "plugins": ["@cool-linter/priority-plugin"]
@@ -95,7 +95,7 @@ This means we need to define and export this variable, so Knip can find our
 
 And here's how we can define this config file pattern from the plugin:
 
-```ts
+```ts title="src/plugins/cool-linter/index.ts"
 export const CONFIG_FILE_PATTERNS = ['cool-linter.config.{js,json}'];
 ```
 
@@ -122,7 +122,8 @@ The `findDependencies` function should do three things:
 For example, you are using Cool Linter in your project, and running Knip results
 in some false positives:
 
-```
+```sh
+$ knip
 Unused dependencies (2)
 @cool-linter/awesome-addon
 @cool-linter/priority-plugin
@@ -135,7 +136,7 @@ This is where our new plugin comes in. Knip will look for
 `cool-linter.config.json`, and the exported `findDependencies` function will be
 invoked with the full path to the file.
 
-```ts
+```ts title="src/plugins/cool-linter/index.ts"
 const findCoolLinterDependencies: GenericPluginCallback =
   async configFilePath => {
     // 1. Load the configuration
@@ -187,7 +188,7 @@ as test and configuration files. They usually depend on `devDependencies`.
 However, some plugins target production files, such as Next.js, Gatsby and
 Remix. Here's a shortened example from the Remix plugin:
 
-```ts
+```ts title="src/plugins/cool-linter/index.ts"
 const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'app/root.tsx',
   'app/entry.{client,server}.{js,jsx,ts,tsx}',
@@ -209,7 +210,7 @@ files related to the tool of the plugin. For instance, Storybook files are in a
 here they can be explicitly added, regardless of the user's `project` files
 configuration.
 
-```ts
+```ts title="src/plugins/cool-linter/index.ts"
 export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
 ```
 
@@ -226,9 +227,9 @@ Let's update the tests to verify our plugin implementation is working correctly.
    Create the file in your IDE, and save it at
    `fixtures/plugins/cool-linter/cool-linter.config.json`.
 
-2. Update the test at `tests/plugins/cool-linter.test.ts`:
+2. Update the test:
 
-   ```ts
+   ```ts title="tests/plugins/cool-linter.test.ts"
    test('Find dependencies in cool-linter configuration (json)', async () => {
      const configFilePath = join(cwd, 'cool-linter.config.json');
      const dependencies = await coolLinter.findDependencies(configFilePath);

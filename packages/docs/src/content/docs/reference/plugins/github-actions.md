@@ -9,7 +9,7 @@ This plugin is enabled when a `.yml` or `.yaml` file is found in the
 
 ## Default configuration
 
-```json
+```json title="knip.json"
 {
   "github-actions": {
     "config": [".github/workflows/*.{yml,yaml}", ".github/**/action.{yml,yaml}"]

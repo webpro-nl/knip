@@ -8,7 +8,7 @@ This page lists all configuration options (in alphabetical order).
 
 In JSON, you can use the provided JSON Schema:
 
-```json
+```json title="knip.json"
 {
   "$schema": "https://unpkg.com/knip@canary/schema.json"
 }
@@ -16,7 +16,7 @@ In JSON, you can use the provided JSON Schema:
 
 In TypeScript, you can use the `KnipConfig` type:
 
-```ts
+```ts title="knip.ts"
 import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {};
@@ -36,7 +36,7 @@ See [Rules & Filters][3].
 
 Array of glob patterns to ignore files. Example:
 
-```json
+```json title="knip.json"
 {
   "ignore": ["**/fixtures"]
 }
@@ -46,7 +46,7 @@ Array of glob patterns to ignore files. Example:
 
 Array of binaries to ignore, no wildcards allowed. Example:
 
-```json
+```json title="knip.json"
 {
   "ignoreBinaries": ["zip", "docker-compose"]
 }
@@ -56,7 +56,7 @@ Array of binaries to ignore, no wildcards allowed. Example:
 
 Array of package names to ignore, no wildcards allowed. Example:
 
-```json
+```json title="knip.json"
 {
   "ignoreDependencies": ["hidden-package"]
 }
@@ -70,7 +70,7 @@ option available. With this option enabled, you don't need to mark everything
 `@public` separately and when something is no longer used internally, it will
 still be reported.
 
-```json
+```json title="knip.json"
 {
   "ignoreExportsUsedInFile": true
 }
@@ -78,7 +78,7 @@ still be reported.
 
 In a more fine-grained manner, you can also ignore only specific issue types:
 
-```json
+```json title="knip.json"
 {
   "ignoreExportsUsedInFile": {
     "interface": true,
@@ -91,7 +91,7 @@ In a more fine-grained manner, you can also ignore only specific issue types:
 
 Array of workspaces to ignore, globs allowed. Example:
 
-```json
+```json title="knip.json"
 {
   "ignoreWorkspaces": ["packages/ignore", "packages/examples/**"]
 }
@@ -113,7 +113,7 @@ Knip automatically includes `compilerOptions.paths` from the TypeScript
 configuration, but does not automatically use other types of import aliases.
 They can be configured manually:
 
-```json
+```json title="knip.json"
 {
   "paths": {
     "@lib": ["./lib/index.ts"],
@@ -136,7 +136,7 @@ There are a few options to modify the behavior of a plugin:
 - Force-enable a plugin by setting its value to `true`
 - Disable a plugin by setting its value to `false`
 
-```json
+```json title="knip.json"
 {
   "mocha": {
     "config": "config/mocha.config.js",

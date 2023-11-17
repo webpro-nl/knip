@@ -76,8 +76,8 @@ for await (const dir of directories) {
             ),
           ]
         : typeof ENABLERS === 'string'
-        ? parseFragment(ENABLERS)
-        : [u('paragraph', [u('text', 'N/A')])];
+          ? parseFragment(ENABLERS)
+          : [u('paragraph', [u('text', 'N/A')])];
 
     const tree = u('root', [
       frontmatter,
@@ -85,7 +85,7 @@ for await (const dir of directories) {
       ...en,
       u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
       u('code', {
-        lang: 'json',
+        lang: 'json title="knip.json"', // TODO How to set attributes/properties/props properly?
         value: JSON.stringify({ [pluginName]: defaults }, null, 2),
       }),
     ]);

@@ -40,10 +40,10 @@ workspace separately.
 
 ## Scripts in package.json
 
-The `main`, `bin`, `exports` and `scripts` fields of `package.json` may contain
-entry files. Let's take a quick look at this example:
+The `main`, `bin`, `exports` and `scripts` fields may contain entry files. Let's
+take a look at this example:
 
-```json
+```json title="package.json"
 {
   "name": "knip-example",
   "main": "index.js",
@@ -85,7 +85,7 @@ examples of additional scripts Knip parses to find entry files and dependencies.
 
 ### execa
 
-If the `execa` dependnecy is imported in source code, Knip considers the
+If the `execa` dependency is imported in source code, Knip considers the
 contents of `$` template tags to be scripts:
 
 ```ts

@@ -12,10 +12,9 @@ directory that has a `package.json`.
 
 ## Configuration
 
-Here's an example `knip.json` configuration with some custom `entry` and
-`project` patterns:
+Here's example configuration with custom `entry` and `project` patterns:
 
-```json
+```json title="knip.json"
 {
   "workspaces": {
     ".": {

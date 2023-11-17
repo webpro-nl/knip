@@ -13,7 +13,7 @@ This plugin is enabled when there is match in `dependencies` or
 
 ## Default configuration
 
-```json
+```json title="knip.json"
 {
   "postcss": {
     "config": ["postcss.config.{cjs,js}", "postcss.config.json", "package.json"]

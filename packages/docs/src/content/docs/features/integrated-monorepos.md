@@ -16,7 +16,7 @@ Cypress plugins).
 
 In that case, we could configure the ESLint and Cypress plugins like this:
 
-```json
+```json title="knip.json"
 {
   "eslint": {
     "config": ["**/.eslintrc.json"]

@@ -5,8 +5,8 @@ description: config
 
 ## Defaults
 
-Knip has good defaults and aims for no or as little configuration as possible.
-This is a simplified version of the default configuration:
+Knip has good defaults and aims for no or minimal configuration. This is a
+simplified version of the default configuration:
 
 ```json
 {
@@ -46,7 +46,7 @@ If your project structure does not match the default `entry` and `project`
 files, you can customize them. Here's an example configuration to include `.js`
 files in the `scripts` folder:
 
-```json
+```json title="knip.json"
 {
   "$schema": "https://unpkg.com/knip@canary/schema.json",
   "entry": ["src/index.ts", "scripts/{build,create}.js"],
@@ -67,10 +67,9 @@ for better results.
 
 :::
 
-In the example above, the file `scripts/build.js` might be referenced in a
-script in `package.json`:
+In the example above, the file `scripts/build.js` might be referenced like so:
 
-```json
+```json title="package.json"
 {
   "name": "my-package",
   "scripts": {

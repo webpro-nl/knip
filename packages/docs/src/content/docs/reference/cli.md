@@ -27,7 +27,7 @@ Show debug output.
 Use this flag to get the count and execution time of potentially expensive
 functions in a table. Example:
 
-```
+```txt frame=terminal
 Name                           size  min       max       median    sum
 -----------------------------  ----  --------  --------  --------  --------
 findReferences                  648     84.98   7698.61     96.41  70941.70
@@ -110,7 +110,7 @@ Read more at [Production Mode][1].
 When a repository is self-contained or private, you may want to include entry
 files when reporting unused exports:
 
-```
+```sh
 knip --include-entry-exports
 ```
 
@@ -155,11 +155,11 @@ Report only provided issue type(s). Can be comma-separated or repeated.
 
 Example:
 
-```
+```sh
 knip --include files,dependencies
 ```
 
-```
+```sh
 knip --include files --include dependencies
 ```
 
@@ -169,7 +169,7 @@ Exclude provided issue type(s) from report. Can be comma-separated or repeated.
 
 Example:
 
-```
+```sh
 knip --exclude classMembers,enumMembers
 ```
 
@@ -177,7 +177,7 @@ knip --exclude classMembers,enumMembers
 
 Shortcut to include all types of dependency issues:
 
-```
+```sh
 --include dependencies,unlisted,unresolved
 ```
 
@@ -185,7 +185,7 @@ Shortcut to include all types of dependency issues:
 
 Shortcut to include all types of export issues:
 
-```
+```sh
 --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
 ```
 
@@ -203,7 +203,7 @@ Available reporters:
 
 Can be repeated. Example:
 
-```
+```sh
 knip --reporter compact
 ```
 
@@ -216,7 +216,7 @@ example)
 
 Example:
 
-```
+```sh
 knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 ```
 
@@ -226,11 +226,11 @@ Preprocess the results before providing it to the reporter(s).
 
 Can be repeated. Examples:
 
-```
+```sh
 knip --preprocessor ./my-preprocessor.ts
 ```
 
-```
+```sh
 knip --preprocessor preprocessor-package
 ```
 
@@ -238,7 +238,7 @@ knip --preprocessor preprocessor-package
 
 Pass extra options to the preprocessor as JSON string.
 
-```
+```sh
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 

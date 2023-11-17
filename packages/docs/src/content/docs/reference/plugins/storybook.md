@@ -13,7 +13,7 @@ This plugin is enabled when there is match in `dependencies` or
 
 ## Default configuration
 
-```json
+```json title="knip.json"
 {
   "storybook": {
     "config": [".storybook/{main,test-runner}.{js,ts}"],

@@ -18,7 +18,7 @@ ship.
 To tell Knip what is production code, add an exclamation mark behind each
 `pattern!` that represents production code:
 
-```json
+```json title="knip.json"
 {
   "entry": ["src/index.ts!", "build/script.js"],
   "project": ["src/**/*.ts!", "build/*.js"]

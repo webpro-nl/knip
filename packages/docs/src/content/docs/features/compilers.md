@@ -71,9 +71,9 @@ automatically.
 
 ### MDX
 
-Here's an example using `@mdx-js/mdx`:
+Here's an example using an actual compiler (`@mdx-js/mdx`):
 
-```ts
+```ts title="knip.ts"
 import compile from '@mdx-js/mdx'; // Use v1
 
 module.exports = {
@@ -86,10 +86,9 @@ module.exports = {
 
 ### Vue
 
-Here's a fully configured `knip.ts` with a "compiler" for `.vue` files in Vue
-projects:
+Here's an example "compiler" for `.vue` files in Vue projects:
 
-```ts
+```ts title="knip.ts"
 const compiler = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
 
 export default {
@@ -115,7 +114,7 @@ already covered by the default entry patterns.
 
 Use a configuration like this to compile non-standard files in Svelte projects:
 
-```ts
+```ts title="knip.ts"
 import sveltePreprocess from 'svelte-preprocess';
 import { preprocess, compile } from 'svelte/compiler';
 

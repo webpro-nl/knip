@@ -22,7 +22,7 @@ In this example we look at Knip's ESLint plugin. The [default `config` file
 patterns of this plugin][2] include `.eslintrc.json` and this is a minimal
 example:
 
-```json
+```json title="knip.json"
 {
   "extends": ["airbnb", "prettier"],
   "plugins": ["@typescript-eslint"]
@@ -66,10 +66,9 @@ configuration.
 
 :::
 
-For example, if your Playwright configuration (`playwright.config.ts`) contains
-the following:
+For example, if your Playwright configuration contains the following:
 
-```ts
+```ts title="playwright.config.ts"
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
@@ -86,7 +85,7 @@ Then the plugin will inform Knip that not its default entry patterns, but
 If that's not correct or in some way doesn't work, you can override this
 behavior in your Knip configuration:
 
-```json
+```json title="knip.json"
 {
   "playwright": {
     "entry": "src/**/*.integration.ts"
@@ -114,10 +113,9 @@ so you don't need to configure them yourself.
 
 ### Angular
 
-The angular plugin parses the `angular.json` configuration file. Here's a
-fragment:
+The Angular plugin parses the Angular configuration file. Here's a fragment:
 
-```json
+```json title="angular.json"
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "projects": {
@@ -141,10 +139,10 @@ This will result in `src/main.ts` being added as an entry file (and
 
 ### GitHub Actions
 
-This plugin parses workflow YAML files, so from the fragment below it will find
-three `run` scripts:
+This plugin parses workflow YAML files. This fragment contains three `run`
+scripts:
 
-```yml
+```yml title=".github/workflows/deploy.yml"
 jobs:
   integration:
     runs-on: ubuntu-latest
@@ -154,14 +152,14 @@ jobs:
       - run: node --loader tsx scripts/deploy.ts
 ```
 
-From these scripts the `scripts/build.js` and `scripts/deploy.ts` files will be
-added as entry files.
+From these scripts, the `scripts/build.js` and `scripts/deploy.ts` files will be
+added as entry files by the GitHub Actions plugin.
 
 ### webpack
 
-Let's take a look at this example `webpack.config.js` file:
+Let's take a look at this example webpack configuration file:
 
-```js
+```js title="webpack.config.js"
 module.exports = env => {
   return {
     entry: {
@@ -196,9 +194,9 @@ Sometimes a configuration file is a JavaScript or TypeScript file that imports
 dependencies, but also contains configuration that needs to be parsed by a
 plugin to find additional dependencies.
 
-Let's take a look at this example `vite.config.ts` file:
+Let's take a look at this example Vite configuration file:
 
-```ts
+```ts title="vite.config.ts"
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 

@@ -21,7 +21,7 @@ configuration (e.g. `"exclude": ["dependencies"]`).
 Use `--include` to report only specific issue types. The following example
 commands do the same:
 
-```
+```sh
 knip --include files --include dependencies
 knip --include files,dependencies
 ```
@@ -29,7 +29,7 @@ knip --include files,dependencies
 Or the other way around, use `--exclude` to ignore the types you're not
 interested in:
 
-```
+```sh
 knip --include files --exclude classMembers,enumMembers
 ```
 
@@ -57,7 +57,7 @@ the total error count, or to exclude them altogether.
 
 Example:
 
-```json
+```json title="knip.json"
 {
   "rules": {
     "files": "warn",

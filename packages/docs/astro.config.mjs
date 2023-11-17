@@ -1,6 +1,12 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
+import expressiveCode from 'astro-expressive-code';
 import { fixInternalLinks } from './scripts/fixInternalLinks';
+
+const setForeground = (theme, scope, value) => {
+  const settings = theme.settings.find(setting => setting.scope?.includes(scope));
+  if (settings) settings.settings.foreground = value;
+};
 
 export default defineConfig({
   site: 'https://knip.dev',
@@ -10,6 +16,19 @@ export default defineConfig({
     remarkPlugins: [fixInternalLinks],
   },
   integrations: [
+    expressiveCode({
+      emitExternalStylesheet: true,
+      frames: {
+        showCopyToClipboardButton: true,
+      },
+      themes: ['min-dark'],
+      theme: 'min-dark',
+      customizeTheme: theme => {
+        setForeground(theme, 'entity.name.tag', '#f68a22');
+        setForeground(theme, 'entity.name.type', '#9DB1C5');
+        return theme;
+      },
+    }),
     starlight({
       title: 'knip.dev',
       logo: {

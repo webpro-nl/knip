@@ -116,6 +116,12 @@ footer .pagination-links a:hover {
   box-shadow: var(--sl-shadow-md);
 }
 
+.expressive-code .frame pre,
+.expressive-code .frame div {
+  margin-top: unset;
+  letter-spacing: -1px;
+}
+
 h2 code,
 h3 code {
   color: var(--sl-color-gray-1);

@@ -31,7 +31,7 @@ files.
 
 The following commands are similar:
 
-```
+```sh
 depcheck
 knip --dependencies
 ```
@@ -48,7 +48,7 @@ test files), then this might work well for you.
 
 The following commands are similar:
 
-```
+```sh
 unimported
 knip --production --dependencies --include files
 ```
@@ -63,7 +63,7 @@ Knip.
 
 The following commands are similar:
 
-```
+```sh
 ts-prune
 knip --include exports,types,nsExports,nsTypes
 ```
@@ -77,7 +77,7 @@ Use `knip --exports` to also include class and enum members.
 
 The following commands are similar:
 
-```
+```sh
 ts-unused-exports
 knip --include exports,types,nsExports,nsTypes
 ```

@@ -11,7 +11,7 @@ This plugin is enabled when there is match in `dependencies` or
 
 ## Default configuration
 
-```json
+```json title="knip.json"
 {
   "ava": {
     "config": ["ava.config.{js,cjs,mjs}", "package.json"],
