@@ -1,6 +1,7 @@
+import { isBuiltin } from 'module';
 import { _glob } from './glob.js';
 import { getStringValues } from './object.js';
-import { toPosix } from './path.js';
+import { isAbsolute, toPosix } from './path.js';
 import type { PackageJson } from '@npmcli/package-json';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
@@ -67,6 +68,7 @@ export const getEntryPathFromManifest = (
 
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
 export const sanitizeSpecifier = (specifier: string) => {
-  if (specifier.startsWith('node:')) return specifier;
+  if (isBuiltin(specifier)) return specifier;
+  if (isAbsolute(specifier)) return specifier;
   return specifier.replace(/^([?!|-]+)?([^!?:]+).*/, '$2');
 };

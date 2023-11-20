@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { sanitizeSpecifier } from '../util/modules.js';
 import { dirname, extname, isAbsolute, isInternal, join } from '../util/path.js';
@@ -28,6 +29,9 @@ export function createCustomModuleResolver(
 
   function resolveModuleName(name: string, containingFile: string): ts.ResolvedModule | undefined {
     const sanitizedSpecifier = sanitizeSpecifier(name);
+
+    // No need to try and resolve builtins, bail out
+    if (isBuiltin(sanitizedSpecifier)) return undefined;
 
     const tsResolvedModule = ts.resolveModuleName(
       sanitizedSpecifier,
