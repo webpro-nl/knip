@@ -32,7 +32,7 @@ const load = async (filePath: string) => {
       return imported.default ?? imported;
     }
 
-    if (isTypeModule(filePath)) {
+    if (ext === '.mts' || (ext === '.ts' && isTypeModule(filePath))) {
       return await jitiESM(filePath);
     } else {
       return await jitiCJS(filePath);
