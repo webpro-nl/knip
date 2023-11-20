@@ -48,8 +48,8 @@ Additionally, the `--strict` flag can be added to:
 
 - Consider `dependencies` (not `devDependencies`) when finding unused or
   unlisted dependencies
-- Verify isolation: workspaces should use strictly their own `dependencies`
 - Include `peerDependencies` when finding unused or unlisted dependencies
+- Verify isolation: workspaces should use strictly their own `dependencies`
 - Type-only imports should be in `devDependencies`
 
 ```sh

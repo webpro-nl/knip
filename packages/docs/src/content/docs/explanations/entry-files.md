@@ -14,7 +14,7 @@ yourself.
 
 ## Default Entry File Patterns
 
-For brevity, the [configuration on the previous page][1] mentions only
+For brevity, the [default configuration][1] on the previous page mentions only
 `index.js` and `index.ts`, but the default set of file names and extensions is
 actually a bit larger:
 
@@ -37,6 +37,8 @@ entry files. Here's the default configuration in full:
 Next to the default locations, or the entry file patterns configured by you,
 Knip also looks for `entry` files in other places. All of this is done for each
 workspace separately.
+
+The values you set override the default values, they are not merged.
 
 ## Scripts in package.json
 
@@ -106,4 +108,4 @@ await $`node scripts/parse.js`;
 
 This will add `scripts/parse.js` as an entry file.
 
-[1]: ../overview/configuration.md
+[1]: ../overview/configuration.md#defaults

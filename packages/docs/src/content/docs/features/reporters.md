@@ -87,8 +87,7 @@ supports a local JavaScript or TypeScript file or an external dependency.
 
 ### Local
 
-Pass `--reporter ./my-reporter`, with the default export of that module having
-this interface:
+The default export of the reporter should be a function with this interface:
 
 ```ts
 type Reporter = async (options: ReporterOptions) => void;
@@ -110,7 +109,7 @@ sent to a service.
 
 Here's a most minimal reporter example:
 
-```ts
+```ts title="./my-reporter.ts"
 import type { Reporter } from 'knip';
 
 const reporter: Reporter = function (options) {
@@ -140,10 +139,10 @@ the same shape/structure (unless you pass it to only your own reporter). Just
 like reporters, use e.g. `--preprocessor ./my-preprocessor` from the command
 line (can be repeated).
 
-The default export of that module having this interface:
+The default export of the preprocessor should be a function with this interface:
 
 ```ts
-type Preprocessor = async (options: ReporterOptions) => ReporterOptions;
+type Preprocessor = async (options: ReporterOptions) =>  ReporterOptions;
 ```
 
 Like reporters, you can use local JavaScript or TypeScript files and external
@@ -151,7 +150,7 @@ npm packages as preprocessors.
 
 Example preprocessor:
 
-```ts
+```ts title="./preprocess.ts"
 import type { Preprocessor } from 'knip';
 
 const preprocess: Preprocessor = function (options) {

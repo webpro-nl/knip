@@ -20,6 +20,9 @@ dependencies:
 - Prevent regressions: tools like TypeScript, ESLint and Prettier do all sorts
   of checks and linting to report violations and prevent regressions. Knip does
   the same for files, dependencies and exports that you forgot to delete.
+- Keeping dead code around has a negative value on readability, as it can be
+  misleading and distracting. Even if it serves no purpose it will need to be
+  maintained (source: [Safe dead code removal → YAGNI][1]).
 
 ## Automation
 
@@ -60,3 +63,5 @@ In large and/or legacy projects, Knip may report false positives and require
 some configuration. Yet it can be a great assistant when cleaning up parts of
 the project or doing large refactors. Again, even a list of results with a few
 false positives is many times better and faster than trying to do it manually.
+
+[1]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it

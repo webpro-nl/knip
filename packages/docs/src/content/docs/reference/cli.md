@@ -22,6 +22,17 @@ Shortcut: `-d`
 
 Show debug output.
 
+### `--no-progress`
+
+Shortcut: `-n`
+
+Don't show dynamic progress updates. Progress is automatically disabled in CI
+environments.
+
+### `--no-config-hints`
+
+Suppress configuration hints.
+
 ### `--performance`
 
 Use this flag to get the count and execution time of potentially expensive
@@ -72,8 +83,8 @@ Default location: `tsconfig.json`
 
 ### `--workspace [dir]`
 
-Lint a single workspace including its ancestor and dependent workspaces. The
-default behavior is to lint all configured workspaces.
+[Lint a single workspace][1] including its ancestor and dependent workspaces.
+The default behavior is to lint all configured workspaces.
 
 Shortcut: `-W`
 
@@ -82,6 +93,21 @@ Shortcut: `-W`
 Default: `cwd` (current directory)
 
 Run the process from a different directory.
+
+### `--no-gitignore`
+
+Ignore `.gitignore` files.
+
+### `--include-entry-exports`
+
+When a repository is self-contained or private, you may want to include entry
+files when reporting unused exports:
+
+```sh
+knip --include-entry-exports
+```
+
+Also see [includeEntryExports][2].
 
 ## Modes
 
@@ -95,47 +121,18 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][1].
+Read more at [Production Mode][3].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies.
 
-Read more at [Production Mode][1].
+Read more at [Production Mode][3].
 
-## Flags
+## Filters
 
-### `--include-entry-exports`
-
-When a repository is self-contained or private, you may want to include entry
-files when reporting unused exports:
-
-```sh
-knip --include-entry-exports
-```
-
-Knip will also report unused exports in entry source files and scripts such as
-those referenced in `package.json`. But not in entry and configuration files
-from plugins, such as `next.config.js` or `src/routes/+page.svelte`.
-
-### `--no-gitignore`
-
-Ignore `.gitignore` files.
-
-### `--no-progress`
-
-Shortcut: `-n`
-
-Don't show dynamic progress updates. Progress is automatically disabled in CI
-environments.
-
-### `--no-config-hints`
-
-Suppress configuration hints.
-
-## Issue Types
-
-Available issue types when using `--inlude` or `--exclude`:
+Available [issue types][4] when filtering output using `--include` or
+`--exclude`:
 
 - `files`
 - `dependencies`
@@ -149,20 +146,6 @@ Available issue types when using `--inlude` or `--exclude`:
 - `enumMembers`
 - `duplicates`
 
-### `--include`
-
-Report only provided issue type(s). Can be comma-separated or repeated.
-
-Example:
-
-```sh
-knip --include files,dependencies
-```
-
-```sh
-knip --include files --include dependencies
-```
-
 ### `--exclude`
 
 Exclude provided issue type(s) from report. Can be comma-separated or repeated.
@@ -171,6 +154,18 @@ Example:
 
 ```sh
 knip --exclude classMembers,enumMembers
+knip --exclude classMembers --exclude enumMembers
+```
+
+### `--include`
+
+Report only provided issue type(s). Can be comma-separated or repeated.
+
+Example:
+
+```sh
+knip --include files,dependencies
+knip --include files --include dependencies
 ```
 
 ### `--dependencies`
@@ -178,7 +173,7 @@ knip --exclude classMembers,enumMembers
 Shortcut to include all types of dependency issues:
 
 ```sh
---include dependencies,unlisted,unresolved
+--include dependencies,unlisted,binaries,unresolved
 ```
 
 ### `--exports`
@@ -207,7 +202,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][2] for custom reporters.
+Also see [Reporters & Preprocessors][5].
 
 ### `--reporter-options [json]`
 
@@ -242,12 +237,11 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
+Also see [Reporters & Preprocessors][5].
+
 ## Exit code
 
-### `--no-exit-code`
-
-Always exit with code zero (`0`), even when there are lint errors. The default
-behavior:
+The default exit codes:
 
 | Code | Description                                                      |
 | :--: | :--------------------------------------------------------------- |
@@ -255,9 +249,16 @@ behavior:
 | `1`  | Knip ran successfully, but there is at least one lint error      |
 | `2`  | Knip did not run successfully due to bad input or internal error |
 
+### `--no-exit-code`
+
+Always exit with code zero (`0`), even when there are lint errors.
+
 ### `--max-issues`
 
 Maximum number of issues before non-zero exit code. Default: `0`
 
-[1]: ../features/production-mode.md
-[2]: ../features/reporters.md
+[1]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[2]: ./configuration.md#includeentryexports
+[3]: ../features/production-mode.md
+[4]: ./issue-types.md
+[5]: ../features/reporters.md

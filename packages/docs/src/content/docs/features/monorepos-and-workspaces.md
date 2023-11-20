@@ -46,8 +46,8 @@ above).
 
 :::caution
 
-In a project with workspaces, the `entry` and `project` options at the root
-level are not functional, they must be moved to the `"."` workspace.
+In a project with workspaces, customized `entry` and `project` options at the
+root level are ignored, they must be moved to the `"."` workspace.
 
 :::
 
@@ -55,20 +55,22 @@ level are not functional, they must be moved to the `"."` workspace.
 
 Knip reads workspaces from four possible locations:
 
-- The `workspaces` array in `package.json` (npm, Yarn, Lerna)
-- The `packages` array in `pnpm-workspace.yaml` (pnpm)
-- The `workspaces.packages` array in `package.json` (legacy)
-- The `workspaces` object in Knip configuration
+1. The `workspaces` array in `package.json` (npm, Bun, Yarn, Lerna)
+2. The `packages` array in `pnpm-workspace.yaml` (pnpm)
+3. The `workspaces.packages` array in `package.json` (legacy)
+4. The `workspaces` object in Knip configuration
 
-The `workspaces` in Knip configuration not already defined in the root
-`package.json` or `pnpm-workspace.yaml` are added.
+The `workspaces` in Knip configuration (4) not already defined in the root
+`package.json` or `pnpm-workspace.yaml` (1, 2, 3) are added to the analysis.
 
 :::caution
 
-Any workspace must have a `package.json` file. Projects with only a root
-`package.json`, please see [integrated monorepos][2].
+A workspace must have a `package.json` file.
 
 :::
+
+For projects with only a root `package.json`, please see [integrated
+monorepos][2].
 
 ## Additional options
 

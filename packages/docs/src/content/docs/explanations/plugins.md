@@ -18,11 +18,10 @@ source files. However, configuration files often reference external dependencies
 in different ways. Knip uses plugins to parse configuration files to find those
 dependencies.
 
-In this example we look at Knip's ESLint plugin. The [default `config` file
-patterns of this plugin][2] include `.eslintrc.json` and this is a minimal
-example:
+In this example we look at [Knip's ESLint plugin][2]. Its default `config`
+includes `.eslintrc.json`. Here's a minimal example:
 
-```json title="knip.json"
+```json title=".eslintrc.json"
 {
   "extends": ["airbnb", "prettier"],
   "plugins": ["@typescript-eslint"]
