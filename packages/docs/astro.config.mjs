@@ -52,6 +52,9 @@ export default defineConfig({
         Footer: './src/components/Footer.astro',
       },
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
+      editLink: {
+        baseUrl: 'https://github.com/webpro/knip/edit/v3/packages/docs/',
+      },
       sidebar: [
         {
           label: 'Overview',
