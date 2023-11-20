@@ -37,6 +37,7 @@ test('getReferencesFromScripts (node)', () => {
   t('node -r package/script', ['package']);
   t('node -r ./require.js script.js', [js, req]);
   t('node --require=pkg1 --require pkg2 script', [js, 'pkg1', 'pkg2']);
+  t('node --import tsx ./main.ts', [ts, 'tsx']);
   t('node --loader ts-node/esm node_modules/webpack-cli/bin/cli.js -c ./webpack.config.ts', ['webpack-cli', 'ts-node']);
   t('node --experimental-loader ts-node/esm/transpile-only script.js', [js, 'ts-node']);
   // TODO With jiti's `esmResolve: true` dirs are no longer resolved to their index.js (but extensionless is OK)
