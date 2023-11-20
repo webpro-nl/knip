@@ -1,0 +1,16 @@
+.card-grid .card {
+  gap: unset;
+}
+
+:root {
+  .card .title .icon {
+    border: unset;
+    background-color: var(--sl-color-orange);
+  }
+}
+
+:root[data-theme='light'] {
+  .card .title .icon {
+    color: var(--sl-color-black);
+  }
+}

@@ -1,0 +1,41 @@
+.content-panel + .content-panel {
+  border: unset;
+}
+
+.sl-markdown-content table th,
+.sl-markdown-content table td {
+  white-space: nowrap;
+  padding: 0.3rem 1rem 0.3rem 0;
+  border: none;
+}
+
+.sl-markdown-content table thead {
+  border-bottom: 1px solid var(--sl-color-gray-1);
+}
+
+.expressive-code .frame pre,
+.expressive-code .frame div {
+  margin-top: unset;
+  letter-spacing: -1px;
+}
+
+h2 code,
+h3 code {
+  color: var(--sl-color-gray-1);
+}
+
+blockquote {
+  border-inline-start-color: var(--sl-color-gray-1);
+}
+
+:root {
+  .header {
+    border-bottom-color: var(--sl-color-dark-orange);
+  }
+}
+
+:root[data-theme='light'] {
+  .header {
+    border-bottom-color: var(--sl-color-orange);
+  }
+}
