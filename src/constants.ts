@@ -46,13 +46,12 @@ export const IGNORED_GLOBAL_BINARIES = [
 
 export const IGNORED_DEPENDENCIES = ['knip', 'typescript'];
 
-export const VIRTUAL_FILE_EXTENSIONS = ['.css', '.html', '.svg'];
-
 export const IGNORED_FILE_EXTENSIONS = [
-  ...VIRTUAL_FILE_EXTENSIONS,
   '.avif',
+  '.css',
   '.eot',
   '.gif',
+  '.html',
   '.ico',
   '.jpeg',
   '.jpg',
@@ -61,6 +60,7 @@ export const IGNORED_FILE_EXTENSIONS = [
   '.sass',
   '.scss',
   '.sh',
+  '.svg',
   '.ttf',
   '.webp',
   '.woff',

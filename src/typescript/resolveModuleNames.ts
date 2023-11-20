@@ -5,12 +5,12 @@ import { dirname, extname, isAbsolute, isInternal, join } from '../util/path.js'
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
-const simpleResolver = (name: string, containingFile: string) => {
+const fileExists = (name: string, containingFile: string) => {
   const resolvedFileName = isAbsolute(name) ? name : join(dirname(containingFile), name);
   if (existsSync(resolvedFileName)) {
     return {
       resolvedFileName,
-      extension: extname(resolvedFileName),
+      extension: extname(name),
       isExternalLibraryImport: false,
       resolvedUsingTsExtension: false,
     };
@@ -39,8 +39,8 @@ export function createCustomModuleResolver(
     // When TS does not resolve it, and it's not a registered virtual file ext, try `fs.existsSync`
     if (!tsResolvedModule) {
       const extension = extname(sanitizedSpecifier);
-      if (extension && isInternal(sanitizedSpecifier) && !virtualFileExtensions.includes(extension)) {
-        const module = simpleResolver(sanitizedSpecifier, containingFile);
+      if (extension && !virtualFileExtensions.includes(extension)) {
+        const module = fileExists(sanitizedSpecifier, containingFile);
         if (module) return module;
       }
     }
@@ -52,7 +52,7 @@ export function createCustomModuleResolver(
       isDeclarationFileExtension(tsResolvedModule?.extension) &&
       isInternal(tsResolvedModule.resolvedFileName)
     ) {
-      const module = simpleResolver(sanitizedSpecifier, containingFile);
+      const module = fileExists(sanitizedSpecifier, containingFile);
       if (module) return module;
     }
 
