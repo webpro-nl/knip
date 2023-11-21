@@ -1,8 +1,6 @@
 .hero img {
-  border: 4px solid transparent;
+  border: 4px solid var(--sl-color-white);
   border-radius: 80px;
-  background: linear-gradient(var(--angle), #fff 66%, #f68a22) border-box;
-  animation: 4s rotate linear infinite;
 }
 
 .hero h1 {
@@ -12,18 +10,6 @@
 
 .tagline {
   font-size: var(--sl-text-3xl);
-}
-
-@property --angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes rotate {
-  to {
-    --angle: 360deg;
-  }
 }
 
 .action.primary {
@@ -42,6 +28,10 @@
 }
 
 :root[data-theme='light'] {
+  .hero img {
+    border-color: var(--sl-color-black);
+  }
+
   .action.primary {
     color: var(--sl-color-black);
     border: 2px solid var(--sl-color-black);
