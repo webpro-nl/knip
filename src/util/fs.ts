@@ -38,7 +38,7 @@ export const parseJSON = async (filePath: string, contents: string) => {
   try {
     return JSON.parse(stripJsonComments(contents, { trailingCommas: true }));
   } catch (error) {
-    throw new LoaderError(`Error loading ${filePath}`, { cause: error });
+    throw new LoaderError(`Error parsing ${filePath}`, { cause: error });
   }
 };
 
