@@ -3,6 +3,7 @@ import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { isInternal, dirname, toAbsolute } from '../../util/path.js';
 import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
+import { getDependenciesFromConfig } from '../babel/index.js';
 import { fallback } from './fallback.js';
 import { PACKAGE_JSON_PATH } from './index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
@@ -16,20 +17,13 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
 
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
   const parser = config.parser;
-  const extraPlugins = config.parserOptions?.babelOptions?.plugins ?? [];
-  const extraParsers = config.parserOptions?.babelOptions?.presets ?? [];
+  const babelDependencies = config.parserOptions?.babelOptions
+    ? getDependenciesFromConfig(config.parserOptions.babelOptions)
+    : [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
   const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependencies) : [];
 
-  return compact([
-    ...extendsSpecifiers,
-    ...plugins,
-    ...extraPlugins,
-    parser,
-    ...extraParsers,
-    ...settings,
-    ...overrides,
-  ]);
+  return compact([...extendsSpecifiers, ...plugins, parser, ...babelDependencies, ...settings, ...overrides]);
 };
 
 type GetDependenciesDeep = (

@@ -43,6 +43,7 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
     'eslint-plugin-cypress',
     '@scope-only/eslint-plugin',
     '@scope/eslint-plugin',
+    '@babel/plugin-proposal-decorators',
     'eslint-import-resolver-typescript',
     'eslint-import-resolver-exports',
   ]);
