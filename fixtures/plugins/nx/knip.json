@@ -1,0 +1,5 @@
+{
+  "typescript": {
+    "config": ["{apps,libs}/**/tsconfig.json"]
+  }
+}

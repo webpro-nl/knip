@@ -14,6 +14,7 @@
     "@nrwl/next": "*",
     "@nrwl/storybook": "*",
     "@nrwl/web": "*",
-    "@nrwl/workspace": "*"
+    "@nrwl/workspace": "*",
+    "@tsconfig/node20": "*"
   }
 }
