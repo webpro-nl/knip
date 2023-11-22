@@ -215,7 +215,7 @@ Example:
 knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 ```
 
-### `--preprocessor [preprocesser]`
+### `--preprocessor [preprocessor]`
 
 Preprocess the results before providing it to the reporter(s).
 

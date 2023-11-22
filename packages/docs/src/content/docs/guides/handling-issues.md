@@ -40,7 +40,7 @@ knip --include files
 ### Mocks and other implicit imports
 
 Some files are imported by other tooling, such as fixtures, mocks or templates.
-You may wanto to ignore them, with patterns like this:
+You may want to ignore them, with patterns like this:
 
 ```json
 {

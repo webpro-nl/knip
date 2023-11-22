@@ -97,7 +97,7 @@ knip --workspace packages/my-lib
 
 This mode includes ancestor and dependent workspaces, for two reasons:
 
-- Ancestor workspaces may contain dependencies the linted workpace uses.
+- Ancestor workspaces may contain dependencies the linted workspace uses.
 - Dependent workspaces may reference exports from the linted workspace.
 
 To lint the workspace in isolation, you can combine this with [strict production
