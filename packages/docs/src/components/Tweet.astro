@@ -1,21 +1,8 @@
 ---
 import sprites from '../assets/sprites.svg';
-import { type TweetWithUser, formatTimestamp } from '../util/tweet.js';
+import { replaceShortenedUrls, type TweetWithUser, formatTimestamp } from '../util/tweet.js';
 
 const tweet: TweetWithUser = replaceShortenedUrls(Astro.props.data);
-
-function replaceShortenedUrls(tweet: TweetWithUser) {
-  if(!tweet.entities.urls) return tweet;
-  tweet.entities.urls.sort((a, b) => b.start - a.start);
-  tweet.entities.urls.forEach(urlEntity => {
-    if(urlEntity.expanded_url.includes('twitter.com')) {
-      tweet.text = tweet.text.replace(urlEntity.url, '')
-    } else {
-      tweet.text = tweet.text.replace(urlEntity.url, `<a href="${urlEntity.expanded_url}">${urlEntity.expanded_url}</a>`);
-    }
-  });
-  return tweet;
-}
 ---
 
 <style>
@@ -26,13 +13,11 @@ function replaceShortenedUrls(tweet: TweetWithUser) {
   .engagement > * {
     margin-top: 0 !important;
   }
-
   header {
     display: flex;
     align-items: center;
     line-height: 1.3;
   }
-
   .n .profile {
     border-radius: 9999px;
     width: 48px;
