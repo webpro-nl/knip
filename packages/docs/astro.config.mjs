@@ -1,7 +1,9 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 import expressiveCode from 'astro-expressive-code';
-import { fixInternalLinks } from './scripts/fixInternalLinks';
+import remarkDirective from 'remark-directive';
+import { transformDirectives } from './remark/transformDirectives.ts';
+import { fixInternalLinks } from './remark/fixInternalLinks.ts';
 
 const setForeground = (theme, scope, value) => {
   const settings = theme.settings.find(setting => setting.scope?.includes(scope));
@@ -13,7 +15,7 @@ export default defineConfig({
   sitemap: false,
   trailingSlash: 'always',
   markdown: {
-    remarkPlugins: [fixInternalLinks],
+    remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
   },
   integrations: [
     expressiveCode({
