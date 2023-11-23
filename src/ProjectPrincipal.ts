@@ -12,6 +12,7 @@ import { timerify } from './util/Performance.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { ExportItem, ExportItemMember } from './types/exports.js';
+import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { GlobbyFilterFunction } from 'globby';
 
 // These compiler options override local options
@@ -61,7 +62,7 @@ export class ProjectPrincipal {
     compilerHost: ts.CompilerHost;
     resolveModuleNames: ReturnType<typeof createCustomModuleResolver>;
     lsFindReferences: ts.LanguageService['findReferences'];
-    program?: ts.Program;
+    program?: ProgramMaybe53;
   };
 
   constructor({ compilerOptions, cwd, compilers, isGitIgnored }: PrincipalOptions) {
@@ -168,13 +169,21 @@ export class ProjectPrincipal {
 
   public analyzeSourceFile(filePath: string, { skipTypeOnly }: { skipTypeOnly: boolean }) {
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
-    const sourceFile = this.backend.fileManager.getSourceFile(filePath);
+    const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
 
     if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
 
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
-    const { imports, exports, scripts } = getImportsAndExports(sourceFile, { skipTypeOnly, skipExports });
+    const getResolvedModule: GetResolvedModule = specifier =>
+      this.backend.program?.getResolvedModule
+        ? this.backend.program.getResolvedModule(sourceFile, specifier, /* mode */ undefined)
+        : sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
+
+    const { imports, exports, scripts } = getImportsAndExports(sourceFile, getResolvedModule, {
+      skipTypeOnly,
+      skipExports,
+    });
 
     const { internal, unresolved, external } = imports;
 

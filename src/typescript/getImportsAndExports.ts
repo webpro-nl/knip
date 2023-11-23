@@ -13,7 +13,7 @@ import getExportVisitors from './visitors/exports/index.js';
 import { getJSXImplicitImportBase } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
-import type { BoundSourceFile } from './SourceFile.js';
+import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
 import type { ExportItems as Exports, ExportItem } from '../types/exports.js';
 import type { Imports } from '../types/imports.js';
 
@@ -43,7 +43,11 @@ type AddInternalImportOptions = AddImportOptions & {
 
 export type AddExportOptions = ExportItem & { identifier: string };
 
-export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetImportsAndExportsOptions) => {
+export const getImportsAndExports = (
+  sourceFile: BoundSourceFile,
+  getResolvedModule: GetResolvedModule,
+  options: GetImportsAndExportsOptions
+) => {
   const internalImports: Imports = new Map();
   const externalImports: Set<string> = new Set();
   const unresolvedImports: Set<string> = new Set();
@@ -89,7 +93,7 @@ export const getImportsAndExports = (sourceFile: BoundSourceFile, options: GetIm
     const { specifier, symbol, identifier = '__anonymous', isReExport = false } = options;
     if (isBuiltin(specifier)) return;
 
-    const module = sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
+    const module = getResolvedModule(specifier);
 
     if (module?.resolvedModule) {
       const filePath = module.resolvedModule.resolvedFileName;
