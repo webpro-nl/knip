@@ -1,21 +1,25 @@
-export const resolvePluginName = (pluginName: string) => {
-  if (!/babel/.test(pluginName)) return `babel-plugin-${pluginName}`;
-  if (pluginName.startsWith('@babel/')) {
-    if (pluginName.startsWith('@babel/plugin')) return pluginName;
-    const [, name] = pluginName.split('/');
-    return `@babel/plugin-${name}`;
-  }
-  return pluginName;
-};
+import { isAbsolute, isInternal } from '../../util/path.js';
 
-export const resolvePresetName = (pluginName: string) => {
-  if (!/babel/.test(pluginName)) return `babel-preset-${pluginName}`;
-  if (pluginName.startsWith('@babel/')) {
-    if (pluginName.startsWith('@babel/preset')) return pluginName;
-    const [, name] = pluginName.split('/');
-    return `@babel/preset-${name}`;
+export const resolveName = (identifier: string, namespace: 'preset' | 'plugin') => {
+  if (isAbsolute(identifier) || isInternal(identifier)) return identifier;
+  if (identifier.startsWith('module:')) return identifier.replace(/^module:/, '');
+  if (identifier.startsWith('@')) {
+    const [scope, name, ...rest] = identifier.split('/');
+    if (rest.length > 0) return identifier;
+    if (scope) {
+      if (!name) return [scope, `babel-${namespace}`].join('/');
+      if (scope === '@babel') {
+        if (name.startsWith(namespace)) return identifier;
+        return `@babel/${namespace}-${name}`;
+      }
+      if (name.includes(`babel-${namespace}`)) return identifier;
+      return [scope, `babel-${namespace}-${name}`].join('/');
+    }
   }
-  return pluginName;
+  const [name, ...rest] = identifier.split('/');
+  if (rest.length > 0) return identifier;
+  if (name.startsWith(`babel-${namespace}`)) return identifier;
+  return `babel-${namespace}-${name}`;
 };
 
 const cacheFn = () => void 0;

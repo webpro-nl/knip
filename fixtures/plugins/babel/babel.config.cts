@@ -1,0 +1,38 @@
+module.exports = api => {
+  return {
+    presets: [
+      '/dir/preset.js',
+      './dir/preset.js',
+      'mod',
+      'mod/preset',
+      'babel-preset-mod2',
+      '@babel/mod',
+      '@babel/preset-mod2',
+      '@babel/mod/preset',
+      '@scope',
+      '@scope2/babel-preset',
+      '@scope/mod',
+      '@scope2/babel-preset-mod',
+      '@scope/prefix-babel-preset-mod',
+      '@scope/mod/preset',
+      'module:my-preset',
+    ],
+    plugins: [
+      '/dir/plugin.js',
+      './dir/plugin.js',
+      'mod',
+      'mod/plugin',
+      'babel-plugin-mod2',
+      '@babel/mod',
+      '@babel/plugin-mod2',
+      '@babel/mod/plugin',
+      '@scope',
+      '@scope2/babel-plugin',
+      '@scope/mod',
+      '@scope2/babel-plugin-mod',
+      '@scope/prefix-babel-plugin-mod',
+      '@scope/mod/plugin',
+      'module:my-plugin',
+    ],
+  };
+};

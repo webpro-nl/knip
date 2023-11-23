@@ -1,11 +1,12 @@
 import { compact } from '../../util/array.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import { resolvePresetName, resolvePluginName, api } from './helpers.js';
+import { resolveName, api } from './helpers.js';
 import type { BabelConfig, BabelConfigObj } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-// https://babeljs.io/docs/en/configuration
+// https://babeljs.io/docs/configuration
+// https://babeljs.io/docs/options#name-normalization
 
 export const NAME = 'Babel';
 

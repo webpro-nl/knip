@@ -53,6 +53,43 @@ test('Find dependencies in Babel configuration (babel.config.js)', async () => {
   ]);
 });
 
+test('Find dependencies in Babel configuration (babel.config.cts)', async () => {
+  const configFilePath = join(cwd, 'babel.config.cts');
+  const dependencies = await babel.findDependencies(configFilePath, { manifest });
+  assert.deepEqual(dependencies, [
+    '/dir/preset.js',
+    './dir/preset.js',
+    'babel-preset-mod',
+    'mod/preset',
+    'babel-preset-mod2',
+    '@babel/preset-mod',
+    '@babel/preset-mod2',
+    '@babel/mod/preset',
+    '@scope/babel-preset',
+    '@scope2/babel-preset',
+    '@scope/babel-preset-mod',
+    '@scope2/babel-preset-mod',
+    '@scope/prefix-babel-preset-mod',
+    '@scope/mod/preset',
+    'my-preset',
+    '/dir/plugin.js',
+    './dir/plugin.js',
+    'babel-plugin-mod',
+    'mod/plugin',
+    'babel-plugin-mod2',
+    '@babel/plugin-mod',
+    '@babel/plugin-mod2',
+    '@babel/mod/plugin',
+    '@scope/babel-plugin',
+    '@scope2/babel-plugin',
+    '@scope/babel-plugin-mod',
+    '@scope2/babel-plugin-mod',
+    '@scope/prefix-babel-plugin-mod',
+    '@scope/mod/plugin',
+    'my-plugin',
+  ]);
+});
+
 test('Find dependencies in Babel configuration (package.json)', async () => {
   const configFilePath = join(cwd, 'package.json');
   const dependencies = await babel.findDependencies(configFilePath, { manifest });
