@@ -2,15 +2,15 @@
 title: Handling Issues
 ---
 
-A long list of unused items can be frustrating. The list may contain many false
-positives and/or it shows a lot of things that can be removed from the codebase.
+A long list of unused items can be frustrating. The list may contain false
+positives, but also things that can actually be removed from the codebase. You
+can get a lot of value out of Knip, but sometimes it requires some initial
+configuration.
 
-This pages guides you in dealing with false positives, and wraps up with a few
-things you can do if there's still a lot of work ahead of you.
-
-It makes sense to go over the issue types one by one. For instance, reducing the
-number of unused files will also reduce the number of unused dependencies. It's
-recommended to work this list from top to bottom.
+This pages guides you in dealing with false positives. It makes sense to go over
+the issue types one by one. For instance, reducing the number of unused files
+will also reduce the number of unused dependencies. It's recommended to work
+this list from top to bottom.
 
 ## Unused files
 
@@ -71,6 +71,12 @@ both the file and the dependency may be reported as an unused.
 [Create a new plugin][5] for tools or frameworks that are not [in the list][6]
 yet, or open an issue to request it.
 
+### Non-standard Files
+
+Files might be imported through files with non-standard extensions like
+`.astro`, `.mdx`, `.vue` or `.svelte`. These files are not included by default.
+See [compilers][9] for more details on how to include them.
+
 ### Integrated Monorepos
 
 Multiple instances of configuration files like `.eslintrc` and
@@ -115,8 +121,8 @@ an existing one.
 ### Non-standard Files
 
 Dependencies might be imported from files with non-standard extensions like
-`.mdx`, `.vue` or `.svelte`. These files are not included by default. See
-[compilers][9] for more details on how to include them.
+`.astro`, `.mdx`, `.vue` or `.svelte`. These files are not included by default.
+See [compilers][9] for more details on how to include them.
 
 ### Unreachable Code
 
@@ -242,19 +248,6 @@ knip --exports
 Do you expect certain exports in the report, but are they missing? They might be
 exported from an entry file. Use [--include-entry-exports][15] to make Knip also
 report unused exports in entry files.
-
-## Start using Knip in CI with lots of reported issues
-
-Linting only really works when it's done in an automated fashion. But with too
-many issues to resolve in a large codebase this might not be feasible right
-away. Here are a few options that may help the process in the meantime:
-
-- Use `--no-exit-code` for exit code `0` in CI.
-- Use `--include` or `--exclude` [output filters][16] to focus on specific issue
-  types.
-- Use [`rules`][17] configuration to focus on specific issue types.
-- Use separate Knip commands to lint e.g. only `--dependencies` or `--exports`.
-- Use [ignore patterns][18] to filter out problematic areas.
 
 [1]: ../explanations/entry-files.md
 [2]: ../features/rules-and-filters.md#filters
