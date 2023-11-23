@@ -27,8 +27,8 @@ const findChangesetsDependencies: GenericPluginCallback = async (configFilePath,
   return Array.isArray(localConfig.changelog)
     ? [localConfig.changelog[0]]
     : typeof localConfig.changelog === 'string'
-    ? [localConfig.changelog]
-    : [];
+      ? [localConfig.changelog]
+      : [];
 };
 
 export const findDependencies = timerify(findChangesetsDependencies);

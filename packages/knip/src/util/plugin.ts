@@ -28,8 +28,8 @@ export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
         ? arrayify(pluginConfig.config)
         : null
       : pluginConfig
-      ? arrayify(pluginConfig)
-      : null;
+        ? arrayify(pluginConfig)
+        : null;
     const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
     const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
     return { config, entry, project };

@@ -31,8 +31,8 @@ const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, op
   const localConfig: TypeDocConfig | undefined = configFilePath.endsWith('package.json')
     ? manifest[PACKAGE_JSON_PATH]
     : configFilePath.endsWith('tsconfig.json')
-    ? (await load(configFilePath)).typedocOptions
-    : await load(configFilePath);
+      ? (await load(configFilePath)).typedocOptions
+      : await load(configFilePath);
 
   return localConfig?.plugin ?? [];
 };

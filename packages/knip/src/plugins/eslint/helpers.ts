@@ -44,8 +44,8 @@ export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, o
   const localConfig: ESLintConfig | undefined = configFilePath.endsWith('package.json')
     ? options.manifest[PACKAGE_JSON_PATH]
     : /(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
-    ? await load(configFilePath)
-    : await fallback(configFilePath);
+      ? await load(configFilePath)
+      : await fallback(configFilePath);
 
   if (localConfig) {
     if (localConfig.extends) {
