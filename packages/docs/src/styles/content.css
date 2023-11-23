@@ -13,12 +13,6 @@
   border-bottom: 1px solid var(--sl-color-gray-1);
 }
 
-.expressive-code .frame pre,
-.expressive-code .frame div {
-  margin-top: unset;
-  letter-spacing: -1px;
-}
-
 h2 code,
 h3 code {
   color: var(--sl-color-gray-1);
@@ -26,6 +20,18 @@ h3 code {
 
 blockquote {
   border-inline-start-color: var(--sl-color-gray-1);
+}
+
+section.plugins ul {
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+section.plugins li {
+  margin: 0;
 }
 
 :root {

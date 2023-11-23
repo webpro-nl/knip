@@ -1,5 +1,5 @@
-.card-grid .card {
-  gap: unset;
+.no-title-cards .card-grid .card {
+  gap: 0;
 }
 
 :root {

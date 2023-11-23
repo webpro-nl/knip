@@ -3,6 +3,8 @@ title: Plugins
 tableOfContents: false
 ---
 
+:::section{.plugins}
+
 - [Angular][1]
 - [Astro][2]
 - [Ava][3]
@@ -50,6 +52,8 @@ tableOfContents: false
 - [Vite][45]
 - [Vitest][46]
 - [Webpack][47]
+
+:::
 
 [1]: ./plugins/angular.md 'Angular'
 [2]: ./plugins/astro.md 'Astro'
