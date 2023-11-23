@@ -12,7 +12,13 @@ export default visit(
         // export type { Identifier, Identifier2 };
         const type = node.isTypeOnly ? SymbolType.TYPE : SymbolType.UNKNOWN;
         return node.exportClause.elements.map(element => {
-          return { node: element, identifier: element.name.getText(), type, pos: element.name.pos };
+          return {
+            node: element,
+            identifier: element.name.getText(),
+            type,
+            // @ts-expect-error TODO Not sure how to assert flowNode properly:
+            pos: element.name.flowNode?.node?.pos ?? element.name.pos,
+          };
         });
       }
     }
