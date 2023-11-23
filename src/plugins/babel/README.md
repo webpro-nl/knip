@@ -12,7 +12,7 @@ or `devDependencies`:
 ```json
 {
   "babel": {
-    "config": ["babel.config.json", "babel.config.js", ".babelrc.json", ".babelrc.js", ".babelrc", "package.json"]
+    "config": ["babel.config.{json,js,cjs,mjs,cts}", ".babelrc.{json,js,cjs,mjs,cts}", ".babelrc", "package.json"]
   }
 }
 ```
