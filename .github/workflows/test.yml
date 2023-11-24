@@ -18,7 +18,6 @@ jobs:
           - ubuntu-latest
           - windows-latest
         node:
-          - 16
           - 18
           - 20
 
@@ -32,8 +31,8 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: 'npm'
       - run: npm install typescript@5.0.4
-      - run: npm run lint
-      - run: npm run build
-      - run: npm run knip
-      - run: npm run knip:production
-      - run: npm test
+      - run: npm run lint --workspaces --if-present
+      - run: npm run build --workspace packages/knip
+      - run: npx knip
+      - run: npx knip --production --strict
+      - run: npm test --workspaces --if-present

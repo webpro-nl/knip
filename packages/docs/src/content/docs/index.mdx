@@ -1,0 +1,74 @@
+---
+title: Knip
+description:
+  Project linter to find unused files, dependencies and exports in JavaScript
+  and TypeScript projects
+template: splash
+hero:
+  tagline:
+    Find unused files, dependencies and exports in JavaScript and TypeScript
+    projects
+  image:
+    file: ../../assets/logo.svg
+  actions:
+    - text: Let's Get Started
+      link: ./overview/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: 'NEW: Announcing Knip v3 canary'
+      link: ./blog/knip-v3/
+      variant: secondary
+    - text: View on GitHub
+      link: https://github.com/webpro/knip
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import Tweets from '../../components/Tweets.astro';
+import Contributors from '../../components/Contributors.astro';
+
+<CardGrid stagger>
+  <Card title="Getting Started" icon="rocket">
+    Read [getting started][1] to install and run Knip
+  </Card>
+  <Card title="Why Use Knip?" icon="approve-check">
+    Understand [what Knip can do for you][2]
+  </Card>
+  <Card title="Troubleshooting" icon="warning">
+    Need help? [Start troubleshooting here][3]
+  </Card>
+  <Card title="Plugins" icon="list-format">
+    Check out the [list of plugins][4]
+  </Card>
+</CardGrid>
+
+## 🧡 Contributors
+
+Special thanks to the wonderful people who have contributed to this project!
+
+<Contributors />
+
+## 🧡 Articles
+
+- Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports,
+  And Dependencies][5]
+- Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code
+  and types][6]
+- Maddy Miller: [Using Knip to find dead code in a high-traffic git repo][7]
+- Josh Goldberg: [Speeding Up Centered Part 4: Unused Code Bloat][8]
+
+## 🧡 Testimonials
+
+<Tweets />
+
+[1]: ./overview/getting-started.mdx
+[2]: ./explanations/why-use-knip.md
+[3]: ./guides/troubleshooting.md
+[4]: ./reference/plugins.md
+[5]:
+  https://www.smashingmagazine.com/2023/08/knip-automated-tool-find-unused-files-exports-dependencies/
+[6]: https://effectivetypescript.com/2023/07/29/knip/
+[7]: https://madelinemiller.dev/blog/knip-dead-code/
+[8]:
+  https://www.joshuakgoldberg.com/blog/speeding-up-centered-part-4-unused-code-bloat/

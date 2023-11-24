@@ -1,0 +1,53 @@
+{
+  "name": "@knip/docs",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Documentation for Knip, hosted at knip.dev",
+  "private": true,
+  "homepage": "https://knip.dev",
+  "repository": {
+    "type": "git",
+    "url": "github:webpro/knip",
+    "directory": "packages/docs"
+  },
+  "scripts": {
+    "prebuild": "tsx scripts/generate-plugin-docs.ts",
+    "build": "astro check && astro build",
+    "dev": "astro dev",
+    "lint": "eslint scripts src",
+    "format": "prettier scripts src --write",
+    "remark": "remark README.md 'src/content/docs/**/*.md' --verbose -o",
+    "postremark": "rg -l '^:::.+\\\\' | xargs sd '(:::.+)\\\\\\[(.+)]' '$1[$2]'"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.13.0",
+    "sharp": "0.32.6"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.3.1",
+    "@knip/eslint-config": "0.0.0",
+    "@types/unist": "3.0.2",
+    "astro": "3.6.0",
+    "astro-expressive-code": "0.29.1",
+    "eslint": "8.54.0",
+    "hastscript": "8.0.0",
+    "kleur": "4.1.5",
+    "prettier": "3.1.0",
+    "prettier-plugin-astro": "0.12.2",
+    "remark-cli": "12.0.0",
+    "remark-directive": "3.0.0",
+    "remark-frontmatter": "5.0.0",
+    "remark-parse": "11.0.0",
+    "remark-preset-webpro": "1.0.0",
+    "remark-stringify": "11.0.0",
+    "tsx": "4.4.0",
+    "unified": "11.0.4",
+    "unist-builder": "4.0.0",
+    "unist-util-visit": "5.0.0"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "preset-webpro"
+    ]
+  }
+}

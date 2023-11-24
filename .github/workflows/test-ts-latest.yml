@@ -12,15 +12,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Ubunut/Node v20
+    name: Ubuntu/Node v20
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 20
       - run: npm install typescript@latest
-      - run: npm run lint
-      - run: npm run build
-      - run: npm run knip
-      - run: npm run knip:production
-      - run: npm test
+      - run: npm run build --workspace packages/knip
+      - run: npx knip
+      - run: npx knip --production --strict
+      - run: npm test --workspaces --if-present

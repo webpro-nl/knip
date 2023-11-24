@@ -1,0 +1,123 @@
+---
+title: Getting Started
+sidebar:
+  order: 1
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Requirements
+
+Knip v3 requires Node.js v18.6 or higher. Or Bun.
+
+## Installation
+
+The recommended way to install Knip is by using your package manager:
+
+<Tabs>
+  <TabItem label="npm">
+
+    ```shell
+    npm install -D knip typescript
+    ```
+
+  </TabItem>
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm add -D knip typescript
+    ```
+
+  </TabItem>
+  <TabItem label="bun">
+
+    ```shell
+    bun add -D knip typescript
+    ```
+
+  </TabItem>
+  <TabItem label="yarn">
+
+    ```shell
+    yarn add -D knip typescript
+    ```
+
+  </TabItem>
+</Tabs>
+
+Knip uses `typescript` as a peer dependency to increase compatibility with your
+project. Add a `knip` script to your `package.json`:
+
+```json title="package.json"
+{
+  "name": "my-project",
+  "scripts": {
+    "knip": "knip"
+  }
+}
+```
+
+## Run Knip
+
+Now you can run Knip to lint your project:
+
+<Tabs>
+  <TabItem label="npm">
+
+    ```shell
+    npm run knip
+    ```
+
+  </TabItem>
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm knip
+    ```
+
+  </TabItem>
+  <TabItem label="bun">
+
+    ```shell
+    bun knip
+    ```
+
+  </TabItem>
+  <TabItem label="yarn">
+
+    ```shell
+    yarn knip
+    ```
+
+  </TabItem>
+</Tabs>
+
+Knip will lint your project and output unused files, dependencies and exports.
+
+## Without Installation
+
+Alternatively, try Knip without adding it to your project:
+
+<Tabs>
+  <TabItem label="npm">
+
+    ```shell
+    npx knip
+    ```
+
+  </TabItem>
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm dlx knip
+    ```
+
+  </TabItem>
+  <TabItem label="bun">
+
+    ```shell
+    bunx knip
+    ```
+
+  </TabItem>
+</Tabs>

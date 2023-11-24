@@ -1,0 +1,21 @@
+{
+  "name": "@fixtures/definitely-typed",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "next": "*",
+    "micromatch": "*",
+    "type-only-production-types": "*"
+  },
+  "devDependencies": {
+    "@types/estree": "*",
+    "@types/micromatch": "*",
+    "@types/mocha": "*",
+    "@types/react-dom": "*",
+    "@types/node": "*",
+    "@types/unused": "*",
+    "@types/without-the-package": "*",
+    "mocha": "*"
+  }
+}

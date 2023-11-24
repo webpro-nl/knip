@@ -1,0 +1,15 @@
+---
+import type { Props } from '@astrojs/starlight/props';
+import Default from '@astrojs/starlight/components/Head.astro';
+
+const slug = Astro.props.slug;
+const url = new URL(Astro.url);
+url.pathname = `/og-v2/docs${slug ? '/' + slug : ''}.webp`;
+url.searchParams.append('v', '2');
+---
+
+<Default {...Astro.props} />
+<meta property="og:image" content={url.href} />
+<meta name="twitter:image" content={url.href} />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="sitemap" href="/sitemap.txt" />

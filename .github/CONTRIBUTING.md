@@ -47,14 +47,12 @@ Please consider this before opening a pull request:
 - Read [development][6] instructions and guidelines.
 - If you think your PR is not ready for review yet, [set it as a draft][7].
 - No need to worry about commit messages, they will probably be squashed into a single commit when merged.
-- After your first PR is merged, you are automatically added to the [list of contributors][8].
+- After your first PR is merged, you are automatically added to the list of contributors.
 
 [1]: ./CODE_OF_CONDUCT.md
-[2]: https://github.com/webpro/knip
+[2]: https://knip.dev
 [3]: #open-an-issue
 [4]: #open-a-pull-request
 [5]: https://github.com/webpro/knip/releases
 [6]: ./DEVELOPMENT.md
-[7]:
-  https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request
-[8]: ../README.md#contributors
+[7]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request

@@ -1,0 +1,47 @@
+{
+  "data": [
+    {
+      "entities": {
+        "annotations": [
+          {
+            "start": 163,
+            "end": 172,
+            "probability": 0.9331,
+            "type": "Other",
+            "normalized_text": "JavaScript"
+          },
+          {
+            "start": 194,
+            "end": 197,
+            "probability": 0.5907,
+            "type": "Other",
+            "normalized_text": "Knip"
+          }
+        ]
+      },
+      "author_id": "18191376",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 2,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 248
+      },
+      "text": "Found a bunch of unused code, -dependencies, and unnecessary exports. Had just one false positive but overall pretty good. 10/10 would recommend.\n\nIf you’ve got a JavaScript package/project use Knip and remove unnecessary code. ✂️",
+      "id": "1692942539614028086",
+      "created_at": "2023-08-19T16:52:09.000Z",
+      "edit_history_tweet_ids": ["1692942539614028086"]
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "id": "18191376",
+        "name": "Waldek Mastykarz",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1670040743006617602/N5VnH4YU_normal.jpg",
+        "username": "waldekm"
+      }
+    ]
+  }
+}

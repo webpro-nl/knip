@@ -1,6 +1,0 @@
-{
-  "name": "@fixtures/internal",
-  "scripts": {
-    "test": "node --test"
-  }
-}

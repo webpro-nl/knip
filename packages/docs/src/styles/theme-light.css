@@ -1,0 +1,12 @@
+:root[data-theme='light'] {
+  --sl-color-orange: #f68a22;
+  --sl-color-bright-orange: #ff922e;
+  --sl-color-dark-orange: #a05400;
+
+  --sl-color-text-accent: var(--sl-color-white);
+  --sl-color-text-invert: var(--sl-color-orange);
+  --sl-color-accent: var(--sl-color-orange);
+  --sl-color-accent-low: var(--sl-color-orange);
+  --sl-icon-color: var(--sl-color-white);
+  --sl-color-bg-inline-code: var(--sl-color-gray-5);
+}

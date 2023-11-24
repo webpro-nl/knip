@@ -1,0 +1,5 @@
+.expressive-code .frame pre,
+.expressive-code .frame div {
+  margin-top: unset;
+  letter-spacing: -0.5px;
+}
