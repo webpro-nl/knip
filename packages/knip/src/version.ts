@@ -1,1 +1,1 @@
-export const version = '3.0.0-canary.3';
+export const version = '3.0.0-canary.4';
