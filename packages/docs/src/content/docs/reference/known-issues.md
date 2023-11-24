@@ -43,9 +43,10 @@ Similar to the previous known issue, this is caused through (not by) jiti:
 TypeError: Reflect.metadata is not a function
 ```
 
-[GitHub Issue #355](https://github.com/webpro/knip/issues/355)
+[GitHub Issue #355][5]
 
 [1]: https://github.com/unjs/jiti
 [2]: ./configuration.md#ignore
 [3]: ./configuration.md#plugins
 [4]: https://github.com/unjs/jiti/issues/174
+[5]: https://github.com/webpro/knip/issues/355

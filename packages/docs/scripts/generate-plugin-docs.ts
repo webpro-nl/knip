@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import prettier from 'prettier';
+import remarkDirective from 'remark-directive';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
@@ -29,6 +30,7 @@ const writeTree = async (tree, filePath) => {
     const file = await unified().run(tree);
     const markdown = unified()
       .use(remarkFrontmatter, ['yaml'])
+      .use(remarkDirective)
       .use(remarkStringify, {
         bullet: '-',
       })
@@ -101,13 +103,16 @@ const frontmatter = u('yaml', `title: Plugins\ntableOfContents: false`);
 
 const tree = u('root', [
   frontmatter,
-  u(
-    'list',
-    { spread: false, ordered: false },
-    plugins.map(plugin =>
-      u('listItem', [u('link', { title: plugin[0], url: `./plugins/${plugin[1]}.md` }, [u('text', plugin[0])])])
-    )
-  ),
+  u('containerDirective', { name: 'section{.plugins}' }, [
+    u(
+      'list',
+      { spread: false, ordered: false },
+      plugins.map(plugin =>
+        u('listItem', [u('link', { title: plugin[0], url: `./plugins/${plugin[1]}.md` }, [u('text', plugin[0])])])
+      )
+    ),
+    u('paragraph'),
+  ]),
 ]);
 
 console.log(`Writing plugin list to plugins.md`);

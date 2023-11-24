@@ -75,13 +75,13 @@ yet, or open an issue to request it.
 
 Files might be imported through files with non-standard extensions like
 `.astro`, `.mdx`, `.vue` or `.svelte`. These files are not included by default.
-See [compilers][9] for more details on how to include them.
+See [compilers][7] for more details on how to include them.
 
 ### Integrated Monorepos
 
 Multiple instances of configuration files like `.eslintrc` and
 `jest.config.json` across the repository may be reported as unused when working
-in a (mono)repo with a single `package.json`. See [integrated monorepos][7] for
+in a (mono)repo with a single `package.json`. See [integrated monorepos][8] for
 more details and how to configure plugins to target those configuration files.
 
 ### Build artifacts and ignored files
@@ -95,7 +95,7 @@ manually for better or more consistent results.
 ## Unused dependencies
 
 Dependencies imported in unused files are reported as unused dependencies.
-That's why it's strongly recommended to try and remedy [unused files][8] first.
+That's why it's strongly recommended to try and remedy [unused files][9] first.
 This solves many cases of reported unused dependencies.
 
 :::tip
@@ -122,7 +122,7 @@ an existing one.
 
 Dependencies might be imported from files with non-standard extensions like
 `.astro`, `.mdx`, `.vue` or `.svelte`. These files are not included by default.
-See [compilers][9] for more details on how to include them.
+See [compilers][7] for more details on how to include them.
 
 ### Unreachable Code
 
@@ -255,15 +255,12 @@ report unused exports in entry files.
 [4]: ../explanations/entry-files.md#plugins
 [5]: ./writing-a-plugin.md
 [6]: ../reference/plugins.md
-[7]: ../features/integrated-monorepos.md
-[8]: #unused-files
-[9]: ../features/compilers.md
+[7]: ../features/compilers.md
+[8]: ../features/integrated-monorepos.md
+[9]: #unused-files
 [10]: #unlisted-binaries
 [11]: https://eslint.org/docs/head/use/configure/configuration-files-new
 [12]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [13]: ../reference/jsdoc-tsdoc-tags.mdx
 [14]: ../reference/configuration.md#ignore-exports-used-in-file
 [15]: ../reference/configuration.md#includeentryexports
-[16]: ../features/rules-and-filters.md
-[17]: ../features/rules-and-filters.md#rules
-[18]: ../reference/configuration.md#ignore
