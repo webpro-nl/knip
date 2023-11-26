@@ -21,7 +21,7 @@ Special thanks to the wonderful people who have contributed to this project:
 
 [1]: https://knip.dev
 [2]: https://www.npmjs.com/package/knip
-[3]: ./.github/CONTRIBUTING.md
+[3]: https://github.com/webpro/knip/blob/main/.github/CONTRIBUTING.md
 [4]: https://discord.gg/r5uXTtbTpc
 [5]: https://github.com/webpro/knip/graphs/contributors
 [6]: https://contrib.rocks/image?repo=webpro/knip

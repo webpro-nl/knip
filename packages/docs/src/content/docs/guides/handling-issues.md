@@ -249,6 +249,12 @@ Do you expect certain exports in the report, but are they missing? They might be
 exported from an entry file. Use [--include-entry-exports][15] to make Knip also
 report unused exports in entry files.
 
+## False Positives
+
+If you believe Knip incorrectly reports something as unused (i.e. a false
+positive), you can help your own project and help improve Knip by creating a
+[minimal reproduction][16] and open an issue on GitHub.
+
 [1]: ../explanations/entry-files.md
 [2]: ../features/rules-and-filters.md#filters
 [3]: ../explanations/plugins.md#entry-files
@@ -264,3 +270,4 @@ report unused exports in entry files.
 [13]: ../reference/jsdoc-tsdoc-tags.mdx
 [14]: ../reference/configuration.md#ignore-exports-used-in-file
 [15]: ../reference/configuration.md#includeentryexports
+[16]: ../guides/troubleshooting.md#minimal-reproduction
