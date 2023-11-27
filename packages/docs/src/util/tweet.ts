@@ -1,6 +1,6 @@
 export const replaceShortenedUrls = (tweet: TweetWithUser) => {
-  if (!tweet.entities.urls) return tweet;
-  let text = tweet.note_tweet?.text ?? tweet.text;
+  let text = (tweet.note_tweet?.text ?? tweet.text).replace(/^(@[^ ]+ )*/, '');
+  if (!tweet.entities.urls) return { ...tweet, text };
   tweet.entities.urls.sort((a, b) => b.start - a.start);
   tweet.entities.urls.forEach(urlEntity => {
     if (urlEntity.media_key) {
