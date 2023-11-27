@@ -48,7 +48,7 @@ files in the `scripts` folder:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@canary/schema.json",
+  "$schema": "https://unpkg.com/knip@3/schema.json",
   "entry": ["src/index.ts", "scripts/{build,create}.js"],
   "project": ["src/**/*.ts", "scripts/**/*.js"]
 }

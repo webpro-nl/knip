@@ -13,7 +13,7 @@ In JSON, you can use the provided JSON Schema:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@canary/schema.json"
+  "$schema": "https://unpkg.com/knip@3/schema.json"
 }
 ```
 
