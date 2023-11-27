@@ -27,6 +27,11 @@ const findPrettierDependencies: GenericPluginCallback = async (configFilePath, {
     ? manifest.prettier
     : await load(configFilePath);
 
+  // https://prettier.io/docs/en/configuration.html#sharing-configurations
+  if (typeof localConfig === 'string') {
+    return [localConfig];
+  }
+
   return localConfig && Array.isArray(localConfig.plugins)
     ? localConfig.plugins.filter((plugin): plugin is string => typeof plugin === 'string')
     : [];
