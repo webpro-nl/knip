@@ -1,0 +1,4 @@
+{
+  "entry": ["*.ts!", "!*.test.ts!"],
+  "project": ["**/*.ts!", "!*.test.ts!"]
+}

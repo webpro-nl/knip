@@ -28,7 +28,7 @@
         "entry": "index.ts!",
         "project": [
           "**/*.ts!",
-          "!ignored/*.ts!"
+          "!ignored/*.ts"
         ]
       }
     }
