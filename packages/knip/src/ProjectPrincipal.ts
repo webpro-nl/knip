@@ -19,16 +19,13 @@ import type { GlobbyFilterFunction } from 'globby';
 // These compiler options override local options
 const baseCompilerOptions = {
   allowJs: true,
-  jsx: ts.JsxEmit.Preserve,
-  jsxImportSource: undefined,
   allowSyntheticDefaultImports: true,
   esModuleInterop: true,
+  jsx: ts.JsxEmit.Preserve,
+  jsxImportSource: undefined,
+  lib: [],
   skipDefaultLibCheck: true,
   skipLibCheck: true,
-  lib: [],
-  target: ts.ScriptTarget.Latest,
-  module: ts.ModuleKind.CommonJS,
-  moduleResolution: ts.ModuleResolutionKind.NodeNext,
 };
 
 const tsCreateProgram = timerify(ts.createProgram);
