@@ -46,11 +46,11 @@ If your project structure does not match the default `entry` and `project`
 files, you can customize them. Here's an example configuration to include `.js`
 files in the `scripts` folder:
 
-```json title="knip.json"
+```json title="knip.jsonc"
 {
-  "$schema": "https://unpkg.com/knip@3/schema.json",
+  "$schema": "https://unpkg.com/knip@3/schema-jsonc.json",
   "entry": ["src/index.ts", "scripts/{build,create}.js"],
-  "project": ["src/**/*.ts", "scripts/**/*.js"]
+  "project": ["src/**/*.ts", "scripts/**/*.js"],
 }
 ```
 

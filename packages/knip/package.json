@@ -25,7 +25,7 @@
     "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
     "lint": "eslint scripts src test",
     "lint:fix": "eslint scripts src test --fix",
-    "format": "prettier scripts src test schema.json --with-node-modules --write",
+    "format": "prettier scripts src test schema.json schema-jsonc.json --with-node-modules --write",
     "pretest": "node rmdir.js tmp && swc src -d tmp/src && swc test -d tmp/test",
     "test": "node --no-warnings --test tmp",
     "coverage": "c8 --reporter html node --no-warnings --loader tsx --test test/*.test.ts test/*/*.test.ts",
@@ -35,11 +35,12 @@
     "qa": "npm run lint && npm run build && npm run knip && npm run knip:production && npm test",
     "release": "release-it",
     "create-plugin": "tsx --no-warnings ./scripts/create-new-plugin.ts",
-    "postcreate-plugin": "prettier schema.json src/ConfigurationValidator.ts --write --config .prettierrc --log-level silent"
+    "postcreate-plugin": "prettier schema.json schema-jsonc.json src/ConfigurationValidator.ts --write --config .prettierrc --log-level silent"
   },
   "files": [
     "dist",
-    "schema.json"
+    "schema.json",
+    "schema-jsonc.json"
   ],
   "dependencies": {
     "@ericcornelissen/bash-parser": "0.5.2",

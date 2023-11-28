@@ -29,6 +29,7 @@ const templateDir = path.join(pluginsDir, '_template');
 const newPluginDir = path.join(pluginsDir, name);
 const pluginsBarrelFilePath = path.join(pluginsDir, 'index.ts');
 const schemaFilePath = path.join(cwd, 'schema.json');
+const schemaFilePathJSONC = path.join(cwd, 'schema-jsonc.json');
 const pluginTestsDir = path.join(cwd, 'test/plugins');
 const validatorFilePath = path.join(cwd, 'src/ConfigurationValidator.ts');
 const pluginTestTemplateFilePath = path.join(pluginTestsDir, '_template.test.ts');
@@ -80,6 +81,9 @@ plugins.properties = Object.keys(properties)
   .reduce((props, key) => ({ ...props, [key]: properties[key] }), {});
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));
+
+const schemaJSONC = { ...schema, allowTrailingCommas: true };
+await fs.writeFile(schemaFilePathJSONC, JSON.stringify(schemaJSONC, null, 2));
 
 console.log(`- Created new plugin in ${relative(newPluginDir)}`);
 console.log(`- Updated ${relative(pluginsBarrelFilePath)} and ${relative(schemaFilePath)}`);
