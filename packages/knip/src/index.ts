@@ -36,8 +36,16 @@ export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
 
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
-  const { cwd, tsConfigFile, gitignore, isStrict, isProduction, isShowProgress, isIncludeEntryExports } =
-    unresolvedConfiguration;
+  const {
+    cwd,
+    tsConfigFile,
+    gitignore,
+    isStrict,
+    isProduction,
+    isShowProgress,
+    isIncludeEntryExports,
+    isIsolateWorkspaces,
+  } = unresolvedConfiguration;
 
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
@@ -130,7 +138,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const { compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
-    const principal = factory.getPrincipal({ cwd: dir, paths, compilerOptions, compilers, pkgName, isGitIgnored });
+    const principal = factory.getPrincipal({
+      cwd: dir,
+      paths,
+      compilerOptions,
+      compilers,
+      pkgName,
+      isGitIgnored,
+      isIsolateWorkspaces,
+    });
 
     const worker = new WorkspaceWorker({
       name,

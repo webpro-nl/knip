@@ -5,6 +5,7 @@ const baseArguments = {
   isProduction: false,
   isShowProgress: false,
   isIncludeEntryExports: false,
+  isIsolateWorkspaces: false,
 };
 
 export default baseArguments;

@@ -17,6 +17,7 @@ Options:
   --dependencies           Shortcut for --include dependencies,unlisted,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
   --include-entry-exports  Include entry files when reporting unused exports
+  --isolate-workspaces     Isolated workspaces in monorepo
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
@@ -56,6 +57,7 @@ try {
       'ignore-internal': { type: 'boolean' },
       include: { type: 'string', multiple: true },
       'include-entry-exports': { type: 'boolean' },
+      'isolate-workspaces': { type: 'boolean' },
       'max-issues': { type: 'string' },
       'no-config-hints': { type: 'boolean' },
       'no-exit-code': { type: 'boolean' },

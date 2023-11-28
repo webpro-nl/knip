@@ -18,6 +18,7 @@ const {
   'no-gitignore': isNoGitIgnore = false,
   'no-progress': isNoProgress = false,
   'include-entry-exports': isIncludeEntryExports = false,
+  'isolate-workspaces': isIsolateWorkspaces = false,
   performance: isObservePerf = false,
   production: isProduction = false,
   'reporter-options': reporterOptions = '',
@@ -52,6 +53,7 @@ const run = async () => {
       isStrict,
       isShowProgress,
       isIncludeEntryExports,
+      isIsolateWorkspaces,
     });
 
     const initialData: ReporterOptions = {

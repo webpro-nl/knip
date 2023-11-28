@@ -16,6 +16,7 @@ export type PrincipalOptions = {
   compilers: [SyncCompilers, AsyncCompilers];
   pkgName: string;
   isGitIgnored: GlobbyFilterFunction;
+  isIsolateWorkspaces: boolean;
 };
 
 const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>
@@ -42,10 +43,10 @@ export class PrincipalFactory {
   principals: Principals = new Set();
 
   public getPrincipal(options: PrincipalOptions) {
-    const { cwd, compilerOptions, paths, pkgName } = options;
+    const { cwd, compilerOptions, paths, pkgName, isIsolateWorkspaces } = options;
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
     const principal = this.findReusablePrincipal(compilerOptions);
-    if (principal) {
+    if (!isIsolateWorkspaces && principal) {
       this.linkPrincipal(principal, cwd, compilerOptions, pkgName);
       return principal.principal;
     } else {
