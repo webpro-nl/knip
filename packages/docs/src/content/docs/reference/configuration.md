@@ -9,13 +9,25 @@ configure Knip.
 
 ## JSON Schema
 
-In JSON, you can use the provided JSON Schema:
+A "@schema" field is a URL that you put at the top of your JSON file. This allows you to get red squiggly lines inside of your IDE when you make a typo or provide an otherwise invalid configuration option.
+
+In JSON, you can use the provided JSON schema:
 
 ```json title="knip.json"
 {
   "$schema": "https://unpkg.com/knip@3/schema.json"
 }
 ```
+
+In JSONC, you can use the provided JSONC schema:
+
+```json title="knip.json"
+{
+  "$schema": "https://unpkg.com/knip@3/schema-jsonc.json"
+}
+```
+
+(It is recommended to use JSONC over JSON so that you can use comments and trailing commas.)
 
 ## Types
 
