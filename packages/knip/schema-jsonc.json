@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Knip configuration for JSONC",
+  "description": "See https://github.com/webpro/knip",
+  "allOf": [
+    {
+      "$ref": "https://unpkg.com/knip@3/schema.json"
+    }
+  ],
+  "allowTrailingCommas": true
+}
