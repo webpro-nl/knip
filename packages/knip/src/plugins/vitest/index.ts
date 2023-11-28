@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import { dirname, join, relative } from '../../util/path.js';
+import { dirname, isAbsolute, join, relative } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load, tryResolve } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
@@ -31,7 +31,7 @@ export const ENTRY_FILE_PATTERNS = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 // TODO: Promote to something more generic, other plugins may like it too
 const resolveEntry = (containingFilePath: string, specifier: string) => {
   const dir = dirname(containingFilePath);
-  const resolvedPath = tryResolve(join(dir, specifier), containingFilePath);
+  const resolvedPath = isAbsolute(specifier) ? specifier : tryResolve(join(dir, specifier), containingFilePath);
   if (resolvedPath) return toEntryPattern(relative(dir, resolvedPath));
   return specifier;
 };
@@ -77,9 +77,14 @@ export const findVitestDependencies = async (
     return Array.from(dependencies);
   }
 
-  if (!localConfig.test) return [];
+  const entry = localConfig.build?.lib?.entry ?? [];
+  const dependencies = (typeof entry === 'string' ? [entry] : Object.values(entry)).map(specifier =>
+    resolveEntry(configFilePath, specifier)
+  );
 
-  return findConfigDependencies(configFilePath, localConfig, options);
+  if (!localConfig.test) return dependencies;
+
+  return [...dependencies, ...findConfigDependencies(configFilePath, localConfig, options)];
 };
 
 const findVitestWorkspaceDependencies: GenericPluginCallback = async (configFilePath, options) => {

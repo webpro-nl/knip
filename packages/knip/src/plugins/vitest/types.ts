@@ -13,7 +13,12 @@ interface VitestConfig {
 }
 
 export interface ViteConfig extends VitestConfig {
-  plugins: unknown[];
+  plugins?: unknown[];
+  build?: {
+    lib?: {
+      entry: string | string[] | { [entryAlias: string]: string };
+    };
+  };
 }
 
 export type COMMAND = 'dev' | 'serve' | 'build';
