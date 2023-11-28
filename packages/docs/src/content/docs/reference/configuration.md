@@ -9,7 +9,9 @@ configure Knip.
 
 ## JSON Schema
 
-A "$schema" field is a URL that you put at the top of your JSON file. This allows you to get red squiggly lines inside of your IDE when you make a typo or provide an otherwise invalid configuration option.
+A "$schema" field is a URL that you put at the top of your JSON file. This
+allows you to get red squiggly lines inside of your IDE when you make a typo or
+provide an otherwise invalid configuration option.
 
 In JSON, you can use the provided JSON schema:
 
