@@ -15,7 +15,7 @@ test('Find reference to re-exports by flow node', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });

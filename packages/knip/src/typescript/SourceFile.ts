@@ -21,6 +21,9 @@ export interface BoundSourceFile extends ts.SourceFile {
   // Used in `maybeAddNamespaceAccessAsImport` (perf only)
   locals?: SymbolTable;
 
+  // Used in `exportDeclaration`
+  getNamedDeclarations?(): Map<string, readonly ts.Declaration[]>;
+
   scriptKind?: ts.ScriptKind;
 
   pragmas?: Map<string, PragmaMap | PragmaMap[]>;
