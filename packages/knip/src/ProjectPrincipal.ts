@@ -244,7 +244,8 @@ export class ProjectPrincipal {
   public getHasReferences(filePath: string, exportedItem: ExportItem) {
     const hasReferences = { external: false, internal: false };
 
-    const symbolReferences = this.findReferences(filePath, exportedItem.pos).flatMap(f => f.references);
+    const pos = exportedItem.posDecl ?? exportedItem.pos;
+    const symbolReferences = this.findReferences(filePath, pos).flatMap(f => f.references);
 
     for (const reference of symbolReferences) {
       if (reference.fileName === filePath) {

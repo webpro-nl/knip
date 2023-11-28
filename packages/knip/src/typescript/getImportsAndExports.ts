@@ -147,7 +147,7 @@ export const getImportsAndExports = (
     }
   };
 
-  const addExport = ({ node, identifier, type, pos, members = [] }: AddExportOptions) => {
+  const addExport = ({ node, identifier, type, pos, posDecl, members = [] }: AddExportOptions) => {
     if (options.skipExports) return;
 
     const jsDocTags = getJSDocTags(node);
@@ -158,7 +158,7 @@ export const getImportsAndExports = (
       const tags = new Set([...item.jsDocTags, ...jsDocTags]);
       exports.set(identifier, { ...item, members: crew, jsDocTags: tags });
     } else {
-      exports.set(identifier, { node, type, members, jsDocTags, pos });
+      exports.set(identifier, { node, type, members, jsDocTags, pos, posDecl: posDecl ?? pos });
     }
 
     if (!jsDocTags.has('@alias')) {

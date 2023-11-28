@@ -7,6 +7,7 @@ type Identifier = string;
 export type ExportItem = {
   node: ts.Node;
   pos: number;
+  posDecl?: number;
   type: SymbolType;
   members?: ExportItemMember[];
   jsDocTags?: Set<string>;
