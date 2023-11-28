@@ -42,8 +42,10 @@ of the error.
 
 If you encounter an issue or false positives when running Knip, you can [open an
 issue on GitHub][5]. Depending on the type of issue, it may be of great help (or
-you may be asked) to create a minimal reproduction. A convenient way to do so is
-by forking one of these templates:
+you may be asked) to create a minimal reproduction. This is sometimes referred
+to as MNWE (minimal not-working example) or MRE (minimal reproducible example).
+
+A convenient way to do so is by forking one of these templates:
 
 - [CodeSandbox][6]
 - [StackBlitz][7]
