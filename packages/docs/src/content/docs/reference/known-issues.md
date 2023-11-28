@@ -32,8 +32,8 @@ Potential workarounds:
 If necessary, you can use `knip --debug` to locate where the error is coming
 from.
 
-The issue is hopefully fixed in [jiti v2][4]. By the way, nothing but love for
-jiti (it's awesome).
+[The issue][4] is hopefully fixed in [jiti v2][5]. By the way, nothing but love
+for jiti (it's awesome).
 
 ## Reflect.metadata is not a function
 
@@ -43,10 +43,11 @@ Similar to the previous known issue, this is caused through (not by) jiti:
 TypeError: Reflect.metadata is not a function
 ```
 
-[GitHub Issue #355][5]
+[GitHub Issue #355][6]
 
 [1]: https://github.com/unjs/jiti
 [2]: ./configuration.md#ignore
 [3]: ./configuration.md#plugins
-[4]: https://github.com/unjs/jiti/issues/174
-[5]: https://github.com/webpro/knip/issues/355
+[4]: https://github.com/unjs/jiti/issues/72
+[5]: https://github.com/unjs/jiti/issues/174
+[6]: https://github.com/webpro/knip/issues/355
