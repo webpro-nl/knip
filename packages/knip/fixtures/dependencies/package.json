@@ -1,4 +1,5 @@
 {
+  "name": "@fixtures/dependencies",
   "scripts": {
     "start": "start-server",
     "test": "jest"

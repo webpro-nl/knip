@@ -1,4 +1,5 @@
 {
+  "name": "@tsconfig-extends/frontend",
   "dependencies": {
     "hastscript": "*"
   },

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/typescript-extends",
+  "name": "@fixtures/tsconfig-extends",
   "workspaces": [
     "packages/*"
   ],

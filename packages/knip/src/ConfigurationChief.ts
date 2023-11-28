@@ -246,7 +246,7 @@ export class ConfigurationChief {
       .map(dir => join(this.cwd, dir));
 
     this.availableWorkspaceManifests = this.getAvailableWorkspaceManifests(this.availableWorkspaceDirs);
-    this.availableWorkspacePkgNames = new Set(this.availableWorkspaceManifests.map(w => w.manifest.name));
+    this.availableWorkspacePkgNames = this.getAvailableWorkspacePkgNames(this.availableWorkspaceManifests);
     this.workspacesGraph = createPkgGraph(this.availableWorkspaceManifests);
     this.enabledWorkspaces = this.getEnabledWorkspaces();
   }
@@ -314,6 +314,16 @@ export class ConfigurationChief {
       if (!manifest) throw new LoaderError(`Unable to load package.json for ${dir}`);
       return { dir, manifest };
     });
+  }
+
+  private getAvailableWorkspacePkgNames(availableWorkspaceManifests: { dir: string; manifest: PackageJson }[]) {
+    const pkgNames = new Set<string>();
+    for (const { dir, manifest } of availableWorkspaceManifests) {
+      if (!manifest.name) throw new ConfigurationError(`Missing package name in ${join(dir, 'package.json')}`);
+      if (pkgNames.has(manifest.name)) throw new ConfigurationError(`Duplicate package name: ${manifest.name}`);
+      pkgNames.add(manifest.name);
+    }
+    return pkgNames;
   }
 
   private getEnabledWorkspaces() {
