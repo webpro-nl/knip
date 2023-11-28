@@ -27,7 +27,7 @@ In JSONC, you can use the provided JSONC schema:
 }
 ```
 
-(It is recommended to use JSONC over JSON so that you can use comments and trailing commas.)
+Use JSONC if you want to use comments and/or trailing commas.
 
 ## Types
 
