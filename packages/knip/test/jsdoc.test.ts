@@ -14,11 +14,13 @@ test('Find imports from jsdoc @type tags', async () => {
   });
 
   assert(issues.unlisted['index.ts']['some-types']);
+  assert(issues.unlisted['index.ts']['type-fest']);
+  assert(issues.unlisted['index.ts']['more-types']);
   assert(issues.unlisted['index.ts']['@jest/types']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 3,
+    unlisted: 4,
     processed: 1,
     total: 1,
   });

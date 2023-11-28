@@ -1,13 +1,5 @@
 import ts from 'typescript';
 
-interface ValidImportTypeNode extends ts.ImportTypeNode {
-  argument: ts.LiteralTypeNode & { literal: ts.StringLiteral };
-}
-
-export function isValidImportTypeNode(node: ts.Node): node is ValidImportTypeNode {
-  return ts.isImportTypeNode(node);
-}
-
 export function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
   return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
 }

@@ -3,6 +3,11 @@ const ignorePatterns = [];
 /** @type {import('some-types').Module} */
 const obj = {};
 
+/**
+ * @returns {Promise<import('type-fest').PackageJson>}
+ */
+const getPackageManifest = async () => ({});
+
 /** @type {string | null} */
 const str = 'str';
 
