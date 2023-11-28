@@ -25,7 +25,9 @@ Knip reports the following types of issues:
 - NSs = namespaces
 - When an issue type has zero issues, it is not shown.
 
-Note that `devDependencies` is covered with a single key for all `dependencies`.
-In [strict production mode][1], `devDependencies` are not included.
+The `devDependencies` are covered in a single key for all `dependencies`. In
+[strict production mode][1], `devDependencies` are not included.
+
+The `types` issue type includes `enum`, `interface` and `type` exports.
 
 [1]: ../features/production-mode.md#strict-mode

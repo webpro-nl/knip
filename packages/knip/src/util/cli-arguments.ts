@@ -14,7 +14,7 @@ Options:
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
-  --dependencies           Shortcut for --include dependencies,unlisted,unresolved
+  --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
   --include-entry-exports  Include entry files when reporting unused exports
   --isolate-workspaces     Isolated workspaces in monorepo

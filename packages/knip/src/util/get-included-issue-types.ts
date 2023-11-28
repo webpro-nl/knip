@@ -1,4 +1,5 @@
 import { ISSUE_TYPES } from '../constants.js';
+import { ConfigurationError } from './errors.js';
 import type { Report } from '../types/issues.js';
 
 type CLIArguments = {
@@ -20,6 +21,11 @@ export const getIncludedIssueTypes = (
   cliArgs: CLIArguments,
   { include = [], exclude = [], isProduction = false }: Options = {}
 ) => {
+  [...cliArgs.include, ...cliArgs.exclude, ...include, ...exclude].forEach(type => {
+    // @ts-expect-error The point is that we're checking for invalid issue types
+    if (!ISSUE_TYPES.includes(type)) throw new ConfigurationError(`Invalid issue type: ${type}`);
+  });
+
   if (cliArgs.dependencies) {
     cliArgs.include = [
       ...cliArgs.include,
