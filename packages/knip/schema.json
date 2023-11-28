@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Knip configuration",
+  "title": "Knip configuration for JSON",
   "description": "See https://github.com/webpro/knip",
   "type": "object",
   "allOf": [
