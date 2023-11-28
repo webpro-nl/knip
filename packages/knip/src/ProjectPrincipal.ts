@@ -20,12 +20,18 @@ import type { GlobbyFilterFunction } from 'globby';
 const baseCompilerOptions = {
   allowJs: true,
   allowSyntheticDefaultImports: true,
+  declaration: false,
+  declarationMap: false,
   esModuleInterop: true,
+  inlineSourceMap: false,
+  inlineSources: false,
   jsx: ts.JsxEmit.Preserve,
   jsxImportSource: undefined,
   lib: [],
+  noEmit: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
+  sourceMap: false,
 };
 
 const tsCreateProgram = timerify(ts.createProgram);
