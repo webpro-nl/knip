@@ -4,5 +4,23 @@ import Default from '@astrojs/starlight/components/Footer.astro';
 import SimpleAnalytics from './SimpleAnalytics.html';
 ---
 
+<style>
+  p {
+    border-top: 1px solid var(--sl-color-gray-3);
+    margin-top: 5rem !important;
+    padding-top: 1rem;
+    text-align: center;
+  }
+  a {
+    color: var(--sl-color-white);
+    margin: 0 0.5rem;
+  }
+</style>
+
 <Default {...Astro.props} />
+<p>
+  <a href="https://github.com/webpro/knip/blob/main/packages/knip/license">ISC License</a>
+  © 2023
+  <a href="https://www.webpro.nl">Lars Kappert</a>
+</p>
 <SimpleAnalytics />
