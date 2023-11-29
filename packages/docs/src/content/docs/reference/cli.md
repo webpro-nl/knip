@@ -136,6 +136,7 @@ Available [issue types][4] when filtering output using `--include` or
 
 - `files`
 - `dependencies`
+- `optionalPeerDependencies`
 - `unlisted`
 - `unresolved`
 - `exports`
@@ -173,7 +174,7 @@ knip --include files --include dependencies
 Shortcut to include all types of dependency issues:
 
 ```sh
---include dependencies,unlisted,binaries,unresolved
+--include dependencies,optionalPeerDependencies,unlisted,binaries,unresolved
 ```
 
 ### `--exports`
