@@ -270,6 +270,7 @@ export class ConfigurationChief {
     const workspaces = await mapWorkspaces({
       pkg: this.manifest ?? {},
       cwd: this.cwd,
+      ignore: this.ignoredWorkspacePatterns,
     });
 
     const manifestWorkspaces = new Map();
