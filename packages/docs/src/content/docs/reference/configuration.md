@@ -53,7 +53,8 @@ See [Rules & Filters][4].
 
 ## `ignore`
 
-Array of glob patterns to ignore files. Example:
+Array of glob patterns to ignore files. Used as ignore patterns when looking up
+`entry` and `project` files. Example:
 
 ```json title="knip.json"
 {
@@ -61,9 +62,13 @@ Array of glob patterns to ignore files. Example:
 }
 ```
 
+This does not 100% guarantee that the targeted files are not included in the
+analysis, so even issues in the ignored files may still be reported. Use
+[`--debug`][5] for details.
+
 ## `ignoreBinaries`
 
-Array of binaries to ignore, no wildcards allowed. Example:
+Array of binaries to exclude from the report. No wildcards allowed. Example:
 
 ```json title="knip.json"
 {
@@ -73,7 +78,8 @@ Array of binaries to ignore, no wildcards allowed. Example:
 
 ## `ignoreDependencies`
 
-Array of package names to ignore, no wildcards allowed. Example:
+Array of package names to exclude from the report. No wildcards allowed.
+Example:
 
 ```json title="knip.json"
 {
@@ -183,17 +189,21 @@ There are a few options to modify the behavior of a plugin:
 
 It should be rarely necessary to override the `entry` patterns, since plugins
 also read custom entry file patterns from the tooling configuration (see
-[Plugins → entry files][5]).
+[Plugins → entry files][6]).
 
 Plugin configuration can be set on root and on a per-workspace level. If enabled
 on root level, it can be disabled on workspace level by setting it to `false`
 there, and vice versa.
 
-Also see [Plugins][6].
+Also see [Plugins][7].
 
 ## `project`
 
 See [configuration][2] and [entry files][3].
+
+## `rules`
+
+See [Rules & Filters][4].
 
 ## `workspaces`
 
@@ -208,12 +218,13 @@ root-only options:
 Workspaces can't be nested in configuration, but they can be nested in folder
 structure.
 
-See [Monorepos and workspaces][7].
+See [Monorepos and workspaces][8].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
 [3]: ../explanations/entry-files.md
 [4]: ../features/rules-and-filters.md#filters
-[5]: ../explanations/plugins.md#entry-files
-[6]: ../explanations/plugins.md
-[7]: ../features/monorepos-and-workspaces.md
+[5]: ../guides/troubleshooting.md#issues-reported-by-knip
+[6]: ../explanations/plugins.md#entry-files
+[7]: ../explanations/plugins.md
+[8]: ../features/monorepos-and-workspaces.md
