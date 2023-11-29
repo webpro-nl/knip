@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { resolve } from '../src/util/path.js';
-import { execFactory } from './helpers/execKnip.js';
+import { execFactory } from './helpers/exec.js';
 import { updatePos } from './helpers/index.js';
 
 const cwd = resolve('fixtures/unresolved');
@@ -32,5 +32,5 @@ test('knip --reporter json', () => {
   // Add line - 1 to every pos (each EOL is one more char)
   updatePos(json);
 
-  assert.equal(exec('knip --reporter json'), JSON.stringify(json) + '\n');
+  assert.equal(exec('knip --reporter json').stdout, JSON.stringify(json) + '\n');
 });

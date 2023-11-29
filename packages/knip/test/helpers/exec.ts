@@ -8,10 +8,14 @@ export const execFactory = (cwd: string) => {
   return (command: string) => {
     try {
       const output = execSync(command.replace(/^knip/, `node ${cliPath}`), { cwd });
-      return output.toString().trim();
+      return { stdout: output.toString().trim(), stderr: '', status: 0 };
     } catch (error) {
       if (error instanceof Error && 'stdout' in error && Buffer.isBuffer(error['stdout'])) {
-        return error['stdout'].toString();
+        return {
+          stdout: error['stdout'].toString(),
+          stderr: error['stderr'].toString(),
+          status: error.status,
+        };
       }
       // Unknown error
       throw error;
