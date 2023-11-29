@@ -75,6 +75,7 @@
       ]
     },
     "includeEntryExports": {
+      "title": "Include entry files when reporting unused exports",
       "type": "boolean"
     },
     "workspaces": {
@@ -187,6 +188,10 @@
           "title": "Dependencies from package.json to ignore",
           "examples": ["husky", "lint-staged"],
           "$ref": "#/definitions/list"
+        },
+        "includeEntryExports": {
+          "title": "Include entry files when reporting unused exports",
+          "type": "boolean"
         }
       }
     },

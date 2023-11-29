@@ -127,6 +127,7 @@ const baseWorkspaceConfigurationSchema = z.object({
   ignore: globSchema.optional(),
   ignoreBinaries: z.array(z.string()).optional(),
   ignoreDependencies: z.array(z.string()).optional(),
+  includeEntryExports: z.boolean().optional(),
 });
 
 const workspaceConfigurationSchema = baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial());
