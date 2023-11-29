@@ -14,6 +14,6 @@ type WorkspaceManifest = {
 
 export type WorkspaceManifests = Map<string, WorkspaceManifest>;
 
-export type HostDependencies = Map<string, Set<string>>;
+export type HostDependencies = Map<string, Set<{ name: string; isPeerOptional: boolean }>>;
 
 export type InstalledBinaries = Map<string, Set<string>>;

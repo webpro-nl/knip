@@ -268,7 +268,7 @@ export class DependencyDeputy {
             ...this.getHostDependenciesFor(workspaceName, dependency),
             ...this.getHostDependenciesFor(workspaceName, typedPackageName),
           ];
-          if (hostDependencies.length) return !!hostDependencies.find(host => isReferencedDependency(host, true));
+          if (hostDependencies.length) return !!hostDependencies.find(host => isReferencedDependency(host.name, true));
 
           if (!referencedDependencies) return false;
 
@@ -277,13 +277,17 @@ export class DependencyDeputy {
 
         // A dependency may not be referenced, but it may be a peer dep of another.
         // If that host is also not referenced we'll report this dependency as unused.
+        // Except if the host has this dependency as an optional peer dep itself.
         const hostDependencies = this.getHostDependenciesFor(workspaceName, dependency);
 
-        hostDependencies.forEach(dep => (!peerDepRecs[dep] ? (peerDepRecs[dep] = 1) : peerDepRecs[dep]++));
-        return hostDependencies.some(peerDependency => isReferencedDependency(peerDependency, true));
+        hostDependencies.forEach(({ name }) => (!peerDepRecs[name] ? (peerDepRecs[name] = 1) : peerDepRecs[name]++));
+        return hostDependencies.some(
+          hostDependency =>
+            (isPeerDep === false || !hostDependency.isPeerOptional) && isReferencedDependency(hostDependency.name, true)
+        );
       };
 
-      const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency);
+      const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency, false);
 
       const pd = this.getProductionDependencies(workspaceName);
       const dd = this.getDevDependencies(workspaceName);

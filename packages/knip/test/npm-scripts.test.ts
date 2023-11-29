@@ -38,7 +38,7 @@ test('Referenced dependencies in npm scripts', async () => {
   ]);
 
   const expectedHostDependencies = new Map();
-  expectedHostDependencies.set('pm2-peer-dep', new Set(['pm2']));
+  expectedHostDependencies.set('pm2-peer-dep', new Set([{ name: 'pm2', isPeerOptional: false }]));
 
   assert.deepEqual(hostDependencies, expectedHostDependencies);
 

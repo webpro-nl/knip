@@ -58,13 +58,17 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
 
       // Read and store peer dependencies
       const packagePeerDependencies = Object.keys(manifest.peerDependencies ?? {});
-      packagePeerDependencies.forEach(packagePeerDependency => {
+      for (const packagePeerDependency of packagePeerDependencies) {
+        const hostDependency = {
+          name: packageName,
+          isPeerOptional: manifest.peerDependenciesMeta?.[packagePeerDependency]?.optional ?? false,
+        };
         if (hostDependencies.has(packagePeerDependency)) {
-          hostDependencies.get(packagePeerDependency)?.add(packageName);
+          hostDependencies.get(packagePeerDependency)?.add(hostDependency);
         } else {
-          hostDependencies.set(packagePeerDependency, new Set([packageName]));
+          hostDependencies.set(packagePeerDependency, new Set([hostDependency]));
         }
-      });
+      }
 
       if (!isDefinitelyTyped(packageName) && (manifest.types || manifest.typings)) hasTypesIncluded.add(packageName);
     }
