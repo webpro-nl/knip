@@ -17,40 +17,36 @@ type Options = {
   exports?: boolean;
 };
 
+const normalize = (values: string[]) => values.map(value => value.split(',')).flat();
+
 export const getIncludedIssueTypes = (
   cliArgs: CLIArguments,
   { include = [], exclude = [], isProduction = false }: Options = {}
 ) => {
-  [...cliArgs.include, ...cliArgs.exclude, ...include, ...exclude].forEach(type => {
+  // Allow space-separated argument values (--include files,dependencies)
+  let incl = normalize(cliArgs.include);
+  let excl = normalize(cliArgs.exclude);
+
+  // Naming is hard...
+  [...incl, ...excl, ...include, ...exclude].forEach(type => {
     // @ts-expect-error The point is that we're checking for invalid issue types
     if (!ISSUE_TYPES.includes(type)) throw new ConfigurationError(`Invalid issue type: ${type}`);
   });
 
+  // CLI arguments override local options
+  const excludes = exclude.filter(exclude => !incl.includes(exclude));
+  const includes = include.filter(include => !excl.includes(include));
+
   if (cliArgs.dependencies) {
-    cliArgs.include = [
-      ...cliArgs.include,
-      'dependencies',
-      'optionalPeerDependencies',
-      'unlisted',
-      'binaries',
-      'unresolved',
-    ];
+    incl = [...incl, 'dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
   }
   if (cliArgs.exports) {
     const exports = ['exports', 'nsExports', 'classMembers', 'types', 'nsTypes', 'enumMembers', 'duplicates'];
-    cliArgs.include = [...cliArgs.include, ...exports];
+    incl = [...incl, ...exports];
   }
 
-  // Allow space-separated argument values (--include files,dependencies)
-  const normalizedIncludesArg = cliArgs.include.map(value => value.split(',')).flat();
-  const normalizedExcludesArg = cliArgs.exclude.map(value => value.split(',')).flat();
-
-  // CLI arguments override local options
-  const excludes = exclude.filter(exclude => !normalizedIncludesArg.includes(exclude));
-  const includes = include.filter(include => !normalizedExcludesArg.includes(include));
-
-  const _include = [normalizedIncludesArg, includes].flat();
-  const _exclude = [normalizedExcludesArg, excludes].flat();
+  const _include = [...incl, ...includes];
+  const _exclude = [...excl, ...excludes];
 
   if (isProduction) {
     // Ignore devDependencies when analyzing production code
