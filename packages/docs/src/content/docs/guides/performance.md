@@ -29,21 +29,22 @@ Example of a star import:
 import * as MyNamespace from './helpers';
 ```
 
-Use the [`--performance` flag](../reference/cli.md#--performance) to see how
-often `findReferences` is used and how much time is spent there.
+Use the [`--performance` flag][1] to see how often `findReferences` is used and
+how much time is spent there.
 
 This article explains the issue in more detail: [Speeding up the JavaScript
-ecosystem - The barrel file debacle][1]. The conclusion: "Get rid of all barrel
+ecosystem - The barrel file debacle][2]. The conclusion: "Get rid of all barrel
 files".
 
 ## Workspace Sharing
 
-Knip "bundles" files from separate workspaces into a single TypeScript program
-if the configuration in `tsconfig.json` allows. This saves memory and time. The
-relevant compiler options are `baseUrl` and `paths`:
+Knip shares files from separate workspaces if the configuration in
+`tsconfig.json` allows this. This reduces memory consumption and run duration.
+The relevant compiler options are `baseUrl` and `paths`, and a workspace is
+shared if the following is true:
 
-- If the `compilerOptions.baseUrl` is not set explicitly
-- If there are no conflicting keys in `compilerOptions.paths`
+- The `compilerOptions.baseUrl` is not set explicitly
+- There are no conflicting keys in `compilerOptions.paths`
 
 With the `--debug` flag you can see how many programs Knip uses. Look for
 messages like this:
@@ -61,15 +62,15 @@ messages like this:
 ```
 
 The first number in `P1/1` is the number of the program, the second number
-indicates additional entry files were found in and added to the same program
-during the first round.
+indicates additional entry files were found in the previous round so it does
+another round of analysis on those files.
 
 ## GitIgnore
 
 Knip looks up `.gitignore` files and uses them to filter out matching entry and
-project files. This increases correctness. Your project may have multiple
-`.gitignore` files across all folders. It slows down finding files using glob
-patterns and in some cases significantly.
+project files. This increases correctness, but it slows down finding files using
+glob patterns and in some cases significantly. Your project may have multiple
+`.gitignore` files across all folders.
 
 You might want see if it's possible to disable that with `--no-gitignore` and
 enjoy a performance boost.
@@ -87,13 +88,17 @@ And to measure the difference of this flag in seconds:
 SECONDS=0; knip > /dev/null; t1=$SECONDS; SECONDS=0; knip --no-gitignore > /dev/null; t2=$SECONDS; echo "Difference: $((t1 - t2)) seconds"
 ```
 
+If there is no difference in unused files, and runs are significantly faster,
+you could consider using the `--no-gitignore` flag.
+
 Analysis on a sample large project went down from 33 to 9 seconds (that's >70%
 faster).
 
 ## A Last Resort
 
 In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][2].
+individual workspaces][3].
 
-[1]: https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
-[2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[1]: ../reference/cli.md#--performance
+[2]: https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
+[3]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace

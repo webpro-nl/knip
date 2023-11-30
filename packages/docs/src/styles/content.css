@@ -18,6 +18,10 @@ h3 code {
   color: var(--sl-color-gray-1);
 }
 
+p code {
+  white-space: nowrap;
+}
+
 blockquote {
   border-inline-start-color: var(--sl-color-gray-1);
 }
