@@ -27,7 +27,9 @@ export function createCustomModuleResolver(
 ) {
   function resolveModuleNames(moduleNames: string[], containingFile: string): Array<ts.ResolvedModuleFull | undefined> {
     return moduleNames.map(moduleName => {
-      const key = `${containingFile}:${moduleName}`;
+      const key = moduleName.startsWith('.')
+        ? join(dirname(containingFile), moduleName)
+        : `${containingFile}:${moduleName}`;
       if (resolutionCache.has(key)) return resolutionCache.get(key)!;
       const resolvedModule = resolveModuleName(moduleName, containingFile);
       resolutionCache.set(key, resolvedModule);
