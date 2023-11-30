@@ -102,6 +102,9 @@
         "npm run knip",
         "npm run knip:production",
         "npm test"
+      ],
+      "after:bump": [
+        "git add ../../package-lock.json"
       ]
     },
     "github": {
