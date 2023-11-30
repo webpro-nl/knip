@@ -70,5 +70,6 @@ export const getEntryPathFromManifest = (
 export const sanitizeSpecifier = (specifier: string) => {
   if (isBuiltin(specifier)) return specifier;
   if (isAbsolute(specifier)) return specifier;
+  if (specifier.startsWith('virtual:')) return specifier;
   return specifier.replace(/^([?!|-]+)?([^!?:]+).*/, '$2');
 };
