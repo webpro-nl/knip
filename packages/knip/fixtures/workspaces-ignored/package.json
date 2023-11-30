@@ -4,7 +4,8 @@
     "ignoreWorkspaces": [
       "packages/c",
       "packages/d*",
-      "packages/f"
+      "packages/f",
+      "packages/g"
     ]
   }
 }

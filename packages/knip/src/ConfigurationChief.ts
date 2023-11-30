@@ -10,7 +10,7 @@ import { arrayify } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { partitionCompilers } from './util/compilers.js';
 import { ConfigurationError, LoaderError } from './util/errors.js';
-import { findFile, loadJSON } from './util/fs.js';
+import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
 import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
@@ -468,8 +468,11 @@ export class ConfigurationChief {
   public getUnusedIgnoredWorkspaces() {
     const ignoredWorkspaceNames = this.config.ignoreWorkspaces;
     const workspaceNames = [...this.manifestWorkspaces.keys(), ...this.additionalWorkspaceNames];
-    return ignoredWorkspaceNames.filter(
-      ignoredWorkspaceName => !workspaceNames.some(name => micromatch.isMatch(name, ignoredWorkspaceName))
-    );
+    return ignoredWorkspaceNames
+      .filter(ignoredWorkspaceName => !workspaceNames.some(name => micromatch.isMatch(name, ignoredWorkspaceName)))
+      .filter(ignoredWorkspaceName => {
+        const dir = join(this.cwd, ignoredWorkspaceName);
+        return !isDirectory(dir) || isFile(join(dir, 'package.json'));
+      });
   }
 }

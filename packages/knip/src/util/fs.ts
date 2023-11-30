@@ -5,6 +5,11 @@ import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
 import { dirname, join } from './path.js';
 
+export const isDirectory = (filePath: string) => {
+  const stat = statSync(filePath, { throwIfNoEntry: false });
+  return stat !== undefined && stat.isDirectory();
+};
+
 export const isFile = (filePath: string) => {
   const stat = statSync(filePath, { throwIfNoEntry: false });
   return stat !== undefined && stat.isFile();
