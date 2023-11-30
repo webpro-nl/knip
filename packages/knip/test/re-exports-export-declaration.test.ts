@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/re-exports-flow-node');
+const cwd = resolve('fixtures/re-exports-export-declaration');
 
 test('Find reference to re-exports by flow node', async () => {
   const { counters } = await main({
