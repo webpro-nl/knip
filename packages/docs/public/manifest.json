@@ -1,0 +1,26 @@
+{
+  "name": "Knip",
+  "short_name": "Knip",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#181818",
+  "background_color": "#f68a22",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/overview/getting-started/"
+}
