@@ -7,14 +7,14 @@
   "types": "./index.d.ts",
   "dependencies": {
     "@eslint/js": "^8.54.0",
-    "@typescript-eslint/eslint-plugin": "^6.12.0",
-    "@typescript-eslint/parser": "^6.12.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
     "eslint-import-resolver-typescript": "3.6.1",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-n": "^16.3.1",
     "globals": "^13.23.0"
   },
   "devDependencies": {
-    "@types/eslint": "8.44.7"
+    "@types/eslint": "8.44.8"
   }
 }
