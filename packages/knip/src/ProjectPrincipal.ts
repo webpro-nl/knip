@@ -6,6 +6,7 @@ import { createHosts } from './typescript/createHosts.js';
 import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
+import { compact } from './util/array.js';
 import { isMaybePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
@@ -28,6 +29,7 @@ const baseCompilerOptions = {
   jsx: ts.JsxEmit.Preserve,
   jsxImportSource: undefined,
   lib: [],
+  types: ['node'],
   noEmit: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
@@ -77,6 +79,7 @@ export class ProjectPrincipal {
     this.compilerOptions = {
       ...compilerOptions,
       ...baseCompilerOptions,
+      types: compact([...(compilerOptions.types ?? []), ...baseCompilerOptions.types]),
       allowNonTsExtensions: [...compilers].flat().length > 0,
     };
 

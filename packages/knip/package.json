@@ -64,7 +64,8 @@
     "zod-validation-error": "2.1.0"
   },
   "peerDependencies": {
-    "typescript": ">=5.0.4"
+    "typescript": ">=5.0.4",
+    "@types/node": ">=18"
   },
   "devDependencies": {
     "@jest/types": "29.6.3",
@@ -76,7 +77,6 @@
     "@types/js-yaml": "^4.0.9",
     "@types/micromatch": "^4.0.6",
     "@types/minimist": "^1.2.5",
-    "@types/node": "^20.10.1",
     "@types/npmcli__map-workspaces": "^3.0.4",
     "@types/npmcli__package-json": "^4.0.3",
     "@types/pkgjs__parseargs": "^0.10.3",

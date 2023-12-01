@@ -18,35 +18,38 @@ The recommended way to install Knip is by using your package manager:
   <TabItem label="npm">
 
     ```shell
-    npm install -D knip typescript
+    npm install -D knip typescript @types/node
     ```
 
   </TabItem>
   <TabItem label="pnpm">
 
     ```shell
-    pnpm add -D knip typescript
+    pnpm add -D knip typescript @types/node
     ```
 
   </TabItem>
   <TabItem label="bun">
 
     ```shell
-    bun add -D knip typescript
+    bun add -D knip typescript @types/node
     ```
 
   </TabItem>
   <TabItem label="yarn">
 
     ```shell
-    yarn add -D knip typescript
+    yarn add -D knip typescript @types/node
     ```
 
   </TabItem>
 </Tabs>
 
-Knip uses `typescript` as a peer dependency to increase compatibility with your
-project. Add a `knip` script to your `package.json`:
+Knip uses `typescript` and ` @types/node` as peer dependencies to increase
+compatibility with your project (they are likely already in your `node_modules`
+anyway).
+
+Add a `knip` script to your `package.json`:
 
 ```json title="package.json"
 {
