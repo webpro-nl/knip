@@ -1,5 +1,5 @@
 {
-  "name": "@fixture/subpath-import-from-plugin",
+  "name": "@fixtures/subpath-import-from-plugin",
   "imports": {
     "#dep": {
       "node": "dep-node-native",

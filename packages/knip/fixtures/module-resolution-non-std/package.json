@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/unresolved",
+  "name": "@fixtures/module-resolution-non-std",
   "dependencies": {
     "@svg-icons/fa-brands": "*",
     "@svg-icons/heroicons-outline": "*"

@@ -3,7 +3,12 @@ import mapWorkspaces from '@npmcli/map-workspaces';
 import { createPkgGraph } from '@pnpm/workspace.pkgs-graph';
 import micromatch from 'micromatch';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
-import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS } from './constants.js';
+import {
+  ROOT_WORKSPACE_NAME,
+  DEFAULT_EXTENSIONS,
+  KNIP_CONFIG_LOCATIONS,
+  DUMMY_VIRTUAL_FILE_EXTENSIONS,
+} from './constants.js';
 import { defaultRules } from './issues/initializers.js';
 import * as plugins from './plugins/index.js';
 import { arrayify } from './util/array.js';
@@ -180,7 +185,9 @@ export class ConfigurationChief {
   }
 
   public getCompilers(): [SyncCompilers, AsyncCompilers] {
-    return [this.config.syncCompilers, this.config.asyncCompilers];
+    const syncCompilers = this.config.syncCompilers;
+    DUMMY_VIRTUAL_FILE_EXTENSIONS.forEach(ext => !syncCompilers.has(ext) && syncCompilers.set(ext, () => ''));
+    return [syncCompilers, this.config.asyncCompilers];
   }
 
   public getRules() {

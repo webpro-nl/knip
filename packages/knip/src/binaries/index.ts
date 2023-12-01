@@ -20,7 +20,7 @@ const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, opti
       if (isBinary(identifier)) return identifier;
       if (isInternal(identifier)) {
         const ext = extname(identifier);
-        if (ext && IGNORED_FILE_EXTENSIONS.includes(ext)) return;
+        if (ext && IGNORED_FILE_EXTENSIONS.has(ext)) return;
         return identifier;
       }
       return getPackageNameFromModuleSpecifier(identifier);

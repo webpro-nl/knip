@@ -1,6 +1,0 @@
-{
-  "name": "@fixtures/tsconfig-paths",
-  "dependencies": {
-    "internal": "*"
-  }
-}

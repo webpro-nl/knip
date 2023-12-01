@@ -46,28 +46,26 @@ export const IGNORED_GLOBAL_BINARIES = [
 
 export const IGNORED_DEPENDENCIES = ['knip', 'typescript'];
 
-export const IGNORED_FILE_EXTENSIONS = [
+// Extensions sometimes imported directly (and compiled away by bundlers, etc.)
+export const DUMMY_VIRTUAL_FILE_EXTENSIONS = new Set(['.html', '.jpeg', '.jpg', '.png', '.svg', '.webp']);
+
+export const IGNORED_FILE_EXTENSIONS = new Set([
   '.avif',
   '.css',
   '.eot',
   '.gif',
-  '.html',
   '.ico',
-  '.jpeg',
-  '.jpg',
   '.less',
-  '.png',
   '.sass',
   '.scss',
   '.sh',
-  '.svg',
   '.ttf',
-  '.webp',
   '.woff',
   '.woff2',
   '.yaml',
   '.yml',
-];
+  ...DUMMY_VIRTUAL_FILE_EXTENSIONS,
+]);
 
 // The `@types/node` dependency does not require the `node` dependency
 export const IGNORE_DEFINITELY_TYPED = ['node'];

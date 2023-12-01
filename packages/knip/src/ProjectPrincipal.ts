@@ -80,7 +80,7 @@ export class ProjectPrincipal {
       ...compilerOptions,
       ...baseCompilerOptions,
       types: compact([...(compilerOptions.types ?? []), ...baseCompilerOptions.types]),
-      allowNonTsExtensions: [...compilers].flat().length > 0,
+      allowNonTsExtensions: true,
     };
 
     const [syncCompilers, asyncCompilers] = compilers;
@@ -220,7 +220,7 @@ export class ProjectPrincipal {
           const isIgnored = this.isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
           if (!isIgnored) {
             const ext = extname(sanitizedSpecifier);
-            const hasIgnoredExtension = IGNORED_FILE_EXTENSIONS.includes(ext);
+            const hasIgnoredExtension = IGNORED_FILE_EXTENSIONS.has(ext);
             if (!ext || (ext !== '.json' && !hasIgnoredExtension)) {
               unresolvedImports.add(unresolvedImport);
             }

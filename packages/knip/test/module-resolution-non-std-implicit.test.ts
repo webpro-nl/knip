@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Resolve modules properly using tsconfig paths with baseUrl', async () => {
-  const cwd = resolve('fixtures/tsconfig-paths-implicit');
+const cwd = resolve('fixtures/module-resolution-non-std-implicit');
 
+test('Resolve non-standard relative specifiers (no tsconfig.json)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

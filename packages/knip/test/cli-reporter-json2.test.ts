@@ -4,7 +4,7 @@ import { resolve } from '../src/util/path.js';
 import { execFactory } from './helpers/exec.js';
 import { updatePos } from './helpers/index.js';
 
-const cwd = resolve('fixtures/unresolved');
+const cwd = resolve('fixtures/module-resolution-non-std');
 
 const exec = execFactory(cwd);
 

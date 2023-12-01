@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Resolve modules properly using tsconfig paths and globs', async () => {
-  const cwd = resolve('fixtures/tsconfig-paths');
+const cwd = resolve('fixtures/module-resolution-tsconfig-paths');
 
+test('Resolve modules properly using tsconfig paths and globs', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

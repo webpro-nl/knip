@@ -13,6 +13,7 @@ import Github from '@svg-icons/fa-brands/github.svg';
 import Briefcase from '@svg-icons/heroicons-outline/briefcase.svg';
 
 import SomeSVG from 'common/image.svg';
+import SomePNG from 'common/image.png';
 
 import './globals.css';
 import 'styles/base.css';

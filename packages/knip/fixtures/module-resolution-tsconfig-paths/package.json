@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/module-resolution-tsconfig-paths",
+  "dependencies": {
+    "internal": "*"
+  }
+}

@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/unresolved');
+const cwd = resolve('fixtures/module-resolution-non-std');
 
-test('Report unresolved imports', async () => {
+test('Resolve non-standard extensions and report unresolved imports', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
