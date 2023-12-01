@@ -11,7 +11,7 @@ const hookFileNames = [
 
 const getGitHooksPath = (defaultPath = '.git/hooks') => {
   try {
-    return execSync('git config --get core.hooksPath', { encoding: 'utf8' }).trim();
+    return execSync('git config --get core.hooksPath 2>/dev/null', { encoding: 'utf8' }).trim();
   } catch (error) {
     return defaultPath;
   }
