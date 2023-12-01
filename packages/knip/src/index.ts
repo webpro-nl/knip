@@ -74,7 +74,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const collector = new IssueCollector({ cwd, rules, filters });
 
-  const enabledPluginsStore: Map<string, string[]> = new Map();
+  const enabledPluginsStore = new Map<string, string[]>();
 
   // TODO Organize better
   deputy.addIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
@@ -263,7 +263,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLog('*', `Installed ${principals.length} principals for ${workspaces.length} workspaces`);
 
-  const analyzedFiles: Set<string> = new Set();
+  const analyzedFiles = new Set<string>();
   const exportedSymbols: Exports = new Map();
   const importedSymbols: Imports = new Map();
 

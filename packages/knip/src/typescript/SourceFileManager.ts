@@ -4,8 +4,8 @@ import { extname, isInternal } from '../util/path.js';
 import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
 
 export class SourceFileManager {
-  sourceFileCache: Map<string, ts.SourceFile | undefined> = new Map();
-  snapshotCache: Map<string, ts.IScriptSnapshot | undefined> = new Map();
+  sourceFileCache = new Map<string, ts.SourceFile | undefined>();
+  snapshotCache = new Map<string, ts.IScriptSnapshot | undefined>();
   syncCompilers?: SyncCompilers;
   asyncCompilers?: AsyncCompilers;
 

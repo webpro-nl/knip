@@ -46,7 +46,7 @@ export const getEntryPathFromManifest = (
 ) => {
   const { main, bin, exports } = manifest;
 
-  const entryPaths: Set<string> = new Set();
+  const entryPaths = new Set<string>();
 
   if (typeof main === 'string') entryPaths.add(main);
 

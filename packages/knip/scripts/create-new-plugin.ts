@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { parseArgs } from '../src/util/parseArgs.js';
+import { parseArgs } from '../src/util/parse-args.js';
 
 const {
   values: { name },

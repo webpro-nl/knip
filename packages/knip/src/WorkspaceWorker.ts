@@ -59,9 +59,9 @@ export class WorkspaceWorker {
   referencedDependencies: ReferencedDependencies = new Set();
   hostDependencies: HostDependencies = new Map();
   installedBinaries: InstalledBinaries = new Map();
-  hasTypesIncluded: Set<string> = new Set();
-  entryFilePatterns: Set<string> = new Set();
-  productionEntryFilePatterns: Set<string> = new Set();
+  hasTypesIncluded = new Set<string>();
+  entryFilePatterns = new Set<string>();
+  productionEntryFilePatterns = new Set<string>();
 
   constructor({
     name,
@@ -267,7 +267,7 @@ export class WorkspaceWorker {
           // Plugin has no config files configured, add one to still invoke it and get the entry:/production: patterns
           if (configFilePaths.length === 0) configFilePaths.push(FAKE_PATH);
 
-          const pluginDependencies: Set<string> = new Set();
+          const pluginDependencies = new Set<string>();
 
           for (const configFilePath of configFilePaths) {
             const dependencies = await plugin.findDependencies(configFilePath, {

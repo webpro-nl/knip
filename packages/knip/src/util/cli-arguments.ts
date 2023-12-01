@@ -1,4 +1,4 @@
-import { parseArgs } from './parseArgs.js';
+import { parseArgs } from './parse-args.js';
 
 export const helpText = `✂️  Find unused files, dependencies and exports in your JavaScript and TypeScript projects
 

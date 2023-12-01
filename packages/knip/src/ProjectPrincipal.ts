@@ -48,11 +48,11 @@ const tsCreateProgram = timerify(ts.createProgram);
  */
 export class ProjectPrincipal {
   // Configured by user and returned from plugins
-  entryPaths: Set<string> = new Set();
-  projectPaths: Set<string> = new Set();
+  entryPaths = new Set<string>();
+  projectPaths = new Set<string>();
 
   // We don't want to report unused exports of config/plugin entry files
-  skipExportsAnalysis: Set<string> = new Set();
+  skipExportsAnalysis = new Set<string>();
 
   isGitIgnored: GlobbyFilterFunction;
   cwd: string;
@@ -191,7 +191,7 @@ export class ProjectPrincipal {
 
     const { internal, unresolved, external } = imports;
 
-    const unresolvedImports: Set<UnresolvedImport> = new Set();
+    const unresolvedImports = new Set<UnresolvedImport>();
 
     unresolved.forEach(unresolvedImport => {
       const { specifier } = unresolvedImport;

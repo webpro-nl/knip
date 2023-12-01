@@ -52,13 +52,13 @@ export const getImportsAndExports = (
   options: GetImportsAndExportsOptions
 ) => {
   const internalImports: Imports = new Map();
-  const externalImports: Set<string> = new Set();
-  const unresolvedImports: Set<UnresolvedImport> = new Set();
+  const externalImports = new Set<string>();
+  const unresolvedImports = new Set<UnresolvedImport>();
   const exports: Exports = new Map();
-  const aliasedExports: Map<string, IssueSymbol[]> = new Map();
-  const scripts: Set<string> = new Set();
+  const aliasedExports = new Map<string, IssueSymbol[]>();
+  const scripts = new Set<string>();
 
-  const importedInternalSymbols: Map<ts.Symbol, string> = new Map();
+  const importedInternalSymbols = new Map<ts.Symbol, string>();
 
   // No file-level visitors yet, so let's keep it simple
   const jsxImport = getJSXImplicitImportBase(sourceFile);

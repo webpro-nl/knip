@@ -28,8 +28,8 @@ export class IssueCollector {
   private filters: Filters;
   private issues = initIssues();
   private counters = initCounters();
-  private referencedFiles: Set<string> = new Set();
-  private configurationHints: Set<ConfigurationHint> = new Set();
+  private referencedFiles = new Set<string>();
+  private configurationHints = new Set<ConfigurationHint>();
 
   constructor({ cwd, rules, filters }: IssueCollectorOptions) {
     this.cwd = cwd;

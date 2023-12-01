@@ -18,7 +18,7 @@ import { getKeysByValue } from './util/object.js';
 import { join, relative, toPosix } from './util/path.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
 import { _require } from './util/require.js';
-import { unwrapFunction } from './util/unwrapFunction.js';
+import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type {
@@ -110,10 +110,10 @@ export class ConfigurationChief {
   manifest?: PackageJson;
 
   ignoredWorkspacePatterns: string[] = [];
-  manifestWorkspaces: Map<string, string> = new Map();
-  additionalWorkspaceNames: Set<string> = new Set();
+  manifestWorkspaces = new Map<string, string>();
+  additionalWorkspaceNames = new Set<string>();
   availableWorkspaceNames: string[] = [];
-  availableWorkspacePkgNames: Set<string | undefined> = new Set();
+  availableWorkspacePkgNames = new Set<string | undefined>();
   availableWorkspaceDirs: string[] = [];
   availableWorkspaceManifests: { dir: string; manifest: PackageJson }[] = [];
   workspacesGraph: ReturnType<typeof createPkgGraph> | undefined;
