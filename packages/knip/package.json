@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "3.3.5",
+  "version": "0.0.0-node-types.0",
   "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
   "repository": {
