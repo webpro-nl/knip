@@ -41,7 +41,7 @@ $ knip --workspace packages/client --include files,dependencies
 $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 
-More documentation and bug reports: https://github.com/webpro/knip`;
+Website: https://knip.dev`;
 
 let parsedArgs;
 try {
