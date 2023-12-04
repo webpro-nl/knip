@@ -6,8 +6,8 @@ sidebar:
 
 ## Introduction
 
-This page describes why Knip uses plugins and their `config` and `entry`
-options.
+This page describes why Knip uses plugins and the difference between `config`
+and `entry` files.
 
 ## Configuration Files
 
@@ -18,8 +18,8 @@ source files. However, configuration files often reference external dependencies
 in different ways. Knip uses plugins to parse configuration files to find those
 dependencies.
 
-In this example we look at [Knip's ESLint plugin][2]. Its default `config`
-includes `.eslintrc.json`. Here's a minimal example:
+In this example we look at [Knip's ESLint plugin][2]. The default `config` file
+patterns include `.eslintrc.json`. Here's a minimal example:
 
 ```json title=".eslintrc.json"
 {
@@ -34,6 +34,9 @@ require the referenced dependencies to be installed.
 In this case, the plugin will return the `eslint-config-airbnb`,
 `eslint-config-prettier` and `@typescript-eslint/eslint-plugin` dependencies, so
 Knip knows they should be listed in `package.json`.
+
+Some tools allow configuration to be stored in `package.json`, that's why some
+the relevant plugins contain `package.json` in the list of `config` files.
 
 :::tip[Summary]
 
@@ -154,6 +157,8 @@ jobs:
 From these scripts, the `scripts/build.js` and `scripts/deploy.ts` files will be
 added as entry files by the GitHub Actions plugin.
 
+You can read more about this in [Script Parser][3].
+
 ### webpack
 
 Let's take a look at this example webpack configuration file:
@@ -237,3 +242,4 @@ Plugins are configured with two distinct types of files:
 
 [1]: ./entry-files.md
 [2]: ../reference/plugins/eslint.md
+[3]: ../features/script-parser.md

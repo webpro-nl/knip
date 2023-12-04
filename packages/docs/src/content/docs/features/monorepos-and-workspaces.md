@@ -95,9 +95,10 @@ Knip run faster). Example:
 knip --workspace packages/my-lib
 ```
 
-This mode includes ancestor and dependent workspaces, for two reasons:
+This will include ancestor and dependent workspaces, for two reasons:
 
-- Ancestor workspaces may contain dependencies the linted workspace uses.
+- Ancestor workspaces may list dependencies in `package.json` the linted
+  workspace uses.
 - Dependent workspaces may reference exports from the linted workspace.
 
 To lint the workspace in isolation, you can combine this with [strict production
