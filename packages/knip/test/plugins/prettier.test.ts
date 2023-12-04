@@ -15,6 +15,6 @@ test('Find dependencies in Prettier configuration (.prettierrc)', async () => {
 
 test('Find dependencies in Prettier configuration (package.json)', async () => {
   const configFilePath = join(cwd, 'package.json');
-  const dependencies = await prettier.findDependencies(configFilePath, {manifest});
+  const dependencies = await prettier.findDependencies(configFilePath, { manifest });
   assert.deepEqual(dependencies, ['@company/prettier-config']);
 });

@@ -37,12 +37,13 @@ const resolveEntry = (containingFilePath: string, specifier: string) => {
   return specifier;
 };
 
+const enablesCoverageInScript = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
+
 const hasScriptWithCoverage = (scripts: Exclude<PackageJsonWithPlugins['scripts'], undefined>) => {
-  return Object.values(scripts).some((script) => {
-    return script.startsWith('vitest') &&
-           (script.includes('--coverage') || script.includes('--coverage.enabled=true'))
+  return Object.values(scripts).some(script => {
+    return enablesCoverageInScript.test(script);
   });
-}
+};
 
 const findConfigDependencies = (
   configFilePath: string,
@@ -59,8 +60,9 @@ const findConfigDependencies = (
   const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
   const reporters = getExternalReporters(testConfig.reporters);
 
-  const hasCoverageEnabled = (testConfig.coverage && testConfig.coverage.enabled !== false) ||
-                             (manifest.scripts !== undefined && hasScriptWithCoverage(manifest.scripts))
+  const hasCoverageEnabled =
+    (testConfig.coverage && testConfig.coverage.enabled !== false) ||
+    (manifest.scripts !== undefined && hasScriptWithCoverage(manifest.scripts));
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
   const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(configFilePath, v));
