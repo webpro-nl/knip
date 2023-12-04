@@ -5,6 +5,7 @@ import { hasDependency, load, tryResolve } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { ViteConfigOrFn, VitestWorkspaceConfig, ViteConfig, MODE, COMMAND } from './types.js';
+import type { PackageJsonWithPlugins } from '../../types/package-json.js';
 import type {
   IsPluginEnabledCallback,
   GenericPluginCallback,
@@ -36,12 +37,20 @@ const resolveEntry = (containingFilePath: string, specifier: string) => {
   return specifier;
 };
 
+const enablesCoverageInScript = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
+
+const hasScriptWithCoverage = (scripts: Exclude<PackageJsonWithPlugins['scripts'], undefined>) => {
+  return Object.values(scripts).some(script => {
+    return enablesCoverageInScript.test(script);
+  });
+};
+
 const findConfigDependencies = (
   configFilePath: string,
   localConfig: ViteConfig,
   options: GenericPluginCallbackOptions
 ) => {
-  const { isProduction, config } = options;
+  const { isProduction, config, manifest } = options;
   const testConfig = localConfig.test;
 
   const entryPatterns = (config?.entry ?? testConfig?.include ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
@@ -50,10 +59,12 @@ const findConfigDependencies = (
 
   const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
   const reporters = getExternalReporters(testConfig.reporters);
-  const coverage =
-    testConfig.coverage && testConfig.coverage.enabled !== false
-      ? [`@vitest/coverage-${testConfig.coverage.provider ?? 'v8'}`]
-      : [];
+
+  const hasCoverageEnabled =
+    (testConfig.coverage && testConfig.coverage.enabled !== false) ||
+    (manifest.scripts !== undefined && hasScriptWithCoverage(manifest.scripts));
+  const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
+
   const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(configFilePath, v));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(v => resolveEntry(configFilePath, v));
   return [...entryPatterns, ...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup];
