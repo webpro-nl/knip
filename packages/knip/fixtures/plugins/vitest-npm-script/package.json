@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/vitest-npm-script",
+  "scripts": {
+    "test:coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "vitest": "^0.34.6"
+  }
+}
