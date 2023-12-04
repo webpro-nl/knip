@@ -47,14 +47,16 @@ test('Find dependencies in vitest configuration', async () => {
   });
 
   assert(issues.unlisted['vitest.workspace.ts']['@edge-runtime/vm']);
+  assert(issues.unlisted['vitest-default-coverage.config.ts']['jsdom']);
+  assert(issues.unlisted['vitest-default-coverage.config.ts']['@vitest/coverage-v8']);
   assert(issues.unlisted['vitest.config.ts']['happy-dom']);
   assert(issues.unlisted['vitest.config.ts']['@vitest/coverage-istanbul']);
   assert(issues.unlisted['vitest.config.ts']['setup.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
-    unlisted: 4,
+    files: 1,
+    unlisted: 6,
     processed: 6,
     total: 6,
   });

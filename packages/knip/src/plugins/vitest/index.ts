@@ -22,7 +22,7 @@ export const ENABLERS = ['vitest'];
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = [
-  'vitest.config.{js,mjs,ts,cjs,mts,cts}',
+  'vitest*.config.{js,mjs,ts,cjs,mts,cts}',
   'vitest.{workspace,projects}.{ts,js,json}',
 ];
 

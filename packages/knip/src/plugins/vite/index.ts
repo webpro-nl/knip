@@ -13,7 +13,7 @@ export const ENABLERS = ['vite'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
+export const CONFIG_FILE_PATTERNS = ['vite*.config.{js,mjs,ts,cjs,mts,cts}'];
 
 const findViteDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const localConfig: ViteConfigOrFn | undefined = await load(configFilePath);
