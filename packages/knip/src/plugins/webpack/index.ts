@@ -18,7 +18,7 @@ export const ENABLERS = ['webpack'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['webpack.config*.{js,ts}'];
+export const CONFIG_FILE_PATTERNS = ['webpack.config*.{js,ts,mjs,cjs,mts,cts}'];
 
 const hasBabelOptions = (use: RuleSetUseItem) =>
   Boolean(use) &&
@@ -102,7 +102,7 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, op
   if (isProduction) return [...entryPatterns];
 
   const scripts = Object.values(manifest.scripts ?? {});
-  const webpackCLI = scripts.some(script => script?.includes('webpack ')) ? ['webpack-cli'] : [];
+  const webpackCLI = scripts.some(script => script && /(?<=^|\s)webpack(?=\s|$)/.test(script)) ? ['webpack-cli'] : [];
   const webpackDevServer = scripts.some(script => script?.includes('webpack serve')) ? ['webpack-dev-server'] : [];
 
   return compact([...entryPatterns, ...dependencies, ...webpackCLI, ...webpackDevServer]);
