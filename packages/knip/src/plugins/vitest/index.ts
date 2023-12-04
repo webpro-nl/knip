@@ -93,7 +93,8 @@ export const findVitestDependencies = async (
     resolveEntry(configFilePath, specifier)
   );
 
-  if (!localConfig.test) return dependencies;
+  // When coming from the vite plugin we should not assume vitest is enabled
+  if (!options.enabledPlugins.includes('vitest')) return dependencies;
 
   return [...dependencies, ...findConfigDependencies(configFilePath, localConfig, options)];
 };

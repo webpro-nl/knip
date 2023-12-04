@@ -275,6 +275,7 @@ export class WorkspaceWorker {
               manifest: this.manifest,
               config: pluginConfig,
               isProduction: this.isProduction,
+              enabledPlugins: this.enabledPlugins,
             });
 
             dependencies.forEach(specifier => {
