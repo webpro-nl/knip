@@ -69,7 +69,9 @@ for await (const dir of directories) {
     const en =
       Array.isArray(ENABLERS) && ENABLERS.length > 0
         ? [
-            ...parseFragment('This plugin is enabled when there is match in `dependencies` or `devDependencies`:'),
+            ...parseFragment(
+              "This plugin is enabled when there's a match in `dependencies` or `devDependencies` in `package.json`:"
+            ),
             u(
               'list',
               ENABLERS.map((enabler: string | RegExp) =>
@@ -90,6 +92,7 @@ for await (const dir of directories) {
         lang: 'json title="knip.json"', // TODO How to set attributes/properties/props properly?
         value: JSON.stringify({ [pluginName]: defaults }, null, 2),
       }),
+      ...parseFragment('Custom `config` or `entry` configuration overrides the defaults, they are not merged.'),
     ]);
 
     console.log(`Writing ${pluginName} docs to plugins/${pluginName}.md`);
