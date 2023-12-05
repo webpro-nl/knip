@@ -1,6 +1,6 @@
 import { compact } from '../../util/array.js';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
-import { isInternal, dirname, toAbsolute } from '../../util/path.js';
+import { basename, isInternal, dirname, toAbsolute } from '../../util/path.js';
 import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
@@ -35,11 +35,12 @@ type GetDependenciesDeep = (
 export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, options, dependencies = new Set()) => {
   const addAll = (deps: string[] | Set<string>) => deps.forEach(dependency => dependencies.add(dependency));
 
-  const localConfig: ESLintConfig | undefined = configFilePath.endsWith('package.json')
-    ? options.manifest[PACKAGE_JSON_PATH]
-    : /(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
-      ? await load(configFilePath)
-      : await fallback(configFilePath);
+  const localConfig: ESLintConfig | undefined =
+    basename(configFilePath) === 'package.json'
+      ? options.manifest[PACKAGE_JSON_PATH]
+      : /(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
+        ? await load(configFilePath)
+        : await fallback(configFilePath);
 
   if (localConfig) {
     if (localConfig.extends) {

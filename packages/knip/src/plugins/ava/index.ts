@@ -1,4 +1,5 @@
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
@@ -33,9 +34,8 @@ export const ENTRY_FILE_PATTERNS = [
 const findAvaDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { cwd, manifest, isProduction, config } = options;
 
-  let localConfig: AvaConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest.ava
-    : await load(configFilePath);
+  let localConfig: AvaConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.ava : await load(configFilePath);
 
   if (typeof localConfig === 'function') localConfig = localConfig();
 

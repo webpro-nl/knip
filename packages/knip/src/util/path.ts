@@ -10,6 +10,8 @@ export const dirname = path.posix.dirname;
 
 export const extname = path.posix.extname;
 
+export const basename = path.posix.basename;
+
 export const join = path.posix.join;
 
 export const toPosix = (value: string) => value.split(path.sep).join(path.posix.sep);

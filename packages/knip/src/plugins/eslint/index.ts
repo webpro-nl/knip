@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesDeep } from './helpers.js';
@@ -33,7 +34,7 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
   if (isProduction) return [];
 
   // The new configuration format does not need custom dependency resolving (it has only imports)
-  if (configFilePath.endsWith('eslint.config.js')) return [];
+  if (basename(configFilePath) === 'eslint.config.js') return [];
 
   const dependencies = await getDependenciesDeep(configFilePath, { cwd, manifest });
   return Array.from(dependencies);

@@ -1,4 +1,4 @@
-import { isInternal } from '../../util/path.js';
+import { basename, isInternal } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
@@ -24,9 +24,8 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
 
   if (isProduction) return [];
 
-  const localConfig: PluginConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest.stylelint
-    : await load(configFilePath);
+  const localConfig: PluginConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.stylelint : await load(configFilePath);
 
   if (!localConfig) return [];
 

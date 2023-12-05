@@ -1,4 +1,5 @@
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { ReleaseItConfig } from './types.js';
@@ -27,9 +28,8 @@ const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, 
 
   if (isProduction) return [];
 
-  const localConfig: ReleaseItConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest[PACKAGE_JSON_PATH]
-    : await load(configFilePath);
+  const localConfig: ReleaseItConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
 
   if (!localConfig) return [];
 

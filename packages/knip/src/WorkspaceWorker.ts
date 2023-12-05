@@ -4,7 +4,7 @@ import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
 import { FAKE_PATH } from './util/loader.js';
 import { get, getKeysByValue } from './util/object.js';
-import { join, toPosix } from './util/path.js';
+import { basename, join, toPosix } from './util/path.js';
 import {
   fromEntryPattern,
   fromProductionEntryPattern,
@@ -258,7 +258,7 @@ export class WorkspaceWorker {
 
           const configFilePaths = allConfigFilePaths.filter(
             filePath =>
-              !filePath.endsWith('package.json') ||
+              basename(filePath) !== 'package.json' ||
               get(this.manifest, 'PACKAGE_JSON_PATH' in plugin ? plugin.PACKAGE_JSON_PATH : pluginName)
           );
 

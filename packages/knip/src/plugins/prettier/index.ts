@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { PrettierConfig } from './types.js';
@@ -23,9 +24,8 @@ export const CONFIG_FILE_PATTERNS = [
 const findPrettierDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   if (isProduction) return [];
 
-  const localConfig: PrettierConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest.prettier
-    : await load(configFilePath);
+  const localConfig: PrettierConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.prettier : await load(configFilePath);
 
   // https://prettier.io/docs/en/configuration.html#sharing-configurations
   if (typeof localConfig === 'string') {

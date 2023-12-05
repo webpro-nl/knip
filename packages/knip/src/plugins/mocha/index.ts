@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
@@ -21,9 +22,8 @@ export const ENTRY_FILE_PATTERNS = ['**/test/*.{js,cjs,mjs}'];
 const findMochaDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config, manifest, isProduction } = options;
 
-  const localConfig: MochaConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest.mocha
-    : await load(configFilePath);
+  const localConfig: MochaConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.mocha : await load(configFilePath);
 
   const entryPatterns = (config.entry ?? (localConfig?.spec ? [localConfig.spec].flat() : ENTRY_FILE_PATTERNS)).map(
     toEntryPattern

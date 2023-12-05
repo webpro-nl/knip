@@ -1,4 +1,4 @@
-import { join, isInternal, toAbsolute, dirname } from '../../util/path.js';
+import { basename, join, isInternal, toAbsolute, dirname } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
@@ -92,9 +92,8 @@ const resolveDependencies = (config: JestInitialOptions, options: GenericPluginC
 const findJestDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { manifest, cwd } = options;
 
-  let localConfig: JestConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest.jest
-    : await resolveExtensibleConfig(configFilePath);
+  let localConfig: JestConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.jest : await resolveExtensibleConfig(configFilePath);
 
   if (typeof localConfig === 'function') localConfig = await localConfig();
 

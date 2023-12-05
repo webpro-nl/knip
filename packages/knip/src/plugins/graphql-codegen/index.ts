@@ -1,4 +1,4 @@
-import { isInternal } from '../../util/path.js';
+import { basename, isInternal } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
@@ -30,9 +30,8 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
 
   if (isProduction) return [];
 
-  const localConfig: GraphqlCodegenTypes | undefined = configFilePath.endsWith('package.json')
-    ? manifest[PACKAGE_JSON_PATH]
-    : await load(configFilePath);
+  const localConfig: GraphqlCodegenTypes | undefined =
+    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
 
   if (!localConfig) return [];
 

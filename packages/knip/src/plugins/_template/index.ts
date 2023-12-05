@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
@@ -28,10 +29,11 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
 
   // load configuration file from `configFilePath` (or grab `manifest` for package.json)
   // load(FAKE_PATH) will return `undefined`
-  const localConfig: PluginConfig | undefined = configFilePath.endsWith('package.json')
-    ? // @ts-expect-error `plugin` is not an actual plugin name
-      manifest.plugin
-    : await load(configFilePath);
+  const localConfig: PluginConfig | undefined =
+    basename(configFilePath) === 'package.json'
+      ? // @ts-expect-error `plugin` is not an actual plugin name
+        manifest.plugin
+      : await load(configFilePath);
 
   if (!localConfig) return [];
 

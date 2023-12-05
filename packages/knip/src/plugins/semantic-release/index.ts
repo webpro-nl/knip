@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { SemanticReleaseConfig } from './types.js';
@@ -26,9 +27,8 @@ const findSemanticReleaseDependencies: GenericPluginCallback = async (configFile
 
   if (isProduction) return [];
 
-  const localConfig: SemanticReleaseConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest[PACKAGE_JSON_PATH]
-    : await load(configFilePath);
+  const localConfig: SemanticReleaseConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
 
   const plugins = (localConfig?.plugins ?? []).map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));
   return plugins;

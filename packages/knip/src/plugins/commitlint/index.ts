@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -26,9 +27,8 @@ export const CONFIG_FILE_PATTERNS = [
 const findCommitLintDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   if (isProduction) return [];
 
-  const localConfig: CommitLintConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest.commitlint
-    : await load(configFilePath);
+  const localConfig: CommitLintConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.commitlint : await load(configFilePath);
 
   if (!localConfig) return [];
 

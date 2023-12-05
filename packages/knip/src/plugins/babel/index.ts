@@ -1,4 +1,5 @@
 import { compact } from '../../util/array.js';
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { resolveName, api } from './helpers.js';
@@ -35,9 +36,8 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): string[] => {
 const findBabelDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   if (isProduction) return [];
 
-  let localConfig: BabelConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest.babel
-    : await load(configFilePath);
+  let localConfig: BabelConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.babel : await load(configFilePath);
 
   if (typeof localConfig === 'function') localConfig = localConfig(api);
 

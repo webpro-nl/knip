@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { CommitizenConfig } from './types.js';
@@ -19,9 +20,8 @@ export const CONFIG_FILE_PATTERNS = ['.czrc', '.cz.json', 'package.json'];
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   if (isProduction) return [];
 
-  const localConfig: CommitizenConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest.config?.commitizen
-    : await load(configFilePath);
+  const localConfig: CommitizenConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.config?.commitizen : await load(configFilePath);
 
   if (!localConfig) return [];
 

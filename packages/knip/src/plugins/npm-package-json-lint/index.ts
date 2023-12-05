@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { NpmPkgJsonLintConfig } from './types.js';
@@ -21,9 +22,8 @@ const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (confi
 
   if (isProduction) return [];
 
-  const localConfig: NpmPkgJsonLintConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest[PACKAGE_JSON_PATH]
-    : await load(configFilePath);
+  const localConfig: NpmPkgJsonLintConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
 
   return localConfig?.extends ? [localConfig.extends] : [];
 };

@@ -1,4 +1,5 @@
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { LintStagedConfig } from './types.js';
@@ -29,9 +30,8 @@ const findLintStagedDependencies: GenericPluginCallback = async (configFilePath,
 
   if (isProduction) return [];
 
-  let localConfig: LintStagedConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest['lint-staged']
-    : await load(configFilePath);
+  let localConfig: LintStagedConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest['lint-staged'] : await load(configFilePath);
 
   if (typeof localConfig === 'function') localConfig = localConfig();
 

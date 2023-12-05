@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { TypeDocConfig } from './types.js';
@@ -28,11 +29,12 @@ const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, op
 
   if (isProduction) return [];
 
-  const localConfig: TypeDocConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest[PACKAGE_JSON_PATH]
-    : configFilePath.endsWith('tsconfig.json')
-      ? (await load(configFilePath)).typedocOptions
-      : await load(configFilePath);
+  const localConfig: TypeDocConfig | undefined =
+    basename(configFilePath) === 'package.json'
+      ? manifest[PACKAGE_JSON_PATH]
+      : basename(configFilePath) === 'tsconfig.json'
+        ? (await load(configFilePath)).typedocOptions
+        : await load(configFilePath);
 
   return localConfig?.plugin ?? [];
 };

@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { RemarkConfig } from './types.js';
@@ -27,9 +28,8 @@ const findRemarkDependencies: GenericPluginCallback = async (configFilePath, opt
 
   if (isProduction) return [];
 
-  const localConfig: RemarkConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest[PACKAGE_JSON_PATH]
-    : await load(configFilePath);
+  const localConfig: RemarkConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
 
   if (!localConfig) return [];
 

@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { PostCSSConfig } from './types.js';
@@ -17,9 +18,8 @@ const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, op
 
   if (isProduction) return [];
 
-  const localConfig: PostCSSConfig | undefined = configFilePath.endsWith('package.json')
-    ? manifest?.postcss
-    : await load(configFilePath);
+  const localConfig: PostCSSConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest?.postcss : await load(configFilePath);
 
   if (!localConfig) return [];
 

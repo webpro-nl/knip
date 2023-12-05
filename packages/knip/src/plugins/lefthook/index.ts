@@ -1,6 +1,7 @@
 import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { getGitHookPaths } from '../../util/git.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
+import { extname } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load, loadFile } from '../../util/plugin.js';
 import { fromBinary } from '../../util/protocols.js';
@@ -26,7 +27,7 @@ const findLefthookDependencies: GenericPluginCallback = async (configFilePath, o
 
   const dependencies = manifest.devDependencies ? Object.keys(manifest.devDependencies) : [];
 
-  if (configFilePath.endsWith('.yml')) {
+  if (extname(configFilePath) === '.yml') {
     const localConfig = await load(configFilePath);
     if (!localConfig) return [];
     const scripts = getValuesByKeyDeep(localConfig, 'run').filter((run): run is string => typeof run === 'string');
