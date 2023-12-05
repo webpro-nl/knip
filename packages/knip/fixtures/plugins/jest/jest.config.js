@@ -25,4 +25,5 @@ module.exports = {
     },
   ],
   testResultsProcessor: 'jest-phabricator',
+  snapshotResolver: '<rootDir>/snapshotResolver.js',
 };

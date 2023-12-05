@@ -26,5 +26,6 @@ test('Find dependencies in Jest configuration (jest.config.js)', async () => {
     join(cwd, '__mocks__/fileMock.js'),
     'identity-obj-proxy',
     'jest-phabricator',
+    join(cwd, 'snapshotResolver.js'),
   ]);
 });

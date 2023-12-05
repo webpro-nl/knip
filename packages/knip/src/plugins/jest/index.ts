@@ -71,6 +71,7 @@ const resolveDependencies = (config: JestInitialOptions, options: GenericPluginC
       : []
   ).filter(value => !/\$[0-9]/.test(value));
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
+  const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
 
   return [
     ...entryPatterns,
@@ -86,6 +87,7 @@ const resolveDependencies = (config: JestInitialOptions, options: GenericPluginC
     ...transform,
     ...moduleNameMapper,
     ...testResultsProcessor,
+    ...snapshotResolver,
   ];
 };
 
