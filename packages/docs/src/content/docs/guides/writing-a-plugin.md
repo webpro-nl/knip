@@ -18,11 +18,11 @@ cd packages/knip
 npm run create-plugin -- --name cool-linter
 ```
 
-It will add source files, and a test and fixtures to get you started.
+This adds source files, and a test and fixtures to get you started. The main
+source file contains comments for some guidance as well.
 
-If there's a plugin similar to what you need, you can also copy the plugin, its
-tests and fixtures. The rest of this tutorial assumes we used the
-`create-plugin` script.
+If there's a plugin similar to what you need, by all means, copy from that
+plugin implementation, tests and fixtures.
 
 ## Exports
 
@@ -77,9 +77,11 @@ define as `CONFIG_FILE_PATTERNS` here in the plugin.
 :::tip
 
 You only need `CONFIG_FILE_PATTERNS` and implement the `findDependencies`
-function if at least one of the configuration files is JSON or YAML, or if the
-configuration references dependencies not using regular `require` or `import`
-statements.
+function if:
+
+- At least one of the configuration files is JSON or YAML, OR
+- The configuration references dependencies not using regular `require` or
+  `import` statements
 
 :::
 
@@ -103,13 +105,15 @@ For each configuration file with a match in `CONFIG_FILE_PATTERNS`, the
 `findDependencies` function will be invoked with the file path as the first
 argument. There should usually be just one match (per workspace).
 
-#### Notes
+#### Note
 
 Configuration files may end with `.js` or `.ts`, such as
 `cool-linter.config.js`. The default export of these files will be handled by
-the `findDependencies` function we will define in our plugin. But since these
-files may also `require` or `import` dependencies, Knip automatically adds them
-to [`ENTRY_FILE_PATTERNS`][4].
+the `findDependencies` function we will define in our plugin (the plugin loads
+the file dynamically). Since these files may also `require` or `import`
+dependencies, Knip also automatically adds them to [`ENTRY_FILE_PATTERNS`][4]
+(for static analysis). Also see [Plugins → Bringing It All Together][5] for an
+example.
 
 ### `findDependencies`
 
@@ -119,8 +123,8 @@ The `findDependencies` function should do three things:
 2. Find dependencies referenced in this configuration.
 3. Return an array of the dependencies.
 
-For example, you are using Cool Linter in your project, and running Knip results
-in some false positives:
+Let's look at an example. Say you're using the Cool Linter tool in your project.
+Running Knip results in some false positives:
 
 ```sh
 $ knip
@@ -176,7 +180,7 @@ various types of entry files:
   `findPluginDependencies`. Yet it does have `next.config.{js,ts}` in
   `ENTRY_FILE_PATTERNS`, since that file may `require` or `import` dependencies.
 
-In [production mode][5], these files are not included. They are included only in
+In [production mode][6], these files are not included. They are included only in
 the default mode.
 
 Cool Linter does not require such files, so we can remove them from our plugin.
@@ -197,7 +201,7 @@ const PRODUCTION_ENTRY_FILE_PATTERNS = [
 ];
 ```
 
-In [production mode][5], these files are included (while `ENTRY_FILE_PATTERNS`
+In [production mode][6], these files are included (while `ENTRY_FILE_PATTERNS`
 are not). They're also included in the default mode.
 
 Cool Linter does not require this export, so we can delete this from our plugin.
@@ -215,7 +219,7 @@ export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
 ```
 
 Most plugins don't need to set this, since the [default configuration for
-`project`][6] already covers these files.
+`project`][7] already covers these files.
 
 Cool Linter does not require this export, so we can delete this from our plugin.
 
@@ -265,5 +269,6 @@ plugin, this might be the right time to open a pull request!
 [2]: https://github.com/webpro/knip/blob/v3/packages/knip/src/types/plugins.ts
 [3]: ../explanations/plugins.md
 [4]: #entry_file_patterns
-[5]: ../features/production-mode.md
-[6]: ../overview/configuration.md#defaults
+[5]: ../explanations/plugins.md#bringing-it-all-together
+[6]: ../features/production-mode.md
+[7]: ../overview/configuration.md#defaults
