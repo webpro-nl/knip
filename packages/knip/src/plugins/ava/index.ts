@@ -1,7 +1,6 @@
-import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { getDependenciesFromScripts, hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import type { AvaConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -47,7 +46,7 @@ const findAvaDependencies: GenericPluginCallback = async (configFilePath, option
   const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
   const fakeCommand = `node ${nodeArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  const dependencies = _getDependenciesFromScripts([fakeCommand], {
+  const dependencies = getDependenciesFromScripts([fakeCommand], {
     cwd,
     manifest,
     knownGlobalsOnly: true,

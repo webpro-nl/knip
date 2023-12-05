@@ -1,8 +1,7 @@
-import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { getGitHookPaths } from '../../util/git.js';
 import { FAKE_PATH } from '../../util/loader.js';
 import { timerify } from '../../util/Performance.js';
-import { hasDependency, loadFile } from '../../util/plugin.js';
+import { getDependenciesFromScripts, hasDependency, loadFile } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://typicode.github.io/husky
@@ -28,7 +27,7 @@ const findHuskyDependencies: GenericPluginCallback = async (configFilePath, opti
 
   if (!script) return [];
 
-  return _getDependenciesFromScripts(String(script), {
+  return getDependenciesFromScripts(String(script), {
     cwd,
     manifest,
     knownGlobalsOnly: true,

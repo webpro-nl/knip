@@ -1,9 +1,8 @@
-import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { getGitHookPaths } from '../../util/git.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { extname } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
-import { hasDependency, load, loadFile } from '../../util/plugin.js';
+import { getDependenciesFromScripts, hasDependency, load, loadFile } from '../../util/plugin.js';
 import { fromBinary } from '../../util/protocols.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -32,14 +31,14 @@ const findLefthookDependencies: GenericPluginCallback = async (configFilePath, o
     if (!localConfig) return [];
     const scripts = getValuesByKeyDeep(localConfig, 'run').filter((run): run is string => typeof run === 'string');
     const lefthook = process.env.CI ? ENABLERS.filter(dependency => dependencies.includes(dependency)) : [];
-    return [...lefthook, ..._getDependenciesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true })];
+    return [...lefthook, ...getDependenciesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true })];
   }
 
   const script = await loadFile(configFilePath);
 
   if (!script) return [];
 
-  const scriptDependencies = _getDependenciesFromScripts([script], { cwd, manifest, knownGlobalsOnly: false });
+  const scriptDependencies = getDependenciesFromScripts([script], { cwd, manifest, knownGlobalsOnly: false });
   const matches = scriptDependencies.find(dep => dependencies.includes(fromBinary(dep)));
   return matches ? [matches] : [];
 };

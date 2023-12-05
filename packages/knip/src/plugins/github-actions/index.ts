@@ -1,8 +1,7 @@
-import { _getDependenciesFromScripts } from '../../binaries/index.js';
 import { _firstGlob } from '../../util/glob.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
 import { timerify } from '../../util/Performance.js';
-import { load } from '../../util/plugin.js';
+import { getDependenciesFromScripts, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
@@ -29,7 +28,7 @@ const findGithubActionsDependencies: GenericPluginCallback = async (configFilePa
 
   const scripts = getValuesByKeyDeep(config, 'run').filter((value): value is string => typeof value === 'string');
 
-  return _getDependenciesFromScripts(scripts, {
+  return getDependenciesFromScripts(scripts, {
     cwd,
     manifest,
     knownGlobalsOnly: true,
