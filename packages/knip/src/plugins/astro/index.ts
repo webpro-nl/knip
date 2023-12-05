@@ -27,7 +27,7 @@ export const findDependencies: GenericPluginCallback = async (configFilePath, op
   if (
     !isProduction &&
     manifest.scripts &&
-    Object.values(manifest.scripts).some(script => /astro (--.+ )?check/.test(script))
+    Object.values(manifest.scripts).some(script => /(?<=^|\s)astro(\s|\s.+\s)check(?=\s|$)/.test(script))
   ) {
     dependencies.push('@astrojs/check');
   }
