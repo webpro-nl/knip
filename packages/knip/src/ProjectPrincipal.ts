@@ -7,7 +7,7 @@ import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { compact } from './util/array.js';
-import { isMaybePackageName, sanitizeSpecifier } from './util/modules.js';
+import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
@@ -213,7 +213,7 @@ export class ProjectPrincipal {
         }
       } else {
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
-        if (isMaybePackageName(sanitizedSpecifier)) {
+        if (isStartsLikePackageName(sanitizedSpecifier)) {
           // Should never end up here; maybe a dependency that was not installed.
           external.add(sanitizedSpecifier);
         } else {

@@ -1,7 +1,7 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { getOrSet } from '../util/map.js';
-import { isMaybePackageName, sanitizeSpecifier } from '../util/modules.js';
+import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
 import {
   isDeclarationFileExtension,
@@ -107,7 +107,10 @@ export const getImportsAndExports = (
           }
 
           const sanitizedSpecifier = sanitizeSpecifier(specifier);
-          if (!isMaybePackageName(sanitizedSpecifier)) return;
+          if (!isStartsLikePackageName(sanitizedSpecifier)) {
+            // Import maps and other exceptions, examples from tests: #dep, #internals/used, $app/stores
+            return;
+          }
 
           if (isDeclarationFileExtension(module.resolvedModule.extension)) {
             // We use TypeScript's module resolution, but it returns DTS references. In the rest of the program we want
