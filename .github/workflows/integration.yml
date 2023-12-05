@@ -54,3 +54,10 @@ jobs:
           repository: TanStack/query
           path: query
       - run: cd query && pnpm install && knip
+
+      - name: Test Knip against argos-ci/argos
+        uses: actions/checkout@v4
+        with:
+          repository: argos-ci/argos
+          path: argos
+      - run: cd argos && npm install && knip
