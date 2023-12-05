@@ -1,6 +1,5 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
-import expressiveCode from 'astro-expressive-code';
 import remarkDirective from 'remark-directive';
 import { transformDirectives } from './remark/transformDirectives.ts';
 import { fixInternalLinks } from './remark/fixInternalLinks.ts';
@@ -18,25 +17,6 @@ export default defineConfig({
     remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
   },
   integrations: [
-    expressiveCode({
-      emitExternalStylesheet: true,
-      styleOverrides: {
-        'frm-tooltipSuccessBg': 'var(--sl-color-orange)',
-        'frm-tooltipSuccessFg': 'var(--sl-color-white)',
-      },
-      frames: {
-        showCopyToClipboardButton: true,
-      },
-      themes: ['min-dark'],
-      theme: 'min-dark',
-      customizeTheme: theme => {
-        theme.settings[0].foreground = '#ededed';
-        setForeground(theme, 'entity.name.tag', '#f68a22');
-        setForeground(theme, 'entity.name.type', '#ededed');
-        setForeground(theme, 'string', '#ededed');
-        return theme;
-      },
-    }),
     starlight({
       title: 'knip.dev',
       logo: {
@@ -83,6 +63,25 @@ export default defineConfig({
           autogenerate: { directory: 'blog' },
         },
       ],
+      expressiveCode: {
+        emitExternalStylesheet: true,
+        styleOverrides: {
+          'frm-tooltipSuccessBg': 'var(--sl-color-orange)',
+          'frm-tooltipSuccessFg': 'var(--sl-color-white)',
+        },
+        frames: {
+          showCopyToClipboardButton: true,
+        },
+        themes: ['min-dark'],
+        theme: 'min-dark',
+        customizeTheme: theme => {
+          theme.settings[0].foreground = '#ededed';
+          setForeground(theme, 'entity.name.tag', '#f68a22');
+          setForeground(theme, 'entity.name.type', '#ededed');
+          setForeground(theme, 'string', '#ededed');
+          return theme;
+        },
+      },
     }),
   ],
 });
