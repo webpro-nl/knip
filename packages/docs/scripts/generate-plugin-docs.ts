@@ -106,7 +106,7 @@ const frontmatter = u('yaml', `title: Plugins\ntableOfContents: false`);
 
 const tree = u('root', [
   frontmatter,
-  u('containerDirective', { name: 'section{.plugins}' }, [
+  u('containerDirective', { name: 'section{.columns.min200}' }, [
     u(
       'list',
       { spread: false, ordered: false },

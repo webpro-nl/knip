@@ -3,7 +3,7 @@ title: Plugins
 tableOfContents: false
 ---
 
-:::section{.plugins}
+:::section{.columns.min200}
 
 - [Angular][1]
 - [Astro][2]
