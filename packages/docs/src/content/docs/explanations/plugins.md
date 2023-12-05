@@ -9,6 +9,12 @@ sidebar:
 This page describes why Knip uses plugins and the difference between `config`
 and `entry` files.
 
+## Enabled
+
+Plugins are enabled if the related package is listed in the list of dependencies
+in `package.json`. For instance, if `astro` is listed in `dependencies` or
+`devDependencies`, then the Astro plugin is enabled.
+
 ## Configuration Files
 
 Knip uses [entry files][1] as starting points to scan your source code and
