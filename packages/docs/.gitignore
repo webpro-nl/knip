@@ -3,4 +3,4 @@
 .env
 dist/
 node_modules/
-src/content/docs/plugins/
+src/content/docs/reference/plugins/
