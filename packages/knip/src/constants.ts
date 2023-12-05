@@ -9,8 +9,9 @@ export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
 
 export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 
-// Binaries that are expected to be globally installed (i.e. https://www.npmjs.com/package/[name] is NOT the expected dependency)
-// Package may exist in npm registry, but last publish is at least 6 years ago.
+// Binaries that are expected to be globally installed
+// In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
+// Package may exist in npm registry, but last publish is at least 6 years ago
 export const IGNORED_GLOBAL_BINARIES = [
   'bash',
   'bun',
@@ -39,9 +40,10 @@ export const IGNORED_GLOBAL_BINARIES = [
   'rm',
   'sh',
   'sudo',
-  'test', // exception
+  'test', // exception (node built-in module)
   'true',
   'yarn',
+  'xargs',
 ];
 
 export const IGNORED_DEPENDENCIES = ['knip', 'typescript'];

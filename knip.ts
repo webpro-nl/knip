@@ -17,7 +17,7 @@ const config: KnipConfig = {
     },
     'packages/docs': {
       entry: ['{remark,scripts}/*.ts', 'src/components/{Head,Footer}.astro!'],
-      ignoreBinaries: ['rg', 'xargs']
+      ignoreBinaries: ['rg']
     }
   },
   compilers: {
