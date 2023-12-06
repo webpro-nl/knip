@@ -7,7 +7,7 @@ type ImportItems = Set<Identifier>;
 export type ImportedModule = {
   specifier: Specifier;
   symbols: ImportItems;
-  isStar: boolean;
+  hasStar: boolean;
   isReExport: boolean;
   isReExportedBy: Set<string>;
 };

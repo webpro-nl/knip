@@ -301,14 +301,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           } else {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const importedModule = importedSymbols.get(specifierFilePath)!;
-            for (const identifier of importItems.symbols) {
-              importedModule.symbols.add(identifier);
-            }
+            for (const identifier of importItems.symbols) importedModule.symbols.add(identifier);
+            if (importItems.hasStar) importedModule.hasStar = true;
             if (importItems.isReExport) {
-              importedModule.isReExport = importItems.isReExport;
+              importedModule.isReExport = true;
               importedModule.isReExportedBy.add(filePath);
             }
-            if (importItems.isStar) importedModule.isStar = importItems.isStar;
           }
         }
 
@@ -401,10 +399,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
 
       if (principal) {
-        // Bail out when in entry file (unless --include-entry-exports)
-        if (!workspace.config.isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
+        const { isIncludeEntryExports } = workspace.config;
 
-        const importingModule = importedSymbols.get(filePath);
+        // Bail out when in entry file (unless --include-entry-exports)
+        if (!isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
+
+        const importsForExport = importedSymbols.get(filePath);
 
         for (const [symbol, exportedItem] of exportItems.entries()) {
           // Skip exports tagged `@public` or `@beta`
@@ -413,9 +413,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Skip exports tagged `@internal` in --production mode
           if (isProduction && exportedItem.jsDocTags.has('@internal')) continue;
 
-          if (importingModule && isSymbolImported(symbol, importingModule)) {
+          if (importsForExport && isSymbolImported(symbol, importsForExport)) {
             // Skip members of classes/enums that are eventually exported by entry files
-            if (importingModule.isReExport && isExportedInEntryFile(principal, importingModule)) continue;
+            if (importsForExport.isReExport && isExportedInEntryFile(principal, importsForExport)) continue;
 
             if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
               principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
@@ -445,29 +445,24 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             continue;
           }
 
-          const isStar = Boolean(importingModule?.isStar);
-          const isReExportedByEntryFile =
-            !workspace.config.isIncludeEntryExports && isStar && isExportedInEntryFile(principal, importingModule);
+          const hasNsImport = Boolean(importsForExport?.hasStar);
 
-          if (!isReExportedByEntryFile && !isExportedItemReferenced(principal, exportedItem, filePath)) {
-            if (['enum', 'type', 'interface'].includes(exportedItem.type)) {
-              const type = isStar ? 'nsTypes' : 'types';
-              collector.addIssue({
-                type,
-                filePath,
-                symbol,
-                symbolType: exportedItem.type,
-                ...principal.getPos(exportedItem.node, exportedItem.pos),
-              });
-            } else {
-              const type = isStar ? 'nsExports' : 'exports';
-              collector.addIssue({
-                type,
-                filePath,
-                symbol,
-                ...principal.getPos(exportedItem.node, exportedItem.pos),
-              });
-            }
+          const isReExport =
+            !isIncludeEntryExports && hasNsImport && isExportedInEntryFile(principal, importsForExport);
+
+          const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
+
+          if (hasNsImport && ((!report.nsTypes && isType) || (!report.nsExports && !isType))) continue;
+
+          if (!isReExport && !isExportedItemReferenced(principal, exportedItem, filePath)) {
+            const type = isType ? (hasNsImport ? 'nsTypes' : 'types') : hasNsImport ? 'nsExports' : 'exports';
+            collector.addIssue({
+              type,
+              filePath,
+              symbol,
+              symbolType: exportedItem.type,
+              ...principal.getPos(exportedItem.node, exportedItem.pos),
+            });
           }
         }
       }

@@ -73,7 +73,7 @@ export const getImportsAndExports = (
 
     const internalImport = getOrSet(internalImports, filePath, {
       specifier,
-      isStar,
+      hasStar: isStar,
       isReExport,
       isReExportedBy: new Set(),
       symbols: new Set(),
@@ -84,7 +84,7 @@ export const getImportsAndExports = (
       internalImport.isReExportedBy.add(sourceFile.fileName);
     }
 
-    if (isStar) internalImport.isStar = isStar;
+    if (isStar) internalImport.hasStar = true;
 
     if (!isStar) internalImport.symbols.add(identifier);
 
