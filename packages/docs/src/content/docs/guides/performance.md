@@ -29,7 +29,7 @@ Example of a star import:
 import * as MyNamespace from './helpers';
 ```
 
-Use the [`--performance` flag][1] to see how often `findReferences` is used and
+Use the `--performance` flag to see how often [`findReferences`][1] is used and
 how much time is spent there.
 
 This article explains the issue in more detail: [Speeding up the JavaScript
@@ -65,6 +65,35 @@ The first number in `P1/1` is the number of the program, the second number
 indicates additional entry files were found in the previous round so it does
 another round of analysis on those files.
 
+## findReferences
+
+The `findReferences` function (from the TypeScript Language Service) is invoked
+for exports that are imported using the `import *` syntax, and for each class
+and enum member. Use the `--performance` flag to see how many times this
+function is invoked and how much time is spent there:
+
+```sh
+knip --performance
+```
+
+The first invocation (per program) is especially expensive, as TypeScript sets
+up symbols and caching.
+
+If you have lots of classes or enums with many members in your codebase, Knip
+can run faster by excluding (one of) them from the report:
+
+```sh
+knip --performance --exclude classMembers,enumMembers
+```
+
+When the codebase contains namespaced imports, the following command will give
+incomplete results. But for the sake of completeness in this topic, calls to
+`findReferences` can be (mostly) prevented:
+
+```sh
+knip --performance --exclude classMembers,enumMembers,nsTypes,nsExports
+```
+
 ## GitIgnore
 
 Knip looks up `.gitignore` files and uses them to filter out matching entry and
@@ -99,6 +128,6 @@ faster).
 In case Knip is unbearable slow (or even crashes), you could resort to [lint
 individual workspaces][3].
 
-[1]: ../reference/cli.md#--performance
+[1]: #findreferences
 [2]: https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
 [3]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
