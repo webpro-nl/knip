@@ -7,6 +7,7 @@ import { getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { compact } from './util/array.js';
+import { debugLog } from './util/debug.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
@@ -286,8 +287,9 @@ export class ProjectPrincipal {
   private findReferences(filePath: string, pos: number) {
     try {
       return this.backend.lsFindReferences(filePath, pos) ?? [];
-    } catch {
+    } catch (error) {
       // TS throws for (cross-referenced) files not in the program
+      debugLog('*', String(error));
       return [];
     }
   }
