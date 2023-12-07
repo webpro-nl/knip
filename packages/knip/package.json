@@ -14,6 +14,16 @@
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
   },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/webpro"
+    },
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/webpro"
+    }
+  ],
   "main": "./dist/index.js",
   "bin": {
     "knip": "./bin/knip.js"
