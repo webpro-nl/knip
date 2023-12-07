@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/ignore-dependencies-binaries",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "c": "tsx index.ts",
+    "d": "ts-node index.ts",
+    "e": "eslint",
+    "f": "formatter"
+  },
+  "devDependencies": {
+    "tsx": "*"
+  }
+}

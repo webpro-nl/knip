@@ -22,6 +22,7 @@ import { _load } from './util/loader.js';
 import { getKeysByValue } from './util/object.js';
 import { join, relative, toPosix } from './util/path.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
+import { toRegexOrString } from './util/regex.js';
 import { _require } from './util/require.js';
 import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
@@ -204,9 +205,9 @@ export class ConfigurationChief {
     const include = rawConfig.include ?? defaultConfig.include;
     const exclude = rawConfig.exclude ?? defaultConfig.exclude;
     const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
-    const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
+    const ignoreBinaries = (rawConfig.ignoreBinaries ?? []).map(toRegexOrString);
+    const ignoreDependencies = (rawConfig.ignoreDependencies ?? []).map(toRegexOrString);
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
-    const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
 

@@ -12,11 +12,10 @@ type IssueCollectorOptions = {
   filters: Filters;
 };
 
-// TODO Fix dirty check
-function objectInSet(set: Set<ConfigurationHint>, obj: ConfigurationHint) {
-  const objJSON = JSON.stringify(obj);
-  return Array.from(set).some(item => JSON.stringify(item) === objJSON);
-}
+const hasHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>
+  Array.from(hints).some(
+    item => item.identifier === hint.identifier && item.type === hint.type && item.workspaceName === hint.workspaceName
+  );
 
 /**
  * - Collects issues and counts them
@@ -64,7 +63,7 @@ export class IssueCollector {
   }
 
   addConfigurationHint(issue: ConfigurationHint) {
-    if (!objectInSet(this.configurationHints, issue)) {
+    if (!hasHint(this.configurationHints, issue)) {
       this.configurationHints.add(issue);
     }
   }

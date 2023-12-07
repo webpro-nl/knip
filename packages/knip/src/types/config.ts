@@ -43,8 +43,8 @@ export interface Configuration {
   include: string[];
   exclude: string[];
   ignore: NormalizedGlob;
-  ignoreBinaries: string[];
-  ignoreDependencies: string[];
+  ignoreBinaries: (string | RegExp)[];
+  ignoreDependencies: (string | RegExp)[];
   ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;

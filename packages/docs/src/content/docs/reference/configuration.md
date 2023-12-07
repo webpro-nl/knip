@@ -68,7 +68,8 @@ analysis, so even issues in the ignored files may still be reported. Use
 
 ## `ignoreBinaries`
 
-Array of binaries to exclude from the report. No wildcards allowed. Example:
+Array of binaries to exclude from the report. Regular expressions allowed.
+Example:
 
 ```json title="knip.json"
 {
@@ -78,12 +79,12 @@ Array of binaries to exclude from the report. No wildcards allowed. Example:
 
 ## `ignoreDependencies`
 
-Array of package names to exclude from the report. No wildcards allowed.
+Array of package names to exclude from the report. Regular expressions allowed.
 Example:
 
 ```json title="knip.json"
 {
-  "ignoreDependencies": ["hidden-package"]
+  "ignoreDependencies": ["hidden-package", "@org/.*"]
 }
 ```
 

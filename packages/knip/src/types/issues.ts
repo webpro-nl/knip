@@ -79,6 +79,6 @@ export type ConfigurationHints = Set<ConfigurationHint>;
 
 export type ConfigurationHint = {
   type: 'ignoreBinaries' | 'ignoreDependencies' | 'ignoreWorkspaces';
-  identifier: string;
+  identifier: string | RegExp;
   workspaceName?: string;
 };

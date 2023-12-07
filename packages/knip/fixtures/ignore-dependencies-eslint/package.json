@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/ignore-dependencies-eslint",
+  "devDependencies": {
+    "@local/eslint-config": "*"
+  }
+}

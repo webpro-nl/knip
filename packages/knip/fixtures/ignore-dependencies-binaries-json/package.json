@@ -1,0 +1,27 @@
+{
+  "name": "@fixtures/ignore-dependencies-binaries-json",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "c": "tsx index.ts",
+    "d": "ts-node index.ts",
+    "e": "eslint",
+    "f": "formatter"
+  },
+  "devDependencies": {
+    "tsx": "*"
+  },
+  "knip": {
+    "ignoreBinaries": [
+      "eslint",
+      "^ts.+",
+      ".*unused-bins.*"
+    ],
+    "ignoreDependencies": [
+      "stream",
+      "^@org/.*",
+      "^rc-.*",
+      ".+unused-deps.+"
+    ]
+  }
+}

@@ -152,6 +152,18 @@ config system][11].
 Unfortunately there's currently no clean way to assign (unused or unlisted)
 dependencies to another workspace.
 
+There is a workaround, though. For example, workspaces that use the
+`@internal/eslint-config` package can force-enable the ESLint plugin (without
+having `eslint` listed) and ignore related dependencies (adjust to your
+situation):
+
+```json
+{
+  "eslint": true,
+  "ignoreDependencies": ["^eslint-.*"]
+}
+```
+
 ## Unlisted dependencies
 
 This means that a dependency is used, but not listed in `package.json`.

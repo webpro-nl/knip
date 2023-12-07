@@ -9,6 +9,8 @@ const asyncCompilerSchema = z.function().args(z.string()).returns(z.promise(z.st
 const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
 const compilersSchema = z.record(z.string(), compilerSchema);
 
+const stringOrRegexSchema = z.array(z.union([z.string(), z.instanceof(RegExp)]));
+
 const issueTypeSchema = z.union([
   z.literal('files'),
   z.literal('dependencies'),
@@ -48,9 +50,9 @@ const rootConfigurationSchema = z.object({
   project: globSchema.optional(),
   paths: pathsSchema.optional(),
   ignore: globSchema.optional(),
-  ignoreBinaries: z.array(z.string()).optional(),
+  ignoreBinaries: stringOrRegexSchema.optional(),
+  ignoreDependencies: stringOrRegexSchema.optional(),
   ignoreExportsUsedInFile: ignoreExportsUsedInFileSchema.optional(),
-  ignoreDependencies: z.array(z.string()).optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
   includeEntryExports: z.boolean().optional(),
   compilers: compilersSchema.optional(),
@@ -125,8 +127,8 @@ const baseWorkspaceConfigurationSchema = z.object({
   project: globSchema.optional(),
   paths: pathsSchema.optional(),
   ignore: globSchema.optional(),
-  ignoreBinaries: z.array(z.string()).optional(),
-  ignoreDependencies: z.array(z.string()).optional(),
+  ignoreBinaries: stringOrRegexSchema.optional(),
+  ignoreDependencies: stringOrRegexSchema.optional(),
   includeEntryExports: z.boolean().optional(),
 });
 

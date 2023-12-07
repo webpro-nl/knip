@@ -22,12 +22,12 @@
   ],
   "properties": {
     "ignoreBinaries": {
-      "title": "Binaries to ignore",
+      "title": "Binaries to ignore (regex allowed)",
       "examples": ["rm", "docker-compose", "curl"],
       "$ref": "#/definitions/list"
     },
     "ignoreDependencies": {
-      "title": "Dependencies from package.json to ignore",
+      "title": "Dependencies from package.json to ignore (regex allowed)",
       "examples": ["husky", "lint-staged"],
       "$ref": "#/definitions/list"
     },
@@ -180,12 +180,12 @@
           "$ref": "#/definitions/globPatterns"
         },
         "ignoreBinaries": {
-          "title": "Binaries to ignore",
+          "title": "Binaries to ignore (regex allowed)",
           "examples": ["rm", "docker-compose", "curl"],
           "$ref": "#/definitions/list"
         },
         "ignoreDependencies": {
-          "title": "Dependencies from package.json to ignore",
+          "title": "Dependencies from package.json to ignore (regex allowed)",
           "examples": ["husky", "lint-staged"],
           "$ref": "#/definitions/list"
         },
