@@ -11,11 +11,11 @@ We can distinguish two types of issues:
 
 ## Issues Reported by Knip
 
-This indicates a successful run, but there are unused items (exit code `1`).
+This indicates a successful run, but there are unused items. Continue with
+[handling issues][3] to deal with unused items reported by Knip.
 
-Read [handling issues][3] on how to deal with the unused items as reported by
-Knip. To better understand why Knip reports what it does, run it in debug mode
-by adding `--debug` to the command:
+To better understand why Knip reports what it does, run it in debug mode by
+adding `--debug` to the command:
 
 ```sh
 knip --debug

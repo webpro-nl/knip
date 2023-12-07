@@ -87,19 +87,19 @@ The best way to understand Knip and what it can do for you is to read the pages
 in the "Understanding Knip" sections, starting with [entry files][1]. Otherwise,
 here's what you might be looking for:
 
-- Find [more options to configure Knip][2].
-- Learn more about [production mode][3].
-- Read about working with [monorepos & workspaces][4].
+- Working with [monorepos & workspaces][2].
+- Using a framework like Astro, Svelte or Nuxt? See [compilers][3] to include
+  `.astro` or `.vue` files.
+- Find [more options to configure Knip][4].
+- Learn more about [production mode][5].
+- Getting lots of output? Find out how to [handle issues][6].
 
-:::caution[Too much output?]
-
-In large codebases, Knip may give a lot of output and it feels daunting to start
-configuration. In that case, you can jump straight to [handling issues][5].
-
-:::
+You can always search this website using the search bar at the top (`Ctrl+/` or
+`Ctrl+K`)
 
 [1]: ../explanations/entry-files.md
-[2]: ../reference/configuration.md
-[3]: ../features/production-mode.md
-[4]: ../features/monorepos-and-workspaces.md
-[5]: ../guides/handling-issues.md
+[2]: ../features/monorepos-and-workspaces.md
+[3]: ../features/compilers.md
+[4]: ../reference/configuration.md
+[5]: ../features/production-mode.md
+[6]: ../guides/handling-issues.md

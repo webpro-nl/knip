@@ -6,8 +6,7 @@ Projects may have source files that are not JavaScript or TypeScript, and thus
 require compilation (or transpilation, or pre-processing, you name it). Files
 like `.mdx`, `.astro`, `.vue` and `.svelte` may also import other sources files
 and external dependencies. So ideally, these files are also included when
-linting the project. To this end, Knip supports a compiler for any file
-extension.
+linting the project. That's why Knip supports compilers.
 
 ## Prerequisites
 
@@ -35,9 +34,9 @@ This may also be an `async` function.
 
 :::tip[Note]
 
-Some of the examples below do not use actual compilers. The goal is to return a
+Some of the examples below do not use real compilers. The goal is to return a
 valid module that can be parsed by the TypeScript compiler to find `import`
-statements.
+statements. However, it's recommended to use real compilers for better results.
 
 :::
 

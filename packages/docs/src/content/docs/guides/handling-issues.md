@@ -12,6 +12,10 @@ the issue types one by one. For instance, reducing the number of unused files
 will also reduce the number of unused dependencies. It's recommended to work
 this list from top to bottom.
 
+If you haven't already, it will probably help if you've made yourself familiar
+with [configuration][1], [entry files][2] and, if applicable, [monorepos &
+workspaces][3] and [compilers][4].
+
 ## Unused files
 
 Files are reported as unused if they are in the set of project files, but not in
@@ -21,7 +25,7 @@ the set of files resolved from the entry files:
 project files - (entry files + resolved files) = unused files
 ```
 
-You may want to read the [entry files][1] explainer first to learn how and where
+You may want to read the [entry files][2] explainer first to learn how and where
 Knip looks for entry files.
 
 In this section we'll look into common patterns that cause unused files and how
@@ -29,7 +33,7 @@ to handle them.
 
 :::tip
 
-Use `--include files` to [filter][2] the report by unused files:
+Use `--include files` to [filter][5] the report by unused files:
 
 ```sh
 knip --include files
@@ -57,8 +61,8 @@ If they should be included instead, add them to the `entry` file patterns.
 Files may be reported as unused if existing plugins do not include that entry
 file pattern yet.
 
-See the [plugins section of entry files][3] for more details. [Override plugin
-configuration][4] to customize default patterns for existing plugins.
+See the [plugins section of entry files][6] for more details. [Override plugin
+configuration][7] to customize default patterns for existing plugins.
 
 #### Missing Plugins
 
@@ -68,20 +72,20 @@ reported as unused because there is no plugin yet that includes those files. For
 example, if some `tool.config.js` contains a reference to `@tool/package` then
 both the file and the dependency may be reported as an unused.
 
-[Create a new plugin][5] for tools or frameworks that are not [in the list][6]
+[Create a new plugin][8] for tools or frameworks that are not [in the list][9]
 yet, or open an issue to request it.
 
 ### Non-standard Files
 
 Files might be imported through files with non-standard extensions like
 `.astro`, `.mdx`, `.vue` or `.svelte`. These files are not included by default.
-See [compilers][7] for more details on how to include them.
+See [compilers][4] for more details on how to include them.
 
 ### Integrated Monorepos
 
 Multiple instances of configuration files like `.eslintrc` and
 `jest.config.json` across the repository may be reported as unused when working
-in a (mono)repo with a single `package.json`. See [integrated monorepos][8] for
+in a (mono)repo with a single `package.json`. See [integrated monorepos][10] for
 more details and how to configure plugins to target those configuration files.
 
 ### Build artifacts and ignored files
@@ -95,12 +99,12 @@ manually for better or more consistent results.
 ## Unused dependencies
 
 Dependencies imported in unused files are reported as unused dependencies.
-That's why it's strongly recommended to try and remedy [unused files][9] first.
+That's why it's strongly recommended to try and remedy [unused files][11] first.
 This solves many cases of reported unused dependencies.
 
 :::tip
 
-Use the `--dependencies` flag to [filter][2] dependency related issues:
+Use the `--dependencies` flag to [filter][5] dependency related issues:
 
 ```sh
 knip --dependencies
@@ -122,7 +126,7 @@ an existing one.
 
 Dependencies might be imported from files with non-standard extensions like
 `.astro`, `.mdx`, `.vue` or `.svelte`. These files are not included by default.
-See [compilers][7] for more details on how to include them.
+See [compilers][4] for more details on how to include them.
 
 ### Unreachable Code
 
@@ -136,7 +140,7 @@ you don't feel like a plugin could solve it, a last resort is to ignore it:
 ```
 
 Depending on the situation, you may want to use `ignoreBinaries` instead. See
-[unlisted binaries][10].
+[unlisted binaries][12].
 
 ### ESLint & Jest
 
@@ -147,7 +151,7 @@ comparable characteristics.
 
 ESLint is still in the process of moving to a modern configuration system, which
 results in the recommendation going forward: migrate to the new [ESLint flat
-config system][11].
+config system][13].
 
 Unfortunately there's currently no clean way to assign (unused or unlisted)
 dependencies to another workspace.
@@ -196,7 +200,7 @@ unlisted binaries this might be caused by `node_modules` not containing the
 packages. This in turn might have been caused by either the way your package
 manager installs dependencies or by running Knip from inside a workspace instead
 of from the root of the repository. Knip should run from the root, and you can
-[lint individual workspaces][12].
+[lint individual workspaces][14].
 
 ### Example
 
@@ -233,8 +237,8 @@ supposed to be listed in `package.json` (and vice versa).
 ## Unused exports
 
 By default, Knip does not report unused exports of `entry` files. There's quite
-a few places [Knip looks for entry files][1] and [plugins add additional entry
-files][3].
+a few places [Knip looks for entry files][2] and [plugins add additional entry
+files][6].
 
 For unused exports in the other used files, there are a few options to consider:
 
@@ -242,12 +246,12 @@ For unused exports in the other used files, there are a few options to consider:
 - Add the file to the `entry` file patterns array in the configuration
 - Move the export(s) to an entry file
 - Re-export the unused export(s) from an entry file
-- Mark the export(s) [using the JSDoc `@public` tag][13]
-- [Ignore exports used in file][14]
+- Mark the export(s) [using the JSDoc `@public` tag][15]
+- [Ignore exports used in file][16]
 
 :::tip
 
-Use the `--exports` flag to [filter][2] exports related issues:
+Use the `--exports` flag to [filter][5] exports related issues:
 
 ```sh
 knip --exports
@@ -258,28 +262,30 @@ knip --exports
 ### Missing Exports?
 
 Do you expect certain exports in the report, but are they missing? They might be
-exported from an entry file. Use [--include-entry-exports][15] to make Knip also
+exported from an entry file. Use [--include-entry-exports][17] to make Knip also
 report unused exports in entry files.
 
 ## False Positives
 
 If you believe Knip incorrectly reports something as unused (i.e. a false
 positive), you can help your own project and help improve Knip by creating a
-[minimal reproduction][16] and open an issue on GitHub.
+[minimal reproduction][18] and open an issue on GitHub.
 
-[1]: ../explanations/entry-files.md
-[2]: ../features/rules-and-filters.md#filters
-[3]: ../explanations/plugins.md#entry-files
-[4]: ../explanations/entry-files.md#plugins
-[5]: ./writing-a-plugin.md
-[6]: ../reference/plugins.md
-[7]: ../features/compilers.md
-[8]: ../features/integrated-monorepos.md
-[9]: #unused-files
-[10]: #unlisted-binaries
-[11]: https://eslint.org/docs/head/use/configure/configuration-files-new
-[12]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[13]: ../reference/jsdoc-tsdoc-tags.mdx
-[14]: ../reference/configuration.md#ignore-exports-used-in-file
-[15]: ../reference/configuration.md#includeentryexports
-[16]: ../guides/troubleshooting.md#minimal-reproduction
+[1]: ../overview/configuration.md
+[2]: ../explanations/entry-files.md
+[3]: ../features/monorepos-and-workspaces.md
+[4]: ../features/compilers.md
+[5]: ../features/rules-and-filters.md#filters
+[6]: ../explanations/plugins.md#entry-files
+[7]: ../explanations/entry-files.md#plugins
+[8]: ./writing-a-plugin.md
+[9]: ../reference/plugins.md
+[10]: ../features/integrated-monorepos.md
+[11]: #unused-files
+[12]: #unlisted-binaries
+[13]: https://eslint.org/docs/head/use/configure/configuration-files-new
+[14]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[15]: ../reference/jsdoc-tsdoc-tags.mdx
+[16]: ../reference/configuration.md#ignore-exports-used-in-file
+[17]: ../reference/configuration.md#includeentryexports
+[18]: ../guides/troubleshooting.md#minimal-reproduction
