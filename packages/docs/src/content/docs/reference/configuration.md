@@ -144,8 +144,10 @@ such as those referenced in `package.json`. But not in entry and configuration
 files as configured by plugins, such as `next.config.js` or
 `src/routes/+page.svelte`.
 
+This will also enable reporting unused members of exported classes and enums.
+
 Set this option at root level to enable this globally, or within workspace
-configs individually.
+configurations individually.
 
 ## `paths`
 

@@ -87,12 +87,15 @@ knip --performance --exclude classMembers,enumMembers
 ```
 
 When the codebase contains namespaced imports, the following command will give
-incomplete results. But for the sake of completeness in this topic, calls to
-`findReferences` can be (mostly) prevented:
+incomplete results and is not recommended. But for the sake of completeness in
+this topic, calls to `findReferences` can be (mostly) prevented:
 
 ```sh
 knip --performance --exclude classMembers,enumMembers,nsTypes,nsExports
 ```
+
+This should approach the performance without namespaced imports (see
+[star imports and barrel files](#star-imports-and-barrel-files)).
 
 ## GitIgnore
 

@@ -195,12 +195,12 @@ Except for those listed as `IGNORED_GLOBAL_BINARIES` in `constants.ts`.
 
 ### Missing Binaries
 
-In case the list of unused (dev) dependencies looks "offset" against the list of
-unlisted binaries this might be caused by `node_modules` not containing the
-packages. This in turn might have been caused by either the way your package
-manager installs dependencies or by running Knip from inside a workspace instead
-of from the root of the repository. Knip should run from the root, and you can
-[lint individual workspaces][14].
+In case unused (dev) dependencies look like a match against unlisted binaries,
+then this might be caused by `node_modules` not containing the packages. And
+this might have been caused by either the way your package manager installs
+dependencies, or by not running Knip from the root of the repository.
+
+Knip should run from the root. But you can [lint individual workspaces][14].
 
 ### Example
 
@@ -232,26 +232,28 @@ that the package is not listed. Knip expects the dependency to be listed with
 `--no` or no flag at all.
 
 The recommendation here is to be explicit: use `--yes` if the dependency is not
-supposed to be listed in `package.json` (and vice versa).
+supposed to be listed in `package.json`. Or use `--no` if the dependency is
+listed.
 
 ## Unused exports
 
-By default, Knip does not report unused exports of `entry` files. There's quite
-a few places [Knip looks for entry files][2] and [plugins add additional entry
-files][6].
+By default, Knip does not report unused exports of `entry` files.
 
-For unused exports in the other used files, there are a few options to consider:
+When unused exports are reported, and you want to keep exporting it, there are a
+few options:
 
-- Add the file to the `exports` field of `package.json`
-- Add the file to the `entry` file patterns array in the configuration
-- Move the export(s) to an entry file
-- Re-export the unused export(s) from an entry file
-- Mark the export(s) [using the JSDoc `@public` tag][15]
-- [Ignore exports used in file][16]
+- [Ignore exports used in file][16] for exports used internally.
+- Individual exports can be [tagged as `@public`][18].
+- Make sure the export ends up in an [entry file][2]:
+  - Add the file to the `entry` file patterns array in the configuration
+  - Move the export(s) to an entry file
+  - Re-export the unused export(s) from an entry file
+  - Add the file to the `exports` field of `package.json`
 
 :::tip
 
-Use the `--exports` flag to [filter][5] exports related issues:
+Use the `--exports` flag to [filter][5] and focus only on exports related
+issues:
 
 ```sh
 knip --exports
@@ -265,11 +267,29 @@ Do you expect certain exports in the report, but are they missing? They might be
 exported from an entry file. Use [--include-entry-exports][17] to make Knip also
 report unused exports in entry files.
 
+## Class and Enum Members
+
+Classes and enums exported from entry files are ignored, and so are their
+members.
+
+Individual class and enum members can be [tagged as `@public`][18]. Reporting
+such members can also be disabled altogether, for example:
+
+```sh
+knip --exclude classMembers --exclude enumMembers
+```
+
+This can [boost performance](./performance.md#findreferences) if there are many
+in the codebase (though the members won't be reported).
+
+Use [--include-entry-exports][17] to make Knip also report members of unused
+exports in entry files.
+
 ## False Positives
 
 If you believe Knip incorrectly reports something as unused (i.e. a false
 positive), you can help your own project and help improve Knip by creating a
-[minimal reproduction][18] and open an issue on GitHub.
+[minimal reproduction][19] and open an issue on GitHub.
 
 [1]: ../overview/configuration.md
 [2]: ../explanations/entry-files.md
@@ -285,7 +305,8 @@ positive), you can help your own project and help improve Knip by creating a
 [12]: #unlisted-binaries
 [13]: https://eslint.org/docs/head/use/configure/configuration-files-new
 [14]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[15]: ../reference/jsdoc-tsdoc-tags.mdx
-[16]: ../reference/configuration.md#ignore-exports-used-in-file
+[15]: ../reference/jsdoc-tsdoc-tags.md
+[16]: ../reference/configuration.md#ignoreexportsusedinfile
 [17]: ../reference/configuration.md#includeentryexports
-[18]: ../guides/troubleshooting.md#minimal-reproduction
+[18]: ../reference/jsdoc-tsdoc-tags.md#public
+[19]: ../guides/troubleshooting.md#minimal-reproduction

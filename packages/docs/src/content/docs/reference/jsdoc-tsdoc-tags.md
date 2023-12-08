@@ -2,8 +2,6 @@
 title: JS/TSDoc Tags
 ---
 
-import { Icon } from '@astrojs/starlight/components';
-
 JSDoc or TSDoc tags can be used to make exceptions for unused or duplicate
 exports.
 

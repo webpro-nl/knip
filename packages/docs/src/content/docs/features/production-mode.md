@@ -64,4 +64,4 @@ Add `--exclude types` if you don't want to include types in the report:
 knip --production --exclude types
 ```
 
-[1]: ../reference/jsdoc-tsdoc-tags.mdx#internal
+[1]: ../reference/jsdoc-tsdoc-tags.md#internal
