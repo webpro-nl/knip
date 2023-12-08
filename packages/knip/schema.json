@@ -96,17 +96,17 @@
     "rules": {
       "type": "object",
       "properties": {
-        "files": { "$ref": "#/definitions/ruleValue" },
-        "dependencies": { "$ref": "#/definitions/ruleValue" },
-        "unlisted": { "$ref": "#/definitions/ruleValue" },
-        "unresolved": { "$ref": "#/definitions/ruleValue" },
-        "exports": { "$ref": "#/definitions/ruleValue" },
-        "nsExports": { "$ref": "#/definitions/ruleValue" },
         "classMembers": { "$ref": "#/definitions/ruleValue" },
-        "types": { "$ref": "#/definitions/ruleValue" },
-        "nsTypes": { "$ref": "#/definitions/ruleValue" },
+        "dependencies": { "$ref": "#/definitions/ruleValue" },
+        "duplicates": { "$ref": "#/definitions/ruleValue" },
         "enumMembers": { "$ref": "#/definitions/ruleValue" },
-        "duplicates": { "$ref": "#/definitions/ruleValue" }
+        "exports": { "$ref": "#/definitions/ruleValue" },
+        "files": { "$ref": "#/definitions/ruleValue" },
+        "nsExports": { "$ref": "#/definitions/ruleValue" },
+        "nsTypes": { "$ref": "#/definitions/ruleValue" },
+        "types": { "$ref": "#/definitions/ruleValue" },
+        "unlisted": { "$ref": "#/definitions/ruleValue" },
+        "unresolved": { "$ref": "#/definitions/ruleValue" }
       }
     }
   },
@@ -123,17 +123,18 @@
       "items": {
         "type": "string",
         "enum": [
-          "files",
-          "dependencies",
-          "unlisted",
-          "exports",
-          "nsExports",
+          "binaries",
           "classMembers",
-          "types",
-          "nsTypes",
-          "enumMembers",
+          "dependencies",
           "duplicates",
-          "binaries"
+          "enumMembers",
+          "exports",
+          "files",
+          "nsExports",
+          "nsTypes",
+          "types",
+          "unlisted",
+          "unresolved"
         ]
       }
     },
