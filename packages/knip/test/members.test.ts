@@ -33,3 +33,33 @@ test('Find unused enum and class members', async () => {
     total: 2,
   });
 });
+
+test('Find unused enum and class members (isIncludeEntryExports)', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    isIncludeEntryExports: true,
+  });
+
+  assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
+  assert(issues.enumMembers['members.ts']['B_Unused']);
+  assert(issues.enumMembers['members.ts']['D_Key']);
+  assert(issues.enumMembers['index.ts']['UnusedMemberInEntryEnum']);
+
+  assert.equal(Object.keys(issues.classMembers['members.ts']).length, 6);
+  assert(issues.classMembers['index.ts']['unusedMemberInEntry']);
+  assert(issues.classMembers['members.ts']['bUnusedPublic']);
+  assert(issues.classMembers['members.ts']['cUnusedProp']);
+  assert(issues.classMembers['members.ts']['dUnusedMember']);
+  assert(issues.classMembers['members.ts']['eUnusedStatic']);
+  assert(issues.classMembers['members.ts']['unusedGetter']);
+  assert(issues.classMembers['members.ts']['unusedSetter']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    enumMembers: 3,
+    classMembers: 7,
+    processed: 2,
+    total: 2,
+  });
+});

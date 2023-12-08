@@ -24,18 +24,18 @@ test('knip --reporter json', () => {
         types: [],
         enumMembers: {
           MyEnum: [
-            { name: 'B_Unused', line: 13, col: 3, pos: 167 },
-            { name: 'D_Key', line: 15, col: 3, pos: 205 },
+            { name: 'B_Unused', line: 17, col: 3, pos: 248 },
+            { name: 'D_Key', line: 19, col: 3, pos: 286 },
           ],
         },
         classMembers: {
           MyClass: [
-            { name: 'bUnusedPublic', line: 28, col: 10, pos: 427 },
-            { name: 'cUnusedProp', line: 33, col: 3, pos: 552 },
-            { name: 'dUnusedMember', line: 40, col: 3, pos: 687 },
-            { name: 'eUnusedStatic', line: 46, col: 10, pos: 804 },
-            { name: 'unusedGetter', line: 57, col: 14, pos: 1001 },
-            { name: 'unusedSetter', line: 61, col: 14, pos: 1071 },
+            { name: 'bUnusedPublic', line: 32, col: 10, pos: 508 },
+            { name: 'cUnusedProp', line: 37, col: 3, pos: 633 },
+            { name: 'dUnusedMember', line: 44, col: 3, pos: 768 },
+            { name: 'eUnusedStatic', line: 50, col: 10, pos: 885 },
+            { name: 'unusedGetter', line: 61, col: 14, pos: 1082 },
+            { name: 'unusedSetter', line: 65, col: 14, pos: 1152 },
           ],
         },
         duplicates: [],

@@ -401,7 +401,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       if (principal) {
         const { isIncludeEntryExports } = workspace.config;
 
-        // Bail out when in entry file (unless --include-entry-exports)
+        // Bail out when in entry file (unless `isIncludeEntryExports`)
         if (!isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
 
         const importsForExport = importedSymbols.get(filePath);
@@ -414,8 +414,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (isProduction && exportedItem.jsDocTags.has('@internal')) continue;
 
           if (importsForExport && isSymbolImported(symbol, importsForExport)) {
-            // Skip members of classes/enums that are eventually exported by entry files
-            if (importsForExport.isReExport && isExportedInEntryFile(principal, importsForExport)) continue;
+            // Skip members of classes/enums that are eventually exported by entry files (unless `isIncludeEntryExports`)
+            if (
+              !isIncludeEntryExports &&
+              importsForExport.isReExport &&
+              isExportedInEntryFile(principal, importsForExport)
+            ) {
+              continue;
+            }
 
             if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
               principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {

@@ -2,7 +2,7 @@ import { MyClass, MyEnum } from './members';
 
 const instance = new MyClass();
 
-class Parent {
+export class Parent {
   instance: MyClass;
   constructor() {
     this.instance = new MyClass();
@@ -10,14 +10,17 @@ class Parent {
     // This member reference is only found because `this.instance` is a typed member of Parent
     this.instance.bUsedExternalFromTypedMemberInstance();
   }
-}
 
-const parent = new Parent();
+  unusedMemberInEntry() {}
+}
 
 instance.bUsedExternal;
 instance.cUsedExternal;
 instance.dUsedExternal();
 MyClass.eUsedExternal;
-parent;
 
 const a: MyEnum.A_UsedExternal = 1;
+
+export enum EntryEnum {
+  UnusedMemberInEntryEnum = 1,
+}

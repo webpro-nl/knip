@@ -1,3 +1,7 @@
+import { Parent, type EntryEnum } from './index';
+
+const parent = new Parent();
+
 enum UnexportedEnun {
   Member = 1,
 }
