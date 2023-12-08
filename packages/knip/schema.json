@@ -132,7 +132,8 @@
           "types",
           "nsTypes",
           "enumMembers",
-          "duplicates"
+          "duplicates",
+          "binaries"
         ]
       }
     },
