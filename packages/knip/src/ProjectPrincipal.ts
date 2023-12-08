@@ -3,7 +3,7 @@ import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
 import { getJSDocTags, getLineAndCharacterOfPosition, isInModuleBlock } from './typescript/ast-helpers.js';
 import { createHosts } from './typescript/createHosts.js';
-import { getImportsAndExports } from './typescript/getImportsAndExports.js';
+import { _getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { compact } from './util/array.js';
@@ -188,7 +188,7 @@ export class ProjectPrincipal {
         ? this.backend.program.getResolvedModule(sourceFile, specifier, /* mode */ undefined)
         : sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
 
-    const { imports, exports, scripts } = getImportsAndExports(sourceFile, getResolvedModule, {
+    const { imports, exports, scripts } = _getImportsAndExports(sourceFile, getResolvedModule, {
       skipTypeOnly,
       skipExports,
     });

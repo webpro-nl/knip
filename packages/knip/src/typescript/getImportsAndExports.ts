@@ -3,6 +3,7 @@ import ts from 'typescript';
 import { getOrSet } from '../util/map.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
+import { timerify } from '../util/Performance.js';
 import {
   isDeclarationFileExtension,
   isAccessExpression,
@@ -46,7 +47,7 @@ type AddInternalImportOptions = AddImportOptions & {
 
 export type AddExportOptions = ExportItem & { identifier: string };
 
-export const getImportsAndExports = (
+const getImportsAndExports = (
   sourceFile: BoundSourceFile,
   getResolvedModule: GetResolvedModule,
   options: GetImportsAndExportsOptions
@@ -239,3 +240,5 @@ export const getImportsAndExports = (
     scripts,
   };
 };
+
+export const _getImportsAndExports = timerify(getImportsAndExports);
