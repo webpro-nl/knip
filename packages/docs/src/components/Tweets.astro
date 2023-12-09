@@ -7,7 +7,8 @@ import { type TweetsResponse, formatTimestamp } from '../util/tweet.js';
 const ENVIRONMENT = import.meta.env.ENVIRONMENT;
 const BEARER_TOKEN = import.meta.env.BEARER_TOKEN;
 
-const isFetch = ENVIRONMENT !== 'development' && Boolean(BEARER_TOKEN);
+// const isFetch = ENVIRONMENT !== 'development' && Boolean(BEARER_TOKEN);
+const isFetch = false;
 
 const tweetIds = [
   '1730180003453927560',
