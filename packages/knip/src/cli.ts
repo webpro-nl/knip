@@ -24,6 +24,8 @@ const {
   'reporter-options': reporterOptions = '',
   'preprocessor-options': preprocessorOptions = '',
   strict: isStrict = false,
+  fix: isFix = false,
+  'fix-type': fixTypes = [],
   tsConfig,
   version: isVersion,
 } = parsedArgValues;
@@ -54,6 +56,8 @@ const run = async () => {
       isShowProgress,
       isIncludeEntryExports,
       isIsolateWorkspaces,
+      isFix,
+      fixTypes: fixTypes.flatMap(type => type.split(',')),
     });
 
     const initialData: ReporterOptions = {

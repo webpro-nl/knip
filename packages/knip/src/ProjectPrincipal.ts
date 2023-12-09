@@ -175,7 +175,10 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(filePath: string, { skipTypeOnly }: { skipTypeOnly: boolean }) {
+  public analyzeSourceFile(
+    filePath: string,
+    { skipTypeOnly, isFixExports, isFixTypes }: { skipTypeOnly: boolean; isFixExports: boolean; isFixTypes: boolean }
+  ) {
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
     const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
 
@@ -191,6 +194,8 @@ export class ProjectPrincipal {
     const { imports, exports, scripts } = _getImportsAndExports(sourceFile, getResolvedModule, {
       skipTypeOnly,
       skipExports,
+      isFixExports,
+      isFixTypes,
     });
 
     const { internal, unresolved, external } = imports;

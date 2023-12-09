@@ -7,4 +7,6 @@ export interface CommandLineOptions {
   isShowProgress: boolean;
   isIncludeEntryExports: boolean;
   isIsolateWorkspaces: boolean;
+  isFix: boolean;
+  fixTypes: string[];
 }

@@ -16,6 +16,8 @@ Options:
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
   --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
+  --fix                    Fix issues
+  --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
   --include-entry-exports  Include entry files when reporting unused exports
   --isolate-workspaces     Isolated workspaces in monorepo
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
@@ -32,6 +34,7 @@ Options:
   -V, --version            Print version
 
 (1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
+(2) Fixable issue types: dependencies, exports, types
 
 Examples:
 
@@ -53,6 +56,8 @@ try {
       directory: { type: 'string' },
       exclude: { type: 'string', multiple: true },
       exports: { type: 'boolean' },
+      fix: { type: 'boolean' },
+      'fix-type': { type: 'string', multiple: true },
       help: { type: 'boolean', short: 'h' },
       'ignore-internal': { type: 'boolean' },
       include: { type: 'string', multiple: true },

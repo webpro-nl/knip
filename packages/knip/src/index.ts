@@ -5,6 +5,7 @@ import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
+import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
@@ -45,6 +46,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isShowProgress,
     isIncludeEntryExports,
     isIsolateWorkspaces,
+    isFix,
+    fixTypes,
   } = unresolvedConfiguration;
 
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
@@ -67,6 +70,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const report = chief.getIssueTypesToReport();
   const rules = chief.getRules();
   const filters = chief.getFilters();
+  const fixer = new IssueFixer({ isEnabled: isFix || fixTypes.length > 0, cwd, fixTypes });
 
   const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
@@ -273,7 +277,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const analyzeSourceFile = (filePath: string, _principal: ProjectPrincipal = principal) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, scripts } = _principal.analyzeSourceFile(filePath, { skipTypeOnly: isStrict });
+        const { imports, exports, scripts } = _principal.analyzeSourceFile(filePath, {
+          skipTypeOnly: isStrict,
+          isFixExports: fixer.isFixUnusedExports,
+          isFixTypes: fixer.isFixUnusedTypes,
+        });
         const { internal, external, unresolved } = imports;
         const { exported, duplicate } = exports;
 
@@ -469,6 +477,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               symbolType: exportedItem.type,
               ...principal.getPos(exportedItem.node, exportedItem.pos),
             });
+            if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fix);
+            else fixer.addUnusedExportNode(filePath, exportedItem.fix);
           }
         }
       }
@@ -499,6 +509,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   );
 
   const { issues, counters, configurationHints } = collector.getIssues();
+
+  if (isFix) {
+    await fixer.fixIssues(issues);
+  }
 
   streamer.clear();
 

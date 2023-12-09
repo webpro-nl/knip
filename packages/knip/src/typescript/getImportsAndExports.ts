@@ -16,7 +16,7 @@ import { getJSXImplicitImportBase } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
-import type { ExportItems as Exports, ExportItem } from '../types/exports.js';
+import type { ExportItems as Exports, ExportItem, ExportPos } from '../types/exports.js';
 import type { Imports, UnresolvedImport } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
 
@@ -29,6 +29,8 @@ const getVisitors = (sourceFile: ts.SourceFile) => ({
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
   skipExports: boolean;
+  isFixExports: boolean;
+  isFixTypes: boolean;
 };
 
 export type AddImportOptions = {
@@ -45,7 +47,7 @@ type AddInternalImportOptions = AddImportOptions & {
   isReExport: boolean;
 };
 
-export type AddExportOptions = ExportItem & { identifier: string };
+export type AddExportOptions = ExportItem & { identifier: string; fix: ExportPos };
 
 const getImportsAndExports = (
   sourceFile: BoundSourceFile,
@@ -151,7 +153,7 @@ const getImportsAndExports = (
     }
   };
 
-  const addExport = ({ node, identifier, type, pos, posDecl, members = [] }: AddExportOptions) => {
+  const addExport = ({ node, identifier, type, pos, posDecl, members = [], fix }: AddExportOptions) => {
     if (options.skipExports) return;
 
     const jsDocTags = getJSDocTags(node);
@@ -162,7 +164,7 @@ const getImportsAndExports = (
       const tags = new Set([...item.jsDocTags, ...jsDocTags]);
       exports.set(identifier, { ...item, members: crew, jsDocTags: tags });
     } else {
-      exports.set(identifier, { node, type, members, jsDocTags, pos, posDecl: posDecl ?? pos });
+      exports.set(identifier, { node, type, members, jsDocTags, pos, posDecl: posDecl ?? pos, fix });
     }
 
     if (!jsDocTags.has('@alias')) {

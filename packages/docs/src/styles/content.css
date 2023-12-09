@@ -2,6 +2,10 @@
   border: unset;
 }
 
+.sl-markdown-content table {
+  overflow: unset;
+}
+
 .sl-markdown-content table th,
 .sl-markdown-content table td {
   white-space: nowrap;
