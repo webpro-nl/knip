@@ -1,6 +1,6 @@
 import { compact } from '../../util/array.js';
-import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
-import { basename, isInternal, dirname, toAbsolute } from '../../util/path.js';
+import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.js';
+import { basename, isInternal, dirname, toAbsolute, isAbsolute } from '../../util/path.js';
 import { load } from '../../util/plugin.js';
 import { _resolve } from '../../util/require.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
@@ -96,10 +96,19 @@ const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) =>
     if (settingKey === 'import/resolver') {
       return (typeof settings === 'string' ? [settings] : Object.keys(settings))
         .filter(key => key !== 'node')
-        .map(key => `eslint-import-resolver-${key}`);
+        .map(key => {
+          // TODO Resolve properly
+          if (isInternal(key)) return key;
+          if (isAbsolute(key)) return getPackageNameFromFilePath(key);
+          return `eslint-import-resolver-${key}`;
+        });
     }
     if (settingKey === 'import/parsers') {
-      return typeof settings === 'string' ? [settings] : Object.keys(settings);
+      return (typeof settings === 'string' ? [settings] : Object.keys(settings)).map(key => {
+        // TODO Resolve properly
+        if (isAbsolute(key)) return getPackageNameFromFilePath(key);
+        return key;
+      });
     }
   });
 };
