@@ -2,29 +2,15 @@ import ts from 'typescript';
 import { importVisitor as visit } from '../index.js';
 
 const extractImportSpecifiers = (node: ts.JSDocTag) => {
-  const importSpecifiers: string[] = [];
+  const imports: { specifier: string; identifier: string }[] = [];
 
   function visit(node: ts.Node) {
-    if (ts.isJSDocTypeExpression(node)) {
-      const typeNode = node.type;
-      if (ts.isTypeReferenceNode(typeNode) && typeNode.typeArguments) {
-        typeNode.typeArguments.forEach(arg => {
-          if (ts.isImportTypeNode(arg)) {
-            const importClause = arg.argument;
-            if (ts.isLiteralTypeNode(importClause) && ts.isStringLiteral(importClause.literal)) {
-              importSpecifiers.push(importClause.literal.text);
-            }
-          }
-        });
-      }
-    }
-    if (ts.isJSDocTypeTag(node)) {
-      const typeNode = node.typeExpression?.type;
-      if (ts.isImportTypeNode(typeNode)) {
-        const importClause = typeNode.argument;
-        if (ts.isLiteralTypeNode(importClause) && ts.isStringLiteral(importClause.literal)) {
-          importSpecifiers.push(importClause.literal.text);
-        }
+    if (ts.isImportTypeNode(node)) {
+      const importClause = node.argument;
+      if (ts.isLiteralTypeNode(importClause) && ts.isStringLiteral(importClause.literal)) {
+        const identifier =
+          node.qualifier && ts.isIdentifier(node.qualifier) ? String(node.qualifier.escapedText) : 'default';
+        imports.push({ specifier: importClause.literal.text, identifier });
       }
     }
     ts.forEachChild(node, visit);
@@ -32,7 +18,7 @@ const extractImportSpecifiers = (node: ts.JSDocTag) => {
 
   visit(node);
 
-  return importSpecifiers;
+  return imports;
 };
 
 export default visit(
@@ -41,9 +27,7 @@ export default visit(
     if ('jsDoc' in node && node.jsDoc) {
       const jsDoc = node.jsDoc as ts.JSDoc[];
       if (jsDoc.length > 0 && jsDoc[0].parent.parent === node.parent) {
-        return jsDoc
-          .flatMap(jsDoc => (jsDoc.tags ?? []).flatMap(extractImportSpecifiers))
-          .map(specifier => ({ specifier }));
+        return jsDoc.flatMap(jsDoc => (jsDoc.tags ?? []).flatMap(extractImportSpecifiers));
       }
     }
     return [];
