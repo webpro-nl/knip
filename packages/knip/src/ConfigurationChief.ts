@@ -311,9 +311,9 @@ export class ConfigurationChief {
   }
 
   private getAvailableWorkspaceNames() {
-    return [ROOT_WORKSPACE_NAME, ...this.manifestWorkspaces.keys(), ...this.additionalWorkspaceNames].filter(
-      name => !micromatch.isMatch(name, this.ignoredWorkspacePatterns)
-    );
+    return [
+      ...new Set([ROOT_WORKSPACE_NAME, ...this.manifestWorkspaces.keys(), ...this.additionalWorkspaceNames]),
+    ].filter(name => !micromatch.isMatch(name, this.ignoredWorkspacePatterns));
   }
 
   private getAvailableWorkspaceManifests(availableWorkspaceDirs: string[]) {
