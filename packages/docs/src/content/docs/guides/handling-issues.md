@@ -242,8 +242,8 @@ By default, Knip does not report unused exports of `entry` files.
 When unused exports are reported, and you want to keep exporting it, there are a
 few options:
 
-- [Ignore exports used in file][16] for exports used internally.
-- Individual exports can be [tagged as `@public`][18].
+- [Ignore exports used in file][15] for exports used internally.
+- Individual exports can be [tagged as `@public`][16].
 - Make sure the export ends up in an [entry file][2]:
   - Add the file to the `entry` file patterns array in the configuration
   - Move the export(s) to an entry file
@@ -272,15 +272,15 @@ report unused exports in entry files.
 Classes and enums exported from entry files are ignored, and so are their
 members.
 
-Individual class and enum members can be [tagged as `@public`][18]. Reporting
+Individual class and enum members can be [tagged as `@public`][16]. Reporting
 such members can also be disabled altogether, for example:
 
 ```sh
 knip --exclude classMembers --exclude enumMembers
 ```
 
-This can [boost performance](./performance.md#findreferences) if there are many
-in the codebase (though the members won't be reported).
+This can [boost performance][18] if there are many in the codebase (though the
+members won't be reported).
 
 Use [--include-entry-exports][17] to make Knip also report members of unused
 exports in entry files.
@@ -305,8 +305,8 @@ positive), you can help your own project and help improve Knip by creating a
 [12]: #unlisted-binaries
 [13]: https://eslint.org/docs/head/use/configure/configuration-files-new
 [14]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[15]: ../reference/jsdoc-tsdoc-tags.md
-[16]: ../reference/configuration.md#ignoreexportsusedinfile
+[15]: ../reference/configuration.md#ignoreexportsusedinfile
+[16]: ../reference/jsdoc-tsdoc-tags.md#public
 [17]: ../reference/configuration.md#includeentryexports
-[18]: ../reference/jsdoc-tsdoc-tags.md#public
+[18]: ./performance.md#findreferences
 [19]: ../guides/troubleshooting.md#minimal-reproduction
