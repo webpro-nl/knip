@@ -265,7 +265,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const principals = factory.getPrincipals();
 
-  debugLog('*', `Installed ${principals.length} principals for ${workspaces.length} workspaces`);
+  debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
   const analyzedFiles = new Set<string>();
   const exportedSymbols: Exports = new Map();

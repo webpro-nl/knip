@@ -59,6 +59,21 @@ Total running time: 5s (mem: 631.27MB)
 - `median`: the median invocation
 - `sum` the accumulated time of all invocations
 
+### `--isolate-workspaces`
+
+By default, Knip optimizes performance by adding eligible workspaces to existing
+TypeScript programs, based on the compatibility of their `compilerOptions`. Use
+this flag to disable this behavior and create one program per workspace.
+
+You can see the behavior in action in [debug mode](#--debug). Look for messages
+like this:
+
+```sh
+[*] Installed 4 programs for 18 workspaces
+...
+[*] Analyzing used resolved files [P1/1] (78)
+```
+
 ## Configuration
 
 ### `--config [file]`

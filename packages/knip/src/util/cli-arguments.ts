@@ -19,7 +19,7 @@ Options:
   --fix                    Fix issues
   --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
   --include-entry-exports  Include entry files when reporting unused exports
-  --isolate-workspaces     Isolated workspaces in monorepo
+  --isolate-workspaces     Isolate workspaces into separate programs (default: false)
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
