@@ -94,8 +94,8 @@ this topic, calls to `findReferences` can be (mostly) prevented:
 knip --performance --exclude classMembers,enumMembers,nsTypes,nsExports
 ```
 
-This should approach the performance without namespaced imports (see
-[star imports and barrel files](#star-imports-and-barrel-files)).
+This should approach the performance without namespaced imports (see [star
+imports and barrel files][3]).
 
 ## GitIgnore
 
@@ -129,8 +129,9 @@ faster).
 ## A Last Resort
 
 In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][3].
+individual workspaces][4].
 
 [1]: #findreferences
 [2]: https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
-[3]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[3]: #star-imports-and-barrel-files
+[4]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace

@@ -2,7 +2,7 @@
 title: A Brief History Of Knip
 date: 2023-10-15
 sidebar:
-  order: 2
+  order: 3
 ---
 
 _Published: 2023-10-15_

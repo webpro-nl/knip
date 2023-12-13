@@ -65,8 +65,8 @@ By default, Knip optimizes performance by adding eligible workspaces to existing
 TypeScript programs, based on the compatibility of their `compilerOptions`. Use
 this flag to disable this behavior and create one program per workspace.
 
-You can see the behavior in action in [debug mode](#--debug). Look for messages
-like this:
+You can see the behavior in action in [debug mode][1]. Look for messages like
+this:
 
 ```sh
 [*] Installed 4 programs for 18 workspaces
@@ -98,7 +98,7 @@ Default location: `tsconfig.json`
 
 ### `--workspace [dir]`
 
-[Lint a single workspace][1] including its ancestor and dependent workspaces.
+[Lint a single workspace][2] including its ancestor and dependent workspaces.
 The default behavior is to lint all configured workspaces.
 
 Shortcut: `-W`
@@ -122,7 +122,7 @@ files when reporting unused exports:
 knip --include-entry-exports
 ```
 
-Also see [includeEntryExports][2].
+Also see [includeEntryExports][3].
 
 ## Modes
 
@@ -136,17 +136,17 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][3].
+Read more at [Production Mode][4].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies.
 
-Read more at [Production Mode][3].
+Read more at [Production Mode][4].
 
 ## Filters
 
-Available [issue types][4] when filtering output using `--include` or
+Available [issue types][5] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -218,7 +218,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][5].
+Also see [Reporters & Preprocessors][6].
 
 ### `--reporter-options [json]`
 
@@ -253,7 +253,7 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
-Also see [Reporters & Preprocessors][5].
+Also see [Reporters & Preprocessors][6].
 
 ## Exit code
 
@@ -273,8 +273,9 @@ Always exit with code zero (`0`), even when there are lint errors.
 
 Maximum number of issues before non-zero exit code. Default: `0`
 
-[1]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[2]: ./configuration.md#includeentryexports
-[3]: ../features/production-mode.md
-[4]: ./issue-types.md
-[5]: ../features/reporters.md
+[1]: #--debug
+[2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[3]: ./configuration.md#includeentryexports
+[4]: ../features/production-mode.md
+[5]: ./issue-types.md
+[6]: ../features/reporters.md

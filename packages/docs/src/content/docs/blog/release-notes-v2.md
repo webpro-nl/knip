@@ -1,7 +1,7 @@
 ---
 title: Release Notes v2
 sidebar:
-  order: 3
+  order: 4
 ---
 
 _2023-03-22_

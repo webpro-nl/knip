@@ -21,9 +21,11 @@ h2 em {
   font-weight: bold;
 }
 
-h2 code,
-h3 code {
-  color: var(--sl-color-gray-1);
+.sl-markdown-content h2 code,
+.sl-markdown-content h3 coe {
+  font-size: 0.9em;
+  color: var(--sl-color-white);
+  /* margin-bottom: 0; */
 }
 
 p code {
