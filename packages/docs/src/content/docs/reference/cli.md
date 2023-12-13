@@ -49,7 +49,7 @@ findGithubActionsDependencies     6      0.16     12.71      0.65     23.45
 findBabelDependencies             2      0.00     38.75     19.37     38.75
 ...
 
-Total running time: 5s
+Total running time: 5s (mem: 631.27MB)
 ```
 
 - `name`: the internal Knip function name

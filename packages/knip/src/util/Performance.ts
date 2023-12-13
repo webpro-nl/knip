@@ -1,7 +1,11 @@
 import { performance, PerformanceObserver, PerformanceEntry } from 'node:perf_hooks';
+import { constants } from 'node:perf_hooks';
+import { memoryUsage } from 'node:process';
 import EasyTable from 'easy-table';
+import prettyMilliseconds from 'pretty-ms';
 import Summary from 'summary';
 import parsedArgValues from './cli-arguments.js';
+import { debugLog } from './debug.js';
 import type { TimerifyOptions } from 'node:perf_hooks';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,18 +22,35 @@ export class Performance {
   endTime = 0;
   entries: PerformanceEntry[] = [];
   instanceId?: number;
-  observer?: PerformanceObserver;
+  fnObserver?: PerformanceObserver;
+  gcObserver?: PerformanceObserver;
+  memoryUsageStart?: ReturnType<typeof memoryUsage>;
+  memoryUsageEnd?: ReturnType<typeof memoryUsage>;
 
   constructor(isEnabled: boolean) {
     if (isEnabled) {
       this.startTime = performance.now();
       this.instanceId = Math.floor(performance.now() * 100);
-      this.observer = new PerformanceObserver(items => {
+
+      // timerified functions
+      this.fnObserver = new PerformanceObserver(items => {
         items.getEntries().forEach(entry => {
           this.entries.push(entry);
         });
       });
-      this.observer.observe({ entryTypes: ['function'] });
+      this.fnObserver.observe({ entryTypes: ['function'] });
+
+      // major garbage collection events
+      this.gcObserver = new PerformanceObserver(items => {
+        for (const item of items.getEntries()) {
+          if ((item.detail as { kind: number })?.kind === constants.NODE_PERFORMANCE_GC_MAJOR) {
+            debugLog('*', `GC (after ${prettyMilliseconds(item.startTime)} in ${prettyMilliseconds(item.duration)})`);
+          }
+        }
+      });
+      this.gcObserver.observe({ entryTypes: ['gc'] });
+
+      this.memoryUsageStart = memoryUsage();
     }
     this.isEnabled = isEnabled;
   }
@@ -86,15 +107,20 @@ export class Performance {
     return this.endTime - this.startTime;
   }
 
+  getMemHeapUsage() {
+    return (this.memoryUsageEnd?.heapUsed ?? 0) - (this.memoryUsageStart?.heapUsed ?? 0);
+  }
+
   public async finalize() {
     if (!this.isEnabled) return;
     this.endTime = performance.now();
+    this.memoryUsageEnd = memoryUsage();
     // Workaround to get all entries
     await this.flush();
   }
 
   public reset() {
     this.entries = [];
-    this.observer?.disconnect();
+    this.fnObserver?.disconnect();
   }
 }

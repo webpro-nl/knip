@@ -84,7 +84,8 @@ const run = async () => {
     if (isObservePerf) {
       await perfObserver.finalize();
       console.log('\n' + perfObserver.getTable());
-      console.log('\nTotal running time:', prettyMilliseconds(perfObserver.getTotalTime()));
+      const mem = Math.round((perfObserver.getMemHeapUsage() / 1024 / 1024) * 100) / 100;
+      console.log('\nTotal running time:', prettyMilliseconds(perfObserver.getTotalTime()), `(mem: ${mem}MB)`);
       perfObserver.reset();
     }
 

@@ -36,7 +36,7 @@ const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Pat
 };
 
 /**
- * The principal factory hands out ProjectPrincipals. It tries to reuse them, since they're expensive in terms of
+ * The principal factory hands out ProjectPrincipals. It tries to reuse programs, since they're expensive in terms of
  * performance. Time will tell if this is actually feasible or not.
  */
 export class PrincipalFactory {
