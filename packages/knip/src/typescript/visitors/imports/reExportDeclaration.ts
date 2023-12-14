@@ -13,7 +13,7 @@ export default visit(
         } else if (node.exportClause.kind === ts.SyntaxKind.NamespaceExport) {
           // Pattern: export * as namespace from 'specifier';
           return {
-            identifier: '*',
+            identifier: `*:${node.exportClause.name.escapedText}`,
             specifier: node.moduleSpecifier.text,
             isReExport: true,
             pos: node.exportClause.name.pos,
@@ -22,7 +22,10 @@ export default visit(
           // Pattern: export { identifier, identifier2 } from 'specifier';
           const specifier = node.moduleSpecifier; // Assign to satisfy TS
           return node.exportClause.elements.map(element => {
-            const identifier = (element.propertyName ?? element.name).getText();
+            const identifier =
+              element.propertyName && element.name
+                ? `${element.name.escapedText}:${element.propertyName.escapedText}`
+                : (element.propertyName ?? element.name).getText();
             return { identifier, specifier: specifier.text, isReExport: true, pos: element.pos };
           });
         }

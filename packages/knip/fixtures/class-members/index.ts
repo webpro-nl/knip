@@ -1,4 +1,4 @@
-import { MyClass, MyEnum } from './members';
+import { MyClass } from './members';
 
 const instance = new MyClass();
 
@@ -18,9 +18,3 @@ instance.bUsedExternal;
 instance.cUsedExternal;
 instance.dUsedExternal();
 MyClass.eUsedExternal;
-
-const a: MyEnum.A_UsedExternal = 1;
-
-export enum EntryEnum {
-  UnusedMemberInEntryEnum = 1,
-}

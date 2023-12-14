@@ -23,8 +23,8 @@ import { loadTSConfig } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { CommandLineOptions } from './types/cli.js';
-import type { ExportItem, Exports } from './types/exports.js';
-import type { ImportedModule, Imports } from './types/imports.js';
+import type { ExportItem, ExportItemMember, Exports } from './types/exports.js';
+import type { ImportsForExport, Imports } from './types/imports.js';
 
 type HandleReferencedDependencyOptions = {
   specifier: string;
@@ -268,8 +268,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
   const analyzedFiles = new Set<string>();
-  const exportedSymbols: Exports = new Map();
-  const importedSymbols: Imports = new Map();
+  const exportedSymbols: Exports = {};
+  const importedSymbols: Imports = {};
+  const unreferencedFiles = new Set<string>();
+  const entryPaths = new Set<string>();
 
   for (const principal of principals) {
     const specifierFilePaths = new Set<string>();
@@ -281,13 +283,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           skipTypeOnly: isStrict,
           isFixExports: fixer.isFixUnusedExports,
           isFixTypes: fixer.isFixUnusedTypes,
+          ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
         });
         const { internal, external, unresolved } = imports;
         const { exported, duplicate } = exports;
 
-        if (exported.size > 0) exportedSymbols.set(filePath, exported);
+        if (Object.keys(exported).length > 0) exportedSymbols[filePath] = exported;
 
-        for (const [specifierFilePath, importItems] of internal.entries()) {
+        for (const [specifierFilePath, importItems] of Object.entries(internal)) {
           const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
           if (packageName && chief.availableWorkspacePkgNames.has(packageName)) {
             // Mark "external" imports from other local workspaces as used dependency
@@ -304,12 +307,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             }
           }
 
-          if (!importedSymbols.has(specifierFilePath)) {
-            importedSymbols.set(specifierFilePath, importItems);
+          if (!importedSymbols[specifierFilePath]) {
+            importedSymbols[specifierFilePath] = importItems;
           } else {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const importedModule = importedSymbols.get(specifierFilePath)!;
-            for (const identifier of importItems.symbols) importedModule.symbols.add(identifier);
+            const importedModule = importedSymbols[specifierFilePath];
+            for (const id of importItems.symbols) importedModule.symbols.push(id);
+            for (const id of importItems.importedNs) importedModule.importedNs.add(id);
+            for (const id of importItems.isReExportedBy) importedModule.isReExportedBy.add(id);
+            for (const id of importItems.isImportedBy) importedModule.isImportedBy.add(id);
             if (importItems.hasStar) importedModule.hasStar = true;
             if (importItems.isReExport) {
               importedModule.isReExport = true;
@@ -369,89 +375,110 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         analyzeSourceFile(specifierFilePath, principal);
       }
     });
+
+    principal.getUnreferencedFiles().forEach(filePath => unreferencedFiles.add(filePath));
+    principal.entryPaths.forEach(filePath => entryPaths.add(filePath));
+    factory.deletePrincipal(principal);
   }
 
-  const isSymbolImported = (symbol: string, importingModule?: ImportedModule): boolean => {
-    if (!importingModule) return false;
-    if (importingModule.symbols.has(symbol)) return true;
-    const { isReExport, isReExportedBy } = importingModule;
-    const hasSymbol = (file: string) => isSymbolImported(symbol, importedSymbols.get(file));
-    return isReExport ? Array.from(isReExportedBy).some(hasSymbol) : false;
+  const isSymbolImported = (
+    filePath: string,
+    symbol: string,
+    importsForExport?: ImportsForExport,
+    depth: number = 0
+  ): boolean => {
+    if (!importsForExport) return false;
+    if (importsForExport.symbols.includes(symbol)) return true;
+    if (Array.from(importsForExport.importedNs).find(ns => importsForExport.symbols.includes(`${ns}.${symbol}`)))
+      return true;
+    if (
+      Array.from(importsForExport.isReExportedAs).find(([file, ns]) =>
+        isSymbolImported(filePath, `${ns}.${symbol}`, importedSymbols[file], depth + 1)
+      )
+    )
+      return true;
+    const { isReExport, isReExportedBy } = importsForExport;
+    const hasSymbol = (file: string) => isSymbolImported(filePath, symbol, importedSymbols[file], depth + 1);
+    if (isReExport) return Array.from(isReExportedBy).some(hasSymbol);
+    return false;
   };
 
-  const isExportedInEntryFile = (principal: ProjectPrincipal, importedModule?: ImportedModule): boolean => {
+  const isExportedInEntryFile = (importedModule?: ImportsForExport): boolean => {
     if (!importedModule) return false;
     const { isReExport, isReExportedBy } = importedModule;
-    const { entryPaths } = principal;
-    const hasFile = (file: string) =>
-      entryPaths.has(file) || isExportedInEntryFile(principal, importedSymbols.get(file));
+    const hasFile = (file: string) => entryPaths.has(file) || isExportedInEntryFile(importedSymbols[file]);
     return isReExport ? Array.from(isReExportedBy).some(hasFile) : false;
   };
 
-  const isExportedItemReferenced = (principal: ProjectPrincipal, exportedItem: ExportItem, filePath: string) => {
-    const hasReferences = principal.getHasReferences(filePath, exportedItem);
+  const getReExportingEntryFile = (
+    importedModule: ImportsForExport | undefined,
+    symbol: string
+  ): string | undefined => {
+    if (!importedModule) return undefined;
+    const { isReExport, isReExportedBy } = importedModule;
+    if (isReExport) {
+      for (const f of isReExportedBy) {
+        if (entryPaths.has(f) && f in exportedSymbols && symbol in exportedSymbols[f]) return f;
+        else return getReExportingEntryFile(importedSymbols[f], symbol);
+      }
+    }
+  };
+
+  const isExportedItemReferenced = (exportedItem: ExportItem | ExportItemMember) => {
     return (
-      hasReferences.external ||
-      (hasReferences.internal &&
-        (typeof chief.config.ignoreExportsUsedInFile === 'object'
-          ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
-          : chief.config.ignoreExportsUsedInFile))
+      exportedItem.refs > 0 &&
+      (typeof chief.config.ignoreExportsUsedInFile === 'object'
+        ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
+        : chief.config.ignoreExportsUsedInFile)
     );
   };
 
   if (isReportValues || isReportTypes) {
     streamer.cast('Analyzing source files...');
 
-    for (const [filePath, exportItems] of exportedSymbols.entries()) {
+    for (const [filePath, exportItems] of Object.entries(exportedSymbols)) {
       const workspace = chief.findWorkspaceByFilePath(filePath);
-      const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
 
-      if (principal) {
+      if (workspace) {
         const { isIncludeEntryExports } = workspace.config;
 
         // Bail out when in entry file (unless `isIncludeEntryExports`)
-        if (!isIncludeEntryExports && principal.entryPaths.has(filePath)) continue;
+        if (!isIncludeEntryExports && entryPaths.has(filePath)) continue;
 
-        const importsForExport = importedSymbols.get(filePath);
+        const importsForExport = importedSymbols[filePath];
 
-        for (const [symbol, exportedItem] of exportItems.entries()) {
+        for (const [symbol, exportedItem] of Object.entries(exportItems)) {
           // Skip exports tagged `@public` or `@beta`
-          if (exportedItem.jsDocTags.has('@public') || exportedItem.jsDocTags.has('@beta')) continue;
+          if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
+
+          // Skip exports tagged `@alias`
+          if (exportedItem.jsDocTags.includes('@alias')) continue;
 
           // Skip exports tagged `@internal` in --production mode
-          if (isProduction && exportedItem.jsDocTags.has('@internal')) continue;
+          if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
 
-          if (importsForExport && isSymbolImported(symbol, importsForExport)) {
-            // Skip members of classes/enums that are eventually exported by entry files (unless `isIncludeEntryExports`)
-            if (
-              !isIncludeEntryExports &&
-              importsForExport.isReExport &&
-              isExportedInEntryFile(principal, importsForExport)
-            ) {
+          if (importsForExport && isSymbolImported(filePath, symbol, importsForExport)) {
+            // Skip members of classes/enums that are eventually re-exported by entry files (unless `isIncludeEntryExports`)
+            if (!isIncludeEntryExports && importsForExport.isReExport && isExportedInEntryFile(importsForExport)) {
               continue;
             }
 
-            if (report.enumMembers && exportedItem.type === 'enum' && exportedItem.members) {
-              principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-                collector.addIssue({
-                  type: 'enumMembers',
-                  filePath,
-                  symbol: member.identifier,
-                  parentSymbol: symbol,
-                  ...principal.getPos(member.node, member.pos),
-                });
-              });
-            }
-
-            if (report.classMembers && exportedItem.type === 'class' && exportedItem.members) {
-              principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-                collector.addIssue({
-                  type: 'classMembers',
-                  filePath,
-                  symbol: member.identifier,
-                  parentSymbol: symbol,
-                  ...principal.getPos(member.node, member.pos),
-                });
+            if (exportedItem.type === 'enum') {
+              exportedItem.members?.forEach(member => {
+                if (
+                  member.refs === 0 &&
+                  !isSymbolImported(filePath, `${symbol}.${member.identifier}`, importsForExport)
+                ) {
+                  collector.addIssue({
+                    type: 'enumMembers',
+                    filePath,
+                    symbol: member.identifier,
+                    parentSymbol: symbol,
+                    pos: exportedItem.pos,
+                    line: exportedItem.line,
+                    col: exportedItem.col,
+                  });
+                }
               });
             }
 
@@ -461,21 +488,28 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           const hasNsImport = Boolean(importsForExport?.hasStar);
 
-          const isReExport =
-            !isIncludeEntryExports && hasNsImport && isExportedInEntryFile(principal, importsForExport);
+          const reExportingEntryFile = getReExportingEntryFile(importsForExport, symbol);
+
+          if (reExportingEntryFile) continue;
+
+          if (!isIncludeEntryExports && importsForExport && importsForExport.hasStar && importsForExport.isReExport) {
+            continue;
+          }
 
           const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
           if (hasNsImport && ((!report.nsTypes && isType) || (!report.nsExports && !isType))) continue;
 
-          if (!isReExport && !isExportedItemReferenced(principal, exportedItem, filePath)) {
+          if (!isExportedItemReferenced(exportedItem)) {
             const type = isType ? (hasNsImport ? 'nsTypes' : 'types') : hasNsImport ? 'nsExports' : 'exports';
             collector.addIssue({
               type,
               filePath,
               symbol,
               symbolType: exportedItem.type,
-              ...principal.getPos(exportedItem.node, exportedItem.pos),
+              pos: exportedItem.pos,
+              line: exportedItem.line,
+              col: exportedItem.col,
             });
             if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fix);
             else fixer.addUnusedExportNode(filePath, exportedItem.fix);
@@ -485,10 +519,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
   }
 
-  const unusedFiles = factory
-    .getPrincipals()
-    .flatMap(principal => principal.getUnreferencedFiles())
-    .filter(filePath => !analyzedFiles.has(filePath));
+  const unusedFiles = [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath));
 
   collector.addFilesIssues(unusedFiles);
 

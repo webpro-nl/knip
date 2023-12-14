@@ -4,15 +4,13 @@ import { importVisitor as visit } from '../index.js';
 
 export default visit(
   () => true,
-  (node, options) => {
+  node => {
     if (ts.isImportDeclaration(node) && ts.isStringLiteralLike(node.moduleSpecifier)) {
       const specifier = node.moduleSpecifier.text;
       if (!node.importClause) {
         // Pattern: import 'side-effects';
         return { specifier };
       } else {
-        if (node.importClause.isTypeOnly && options.skipTypeOnly) return;
-
         const imports = [];
 
         if (isDefaultImport(node)) {
@@ -31,8 +29,14 @@ export default visit(
             // Pattern: import { identifier as NS } from 'specifier'
             node.importClause.namedBindings.elements.forEach(element => {
               const identifier = (element.propertyName ?? element.name).getText();
-              // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportSpecifier'.
-              imports.push({ symbol: element.symbol, specifier, identifier, pos: element.pos });
+              imports.push({
+                // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportSpecifier'.
+                symbol: element.symbol,
+                isTypeOnly: node.importClause?.isTypeOnly,
+                specifier,
+                identifier,
+                pos: element.pos,
+              });
             });
           }
         }

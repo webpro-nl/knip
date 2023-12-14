@@ -8,7 +8,7 @@ const cwd = resolve('fixtures/exports');
 
 const exec = execFactory(cwd);
 
-test('knip --reporter json', () => {
+test('knip --reporter json (exports & types)', () => {
   const json = {
     files: [],
     issues: [

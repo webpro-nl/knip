@@ -50,5 +50,5 @@ export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers }: Cre
     resolveModuleNames: languageServiceHost.resolveModuleNames,
   };
 
-  return { fileManager, languageServiceHost, compilerHost, resolveModuleNames };
+  return { fileManager, compilerHost, resolveModuleNames };
 };

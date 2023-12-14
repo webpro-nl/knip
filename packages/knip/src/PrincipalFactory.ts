@@ -1,5 +1,6 @@
 import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
+import { debugLog } from './util/debug.js';
 import { toAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { GlobbyFilterFunction } from 'globby';
@@ -92,5 +93,13 @@ export class PrincipalFactory {
 
   public getPrincipalByPackageName(packageName: string) {
     return Array.from(this.principals).find(principal => principal.pkgNames.has(packageName))?.principal;
+  }
+
+  public deletePrincipal(principal: ProjectPrincipal) {
+    const p = Array.from(this.principals).find(p => p.principal === principal);
+    if (p) {
+      debugLog('*', `Deleting principal at ${[...p.cwds]} for ${[...p.pkgNames]}`);
+      this.principals.delete(p);
+    }
   }
 }

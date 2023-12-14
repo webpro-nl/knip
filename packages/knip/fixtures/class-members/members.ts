@@ -1,22 +1,11 @@
-import { Parent, type EntryEnum } from './index';
+import { Parent } from './index';
 
 const parent = new Parent();
-
-enum UnexportedEnun {
-  Member = 1,
-}
 
 class UnexportedClass {
   prop;
   public publicProp;
   public publicMethod() {}
-}
-
-export enum MyEnum {
-  A_UsedExternal = 1,
-  B_Unused = 1,
-  C_UsedInternal = 1,
-  'D_Key' = 'D_Value',
 }
 
 export class MyClass {

@@ -1,5 +1,6 @@
 import ts from 'typescript';
-import type { GetImportsAndExportsOptions, AddExportOptions, AddImportOptions } from '../getImportsAndExports.js';
+import type { ExportedNode } from '../../types/exports.js';
+import type { GetImportsAndExportsOptions, AddImportOptions } from '../getImportsAndExports.js';
 
 type FileCondition = (sourceFile: ts.SourceFile) => boolean;
 type VisitorFactory<T> = (fileCondition: FileCondition, fn: Visitor<T>) => VisitorCondition<T>;
@@ -12,7 +13,7 @@ export const importVisitor: VisitorFactory<AddImportOptions> = (fileCondition, v
   }
 };
 
-export const exportVisitor: VisitorFactory<AddExportOptions> = (fileCondition, visitorFn) => sourceFile => {
+export const exportVisitor: VisitorFactory<ExportedNode> = (fileCondition, visitorFn) => sourceFile => {
   if (fileCondition(sourceFile)) {
     return (node, options) => visitorFn(node, options);
   }

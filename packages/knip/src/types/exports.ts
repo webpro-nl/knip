@@ -5,17 +5,17 @@ type FilePath = string;
 type Identifier = string;
 export type ExportPos = [number, number] | [];
 
-export type ExportItem = {
+export type ExportedNode = {
   node: ts.Node;
+  identifier: Identifier;
   pos: number;
-  posDecl?: number; // declPos (position of declaration) is sometimes required for `findReferences`
   type: SymbolType;
-  members?: ExportItemMember[];
+  members?: ExportNodeMember[];
   jsDocTags?: Set<string>;
   fix: ExportPos;
 };
 
-export type ExportItemMember = {
+type ExportNodeMember = {
   node: ts.Node;
   identifier: Identifier;
   pos: number;
@@ -23,6 +23,30 @@ export type ExportItemMember = {
   fix: ExportPos;
 };
 
-export type ExportItems = Map<string, Required<ExportItem>>;
+export interface ExportItem {
+  identifier: Identifier;
+  pos: number;
+  line: number;
+  col: number;
+  type: SymbolType;
+  members: ExportItemMember[];
+  jsDocTags: Array<string>;
+  refs: number;
+  fix: ExportPos;
+  symbol?: ts.Symbol;
+}
 
-export type Exports = Map<FilePath, ExportItems>;
+export type ExportItemMember = {
+  identifier: Identifier;
+  pos: number;
+  line: number;
+  col: number;
+  type: SymbolType;
+  refs: number;
+  fix: ExportPos;
+  symbol?: ts.Symbol;
+};
+
+export type ExportItems = Record<string, ExportItem>;
+
+export type Exports = Record<FilePath, ExportItems>;

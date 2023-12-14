@@ -16,7 +16,7 @@ export function isDefaultImport(
   return node.kind === ts.SyntaxKind.ImportDeclaration && !!node.importClause && !!node.importClause.name;
 }
 
-export function isAccessExpression(node: ts.Node): node is ts.PropertyAccessExpression | ts.ElementAccessExpression {
+export function isAccessExpression(node: ts.Node): node is ts.AccessExpression {
   return ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node);
 }
 
@@ -46,10 +46,6 @@ export function isPropertyAccessCall(node: ts.Node, identifier: string): node is
     ts.isPropertyAccessExpression(node.expression) &&
     node.expression.getText() === identifier
   );
-}
-
-export function getAccessExpressionName(node: ts.PropertyAccessExpression | ts.ElementAccessExpression) {
-  return 'argumentExpression' in node ? stripQuotes(node.argumentExpression.getText()) : node.name.getText();
 }
 
 export function stripQuotes(name: string) {
@@ -114,24 +110,15 @@ export function findDescendants<T>(node: ts.Node | undefined, callback: (element
 export const isDeclarationFileExtension = (extension: string) =>
   extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
 
-export const isInModuleBlock = (node: ts.Node) => {
-  node = node?.parent;
-  while (node) {
-    if (ts.isModuleBlock(node)) return true;
-    node = node.parent;
-  }
-  return false;
-};
-
 export const getJSDocTags = (node: ts.Node) => {
-  const tags = new Set<string>();
+  const tags = new Array<string>();
   let tagNodes = ts.getJSDocTags(node);
   if (ts.isExportSpecifier(node) || ts.isBindingElement(node)) {
     tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent.parent)];
   }
   for (const tagNode of tagNodes) {
     const match = tagNode.getText()?.match(/@\S+/);
-    if (match) tags.add(match[0]);
+    if (match) tags.push(match[0]);
   }
   return tags;
 };
@@ -139,4 +126,20 @@ export const getJSDocTags = (node: ts.Node) => {
 export const getLineAndCharacterOfPosition = (node: ts.Node, pos: number) => {
   const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
   return { line: line + 1, col: character + 1, pos };
+};
+
+export const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => {
+  if (ts.isElementAccessExpression(node)) {
+    if (ts.isStringLiteral(node.argumentExpression)) return node.argumentExpression.text;
+    const type = typeChecker.getTypeAtLocation(node.argumentExpression);
+    if (type.isUnion()) {
+      return type.types.map(type => (type as ts.LiteralType).value as string);
+    } else if ((type as ts.LiteralType).value) {
+      return (type as ts.LiteralType).value as string;
+    }
+  }
+
+  if (ts.isPropertyAccessExpression(node)) {
+    return node.name.escapedText;
+  }
 };

@@ -1,19 +1,16 @@
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
-import { getJSDocTags, getLineAndCharacterOfPosition, isInModuleBlock } from './typescript/ast-helpers.js';
 import { createHosts } from './typescript/createHosts.js';
 import { _getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { compact } from './util/array.js';
-import { debugLog } from './util/debug.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
-import type { ExportItem, ExportItemMember } from './types/exports.js';
 import type { UnresolvedImport } from './types/imports.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { GlobbyFilterFunction } from 'globby';
@@ -38,6 +35,13 @@ const baseCompilerOptions = {
 };
 
 const tsCreateProgram = timerify(ts.createProgram);
+
+type AnalyzeSourceFileOptions = {
+  skipTypeOnly: boolean;
+  isFixExports: boolean;
+  isFixTypes: boolean;
+  ignoreExportsUsedInFile: boolean;
+};
 
 /**
  * This class aims to abstract away TypeScript specific things from the main flow.
@@ -68,8 +72,8 @@ export class ProjectPrincipal {
     fileManager: SourceFileManager;
     compilerHost: ts.CompilerHost;
     resolveModuleNames: ReturnType<typeof createCustomModuleResolver>;
-    lsFindReferences: ts.LanguageService['findReferences'];
     program?: ProgramMaybe53;
+    typeChecker?: ts.TypeChecker;
   };
 
   constructor({ compilerOptions, cwd, compilers, isGitIgnored }: PrincipalOptions) {
@@ -89,22 +93,17 @@ export class ProjectPrincipal {
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
 
-    const { fileManager, compilerHost, languageServiceHost, resolveModuleNames } = createHosts({
+    const { fileManager, compilerHost, resolveModuleNames } = createHosts({
       cwd: this.cwd,
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
       compilers: [this.syncCompilers, this.asyncCompilers],
     });
 
-    const languageService = ts.createLanguageService(languageServiceHost, ts.createDocumentRegistry());
-
-    const lsFindReferences = timerify(languageService?.findReferences);
-
     this.backend = {
       fileManager,
       compilerHost,
       resolveModuleNames,
-      lsFindReferences,
     };
   }
 
@@ -121,7 +120,7 @@ export class ProjectPrincipal {
     );
 
     const typeChecker = timerify(this.backend.program.getTypeChecker);
-    typeChecker();
+    this.backend.typeChecker = typeChecker();
   }
 
   private hasAcceptedExtension(filePath: string) {
@@ -175,10 +174,7 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(
-    filePath: string,
-    { skipTypeOnly, isFixExports, isFixTypes }: { skipTypeOnly: boolean; isFixExports: boolean; isFixTypes: boolean }
-  ) {
+  public analyzeSourceFile(filePath: string, options: AnalyzeSourceFileOptions) {
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
     const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
 
@@ -191,12 +187,12 @@ export class ProjectPrincipal {
         ? this.backend.program.getResolvedModule(sourceFile, specifier, /* mode */ undefined)
         : sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
 
-    const { imports, exports, scripts } = _getImportsAndExports(sourceFile, getResolvedModule, {
-      skipTypeOnly,
-      skipExports,
-      isFixExports,
-      isFixTypes,
-    });
+    const { imports, exports, scripts } = _getImportsAndExports(
+      sourceFile,
+      getResolvedModule,
+      this.backend.typeChecker!,
+      { ...options, skipExports }
+    );
 
     const { internal, unresolved, external } = imports;
 
@@ -248,58 +244,5 @@ export class ProjectPrincipal {
 
   public resolveModule(specifier: string, filePath: string = specifier) {
     return this.backend.resolveModuleNames([specifier], filePath)[0];
-  }
-
-  public getHasReferences(filePath: string, exportedItem: ExportItem) {
-    const hasReferences = { external: false, internal: false };
-
-    const pos = exportedItem.posDecl ?? exportedItem.pos;
-    const symbolReferences = this.findReferences(filePath, pos).flatMap(f => f.references);
-
-    for (const reference of symbolReferences) {
-      if (reference.fileName === filePath) {
-        if (!reference.isDefinition) {
-          hasReferences.internal = true;
-        }
-      } else {
-        hasReferences.external = true;
-      }
-    }
-
-    if (!hasReferences.external && hasReferences.internal) {
-      // Consider exports in module blocks (namespaces) referenced in the same file as external refs
-      // Pattern: namespace NS { export type T }; type U = NS.T;
-      hasReferences.external = isInModuleBlock(exportedItem.node);
-    }
-
-    return hasReferences;
-  }
-
-  public findUnusedMembers(filePath: string, members: ExportItemMember[]) {
-    return members.filter(member => {
-      if (getJSDocTags(member.node).has('@public')) return false;
-      const referencedSymbols = this.findReferences(filePath, member.pos);
-      const files = referencedSymbols
-        .flatMap(refs => refs.references)
-        .filter(ref => !ref.isDefinition)
-        .map(ref => ref.fileName);
-      const internalRefs = files.filter(f => f === filePath);
-      const externalRefs = files.filter(f => f !== filePath);
-      return externalRefs.length === 0 && internalRefs.length === 0;
-    });
-  }
-
-  private findReferences(filePath: string, pos: number) {
-    try {
-      return this.backend.lsFindReferences(filePath, pos) ?? [];
-    } catch (error) {
-      // TS throws for (cross-referenced) files not in the program
-      debugLog('*', String(error));
-      return [];
-    }
-  }
-
-  public getPos(node: ts.Node, pos: number) {
-    return getLineAndCharacterOfPosition(node, pos);
   }
 }

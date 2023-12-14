@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/imports-namespace');
+const cwd = resolve('fixtures/re-exports-deep');
 
-test('Ignore namespace re-export by entry file', async () => {
+test('Find deep re-exports', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -15,8 +15,7 @@ test('Ignore namespace re-export by entry file', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    nsExports: 3, // TODO should be 0
-    processed: 4,
-    total: 4,
+    processed: 7,
+    total: 7,
   });
 });
