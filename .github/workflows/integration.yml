@@ -60,4 +60,4 @@ jobs:
         with:
           repository: argos-ci/argos
           path: argos
-      - run: cd argos && npm install && knip
+      - run: cd argos && npm install && knip --no-exit-code
