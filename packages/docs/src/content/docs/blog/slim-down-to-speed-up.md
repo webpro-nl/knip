@@ -1,8 +1,7 @@
 ---
 title: Slim down to speed up
-date: 2023-12-13
+date: 2023-12-14
 sidebar:
-  hidden: true
   order: 1
 ---
 
