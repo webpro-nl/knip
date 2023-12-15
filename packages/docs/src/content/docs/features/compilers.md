@@ -107,7 +107,8 @@ this is not a real compiler, but in many cases it's enough to extract and return
 the contents of the `<script>` elements as a TypeScript module.
 
 Knip does not have a Vue plugin, mainly because the entry file `src/main.ts` is
-already covered by the default entry patterns.
+already covered by the default entry patterns. You may need to add e.g.
+`src/App.vue` as an entry file.
 
 ### Svelte
 

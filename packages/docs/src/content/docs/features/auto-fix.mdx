@@ -30,6 +30,43 @@ Use `--fix-type` to fix only specific issue types (`exports`, `types` and/or
 knip --fix-type exports,types
 ```
 
+## Example Result
+
+The `export` keyword for unused exports is removed:
+
+```diff title="file.js"
+-export default class MyClass {}
++class MyClass {}
+```
+
+Note that also the `default` keyword was removed here.
+
+Sometimes a line can be completely removed safely:
+
+```diff title="file.js"
+-module.exports.UNUSED = 1;
+-module.exports['ACCESS'] = 1;
++
++
+```
+
+Unused dependencies are removed from `package.json`:
+
+```diff title="package.json"
+ {
+   "name": "my-package",
+   "dependencies": {
+-    "rimraf": "*",
+-    "unused-dependency": "*"
++    "rimraf": "*"
+   },
+-  "devDependencies": {
+-    "unreferenced-package": "5.3.3"
+-  }
++  "devDependencies": {}
+ }
+```
+
 ## Post-fix
 
 - You may want to run tools like `eslint --fix` or `prettier --write` to fix the

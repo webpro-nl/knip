@@ -236,10 +236,12 @@ NS.referencedExport();
 Previously, Knip used `findReferences()` to "trace back" the usage of the
 exported `referencedExport`.
 
-Yet in v4, during AST traversal of `index.ts` , Knip sees that
-`referencedExport` is attached to the imported `NS` namespace, and stores that
-as an imported identifier of `namespace.ts`. When matching exports against
-imports, this lookup comes at no extra cost.
+The gist of the optimization is to pre-determine all imports and exports. During
+AST traversal of `index.ts` , Knip sees that `referencedExport` is attached to
+the imported `NS` namespace, and stores that as an imported identifier of
+`namespace.ts`. When matching exports against imports, this lookup comes at no
+extra cost. Additionally, this can be stored as strings, so it can be serialized
+too. And that means it can be cached.
 
 Knip already did this for trivial cases as shown in the first example of this
 article. This has now been extended to cover more patterns. This is also what
@@ -259,6 +261,8 @@ false positive that wasn't there in v3, please [report this][2].
 ```sh
 npm install -D knip@canary
 ```
+
+Remember, Knip it before you ship it! Have a great day ☀️
 
 [1]: https://github.com/remix-run/remix
 [2]: https://github.com/webpro/knip/issues

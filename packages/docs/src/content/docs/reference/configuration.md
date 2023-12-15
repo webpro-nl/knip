@@ -77,6 +77,8 @@ Example:
 }
 ```
 
+Actual regular expressions can be used in dynamic configurations.
+
 ## `ignoreDependencies`
 
 Array of package names to exclude from the report. Regular expressions allowed.
@@ -86,6 +88,14 @@ Example:
 {
   "ignoreDependencies": ["hidden-package", "@org/.*"]
 }
+```
+
+Actual regular expressions can be used in dynamic configurations:
+
+```ts title="knip.ts"
+export default {
+  ignoreDependencies: [/@org\/.*/, /^lib-.*/],
+};
 ```
 
 ## `ignoreExportsUsedInFile`
