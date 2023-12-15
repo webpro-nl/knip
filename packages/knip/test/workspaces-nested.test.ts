@@ -10,6 +10,8 @@ const cwd = resolve('fixtures/workspaces-nested');
 const expectedConfigurationHintsProduction = new Set([
   { identifier: 'ignored-dep-global', type: 'ignoreDependencies', workspaceName: '.' },
   { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
+  { type: 'ignoreBinaries', workspaceName: 'L-1-1/L-1-2', identifier: 'unused-ignored-bin-L-2' },
+  { type: 'ignoreDependencies', workspaceName: 'L-1-1/L-1-2/L-1-3', identifier: 'unused-ignored-dep-L-3' },
 ]);
 
 const expectedConfigurationHints = new Set([
