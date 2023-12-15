@@ -45,7 +45,7 @@
     "qa": "npm run lint && npm run build && npm run knip && npm run knip:production && npm test",
     "release": "release-it",
     "create-plugin": "tsx --no-warnings ./scripts/create-new-plugin.ts",
-    "postcreate-plugin": "prettier schema.json schema-jsonc.json src/ConfigurationValidator.ts --write --config .prettierrc --log-level silent"
+    "postcreate-plugin": "prettier schema.json schema-jsonc.json src/ConfigurationValidator.ts --write --config .prettierrc.json"
   },
   "files": [
     "dist",
