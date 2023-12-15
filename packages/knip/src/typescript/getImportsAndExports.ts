@@ -10,6 +10,7 @@ import {
   getLineAndCharacterOfPosition,
   getMemberStringLiterals,
 } from './ast-helpers.js';
+import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getJSXImplicitImportBase } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
@@ -22,6 +23,7 @@ import type { IssueSymbol } from '../types/issues.js';
 const getVisitors = (sourceFile: ts.SourceFile) => ({
   export: getExportVisitors(sourceFile),
   import: getImportVisitors(sourceFile),
+  dynamicImport: getDynamicImportVisitors(sourceFile),
   script: getScriptVisitors(sourceFile),
 });
 
@@ -247,6 +249,8 @@ const getImportsAndExports = (
     }
   };
 
+  const addScript = (script: string) => scripts.add(script);
+
   const maybeAddAliasedExport = (node: ts.Expression | undefined, alias: string) => {
     const identifier = node?.getText();
     if (node && identifier) {
@@ -264,30 +268,29 @@ const getImportsAndExports = (
   };
 
   const visit = (node: ts.Node) => {
-    for (const visitor of visitors.import) {
-      if (visitor) {
-        const results = visitor(node, options);
-        if (results) [results].flat().forEach(addImport);
-      }
+    for (const visitor of visitors.dynamicImport) {
+      const result = visitor(node, options);
+      result && (Array.isArray(result) ? result.forEach(addImport) : addImport(result));
     }
 
-    // Skip non-top level exports
+    // Skip some work by handling only top-level import/export assignments
     const isTopLevel = node.parent === sourceFile || node.parent?.parent === sourceFile;
 
     if (isTopLevel) {
+      for (const visitor of visitors.import) {
+        const result = visitor(node, options);
+        result && (Array.isArray(result) ? result.forEach(addImport) : addImport(result));
+      }
+
       for (const visitor of visitors.export) {
-        if (visitor) {
-          const results = visitor(node, options);
-          if (results) [results].flat().forEach(addExport);
-        }
+        const result = visitor(node, options);
+        result && (Array.isArray(result) ? result.forEach(addExport) : addExport(result));
       }
     }
 
     for (const visitor of visitors.script) {
-      if (visitor) {
-        const results = visitor(node, options);
-        if (results) [results].flat().forEach(script => scripts.add(script));
-      }
+      const result = visitor(node, options);
+      result && (Array.isArray(result) ? result.forEach(addScript) : addScript(result));
     }
 
     if (ts.isIdentifier(node) && isAccessExpression(node.parent)) {

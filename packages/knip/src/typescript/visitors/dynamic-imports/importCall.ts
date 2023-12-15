@@ -6,7 +6,6 @@ export default visit(
   () => true,
   node => {
     if (isImportCall(node)) {
-      // Pattern: import('specifier')
       if (node.arguments[0] && ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
 
@@ -23,7 +22,6 @@ export default visit(
               if (identifier === 'then') {
                 const callExpression = node.parent.parent;
                 if (ts.isCallExpression(callExpression) && ts.isFunctionLike(callExpression.arguments[0])) {
-                  // Pattern: import('specifier').then(module => module.identifier);
                   const arg = callExpression.arguments[0].parameters[0];
                   if (ts.isIdentifier(arg.name)) {
                     const argName = arg.name.escapedText;
@@ -32,6 +30,7 @@ export default visit(
                       ts.isPropertyAccessExpression
                     ).filter(binding => binding.expression.getText() === argName);
                     if (accessExpressions.length > 0) {
+                      // Pattern: import('specifier').then(module => module.identifier);
                       return accessExpressions.map(binding => {
                         const identifier = String(binding.name.escapedText);
                         return { identifier, specifier, pos };
@@ -50,10 +49,10 @@ export default visit(
               ts.isElementAccessExpression(accessExpression) &&
               ts.isStringLiteral(accessExpression.argumentExpression)
             ) {
-              // Pattern: import('side-effects').identifier
               const name = stripQuotes(accessExpression.argumentExpression.text);
               const pos = accessExpression.argumentExpression.pos;
               const identifier = name;
+              // Pattern: import('side-effects').identifier
               return { identifier, specifier, pos };
             }
           } else {
@@ -88,16 +87,17 @@ export default visit(
                 ts.isVariableDeclaration(variableDeclaration) &&
                 ts.isArrayBindingPattern(variableDeclaration.name)
               ) {
-                // Pattern: const [a, { default: b, c }] = await Promise.all([import('A'), import('B')]);
                 const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
                 const element = variableDeclaration.name.elements[index];
                 if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
+                  // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
                   return element.name.elements.map(element => {
                     const identifier = (element.propertyName ?? element.name).getText();
                     return { identifier, specifier, pos: element.pos };
                   });
                 }
 
+                // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
                 return { identifier: 'default', specifier, pos: element.pos };
               }
 
@@ -107,6 +107,7 @@ export default visit(
           }
         }
 
+        // Fallback, seems to never happen though
         return { specifier, identifier: 'default', pos: node.arguments[0].pos };
       }
     }
