@@ -9,7 +9,7 @@ export default visit(
       const specifier = node.moduleSpecifier.text;
       if (!node.importClause) {
         // Pattern: import 'side-effects';
-        return { specifier };
+        return { specifier, identifier: undefined, pos: node.pos };
       } else {
         const imports = [];
 

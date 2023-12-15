@@ -23,8 +23,8 @@ import { loadTSConfig } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { CommandLineOptions } from './types/cli.js';
-import type { ExportItem, ExportItemMember, Exports } from './types/exports.js';
-import type { ImportsForExport, Imports } from './types/imports.js';
+import type { SerializableExport, SerializableExportMember, SerializableExportMap } from './types/exports.js';
+import type { SerializableImports, SerializableImportMap } from './types/imports.js';
 
 type HandleReferencedDependencyOptions = {
   specifier: string;
@@ -268,8 +268,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
   const analyzedFiles = new Set<string>();
-  const exportedSymbols: Exports = {};
-  const importedSymbols: Imports = {};
+  const exportedSymbols: SerializableExportMap = {};
+  const importedSymbols: SerializableImportMap = {};
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
 
@@ -384,7 +384,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const isSymbolImported = (
     filePath: string,
     symbol: string,
-    importsForExport?: ImportsForExport,
+    importsForExport?: SerializableImports,
     depth: number = 0
   ): boolean => {
     if (!importsForExport) return false;
@@ -403,7 +403,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     return false;
   };
 
-  const isExportedInEntryFile = (importedModule?: ImportsForExport): boolean => {
+  const isExportedInEntryFile = (importedModule?: SerializableImports): boolean => {
     if (!importedModule) return false;
     const { isReExport, isReExportedBy } = importedModule;
     const hasFile = (file: string) => entryPaths.has(file) || isExportedInEntryFile(importedSymbols[file]);
@@ -411,7 +411,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   const getReExportingEntryFile = (
-    importedModule: ImportsForExport | undefined,
+    importedModule: SerializableImports | undefined,
     symbol: string
   ): string | undefined => {
     if (!importedModule) return undefined;
@@ -424,7 +424,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
   };
 
-  const isExportedItemReferenced = (exportedItem: ExportItem | ExportItemMember) => {
+  const isExportedItemReferenced = (exportedItem: SerializableExport | SerializableExportMember) => {
     return (
       exportedItem.refs > 0 &&
       (typeof chief.config.ignoreExportsUsedInFile === 'object'

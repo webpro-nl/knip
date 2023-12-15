@@ -3,9 +3,10 @@ import type { SymbolType } from './issues.js';
 
 type FilePath = string;
 type Identifier = string;
+
 export type ExportPos = [number, number] | [];
 
-export type ExportedNode = {
+export type ExportNode = {
   node: ts.Node;
   identifier: Identifier;
   pos: number;
@@ -23,20 +24,20 @@ type ExportNodeMember = {
   fix: ExportPos;
 };
 
-export interface ExportItem {
+export interface SerializableExport {
   identifier: Identifier;
   pos: number;
   line: number;
   col: number;
   type: SymbolType;
-  members: ExportItemMember[];
+  members: SerializableExportMember[];
   jsDocTags: Array<string>;
   refs: number;
   fix: ExportPos;
   symbol?: ts.Symbol;
 }
 
-export type ExportItemMember = {
+export type SerializableExportMember = {
   identifier: Identifier;
   pos: number;
   line: number;
@@ -47,6 +48,6 @@ export type ExportItemMember = {
   symbol?: ts.Symbol;
 };
 
-export type ExportItems = Record<string, ExportItem>;
+export type SerializableExports = Record<Identifier, SerializableExport>;
 
-export type Exports = Record<FilePath, ExportItems>;
+export type SerializableExportMap = Record<FilePath, SerializableExports>;

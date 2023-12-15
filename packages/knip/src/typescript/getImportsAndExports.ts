@@ -16,8 +16,13 @@ import { getJSXImplicitImportBase } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
-import type { ExportedNode, ExportItem, ExportItemMember, ExportItems } from '../types/exports.js';
-import type { Imports, ImportsForExport, UnresolvedImport } from '../types/imports.js';
+import type {
+  ExportNode,
+  SerializableExport,
+  SerializableExportMember,
+  SerializableExports,
+} from '../types/exports.js';
+import type { ImportNode, SerializableImportMap, UnresolvedImport } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
 
 const getVisitors = (sourceFile: ts.SourceFile) => ({
@@ -35,20 +40,12 @@ export type GetImportsAndExportsOptions = {
   ignoreExportsUsedInFile: boolean;
 };
 
-export type AddImportOptions = {
-  specifier: string;
-  symbol?: ts.Symbol;
-  identifier?: string;
-  isTypeOnly?: boolean;
-  isReExport?: boolean;
-  pos?: number;
-};
-
-type AddInternalImportOptions = AddImportOptions & {
+interface AddInternalImportOptions extends ImportNode {
+  namespace?: string;
   identifier: string;
   filePath: string;
   isReExport: boolean;
-};
+}
 
 const getImportsAndExports = (
   sourceFile: BoundSourceFile,
@@ -57,10 +54,10 @@ const getImportsAndExports = (
   options: GetImportsAndExportsOptions
 ) => {
   const { skipTypeOnly } = options;
-  const internalImports: Imports = {};
+  const internalImports: SerializableImportMap = {};
   const externalImports = new Set<string>();
   const unresolvedImports = new Set<UnresolvedImport>();
-  const exports: ExportItems = {};
+  const exports: SerializableExports = {};
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
 
@@ -73,63 +70,51 @@ const getImportsAndExports = (
   const visitors = getVisitors(sourceFile);
 
   const addInternalImport = (options: AddInternalImportOptions) => {
-    const { identifier, specifier, symbol, filePath, isReExport } = options;
+    const { identifier, specifier, symbol, filePath, namespace, isReExport } = options;
 
-    const isStar = identifier === '*' || identifier.startsWith('*:');
+    const isStar = identifier === '*';
 
-    const internalImport: ImportsForExport =
-      filePath in internalImports
-        ? internalImports[filePath]
-        : {
-            specifier,
-            hasStar: isStar,
-            isReExport,
-            isReExportedBy: new Set<string>(),
-            isReExportedAs: new Set<[string, string]>(),
-            isImportedBy: new Set<string>(),
-            importedNs: new Set<string>(),
-            symbols: [],
-          };
-    internalImports[filePath] = internalImport;
+    const internalImport = (internalImports[filePath] = internalImports[filePath] ?? {
+      specifier,
+      hasStar: isStar,
+      isReExport,
+      isReExportedBy: new Set<string>(),
+      isReExportedAs: new Set<[string, string]>(),
+      isImportedBy: new Set<string>(),
+      importedNs: new Set<string>(),
+      symbols: [],
+    });
 
     if (isReExport && isStar) {
-      const [, id] = identifier.split(':');
       internalImport.isReExport = true;
-      if (id) {
-        internalImport.isReExportedAs.add([sourceFile.fileName, id]);
+      if (namespace) {
+        internalImport.isReExportedAs.add([sourceFile.fileName, namespace]);
       } else {
         internalImport.isReExportedBy.add(sourceFile.fileName);
       }
     } else if (isReExport) {
-      const [ns, id] = identifier.split(':');
       internalImport.isReExport = true;
-      if (id) {
-        internalImport.isReExportedAs.add([sourceFile.fileName, ns]);
-        internalImport.symbols.push(id);
+      if (namespace) {
+        internalImport.isReExportedAs.add([sourceFile.fileName, namespace]);
+        internalImport.symbols.push(namespace);
       } else {
         internalImport.isReExportedBy.add(sourceFile.fileName);
         internalImport.symbols.push(identifier);
       }
     } else if (isStar) {
       internalImport.hasStar = true;
-      if (symbol) {
-        const ns = String(symbol.escapedName);
-        internalImport.importedNs.add(ns);
-      }
+      if (symbol) internalImport.importedNs.add(String(symbol.escapedName));
     } else {
       internalImport.symbols.push(identifier.replace(/^\*:/, ''));
     }
 
-    // Store imported namespace symbol for reference in `maybeAddNamespaceAccessAsImport`
-    if (symbol) {
-      importedInternalSymbols.set(symbol, filePath);
-    }
+    if (symbol) importedInternalSymbols.set(symbol, filePath);
 
     internalImport.isImportedBy.add(sourceFile.fileName);
   };
 
-  const addImport = (options: AddImportOptions) => {
-    const { specifier, symbol, identifier = '__anonymous', isTypeOnly, isReExport = false, pos } = options;
+  const addImport = (options: ImportNode) => {
+    const { specifier, isTypeOnly, pos, identifier = '__anonymous', isReExport = false } = options;
     if (isBuiltin(specifier)) return;
 
     const module = getResolvedModule(specifier);
@@ -139,7 +124,7 @@ const getImportsAndExports = (
       if (filePath) {
         if (module.resolvedModule.isExternalLibraryImport) {
           if (!isInNodeModules(filePath)) {
-            addInternalImport({ identifier, specifier, symbol, filePath, isReExport });
+            addInternalImport({ ...options, identifier, filePath, isReExport });
           }
 
           if (skipTypeOnly && isTypeOnly) return;
@@ -158,7 +143,7 @@ const getImportsAndExports = (
             externalImports.add(module.resolvedModule.packageId?.name ?? sanitizedSpecifier);
           }
         } else {
-          addInternalImport({ identifier, specifier, symbol, filePath, isReExport });
+          addInternalImport({ ...options, identifier, filePath, isReExport });
         }
       }
     } else {
@@ -173,24 +158,19 @@ const getImportsAndExports = (
     }
   };
 
-  const maybeAddNamespaceAccessAsImport = ({ namespace, member }: { namespace: string; member: string | string[] }) => {
+  const maybeAddNamespaceAccessAsImport = (namespace: string, member: string | string[]) => {
     const symbol = sourceFile.locals?.get(namespace);
     if (symbol) {
       const importedSymbolFilePath = importedInternalSymbols.get(symbol);
       if (importedSymbolFilePath) {
         const internalImport = internalImports[importedSymbolFilePath];
-        if (symbol.declarations && ts.isNamespaceImport(symbol.declarations[0])) {
-          if (typeof member === 'string') internalImport.symbols.push(`${namespace}.${member}`);
-          else member.forEach(member => internalImport.symbols.push(`${namespace}.${member}`));
-        } else {
-          if (typeof member === 'string') internalImport.symbols.push(`${namespace}.${member}`);
-          else member.forEach(member => internalImport.symbols.push(`${namespace}.${member}`));
-        }
+        if (typeof member === 'string') internalImport.symbols.push(`${namespace}.${member}`);
+        else member.forEach(member => internalImport.symbols.push(`${namespace}.${member}`));
       }
     }
   };
 
-  const addExport = ({ node, identifier, type, pos, members = [], fix }: ExportedNode) => {
+  const addExport = ({ node, identifier, type, pos, members = [], fix }: ExportNode) => {
     if (options.skipExports) return;
 
     if (ts.isExportSpecifier(node) && node.propertyName) {
@@ -305,19 +285,13 @@ const getImportsAndExports = (
             members = [ms].flat().flatMap(id => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`)));
             current = current.parent;
           }
-          maybeAddNamespaceAccessAsImport({
-            namespace: String(node.escapedText),
-            member: members,
-          });
+          maybeAddNamespaceAccessAsImport(String(node.escapedText), members);
         }
       }
     }
 
     if (ts.isTypeReferenceNode(node) && ts.isQualifiedName(node.typeName)) {
-      maybeAddNamespaceAccessAsImport({
-        namespace: node.typeName.left.getText(),
-        member: node.typeName.right.getText(),
-      });
+      maybeAddNamespaceAccessAsImport(node.typeName.left.getText(), node.typeName.right.getText());
     }
 
     ts.forEachChild(node, visit);
@@ -325,7 +299,7 @@ const getImportsAndExports = (
 
   visit(sourceFile);
 
-  const setRefs = (item: ExportItem | ExportItemMember) => {
+  const setRefs = (item: SerializableExport | SerializableExportMember) => {
     if (!item.symbol) return;
     for (const match of sourceFile.text.matchAll(new RegExp(item.identifier.replace(/\$/g, '\\$'), 'g'))) {
       const isDeclaration = match.index === item.pos || match.index === item.pos + 1; // off-by-one from `stripQuotes` but we don't want to change the `pos` either
