@@ -6,7 +6,7 @@ import {
   ROOT_WORKSPACE_NAME,
 } from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
-import { hasMatch, hasMatchInArray, hasMatchInSet } from './util/regex.js';
+import { hasMatch, hasMatchInArray, hasMatchInSet, toRegexOrString, findKey } from './util/regex.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { ConfigurationHints, Issue } from './types/issues.js';
 import type { WorkspaceManifests, HostDependencies, InstalledBinaries } from './types/workspace.js';
@@ -92,8 +92,8 @@ export class DependencyDeputy {
   }
 
   addIgnored(ignoreBinaries: (string | RegExp)[], ignoreDependencies: (string | RegExp)[]) {
-    this.ignoreBinaries = ignoreBinaries;
-    this.ignoreDependencies = ignoreDependencies;
+    this.ignoreBinaries = ignoreBinaries.map(toRegexOrString);
+    this.ignoreDependencies = ignoreDependencies.map(toRegexOrString);
   }
 
   getWorkspaceManifest(workspaceName: string) {
@@ -338,23 +338,34 @@ export class DependencyDeputy {
       const referencedBinaries = this.referencedBinaries.get(workspaceName);
       const installedBinaries = this.getInstalledBinaries(workspaceName);
 
+      const ignoredBinaries = this._manifests.get(workspaceName)?.ignoreBinaries ?? [];
+      const ignoredDependencies = this._manifests.get(workspaceName)?.ignoreDependencies ?? [];
+
       referencedDependencies?.forEach(pkg => {
-        for (const key of rootIgnoreDependencies.keys()) {
+        for (const key of [...ignoredDependencies, ...rootIgnoreDependencies.keys()]) {
           if ((typeof key === 'string' && key === pkg) || (key instanceof RegExp && key.test(pkg))) {
-            rootIgnoreDependencies.set(key, rootIgnoreDependencies.get(key)! + 1);
-            return;
+            const rootKey = typeof key === 'string' ? key : findKey(rootIgnoreDependencies, key);
+            if (rootKey && rootIgnoreDependencies.has(rootKey)) {
+              rootIgnoreDependencies.set(rootKey, rootIgnoreDependencies.get(rootKey)! + 1);
+              return;
+            }
           }
         }
       });
 
       referencedBinaries?.forEach(binaryName => {
-        for (const key of rootIgnoreBinaries.keys()) {
+        for (const key of [...ignoredBinaries, ...rootIgnoreBinaries.keys()]) {
           if ((typeof key === 'string' && key === binaryName) || (key instanceof RegExp && key.test(binaryName))) {
-            rootIgnoreBinaries.set(key, rootIgnoreBinaries.get(key)! + 1);
-            return;
+            const rootKey = typeof key === 'string' ? key : findKey(rootIgnoreBinaries, key);
+            if (rootKey && rootIgnoreBinaries.has(rootKey)) {
+              rootIgnoreBinaries.set(rootKey, rootIgnoreBinaries.get(rootKey)! + 1);
+              return;
+            }
           }
         }
       });
+
+      if (workspaceName === ROOT_WORKSPACE_NAME) continue;
 
       const dependencies = [
         ...this.getProductionDependencies(workspaceName),
@@ -365,11 +376,11 @@ export class DependencyDeputy {
       ignoreDependencies
         .filter(packageName => {
           if (hasMatchInArray(IGNORED_DEPENDENCIES, packageName)) return true;
-          if (workspaceName !== ROOT_WORKSPACE_NAME && this.ignoreDependencies.includes(packageName)) return true;
+          if (this.ignoreDependencies.includes(packageName)) return true;
           const isReferenced = hasMatchInSet(referencedDependencies, packageName);
           const isListed =
             hasMatchInArray(dependencies, packageName) && !hasMatchInArray(peerDependencies, packageName);
-          return isListed && isReferenced;
+          return (isListed && isReferenced) || (!isReferenced && !isListed);
         })
         .forEach(identifier => {
           configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' });
@@ -378,10 +389,10 @@ export class DependencyDeputy {
       ignoreBinaries
         .filter(binaryName => {
           if (hasMatchInArray(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
-          if (workspaceName !== ROOT_WORKSPACE_NAME && this.ignoreBinaries.includes(binaryName)) return true;
+          if (this.ignoreBinaries.includes(binaryName)) return true;
           const isReferenced = hasMatchInSet(referencedBinaries, binaryName);
           const isInstalled = hasMatchInArray(Array.from(installedBinaries?.keys() ?? []), binaryName);
-          return isReferenced && isInstalled;
+          return (isReferenced && isInstalled) || (!isInstalled && !isReferenced);
         })
         .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' }));
     }

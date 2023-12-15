@@ -10,6 +10,8 @@ export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
 type NormalizedGlob = string[];
 
+type IgnorePatterns = (string | RegExp)[];
+
 export type PluginName = keyof typeof Plugins;
 
 export type PluginMap = typeof Plugins;
@@ -29,8 +31,8 @@ interface BaseWorkspaceConfiguration {
   project: NormalizedGlob;
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
-  ignoreBinaries: string[];
-  ignoreDependencies: string[];
+  ignoreBinaries: IgnorePatterns;
+  ignoreDependencies: IgnorePatterns;
   isIncludeEntryExports: boolean;
 }
 
@@ -43,8 +45,8 @@ export interface Configuration {
   include: string[];
   exclude: string[];
   ignore: NormalizedGlob;
-  ignoreBinaries: (string | RegExp)[];
-  ignoreDependencies: (string | RegExp)[];
+  ignoreBinaries: IgnorePatterns;
+  ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;

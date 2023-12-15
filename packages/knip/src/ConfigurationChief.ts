@@ -436,8 +436,8 @@ export class ConfigurationChief {
     const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : defaultConfig.project;
     const paths = workspaceConfig.paths ?? defaultConfig.paths;
     const ignore = arrayify(workspaceConfig.ignore);
-    const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries);
-    const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies);
+    const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries).map(toRegexOrString);
+    const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies).map(toRegexOrString);
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
     const plugins: Partial<PluginsConfiguration> = {};
