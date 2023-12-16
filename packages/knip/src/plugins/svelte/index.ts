@@ -13,7 +13,7 @@ export const ENABLERS = ['svelte'];
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 /** @public */
-export const ENTRY_FILE_PATTERNS = ['svelte.config.js', 'vite.config.ts'];
+export const ENTRY_FILE_PATTERNS = ['svelte.config.js', 'vite.config.{js,ts}'];
 
 /** @public */
 export const PRODUCTION_ENTRY_FILE_PATTERNS = [
