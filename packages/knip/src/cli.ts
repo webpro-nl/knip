@@ -56,7 +56,7 @@ const run = async () => {
       isShowProgress,
       isIncludeEntryExports,
       isIsolateWorkspaces,
-      isFix,
+      isFix: isFix || fixTypes.length > 0,
       fixTypes: fixTypes.flatMap(type => type.split(',')),
     });
 
