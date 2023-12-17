@@ -173,13 +173,31 @@ const getImportsAndExports = (
   const addExport = ({ node, identifier, type, pos, members = [], fix }: ExportNode) => {
     if (options.skipExports) return;
 
-    if (ts.isExportSpecifier(node) && node.propertyName) {
-      const symbol = typeChecker.getSymbolAtLocation(node.propertyName);
-      if (symbol) {
-        const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-        if (importedSymbolFilePath) {
-          const internalImport = internalImports[importedSymbolFilePath];
-          internalImport.isReExportedAs.add([sourceFile.fileName, node.name.getText()]);
+    if (ts.isExportSpecifier(node)) {
+      // TODO Clean up and maybe sort out in visitors/exports/exportDeclaration.ts
+      if (node.propertyName) {
+        const symbol = typeChecker.getSymbolAtLocation(node.propertyName);
+        if (symbol) {
+          const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+          if (importedSymbolFilePath) {
+            const internalImport = internalImports[importedSymbolFilePath];
+            internalImport.isReExportedAs.add([sourceFile.fileName, node.name.getText()]);
+          }
+        }
+      } else {
+        const declaration = sourceFile
+          .getNamedDeclarations?.()
+          ?.get(identifier)
+          ?.find(n => n !== node);
+        // @ts-expect-error TODO Clean up and maybe sort out in visitors/exports/exportDeclaration.ts
+        const symbol = declaration?.symbol;
+        if (symbol) {
+          const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+          if (importedSymbolFilePath) {
+            const internalImport = internalImports[importedSymbolFilePath];
+            internalImport.isReExport = true;
+            internalImport.isReExportedBy.add(sourceFile.fileName);
+          }
         }
       }
     }

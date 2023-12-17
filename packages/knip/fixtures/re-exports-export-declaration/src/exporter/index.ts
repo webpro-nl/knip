@@ -1,6 +1,9 @@
-import * as exporterNS from './exporter';
-import * as exporterFnNS from './exporter-fn';
+import * as exporterA from './exporterA';
+import * as exporterB from './exporterB';
+import * as exporterC from './exporterC';
+import * as exporterD from './exporterD';
 
-exporterFnNS.cb2();
+exporterB.fn();
 
-export { exporterNS as exporter, exporterFnNS as exporterFn };
+export { exporterA as reExporterA, exporterB as reExporterB, exporterC };
+export { exporterD };

@@ -1,5 +1,9 @@
-import { exporter, exporterFn } from './exporter';
+import { reExporterA, reExporterB, exporterC, exporterD } from './exporter';
 
-exporter.cb();
+reExporterA.cb();
 
-exporterFn.cb();
+reExporterB.cb();
+
+exporterC.cb();
+
+exporterD.cb();
