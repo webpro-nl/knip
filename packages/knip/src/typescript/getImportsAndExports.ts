@@ -158,7 +158,7 @@ const getImportsAndExports = (
     }
   };
 
-  const maybeAddNamespaceAccessAsImport = (namespace: string, member: string | string[]) => {
+  const maybeAccessExpressionAsNsImport = (namespace: string, member: string | string[]) => {
     const symbol = sourceFile.locals?.get(namespace);
     if (symbol) {
       const importedSymbolFilePath = importedInternalSymbols.get(symbol);
@@ -304,13 +304,13 @@ const getImportsAndExports = (
             members = [ms].flat().flatMap(id => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`)));
             current = current.parent;
           }
-          maybeAddNamespaceAccessAsImport(String(node.escapedText), members);
+          maybeAccessExpressionAsNsImport(String(node.escapedText), members);
         }
       }
     }
 
     if (ts.isTypeReferenceNode(node) && ts.isQualifiedName(node.typeName)) {
-      maybeAddNamespaceAccessAsImport(node.typeName.left.getText(), node.typeName.right.getText());
+      maybeAccessExpressionAsNsImport(node.typeName.left.getText(), node.typeName.right.getText());
     }
 
     ts.forEachChild(node, visit);
