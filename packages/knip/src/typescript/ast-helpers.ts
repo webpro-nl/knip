@@ -132,11 +132,7 @@ export const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.No
   if (ts.isElementAccessExpression(node)) {
     if (ts.isStringLiteral(node.argumentExpression)) return node.argumentExpression.text;
     const type = typeChecker.getTypeAtLocation(node.argumentExpression);
-    if (type.isUnion()) {
-      return type.types.map(type => (type as ts.LiteralType).value as string);
-    } else if ((type as ts.LiteralType).value) {
-      return (type as ts.LiteralType).value as string;
-    }
+    if (type.isUnion()) return type.types.map(type => (type as ts.LiteralType).value as string);
   }
 
   if (ts.isPropertyAccessExpression(node)) {
