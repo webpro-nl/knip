@@ -70,7 +70,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const report = chief.getIssueTypesToReport();
   const rules = chief.getRules();
   const filters = chief.getFilters();
-  const fixer = new IssueFixer({ isEnabled: isFix || fixTypes.length > 0, cwd, fixTypes });
+  const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes });
 
   const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
