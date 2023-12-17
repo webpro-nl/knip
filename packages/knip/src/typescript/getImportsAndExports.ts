@@ -205,7 +205,8 @@ const getImportsAndExports = (
       const item = exports[identifier];
       const crew = [...(item.members ?? []), ...m];
       const tags = [...(item.jsDocTags ?? []), ...jsDocTags];
-      exports[identifier] = { ...item, members: crew, jsDocTags: tags };
+      const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
+      exports[identifier] = { ...item, members: crew, jsDocTags: tags, fixes };
     } else {
       const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
       exports[identifier] = {
@@ -218,7 +219,7 @@ const getImportsAndExports = (
         pos,
         line: line + 1,
         col: character + 1,
-        fix,
+        fixes: fix ? [fix] : [],
         refs: 0,
       };
     }

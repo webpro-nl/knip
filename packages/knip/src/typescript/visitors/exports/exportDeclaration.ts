@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { SymbolType } from '../../../types/issues.js';
 import { exportVisitor as visit } from '../index.js';
-import type { ExportPos } from 'src/types/exports.js';
+import type { Fix } from 'src/types/exports.js';
 import type { BoundSourceFile } from 'src/typescript/SourceFile.js';
 
 export default visit(
@@ -21,7 +21,7 @@ export default visit(
           const pos = element.name.pos;
           const name = ts.getNameOfDeclaration(declaration);
           const posDecl = name?.pos ?? declaration?.pos ?? pos;
-          const fix: ExportPos = isFixExports || isFixTypes ? [element.getStart(), element.getEnd()] : [];
+          const fix: Fix = isFixExports || isFixTypes ? [element.getStart(), element.getEnd()] : undefined;
           return { node: element, identifier, type, pos, posDecl, fix };
         });
       }

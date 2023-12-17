@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import NPMCliPackageJson from '@npmcli/package-json';
 import { dirname, join } from './util/path.js';
-import type { ExportPos } from './types/exports.js';
+import type { Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
 import type { PackageJson } from '@npmcli/package-json';
 
@@ -23,16 +23,16 @@ export class IssueFixer {
     this.isFixUnusedExports = fixTypes.length === 0 || fixTypes.includes('exports');
   }
 
-  public addUnusedTypeNode(filePath: string, fix: ExportPos) {
+  public addUnusedTypeNode(filePath: string, fix: Fixes) {
     if (fix.length === 0) return;
-    if (this.unusedTypeNodes.has(filePath)) this.unusedTypeNodes.get(filePath)!.add(fix);
-    else this.unusedTypeNodes.set(filePath, new Set([fix]));
+    if (this.unusedTypeNodes.has(filePath)) fix.forEach(fix => this.unusedTypeNodes.get(filePath)!.add(fix));
+    else this.unusedTypeNodes.set(filePath, new Set(fix));
   }
 
-  public addUnusedExportNode(filePath: string, fix: ExportPos) {
+  public addUnusedExportNode(filePath: string, fix: Fixes) {
     if (fix.length === 0) return;
-    if (this.unusedExportNodes.has(filePath)) this.unusedExportNodes.get(filePath)!.add(fix);
-    else this.unusedExportNodes.set(filePath, new Set([fix]));
+    if (this.unusedExportNodes.has(filePath)) fix.forEach(fix => this.unusedExportNodes.get(filePath)!.add(fix));
+    else this.unusedExportNodes.set(filePath, new Set(fix));
   }
 
   public async fixIssues(issues: Issues) {
@@ -43,7 +43,7 @@ export class IssueFixer {
   private async removeUnusedExportKeywords() {
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
-      const exportPositions: Array<[number, number]> = [
+      const exportPositions: Fixes = [
         ...(this.isFixUnusedTypes ? this.unusedTypeNodes.get(filePath) ?? [] : []),
         ...(this.isFixUnusedExports ? this.unusedExportNodes.get(filePath) ?? [] : []),
       ].sort((a, b) => b[0] - a[0]);

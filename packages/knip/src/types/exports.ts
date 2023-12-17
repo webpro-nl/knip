@@ -4,7 +4,9 @@ import type { SymbolType } from './issues.js';
 type FilePath = string;
 type Identifier = string;
 
-export type ExportPos = [number, number] | [];
+type ExportPosTuple = [number, number];
+export type Fix = ExportPosTuple | undefined;
+export type Fixes = Array<ExportPosTuple>;
 
 export type ExportNode = {
   node: ts.Node;
@@ -13,7 +15,7 @@ export type ExportNode = {
   type: SymbolType;
   members?: ExportNodeMember[];
   jsDocTags?: Set<string>;
-  fix: ExportPos;
+  fix: Fix;
 };
 
 type ExportNodeMember = {
@@ -21,7 +23,7 @@ type ExportNodeMember = {
   identifier: Identifier;
   pos: number;
   type: SymbolType;
-  fix: ExportPos;
+  fix: Fix;
 };
 
 export interface SerializableExport {
@@ -33,7 +35,7 @@ export interface SerializableExport {
   members: SerializableExportMember[];
   jsDocTags: Array<string>;
   refs: number;
-  fix: ExportPos;
+  fixes: Fixes;
   symbol?: ts.Symbol;
 }
 
@@ -44,7 +46,7 @@ export type SerializableExportMember = {
   col: number;
   type: SymbolType;
   refs: number;
-  fix: ExportPos;
+  fix: Fix;
   symbol?: ts.Symbol;
 };
 

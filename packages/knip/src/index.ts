@@ -511,8 +511,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               line: exportedItem.line,
               col: exportedItem.col,
             });
-            if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fix);
-            else fixer.addUnusedExportNode(filePath, exportedItem.fix);
+            if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
+            else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
           }
         }
       }
