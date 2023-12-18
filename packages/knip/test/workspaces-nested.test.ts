@@ -8,16 +8,16 @@ import baseCounters from './helpers/baseCounters.js';
 const cwd = resolve('fixtures/workspaces-nested');
 
 const expectedConfigurationHintsProduction = new Set([
-  { identifier: 'ignored-dep-global', type: 'ignoreDependencies', workspaceName: '.' },
+  { type: 'ignoreDependencies', identifier: 'ignored-dep-global', workspaceName: '.' },
   { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
-  { type: 'ignoreBinaries', workspaceName: 'L-1-1/L-1-2', identifier: 'unused-ignored-bin-L-2' },
-  { type: 'ignoreDependencies', workspaceName: 'L-1-1/L-1-2/L-1-3', identifier: 'unused-ignored-dep-L-3' },
 ]);
 
 const expectedConfigurationHints = new Set([
   ...expectedConfigurationHintsProduction,
-  { type: 'ignoreDependencies', workspaceName: '.', identifier: 'unused-ignored-dep-global' },
-  { identifier: 'unused-ignored-bin-global', type: 'ignoreBinaries', workspaceName: '.' },
+  { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-global', workspaceName: '.' },
+  { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-L-2', workspaceName: 'L-1-1/L-1-2' },
+  { type: 'ignoreDependencies', identifier: 'unused-ignored-dep-global', workspaceName: '.' },
+  { type: 'ignoreDependencies', identifier: 'unused-ignored-dep-L-3', workspaceName: 'L-1-1/L-1-2/L-1-3' },
 ]);
 
 test('Find unused dependencies in nested workspaces with default config in production mode (default)', async () => {

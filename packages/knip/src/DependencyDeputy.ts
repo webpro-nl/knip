@@ -380,7 +380,7 @@ export class DependencyDeputy {
           const isReferenced = hasMatchInSet(referencedDependencies, packageName);
           const isListed =
             hasMatchInArray(dependencies, packageName) && !hasMatchInArray(peerDependencies, packageName);
-          return (isListed && isReferenced) || (!isReferenced && !isListed);
+          return (isListed && isReferenced) || (!this.isProduction && !isReferenced && !isListed);
         })
         .forEach(identifier => {
           configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' });
@@ -392,7 +392,7 @@ export class DependencyDeputy {
           if (this.ignoreBinaries.includes(binaryName)) return true;
           const isReferenced = hasMatchInSet(referencedBinaries, binaryName);
           const isInstalled = hasMatchInArray(Array.from(installedBinaries?.keys() ?? []), binaryName);
-          return (isReferenced && isInstalled) || (!isInstalled && !isReferenced);
+          return (isReferenced && isInstalled) || (!this.isProduction && !isInstalled && !isReferenced);
         })
         .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' }));
     }
