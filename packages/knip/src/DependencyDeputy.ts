@@ -404,17 +404,6 @@ export class DependencyDeputy {
     ];
     const peerDependencies = this.getPeerDependencies(ROOT_WORKSPACE_NAME);
 
-    Array.from(rootIgnoreBinaries.keys())
-      .filter(binaryName => {
-        if (hasMatchInArray(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
-        const isReferenced = rootIgnoreBinaries.get(binaryName) !== 0;
-        const isInstalled = hasMatchInArray(Array.from(installedBinaries?.keys() ?? []), binaryName);
-        return (isReferenced && isInstalled) || (!this.isProduction && !isReferenced && !isInstalled);
-      })
-      .forEach(identifier =>
-        configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreBinaries' })
-      );
-
     Array.from(rootIgnoreDependencies.keys())
       .filter(packageName => {
         if (hasMatchInArray(IGNORED_DEPENDENCIES, packageName)) return true;
@@ -424,6 +413,17 @@ export class DependencyDeputy {
       })
       .forEach(identifier =>
         configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreDependencies' })
+      );
+
+    Array.from(rootIgnoreBinaries.keys())
+      .filter(binaryName => {
+        if (hasMatchInArray(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
+        const isReferenced = rootIgnoreBinaries.get(binaryName) !== 0;
+        const isInstalled = hasMatchInArray(Array.from(installedBinaries?.keys() ?? []), binaryName);
+        return (isReferenced && isInstalled) || (!this.isProduction && !isReferenced && !isInstalled);
+      })
+      .forEach(identifier =>
+        configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreBinaries' })
       );
 
     return { configurationHints };
