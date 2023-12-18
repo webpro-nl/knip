@@ -25,8 +25,12 @@ export const PRODUCTION_ENTRY_FILE_PATTERNS = [
 
 export const PROJECT_FILE_PATTERNS = ['src/**/*.{js,ts,svelte}'];
 
-const findSvelteDependencies: GenericPluginCallback = async () => {
-  return [...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern), ...ENTRY_FILE_PATTERNS.map(toEntryPattern)];
+const findSvelteDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { config } = options;
+
+  return config.entry
+    ? config.entry.map(toProductionEntryPattern)
+    : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
 };
 
 export const findDependencies = timerify(findSvelteDependencies);
