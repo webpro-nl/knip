@@ -10,6 +10,7 @@ export type Fixes = Array<ExportPosTuple>;
 
 export type ExportNode = {
   node: ts.Node;
+  symbol?: ts.Symbol;
   identifier: Identifier;
   pos: number;
   type: SymbolType;

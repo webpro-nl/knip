@@ -6,7 +6,7 @@ const config: KnipConfig = {
       ignoreBinaries: ['knip']
     },
     'packages/knip': {
-      entry: ['src/{index,cli}.ts!'],
+      entry: ['src/{index,cli}.ts!', 'src/plugins/*/index.ts!'],
       project: ['src/**/*.ts!'],
       ignore: ['**/fixtures/**', '**/_template/**', '**/dist/**'],
       ignoreDependencies: ['@pnpm/logger'],

@@ -22,6 +22,7 @@ export type SerializableImports = {
   isReExport: boolean;
   isReExportedBy: Set<string>;
   isReExportedAs: Set<[string, string]>;
+  isReExportedAsNs: Set<[string, string]>;
   isImportedBy: Set<string>; // Could be removed, for debugging purposes only
 };
 

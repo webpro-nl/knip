@@ -80,6 +80,7 @@ const getImportsAndExports = (
       isReExport,
       isReExportedBy: new Set<string>(),
       isReExportedAs: new Set<[string, string]>(),
+      isReExportedAsNs: new Set<[string, string]>(),
       isImportedBy: new Set<string>(),
       importedNs: new Set<string>(),
       symbols: [],
@@ -88,7 +89,7 @@ const getImportsAndExports = (
     if (isReExport && isStar) {
       internalImport.isReExport = true;
       if (namespace) {
-        internalImport.isReExportedAs.add([sourceFile.fileName, namespace]);
+        internalImport.isReExportedAsNs.add([sourceFile.fileName, namespace]);
       } else {
         internalImport.isReExportedBy.add(sourceFile.fileName);
       }
@@ -170,12 +171,15 @@ const getImportsAndExports = (
     }
   };
 
-  const addExport = ({ node, identifier, type, pos, members = [], fix }: ExportNode) => {
+  const addExport = ({ node, symbol, identifier, type, pos, members = [], fix }: ExportNode) => {
     if (options.skipExports) return;
 
     if (ts.isExportSpecifier(node)) {
-      // TODO Clean up and maybe sort out in visitors/exports/exportDeclaration.ts
+      // Re-exports are handled in import visitors (because module resolution),
+      // but in other export declarations we can't (easily) get the imported symbol for indirect/mediated re-exports
       if (node.propertyName) {
+        // TODO Tried to sort it out in visitors/exports/exportDeclaration.ts,
+        // but seems we need `typeChecker.getSymbolAtLocation` which isn't available over there
         const symbol = typeChecker.getSymbolAtLocation(node.propertyName);
         if (symbol) {
           const importedSymbolFilePath = importedInternalSymbols.get(symbol);
@@ -184,20 +188,12 @@ const getImportsAndExports = (
             internalImport.isReExportedAs.add([sourceFile.fileName, node.name.getText()]);
           }
         }
-      } else {
-        const declaration = sourceFile
-          .getNamedDeclarations?.()
-          ?.get(identifier)
-          ?.find(n => n !== node);
-        // @ts-expect-error TODO Clean up and maybe sort out in visitors/exports/exportDeclaration.ts
-        const symbol = declaration?.symbol;
-        if (symbol) {
-          const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-          if (importedSymbolFilePath) {
-            const internalImport = internalImports[importedSymbolFilePath];
-            internalImport.isReExport = true;
-            internalImport.isReExportedBy.add(sourceFile.fileName);
-          }
+      } else if (symbol) {
+        const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+        if (importedSymbolFilePath) {
+          const internalImport = internalImports[importedSymbolFilePath];
+          internalImport.isReExport = true;
+          internalImport.isReExportedAs.add([sourceFile.fileName, identifier]);
         }
       }
     }

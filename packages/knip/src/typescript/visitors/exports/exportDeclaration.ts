@@ -19,10 +19,9 @@ export default visit(
           const identifier = String(element.name.escapedText);
           const declaration = declarations?.get(identifier)?.find((d: ts.Node) => d !== element);
           const pos = element.name.pos;
-          const name = ts.getNameOfDeclaration(declaration);
-          const posDecl = name?.pos ?? declaration?.pos ?? pos;
           const fix: Fix = isFixExports || isFixTypes ? [element.getStart(), element.getEnd()] : undefined;
-          return { node: element, identifier, type, pos, posDecl, fix };
+          // @ts-expect-error TODO Fix (convenience in addExport)
+          return { node: element, symbol: declaration?.symbol, identifier, type, pos, fix };
         });
       }
     }

@@ -387,16 +387,34 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     importsForExport?: SerializableImports,
     depth: number = 0
   ): boolean => {
-    if (!importsForExport) return false;
-    if (importsForExport.symbols.includes(symbol)) return true;
-    if (Array.from(importsForExport.importedNs).find(ns => importsForExport.symbols.includes(`${ns}.${symbol}`)))
+    if (!importsForExport) {
+      return false;
+    }
+
+    if (importsForExport.symbols.includes(symbol)) {
       return true;
+    }
+
+    if (Array.from(importsForExport.importedNs).find(ns => importsForExport.symbols.includes(`${ns}.${symbol}`))) {
+      return true;
+    }
+
     if (
       Array.from(importsForExport.isReExportedAs).find(([file, ns]) =>
+        isSymbolImported(filePath, ns, importedSymbols[file], depth + 1)
+      )
+    ) {
+      return true;
+    }
+
+    if (
+      Array.from(importsForExport.isReExportedAsNs).find(([file, ns]) =>
         isSymbolImported(filePath, `${ns}.${symbol}`, importedSymbols[file], depth + 1)
       )
-    )
+    ) {
       return true;
+    }
+
     const { isReExport, isReExportedBy } = importsForExport;
     const hasSymbol = (file: string) => isSymbolImported(filePath, symbol, importedSymbols[file], depth + 1);
     if (isReExport) return Array.from(isReExportedBy).some(hasSymbol);
@@ -415,11 +433,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     symbol: string
   ): string | undefined => {
     if (!importedModule) return undefined;
-    const { isReExport, isReExportedBy } = importedModule;
+    const { isReExport, isReExportedBy, isReExportedAsNs } = importedModule;
     if (isReExport) {
       for (const f of isReExportedBy) {
-        if (entryPaths.has(f) && f in exportedSymbols && symbol in exportedSymbols[f]) return f;
-        else return getReExportingEntryFile(importedSymbols[f], symbol);
+        if (entryPaths.has(f)) {
+          if (entryPaths.has(f) && f in exportedSymbols && symbol in exportedSymbols[f]) return f;
+          else if (importedModule.hasStar) return f;
+        } else {
+          return getReExportingEntryFile(importedSymbols[f], symbol);
+        }
+      }
+    }
+    if (isReExportedAsNs.size > 0) {
+      for (const [f, ns] of isReExportedAsNs) {
+        if (entryPaths.has(f)) return f;
+        else return getReExportingEntryFile(importedSymbols[f], ns);
       }
     }
   };
@@ -488,13 +516,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           const hasNsImport = Boolean(importsForExport?.hasStar);
 
-          const reExportingEntryFile = getReExportingEntryFile(importsForExport, symbol);
-
-          if (reExportingEntryFile) continue;
-
-          if (!isIncludeEntryExports && importsForExport && importsForExport.hasStar && importsForExport.isReExport) {
-            continue;
-          }
+          if (!isIncludeEntryExports && getReExportingEntryFile(importsForExport, symbol)) continue;
 
           const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
