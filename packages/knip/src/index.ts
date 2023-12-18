@@ -170,9 +170,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     principal.addEntryPaths(definitionPaths);
     debugLogArray(name, `Definition paths`, definitionPaths);
 
-    const sharedGlobOptions = { cwd, workingDir: dir, gitignore, ignore: worker.getIgnorePatterns() };
+    const ignore = worker.getIgnorePatterns();
+    const sharedGlobOptions = { cwd, workingDir: dir, gitignore };
 
-    const entryPathsFromManifest = await getEntryPathFromManifest(manifest, sharedGlobOptions);
+    collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
+
+    const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
     debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
     principal.addEntryPaths(entryPathsFromManifest);
 

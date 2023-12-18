@@ -22,7 +22,6 @@ const negatedLast = (pattern: string) => (pattern.startsWith('!') ? 1 : -1);
 interface BaseGlobOptions {
   cwd: string;
   patterns: string[];
-  ignore?: string[];
   gitignore?: boolean;
 }
 
@@ -30,7 +29,7 @@ interface GlobOptions extends BaseGlobOptions {
   workingDir?: string;
 }
 
-const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = true }: GlobOptions) => {
+const glob = async ({ cwd, workingDir = cwd, patterns, gitignore = true }: GlobOptions) => {
   if (patterns.length === 0) return [];
 
   const relativePath = relative(cwd, workingDir);
@@ -42,7 +41,7 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   // Only negated patterns? Bail out.
   if (globPatterns[0].startsWith('!')) return [];
 
-  const ignorePatterns = compact([...ignore, ...GLOBAL_IGNORE_PATTERNS]);
+  const ignorePatterns = GLOBAL_IGNORE_PATTERNS;
 
   debugLogObject(relativePath || ROOT_WORKSPACE_NAME, `Glob options`, { cwd, globPatterns, ignorePatterns, gitignore });
 
@@ -55,11 +54,11 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   });
 };
 
-const pureGlob = async ({ cwd, patterns, ignore = [], gitignore = true }: BaseGlobOptions) => {
+const pureGlob = async ({ cwd, patterns, gitignore = true }: BaseGlobOptions) => {
   if (patterns.length === 0) return [];
   return globby(patterns, {
     cwd,
-    ignore: [...ignore, ...GLOBAL_IGNORE_PATTERNS],
+    ignore: GLOBAL_IGNORE_PATTERNS,
     gitignore,
     absolute: true,
   });

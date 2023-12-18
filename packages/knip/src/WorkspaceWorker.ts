@@ -243,7 +243,6 @@ export class WorkspaceWorker {
   private async findDependenciesByPlugins() {
     const name = this.name;
     const cwd = this.dir;
-    const ignore = this.getIgnorePatterns();
 
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       if (this.enabled[pluginName]) {
@@ -254,7 +253,7 @@ export class WorkspaceWorker {
           if (!pluginConfig) continue;
 
           const patterns = this.getConfigurationFilePatterns(pluginName);
-          const allConfigFilePaths = await _pureGlob({ patterns, cwd, ignore, gitignore: false });
+          const allConfigFilePaths = await _pureGlob({ patterns, cwd, gitignore: false });
 
           const configFilePaths = allConfigFilePaths.filter(
             filePath =>

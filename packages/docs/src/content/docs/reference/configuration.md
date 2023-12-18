@@ -45,6 +45,15 @@ export default config;
 
 ## `entry`
 
+Array of glob patterns to find entry files. Prefix with `!` for negation.
+Example:
+
+```json title="knip.json"
+{
+  "entry": ["src/index.ts", "scripts/*.ts", "!scripts/except-this-one.ts"]
+}
+```
+
 See [configuration][2] and [entry files][3].
 
 ## `exclude`
@@ -53,8 +62,7 @@ See [Rules & Filters][4].
 
 ## `ignore`
 
-Array of glob patterns to ignore files. Used as ignore patterns when looking up
-`entry` and `project` files. Example:
+Array of glob patterns to ignore issues from matching files. Example:
 
 ```json title="knip.json"
 {
@@ -62,9 +70,9 @@ Array of glob patterns to ignore files. Used as ignore patterns when looking up
 }
 ```
 
-This does not 100% guarantee that the targeted files are not included in the
-analysis, so even issues in the ignored files may still be reported. Use
-[`--debug`][5] for details.
+Use negated patterns in `entry` and `project` glob patterns to prevent matching
+files from being added to the analysis. Use `ignore` patterns to exclude issues
+in matching files from being reported.
 
 ## `ignoreBinaries`
 
@@ -201,6 +209,14 @@ there, and vice versa.
 Also see [Plugins][7].
 
 ## `project`
+
+Array of glob patterns to find project files. Example:
+
+```json title="knip.json"
+{
+  "project": ["src/**/*.ts", "scripts/**/*.ts"]
+}
+```
 
 See [configuration][2] and [entry files][3].
 

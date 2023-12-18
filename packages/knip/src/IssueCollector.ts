@@ -1,3 +1,4 @@
+import micromatch from 'micromatch';
 import { initIssues, initCounters } from './issues/initializers.js';
 import { relative } from './util/path.js';
 import type { ConfigurationHint, Issue, Rules } from './types/issues.js';
@@ -29,11 +30,20 @@ export class IssueCollector {
   private counters = initCounters();
   private referencedFiles = new Set<string>();
   private configurationHints = new Set<ConfigurationHint>();
+  private ignorePatterns = new Set<string>();
+  private isMatch: (filePath: string) => boolean;
 
   constructor({ cwd, rules, filters }: IssueCollectorOptions) {
     this.cwd = cwd;
     this.rules = rules;
     this.filters = filters;
+    this.isMatch = () => false;
+  }
+
+  addIgnorePatterns(patterns: string[]) {
+    patterns.forEach(pattern => this.ignorePatterns.add(pattern));
+    const p = [...this.ignorePatterns];
+    this.isMatch = (filePath: string) => micromatch.isMatch(filePath, p, { dot: true });
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
@@ -45,6 +55,7 @@ export class IssueCollector {
     filePaths.forEach(filePath => {
       if (this.filters.dir && !filePath.startsWith(this.filters.dir + '/')) return;
       if (this.referencedFiles.has(filePath)) return;
+      if (this.isMatch(filePath)) return;
       this.issues.files.add(filePath);
       this.counters.files++;
       this.counters.processed++;
@@ -53,6 +64,7 @@ export class IssueCollector {
 
   addIssue(issue: Issue) {
     if (this.filters.dir && !issue.filePath.startsWith(this.filters.dir + '/')) return;
+    if (this.isMatch(issue.filePath)) return;
     const key = relative(this.cwd, issue.filePath);
     issue.severity = this.rules[issue.type];
     this.issues[issue.type][key] = this.issues[issue.type][key] ?? {};
