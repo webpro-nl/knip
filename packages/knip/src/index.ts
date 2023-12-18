@@ -279,8 +279,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       if (workspace) {
         const { imports, exports, scripts } = _principal.analyzeSourceFile(filePath, {
           skipTypeOnly: isStrict,
-          isFixExports: fixer.isFixUnusedExports,
-          isFixTypes: fixer.isFixUnusedTypes,
+          isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
+          isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
         });
         const { internal, external, unresolved } = imports;
         const { exported, duplicate } = exports;
