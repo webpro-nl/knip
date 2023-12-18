@@ -113,6 +113,7 @@ const pluginsSchema = z.object({
   storybook: pluginSchema,
   stryker: pluginSchema,
   stylelint: pluginSchema,
+  svelte: pluginSchema,
   tailwind: pluginSchema,
   tsup: pluginSchema,
   typedoc: pluginSchema,
