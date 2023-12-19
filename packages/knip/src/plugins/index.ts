@@ -9,6 +9,7 @@ export * as commitlint from './commitlint/index.js';
 export * as cspell from './cspell/index.js';
 export * as cypress from './cypress/index.js';
 export * as drizzle from './drizzle/index.js';
+export * as eleventy from './eleventy/index.js';
 export * as eslint from './eslint/index.js';
 export * as gatsby from './gatsby/index.js';
 export * as githubActions from './github-actions/index.js';
