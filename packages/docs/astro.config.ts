@@ -1,8 +1,9 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 import remarkDirective from 'remark-directive';
-import { transformDirectives } from './remark/transformDirectives.ts';
+import { base } from './config.js';
 import { fixInternalLinks } from './remark/fixInternalLinks.ts';
+import { transformDirectives } from './remark/transformDirectives.ts';
 
 const setForeground = (theme, scope, value) => {
   const settings = theme.settings.find(setting => setting.scope?.includes(scope));
@@ -11,8 +12,8 @@ const setForeground = (theme, scope, value) => {
 
 export default defineConfig({
   site: 'https://knip.dev',
-  base: '/v4',
-  outDir: './dist/v4',
+  base,
+  outDir: './dist' + base,
   sitemap: false,
   trailingSlash: 'never',
   markdown: {
