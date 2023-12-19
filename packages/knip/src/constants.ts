@@ -2,7 +2,16 @@ import type { IssueType } from './types/issues.js';
 
 export const ROOT_WORKSPACE_NAME = '.';
 
-export const KNIP_CONFIG_LOCATIONS = ['knip.json', 'knip.jsonc', '.knip.json', '.knip.jsonc', 'knip.ts', 'knip.js'];
+export const KNIP_CONFIG_LOCATIONS = [
+  'knip.json',
+  'knip.jsonc',
+  '.knip.json',
+  '.knip.jsonc',
+  'knip.ts',
+  'knip.js',
+  'knip.config.ts',
+  'knip.config.js',
+];
 
 // TS extensions: https://github.com/microsoft/TypeScript/blob/da8dfbf0ff6a94df65568fd048aec0d763c65811/src/compiler/types.ts#L7637-L7651
 export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'];

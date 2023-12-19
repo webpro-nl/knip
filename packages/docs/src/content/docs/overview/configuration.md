@@ -36,6 +36,8 @@ This is where Knip looks for a configuration file:
 - `.knip.jsonc`
 - `knip.ts`
 - `knip.js`
+- `knip.config.ts`
+- `knip.config.js`
 - `knip` in `package.json`
 
 Use `--config path/to/knip.config.json` for a different file path.
