@@ -1,10 +1,20 @@
 import { h } from 'hastscript';
 import { visit, type Visitor } from 'unist-util-visit';
-import type { Parent } from 'unist';
+import type { Node, Parent } from 'unist';
+
+interface DirectiveNode extends Node {
+  type: 'textDirective' | 'leafDirective' | 'containerDirective';
+  name: string;
+  attributes: Record<string, any>;
+  data: Record<string, any>;
+}
+
+const isDirectiveNode = (node: Node): node is DirectiveNode =>
+  node.type === 'textDirective' || node.type === 'leafDirective' || node.type === 'containerDirective';
 
 export const transformDirectives = () => (tree: Parent) => {
-  const visitor: Visitor = (node, index, parent) => {
-    if (node.type === 'textDirective' || node.type === 'leafDirective' || node.type === 'containerDirective') {
+  const visitor: Visitor<Node> = node => {
+    if (isDirectiveNode(node)) {
       const hast = h(node.name, node.attributes);
       const data = node.data || (node.data = {});
       data.hName = hast.tagName;

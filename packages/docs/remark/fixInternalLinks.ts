@@ -1,6 +1,13 @@
 import { bold, cyan, dim } from 'kleur/colors';
 import { visit, type Visitor } from 'unist-util-visit';
-import type { Parent } from 'unist';
+import type { Node, Parent } from 'unist';
+
+interface LinkNode extends Node {
+  url: string;
+}
+
+const isLinkNode = (node: Node): node is LinkNode =>
+  (node.type === 'link' || node.type === 'definition') && typeof (node as LinkNode).url === 'string';
 
 const dateTimeFormat = new Intl.DateTimeFormat([], {
   hour: '2-digit',
@@ -10,7 +17,7 @@ const dateTimeFormat = new Intl.DateTimeFormat([], {
 
 export const fixInternalLinks = () => (tree: Parent) => {
   const visitor: Visitor = node => {
-    if ((node.type === 'link' || node.type === 'definition') && node.url.startsWith('.')) {
+    if (isLinkNode(node) && node.url.startsWith('.')) {
       const url = node.url;
       node.url = url
         .replace(/^(\.\/|\.\.\/)/, (match: string) => (match === './' ? '../' : '../../'))
