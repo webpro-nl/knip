@@ -8,7 +8,7 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/eleventy');
 
 test('Find dependencies in Eleventy configuration', async () => {
-  const { issues, counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
