@@ -50,7 +50,7 @@ kept in memory for the duration of the process.
 "Why does everything need to stay in memory?", you may wonder. The answer is
 that Knip uses `findReferences` at the end of the process. Knip relied on this
 TypeScript Language Server method for everything that's not easy to find. More
-about that later in [the story of findReferences](#the-story-of-findreferences)
+about that later in [the story of findReferences][1]
 
 ## Serialization
 
@@ -113,7 +113,7 @@ what's in store here? A lot!
 
 I heard you. Here's some example data. You can get it directly from Knip using
 the `--performance` flag when running it on any codebase. Below we have some
-data after linting the [Remix monorepo][1].
+data after linting the [Remix monorepo][2].
 
 ### Knip v3
 
@@ -256,7 +256,7 @@ shaking things off. In the end it's all about trade-offs.
 ## Let's Go!
 
 You can start using Knip v4 today, feel free to try it out! You might find a
-false positive that wasn't there in v3, please [report this][2].
+false positive that wasn't there in v3, please [report this][3].
 
 ```sh
 npm install -D knip@canary
@@ -264,5 +264,6 @@ npm install -D knip@canary
 
 Remember, Knip it before you ship it! Have a great day ☀️
 
-[1]: https://github.com/remix-run/remix
-[2]: https://github.com/webpro/knip/issues
+[1]: #the-story-of-findreferences
+[2]: https://github.com/remix-run/remix
+[3]: https://github.com/webpro/knip/issues
