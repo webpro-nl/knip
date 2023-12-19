@@ -13,7 +13,7 @@ export const fixInternalLinks = () => (tree: Parent) => {
     if ((node.type === 'link' || node.type === 'definition') && node.url.startsWith('.')) {
       const url = node.url;
       node.url = url
-        .replace(/^(\.\/|\.\.\/)/, (match: string) => (match === './' ? '../' : '../../'))
+        .replace(/^(\.\/|\.\.\/)/, (match: string) => (match === './' ? '.' : '../'))
         .replace(/\.mdx?(#.+)?$/, '/$1');
       console.log(`${dim(dateTimeFormat.format(new Date()))} ${bold(cyan('[fix-link]'))} Modify ${url} → ${node.url}`);
     }

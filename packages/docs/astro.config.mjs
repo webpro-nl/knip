@@ -11,8 +11,10 @@ const setForeground = (theme, scope, value) => {
 
 export default defineConfig({
   site: 'https://knip.dev',
+  base: '/v4',
+  outDir: './dist/v4',
   sitemap: false,
-  trailingSlash: 'always',
+  trailingSlash: 'never',
   markdown: {
     remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
   },
