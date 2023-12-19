@@ -10,6 +10,8 @@ import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 import { u } from 'unist-builder';
 import { base } from '../config.js';
+import type { Root } from 'mdast';
+import type { Node } from 'unist';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const referenceDocsDir = path.join(rootDir, 'src/content/docs/reference');
@@ -26,7 +28,7 @@ const parseFragment = (text: string) => {
   return tree.children;
 };
 
-const writeTree = async (tree, filePath) => {
+const writeTree = async (tree: Node, filePath: string) => {
   try {
     const file = await unified().run(tree);
     const markdown = unified()
@@ -35,7 +37,7 @@ const writeTree = async (tree, filePath) => {
       .use(remarkStringify, {
         bullet: '-',
       })
-      .stringify(file);
+      .stringify(file as Root);
 
     const formattedMarkdown = await prettier.format(markdown, { ...prettierOptions, parser: 'markdown' });
     await fs.writeFile(filePath, formattedMarkdown);

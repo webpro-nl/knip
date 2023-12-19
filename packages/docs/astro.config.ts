@@ -4,8 +4,9 @@ import remarkDirective from 'remark-directive';
 import { base } from './config.js';
 import { fixInternalLinks } from './remark/fixInternalLinks.ts';
 import { transformDirectives } from './remark/transformDirectives.ts';
+import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 
-const setForeground = (theme, scope, value) => {
+const setForeground = (theme: ExpressiveCodeTheme, scope: string, value: string) => {
   const settings = theme.settings.find(setting => setting.scope?.includes(scope));
   if (settings) settings.settings.foreground = value;
 };
@@ -69,6 +70,7 @@ export default defineConfig({
       expressiveCode: {
         emitExternalStylesheet: true,
         styleOverrides: {
+          // @ts-expect-error TODO
           'frm-tooltipSuccessBg': 'var(--sl-color-orange)',
           'frm-tooltipSuccessFg': 'var(--sl-color-white)',
         },
@@ -76,9 +78,9 @@ export default defineConfig({
           showCopyToClipboardButton: true,
         },
         themes: ['min-dark'],
-        theme: 'min-dark',
+        // @ts-expect-error TODO
+        theme: { type: 'dark', name: 'min-dark', fg: '#ededed' },
         customizeTheme: theme => {
-          theme.settings[0].foreground = '#ededed';
           setForeground(theme, 'entity.name.tag', '#f68a22');
           setForeground(theme, 'entity.name.type', '#ededed');
           setForeground(theme, 'string', '#ededed');

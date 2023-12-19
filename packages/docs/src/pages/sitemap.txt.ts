@@ -1,6 +1,12 @@
 import type { APIContext } from 'astro';
 
-const data = await import.meta.glob(['/src/content/**/!([)*.{md,mdx}'], { eager: true });
+interface Page {
+  frontmatter: {
+    draft: boolean;
+  };
+}
+
+const data: Record<string, Page> = await import.meta.glob(['/src/content/**/!([)*.{md,mdx}'], { eager: true });
 const plugins = await import.meta.glob(['/dist/reference/plugins/*/index.html'], { eager: true });
 
 const pages = new Set<string>();

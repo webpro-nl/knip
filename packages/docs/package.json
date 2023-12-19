@@ -27,6 +27,7 @@
   "devDependencies": {
     "@astrojs/check": "0.3.3",
     "@knip/eslint-config": "0.0.0",
+    "@types/mdast": "4.0.3",
     "@types/unist": "3.0.2",
     "astro": "4.0.6",
     "eslint": "8.56.0",

@@ -4,9 +4,9 @@ import Tweet from './Tweet.astro';
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import { type TweetsResponse, formatTimestamp } from '../util/tweet.js';
 
-const ENVIRONMENT = import.meta.env.ENVIRONMENT;
 const BEARER_TOKEN = import.meta.env.BEARER_TOKEN;
 
+// const ENVIRONMENT = import.meta.env.ENVIRONMENT;
 // const isFetch = ENVIRONMENT !== 'development' && Boolean(BEARER_TOKEN);
 const isFetch = false;
 
