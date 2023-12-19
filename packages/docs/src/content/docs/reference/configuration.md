@@ -66,13 +66,13 @@ Array of glob patterns to ignore issues from matching files. Example:
 
 ```json title="knip.json"
 {
-  "ignore": ["**/fixtures"]
+  "ignore": ["src/generated.ts", "fixtures/**"]
 }
 ```
 
-Use negated patterns in `entry` and `project` glob patterns to prevent matching
-files from being added to the analysis. Use `ignore` patterns to exclude issues
-in matching files from being reported.
+- Use negated patterns in `entry` and `project` glob patterns to prevent
+  matching files from being added to the analysis.
+- Use `ignore` patterns to exclude issues in matching files from being reported.
 
 ## `ignoreBinaries`
 
@@ -200,13 +200,13 @@ There are a few options to modify the behavior of a plugin:
 
 It should be rarely necessary to override the `entry` patterns, since plugins
 also read custom entry file patterns from the tooling configuration (see
-[Plugins → entry files][6]).
+[Plugins → entry files][5]).
 
 Plugin configuration can be set on root and on a per-workspace level. If enabled
 on root level, it can be disabled on workspace level by setting it to `false`
 there, and vice versa.
 
-Also see [Plugins][7].
+Also see [Plugins][6].
 
 ## `project`
 
@@ -237,13 +237,12 @@ root-only options:
 Workspaces can't be nested in configuration, but they can be nested in folder
 structure.
 
-See [Monorepos and workspaces][8].
+See [Monorepos and workspaces][7].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
 [3]: ../explanations/entry-files.md
 [4]: ../features/rules-and-filters.md#filters
-[5]: ../guides/troubleshooting.md#issues-reported-by-knip
-[6]: ../explanations/plugins.md#entry-files
-[7]: ../explanations/plugins.md
-[8]: ../features/monorepos-and-workspaces.md
+[5]: ../explanations/plugins.md#entry-files
+[6]: ../explanations/plugins.md
+[7]: ../features/monorepos-and-workspaces.md
