@@ -46,7 +46,12 @@ jobs:
         with:
           repository: microsoft/DefinitelyTyped-tools
           path: DefinitelyTyped-tools
-      - run: cd DefinitelyTyped-tools && pnpm install && knip
+      - run: |
+          cd DefinitelyTyped-tools
+          sed -i 's/"ignore": \["\*\*\/fixtures", "\*\*\/testsource"/"ignore": \["\*\*\/fixtures\/\*\*", "\*\*\/testsource\/\*\*"/' .knip.jsonc
+          cat .knip.jsonc
+          pnpm install
+          knip
 
       - name: Test Knip against TanStack/query
         uses: actions/checkout@v4
@@ -60,4 +65,11 @@ jobs:
         with:
           repository: argos-ci/argos
           path: argos
-      - run: cd argos && npm install && knip --no-exit-code
+      - run: |
+          cd argos
+          sed -i 's/"ignore": \["src\/gql"]/\"ignore\": \["src\/gql\/\*\*"]/g' knip.json
+          sed -i 's/"ignore": \["db", "knexfile.js", "src\/graphql\/__generated__"]/\"ignore\": \["db\/\*\*", "knexfile.js", "src\/graphql\/__generated__\/\*\*"]/g' knip.json
+          sed -i 's/"ignore": \["playwright.config.mjs", "examples"]/\"ignore\": \["playwright.config.mjs", "examples\/\*\*"]/g' knip.json
+          cat knip.json
+          npm install
+          knip
