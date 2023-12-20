@@ -1,9 +1,15 @@
 {
-  "name": "@fixtures/wireit-apps-withcommands",
-  "version": "*",
+  "name": "@fixtures/wireit",
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "build": "wireit",
     "dev": "wireit"
+  },
+  "devDependencies": {
+    "wireit": "*"
   },
   "wireit": {
     "build": {

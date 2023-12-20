@@ -32,11 +32,9 @@ const findWireItDependencies: GenericPluginCallback = async (_configFilePath, op
   const localConfig = manifest[PACKAGE_JSON_PATH] as WireitConfig;
   if (!localConfig) return [];
 
-  const scriptArray = Object.values(localConfig)
-    .map(({ command: script }) => script!)
-    .filter(script => script !== undefined);
+  const scripts = Object.values(localConfig).flatMap(({ command: script }) => (script ? [script] : []));
 
-  const scriptDependencies = getDependenciesFromScripts(scriptArray, { cwd, manifest });
+  const scriptDependencies = getDependenciesFromScripts(scripts, { cwd, manifest });
 
   return scriptDependencies;
 };

@@ -425,6 +425,10 @@
         "webpack": {
           "title": "Webpack plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/webpack/README.md)",
           "$ref": "#/definitions/plugin"
+        },
+        "wireit": {
+          "title": "Wireit plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/wireit/README.md)",
+          "$ref": "#/definitions/plugin"
         }
       }
     },

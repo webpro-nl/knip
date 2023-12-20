@@ -1,0 +1,32 @@
+{
+  "name": "@fixtures/wireit-apps-example-configuration",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "wireit",
+    "bundle": "wireit"
+  },
+  "wireit": {
+    "build": {
+      "command": "tsc",
+      "files": [
+        "src/**/*.ts",
+        "tsconfig.json"
+      ],
+      "output": [
+        "lib/**"
+      ]
+    },
+    "bundle": {
+      "command": "rollup -c",
+      "dependencies": [
+        "build"
+      ],
+      "files": [
+        "rollup.config.json"
+      ],
+      "output": [
+        "dist/bundle.js"
+      ]
+    }
+  }
+}
