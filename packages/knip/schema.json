@@ -274,6 +274,10 @@
           "title": "Drizzle plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/drizzle/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "eleventy": {
+          "title": "eleventy plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/eleventy/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "eslint": {
           "title": "ESLint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/eslint/README.md)",
           "$ref": "#/definitions/plugin"

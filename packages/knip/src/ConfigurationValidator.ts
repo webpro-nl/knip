@@ -86,6 +86,7 @@ const pluginsSchema = z.object({
   commitlint: pluginSchema,
   cspell: pluginSchema,
   cypress: pluginSchema,
+	eleventy: pluginSchema,
   eslint: pluginSchema,
   gatsby: pluginSchema,
   'github-actions': pluginSchema,
