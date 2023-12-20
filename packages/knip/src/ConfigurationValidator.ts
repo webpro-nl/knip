@@ -121,6 +121,7 @@ const pluginsSchema = z.object({
   vite: pluginSchema,
   vitest: pluginSchema,
   webpack: pluginSchema,
+  wireit: pluginSchema,
 });
 
 const baseWorkspaceConfigurationSchema = z.object({
