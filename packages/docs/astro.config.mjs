@@ -12,7 +12,7 @@ const setForeground = (theme, scope, value) => {
 export default defineConfig({
   site: 'https://knip.dev',
   sitemap: false,
-  trailingSlash: 'always',
+  trailingSlash: 'never',
   markdown: {
     remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
   },
@@ -31,6 +31,7 @@ export default defineConfig({
       },
       components: {
         Head: './src/components/Head.astro',
+        Header: './src/components/Header.astro',
         Footer: './src/components/Footer.astro',
       },
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
