@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/linthtml",
+  "version": "*",
+  "scripts": {
+    "lint:html": "npx @linthtml/linthtml \"**/*.html\""
+  },
+  "devDependencies": {
+    "@linthtml/linthtml": "*",
+    "@linthtml/linthtml-config-recommended": "*"
+  }
+}

@@ -18,6 +18,7 @@ export * as husky from './husky/index.js';
 export * as jest from './jest/index.js';
 export * as lefthook from './lefthook/index.js';
 export * as lintStaged from './lint-staged/index.js';
+export * as linthtml from './linthtml/index.js';
 export * as markdownlint from './markdownlint/index.js';
 export * as mocha from './mocha/index.js';
 export * as next from './next/index.js';
