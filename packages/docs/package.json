@@ -29,7 +29,7 @@
     "@knip/eslint-config": "0.0.0",
     "@types/mdast": "4.0.3",
     "@types/unist": "3.0.2",
-    "astro": "4.0.6",
+    "astro": "4.0.7",
     "eslint": "8.56.0",
     "hastscript": "8.0.0",
     "kleur": "4.1.5",
@@ -41,7 +41,7 @@
     "remark-parse": "11.0.0",
     "remark-preset-webpro": "1.0.0",
     "remark-stringify": "11.0.0",
-    "tsx": "4.6.2",
+    "tsx": "4.7.0",
     "unified": "11.0.4",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.0.0"

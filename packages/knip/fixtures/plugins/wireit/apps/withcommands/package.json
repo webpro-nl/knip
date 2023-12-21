@@ -1,0 +1,16 @@
+{
+  "name": "@fixtures/wireit-apps-withcommands",
+  "version": "*",
+  "scripts": {
+    "build": "wireit",
+    "dev": "wireit"
+  },
+  "wireit": {
+    "build": {
+      "command": "tsc"
+    },
+    "dev": {
+      "command": "tsc --watch"
+    }
+  }
+}
