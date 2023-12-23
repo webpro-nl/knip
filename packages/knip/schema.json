@@ -310,6 +310,10 @@
           "title": "lint-staged plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/lint-staged/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "linthtml": {
+          "title": "linthtml plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/linthtml/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "markdownlint": {
           "title": "markdownlint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/markdownlint/README.md)",
           "$ref": "#/definitions/plugin"
