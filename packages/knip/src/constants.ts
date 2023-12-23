@@ -28,6 +28,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'echo',
   'exec',
   'exit',
+  'find',
   'git',
   'grep',
   'mkdir',
