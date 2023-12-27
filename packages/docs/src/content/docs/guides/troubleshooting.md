@@ -66,7 +66,7 @@ In a more general sense, [Why use Knip?][12] explains what Knip can do for you.
 If you can't find your answer in any of the aforementioned resources, feel free
 to [open an issue on GitHub][5] or discuss it in [the Discord channel][13].
 
-[1]: #handling-issues
+[1]: #issues-reported-by-knip
 [2]: #exceptions-thrown-by-knip
 [3]: ../guides/handling-issues.md
 [4]: ../reference/known-issues.md
