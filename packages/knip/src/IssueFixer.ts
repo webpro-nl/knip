@@ -49,10 +49,9 @@ export class IssueFixer {
       ].sort((a, b) => b[0] - a[0]);
 
       if (exportPositions.length > 0) {
-        const text = await readFile(filePath, 'utf-8');
         const sourceFileText = exportPositions.reduce(
           (text, [start, end]) => text.substring(0, start) + text.substring(end),
-          text
+          await readFile(filePath, 'utf-8')
         );
         await writeFile(filePath, sourceFileText);
       }

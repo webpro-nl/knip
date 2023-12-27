@@ -315,15 +315,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           } else {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const importedModule = importedSymbols[specifierFilePath];
-            for (const id of importItems.symbols) importedModule.symbols.push(id);
+            for (const id of importItems.identifiers) importedModule.identifiers.add(id);
             for (const id of importItems.importedNs) importedModule.importedNs.add(id);
             for (const id of importItems.isReExportedBy) importedModule.isReExportedBy.add(id);
-            for (const id of importItems.isImportedBy) importedModule.isImportedBy.add(id);
+            for (const id of importItems.isReExportedNs) importedModule.isReExportedNs.add(id);
             if (importItems.hasStar) importedModule.hasStar = true;
-            if (importItems.isReExport) {
-              importedModule.isReExport = true;
-              importedModule.isReExportedBy.add(filePath);
-            }
+            if (importItems.isReExport) importedModule.isReExport = true;
+            // debug only:
+            for (const id of importItems.isImportedBy) importedModule.isImportedBy.add(id);
           }
         }
 
@@ -384,9 +383,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     factory.deletePrincipal(principal);
   }
 
-  const isSymbolImported = (
+  const isIdentifierImported = (
     filePath: string,
-    symbol: string,
+    identifier: string,
     importsForExport?: SerializableImports,
     depth: number = 0
   ): boolean => {
@@ -394,17 +393,17 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       return false;
     }
 
-    if (importsForExport.symbols.includes(symbol)) {
+    if (importsForExport.identifiers.has(identifier)) {
       return true;
     }
 
-    if (Array.from(importsForExport.importedNs).find(ns => importsForExport.symbols.includes(`${ns}.${symbol}`))) {
+    if (Array.from(importsForExport.importedNs).find(ns => importsForExport.identifiers.has(`${ns}.${identifier}`))) {
       return true;
     }
 
     if (
       Array.from(importsForExport.isReExportedAs).find(([file, ns]) =>
-        isSymbolImported(filePath, ns, importedSymbols[file], depth + 1)
+        isIdentifierImported(filePath, ns, importedSymbols[file], depth + 1)
       )
     ) {
       return true;
@@ -412,15 +411,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (
       Array.from(importsForExport.isReExportedAsNs).find(([file, ns]) =>
-        isSymbolImported(filePath, `${ns}.${symbol}`, importedSymbols[file], depth + 1)
+        isIdentifierImported(filePath, `${ns}.${identifier}`, importedSymbols[file], depth + 1)
       )
     ) {
       return true;
     }
 
     const { isReExport, isReExportedBy } = importsForExport;
-    const hasSymbol = (file: string) => isSymbolImported(filePath, symbol, importedSymbols[file], depth + 1);
-    if (isReExport) return Array.from(isReExportedBy).some(hasSymbol);
+    const isImported = (file: string) => isIdentifierImported(filePath, identifier, importedSymbols[file], depth + 1);
+    if (isReExport) return Array.from(isReExportedBy).some(isImported);
     return false;
   };
 
@@ -431,26 +430,27 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     return isReExport ? Array.from(isReExportedBy).some(hasFile) : false;
   };
 
-  const getReExportingEntryFile = (
-    importedModule: SerializableImports | undefined,
-    symbol: string
-  ): string | undefined => {
+  const getReExportingEntryFile = (importedModule: SerializableImports | undefined, id: string): string | undefined => {
     if (!importedModule) return undefined;
-    const { isReExport, isReExportedBy, isReExportedAsNs } = importedModule;
+    const { isReExport, isReExportedBy, isReExportedNs } = importedModule;
     if (isReExport) {
-      for (const f of isReExportedBy) {
-        if (entryPaths.has(f)) {
-          if (entryPaths.has(f) && f in exportedSymbols && symbol in exportedSymbols[f]) return f;
-          else if (importedModule.hasStar) return f;
+      for (const filePath of isReExportedBy) {
+        if (entryPaths.has(filePath)) {
+          if (entryPaths.has(filePath) && filePath in exportedSymbols && id in exportedSymbols[filePath]) {
+            return filePath;
+          } else if (importedModule.hasStar) {
+            return filePath;
+          }
         } else {
-          return getReExportingEntryFile(importedSymbols[f], symbol);
+          return getReExportingEntryFile(importedSymbols[filePath], id);
         }
       }
-    }
-    if (isReExportedAsNs.size > 0) {
-      for (const [f, ns] of isReExportedAsNs) {
-        if (entryPaths.has(f)) return f;
-        else return getReExportingEntryFile(importedSymbols[f], ns);
+      for (const [filePath, namespace] of isReExportedNs) {
+        if (entryPaths.has(filePath)) {
+          return filePath;
+        } else {
+          return getReExportingEntryFile(importedSymbols[filePath], namespace);
+        }
       }
     }
   };
@@ -478,7 +478,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
         const importsForExport = importedSymbols[filePath];
 
-        for (const [symbol, exportedItem] of Object.entries(exportItems)) {
+        for (const [identifier, exportedItem] of Object.entries(exportItems)) {
           // Skip exports tagged `@public` or `@beta`
           if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
 
@@ -488,7 +488,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Skip exports tagged `@internal` in --production mode
           if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
 
-          if (importsForExport && isSymbolImported(filePath, symbol, importsForExport)) {
+          if (importsForExport && isIdentifierImported(filePath, identifier, importsForExport)) {
             // Skip members of classes/enums that are eventually re-exported by entry files (unless `isIncludeEntryExports`)
             if (!isIncludeEntryExports && importsForExport.isReExport && isExportedInEntryFile(importsForExport)) {
               continue;
@@ -498,13 +498,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               exportedItem.members?.forEach(member => {
                 if (
                   member.refs === 0 &&
-                  !isSymbolImported(filePath, `${symbol}.${member.identifier}`, importsForExport)
+                  !isIdentifierImported(filePath, `${identifier}.${member.identifier}`, importsForExport)
                 ) {
                   collector.addIssue({
                     type: 'enumMembers',
                     filePath,
                     symbol: member.identifier,
-                    parentSymbol: symbol,
+                    parentSymbol: identifier,
                     pos: exportedItem.pos,
                     line: exportedItem.line,
                     col: exportedItem.col,
@@ -513,13 +513,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               });
             }
 
-            // This symbol was imported, so we bail out early
+            // This id was imported, so we bail out early
             continue;
           }
 
           const hasNsImport = Boolean(importsForExport?.hasStar);
 
-          if (!isIncludeEntryExports && getReExportingEntryFile(importsForExport, symbol)) continue;
+          if (!isIncludeEntryExports && getReExportingEntryFile(importsForExport, identifier)) continue;
 
           const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
@@ -530,7 +530,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             collector.addIssue({
               type,
               filePath,
-              symbol,
+              symbol: identifier,
               symbolType: exportedItem.type,
               pos: exportedItem.pos,
               line: exportedItem.line,

@@ -78,35 +78,26 @@ const getImportsAndExports = (
       specifier,
       hasStar: isStar,
       isReExport,
-      isReExportedBy: new Set<string>(),
-      isReExportedAs: new Set<[string, string]>(),
-      isReExportedAsNs: new Set<[string, string]>(),
-      isImportedBy: new Set<string>(),
-      importedNs: new Set<string>(),
-      symbols: [],
+      isReExportedBy: new Set(),
+      isReExportedAs: new Set(),
+      isReExportedNs: new Set(),
+      importedNs: new Set(),
+      identifiers: new Set(),
+      // debug only:
+      isImportedBy: new Set(),
     });
 
-    if (isReExport && isStar) {
+    if (isReExport) {
       internalImport.isReExport = true;
-      if (namespace) {
-        internalImport.isReExportedAsNs.add([sourceFile.fileName, namespace]);
-      } else {
-        internalImport.isReExportedBy.add(sourceFile.fileName);
-      }
-    } else if (isReExport) {
-      internalImport.isReExport = true;
-      if (namespace) {
-        internalImport.isReExportedAs.add([sourceFile.fileName, namespace]);
-        internalImport.symbols.push(namespace);
-      } else {
-        internalImport.isReExportedBy.add(sourceFile.fileName);
-        internalImport.symbols.push(identifier);
-      }
-    } else if (isStar) {
+      if (namespace) internalImport.isReExportedNs.add([sourceFile.fileName, namespace]);
+      else internalImport.isReExportedBy.add(sourceFile.fileName);
+    }
+
+    if (isStar) {
       internalImport.hasStar = true;
       if (symbol) internalImport.importedNs.add(String(symbol.escapedName));
     } else {
-      internalImport.symbols.push(identifier.replace(/^\*:/, ''));
+      internalImport.identifiers.add(namespace ?? identifier);
     }
 
     if (symbol) importedInternalSymbols.set(symbol, filePath);
@@ -165,8 +156,8 @@ const getImportsAndExports = (
       const importedSymbolFilePath = importedInternalSymbols.get(symbol);
       if (importedSymbolFilePath) {
         const internalImport = internalImports[importedSymbolFilePath];
-        if (typeof member === 'string') internalImport.symbols.push(`${namespace}.${member}`);
-        else member.forEach(member => internalImport.symbols.push(`${namespace}.${member}`));
+        if (typeof member === 'string') internalImport.identifiers.add(`${namespace}.${member}`);
+        else member.forEach(member => internalImport.identifiers.add(`${namespace}.${member}`));
       }
     }
   };
@@ -185,6 +176,7 @@ const getImportsAndExports = (
           const importedSymbolFilePath = importedInternalSymbols.get(symbol);
           if (importedSymbolFilePath) {
             const internalImport = internalImports[importedSymbolFilePath];
+            internalImport.isReExport = true;
             internalImport.isReExportedAs.add([sourceFile.fileName, node.name.getText()]);
           }
         }
@@ -217,10 +209,10 @@ const getImportsAndExports = (
 
     if (exports[identifier]) {
       const item = exports[identifier];
-      const crew = [...(item.members ?? []), ...m];
+      const members = [...(item.members ?? []), ...m];
       const tags = [...(item.jsDocTags ?? []), ...jsDocTags];
       const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
-      exports[identifier] = { ...item, members: crew, jsDocTags: tags, fixes };
+      exports[identifier] = { ...item, members, jsDocTags: tags, fixes };
     } else {
       const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
       exports[identifier] = {
@@ -249,15 +241,17 @@ const getImportsAndExports = (
   const maybeAddAliasedExport = (node: ts.Expression | undefined, alias: string) => {
     const identifier = node?.getText();
     if (node && identifier) {
-      const exprt = sourceFile.symbol?.exports?.get(identifier);
-      if (exprt && exprt.valueDeclaration) {
+      const symbol = sourceFile.symbol?.exports?.get(identifier);
+      if (symbol && symbol.valueDeclaration) {
         if (!aliasedExports.has(identifier)) {
-          const pos = getLineAndCharacterOfPosition(exprt.valueDeclaration, exprt.valueDeclaration.pos);
+          const pos = getLineAndCharacterOfPosition(symbol.valueDeclaration, symbol.valueDeclaration.pos);
           aliasedExports.set(identifier, [{ symbol: identifier, ...pos }]);
         }
-        const i = aliasedExports.get(identifier);
-        const pos = getLineAndCharacterOfPosition(node, node.pos);
-        i?.push({ symbol: alias, ...pos });
+        const aliasedExport = aliasedExports.get(identifier);
+        if (aliasedExport) {
+          const pos = getLineAndCharacterOfPosition(node, node.pos);
+          aliasedExport.push({ symbol: alias, ...pos });
+        }
       }
     }
   };
@@ -332,7 +326,10 @@ const getImportsAndExports = (
   for (let key in exports) {
     const item = exports[key];
     if (options.ignoreExportsUsedInFile) setRefs(item);
-    item.members.forEach(member => setRefs(member));
+    item.members.forEach(member => {
+      setRefs(member);
+      delete member.symbol;
+    });
     delete item.symbol;
   }
 

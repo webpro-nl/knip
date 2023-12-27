@@ -12,17 +12,17 @@ export interface ImportNode {
 type FilePath = string;
 type Specifier = string;
 type Identifier = string;
-type Identifiers = Array<Identifier>;
+type Identifiers = Set<Identifier>;
 
 export type SerializableImports = {
   specifier: Specifier;
-  symbols: Identifiers;
+  identifiers: Identifiers;
   hasStar: boolean;
   importedNs: Set<string>;
   isReExport: boolean;
   isReExportedBy: Set<string>;
   isReExportedAs: Set<[string, string]>;
-  isReExportedAsNs: Set<[string, string]>;
+  isReExportedNs: Set<[string, string]>;
   isImportedBy: Set<string>; // Could be removed, for debugging purposes only
 };
 
