@@ -23,7 +23,6 @@ export type SerializableImports = {
   isReExportedBy: Set<string>;
   isReExportedAs: Set<[string, string]>;
   isReExportedNs: Set<[string, string]>;
-  isImportedBy: Set<string>; // Could be removed, for debugging purposes only
 };
 
 export type SerializableImportMap = Record<FilePath, SerializableImports>;

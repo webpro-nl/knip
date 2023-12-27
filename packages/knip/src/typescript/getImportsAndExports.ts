@@ -83,8 +83,6 @@ const getImportsAndExports = (
       isReExportedNs: new Set(),
       importedNs: new Set(),
       identifiers: new Set(),
-      // debug only:
-      isImportedBy: new Set(),
     });
 
     if (isReExport) {
@@ -101,8 +99,6 @@ const getImportsAndExports = (
     }
 
     if (symbol) importedInternalSymbols.set(symbol, filePath);
-
-    internalImport.isImportedBy.add(sourceFile.fileName);
   };
 
   const addImport = (options: ImportNode) => {

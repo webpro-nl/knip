@@ -75,6 +75,7 @@ try {
       reporter: { type: 'string', multiple: true },
       'reporter-options': { type: 'string' },
       strict: { type: 'boolean' },
+      trace: { type: 'boolean' },
       tsConfig: { type: 'string', short: 't' },
       version: { type: 'boolean', short: 'V' },
       workspace: { type: 'string', short: 'W' },

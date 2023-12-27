@@ -8,7 +8,7 @@ import { IssueCollector } from './IssueCollector.js';
 import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
+import { debugLogObject, debugLogArray, debugLog, exportLookupLog } from './util/debug.js';
 import { _glob, negate } from './util/glob.js';
 import {
   getEntryPathFromManifest,
@@ -321,8 +321,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             for (const id of importItems.isReExportedNs) importedModule.isReExportedNs.add(id);
             if (importItems.hasStar) importedModule.hasStar = true;
             if (importItems.isReExport) importedModule.isReExport = true;
-            // debug only:
-            for (const id of importItems.isImportedBy) importedModule.isImportedBy.add(id);
           }
         }
 
@@ -385,41 +383,51 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const isIdentifierImported = (
     filePath: string,
-    identifier: string,
+    id: string,
     importsForExport?: SerializableImports,
     depth: number = 0
   ): boolean => {
     if (!importsForExport) {
+      exportLookupLog(depth, `no imports found from`, filePath);
       return false;
     }
 
-    if (importsForExport.identifiers.has(identifier)) {
+    if (importsForExport.identifiers.has(id)) {
+      exportLookupLog(depth, `imported from`, filePath);
       return true;
     }
 
-    if (Array.from(importsForExport.importedNs).find(ns => importsForExport.identifiers.has(`${ns}.${identifier}`))) {
-      return true;
+    for (const ns of importsForExport.importedNs) {
+      if (importsForExport.identifiers.has(`${ns}.${id}`)) {
+        exportLookupLog(depth, `imported on ${ns} from`, filePath);
+        return true;
+      }
     }
 
-    if (
-      Array.from(importsForExport.isReExportedAs).find(([file, ns]) =>
-        isIdentifierImported(filePath, ns, importedSymbols[file], depth + 1)
-      )
-    ) {
-      return true;
+    if (importsForExport.isReExport) {
+      for (const filePath of importsForExport.isReExportedBy) {
+        if (isIdentifierImported(filePath, id, importedSymbols[filePath], depth + 1)) {
+          exportLookupLog(depth, `re-exported by`, filePath);
+          return true;
+        }
+      }
+
+      for (const [filePath, alias] of importsForExport.isReExportedAs) {
+        if (isIdentifierImported(filePath, alias, importedSymbols[filePath], depth + 1)) {
+          exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
+          return true;
+        }
+      }
+
+      for (const [filePath, ns] of importsForExport.isReExportedNs) {
+        if (isIdentifierImported(filePath, `${ns}.${id}`, importedSymbols[filePath], depth + 1)) {
+          exportLookupLog(depth, `re-exported on ${ns} by`, filePath);
+          return true;
+        }
+      }
     }
 
-    if (
-      Array.from(importsForExport.isReExportedAsNs).find(([file, ns]) =>
-        isIdentifierImported(filePath, `${ns}.${identifier}`, importedSymbols[file], depth + 1)
-      )
-    ) {
-      return true;
-    }
-
-    const { isReExport, isReExportedBy } = importsForExport;
-    const isImported = (file: string) => isIdentifierImported(filePath, identifier, importedSymbols[file], depth + 1);
-    if (isReExport) return Array.from(isReExportedBy).some(isImported);
+    exportLookupLog(depth, `not imported from`, filePath);
     return false;
   };
 
@@ -479,6 +487,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const importsForExport = importedSymbols[filePath];
 
         for (const [identifier, exportedItem] of Object.entries(exportItems)) {
+          exportLookupLog(-1, `Looking up export ${identifier} from`, filePath);
+
           // Skip exports tagged `@public` or `@beta`
           if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
 
@@ -488,38 +498,39 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Skip exports tagged `@internal` in --production mode
           if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
 
-          if (importsForExport && isIdentifierImported(filePath, identifier, importsForExport)) {
-            // Skip members of classes/enums that are eventually re-exported by entry files (unless `isIncludeEntryExports`)
-            if (!isIncludeEntryExports && importsForExport.isReExport && isExportedInEntryFile(importsForExport)) {
+          if (importsForExport) {
+            const reExportingEntryFile = getReExportingEntryFile(importsForExport, identifier);
+            if (!isIncludeEntryExports && reExportingEntryFile) {
+              exportLookupLog(0, `re-exported from entry`, reExportingEntryFile);
               continue;
             }
 
-            if (exportedItem.type === 'enum') {
-              exportedItem.members?.forEach(member => {
-                if (
-                  member.refs === 0 &&
-                  !isIdentifierImported(filePath, `${identifier}.${member.identifier}`, importsForExport)
-                ) {
-                  collector.addIssue({
-                    type: 'enumMembers',
-                    filePath,
-                    symbol: member.identifier,
-                    parentSymbol: identifier,
-                    pos: exportedItem.pos,
-                    line: exportedItem.line,
-                    col: exportedItem.col,
-                  });
-                }
-              });
-            }
+            if (isIdentifierImported(filePath, identifier, importsForExport)) {
+              if (exportedItem.type === 'enum') {
+                exportedItem.members?.forEach(member => {
+                  if (
+                    member.refs === 0 &&
+                    !isIdentifierImported(filePath, `${identifier}.${member.identifier}`, importsForExport)
+                  ) {
+                    collector.addIssue({
+                      type: 'enumMembers',
+                      filePath,
+                      symbol: member.identifier,
+                      parentSymbol: identifier,
+                      pos: exportedItem.pos,
+                      line: exportedItem.line,
+                      col: exportedItem.col,
+                    });
+                  }
+                });
+              }
 
-            // This id was imported, so we bail out early
-            continue;
+              // This id was imported, so we bail out early
+              continue;
+            }
           }
 
           const hasNsImport = Boolean(importsForExport?.hasStar);
-
-          if (!isIncludeEntryExports && getReExportingEntryFile(importsForExport, identifier)) continue;
 
           const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
