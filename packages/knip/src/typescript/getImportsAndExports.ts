@@ -181,7 +181,7 @@ const getImportsAndExports = (
         if (importedSymbolFilePath) {
           const internalImport = internalImports[importedSymbolFilePath];
           internalImport.isReExport = true;
-          internalImport.isReExportedAs.add([sourceFile.fileName, identifier]);
+          internalImport.isReExportedNs.add([sourceFile.fileName, identifier]);
         }
       }
     }
