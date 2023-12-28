@@ -431,13 +431,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     return false;
   };
 
-  const isExportedInEntryFile = (importedModule?: SerializableImports): boolean => {
-    if (!importedModule) return false;
-    const { isReExport, isReExportedBy } = importedModule;
-    const hasFile = (file: string) => entryPaths.has(file) || isExportedInEntryFile(importedSymbols[file]);
-    return isReExport ? Array.from(isReExportedBy).some(hasFile) : false;
-  };
-
   const getReExportingEntryFile = (importedModule: SerializableImports | undefined, id: string): string | undefined => {
     if (!importedModule) return undefined;
     const { isReExport, isReExportedBy, isReExportedNs } = importedModule;
