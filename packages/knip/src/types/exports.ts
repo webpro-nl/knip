@@ -19,7 +19,7 @@ export type ExportNode = {
   fix: Fix;
 };
 
-type ExportNodeMember = {
+export type ExportNodeMember = {
   node: ts.Node;
   identifier: Identifier;
   pos: number;

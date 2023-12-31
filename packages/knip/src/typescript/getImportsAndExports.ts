@@ -18,6 +18,7 @@ import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
 import type {
   ExportNode,
+  ExportNodeMember,
   SerializableExport,
   SerializableExportMember,
   SerializableExports,
@@ -31,6 +32,21 @@ const getVisitors = (sourceFile: ts.SourceFile) => ({
   dynamicImport: getDynamicImportVisitors(sourceFile),
   script: getScriptVisitors(sourceFile),
 });
+
+const createSerializableMember = (node: ts.Node, member: ExportNodeMember, pos: number): SerializableExportMember => {
+  const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
+  return {
+    // @ts-expect-error TODO
+    symbol: member.node.symbol,
+    identifier: member.identifier,
+    type: member.type,
+    pos: member.pos,
+    line: line + 1,
+    col: character + 1,
+    fix: member.fix,
+    refs: 0,
+  };
+};
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
@@ -195,24 +211,11 @@ const getImportsAndExports = (
 
     const jsDocTags = getJSDocTags(node);
 
-    const m = members.map(member => {
-      const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
-      return {
-        // @ts-expect-error TODO
-        symbol: member.node.symbol,
-        identifier: member.identifier,
-        type: member.type,
-        pos: member.pos,
-        line: line + 1,
-        col: character + 1,
-        fix: member.fix,
-        refs: 0,
-      };
-    });
+    const serializedMembers = members.map(member => createSerializableMember(node, member, member.pos));
 
     if (exports[identifier]) {
       const item = exports[identifier];
-      const members = [...(item.members ?? []), ...m];
+      const members = [...(item.members ?? []), ...serializedMembers];
       const tags = [...(item.jsDocTags ?? []), ...jsDocTags];
       const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
       exports[identifier] = { ...item, members, jsDocTags: tags, fixes };
@@ -223,7 +226,7 @@ const getImportsAndExports = (
         // @ts-expect-error TODO
         symbol: node.symbol,
         type,
-        members: m,
+        members: serializedMembers,
         jsDocTags,
         pos,
         line: line + 1,
