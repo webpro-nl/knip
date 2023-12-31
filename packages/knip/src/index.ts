@@ -381,7 +381,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     factory.deletePrincipal(principal);
   }
 
-  const isIdentifierImported = (
+  const isIdentifierReferenced = (
     filePath: string,
     id: string,
     importsForExport?: SerializableImports,
@@ -406,21 +406,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (importsForExport.isReExport) {
       for (const filePath of importsForExport.isReExportedBy) {
-        if (isIdentifierImported(filePath, id, importedSymbols[filePath], depth + 1)) {
+        if (isIdentifierReferenced(filePath, id, importedSymbols[filePath], depth + 1)) {
           exportLookupLog(depth, `re-exported by`, filePath);
           return true;
         }
       }
 
       for (const [filePath, alias] of importsForExport.isReExportedAs) {
-        if (isIdentifierImported(filePath, alias, importedSymbols[filePath], depth + 1)) {
+        if (isIdentifierReferenced(filePath, alias, importedSymbols[filePath], depth + 1)) {
           exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
           return true;
         }
       }
 
       for (const [filePath, ns] of importsForExport.isReExportedNs) {
-        if (isIdentifierImported(filePath, `${ns}.${id}`, importedSymbols[filePath], depth + 1)) {
+        if (isIdentifierReferenced(filePath, `${ns}.${id}`, importedSymbols[filePath], depth + 1)) {
           exportLookupLog(depth, `re-exported on ${ns} by`, filePath);
           return true;
         }
@@ -431,29 +431,54 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     return false;
   };
 
-  const getReExportingEntryFile = (importedModule: SerializableImports | undefined, id: string): string | undefined => {
+  const getReExportingEntryFile = (
+    importedModule: SerializableImports | undefined,
+    id: string,
+    depth: number = 0
+  ): string | undefined => {
     if (!importedModule) return undefined;
-    const { isReExport, isReExportedBy, isReExportedNs } = importedModule;
-    if (isReExport) {
-      for (const filePath of isReExportedBy) {
+
+    if (importedModule.isReExport) {
+      for (const filePath of importedModule.isReExportedBy) {
         if (entryPaths.has(filePath)) {
-          if (entryPaths.has(filePath) && filePath in exportedSymbols && id in exportedSymbols[filePath]) {
+          if (filePath in exportedSymbols && id in exportedSymbols[filePath]) {
+            exportLookupLog(depth, `re-exported by entry`, filePath);
             return filePath;
           } else if (importedModule.hasStar) {
+            exportLookupLog(depth, `re-exported (*) by entry`, filePath);
             return filePath;
           }
         } else {
-          return getReExportingEntryFile(importedSymbols[filePath], id);
+          exportLookupLog(depth, `re-exported by`, filePath);
+          const file = getReExportingEntryFile(importedSymbols[filePath], id, depth + 1);
+          if (file) return file;
         }
       }
-      for (const [filePath, namespace] of isReExportedNs) {
+
+      for (const [filePath, namespace] of importedModule.isReExportedNs) {
         if (entryPaths.has(filePath)) {
+          exportLookupLog(depth, `re-exported on ${namespace} by entry`, filePath);
           return filePath;
         } else {
-          return getReExportingEntryFile(importedSymbols[filePath], namespace);
+          exportLookupLog(depth, `re-exported on ${namespace} by`, filePath);
+          const file = getReExportingEntryFile(importedSymbols[filePath], namespace, depth + 1);
+          if (file) return file;
+        }
+      }
+
+      for (const [filePath, alias] of importedModule.isReExportedAs) {
+        if (entryPaths.has(filePath)) {
+          exportLookupLog(depth, `re-exported as ${alias} by entry`, filePath);
+          return filePath;
+        } else {
+          exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
+          const file = getReExportingEntryFile(importedSymbols[filePath], alias, depth + 1);
+          if (file) return file;
         }
       }
     }
+
+    exportLookupLog(depth, `${id} is not re-exported`, '');
   };
 
   const isExportedItemReferenced = (exportedItem: SerializableExport | SerializableExportMember) => {
@@ -480,8 +505,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const importsForExport = importedSymbols[filePath];
 
         for (const [identifier, exportedItem] of Object.entries(exportItems)) {
-          exportLookupLog(-1, `Looking up export ${identifier} from`, filePath);
-
           // Skip exports tagged `@public` or `@beta`
           if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
 
@@ -492,28 +515,28 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
 
           if (importsForExport) {
-            const reExportingEntryFile = getReExportingEntryFile(importsForExport, identifier);
-            if (!isIncludeEntryExports && reExportingEntryFile) {
-              exportLookupLog(0, `re-exported from entry`, reExportingEntryFile);
-              continue;
+            if (!isIncludeEntryExports) {
+              exportLookupLog(-1, `Looking up re-exporting file for ${identifier} from`, filePath);
+              if (getReExportingEntryFile(importsForExport, identifier)) continue;
             }
 
-            if (isIdentifierImported(filePath, identifier, importsForExport)) {
+            exportLookupLog(-1, `Looking up export ${identifier} from`, filePath);
+            if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
               if (exportedItem.type === 'enum') {
                 exportedItem.members?.forEach(member => {
-                  if (
-                    member.refs === 0 &&
-                    !isIdentifierImported(filePath, `${identifier}.${member.identifier}`, importsForExport)
-                  ) {
-                    collector.addIssue({
-                      type: 'enumMembers',
-                      filePath,
-                      symbol: member.identifier,
-                      parentSymbol: identifier,
-                      pos: exportedItem.pos,
-                      line: exportedItem.line,
-                      col: exportedItem.col,
-                    });
+                  if (member.refs === 0) {
+                    exportLookupLog(-1, `Looking up export member ${identifier}.${member.identifier} from`, filePath);
+                    if (!isIdentifierReferenced(filePath, `${identifier}.${member.identifier}`, importsForExport)) {
+                      collector.addIssue({
+                        type: 'enumMembers',
+                        filePath,
+                        symbol: member.identifier,
+                        parentSymbol: identifier,
+                        pos: exportedItem.pos,
+                        line: exportedItem.line,
+                        col: exportedItem.col,
+                      });
+                    }
                   }
                 });
               }

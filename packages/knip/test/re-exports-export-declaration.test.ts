@@ -7,10 +7,24 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/re-exports-export-declaration');
 
-test('Find reference to re-exports by flow node', async () => {
+test('Find re-exports through namespaces (1)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
+  });
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 6,
+    total: 6,
+  });
+});
+
+test('Find re-exports through namespaces (1) including entry files', async () => {
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+    isIncludeEntryExports: true,
   });
 
   assert.deepEqual(counters, {

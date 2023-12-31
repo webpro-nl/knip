@@ -161,10 +161,13 @@ const getImportsAndExports = (
   const addExport = ({ node, symbol, identifier, type, pos, members = [], fix }: ExportNode) => {
     if (options.skipExports) return;
 
-    if (ts.isExportSpecifier(node)) {
+    const isExportSpecifier = ts.isExportSpecifier(node);
+    const isExportAssignment = ts.isExportAssignment(node);
+
+    if (isExportSpecifier || isExportAssignment) {
       // Re-exports are handled in import visitors (because module resolution),
       // but in other export declarations we can't (easily) get the imported symbol for indirect/mediated re-exports
-      if (node.propertyName) {
+      if (isExportSpecifier && node.propertyName) {
         // TODO Tried to sort it out in visitors/exports/exportDeclaration.ts,
         // but seems we need `typeChecker.getSymbolAtLocation` which isn't available over there
         const symbol = typeChecker.getSymbolAtLocation(node.propertyName);
@@ -181,7 +184,11 @@ const getImportsAndExports = (
         if (importedSymbolFilePath) {
           const internalImport = internalImports[importedSymbolFilePath];
           internalImport.isReExport = true;
-          internalImport.isReExportedNs.add([sourceFile.fileName, identifier]);
+          if (isExportAssignment) {
+            internalImport.isReExportedAs.add([sourceFile.fileName, 'default']);
+          } else {
+            internalImport.isReExportedNs.add([sourceFile.fileName, identifier]);
+          }
         }
       }
     }
@@ -296,7 +303,9 @@ const getImportsAndExports = (
     }
 
     if (ts.isTypeReferenceNode(node) && ts.isQualifiedName(node.typeName)) {
-      maybeAddAccessExpressionAsNsImport(node.typeName.left.getText(), node.typeName.right.getText());
+      const [ns, ...right] = [node.typeName.left.getText(), node.typeName.right.getText()].join('.').split('.');
+      const members = right.map((_r, index) => right.slice(0, index + 1).join('.'));
+      maybeAddAccessExpressionAsNsImport(ns, members);
     }
 
     ts.forEachChild(node, visit);

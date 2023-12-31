@@ -1,1 +1,3 @@
-export * as ROOT from './1-root';
+import * as ROOT from './1-root';
+
+export = ROOT;
