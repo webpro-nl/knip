@@ -11,12 +11,13 @@ import type { ReporterOptions, IssueType } from './types/issues.js';
 
 const {
   debug: isDebug = false,
+  trace: isTrace = false,
   help: isHelp,
   'max-issues': maxIssues = '0',
   'no-config-hints': noConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
-  'no-progress': isNoProgress = false,
+  'no-progress': isNoProgress = isDebug || isTrace || false,
   'include-entry-exports': isIncludeEntryExports = false,
   'isolate-workspaces': isIsolateWorkspaces = false,
   performance: isObservePerf = false,
@@ -40,8 +41,7 @@ if (isVersion) {
   process.exit(0);
 }
 
-const isShowProgress =
-  !isDebug && isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
+const isShowProgress = isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
 
 const run = async () => {
   try {
