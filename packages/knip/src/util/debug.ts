@@ -23,27 +23,24 @@ const logArray = (collection: string[]) => {
   console.log(util.inspect(collection.sort(), inspectOptions));
 };
 
-export const debugLog = (context: string, message: string) => {
-  if (!IS_DEBUG_ENABLED) return;
-  console.log(`${ctx(context)} ${message}`);
-};
+export const debugLog = IS_DEBUG_ENABLED
+  ? (context: string, message: string) => console.log(`${ctx(context)} ${message}`)
+  : noop;
 
-export const debugLogObject = (context: string, name: string, obj: unknown | (() => unknown)) => {
-  if (!IS_DEBUG_ENABLED) return;
-  console.log(`${ctx(context)} ${name}`);
-  console.log(util.inspect(typeof obj === 'function' ? obj() : obj, inspectOptions));
-};
+export const debugLogObject = IS_DEBUG_ENABLED
+  ? (context: string, name: string, obj: unknown | (() => unknown)) => {
+      console.log(`${ctx(context)} ${name}`);
+      console.log(util.inspect(typeof obj === 'function' ? obj() : obj, inspectOptions));
+    }
+  : noop;
 
-export const debugLogArray = (
-  context: string | [string, string],
-  message: string,
-  elements: string[] | Set<string>
-) => {
-  if (!IS_DEBUG_ENABLED) return;
-  const collection = Array.from(elements);
-  console.debug(`${ctx(context)} ${message} (${collection.length})`);
-  logArray(collection);
-};
+export const debugLogArray = IS_DEBUG_ENABLED
+  ? (context: string | [string, string], message: string, elements: string[] | Set<string>) => {
+      const collection = Array.from(elements);
+      console.debug(`${ctx(context)} ${message} (${collection.length})`);
+      logArray(collection);
+    }
+  : noop;
 
 const levels = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨'];
 export const exportLookupLog = IS_TRACE_ENABLED
