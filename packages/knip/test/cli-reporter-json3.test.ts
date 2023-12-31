@@ -24,8 +24,8 @@ test('knip --reporter json (enum members)', () => {
         types: [],
         enumMembers: {
           MyEnum: [
-            { name: 'B_Unused', line: 7, col: 13, pos: 94 },
-            { name: 'D_Key', line: 7, col: 13, pos: 94 },
+            { name: 'B_Unused', line: 9, col: 3, pos: 127 },
+            { name: 'D_Key', line: 11, col: 3, pos: 165 },
           ],
         },
         classMembers: {},

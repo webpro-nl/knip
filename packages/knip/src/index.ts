@@ -532,9 +532,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                         filePath,
                         symbol: member.identifier,
                         parentSymbol: identifier,
-                        pos: exportedItem.pos,
-                        line: exportedItem.line,
-                        col: exportedItem.col,
+                        pos: member.pos,
+                        line: member.line,
+                        col: member.col,
                       });
                     }
                   }
