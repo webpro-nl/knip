@@ -12,6 +12,9 @@ const noop = () => {};
 
 const inspectOptions = { maxArrayLength: null, depth: null, colors: true };
 
+/** @public */
+export const inspect = (obj: unknown) => console.log(util.inspect(obj, inspectOptions));
+
 const ctx = (text: string | [string, string]) =>
   typeof text === 'string' ? chalk.yellow(`[${text}]`) : `${chalk.yellow(`[${text[0]}]`)} ${chalk.cyan(text[1])}`;
 
