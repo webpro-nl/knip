@@ -19,6 +19,7 @@ import {
 import { dirname, isInNodeModules, join, isInternal } from './util/path.js';
 import { fromBinary, isBinary } from './util/protocols.js';
 import { _resolveSpecifier } from './util/require.js';
+import { hasTag } from './util/tag.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { Workspace } from './ConfigurationChief.js';
@@ -46,6 +47,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isShowProgress,
     isIncludeEntryExports,
     isIsolateWorkspaces,
+    tags,
     isFix,
     fixTypes,
   } = unresolvedConfiguration;
@@ -75,6 +77,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
+  const [includeJSDocTags, excludeJSDocTags] = tags;
 
   const collector = new IssueCollector({ cwd, rules, filters });
 
@@ -510,6 +513,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           // Skip exports tagged `@alias`
           if (exportedItem.jsDocTags.includes('@alias')) continue;
+
+          // If populated, skip exports not tagged with any of the specified tags
+          if (includeJSDocTags.length > 0 && !hasTag(includeJSDocTags, exportedItem.jsDocTags)) continue;
+
+          // If populated, skip exports tagged with any of the specified tags
+          if (excludeJSDocTags.length > 0 && hasTag(excludeJSDocTags, exportedItem.jsDocTags)) continue;
 
           // Skip exports tagged `@internal` in --production mode
           if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;

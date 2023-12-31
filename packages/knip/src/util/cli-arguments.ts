@@ -56,6 +56,7 @@ try {
       directory: { type: 'string' },
       exclude: { type: 'string', multiple: true },
       exports: { type: 'boolean' },
+      'experimental-tags': { type: 'string', multiple: true },
       fix: { type: 'boolean' },
       'fix-type': { type: 'string', multiple: true },
       help: { type: 'boolean', short: 'h' },

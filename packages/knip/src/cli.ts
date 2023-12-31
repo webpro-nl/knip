@@ -5,6 +5,7 @@ import { isKnownError, getKnownError, isConfigurationError, hasCause } from './u
 import { cwd } from './util/path.js';
 import { Performance } from './util/Performance.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
+import { splitTags } from './util/tag.js';
 import { version } from './version.js';
 import { main } from './index.js';
 import type { ReporterOptions, IssueType } from './types/issues.js';
@@ -29,6 +30,7 @@ const {
   'fix-type': fixTypes = [],
   tsConfig,
   version: isVersion,
+  'experimental-tags': tags = [],
 } = parsedArgValues;
 
 if (isHelp) {
@@ -56,6 +58,7 @@ const run = async () => {
       isShowProgress,
       isIncludeEntryExports,
       isIsolateWorkspaces,
+      tags: splitTags(tags),
       isFix: isFix || fixTypes.length > 0,
       fixTypes: fixTypes.flatMap(type => type.split(',')),
     });
