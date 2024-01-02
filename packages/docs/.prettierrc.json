@@ -5,6 +5,7 @@
   "arrowParens": "avoid",
   "proseWrap": "always",
   "trailingComma": "es5",
+  "bracketSameLine": true,
   "overrides": [
     {
       "files": ["*.(ts|js|mjs)"],
