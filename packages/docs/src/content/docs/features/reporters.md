@@ -79,30 +79,28 @@ knip --reporter json
 ### Markdown
 
 The built-in `markdown` reporter output is meant to be saved to a markdown file.
-This allows following the changes in issues over time. It reports issues in 
-markdown tables separated by issue types as headings, for 
-example:
+This allows following the changes in issues over time. It reports issues in
+markdown tables separated by issue types as headings, for example:
 
 ```md
 # Knip report
 
 ## Unused files (1)
 
-* src/unused.ts
+- src/unused.ts
 
 ## Unlisted dependencies (2)
 
 | Name            | Location     |
-|:----------------|:-------------|
+| :-------------- | :----------- |
 | unresolved      | src/index.ts |
 | @org/unresolved | src/index.ts |
 
 ## Unresolved imports (1)
 
 | Name         | Location     |
-|:-------------|:-------------|
+| :----------- | :----------- |
 | ./unresolved | src/index.ts |
-
 ```
 
 ## Custom Reporters
