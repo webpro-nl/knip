@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/imports-typeof",
+  "devDependencies": {
+    "external": "*"
+  }
+}
