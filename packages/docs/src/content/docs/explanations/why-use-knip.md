@@ -4,10 +4,15 @@ sidebar:
   order: 3
 ---
 
+The value of removing obsolete things from your code is undeniable. However,
+finding them is a manual and tedious job. This is where Knip comes in. As
+codebases grow in complexity and size, automated and comprehensive tooling
+becomes critical.
+
 ## Less is more
 
-Here are just a few of many reasons why you should delete unused code, files and
-dependencies:
+There are plenty of reasons to delete unused files, unused dependencies and
+"dead code":
 
 - Easier maintenance: things are easier to manage when there's less of it.
 - Improved performance: startup time, build time and/or bundle size can be
@@ -64,4 +69,26 @@ some configuration. Yet it can be a great assistant when cleaning up parts of
 the project or doing large refactors. Again, even a list of results with a few
 false positives is many times better and faster than trying to do it manually.
 
+## Unobtrusive
+
+Knip does not introduce new syntax for you to learn. This may sound obvious, but
+consider comments like the following:
+
+```js
+// eslint-disable-next-line
+// prettier-ignore
+// @ts-expect-error
+```
+
+Maybe you wonder why Knip does not have similar comments like `// knip-ignore`
+so you can easily get rid of false positives? A variety of reasons:
+
+1. A false positive may be a bug in Knip, and should be reported (not easily
+   dismissed).
+2. The [documentation makes you think twice][2] before using syntax like
+   `@public` or `@internal` tags.
+3. In the event you want to remove Knip, you only need to uninstall the `knip`
+   dependency and delete the file to configure it.
+
 [1]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
+[2]: ../reference/jsdoc-tsdoc-tags.md

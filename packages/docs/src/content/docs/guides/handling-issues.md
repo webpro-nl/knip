@@ -237,13 +237,25 @@ listed.
 
 ## Unused exports
 
-By default, Knip does not report unused exports of `entry` files.
+Knip does not report unused exports of `entry` files. These exports are
+considered part of the public API surface of a package, and are often not used
+internally by your own code (except tests).
 
-When unused exports are reported, and you want to keep exporting it, there are a
-few options:
+Do you expect certain exports in the report, but are they missing? They might be
+exported from an entry file. Move exports like this to non-entry files, or use
+[--include-entry-exports][15] to make Knip also report unused exports in entry
+files. This option is most useful in monorepos and can also be set per workspace
+separately.
 
-- [Ignore exports used in file][15] for exports used internally.
-- Individual exports can be [tagged as `@public`][16].
+If you think the report of an unused export is invalid, please consider this:
+
+1. Is this a [false positive][16] and potentially a bug in Knip?
+2. Should the export really be part of the public API surface?
+
+With all that said, there are a few options to handle unused exports:
+
+- [Ignore exports used in file][17] for exports used internally.
+- Individual exports can be [tagged as `@public`][18].
 - Make sure the export ends up in an [entry file][2]:
   - Add the file to the `entry` file patterns array in the configuration
   - Move the export(s) to an entry file
@@ -261,35 +273,29 @@ knip --exports
 
 :::
 
-### Missing Exports?
-
-Do you expect certain exports in the report, but are they missing? They might be
-exported from an entry file. Use [--include-entry-exports][17] to make Knip also
-report unused exports in entry files.
-
 ## Class and Enum Members
 
 Classes and enums exported from entry files are ignored, and so are their
 members.
 
-Individual class and enum members can be [tagged as `@public`][16]. Reporting
+Individual class and enum members can be [tagged as `@public`][18]. Reporting
 such members can also be disabled altogether, for example:
 
 ```sh
 knip --exclude classMembers --exclude enumMembers
 ```
 
-This can [boost performance][18] if there are many in the codebase (though the
+This can [boost performance][19] if there are many in the codebase (though the
 members won't be reported).
 
-Use [--include-entry-exports][17] to make Knip also report members of unused
+Use [--include-entry-exports][15] to make Knip also report members of unused
 exports in entry files.
 
 ## False Positives
 
 If you believe Knip incorrectly reports something as unused (i.e. a false
 positive), you can help your own project and help improve Knip by creating a
-[minimal reproduction][19] and open an issue on GitHub.
+[minimal reproduction][20] and open an issue on GitHub.
 
 [1]: ../overview/configuration.md
 [2]: ../explanations/entry-files.md
@@ -305,8 +311,9 @@ positive), you can help your own project and help improve Knip by creating a
 [12]: #unlisted-binaries
 [13]: https://eslint.org/docs/head/use/configure/configuration-files-new
 [14]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[15]: ../reference/configuration.md#ignoreexportsusedinfile
-[16]: ../reference/jsdoc-tsdoc-tags.md#public
-[17]: ../reference/configuration.md#includeentryexports
-[18]: ./performance.md#findreferences
-[19]: ../guides/troubleshooting.md#minimal-reproduction
+[15]: ../reference/configuration.md#includeentryexports
+[16]: #false-positives
+[17]: ../reference/configuration.md#ignoreexportsusedinfile
+[18]: ../reference/jsdoc-tsdoc-tags.md#public
+[19]: ./performance.md#findreferences
+[20]: ../guides/troubleshooting.md#minimal-reproduction

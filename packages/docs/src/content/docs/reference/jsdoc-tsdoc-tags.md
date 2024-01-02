@@ -5,16 +5,15 @@ title: JS/TSDoc Tags
 JSDoc or TSDoc tags can be used to make exceptions for unused or duplicate
 exports.
 
-Knip tries to minimize configuration and introduces as little new things for you
-to learn as possible. That's why it hooks into JSDoc and TSDoc tags.
+Knip tries to minimize configuration and introduces no new syntax. That's why it
+hooks into JSDoc and TSDoc tags.
 
 :::caution
 
 Adding tags or excluding a certain type of issues from the report is usually not
-recommended. It means hiding issues, which are often a sign of a code smell or
-ambiguity and ends up as something that's harder to maintain. It's usually
-better to refactor the code, or report an issue with Knip if there's a false
-positive.
+recommended. It means hiding issues, which is often a sign of code smell or
+ambiguity and ends up harder to maintain. It's usually better to refactor the
+code, or report an issue with Knip for false positives.
 
 :::
 

@@ -14,8 +14,8 @@ We can distinguish two types of issues:
 This indicates a successful run, but there are unused items. Continue with
 [handling issues][3] to deal with unused items reported by Knip.
 
-To better understand why Knip reports what it does, run it in debug mode by
-adding `--debug` to the command:
+To better understand why Knip reports what it does, you may want to run it in
+debug mode by adding `--debug` to the command:
 
 ```sh
 knip --debug
@@ -32,8 +32,7 @@ This will give a lengthy output, including:
 ## Exceptions thrown by Knip
 
 Knip (or one of its plugins loading a configuration file) may throw an error,
-resulting in an unsuccessful run (exit code `2`). You might be encountering a
-[known issue][4].
+resulting in an unsuccessful run. You might be encountering a [known issue][4].
 
 Add `--debug` to the command for more error details to better locate the cause
 of the error.
