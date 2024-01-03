@@ -29,9 +29,9 @@ function convertGitignoreToMicromatch(pattern: string, base: string) {
   if (!pattern.includes('/')) pattern = '**/' + pattern;
   // leading slash on git is equivalent to no leading slash in micromatch
   else if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  // when pattern is fixed (not dynamic) or ends with a slash, micromatch does not interpret it recursively
+  // micromatch does not interpret dirs as matching their children, git does
   if (pattern.endsWith('/')) otherPatterns.push(pattern + '**');
-  else if (pattern.includes('*')) otherPatterns.push(pattern + '/**');
+  else otherPatterns.push(pattern + '/**');
   return { negated, patterns: [pattern, ...otherPatterns].map(pattern => path.join(base, pattern)) };
 }
 
@@ -96,5 +96,9 @@ export async function globby(patterns: string | string[], options: Options): Pro
 
 export async function isGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
   const gitignore = await loadGitignores(options);
-  return path => micromatch.any(path, gitignore.ignores, { ignore: gitignore.unignores });
+  return filePath => {
+    const ret = micromatch.any(path.relative(options.cwd, filePath), gitignore.ignores, { ignore: gitignore.unignores });
+    // debugLogObject(filePath, 'isGitIgnored', { path: path.relative(options.cwd, filePath), gitignore });
+    return ret;
+  };
 }
