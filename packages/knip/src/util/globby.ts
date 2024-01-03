@@ -9,20 +9,17 @@ import * as path from './path.js';
 
 const walk = promisify(_walk);
 type Options = {
-  /**
-	Respect ignore patterns in `.gitignore` files that apply to the globbed files.
-	*/
+  /** Respect ignore patterns in `.gitignore` files that apply to the globbed files. */
   readonly gitignore?: boolean;
 
-  /**
-	The current working directory in which to search.
-	*/
+  /** The current working directory in which to search. */
   readonly cwd: string;
 } & FastGlobOptionsWithoutCwd;
 
 type FastGlobOptionsWithoutCwd = Pick<FastGlobOptions, 'onlyDirectories' | 'ignore' | 'absolute' | 'dot'>;
 
-const applyBaseToPattern = (pattern: string, base: string) => {
+/** micromatch and gitignore use slightly different syntax */
+function convertGitignoreToMicromatch(pattern: string, base: string) {
   let negated = pattern[0] === '!';
   if (negated) {
     pattern = pattern.slice(1);
@@ -36,20 +33,20 @@ const applyBaseToPattern = (pattern: string, base: string) => {
   if (pattern.endsWith('/')) otherPatterns.push(pattern + '**');
   else if (pattern.includes('*')) otherPatterns.push(pattern + '/**');
   return { negated, patterns: [pattern, ...otherPatterns].map(pattern => path.join(base, pattern)) };
-};
+}
 
-const parseIgnoreFile = (filePath: string, cwd: string) => {
+function parseGitignoreFile(filePath: string, cwd: string) {
   const file = fs.readFileSync(filePath, 'utf8');
   const base = path.relative(cwd, path.dirname(filePath));
 
   return file
     .split(/\r?\n/)
     .filter(line => line && !line.startsWith('#'))
-    .map(pattern => applyBaseToPattern(pattern, base));
-};
+    .map(pattern => convertGitignoreToMicromatch(pattern, base));
+}
 type Gitignores = { ignores: string[]; unignores: string[] };
 
-/** walks a directory, parsing gitignores and using them directly on the way */
+/** walks a directory, parsing gitignores and using them directly on the way (early pruning) */
 async function parseFindGitignores(options: Options): Promise<Gitignores> {
   const ignores: string[] = [];
   const unignores: string[] = [];
@@ -58,7 +55,7 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
     entryFilter: entry => {
       if (entry.dirent.isFile() && entry.name === '.gitignore') {
         consideredFiles.push(entry.path);
-        for (const rule of parseIgnoreFile(entry.path, options.cwd))
+        for (const rule of parseGitignoreFile(entry.path, options.cwd))
           if (rule.negated) unignores.push(...rule.patterns);
           else ignores.push(...rule.patterns);
         return true;
@@ -72,6 +69,7 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
 }
 const cachedIgnores = new Map<string, Gitignores>();
 
+/** load gitignores into memory, with caching */
 async function loadGitignores(options: Options): Promise<Gitignores> {
   let gitignore = cachedIgnores.get(options.cwd);
   if (!gitignore) {
@@ -80,12 +78,13 @@ async function loadGitignores(options: Options): Promise<Gitignores> {
   }
   return gitignore;
 }
+/** simpler and faste replacement for the globby npm library */
 export async function globby(patterns: string | string[], options: Options): Promise<string[]> {
   const ignore = options.ignore ?? [];
   if (options.gitignore) {
     const gitignores = await loadGitignores(options);
     ignore.push(...gitignores.ignores);
-    // ignore.push(...gitignores.unignores.map(e => '!' + e));
+    ignore.push(...gitignores.unignores.map(e => '!' + e));
   }
   debugLogObject(options.cwd, `fastGlobOptions`, { patterns, ...options, ignore });
 
