@@ -27,13 +27,15 @@ const applyBaseToPattern = (pattern: string, base: string) => {
   if (negated) {
     pattern = pattern.slice(1);
   }
+  const otherPatterns = [];
   // gitignore matches by basename if no slash present
   if (!pattern.includes('/')) pattern = '**/' + pattern;
   // leading slash on git is equivalent to no leading slash in micromatch
-  if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  // trailing slash on git is equivalent to /** at the end in micromatch
-  if (pattern.endsWith('/')) pattern = pattern + '**';
-  return { negated, pattern: path.join(base, pattern) };
+  else if (pattern.startsWith('/')) pattern = pattern.slice(1);
+  // when pattern is fixed (not dynamic) or ends with a slash, micromatch does not interpret it recursively
+  if (pattern.endsWith('/')) otherPatterns.push(pattern + '**');
+  else if (pattern.includes('*')) otherPatterns.push(pattern + '/**');
+  return { negated, patterns: [pattern, ...otherPatterns].map(pattern => path.join(base, pattern)) };
 };
 
 const parseIgnoreFile = (filePath: string, cwd: string) => {
@@ -57,8 +59,8 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
       if (entry.dirent.isFile() && entry.name === '.gitignore') {
         consideredFiles.push(entry.path);
         for (const rule of parseIgnoreFile(entry.path, options.cwd))
-          if (rule.negated) unignores.push(rule.pattern);
-          else ignores.push(rule.pattern);
+          if (rule.negated) unignores.push(...rule.patterns);
+          else ignores.push(...rule.patterns);
         return true;
       }
       return false;
@@ -79,14 +81,13 @@ async function loadGitignores(options: Options): Promise<Gitignores> {
   return gitignore;
 }
 export async function globby(patterns: string | string[], options: Options): Promise<string[]> {
-
   const ignore = options.ignore ?? [];
   if (options.gitignore) {
     const gitignores = await loadGitignores(options);
     ignore.push(...gitignores.ignores);
     // ignore.push(...gitignores.unignores.map(e => '!' + e));
   }
-  debugLogObject(options.cwd, `fastGlobOptions`, {patterns, ...options, ignore });
+  debugLogObject(options.cwd, `fastGlobOptions`, { patterns, ...options, ignore });
 
   return fastGlob(patterns, {
     ...options,
@@ -98,4 +99,3 @@ export async function isGitIgnoredFn(options: Options): Promise<(path: string) =
   const gitignore = await loadGitignores(options);
   return path => micromatch.any(path, gitignore.ignores, { ignore: gitignore.unignores });
 }
-
