@@ -54,16 +54,10 @@ const resolveUseItem = (use: RuleSetUseItem) => {
   return [];
 };
 
-const findWebpackDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction, cwd } = options;
-
-  const localConfig: WebpackConfig | undefined = await load(configFilePath);
-
-  if (!localConfig) return [];
-
+export const findDependenciesFromConfig = async ({ config, cwd }: { config: WebpackConfig; cwd: string }) => {
   // Projects may use a single config function for both development and production modes, so resolve it twice
   // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
-  const passes = typeof localConfig === 'function' ? [false, true] : [false];
+  const passes = typeof config === 'function' ? [false, true] : [false];
 
   const dependencies = new Set<string>();
   const entryPatterns = new Set<string>();
@@ -71,7 +65,7 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, op
   for (const isProduction of passes) {
     const env: Env = { production: isProduction };
     const argv: Argv = { mode: isProduction ? 'production' : 'development' };
-    const resolvedConfig = typeof localConfig === 'function' ? await localConfig(env, argv) : localConfig;
+    const resolvedConfig = typeof config === 'function' ? await config(env, argv) : config;
 
     for (const options of [resolvedConfig].flat()) {
       const entries = [];
@@ -98,6 +92,18 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, op
       });
     }
   }
+
+  return { dependencies, entryPatterns };
+};
+
+const findWebpackDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { manifest, isProduction, cwd } = options;
+
+  const localConfig: WebpackConfig | undefined = await load(configFilePath);
+
+  if (!localConfig) return [];
+
+  const { dependencies, entryPatterns } = await findDependenciesFromConfig({ config: localConfig, cwd });
 
   if (isProduction) return [...entryPatterns];
 
