@@ -1,8 +1,8 @@
 import fg from 'fast-glob';
-import { globby } from 'globby';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
+import { globby } from './globby.js';
 import { join, relative } from './path.js';
 import { timerify } from './Performance.js';
 
