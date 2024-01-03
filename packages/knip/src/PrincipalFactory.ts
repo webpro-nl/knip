@@ -2,7 +2,7 @@ import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLog } from './util/debug.js';
 import { toAbsolute } from './util/path.js';
-import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
+import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
 import type { GlobbyFilterFunction } from 'globby';
 
 type Paths = ts.CompilerOptions['paths'];
@@ -44,11 +44,11 @@ export class PrincipalFactory {
   principals: Principals = new Set();
 
   public getPrincipal(options: PrincipalOptions) {
-    const { cwd, compilerOptions, paths, pkgName, isIsolateWorkspaces } = options;
+    const { cwd, compilerOptions, paths, pkgName, isIsolateWorkspaces, compilers } = options;
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
     const principal = this.findReusablePrincipal(compilerOptions);
     if (!isIsolateWorkspaces && principal) {
-      this.linkPrincipal(principal, cwd, compilerOptions, pkgName);
+      this.linkPrincipal(principal, cwd, compilerOptions, pkgName, compilers);
       return principal.principal;
     } else {
       return this.addNewPrincipal(options);
@@ -70,11 +70,18 @@ export class PrincipalFactory {
     return principal;
   }
 
-  private linkPrincipal(principal: Principal, cwd: string, compilerOptions: ts.CompilerOptions, pkgName: string) {
+  private linkPrincipal(
+    principal: Principal,
+    cwd: string,
+    compilerOptions: ts.CompilerOptions,
+    pkgName: string,
+    compilers: [SyncCompilers, AsyncCompilers]
+  ) {
     const { pathsBasePath, paths } = compilerOptions;
     if (pathsBasePath) principal.principal.compilerOptions.pathsBasePath = pathsBasePath;
     Object.keys(paths ?? {}).forEach(p => principal.pathKeys.add(p));
-    principal.principal.compilerOptions.paths = { ...principal.principal.compilerOptions.paths, ...paths };
+    principal.principal.addPaths(paths);
+    principal.principal.addCompilers(compilers);
     principal.cwds.add(cwd);
     principal.pkgNames.add(pkgName);
   }

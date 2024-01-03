@@ -2,10 +2,11 @@ import { EOL } from 'node:os';
 // eslint-disable-next-line n/no-restricted-import
 import path from 'node:path';
 import ts from 'typescript';
+import { getExtensions } from '../compilers/index.js';
 import { createCustomModuleResolver } from './resolveModuleNames.js';
 import { SourceFileManager } from './SourceFileManager.js';
 import { createCustomSys } from './sys.js';
-import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
+import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 
@@ -20,7 +21,7 @@ const fileManager = new SourceFileManager();
 
 export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers }: CreateHostsOptions) => {
   fileManager.installCompilers(compilers);
-  const virtualFileExtensions = [...compilers[0].keys(), ...compilers[1].keys()];
+  const virtualFileExtensions = getExtensions(compilers);
   const sys = createCustomSys(cwd, virtualFileExtensions);
   const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, virtualFileExtensions);
 

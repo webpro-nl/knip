@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { debugLog } from '../util/debug.js';
 import { extname, isInternal } from '../util/path.js';
-import type { SyncCompilers, AsyncCompilers } from '../types/compilers.js';
+import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
 
 export class SourceFileManager {
   sourceFileCache = new Map<string, ts.SourceFile | undefined>();

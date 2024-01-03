@@ -31,7 +31,7 @@ type WorkspaceManagerOptions = {
   isStrict: boolean;
 };
 
-type ReferencedDependencies = Set<[string, string]>;
+export type ReferencedDependencies = Set<[string, string]>;
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 

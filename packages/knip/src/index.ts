@@ -1,6 +1,7 @@
 import { isGitIgnoredSync } from 'globby';
 import micromatch from 'micromatch';
 import { _getDependenciesFromScripts } from './binaries/index.js';
+import { getExtensions, mergeCompilers } from './compilers/index.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
@@ -67,7 +68,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   await chief.init();
 
-  const compilers = chief.getCompilers();
   const workspaces = chief.getWorkspaces();
   const report = chief.getIssueTypesToReport();
   const rules = chief.getRules();
@@ -86,7 +86,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   // TODO Organize better
   deputy.addIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
 
-  const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
+  const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, ancestors: w.ancestors }));
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
   debugLogObject('*', 'Included workspace configs', o);
 
@@ -100,7 +100,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js, ./module.ts, ./module.d.ts
       const filePath = principal.resolveModule(specifier, containingFilePath)?.resolvedFileName;
       if (filePath) {
-        const ignorePatterns = workspace.config.ignore.map(pattern => join(workspace.dir, pattern));
+        const ignorePatterns = workspace.config?.ignore.map(pattern => join(workspace.dir, pattern)) ?? [];
         const isIgnored = micromatch.isMatch(filePath, ignorePatterns);
         if (!isIgnored) principal.addEntryPath(filePath);
       } else {
@@ -136,18 +136,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   for (const workspace of workspaces) {
-    const { name, dir, config, ancestors, pkgName, manifestPath, manifest } = workspace;
-    const { paths, ignoreDependencies, ignoreBinaries } = config;
+    const { name, dir, ancestors, pkgName, manifestPath, manifest } = workspace;
 
     streamer.cast(`Analyzing workspace ${name}...`);
 
-    deputy.addWorkspace({ name, dir, manifestPath, manifest, ignoreDependencies, ignoreBinaries });
+    const compilers = mergeCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, manifest);
+    const extensions = getExtensions(compilers);
+    const config = chief.getConfigForWorkspace(name, extensions);
+
+    deputy.addWorkspace({ name, dir, manifestPath, manifest, ...config });
 
     const { compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
     const principal = factory.getPrincipal({
       cwd: dir,
-      paths,
+      paths: config.paths,
       compilerOptions,
       compilers,
       pkgName,
@@ -195,14 +198,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       productionEntryFilePatterns,
     } = dependencies;
 
+    principal.addReferencedDependencies(referencedDependencies, name);
     deputy.addHostDependencies(name, hostDependencies);
     deputy.setInstalledBinaries(name, installedBinaries);
     deputy.setHasTypesIncluded(name, hasTypesIncluded);
     enabledPluginsStore.set(name, enabledPlugins);
-
-    referencedDependencies.forEach(([containingFilePath, specifier]) => {
-      handleReferencedDependency({ specifier, containingFilePath, principal, workspace });
-    });
 
     if (isProduction) {
       const negatedEntryPatterns: string[] = entryFilePatterns.map(negate);
@@ -280,6 +280,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const entryPaths = new Set<string>();
 
   for (const principal of principals) {
+    principal.init();
+
+    principal.referencedDependencies.forEach(([containingFilePath, specifier, workspaceName]) => {
+      const workspace = chief.findWorkspaceByName(workspaceName);
+      if (workspace) handleReferencedDependency({ specifier, containingFilePath, principal, workspace });
+    });
+
     const specifierFilePaths = new Set<string>();
 
     const analyzeSourceFile = (filePath: string, _principal: ProjectPrincipal = principal) => {

@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { dummyCompilers, getExtensions } from './compilers/index.js';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
 import { createHosts } from './typescript/createHosts.js';
@@ -9,10 +10,11 @@ import { compact } from './util/array.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
+import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
-import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
 import type { UnresolvedImport } from './types/imports.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
+import type { ReferencedDependencies } from './WorkspaceWorker.js';
 import type { GlobbyFilterFunction } from 'globby';
 
 // These compiler options override local options
@@ -57,6 +59,7 @@ export class ProjectPrincipal {
   // Configured by user and returned from plugins
   entryPaths = new Set<string>();
   projectPaths = new Set<string>();
+  referencedDependencies: Set<[string, string, string]> = new Set();
 
   // We don't want to report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
@@ -68,6 +71,7 @@ export class ProjectPrincipal {
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
 
+  // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
   backend: {
     fileManager: SourceFileManager;
     compilerHost: ts.CompilerHost;
@@ -89,9 +93,13 @@ export class ProjectPrincipal {
     };
 
     const [syncCompilers, asyncCompilers] = compilers;
-    this.extensions = new Set([...DEFAULT_EXTENSIONS, ...syncCompilers.keys(), ...asyncCompilers.keys()]);
+    this.extensions = new Set([...DEFAULT_EXTENSIONS, ...getExtensions(compilers)]);
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
+  }
+
+  init() {
+    this.addCompilers([dummyCompilers, new Map()]);
 
     const { fileManager, compilerHost, resolveModuleNames } = createHosts({
       cwd: this.cwd,
@@ -105,6 +113,16 @@ export class ProjectPrincipal {
       compilerHost,
       resolveModuleNames,
     };
+  }
+
+  addPaths(paths: ts.CompilerOptions['paths']) {
+    this.compilerOptions.paths = { ...this.compilerOptions.paths, ...paths };
+  }
+
+  addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
+    this.syncCompilers = new Map([...this.syncCompilers, ...compilers[0]]);
+    this.asyncCompilers = new Map([...this.asyncCompilers, ...compilers[1]]);
+    this.extensions = new Set([...this.extensions, ...getExtensions(compilers)]);
   }
 
   /**
@@ -143,6 +161,12 @@ export class ProjectPrincipal {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
       this.projectPaths.add(filePath);
     }
+  }
+
+  public addReferencedDependencies(referencedDependencies: ReferencedDependencies, workspaceName: string) {
+    referencedDependencies.forEach(referencedDependency =>
+      this.referencedDependencies.add([...referencedDependency, workspaceName])
+    );
   }
 
   /**
