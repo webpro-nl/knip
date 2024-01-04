@@ -54,7 +54,7 @@ const resolveUseItem = (use: RuleSetUseItem) => {
   return [];
 };
 
-export const findDependenciesFromConfig = async ({ config, cwd }: { config: WebpackConfig; cwd: string }) => {
+export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { config: WebpackConfig; cwd: string }) => {
   // Projects may use a single config function for both development and production modes, so resolve it twice
   // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
   const passes = typeof config === 'function' ? [false, true] : [false];
@@ -103,7 +103,7 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, op
 
   if (!localConfig) return [];
 
-  const { dependencies, entryPatterns } = await findDependenciesFromConfig({ config: localConfig, cwd });
+  const { dependencies, entryPatterns } = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
 
   if (isProduction) return [...entryPatterns];
 

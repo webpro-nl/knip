@@ -422,6 +422,10 @@
           "title": "vitest plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/vitest/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "vue": {
+          "title": "vue plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/vue/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "webpack": {
           "title": "Webpack plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/webpack/README.md)",
           "$ref": "#/definitions/plugin"

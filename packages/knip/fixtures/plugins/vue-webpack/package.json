@@ -1,0 +1,14 @@
+{
+  "name": "compilers-vue",
+  "dependencies": {
+    "vue": "*"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "*",
+    "babel-loader": "*",
+    "circular-dependency-plugin": "*",
+    "graphql-tag": "*",
+    "raw-loader": "*",
+    "webpack": "*"
+  }
+}

@@ -2,7 +2,6 @@ const compiler = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
 
 export default {
   entry: ['parent.vue'],
-  project: '**/*.{ts,vue}',
   compilers: {
     vue: text => {
       const scripts = [];

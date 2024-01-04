@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/vue",
+  "version": "*",
+  "dependencies": {
+    "vue": "*"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "*"
+  }
+}

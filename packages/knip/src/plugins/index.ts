@@ -48,3 +48,4 @@ export * as vite from './vite/index.js';
 export * as vitest from './vitest/index.js';
 export * as webpack from './webpack/index.js';
 export * as wireit from './wireit/index.js';
+export * as vue from './vue/index.js';
