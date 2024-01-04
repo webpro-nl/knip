@@ -20,10 +20,6 @@ const config: KnipConfig = {
       ignore: 'config.ts',
       ignoreBinaries: ['rg']
     }
-  },
-  compilers: {
-    astro: (text: string) => [...text.replace(/```[\s\S]*?```/g, '').matchAll(/import\s[^;]+;/g)].join('\n'),
-    mdx: (text: string) => [...text.replace(/```[\s\S]*?```/g, '').matchAll(/import\s[^;]+;/g)].join('\n')
   }
 };
 
