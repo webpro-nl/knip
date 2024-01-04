@@ -233,7 +233,7 @@ Let's update the tests to verify our plugin implementation is working correctly.
 
 2. Update the test:
 
-   ```ts title="tests/plugins/cool-linter.test.ts"
+   ```ts title="test/plugins/cool-linter.test.ts"
    test('Find dependencies in cool-linter configuration (json)', async () => {
      const configFilePath = join(cwd, 'cool-linter.config.json');
      const dependencies = await coolLinter.findDependencies(configFilePath);
@@ -250,7 +250,7 @@ Let's update the tests to verify our plugin implementation is working correctly.
 3. Run the test:
 
    ```sh
-   npx tsx tests/plugins/cool-linter.test.ts
+   npx tsx test/plugins/cool-linter.test.ts
    ```
 
 If all went well, the test passes and you created a new plugin for Knip! 🆕 🎉
