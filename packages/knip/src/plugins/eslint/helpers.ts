@@ -16,7 +16,7 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
     extendsSpecifiers.push('eslint-config-prettier');
 
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
-  const parser = config.parser;
+  const parser = config.parser ?? config.parserOptions?.parser;
   const babelDependencies = config.parserOptions?.babelOptions
     ? getDependenciesFromConfig(config.parserOptions.babelOptions)
     : [];
