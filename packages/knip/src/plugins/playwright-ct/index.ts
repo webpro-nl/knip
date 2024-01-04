@@ -1,7 +1,7 @@
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
-import { toEntryPatterns } from '../playwright/index.js';
+import { findPlaywrightDependenciesFromConfig } from '../playwright/index.js';
 import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 import type { PlaywrightTestConfig } from 'playwright/test';
 
@@ -23,14 +23,13 @@ const findPlaywrightCTDependencies: GenericPluginCallback = async (configFilePat
   const { cwd, config } = options;
 
   const localConfig: PlaywrightTestConfig | undefined = await load(configFilePath);
+  const defaultPatterns = (config?.entry ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
 
   if (localConfig) {
-    const projects = localConfig.projects ? [localConfig, ...localConfig.projects] : [localConfig];
-    const patterns = projects.flatMap(config => toEntryPatterns(config.testMatch, cwd, configFilePath, config));
-    if (patterns.length > 0) return patterns;
+    return findPlaywrightDependenciesFromConfig({ config: localConfig, cwd, configFilePath, defaultPatterns });
   }
 
-  return (config?.entry ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
+  return defaultPatterns;
 };
 
 export const findDependencies = timerify(findPlaywrightCTDependencies);

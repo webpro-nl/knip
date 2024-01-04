@@ -4,6 +4,7 @@
     "test": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "*"
+    "@playwright/test": "*",
+    "table": "*"
   }
 }
