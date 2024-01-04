@@ -18,7 +18,12 @@ type Options = {
 
 type FastGlobOptionsWithoutCwd = Pick<FastGlobOptions, 'onlyDirectories' | 'ignore' | 'absolute' | 'dot'>;
 
-/** micromatch and gitignore use slightly different syntax */
+/**
+ * micromatch and gitignore use slightly different syntax. convert it.
+ * 
+ * we can't use the `ignore` npm library because (a) it doesn't support multiple gitignore files and
+ * (b) we want to pass the resulting globs to fast-glob which uses micromatch internally.
+ */
 function convertGitignoreToMicromatch(pattern: string, base: string) {
   let negated = pattern[0] === '!';
   if (negated) {
@@ -35,6 +40,7 @@ function convertGitignoreToMicromatch(pattern: string, base: string) {
   return { negated, patterns: [pattern, ...otherPatterns].map(pattern => path.join(base, pattern)) };
 }
 
+/** this function needs to be synchronous currently because the fs.walk library takes a synchronous callback for filtering */
 function parseGitignoreFile(filePath: string, cwd: string) {
   const file = fs.readFileSync(filePath, 'utf8');
   const base = path.relative(cwd, path.dirname(filePath));
@@ -44,17 +50,20 @@ function parseGitignoreFile(filePath: string, cwd: string) {
     .filter(line => line && !line.startsWith('#'))
     .map(pattern => convertGitignoreToMicromatch(pattern, base));
 }
+/** contains parsed individual gitignore rules from potentially multiple gitignore files */
 type Gitignores = { ignores: string[]; unignores: string[] };
 
 /** walks a directory, parsing gitignores and using them directly on the way (early pruning) */
 async function parseFindGitignores(options: Options): Promise<Gitignores> {
   const ignores: string[] = [];
   const unignores: string[] = [];
-  const consideredFiles: string[] = [];
+  const gitignoreFiles: string[] = [];
+  // we don't actually care about the result of the walk since we incrementally add the results in entryFilter
   await walk(options.cwd, {
+    // when we see a .gitignore, parse and add it
     entryFilter: entry => {
       if (entry.dirent.isFile() && entry.name === '.gitignore') {
-        consideredFiles.push(entry.path);
+        gitignoreFiles.push(entry.path);
         for (const rule of parseGitignoreFile(entry.path, options.cwd))
           if (rule.negated) unignores.push(...rule.patterns);
           else ignores.push(...rule.patterns);
@@ -62,11 +71,14 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
       }
       return false;
     },
+    // early pruning: don't recurse into directories that are ignored (important!)
     deepFilter: entry => !micromatch.any(path.relative(options.cwd, entry.path), ignores, { ignore: unignores }),
   });
-  debugLogObject(options.cwd, 'gitignore files', { consideredFiles, ignores, unignores });
+  debugLogObject(options.cwd, 'parsed gitignore files', { consideredFiles: gitignoreFiles, ignores, unignores });
   return { ignores, unignores };
 }
+
+// since knip parses gitignores only a limited number of times and mostly purely for the repo root, permanent caching should be fine
 const cachedIgnores = new Map<string, Gitignores>();
 
 /** load gitignores into memory, with caching */
@@ -78,12 +90,16 @@ async function loadGitignores(options: Options): Promise<Gitignores> {
   }
   return gitignore;
 }
-/** simpler and faste replacement for the globby npm library */
+/** simpler and faster replacement for the globby npm library */
 export async function globby(patterns: string | string[], options: Options): Promise<string[]> {
   const ignore = options.ignore ?? [];
   if (options.gitignore) {
     const gitignores = await loadGitignores(options);
+    // add git ignores to knip explicit ignores
     ignore.push(...gitignores.ignores);
+    // add git unignores (!foo/bar).
+    // I'm not sure 100% what the behaviour of fast-glob is here. Potentially this will cause it 
+    // to have git unignores to take precedence over knip ignores.
     ignore.push(...gitignores.unignores.map(e => '!' + e));
   }
   debugLogObject(options.cwd, `fastGlobOptions`, { patterns, ...options, ignore });
@@ -94,6 +110,7 @@ export async function globby(patterns: string | string[], options: Options): Pro
   });
 }
 
+/** create a function that should be equivalent to `git check-ignored` */
 export async function isGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
   const gitignore = await loadGitignores(options);
   return filePath => {
