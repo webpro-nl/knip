@@ -9,6 +9,7 @@ Knip provides the following built-in reporters:
 - `codeowners`
 - `compact`
 - `json`
+- `markdown`
 - `symbol` (default)
 
 Example usage:
