@@ -1,0 +1,8 @@
+name: Action Node A
+description: Description
+
+runs:
+  using: node16
+  pre: './dist/pre.js'
+  main: main.js
+  post: './post.js'
