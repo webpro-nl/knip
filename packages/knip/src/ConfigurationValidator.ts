@@ -121,6 +121,7 @@ const pluginsSchema = z.object({
   tsup: pluginSchema,
   typedoc: pluginSchema,
   typescript: pluginSchema,
+  unbuild: pluginSchema,
   vite: pluginSchema,
   vitest: pluginSchema,
   webpack: pluginSchema,
