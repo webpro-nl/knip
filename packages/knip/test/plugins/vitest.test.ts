@@ -15,7 +15,7 @@ test('Find dependencies in vitest configuration (vitest)', async () => {
   const configFilePath = join(cwd, 'vitest.config.ts');
   const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest, config, enabledPlugins });
   assert.deepEqual(dependencies, [
-    'entry:**/*.{test,spec}.?(c|m)[jt]s?(x)',
+    'entry:**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)',
     'happy-dom',
     '@vitest/coverage-istanbul',
     'setup.js',
@@ -26,14 +26,14 @@ test('Find dependencies in vitest configuration (vitest)', async () => {
 test('Find dependencies in vitest configuration without coverage providers (vitest)', async () => {
   const configFilePath = join(cwd, 'vitest-default-coverage.config');
   const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest, config, enabledPlugins });
-  assert.deepEqual(dependencies, ['entry:**/*.{test,spec}.?(c|m)[jt]s?(x)', 'jsdom', '@vitest/coverage-v8']);
+  assert.deepEqual(dependencies, ['entry:**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)', 'jsdom', '@vitest/coverage-v8']);
 });
 
 test('Find dependencies in vitest configuration (vite)', async () => {
   const configFilePath = join(cwd, 'vite.config.ts');
   const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest, config, enabledPlugins });
   assert.deepEqual(dependencies, [
-    'entry:**/*.{test,spec}.?(c|m)[jt]s?(x)',
+    'entry:**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)',
     '@vitest/coverage-c8',
     './setup.js',
     './global.ts',

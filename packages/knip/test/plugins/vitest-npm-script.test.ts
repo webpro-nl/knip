@@ -11,5 +11,5 @@ const enabledPlugins = ['vitest'];
 test('detects the coverage dependency when a npm script activates coverage', async () => {
   const configFilePath = join(cwd, 'vitest.config.ts');
   const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest, config, enabledPlugins });
-  assert.deepEqual(dependencies, ['entry:**/*.{test,spec}.?(c|m)[jt]s?(x)', '@vitest/coverage-v8']);
+  assert.deepEqual(dependencies, ['entry:**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)', '@vitest/coverage-v8']);
 });

@@ -27,7 +27,7 @@ export const CONFIG_FILE_PATTERNS = [
 ];
 
 /** @public */
-export const ENTRY_FILE_PATTERNS = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
+export const ENTRY_FILE_PATTERNS = ['**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)'];
 
 // TODO: Promote to something more generic, other plugins may like it too
 const resolveEntry = (containingFilePath: string, specifier: string) => {

@@ -60,7 +60,7 @@ dependencies.
 For example, if `next` is listed as a dependency in `package.json`, the Next.js
 plugin will automatically add multiple patterns as entry files, such as
 `pages/**/*.{js,jsx,ts,tsx}`. If `vitest` is listed, the Vitest plugin adds
-`**/*.{test,spec}.ts` as entry file patterns. Most plugins have entry files
+`**/*.{test,test-d,spec}.ts` as entry file patterns. Most plugins have entry files
 configured, so you don't have to.
 
 It's mostly plugins for meta frameworks and test runners that have `entry` files
