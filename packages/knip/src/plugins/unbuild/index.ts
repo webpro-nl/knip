@@ -1,5 +1,7 @@
+import { toEntryPattern } from 'src/util/protocols.js';
 import { timerify } from '../../util/Performance.js';
-import { hasDependency } from '../../util/plugin.js';
+import { hasDependency, load } from '../../util/plugin.js';
+import type { UnbuildConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/unjs/unbuild#unbuild
@@ -13,14 +15,22 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 
 export const CONFIG_FILE_PATTERNS = ['build.config.{js,cjs,mjs,ts,mts,cts,json}'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [];
+const findUnbuildDependencies: GenericPluginCallback = async configFilePath => {
+  const localConfig: UnbuildConfig | undefined = await load(configFilePath);
+  if (!localConfig) return [];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [];
+  const entries = [];
+  if (Array.isArray(localConfig)) {
+    for (const obj of localConfig) {
+      entries.push(...(obj.entries || []));
+    }
+  } else {
+    entries.push(...(localConfig.entries || []));
+  }
 
-export const PROJECT_FILE_PATTERNS = [];
+  const entryPatterns = entries.map(entry => toEntryPattern(typeof entry === 'string' ? entry : entry.input));
 
-const findPluginDependencies: GenericPluginCallback = async () => [];
+  return [...entryPatterns];
+};
 
-export const findDependencies = timerify(findPluginDependencies);
+export const findDependencies = timerify(findUnbuildDependencies);
