@@ -1,4 +1,4 @@
-export type UnbuildConfigObject = {
+type UnbuildConfigObject = Partial<{
   name: string;
   entries:
     | string[]
@@ -10,6 +10,6 @@ export type UnbuildConfigObject = {
   outDir: string;
   declaration: boolean;
   rollup: Record<string, unknown>;
-};
+}>;
 
-export type UnbuildConfig = Partial<UnbuildConfigObject> | Partial<UnbuildConfigObject>[];
+export type UnbuildConfig = UnbuildConfigObject | UnbuildConfigObject[];
