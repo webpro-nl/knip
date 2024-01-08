@@ -28,3 +28,25 @@ test('Find dependencies in github-actions workflow configurations', async () => 
     join(cwd, 'scripts/get-release-notes.js'),
   ]);
 });
+
+test('Find dependencies in github-actions composite action', async () => {
+  const configFilePath = join(cwd, '.github/actions/composite/action.yml');
+  const dependencies = await GithubActions.findDependencies(configFilePath, { cwd, manifest });
+  assert.deepEqual(dependencies, [join(cwd, 'comment.ts'), 'esbuild-register', 'bin:playwright', 'bin:eslint']);
+});
+
+test('Find dependencies in github-actions node action A', async () => {
+  const configFilePath = join(cwd, '.github/actions/node-a/action.yml');
+  const dependencies = await GithubActions.findDependencies(configFilePath, { cwd, manifest });
+  assert.deepEqual(dependencies, [
+    join(cwd, '.github/actions/node-a/dist/pre.js'),
+    join(cwd, '.github/actions/node-a/main.js'),
+    join(cwd, '.github/actions/node-a/post.js'),
+  ]);
+});
+
+test('Find dependencies in github-actions node action B', async () => {
+  const configFilePath = join(cwd, '.github/actions/node-b/action.yaml');
+  const dependencies = await GithubActions.findDependencies(configFilePath, { cwd, manifest });
+  assert.deepEqual(dependencies, [join(cwd, '.github/actions/node-b/main.js')]);
+});

@@ -1,0 +1,6 @@
+name: Action Node B
+description: Description
+
+runs:
+  using: 'node20'
+  main: main.js
