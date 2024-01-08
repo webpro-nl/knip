@@ -1,6 +1,6 @@
 import { _firstGlob } from '../../util/glob.js';
 import { getValuesByKeyDeep } from '../../util/object.js';
-import { dirname, join } from '../../util/path.js';
+import { basename, dirname, join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { getDependenciesFromScripts, load } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -24,6 +24,7 @@ export const CONFIG_FILE_PATTERNS = ['.github/workflows/*.{yml,yaml}', '.github/
 
 const findGithubActionsDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { cwd, manifest, isProduction } = options;
+  const configFileName = basename(configFilePath);
 
   if (isProduction) return [];
 
@@ -43,7 +44,7 @@ const findGithubActionsDependencies: GenericPluginCallback = async (configFilePa
   ];
 
   function getActionDependencies() {
-    const isActionManifest = configFilePath.endsWith('action.yml') || configFilePath.endsWith('action.yaml');
+    const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
     if (!isActionManifest || !config?.runs?.using?.startsWith('node')) {
       return [];
     }
