@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/unbuild",
+  "version": "*",
+  "devDependencies": {
+    "unbuild": "^2.0.0"
+  }
+}

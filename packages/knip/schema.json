@@ -49,7 +49,9 @@
     "ignoreExportsUsedInFile": {
       "title": "Ignore exports used in file",
       "examples": [
-        { "ignoreExportsUsedInFile": true },
+        {
+          "ignoreExportsUsedInFile": true
+        },
         {
           "ignoreExportsUsedInFile": {
             "interface": true,
@@ -64,12 +66,24 @@
         {
           "type": "object",
           "properties": {
-            "class": { "type": "boolean" },
-            "enum": { "type": "boolean" },
-            "function": { "type": "boolean" },
-            "interface": { "type": "boolean" },
-            "member": { "type": "boolean" },
-            "type": { "type": "boolean" }
+            "class": {
+              "type": "boolean"
+            },
+            "enum": {
+              "type": "boolean"
+            },
+            "function": {
+              "type": "boolean"
+            },
+            "interface": {
+              "type": "boolean"
+            },
+            "member": {
+              "type": "boolean"
+            },
+            "type": {
+              "type": "boolean"
+            }
           }
         }
       ]
@@ -96,17 +110,39 @@
     "rules": {
       "type": "object",
       "properties": {
-        "classMembers": { "$ref": "#/definitions/ruleValue" },
-        "dependencies": { "$ref": "#/definitions/ruleValue" },
-        "duplicates": { "$ref": "#/definitions/ruleValue" },
-        "enumMembers": { "$ref": "#/definitions/ruleValue" },
-        "exports": { "$ref": "#/definitions/ruleValue" },
-        "files": { "$ref": "#/definitions/ruleValue" },
-        "nsExports": { "$ref": "#/definitions/ruleValue" },
-        "nsTypes": { "$ref": "#/definitions/ruleValue" },
-        "types": { "$ref": "#/definitions/ruleValue" },
-        "unlisted": { "$ref": "#/definitions/ruleValue" },
-        "unresolved": { "$ref": "#/definitions/ruleValue" }
+        "classMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "dependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "duplicates": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "enumMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "exports": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "files": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "nsExports": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "nsTypes": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "types": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "unlisted": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "unresolved": {
+          "$ref": "#/definitions/ruleValue"
+        }
       }
     }
   },
@@ -412,6 +448,10 @@
         },
         "typescript": {
           "title": "TypeScript plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/typescript/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unbuild": {
+          "title": "unbuild plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/unbuild/README.md)",
           "$ref": "#/definitions/plugin"
         },
         "vite": {
