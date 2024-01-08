@@ -16,42 +16,47 @@ tableOfContents: false
 - [cspell][9]
 - [Cypress][10]
 - [Drizzle][11]
-- [ESLint][12]
-- [Gatsby][13]
-- [GitHub Actions][14]
-- [GraphQL Codegen][15]
-- [husky][16]
-- [Jest][17]
-- [Lefthook][18]
-- [lint-staged][19]
-- [markdownlint][20]
-- [Mocha][21]
-- [Next.js][22]
-- [Node.js Test Runner][23]
-- [npm-package-json-lint][24]
-- [Nx][25]
-- [nyc][26]
-- [Playwright][27]
-- [Playwright for components][28]
-- [PostCSS][29]
-- [Prettier][30]
-- [Release It][31]
-- [Remark][32]
-- [Remix][33]
-- [Rollup][34]
-- [Semantic Release][35]
-- [Sentry][36]
-- [Storybook][37]
-- [Stryker][38]
-- [Stylelint][39]
-- [Svelte][40]
-- [Tailwind][41]
-- [tsup][42]
-- [TypeDoc][43]
-- [TypeScript][44]
-- [Vite][45]
-- [Vitest][46]
-- [Webpack][47]
+- [Eleventy][12]
+- [ESLint][13]
+- [Gatsby][14]
+- [GitHub Actions][15]
+- [GraphQL Codegen][16]
+- [husky][17]
+- [Jest][18]
+- [Lefthook][19]
+- [lint-staged][20]
+- [LintHTML][21]
+- [markdownlint][22]
+- [Mocha][23]
+- [Next.js][24]
+- [Node.js Test Runner][25]
+- [npm-package-json-lint][26]
+- [Nx][27]
+- [nyc][28]
+- [Playwright][29]
+- [Playwright for components][30]
+- [PostCSS][31]
+- [Prettier][32]
+- [Release It][33]
+- [Remark][34]
+- [Remix][35]
+- [Rollup][36]
+- [Semantic Release][37]
+- [Sentry][38]
+- [Storybook][39]
+- [Stryker][40]
+- [Stylelint][41]
+- [Svelte][42]
+- [Tailwind][43]
+- [tsup][44]
+- [TypeDoc][45]
+- [TypeScript][46]
+- [unbuild][47]
+- [Vite][48]
+- [Vitest][49]
+- [Vue][50]
+- [Webpack][51]
+- [Wireit][52]
 
 :::
 
@@ -66,39 +71,44 @@ tableOfContents: false
 [9]: ./plugins/cspell.md 'cspell'
 [10]: ./plugins/cypress.md 'Cypress'
 [11]: ./plugins/drizzle.md 'Drizzle'
-[12]: ./plugins/eslint.md 'ESLint'
-[13]: ./plugins/gatsby.md 'Gatsby'
-[14]: ./plugins/github-actions.md 'GitHub Actions'
-[15]: ./plugins/graphql-codegen.md 'GraphQL Codegen'
-[16]: ./plugins/husky.md 'husky'
-[17]: ./plugins/jest.md 'Jest'
-[18]: ./plugins/lefthook.md 'Lefthook'
-[19]: ./plugins/lint-staged.md 'lint-staged'
-[20]: ./plugins/markdownlint.md 'markdownlint'
-[21]: ./plugins/mocha.md 'Mocha'
-[22]: ./plugins/next.md 'Next.js'
-[23]: ./plugins/node-test-runner.md 'Node.js Test Runner'
-[24]: ./plugins/npm-package-json-lint.md 'npm-package-json-lint'
-[25]: ./plugins/nx.md 'Nx'
-[26]: ./plugins/nyc.md 'nyc'
-[27]: ./plugins/playwright.md 'Playwright'
-[28]: ./plugins/playwright-ct.md 'Playwright for components'
-[29]: ./plugins/postcss.md 'PostCSS'
-[30]: ./plugins/prettier.md 'Prettier'
-[31]: ./plugins/release-it.md 'Release It'
-[32]: ./plugins/remark.md 'Remark'
-[33]: ./plugins/remix.md 'Remix'
-[34]: ./plugins/rollup.md 'Rollup'
-[35]: ./plugins/semantic-release.md 'Semantic Release'
-[36]: ./plugins/sentry.md 'Sentry'
-[37]: ./plugins/storybook.md 'Storybook'
-[38]: ./plugins/stryker.md 'Stryker'
-[39]: ./plugins/stylelint.md 'Stylelint'
-[40]: ./plugins/svelte.md 'Svelte'
-[41]: ./plugins/tailwind.md 'Tailwind'
-[42]: ./plugins/tsup.md 'tsup'
-[43]: ./plugins/typedoc.md 'TypeDoc'
-[44]: ./plugins/typescript.md 'TypeScript'
-[45]: ./plugins/vite.md 'Vite'
-[46]: ./plugins/vitest.md 'Vitest'
-[47]: ./plugins/webpack.md 'Webpack'
+[12]: ./plugins/eleventy.md 'Eleventy'
+[13]: ./plugins/eslint.md 'ESLint'
+[14]: ./plugins/gatsby.md 'Gatsby'
+[15]: ./plugins/github-actions.md 'GitHub Actions'
+[16]: ./plugins/graphql-codegen.md 'GraphQL Codegen'
+[17]: ./plugins/husky.md 'husky'
+[18]: ./plugins/jest.md 'Jest'
+[19]: ./plugins/lefthook.md 'Lefthook'
+[20]: ./plugins/lint-staged.md 'lint-staged'
+[21]: ./plugins/linthtml.md 'LintHTML'
+[22]: ./plugins/markdownlint.md 'markdownlint'
+[23]: ./plugins/mocha.md 'Mocha'
+[24]: ./plugins/next.md 'Next.js'
+[25]: ./plugins/node-test-runner.md 'Node.js Test Runner'
+[26]: ./plugins/npm-package-json-lint.md 'npm-package-json-lint'
+[27]: ./plugins/nx.md 'Nx'
+[28]: ./plugins/nyc.md 'nyc'
+[29]: ./plugins/playwright.md 'Playwright'
+[30]: ./plugins/playwright-ct.md 'Playwright for components'
+[31]: ./plugins/postcss.md 'PostCSS'
+[32]: ./plugins/prettier.md 'Prettier'
+[33]: ./plugins/release-it.md 'Release It'
+[34]: ./plugins/remark.md 'Remark'
+[35]: ./plugins/remix.md 'Remix'
+[36]: ./plugins/rollup.md 'Rollup'
+[37]: ./plugins/semantic-release.md 'Semantic Release'
+[38]: ./plugins/sentry.md 'Sentry'
+[39]: ./plugins/storybook.md 'Storybook'
+[40]: ./plugins/stryker.md 'Stryker'
+[41]: ./plugins/stylelint.md 'Stylelint'
+[42]: ./plugins/svelte.md 'Svelte'
+[43]: ./plugins/tailwind.md 'Tailwind'
+[44]: ./plugins/tsup.md 'tsup'
+[45]: ./plugins/typedoc.md 'TypeDoc'
+[46]: ./plugins/typescript.md 'TypeScript'
+[47]: ./plugins/unbuild.md 'unbuild'
+[48]: ./plugins/vite.md 'Vite'
+[49]: ./plugins/vitest.md 'Vitest'
+[50]: ./plugins/vue.md 'Vue'
+[51]: ./plugins/webpack.md 'Webpack'
+[52]: ./plugins/wireit.md 'Wireit'
