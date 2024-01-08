@@ -39,6 +39,7 @@ export const IGNORED_GLOBAL_BINARIES = [
   'pnpm',
   'pnpx',
   'rm',
+  'set',
   'sh',
   'sudo',
   'test', // exception (node built-in module)
