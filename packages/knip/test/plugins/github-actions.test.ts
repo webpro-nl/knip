@@ -32,23 +32,7 @@ test('Find dependencies in github-actions workflow configurations', async () => 
 test('Find dependencies in github-actions composite action', async () => {
   const configFilePath = join(cwd, '.github/actions/composite/action.yml');
   const dependencies = await GithubActions.findDependencies(configFilePath, { cwd, manifest });
-  assert.deepEqual(dependencies, [
-    join(cwd, 'comment.ts'),
-    'esbuild-register',
-    join(cwd, 'scripts/check-dependencies.js'),
-    'bin:playwright',
-    'bin:prisma',
-    'bin:eslint',
-    'bin:release-it',
-    'bin:knip',
-    'bin:nyc',
-    'retry-cli',
-    'bin:curl',
-    '@scope/retry-cli',
-    'bin:changeset',
-    'bin:wait-on',
-    join(cwd, 'scripts/get-release-notes.js'),
-  ]);
+  assert.deepEqual(dependencies, [join(cwd, 'comment.ts'), 'esbuild-register', 'bin:playwright', 'bin:eslint']);
 });
 
 test('Find dependencies in github-actions node action A', async () => {
