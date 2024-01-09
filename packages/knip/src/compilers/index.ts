@@ -1,8 +1,8 @@
 import { DUMMY_VIRTUAL_FILE_EXTENSIONS } from '../constants.js';
-import * as Astro from './astro.js';
-import * as MDX from './mdx.js';
-import * as Svelte from './svelte.js';
-import * as Vue from './vue.js';
+import Astro from './astro.js';
+import MDX from './mdx.js';
+import Svelte from './svelte.js';
+import Vue from './vue.js';
 import type { AsyncCompilerFn, AsyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
 import type { RawConfiguration } from '../types/config.js';
 import type { PackageJson } from '@npmcli/package-json';
