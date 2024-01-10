@@ -3,7 +3,9 @@ import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
+import { FAKE_PATH } from './loader.js';
 import { dirname, join } from './path.js';
+import { timerify } from './Performance.js';
 
 export const isDirectory = (filePath: string) => {
   const stat = statSync(filePath, { throwIfNoEntry: false });
@@ -30,6 +32,8 @@ export const loadFile = async (filePath: string) => {
 };
 
 export const loadJSON = async (filePath: string) => {
+  // TODO: Turn into a config issue warning
+  if (filePath === FAKE_PATH) return;
   const contents = await loadFile(filePath);
   return parseJSON(filePath, contents);
 };
@@ -66,3 +70,5 @@ export function isTypeModule(path: string) {
   }
   return false;
 }
+
+export const _loadJSON = timerify(loadJSON);

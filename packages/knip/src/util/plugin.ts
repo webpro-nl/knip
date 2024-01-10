@@ -1,4 +1,5 @@
 export { _load as load, _loadFile as loadFile } from './loader.js';
+export { _loadJSON as loadJSON } from './fs.js';
 export { _tryResolve as tryResolve } from './require.js';
 export { _getDependenciesFromScripts as getDependenciesFromScripts } from '../binaries/index.js';
 import { arrayify } from './array.js';

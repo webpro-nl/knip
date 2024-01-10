@@ -1,7 +1,7 @@
 import { compact } from '../../util/array.js';
 import { dirname, isInternal, toAbsolute } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency, loadJSON } from '../../util/plugin.js';
 import { loadTSConfig } from '../../util/tsconfig-loader.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 import type { TsConfigJson } from 'type-fest';
@@ -18,7 +18,7 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const CONFIG_FILE_PATTERNS = ['tsconfig.json', 'tsconfig.*.json'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
-  const localConfig: TsConfigJson | undefined = await load(configFilePath);
+  const localConfig: TsConfigJson | undefined = await loadJSON(configFilePath);
 
   if (!localConfig) return;
 
