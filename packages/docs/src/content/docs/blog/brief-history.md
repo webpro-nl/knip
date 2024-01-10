@@ -27,4 +27,4 @@ just for you!
 [3]: https://github.com/webpro/knip/releases/tag/1.0.0-alpha.0
 [4]: https://github.com/webpro/knip/tree/1.0.0
 [5]: https://github.com/webpro/knip/issues/73
-[6]: ./knip-v3.mdx
+[6]: ../knip-v3.mdx

@@ -233,7 +233,7 @@ structure.
 
 See [Monorepos and workspaces][8].
 
-[1]: ../../reference/dynamic-configuration.mdx
+[1]: ./dynamic-configuration.mdx
 [2]: ../../overview/configuration.md
 [3]: ../../explanations/entry-files.md
 [4]: ../../features/rules-and-filters.md#filters
