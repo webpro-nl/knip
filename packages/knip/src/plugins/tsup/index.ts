@@ -1,3 +1,4 @@
+import { basename } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
@@ -13,10 +14,14 @@ export const ENABLERS = ['tsup'];
 
 export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['tsup.config.js'];
+export const CONFIG_FILE_PATTERNS = ['tsup.config.{js,ts,cjs,json}', 'package.json'];
 
-const findTsupDependencies: GenericPluginCallback = async configFilePath => {
-  let localConfig: TsupConfig | undefined = await load(configFilePath);
+const findTsupDependencies: GenericPluginCallback = async (configFilePath, options) => {
+  const { manifest } = options;
+
+  let localConfig: TsupConfig | undefined =
+    basename(configFilePath) === 'package.json' ? manifest.tsup : await load(configFilePath);
+
   if (typeof localConfig === 'function') localConfig = await localConfig({});
 
   if (!localConfig) return [];
