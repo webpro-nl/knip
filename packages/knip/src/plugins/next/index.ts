@@ -15,11 +15,11 @@ export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDepen
 export const ENTRY_FILE_PATTERNS = ['next.config.{js,ts,cjs,mjs}'];
 
 const productionEntryFilePatternsWithoutSrc = [
-  'middleware.{js,jsx,ts,tsx}',
+  '{instrumentation,middleware}.{js,ts}',
   'app/global-error.{js,jsx,ts,tsx}',
-  'app/**/{error,layout,loading,not-found,page,template,route,default}.{js,jsx,ts,tsx}',
-  'instrumentation.{js,jsx,ts,tsx}',
-  'app/{manifest,sitemap,robots}.{js,jsx,ts,tsx}',
+  'app/**/{error,layout,loading,not-found,page,template}.{js,jsx,ts,tsx}',
+  'app/**/{route,default}.{js,ts}',
+  'app/{manifest,sitemap,robots}.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
   'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
   'pages/**/*.{js,jsx,ts,tsx}',
