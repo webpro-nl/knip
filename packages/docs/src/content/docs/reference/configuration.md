@@ -233,11 +233,11 @@ structure.
 
 See [Monorepos and workspaces][8].
 
-[1]: ./dynamic-configuration.mdx
-[2]: ../../overview/configuration.md
-[3]: ../../explanations/entry-files.md
-[4]: ../../features/rules-and-filters.md#filters
-[5]: ../../guides/troubleshooting.md#issues-reported-by-knip
-[6]: ../../explanations/plugins.md#entry-files
-[7]: ../../explanations/plugins.md
-[8]: ../../features/monorepos-and-workspaces.md
+[1]: ../reference/dynamic-configuration.mdx
+[2]: ../overview/configuration.md
+[3]: ../explanations/entry-files.md
+[4]: ../features/rules-and-filters.md#filters
+[5]: ../guides/troubleshooting.md#issues-reported-by-knip
+[6]: ../explanations/plugins.md#entry-files
+[7]: ../explanations/plugins.md
+[8]: ../features/monorepos-and-workspaces.md
