@@ -100,7 +100,7 @@ async function loadGitignores(options: Options): Promise<Gitignores> {
 
 /** simpler and faster replacement for the globby npm library */
 export async function globby(patterns: string | string[], options: Options): Promise<string[]> {
-  const ignore = options.ignore ?? [];
+  const ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
   if (options.gitignore) {
     const gitignores = await loadGitignores(options);
     // add git ignores to knip explicit ignores
