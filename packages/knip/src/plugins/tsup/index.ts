@@ -26,11 +26,15 @@ const findTsupDependencies: GenericPluginCallback = async (configFilePath, optio
 
   if (!localConfig) return [];
 
-  const entryPatterns = [localConfig].flat().flatMap(config => {
-    if (!config.entry) return [];
-    if (Array.isArray(config.entry)) return config.entry.map(toEntryPattern);
-    return Object.values(config.entry).map(toEntryPattern);
-  });
+  const entryPatterns = [localConfig]
+    .flat()
+    .flatMap(config => {
+      if (!config.entry) return [];
+      if (Array.isArray(config.entry)) return config.entry;
+      return Object.values(config.entry);
+    })
+    .filter(entry => !entry.startsWith('!'))
+    .map(toEntryPattern);
 
   return entryPatterns;
 };
