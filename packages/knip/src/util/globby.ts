@@ -120,6 +120,8 @@ export async function globby(patterns: string | string[], options: Options): Pro
 
 /** create a function that should be equivalent to `git check-ignored` */
 export async function isGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
+  cachedIgnores.clear();
+  if (options.gitignore === false) return () => false;
   const gitignore = await loadGitignores(options);
   const matcher = picomatch(gitignore.ignores, { ignore: gitignore.unignores });
   const isGitIgnored = (filePath: string) => {

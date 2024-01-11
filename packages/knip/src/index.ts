@@ -62,7 +62,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   // Central function, to prevent `Path is not in cwd` errors from `globby`
   // Provide `cwd`, otherwise defaults to `process.cwd()` w/ incompatible slashes in Windows
-  const isGitIgnored = gitignore ? await isGitIgnoredFn({ cwd }) : () => false;
+  const isGitIgnored = await isGitIgnoredFn({ cwd, gitignore });
 
   streamer.cast('Reading workspace configuration(s)...');
 
