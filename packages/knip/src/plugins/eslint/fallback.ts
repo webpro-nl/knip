@@ -6,7 +6,7 @@ import type { TransformOptions } from 'jiti/dist/types.js';
 
 const rushstackMatch = /require\(("|')@rushstack\/(eslint-config\/patch|eslint-patch)\/modern-module-resolution("|')\)/;
 
-// @ts-expect-error Our package.json has type=module (for globby, chalk, etc), but here it confuses TypeScript
+// @ts-expect-error Our package.json has type=module (for globby, picocolors, etc), but here it confuses TypeScript
 const jiti = createJITI(process.cwd(), {
   cache: false,
   transform: (opts: TransformOptions) => {

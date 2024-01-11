@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import picocolors from 'picocolors';
 import { ISSUE_TYPE_TITLE } from '../constants.js';
 import { toRelative, relative } from '../util/path.js';
 import type { Issue, IssueSeverity, IssueSymbol } from '../types/issues.js';
@@ -10,7 +10,7 @@ export const getTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => {
 };
 
 export const logTitle = (title: string, count: number) =>
-  console.log(`${chalk.bold.yellow.underline(title)} (${count})`);
+  console.log(`${picocolors.bold(picocolors.yellow(picocolors.underline(title)))} (${count})`);
 
 type LogIssueLine = {
   owner?: string;
@@ -23,8 +23,8 @@ type LogIssueLine = {
 export const logIssueLine = ({ owner, filePath, symbols, parentSymbol, severity }: LogIssueLine) => {
   const symbol = symbols ? `: ${symbols.map(s => s.symbol).join(', ')}` : '';
   const parent = parentSymbol ? ` (${parentSymbol})` : '';
-  const print = severity === 'warn' ? chalk.grey : identity;
-  console.log(`${owner ? `${chalk.cyan(owner)} ` : ''}${print(`${relative(filePath)}${symbol}${parent}`)}`);
+  const print = severity === 'warn' ? picocolors.gray : identity;
+  console.log(`${owner ? `${picocolors.cyan(owner)} ` : ''}${print(`${relative(filePath)}${symbol}${parent}`)}`);
 };
 
 export const logIssueSet = (issues: string[]) => {

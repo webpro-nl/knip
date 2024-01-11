@@ -1,5 +1,5 @@
-import chalk from 'chalk';
 import EasyTable from 'easy-table';
+import picocolors from 'picocolors';
 import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { relative } from '../util/path.js';
 import { getTitle, logTitle, logIssueSet, identity } from './util.js';
@@ -12,7 +12,7 @@ const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? text.slice(0,
 const logIssueRecord = (issues: Issue[]) => {
   const table = new EasyTable();
   issues.forEach(issue => {
-    const print = issue.severity === 'warn' ? chalk.grey : identity;
+    const print = issue.severity === 'warn' ? picocolors.gray : identity;
     table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.map(s => s.symbol).join(', ')) : issue.symbol));
     issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
     issue.symbolType && table.cell('symbolType', print(issue.symbolType));
@@ -56,7 +56,7 @@ export default ({ report, issues, configurationHints, noConfigHints, isShowProgr
       const { type, workspaceName, identifier } = hint;
       const message = `Unused item in ${type}`;
       const workspace = workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : ``;
-      console.warn(chalk.grey(`${message}${workspace}:`), identifier);
+      console.warn(picocolors.gray(`${message}${workspace}:`), identifier);
     });
   }
 
