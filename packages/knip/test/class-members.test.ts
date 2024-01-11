@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/class-members');
 
-test.skip('Find unused class members', async () => {
+test('Find unused class members', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -29,7 +29,7 @@ test.skip('Find unused class members', async () => {
   });
 });
 
-test.skip('Find unused class members (isIncludeEntryExports)', async () => {
+test('Find unused class members (isIncludeEntryExports)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

@@ -12,6 +12,7 @@ import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
+import type { SerializableExportMember } from './types/exports.js';
 import type { UnresolvedImport } from './types/imports.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { ReferencedDependencies } from './WorkspaceWorker.js';
@@ -78,7 +79,10 @@ export class ProjectPrincipal {
     resolveModuleNames: ReturnType<typeof createCustomModuleResolver>;
     program?: ProgramMaybe53;
     typeChecker?: ts.TypeChecker;
+    languageServiceHost: ts.LanguageServiceHost;
   };
+
+  findReferences?: ts.LanguageService['findReferences'];
 
   constructor({ compilerOptions, cwd, compilers, isGitIgnored }: PrincipalOptions) {
     this.cwd = cwd;
@@ -101,7 +105,7 @@ export class ProjectPrincipal {
   init() {
     this.addCompilers([dummyCompilers, new Map()]);
 
-    const { fileManager, compilerHost, resolveModuleNames } = createHosts({
+    const { fileManager, compilerHost, resolveModuleNames, languageServiceHost } = createHosts({
       cwd: this.cwd,
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
@@ -112,6 +116,7 @@ export class ProjectPrincipal {
       fileManager,
       compilerHost,
       resolveModuleNames,
+      languageServiceHost,
     };
   }
 
@@ -268,5 +273,24 @@ export class ProjectPrincipal {
 
   public resolveModule(specifier: string, filePath: string = specifier) {
     return this.backend.resolveModuleNames([specifier], filePath)[0];
+  }
+
+  public findUnusedMembers(filePath: string, members: SerializableExportMember[]) {
+    if (!this.findReferences) {
+      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
+      this.findReferences = timerify(languageService.findReferences);
+    }
+
+    return members.filter(member => {
+      if (member.jsDocTags.includes('@public')) return false;
+      const referencedSymbols = this.findReferences!(filePath, member.pos);
+      const files = (referencedSymbols ?? [])
+        .flatMap(refs => refs.references)
+        .filter(ref => !ref.isDefinition)
+        .map(ref => ref.fileName);
+      const internalRefs = files.filter(f => f === filePath);
+      const externalRefs = files.filter(f => f !== filePath);
+      return externalRefs.length === 0 && internalRefs.length === 0;
+    });
   }
 }

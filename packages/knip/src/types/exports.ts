@@ -3,6 +3,7 @@ import type { SymbolType } from './issues.js';
 
 type FilePath = string;
 type Identifier = string;
+type Tags = Array<string>;
 
 type ExportPosTuple = [number, number];
 export type Fix = ExportPosTuple | undefined;
@@ -34,7 +35,7 @@ export interface SerializableExport {
   col: number;
   type: SymbolType;
   members: SerializableExportMember[];
-  jsDocTags: Array<string>;
+  jsDocTags: Tags;
   refs: number;
   fixes: Fixes;
   symbol?: ts.Symbol;
@@ -49,6 +50,7 @@ export type SerializableExportMember = {
   refs: number;
   fix: Fix;
   symbol?: ts.Symbol;
+  jsDocTags: Tags;
 };
 
 export type SerializableExports = Record<Identifier, SerializableExport>;

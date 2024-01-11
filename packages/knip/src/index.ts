@@ -77,6 +77,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
+  const isReportClassMembers = report.classMembers;
   const [includeJSDocTags, excludeJSDocTags] = tags;
 
   const collector = new IssueCollector({ cwd, rules, filters });
@@ -278,6 +279,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const importedSymbols: SerializableImportMap = {};
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
+  const exportedClasses = new Set<[string, SerializableExport]>();
 
   for (const principal of principals) {
     principal.init();
@@ -388,7 +390,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     principal.getUnreferencedFiles().forEach(filePath => unreferencedFiles.add(filePath));
     principal.entryPaths.forEach(filePath => entryPaths.add(filePath));
-    factory.deletePrincipal(principal);
+
+    // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
+    if (!isReportClassMembers) factory.deletePrincipal(principal);
   }
 
   const isIdentifierReferenced = (
@@ -557,6 +561,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                 });
               }
 
+              if (isReportClassMembers && exportedItem.type === 'class') {
+                exportedClasses.add([filePath, exportedItem]);
+              }
+
               // This id was imported, so we bail out early
               continue;
             }
@@ -608,6 +616,27 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   );
 
   const { issues, counters, configurationHints } = collector.getIssues();
+
+  if (isReportClassMembers) {
+    streamer.cast('Validating expensive classy memberships...');
+    for (const [filePath, exportedItem] of exportedClasses) {
+      const workspace = chief.findWorkspaceByFilePath(filePath);
+      const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
+      if (principal) {
+        principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
+          collector.addIssue({
+            type: 'classMembers',
+            filePath,
+            symbol: member.identifier,
+            parentSymbol: exportedItem.identifier,
+            pos: member.pos,
+            line: member.line,
+            col: member.col,
+          });
+        });
+      }
+    }
+  }
 
   if (isFix) {
     await fixer.fixIssues(issues);

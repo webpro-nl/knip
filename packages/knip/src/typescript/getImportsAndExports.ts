@@ -45,6 +45,7 @@ const createSerializableMember = (node: ts.Node, member: ExportNodeMember, pos: 
     col: character + 1,
     fix: member.fix,
     refs: 0,
+    jsDocTags: getJSDocTags(member.node),
   };
 };
 
