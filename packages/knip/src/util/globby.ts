@@ -3,9 +3,11 @@ import { promisify } from 'node:util';
 import { walk as _walk } from '@nodelib/fs.walk';
 import { type Options as FastGlobOptions } from 'fast-glob';
 import fastGlob from 'fast-glob';
-import micromatch from 'micromatch';
+import picomatch from "picomatch"; // TODO: this should potentially be from "picomatch/posix" for windows compat
 import { debugLogObject } from './debug.js';
 import * as path from './path.js';
+import { timerify } from './Performance.js';
+import type { Entry } from '@nodelib/fs.walk'
 
 const walk = promisify(_walk);
 type Options = {
@@ -54,30 +56,36 @@ function parseGitignoreFile(filePath: string, cwd: string) {
 type Gitignores = { ignores: string[]; unignores: string[] };
 
 /** walks a directory, parsing gitignores and using them directly on the way (early pruning) */
-async function parseFindGitignores(options: Options): Promise<Gitignores> {
+async function _parseFindGitignores(options: Options): Promise<Gitignores> {
   const ignores: string[] = [];
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
+  // whenever a new gitignore file is found, this matcher is recompiled
+  let matcher: picomatch.Matcher = () => true;
+  const entryFilter = (entry: Entry) => {
+    if (entry.dirent.isFile() && entry.name === '.gitignore') {
+      gitignoreFiles.push(entry.path);
+      for (const rule of parseGitignoreFile(entry.path, options.cwd))
+        if (rule.negated) unignores.push(...rule.patterns);
+        else ignores.push(...rule.patterns);
+      matcher = picomatch(ignores, { ignore: unignores });
+      return true;
+    }
+    return false;
+  };
+  const deepFilter = (entry: Entry) => !matcher(path.relative(options.cwd, entry.path))
   // we don't actually care about the result of the walk since we incrementally add the results in entryFilter
   await walk(options.cwd, {
     // when we see a .gitignore, parse and add it
-    entryFilter: entry => {
-      if (entry.dirent.isFile() && entry.name === '.gitignore') {
-        gitignoreFiles.push(entry.path);
-        for (const rule of parseGitignoreFile(entry.path, options.cwd))
-          if (rule.negated) unignores.push(...rule.patterns);
-          else ignores.push(...rule.patterns);
-        return true;
-      }
-      return false;
-    },
+    entryFilter: timerify(entryFilter),
     // early pruning: don't recurse into directories that are ignored (important!)
-    deepFilter: entry => !micromatch.any(path.relative(options.cwd, entry.path), ignores, { ignore: unignores }),
+    deepFilter: timerify(deepFilter),
   });
   debugLogObject(options.cwd, 'parsed gitignore files', { consideredFiles: gitignoreFiles, ignores, unignores });
   return { ignores, unignores };
 }
 
+const parseFindGitignores = timerify(_parseFindGitignores);
 // since knip parses gitignores only a limited number of times and mostly purely for the repo root, permanent caching should be fine
 const cachedIgnores = new Map<string, Gitignores>();
 
@@ -113,9 +121,11 @@ export async function globby(patterns: string | string[], options: Options): Pro
 /** create a function that should be equivalent to `git check-ignored` */
 export async function isGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
   const gitignore = await loadGitignores(options);
-  return filePath => {
-    const ret = micromatch.any(path.relative(options.cwd, filePath), gitignore.ignores, { ignore: gitignore.unignores });
+  const matcher = picomatch(gitignore.ignores, { ignore: gitignore.unignores });
+  const isGitIgnored = (filePath: string) => {
+    const ret = matcher(path.relative(options.cwd, filePath));
     // debugLogObject(filePath, 'isGitIgnored', { path: path.relative(options.cwd, filePath), gitignore });
     return ret;
   };
+  return timerify(isGitIgnored);
 }
