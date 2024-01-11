@@ -4,6 +4,7 @@ import { walk as _walk } from '@nodelib/fs.walk';
 import { type Options as FastGlobOptions } from 'fast-glob';
 import fastGlob from 'fast-glob';
 import picomatch from 'picomatch';
+import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { debugLogObject } from './debug.js';
 import * as path from './path.js';
 import { timerify } from './Performance.js';
@@ -57,18 +58,16 @@ type Gitignores = { ignores: string[]; unignores: string[] };
 
 /** walks a directory, parsing gitignores and using them directly on the way (early pruning) */
 async function _parseFindGitignores(options: Options): Promise<Gitignores> {
-  const ignores: string[] = [];
+  const ignores = ['.git', ...GLOBAL_IGNORE_PATTERNS];
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
-  // whenever a new gitignore file is found, this matcher is recompiled
-  let matcher: picomatch.Matcher = () => true;
+  const matcher: picomatch.Matcher = picomatch(ignores, { ignore: unignores });
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
       gitignoreFiles.push(entry.path);
       for (const rule of parseGitignoreFile(entry.path, options.cwd))
         if (rule.negated) unignores.push(...rule.patterns);
         else ignores.push(...rule.patterns);
-      matcher = picomatch(ignores, { ignore: unignores });
       return true;
     }
     return false;
