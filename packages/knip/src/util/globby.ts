@@ -3,16 +3,16 @@ import { promisify } from 'node:util';
 import { walk as _walk } from '@nodelib/fs.walk';
 import { type Options as FastGlobOptions } from 'fast-glob';
 import fastGlob from 'fast-glob';
-import picomatch from "picomatch"; // TODO: this should potentially be from "picomatch/posix" for windows compat
+import picomatch from 'picomatch';
 import { debugLogObject } from './debug.js';
 import * as path from './path.js';
 import { timerify } from './Performance.js';
-import type { Entry } from '@nodelib/fs.walk'
+import type { Entry } from '@nodelib/fs.walk';
 
 const walk = promisify(_walk);
 type Options = {
   /** Respect ignore patterns in `.gitignore` files that apply to the globbed files. */
-  readonly gitignore?: boolean;
+  readonly gitignore: boolean;
 
   /** The current working directory in which to search. */
   readonly cwd: string;
@@ -22,7 +22,7 @@ type FastGlobOptionsWithoutCwd = Pick<FastGlobOptions, 'onlyDirectories' | 'igno
 
 /**
  * micromatch and gitignore use slightly different syntax. convert it.
- * 
+ *
  * we can't use the `ignore` npm library because (a) it doesn't support multiple gitignore files and
  * (b) we want to pass the resulting globs to fast-glob which uses micromatch internally.
  */
@@ -73,7 +73,7 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
     }
     return false;
   };
-  const deepFilter = (entry: Entry) => !matcher(path.relative(options.cwd, entry.path))
+  const deepFilter = (entry: Entry) => !matcher(path.relative(options.cwd, entry.path));
   // we don't actually care about the result of the walk since we incrementally add the results in entryFilter
   await walk(options.cwd, {
     // when we see a .gitignore, parse and add it
@@ -98,6 +98,7 @@ async function loadGitignores(options: Options): Promise<Gitignores> {
   }
   return gitignore;
 }
+
 /** simpler and faster replacement for the globby npm library */
 export async function globby(patterns: string | string[], options: Options): Promise<string[]> {
   const ignore = options.ignore ?? [];
@@ -106,10 +107,11 @@ export async function globby(patterns: string | string[], options: Options): Pro
     // add git ignores to knip explicit ignores
     ignore.push(...gitignores.ignores);
     // add git unignores (!foo/bar).
-    // I'm not sure 100% what the behaviour of fast-glob is here. Potentially this will cause it 
+    // I'm not sure 100% what the behaviour of fast-glob is here. Potentially this will cause it
     // to have git unignores to take precedence over knip ignores.
     ignore.push(...gitignores.unignores.map(e => '!' + e));
   }
+
   debugLogObject(options.cwd, `fastGlobOptions`, { patterns, ...options, ignore });
 
   return fastGlob(patterns, {

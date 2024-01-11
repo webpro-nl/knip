@@ -71,10 +71,11 @@ const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
   }
 };
 
-const dirGlob = async ({ cwd, patterns }: BaseGlobOptions) =>
+const dirGlob = async ({ cwd, patterns, gitignore = true }: BaseGlobOptions) =>
   globby(patterns, {
     cwd,
     onlyDirectories: true,
+    gitignore,
   });
 
 export const _glob = timerify(glob);
