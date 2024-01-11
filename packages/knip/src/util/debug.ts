@@ -1,5 +1,5 @@
 import util from 'node:util';
-import chalk from 'chalk';
+import picocolors from 'picocolors';
 import parsedArgValues from './cli-arguments.js';
 
 const { debug } = parsedArgValues;
@@ -9,7 +9,7 @@ const IS_ENABLED = debug ?? false;
 const inspectOptions = { maxArrayLength: null, depth: null, colors: true };
 
 const ctx = (text: string | [string, string]) =>
-  typeof text === 'string' ? chalk.yellow(`[${text}]`) : `${chalk.yellow(`[${text[0]}]`)} ${chalk.cyan(text[1])}`;
+  typeof text === 'string' ? picocolors.yellow(`[${text}]`) : `${picocolors.yellow(`[${text[0]}]`)} ${picocolors.cyan(text[1])}`;
 
 // Inspect arrays, otherwise Node [will, knip, ...n-100 more items]
 const logArray = (collection: string[]) => {

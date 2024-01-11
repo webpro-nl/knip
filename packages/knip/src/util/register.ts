@@ -7,7 +7,7 @@ const options = {
   esmResolve: false,
 };
 
-// @ts-expect-error Our package.json has type=module (for globby, chalk, etc), but here it confuses TypeScript
+// @ts-expect-error Our package.json has type=module (for globby, picocolors, etc), but here it confuses TypeScript
 const createLoader = (options: JITIOptions) => createJITI(process.cwd(), options);
 
 export const jitiCJS = createLoader(options);

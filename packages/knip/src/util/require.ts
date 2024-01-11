@@ -23,7 +23,7 @@ const tryResolve = (specifier: string, from: string) => {
 
 const resolveSpecifier = (dir: string, specifier: string) => {
   try {
-    // @ts-expect-error Our package.json has type=module (for globby, chalk, etc), but here it confuses TypeScript
+    // @ts-expect-error Our package.json has type=module (for globby, picocolors, etc), but here it confuses TypeScript
     const jiti = createJITI(dir);
     return toPosix(jiti.resolve(specifier));
   } catch {
