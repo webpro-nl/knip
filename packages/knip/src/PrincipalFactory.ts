@@ -3,7 +3,6 @@ import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLog } from './util/debug.js';
 import { toAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
-import type { GlobbyFilterFunction } from 'globby';
 
 type Paths = ts.CompilerOptions['paths'];
 
@@ -16,7 +15,7 @@ export type PrincipalOptions = {
   paths: Paths;
   compilers: [SyncCompilers, AsyncCompilers];
   pkgName: string;
-  isGitIgnored: GlobbyFilterFunction;
+  isGitIgnored: (path: string) => boolean;
   isIsolateWorkspaces: boolean;
 };
 

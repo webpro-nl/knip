@@ -54,20 +54,22 @@
   ],
   "dependencies": {
     "@ericcornelissen/bash-parser": "0.5.2",
+    "@nodelib/fs.walk": "2.0.0",
     "@npmcli/map-workspaces": "3.0.4",
     "@npmcli/package-json": "5.0.0",
     "@pkgjs/parseargs": "0.11.0",
     "@pnpm/logger": "5.0.0",
     "@pnpm/workspace.pkgs-graph": "^2.0.12",
     "@snyk/github-codeowners": "1.1.0",
+    "@types/picomatch": "2.3.3",
     "chalk": "^5.3.0",
     "easy-table": "1.2.0",
     "fast-glob": "3.3.2",
-    "globby": "^14.0.0",
     "jiti": "1.21.0",
     "js-yaml": "4.1.0",
     "micromatch": "4.0.5",
     "minimist": "1.2.8",
+    "picomatch": "3.0.1",
     "pretty-ms": "8.0.0",
     "strip-json-comments": "5.0.1",
     "summary": "2.1.0",
@@ -75,8 +77,8 @@
     "zod-validation-error": "2.1.0"
   },
   "peerDependencies": {
-    "typescript": ">=5.0.4",
-    "@types/node": ">=18"
+    "@types/node": ">=18",
+    "typescript": ">=5.0.4"
   },
   "devDependencies": {
     "@jest/types": "29.6.3",

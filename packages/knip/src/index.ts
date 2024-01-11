@@ -1,4 +1,3 @@
-import { isGitIgnoredSync } from 'globby';
 import micromatch from 'micromatch';
 import { _getDependenciesFromScripts } from './binaries/index.js';
 import { getExtensions, mergeCompilers } from './compilers/index.js';
@@ -11,6 +10,7 @@ import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLogObject, debugLogArray, debugLog, exportLookupLog } from './util/debug.js';
 import { _glob, negate } from './util/glob.js';
+import { isGitIgnoredFn } from './util/globby.js';
 import {
   getEntryPathFromManifest,
   getPackageNameFromFilePath,
@@ -62,7 +62,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   // Central function, to prevent `Path is not in cwd` errors from `globby`
   // Provide `cwd`, otherwise defaults to `process.cwd()` w/ incompatible slashes in Windows
-  const isGitIgnored = gitignore ? isGitIgnoredSync({ cwd }) : () => false;
+  const isGitIgnored = gitignore ? await isGitIgnoredFn({ cwd }) : () => false;
 
   streamer.cast('Reading workspace configuration(s)...');
 

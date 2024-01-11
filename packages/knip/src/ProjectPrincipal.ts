@@ -16,7 +16,6 @@ import type { SerializableExportMember } from './types/exports.js';
 import type { UnresolvedImport } from './types/imports.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { ReferencedDependencies } from './WorkspaceWorker.js';
-import type { GlobbyFilterFunction } from 'globby';
 
 // These compiler options override local options
 const baseCompilerOptions = {
@@ -65,7 +64,7 @@ export class ProjectPrincipal {
   // We don't want to report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
 
-  isGitIgnored: GlobbyFilterFunction;
+  isGitIgnored: (path: string) => boolean;
   cwd: string;
   compilerOptions: ts.CompilerOptions;
   extensions: Set<string>;
