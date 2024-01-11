@@ -19,6 +19,7 @@
     "knip": "knip",
     "watch": "npm run watch --workspace packages/knip",
     "docs": "npm run dev --workspace packages/docs",
+    "format": "npm run format --workspaces --if-present",
     "test": "npm run qa --workspaces --if-present"
   },
   "peerDependencies": {
