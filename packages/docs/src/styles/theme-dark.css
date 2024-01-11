@@ -1,23 +1,23 @@
+/* Colors borrowed from https://twitter.com/tushtisachdeva/status/1738940090628571177 */
+
 :root {
   --sl-font: 'Source Sans Pro', sans-serif;
 
-  --sl-color-orange: #f68a22;
-  --sl-color-bright-orange: #ff922e;
-  --sl-color-dark-orange: #a05400;
+  --sl-color-orange: #f56e0f;
+  --sl-color-bright-orange: #f68a22;
 
-  --sl-color-white: #ededed;
-  --sl-color-gray-1: #b0b0b0;
-  --sl-color-gray-2: #b0b0b0;
-  --sl-color-gray-3: #b0b0b0;
+  --sl-color-white: #fbfbfb;
+  --sl-color-gray-1: #bdbdbd;
+  --sl-color-gray-2: #878787;
+  --sl-color-gray-3: #878787;
   --sl-color-gray-4: #353841;
-  --sl-color-gray-5: #24272f;
-  --sl-color-gray-6: rgb(42, 42, 42);
-  --sl-color-black: rgb(24, 24, 24);
+  --sl-color-gray-5: #262626;
+  --sl-color-gray-6: #1b1b1e;
+  --sl-color-black: #151419;
 
+  --sl-color-text: var(--sl-color-gray-1);
   --sl-color-accent-low: var(--sl-color-orange);
   --sl-color-text-accent: var(--sl-color-white);
-
-  /* --sl-color-accent-transparent: oklch(76.18% 0.205 57.38); */
 
   --sl-color-bg: var(--sl-color-gray-6);
   --sl-color-bg-nav: var(--sl-color-black);

@@ -9,7 +9,7 @@
       }
 
       .bg {
-        fill: #f68923;
+        fill: #f56e0f;
         stroke-width: 0px;
       }
   </style>

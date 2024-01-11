@@ -77,7 +77,7 @@ export default defineConfig({
         theme: 'min-dark',
         customizeTheme: theme => {
           theme.settings[0].foreground = '#ededed';
-          setForeground(theme, 'entity.name.tag', '#f68a22');
+          setForeground(theme, 'entity.name.tag', '#f56e0f');
           setForeground(theme, 'entity.name.type', '#ededed');
           setForeground(theme, 'string', '#ededed');
           return theme;

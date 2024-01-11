@@ -58,7 +58,7 @@ section.plugins li {
 
 :root {
   .header {
-    border-bottom-color: var(--sl-color-dark-orange);
+    border-bottom-color: var(--sl-color-orange);
   }
 }
 
@@ -72,4 +72,11 @@ section.plugins li {
   font-size: 1.3rem;
   text-align: center;
   margin-bottom: 5rem;
+}
+
+.sl-badge.caution,
+.sl-badge.outline {
+  --sl-color-bg-badge: transparent;
+  --sl-color-border-badge: var(--sl-color-orange);
+  color: var(--sl-color-white);
 }

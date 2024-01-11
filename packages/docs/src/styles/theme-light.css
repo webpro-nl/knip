@@ -1,7 +1,5 @@
 :root[data-theme='light'] {
-  --sl-color-orange: #f68a22;
-  --sl-color-bright-orange: #ff922e;
-  --sl-color-dark-orange: #a05400;
+  --sl-color-orange: #f56e0f;
 
   --sl-color-text-accent: var(--sl-color-white);
   --sl-color-text-invert: var(--sl-color-orange);
