@@ -46,7 +46,7 @@ function convertGitignoreToMicromatch(pattern: string, base: string) {
 /** this function needs to be synchronous currently because the fs.walk library takes a synchronous callback for filtering */
 function parseGitignoreFile(filePath: string, cwd: string) {
   const file = fs.readFileSync(filePath, 'utf8');
-  const base = path.relative(cwd, path.dirname(filePath));
+  const base = path.relative(cwd, path.dirname(path.toPosix(filePath)));
 
   return file
     .split(/\r?\n/)
