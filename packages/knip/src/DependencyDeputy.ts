@@ -224,13 +224,6 @@ export class DependencyDeputy {
     return dependencies.includes(packageName);
   }
 
-  public getHasDependencyPredicate(workspaceName: string) {
-    const manifest = this._manifests.get(workspaceName);
-    if (!manifest) return () => false;
-    const dependencies = this.isStrict ? this.getProductionDependencies(workspaceName) : manifest.allDependencies;
-    return (packageName: string) => dependencies.includes(packageName);
-  }
-
   public settleDependencyIssues() {
     const dependencyIssues: Issue[] = [];
     const devDependencyIssues: Issue[] = [];
