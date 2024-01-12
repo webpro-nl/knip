@@ -77,7 +77,7 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
       if (typeof options.entry === 'string') entries.push(options.entry);
       else if (Array.isArray(options.entry)) entries.push(...options.entry);
       else if (typeof options.entry === 'object') {
-        Object.values(options.entry).map(entry => {
+        Object.values(options.entry).forEach(entry => {
           if (typeof entry === 'string') entries.push(entry);
           else if (Array.isArray(entry)) entries.push(...entry);
           else if (typeof entry === 'function') entries.push((entry as () => string)());
