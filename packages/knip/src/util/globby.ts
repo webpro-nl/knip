@@ -12,6 +12,8 @@ import type { Entry } from '@nodelib/fs.walk';
 
 const walk = promisify(_walk);
 
+const _picomatch = timerify(picomatch);
+
 type Options = { gitignore: boolean; cwd: string };
 
 type GlobOptions = {
@@ -58,8 +60,18 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
   const ignores: string[] = ['.git', ...GLOBAL_IGNORE_PATTERNS];
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
+  const pmOptions = { ignore: unignores };
 
-  const matcher: picomatch.Matcher = picomatch(ignores, { ignore: unignores });
+  // Warning: earlier matchers don't include later unignores (perf win, but can't unignore from ancestor gitignores)
+  const matchers = ignores.map(ignore => _picomatch(ignore, pmOptions));
+
+  const matcher = (str: string) => {
+    for (const isMatch of matchers) {
+      const state = isMatch(str);
+      if (state) return state;
+    }
+    return false;
+  };
 
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
@@ -94,6 +106,7 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
       ignores.push(...dirIgnores);
       unignores.push(...dirUnignores);
       cachedIgnores.set(dir, { ignores: dirIgnores, unignores: dirUnignores });
+      matchers.push(...dirIgnores.map(ignore => _picomatch(ignore, pmOptions)));
 
       return true;
     }
