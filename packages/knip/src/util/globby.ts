@@ -56,7 +56,7 @@ function parseGitignoreFile(filePath: string) {
     .map(pattern => convertGitignoreToMicromatch(pattern));
 }
 
-async function _parseFindGitignores(options: Options): Promise<Gitignores> {
+async function parseFindGitignores(options: Options): Promise<Gitignores> {
   const ignores: string[] = ['.git', ...GLOBAL_IGNORE_PATTERNS];
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
@@ -121,7 +121,7 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
   return { ignores, unignores };
 }
 
-const parseFindGitignores = timerify(_parseFindGitignores);
+const _parseFindGitignores = timerify(parseFindGitignores);
 
 /** simpler and faster replacement for the globby npm library */
 export async function globby(patterns: string | string[], options: GlobOptions): Promise<string[]> {
@@ -152,8 +152,8 @@ export async function globby(patterns: string | string[], options: GlobOptions):
 export async function isGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
   cachedIgnores.clear();
   if (options.gitignore === false) return () => false;
-  const gitignore = await parseFindGitignores(options);
-  const matcher = picomatch(gitignore.ignores, { ignore: gitignore.unignores });
+  const gitignore = await _parseFindGitignores(options);
+  const matcher = _picomatch(gitignore.ignores, { ignore: gitignore.unignores });
   const isGitIgnored = (filePath: string) => {
     const ret = matcher(relative(options.cwd, filePath));
     // debugLogObject(filePath, 'isGitIgnored', { path: relative(options.cwd, filePath), gitignore });
