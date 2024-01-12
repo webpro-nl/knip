@@ -11,73 +11,97 @@ import { timerify } from './Performance.js';
 import type { Entry } from '@nodelib/fs.walk';
 
 const walk = promisify(_walk);
-type Options = {
-  /** Respect ignore patterns in `.gitignore` files that apply to the globbed files. */
-  readonly gitignore: boolean;
 
-  /** The current working directory in which to search. */
+type Options = { gitignore: boolean; cwd: string };
+
+type GlobOptions = {
+  readonly gitignore: boolean;
   readonly cwd: string;
+  readonly dir: string;
 } & FastGlobOptionsWithoutCwd;
 
 type FastGlobOptionsWithoutCwd = Pick<FastGlobOptions, 'onlyDirectories' | 'ignore' | 'absolute' | 'dot'>;
 
-/**
- * micromatch and gitignore use slightly different syntax. convert it.
- *
- * we can't use the `ignore` npm library because (a) it doesn't support multiple gitignore files and
- * (b) we want to pass the resulting globs to fast-glob which uses micromatch internally.
- */
-function convertGitignoreToMicromatch(pattern: string, base: string) {
+type Gitignores = { ignores: string[]; unignores: string[] };
+
+const cachedIgnores = new Map<string, Gitignores>();
+
+function convertGitignoreToMicromatch(pattern: string) {
   let negated = pattern[0] === '!';
   if (negated) {
     pattern = pattern.slice(1);
   }
-  const otherPatterns = [];
-  // gitignore matches by basename if no slash present
+
+  let extPattern;
+
+  if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
+
   if (!pattern.includes('/')) pattern = '**/' + pattern;
-  // leading slash on git is equivalent to no leading slash in micromatch
   else if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  // micromatch does not interpret dirs as matching their children, git does
-  if (pattern.endsWith('/')) otherPatterns.push(pattern + '**');
-  else otherPatterns.push(pattern + '/**');
-  return { negated, patterns: [pattern, ...otherPatterns].map(pattern => path.join(base, pattern)) };
+
+  if (pattern.endsWith('/*')) extPattern = pattern;
+  else if (pattern.endsWith('/')) extPattern = pattern + '**';
+  else extPattern = pattern + '/**';
+
+  return { negated, patterns: [pattern, extPattern] };
 }
 
-/** this function needs to be synchronous currently because the fs.walk library takes a synchronous callback for filtering */
-function parseGitignoreFile(filePath: string, cwd: string) {
+function parseGitignoreFile(filePath: string) {
   const file = fs.readFileSync(filePath, 'utf8');
-  const base = path.relative(cwd, path.dirname(path.toPosix(filePath)));
-
   return file
     .split(/\r?\n/)
     .filter(line => line && !line.startsWith('#'))
-    .map(pattern => convertGitignoreToMicromatch(pattern, base));
+    .map(pattern => convertGitignoreToMicromatch(pattern));
 }
-/** contains parsed individual gitignore rules from potentially multiple gitignore files */
-type Gitignores = { ignores: string[]; unignores: string[] };
 
-/** walks a directory, parsing gitignores and using them directly on the way (early pruning) */
 async function _parseFindGitignores(options: Options): Promise<Gitignores> {
-  const ignores = ['.git', ...GLOBAL_IGNORE_PATTERNS];
+  const ignores: string[] = ['.git', ...GLOBAL_IGNORE_PATTERNS];
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
+
   const matcher: picomatch.Matcher = picomatch(ignores, { ignore: unignores });
+
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
       gitignoreFiles.push(entry.path);
-      for (const rule of parseGitignoreFile(entry.path, options.cwd))
-        if (rule.negated) unignores.push(...rule.patterns);
-        else ignores.push(...rule.patterns);
+
+      const dir = path.dirname(path.toPosix(entry.path));
+      const base = path.relative(options.cwd, dir);
+      const dirIgnores = base === '' ? ['.git', ...GLOBAL_IGNORE_PATTERNS] : [];
+      const dirUnignores = [];
+
+      for (const rule of parseGitignoreFile(entry.path)) {
+        const [p, ext] = rule.patterns;
+        if (rule.negated) {
+          if (base === '') {
+            if (!unignores.includes(ext)) dirUnignores.push(...rule.patterns);
+          } else {
+            if (!unignores.includes(ext.startsWith('**/') ? ext : '**/' + ext)) {
+              dirUnignores.push(path.join(base, p), path.join(base, ext));
+            }
+          }
+        } else {
+          if (base === '') {
+            if (!ignores.includes(ext)) dirIgnores.push(...rule.patterns);
+          } else {
+            if (!ignores.includes(ext.startsWith('**/') ? ext : '**/' + ext)) {
+              dirIgnores.push(path.join(base, p), path.join(base, ext));
+            }
+          }
+        }
+      }
+
+      ignores.push(...dirIgnores);
+      unignores.push(...dirUnignores);
+      cachedIgnores.set(dir, { ignores: dirIgnores, unignores: dirUnignores });
+
       return true;
     }
     return false;
   };
   const deepFilter = (entry: Entry) => !matcher(path.relative(options.cwd, entry.path));
-  // we don't actually care about the result of the walk since we incrementally add the results in entryFilter
   await walk(options.cwd, {
-    // when we see a .gitignore, parse and add it
     entryFilter: timerify(entryFilter),
-    // early pruning: don't recurse into directories that are ignored (important!)
     deepFilter: timerify(deepFilter),
   });
   debugLogObject(options.cwd, 'parsed gitignore files', { consideredFiles: gitignoreFiles, ignores, unignores });
@@ -85,30 +109,22 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
 }
 
 const parseFindGitignores = timerify(_parseFindGitignores);
-// since knip parses gitignores only a limited number of times and mostly purely for the repo root, permanent caching should be fine
-const cachedIgnores = new Map<string, Gitignores>();
-
-/** load gitignores into memory, with caching */
-async function loadGitignores(options: Options): Promise<Gitignores> {
-  let gitignore = cachedIgnores.get(options.cwd);
-  if (!gitignore) {
-    gitignore = await parseFindGitignores(options);
-    cachedIgnores.set(options.cwd, gitignore);
-  }
-  return gitignore;
-}
 
 /** simpler and faster replacement for the globby npm library */
-export async function globby(patterns: string | string[], options: Options): Promise<string[]> {
+export async function globby(patterns: string | string[], options: GlobOptions): Promise<string[]> {
   const ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
   if (options.gitignore) {
-    const gitignores = await loadGitignores(options);
-    // add git ignores to knip explicit ignores
-    ignore.push(...gitignores.ignores);
-    // add git unignores (!foo/bar).
-    // I'm not sure 100% what the behaviour of fast-glob is here. Potentially this will cause it
-    // to have git unignores to take precedence over knip ignores.
-    ignore.push(...gitignores.unignores.map(e => '!' + e));
+    let dir = options.dir;
+    while (dir !== options.cwd) {
+      const i = cachedIgnores.get(dir);
+      if (i) {
+        ignore.push(...i.ignores);
+        ignore.push(...i.unignores.map(e => '!' + e));
+      }
+      dir = path.dirname(dir);
+    }
+    const i = cachedIgnores.get(options.cwd);
+    if (i) ignore.push(...i.ignores);
   }
 
   debugLogObject(options.cwd, `fastGlobOptions`, { patterns, ...options, ignore });
@@ -123,7 +139,7 @@ export async function globby(patterns: string | string[], options: Options): Pro
 export async function isGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
   cachedIgnores.clear();
   if (options.gitignore === false) return () => false;
-  const gitignore = await loadGitignores(options);
+  const gitignore = await parseFindGitignores(options);
   const matcher = picomatch(gitignore.ignores, { ignore: gitignore.unignores });
   const isGitIgnored = (filePath: string) => {
     const ret = matcher(path.relative(options.cwd, filePath));

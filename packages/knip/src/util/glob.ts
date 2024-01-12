@@ -41,13 +41,11 @@ const glob = async ({ cwd, workingDir = cwd, patterns, gitignore = true }: GlobO
   // Only negated patterns? Bail out.
   if (globPatterns[0].startsWith('!')) return [];
 
-  const ignorePatterns = GLOBAL_IGNORE_PATTERNS;
-
-  debugLogObject(relativePath || ROOT_WORKSPACE_NAME, `Glob options`, { cwd, globPatterns, ignorePatterns, gitignore });
+  debugLogObject(relativePath || ROOT_WORKSPACE_NAME, `Glob options`, { cwd, globPatterns, gitignore });
 
   return globby(globPatterns, {
     cwd,
-    ignore: ignorePatterns,
+    dir: workingDir,
     gitignore,
     absolute: true,
     dot: true,
@@ -58,7 +56,7 @@ const pureGlob = async ({ cwd, patterns, gitignore = true }: BaseGlobOptions) =>
   if (patterns.length === 0) return [];
   return globby(patterns, {
     cwd,
-    ignore: GLOBAL_IGNORE_PATTERNS,
+    dir: cwd,
     gitignore,
     absolute: true,
   });
@@ -74,6 +72,7 @@ const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
 const dirGlob = async ({ cwd, patterns, gitignore = true }: BaseGlobOptions) =>
   globby(patterns, {
     cwd,
+    dir: cwd,
     onlyDirectories: true,
     gitignore,
   });
