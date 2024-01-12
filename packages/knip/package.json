@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "4.0.0-canary.11",
+  "version": "4.0.0-canary.12",
   "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
   "repository": {
