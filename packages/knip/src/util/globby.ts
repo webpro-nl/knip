@@ -6,7 +6,7 @@ import fastGlob from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { debugLogObject } from './debug.js';
-import * as path from './path.js';
+import { dirname, join, relative, toPosix } from './path.js';
 import { timerify } from './Performance.js';
 import type { Entry } from '@nodelib/fs.walk';
 
@@ -65,8 +65,8 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
       gitignoreFiles.push(entry.path);
 
-      const dir = path.dirname(path.toPosix(entry.path));
-      const base = path.relative(options.cwd, dir);
+      const dir = dirname(toPosix(entry.path));
+      const base = relative(options.cwd, dir);
       const dirIgnores = base === '' ? ['.git', ...GLOBAL_IGNORE_PATTERNS] : [];
       const dirUnignores = [];
 
@@ -77,7 +77,7 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
             if (!unignores.includes(ext)) dirUnignores.push(...rule.patterns);
           } else {
             if (!unignores.includes(ext.startsWith('**/') ? ext : '**/' + ext)) {
-              dirUnignores.push(path.join(base, p), path.join(base, ext));
+              dirUnignores.push(join(base, p), join(base, ext));
             }
           }
         } else {
@@ -85,7 +85,7 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
             if (!ignores.includes(ext)) dirIgnores.push(...rule.patterns);
           } else {
             if (!ignores.includes(ext.startsWith('**/') ? ext : '**/' + ext)) {
-              dirIgnores.push(path.join(base, p), path.join(base, ext));
+              dirIgnores.push(join(base, p), join(base, ext));
             }
           }
         }
@@ -99,7 +99,7 @@ async function _parseFindGitignores(options: Options): Promise<Gitignores> {
     }
     return false;
   };
-  const deepFilter = (entry: Entry) => !matcher(path.relative(options.cwd, entry.path));
+  const deepFilter = (entry: Entry) => !matcher(relative(options.cwd, entry.path));
   await walk(options.cwd, {
     entryFilter: timerify(entryFilter),
     deepFilter: timerify(deepFilter),
@@ -121,7 +121,7 @@ export async function globby(patterns: string | string[], options: GlobOptions):
         ignore.push(...i.ignores);
         ignore.push(...i.unignores.map(e => '!' + e));
       }
-      dir = path.dirname(dir);
+      dir = dirname(dir);
     }
     const i = cachedIgnores.get(options.cwd);
     if (i) ignore.push(...i.ignores);
@@ -142,8 +142,8 @@ export async function isGitIgnoredFn(options: Options): Promise<(path: string) =
   const gitignore = await parseFindGitignores(options);
   const matcher = picomatch(gitignore.ignores, { ignore: gitignore.unignores });
   const isGitIgnored = (filePath: string) => {
-    const ret = matcher(path.relative(options.cwd, filePath));
-    // debugLogObject(filePath, 'isGitIgnored', { path: path.relative(options.cwd, filePath), gitignore });
+    const ret = matcher(relative(options.cwd, filePath));
+    // debugLogObject(filePath, 'isGitIgnored', { path: relative(options.cwd, filePath), gitignore });
     return ret;
   };
   return timerify(isGitIgnored);
