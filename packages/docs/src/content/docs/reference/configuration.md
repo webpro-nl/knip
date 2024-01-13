@@ -9,7 +9,7 @@ configure Knip.
 
 ## JSON Schema
 
-A "$schema" field is a URL that you put at the top of your JSON file. This
+A `$schema` field is a URL that you put at the top of your JSON file. This
 allows you to get red squiggly lines inside of your IDE when you make a typo or
 provide an otherwise invalid configuration option.
 
@@ -17,7 +17,7 @@ In JSON, you can use the provided JSON schema:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@3/schema.json"
+  "$schema": "https://unpkg.com/knip@4/schema.json"
 }
 ```
 
@@ -25,7 +25,7 @@ In JSONC, you can use the provided JSONC schema:
 
 ```json title="knip.jsonc"
 {
-  "$schema": "https://unpkg.com/knip@3/schema-jsonc.json"
+  "$schema": "https://unpkg.com/knip@4/schema-jsonc.json"
 }
 ```
 
