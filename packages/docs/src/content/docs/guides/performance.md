@@ -79,35 +79,6 @@ knip --include classMembers --performance
 The first invocation (per program) is especially expensive, as TypeScript sets
 up symbols and caching.
 
-## GitIgnore
-
-Knip looks up `.gitignore` files and uses them to filter out matching entry and
-project files. This increases correctness, but it slows down finding files using
-glob patterns and in some cases significantly. Your project may have multiple
-`.gitignore` files across all folders.
-
-You might want see if it's possible to disable that with `--no-gitignore` and
-enjoy a performance boost.
-
-To help determine whether this trade-off might be worth it for you, first check
-the difference in unused files:
-
-```sh
-diff <(knip --no-gitignore --include files) <(knip --include files)
-```
-
-And to measure the difference of this flag in seconds:
-
-```sh
-SECONDS=0; knip > /dev/null; t1=$SECONDS; SECONDS=0; knip --no-gitignore > /dev/null; t2=$SECONDS; echo "Difference: $((t1 - t2)) seconds"
-```
-
-If there is no difference in unused files, and runs are significantly faster,
-you could consider using the `--no-gitignore` flag.
-
-Analysis on a sample large project went down from 33 to 9 seconds (that's >70%
-faster).
-
 ## A Last Resort
 
 In case Knip is unbearable slow (or even crashes), you could resort to [lint

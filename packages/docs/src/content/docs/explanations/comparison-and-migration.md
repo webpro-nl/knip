@@ -8,9 +8,9 @@ than all of them combined, which is a vision you might not align with. So if any
 of those tools has the right scope for your requirements, then by all means, use
 what suits you best.
 
-All tools have in common that they are faster than Knip, have less features, and
-don't support the concept of [monorepos/workspaces][1]. Feel free to send in
-projects that Knip does not handle better, I'm up for the challenge!
+All tools have in common that they have less features and don't support the
+concept of [monorepos/workspaces][1]. Feel free to send in projects that Knip
+does not handle better, I'm up for the challenge!
 
 ## Migration
 
