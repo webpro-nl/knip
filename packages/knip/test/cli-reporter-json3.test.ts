@@ -28,7 +28,6 @@ test('knip --reporter json (enum members)', () => {
             { name: 'D_Key', line: 11, col: 3, pos: 165 },
           ],
         },
-        classMembers: {},
         duplicates: [],
       },
     ],

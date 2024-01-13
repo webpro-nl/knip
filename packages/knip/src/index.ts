@@ -74,6 +74,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const filters = chief.getFilters();
   const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes });
 
+  debugLogObject('*', 'Included issue types', report);
+
   const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;

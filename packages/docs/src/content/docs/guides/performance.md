@@ -68,34 +68,16 @@ another round of analysis on those files.
 ## findReferences
 
 The `findReferences` function (from the TypeScript Language Service) is invoked
-for exports that are imported using the `import *` syntax, and for each class
-and enum member. Use the `--performance` flag to see how many times this
-function is invoked and how much time is spent there:
+for exported class members. If finding unused class members is enabled, use the
+`--performance` flag to see how many times this function is invoked and how much
+time is spent there:
 
 ```sh
-knip --performance
+knip --include classMembers --performance
 ```
 
 The first invocation (per program) is especially expensive, as TypeScript sets
 up symbols and caching.
-
-If you have lots of classes or enums with many members in your codebase, Knip
-can run faster by excluding (one of) them from the report:
-
-```sh
-knip --performance --exclude classMembers,enumMembers
-```
-
-When the codebase contains namespaced imports, the following command will give
-incomplete results and is not recommended. But for the sake of completeness in
-this topic, calls to `findReferences` can be (mostly) prevented:
-
-```sh
-knip --performance --exclude classMembers,enumMembers,nsTypes,nsExports
-```
-
-This should approach the performance without namespaced imports (see [star
-imports and barrel files][3]).
 
 ## GitIgnore
 

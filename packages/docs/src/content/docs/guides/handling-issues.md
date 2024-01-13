@@ -267,23 +267,38 @@ Do you expect certain exports in the report, but are they missing? They might be
 exported from an entry file. Use [--include-entry-exports][17] to make Knip also
 report unused exports in entry files.
 
-## Class and Enum Members
+## Class Members
 
-Classes and enums exported from entry files are ignored, and so are their
-members.
-
-Individual class and enum members can be [tagged as `@public`][16]. Reporting
-such members can also be disabled altogether, for example:
+Unused class members are not reported by default, here's how to enable them:
 
 ```sh
-knip --exclude classMembers --exclude enumMembers
+knip --include classMembers
 ```
 
-This can [boost performance][18] if there are many in the codebase (though the
-members won't be reported).
+This option is also available in the Knip configuration file. Note that this
+feature comes at a cost: linting will take more time and more memory (in rare
+cases it may even run out of memory in large repositories).
 
-Use [--include-entry-exports][17] to make Knip also report members of unused
-exports in entry files.
+Individual class members can be [tagged as `@public`][16].
+
+Classes exported from entry files are ignored, and so are their members. Use
+[--include-entry-exports][17] to make Knip also report members of unused export
+in entry files.
+
+## Enum Members
+
+Unused enums and unused members of enums are reported by default. Reporting such
+members can also be disabled altogether, for example:
+
+```sh
+knip --exclude enumMembers
+```
+
+Individual enum members can be [tagged as `@public`][16].
+
+Enums exported from entry files are ignored, and so are their members. Use
+[--include-entry-exports][17] to make Knip also report members of unused exports
+in entry files.
 
 ## False Positives
 

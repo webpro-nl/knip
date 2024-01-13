@@ -17,6 +17,9 @@ type Options = {
   exports?: boolean;
 };
 
+const defaultExcludedIssueTypes = ['classMembers'];
+const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.includes(type));
+
 const normalize = (values: string[]) => values.map(value => value.split(',')).flat();
 
 export const getIncludedIssueTypes = (
@@ -57,7 +60,13 @@ export const getIncludedIssueTypes = (
     if (_exclude.includes('dependencies')) _exclude.push('devDependencies', 'optionalPeerDependencies');
   }
 
-  const included = (_include.length > 0 ? _include : ISSUE_TYPES).filter(group => !_exclude.includes(group));
+  const included = (
+    _include.length > 0
+      ? _include.some(type => !defaultExcludedIssueTypes.includes(type))
+        ? _include
+        : [..._include, ...defaultIssueTypes]
+      : defaultIssueTypes
+  ).filter(group => !_exclude.includes(group));
 
   return ISSUE_TYPES.reduce((types, group) => ((types[group] = included.includes(group)), types), {} as Report);
 };
