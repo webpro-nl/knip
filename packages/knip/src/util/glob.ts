@@ -1,7 +1,6 @@
 import fg from 'fast-glob';
-import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
+import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { compact } from './array.js';
-import { debugLogObject } from './debug.js';
 import { globby } from './globby.js';
 import { join, relative } from './path.js';
 import { timerify } from './Performance.js';
@@ -40,8 +39,6 @@ const glob = async ({ cwd, workingDir = cwd, patterns, gitignore = true }: GlobO
 
   // Only negated patterns? Bail out.
   if (globPatterns[0].startsWith('!')) return [];
-
-  debugLogObject(relativePath || ROOT_WORKSPACE_NAME, `Glob options`, { cwd, globPatterns, gitignore });
 
   return globby(globPatterns, {
     cwd,

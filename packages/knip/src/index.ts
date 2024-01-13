@@ -60,8 +60,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
-  // Central function, to prevent `Path is not in cwd` errors from `globby`
-  // Provide `cwd`, otherwise defaults to `process.cwd()` w/ incompatible slashes in Windows
   const isGitIgnored = await isGitIgnoredFn({ cwd, gitignore });
 
   streamer.cast('Reading workspace configuration(s)...');

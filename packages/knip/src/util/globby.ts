@@ -4,7 +4,7 @@ import { walk as _walk } from '@nodelib/fs.walk';
 import { type Options as FastGlobOptions } from 'fast-glob';
 import fastGlob from 'fast-glob';
 import picomatch from 'picomatch';
-import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
+import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { debugLogObject } from './debug.js';
 import { dirname, join, relative, toPosix } from './path.js';
 import { timerify } from './Performance.js';
@@ -117,7 +117,7 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
     entryFilter: timerify(entryFilter),
     deepFilter: timerify(deepFilter),
   });
-  debugLogObject(options.cwd, 'parsed gitignore files', { consideredFiles: gitignoreFiles, ignores, unignores });
+  debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles, ignores, unignores });
   return { ignores, unignores };
 }
 
@@ -140,12 +140,12 @@ export async function globby(patterns: string | string[], options: GlobOptions):
     if (i) ignore.push(...i.ignores);
   }
 
-  debugLogObject(options.cwd, `fastGlobOptions`, { patterns, ...options, ignore });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { dir, ...fastGlobOptions } = { ...options, ignore };
 
-  return fastGlob(patterns, {
-    ...options,
-    ignore,
-  });
+  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, `Glob options`, fastGlobOptions);
+
+  return fastGlob(patterns, fastGlobOptions);
 }
 
 /** create a function that should be equivalent to `git check-ignored` */

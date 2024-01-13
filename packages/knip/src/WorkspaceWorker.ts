@@ -124,7 +124,7 @@ export class WorkspaceWorker {
 
     const enabledPluginNames = this.enabledPlugins.map(name => plugins[name].NAME);
 
-    debugLogObject(this.name, `Enabled plugins (${this.name})`, enabledPluginNames);
+    debugLogObject(this.name, 'Enabled plugins', enabledPluginNames);
   }
 
   private async initReferencedDependencies() {
