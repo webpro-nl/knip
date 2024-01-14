@@ -89,7 +89,7 @@ export class Performance {
   getTable() {
     const entriesByName = this.getEntriesByName();
     const table = new EasyTable();
-    Object.entries(entriesByName).map(([name, values]) => {
+    Object.entries(entriesByName).forEach(([name, values]) => {
       const stats = new Summary(values);
       table.cell('Name', name);
       table.cell('size', stats.size(), EasyTable.number(0));
