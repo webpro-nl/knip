@@ -298,7 +298,7 @@ const getImportsAndExports = (
           while (current) {
             const ms = getMemberStringLiterals(typeChecker, current);
             if (!ms) break;
-            members = [ms].flat().flatMap(id => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`)));
+            members = members.concat(ms.flatMap(id => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`))));
             current = current.parent;
           }
           maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);

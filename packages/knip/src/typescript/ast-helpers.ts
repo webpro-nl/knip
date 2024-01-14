@@ -130,12 +130,12 @@ export const getLineAndCharacterOfPosition = (node: ts.Node, pos: number) => {
 
 export const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => {
   if (ts.isElementAccessExpression(node)) {
-    if (ts.isStringLiteral(node.argumentExpression)) return node.argumentExpression.text;
+    if (ts.isStringLiteral(node.argumentExpression)) return [node.argumentExpression.text];
     const type = typeChecker.getTypeAtLocation(node.argumentExpression);
     if (type.isUnion()) return type.types.map(type => (type as ts.LiteralType).value as string);
   }
 
   if (ts.isPropertyAccessExpression(node)) {
-    return node.name.escapedText;
+    return [node.name.escapedText as string];
   }
 };
