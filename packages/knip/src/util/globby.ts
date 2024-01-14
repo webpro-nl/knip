@@ -38,8 +38,8 @@ function convertGitignoreToMicromatch(pattern: string) {
 
   if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
 
-  if (!pattern.includes('/')) pattern = '**/' + pattern;
-  else if (pattern.startsWith('/')) pattern = pattern.slice(1);
+  if (pattern.startsWith('/')) pattern = pattern.slice(1);
+  else pattern = '**/' + pattern;
 
   if (pattern.endsWith('/*')) extPattern = pattern;
   else if (pattern.endsWith('/')) extPattern = pattern + '**';
