@@ -82,7 +82,10 @@ const tweet: TweetWithUser = replaceShortenedUrls(Astro.props.data);
             <title>retweets</title>
             <use href={`${sprites.src}#retweets`} />
           </svg>
-          <span>{tweet.public_metrics.retweet_count}</span>
+          <span>
+            {tweet.public_metrics.retweet_count +
+              tweet.public_metrics.quote_count}
+          </span>
         </div>
         <div>
           <svg width="24" height="24">

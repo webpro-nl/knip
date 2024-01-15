@@ -2,6 +2,43 @@
   "data": [
     {
       "entities": {
+        "urls": [
+          {
+            "start": 4,
+            "end": 27,
+            "url": "https://t.co/JyMwFtAeGG",
+            "expanded_url": "http://knip.dev",
+            "display_url": "knip.dev",
+            "status": 200,
+            "title": "Knip",
+            "description": "Project linter to find unused files, dependencies and exports in JavaScript and TypeScript projects",
+            "unwound_url": "https://knip.dev/"
+          },
+          {
+            "start": 239,
+            "end": 262,
+            "url": "https://t.co/bliep",
+            "display_url": "pic.twitter.com/uOuO1ch5ij",
+            "media_key": "1"
+          }
+        ]
+      },
+      "id": "1745972825490604506",
+      "author_id": "1",
+      "created_at": "2024-01-13T01:55:00.000Z",
+      "attachments": { "media_keys": ["1"] },
+      "text": "warning: do not use a tool like https://t.co/JyMwFtAeGG + code search to delete a ton of unused code. It works too well.\n\nI just did this in https://github.com/sourcegraph/cody/pull/2705, and my boss said if I end the week with net negative lines of code committed, I'm in deep trouble. https://t.co/bliep",
+      "public_metrics": {
+        "retweet_count": 1,
+        "reply_count": 3,
+        "like_count": 13,
+        "quote_count": 1,
+        "bookmark_count": 3,
+        "impression_count": 933
+      }
+    },
+    {
+      "entities": {
         "mentions": [
           {
             "start": 31,
@@ -687,12 +724,23 @@
   "includes": {
     "media": [
       {
+        "media_key": "1",
+        "url": "https://pbs.twimg.com/media/GDrwdB3aYAAu4am?format=png&name=orig",
+        "type": "photo"
+      },
+      {
         "media_key": "3_1730179997682552832",
         "url": "https://pbs.twimg.com/media/GALVin9a0AAsn0-.jpg",
         "type": "photo"
       }
     ],
     "users": [
+      {
+        "id": "1",
+        "username": "sqs",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1519180377604034560/NxI03WYE_400x400.jpg",
+        "name": "Quinn Slack"
+      },
       {
         "id": "22918124",
         "username": "gregberge_",
