@@ -143,7 +143,10 @@ export async function globby(patterns: string | string[], options: GlobOptions):
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { dir, ...fastGlobOptions } = { ...options, ignore };
 
-  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, `Glob options`, fastGlobOptions);
+  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, `Glob options`, {
+    patterns,
+    ...fastGlobOptions,
+  });
 
   return fastGlob(patterns, fastGlobOptions);
 }
