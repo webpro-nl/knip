@@ -200,6 +200,40 @@ Shortcut to include all types of export issues:
 --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
 ```
 
+### `--experimental-tags`
+
+Exports can be tagged with known or arbitrary JSDoc/TSDoc tags:
+
+```ts
+/**
+ * Description of my exported value
+ *
+ * @type number
+ * @internal
+ * @custom Unimportant matters
+ */
+export const myExport = 1;
+```
+
+And then include (`+`) or exclude (`-`) these tagged exports from the report
+like so:
+
+```shell
+knip --experimental-tags=+custom
+knip --experimental-tags=-custom,-internal
+```
+
+This way, you can either focus on or ignore specific tagged exports with tags
+you define yourself. This also works for individual class or enum members.
+
+The default directive is `+` (include) and the `@` prefix is ignored, so the
+notation below is valid and will report only exports tagged `@custom` or
+`@internal`:
+
+```shell
+knip --experimental-tags @custom --experimental-tags @internal
+```
+
 ## Reporters & Preprocessors
 
 ### `--reporter [reporter]`

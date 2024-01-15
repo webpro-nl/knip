@@ -115,6 +115,8 @@ export const getJSDocTags = (node: ts.Node) => {
   let tagNodes = ts.getJSDocTags(node);
   if (ts.isExportSpecifier(node) || ts.isBindingElement(node)) {
     tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent.parent)];
+  } else if (ts.isEnumMember(node) || ts.isClassElement(node)) {
+    tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent)];
   }
   for (const tagNode of tagNodes) {
     const match = tagNode.getText()?.match(/@\S+/);
