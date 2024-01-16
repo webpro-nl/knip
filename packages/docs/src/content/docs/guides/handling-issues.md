@@ -244,6 +244,7 @@ few options:
 
 - [Ignore exports used in file][15] for exports used internally.
 - Individual exports can be [tagged as `@public`][16].
+- Individual exports can be excluded using arbitrary [tags (experimental)][17].
 - Make sure the export ends up in an [entry file][2]:
   - Add the file to the `entry` file patterns array in the configuration
   - Move the export(s) to an entry file
@@ -264,7 +265,7 @@ knip --exports
 ### Missing Exports?
 
 Do you expect certain exports in the report, but are they missing? They might be
-exported from an entry file. Use [--include-entry-exports][17] to make Knip also
+exported from an entry file. Use [--include-entry-exports][18] to make Knip also
 report unused exports in entry files.
 
 ## Class Members
@@ -282,7 +283,7 @@ cases it may even run out of memory in large repositories).
 Individual class members can be [tagged as `@public`][16].
 
 Classes exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][17] to make Knip also report members of unused export
+[--include-entry-exports][18] to make Knip also report members of unused export
 in entry files.
 
 ## Enum Members
@@ -297,14 +298,14 @@ knip --exclude enumMembers
 Individual enum members can be [tagged as `@public`][16].
 
 Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][17] to make Knip also report members of unused exports
+[--include-entry-exports][18] to make Knip also report members of unused exports
 in entry files.
 
 ## False Positives
 
 If you believe Knip incorrectly reports something as unused (i.e. a false
 positive), you can help your own project and help improve Knip by creating a
-[minimal reproduction][18] and open an issue on GitHub.
+[minimal reproduction][19] and open an issue on GitHub.
 
 [1]: ../overview/configuration.md
 [2]: ../explanations/entry-files.md
@@ -322,5 +323,6 @@ positive), you can help your own project and help improve Knip by creating a
 [14]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [15]: ../reference/configuration.md#ignoreexportsusedinfile
 [16]: ../reference/jsdoc-tsdoc-tags.md#public
-[17]: ../reference/configuration.md#includeentryexports
-[18]: ../guides/troubleshooting.md#minimal-reproduction
+[17]: ../reference/cli.md#--experimental-tags
+[18]: ../reference/configuration.md#includeentryexports
+[19]: ../guides/troubleshooting.md#minimal-reproduction
