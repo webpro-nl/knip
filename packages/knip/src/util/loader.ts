@@ -13,7 +13,7 @@ const load = async (filePath: string) => {
   if (filePath === FAKE_PATH) return;
   try {
     const ext = extname(filePath);
-    if (filePath.endsWith("rc")) {
+    if (filePath.endsWith('rc')) {
       const contents = await loadFile(filePath);
       return parseYAML(contents).catch(() => parseJSON(filePath, contents));
     }

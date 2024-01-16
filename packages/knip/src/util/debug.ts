@@ -9,7 +9,9 @@ const IS_ENABLED = debug ?? false;
 const inspectOptions = { maxArrayLength: null, depth: null, colors: true };
 
 const ctx = (text: string | [string, string]) =>
-  typeof text === 'string' ? picocolors.yellow(`[${text}]`) : `${picocolors.yellow(`[${text[0]}]`)} ${picocolors.cyan(text[1])}`;
+  typeof text === 'string'
+    ? picocolors.yellow(`[${text}]`)
+    : `${picocolors.yellow(`[${text[0]}]`)} ${picocolors.cyan(text[1])}`;
 
 // Inspect arrays, otherwise Node [will, knip, ...n-100 more items]
 const logArray = (collection: string[]) => {
