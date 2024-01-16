@@ -4,14 +4,13 @@ import { getDependenciesFromScripts, hasDependency, load } from '../../util/plug
 import type { NxProjectConfiguration } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-export const NAME = 'Nx';
+const NAME = 'Nx';
 
-/** @public */
-export const ENABLERS = ['nx', /^@nrwl\//, /^@nx\//];
+const ENABLERS = ['nx', /^@nrwl\//, /^@nx\//];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['project.json', '{apps,libs}/**/project.json'];
+const CONFIG_FILE_PATTERNS = ['project.json', '{apps,libs}/**/project.json'];
 
 const findNxDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { cwd, manifest, isProduction } = options;
@@ -36,4 +35,12 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, options
   return compact([...executors, ...dependencies]);
 };
 
-export const findDependencies = timerify(findNxDependencies);
+const findDependencies = timerify(findNxDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

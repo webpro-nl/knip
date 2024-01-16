@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as nyc from '../../src/plugins/nyc/index.js';
+import { default as nyc } from '../../src/plugins/nyc/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/nyc');

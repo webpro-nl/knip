@@ -6,21 +6,21 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/commitizen/cz-cli
 
-export const NAME = 'Commitizen';
+const NAME = 'Commitizen';
 
-/** @public */
-export const ENABLERS = ['commitizen'];
+const ENABLERS = ['commitizen'];
 
-export const PACKAGE_JSON_PATH = 'config.commitizen';
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const PACKAGE_JSON_PATH = 'config.commitizen';
 
-export const CONFIG_FILE_PATTERNS = ['.czrc', '.cz.json', 'package.json'];
+const CONFIG_FILE_PATTERNS = ['.czrc', '.cz.json', 'package.json'];
 
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
   if (isProduction) return [];
 
   const localConfig: CommitizenConfig | undefined =
+    // @ts-expect-error TODO
     basename(configFilePath) === 'package.json' ? manifest.config?.commitizen : await load(configFilePath);
 
   if (!localConfig) return [];
@@ -28,4 +28,13 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, { m
   return localConfig.path ? [localConfig.path] : [];
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+const findDependencies = timerify(findPluginDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

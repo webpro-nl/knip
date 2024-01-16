@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as nx from '../../src/plugins/nx/index.js';
+import { default as nx } from '../../src/plugins/nx/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/nx');

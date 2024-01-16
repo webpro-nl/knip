@@ -5,24 +5,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/google/wireit
 
-export const NAME = 'Wireit';
+const NAME = 'Wireit';
 
-/** @public */
-export const ENABLERS = ['wireit'];
+const ENABLERS = ['wireit'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['package.json'];
+const PACKAGE_JSON_PATH = 'wireit';
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [];
-
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [];
-
-export const PROJECT_FILE_PATTERNS = [];
-
-export const PACKAGE_JSON_PATH = 'wireit';
+const CONFIG_FILE_PATTERNS = ['package.json'];
 
 const findWireItDependencies: GenericPluginCallback = async (_configFilePath, options) => {
   const { cwd, manifest, isProduction } = options;
@@ -39,4 +30,13 @@ const findWireItDependencies: GenericPluginCallback = async (_configFilePath, op
   return scriptDependencies;
 };
 
-export const findDependencies = timerify(findWireItDependencies);
+const findDependencies = timerify(findWireItDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

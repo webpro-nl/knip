@@ -8,14 +8,13 @@ type ChangesetsConfig = {
   changelog: string | string[];
 };
 
-export const NAME = 'Changesets';
+const NAME = 'Changesets';
 
-/** @public */
-export const ENABLERS = ['@changesets/cli'];
+const ENABLERS = ['@changesets/cli'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['.changeset/config.json'];
+const CONFIG_FILE_PATTERNS = ['.changeset/config.json'];
 
 const findChangesetsDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
   if (isProduction) return [];
@@ -31,4 +30,12 @@ const findChangesetsDependencies: GenericPluginCallback = async (configFilePath,
       : [];
 };
 
-export const findDependencies = timerify(findChangesetsDependencies);
+const findDependencies = timerify(findChangesetsDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

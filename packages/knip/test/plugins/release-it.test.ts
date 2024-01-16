@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as releaseIt from '../../src/plugins/release-it/index.js';
+import { default as releaseIt } from '../../src/plugins/release-it/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/release-it');

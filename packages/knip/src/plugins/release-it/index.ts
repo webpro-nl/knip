@@ -6,21 +6,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/release-it/release-it/blob/master/docs/plugins.md#using-a-plugin
 
-export const NAME = 'Release It';
+const NAME = 'Release It';
 
-/** @public */
-export const ENABLERS = ['release-it'];
+const ENABLERS = ['release-it'];
 
-export const PACKAGE_JSON_PATH = 'release-it';
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const PACKAGE_JSON_PATH = 'release-it';
 
-export const CONFIG_FILE_PATTERNS = [
-  '.release-it.json',
-  '.release-it.{js,cjs}',
-  '.release-it.{yml,yaml}',
-  'package.json',
-];
+const CONFIG_FILE_PATTERNS = ['.release-it.json', '.release-it.{js,cjs}', '.release-it.{yml,yaml}', 'package.json'];
 
 const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { cwd, manifest, isProduction } = options;
@@ -45,4 +39,13 @@ const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, 
   return [...plugins, ...dependencies];
 };
 
-export const findDependencies = timerify(findReleaseItDependencies);
+const findDependencies = timerify(findReleaseItDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

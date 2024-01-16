@@ -7,14 +7,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://paka.dev/npm/tsup/api
 
-export const NAME = 'tsup';
+const NAME = 'tsup';
 
-/** @public */
-export const ENABLERS = ['tsup'];
+const ENABLERS = ['tsup'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['tsup.config.{js,ts,cjs,json}', 'package.json'];
+const CONFIG_FILE_PATTERNS = ['tsup.config.{js,ts,cjs,json}', 'package.json'];
 
 const findTsupDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { manifest } = options;
@@ -39,4 +38,12 @@ const findTsupDependencies: GenericPluginCallback = async (configFilePath, optio
   return entryPatterns;
 };
 
-export const findDependencies = timerify(findTsupDependencies);
+const findDependencies = timerify(findTsupDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

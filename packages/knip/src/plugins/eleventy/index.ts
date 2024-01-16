@@ -5,18 +5,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://www.11ty.dev/docs/
 
-export const NAME = 'Eleventy';
+const NAME = 'Eleventy';
 
-/** @public */
-export const ENABLERS = ['@11ty/eleventy'];
+const ENABLERS = ['@11ty/eleventy'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['.eleventy.js', 'eleventy.config.{js,cjs}'];
+const ENTRY_FILE_PATTERNS = ['.eleventy.js', 'eleventy.config.{js,cjs}'];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = ['posts/**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}'];
+const PRODUCTION_ENTRY_FILE_PATTERNS = ['posts/**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}'];
 
 const findEleventyDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config } = options;
@@ -26,4 +23,13 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
     : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
 };
 
-export const findDependencies = timerify(findEleventyDependencies);
+const findDependencies = timerify(findEleventyDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  ENTRY_FILE_PATTERNS,
+  PRODUCTION_ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

@@ -47,7 +47,10 @@ await fs.cp(templateDir, newPluginDir, {
 });
 
 const barrelFile = String(await fs.readFile(pluginsBarrelFilePath));
-await fs.writeFile(pluginsBarrelFilePath, barrelFile + `export * as ${camelCasedName} from './${name}/index.js';`);
+await fs.writeFile(
+  pluginsBarrelFilePath,
+  barrelFile + `export { default as ${camelCasedName} } from './${name}/index.js';`
+);
 
 const validatorContent = String(await fs.readFile(validatorFilePath));
 const pluginsPrefix = 'const pluginsSchema = z.object({';

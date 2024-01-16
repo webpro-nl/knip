@@ -6,18 +6,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://stylelint.io/user-guide/configure/
 
-export const NAME = 'Stylelint';
+const NAME = 'Stylelint';
 
-/** @public */
-export const ENABLERS = ['stylelint'];
+const ENABLERS = ['stylelint'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = [
-  '.stylelintrc',
-  '.stylelintrc.{cjs,js,json,yaml,yml}',
-  'stylelint.config.{cjs,mjs,js}',
-];
+const CONFIG_FILE_PATTERNS = ['.stylelintrc', '.stylelintrc.{cjs,js,json,yaml,yml}', 'stylelint.config.{cjs,mjs,js}'];
 
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { manifest, isProduction } = options;
@@ -35,4 +30,12 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return [...extend, ...plugins];
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+const findDependencies = timerify(findPluginDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as commitlint from '../../src/plugins/commitlint/index.js';
+import { default as commitlint } from '../../src/plugins/commitlint/index.js';
 import { join, resolve } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 

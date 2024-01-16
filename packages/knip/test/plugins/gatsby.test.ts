@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as gatsby from '../../src/plugins/gatsby/index.js';
+import { default as gatsby } from '../../src/plugins/gatsby/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { pluginConfig as config } from '../helpers/index.js';
 

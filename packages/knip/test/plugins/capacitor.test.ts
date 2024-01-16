@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as capacitor from '../../src/plugins/capacitor/index.js';
+import { default as capacitor } from '../../src/plugins/capacitor/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/capacitor');

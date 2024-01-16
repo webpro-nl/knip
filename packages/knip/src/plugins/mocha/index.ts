@@ -7,17 +7,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://mochajs.org/#configuring-mocha-nodejs
 
-export const NAME = 'Mocha';
+const NAME = 'Mocha';
 
-/** @public */
-export const ENABLERS = ['mocha'];
+const ENABLERS = ['mocha'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
+const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['**/test/*.{js,cjs,mjs}'];
+const ENTRY_FILE_PATTERNS = ['**/test/*.{js,cjs,mjs}'];
 
 const findMochaDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config, manifest, isProduction } = options;
@@ -36,4 +34,13 @@ const findMochaDependencies: GenericPluginCallback = async (configFilePath, opti
   return [...require, ...entryPatterns];
 };
 
-export const findDependencies = timerify(findMochaDependencies);
+const findDependencies = timerify(findMochaDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

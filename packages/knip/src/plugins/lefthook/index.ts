@@ -8,16 +8,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/evilmartians/lefthook
 
-export const NAME = 'Lefthook';
+const NAME = 'Lefthook';
 
-/** @public */
-export const ENABLERS = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
+const ENABLERS = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 const gitHookPaths = getGitHookPaths();
 
-export const CONFIG_FILE_PATTERNS = ['lefthook.yml', ...gitHookPaths];
+const CONFIG_FILE_PATTERNS = ['lefthook.yml', ...gitHookPaths];
 
 const findLefthookDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { cwd, manifest, isProduction } = options;
@@ -43,4 +42,12 @@ const findLefthookDependencies: GenericPluginCallback = async (configFilePath, o
   return matches ? [matches] : [];
 };
 
-export const findDependencies = timerify(findLefthookDependencies);
+const findDependencies = timerify(findLefthookDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

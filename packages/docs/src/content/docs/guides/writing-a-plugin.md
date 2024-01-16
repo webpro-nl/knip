@@ -36,7 +36,7 @@ The name of the plugin to display in the [list of plugins][1] and in debug
 output.
 
 ```ts title="src/plugins/cool-linter/index.ts"
-export const NAME = 'Cool Linter';
+const NAME = 'Cool Linter';
 ```
 
 ### `ENABLERS`
@@ -46,7 +46,7 @@ dependencies so the `isEnabled` function can determine whether the plugin should
 be enabled or not. This is often a single package name, for example:
 
 ```ts title="src/plugins/cool-linter/index.ts"
-export const ENABLERS = ['cool-linter'];
+const ENABLERS = ['cool-linter'];
 ```
 
 ### `isEnabled`
@@ -54,8 +54,7 @@ export const ENABLERS = ['cool-linter'];
 This function can be fairly straightforward with the `hasDependency` helper:
 
 ```ts title="src/plugins/cool-linter/index.ts"
-export const isEnabled = ({ dependencies }) =>
-  hasDependency(dependencies, ENABLERS);
+const isEnabled = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 ```
 
 This will check whether a match is found in the `dependencies` or
@@ -98,7 +97,7 @@ configuration file:
 And here's how we can define this config file pattern from the plugin:
 
 ```ts title="src/plugins/cool-linter/index.ts"
-export const CONFIG_FILE_PATTERNS = ['cool-linter.config.{js,json}'];
+const CONFIG_FILE_PATTERNS = ['cool-linter.config.{js,json}'];
 ```
 
 For each configuration file with a match in `CONFIG_FILE_PATTERNS`, the
@@ -154,7 +153,7 @@ const findCoolLinterDependencies: GenericPluginCallback =
     return [...addons, ...plugins];
   };
 
-export const findDependencies = timerify(findCoolLinterDependencies);
+const findDependencies = timerify(findCoolLinterDependencies);
 ```
 
 #### Notes
@@ -215,7 +214,7 @@ here they can be explicitly added, regardless of the user's `project` files
 configuration.
 
 ```ts title="src/plugins/cool-linter/index.ts"
-export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
+const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
 ```
 
 Most plugins don't need to set this, since the [default configuration for

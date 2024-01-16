@@ -7,16 +7,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 // https://typicode.github.io/husky
 // https://git-scm.com/docs/githooks
 
-export const NAME = 'husky';
+const NAME = 'husky';
 
-/** @public */
-export const ENABLERS = ['husky'];
+const ENABLERS = ['husky'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 const gitHookPaths = getGitHookPaths('.husky');
 
-export const CONFIG_FILE_PATTERNS = [...gitHookPaths];
+const CONFIG_FILE_PATTERNS = [...gitHookPaths];
 
 const findHuskyDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { cwd, manifest, isProduction } = options;
@@ -34,4 +33,12 @@ const findHuskyDependencies: GenericPluginCallback = async (configFilePath, opti
   });
 };
 
-export const findDependencies = timerify(findHuskyDependencies);
+const findDependencies = timerify(findHuskyDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

@@ -4,14 +4,13 @@ import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types
 
 // https://docs.cypress.io/guides/references/configuration
 
-export const NAME = 'Cypress';
+const NAME = 'Cypress';
 
-/** @public */
-export const ENABLERS = ['cypress'];
+const ENABLERS = ['cypress'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['cypress.config.{js,ts,mjs,cjs}'];
+const CONFIG_FILE_PATTERNS = ['cypress.config.{js,ts,mjs,cjs}'];
 
 const TEST_FILE_PATTERNS = ['cypress/e2e/**/*.cy.{js,jsx,ts,tsx}'];
 
@@ -20,10 +19,9 @@ const SUPPORT_FILE_PATTERNS = [
   'cypress/plugins/index.js', // Deprecated since Cypress v10
 ];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [...TEST_FILE_PATTERNS, ...SUPPORT_FILE_PATTERNS];
+const ENTRY_FILE_PATTERNS = [...TEST_FILE_PATTERNS, ...SUPPORT_FILE_PATTERNS];
 
-export const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
+const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config } = options;
 
   const localConfig = await load(configFilePath);
@@ -35,4 +33,13 @@ export const findDependencies: GenericPluginCallback = async (configFilePath, op
   const patterns = [localConfig.e2e?.specPattern ?? [], localConfig.component?.specPattern ?? []].flat();
   const entryPatterns = (patterns.length > 0 ? patterns : TEST_FILE_PATTERNS).map(toEntryPattern);
   return [...entryPatterns, ...SUPPORT_FILE_PATTERNS.map(toEntryPattern)];
+};
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
 };

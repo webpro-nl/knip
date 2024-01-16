@@ -10,6 +10,7 @@ import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 import { u } from 'unist-builder';
 import { base } from '../config.js';
+import type { Plugin } from '../../knip/src/types/plugins.js';
 import type { Root } from 'mdast';
 import type { Node } from 'unist';
 
@@ -50,6 +51,8 @@ for await (const dir of directories) {
   if (dir.isDirectory() && dir.name !== '_template') {
     const pluginName = dir.name;
     const pluginDir = path.join(pluginsDir, pluginName);
+    const plugin: Plugin = (await import(path.join(pluginDir, 'index.ts'))).default;
+
     const {
       NAME,
       ENABLERS,
@@ -57,17 +60,17 @@ for await (const dir of directories) {
       ENTRY_FILE_PATTERNS: entry,
       PRODUCTION_ENTRY_FILE_PATTERNS: production,
       PROJECT_FILE_PATTERNS: project,
-    } = await import(path.join(pluginDir, 'index.ts'));
+    } = plugin;
 
     plugins.push([NAME, pluginName]);
 
     const frontmatter = u('yaml', `title: ${NAME}`);
 
     const defaults: Record<string, string[]> = {};
-    if (config?.length > 0) defaults.config = config;
-    if (entry?.length > 0) defaults.entry = entry;
-    if (production?.length > 0) defaults.entry = [...(defaults.entry ?? []), ...production];
-    if (project?.length > 0) defaults.project = project;
+    if (config && config.length > 0) defaults.config = config;
+    if (entry && entry.length > 0) defaults.entry = entry;
+    if (production && production.length > 0) defaults.entry = [...(defaults.entry ?? []), ...production];
+    if (project && project.length > 0) defaults.project = project;
 
     const en =
       Array.isArray(ENABLERS) && ENABLERS.length > 0

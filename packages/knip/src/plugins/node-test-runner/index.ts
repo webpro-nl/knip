@@ -4,19 +4,17 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://nodejs.dev/en/api/test/
 
-export const NAME = 'Node.js Test Runner';
+const NAME = 'Node.js Test Runner';
 
-/** @public */
-export const ENABLERS = 'This plugin is enabled when any script in `package.json` includes `node --test`';
+const ENABLERS = 'This plugin is enabled when any script in `package.json` includes `node --test`';
 
 // TODO Better to scan the entry files until the first `node:test` import, but that's expensive
-export const isEnabled: IsPluginEnabledCallback = ({ manifest }) =>
+const isEnabled: IsPluginEnabledCallback = ({ manifest }) =>
   Object.keys(manifest.scripts ?? {}).some(
     script => manifest.scripts && /(?<=^|\s)node (.*)--test/.test(manifest.scripts[script])
   );
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [
+const ENTRY_FILE_PATTERNS = [
   '**/*{.,-,_}test.?(c|m)js',
   '**/test-*.?(c|m)js',
   '**/test.?(c|m)js',
@@ -27,4 +25,12 @@ const findNodeTestRunnerDependencies: GenericPluginCallback = async (configFileP
   return (options.config?.entry ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
 };
 
-export const findDependencies = timerify(findNodeTestRunnerDependencies);
+const findDependencies = timerify(findNodeTestRunnerDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

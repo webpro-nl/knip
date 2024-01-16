@@ -8,14 +8,13 @@ import type { TsConfigJson } from 'type-fest';
 
 // https://www.typescriptlang.org/tsconfig
 
-export const NAME = 'TypeScript';
+const NAME = 'TypeScript';
 
-/** @public */
-export const ENABLERS = ['typescript'];
+const ENABLERS = ['typescript'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['tsconfig.json', 'tsconfig.*.json'];
+const CONFIG_FILE_PATTERNS = ['tsconfig.json', 'tsconfig.*.json'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const localConfig: TsConfigJson | undefined = await loadJSON(configFilePath);
@@ -57,4 +56,12 @@ export const findTypeScriptDependencies: GenericPluginCallback = async (configFi
   return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
 };
 
-export const findDependencies = timerify(findTypeScriptDependencies);
+const findDependencies = timerify(findTypeScriptDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

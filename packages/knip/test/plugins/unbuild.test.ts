@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as unbuild from '../../src/plugins/unbuild/index.js';
+import { default as unbuild } from '../../src/plugins/unbuild/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest, pluginConfig as config } from '../helpers/index.js';
 

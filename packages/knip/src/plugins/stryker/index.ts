@@ -5,14 +5,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://stryker-mutator.io/docs/stryker-js/config-file/
 
-export const NAME = 'Stryker';
+const NAME = 'Stryker';
 
-/** @public */
-export const ENABLERS = ['@stryker-mutator/core'];
+const ENABLERS = ['@stryker-mutator/core'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['?(.)stryker.{conf,config}.{js,mjs,cjs,json}'];
+const CONFIG_FILE_PATTERNS = ['?(.)stryker.{conf,config}.{js,mjs,cjs,json}'];
 
 const findStrykerDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { isProduction } = options;
@@ -32,4 +31,12 @@ const findStrykerDependencies: GenericPluginCallback = async (configFilePath, op
   return [...runners, ...checkers, ...plugins];
 };
 
-export const findDependencies = timerify(findStrykerDependencies);
+const findDependencies = timerify(findStrykerDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

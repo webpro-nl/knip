@@ -163,6 +163,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       dir,
       cwd,
       config,
+      // @ts-expect-error TODO
       manifest,
       isProduction,
       isStrict,

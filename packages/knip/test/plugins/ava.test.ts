@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as ava from '../../src/plugins/ava/index.js';
+import { default as ava } from '../../src/plugins/ava/index.js';
 import { join, resolve } from '../../src/util/path.js';
 import { getManifest, pluginConfig as config } from '../helpers/index.js';
 

@@ -11,18 +11,16 @@ import type {
 
 // https://jestjs.io/docs/configuration
 
-export const NAME = 'Jest';
+const NAME = 'Jest';
 
-/** @public */
-export const ENABLERS = ['jest'];
+const ENABLERS = ['jest'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =>
+const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =>
   hasDependency(dependencies, ENABLERS) || Boolean(manifest.name?.startsWith('jest-presets'));
 
-export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
+const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
+const ENTRY_FILE_PATTERNS = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const config = await load(configFilePath);
@@ -112,4 +110,13 @@ const findJestDependencies: GenericPluginCallback = async (configFilePath, optio
   return dependencies.map(replaceRootDir).map(dependency => dependency.replace(matchCwd, toEntryPattern('')));
 };
 
-export const findDependencies = timerify(findJestDependencies);
+const findDependencies = timerify(findJestDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as cspell from '../../src/plugins/cspell/index.js';
+import { default as cspell } from '../../src/plugins/cspell/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/cspell');

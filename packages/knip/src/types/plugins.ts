@@ -22,3 +22,16 @@ export type GenericPluginCallback = (
   configFilePath: string,
   options: GenericPluginCallbackOptions
 ) => Promise<string[]> | string[];
+
+/** @internal */
+export interface Plugin {
+  NAME: string;
+  ENABLERS: string[];
+  PACKAGE_JSON_PATH?: string;
+  isEnabled: IsPluginEnabledCallback;
+  CONFIG_FILE_PATTERNS?: string[];
+  ENTRY_FILE_PATTERNS?: string[];
+  PRODUCTION_ENTRY_FILE_PATTERNS?: string[];
+  PROJECT_FILE_PATTERNS?: string[];
+  findDependencies: GenericPluginCallback;
+}

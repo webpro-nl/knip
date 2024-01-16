@@ -7,17 +7,15 @@ import type { PlaywrightTestConfig } from 'playwright/test';
 
 // https://playwright.dev/docs/test-configuration
 
-export const NAME = 'Playwright';
+const NAME = 'Playwright';
 
-/** @public */
-export const ENABLERS = ['@playwright/test'];
+const ENABLERS = ['@playwright/test'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['playwright.config.{js,ts}'];
+const CONFIG_FILE_PATTERNS = ['playwright.config.{js,ts}'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
+const ENTRY_FILE_PATTERNS = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
 const toEntryPatterns = (
   testMatch: string | RegExp | Array<string | RegExp> | undefined,
@@ -69,4 +67,13 @@ const findPlaywrightDependencies: GenericPluginCallback = async (configFilePath,
   return defaultPatterns;
 };
 
-export const findDependencies = timerify(findPlaywrightDependencies);
+const findDependencies = timerify(findPlaywrightDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

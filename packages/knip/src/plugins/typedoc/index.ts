@@ -6,16 +6,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://typedoc.org/guides/overview/
 
-export const NAME = 'TypeDoc';
+const NAME = 'TypeDoc';
 
-/** @public */
-export const ENABLERS = ['typedoc'];
+const ENABLERS = ['typedoc'];
 
-export const PACKAGE_JSON_PATH = 'typedocOptions';
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const PACKAGE_JSON_PATH = 'typedocOptions';
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   'typedoc.{js,cjs,json,jsonc}',
   'typedoc.config.{js,cjs}',
   '.config/typedoc.{js,cjs,json,jsonc}',
@@ -39,4 +38,13 @@ const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, op
   return localConfig?.plugin ?? [];
 };
 
-export const findDependencies = timerify(findTypeDocDependencies);
+const findDependencies = timerify(findTypeDocDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

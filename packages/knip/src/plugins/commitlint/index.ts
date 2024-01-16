@@ -10,14 +10,13 @@ type CommitLintConfig = {
   extends: string[];
 };
 
-export const NAME = 'commitlint';
+const NAME = 'commitlint';
 
-/** @public */
-export const ENABLERS = ['@commitlint/cli'];
+const ENABLERS = ['@commitlint/cli'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   '.commitlintrc',
   '.commitlintrc.{json,yaml,yml,js,cjs,ts,cts}',
   'commitlint.config.{js,cjs,ts,cts}',
@@ -35,4 +34,12 @@ const findCommitLintDependencies: GenericPluginCallback = async (configFilePath,
   return localConfig.extends ? [localConfig.extends].flat() : [];
 };
 
-export const findDependencies = timerify(findCommitLintDependencies);
+const findDependencies = timerify(findCommitLintDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

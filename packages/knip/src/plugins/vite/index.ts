@@ -6,12 +6,11 @@ import type { ViteConfigOrFn } from '../vitest/types.js';
 
 // https://vitejs.dev/config/
 
-export const NAME = 'Vite';
+const NAME = 'Vite';
 
-/** @public */
-export const ENABLERS = ['vite'];
+const ENABLERS = ['vite'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
 export const CONFIG_FILE_PATTERNS = ['vite*.config.{js,mjs,ts,cjs,mts,cts}'];
 
@@ -23,4 +22,12 @@ const findViteDependencies: GenericPluginCallback = async (configFilePath, optio
   return findVitestDependencies(configFilePath, localConfig, options);
 };
 
-export const findDependencies = timerify(findViteDependencies);
+const findDependencies = timerify(findViteDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

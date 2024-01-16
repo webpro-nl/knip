@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as eslint from '../../src/plugins/eslint/index.js';
+import { default as eslint } from '../../src/plugins/eslint/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 

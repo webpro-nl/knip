@@ -5,18 +5,15 @@ import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types
 
 // https://remix.run/docs/en/v1/api/conventions
 
-export const NAME = 'Remix';
+const NAME = 'Remix';
 
-/** @public */
-export const ENABLERS = [/^@remix-run\//];
+const ENABLERS = [/^@remix-run\//];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['remix.config.js', 'remix.init/index.js'];
+const ENTRY_FILE_PATTERNS = ['remix.config.js', 'remix.init/index.js'];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [
+const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'app/root.tsx',
   'app/entry.{client,server}.{js,jsx,ts,tsx}',
   'app/routes/**/*.{js,ts,tsx}',
@@ -31,4 +28,13 @@ const findRemixDependencies: GenericPluginCallback = async (configFilePath, opti
     : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
 };
 
-export const findDependencies = timerify(findRemixDependencies);
+const findDependencies = timerify(findRemixDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  ENTRY_FILE_PATTERNS,
+  PRODUCTION_ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

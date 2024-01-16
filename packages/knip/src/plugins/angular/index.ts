@@ -7,14 +7,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://angular.io/guide/workspace-config
 
-export const NAME = 'Angular';
+const NAME = 'Angular';
 
-/** @public */
-export const ENABLERS = ['@angular/cli'];
+const ENABLERS = ['@angular/cli'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['angular.json'];
+const CONFIG_FILE_PATTERNS = ['angular.json'];
 
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { cwd } = options;
@@ -46,4 +45,12 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return Array.from(dependencies);
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+const findDependencies = timerify(findPluginDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

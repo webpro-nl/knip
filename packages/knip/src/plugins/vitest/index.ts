@@ -14,20 +14,15 @@ import type {
 
 // https://vitest.dev/config/
 
-export const NAME = 'Vitest';
+const NAME = 'Vitest';
 
-/** @public */
-export const ENABLERS = ['vitest'];
+const ENABLERS = ['vitest'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = [
-  'vitest*.config.{js,mjs,ts,cjs,mts,cts}',
-  'vitest.{workspace,projects}.{ts,js,json}',
-];
+const CONFIG_FILE_PATTERNS = ['vitest*.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{ts,js,json}'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)'];
+const ENTRY_FILE_PATTERNS = ['**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)'];
 
 // TODO: Promote to something more generic, other plugins may like it too
 const resolveEntry = (containingFilePath: string, specifier: string) => {
@@ -113,4 +108,13 @@ const findVitestWorkspaceDependencies: GenericPluginCallback = async (configFile
   return compact(dependencies);
 };
 
-export const findDependencies = timerify(findVitestWorkspaceDependencies);
+const findDependencies = timerify(findVitestWorkspaceDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

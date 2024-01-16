@@ -7,28 +7,24 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // link to docs
 
-export const NAME = '';
+const NAME = '';
 
-/** @public */
-export const ENABLERS = [''];
+const ENABLERS = [''];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = [];
+const CONFIG_FILE_PATTERNS: string[] = [];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [];
+const ENTRY_FILE_PATTERNS: string[] = [];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [];
+const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = [];
 
-export const PROJECT_FILE_PATTERNS = [];
+const PROJECT_FILE_PATTERNS: string[] = [];
 
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { manifest, config, isProduction } = options;
 
   const localConfig: PluginConfig | undefined =
-    // @ts-expect-error `plugin` is a placeholder, not an actual plugin name
     basename(configFilePath) === 'package.json' ? manifest.plugin : await load(configFilePath);
 
   if (!localConfig) return [];
@@ -64,4 +60,15 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return [...dependencies, ...entryPatterns, ...productionPatterns];
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+const findDependencies = timerify(findPluginDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  PRODUCTION_ENTRY_FILE_PATTERNS,
+  PROJECT_FILE_PATTERNS,
+  findDependencies,
+};

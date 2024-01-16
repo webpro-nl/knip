@@ -6,16 +6,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/semantic-release/semantic-release/blob/master/docs/usage/configuration.md#configuration-file
 
-export const NAME = 'Semantic Release';
+const NAME = 'Semantic Release';
 
-/** @public */
-export const ENABLERS = ['semantic-release'];
+const ENABLERS = ['semantic-release'];
 
-export const PACKAGE_JSON_PATH = 'release';
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const PACKAGE_JSON_PATH = 'release';
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   '.releaserc',
   '.releaserc.{yaml,yml,json,js,cjs}',
   'release.config.{js,cjs}',
@@ -34,4 +33,13 @@ const findSemanticReleaseDependencies: GenericPluginCallback = async (configFile
   return plugins;
 };
 
-export const findDependencies = timerify(findSemanticReleaseDependencies);
+const findDependencies = timerify(findSemanticReleaseDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

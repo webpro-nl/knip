@@ -6,14 +6,13 @@ import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types
 
 // https://orm.drizzle.team/kit-docs/overview
 
-export const NAME = 'Drizzle';
+const NAME = 'Drizzle';
 
-/** @public */
-export const ENABLERS = ['drizzle-kit'];
+const ENABLERS = ['drizzle-kit'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['drizzle.config.{ts,js,json}'];
+const CONFIG_FILE_PATTERNS = ['drizzle.config.{ts,js,json}'];
 
 const findDrizzleDependencies: GenericPluginCallback = async configFilePath => {
   const localConfig: DrizzleConfig | undefined = await load(configFilePath);
@@ -23,4 +22,12 @@ const findDrizzleDependencies: GenericPluginCallback = async configFilePath => {
   return [localConfig.schema].flat().map(toProductionEntryPattern);
 };
 
-export const findDependencies = timerify(findDrizzleDependencies);
+const findDependencies = timerify(findDrizzleDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

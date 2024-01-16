@@ -3,11 +3,17 @@ import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://tailwindcss.com/docs/configuration
 
-export const NAME = 'Tailwind';
+const NAME = 'Tailwind';
 
-/** @public */
-export const ENABLERS = ['tailwindcss'];
+const ENABLERS = ['tailwindcss'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['tailwind.config.{js,cjs,mjs,ts}'];
+const CONFIG_FILE_PATTERNS = ['tailwind.config.{js,cjs,mjs,ts}'];
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+};

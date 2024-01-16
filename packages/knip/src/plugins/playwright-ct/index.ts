@@ -7,17 +7,15 @@ import type { PlaywrightTestConfig } from 'playwright/test';
 
 // https://playwright.dev/docs/test-components
 
-export const NAME = 'Playwright for components';
+const NAME = 'Playwright for components';
 
-/** @public */
-export const ENABLERS = [/^@playwright\/experimental-ct-/];
+const ENABLERS = [/^@playwright\/experimental-ct-/];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['playwright-ct.config.{js,ts}', 'playwright/index.{js,ts,jsx,tsx}'];
+const CONFIG_FILE_PATTERNS = ['playwright-ct.config.{js,ts}', 'playwright/index.{js,ts,jsx,tsx}'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
+const ENTRY_FILE_PATTERNS = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
 const findPlaywrightCTDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { cwd, config } = options;
@@ -32,4 +30,13 @@ const findPlaywrightCTDependencies: GenericPluginCallback = async (configFilePat
   return defaultPatterns;
 };
 
-export const findDependencies = timerify(findPlaywrightCTDependencies);
+const findDependencies = timerify(findPlaywrightCTDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

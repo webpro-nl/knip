@@ -6,24 +6,21 @@ import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types
 
 // https://kit.svelte.dev/docs
 
-export const NAME = 'Svelte';
+const NAME = 'Svelte';
 
-/** @public */
-export const ENABLERS = ['svelte'];
+const ENABLERS = ['svelte'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['svelte.config.js', ...VITE_CONFIG_FILE_PATTERNS];
+const ENTRY_FILE_PATTERNS = ['svelte.config.js', ...VITE_CONFIG_FILE_PATTERNS];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [
+const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',
   'src/hooks.{server,client}.{js,ts}',
   'src/params/*{js,ts}',
 ];
 
-export const PROJECT_FILE_PATTERNS = ['src/**/*.{js,ts,svelte}'];
+const PROJECT_FILE_PATTERNS = ['src/**/*.{js,ts,svelte}'];
 
 const findSvelteDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config } = options;
@@ -33,4 +30,14 @@ const findSvelteDependencies: GenericPluginCallback = async (configFilePath, opt
     : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
 };
 
-export const findDependencies = timerify(findSvelteDependencies);
+const findDependencies = timerify(findSvelteDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  ENTRY_FILE_PATTERNS,
+  PRODUCTION_ENTRY_FILE_PATTERNS,
+  PROJECT_FILE_PATTERNS,
+  findDependencies,
+};

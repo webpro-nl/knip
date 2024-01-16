@@ -7,17 +7,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/avajs/ava/blob/main/docs/06-configuration.md
 
-export const NAME = 'Ava';
+const NAME = 'Ava';
 
-/** @public */
-export const ENABLERS = ['ava'];
+const ENABLERS = ['ava'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
+const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [
+const ENTRY_FILE_PATTERNS = [
   `test.{js,cjs,mjs,ts}`,
   `{src,source}/test.{js,cjs,mjs,ts}`,
   `**/__tests__/**/*.{js,cjs,mjs,ts}`,
@@ -55,4 +53,13 @@ const findAvaDependencies: GenericPluginCallback = async (configFilePath, option
   return [...entryPatterns, ...dependencies];
 };
 
-export const findDependencies = timerify(findAvaDependencies);
+const findDependencies = timerify(findAvaDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

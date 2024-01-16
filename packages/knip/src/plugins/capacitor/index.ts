@@ -5,14 +5,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://capacitorjs.com/docs/config
 
-export const NAME = 'Capacitor';
+const NAME = 'Capacitor';
 
-/** @public */
-export const ENABLERS = [/^@capacitor\//];
+const ENABLERS = [/^@capacitor\//];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['capacitor.config.ts'];
+const CONFIG_FILE_PATTERNS = ['capacitor.config.ts'];
 
 const findCapacitorDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
   if (isProduction) return [];
@@ -24,4 +23,12 @@ const findCapacitorDependencies: GenericPluginCallback = async (configFilePath, 
   return localConfig.includePlugins ?? [];
 };
 
-export const findDependencies = timerify(findCapacitorDependencies);
+const findDependencies = timerify(findCapacitorDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

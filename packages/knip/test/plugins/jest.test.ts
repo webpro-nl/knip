@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 // eslint-disable-next-line n/no-restricted-import
 import path from 'node:path';
 import test from 'node:test';
-import * as jest from '../../src/plugins/jest/index.js';
+import { default as jest } from '../../src/plugins/jest/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/jest');

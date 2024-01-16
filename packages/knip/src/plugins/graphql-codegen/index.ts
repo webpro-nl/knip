@@ -9,16 +9,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 // https://the-guild.dev/graphql/codegen/docs/config-reference/codegen-config
 // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/config.ts
 
-export const NAME = 'GraphQL Codegen';
+const NAME = 'GraphQL Codegen';
 
-/** @public */
-export const ENABLERS = [/^@graphql-codegen\//];
+const ENABLERS = [/^@graphql-codegen\//];
 
-export const PACKAGE_JSON_PATH = 'codegen';
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const PACKAGE_JSON_PATH = 'codegen';
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   'codegen.{json,yml,yaml,js,ts,mjs,cts}',
   '.codegenrc.{json,yml,yaml,js,ts}',
   'codegen.config.js',
@@ -60,4 +59,13 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return [...presets, ...flatPlugins, ...nestedPlugins];
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+const findDependencies = timerify(findPluginDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

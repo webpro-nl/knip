@@ -6,15 +6,14 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://prettier.io/docs/en/configuration.html
 
-export const NAME = 'Prettier';
+const NAME = 'Prettier';
 
-/** @public */
-export const ENABLERS = ['prettier'];
+const ENABLERS = ['prettier'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies, config }) =>
+const isEnabled: IsPluginEnabledCallback = ({ dependencies, config }) =>
   hasDependency(dependencies, ENABLERS) || 'prettier' in config;
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   '.prettierrc',
   '.prettierrc.{json,js,cjs,mjs,yml,yaml}',
   'prettier.config.{js,cjs,mjs}',
@@ -37,4 +36,12 @@ const findPrettierDependencies: GenericPluginCallback = async (configFilePath, {
     : [];
 };
 
-export const findDependencies = timerify(findPrettierDependencies);
+const findDependencies = timerify(findPrettierDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

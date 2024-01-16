@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as changesets from '../../src/plugins/changesets/index.js';
+import { default as changesets } from '../../src/plugins/changesets/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/changesets');

@@ -7,23 +7,21 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://storybook.js.org/docs/react/configure/overview
 
-export const NAME = 'Storybook';
+const NAME = 'Storybook';
 
-/** @public */
-export const ENABLERS = [/^@storybook\//, '@nrwl/storybook'];
+const ENABLERS = [/^@storybook\//, '@nrwl/storybook'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['.storybook/{main,test-runner}.{js,ts}'];
+const CONFIG_FILE_PATTERNS = ['.storybook/{main,test-runner}.{js,ts}'];
 
 const STORIES_FILE_PATTERNS = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
 
 const REST_ENTRY_FILE_PATTERNS = ['.storybook/{manager,preview}.{js,jsx,ts,tsx}'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [...REST_ENTRY_FILE_PATTERNS, ...STORIES_FILE_PATTERNS];
+const ENTRY_FILE_PATTERNS = [...REST_ENTRY_FILE_PATTERNS, ...STORIES_FILE_PATTERNS];
 
-export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
+const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
 
 const findStorybookDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { isProduction, cwd, config } = options;
@@ -55,4 +53,14 @@ const findStorybookDependencies: GenericPluginCallback = async (configFilePath, 
   return [...entryPatterns, ...addons, ...builderPackages, ...frameworks];
 };
 
-export const findDependencies = timerify(findStorybookDependencies);
+const findDependencies = timerify(findStorybookDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  ENTRY_FILE_PATTERNS,
+  PROJECT_FILE_PATTERNS,
+  findDependencies,
+};

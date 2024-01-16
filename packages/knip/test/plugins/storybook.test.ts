@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as storybook from '../../src/plugins/storybook/index.js';
+import { default as storybook } from '../../src/plugins/storybook/index.js';
 import { resolve, join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/storybook');

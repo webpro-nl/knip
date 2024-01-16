@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../src/index.js';
-import * as graphqlCodegen from '../../src/plugins/graphql-codegen/index.js';
+import { default as graphqlCodegen } from '../../src/plugins/graphql-codegen/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';

@@ -5,19 +5,25 @@ import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types
 
 // https://rollupjs.org/guide/en/#configuration-files
 
-export const NAME = 'Rollup';
+const NAME = 'Rollup';
 
-/** @public */
-export const ENABLERS = ['rollup'];
+const ENABLERS = ['rollup'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['rollup.config.{js,cjs,mjs,ts}'];
+const ENTRY_FILE_PATTERNS = ['rollup.config.{js,cjs,mjs,ts}'];
 
 const findRollupDependencies: GenericPluginCallback = async () => {
   const entryPatterns = ENTRY_FILE_PATTERNS.map(toEntryPattern);
   return entryPatterns;
 };
 
-export const findDependencies = timerify(findRollupDependencies);
+const findDependencies = timerify(findRollupDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

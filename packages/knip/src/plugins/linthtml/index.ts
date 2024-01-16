@@ -7,16 +7,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://linthtml.vercel.app/
 
-export const NAME = 'LintHTML';
+const NAME = 'LintHTML';
 
-export const PACKAGE_JSON_PATH = 'linthtmlConfig';
+const PACKAGE_JSON_PATH = 'linthtmlConfig';
 
-/** @public */
-export const ENABLERS = ['@linthtml/linthtml'];
+const ENABLERS = ['@linthtml/linthtml'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   '.linthtmlrc',
   '.linthtmlrc.json',
   '.linthtmlrc.yml',
@@ -42,4 +41,13 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return [...extensions, ...plugins];
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+const findDependencies = timerify(findPluginDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

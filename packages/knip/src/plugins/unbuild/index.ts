@@ -6,14 +6,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/unjs/unbuild#unbuild
 
-export const NAME = 'unbuild';
+const NAME = 'unbuild';
 
-/** @public */
-export const ENABLERS = ['unbuild'];
+const ENABLERS = ['unbuild'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['build.config.{js,cjs,mjs,ts,mts,cts,json}'];
+const CONFIG_FILE_PATTERNS = ['build.config.{js,cjs,mjs,ts,mts,cts,json}'];
 
 const findUnbuildDependencies: GenericPluginCallback = async configFilePath => {
   const localConfig: UnbuildConfig | undefined = await load(configFilePath);
@@ -26,4 +25,12 @@ const findUnbuildDependencies: GenericPluginCallback = async configFilePath => {
     .map(toEntryPattern);
 };
 
-export const findDependencies = timerify(findUnbuildDependencies);
+const findDependencies = timerify(findUnbuildDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

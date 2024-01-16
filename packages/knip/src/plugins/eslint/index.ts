@@ -10,19 +10,18 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 // Note: shareable configs should use `peerDependencies` for plugins
 // https://eslint.org/docs/latest/extend/shareable-configs#publishing-a-shareable-config
 
-export const NAME = 'ESLint';
+const NAME = 'ESLint';
 
-/** @public */
-export const ENABLERS = ['eslint'];
+const ENABLERS = ['eslint'];
 
-export const PACKAGE_JSON_PATH = 'eslintConfig';
-
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest, config }) =>
+const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest, config }) =>
   hasDependency(dependencies, ENABLERS) ||
   'eslint' in config ||
   Boolean(manifest.name && /(^eslint-config|\/eslint-config)/.test(manifest.name));
 
-export const CONFIG_FILE_PATTERNS = [
+export const PACKAGE_JSON_PATH = 'eslintConfig';
+
+const CONFIG_FILE_PATTERNS = [
   'eslint.config.js',
   '.eslintrc',
   '.eslintrc.{js,json,cjs}',
@@ -40,4 +39,13 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
   return Array.from(dependencies);
 };
 
-export const findDependencies = timerify(findESLintDependencies);
+const findDependencies = timerify(findESLintDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

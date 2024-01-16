@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as GithubActions from '../../src/plugins/github-actions/index.js';
+import { default as GithubActions } from '../../src/plugins/github-actions/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 

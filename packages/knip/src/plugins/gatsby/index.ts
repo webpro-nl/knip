@@ -7,17 +7,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/gatsby-project-structure.md
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/config-files/gatsby-config.md
 
-export const NAME = 'Gatsby';
+const NAME = 'Gatsby';
 
-/** @public */
-export const ENABLERS = ['gatsby', 'gatsby-cli'];
+const ENABLERS = ['gatsby', 'gatsby-cli'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['gatsby-{config,node}.{js,jsx,ts,tsx}', 'plugins/**/gatsby-node.{js,jsx,ts,tsx}'];
+const CONFIG_FILE_PATTERNS = ['gatsby-{config,node}.{js,jsx,ts,tsx}', 'plugins/**/gatsby-node.{js,jsx,ts,tsx}'];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [
+const PRODUCTION_ENTRY_FILE_PATTERNS = [
   'gatsby-{browser,ssr}.{js,jsx,ts,tsx}',
   'src/api/**/*.{js,ts}',
   'src/pages/**/*.{js,jsx,ts,tsx}',
@@ -52,4 +50,13 @@ const findGatsbyDependencies: GenericPluginCallback = async (configFilePath, opt
   return [];
 };
 
-export const findDependencies = timerify(findGatsbyDependencies);
+const findDependencies = timerify(findGatsbyDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  PRODUCTION_ENTRY_FILE_PATTERNS,
+  findDependencies,
+};

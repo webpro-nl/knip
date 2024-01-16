@@ -9,14 +9,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 // https://babeljs.io/docs/configuration
 // https://babeljs.io/docs/options#name-normalization
 
-export const NAME = 'Babel';
+const NAME = 'Babel';
 
-/** @public */
-export const ENABLERS = [/^@babel\//];
+const ENABLERS = [/^@babel\//];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   'babel.config.{json,js,cjs,mjs,cts}',
   '.babelrc.{json,js,cjs,mjs,cts}',
   '.babelrc',
@@ -46,4 +45,12 @@ const findBabelDependencies: GenericPluginCallback = async (configFilePath, { ma
   return getDependenciesFromConfig(localConfig);
 };
 
-export const findDependencies = timerify(findBabelDependencies);
+const findDependencies = timerify(findBabelDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

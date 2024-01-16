@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as __PLUGIN_CAMELCASED_NAME__ from '../../src/plugins/_template/index.js';
+import { default as __PLUGIN_CAMELCASED_NAME__ } from '../../src/plugins/_template/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest, pluginConfig as config } from '../helpers/index.js';
 

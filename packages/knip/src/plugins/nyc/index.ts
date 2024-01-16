@@ -5,14 +5,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://www.npmjs.com/package/nyc
 
-export const NAME = 'nyc';
+const NAME = 'nyc';
 
-/** @public */
-export const ENABLERS = ['nyc'];
+const ENABLERS = ['nyc'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
+const CONFIG_FILE_PATTERNS = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
 
 const findNycDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { isProduction } = options;
@@ -24,4 +23,12 @@ const findNycDependencies: GenericPluginCallback = async (configFilePath, option
   return localConfig?.extends ? [localConfig.extends].flat() : [];
 };
 
-export const findDependencies = timerify(findNycDependencies);
+const findDependencies = timerify(findNycDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

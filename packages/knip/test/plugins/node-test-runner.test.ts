@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as nodeTestRunner from '../../src/plugins/node-test-runner/index.js';
+import { default as nodeTestRunner } from '../../src/plugins/node-test-runner/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest } from '../helpers/index.js';
 

@@ -11,14 +11,13 @@ import type { RuleSetRule, RuleSetUseItem } from 'webpack';
 
 // https://webpack.js.org/configuration/
 
-export const NAME = 'Webpack';
+const NAME = 'Webpack';
 
-/** @public */
-export const ENABLERS = ['webpack'];
+const ENABLERS = ['webpack'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['webpack.config*.{js,ts,mjs,cjs,mts,cts}'];
+const CONFIG_FILE_PATTERNS = ['webpack.config*.{js,ts,mjs,cjs,mts,cts}'];
 
 const hasBabelOptions = (use: RuleSetUseItem) =>
   Boolean(use) &&
@@ -114,4 +113,12 @@ const findWebpackDependencies: GenericPluginCallback = async (configFilePath, op
   return compact([...entryPatterns, ...dependencies, ...webpackCLI, ...webpackDevServer]);
 };
 
-export const findDependencies = timerify(findWebpackDependencies);
+const findDependencies = timerify(findWebpackDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

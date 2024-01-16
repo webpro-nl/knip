@@ -5,14 +5,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/streetsidesoftware/cspell/tree/main/packages/cspell#customization
 
-export const NAME = 'cspell';
+const NAME = 'cspell';
 
-/** @public */
-export const ENABLERS = ['cspell'];
+const ENABLERS = ['cspell'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   'cspell.config.{js,cjs,json,yaml,yml}',
   'cspell.{json,yaml,yml}',
   '.c{s,S}pell.json',
@@ -30,4 +29,12 @@ const findCspellDependencies: GenericPluginCallback = async (configFilePath, { i
   return imports;
 };
 
-export const findDependencies = timerify(findCspellDependencies);
+const findDependencies = timerify(findCspellDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

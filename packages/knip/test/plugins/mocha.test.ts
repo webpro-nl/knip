@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as mocha from '../../src/plugins/mocha/index.js';
+import { default as mocha } from '../../src/plugins/mocha/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import { getManifest, pluginConfig as config } from '../helpers/index.js';
 

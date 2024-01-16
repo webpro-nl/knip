@@ -6,16 +6,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/okonet/lint-staged
 
-export const NAME = 'lint-staged';
+const NAME = 'lint-staged';
 
-/** @public */
-export const ENABLERS = ['lint-staged'];
+const ENABLERS = ['lint-staged'];
 
-export const PACKAGE_JSON_PATH = 'lint-staged';
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const PACKAGE_JSON_PATH = 'lint-staged';
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   '.lintstagedrc',
   '.lintstagedrc.json',
   '.lintstagedrc.{yml,yaml}',
@@ -47,4 +46,13 @@ const findLintStagedDependencies: GenericPluginCallback = async (configFilePath,
   return Array.from(dependencies);
 };
 
-export const findDependencies = timerify(findLintStagedDependencies);
+const findDependencies = timerify(findLintStagedDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

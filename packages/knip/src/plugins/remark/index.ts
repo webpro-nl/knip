@@ -6,16 +6,15 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/remarkjs/remark/blob/main/packages/remark-cli/readme.md
 
-export const NAME = 'Remark';
+const NAME = 'Remark';
 
-/** @public */
-export const ENABLERS = ['remark-cli'];
+const ENABLERS = ['remark-cli'];
 
-export const PACKAGE_JSON_PATH = 'remarkConfig';
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const PACKAGE_JSON_PATH = 'remarkConfig';
 
-export const CONFIG_FILE_PATTERNS = [
+const CONFIG_FILE_PATTERNS = [
   'package.json',
   '.remarkrc',
   '.remarkrc.json',
@@ -44,4 +43,13 @@ const findRemarkDependencies: GenericPluginCallback = async (configFilePath, opt
   return plugins;
 };
 
-export const findDependencies = timerify(findRemarkDependencies);
+const findDependencies = timerify(findRemarkDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  PACKAGE_JSON_PATH,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

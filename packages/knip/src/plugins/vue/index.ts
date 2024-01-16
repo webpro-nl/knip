@@ -8,22 +8,17 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 // https://cli.vuejs.org/config/
 // https://vuejs.org/guide/scaling-up/tooling.html#vue-cli
 
-export const NAME = 'Vue';
+const NAME = 'Vue';
 
-/** @public */
-export const ENABLERS = ['vue'];
+const ENABLERS = ['vue'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['vue.config.{js,ts}'];
+const CONFIG_FILE_PATTERNS = ['vue.config.{js,ts}'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [];
+const ENTRY_FILE_PATTERNS: string[] = [];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [];
-
-export const PROJECT_FILE_PATTERNS = [];
+const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = [];
 
 const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config, isProduction, cwd, manifest } = options;
@@ -66,4 +61,12 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return deps;
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+const findDependencies = timerify(findPluginDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

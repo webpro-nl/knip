@@ -6,14 +6,13 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 // https://github.com/igorshubovych/markdownlint-cli
 
-export const NAME = 'markdownlint';
+const NAME = 'markdownlint';
 
-/** @public */
-export const ENABLERS = ['markdownlint-cli'];
+const ENABLERS = ['markdownlint-cli'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-export const CONFIG_FILE_PATTERNS = ['.markdownlint.{json,jsonc}', '.markdownlint.{yml,yaml}'];
+const CONFIG_FILE_PATTERNS = ['.markdownlint.{json,jsonc}', '.markdownlint.{yml,yaml}'];
 
 const findMarkdownlintConfigDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { manifest, isProduction } = options;
@@ -32,4 +31,12 @@ const findMarkdownlintConfigDependencies: GenericPluginCallback = async (configF
   return [...extend, ...uses];
 };
 
-export const findDependencies = timerify(findMarkdownlintConfigDependencies);
+const findDependencies = timerify(findMarkdownlintConfigDependencies);
+
+export default {
+  NAME,
+  ENABLERS,
+  isEnabled,
+  CONFIG_FILE_PATTERNS,
+  findDependencies,
+};

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../src/index.js';
-import * as babel from '../../src/plugins/babel/index.js';
+import { default as babel } from '../../src/plugins/babel/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import { getManifest } from '../helpers/index.js';
