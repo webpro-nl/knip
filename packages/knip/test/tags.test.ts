@@ -25,10 +25,13 @@ test('Include or exclude tagged exports (default)', async () => {
   assert(issues.enumMembers['tags.ts']['UnusedCustom']);
   assert(issues.enumMembers['tags.ts']['UnusedInternal']);
   assert(issues.enumMembers['tags.ts']['UnusedCustomAndInternal']);
+  assert(issues.nsExports['tags.ts']['MyCustomClass']);
+  assert(issues.nsTypes['tags.ts']['MyCustomEnum']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    nsExports: 4,
+    nsExports: 5,
+    nsTypes: 1,
     classMembers: 4,
     enumMembers: 4,
     processed: 2,
@@ -45,16 +48,13 @@ test('Include or exclude tagged exports (include)', async () => {
 
   assert(issues.nsExports['tags.ts']['UnusedCustom']);
   assert(issues.nsExports['tags.ts']['UnusedCustomAndInternal']);
-  assert(issues.classMembers['tags.ts']['UnusedCustom']);
-  assert(issues.classMembers['tags.ts']['UnusedCustomAndInternal']);
-  assert(issues.enumMembers['tags.ts']['UnusedCustom']);
-  assert(issues.enumMembers['tags.ts']['UnusedCustomAndInternal']);
+  assert(issues.nsExports['tags.ts']['MyCustomClass']);
+  assert(issues.nsTypes['tags.ts']['MyCustomEnum']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    nsExports: 2,
-    classMembers: 2,
-    enumMembers: 2,
+    nsExports: 3,
+    nsTypes: 1,
     processed: 2,
     total: 2,
   });

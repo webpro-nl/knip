@@ -525,9 +525,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Skip exports tagged `@alias`
           if (exportedItem.jsDocTags.includes('@alias')) continue;
 
-          if (exportedItem.type !== 'enum' && exportedItem.type !== 'class' && shouldIgnore(exportedItem, tags)) {
-            continue;
-          }
+          if (shouldIgnore(exportedItem, tags)) continue;
 
           // Skip exports tagged `@internal` in --production mode
           if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
@@ -623,9 +621,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
       if (principal) {
-        principal.findUnusedMembers(filePath, exportedItem.members).forEach(member => {
-          if (shouldIgnore(member, tags)) return;
-
+        const members = exportedItem.members.filter(member => !shouldIgnore(member, tags));
+        principal.findUnusedMembers(filePath, members).forEach(member => {
           collector.addIssue({
             type: 'classMembers',
             filePath,

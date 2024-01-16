@@ -58,3 +58,9 @@ export class MyClass {
    */
   UnusedCustomAndInternal = 1;
 }
+
+/** @custom */
+export class MyCustomClass {}
+
+/** @custom */
+export enum MyCustomEnum {}
