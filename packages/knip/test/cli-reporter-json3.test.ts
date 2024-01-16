@@ -4,11 +4,11 @@ import { resolve } from '../src/util/path.js';
 import { execFactory } from './helpers/exec.js';
 import { updatePos } from './helpers/index.js';
 
-const cwd = resolve('fixtures/members');
+const cwd = resolve('fixtures/enum-members');
 
 const exec = execFactory(cwd);
 
-test('knip --reporter json', () => {
+test('knip --reporter json (enum members)', () => {
   const json = {
     files: [],
     issues: [
@@ -24,18 +24,8 @@ test('knip --reporter json', () => {
         types: [],
         enumMembers: {
           MyEnum: [
-            { name: 'B_Unused', line: 17, col: 3, pos: 248 },
-            { name: 'D_Key', line: 19, col: 3, pos: 286 },
-          ],
-        },
-        classMembers: {
-          MyClass: [
-            { name: 'bUnusedPublic', line: 32, col: 10, pos: 508 },
-            { name: 'cUnusedProp', line: 37, col: 3, pos: 633 },
-            { name: 'dUnusedMember', line: 44, col: 3, pos: 768 },
-            { name: 'eUnusedStatic', line: 50, col: 10, pos: 885 },
-            { name: 'unusedGetter', line: 61, col: 14, pos: 1082 },
-            { name: 'unusedSetter', line: 65, col: 14, pos: 1152 },
+            { name: 'B_Unused', line: 9, col: 3, pos: 127 },
+            { name: 'D_Key', line: 11, col: 3, pos: 165 },
           ],
         },
         duplicates: [],

@@ -28,6 +28,7 @@ This will give a lengthy output, including:
 - Enabled plugins per workspace
 - Glob patterns and options followed by matching file paths
 - Plugin config file paths and found dependencies per plugin
+- Compiled non-standard source files
 
 ## Exceptions thrown by Knip
 

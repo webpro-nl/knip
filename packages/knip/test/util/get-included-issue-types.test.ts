@@ -3,11 +3,23 @@ import test from 'node:test';
 import { ISSUE_TYPES } from '../../src/constants.js';
 import { getIncludedIssueTypes } from '../../src/util/get-included-issue-types.js';
 
-const all = Object.fromEntries(ISSUE_TYPES.map(type => [type, true]));
-const none = Object.fromEntries(ISSUE_TYPES.map(type => [type, false]));
+const included = (type: string) => [type, true];
+const excluded = (type: string) => [type, false];
+const all = Object.fromEntries(ISSUE_TYPES.map(included));
+const none = Object.fromEntries(ISSUE_TYPES.map(excluded));
+const defaults = Object.fromEntries([
+  ...ISSUE_TYPES.filter(type => type !== 'classMembers').map(included),
+  ...['classMembers'].map(excluded),
+]);
 
 test('Resolve included issue types (default)', async () => {
   const cliArgs = { include: [], exclude: [], dependencies: false, exports: false };
+  const config = getIncludedIssueTypes(cliArgs);
+  assert.deepEqual(config, { ...defaults });
+});
+
+test('Resolve included issue types (all)', async () => {
+  const cliArgs = { include: ['classMembers'], exclude: [], dependencies: false, exports: false };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, { ...all });
 });
@@ -21,7 +33,7 @@ test('Resolve included issue types (include single)', async () => {
 test('Resolve included issue types (exclude some)', async () => {
   const cliArgs = { include: [], exclude: ['duplicates', 'nsTypes'], dependencies: false, exports: false };
   const config = getIncludedIssueTypes(cliArgs);
-  assert.deepEqual(config, { ...all, duplicates: false, nsTypes: false });
+  assert.deepEqual(config, { ...defaults, duplicates: false, nsTypes: false });
 });
 
 test('Resolve included issue types (overlap)', async () => {
@@ -50,7 +62,12 @@ test('Resolve included issue types (include dependencies)', async () => {
 test('Resolve included issue types (exclude dependencies)', async () => {
   const cliArgs = { include: [], exclude: ['dependencies'], dependencies: false, exports: false };
   const config = getIncludedIssueTypes(cliArgs);
-  assert.deepEqual(config, { ...all, dependencies: false, devDependencies: false, optionalPeerDependencies: false });
+  assert.deepEqual(config, {
+    ...defaults,
+    dependencies: false,
+    devDependencies: false,
+    optionalPeerDependencies: false,
+  });
 });
 
 test('Resolve included issue types (--dependencies)', async () => {
@@ -83,7 +100,7 @@ test('Resolve included issue types (--exports)', async () => {
 });
 
 test('Resolve included issue types (all)', async () => {
-  const cliArgs = { include: ['files'], exclude: [], dependencies: true, exports: true };
+  const cliArgs = { include: ['files', 'classMembers'], exclude: [], dependencies: true, exports: true };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, all);
 });

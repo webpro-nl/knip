@@ -14,16 +14,31 @@ export default visit(
           // Pattern: export * as namespace from 'specifier';
           return {
             identifier: '*',
+            namespace: node.exportClause.name.escapedText,
             specifier: node.moduleSpecifier.text,
             isReExport: true,
             pos: node.exportClause.name.pos,
           };
         } else {
-          // Pattern: export { identifier, identifier2 } from 'specifier';
           const specifier = node.moduleSpecifier; // Assign to satisfy TS
           return node.exportClause.elements.map(element => {
-            const identifier = (element.propertyName ?? element.name).getText();
-            return { identifier, specifier: specifier.text, isReExport: true, pos: element.pos };
+            if (element.propertyName && element.name) {
+              // Pattern: export { identifier as otherIdentifier } from 'specifier';
+              return {
+                identifier: String(element.name.escapedText),
+                namespace: element.propertyName.escapedText,
+                specifier: specifier.text,
+                isReExport: true,
+                pos: element.pos,
+              };
+            }
+            // Pattern: export { identifier } from 'specifier';
+            return {
+              identifier: (element.propertyName ?? element.name).getText(),
+              specifier: specifier.text,
+              isReExport: true,
+              pos: element.pos,
+            };
           });
         }
       }

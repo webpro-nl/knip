@@ -8,7 +8,7 @@ const cwd = resolve('fixtures/exports');
 
 const exec = execFactory(cwd);
 
-test('knip --reporter json', () => {
+test('knip --reporter json (exports & types)', () => {
   const json = {
     files: [],
     issues: [
@@ -23,7 +23,6 @@ test('knip --reporter json', () => {
         exports: [{ name: 'NamedExport', line: 1, col: 14, pos: 13 }],
         types: [],
         enumMembers: {},
-        classMembers: {},
         duplicates: [],
       },
       {
@@ -37,7 +36,6 @@ test('knip --reporter json', () => {
         exports: [{ name: 'unusedZero', line: 3, col: 14, pos: 39 }],
         types: [],
         enumMembers: {},
-        classMembers: {},
         duplicates: [],
       },
       {
@@ -51,7 +49,6 @@ test('knip --reporter json', () => {
         exports: [{ name: 'unusedInMix', line: 1, col: 14, pos: 13 }],
         types: [],
         enumMembers: {},
-        classMembers: {},
         duplicates: [],
       },
       {
@@ -69,7 +66,6 @@ test('knip --reporter json', () => {
         ],
         types: [{ name: 'MyAnyType', line: 19, col: 13, pos: 702 }],
         enumMembers: {},
-        classMembers: {},
         duplicates: [
           [
             { name: 'exportedResult', line: 17, col: 13, pos: 649 },
@@ -91,7 +87,6 @@ test('knip --reporter json', () => {
         ],
         types: [],
         enumMembers: {},
-        classMembers: {},
         duplicates: [],
       },
       {
@@ -105,7 +100,6 @@ test('knip --reporter json', () => {
         exports: [{ name: 'nsUnusedKey', line: 3, col: 14, pos: 84 }],
         types: [{ name: 'MyNamespace', line: 5, col: 18, pos: 119 }],
         enumMembers: {},
-        classMembers: {},
         duplicates: [],
       },
       {
@@ -122,7 +116,6 @@ test('knip --reporter json', () => {
           { name: 'MyType', line: 8, col: 14, pos: 145 },
         ],
         enumMembers: {},
-        classMembers: {},
         duplicates: [],
       },
     ],

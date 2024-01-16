@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { SymbolType } from '../../../types/issues.js';
 import { exportVisitor as visit } from '../index.js';
-import type { ExportPos } from 'src/types/exports.js';
+import type { Fix } from 'src/types/exports.js';
 import type { BoundSourceFile } from 'src/typescript/SourceFile.js';
 
 export default visit(
@@ -19,10 +19,9 @@ export default visit(
           const identifier = String(element.name.escapedText);
           const declaration = declarations?.get(identifier)?.find((d: ts.Node) => d !== element);
           const pos = element.name.pos;
-          const name = ts.getNameOfDeclaration(declaration);
-          const posDecl = name?.pos ?? declaration?.pos ?? pos;
-          const fix: ExportPos = isFixExports || isFixTypes ? [element.getStart(), element.getEnd()] : [];
-          return { node: element, identifier, type, pos, posDecl, fix };
+          const fix: Fix = isFixExports || isFixTypes ? [element.getStart(), element.getEnd()] : undefined;
+          // @ts-expect-error TODO Fix (convenience in addExport)
+          return { node: element, symbol: declaration?.symbol, identifier, type, pos, fix };
         });
       }
     }

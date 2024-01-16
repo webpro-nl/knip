@@ -70,7 +70,9 @@ const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config', rawSpeci
   const specifier = rawSpecifier.replace(/(^plugin:|:.+$)/, '');
   if (isQualifiedSpecifier(specifier)) return specifier;
   if (!specifier.startsWith('@')) {
-    const id = rawSpecifier.startsWith('plugin:') ? getPackageNameFromModuleSpecifier(specifier) : specifier;
+    const id = rawSpecifier.startsWith('plugin:')
+      ? getPackageNameFromModuleSpecifier(specifier)
+      : specifier.split('/')[0];
     return `${namespace}-${id}`;
   }
   const [scope, name, ...rest] = specifier.split('/');
@@ -82,9 +84,6 @@ const resolvePluginSpecifier = (specifier: string) => resolveSpecifier('eslint-p
 
 const resolveExtendSpecifier = (specifier: string) => {
   if (isInternal(specifier)) return;
-
-  // Exception: eslint-config-next → next
-  if (/^next(\/.+)?$/.test(specifier)) return specifier;
 
   const namespace = specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config';
   return resolveSpecifier(namespace, specifier);

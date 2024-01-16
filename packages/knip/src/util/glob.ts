@@ -1,8 +1,7 @@
 import fg from 'fast-glob';
-import { globby } from 'globby';
-import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
+import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { compact } from './array.js';
-import { debugLogObject } from './debug.js';
+import { globby } from './globby.js';
 import { join, relative } from './path.js';
 import { timerify } from './Performance.js';
 
@@ -22,7 +21,6 @@ const negatedLast = (pattern: string) => (pattern.startsWith('!') ? 1 : -1);
 interface BaseGlobOptions {
   cwd: string;
   patterns: string[];
-  ignore?: string[];
   gitignore?: boolean;
 }
 
@@ -30,7 +28,7 @@ interface GlobOptions extends BaseGlobOptions {
   workingDir?: string;
 }
 
-const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = true }: GlobOptions) => {
+const glob = async ({ cwd, workingDir = cwd, patterns, gitignore = true }: GlobOptions) => {
   if (patterns.length === 0) return [];
 
   const relativePath = relative(cwd, workingDir);
@@ -42,24 +40,20 @@ const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = 
   // Only negated patterns? Bail out.
   if (globPatterns[0].startsWith('!')) return [];
 
-  const ignorePatterns = compact([...ignore, ...GLOBAL_IGNORE_PATTERNS]);
-
-  debugLogObject(relativePath || ROOT_WORKSPACE_NAME, `Glob options`, { cwd, globPatterns, ignorePatterns, gitignore });
-
   return globby(globPatterns, {
     cwd,
-    ignore: ignorePatterns,
+    dir: workingDir,
     gitignore,
     absolute: true,
     dot: true,
   });
 };
 
-const pureGlob = async ({ cwd, patterns, ignore = [], gitignore = true }: BaseGlobOptions) => {
+const pureGlob = async ({ cwd, patterns, gitignore = true }: BaseGlobOptions) => {
   if (patterns.length === 0) return [];
   return globby(patterns, {
     cwd,
-    ignore: [...ignore, ...GLOBAL_IGNORE_PATTERNS],
+    dir: cwd,
     gitignore,
     absolute: true,
   });
@@ -72,10 +66,12 @@ const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
   }
 };
 
-const dirGlob = async ({ cwd, patterns }: BaseGlobOptions) =>
+const dirGlob = async ({ cwd, patterns, gitignore = true }: BaseGlobOptions) =>
   globby(patterns, {
     cwd,
+    dir: cwd,
     onlyDirectories: true,
+    gitignore,
   });
 
 export const _glob = timerify(glob);

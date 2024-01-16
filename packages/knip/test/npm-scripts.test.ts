@@ -89,7 +89,7 @@ test('Unused dependencies in npm scripts', async () => {
     devDependencies: 1,
     binaries: 2,
     processed: 1,
-    total: 1,
+    total: 2,
   });
 
   assert.deepEqual(
@@ -118,7 +118,7 @@ test('Unused dependencies in npm scripts (strict)', async () => {
     files: 1,
     dependencies: 2,
     processed: 1,
-    total: 1,
+    total: 2,
   });
 
   assert.deepEqual(

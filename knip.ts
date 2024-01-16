@@ -6,7 +6,7 @@ const config: KnipConfig = {
       ignoreBinaries: ['knip']
     },
     'packages/knip': {
-      entry: ['src/{index,cli}.ts!'],
+      entry: ['src/{index,cli}.ts!', 'src/plugins/*/index.ts!'],
       project: ['src/**/*.ts!'],
       ignore: ['**/fixtures/**', '**/_template/**', '**/dist/**'],
       ignoreDependencies: ['@pnpm/logger'],
@@ -20,10 +20,6 @@ const config: KnipConfig = {
       ignore: 'config.ts',
       ignoreBinaries: ['rg']
     }
-  },
-  compilers: {
-    astro: (text: string) => [...text.replace(/```[\s\S]*?```/g, '').matchAll(/import\s[^;]+;/g)].join('\n'),
-    mdx: (text: string) => [...text.replace(/```[\s\S]*?```/g, '').matchAll(/import\s[^;]+;/g)].join('\n')
   }
 };
 

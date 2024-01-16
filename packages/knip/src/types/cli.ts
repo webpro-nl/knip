@@ -7,6 +7,9 @@ export interface CommandLineOptions {
   isShowProgress: boolean;
   isIncludeEntryExports: boolean;
   isIsolateWorkspaces: boolean;
+  tags: Tags;
   isFix: boolean;
   fixTypes: string[];
 }
+
+export type Tags = [string[], string[]];

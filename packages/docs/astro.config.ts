@@ -1,16 +1,20 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 import remarkDirective from 'remark-directive';
-import { transformDirectives } from './remark/transformDirectives.ts';
+import { base } from './config.js';
 import { fixInternalLinks } from './remark/fixInternalLinks.ts';
+import { transformDirectives } from './remark/transformDirectives.ts';
+import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 
-const setForeground = (theme, scope, value) => {
+const setForeground = (theme: ExpressiveCodeTheme, scope: string, value: string) => {
   const settings = theme.settings.find(setting => setting.scope?.includes(scope));
   if (settings) settings.settings.foreground = value;
 };
 
 export default defineConfig({
   site: 'https://knip.dev',
+  base,
+  // @ts-expect-error TODO
   sitemap: false,
   trailingSlash: 'never',
   markdown: {
@@ -36,7 +40,7 @@ export default defineConfig({
       },
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
       editLink: {
-        baseUrl: 'https://github.com/webpro/knip/edit/main/packages/docs',
+        baseUrl: 'https://github.com/webpro/knip/edit/v3/packages/docs/',
       },
       sidebar: [
         {
@@ -67,6 +71,7 @@ export default defineConfig({
       expressiveCode: {
         emitExternalStylesheet: true,
         styleOverrides: {
+          // @ts-expect-error TODO
           'frm-tooltipSuccessBg': 'var(--sl-color-orange)',
           'frm-tooltipSuccessFg': 'var(--sl-color-white)',
         },
@@ -74,10 +79,8 @@ export default defineConfig({
           showCopyToClipboardButton: true,
         },
         themes: ['min-dark'],
-        theme: 'min-dark',
         customizeTheme: theme => {
-          theme.settings[0].foreground = '#ededed';
-          setForeground(theme, 'entity.name.tag', '#f56e0f');
+          setForeground(theme, 'entity.name.tag', '#f68a22');
           setForeground(theme, 'entity.name.type', '#ededed');
           setForeground(theme, 'string', '#ededed');
           return theme;

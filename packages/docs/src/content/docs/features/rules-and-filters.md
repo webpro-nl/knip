@@ -30,7 +30,7 @@ Or the other way around, use `--exclude` to ignore the types you're not
 interested in:
 
 ```sh
-knip --include files --exclude classMembers,enumMembers
+knip --include files --exclude enumMembers,duplicates
 ```
 
 Also see the [list of issue types][1].

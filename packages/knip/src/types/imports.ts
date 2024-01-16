@@ -1,17 +1,30 @@
+import ts from 'typescript';
+
+export interface ImportNode {
+  specifier: string;
+  identifier: string | undefined;
+  pos: number | undefined;
+  symbol?: ts.Symbol;
+  isTypeOnly?: boolean;
+  isReExport?: boolean;
+}
+
 type FilePath = string;
 type Specifier = string;
 type Identifier = string;
+type Identifiers = Set<Identifier>;
 
-type ImportItems = Set<Identifier>;
-
-export type ImportedModule = {
+export type SerializableImports = {
   specifier: Specifier;
-  symbols: ImportItems;
+  identifiers: Identifiers;
   hasStar: boolean;
+  importedNs: Set<string>;
   isReExport: boolean;
   isReExportedBy: Set<string>;
+  isReExportedAs: Set<[string, string]>;
+  isReExportedNs: Set<[string, string]>;
 };
 
-export type Imports = Map<FilePath, ImportedModule>;
+export type SerializableImportMap = Record<FilePath, SerializableImports>;
 
 export type UnresolvedImport = { specifier: string; pos?: number; line?: number; col?: number };

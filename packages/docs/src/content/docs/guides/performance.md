@@ -68,70 +68,22 @@ another round of analysis on those files.
 ## findReferences
 
 The `findReferences` function (from the TypeScript Language Service) is invoked
-for exports that are imported using the `import *` syntax, and for each class
-and enum member. Use the `--performance` flag to see how many times this
-function is invoked and how much time is spent there:
+for exported class members. If finding unused class members is enabled, use the
+`--performance` flag to see how many times this function is invoked and how much
+time is spent there:
 
 ```sh
-knip --performance
+knip --include classMembers --performance
 ```
 
 The first invocation (per program) is especially expensive, as TypeScript sets
 up symbols and caching.
 
-If you have lots of classes or enums with many members in your codebase, Knip
-can run faster by excluding (one of) them from the report:
-
-```sh
-knip --performance --exclude classMembers,enumMembers
-```
-
-When the codebase contains namespaced imports, the following command will give
-incomplete results and is not recommended. But for the sake of completeness in
-this topic, calls to `findReferences` can be (mostly) prevented:
-
-```sh
-knip --performance --exclude classMembers,enumMembers,nsTypes,nsExports
-```
-
-This should approach the performance without namespaced imports (see [star
-imports and barrel files][3]).
-
-## GitIgnore
-
-Knip looks up `.gitignore` files and uses them to filter out matching entry and
-project files. This increases correctness, but it slows down finding files using
-glob patterns and in some cases significantly. Your project may have multiple
-`.gitignore` files across all folders.
-
-You might want see if it's possible to disable that with `--no-gitignore` and
-enjoy a performance boost.
-
-To help determine whether this trade-off might be worth it for you, first check
-the difference in unused files:
-
-```sh
-diff <(knip --no-gitignore --include files) <(knip --include files)
-```
-
-And to measure the difference of this flag in seconds:
-
-```sh
-SECONDS=0; knip > /dev/null; t1=$SECONDS; SECONDS=0; knip --no-gitignore > /dev/null; t2=$SECONDS; echo "Difference: $((t1 - t2)) seconds"
-```
-
-If there is no difference in unused files, and runs are significantly faster,
-you could consider using the `--no-gitignore` flag.
-
-Analysis on a sample large project went down from 33 to 9 seconds (that's >70%
-faster).
-
 ## A Last Resort
 
 In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][4].
+individual workspaces][3].
 
 [1]: #findreferences
 [2]: https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
-[3]: #star-imports-and-barrel-files
-[4]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[3]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace

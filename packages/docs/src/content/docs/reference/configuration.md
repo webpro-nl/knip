@@ -9,7 +9,7 @@ configure Knip.
 
 ## JSON Schema
 
-A "$schema" field is a URL that you put at the top of your JSON file. This
+A `$schema` field is a URL that you put at the top of your JSON file. This
 allows you to get red squiggly lines inside of your IDE when you make a typo or
 provide an otherwise invalid configuration option.
 
@@ -17,7 +17,7 @@ In JSON, you can use the provided JSON schema:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@3/schema.json"
+  "$schema": "https://unpkg.com/knip@4/schema.json"
 }
 ```
 
@@ -25,7 +25,7 @@ In JSONC, you can use the provided JSONC schema:
 
 ```json title="knip.jsonc"
 {
-  "$schema": "https://unpkg.com/knip@3/schema-jsonc.json"
+  "$schema": "https://unpkg.com/knip@4/schema-jsonc.json"
 }
 ```
 
@@ -45,6 +45,15 @@ export default config;
 
 ## `entry`
 
+Array of glob patterns to find entry files. Prefix with `!` for negation.
+Example:
+
+```json title="knip.json"
+{
+  "entry": ["src/index.ts", "scripts/*.ts", "!scripts/except-this-one.ts"]
+}
+```
+
 See [configuration][2] and [entry files][3].
 
 ## `exclude`
@@ -53,18 +62,17 @@ See [Rules & Filters][4].
 
 ## `ignore`
 
-Array of glob patterns to ignore files. Used as ignore patterns when looking up
-`entry` and `project` files. Example:
+Array of glob patterns to ignore issues from matching files. Example:
 
 ```json title="knip.json"
 {
-  "ignore": ["**/fixtures"]
+  "ignore": ["src/generated.ts", "fixtures/**"]
 }
 ```
 
-This does not 100% guarantee that the targeted files are not included in the
-analysis, so even issues in the ignored files may still be reported. Use
-[`--debug`][5] for details.
+- Use negated patterns in `entry` and `project` glob patterns to prevent
+  matching files from being added to the analysis.
+- Use `ignore` patterns to exclude issues in matching files from being reported.
 
 ## `ignoreBinaries`
 
@@ -202,15 +210,23 @@ There are a few options to modify the behavior of a plugin:
 
 It should be rarely necessary to override the `entry` patterns, since plugins
 also read custom entry file patterns from the tooling configuration (see
-[Plugins → entry files][6]).
+[Plugins → entry files][5]).
 
 Plugin configuration can be set on root and on a per-workspace level. If enabled
 on root level, it can be disabled on workspace level by setting it to `false`
 there, and vice versa.
 
-Also see [Plugins][7].
+Also see [Plugins][6].
 
 ## `project`
+
+Array of glob patterns to find project files. Example:
+
+```json title="knip.json"
+{
+  "project": ["src/**/*.ts", "scripts/**/*.ts"]
+}
+```
 
 See [configuration][2] and [entry files][3].
 
@@ -231,13 +247,12 @@ root-only options:
 Workspaces can't be nested in configuration, but they can be nested in folder
 structure.
 
-See [Monorepos and workspaces][8].
+See [Monorepos and workspaces][7].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
 [3]: ../explanations/entry-files.md
 [4]: ../features/rules-and-filters.md#filters
-[5]: ../guides/troubleshooting.md#issues-reported-by-knip
-[6]: ../explanations/plugins.md#entry-files
-[7]: ../explanations/plugins.md
-[8]: ../features/monorepos-and-workspaces.md
+[5]: ../explanations/plugins.md#entry-files
+[6]: ../explanations/plugins.md
+[7]: ../features/monorepos-and-workspaces.md

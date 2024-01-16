@@ -8,7 +8,7 @@ const cwd = resolve('fixtures/module-resolution-non-std');
 
 const exec = execFactory(cwd);
 
-test('knip --reporter json', () => {
+test('knip --reporter json (files, unlisted & unresolved)', () => {
   const json = {
     files: ['src/unused.ts'],
     issues: [
@@ -23,7 +23,6 @@ test('knip --reporter json', () => {
         exports: [],
         types: [],
         enumMembers: {},
-        classMembers: {},
         duplicates: [],
       },
     ],

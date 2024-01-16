@@ -36,6 +36,8 @@ This is where Knip looks for a configuration file:
 - `.knip.jsonc`
 - `knip.ts`
 - `knip.js`
+- `knip.config.ts`
+- `knip.config.js`
 - `knip` in `package.json`
 
 Use `--config path/to/knip.config.json` for a different file path.
@@ -48,7 +50,7 @@ files in the `scripts` folder:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@3/schema.json",
+  "$schema": "https://unpkg.com/knip@4/schema.json",
   "entry": ["src/index.ts", "scripts/{build,create}.js"],
   "project": ["src/**/*.ts", "scripts/**/*.js"]
 }

@@ -31,7 +31,7 @@ type WorkspaceManagerOptions = {
   isStrict: boolean;
 };
 
-type ReferencedDependencies = Set<[string, string]>;
+export type ReferencedDependencies = Set<[string, string]>;
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
@@ -124,7 +124,7 @@ export class WorkspaceWorker {
 
     const enabledPluginNames = this.enabledPlugins.map(name => plugins[name].NAME);
 
-    debugLogObject(this.name, `Enabled plugins (${this.name})`, enabledPluginNames);
+    debugLogObject(this.name, 'Enabled plugins', enabledPluginNames);
   }
 
   private async initReferencedDependencies() {
@@ -243,7 +243,6 @@ export class WorkspaceWorker {
   private async findDependenciesByPlugins() {
     const name = this.name;
     const cwd = this.dir;
-    const ignore = this.getIgnorePatterns();
 
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginNames) {
       if (this.enabled[pluginName]) {
@@ -254,7 +253,7 @@ export class WorkspaceWorker {
           if (!pluginConfig) continue;
 
           const patterns = this.getConfigurationFilePatterns(pluginName);
-          const allConfigFilePaths = await _pureGlob({ patterns, cwd, ignore, gitignore: false });
+          const allConfigFilePaths = await _pureGlob({ patterns, cwd, gitignore: false });
 
           const configFilePaths = allConfigFilePaths.filter(
             filePath =>

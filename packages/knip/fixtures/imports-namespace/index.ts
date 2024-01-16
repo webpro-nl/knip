@@ -7,3 +7,5 @@ NS['identifier16'];
 NS.identifier17();
 
 const { identifier18, identifier19, identifier20 } = NS2;
+
+NS2.identifier21.method();

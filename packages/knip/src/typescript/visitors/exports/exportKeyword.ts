@@ -3,7 +3,7 @@ import { SymbolType } from '../../../types/issues.js';
 import { compact } from '../../../util/array.js';
 import { isGetOrSetAccessorDeclaration, isPrivateMember, stripQuotes } from '../../ast-helpers.js';
 import { exportVisitor as visit } from '../index.js';
-import type { ExportPos } from '../../../types/exports.js';
+import type { Fix } from '../../../types/exports.js';
 
 export default visit(
   () => true,
@@ -20,7 +20,7 @@ export default visit(
             return compact(
               declaration.name.elements.map(element => {
                 if (ts.isIdentifier(element.name)) {
-                  const fix: ExportPos = isFixExports ? [element.getStart(), element.getEnd()] : [];
+                  const fix: Fix = isFixExports ? [element.getStart(), element.getEnd()] : undefined;
                   return {
                     node: element,
                     identifier: element.name.escapedText.toString(),
@@ -36,7 +36,7 @@ export default visit(
             return compact(
               declaration.name.elements.map(element => {
                 if (ts.isBindingElement(element)) {
-                  const fix: ExportPos = isFixExports ? [element.getStart(), element.getEnd()] : [];
+                  const fix: Fix = isFixExports ? [element.getStart(), element.getEnd()] : undefined;
                   return {
                     node: element,
                     identifier: element.getText(),
@@ -50,7 +50,7 @@ export default visit(
           } else {
             // Pattern: export const MyVar = 1;
             const identifier = declaration.name.getText();
-            const fix: ExportPos = isFixExports ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : [];
+            const fix: Fix = isFixExports ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : undefined;
             return {
               node: declaration,
               identifier,
@@ -69,9 +69,9 @@ export default visit(
         const identifier = defaultKeyword ? 'default' : node.name.getText();
 
         const pos = (node.name ?? node.body ?? node).getStart();
-        const fix: ExportPos = isFixExports
+        const fix: Fix = isFixExports
           ? [exportKeyword.getStart(), (defaultKeyword ?? exportKeyword).getEnd() + 1]
-          : [];
+          : undefined;
         return {
           node,
           identifier,
@@ -98,11 +98,11 @@ export default visit(
             identifier: member.name.getText(),
             pos: member.name.getStart(),
             type: SymbolType.MEMBER,
-            fix: [] as ExportPos,
+            fix: undefined,
           }));
-        const fix: ExportPos = isFixExports
+        const fix: Fix = isFixExports
           ? [exportKeyword.getStart(), (defaultKeyword ?? exportKeyword).getEnd() + 1]
-          : [];
+          : undefined;
         return {
           node,
           identifier,
@@ -114,7 +114,7 @@ export default visit(
       }
 
       if (ts.isTypeAliasDeclaration(node)) {
-        const fix: ExportPos = isFixTypes ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : [];
+        const fix: Fix = isFixTypes ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : undefined;
         return {
           node,
           identifier: node.name.getText(),
@@ -125,7 +125,7 @@ export default visit(
       }
 
       if (ts.isInterfaceDeclaration(node)) {
-        const fix: ExportPos = isFixTypes ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : [];
+        const fix: Fix = isFixTypes ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : undefined;
         return {
           node,
           identifier: node.name.getText(),
@@ -143,9 +143,9 @@ export default visit(
           identifier: stripQuotes(member.name.getText()),
           pos: member.name.getStart(),
           type: SymbolType.MEMBER,
-          fix: [] as ExportPos,
+          fix: undefined,
         }));
-        const fix: ExportPos = isFixTypes ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : [];
+        const fix: Fix = isFixTypes ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : undefined;
         return {
           node,
           identifier,

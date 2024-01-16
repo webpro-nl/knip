@@ -5,18 +5,20 @@ import { isKnownError, getKnownError, isConfigurationError, hasCause } from './u
 import { cwd } from './util/path.js';
 import { Performance } from './util/Performance.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
+import { splitTags } from './util/tag.js';
 import { version } from './version.js';
 import { main } from './index.js';
 import type { ReporterOptions, IssueType } from './types/issues.js';
 
 const {
   debug: isDebug = false,
+  trace: isTrace = false,
   help: isHelp,
   'max-issues': maxIssues = '0',
   'no-config-hints': noConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
-  'no-progress': isNoProgress = false,
+  'no-progress': isNoProgress = isDebug || isTrace || false,
   'include-entry-exports': isIncludeEntryExports = false,
   'isolate-workspaces': isIsolateWorkspaces = false,
   performance: isObservePerf = false,
@@ -28,6 +30,7 @@ const {
   'fix-type': fixTypes = [],
   tsConfig,
   version: isVersion,
+  'experimental-tags': tags = [],
 } = parsedArgValues;
 
 if (isHelp) {
@@ -40,8 +43,7 @@ if (isVersion) {
   process.exit(0);
 }
 
-const isShowProgress =
-  !isDebug && isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
+const isShowProgress = isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
 
 const run = async () => {
   try {
@@ -56,6 +58,7 @@ const run = async () => {
       isShowProgress,
       isIncludeEntryExports,
       isIsolateWorkspaces,
+      tags: splitTags(tags),
       isFix: isFix || fixTypes.length > 0,
       fixTypes: fixTypes.flatMap(type => type.split(',')),
     });

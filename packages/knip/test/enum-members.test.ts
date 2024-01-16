@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { main } from '../src/index.js';
+import { resolve } from '../src/util/path.js';
+import baseArguments from './helpers/baseArguments.js';
+import baseCounters from './helpers/baseCounters.js';
+
+const cwd = resolve('fixtures/enum-members');
+
+test('Find unused enum members', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
+  assert(issues.enumMembers['members.ts']['B_Unused']);
+  assert(issues.enumMembers['members.ts']['D_Key']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    enumMembers: 2,
+    processed: 2,
+    total: 2,
+  });
+});
+
+test('Find unused enum members (isIncludeEntryExports)', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    isIncludeEntryExports: true,
+  });
+
+  assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
+  assert(issues.enumMembers['members.ts']['B_Unused']);
+  assert(issues.enumMembers['members.ts']['D_Key']);
+  assert(issues.enumMembers['index.ts']['UnusedMemberInEntryEnum']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    enumMembers: 3,
+    processed: 2,
+    total: 2,
+  });
+});
