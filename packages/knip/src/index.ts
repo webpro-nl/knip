@@ -86,7 +86,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   // TODO Organize better
   deputy.addIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
 
-  const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, ancestors: w.ancestors }));
+  const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
   debugLogObject('*', 'Included workspace configs', o);
 
