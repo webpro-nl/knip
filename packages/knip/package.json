@@ -38,7 +38,7 @@
     "format": "prettier scripts src test schema.json schema-jsonc.json --with-node-modules --write",
     "pretest": "node rmdir.js tmp && swc src -d tmp/src && swc test -d tmp/test",
     "test": "node --no-warnings --test tmp",
-    "coverage": "c8 --reporter html node --no-warnings --loader tsx --test test/*.test.ts test/*/*.test.ts",
+    "coverage": "c8 --reporter html node --no-warnings --import tsx --test test/*.test.ts test/*/*.test.ts",
     "watch": "npm link && tsc --watch",
     "prebuild": "node rmdir.js dist",
     "build": "tsc",
