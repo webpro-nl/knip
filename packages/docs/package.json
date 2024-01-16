@@ -21,19 +21,19 @@
     "qa": "npm run build && npm run lint && npm run remark"
   },
   "dependencies": {
-    "@astrojs/starlight": "0.15.1",
-    "sharp": "0.33.1"
+    "@astrojs/starlight": "0.15.3",
+    "sharp": "0.33.2"
   },
   "devDependencies": {
-    "@astrojs/check": "0.3.4",
+    "@astrojs/check": "0.4.1",
     "@knip/eslint-config": "0.0.0",
     "@types/mdast": "4.0.3",
     "@types/unist": "3.0.2",
-    "astro": "4.0.8",
+    "astro": "4.1.2",
     "eslint": "8.56.0",
     "hastscript": "8.0.0",
     "kleur": "4.1.5",
-    "prettier": "3.1.1",
+    "prettier": "3.2.2",
     "prettier-plugin-astro": "0.12.3",
     "remark-cli": "12.0.0",
     "remark-directive": "3.0.0",
