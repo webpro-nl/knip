@@ -104,7 +104,8 @@ const getImportsAndExports = (
 
     if (isReExport) {
       internalImport.isReExport = true;
-      if (namespace) internalImport.isReExportedNs.add([sourceFile.fileName, namespace]);
+      if (namespace && isStar) internalImport.isReExportedAs.add([sourceFile.fileName, namespace]);
+      else if (namespace) internalImport.isReExportedNs.add([sourceFile.fileName, namespace]);
       else internalImport.isReExportedBy.add(sourceFile.fileName);
     }
 

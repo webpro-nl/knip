@@ -491,7 +491,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
     }
 
-    exportLookupLog(depth, `${id} is not re-exported`, '');
+    exportLookupLog(depth, `${id} is not re-exported by entry file`, '');
   };
 
   const isExportedItemReferenced = (exportedItem: SerializableExport | SerializableExportMember) => {
