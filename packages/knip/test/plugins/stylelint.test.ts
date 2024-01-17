@@ -10,5 +10,10 @@ const manifest = getManifest(cwd);
 test('Find dependencies in stylelint configuration (json)', async () => {
   const configFilePath = join(cwd, '.stylelintrc');
   const dependencies = await stylelint.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['stylelint-config-standard', 'stylelint-order']);
+  assert.deepEqual(dependencies, [
+    'stylelint-config-standard',
+    'stylelint-order',
+    'stylelint-config-html/html',
+    'stylelint-config-standard',
+  ]);
 });

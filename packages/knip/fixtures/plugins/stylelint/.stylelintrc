@@ -3,5 +3,13 @@
   "plugins": ["stylelint-order"],
   "rules": {
     "alpha-value-notation": "number"
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.html"
+      ],
+      "extends": ["stylelint-config-html/html", "stylelint-config-standard"]
+    }
+  ]
 }
