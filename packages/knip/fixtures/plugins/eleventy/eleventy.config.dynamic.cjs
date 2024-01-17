@@ -1,4 +1,4 @@
-// Stripped down version of https://github.com/11ty/eleventy-base-blog/blob/main/eleventy.config.js.
+// https://github.com/11ty/eleventy-base-blog/blob/main/eleventy.config.js
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({
     './public/': '/',
