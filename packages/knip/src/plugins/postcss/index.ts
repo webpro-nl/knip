@@ -6,7 +6,7 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 const NAME = 'PostCSS';
 
-const ENABLERS = ['postcss', 'next'];
+const ENABLERS = ['postcss', 'postcss-cli', 'next'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
