@@ -38,6 +38,5 @@ export default {
   ENABLERS,
   isEnabled,
   ENTRY_FILE_PATTERNS,
-  PRODUCTION_ENTRY_FILE_PATTERNS,
   findDependencies,
 };
