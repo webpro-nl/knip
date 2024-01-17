@@ -14,11 +14,15 @@ const ENABLERS = ['@11ty/eleventy'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-const ENTRY_FILE_PATTERNS = ['.eleventy.js', 'eleventy.config.{js,cjs}'];
+const CONFIG_FILE_PATTERNS: string[] = ['.eleventy.js', 'eleventy.config.{js,cjs}'];
 
-const PRODUCTION_ENTRY_FILE_PATTERNS = ['**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}']
+const ENTRY_FILE_PATTERNS: string[] = [];
+
+const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = ['**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}']
   .map(pattern => [`src/${pattern}`, `content/${pattern}`])
   .flat();
+
+const PROJECT_FILE_PATTERNS: string[] = [];
 
 const findEleventyDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config } = options;
@@ -51,7 +55,9 @@ export default {
   NAME,
   ENABLERS,
   isEnabled,
+  CONFIG_FILE_PATTERNS,
   ENTRY_FILE_PATTERNS,
   PRODUCTION_ENTRY_FILE_PATTERNS,
+  PROJECT_FILE_PATTERNS,
   findDependencies,
 };
