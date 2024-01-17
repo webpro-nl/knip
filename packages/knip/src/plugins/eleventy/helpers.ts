@@ -149,5 +149,5 @@ export const defaultEleventyConfig: EleventyConfig = {
     layouts: '_includes',
     data: '_data',
   },
-  templateFormats: 'html,liquid,ejs,md,hbs,mustache,haml,pug,njk,11ty.js',
+  templateFormats: '11ty.js',
 };
