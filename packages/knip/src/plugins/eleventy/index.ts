@@ -1,7 +1,7 @@
 import { join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
 import type { EleventyConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -26,7 +26,7 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
   let localConfig = (await load(configFilePath)) as
     | Partial<EleventyConfig>
     | ((arg: DummyEleventyConfig) => Promise<Partial<EleventyConfig>>);
-  if (!localConfig) return [];
+  if (!localConfig) return PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern);
   if (typeof localConfig === 'function') localConfig = await localConfig(new DummyEleventyConfig());
 
   const inputDir = localConfig?.dir?.input || defaultEleventyConfig.dir.input;
