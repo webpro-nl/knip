@@ -6,4 +6,5 @@ export type EleventyConfig = {
     layouts: string;
     data: string;
   };
+  templateFormats: string | string[];
 };
