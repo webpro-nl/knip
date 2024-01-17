@@ -21,9 +21,9 @@ const PRODUCTION_ENTRY_FILE_PATTERNS = ['posts/**/*.11tydata.js', '_data/**/*.{j
 const findEleventyDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config } = options;
 
-  const localConfig: ((arg0: DummyEleventyConfig) => Promise<EleventyConfig>) = await load(configFilePath);
+  const localConfig: (arg0: DummyEleventyConfig) => Promise<EleventyConfig> = await load(configFilePath);
 
-  const result = { ...(await localConfig(new DummyEleventyConfig())), ...defaultEleventyConfig }  
+  const result = { ...(await localConfig(new DummyEleventyConfig())), ...defaultEleventyConfig };
 
   return config.entry
     ? config.entry.map(toProductionEntryPattern)
