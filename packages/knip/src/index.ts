@@ -325,7 +325,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (!importedSymbols[specifierFilePath]) {
             importedSymbols[specifierFilePath] = importItems;
           } else {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const importedModule = importedSymbols[specifierFilePath];
             for (const id of importItems.identifiers) importedModule.identifiers.add(id);
             for (const id of importItems.importedNs) importedModule.importedNs.add(id);
