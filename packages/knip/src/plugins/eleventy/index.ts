@@ -23,11 +23,10 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
 
   let localConfig = await load(configFilePath);
   if (typeof localConfig === 'function') localConfig = await localConfig(new DummyEleventyConfig());
-
-  const result = { ...localConfig, ...defaultEleventyConfig };
+  localConfig = { ...localConfig, ...defaultEleventyConfig };
 
   // Data directory pattern:
-  toEntryPattern(`${join(result.dir.input, result.dir.data)}/**/*.js`);
+  toEntryPattern(join(localConfig.dir.input, localConfig.dir.data, '**/*.js'));
 
   return config.entry
     ? config.entry.map(toProductionEntryPattern)
