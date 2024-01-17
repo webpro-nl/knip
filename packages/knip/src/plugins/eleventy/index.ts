@@ -41,8 +41,7 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
       join(inputDir, dataDir, '**/*.js'),
       join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
       join(inputDir, '**/*.11tydata.js'),
-    ] ??
-    ENTRY_FILE_PATTERNS
+    ]
   ).map(toEntryPattern);
 };
 
