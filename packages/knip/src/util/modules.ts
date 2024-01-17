@@ -17,7 +17,7 @@ export const getPackageNameFromFilePath = (value: string) => {
 };
 
 export const normalizeSpecifierFromFilePath = (value: string) => {
-  const match = toPosix(value).match(/.*\/node_modules\/(.+)/);
+  const match = /.*\/node_modules\/(.+)/.exec(toPosix(value));
   if (match) return match[match.length - 1];
   return value;
 };

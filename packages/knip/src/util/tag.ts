@@ -6,7 +6,7 @@ export const splitTags = (tags: string[]) =>
     .flatMap(tag => tag.split(','))
     .reduce<Tags>(
       ([incl, excl], tag) => {
-        (tag.startsWith('-') ? excl : incl).push(tag.match(/[a-zA-Z]+/)![0]);
+        (tag.startsWith('-') ? excl : incl).push(/[a-zA-Z]+/.exec(tag)![0]);
         return [incl, excl];
       },
       [[], []]
