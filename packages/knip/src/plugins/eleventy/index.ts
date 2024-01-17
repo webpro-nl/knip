@@ -3,6 +3,7 @@ import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
+import type { EleventyConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://www.11ty.dev/docs/
@@ -18,18 +19,20 @@ const ENTRY_FILE_PATTERNS = ['.eleventy.js', 'eleventy.config.{js,cjs}'];
 const findEleventyDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config } = options;
 
-  let localConfig = await load(configFilePath);
+  let localConfig = (await load(configFilePath)) as
+    | Partial<EleventyConfig>
+    | ((arg: DummyEleventyConfig) => Promise<Partial<EleventyConfig>>);
   if (typeof localConfig === 'function') localConfig = await localConfig(new DummyEleventyConfig());
-  localConfig = { ...localConfig, ...defaultEleventyConfig };
+
+  const inputDir = localConfig?.dir?.input || defaultEleventyConfig.dir.input;
+  const dataDir = localConfig?.dir?.data || defaultEleventyConfig.dir.data;
+  const templateFormats = localConfig.templateFormats || defaultEleventyConfig.templateFormats;
 
   return (
     config?.entry ?? [
-      join(localConfig.dir.input, localConfig.dir.data, '**/*.js'),
-      join(
-        localConfig.dir.input,
-        `**/*.{${typeof localConfig.templateFormats === 'string' ? localConfig.templateFormats : localConfig.templateFormats.join(',')}}`
-      ),
-      join(localConfig.dir.input, '**/*.11tydata.js'),
+      join(inputDir, dataDir, '**/*.js'),
+      join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
+      join(inputDir, '**/*.11tydata.js'),
     ] ??
     ENTRY_FILE_PATTERNS
   ).map(toEntryPattern);
