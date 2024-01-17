@@ -1,10 +1,9 @@
+import { join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { toEntryPattern } from '../../util/protocols.js';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
-import type { EleventyConfig } from './types.js';
-import { join } from '../../util/path.js';
+import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://www.11ty.dev/docs/
 
@@ -16,8 +15,6 @@ const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(d
 
 const ENTRY_FILE_PATTERNS = ['.eleventy.js', 'eleventy.config.{js,cjs}'];
 
-const PRODUCTION_ENTRY_FILE_PATTERNS = ['posts/**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}'];
-
 const findEleventyDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config } = options;
 
@@ -25,12 +22,13 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
   if (typeof localConfig === 'function') localConfig = await localConfig(new DummyEleventyConfig());
   localConfig = { ...localConfig, ...defaultEleventyConfig };
 
-  // Data directory pattern:
-  toEntryPattern(join(localConfig.dir.input, localConfig.dir.data, '**/*.js'));
-
-  return config.entry
-    ? config.entry.map(toProductionEntryPattern)
-    : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
+  return (
+    config?.entry ?? [
+      join(localConfig.dir.input, localConfig.dir.data, '**/*.js'),
+      join(localConfig.dir.input, '**/*.11tydata.js'),
+    ] ??
+    ENTRY_FILE_PATTERNS
+  ).map(toEntryPattern);
 };
 
 const findDependencies = timerify(findEleventyDependencies);
