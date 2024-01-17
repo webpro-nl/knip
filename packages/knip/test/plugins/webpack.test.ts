@@ -39,6 +39,20 @@ test('Find dependencies in Webpack configuration (webpack.config.js)', async () 
   ]);
 });
 
+test('Find dependencies in Webpack configuration (webpack.babel.config.js)', async () => {
+  const configFilePath = join(cwd, 'webpack.babel.js');
+  const dependencies = await webpack.findDependencies(configFilePath, { cwd, manifest });
+  assert.deepEqual(dependencies, [
+    'production:lib/linter/linter.js',
+    'babel-loader',
+    '@babel/preset-env',
+    'core-js/stable',
+    'regenerator-runtime/runtime',
+    'webpack-cli',
+    'webpack-dev-server',
+  ]);
+});
+
 test('Find dependencies in Webpack configuration', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
@@ -53,10 +67,10 @@ test('Find dependencies in Webpack configuration', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
+    files: 2,
     devDependencies: 1,
     unlisted: 3,
-    processed: 10,
-    total: 10,
+    processed: 11,
+    total: 11,
   });
 });

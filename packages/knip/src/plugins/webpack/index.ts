@@ -1,5 +1,5 @@
 import { compact } from '../../util/array.js';
-import { join, relative } from '../../util/path.js';
+import { isInternal, join, relative } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
@@ -34,15 +34,15 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
   if (typeof rule.use === 'string') return [rule.use];
   let useItem = rule.use ?? rule.loader ?? rule;
   if (typeof useItem === 'function') useItem = useItem(info);
-  return [useItem].flat().flatMap((useItem: RuleSetUseItem | undefined | null | false | 0) => {
-    if (!useItem) return [];
-    if (hasBabelOptions(useItem)) {
-      return [
-        ...resolveUseItem(useItem),
-        ...getDependenciesFromConfig((useItem as { options: BabelConfigObj }).options),
-      ];
+  if (typeof useItem === 'string' && hasBabelOptions(rule)) {
+    return [useItem, ...getDependenciesFromConfig((rule as { options: BabelConfigObj }).options)];
+  }
+  return [useItem].flat().flatMap((item: RuleSetUseItem | undefined | null | false | 0) => {
+    if (!item) return [];
+    if (hasBabelOptions(item)) {
+      return [...resolveUseItem(item), ...getDependenciesFromConfig((item as { options: BabelConfigObj }).options)];
     }
-    return resolveUseItem(useItem);
+    return resolveUseItem(item);
   });
 };
 
@@ -85,9 +85,13 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
       }
 
       entries.forEach(entry => {
-        const item = relative(cwd, join(options.context ? options.context : cwd, entry));
-        const value = options.mode === 'development' ? toEntryPattern(item) : toProductionEntryPattern(item);
-        entryPatterns.add(value);
+        if (!isInternal(entry)) {
+          dependencies.add(entry);
+        } else {
+          const item = relative(cwd, join(options.context ? options.context : cwd, entry));
+          const value = options.mode === 'development' ? toEntryPattern(item) : toProductionEntryPattern(item);
+          entryPatterns.add(value);
+        }
       });
     }
   }
