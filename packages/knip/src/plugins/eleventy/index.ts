@@ -26,7 +26,10 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
   let localConfig = (await load(configFilePath)) as
     | Partial<EleventyConfig>
     | ((arg: DummyEleventyConfig) => Promise<Partial<EleventyConfig>>);
-  if (!localConfig) return PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern);
+  if (!localConfig)
+    return config.entry
+      ? config.entry.map(toProductionEntryPattern)
+      : PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern);
   if (typeof localConfig === 'function') localConfig = await localConfig(new DummyEleventyConfig());
 
   const inputDir = localConfig?.dir?.input || defaultEleventyConfig.dir.input;
