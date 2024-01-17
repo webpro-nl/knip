@@ -16,6 +16,10 @@ const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(d
 
 const ENTRY_FILE_PATTERNS = ['.eleventy.js', 'eleventy.config.{js,cjs}'];
 
+const PRODUCTION_ENTRY_FILE_PATTERNS = ['**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}']
+  .map(pattern => [`src/${pattern}`, `content/${pattern}`])
+  .flat();
+
 const findEleventyDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { config } = options;
 
@@ -46,5 +50,6 @@ export default {
   ENABLERS,
   isEnabled,
   ENTRY_FILE_PATTERNS,
+  PRODUCTION_ENTRY_FILE_PATTERNS,
   findDependencies,
 };
