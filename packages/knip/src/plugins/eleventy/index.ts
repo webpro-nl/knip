@@ -18,9 +18,7 @@ const CONFIG_FILE_PATTERNS: string[] = ['.eleventy.js', 'eleventy.config.{js,cjs
 
 const ENTRY_FILE_PATTERNS: string[] = [];
 
-const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = ['**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}']
-  .map(pattern => [`src/${pattern}`, `content/${pattern}`])
-  .flat();
+const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = ['posts/**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}'];
 
 const PROJECT_FILE_PATTERNS: string[] = [];
 
