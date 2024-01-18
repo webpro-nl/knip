@@ -33,11 +33,11 @@ export default visit(isJS, (node, { isFixExports }) => {
             // Pattern: module.exports = { identifier, identifier2 }
             return expr.properties.map(node => {
               const fix: Fix = isFixExports ? [node.getStart(), node.getEnd()] : undefined;
-              return { node, identifier: node.getText(), type: SymbolType.UNKNOWN, pos: node.pos, fix };
+              return { node, identifier: node.getText(), type: SymbolType.UNKNOWN, pos: node.getStart(), fix };
             });
           } else {
             // Pattern: module.exports = any
-            return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos: expr.pos, fix: undefined };
+            return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos: expr.pos + 1, fix: undefined };
           }
         }
       } else if (
