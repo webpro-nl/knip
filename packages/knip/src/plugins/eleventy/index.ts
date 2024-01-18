@@ -1,4 +1,4 @@
-import { DEFAULT_EXTENSIONS } from 'src/constants.js';
+import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import { extname, join, normalize } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
