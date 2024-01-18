@@ -14,6 +14,8 @@ export const basename = path.posix.basename;
 
 export const join = path.posix.join;
 
+export const normalize = path.posix.normalize;
+
 export const toPosix = (value: string) => value.split(path.sep).join(path.posix.sep);
 
 export const cwd = directory ? path.posix.resolve(directory) : toPosix(process.cwd());

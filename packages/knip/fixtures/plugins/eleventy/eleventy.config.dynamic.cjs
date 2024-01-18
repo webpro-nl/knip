@@ -3,6 +3,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({
     './public/': '/',
     './node_modules/prismjs/themes/prism-okaidia.css': '/css/prism-okaidia.css',
+    './js/client/script.js': 'script.js',
   });
   eleventyConfig.addWatchTarget('content/**/*.{svg,webp,png,jpeg}');
   eleventyConfig.addPlugin();

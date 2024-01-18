@@ -33,7 +33,15 @@ export class DummyEleventyConfig {
   _executePlugin() {}
   getNamespacedName() {}
   namespace() {}
-  addPassthroughCopy() {}
+  addPassthroughCopy(input: string | Record<string, string>) {
+    if (typeof input === 'string') {
+      this.passthroughCopies[input] = {};
+    } else {
+      for (let [inputPath] of Object.entries(input)) {
+        this.passthroughCopies[inputPath] = {};
+      }
+    }
+  }
   _normalizeTemplateFormats() {}
   setTemplateFormats() {}
   addTemplateFormats() {}
@@ -104,7 +112,7 @@ export class DummyEleventyConfig {
   javascriptFunctions = {};
   markdownHighlighter = null;
   libraryOverrides = {};
-  passthroughCopies = {};
+  passthroughCopies: Record<string, Record<never, never>> = {};
   layoutAliases = {};
   layoutResolution = true;
   linters = {};
