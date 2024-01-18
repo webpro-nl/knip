@@ -1,7 +1,4 @@
-module.exports = (_config) => {
-  return {
-    htmlTemplateEngine: 'njk',
-    markdownTemplateEngine: 'njk',
-    templateFormats: ['njk'],
-  };
+module.exports = {
+  htmlTemplateEngine: 'njk',
+  markdownTemplateEngine: 'njk',
 };
