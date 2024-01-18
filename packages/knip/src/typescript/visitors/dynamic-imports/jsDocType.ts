@@ -11,7 +11,7 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
       if (ts.isLiteralTypeNode(importClause) && ts.isStringLiteral(importClause.literal)) {
         const identifier =
           node.qualifier && ts.isIdentifier(node.qualifier) ? String(node.qualifier.escapedText) : 'default';
-        imports.push({ specifier: importClause.literal.text, identifier, pos: undefined });
+        imports.push({ specifier: importClause.literal.text, identifier, pos: importClause.literal.pos });
       }
     }
     ts.forEachChild(node, visit);
