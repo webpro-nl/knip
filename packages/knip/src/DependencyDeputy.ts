@@ -194,7 +194,7 @@ export class DependencyDeputy {
   }
 
   public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): boolean {
-    if (IGNORED_GLOBAL_BINARIES.includes(binaryName)) return true;
+    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return true;
 
     this.addReferencedBinary(workspace.name, binaryName);
 
@@ -375,7 +375,7 @@ export class DependencyDeputy {
 
       ignoreDependencies
         .filter(packageName => {
-          if (hasMatchInArray(IGNORED_DEPENDENCIES, packageName)) return true;
+          if (hasMatchInSet(IGNORED_DEPENDENCIES, packageName)) return true;
           if (this.ignoreDependencies.includes(packageName)) return true;
           const isReferenced = hasMatchInSet(referencedDependencies, packageName);
           const isListed =
@@ -388,7 +388,7 @@ export class DependencyDeputy {
 
       ignoreBinaries
         .filter(binaryName => {
-          if (hasMatchInArray(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
+          if (hasMatchInSet(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
           if (this.ignoreBinaries.includes(binaryName)) return true;
           const isReferenced = hasMatchInSet(referencedBinaries, binaryName);
           const isInstalled = hasMatchInArray(Array.from(installedBinaries?.keys() ?? []), binaryName);
@@ -406,7 +406,7 @@ export class DependencyDeputy {
 
     Array.from(rootIgnoreDependencies.keys())
       .filter(packageName => {
-        if (hasMatchInArray(IGNORED_DEPENDENCIES, packageName)) return true;
+        if (hasMatchInSet(IGNORED_DEPENDENCIES, packageName)) return true;
         const isReferenced = rootIgnoreDependencies.get(packageName) !== 0;
         const isListed = hasMatchInArray(dependencies, packageName) && !hasMatchInArray(peerDependencies, packageName);
         return (isReferenced && isListed) || (!this.isProduction && !isReferenced && !isListed);
@@ -417,7 +417,7 @@ export class DependencyDeputy {
 
     Array.from(rootIgnoreBinaries.keys())
       .filter(binaryName => {
-        if (hasMatchInArray(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
+        if (hasMatchInSet(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
         const isReferenced = rootIgnoreBinaries.get(binaryName) !== 0;
         const isInstalled = hasMatchInArray(Array.from(installedBinaries?.keys() ?? []), binaryName);
         return (isReferenced && isInstalled) || (!this.isProduction && !isReferenced && !isInstalled);

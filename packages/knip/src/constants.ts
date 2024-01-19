@@ -21,7 +21,7 @@ export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 // Binaries that are expected to be globally installed
 // In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
 // Package may exist in npm registry, but last publish is at least 6 years ago
-export const IGNORED_GLOBAL_BINARIES = [
+export const IGNORED_GLOBAL_BINARIES = new Set([
   'bash',
   'bun',
   'bunx',
@@ -55,9 +55,9 @@ export const IGNORED_GLOBAL_BINARIES = [
   'true',
   'yarn',
   'xargs',
-];
+]);
 
-export const IGNORED_DEPENDENCIES = ['knip', 'typescript'];
+export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
 
 // Extensions sometimes imported directly (and compiled away by bundlers, etc.)
 export const DUMMY_VIRTUAL_FILE_EXTENSIONS = new Set(['.html', '.jpeg', '.jpg', '.png', '.svg', '.webp']);
