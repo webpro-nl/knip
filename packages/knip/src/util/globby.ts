@@ -140,13 +140,9 @@ export async function globby(patterns: string | string[], options: GlobOptions):
     if (i) ignore.push(...i.ignores);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { dir, ...fastGlobOptions } = { ...options, ignore };
 
-  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, `Glob options`, {
-    patterns,
-    ...fastGlobOptions,
-  });
+  debugLogObject(relative(options.cwd, dir) || ROOT_WORKSPACE_NAME, `Glob options`, { patterns, ...options });
 
   return fastGlob(patterns, fastGlobOptions);
 }
