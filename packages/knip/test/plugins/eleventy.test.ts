@@ -20,5 +20,8 @@ test('Find dependencies in Eleventy configuration (dynamic)', async () => {
     'entry:_data/**/*.js',
     'entry:content/**/*.{md,njk,html,liquid}',
     'entry:content/**/*.11tydata.js',
+    'entry:./public/',
+    'entry:./js/client/script.js',
+    './node_modules/prismjs/themes/prism-okaidia.css',
   ]);
 });

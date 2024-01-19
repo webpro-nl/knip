@@ -1,4 +1,6 @@
-import { join } from '../../util/path.js';
+import { DEFAULT_EXTENSIONS } from '../../constants.js';
+import { isDirectory } from '../../util/fs.js';
+import { dirname, isInternal, join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
@@ -32,19 +34,40 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
     return config.entry
       ? config.entry.map(toProductionEntryPattern)
       : PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern);
-  if (typeof localConfig === 'function') localConfig = await localConfig(new DummyEleventyConfig());
+
+  const dummyUserConfig = new DummyEleventyConfig();
+  if (typeof localConfig === 'function') localConfig = await localConfig(dummyUserConfig);
 
   const inputDir = localConfig?.dir?.input || defaultEleventyConfig.dir.input;
   const dataDir = localConfig?.dir?.data || defaultEleventyConfig.dir.data;
   const templateFormats = localConfig.templateFormats || defaultEleventyConfig.templateFormats;
 
-  return (
-    config?.entry ?? [
-      join(inputDir, dataDir, '**/*.js'),
-      join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
-      join(inputDir, '**/*.11tydata.js'),
-    ]
-  ).map(toEntryPattern);
+  const exts = DEFAULT_EXTENSIONS.map(extname => extname.slice(1)).join(',');
+  const copiedPackages = new Set<string>();
+  const copiedEntries = new Set<string>();
+
+  for (const path of Object.keys(dummyUserConfig.passthroughCopies)) {
+    const isDir = !path.includes('*') && isDirectory(join(dirname(configFilePath), path));
+    if (isDir) {
+      copiedEntries.add(join(path, `**/*.{${exts}}`));
+    } else if (isInternal(path)) {
+      copiedEntries.add(path);
+    } else {
+      copiedPackages.add(path);
+    }
+  }
+
+  return [
+    ...(
+      config?.entry ?? [
+        join(inputDir, dataDir, '**/*.js'),
+        join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
+        join(inputDir, '**/*.11tydata.js'),
+        ...copiedEntries,
+      ]
+    ).map(toEntryPattern),
+    ...copiedPackages,
+  ];
 };
 
 const findDependencies = timerify(findEleventyDependencies);
