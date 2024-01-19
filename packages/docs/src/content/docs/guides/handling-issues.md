@@ -222,8 +222,9 @@ this example:
 This example works fine without anything reported, as the `@commitlint/cli`
 package includes the `commitlint` binary. However, some script may contain
 `npx commitlint` and here Knip assumes `commitlint` is the name of the package.
-This technically works as `commitlint` is a transitive dependency, but to avoid
-confusing Knip it's recommended to use `npx @commitlint/cli`.
+This technically works as `commitlint` is a transitive dependency of
+`@commitlint/cli`, but to avoid confusion it's recommended to use
+`npx @commitlint/cli`.
 
 ## npx
 
