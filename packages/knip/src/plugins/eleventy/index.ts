@@ -3,7 +3,7 @@ import { isDirectory } from '../../util/fs.js';
 import { dirname, isInternal, join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
+import { toProductionEntryPattern } from '../../util/protocols.js';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
 import type { EleventyConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -65,7 +65,7 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
         join(inputDir, '**/*.11tydata.js'),
         ...copiedEntries,
       ]
-    ).map(toEntryPattern),
+    ).map(toProductionEntryPattern),
     ...copiedPackages,
   ];
 };

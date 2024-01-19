@@ -10,18 +10,22 @@ const manifest = getManifest(cwd);
 test('Find dependencies in Eleventy configuration (static)', async () => {
   const configFilePath = join(cwd, 'eleventy.config.cjs');
   const dependencies = await eleventy.findDependencies(configFilePath, { manifest, config });
-  assert.deepEqual(dependencies, ['entry:_data/**/*.js', 'entry:**/*.{11ty.js}', 'entry:**/*.11tydata.js']);
+  assert.deepEqual(dependencies, [
+    'production:_data/**/*.js',
+    'production:**/*.{11ty.js}',
+    'production:**/*.11tydata.js',
+  ]);
 });
 
 test('Find dependencies in Eleventy configuration (dynamic)', async () => {
   const configFilePath = join(cwd, 'eleventy.config.dynamic.cjs');
   const dependencies = await eleventy.findDependencies(configFilePath, { manifest, config });
   assert.deepEqual(dependencies, [
-    'entry:_data/**/*.js',
-    'entry:content/**/*.{md,njk,html,liquid}',
-    'entry:content/**/*.11tydata.js',
-    'entry:./public/',
-    'entry:./js/client/script.js',
+    'production:_data/**/*.js',
+    'production:content/**/*.{md,njk,html,liquid}',
+    'production:content/**/*.11tydata.js',
+    'production:./public/',
+    'production:./js/client/script.js',
     './node_modules/prismjs/themes/prism-okaidia.css',
   ]);
 });
