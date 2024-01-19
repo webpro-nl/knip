@@ -1,5 +1,6 @@
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
-import { extname, join, normalize } from '../../util/path.js';
+import { isDirectory } from '../../util/fs.js';
+import { dirname, isInternal, join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
@@ -41,17 +42,18 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
   const dataDir = localConfig?.dir?.data || defaultEleventyConfig.dir.data;
   const templateFormats = localConfig.templateFormats || defaultEleventyConfig.templateFormats;
 
-  const copiedPackages = [];
-  const copiedEntries = [];
+  const exts = DEFAULT_EXTENSIONS.map(extname => extname.slice(1)).join(',');
+  const copiedPackages = new Set<string>();
+  const copiedEntries = new Set<string>();
 
-  for (const path of Object.keys(dummyUserConfig.passthroughCopies).map(normalize)) {
-    const parts = path.split('/');
-    if (path.startsWith('node_modules/') && parts.length > 1) {
-      copiedPackages.push(parts.at(1) as string);
+  for (const path of Object.keys(dummyUserConfig.passthroughCopies)) {
+    const isDir = !path.includes('*') && isDirectory(join(dirname(configFilePath), path));
+    if (isDir) {
+      copiedEntries.add(join(path, `**/*.{${exts}}`));
+    } else if (isInternal(path)) {
+      copiedEntries.add(path);
     } else {
-      if (path.endsWith('/')) {
-        copiedEntries.push(`${path}*.{${DEFAULT_EXTENSIONS.join(',')}}`);
-      } else copiedEntries.push(path);
+      copiedPackages.add(path);
     }
   }
 
@@ -61,7 +63,7 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
         join(inputDir, dataDir, '**/*.js'),
         join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
         join(inputDir, '**/*.11tydata.js'),
-        ...copiedEntries.filter(path => DEFAULT_EXTENSIONS.includes(extname(path))),
+        ...copiedEntries,
       ]
     ).map(toEntryPattern),
     ...copiedPackages,
