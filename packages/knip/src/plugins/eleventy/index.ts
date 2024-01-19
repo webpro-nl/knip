@@ -1,6 +1,6 @@
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import { isDirectory } from '../../util/fs.js';
-import { dirname, isInNodeModules, isInternal, join } from '../../util/path.js';
+import { dirname, isInNodeModules, join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toProductionEntryPattern } from '../../util/protocols.js';
