@@ -1,6 +1,6 @@
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import { isDirectory } from '../../util/fs.js';
-import { dirname, isInternal, join } from '../../util/path.js';
+import { dirname, isInNodeModules, isInternal, join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toProductionEntryPattern } from '../../util/protocols.js';
@@ -50,10 +50,10 @@ const findEleventyDependencies: GenericPluginCallback = async (configFilePath, o
     const isDir = !path.includes('*') && isDirectory(join(dirname(configFilePath), path));
     if (isDir) {
       copiedEntries.add(join(path, `**/*.{${exts}}`));
-    } else if (isInternal(path)) {
-      copiedEntries.add(path);
-    } else {
+    } else if (isInNodeModules(path)) {
       copiedPackages.add(path);
+    } else {
+      copiedEntries.add(path);
     }
   }
 
