@@ -1,6 +1,7 @@
 import { readFileSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
+import * as toml from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
 import { FAKE_PATH } from './loader.js';
@@ -43,6 +44,11 @@ export const loadYAML = async (filePath: string) => {
   return parseYAML(contents);
 };
 
+export const loadTOML = async (filePath: string) => {
+  const contents = await loadFile(filePath);
+  return parseTOML(contents);
+};
+
 export const parseJSON = async (filePath: string, contents: string) => {
   try {
     return JSON.parse(stripJsonComments(contents, { trailingCommas: true }));
@@ -53,6 +59,10 @@ export const parseJSON = async (filePath: string, contents: string) => {
 
 export const parseYAML = async (contents: string) => {
   return yaml.load(contents);
+};
+
+export const parseTOML = async (contents: string) => {
+  return toml.parse(contents);
 };
 
 export function isTypeModule(path: string) {

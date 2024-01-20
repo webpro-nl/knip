@@ -10,7 +10,7 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 const NAME = 'Netlify';
 
-const ENABLERS = ['@netlify/functions'];
+const ENABLERS = [/^@netlify\//, 'netlify-cli'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
@@ -44,20 +44,24 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
       ) as FunctionsConfig[]
     ).flatMap(x => x?.external_node_modules || []),
   ];
-  const entryFiles = localConfig?.functions?.included_files ?? [];
-  if (localConfig.functions?.directory) {
-    entryFiles.push(
-      join(
-        localConfig.functions.directory,
-        // Filter out `[j|t]sx`.
-        `**/*.{${DEFAULT_EXTENSIONS.filter(ext => !ext.endsWith('x'))
-          .map(ext => ext.slice(1))
-          .join(',')}}`
-      )
-    );
-  }
+  const entryFiles = [
+    ...(localConfig?.functions?.included_files ?? []),
+    ...(
+      Object.values(localConfig.functions || {}).filter(
+        x => typeof x === 'object' && 'included_files' in x
+      ) as FunctionsConfig[]
+    ).flatMap(x => x?.included_files || []),
+    join(
+      localConfig.functions?.directory ?? 'netlify/functions',
+      // Filter out `[j|t]sx`.
+      `**/*.{${DEFAULT_EXTENSIONS.filter(ext => !ext.endsWith('x'))
+        .map(ext => ext.slice(1))
+        .join(',')}}`
+    ),
+    // Filter out exclude globs.
+  ].filter(file => !file.startsWith('!'));
 
-  return [...dependencies, ...(localConfig?.functions?.included_files ?? []).map(toProductionEntryPattern)];
+  return [...dependencies, ...entryFiles.map(toProductionEntryPattern)];
 };
 
 const findDependencies = timerify(findPluginDependencies);
