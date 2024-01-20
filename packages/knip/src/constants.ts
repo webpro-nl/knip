@@ -40,6 +40,8 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'find',
   'git',
   'grep',
+  'gzip',
+  'ls',
   'mkdir',
   'mv',
   'node',
@@ -58,6 +60,8 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
 ]);
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
+
+export const IGNORED_RUNTIME_DEPENDENCIES = new Set(['bun']);
 
 // Extensions sometimes imported directly (and compiled away by bundlers, etc.)
 export const DUMMY_VIRTUAL_FILE_EXTENSIONS = new Set(['.html', '.jpeg', '.jpg', '.png', '.svg', '.webp']);

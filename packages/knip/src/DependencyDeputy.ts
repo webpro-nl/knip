@@ -3,6 +3,7 @@ import {
   IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
   IGNORED_GLOBAL_BINARIES,
+  IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
 } from './constants.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
@@ -167,6 +168,7 @@ export class DependencyDeputy {
    */
   public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string): boolean {
     if (isBuiltin(packageName)) return true;
+    if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports
     if (packageName === workspace.pkgName) return true;
