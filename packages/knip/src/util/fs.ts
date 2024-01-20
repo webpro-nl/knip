@@ -1,7 +1,7 @@
 import { readFileSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
-import * as toml from 'smol-toml';
+import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
 import { FAKE_PATH } from './loader.js';
