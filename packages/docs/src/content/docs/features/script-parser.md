@@ -71,6 +71,18 @@ TypeScript source code files, it looks for imports and exports. But there's a
 few more (rather obscure) things that Knip detects in the process. Below are
 examples of additional scripts Knip parses to find entry files and dependencies.
 
+### bun
+
+If the `bun` dependency is imported in source code, Knip considers the contents
+of `$` template tags to be scripts:
+
+```ts
+import { $ } from 'bun';
+await $`cd .. && rm -rf node_modules/rimraf && `;
+```
+
+Parsing the script results in the `rimraf` binary/dependency as referenced.
+
 ### execa
 
 If the `execa` dependency is imported in source code, Knip considers the
@@ -81,7 +93,7 @@ await $({ stdio: 'inherit' })`c8 node hydrate.js`;
 ```
 
 Parsing the script results in `hydrate.js` added as an entry file and the `c8`
-dependency as referenced.
+binary/dependency as referenced.
 
 ### zx
 

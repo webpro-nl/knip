@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/script-visitors-bun",
+  "dependencies": {
+    "boxen-cli": "*"
+  }
+}
