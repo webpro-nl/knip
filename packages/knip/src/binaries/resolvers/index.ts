@@ -1,3 +1,4 @@
+export * as bun from './bun.js';
 export * as c8 from './c8.js';
 export * as dotenv from './dotenv.js';
 export * as node from './node.js';
