@@ -61,10 +61,6 @@ export const parseYAML = async (contents: string) => {
   return yaml.load(contents);
 };
 
-export const parseTOML = async (contents: string) => {
-  return toml.parse(contents);
-};
-
 export function isTypeModule(path: string) {
   while (path && path !== '.' && path !== '/') {
     path = dirname(path);
