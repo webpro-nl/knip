@@ -1,9 +1,9 @@
-import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import { join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toProductionEntryPattern } from '../../util/protocols.js';
-import type { FunctionsConfig, NetlifyConfig } from './types.js';
+import { extractFunctionsConfigProperty, validFunctionExtensions } from './helpers.js';
+import type { NetlifyConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://docs.netlify.com/ or https://docs.netlify.com/functions/get-started/?fn-language=ts
@@ -18,11 +18,7 @@ const CONFIG_FILE_PATTERNS: string[] = ['netlify.toml'];
 
 const ENTRY_FILE_PATTERNS: string[] = [];
 
-const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = [
-  `netlify/functions/**/*.{${DEFAULT_EXTENSIONS.filter(ext => !ext.endsWith('x'))
-    .map(ext => ext.slice(1))
-    .join(',')}}`,
-];
+const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = [`netlify/functions/**/*.{${validFunctionExtensions()}}`];
 
 const PROJECT_FILE_PATTERNS: string[] = [];
 
@@ -37,28 +33,11 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
 
   const dependencies = [
     ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []),
-    ...(localConfig?.functions?.external_node_modules ?? []),
-    ...(
-      Object.values(localConfig.functions || {}).filter(
-        x => typeof x === 'object' && 'external_node_modules' in x
-      ) as FunctionsConfig[]
-    ).flatMap(x => x?.external_node_modules || []),
+    ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules'),
   ];
   const entryFiles = [
-    ...(localConfig?.functions?.included_files ?? []),
-    ...(
-      Object.values(localConfig.functions || {}).filter(
-        x => typeof x === 'object' && 'included_files' in x
-      ) as FunctionsConfig[]
-    ).flatMap(x => x?.included_files || []),
-    join(
-      localConfig.functions?.directory ?? 'netlify/functions',
-      // Filter out `[j|t]sx`.
-      `**/*.{${DEFAULT_EXTENSIONS.filter(ext => !ext.endsWith('x'))
-        .map(ext => ext.slice(1))
-        .join(',')}}`
-    ),
-    // Filter out exclude globs.
+    ...extractFunctionsConfigProperty(localConfig.functions || {}, 'included_files'),
+    join(localConfig.functions?.directory ?? 'netlify/functions', `**/*.{${validFunctionExtensions()}}`),
   ].filter(file => !file.startsWith('!'));
 
   return [...dependencies, ...entryFiles.map(toProductionEntryPattern)];
