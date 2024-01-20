@@ -78,10 +78,12 @@ of `$` template tags to be scripts:
 
 ```ts
 import { $ } from 'bun';
-await $`cd .. && rm -rf node_modules/rimraf && `;
+await $`bun boxen I ❤ unicorns`;
+await $`boxen I ❤ unicorns`;
 ```
 
-Parsing the script results in the `rimraf` binary/dependency as referenced.
+Parsing the script results in the `boxen` binary (the `boxen-cli` dependency) as
+referenced (twice).
 
 ### execa
 
