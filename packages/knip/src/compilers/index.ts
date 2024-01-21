@@ -41,6 +41,7 @@ const compilers = new Map([
 ]);
 
 const dummyCompiler: SyncCompilerFn = () => '';
+
 export const dummyCompilers = new Map(Array.from(DUMMY_VIRTUAL_FILE_EXTENSIONS).map(ext => [ext, dummyCompiler]));
 
 const getDependencies = (manifest: PackageJson) => [
@@ -48,7 +49,7 @@ const getDependencies = (manifest: PackageJson) => [
   ...Object.keys(manifest?.devDependencies ?? {}),
 ];
 
-export const mergeCompilers = (
+export const getIncludedCompilers = (
   syncCompilers: SyncCompilers,
   asyncCompilers: AsyncCompilers,
   manifest: PackageJson
@@ -64,7 +65,7 @@ export const mergeCompilers = (
   return [syncCompilers, asyncCompilers];
 };
 
-export const getExtensions = (compilers: [SyncCompilers, AsyncCompilers]) => [
+export const getCompilerExtensions = (compilers: [SyncCompilers, AsyncCompilers]) => [
   ...compilers[0].keys(),
   ...compilers[1].keys(),
 ];

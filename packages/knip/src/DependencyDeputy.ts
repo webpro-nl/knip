@@ -92,7 +92,7 @@ export class DependencyDeputy {
     });
   }
 
-  addIgnored(ignoreBinaries: (string | RegExp)[], ignoreDependencies: (string | RegExp)[]) {
+  setIgnored(ignoreBinaries: (string | RegExp)[], ignoreDependencies: (string | RegExp)[]) {
     this.ignoreBinaries = ignoreBinaries.map(toRegexOrString);
     this.ignoreDependencies = ignoreDependencies.map(toRegexOrString);
   }
@@ -142,7 +142,7 @@ export class DependencyDeputy {
     this.referencedBinaries.get(workspaceName)?.add(binaryName);
   }
 
-  addHostDependencies(workspaceName: string, hostDependencies: HostDependencies) {
+  setHostDependencies(workspaceName: string, hostDependencies: HostDependencies) {
     this.hostDependencies.set(workspaceName, hostDependencies);
   }
 

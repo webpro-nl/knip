@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { dummyCompilers, getExtensions } from './compilers/index.js';
+import { dummyCompilers, getCompilerExtensions } from './compilers/index.js';
 import { DEFAULT_EXTENSIONS } from './constants.js';
 import { IGNORED_FILE_EXTENSIONS } from './constants.js';
 import { createHosts } from './typescript/createHosts.js';
@@ -96,7 +96,7 @@ export class ProjectPrincipal {
     };
 
     const [syncCompilers, asyncCompilers] = compilers;
-    this.extensions = new Set([...DEFAULT_EXTENSIONS, ...getExtensions(compilers)]);
+    this.extensions = new Set([...DEFAULT_EXTENSIONS, ...getCompilerExtensions(compilers)]);
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
   }
@@ -126,7 +126,7 @@ export class ProjectPrincipal {
   addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
     this.syncCompilers = new Map([...this.syncCompilers, ...compilers[0]]);
     this.asyncCompilers = new Map([...this.asyncCompilers, ...compilers[1]]);
-    this.extensions = new Set([...this.extensions, ...getExtensions(compilers)]);
+    this.extensions = new Set([...this.extensions, ...getCompilerExtensions(compilers)]);
   }
 
   /**
@@ -167,7 +167,7 @@ export class ProjectPrincipal {
     }
   }
 
-  public addReferencedDependencies(referencedDependencies: ReferencedDependencies, workspaceName: string) {
+  public addReferencedDependencies(workspaceName: string, referencedDependencies: ReferencedDependencies) {
     referencedDependencies.forEach(referencedDependency =>
       this.referencedDependencies.add([...referencedDependency, workspaceName])
     );

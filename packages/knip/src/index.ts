@@ -1,6 +1,6 @@
 import micromatch from 'micromatch';
 import { _getDependenciesFromScripts } from './binaries/index.js';
-import { getExtensions, mergeCompilers } from './compilers/index.js';
+import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
@@ -66,8 +66,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   await chief.init();
 
-  const workspaces = chief.getWorkspaces();
-  const report = chief.getIssueTypesToReport();
+  const workspaces = chief.getIncludedWorkspaces();
+  const report = chief.getIncludedIssueTypes();
   const rules = chief.getRules();
   const filters = chief.getFilters();
   const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes });
@@ -84,7 +84,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const enabledPluginsStore = new Map<string, string[]>();
 
   // TODO Organize better
-  deputy.addIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
+  deputy.setIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
 
   const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
@@ -140,8 +140,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     streamer.cast(`Analyzing workspace ${name}...`);
 
-    const compilers = mergeCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, manifest);
-    const extensions = getExtensions(compilers);
+    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, manifest);
+    const extensions = getCompilerExtensions(compilers);
     const config = chief.getConfigForWorkspace(name, extensions);
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ...config });
