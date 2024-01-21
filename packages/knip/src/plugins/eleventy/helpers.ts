@@ -1,6 +1,8 @@
 import type { EleventyConfig } from './types.js';
 
 // https://github.com/11ty/eleventy/blob/main/src/UserConfig.js
+
+/** @public */
 export class DummyEleventyConfig {
   constructor() {}
   _getUniqueId() {}

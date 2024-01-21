@@ -1,6 +1,7 @@
 import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
+  include: ['classMembers'],
   workspaces: {
     '.': {
       ignoreBinaries: ['knip']
