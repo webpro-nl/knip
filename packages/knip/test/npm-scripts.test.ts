@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.js';
-import * as npm from '../src/manifest/index.js';
+import { analyzeManifest } from '../src/manifest/index.js';
 import { resolve, join } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
@@ -19,9 +19,9 @@ test('Referenced dependencies in npm scripts', async () => {
     cwd,
   };
 
-  const { dependencies, hostDependencies, installedBinaries } = await npm.findDependencies(config);
+  const { referencedDependencies, hostDependencies, installedBinaries } = await analyzeManifest(config);
 
-  assert.deepEqual(dependencies, [
+  assert.deepEqual(referencedDependencies, [
     'bin:nodemon',
     join(cwd, 'script.js'),
     'bin:rm',

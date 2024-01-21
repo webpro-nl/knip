@@ -6,12 +6,14 @@ import {
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
 } from './constants.js';
+import { analyzeManifest } from './manifest/index.js';
 import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
 import { hasMatch, hasMatchInArray, hasMatchInSet, toRegexOrString, findKey } from './util/regex.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { ConfigurationHints, Issue } from './types/issues.js';
 import type { PackageJson } from './types/package-json.js';
 import type { WorkspaceManifests, HostDependencies, InstalledBinaries } from './types/workspace.js';
+import type { ReferencedDependencies } from './WorkspaceWorker.js';
 
 type Options = {
   isProduction: boolean;
@@ -90,6 +92,28 @@ export class DependencyDeputy {
       devDependencies,
       allDependencies,
     });
+  }
+
+  public async analyzeManifest(name: string, cwd: string, manifest: PackageJson): Promise<ReferencedDependencies> {
+    const wsManifest = this.getWorkspaceManifest(name);
+    if (wsManifest) {
+      const { workspaceDir, manifestPath } = wsManifest;
+      const { referencedDependencies, hostDependencies, installedBinaries, hasTypesIncluded } = await analyzeManifest({
+        manifest,
+        isProduction: this.isProduction,
+        isStrict: this.isStrict,
+        dir: workspaceDir,
+        cwd,
+      });
+
+      this.setHostDependencies(name, hostDependencies);
+      this.setInstalledBinaries(name, installedBinaries);
+      this.setHasTypesIncluded(name, hasTypesIncluded);
+
+      return new Set(referencedDependencies.map(dependency => [manifestPath, dependency]));
+    }
+
+    return new Set();
   }
 
   setIgnored(ignoreBinaries: (string | RegExp)[], ignoreDependencies: (string | RegExp)[]) {

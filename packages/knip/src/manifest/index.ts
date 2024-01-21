@@ -13,7 +13,7 @@ type Options = {
   cwd: string;
 };
 
-const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir, cwd }: Options) => {
+const analyzeManifestFile = async ({ manifest, isProduction, isStrict, dir, cwd }: Options) => {
   const scriptFilter = isProduction ? ['start', 'postinstall'] : [];
   const hostDependencies: HostDependencies = new Map();
 
@@ -24,7 +24,7 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
     return scripts;
   }, [] as string[]);
 
-  const dependencies = _getDependenciesFromScripts(scripts, { cwd: dir, manifest });
+  const referencedDependencies = _getDependenciesFromScripts(scripts, { cwd: dir, manifest });
 
   // Find all binaries for each dependency
   const installedBinaries: InstalledBinaries = new Map();
@@ -75,11 +75,11 @@ const findManifestDependencies = async ({ manifest, isProduction, isStrict, dir,
   }
 
   return {
-    dependencies,
+    referencedDependencies,
     hostDependencies,
     installedBinaries,
     hasTypesIncluded,
   };
 };
 
-export const findDependencies = timerify(findManifestDependencies);
+export const analyzeManifest = timerify(analyzeManifestFile);

@@ -146,6 +146,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     deputy.addWorkspace({ name, dir, manifestPath, manifest, ...config });
 
+    const referencedDependenciesInManifest = await deputy.analyzeManifest(name, cwd, manifest);
+
     const { compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
     const principal = factory.getPrincipal({
@@ -185,27 +187,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
     principal.addEntryPaths(entryPathsFromManifest);
 
-    // Get peerDependencies, installed binaries, entry files gathered through all plugins, and hand over
-    // A bit of an entangled hotchpotch, but it's all related, and efficient in terms of reading package.json once, etc.
-    const dependencies = await worker.findAllDependencies();
-    const {
-      referencedDependencies,
-      hostDependencies,
-      installedBinaries,
-      hasTypesIncluded,
-      enabledPlugins,
-      entryFilePatterns,
-      productionEntryFilePatterns,
-    } = dependencies;
+    const dependencies = await worker.findDependenciesByPlugins();
+    const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } = dependencies;
+    principal.addReferencedDependencies(name, referencedDependencies);
+    principal.addReferencedDependencies(name, referencedDependenciesInManifest);
 
-    principal.addReferencedDependencies(referencedDependencies, name);
-    deputy.addHostDependencies(name, hostDependencies);
-    deputy.setInstalledBinaries(name, installedBinaries);
-    deputy.setHasTypesIncluded(name, hasTypesIncluded);
     enabledPluginsStore.set(name, enabledPlugins);
 
     if (isProduction) {
-      const negatedEntryPatterns: string[] = entryFilePatterns.map(negate);
+      const negatedEntryPatterns: string[] = Array.from(entryFilePatterns).map(negate);
 
       {
         const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
@@ -215,7 +205,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
 
       {
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns: productionEntryFilePatterns });
+        const patterns = Array.from(productionEntryFilePatterns);
+        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(name, `Production plugin entry paths`, pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
