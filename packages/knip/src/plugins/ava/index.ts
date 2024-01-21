@@ -29,7 +29,7 @@ const ENTRY_FILE_PATTERNS = [
 ];
 
 const findAvaDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction, config } = options;
+  const { manifest, isProduction, config } = options;
 
   let localConfig: AvaConfig | undefined =
     basename(configFilePath) === 'package.json' ? manifest.ava : await load(configFilePath);
@@ -44,11 +44,7 @@ const findAvaDependencies: GenericPluginCallback = async (configFilePath, option
   const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
   const fakeCommand = `node ${nodeArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  const dependencies = getDependenciesFromScripts([fakeCommand], {
-    cwd,
-    manifest,
-    knownGlobalsOnly: true,
-  });
+  const dependencies = getDependenciesFromScripts([fakeCommand], { ...options, knownGlobalsOnly: true });
 
   return [...entryPatterns, ...dependencies];
 };

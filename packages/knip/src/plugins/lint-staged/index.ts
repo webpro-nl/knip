@@ -24,7 +24,7 @@ const CONFIG_FILE_PATTERNS = [
 ];
 
 const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+  const { manifest, isProduction } = options;
 
   if (isProduction) return [];
 
@@ -39,7 +39,6 @@ const findLintStagedDependencies: GenericPluginCallback = async (configFilePath,
 
   for (const entry of Object.values(localConfig).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
-    const options = { cwd, manifest };
     getDependenciesFromScripts(scripts, options).forEach(identifier => dependencies.add(identifier));
   }
 

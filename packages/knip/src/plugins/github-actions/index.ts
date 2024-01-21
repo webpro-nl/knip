@@ -21,7 +21,7 @@ const isEnabled: IsPluginEnabledCallback = async ({ cwd }) =>
 const CONFIG_FILE_PATTERNS = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'];
 
 const findGithubActionsDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+  const { isProduction } = options;
   const configFileName = basename(configFilePath);
 
   if (isProduction) return [];
@@ -32,14 +32,7 @@ const findGithubActionsDependencies: GenericPluginCallback = async (configFilePa
 
   const scripts = getValuesByKeyDeep(config, 'run').filter(isString);
 
-  return [
-    ...getActionDependencies(),
-    ...getDependenciesFromScripts(scripts, {
-      cwd,
-      manifest,
-      knownGlobalsOnly: true,
-    }),
-  ];
+  return [...getActionDependencies(), ...getDependenciesFromScripts(scripts, { ...options, knownGlobalsOnly: true })];
 
   function getActionDependencies() {
     const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';

@@ -17,7 +17,7 @@ const PACKAGE_JSON_PATH = 'release-it';
 const CONFIG_FILE_PATTERNS = ['.release-it.json', '.release-it.{js,cjs}', '.release-it.{yml,yaml}', 'package.json'];
 
 const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+  const { manifest, isProduction } = options;
 
   if (isProduction) return [];
 
@@ -34,7 +34,7 @@ const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, 
   if (typeof localConfig.gitlab?.releaseNotes === 'string') {
     scripts.push(localConfig.gitlab.releaseNotes);
   }
-  const dependencies = getDependenciesFromScripts(scripts, { cwd, manifest });
+  const dependencies = getDependenciesFromScripts(scripts, options);
 
   return [...plugins, ...dependencies];
 };

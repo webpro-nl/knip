@@ -18,7 +18,7 @@ const gitHookPaths = getGitHookPaths('.husky');
 const CONFIG_FILE_PATTERNS = [...gitHookPaths];
 
 const findHuskyDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+  const { isProduction } = options;
 
   if (isProduction || configFilePath === FAKE_PATH) return [];
 
@@ -26,11 +26,7 @@ const findHuskyDependencies: GenericPluginCallback = async (configFilePath, opti
 
   if (!script) return [];
 
-  return getDependenciesFromScripts(String(script), {
-    cwd,
-    manifest,
-    knownGlobalsOnly: true,
-  });
+  return getDependenciesFromScripts(String(script), { ...options, knownGlobalsOnly: true });
 };
 
 const findDependencies = timerify(findHuskyDependencies);

@@ -16,7 +16,7 @@ const PACKAGE_JSON_PATH = 'wireit';
 const CONFIG_FILE_PATTERNS = ['package.json'];
 
 const findWireItDependencies: GenericPluginCallback = async (_configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+  const { manifest, isProduction } = options;
 
   if (isProduction) return [];
 
@@ -25,7 +25,7 @@ const findWireItDependencies: GenericPluginCallback = async (_configFilePath, op
 
   const scripts = Object.values(localConfig).flatMap(({ command: script }) => (script ? [script] : []));
 
-  const scriptDependencies = getDependenciesFromScripts(scripts, { cwd, manifest });
+  const scriptDependencies = getDependenciesFromScripts(scripts, options);
 
   return scriptDependencies;
 };

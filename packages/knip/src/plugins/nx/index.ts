@@ -13,7 +13,7 @@ const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(d
 const CONFIG_FILE_PATTERNS = ['project.json', '{apps,libs}/**/project.json'];
 
 const findNxDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+  const { isProduction } = options;
 
   if (isProduction) return [];
 
@@ -30,7 +30,7 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, options
   const scripts = targets
     .filter(target => target.executor === 'nx:run-commands')
     .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []));
-  const dependencies = getDependenciesFromScripts(scripts, { cwd, manifest });
+  const dependencies = getDependenciesFromScripts(scripts, options);
 
   return compact([...executors, ...dependencies]);
 };

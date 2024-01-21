@@ -19,7 +19,7 @@ const gitHookPaths = getGitHookPaths();
 const CONFIG_FILE_PATTERNS = ['lefthook.yml', ...gitHookPaths];
 
 const findLefthookDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+  const { manifest, isProduction } = options;
 
   if (isProduction) return [];
 
@@ -30,14 +30,14 @@ const findLefthookDependencies: GenericPluginCallback = async (configFilePath, o
     if (!localConfig) return [];
     const scripts = getValuesByKeyDeep(localConfig, 'run').filter((run): run is string => typeof run === 'string');
     const lefthook = process.env.CI ? ENABLERS.filter(dependency => dependencies.includes(dependency)) : [];
-    return [...lefthook, ...getDependenciesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true })];
+    return [...lefthook, ...getDependenciesFromScripts(scripts, { ...options, knownGlobalsOnly: true })];
   }
 
   const script = await loadFile(configFilePath);
 
   if (!script) return [];
 
-  const scriptDependencies = getDependenciesFromScripts([script], { cwd, manifest, knownGlobalsOnly: false });
+  const scriptDependencies = getDependenciesFromScripts([script], options);
   const matches = scriptDependencies.find(dep => dependencies.includes(fromBinary(dep)));
   return matches ? [matches] : [];
 };
