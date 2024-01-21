@@ -7,12 +7,9 @@ import { fromBinary, isBinary } from '../util/protocols.js';
 import { getBinariesFromScript } from './bash-parser.js';
 import type { GetDependenciesFromScripts } from './types.js';
 
-const defaultCwd = process.cwd();
-
-const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, options = {}) => {
-  const { cwd = defaultCwd, manifest = {}, knownGlobalsOnly = false } = options;
+const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, options) => {
   const scripts = typeof npmScripts === 'string' ? [npmScripts] : [...npmScripts];
-  const results = scripts.flatMap(script => getBinariesFromScript(script, { cwd, manifest, knownGlobalsOnly }));
+  const results = scripts.flatMap(script => getBinariesFromScript(script, options));
 
   return compact(
     results.map(identifier => {

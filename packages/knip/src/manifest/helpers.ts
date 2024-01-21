@@ -1,9 +1,10 @@
 import { join } from '../util/path.js';
 import { _require } from '../util/require.js';
+import type { Scripts } from '../types/package-json.js';
 
-type Options = { dir: string; packageName: string; cwd: string };
+type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 
-export const getPackageManifest = async ({ dir, packageName, cwd }: Options) => {
+export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManifestOptions) => {
   // TODO Not sure what's the most efficient way to get a package.json, but this seems to do the job across package
   // managers (npm, Yarn, pnpm)
   try {
@@ -18,4 +19,23 @@ export const getPackageManifest = async ({ dir, packageName, cwd }: Options) => 
     }
     // Explicitly suppressing errors here
   }
+};
+
+type GetFilteredScriptsOptions = {
+  isProduction: boolean;
+  scripts?: Scripts;
+};
+
+export const getFilteredScripts = ({ isProduction, scripts }: GetFilteredScriptsOptions) => {
+  if (!scripts) return {};
+  if (!isProduction) return scripts;
+
+  const scriptFilter = new Set(['start', 'postinstall']);
+  const filteredScripts: Scripts = {};
+
+  for (let scriptName in scripts) {
+    if (scriptFilter.has(scriptName)) filteredScripts[scriptName] = scripts[scriptName];
+  }
+
+  return filteredScripts;
 };

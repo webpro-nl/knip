@@ -37,12 +37,11 @@ const commands = [
   'workspaces',
 ];
 
-export const resolve: Resolver = (_binary, args, { manifest, fromArgs }) => {
-  const scripts = manifest.scripts ? Object.keys(manifest.scripts) : [];
+export const resolve: Resolver = (_binary, args, { manifestScriptNames, fromArgs }) => {
   const parsed = parseArgs(args, {});
   const [command, binary] = parsed._;
-  if (scripts.includes(command) || commands.includes(command)) return [];
-  if (command === 'run' && scripts.includes(binary)) return [];
+  if (manifestScriptNames.has(command) || commands.includes(command)) return [];
+  if (command === 'run' && manifestScriptNames.has(binary)) return [];
   if (command === 'run' || command === 'exec') return [toBinary(binary)];
   if (command === 'node') return fromArgs(parsed._);
   return command ? [toBinary(command)] : [];

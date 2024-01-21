@@ -56,11 +56,10 @@ const commands = [
   'why',
 ];
 
-export const resolve: Resolver = (_binary, args, { manifest }) => {
-  const scripts = manifest.scripts ? Object.keys(manifest.scripts) : [];
+export const resolve: Resolver = (_binary, args, { manifestScriptNames }) => {
   const parsed = parseArgs(args, { alias: { recursive: 'r' }, boolean: ['recursive'] });
   const [command, binary] = parsed._;
-  if (scripts.includes(command) || commands.includes(command)) return [];
+  if (manifestScriptNames.has(command) || commands.includes(command)) return [];
   if (command === 'exec') return [toBinary(binary)];
   return command ? [toBinary(command)] : [];
 };

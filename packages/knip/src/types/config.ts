@@ -31,8 +31,6 @@ interface BaseWorkspaceConfiguration {
   project: NormalizedGlob;
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
-  ignoreBinaries: IgnorePatterns;
-  ignoreDependencies: IgnorePatterns;
   isIncludeEntryExports: boolean;
 }
 

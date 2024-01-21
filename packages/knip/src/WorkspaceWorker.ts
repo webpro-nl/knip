@@ -12,7 +12,7 @@ import {
 } from './util/protocols.js';
 import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';
-import type { InstalledBinaries, HostDependencies } from './types/workspace.js';
+import type { DependencySet } from './types/workspace.js';
 import type { Entries } from 'type-fest';
 
 type PluginNames = Entries<typeof plugins>;
@@ -23,6 +23,7 @@ type WorkspaceManagerOptions = {
   cwd: string;
   config: WorkspaceConfiguration;
   manifest: PackageJson;
+  dependencies: DependencySet;
   rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -51,6 +52,8 @@ export class WorkspaceWorker {
   cwd: string;
   config: WorkspaceConfiguration;
   manifest: PackageJson;
+  manifestScriptNames: Set<string>;
+  dependencies: DependencySet;
   isProduction;
   isStrict;
   rootIgnore: Configuration['ignore'];
@@ -66,6 +69,7 @@ export class WorkspaceWorker {
     cwd,
     config,
     manifest,
+    dependencies,
     isProduction,
     isStrict,
     rootIgnore,
@@ -77,6 +81,8 @@ export class WorkspaceWorker {
     this.cwd = cwd;
     this.config = config;
     this.manifest = manifest;
+    this.manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
+    this.dependencies = dependencies;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
     this.rootIgnore = rootIgnore;
@@ -90,10 +96,6 @@ export class WorkspaceWorker {
 
   private async determineEnabledPlugins() {
     const manifest = this.manifest;
-    const deps = Object.keys(manifest.dependencies ?? {});
-    const devDeps = Object.keys(manifest.devDependencies ?? {});
-    const dependencies = new Set([...deps, ...devDeps]);
-
     const pluginEntries = Object.entries(plugins) as PluginNames;
 
     for (const [pluginName, plugin] of pluginEntries) {
@@ -105,7 +107,7 @@ export class WorkspaceWorker {
       const isEnabledInAncestor = this.enabledPluginsInAncestors.includes(pluginName);
       if (
         isEnabledInAncestor ||
-        (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies, config: this.config }))
+        (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies: this.dependencies, config: this.config }))
       ) {
         this.enabledPluginsMap[pluginName] = true;
       }
@@ -251,6 +253,8 @@ export class WorkspaceWorker {
             const dependencies = await plugin.findDependencies(configFilePath, {
               cwd,
               manifest: this.manifest,
+              manifestScriptNames: this.manifestScriptNames,
+              dependencies: this.dependencies,
               config: pluginConfig,
               isProduction: this.isProduction,
               enabledPlugins: this.enabledPlugins,

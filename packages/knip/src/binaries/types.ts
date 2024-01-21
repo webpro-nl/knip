@@ -1,13 +1,18 @@
-import type { PackageJson } from '../types/package-json.js';
+import type { BaseOptions } from '../types/plugins.js';
 
-type Options = { cwd?: string; manifest?: PackageJson; knownGlobalsOnly?: boolean };
+export interface GetDependenciesFromScriptsOptions extends BaseOptions {
+  knownGlobalsOnly?: boolean;
+}
 
-export type GetDependenciesFromScripts = (npmScripts: string | string[] | Set<string>, options?: Options) => string[];
+export type GetDependenciesFromScripts = (
+  npmScripts: string | string[] | Set<string>,
+  options: GetDependenciesFromScriptsOptions
+) => string[];
 
 type FromArgs = (args: string[]) => string[];
 
-export type Resolver = (
-  binary: string,
-  args: string[],
-  options: { cwd: string; manifest: PackageJson; fromArgs: FromArgs }
-) => string[];
+interface BinaryResolverOptions extends GetDependenciesFromScriptsOptions {
+  fromArgs: FromArgs;
+}
+
+export type Resolver = (binary: string, args: string[], options: BinaryResolverOptions) => string[];

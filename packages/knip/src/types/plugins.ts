@@ -1,5 +1,12 @@
 import type { EnsuredPluginConfiguration, WorkspaceConfiguration } from './config.js';
 import type { PackageJson } from './package-json.js';
+import type { DependencySet } from './workspace.js';
+
+export interface BaseOptions {
+  cwd: string;
+  manifestScriptNames: Set<string>;
+  dependencies: DependencySet;
+}
 
 type IsPluginEnabledCallbackOptions = {
   cwd: string;
@@ -10,13 +17,12 @@ type IsPluginEnabledCallbackOptions = {
 
 export type IsPluginEnabledCallback = (options: IsPluginEnabledCallbackOptions) => boolean | Promise<boolean>;
 
-export type GenericPluginCallbackOptions = {
-  cwd: string;
+export interface GenericPluginCallbackOptions extends BaseOptions {
   manifest: PackageJson;
   config: EnsuredPluginConfiguration;
   isProduction: boolean;
   enabledPlugins: string[];
-};
+}
 
 export type GenericPluginCallback = (
   configFilePath: string,

@@ -5,7 +5,7 @@ import Svelte from './svelte.js';
 import Vue from './vue.js';
 import type { AsyncCompilerFn, AsyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
 import type { RawConfiguration } from '../types/config.js';
-import type { PackageJson } from '../types/package-json.js';
+import type { DependencySet } from '../types/workspace.js';
 
 // TODO This does not detect functions returning a promise (just the async keyword)
 const isAsync = (fn?: SyncCompilerFn | AsyncCompilerFn) => (fn ? fn.constructor.name === 'AsyncFunction' : false);
@@ -44,18 +44,12 @@ const dummyCompiler: SyncCompilerFn = () => '';
 
 export const dummyCompilers = new Map(Array.from(DUMMY_VIRTUAL_FILE_EXTENSIONS).map(ext => [ext, dummyCompiler]));
 
-const getDependencies = (manifest: PackageJson) => [
-  ...Object.keys(manifest?.dependencies ?? {}),
-  ...Object.keys(manifest?.devDependencies ?? {}),
-];
-
 export const getIncludedCompilers = (
   syncCompilers: SyncCompilers,
   asyncCompilers: AsyncCompilers,
-  manifest: PackageJson
+  dependencies: DependencySet
 ): [SyncCompilers, AsyncCompilers] => {
-  const dependencies = getDependencies(manifest);
-  const hasDependency = (packageName: string) => dependencies.includes(packageName);
+  const hasDependency = (packageName: string) => dependencies.has(packageName);
 
   for (const [extension, { condition, compiler }] of compilers.entries()) {
     if (!syncCompilers.has(extension) && condition(hasDependency)) {

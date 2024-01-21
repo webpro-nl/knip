@@ -17,6 +17,8 @@ type ExtractKeys<T, K extends string> = T extends { PACKAGE_JSON_PATH: infer P }
 type PluginKeys = { [K in keyof PluginMap]: ExtractKeys<PluginMap[K], K> };
 type Plugins = MergeUnion<PluginKeys[keyof PluginMap]>;
 
+export type Scripts = Record<string, string>;
+
 export type PackageJson = {
   name?: string;
   main?: string;
@@ -24,7 +26,7 @@ export type PackageJson = {
   version?: string;
   workspaces?: string[] | { packages?: string[] };
   exports?: Exports;
-  scripts?: Record<string, string>;
+  scripts?: Scripts;
   dependencies?: Dependency;
   devDependencies?: Dependency;
   peerDependencies?: Dependency;

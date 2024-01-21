@@ -3,22 +3,19 @@ import { debugLogObject } from '../util/debug.js';
 import * as FallbackResolver from './resolvers/fallback.js';
 import * as KnownResolvers from './resolvers/index.js';
 import { stripBinaryPath } from './util.js';
-import type { PackageJson } from '../types/package-json.js';
+import type { GetDependenciesFromScriptsOptions } from './types.js';
 import type { Node } from '@ericcornelissen/bash-parser';
 
 // https://vorpaljs.github.io/bash-parser-playground/
 
 type KnownResolver = keyof typeof KnownResolvers;
 
-export const getBinariesFromScript = (
-  script: string,
-  { cwd, manifest, knownGlobalsOnly = false }: { cwd: string; manifest: PackageJson; knownGlobalsOnly?: boolean }
-) => {
+export const getBinariesFromScript = (script: string, options: GetDependenciesFromScriptsOptions) => {
   if (!script) return [];
 
   // Helper for recursive calls
   const fromArgs = (args: string[]) =>
-    getBinariesFromScript(args.filter(arg => arg !== '--').join(' '), { cwd, manifest });
+    getBinariesFromScript(args.filter(arg => arg !== '--').join(' '), { ...options, knownGlobalsOnly: false });
 
   const getBinariesFromNodes = (nodes: Node[]): string[] =>
     nodes.flatMap(node => {
@@ -46,15 +43,15 @@ export const getBinariesFromScript = (
           if (['!', 'test'].includes(binary)) return fromArgs(args);
 
           if (binary in KnownResolvers) {
-            return KnownResolvers[binary as KnownResolver].resolve(binary, args, { cwd, manifest, fromArgs });
+            return KnownResolvers[binary as KnownResolver].resolve(binary, args, { ...options, fromArgs });
           }
 
           // Before using the fallback resolver, we need a way to bail out for scripts in environments like GitHub
           // Actions, which are provisioned with lots of unknown global binaries.
-          if (knownGlobalsOnly) return [];
+          if (options.knownGlobalsOnly) return [];
 
           // We apply a kitchen sink fallback resolver for everything else
-          return FallbackResolver.resolve(binary, args, { cwd, manifest, fromArgs });
+          return FallbackResolver.resolve(binary, args, { ...options, fromArgs });
         }
         case 'LogicalExpression':
           return getBinariesFromNodes([node.left, node.right]);

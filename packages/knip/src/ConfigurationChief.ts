@@ -81,7 +81,6 @@ export type Workspace = {
   ancestors: string[];
   config: WorkspaceConfiguration;
   manifestPath: string;
-  manifest: PackageJson;
 };
 
 /**
@@ -360,9 +359,12 @@ export class ConfigurationChief {
           config: this.getConfigForWorkspace(name, DEFAULT_EXTENSIONS),
           ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
           manifestPath: join(dir, 'package.json'),
-          manifest: this.availableWorkspaceManifests?.find(item => item.dir === dir)?.manifest ?? {},
         };
       });
+  }
+
+  public getManifestForWorkspace(dir: string) {
+    return this.availableWorkspaceManifests?.find(item => item.dir === dir)?.manifest ?? {};
   }
 
   public getIncludedWorkspaces() {
@@ -397,6 +399,20 @@ export class ConfigurationChief {
       .find(pattern => micromatch.isMatch(workspaceName, pattern));
   }
 
+  public getIgnores(workspaceName: string) {
+    const key = this.getConfigKeyForWorkspace(workspaceName);
+    const workspaces = this.rawConfig?.workspaces ?? {};
+    const workspaceConfig =
+      (key
+        ? key === ROOT_WORKSPACE_NAME && !(ROOT_WORKSPACE_NAME in workspaces)
+          ? this.rawConfig
+          : workspaces[key]
+        : {}) ?? {};
+    const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries).map(toRegexOrString);
+    const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies).map(toRegexOrString);
+    return { ignoreBinaries, ignoreDependencies };
+  }
+
   public getConfigForWorkspace(workspaceName: string, extensions: string[]) {
     const baseConfig = getDefaultWorkspaceConfig(extensions);
     const key = this.getConfigKeyForWorkspace(workspaceName);
@@ -412,8 +428,6 @@ export class ConfigurationChief {
     const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : baseConfig.project;
     const paths = workspaceConfig.paths ?? {};
     const ignore = arrayify(workspaceConfig.ignore);
-    const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries).map(toRegexOrString);
-    const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies).map(toRegexOrString);
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
     const plugins: Partial<PluginsConfiguration> = {};
@@ -430,7 +444,7 @@ export class ConfigurationChief {
       }
     }
 
-    return { entry, project, paths, ignore, ignoreBinaries, ignoreDependencies, isIncludeEntryExports, ...plugins };
+    return { entry, project, paths, ignore, isIncludeEntryExports, ...plugins };
   }
 
   public getIncludedIssueTypes() {

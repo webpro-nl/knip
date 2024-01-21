@@ -6,6 +6,7 @@ import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { IssueFixer } from './IssueFixer.js';
+import { getFilteredScripts } from './manifest/helpers.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLogObject, debugLogArray, debugLog, exportLookupLog } from './util/debug.js';
@@ -136,17 +137,23 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   for (const workspace of workspaces) {
-    const { name, dir, ancestors, pkgName, manifestPath, manifest } = workspace;
+    const { name, dir, ancestors, pkgName, manifestPath } = workspace;
 
     streamer.cast(`Analyzing workspace ${name}...`);
 
-    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, manifest);
+    const manifest = chief.getManifestForWorkspace(dir);
+    const { ignoreBinaries, ignoreDependencies } = chief.getIgnores(name);
+
+    deputy.addWorkspace({ name, cwd, dir, manifestPath, manifest, ignoreBinaries, ignoreDependencies });
+    const dependencies = deputy.getDependencies(name);
+
+    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
     const extensions = getCompilerExtensions(compilers);
     const config = chief.getConfigForWorkspace(name, extensions);
 
-    deputy.addWorkspace({ name, dir, manifestPath, manifest, ...config });
-
-    const referencedDependenciesInManifest = await deputy.analyzeManifest(name, cwd, manifest);
+    const filteredScripts = getFilteredScripts({ isProduction, scripts: manifest.scripts });
+    const manifestScripts = Object.values(filteredScripts);
+    const manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
 
     const { compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
@@ -166,6 +173,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       cwd,
       config,
       manifest,
+      dependencies,
       isProduction,
       isStrict,
       rootIgnore: chief.config.ignore,
@@ -183,16 +191,24 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
-    const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
-    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
-    principal.addEntryPaths(entryPathsFromManifest);
+    {
+      // Add dependencies from package.json
+      const options = { manifestScriptNames, cwd: dir, dependencies };
+      const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
+      principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
+    }
 
-    const dependencies = await worker.findDependenciesByPlugins();
-    const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } = dependencies;
-    principal.addReferencedDependencies(name, referencedDependencies);
-    principal.addReferencedDependencies(name, referencedDependenciesInManifest);
+    {
+      // Add entry paths from package.json
+      const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
+      debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
+      principal.addEntryPaths(entryPathsFromManifest);
+    }
 
+    const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } =
+      await worker.findDependenciesByPlugins();
     enabledPluginsStore.set(name, enabledPlugins);
+    principal.addReferencedDependencies(name, referencedDependencies);
 
     if (isProduction) {
       const negatedEntryPatterns: string[] = Array.from(entryFilePatterns).map(negate);
@@ -343,7 +359,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           collector.addIssue({ type: 'unresolved', filePath, symbol: specifier, pos, line, col });
         });
 
-        _getDependenciesFromScripts(scripts, { cwd: dirname(filePath) }).forEach(specifier => {
+        _getDependenciesFromScripts(scripts, {
+          cwd: dirname(filePath),
+          manifestScriptNames: new Set(),
+          dependencies: deputy.getDependencies(workspace.name),
+        }).forEach(specifier => {
           handleReferencedDependency({ specifier, containingFilePath: filePath, principal: _principal, workspace });
         });
       }
