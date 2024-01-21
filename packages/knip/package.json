@@ -71,6 +71,7 @@
     "picocolors": "1.0.0",
     "picomatch": "3.0.1",
     "pretty-ms": "8.0.0",
+    "smol-toml": "1.1.3",
     "strip-json-comments": "5.0.1",
     "summary": "2.1.0",
     "zod": "3.22.4",

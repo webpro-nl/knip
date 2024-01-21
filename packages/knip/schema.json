@@ -358,6 +358,10 @@
           "title": "Mocha plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/mocha/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "netlify": {
+          "title": "Netlify plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/netlify/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "next": {
           "title": "Next.js plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/main/README.md)",
           "$ref": "#/definitions/plugin"

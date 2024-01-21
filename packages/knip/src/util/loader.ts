@@ -1,6 +1,6 @@
 import { pathToFileURL } from 'node:url';
 import { LoaderError } from './errors.js';
-import { loadJSON, loadYAML, loadFile, parseJSON, parseYAML } from './fs.js';
+import { loadJSON, loadYAML, loadTOML, loadFile, parseJSON, parseYAML } from './fs.js';
 import { isTypeModule } from './fs.js';
 import { extname } from './path.js';
 import { timerify } from './Performance.js';
@@ -24,6 +24,10 @@ const load = async (filePath: string) => {
 
     if (ext === '.yaml' || ext === '.yml') {
       return loadYAML(filePath);
+    }
+
+    if (ext === '.toml') {
+      return loadTOML(filePath);
     }
 
     if (ext === '.mjs' || (ext === '.js' && isTypeModule(filePath))) {
