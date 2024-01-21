@@ -5,7 +5,7 @@ import { hasDependency, load, tryResolve } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { ViteConfigOrFn, VitestWorkspaceConfig, ViteConfig, MODE, COMMAND } from './types.js';
-import type { PackageJsonWithPlugins } from '../../types/package-json.js';
+import type { PackageJson } from '../../types/package-json.js';
 import type {
   IsPluginEnabledCallback,
   GenericPluginCallback,
@@ -32,13 +32,14 @@ const resolveEntry = (containingFilePath: string, specifier: string) => {
   return specifier;
 };
 
-const enablesCoverageInScript = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
+const isVitestCoverageCommand = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
 
-const hasScriptWithCoverage = (scripts: Exclude<PackageJsonWithPlugins['scripts'], undefined>) => {
-  return Object.values(scripts).some(script => {
-    return enablesCoverageInScript.test(script);
-  });
-};
+const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
+  scripts
+    ? Object.values(scripts).some(script => {
+        return isVitestCoverageCommand.test(script);
+      })
+    : false;
 
 const findConfigDependencies = (
   configFilePath: string,
@@ -56,8 +57,7 @@ const findConfigDependencies = (
   const reporters = getExternalReporters(testConfig.reporters);
 
   const hasCoverageEnabled =
-    (testConfig.coverage && testConfig.coverage.enabled !== false) ||
-    (manifest.scripts !== undefined && hasScriptWithCoverage(manifest.scripts));
+    (testConfig.coverage && testConfig.coverage.enabled !== false) || hasScriptWithCoverage(manifest.scripts);
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
   const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(configFilePath, v));
