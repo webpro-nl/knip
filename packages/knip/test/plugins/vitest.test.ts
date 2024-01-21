@@ -5,15 +5,15 @@ import { default as vitest } from '../../src/plugins/vitest/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { getManifest, pluginConfig as config } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/vitest');
-const manifest = getManifest(cwd);
+const options = buildOptions(cwd);
 const enabledPlugins = ['vitest'];
 
 test('Find dependencies in vitest configuration (vitest)', async () => {
   const configFilePath = join(cwd, 'vitest.config.ts');
-  const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest, config, enabledPlugins });
+  const dependencies = await vitest.findDependencies(configFilePath, { ...options, enabledPlugins });
   assert.deepEqual(dependencies, [
     'entry:**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)',
     'happy-dom',
@@ -25,13 +25,13 @@ test('Find dependencies in vitest configuration (vitest)', async () => {
 
 test('Find dependencies in vitest configuration without coverage providers (vitest)', async () => {
   const configFilePath = join(cwd, 'vitest-default-coverage.config');
-  const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest, config, enabledPlugins });
+  const dependencies = await vitest.findDependencies(configFilePath, { ...options, enabledPlugins });
   assert.deepEqual(dependencies, ['entry:**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)', 'jsdom', '@vitest/coverage-v8']);
 });
 
 test('Find dependencies in vitest configuration (vite)', async () => {
   const configFilePath = join(cwd, 'vite.config.ts');
-  const dependencies = await vitest.findDependencies(configFilePath, { cwd, manifest, config, enabledPlugins });
+  const dependencies = await vitest.findDependencies(configFilePath, { ...options, enabledPlugins });
   assert.deepEqual(dependencies, [
     'entry:**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)',
     '@vitest/coverage-c8',

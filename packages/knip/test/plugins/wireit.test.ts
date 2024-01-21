@@ -5,31 +5,30 @@ import { default as wireit } from '../../src/plugins/wireit/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { getManifest, pluginConfig as config } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/wireit');
-const options = { cwd, config, isProduction: false, enabledPlugins: [] };
 
 test('Find no dependencies when the wireit configuration is missing', async () => {
   const dir = join(cwd, 'apps/missing');
   const configFilePath = join(dir, 'package.json');
-  const manifest = getManifest(dir);
-  const dependencies = await wireit.findDependencies(configFilePath, { ...options, manifest, cwd: dir });
+  const options = buildOptions(dir);
+  const dependencies = await wireit.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, []);
 });
 
 test('Find dependencies when the wireit configuration has commands', async () => {
   const configFilePath = join(cwd, 'package.json');
-  const manifest = getManifest(cwd);
-  const dependencies = await wireit.findDependencies(configFilePath, { ...options, manifest });
+  const options = buildOptions(cwd);
+  const dependencies = await wireit.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, ['bin:tsc']);
 });
 
 test('Find dependencies in the example wireit configuration', async () => {
   const dir = join(cwd, 'apps/example-configuration');
   const configFilePath = join(dir, 'package.json');
-  const manifest = getManifest(dir);
-  const dependencies = await wireit.findDependencies(configFilePath, { ...options, manifest, cwd: dir });
+  const options = buildOptions(dir);
+  const dependencies = await wireit.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, ['bin:tsc', 'bin:rollup']);
 });
 

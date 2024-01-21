@@ -4,14 +4,14 @@ import { main } from '../../src/index.js';
 import { default as babel } from '../../src/plugins/babel/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
-import { getManifest } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/babel');
-const manifest = getManifest(cwd);
+const options = buildOptions(cwd);
 
 test('Find dependencies in Babel configuration (.babelrc)', async () => {
   const configFilePath = join(cwd, '.babelrc');
-  const dependencies = await babel.findDependencies(configFilePath, { manifest });
+  const dependencies = await babel.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     '@babel/preset-env',
     '@babel/preset-typescript',
@@ -25,7 +25,7 @@ test('Find dependencies in Babel configuration (.babelrc)', async () => {
 
 test('Find dependencies in Babel configuration (.babelrc.js)', async () => {
   const configFilePath = join(cwd, '.babelrc.js');
-  const dependencies = await babel.findDependencies(configFilePath, { manifest });
+  const dependencies = await babel.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     '@babel/preset-env',
     '@babel/preset-typescript',
@@ -39,7 +39,7 @@ test('Find dependencies in Babel configuration (.babelrc.js)', async () => {
 
 test('Find dependencies in Babel configuration (babel.config.js)', async () => {
   const configFilePath = join(cwd, 'babel.config.js');
-  const dependencies = await babel.findDependencies(configFilePath, { manifest });
+  const dependencies = await babel.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     '@babel/preset-env',
     '@babel/preset-typescript',
@@ -55,7 +55,7 @@ test('Find dependencies in Babel configuration (babel.config.js)', async () => {
 
 test('Find dependencies in Babel configuration (babel.config.cts)', async () => {
   const configFilePath = join(cwd, 'babel.config.cts');
-  const dependencies = await babel.findDependencies(configFilePath, { manifest });
+  const dependencies = await babel.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     '/dir/preset.js',
     './dir/preset.js',
@@ -92,7 +92,7 @@ test('Find dependencies in Babel configuration (babel.config.cts)', async () => 
 
 test('Find dependencies in Babel configuration (package.json)', async () => {
   const configFilePath = join(cwd, 'package.json');
-  const dependencies = await babel.findDependencies(configFilePath, { manifest });
+  const dependencies = await babel.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, ['@babel/preset-env']);
 });
 

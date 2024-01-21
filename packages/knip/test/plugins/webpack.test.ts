@@ -7,14 +7,14 @@ import { default as webpack } from '../../src/plugins/webpack/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { getManifest } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/webpack');
-const manifest = getManifest(cwd);
+const options = buildOptions(cwd);
 
 test('Find dependencies in Webpack configuration (webpack.config.js)', async () => {
   const configFilePath = join(cwd, 'webpack.config.js');
-  const dependencies = await webpack.findDependencies(configFilePath, { cwd, manifest });
+  const dependencies = await webpack.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     'entry:src/app.ts',
     'entry:src/vendor.ts',
@@ -41,7 +41,7 @@ test('Find dependencies in Webpack configuration (webpack.config.js)', async () 
 
 test('Find dependencies in Webpack configuration (webpack.babel.config.js)', async () => {
   const configFilePath = join(cwd, 'webpack.babel.js');
-  const dependencies = await webpack.findDependencies(configFilePath, { cwd, manifest });
+  const dependencies = await webpack.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     'production:lib/linter/linter.js',
     'babel-loader',

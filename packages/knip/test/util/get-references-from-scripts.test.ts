@@ -11,12 +11,15 @@ const ts = join(cwd, 'main.ts');
 const req = join(cwd, 'require.js');
 const index = join(cwd, 'dir', 'index.js');
 
-const pkgScripts = { cwd, manifest: { scripts: { program: '' } } };
+const pkgScripts = { cwd, manifestScriptNames: new Set(['program']) };
 const knownOnly = { cwd, knownGlobalsOnly: true };
 
 type T = (script: string | string[], dependencies: string[], options?: { cwd: string }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
-  assert.deepEqual(_getDependenciesFromScripts(script, options), dependencies);
+  assert.deepEqual(
+    _getDependenciesFromScripts(script, { manifestScriptNames: new Set(), dependencies: new Set(), ...options }),
+    dependencies
+  );
 
 test('getReferencesFromScripts', () => {
   t('program', ['bin:program']);

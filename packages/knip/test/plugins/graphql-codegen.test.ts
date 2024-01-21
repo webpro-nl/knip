@@ -5,20 +5,20 @@ import { default as graphqlCodegen } from '../../src/plugins/graphql-codegen/ind
 import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { getManifest, pluginConfig as config } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/graphql-codegen');
-const manifest = getManifest(cwd);
+const options = buildOptions(cwd);
 
 test('Find dependencies in graphql-codegen configuration (json)', async () => {
   const configFilePath = join(cwd, 'package.json');
-  const dependencies = await graphqlCodegen.findDependencies(configFilePath, { manifest, config });
+  const dependencies = await graphqlCodegen.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, ['@graphql-codegen/client-preset']);
 });
 
 test('Find dependencies in graphql-codegen configuration (codegen.ts)', async () => {
   const configFilePath = join(cwd, 'codegen.ts');
-  const dependencies = await graphqlCodegen.findDependencies(configFilePath, { manifest, config });
+  const dependencies = await graphqlCodegen.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     '@graphql-codegen/near-operation-file-preset',
     '@graphql-codegen/schema-ast',
@@ -33,7 +33,7 @@ test('Find dependencies in graphql-codegen configuration (codegen.ts)', async ()
 
 test('Find dependencies in graphql-codegen configuration (codegen.yaml)', async () => {
   const configFilePath = join(cwd, 'codegen.yaml');
-  const dependencies = await graphqlCodegen.findDependencies(configFilePath, { manifest, config });
+  const dependencies = await graphqlCodegen.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     '@graphql-codegen/typescript',
     '@graphql-codegen/typescript-operations',

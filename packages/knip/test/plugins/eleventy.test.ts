@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { default as eleventy } from '../../src/plugins/eleventy/index.js';
 import { resolve, join } from '../../src/util/path.js';
-import { getManifest, pluginConfig as config } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/eleventy');
-const manifest = getManifest(cwd);
+const options = buildOptions(cwd);
 
 test('Find dependencies in Eleventy configuration (static)', async () => {
   const configFilePath = join(cwd, 'eleventy.config.cjs');
-  const dependencies = await eleventy.findDependencies(configFilePath, { manifest, config });
+  const dependencies = await eleventy.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     'production:_data/**/*.js',
     'production:**/*.{11ty.js}',
@@ -19,7 +19,7 @@ test('Find dependencies in Eleventy configuration (static)', async () => {
 
 test('Find dependencies in Eleventy configuration (dynamic)', async () => {
   const configFilePath = join(cwd, 'eleventy.config.dynamic.cjs');
-  const dependencies = await eleventy.findDependencies(configFilePath, { manifest, config });
+  const dependencies = await eleventy.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     'production:_data/**/*.js',
     'production:content/**/*.{md,njk,html,liquid}',

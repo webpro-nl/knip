@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.js';
-import { analyzeManifest } from '../src/manifest/index.js';
-import { resolve, join } from '../src/util/path.js';
+import { getDependencyMetaData } from '../src/manifest/index.js';
+import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 import { getManifest } from './helpers/index.js';
@@ -10,35 +10,17 @@ import { getManifest } from './helpers/index.js';
 const cwd = resolve('fixtures/npm-scripts');
 const manifest = getManifest(cwd);
 
-test('Referenced dependencies in npm scripts', async () => {
+test('Get metadata from dependencies (getDependencyMetaData)', async () => {
   const config = {
-    manifest,
-    isProduction: false,
-    isStrict: false,
     dir: cwd,
     cwd,
+    packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
   };
 
-  const { referencedDependencies, hostDependencies, installedBinaries } = await analyzeManifest(config);
-
-  assert.deepEqual(referencedDependencies, [
-    'bin:nodemon',
-    join(cwd, 'script.js'),
-    'bin:rm',
-    'bin:dotenv',
-    'bin:nx',
-    'bin:pm2',
-    'bin:pm2-dev',
-    'bin:eslint',
-    'bin:commitlint',
-    'bin:bash',
-    join(cwd, 'ignore.js'),
-    'bin:package',
-    'bin:runnable',
-  ]);
+  const { hostDependencies, installedBinaries } = await getDependencyMetaData(config);
 
   const expectedHostDependencies = new Map();
-  expectedHostDependencies.set('pm2-peer-dep', new Set([{ name: 'pm2', isPeerOptional: false }]));
+  expectedHostDependencies.set('pm2-peer-dep', [{ name: 'pm2', isPeerOptional: false }]);
 
   assert.deepEqual(hostDependencies, expectedHostDependencies);
 

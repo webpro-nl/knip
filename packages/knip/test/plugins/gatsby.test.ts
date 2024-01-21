@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { default as gatsby } from '../../src/plugins/gatsby/index.js';
 import { resolve, join } from '../../src/util/path.js';
-import { pluginConfig as config } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/gatsby');
+const options = buildOptions(cwd);
 
 test('Find dependencies in Gatsby configuration (gatsby-config.js)', async () => {
   const configFilePath = join(cwd, 'gatsby-config.js');
-  const dependencies = await gatsby.findDependencies(configFilePath, { config });
+  const dependencies = await gatsby.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     '@sentry/gatsby',
     'gatsby-plugin-webpack-bundle-analyser-v2',
@@ -26,7 +27,7 @@ test('Find dependencies in Gatsby configuration (gatsby-config.js)', async () =>
 
 test('Find dependencies in Gatsby configuration (gatsby-node.js)', async () => {
   const configFilePath = join(cwd, 'gatsby-node.js');
-  const dependencies = await gatsby.findDependencies(configFilePath, { config });
+  const dependencies = await gatsby.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     '@babel/plugin-proposal-function-bind',
     '@babel/plugin-proposal-export-default-from',

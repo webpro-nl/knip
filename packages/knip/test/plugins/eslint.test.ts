@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { default as eslint } from '../../src/plugins/eslint/index.js';
 import { resolve, join } from '../../src/util/path.js';
-import { getManifest } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/eslint');
-const manifest = getManifest(cwd);
+const options = buildOptions(cwd);
 
 test('Find dependencies in ESLint configuration (legacy json)', async () => {
   const configFilePath = join(cwd, '.eslintrc.json');
-  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
+  const dependencies = await eslint.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     join(cwd, 'base.eslint.json'),
     'eslint',
@@ -24,7 +24,7 @@ test('Find dependencies in ESLint configuration (legacy json)', async () => {
 
 test('Find dependencies in ESLint configuration (legacy js)', async () => {
   const configFilePath = join(cwd, '.eslintrc.js');
-  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
+  const dependencies = await eslint.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     join(cwd, 'base.eslint.json'),
     'eslint',
@@ -51,13 +51,13 @@ test('Find dependencies in ESLint configuration (legacy js)', async () => {
 
 test('Find dependencies in ESLint configuration (legacy yaml)', async () => {
   const configFilePath = join(cwd, '.eslintrc.yml');
-  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
+  const dependencies = await eslint.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, ['@sinonjs/eslint-config', '@sinonjs/eslint-plugin-no-prototype-methods']);
 });
 
 test('Find dependencies in ESLint configuration (custom prettier config)', async () => {
   const configFilePath = join(cwd, '.eslintrc.cjs');
-  const dependencies = await eslint.findDependencies(configFilePath, { cwd, manifest });
+  const dependencies = await eslint.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, [
     'eslint',
     '@typescript-eslint/eslint-plugin',

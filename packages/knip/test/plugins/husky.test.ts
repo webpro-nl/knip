@@ -5,14 +5,14 @@ import { default as husky } from '../../src/plugins/husky/index.js';
 import { resolve, join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { getManifest } from '../helpers/index.js';
+import { buildOptions } from '../helpers/index.js';
 
 const cwd = resolve('fixtures/plugins/husky');
-const manifest = getManifest(cwd);
+const options = buildOptions(cwd);
 
 test('Find dependencies in husky configuration (plugin)', async () => {
   const configFilePath = join(cwd, '.husky/pre-commit');
-  const dependencies = await husky.findDependencies(configFilePath, { manifest });
+  const dependencies = await husky.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, ['lint-staged', 'bin:commitlint']);
 });
 
