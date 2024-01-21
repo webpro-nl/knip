@@ -2,7 +2,7 @@ import { join } from '../../util/path.js';
 import { timerify } from '../../util/Performance.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import { toProductionEntryPattern } from '../../util/protocols.js';
-import { extractFunctionsConfigProperty, validFunctionExtensions } from './helpers.js';
+import { NETLIFY_FUNCTIONS_EXTS, extractFunctionsConfigProperty } from './helpers.js';
 import type { NetlifyConfig } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
@@ -18,7 +18,7 @@ const CONFIG_FILE_PATTERNS: string[] = ['netlify.toml'];
 
 const ENTRY_FILE_PATTERNS: string[] = [];
 
-const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = [`netlify/functions/**/*.{${validFunctionExtensions()}}`];
+const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = [`netlify/functions/**/*.{${NETLIFY_FUNCTIONS_EXTS}}`];
 
 const PROJECT_FILE_PATTERNS: string[] = [];
 
@@ -37,7 +37,7 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   ];
   const entryFiles = [
     ...extractFunctionsConfigProperty(localConfig.functions || {}, 'included_files'),
-    join(localConfig.functions?.directory ?? 'netlify/functions', `**/*.{${validFunctionExtensions()}}`),
+    join(localConfig.functions?.directory ?? 'netlify/functions', `**/*.{${NETLIFY_FUNCTIONS_EXTS}}`),
   ].filter(file => !file.startsWith('!'));
 
   return [...dependencies, ...entryFiles.map(toProductionEntryPattern)];
