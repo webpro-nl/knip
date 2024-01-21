@@ -28,35 +28,36 @@ tableOfContents: false
 - [LintHTML][21]
 - [markdownlint][22]
 - [Mocha][23]
-- [Next.js][24]
-- [Node.js Test Runner][25]
-- [npm-package-json-lint][26]
-- [Nx][27]
-- [nyc][28]
-- [Playwright][29]
-- [Playwright for components][30]
-- [PostCSS][31]
-- [Prettier][32]
-- [Release It][33]
-- [Remark][34]
-- [Remix][35]
-- [Rollup][36]
-- [Semantic Release][37]
-- [Sentry][38]
-- [Storybook][39]
-- [Stryker][40]
-- [Stylelint][41]
-- [Svelte][42]
-- [Tailwind][43]
-- [tsup][44]
-- [TypeDoc][45]
-- [TypeScript][46]
-- [unbuild][47]
-- [Vite][48]
-- [Vitest][49]
-- [Vue][50]
-- [Webpack][51]
-- [Wireit][52]
+- [Netlify][24]
+- [Next.js][25]
+- [Node.js Test Runner][26]
+- [npm-package-json-lint][27]
+- [Nx][28]
+- [nyc][29]
+- [Playwright][30]
+- [Playwright for components][31]
+- [PostCSS][32]
+- [Prettier][33]
+- [Release It][34]
+- [Remark][35]
+- [Remix][36]
+- [Rollup][37]
+- [Semantic Release][38]
+- [Sentry][39]
+- [Storybook][40]
+- [Stryker][41]
+- [Stylelint][42]
+- [Svelte][43]
+- [Tailwind][44]
+- [tsup][45]
+- [TypeDoc][46]
+- [TypeScript][47]
+- [unbuild][48]
+- [Vite][49]
+- [Vitest][50]
+- [Vue][51]
+- [Webpack][52]
+- [Wireit][53]
 
 :::
 
@@ -83,32 +84,33 @@ tableOfContents: false
 [21]: /reference/plugins/linthtml 'LintHTML'
 [22]: /reference/plugins/markdownlint 'markdownlint'
 [23]: /reference/plugins/mocha 'Mocha'
-[24]: /reference/plugins/next 'Next.js'
-[25]: /reference/plugins/node-test-runner 'Node.js Test Runner'
-[26]: /reference/plugins/npm-package-json-lint 'npm-package-json-lint'
-[27]: /reference/plugins/nx 'Nx'
-[28]: /reference/plugins/nyc 'nyc'
-[29]: /reference/plugins/playwright 'Playwright'
-[30]: /reference/plugins/playwright-ct 'Playwright for components'
-[31]: /reference/plugins/postcss 'PostCSS'
-[32]: /reference/plugins/prettier 'Prettier'
-[33]: /reference/plugins/release-it 'Release It'
-[34]: /reference/plugins/remark 'Remark'
-[35]: /reference/plugins/remix 'Remix'
-[36]: /reference/plugins/rollup 'Rollup'
-[37]: /reference/plugins/semantic-release 'Semantic Release'
-[38]: /reference/plugins/sentry 'Sentry'
-[39]: /reference/plugins/storybook 'Storybook'
-[40]: /reference/plugins/stryker 'Stryker'
-[41]: /reference/plugins/stylelint 'Stylelint'
-[42]: /reference/plugins/svelte 'Svelte'
-[43]: /reference/plugins/tailwind 'Tailwind'
-[44]: /reference/plugins/tsup 'tsup'
-[45]: /reference/plugins/typedoc 'TypeDoc'
-[46]: /reference/plugins/typescript 'TypeScript'
-[47]: /reference/plugins/unbuild 'unbuild'
-[48]: /reference/plugins/vite 'Vite'
-[49]: /reference/plugins/vitest 'Vitest'
-[50]: /reference/plugins/vue 'Vue'
-[51]: /reference/plugins/webpack 'Webpack'
-[52]: /reference/plugins/wireit 'Wireit'
+[24]: /reference/plugins/netlify 'Netlify'
+[25]: /reference/plugins/next 'Next.js'
+[26]: /reference/plugins/node-test-runner 'Node.js Test Runner'
+[27]: /reference/plugins/npm-package-json-lint 'npm-package-json-lint'
+[28]: /reference/plugins/nx 'Nx'
+[29]: /reference/plugins/nyc 'nyc'
+[30]: /reference/plugins/playwright 'Playwright'
+[31]: /reference/plugins/playwright-ct 'Playwright for components'
+[32]: /reference/plugins/postcss 'PostCSS'
+[33]: /reference/plugins/prettier 'Prettier'
+[34]: /reference/plugins/release-it 'Release It'
+[35]: /reference/plugins/remark 'Remark'
+[36]: /reference/plugins/remix 'Remix'
+[37]: /reference/plugins/rollup 'Rollup'
+[38]: /reference/plugins/semantic-release 'Semantic Release'
+[39]: /reference/plugins/sentry 'Sentry'
+[40]: /reference/plugins/storybook 'Storybook'
+[41]: /reference/plugins/stryker 'Stryker'
+[42]: /reference/plugins/stylelint 'Stylelint'
+[43]: /reference/plugins/svelte 'Svelte'
+[44]: /reference/plugins/tailwind 'Tailwind'
+[45]: /reference/plugins/tsup 'tsup'
+[46]: /reference/plugins/typedoc 'TypeDoc'
+[47]: /reference/plugins/typescript 'TypeScript'
+[48]: /reference/plugins/unbuild 'unbuild'
+[49]: /reference/plugins/vite 'Vite'
+[50]: /reference/plugins/vitest 'Vitest'
+[51]: /reference/plugins/vue 'Vue'
+[52]: /reference/plugins/webpack 'Webpack'
+[53]: /reference/plugins/wireit 'Wireit'
