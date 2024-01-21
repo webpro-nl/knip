@@ -20,6 +20,9 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addShortcode('related_rules', () => {});
   eleventyConfig.addWatchTarget('./src/assets/');
   eleventyConfig.addPassthroughCopy({
+    'src/_includes/abc.js': '/assets/abc.js',
+  });
+  eleventyConfig.addPassthroughCopy({
     './src/static': '/',
   });
   eleventyConfig.addPassthroughCopy('./src/assets/');
