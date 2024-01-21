@@ -10,7 +10,7 @@ import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types
 
 const NAME = 'Netlify';
 
-const ENABLERS = [/^@netlify\//, 'netlify-cli'];
+const ENABLERS = [/^@netlify\/plugin-/, 'netlify-cli', '@netlify/functions'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
