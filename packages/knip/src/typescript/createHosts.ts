@@ -2,7 +2,7 @@ import { EOL } from 'node:os';
 // eslint-disable-next-line n/no-restricted-import
 import path from 'node:path';
 import ts from 'typescript';
-import { getExtensions } from '../compilers/index.js';
+import { getCompilerExtensions } from '../compilers/index.js';
 import { createCustomModuleResolver } from './resolveModuleNames.js';
 import { SourceFileManager } from './SourceFileManager.js';
 import { createCustomSys } from './sys.js';
@@ -21,7 +21,7 @@ const fileManager = new SourceFileManager();
 
 export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers }: CreateHostsOptions) => {
   fileManager.installCompilers(compilers);
-  const virtualFileExtensions = getExtensions(compilers);
+  const virtualFileExtensions = getCompilerExtensions(compilers);
   const sys = createCustomSys(cwd, virtualFileExtensions);
   const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, virtualFileExtensions);
 
