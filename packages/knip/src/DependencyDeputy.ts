@@ -10,8 +10,8 @@ import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped
 import { hasMatch, hasMatchInArray, hasMatchInSet, toRegexOrString, findKey } from './util/regex.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { ConfigurationHints, Issue } from './types/issues.js';
+import type { PackageJson } from './types/package-json.js';
 import type { WorkspaceManifests, HostDependencies, InstalledBinaries } from './types/workspace.js';
-import type { PackageJson } from '@npmcli/package-json';
 
 type Options = {
   isProduction: boolean;

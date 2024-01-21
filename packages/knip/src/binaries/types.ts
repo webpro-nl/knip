@@ -1,4 +1,4 @@
-import type { PackageJson } from '@npmcli/package-json';
+import type { PackageJson } from '../types/package-json.js';
 
 type Options = { cwd?: string; manifest?: PackageJson; knownGlobalsOnly?: boolean };
 

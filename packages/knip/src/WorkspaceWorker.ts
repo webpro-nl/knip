@@ -12,7 +12,7 @@ import {
   isProductionEntryPattern,
 } from './util/protocols.js';
 import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
-import type { PackageJsonWithPlugins } from './types/package-json.js';
+import type { PackageJson } from './types/package-json.js';
 import type { InstalledBinaries, HostDependencies } from './types/workspace.js';
 import type { Entries } from 'type-fest';
 
@@ -23,7 +23,7 @@ type WorkspaceManagerOptions = {
   dir: string;
   cwd: string;
   config: WorkspaceConfiguration;
-  manifest: PackageJsonWithPlugins;
+  manifest: PackageJson;
   rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -47,7 +47,7 @@ export class WorkspaceWorker {
   dir: string;
   cwd: string;
   config: WorkspaceConfiguration;
-  manifest: PackageJsonWithPlugins;
+  manifest: PackageJson;
   isProduction;
   isStrict;
   rootIgnore: Configuration['ignore'];

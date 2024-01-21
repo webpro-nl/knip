@@ -2,7 +2,7 @@ import { isBuiltin } from 'module';
 import { _glob } from './glob.js';
 import { getStringValues } from './object.js';
 import { isAbsolute, toPosix } from './path.js';
-import type { PackageJson } from '@npmcli/package-json';
+import type { PackageJson } from '../types/package-json.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   if (!isStartsLikePackageName(moduleSpecifier)) return;

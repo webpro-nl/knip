@@ -29,7 +29,7 @@ import type {
   PluginsConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { PackageJson } from '@npmcli/package-json';
+import type { PackageJson } from './types/package-json.js';
 
 const {
   config: rawConfigArg,

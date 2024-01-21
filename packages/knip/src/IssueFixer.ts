@@ -1,9 +1,8 @@
 import { readFile, writeFile } from 'fs/promises';
-import NPMCliPackageJson from '@npmcli/package-json';
+import NPMCliPackageJson, { type PackageJson } from '@npmcli/package-json';
 import { dirname, join } from './util/path.js';
 import type { Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
-import type { PackageJson } from '@npmcli/package-json';
 
 export class IssueFixer {
   isEnabled = false;

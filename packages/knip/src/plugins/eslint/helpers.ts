@@ -7,7 +7,7 @@ import { getDependenciesFromConfig } from '../babel/index.js';
 import { fallback } from './fallback.js';
 import { PACKAGE_JSON_PATH } from './index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
-import type { PackageJsonWithPlugins } from '../../types/package-json.js';
+import type { PackageJson } from '../../types/package-json.js';
 
 const getDependencies = (config: ESLintConfig | OverrideConfig) => {
   const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendSpecifier) : [];
@@ -28,7 +28,7 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
 
 type GetDependenciesDeep = (
   configFilePath: string,
-  options: { cwd: string; manifest: PackageJsonWithPlugins },
+  options: { cwd: string; manifest: PackageJson },
   dependencies?: Set<string>
 ) => Promise<Set<string>>;
 

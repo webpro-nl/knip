@@ -17,7 +17,7 @@ type ExtractKeys<T, K extends string> = T extends { PACKAGE_JSON_PATH: infer P }
 type PluginKeys = { [K in keyof PluginMap]: ExtractKeys<PluginMap[K], K> };
 type Plugins = MergeUnion<PluginKeys[keyof PluginMap]>;
 
-export type PackageJsonWithPlugins = {
+export type PackageJson = {
   name?: string;
   main?: string;
   bin?: string | Record<string, string>;

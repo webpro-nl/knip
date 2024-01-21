@@ -1,9 +1,9 @@
 import type { EnsuredPluginConfiguration, WorkspaceConfiguration } from './config.js';
-import type { PackageJsonWithPlugins } from './package-json.js';
+import type { PackageJson } from './package-json.js';
 
 type IsPluginEnabledCallbackOptions = {
   cwd: string;
-  manifest: PackageJsonWithPlugins;
+  manifest: PackageJson;
   dependencies: Set<string>;
   config: WorkspaceConfiguration;
 };
@@ -12,7 +12,7 @@ export type IsPluginEnabledCallback = (options: IsPluginEnabledCallbackOptions) 
 
 export type GenericPluginCallbackOptions = {
   cwd: string;
-  manifest: PackageJsonWithPlugins;
+  manifest: PackageJson;
   config: EnsuredPluginConfiguration;
   isProduction: boolean;
   enabledPlugins: string[];
