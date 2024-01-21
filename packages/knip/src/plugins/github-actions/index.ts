@@ -32,18 +32,14 @@ const findGithubActionsDependencies: GenericPluginCallback = async (configFilePa
 
   const scripts = getValuesByKeyDeep(config, 'run').filter(isString);
 
-  return [...getActionDependencies(), ...getDependenciesFromScripts(scripts, { ...options, knownGlobalsOnly: true })];
-
-  function getActionDependencies() {
+  const getActionDependencies = () => {
     const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
-    if (!isActionManifest || !config?.runs?.using?.startsWith('node')) {
-      return [];
-    }
-
+    if (!isActionManifest || !config?.runs?.using?.startsWith('node')) return [];
     const scripts = [config.runs.pre, config.runs.main, config.runs.post].filter(isString);
-
     return scripts.map(script => join(dirname(configFilePath), script));
-  }
+  };
+
+  return [...getActionDependencies(), ...getDependenciesFromScripts(scripts, { ...options, knownGlobalsOnly: true })];
 };
 
 const findDependencies = timerify(findGithubActionsDependencies);
