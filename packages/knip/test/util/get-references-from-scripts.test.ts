@@ -41,7 +41,7 @@ test('getReferencesFromScripts (node)', () => {
   t('node --loader ts-node/esm node_modules/webpack-cli/bin/cli.js -c ./webpack.config.ts', ['webpack-cli', 'ts-node']);
   t('node --experimental-loader ts-node/esm/transpile-only script.js', [js, 'ts-node']);
   // TODO With jiti's `esmResolve: true` dirs are no longer resolved to their index.js (but extensionless is OK)
-  // But the enablng that has a much bigger advantages and seems to fix the `*.config.ts` loading errors
+  // But enabling that has a much bigger advantages and seems to fix the `*.config.ts` loading errors
   // t('node -r @scope/package/register ./dir', [index, '@scope/package']);
   t('node -r @scope/package/register ./dir/index', [index, '@scope/package']);
   t('node --inspect-brk -r tsconfig-paths/register node_modules/.bin/jest --runInBand', ['bin:jest', 'tsconfig-paths']);
