@@ -1,7 +1,7 @@
 import parse from '@ericcornelissen/bash-parser';
 import { debugLogObject } from '../util/debug.js';
 import * as FallbackResolver from './resolvers/fallback.js';
-import * as KnownResolvers from './resolvers/index.js';
+import KnownResolvers from './resolvers/index.js';
 import { stripBinaryPath } from './util.js';
 import type { GetDependenciesFromScriptsOptions } from './types.js';
 import type { Node } from '@ericcornelissen/bash-parser';
@@ -43,7 +43,8 @@ export const getBinariesFromScript = (script: string, options: GetDependenciesFr
           if (['!', 'test'].includes(binary)) return fromArgs(args);
 
           if (binary in KnownResolvers) {
-            return KnownResolvers[binary as KnownResolver].resolve(binary, args, { ...options, fromArgs });
+            const resolver = KnownResolvers[binary as KnownResolver];
+            return resolver(binary, args, { ...options, fromArgs });
           }
 
           // Before using the fallback resolver, we need a way to bail out for scripts in environments like GitHub

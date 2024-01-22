@@ -18,7 +18,6 @@ const argFilters: ArgResolvers = {
   esbuild: withPositional,
   execa: withPositional,
   vitest: withoutRequire,
-  'ts-node': withPositional,
   zx: withPositional,
   default: withoutPositional,
 };

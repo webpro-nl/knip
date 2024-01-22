@@ -57,6 +57,7 @@ test('getReferencesFromScripts (node)', () => {
 
 test('getReferencesFromScripts (ts-node)', () => {
   t('ts-node --require pkg/register main.ts', ['bin:ts-node', ts, 'pkg']);
+  t('ts-node -T main.ts', ['bin:ts-node', ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', ['bin:babel-node', ts]);
 });
 
