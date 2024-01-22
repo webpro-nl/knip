@@ -1,5 +1,7 @@
 ---
 title: Handling Issues
+sidebar:
+  order: 2
 ---
 
 A long list of unused items can be frustrating. The list may contain false
