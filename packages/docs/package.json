@@ -21,6 +21,7 @@
     "qa": "npm run build && npm run lint && npm run remark"
   },
   "dependencies": {
+    "@astro-community/astro-embed-youtube": "0.4.4",
     "@astrojs/starlight": "0.15.3",
     "sharp": "0.33.2"
   },
