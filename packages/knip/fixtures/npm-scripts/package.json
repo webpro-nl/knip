@@ -11,7 +11,8 @@
     "ignore": "node ignore.js",
     "ignore-artifact": "node dist/ignore.js",
     "start": "package",
-    "go": "runnable"
+    "go": "runnable",
+    "go-live": "deploy -r repo_name"
   },
   "dependencies": {
     "express": "*",
@@ -36,6 +37,7 @@
     "ignoreBinaries": [
       "rm",
       "bash",
+      "deploy",
       "eslint"
     ]
   }

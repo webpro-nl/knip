@@ -14,6 +14,7 @@ const withoutRequire: ArgResolver = () => [];
 
 const argFilters: ArgResolvers = {
   adb: withoutRequire,
+  deploy: withoutRequire,
   'babel-node': withPositional,
   esbuild: withPositional,
   execa: withPositional,
