@@ -4,7 +4,6 @@ import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
 import { timerify } from '../util/Performance.js';
 import {
-  isDeclarationFileExtension,
   isAccessExpression,
   getJSDocTags,
   getLineAndCharacterOfPosition,
@@ -141,13 +140,9 @@ const getImportsAndExports = (
             return;
           }
 
-          if (isDeclarationFileExtension(module.resolvedModule.extension)) {
-            // We use TypeScript's module resolution, but it returns DTS references. In the rest of the program we want
-            // the package name based on the original specifier.
-            externalImports.add(sanitizedSpecifier);
-          } else {
-            externalImports.add(module.resolvedModule.packageId?.name ?? sanitizedSpecifier);
-          }
+          // TypeScript module resolution may return DTS references or unaliased npm package names,
+          // but in the rest of the program we want the package name based on the original specifier.
+          externalImports.add(sanitizedSpecifier);
         } else {
           addInternalImport({ ...options, identifier, filePath, isReExport });
         }
