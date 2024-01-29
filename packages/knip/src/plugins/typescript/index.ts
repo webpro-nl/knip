@@ -17,7 +17,8 @@ const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(d
 const CONFIG_FILE_PATTERNS = ['tsconfig.json', 'tsconfig.*.json'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
-  const localConfig: TsConfigJson | undefined = await loadJSON(configFilePath);
+  const filePath = configFilePath.replace(/(\.json)?$/, '.json');
+  const localConfig: TsConfigJson | undefined = await loadJSON(filePath);
 
   if (!localConfig) return;
 

@@ -6,7 +6,7 @@ import { extname } from './path.js';
 import { timerify } from './Performance.js';
 import { jitiCJS, jitiESM } from './register.js';
 
-export const FAKE_PATH = '__FAKE__';
+export const FAKE_PATH = '__FAKE__.json';
 
 const load = async (filePath: string) => {
   // TODO: Turn into a config issue warning
