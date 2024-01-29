@@ -64,7 +64,7 @@ for await (const dir of directories) {
 
     plugins.push([NAME, pluginName]);
 
-    const frontmatter = u('yaml', `title: ${NAME}`);
+    const frontmatter = u('yaml', `title: ${NAME}\nsidebar:\n  hidden: true`);
 
     const defaults: Record<string, string[]> = {};
     if (config && config.length > 0) defaults.config = config;
