@@ -106,6 +106,7 @@ const pluginsSchema = z.object({
   nx: pluginSchema,
   nyc: pluginSchema,
   playwright: pluginSchema,
+  'playwright-ct': pluginSchema,
   postcss: pluginSchema,
   prettier: pluginSchema,
   'release-it': pluginSchema,
