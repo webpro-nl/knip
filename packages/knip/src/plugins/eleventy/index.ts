@@ -16,7 +16,7 @@ const ENABLERS = ['@11ty/eleventy'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-const CONFIG_FILE_PATTERNS: string[] = ['.eleventy.js', 'eleventy.config.{js,cjs}'];
+const CONFIG_FILE_PATTERNS: string[] = ['.eleventy.js', 'eleventy.config.{js,cjs,mjs}'];
 
 const ENTRY_FILE_PATTERNS: string[] = [];
 
