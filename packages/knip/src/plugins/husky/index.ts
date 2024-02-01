@@ -1,5 +1,4 @@
 import { getGitHookPaths } from '../../util/git.js';
-import { FAKE_PATH } from '../../util/loader.js';
 import { timerify } from '../../util/Performance.js';
 import { getDependenciesFromScripts, hasDependency, loadFile } from '../../util/plugin.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
@@ -20,7 +19,7 @@ const CONFIG_FILE_PATTERNS = [...gitHookPaths];
 const findHuskyDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { isProduction } = options;
 
-  if (isProduction || configFilePath === FAKE_PATH) return [];
+  if (isProduction) return [];
 
   const script = await loadFile(configFilePath);
 
