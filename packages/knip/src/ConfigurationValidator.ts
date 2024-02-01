@@ -76,7 +76,6 @@ export const pluginSchema = z.union([
 ]);
 
 const pluginsSchema = z.object({
-  vue: pluginSchema,
   astro: pluginSchema,
   angular: pluginSchema,
   ava: pluginSchema,
@@ -124,10 +123,12 @@ const pluginsSchema = z.object({
   typedoc: pluginSchema,
   typescript: pluginSchema,
   unbuild: pluginSchema,
+  vue: pluginSchema,
   vite: pluginSchema,
   vitest: pluginSchema,
   webpack: pluginSchema,
   wireit: pluginSchema,
+  yorkie: pluginSchema,
 });
 
 const baseWorkspaceConfigurationSchema = z.object({

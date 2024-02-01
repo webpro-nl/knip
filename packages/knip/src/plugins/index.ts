@@ -51,3 +51,4 @@ export { default as vitest } from './vitest/index.js';
 export { default as vue } from './vue/index.js';
 export { default as webpack } from './webpack/index.js';
 export { default as wireit } from './wireit/index.js';
+export { default as yorkie } from './yorkie/index.js';
