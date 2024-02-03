@@ -149,6 +149,9 @@ test('getReferencesFromScripts (pnpm)', () => {
   t('pnpm dlx pkg', []);
   t('pnpm --package=pkg-a dlx pkg', []);
   t('pnpm --recursive --parallel test -- --sequence.seed=1700316221712', []);
+  t('pnpm program script.js', [], pkgScripts);
+  t('pnpm --silent program script.js', [], pkgScripts);
+  t('pnpm --silent run program script.js', [], pkgScripts);
 });
 
 test('getReferencesFromScripts (yarn)', () => {

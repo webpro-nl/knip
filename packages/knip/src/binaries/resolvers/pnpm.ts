@@ -57,7 +57,10 @@ const commands = [
 ];
 
 export const resolve: Resolver = (_binary, args, { manifestScriptNames }) => {
-  const parsed = parseArgs(args, { alias: { recursive: 'r' }, boolean: ['recursive'] });
+  const parsed = parseArgs(args, {
+    boolean: ['recursive', 'silent', 'shell-mode'],
+    alias: { recursive: 'r', silent: 's', 'shell-mode': 'c' },
+  });
   const [command, binary] = parsed._;
   if (manifestScriptNames.has(command) || commands.includes(command)) return [];
   if (command === 'exec') return [toBinary(binary)];
