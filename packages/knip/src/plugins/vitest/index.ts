@@ -91,7 +91,7 @@ export const findVitestDependencies = async (
   // When coming from the vite plugin we should not assume vitest is enabled
   if (!options.enabledPlugins.includes('vitest')) return dependencies;
 
-  return [...dependencies, ...findConfigDependencies(configFilePath, localConfig, options)];
+  return compact([...dependencies, ...findConfigDependencies(configFilePath, localConfig, options)]);
 };
 
 const findVitestWorkspaceDependencies: GenericPluginCallback = async (configFilePath, options) => {
