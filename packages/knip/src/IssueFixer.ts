@@ -22,16 +22,16 @@ export class IssueFixer {
     this.isFixUnusedExports = fixTypes.length === 0 || fixTypes.includes('exports');
   }
 
-  public addUnusedTypeNode(filePath: string, fix: Fixes) {
-    if (fix.length === 0) return;
-    if (this.unusedTypeNodes.has(filePath)) fix.forEach(fix => this.unusedTypeNodes.get(filePath)!.add(fix));
-    else this.unusedTypeNodes.set(filePath, new Set(fix));
+  public addUnusedTypeNode(filePath: string, fixes: Fixes | undefined) {
+    if (!fixes || fixes.length === 0) return;
+    if (this.unusedTypeNodes.has(filePath)) fixes.forEach(fix => this.unusedTypeNodes.get(filePath)!.add(fix));
+    else this.unusedTypeNodes.set(filePath, new Set(fixes));
   }
 
-  public addUnusedExportNode(filePath: string, fix: Fixes) {
-    if (fix.length === 0) return;
-    if (this.unusedExportNodes.has(filePath)) fix.forEach(fix => this.unusedExportNodes.get(filePath)!.add(fix));
-    else this.unusedExportNodes.set(filePath, new Set(fix));
+  public addUnusedExportNode(filePath: string, fixes: Fixes | undefined) {
+    if (!fixes || fixes.length === 0) return;
+    if (this.unusedExportNodes.has(filePath)) fixes.forEach(fix => this.unusedExportNodes.get(filePath)!.add(fix));
+    else this.unusedExportNodes.set(filePath, new Set(fixes));
   }
 
   public async fixIssues(issues: Issues) {
