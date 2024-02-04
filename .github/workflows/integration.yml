@@ -48,8 +48,6 @@ jobs:
           path: DefinitelyTyped-tools
       - run: |
           cd DefinitelyTyped-tools
-          sed -i 's/"ignore": \["\*\*\/fixtures", "\*\*\/testsource"/"ignore": \["\*\*\/fixtures\/\*\*", "\*\*\/testsource\/\*\*"/' .knip.jsonc
-          cat .knip.jsonc
           pnpm install
           knip
 
