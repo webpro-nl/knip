@@ -39,6 +39,8 @@ export type Issues = {
   types: IssueRecords;
   nsExports: IssueRecords;
   nsTypes: IssueRecords;
+  nsExport: IssueRecords;
+  nsType: IssueRecords;
   duplicates: IssueRecords;
   enumMembers: IssueRecords;
   classMembers: IssueRecords;

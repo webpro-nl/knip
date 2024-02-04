@@ -285,19 +285,56 @@ const getImportsAndExports = (
       result && (Array.isArray(result) ? result.forEach(addScript) : addScript(result));
     }
 
-    if (ts.isIdentifier(node) && isAccessExpression(node.parent)) {
-      const symbol = sourceFile.locals?.get(String(node.escapedText));
-      if (symbol) {
-        if (importedInternalSymbols.has(symbol)) {
-          let members: string[] = [];
-          let current: ts.Node = node.parent;
-          while (current) {
-            const ms = getMemberStringLiterals(typeChecker, current);
-            if (!ms) break;
-            members = members.concat(ms.flatMap(id => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`))));
-            current = current.parent;
+    if (ts.isIdentifier(node)) {
+      if (isAccessExpression(node.parent)) {
+        const symbol = sourceFile.locals?.get(String(node.escapedText));
+        if (symbol) {
+          if (importedInternalSymbols.has(symbol)) {
+            let members: string[] = [];
+            let current: ts.Node = node.parent;
+            while (current) {
+              const ms = getMemberStringLiterals(typeChecker, current);
+              if (!ms) break;
+              members = members.concat(
+                ms.flatMap(id => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`)))
+              );
+              current = current.parent;
+            }
+            maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
           }
-          maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
+        }
+      } else if (
+        // TODO Ideally we store NamespaceImport symbols and check directly against those, but can't get symbols to match
+        ts.isShorthandPropertyAssignment(node.parent) ||
+        (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
+        ts.isSpreadAssignment(node.parent) ||
+        ts.isExportAssignment(node.parent)
+      ) {
+        const symbol = sourceFile.locals?.get(String(node.escapedText));
+        if (symbol) {
+          const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+          if (importedSymbolFilePath) {
+            internalImports[importedSymbolFilePath].identifiers.add(String(node.escapedText));
+          }
+        }
+      } else if (ts.isVariableDeclaration(node.parent)) {
+        if (ts.isVariableDeclarationList(node.parent.parent) && ts.isObjectBindingPattern(node.parent.name)) {
+          const symbol = sourceFile.locals?.get(String(node.escapedText));
+          if (symbol) {
+            const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+            if (importedSymbolFilePath) {
+              const members = node.parent.name.elements.flatMap(decl => decl.name.getText());
+              maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
+            }
+          }
+        } else if (node.parent.initializer === node) {
+          const symbol = sourceFile.locals?.get(String(node.escapedText));
+          if (symbol) {
+            const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+            if (importedSymbolFilePath) {
+              internalImports[importedSymbolFilePath].identifiers.add(String(node.escapedText));
+            }
+          }
         }
       }
     }

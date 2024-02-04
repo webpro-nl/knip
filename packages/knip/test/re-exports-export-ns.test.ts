@@ -33,7 +33,7 @@ test('Find re-exports through namespaces (1) including entry files', async () =>
   });
 
   assert(issues.exports['index.ts']['default']);
-  assert(issues.nsExports['1-root.ts']['exportedFnOnNs']);
+  assert(issues.nsExport['1-root.ts']['exportedFnOnNs']);
   assert(issues.nsExports['4-leaf-C.ts']['fnC']);
   assert(issues.enumMembers['4-leaf-A.ts']['UnusedProp']);
 
@@ -41,7 +41,8 @@ test('Find re-exports through namespaces (1) including entry files', async () =>
     ...baseCounters,
     exports: 1,
     enumMembers: 1,
-    nsExports: 2,
+    nsExport: 1,
+    nsExports: 1,
     processed: 7,
     total: 7,
   });

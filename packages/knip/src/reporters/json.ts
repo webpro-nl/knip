@@ -21,6 +21,8 @@ type Row = {
   binaries?: Array<{ name: string }>;
   unresolved?: Array<{ name: string }>;
   exports?: Array<Item>;
+  nsExport?: Array<Item>;
+  nsType?: Array<Item>;
   types?: Array<Item>;
   duplicates?: Array<Item[]>;
   enumMembers?: Record<string, Array<Item>>;
@@ -56,7 +58,9 @@ export default async ({ report, issues, options }: ReporterOptions) => {
       ...(report.binaries && { binaries: [] }),
       ...(report.unresolved && { unresolved: [] }),
       ...((report.exports || report.nsExports) && { exports: [] }),
+      ...(report.nsExport && { nsExport: [] }),
       ...((report.types || report.nsTypes) && { types: [] }),
+      ...(report.nsType && { nsType: [] }),
       ...(report.enumMembers && { enumMembers: {} }),
       ...(report.classMembers && { classMembers: {} }),
       ...(report.duplicates && { duplicates: [] }),

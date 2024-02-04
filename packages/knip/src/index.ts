@@ -23,6 +23,7 @@ import { fromBinary, isBinary } from './util/protocols.js';
 import { _resolveSpecifier } from './util/require.js';
 import { shouldIgnore } from './util/tag.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
+import { getType, hasStrictlyNsReference } from './util/type.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -584,9 +585,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (hasNsImport && ((!report.nsTypes && isType) || (!report.nsExports && !isType))) continue;
 
           if (!isExportedItemReferenced(exportedItem)) {
-            const type = isType ? (hasNsImport ? 'nsTypes' : 'types') : hasNsImport ? 'nsExports' : 'exports';
             collector.addIssue({
-              type,
+              type: getType(hasStrictlyNsReference(importsForExport), isType, hasNsImport),
               filePath,
               symbol: identifier,
               symbolType: exportedItem.type,
