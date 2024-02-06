@@ -21,7 +21,8 @@ const findNxDependanciesInNxJson: GenericPluginCallback = async configFilePath =
   const targetsDefault = localConfig.targetDefaults
     ? Object.keys(localConfig.targetDefaults)
         // Ensure we only grab executors from plugins instead of manual targets
-        .filter(it => it.includes(':'))
+        // Limiting to scoped packages to ensure we don't have false positives
+        .filter(it => it.includes(':') && it.startsWith('@'))
         .map(it => it.split(':')[0])
     : [];
 
