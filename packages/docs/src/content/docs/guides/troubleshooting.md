@@ -50,6 +50,13 @@ A convenient way to do so is by forking one of these templates:
 - [CodeSandbox][6]
 - [StackBlitz][7]
 
+:::tip
+
+The optimal way is to add fixtures and/or failing tests to the Knip repository,
+and open a pull request to discuss the issue!
+
+:::
+
 Other solutions may work well too, the goal is to have an easy and common
 understanding and reproduction.
 
