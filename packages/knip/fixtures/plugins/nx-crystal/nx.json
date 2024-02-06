@@ -65,6 +65,11 @@
       "cache": true,
       "dependsOn": ["^my-custom-thing"],
       "inputs": ["production", "^production"]
+    },
+    "test:custom-thing": {
+      "cache": true,
+      "dependsOn": ["^my-custom-thing"],
+      "inputs": ["production", "^production"]
     }
   }
 }
