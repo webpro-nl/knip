@@ -13,7 +13,7 @@ const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(d
 
 const CONFIG_FILE_PATTERNS = ['nx.json', 'project.json', '{apps,libs}/**/project.json'];
 
-const findNxDependanciesInNxJson: GenericPluginCallback = async configFilePath => {
+const findNxDependenciesInNxJson: GenericPluginCallback = async configFilePath => {
   const localConfig: NxConfigRoot | undefined = await load(configFilePath);
 
   if (!localConfig) return [];
@@ -46,7 +46,7 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, options
   if (isProduction) return [];
 
   if (configFilePath.endsWith('nx.json')) {
-    return findNxDependanciesInNxJson(configFilePath, options);
+    return findNxDependenciesInNxJson(configFilePath, options);
   }
 
   const localConfig: NxProjectConfiguration | undefined = await load(configFilePath);
