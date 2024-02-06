@@ -1,0 +1,17 @@
+{
+  "name": "@fixtures/nx",
+  "scripts": {
+    "nx": "nx"
+  },
+  "devDependencies": {
+    "@nx/webpack": "*",
+    "@nx/eslint": "*",
+    "@nx/playwright": "*",
+    "@nx/jest": "*",
+    "@nx/vite": "*",
+    "@nx/cypress": "*",
+    "@nx/react": "*",
+    "@nx/rollup": "*",
+    "@nrwl/workspace": "*"
+  }
+}

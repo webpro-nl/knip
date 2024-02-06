@@ -9,3 +9,11 @@ export interface NxProjectConfiguration {
     };
   };
 }
+
+export interface NxConfigRoot {
+  plugins?: Array<{
+    plugin: string;
+  }>
+  generators?: Record<string, unknown>;
+  targetDefaults?: Record<string, unknown>;
+}
