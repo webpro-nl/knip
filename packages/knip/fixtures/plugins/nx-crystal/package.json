@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/nx",
+  "name": "@fixtures/nx-crystal",
   "scripts": {
     "nx": "nx"
   },
