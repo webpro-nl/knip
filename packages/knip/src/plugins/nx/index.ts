@@ -1,7 +1,8 @@
 import { compact } from '../../util/array.js';
+import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { timerify } from '../../util/Performance.js';
 import { getDependenciesFromScripts, hasDependency, load } from '../../util/plugin.js';
-import type { NxProjectConfiguration } from './types.js';
+import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 const NAME = 'Nx';
@@ -10,12 +11,43 @@ const ENABLERS = ['nx', /^@nrwl\//, /^@nx\//];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-const CONFIG_FILE_PATTERNS = ['project.json', '{apps,libs}/**/project.json'];
+const CONFIG_FILE_PATTERNS = ['nx.json', 'project.json', '{apps,libs}/**/project.json'];
+
+const findNxDependenciesInNxJson: GenericPluginCallback = async configFilePath => {
+  const localConfig: NxConfigRoot | undefined = await load(configFilePath);
+
+  if (!localConfig) return [];
+
+  const targetsDefault = localConfig.targetDefaults
+    ? Object.keys(localConfig.targetDefaults)
+        // Ensure we only grab executors from plugins instead of manual targets
+        // Limiting to scoped packages to ensure we don't have false positives
+        .filter(it => it.includes(':') && it.startsWith('@'))
+        .map(it => it.split(':')[0])
+    : [];
+
+  const plugins =
+    localConfig.plugins && Array.isArray(localConfig.plugins)
+      ? localConfig.plugins.map(it => getPackageNameFromModuleSpecifier(it.plugin)).filter(value => value !== undefined)
+      : [];
+
+  const generators = localConfig.generators
+    ? Object.keys(localConfig.generators)
+        .map(it => getPackageNameFromModuleSpecifier(it))
+        .filter(value => value !== undefined)
+    : [];
+
+  return compact([...targetsDefault, ...plugins, ...generators]);
+};
 
 const findNxDependencies: GenericPluginCallback = async (configFilePath, options) => {
   const { isProduction } = options;
 
   if (isProduction) return [];
+
+  if (configFilePath.endsWith('nx.json')) {
+    return findNxDependenciesInNxJson(configFilePath, options);
+  }
 
   const localConfig: NxProjectConfiguration | undefined = await load(configFilePath);
 
