@@ -12,7 +12,7 @@ const ENABLERS = ['husky'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-const gitHookPaths = getGitHookPaths('.husky');
+const gitHookPaths = getGitHookPaths('.husky', false);
 
 const CONFIG_FILE_PATTERNS = [...gitHookPaths];
 

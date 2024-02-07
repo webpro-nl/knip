@@ -1,7 +1,7 @@
 {
   "name": "@fixtures/husky",
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky",
     "build": "node",
     "test": "node"
   },

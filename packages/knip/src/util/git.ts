@@ -17,7 +17,7 @@ const getGitHooksPath = (defaultPath = '.git/hooks') => {
   }
 };
 
-export const getGitHookPaths = (defaultPath = '.git/hooks') => {
-  const gitHooksPath = getGitHooksPath(defaultPath);
+export const getGitHookPaths = (defaultPath = '.git/hooks', followGitConfig = true) => {
+  const gitHooksPath = followGitConfig ? getGitHooksPath(defaultPath) : defaultPath;
   return hookFileNames.map(fileName => join(gitHooksPath, fileName));
 };
