@@ -85,7 +85,7 @@ export const IGNORED_FILE_EXTENSIONS = new Set([
 ]);
 
 // The `@types/node` dependency does not require the `node` dependency
-export const IGNORE_DEFINITELY_TYPED = ['node'];
+export const IGNORE_DEFINITELY_TYPED = ['node', 'bun'];
 
 export const ISSUE_TYPES: IssueType[] = [
   'files',
