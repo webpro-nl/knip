@@ -148,7 +148,7 @@ export async function globby(patterns: string | string[], options: GlobOptions):
 }
 
 /** create a function that should be equivalent to `git check-ignored` */
-export async function isGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
+export async function getGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
   cachedIgnores.clear();
   if (options.gitignore === false) return () => false;
   const gitignore = await _parseFindGitignores(options);

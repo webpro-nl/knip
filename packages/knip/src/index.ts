@@ -11,7 +11,7 @@ import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLogObject, debugLogArray, debugLog, exportLookupLog } from './util/debug.js';
 import { _glob, negate } from './util/glob.js';
-import { isGitIgnoredFn } from './util/globby.js';
+import { getGitIgnoredFn } from './util/globby.js';
 import {
   getEntryPathFromManifest,
   getPackageNameFromFilePath,
@@ -61,7 +61,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
-  const isGitIgnored = await isGitIgnoredFn({ cwd, gitignore });
+  const isGitIgnored = await getGitIgnoredFn({ cwd, gitignore });
 
   streamer.cast('Reading workspace configuration(s)...');
 
@@ -320,7 +320,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               const workspace = chief.findWorkspaceByFilePath(specifierFilePath);
               if (workspace) {
                 const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-                if (principal && !principal.isGitIgnored(specifierFilePath)) {
+                if (principal && !isGitIgnored(specifierFilePath)) {
                   // Defer to outside loop to prevent potential duplicate analysis and/or infinite recursion
                   specifierFilePaths.add(specifierFilePath);
                 }
