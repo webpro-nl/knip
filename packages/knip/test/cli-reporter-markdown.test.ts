@@ -16,16 +16,16 @@ test('knip --reporter markdown', () => {
 
 ## Unlisted dependencies (2)
 
-| Name            | Location     |
-|:----------------|:-------------|
-| unresolved      | src/index.ts |
-| @org/unresolved | src/index.ts |
+| Name            | Location     | Severity |
+| :-------------- | :----------- | :------- |
+| @org/unresolved | src/index.ts | error    |
+| unresolved      | src/index.ts | error    |
 
 ## Unresolved imports (1)
 
-| Name         | Location     |
-|:-------------|:-------------|
-| ./unresolved | src/index.ts |
+| Name         | Location          | Severity |
+| :----------- | :---------------- | :------- |
+| ./unresolved | src/index.ts:8:23 | error    |
 
 `;
   const out = exec('knip --reporter markdown').stdout;

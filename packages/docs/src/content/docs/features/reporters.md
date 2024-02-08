@@ -91,16 +91,16 @@ markdown tables separated by issue types as headings, for example:
 
 ## Unlisted dependencies (2)
 
-| Name            | Location     |
-| :-------------- | :----------- |
-| unresolved      | src/index.ts |
-| @org/unresolved | src/index.ts |
+| Name            | Location          | Severity |
+| :-------------- | :---------------- | :------- |
+| unresolved      | src/index.ts:8:23 | error    |
+| @org/unresolved | src/index.ts:9:23 | error    |
 
 ## Unresolved imports (1)
 
-| Name         | Location     |
-| :----------- | :----------- |
-| ./unresolved | src/index.ts |
+| Name         | Location           | Severity |
+| :----------- | :----------------- | :------- |
+| ./unresolved | src/index.ts:10:12 | error    |
 ```
 
 ## Custom Reporters
@@ -170,7 +170,7 @@ line (can be repeated).
 The default export of the preprocessor should be a function with this interface:
 
 ```ts
-type Preprocessor = async (options: ReporterOptions) =>  ReporterOptions;
+type Preprocessor = async (options: ReporterOptions) => ReporterOptions;
 ```
 
 Like reporters, you can use local JavaScript or TypeScript files and external

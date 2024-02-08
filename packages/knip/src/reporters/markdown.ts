@@ -6,6 +6,13 @@ import type { Entries } from 'type-fest';
 export default ({ report, issues }: ReporterOptions) => {
   console.log('# Knip report\n');
 
+  const getFilePath = (issue: Issue) => {
+    if (!issue.line || !issue.col) return relative(issue.filePath);
+    return `${relative(issue.filePath)}:${issue.line}:${issue.col}`;
+  };
+  const sortLongestSymbol = (a: Issue, b: Issue) => b.symbol.length - a.symbol.length;
+  const sortLongestFilePath = (a: Issue, b: Issue) => getFilePath(b).length - getFilePath(a).length;
+
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = getTitle(reportType);
@@ -21,16 +28,17 @@ export default ({ report, issues }: ReporterOptions) => {
             console.log(`* ${toRelative(issue)}`);
           });
         } else {
-          const longestSymbol = issuesForType.sort((a, b) => b.symbol.length - a.symbol.length)[0].symbol.length;
-          const longestFilePath = relative(
-            issuesForType.sort((a, b) => relative(b.filePath).length - relative(a.filePath).length)[0].filePath
-          ).length;
-          const sortedByFilePath = issuesForType.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
-          console.log(`| ${`Name`.padEnd(longestSymbol)} | ${`Location`.padEnd(longestFilePath)} |`);
-          console.log(`|:${'-'.repeat(longestSymbol + 1)}|:${'-'.repeat(longestFilePath + 1)}|`);
+          const longestSymbol = issuesForType.sort(sortLongestSymbol)[0].symbol.length;
+          const sortedByFilePath = issuesForType.sort(sortLongestFilePath);
+          const longestFilePath = getFilePath(sortedByFilePath[0]).length;
+
+          console.log(`| ${`Name`.padEnd(longestSymbol)} | ${`Location`.padEnd(longestFilePath)} | Severity |`);
+          console.log(`| :${'-'.repeat(longestSymbol - 1)} | :${'-'.repeat(longestFilePath - 1)} | :------- |`);
           sortedByFilePath.forEach((issue: Issue) => {
             console.log(
-              `| ${issue.symbol.padEnd(longestSymbol)} | ${relative(issue.filePath).padEnd(longestFilePath)} |`
+              `| ${issue.symbol.padEnd(longestSymbol)} | ${getFilePath(issue).padEnd(longestFilePath)} | ${(
+                issue.severity ?? ''
+              ).padEnd(8)} |`
             );
           });
         }
