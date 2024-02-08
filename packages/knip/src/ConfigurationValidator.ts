@@ -123,6 +123,7 @@ const pluginsSchema = z.object({
   typedoc: pluginSchema,
   typescript: pluginSchema,
   unbuild: pluginSchema,
+  'vercel-og': pluginSchema,
   vue: pluginSchema,
   vite: pluginSchema,
   vitest: pluginSchema,

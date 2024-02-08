@@ -53,11 +53,13 @@ tableOfContents: false
 - [TypeDoc][46]
 - [TypeScript][47]
 - [unbuild][48]
-- [Vite][49]
-- [Vitest][50]
-- [Vue][51]
-- [Webpack][52]
-- [Wireit][53]
+- [Vercel OG][49]
+- [Vite][50]
+- [Vitest][51]
+- [Vue][52]
+- [Webpack][53]
+- [Wireit][54]
+- [yorkie][55]
 
 :::
 
@@ -109,8 +111,10 @@ tableOfContents: false
 [46]: /reference/plugins/typedoc 'TypeDoc'
 [47]: /reference/plugins/typescript 'TypeScript'
 [48]: /reference/plugins/unbuild 'unbuild'
-[49]: /reference/plugins/vite 'Vite'
-[50]: /reference/plugins/vitest 'Vitest'
-[51]: /reference/plugins/vue 'Vue'
-[52]: /reference/plugins/webpack 'Webpack'
-[53]: /reference/plugins/wireit 'Wireit'
+[49]: /reference/plugins/vercel-og 'Vercel OG'
+[50]: /reference/plugins/vite 'Vite'
+[51]: /reference/plugins/vitest 'Vitest'
+[52]: /reference/plugins/vue 'Vue'
+[53]: /reference/plugins/webpack 'Webpack'
+[54]: /reference/plugins/wireit 'Wireit'
+[55]: /reference/plugins/yorkie 'yorkie'
