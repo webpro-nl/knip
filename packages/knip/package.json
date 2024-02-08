@@ -68,7 +68,7 @@
     "micromatch": "4.0.5",
     "minimist": "1.2.8",
     "picocolors": "1.0.0",
-    "picomatch": "3.0.1",
+    "picomatch": "4.0.1",
     "pretty-ms": "9.0.0",
     "smol-toml": "1.1.4",
     "strip-json-comments": "5.0.1",
