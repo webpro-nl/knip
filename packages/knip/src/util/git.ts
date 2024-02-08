@@ -2,6 +2,9 @@ import { execSync } from 'child_process';
 import { join } from './path.js';
 
 // TODO More hooks exists, but is it worth adding all of them?
+// https://git-scm.com/docs/githooks
+// https://github.com/fisker/git-hooks-list/blob/main/index.json
+
 const hookFileNames = [
   `prepare-commit-msg`,
   `commit-msg`,

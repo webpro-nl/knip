@@ -4,7 +4,6 @@ import { getDependenciesFromScripts, hasDependency, loadFile } from '../../util/
 import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://typicode.github.io/husky
-// https://git-scm.com/docs/githooks
 
 const NAME = 'husky';
 
