@@ -13,7 +13,7 @@ import type { RuleSetRule, RuleSetUseItem } from 'webpack';
 
 const NAME = 'Webpack';
 
-const ENABLERS = ['webpack'];
+const ENABLERS = ['webpack', 'webpack-cli'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 

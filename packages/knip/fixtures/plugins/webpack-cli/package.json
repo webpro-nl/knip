@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/webpack-cli",
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "webpack-cli": "*",
+    "copy-webpack-plugin": "*"
+  }
+}
