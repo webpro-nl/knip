@@ -7,16 +7,16 @@ import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 import { buildOptions } from '../helpers/index.js';
 
-const cwd = resolve('fixtures/plugins/husky');
+const cwd = resolve('fixtures/plugins/husky-v8');
 const options = buildOptions(cwd);
 
-test('Find dependencies in husky configuration (plugin)', async () => {
+test('Find dependencies in husky v8 configuration (plugin)', async () => {
   const configFilePath = join(cwd, '.husky/pre-commit');
   const dependencies = await husky.findDependencies(configFilePath, options);
   assert.deepEqual(dependencies, ['lint-staged', 'bin:commitlint']);
 });
 
-test('Find dependencies in husky configuration (main)', async () => {
+test('Find dependencies in husky v8 configuration (main)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

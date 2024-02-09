@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/husky",
+  "name": "@fixtures/husky-v9",
   "scripts": {
     "prepare": "husky",
     "build": "node",
@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "*",
-    "husky": "*",
+    "husky": "9.0.0",
     "lint-staged": "*"
   }
 }

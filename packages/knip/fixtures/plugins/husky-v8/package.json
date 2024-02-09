@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/husky-v8",
+  "scripts": {
+    "prepare": "husky install",
+    "build": "node",
+    "test": "node"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "*",
+    "husky": "8.0.0",
+    "lint-staged": "*"
+  }
+}
