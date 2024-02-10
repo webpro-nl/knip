@@ -13,6 +13,10 @@
   border: none;
 }
 
+:root[data-theme='dark'] .sl-markdown-content table td code {
+  padding-left: 0;
+}
+
 .sl-markdown-content table thead {
   border-bottom: 1px solid var(--sl-color-gray-1);
 }
