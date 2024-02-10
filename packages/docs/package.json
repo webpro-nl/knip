@@ -22,11 +22,11 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.4.4",
-    "@astrojs/starlight": "0.17.3",
+    "@astrojs/starlight": "0.18.0",
     "sharp": "0.33.2"
   },
   "devDependencies": {
-    "@astrojs/check": "0.4.1",
+    "@astrojs/check": "0.5.2",
     "@knip/eslint-config": "0.0.0",
     "@types/mdast": "4.0.3",
     "@types/unist": "3.0.2",
@@ -42,7 +42,7 @@
     "remark-parse": "11.0.0",
     "remark-preset-webpro": "1.0.0",
     "remark-stringify": "11.0.0",
-    "tsx": "4.7.0",
+    "tsx": "4.7.1",
     "unified": "11.0.4",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.0.0"
