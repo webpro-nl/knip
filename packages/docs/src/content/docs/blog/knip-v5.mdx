@@ -14,7 +14,7 @@ Today brings the smallest major release so far. Tiny yet mighty!
 Below are two cases to demonstrate the change in how unused exports are
 reported.
 
-## Case 1 (referenced)
+## Case 1
 
 The first case shows two exports with a namespaced import that references one of
 those exports explicitly:
@@ -52,9 +52,9 @@ Are the `version` and `getRocket` exports used? We can't know. The same is true
 for the spread object pattern:
 
 ```ts title="index.js"
-import * as Knip from './knip.js';
+import * as NS from './knip.js';
 
-const Cut = { ...NS };
+const Spread = { ...NS };
 ```
 
 Previously those exports would go into the "Unused exports in namespaces"
