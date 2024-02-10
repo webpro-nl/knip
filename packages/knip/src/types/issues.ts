@@ -46,7 +46,7 @@ export type Issues = {
 
 export type IssueType = keyof Issues;
 
-export type SymbolIssueType = Exclude<IssueType, 'files'>;
+type SymbolIssueType = Exclude<IssueType, 'files'>;
 
 export type Report = {
   [key in keyof Issues]: boolean;
