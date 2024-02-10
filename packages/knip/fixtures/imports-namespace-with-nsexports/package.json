@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/imports-namespace-with-nsexports",
+  "knip": {
+    "include": [
+      "nsExports"
+    ]
+  }
+}

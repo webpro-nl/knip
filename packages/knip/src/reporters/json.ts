@@ -2,7 +2,7 @@ import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/inde
 import { isFile } from '../util/fs.js';
 import { relative, resolve } from '../util/path.js';
 import { convert } from './util.js';
-import type { Report, ReporterOptions, IssueRecords, SymbolIssueType, Issue } from '../types/issues.js';
+import type { Report, ReporterOptions, IssueRecords, Issue } from '../types/issues.js';
 import type { Entries } from 'type-fest';
 
 type ExtraReporterOptions = {
@@ -22,13 +22,12 @@ type Row = {
   unresolved?: Array<{ name: string }>;
   exports?: Array<Item>;
   types?: Array<Item>;
+  nsExports?: Array<Item>;
+  nsTypes?: Array<Item>;
   duplicates?: Array<Item[]>;
   enumMembers?: Record<string, Array<Item>>;
   classMembers?: Record<string, Array<Item>>;
 };
-
-const mergeTypes = (type: SymbolIssueType) =>
-  type === 'exports' || type === 'nsExports' ? 'exports' : type === 'types' || type === 'nsTypes' ? 'types' : type;
 
 export default async ({ report, issues, options }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
@@ -55,8 +54,10 @@ export default async ({ report, issues, options }: ReporterOptions) => {
       ...(report.unlisted && { unlisted: [] }),
       ...(report.binaries && { binaries: [] }),
       ...(report.unresolved && { unresolved: [] }),
-      ...((report.exports || report.nsExports) && { exports: [] }),
-      ...((report.types || report.nsTypes) && { types: [] }),
+      ...(report.exports && { exports: [] }),
+      ...(report.nsExports && { nsExports: [] }),
+      ...(report.types && { types: [] }),
+      ...(report.nsTypes && { nsTypes: [] }),
       ...(report.enumMembers && { enumMembers: {} }),
       ...(report.classMembers && { classMembers: {} }),
       ...(report.duplicates && { duplicates: [] }),
@@ -64,13 +65,12 @@ export default async ({ report, issues, options }: ReporterOptions) => {
     return row;
   };
 
-  for (const [reportType, isReportType] of Object.entries(report) as Entries<Report>) {
+  for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (isReportType) {
-      if (reportType === 'files') {
+      if (type === 'files') {
         // Ignore
       } else {
-        const type = mergeTypes(reportType);
-        flatten(issues[reportType] as IssueRecords).forEach(issue => {
+        flatten(issues[type] as IssueRecords).forEach(issue => {
           const { filePath, symbol, symbols, parentSymbol } = issue;
           json[filePath] = json[filePath] ?? initRow(filePath);
           if (type === 'duplicates') {
@@ -82,7 +82,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
               item[parentSymbol].push(convert(issue));
             }
           } else {
-            if (type === 'exports' || type === 'types' || type === 'unresolved') {
+            if (['exports', 'nsExports', 'types', 'nsTypes', 'unresolved'].includes(type)) {
               json[filePath][type]?.push(convert(issue));
             } else {
               json[filePath][type]?.push({ name: symbol });

@@ -1,11 +1,3 @@
 {
-  "name": "@fixtures/namespace",
-  "knip": {
-    "entry": [
-      "index.ts"
-    ],
-    "project": [
-      "*.ts"
-    ]
-  }
+  "name": "@fixtures/imports-namespace"
 }

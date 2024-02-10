@@ -28,11 +28,11 @@ test('Report unused nsExports in entry source files', async () => {
     isIncludeEntryExports: true,
   });
 
-  assert(issues.nsExports['packages/shared/bar.mjs']['bar']);
+  assert(issues.exports['packages/shared/bar.mjs']['bar']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    nsExports: 1,
+    exports: 1,
     processed: 4,
     total: 4,
   });

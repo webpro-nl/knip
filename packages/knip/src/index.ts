@@ -23,6 +23,7 @@ import { fromBinary, isBinary } from './util/protocols.js';
 import { _resolveSpecifier } from './util/require.js';
 import { shouldIgnore } from './util/tag.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
+import { getType, getHasStrictlyNsReferences } from './util/type.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { Workspace } from './ConfigurationChief.js';
 import type { CommandLineOptions } from './types/cli.js';
@@ -577,19 +578,20 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             }
           }
 
-          const hasNsImport = Boolean(importsForExport?.hasStar);
+          const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(importsForExport);
 
           const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
-          if (hasNsImport && ((!report.nsTypes && isType) || (!report.nsExports && !isType))) continue;
+          if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || (!report.nsExports && !isType))) continue;
 
           if (!isExportedItemReferenced(exportedItem)) {
-            const type = isType ? (hasNsImport ? 'nsTypes' : 'types') : hasNsImport ? 'nsExports' : 'exports';
+            const type = getType(hasStrictlyNsReferences, isType);
             collector.addIssue({
               type,
               filePath,
               symbol: identifier,
               symbolType: exportedItem.type,
+              parentSymbol: namespace,
               pos: exportedItem.pos,
               line: exportedItem.line,
               col: exportedItem.col,
