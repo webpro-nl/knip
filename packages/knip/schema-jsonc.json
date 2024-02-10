@@ -4,7 +4,7 @@
   "description": "See https://github.com/webpro/knip",
   "allOf": [
     {
-      "$ref": "https://unpkg.com/knip@4/schema.json"
+      "$ref": "https://unpkg.com/knip@5/schema.json"
     }
   ],
   "allowTrailingCommas": true
