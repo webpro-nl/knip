@@ -7,6 +7,10 @@
     },
     {
       "source": "/v4/:path*",
+      "destination": "https://knip-dev-v4.vercel.app/v4/:path*"
+    },
+    {
+      "source": "/v5/:path*",
       "destination": "/:path*"
     }
   ]
