@@ -64,11 +64,4 @@ jobs:
           repository: argos-ci/argos
           path: argos
       - run: |
-          cd argos
-          sed -i 's/"ignore": \["src\/gql"]/\"ignore\": \["src\/gql\/\*\*"]/g' knip.json
-          sed -i 's/"ignore": \["db", "knexfile.js", "src\/graphql\/__generated__"]/\"ignore\": \["db\/\*\*", "knexfile.js", "src\/graphql\/__generated__\/\*\*"]/g' knip.json
-          sed -i 's/"ignore": \["playwright.config.mjs", "examples"]/\"ignore\": \["playwright.config.mjs", "examples\/\*\*"]/g' knip.json
-          sed -i '/Objection/d' apps/backend/src/database/index.ts
-          cat knip.json
-          npm install
-          knip
+          cd argos && npm install && knip
