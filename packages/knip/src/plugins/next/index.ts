@@ -10,7 +10,7 @@ const ENABLERS = ['next'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-const ENTRY_FILE_PATTERNS = ['next.config.{js,ts,cjs,mjs}'];
+const ENTRY_FILE_PATTERNS = ['next.config.{js,ts,cjs,mjs}', 'next.navigation.{js,ts,cjs,mjs}'];
 
 const productionEntryFilePatternsWithoutSrc = [
   '{instrumentation,middleware}.{js,ts}',
