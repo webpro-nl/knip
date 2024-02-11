@@ -16,6 +16,7 @@ const TEST_FILE_PATTERNS = ['cypress/e2e/**/*.cy.{js,jsx,ts,tsx}'];
 
 const SUPPORT_FILE_PATTERNS = [
   'cypress/support/e2e.{js,jsx,ts,tsx}',
+  'cypress/support/commands.{js,ts}',
   'cypress/plugins/index.js', // Deprecated since Cypress v10
 ];
 
