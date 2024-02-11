@@ -35,7 +35,8 @@
         "serveTargetName": "serve",
         "serveStaticTargetName": "serve-static"
       }
-    }
+    },
+    "@nx/nuxt/plugin"
   ],
   "generators": {
     "@nx/react": {

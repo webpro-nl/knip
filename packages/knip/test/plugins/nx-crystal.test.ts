@@ -17,6 +17,7 @@ test('Find dependencies in Nx configuration nx.json', async () => {
     '@nx/playwright',
     '@nx/jest',
     '@nx/vite',
+    '@nx/nuxt',
     '@nx/react',
   ]);
 });
