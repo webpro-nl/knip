@@ -17,7 +17,7 @@ const productionEntryFilePatternsWithoutSrc = [
   'app/global-error.{js,jsx,ts,tsx}',
   'app/**/{error,layout,loading,not-found,page,template}.{js,jsx,ts,tsx}',
   'app/**/{route}.{js,jsx,ts,tsx}',
-  'app/**/{default}.{js,ts,tsx}',
+  'app/**/default.{js,jsx,ts,tsx}',
   'app/{manifest,sitemap,robots}.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
   'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
