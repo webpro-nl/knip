@@ -251,6 +251,7 @@ export class ConfigurationChief {
 
   private async getWorkspaceManifests() {
     const workspaces = await mapWorkspaces({
+      // @ts-expect-error Close enough
       pkg: this.manifest ?? {},
       cwd: this.cwd,
     });
