@@ -28,9 +28,11 @@ const findNxDependenciesInNxJson: GenericPluginCallback = async configFilePath =
 
   const plugins =
     localConfig.plugins && Array.isArray(localConfig.plugins)
-      ? localConfig.plugins.map(it => getPackageNameFromModuleSpecifier(it.plugin)).filter(value => value !== undefined)
+      ? localConfig.plugins
+          .map(item => (typeof item === 'string' ? item : item.plugin))
+          .map(it => getPackageNameFromModuleSpecifier(it))
+          .filter(value => value !== undefined)
       : [];
-
   const generators = localConfig.generators
     ? Object.keys(localConfig.generators)
         .map(it => getPackageNameFromModuleSpecifier(it))
