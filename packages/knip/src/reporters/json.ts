@@ -93,10 +93,12 @@ export default async ({ report, issues, options }: ReporterOptions) => {
     }
   }
 
-  console.log(
-    JSON.stringify({
-      files: Array.from(issues.files).map(filePath => relative(filePath)),
-      issues: Object.values(json),
-    })
-  );
+  const output = JSON.stringify({
+    files: Array.from(issues.files).map(filePath => relative(filePath)),
+    issues: Object.values(json),
+  });
+
+  // @ts-expect-error _handle is private
+  process.stdout._handle?.setBlocking?.(true);
+  process.stdout.write(output);
 };
