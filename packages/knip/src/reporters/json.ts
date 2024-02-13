@@ -98,6 +98,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
     issues: Object.values(json),
   });
 
+  // See: https://github.com/nodejs/node/issues/6379
   // @ts-expect-error _handle is private
   process.stdout._handle?.setBlocking?.(true);
   process.stdout.write(output);
