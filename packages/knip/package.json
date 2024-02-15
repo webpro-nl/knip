@@ -75,7 +75,7 @@
     "strip-json-comments": "5.0.1",
     "summary": "2.1.0",
     "zod": "3.22.4",
-    "zod-validation-error": "3.0.0"
+    "zod-validation-error": "3.0.2"
   },
   "peerDependencies": {
     "@types/node": ">=18",
@@ -86,7 +86,7 @@
     "@knip/eslint-config": "0.0.0",
     "@release-it/bumper": "^6.0.1",
     "@swc/cli": "^0.3.9",
-    "@swc/core": "^1.4.0",
+    "@swc/core": "^1.4.2",
     "@types/js-yaml": "^4.0.9",
     "@types/micromatch": "^4.0.6",
     "@types/minimist": "^1.2.5",
@@ -98,9 +98,9 @@
     "eslint": "^8.56.0",
     "playwright": "^1.41.2",
     "prettier": "^3.2.5",
-    "release-it": "^17.0.3",
+    "release-it": "^17.1.1",
     "tsx": "^4.7.1",
-    "type-fest": "^4.10.2",
+    "type-fest": "^4.10.3",
     "typescript": "5.3.3"
   },
   "engines": {
