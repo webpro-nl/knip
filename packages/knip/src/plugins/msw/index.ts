@@ -10,7 +10,8 @@ const ENABLERS = ['msw'];
 
 const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
 
-const ENTRY_FILE_PATTERNS = [  '**/mockServiceWorker.{js,ts}',
+const ENTRY_FILE_PATTERNS = [
+  '**/mockServiceWorker.{js,ts}',
   'mocks/browser.{js,ts}',
   'mocks/handlers.{js,ts}"',
   'mocks/index.{js,ts}"',

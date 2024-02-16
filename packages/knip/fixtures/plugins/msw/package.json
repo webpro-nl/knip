@@ -3,5 +3,8 @@
   "version": "*",
   "devDependencies": {
     "netlify-cli": "*"
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }
