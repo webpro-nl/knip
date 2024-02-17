@@ -1,5 +1,5 @@
 import { hasDependency } from '../../util/plugin.js';
-import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
+import { toEntryPattern } from '../../util/protocols.js';
 import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://mswjs.io/docs/integrations/browser
@@ -22,7 +22,7 @@ const findDependencies: GenericPluginCallback = async (configFilePath, options) 
   const { config } = options;
 
   return config.entry
-    ? config.entry.map(toProductionEntryPattern)
+    ? config.entry.map(toEntryPattern)
     : [...ENTRY_FILE_PATTERNS.map(toEntryPattern)];
 };
 
