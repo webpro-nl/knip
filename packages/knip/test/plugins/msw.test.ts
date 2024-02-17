@@ -7,34 +7,23 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/msw');
 
-test('Find dependencies in msw configuration', async () => {
+test('Should not see the msw files in issues', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isStrict: true,
   });
 
-  assert.deepEqual(
-    issues.files,
-    new Set([
-      join(cwd, 'mockServiceWorker.js'),
-      join(cwd, 'mocks/browser.ts'),
-      join(cwd, 'mocks/handlers.ts'),
-      join(cwd, 'mocks/index.ts'),
-      join(cwd, 'mocks/server.ts'),
-      join(cwd, 'public/mockServiceWorker.js'),
-      join(cwd, 'src/mocks/browser.ts'),
-      join(cwd, 'src/mocks/handlers.ts'),
-      join(cwd, 'src/mocks/index.ts'),
-      join(cwd, 'src/mocks/server.ts'),
-    ])
-  );
+  assert.equal(issues.files.size, 3);
+  assert(issues.files.has(join(cwd, 'junk.js')));
+  assert(issues.files.has(join(cwd, 'mocks/junk.js')));
+  assert(issues.files.has(join(cwd, 'src/mocks/junk.js')));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    files: 10,
-    total: 10,
-    processed: 10,
+    files: 3,
+    total: 13,
+    processed: 13,
   });
 });

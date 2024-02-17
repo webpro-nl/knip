@@ -21,6 +21,7 @@ export { default as lintStaged } from './lint-staged/index.js';
 export { default as linthtml } from './linthtml/index.js';
 export { default as markdownlint } from './markdownlint/index.js';
 export { default as mocha } from './mocha/index.js';
+export { default as msw } from './msw/index.js';
 export { default as netlify } from './netlify/index.js';
 export { default as next } from './next/index.js';
 export { default as nodeTestRunner } from './node-test-runner/index.js';
