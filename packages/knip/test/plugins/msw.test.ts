@@ -17,6 +17,11 @@ test('Find dependencies in msw configuration', async () => {
   assert.deepEqual(
     issues.files,
     new Set([
+      join(cwd, 'mockServiceWorker.js'),
+      join(cwd, 'mocks/browser.ts'),
+      join(cwd, 'mocks/handlers.ts'),
+      join(cwd, 'mocks/index.ts'),
+      join(cwd, 'mocks/server.ts'),
       join(cwd, 'public/mockServiceWorker.js'),
       join(cwd, 'src/mocks/browser.ts'),
       join(cwd, 'src/mocks/handlers.ts'),
@@ -28,8 +33,8 @@ test('Find dependencies in msw configuration', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    files: 5,
-    total: 5,
-    processed: 5,
+    files: 10,
+    total: 10,
+    processed: 10,
   });
 });
