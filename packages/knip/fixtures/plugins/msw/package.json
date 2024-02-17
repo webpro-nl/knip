@@ -2,7 +2,7 @@
   "name": "@fixtures/msw",
   "version": "*",
   "devDependencies": {
-    "netlify-cli": "*"
+    "msw": "*"
   },
   "msw": {
     "workerDirectory": "public"
