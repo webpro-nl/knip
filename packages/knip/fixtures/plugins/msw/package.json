@@ -8,6 +8,6 @@
     "msw": "*"
   },
   "msw": {
-    "workerDirectory": "public"
+    "workerDirectory": "bob"
   }
 }

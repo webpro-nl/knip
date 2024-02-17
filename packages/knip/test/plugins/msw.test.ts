@@ -23,7 +23,7 @@ test('Should not see the msw files in issues', async () => {
     ...baseCounters,
     devDependencies: 1,
     files: 3,
-    total: 13,
-    processed: 13,
+    total: 14,
+    processed: 14,
   });
 });
