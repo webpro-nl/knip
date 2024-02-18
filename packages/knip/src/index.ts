@@ -145,6 +145,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const manifest = chief.getManifestForWorkspace(dir);
     const { ignoreBinaries, ignoreDependencies } = chief.getIgnores(name);
 
+    if (!manifest) continue;
+
     deputy.addWorkspace({ name, cwd, dir, manifestPath, manifest, ignoreBinaries, ignoreDependencies });
     const dependencies = deputy.getDependencies(name);
 

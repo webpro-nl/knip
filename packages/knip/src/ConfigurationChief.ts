@@ -365,7 +365,7 @@ export class ConfigurationChief {
   }
 
   public getManifestForWorkspace(dir: string) {
-    return this.availableWorkspaceManifests?.find(item => item.dir === dir)?.manifest ?? {};
+    return this.availableWorkspaceManifests?.find(item => item.dir === dir)?.manifest;
   }
 
   public getIncludedWorkspaces() {
