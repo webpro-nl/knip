@@ -22,7 +22,7 @@ const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest, config }) 
 export const PACKAGE_JSON_PATH = 'eslintConfig';
 
 const CONFIG_FILE_PATTERNS = [
-  'eslint.config.js',
+  'eslint.config.{js,cjs,mjs}',
   '.eslintrc',
   '.eslintrc.{js,json,cjs}',
   '.eslintrc.{yml,yaml}',
@@ -33,7 +33,13 @@ const findESLintDependencies: GenericPluginCallback = async (configFilePath, { c
   if (isProduction) return [];
 
   // The new configuration format does not need custom dependency resolving (it has only imports)
-  if (basename(configFilePath) === 'eslint.config.js') return [];
+  const baseFilePath = basename(configFilePath);
+  if (
+    baseFilePath === 'eslint.config.js' ||
+    baseFilePath === 'eslint.config.cjs' ||
+    baseFilePath === 'eslint.config.mjs'
+  )
+    return [];
 
   const dependencies = await getDependenciesDeep(configFilePath, { cwd, manifest });
   return Array.from(dependencies);
