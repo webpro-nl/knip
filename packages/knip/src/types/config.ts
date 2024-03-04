@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ConfigurationValidator, pluginSchema } from '../ConfigurationValidator.js';
 import * as Plugins from '../plugins/index.js';
-import type { Rules } from './issues.js';
+import type { Rules, IssueType } from './issues.js';
 import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
 
 export type RawConfiguration = z.infer<typeof ConfigurationValidator>;
@@ -40,8 +40,8 @@ type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 
 
 export interface Configuration {
   rules: Rules;
-  include: string[];
-  exclude: string[];
+  include: IssueType[];
+  exclude: IssueType[];
   ignore: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;

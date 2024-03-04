@@ -61,8 +61,8 @@ const rootConfigurationSchema = z.object({
 });
 
 const reportConfigSchema = z.object({
-  include: z.array(z.string()).optional(),
-  exclude: z.array(z.string()).optional(),
+  include: z.array(issueTypeSchema).optional(),
+  exclude: z.array(issueTypeSchema).optional(),
 });
 
 export const pluginSchema = z.union([
