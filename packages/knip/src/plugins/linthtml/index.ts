@@ -20,6 +20,7 @@ const CONFIG_FILE_PATTERNS = [
   '.linthtmlrc.json',
   '.linthtmlrc.yml',
   '.linthtmlrc.{js,cjs}',
+  'linthtml.config.js',
   'package.json',
 ];
 
