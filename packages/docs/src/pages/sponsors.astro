@@ -1,0 +1,16 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import SponsorsComponent from '../components/Sponsors.astro';
+---
+
+<StarlightPage frontmatter={{ title: 'Sponsors Overview', template: 'splash' }}>
+  <p>To all sponsors: THANK YOU! 🧡</p>
+
+  <p>
+    Your company on this page? Using Knip at work? <a
+      href="https://github.com/sponsors/webpro">Become a sponsor</a
+    >!
+  </p>
+
+  <SponsorsComponent showAll={true} />
+</StarlightPage>;

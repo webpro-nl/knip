@@ -1,0 +1,40 @@
+.sponsors {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;
+  padding: 3rem 0;
+}
+
+.sponsors.row {
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.sponsors a {
+  border-bottom: none;
+}
+
+.sponsors .w500 {
+  width: 500px;
+}
+
+.sponsors .w400 {
+  width: 400px;
+}
+
+.sponsors .w300 {
+  width: 300px;
+}
+
+.sponsors .w200 {
+  width: 200px;
+}
+
+.sponsors .w150 {
+  width: 150px;
+}
+
+.sponsors .w100 {
+  width: 100px;
+}

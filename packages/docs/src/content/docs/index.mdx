@@ -15,10 +15,6 @@ hero:
       link: ./overview/getting-started
       icon: right-arrow
       variant: primary
-    - text: 'OUT NOW: Knip v5!'
-      link: /blog/knip-v5
-      icon: rocket
-      variant: secondary
     - text: View on GitHub
       link: https://github.com/webpro/knip
       icon: external
@@ -28,11 +24,12 @@ hero:
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import { YouTube } from '@astro-community/astro-embed-youtube';
 import Tweets from '../../components/Tweets.astro';
+import Sponsors from '../../components/Sponsors.astro';
 import Contributors from '../../components/Contributors.astro';
 
 :::div{.sponsor}
 
-Are you using Knip at work? Please consider [sponsoring me][1]!
+Using Knip at work? Please consider [sponsoring me][1]!
 
 :::
 
@@ -57,6 +54,13 @@ Are you using Knip at work? Please consider [sponsoring me][1]!
 and overview of Knip:
 
 <YouTube id="uhEkgWt-pUM" />
+
+## 🧡 Sponsors
+
+Big shoutout to the awesome companies and people sponsoring this project! See
+[Sponsors](./sponsors) for the full list.
+
+<Sponsors direction="row" showAll={false} />
 
 ## 🧡 Contributors
 
