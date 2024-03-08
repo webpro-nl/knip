@@ -6,15 +6,15 @@
   "main": "./index.js",
   "types": "./index.d.ts",
   "dependencies": {
-    "@eslint/js": "^8.56.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
-    "@typescript-eslint/parser": "^7.0.2",
+    "@eslint/js": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
     "eslint-import-resolver-typescript": "3.6.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "globals": "^14.0.0"
   },
   "devDependencies": {
-    "@types/eslint": "8.56.3"
+    "@types/eslint": "8.56.5"
   }
 }
