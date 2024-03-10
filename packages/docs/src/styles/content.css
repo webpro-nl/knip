@@ -26,7 +26,7 @@ h2 em {
 }
 
 .sl-markdown-content h2 code,
-.sl-markdown-content h3 coe {
+.sl-markdown-content h3 code {
   font-size: 0.9em;
   color: var(--sl-color-white);
   /* margin-bottom: 0; */
