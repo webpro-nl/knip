@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/release-it",
+  "devDependencies": {
+    "release-it": "*"
+  }
+}

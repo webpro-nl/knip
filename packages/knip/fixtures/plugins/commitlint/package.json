@@ -1,4 +1,8 @@
 {
+  "name": "@fixtures/commitlint",
+  "devDependencies": {
+    "@commitlint/cli": "*"
+  },
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/cspell",
+  "devDependencies": {
+    "cspell": "*"
+  }
+}

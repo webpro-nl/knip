@@ -1,4 +1,8 @@
 {
+  "name": "@fixtures/lint-staged",
+  "devDependencies": {
+    "lint-staged": "*"
+  },
   "lint-staged": {
     "*.js": [
       "eslint",

@@ -1,6 +1,9 @@
 {
   "name": "@fixtures/graphql-codegen",
   "version": "*",
+  "scripts": {
+    "codegen": "graphql-codegen"
+  },
   "devDependencies": {
     "@graphql-codegen/cli": "*"
   },

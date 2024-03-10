@@ -1,4 +1,8 @@
 {
+  "name": "@fixtures/semantic-release",
+  "devDependencies": {
+    "semantic-release": "*"
+  },
   "release": {
     "branches": [
       "main"

@@ -2,13 +2,9 @@
   "name": "@fixtures/eleventy2",
   "scripts": {
     "start": "npx @11ty/eleventy --serve",
-    "build": "npx @11ty/eleventy",
-    "build:website:watch": "eleventy --serve --port=2023"
+    "build": "npx @11ty/eleventy"
   },
   "devDependencies": {
-    "@11ty/eleventy": "*",
-    "@11ty/eleventy-navigation": "*",
-    "@11ty/eleventy-plugin-syntaxhighlight": "*",
-    "@org/lib": "*"
+    "@11ty/eleventy": "*"
   }
 }

@@ -1,4 +1,5 @@
 {
+  "name": "@fixtures/mocha",
   "mocha": {
     "extension": [
       "ts"

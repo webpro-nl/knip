@@ -8,5 +8,11 @@
     "@storybook/addon-essentials": "*",
     "@storybook/addon-a11y": "*",
     "storybook-addon-performance": "*"
+  },
+  "knip": {
+    "storybook": {
+      "config": "main.js",
+      "entry": "preview.js"
+    }
   }
 }

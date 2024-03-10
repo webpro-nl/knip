@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/changesets",
+  "devDependencies": {
+    "@changesets/cli": "*"
+  }
+}
