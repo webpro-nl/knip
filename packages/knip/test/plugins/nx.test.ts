@@ -1,26 +1,35 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as nx } from '../../src/plugins/nx/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/nx');
-const options = buildOptions(cwd);
 
-test('Find dependencies in Nx configuration (1)', async () => {
-  const configFilePath = join(cwd, 'apps/a/project.json');
-  const dependencies = await nx.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['@nrwl/next', '@nrwl/linter', '@nrwl/cypress']);
-});
+test('Find dependencies with the Nx plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in Nx configuration (2)', async () => {
-  const configFilePath = join(cwd, 'apps/b/project.json');
-  const dependencies = await nx.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['@nx/next', '@nx/linter', '@js/cypress']);
-});
+  assert(issues.devDependencies['package.json']['@nx/cypress']);
+  assert(issues.devDependencies['package.json']['@nrwl/devkit']);
+  assert(issues.devDependencies['package.json']['@nrwl/storybook']);
+  assert(issues.devDependencies['package.json']['@nrwl/web']);
+  assert(issues.devDependencies['package.json']['@nrwl/workspace']);
+  assert(issues.unlisted['apps/b/project.json']['@js/cypress']);
+  assert(issues.unlisted['libs/b/project.json']['nx']);
+  assert(issues.binaries['package.json']['nx']);
+  assert(issues.binaries['libs/b/project.json']['webpack']);
+  assert(issues.binaries['libs/b/project.json']['compodoc']);
 
-test('Find dependencies in Nx configuration (3)', async () => {
-  const configFilePath = join(cwd, 'libs/b/project.json');
-  const dependencies = await nx.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['nx', '@nrwl/jest', 'bin:ls', 'bin:webpack', 'bin:compodoc']);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 3,
+    devDependencies: 5,
+    unlisted: 2,
+    processed: 0,
+    total: 0,
+  });
 });

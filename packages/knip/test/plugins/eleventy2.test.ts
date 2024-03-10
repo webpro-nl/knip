@@ -7,15 +7,18 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/eleventy2');
 
-test('Find dependencies in Eleventy configuration (static)', async () => {
-  const { counters } = await main({
+test('Find dependencies with the Eleventy plugin (2)', async () => {
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
+  assert(issues.unlisted['eleventy.config.cjs']['./node_modules/prismjs/themes/prism-okaidia.css']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    unlisted: 1,
+    processed: 2,
+    total: 2,
   });
 });

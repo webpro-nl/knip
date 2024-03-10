@@ -8,7 +8,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/lefthook-v1');
 
-test('Find dependencies in lefthook v1 configuration', async () => {
+test('Find dependencies with the lefthook v1 plugin', async () => {
   const CI = process.env.CI;
   process.env.CI = '';
   await fs.rename(join(cwd, '_git'), join(cwd, '.git')); // Can't add .git folder to repo

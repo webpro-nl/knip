@@ -5,9 +5,9 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/plugins/playwright2');
+const cwd = resolve('fixtures/plugins/eleventy3');
 
-test('Find dependencies with the Playwright plugin', async () => {
+test('Find dependencies with the Eleventy plugin (3)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -15,7 +15,7 @@ test('Find dependencies with the Playwright plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 5,
+    total: 5,
   });
 });

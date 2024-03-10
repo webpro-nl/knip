@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/linthtml');
 
-test('Find dependencies in LintHTML configuration', async () => {
+test('Find dependencies with the LintHTML plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

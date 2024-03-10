@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/lefthook-ci');
 
-test('Find dependencies in lefthook configuration in CI', async () => {
+test('Find dependencies with the Lefthook plugin (CI)', async () => {
   const CI = process.env.CI;
   process.env.CI = '1';
 

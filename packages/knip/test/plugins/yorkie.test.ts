@@ -1,14 +1,29 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as yorkie } from '../../src/plugins/yorkie/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/yorkie');
-const options = buildOptions(cwd);
 
-test('Find dependencies in yorkie configuration (json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await yorkie.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['yorkie', 'bin:lint-staged']);
+test('Find dependencies with the yorkie plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert(issues.devDependencies['package.json']['lint-staged']);
+  assert(issues.binaries['package.json']['eslint']);
+  assert(issues.binaries['package.json']['markdownlint']);
+  assert(issues.binaries['package.json']['svgo']);
+  assert(issues.binaries['package.json']['lint-staged']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 4,
+    devDependencies: 1,
+    processed: 0,
+    total: 0,
+  });
 });

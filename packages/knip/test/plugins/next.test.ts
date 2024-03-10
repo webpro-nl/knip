@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/next');
 
-test('Find dependencies in Next.js configuration', async () => {
+test('Find dependencies with the Next.js plugin', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

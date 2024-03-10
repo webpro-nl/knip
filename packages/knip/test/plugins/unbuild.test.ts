@@ -1,14 +1,21 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as unbuild } from '../../src/plugins/unbuild/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/unbuild');
-const options = buildOptions(cwd);
 
-test('Find dependencies in unbuild configuration', async () => {
-  const configFilePath = join(cwd, 'build.config.ts');
-  const dependencies = await unbuild.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['entry:./src/index', 'entry:./src/package/components/']);
+test('Find dependencies with the unbuild plugin', async () => {
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
 });

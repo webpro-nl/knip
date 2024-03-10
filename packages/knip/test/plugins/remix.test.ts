@@ -7,11 +7,13 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/remix');
 
-test('Find dependencies in Remix configuration', async () => {
+test('Find dependencies with the Remix plugin', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
+
+  assert(issues.devDependencies['package.json']['npm-run-all']);
 
   assert(issues.unresolved['app/root.tsx']['./session.server']);
 

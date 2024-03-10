@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/rollup');
 
-test('Find dependencies in Rollup configuration', async () => {
+test('Find dependencies with the Rollup plugin', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/drizzle');
 
-test('Find dependencies in Drizzle configuration', async () => {
+test('Find dependencies with the Drizzle plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

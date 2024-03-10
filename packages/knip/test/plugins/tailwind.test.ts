@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/tailwind');
 
-test('Find dependencies in tailwind configuration', async () => {
+test('Find dependencies with the Tailwind plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

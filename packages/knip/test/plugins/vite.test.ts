@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/vite');
 
-test('Find dependencies in Vite configuration', async () => {
+test('Find dependencies with the Vite plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

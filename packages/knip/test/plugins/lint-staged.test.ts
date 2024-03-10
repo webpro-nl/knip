@@ -1,20 +1,29 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as lintStaged } from '../../src/plugins/lint-staged/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/lint-staged');
-const options = buildOptions(cwd);
 
-test('Find dependencies in lint-staged configuration (json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await lintStaged.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['bin:eslint', 'bin:prettier']);
-});
+test('Find dependencies with the lint-staged plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in lint-staged configuration (js)', async () => {
-  const configFilePath = join(cwd, '.lintstagedrc.js');
-  const dependencies = await lintStaged.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['bin:eslint', 'bin:prettier']);
+  assert(issues.binaries['package.json']['eslint']);
+  assert(issues.binaries['package.json']['prettier']);
+  assert(issues.binaries['.lintstagedrc.js']['eslint']);
+  assert(issues.binaries['.lintstagedrc.js']['prettier']);
+  assert(issues.devDependencies['package.json']['lint-staged']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 4,
+    devDependencies: 1,
+    processed: 1,
+    total: 1,
+  });
 });

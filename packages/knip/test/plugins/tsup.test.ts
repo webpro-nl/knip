@@ -1,14 +1,19 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as tsup } from '../../src/plugins/tsup/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/tsup');
-const options = buildOptions(cwd);
 
-test('Find dependencies in tsup configuration (json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await tsup.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, []);
+test('Find dependencies with the tsup plugin', async () => {
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+  });
 });

@@ -1,73 +1,50 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as eslint } from '../../src/plugins/eslint/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/eslint');
-const options = buildOptions(cwd);
 
-test('Find dependencies in ESLint configuration (legacy json)', async () => {
-  const configFilePath = join(cwd, '.eslintrc.json');
-  const dependencies = await eslint.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    join(cwd, 'base.eslint.json'),
-    'eslint',
-    'eslint-plugin-import',
-    '@typescript-eslint/parser',
-    'eslint-config-airbnb',
-    '@typescript-eslint/eslint-plugin',
-    'eslint-config-prettier',
-    '@babel/plugin-syntax-import-assertions',
-  ]);
-});
+test('Find dependencies with the ESLint plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in ESLint configuration (legacy js)', async () => {
-  const configFilePath = join(cwd, '.eslintrc.js');
-  const dependencies = await eslint.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    join(cwd, 'base.eslint.json'),
-    'eslint',
-    'eslint-plugin-import',
-    '@typescript-eslint/parser',
-    'eslint-config-airbnb',
-    '@typescript-eslint/eslint-plugin',
-    'eslint-config-next',
-    '@next/eslint-plugin-next/recommended',
-    'eslint-plugin-eslint-comments',
-    'eslint-plugin-eslint-plugin',
-    '@scope/eslint-config/file',
-    'eslint-plugin-prettier',
-    'eslint-config-prettier',
-    '@nrwl/eslint-plugin-nx',
-    'eslint-plugin-cypress',
-    '@scope-only/eslint-plugin',
-    '@scope/eslint-plugin',
-    '@babel/plugin-proposal-decorators',
-    'eslint-import-resolver-typescript',
-    'eslint-import-resolver-exports',
-  ]);
-});
+  assert(issues.unlisted['.eslintrc.cjs']['@scope/eslint-plugin']);
+  assert(issues.unlisted['.eslintrc.cjs']['@scope/eslint-plugin-name']);
+  assert(issues.unlisted['.eslintrc.cjs']['@shopify/eslint-plugin']);
+  assert(issues.unlisted['.eslintrc.cjs']['eslint-config-airbnb']);
+  assert(issues.unlisted['.eslintrc.cjs']['eslint-config-next']);
+  assert(issues.unlisted['.eslintrc.cjs']['eslint-plugin-import']);
 
-test('Find dependencies in ESLint configuration (legacy yaml)', async () => {
-  const configFilePath = join(cwd, '.eslintrc.yml');
-  const dependencies = await eslint.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['@sinonjs/eslint-config', '@sinonjs/eslint-plugin-no-prototype-methods']);
-});
+  assert(issues.unlisted['.eslintrc.js']['@babel/plugin-proposal-decorators']);
+  assert(issues.unlisted['.eslintrc.js']['@next/eslint-plugin-next/recommended']);
+  assert(issues.unlisted['.eslintrc.js']['@scope-only/eslint-plugin']);
+  assert(issues.unlisted['.eslintrc.js']['@scope/eslint-config/file']);
+  assert(issues.unlisted['.eslintrc.js']['@scope/eslint-plugin']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-config-airbnb']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-config-next']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-import-resolver-exports']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-import-resolver-typescript']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-cypress']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-comments']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-plugin']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-import']);
 
-test('Find dependencies in ESLint configuration (custom prettier config)', async () => {
-  const configFilePath = join(cwd, '.eslintrc.cjs');
-  const dependencies = await eslint.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    'eslint',
-    '@typescript-eslint/eslint-plugin',
-    'eslint-plugin-prettier',
-    'eslint-config-airbnb',
-    '@shopify/eslint-plugin',
-    'eslint-config-next',
-    'eslint-config-prettier',
-    'eslint-plugin-import',
-    '@scope/eslint-plugin-name',
-    '@scope/eslint-plugin',
-  ]);
+  assert(issues.unlisted['.eslintrc.json']['@babel/plugin-syntax-import-assertions']);
+  assert(issues.unlisted['.eslintrc.json']['eslint-config-airbnb']);
+  assert(issues.unlisted['.eslintrc.json']['eslint-plugin-import']);
+
+  assert(issues.unlisted['.eslintrc.yml']['@sinonjs/eslint-config']);
+  assert(issues.unlisted['.eslintrc.yml']['@sinonjs/eslint-plugin-no-prototype-methods']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    unlisted: 24,
+    processed: 4,
+    total: 4,
+  });
 });

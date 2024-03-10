@@ -1,24 +1,29 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as netlify } from '../../src/plugins/netlify/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/netlify');
-const options = buildOptions(cwd);
 
-test('Find dependencies in netlify configuration (json)', async () => {
-  const configFilePath = join(cwd, 'netlify.toml');
-  const dependencies = await netlify.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    'netlify-plugin-check-output-for-puppy-references',
-    'package-1',
-    'package-2',
-    'package-3',
-    'package-4',
-    'production:files/*.md',
-    'production:package.json',
-    'production:images/**',
-    'production:myfunctions/**/*.{js,mjs,cjs,ts,mts,cts}',
-  ]);
+test('Find dependencies with the Netlify plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert(issues.unlisted['netlify.toml']['netlify-plugin-check-output-for-puppy-references']);
+  assert(issues.unlisted['netlify.toml']['package-1']);
+  assert(issues.unlisted['netlify.toml']['package-2']);
+  assert(issues.unlisted['netlify.toml']['package-3']);
+  assert(issues.unlisted['netlify.toml']['package-4']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unlisted: 5,
+    processed: 0,
+    total: 0,
+  });
 });
