@@ -6,15 +6,14 @@ import prettyMilliseconds from 'pretty-ms';
 import Summary from 'summary';
 import parsedArgValues from './cli-arguments.js';
 import { debugLog } from './debug.js';
-import type { TimerifyOptions } from 'node:perf_hooks';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Timerify = <T extends (...params: any[]) => any>(fn: T, options?: TimerifyOptions) => T;
 
 const { performance: isEnabled = false } = parsedArgValues;
 
-// Naming convention: _wrapped() functions are prefixed with an underscore
-export const timerify: Timerify = fn => (isEnabled ? performance.timerify(fn) : fn);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
+  if (!isEnabled) return fn;
+  return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));
+};
 
 export class Performance {
   isEnabled: boolean;

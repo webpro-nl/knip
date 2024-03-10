@@ -30,6 +30,10 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
+  "imports": {
+    "#p/*.ts": "./src/*.ts",
+    "#p/*.js": "./dist/*.js"
+  },
   "scripts": {
     "knip": "node ./dist/cli.js --directory ../..",
     "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
