@@ -53,11 +53,11 @@ for await (const dir of directories) {
     const pluginDir = path.join(pluginsDir, pluginName);
     const plugin: Plugin = (await import(path.join(pluginDir, 'index.ts'))).default;
 
-    const { name, enablers, config, entry, production, project } = plugin;
+    const { title, enablers, config, entry, production, project } = plugin;
 
-    plugins.push([name, pluginName]);
+    plugins.push([title, pluginName]);
 
-    const frontmatter = u('yaml', `title: ${name}\nsidebar:\n  hidden: true`);
+    const frontmatter = u('yaml', `title: ${title}\nsidebar:\n  hidden: true`);
 
     const defaults: Record<string, string[]> = {};
     if (config && config.length > 0) defaults.config = config;

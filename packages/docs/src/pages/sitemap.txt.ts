@@ -6,8 +6,8 @@ interface Page {
   };
 }
 
-const data: Record<string, Page> = await import.meta.glob(['/src/content/**/!([)*.{md,mdx}'], { eager: true });
-const plugins = await import.meta.glob(['/dist/reference/plugins/*/index.html'], { eager: true });
+const data: Record<string, Page> = import.meta.glob(['/src/content/**/!([)*.{md,mdx}'], { eager: true });
+const plugins = import.meta.glob(['/dist/reference/plugins/*/index.html'], { eager: true });
 
 const pages = new Set<string>();
 for (const [filePath, page] of Object.entries(data)) {
