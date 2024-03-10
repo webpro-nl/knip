@@ -1,20 +1,18 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency, load } from '../../util/plugin.js';
+import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { LintStagedConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/okonet/lint-staged
 
-const NAME = 'lint-staged';
+const title = 'lint-staged';
 
-const ENABLERS = ['lint-staged'];
+const enablers = ['lint-staged'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const PACKAGE_JSON_PATH = 'lint-staged';
+const packageJsonPath = 'lint-staged';
 
-const CONFIG_FILE_PATTERNS = [
+const config = [
   '.lintstagedrc',
   '.lintstagedrc.json',
   '.lintstagedrc.{yml,yaml}',
@@ -23,21 +21,14 @@ const CONFIG_FILE_PATTERNS = [
   'package.json',
 ];
 
-const findLintStagedDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
+const resolveConfig: ResolveConfig<LintStagedConfig> = async (config, options) => {
+  if (typeof config === 'function') config = config();
 
-  if (isProduction) return [];
-
-  let localConfig: LintStagedConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest['lint-staged'] : await load(configFilePath);
-
-  if (typeof localConfig === 'function') localConfig = localConfig();
-
-  if (!localConfig) return [];
+  if (!config) return [];
 
   const dependencies = new Set<string>();
 
-  for (const entry of Object.values(localConfig).flat()) {
+  for (const entry of Object.values(config).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
     getDependenciesFromScripts(scripts, options).forEach(identifier => dependencies.add(identifier));
   }
@@ -45,13 +36,11 @@ const findLintStagedDependencies: GenericPluginCallback = async (configFilePath,
   return Array.from(dependencies);
 };
 
-const findDependencies = timerify(findLintStagedDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  PACKAGE_JSON_PATH,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  packageJsonPath,
+  config,
+  resolveConfig,
+} as const;

@@ -1,34 +1,24 @@
-import { _firstGlob } from '../../util/glob.js';
-import { getValuesByKeyDeep } from '../../util/object.js';
-import { basename, dirname, join } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, load } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
-
-function isString(value: unknown): value is string {
-  return typeof value === 'string';
-}
+import { _firstGlob } from '#p/util/glob.js';
+import { getValuesByKeyDeep } from '#p/util/object.js';
+import { join } from '#p/util/path.js';
+import { getDependenciesFromScripts } from '#p/util/plugin.js';
+import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
-const NAME = 'GitHub Actions';
+const title = 'GitHub Actions';
 
-const ENABLERS = 'This plugin is enabled when a `.yml` or `.yaml` file is found in the `.github/workflows` folder.';
+const enablers = 'This plugin is enabled when a `.yml` or `.yaml` file is found in the `.github/workflows` folder.';
 
-const isEnabled: IsPluginEnabledCallback = async ({ cwd }) =>
+const isEnabled: IsPluginEnabled = async ({ cwd }) =>
   Boolean(await _firstGlob({ cwd, patterns: ['.github/workflows/*.{yml,yaml}'] }));
 
-const CONFIG_FILE_PATTERNS = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'];
+const config = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'];
 
-const findGithubActionsDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { isProduction } = options;
-  const configFileName = basename(configFilePath);
+const isString = (value: unknown): value is string => typeof value === 'string';
 
-  if (isProduction) return [];
-
-  const config = await load(configFilePath);
-
-  if (!config) return [];
+const resolveConfig: ResolveConfig = async (config, options) => {
+  const { configFileDir, configFileName } = options;
 
   const scripts = getValuesByKeyDeep(config, 'run').filter(isString);
 
@@ -36,18 +26,16 @@ const findGithubActionsDependencies: GenericPluginCallback = async (configFilePa
     const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
     if (!isActionManifest || !config?.runs?.using?.startsWith('node')) return [];
     const scripts = [config.runs.pre, config.runs.main, config.runs.post].filter(isString);
-    return scripts.map(script => join(dirname(configFilePath), script));
+    return scripts.map(script => join(configFileDir, script));
   };
 
   return [...getActionDependencies(), ...getDependenciesFromScripts(scripts, { ...options, knownGlobalsOnly: true })];
 };
 
-const findDependencies = timerify(findGithubActionsDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
+  config,
+  resolveConfig,
 };

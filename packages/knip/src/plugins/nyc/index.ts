@@ -1,34 +1,25 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { NycConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://www.npmjs.com/package/nyc
 
-const NAME = 'nyc';
+const title = 'nyc';
 
-const ENABLERS = ['nyc'];
+const enablers = ['nyc'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
+const config = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
 
-const findNycDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: NycConfig | undefined = await load(configFilePath);
-
-  return localConfig?.extends ? [localConfig.extends].flat() : [];
+const resolveConfig: ResolveConfig<NycConfig> = config => {
+  return config?.extends ? [config.extends].flat() : [];
 };
-
-const findDependencies = timerify(findNycDependencies);
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  resolveConfig,
+} as const;

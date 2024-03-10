@@ -1,45 +1,31 @@
-import { basename, isInternal } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { isInternal } from '#p/util/path.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { BaseStyleLintConfig, StyleLintConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://stylelint.io/user-guide/configure/
 
-const NAME = 'Stylelint';
+const title = 'Stylelint';
 
-const ENABLERS = ['stylelint'];
+const enablers = ['stylelint'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['.stylelintrc', '.stylelintrc.{cjs,js,json,yaml,yml}', 'stylelint.config.{cjs,mjs,js}'];
+const config = ['.stylelintrc', '.stylelintrc.{cjs,js,json,yaml,yml}', 'stylelint.config.{cjs,mjs,js}'];
 
-const findDependenciesInConfig = (config: StyleLintConfig | BaseStyleLintConfig): string[] => {
+const resolve = (config: StyleLintConfig | BaseStyleLintConfig): string[] => {
   const extend = config.extends ? [config.extends].flat().filter(id => !isInternal(id)) : [];
   const plugins = config.plugins ? [config.plugins].flat().filter(id => !isInternal(id)) : [];
-  const overrideConfigs = 'overrides' in config ? config.overrides.flatMap(findDependenciesInConfig) : [];
+  const overrideConfigs = 'overrides' in config ? config.overrides.flatMap(resolve) : [];
   return [...extend, ...plugins, ...overrideConfigs];
 };
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: StyleLintConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.stylelint : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return findDependenciesInConfig(localConfig);
-};
-
-const findDependencies = timerify(findPluginDependencies);
+const resolveConfig: ResolveConfig<StyleLintConfig> = config => resolve(config);
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  resolveConfig,
+} as const;

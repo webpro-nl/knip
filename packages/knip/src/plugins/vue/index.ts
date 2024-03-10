@@ -1,37 +1,25 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
+import { hasDependency } from '#p/util/plugin.js';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { VueConfig, WebpackConfiguration } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://cli.vuejs.org/config/
 // https://vuejs.org/guide/scaling-up/tooling.html#vue-cli
 
-const NAME = 'Vue';
+const title = 'Vue';
 
-const ENABLERS = ['vue'];
+const enablers = ['vue'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['vue.config.{js,ts}'];
+const config = ['vue.config.{js,ts}'];
 
-const ENTRY_FILE_PATTERNS: string[] = [];
+const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
+  const { cwd, isProduction, manifest } = options;
 
-const PRODUCTION_ENTRY_FILE_PATTERNS: string[] = [];
+  const deps: string[] = [];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { config, isProduction, cwd, manifest } = options;
-
-  const localConfig: VueConfig | undefined = await load(configFilePath);
-
-  const deps = config.entry
-    ? config.entry.map(toProductionEntryPattern)
-    : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
-
-  if (isProduction || !localConfig) return deps;
-
-  if (localConfig.configureWebpack) {
+  if (config.configureWebpack) {
     const baseConfig = {
       mode: 'development',
       entry: {},
@@ -40,9 +28,7 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
       module: { rules: [] },
     } satisfies WebpackConfiguration;
     const modifiedConfig =
-      typeof localConfig.configureWebpack === 'function'
-        ? localConfig.configureWebpack(baseConfig)
-        : localConfig.configureWebpack;
+      typeof config.configureWebpack === 'function' ? config.configureWebpack(baseConfig) : config.configureWebpack;
     const { dependencies } = await findWebpackDependenciesFromConfig({
       config: modifiedConfig ?? baseConfig,
       cwd,
@@ -61,12 +47,10 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return deps;
 };
 
-const findDependencies = timerify(findPluginDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  resolveConfig,
+} as const;

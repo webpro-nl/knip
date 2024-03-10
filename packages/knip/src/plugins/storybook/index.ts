@@ -1,66 +1,54 @@
-import { dirname, join, relative } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { join, relative } from '#p/util/path.js';
+import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { StorybookConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://storybook.js.org/docs/react/configure/overview
 
-const NAME = 'Storybook';
+const title = 'Storybook';
 
-const ENABLERS = [/^@storybook\//, '@nrwl/storybook'];
+const enablers = [/^@storybook\//, '@nrwl/storybook'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['.storybook/{main,test-runner}.{js,ts}'];
+const config = ['.storybook/{main,test-runner}.{js,ts}'];
 
-const STORIES_FILE_PATTERNS = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
+const stories = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
 
-const REST_ENTRY_FILE_PATTERNS = ['.storybook/{manager,preview}.{js,jsx,ts,tsx}'];
+const restEntry = ['.storybook/{manager,preview}.{js,jsx,ts,tsx}'];
 
-const ENTRY_FILE_PATTERNS = [...REST_ENTRY_FILE_PATTERNS, ...STORIES_FILE_PATTERNS];
+const entry = [...restEntry, ...stories];
 
-const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
+const project = ['.storybook/**/*.{js,jsx,ts,tsx}'];
 
-const findStorybookDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { isProduction, cwd, config } = options;
-
-  const localConfig: StorybookConfig | undefined = await load(configFilePath);
-
-  const stories =
-    typeof localConfig?.stories === 'function'
-      ? await localConfig.stories(STORIES_FILE_PATTERNS)
-      : localConfig?.stories;
-  const relativePatterns = stories?.map(pattern => {
-    if (typeof pattern === 'string') return relative(cwd, join(dirname(configFilePath), pattern));
-    return relative(cwd, join(dirname(configFilePath), pattern.directory, pattern.files ?? STORIES_FILE_PATTERNS[0]));
+const resolveEntryPaths: ResolveEntryPaths<StorybookConfig> = async (localConfig, options) => {
+  const { cwd, configFileDir } = options;
+  const strs = typeof localConfig?.stories === 'function' ? await localConfig.stories(stories) : localConfig?.stories;
+  const relativePatterns = strs?.map(pattern => {
+    if (typeof pattern === 'string') return relative(cwd, join(configFileDir, pattern));
+    return relative(cwd, join(configFileDir, pattern.directory, pattern.files ?? stories[0]));
   });
-  const patterns = [
-    ...(config?.entry ?? REST_ENTRY_FILE_PATTERNS),
-    ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : STORIES_FILE_PATTERNS),
-  ];
-  const entryPatterns = patterns.map(toEntryPattern);
+  const patterns = [...restEntry, ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : stories)];
+  return patterns.map(toEntryPattern);
+};
 
-  if (!localConfig || isProduction) return entryPatterns;
-
+const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {
   const addons = localConfig.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
   const builder = localConfig?.core?.builder;
   const builderPackages =
     builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
   const frameworks = localConfig.framework?.name ? [localConfig.framework.name] : [];
-
-  return [...entryPatterns, ...addons, ...builderPackages, ...frameworks];
+  return [...addons, ...builderPackages, ...frameworks];
 };
-
-const findDependencies = timerify(findStorybookDependencies);
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  ENTRY_FILE_PATTERNS,
-  PROJECT_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  entry,
+  project,
+  resolveEntryPaths,
+  resolveConfig,
+} as const;

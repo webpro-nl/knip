@@ -1,79 +1,56 @@
-import { dirname, join, relative } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
+import { join, relative } from '#p/util/path.js';
+import { hasDependency } from '#p/util/plugin.js';
+import { toEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, ResolveEntryPaths, ResolveConfig } from '#p/types/plugins.js';
 import type { PlaywrightTestConfig } from 'playwright/test';
 
 // https://playwright.dev/docs/test-configuration
 
-const NAME = 'Playwright';
+const title = 'Playwright';
 
-const ENABLERS = ['@playwright/test'];
+const enablers = ['@playwright/test'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['playwright.config.{js,ts}'];
+const config = ['playwright.config.{js,ts}'];
 
-const ENTRY_FILE_PATTERNS = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
+export const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
 const toEntryPatterns = (
   testMatch: string | RegExp | Array<string | RegExp> | undefined,
   cwd: string,
-  configFilePath: string,
-  config: PlaywrightTestConfig
+  configDir: string,
+  localConfig: PlaywrightTestConfig
 ) => {
   if (!testMatch) return [];
-  const dir = relative(cwd, config.testDir ? join(dirname(configFilePath), config.testDir) : dirname(configFilePath));
+  const dir = relative(cwd, localConfig.testDir ? join(configDir, localConfig.testDir) : configDir);
   const patterns = [testMatch].flat().filter((p): p is string => typeof p === 'string');
   return patterns.map(pattern => toEntryPattern(join(dir, pattern)));
 };
 
 const builtinReporters = ['dot', 'line', 'list', 'junit', 'html', 'blob', 'json', 'github'];
 
-export const findPlaywrightDependenciesFromConfig = ({
-  config,
-  cwd,
-  configFilePath,
-  defaultPatterns,
-}: {
-  config: PlaywrightTestConfig;
-  cwd: string;
-  configFilePath: string;
-  defaultPatterns: string[];
-}) => {
-  const projects = config.projects ? [config, ...config.projects] : [config];
-  const patterns = projects.flatMap(config => toEntryPatterns(config.testMatch, cwd, configFilePath, config));
+export const resolveEntryPaths: ResolveEntryPaths<PlaywrightTestConfig> = async (localConfig, options) => {
+  const { cwd, configFileDir } = options;
+  const projects = localConfig.projects ? [localConfig, ...localConfig.projects] : [localConfig];
+  return projects.flatMap(config => toEntryPatterns(config.testMatch, cwd, configFileDir, config));
+};
+
+export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async config => {
   const reporters = [config.reporter].flat().flatMap(reporter => {
     const name = typeof reporter === 'string' ? reporter : reporter?.[0];
     if (!name || builtinReporters.includes(name)) return [];
     return [name];
   });
-
-  return [...(patterns.length > 0 ? patterns : defaultPatterns), ...reporters];
+  return [...reporters];
 };
-
-const findPlaywrightDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, config } = options;
-
-  const localConfig: PlaywrightTestConfig | undefined = await load(configFilePath);
-
-  const defaultPatterns = (config?.entry ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
-
-  if (localConfig) {
-    return findPlaywrightDependenciesFromConfig({ cwd, configFilePath, config: localConfig, defaultPatterns });
-  }
-
-  return defaultPatterns;
-};
-
-const findDependencies = timerify(findPlaywrightDependencies);
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  ENTRY_FILE_PATTERNS,
-  findDependencies,
+  config,
+  entry,
+  resolveConfig,
+  resolveEntryPaths,
 };

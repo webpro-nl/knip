@@ -1,20 +1,18 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
 import type { TypeDocConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://typedoc.org/guides/overview/
 
-const NAME = 'TypeDoc';
+const title = 'TypeDoc';
 
-const ENABLERS = ['typedoc'];
+const enablers = ['typedoc'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const PACKAGE_JSON_PATH = 'typedocOptions';
+const packageJsonPath = 'typedocOptions';
 
-const CONFIG_FILE_PATTERNS = [
+const config = [
   'typedoc.{js,cjs,json,jsonc}',
   'typedoc.config.{js,cjs}',
   '.config/typedoc.{js,cjs,json,jsonc}',
@@ -23,28 +21,16 @@ const CONFIG_FILE_PATTERNS = [
   'tsconfig.json',
 ];
 
-const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: TypeDocConfig | undefined =
-    basename(configFilePath) === 'package.json'
-      ? manifest[PACKAGE_JSON_PATH]
-      : basename(configFilePath) === 'tsconfig.json'
-        ? (await load(configFilePath)).typedocOptions
-        : await load(configFilePath);
-
-  return localConfig?.plugin ?? [];
+const resolveConfig: ResolveConfig<TypeDocConfig | { typedocOptions: TypeDocConfig }> = config => {
+  config = 'typedocOptions' in config ? config.typedocOptions : config; // exception for `tsconfig.json`
+  return config?.plugin ?? [];
 };
-
-const findDependencies = timerify(findTypeDocDependencies);
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  PACKAGE_JSON_PATH,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  packageJsonPath,
+  config,
+  resolveConfig,
+} as const;

@@ -1,29 +1,19 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled } from '#p/types/plugins.js';
 
 // https://docs.sentry.io/platforms/javascript/configuration/
 
-const NAME = 'Sentry';
+const title = 'Sentry';
 
-const ENABLERS = [/^@sentry\//];
+const enablers = [/^@sentry\//];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const ENTRY_FILE_PATTERNS = ['sentry.{client,server,edge}.config.{js,ts}'];
-
-const findSentryDependencies: GenericPluginCallback = async () => {
-  const entryPatterns = ENTRY_FILE_PATTERNS.map(toEntryPattern);
-  return entryPatterns;
-};
-
-const findDependencies = timerify(findSentryDependencies);
+const entry = ['sentry.{client,server,edge}.config.{js,ts}'];
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  ENTRY_FILE_PATTERNS,
-  findDependencies,
+  entry,
 };

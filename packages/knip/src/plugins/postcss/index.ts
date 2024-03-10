@@ -1,29 +1,18 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { PostCSSConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-const NAME = 'PostCSS';
+const title = 'PostCSS';
 
-const ENABLERS = ['postcss', 'postcss-cli', 'next'];
+const enablers = ['postcss', 'postcss-cli', 'next'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['postcss.config.{cjs,js}', 'postcss.config.json', 'package.json'];
+const config = ['postcss.config.{cjs,js}', 'postcss.config.json', 'package.json'];
 
-const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: PostCSSConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest?.postcss : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return localConfig.plugins
-    ? (Array.isArray(localConfig.plugins) ? localConfig.plugins : Object.keys(localConfig.plugins)).flatMap(plugin => {
+const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
+  return config.plugins
+    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).flatMap(plugin => {
         if (typeof plugin === 'string') return plugin;
         if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
         return [];
@@ -31,12 +20,10 @@ const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, op
     : [];
 };
 
-const findDependencies = timerify(findPostCSSDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  resolveConfig,
+} as const;

@@ -1,53 +1,35 @@
-import { basename, isInternal } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import { isInternal } from '#p/util/path.js';
+import { hasDependency } from '#p/util/plugin.js';
+import { toEntryPattern } from '#p/util/protocols.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { PluginConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://linthtml.vercel.app/
 
-const NAME = 'LintHTML';
+const title = 'LintHTML';
 
-const PACKAGE_JSON_PATH = 'linthtmlConfig';
+const packageJsonPath = 'linthtmlConfig';
 
-const ENABLERS = ['@linthtml/linthtml'];
+const enablers = ['@linthtml/linthtml'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = [
-  '.linthtmlrc',
-  '.linthtmlrc.json',
-  '.linthtmlrc.yml',
-  '.linthtmlrc.{js,cjs}',
-  'package.json',
-];
+const config = ['.linthtmlrc', '.linthtmlrc.json', '.linthtmlrc.yml', '.linthtmlrc.{js,cjs}', 'package.json'];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest } = options;
-
-  const localConfig: PluginConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.linthtmlConfig : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  const extensions = [localConfig.extends ?? []]
+const resolveConfig: ResolveConfig<PluginConfig> = config => {
+  const extensions = [config.extends ?? []]
     .flat()
     .map(extension => (isInternal(extension) ? toEntryPattern(extension) : extension));
-  const plugins = [localConfig.plugins ?? []]
-    .flat()
-    .map(plugin => (isInternal(plugin) ? toEntryPattern(plugin) : plugin));
+  const plugins = [config.plugins ?? []].flat().map(plugin => (isInternal(plugin) ? toEntryPattern(plugin) : plugin));
 
   return [...extensions, ...plugins];
 };
 
-const findDependencies = timerify(findPluginDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  PACKAGE_JSON_PATH,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  packageJsonPath,
+  config,
+  resolveConfig,
+} as const;

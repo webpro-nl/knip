@@ -1,40 +1,30 @@
-import { basename, isInternal } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import { isInternal } from '#p/util/path.js';
+import { hasDependency } from '#p/util/plugin.js';
+import { toEntryPattern } from '#p/util/protocols.js';
 import { isConfigurationOutput } from './types.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { ConfiguredPlugin, GraphqlCodegenTypes, PresetNames } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://the-guild.dev/graphql/codegen/docs/config-reference/codegen-config
 // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/config.ts
 
-const NAME = 'GraphQL Codegen';
+const title = 'GraphQL Codegen';
 
-const ENABLERS = [/^@graphql-codegen\//];
+const enablers = [/^@graphql-codegen\//];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const PACKAGE_JSON_PATH = 'codegen';
+const packageJsonPath = 'codegen';
 
-const CONFIG_FILE_PATTERNS = [
+const config = [
   'codegen.{json,yml,yaml,js,ts,mjs,cts}',
   '.codegenrc.{json,yml,yaml,js,ts}',
   'codegen.config.js',
   'package.json',
 ];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: GraphqlCodegenTypes | undefined =
-    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  const generateSet = Object.values(localConfig.generates);
+const resolveConfig: ResolveConfig<GraphqlCodegenTypes> = config => {
+  const generateSet = Object.values(config.generates);
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 
@@ -59,13 +49,11 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return [...presets, ...flatPlugins, ...nestedPlugins];
 };
 
-const findDependencies = timerify(findPluginDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  PACKAGE_JSON_PATH,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  packageJsonPath,
+  config,
+  resolveConfig,
+} as const;

@@ -1,33 +1,25 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { findVitestDependencies } from '../vitest/index.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
-import type { ViteConfigOrFn } from '../vitest/types.js';
+import { hasDependency } from '#p/util/plugin.js';
+import { resolveEntryPaths, resolveConfig } from '../vitest/index.js';
+import type { IsPluginEnabled } from '#p/types/plugins.js';
 
 // https://vitejs.dev/config/
 
-const NAME = 'Vite';
+const title = 'Vite';
 
-const ENABLERS = ['vite'];
+const enablers = ['vite'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = ['vite*.config.{js,mjs,ts,cjs,mts,cts}'];
+export const config = ['vite*.config.{js,mjs,ts,cjs,mts,cts}'];
 
-const findViteDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const localConfig: ViteConfigOrFn | undefined = await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return findVitestDependencies(configFilePath, localConfig, options);
-};
-
-const findDependencies = timerify(findViteDependencies);
+const production: string[] = [];
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
+  config,
+  production,
+  resolveEntryPaths,
+  resolveConfig,
 };

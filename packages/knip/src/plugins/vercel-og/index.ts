@@ -1,33 +1,23 @@
-import { hasDependency } from '../../util/plugin.js';
-import { toProductionEntryPattern } from '../../util/protocols.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled } from '#p/types/plugins.js';
 
 // https://vercel.com/docs/functions/og-image-generation
 
-const NAME = 'Vercel OG';
+const title = 'Vercel OG';
 
-const ENABLERS = ['next', '@vercel/og'];
+const enablers = ['next', '@vercel/og'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const PRODUCTION_ENTRY_FILE_PATTERNS = [
+const production = [
   '{src/,}pages/api/og.{jsx,tsx}',
   '{src/,}app/api/og/route.{jsx,tsx}',
   // 'api/og.{jsx,tsx}', // TODO maybe add for non-Next.js projects
 ];
 
-const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { config } = options;
-
-  return config.entry
-    ? config.entry.map(toProductionEntryPattern)
-    : PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern);
-};
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  PRODUCTION_ENTRY_FILE_PATTERNS,
-  findDependencies,
+  production,
 };

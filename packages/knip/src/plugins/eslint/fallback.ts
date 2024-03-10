@@ -1,7 +1,6 @@
+import { timerify } from '#p/util/Performance.js';
 import createJITI from 'jiti';
 import transform from 'jiti/dist/babel.js';
-import { FAKE_PATH } from '../../util/loader.js';
-import { timerify } from '../../util/Performance.js';
 import type { TransformOptions } from 'jiti/dist/types.js';
 
 const rushstackMatch = /require\(("|')@rushstack\/(eslint-config\/patch|eslint-patch)\/modern-module-resolution("|')\)/;
@@ -25,7 +24,6 @@ const jiti = createJITI(process.cwd(), {
  * ```
  */
 const load = (configFilePath: string) => {
-  if (configFilePath === FAKE_PATH) return;
   return jiti(configFilePath);
 };
 
