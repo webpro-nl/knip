@@ -138,9 +138,19 @@ This function receives the exported value of the `config` files, and executes
 the `resolveConfig` function with this object. The plugin should return the
 dependencies referenced in this object.
 
-Knip supports JSON, YAML, TOML, JavaScript and TypeScript config files.
+Knip supports JSON, YAML, TOML, JavaScript and TypeScript config files. Files
+without an extension are provided as plain text strings.
 
-### Custom entry paths
+:::tip[Should I implement resolveConfig?]
+
+You should implement `resolveConfig` if:
+
+- The tool supports a `config` file in JSON or YAML format, and/or
+- The `config` file reference dependencies as strings
+
+:::
+
+## Example 3: custom entry paths
 
 Some tools operate mostly on entry files, some examples:
 
@@ -167,66 +177,12 @@ custom locations for test files. If this function is implemented in a plugin,
 Knip will use its return value over the default `entry` patterns. The result is
 that users don't need to duplicate this customization in both Ava and Knip.
 
-## Example 3
+:::tip[Should I implement resolveEntryPaths?]
 
-Most plugins can be kept relatively simple like the examples above, but
-sometimes more customization is required. This is where the `resolveFromPath`
-function comes in.
-
-### 7. `resolveFromPath`
-
-Compared to the `resolveConfig` function, this function receives the path to the
-configuration file instead of the `config` object:
-
-```ts title="src/plugins/tool/index.ts"
-import { load } from '~/util/plugin.js';
-
-const resolveFromPath: GenericPluginCallback = async (
-  configFilePath,
-  options
-) => {
-  // 1. Load the configuration
-  const config = await load(configFilePath);
-
-  // 2. Grab the dependencies from the object
-  const addons = config?.addons ?? [];
-  const plugins = config?.plugins ?? [];
-
-  // 3. Return the results
-  return [...addons, ...plugins];
-};
-
-export default {
-  resolveFromPath,
-};
-```
-
-## When to use what?
-
-You might be wondering which functions you should be using for your plugin. Each
-plugin falls in one of three categories:
-
-| Category | File patterns | Method            | Example |
-| :------: | :------------ | :---------------- | :-----: |
-|    1     | `entry`       | none              |    1    |
-|    2     | `config`      | `resolveConfig`   |    2    |
-|    3     | `config`      | `resolveFromPath` |    3    |
-
-The majority of plugins are straightforward and fit in category 1 or 2:
-
-:::tip[Rule of thumb]
-
-- Does the tool support a `config` file in JSON or YAML format? Category 2.
-- Does the `config` file reference dependencies as strings? Category 2.
+You should implement `resolveEntryPaths` if the configuration object contains
+file patterns that override the plugin's default `entry` patterns.
 
 :::
-
-That covers the majority of plugins (85%). During development, for the remaining
-plugins in category 3 it's mostly a matter of moving the logic into a single
-`resolveFromPath` function when necessary.
-
-Example 1 is in category 1, and so on. See [example 2](#example-2-config) that
-fits in category 2.
 
 ## Create a new plugin
 
@@ -258,13 +214,7 @@ individual plugin pages][1] from the exported plugin values.
 
 Thanks for reading. If you have been following this guide to create a new
 plugin, this might be the right time to open a pull request! Feel free to join
-[the Knip Discord channel][8] if you have any questions.
+[the Knip Discord channel][2] if you have any questions.
 
 [1]: ../reference/plugins.md
-[2]: https://github.com/webpro/knip/blob/v3/packages/knip/src/types/plugins.ts
-[3]: ../explanations/plugins.md
-[4]: #entry
-[5]: ../explanations/plugins.md#bringing-it-all-together
-[6]: ../features/production-mode.md
-[7]: ../overview/configuration.md#defaults
-[8]: https://discord.gg/r5uXTtbTpc
+[2]: https://discord.gg/r5uXTtbTpc
