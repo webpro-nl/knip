@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.js';
 import { getDependencyMetaData } from '../src/manifest/index.js';
-import { resolve } from '../src/util/path.js';
+import { join, resolve } from '../src/util/path.js';
+import { load } from '../src/util/plugin.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
-import { getManifest } from './helpers/index.js';
 
 const cwd = resolve('fixtures/npm-scripts');
-const manifest = getManifest(cwd);
+const manifest = await load(join(cwd, 'package.json'));
 
 test('Get metadata from dependencies (getDependencyMetaData)', async () => {
   const config = {

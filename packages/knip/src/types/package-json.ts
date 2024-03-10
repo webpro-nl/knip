@@ -1,5 +1,5 @@
 import type { PluginMap } from './config.js';
-import type { LiteralUnion, MergeUnion } from './util.js';
+import type { LiteralUnion } from './util.js';
 
 type Dependency = Record<string, string>;
 type ExportCondition = LiteralUnion<
@@ -8,14 +8,17 @@ type ExportCondition = LiteralUnion<
 >;
 type Exports = null | string | string[] | { [key in ExportCondition]: Exports } | { [key: string]: Exports };
 
-type ExtractKeys<T, K extends string> = T extends { PACKAGE_JSON_PATH: infer P }
-  ? P extends `${infer First}.${infer Second}`
-    ? { [K1 in First]?: { [K2 in Second]?: unknown } }
-    : { [P in T['PACKAGE_JSON_PATH'] & string]?: unknown }
-  : Record<K, unknown>;
+type PackageJsonPath<T> = T extends { packageJsonPath: infer P } ? (P extends string ? P : never) : never;
 
-type PluginKeys = { [K in keyof PluginMap]: ExtractKeys<PluginMap[K], K> };
-type Plugins = MergeUnion<PluginKeys[keyof PluginMap]>;
+type WithPackageJsonPathAsKey<T> = {
+  [K in keyof T]: PackageJsonPath<T[K]> extends never ? K : PackageJsonPath<T[K]>;
+};
+
+type PluginConfigs<P> = {
+  [K in keyof P as WithPackageJsonPathAsKey<P>[K]]: unknown;
+};
+
+type Plugins = PluginConfigs<PluginMap> & { plugin: unknown };
 
 export type Scripts = Record<string, string>;
 

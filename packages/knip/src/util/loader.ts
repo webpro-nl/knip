@@ -46,13 +46,4 @@ const load = async (filePath: string) => {
   }
 };
 
-const loadFileAsync = async (filePath: string) => {
-  try {
-    return await loadFile(filePath);
-  } catch (error) {
-    throw new LoaderError(`Error loading ${filePath}`, { cause: error });
-  }
-};
-
 export const _load = timerify(load);
-export const _loadFile = timerify(loadFileAsync);

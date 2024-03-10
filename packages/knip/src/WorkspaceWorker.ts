@@ -9,7 +9,6 @@ import {
   fromProductionEntryPattern,
   isEntryPattern,
   isProductionEntryPattern,
-  toEntryPattern,
 } from './util/protocols.js';
 import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';

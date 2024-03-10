@@ -1,8 +1,8 @@
 import ts from 'typescript';
 import { SymbolType } from '../../../types/issues.js';
 import { exportVisitor as visit } from '../index.js';
-import type { Fix } from 'src/types/exports.js';
-import type { BoundSourceFile } from 'src/typescript/SourceFile.js';
+import type { Fix } from '../../../types/exports.js';
+import type { BoundSourceFile } from '../../SourceFile.js';
 
 export default visit(
   () => true,

@@ -10,7 +10,7 @@ export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
 type NormalizedGlob = string[];
 
-type IgnorePatterns = (string | RegExp)[];
+export type IgnorePatterns = (string | RegExp)[];
 
 export type PluginName = keyof typeof Plugins;
 

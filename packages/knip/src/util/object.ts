@@ -38,5 +38,5 @@ export const getKeysByValue = <T>(obj: T, value: unknown): (keyof T)[] => {
   return keys;
 };
 
-// @ts-expect-error just pass good objects alright
-export const get = (obj: unknown, path: string) => path.split('.').reduce((o, p) => o && o[p], obj);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get = <T>(obj: T, path: string) => path.split('.').reduce((o: any, p) => o && o[p], obj);
