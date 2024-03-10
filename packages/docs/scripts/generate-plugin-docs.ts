@@ -53,18 +53,11 @@ for await (const dir of directories) {
     const pluginDir = path.join(pluginsDir, pluginName);
     const plugin: Plugin = (await import(path.join(pluginDir, 'index.ts'))).default;
 
-    const {
-      NAME,
-      ENABLERS,
-      CONFIG_FILE_PATTERNS: config,
-      ENTRY_FILE_PATTERNS: entry,
-      PRODUCTION_ENTRY_FILE_PATTERNS: production,
-      PROJECT_FILE_PATTERNS: project,
-    } = plugin;
+    const { name, enablers, config, entry, production, project } = plugin;
 
-    plugins.push([NAME, pluginName]);
+    plugins.push([name, pluginName]);
 
-    const frontmatter = u('yaml', `title: ${NAME}\nsidebar:\n  hidden: true`);
+    const frontmatter = u('yaml', `title: ${name}\nsidebar:\n  hidden: true`);
 
     const defaults: Record<string, string[]> = {};
     if (config && config.length > 0) defaults.config = config;
@@ -73,20 +66,20 @@ for await (const dir of directories) {
     if (project && project.length > 0) defaults.project = project;
 
     const en =
-      Array.isArray(ENABLERS) && ENABLERS.length > 0
+      Array.isArray(enablers) && enablers.length > 0
         ? [
             ...parseFragment(
               "This plugin is enabled when there's a match in `dependencies` or `devDependencies` in `package.json`:"
             ),
             u(
               'list',
-              ENABLERS.map((enabler: string | RegExp) =>
+              enablers.map((enabler: string | RegExp) =>
                 u('listItem', [u('inlineCode', typeof enabler === 'string' ? enabler : enabler.source)])
               )
             ),
           ]
-        : typeof ENABLERS === 'string'
-          ? parseFragment(ENABLERS)
+        : typeof enablers === 'string'
+          ? parseFragment(enablers)
           : [u('paragraph', [u('text', 'N/A')])];
 
     const tree = u('root', [
