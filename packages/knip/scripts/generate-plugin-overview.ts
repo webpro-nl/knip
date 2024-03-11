@@ -23,7 +23,6 @@ for await (const dir of directories) {
       entry: plugin.entry?.length > 0 ? 1 : 0,
       production: plugin.production?.length > 0 ? 1 : 0,
       resolve: plugin.resolve ? 1 : 0,
-      resolveFromPath: plugin.resolveFromPath ? 1 : 0,
       resolveConfig: plugin.resolveConfig ? 1 : 0,
       resolveEntryPaths: plugin.resolveEntryPaths ? 1 : 0,
       n: 1,
@@ -40,7 +39,6 @@ data.forEach(plugin => {
   t.cell('production', plugin.production, Table.number(0));
   t.cell('resolve', plugin.resolve, Table.number(0));
   t.cell('resolveEntryPaths', plugin.resolveEntryPaths, Table.number(0));
-  t.cell('resolveFromPath', plugin.resolveFromPath, Table.number(0));
   t.cell('resolveConfig', plugin.resolveConfig, Table.number(0));
   t.cell('n', plugin.n, Table.number(0));
   t.newRow();
@@ -53,7 +51,6 @@ t.total('entry');
 t.total('production');
 t.total('resolve');
 t.total('resolveEntryPaths');
-t.total('resolveFromPath');
 t.total('resolveConfig');
 t.total('n');
 
