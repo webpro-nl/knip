@@ -2,12 +2,12 @@ export { _load as load, _loadFile as loadFile } from './loader.js';
 export { _loadJSON as loadJSON } from './fs.js';
 export { _tryResolve as tryResolve } from './require.js';
 export { _getDependenciesFromScripts as getDependenciesFromScripts } from '../binaries/index.js';
-import { fallback } from '../plugins/eslint/fallback.js';
 import { arrayify } from './array.js';
 import { _load as load } from './loader.js';
 import { get } from './object.js';
 import { basename } from './path.js';
 import { toEntryPattern, toProductionEntryPattern } from './protocols.js';
+import { _loadESLintConfig as loadESLintConfig } from './require.js';
 import type { RawPluginConfiguration } from '../types/config.js';
 import type { PluginOptions, Plugin } from '../types/plugins.js';
 
@@ -56,9 +56,9 @@ export const loadConfigForPlugin = async (
   const localConfig =
     basename(configFilePath) === 'package.json'
       ? get(manifest, packageJsonPath ?? pluginName)
-      : // TODO To get rid of `resolveFromPath`
+      : // TODO Leftover from plugin API streamline refactor
         plugin.title === 'ESLint' && !/(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
-        ? await fallback(configFilePath)
+        ? await loadESLintConfig(configFilePath)
         : await load(configFilePath);
 
   return localConfig;
