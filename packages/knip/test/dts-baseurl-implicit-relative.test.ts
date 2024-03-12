@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused files, dependencies and exports in workspaces with cross self-references', async () => {
-  const cwd = resolve('fixtures/workspaces-self-reference');
+const cwd = resolve('fixtures/dts-baseurl-implicit-relative');
 
+test('Include js files referred by the declaration files', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -15,7 +15,7 @@ test('Find unused files, dependencies and exports in workspaces with cross self-
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 8,
-    total: 8,
+    processed: 5,
+    total: 5,
   });
 });

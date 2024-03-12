@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { sanitizeSpecifier } from '../util/modules.js';
-import { dirname, extname, isAbsolute, isInternal, join } from '../util/path.js';
+import { basename, dirname, extname, format, isAbsolute, isInternal, join } from '../util/path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
@@ -14,6 +14,31 @@ const fileExists = (name: string, containingFile: string) => {
     return {
       resolvedFileName,
       extension: extname(name),
+      isExternalLibraryImport: false,
+      resolvedUsingTsExtension: false,
+    };
+  }
+};
+
+const DECLARATION_EXTENSIONS_MAP = {
+  [ts.Extension.Dts]: ts.Extension.Js,
+  [ts.Extension.Dmts]: ts.Extension.Mjs,
+  [ts.Extension.Dcts]: ts.Extension.Cjs,
+} as const;
+
+const jsMatchingDeclarationFileExists = (resolveDtsFileName: string, declarationFileExtension: string) => {
+  const mappedExtension =
+    DECLARATION_EXTENSIONS_MAP[declarationFileExtension as keyof typeof DECLARATION_EXTENSIONS_MAP];
+  const resolvedFileName = format({
+    ext: mappedExtension,
+    dir: dirname(resolveDtsFileName),
+    name: basename(resolveDtsFileName, declarationFileExtension),
+  });
+
+  if (existsSync(resolvedFileName)) {
+    return {
+      resolvedFileName,
+      extension: mappedExtension,
       isExternalLibraryImport: false,
       resolvedUsingTsExtension: false,
     };
@@ -66,8 +91,14 @@ export function createCustomModuleResolver(
       isDeclarationFileExtension(tsResolvedModule?.extension) &&
       isInternal(tsResolvedModule.resolvedFileName)
     ) {
-      const module = fileExists(sanitizedSpecifier, containingFile);
-      if (module) return module;
+      {
+        const module = jsMatchingDeclarationFileExists(tsResolvedModule.resolvedFileName, tsResolvedModule.extension);
+        if (module) return module;
+      }
+      {
+        const module = fileExists(sanitizedSpecifier, containingFile);
+        if (module) return module;
+      }
     }
 
     if (virtualFileExtensions.length === 0) return tsResolvedModule;
