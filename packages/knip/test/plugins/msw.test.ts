@@ -14,7 +14,7 @@ test('Should not see the msw files in issues', async () => {
     isStrict: true,
   });
 
-  assert.equal(issues.files.size, 3);
+  assert.equal(issues.files.size, 13);
   assert(issues.files.has(join(cwd, 'junk.js')));
   assert(issues.files.has(join(cwd, 'mocks/junk.js')));
   assert(issues.files.has(join(cwd, 'src/mocks/junk.js')));
@@ -22,7 +22,7 @@ test('Should not see the msw files in issues', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    files: 3,
+    files: 13,
     total: 14,
     processed: 14,
   });

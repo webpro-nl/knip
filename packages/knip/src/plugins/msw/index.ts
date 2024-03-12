@@ -1,3 +1,5 @@
+// eslint-disable-next-line n/no-restricted-import
+import path from 'node:path';
 import { basename } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
@@ -14,15 +16,7 @@ const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(d
 const CONFIG_FILE_PATTERNS = ['package.json'];
 
 const ENTRY_FILE_PATTERNS = [
-  '**/mockServiceWorker.{js,ts}',
-  'mocks/browser.{js,ts}',
-  'mocks/handlers.{js,ts}"',
-  'mocks/index.{js,ts}"',
-  'mocks/server.{js,ts}"',
-  'src/mocks/browser.{js,ts}',
-  'src/mocks/handlers.{js,ts}"',
-  'src/mocks/index.{js,ts}"',
-  'src/mocks/server.{js,ts}"',
+  'mockServiceWorker.js',
 ];
 
 const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
@@ -34,7 +28,7 @@ const findDependencies: GenericPluginCallback = async (configFilePath, options) 
   const workerDirectory = localConfig?.workerDirectory;
 
   if (workerDirectory) {
-    ENTRY_FILE_PATTERNS.push(`${workerDirectory}/mockServiceWorker.{js,ts}`)
+    return [toEntryPattern(path.join(workerDirectory, '/mockServiceWorker.js'))];
   }
 
   const entryPatterns =  ENTRY_FILE_PATTERNS.map(toEntryPattern);
