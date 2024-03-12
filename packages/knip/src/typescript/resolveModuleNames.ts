@@ -21,17 +21,18 @@ const fileExists = (name: string, containingFile: string) => {
 };
 
 const DECLARATION_EXTENSIONS_MAP = {
-  [ts.Extension.Dts]:ts.Extension.Js,
-  [ts.Extension.Dmts]:ts.Extension.Mjs,
-  [ts.Extension.Dcts]:ts.Extension.Cjs,
+  [ts.Extension.Dts]: ts.Extension.Js,
+  [ts.Extension.Dmts]: ts.Extension.Mjs,
+  [ts.Extension.Dcts]: ts.Extension.Cjs,
 } as const;
 
 const jsMatchingDeclarationFileExists = (resolveDtsFileName: string, declarationFileExtension: string) => {
-  const mappedExtension = DECLARATION_EXTENSIONS_MAP[declarationFileExtension as keyof typeof DECLARATION_EXTENSIONS_MAP];
+  const mappedExtension =
+    DECLARATION_EXTENSIONS_MAP[declarationFileExtension as keyof typeof DECLARATION_EXTENSIONS_MAP];
   const resolvedFileName = format({
     ext: mappedExtension,
     dir: dirname(resolveDtsFileName),
-    name: basename(resolveDtsFileName, declarationFileExtension)
+    name: basename(resolveDtsFileName, declarationFileExtension),
   });
 
   if (existsSync(resolvedFileName)) {
@@ -42,7 +43,7 @@ const jsMatchingDeclarationFileExists = (resolveDtsFileName: string, declaration
       resolvedUsingTsExtension: false,
     };
   }
-}
+};
 
 export function createCustomModuleResolver(
   customSys: typeof ts.sys,
@@ -90,14 +91,14 @@ export function createCustomModuleResolver(
       isDeclarationFileExtension(tsResolvedModule?.extension) &&
       isInternal(tsResolvedModule.resolvedFileName)
     ) {
-        {
-          const module = jsMatchingDeclarationFileExists(tsResolvedModule.resolvedFileName, tsResolvedModule.extension)
-          if (module) return module;
-        }
-        {
-          const module = fileExists(sanitizedSpecifier, containingFile);
-          if (module) return module;
-        }
+      {
+        const module = jsMatchingDeclarationFileExists(tsResolvedModule.resolvedFileName, tsResolvedModule.extension);
+        if (module) return module;
+      }
+      {
+        const module = fileExists(sanitizedSpecifier, containingFile);
+        if (module) return module;
+      }
     }
 
     if (virtualFileExtensions.length === 0) return tsResolvedModule;
