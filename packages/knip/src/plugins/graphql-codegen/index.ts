@@ -34,7 +34,7 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
 
   if (!localConfig) return [];
 
-  const generateSet = Object.values(localConfig.generates);
+  const generateSet = localConfig.generates ? Object.values(localConfig.generates) : [];
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 

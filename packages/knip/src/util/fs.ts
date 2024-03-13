@@ -57,7 +57,7 @@ export const parseJSON = async (filePath: string, contents: string) => {
   }
 };
 
-export const parseYAML = async (contents: string) => {
+export const parseYAML = (contents: string) => {
   return yaml.load(contents);
 };
 

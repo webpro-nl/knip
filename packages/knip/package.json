@@ -86,6 +86,7 @@
     "@release-it/bumper": "^6.0.1",
     "@swc/cli": "^0.3.10",
     "@swc/core": "^1.4.6",
+    "@types/bun": "1.0.8",
     "@types/js-yaml": "^4.0.9",
     "@types/micromatch": "^4.0.6",
     "@types/minimist": "^1.2.5",

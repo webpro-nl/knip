@@ -15,19 +15,28 @@ const load = async (filePath: string) => {
     const ext = extname(filePath);
     if (filePath.endsWith('rc')) {
       const contents = await loadFile(filePath);
-      return parseYAML(contents).catch(() => parseJSON(filePath, contents));
-    }
-
-    if (ext === '.json' || ext === '.jsonc') {
-      return loadJSON(filePath);
+      try {
+        return parseYAML(contents);
+      } catch {
+        return parseJSON(filePath, contents);
+      }
     }
 
     if (ext === '.yaml' || ext === '.yml') {
-      return loadYAML(filePath);
+      return await loadYAML(filePath);
+    }
+
+    if (ext === '.json' || ext === '.jsonc') {
+      return await loadJSON(filePath);
+    }
+
+    if (typeof Bun !== 'undefined') {
+      const imported = await import(filePath);
+      return imported.default ?? imported;
     }
 
     if (ext === '.toml') {
-      return loadTOML(filePath);
+      return await loadTOML(filePath);
     }
 
     if (ext === '.mjs' || (ext === '.js' && isTypeModule(filePath))) {
