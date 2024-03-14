@@ -4,8 +4,8 @@ const globSchema = z.union([z.string(), z.array(z.string())]);
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
-const syncCompilerSchema = z.function().args(z.string()).returns(z.string());
-const asyncCompilerSchema = z.function().args(z.string()).returns(z.promise(z.string()));
+const syncCompilerSchema = z.function().args(z.string(), z.string()).returns(z.string());
+const asyncCompilerSchema = z.function().args(z.string(), z.string()).returns(z.promise(z.string()));
 const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
 const compilersSchema = z.record(z.string(), compilerSchema);
 
