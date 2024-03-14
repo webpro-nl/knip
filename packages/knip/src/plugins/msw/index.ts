@@ -1,8 +1,8 @@
-// eslint-disable-next-line n/no-restricted-import
-import path from 'node:path';
+import { join } from '../../util/path.js';
 import { basename } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
+import type { MSWConfig } from './types.js';
 import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://mswjs.io/docs/integrations/browser
@@ -15,27 +15,17 @@ const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(d
 
 const CONFIG_FILE_PATTERNS = ['package.json'];
 
-const ENTRY_FILE_PATTERNS = [
-  'mockServiceWorker.js',
-];
+const ENTRY_FILE_PATTERNS = ['mockServiceWorker.js'];
 
 const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
+  const { manifest } = options;
 
-  const localConfig = basename(configFilePath) === 'package.json' ? manifest.msw : undefined;
-  /* eslint-disable @typescript-eslint/ban-ts-comment */
-  // @ts-ignore
-  const workerDirectory = localConfig?.workerDirectory;
+  // @ts-expect-error Bug in TS? (see other plugins with `await load`)
+  const localConfig: MSWConfig | undefined = basename(configFilePath) === 'package.json' ? manifest.msw : undefined;
 
-  if (workerDirectory) {
-    return [toEntryPattern(path.join(workerDirectory, '/mockServiceWorker.js'))];
-  }
+  const workerDirectory = localConfig?.workerDirectory ?? '.';
 
-  const entryPatterns =  ENTRY_FILE_PATTERNS.map(toEntryPattern);
-
-  if (isProduction) return entryPatterns;
-
-  return [...entryPatterns];
+  return ENTRY_FILE_PATTERNS.map(pattern => toEntryPattern(join(workerDirectory, pattern)));
 };
 
 export default {

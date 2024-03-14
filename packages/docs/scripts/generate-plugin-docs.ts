@@ -10,7 +10,7 @@ import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 import { u } from 'unist-builder';
 import { base } from '../config.js';
-import type { Plugin } from 'knip/dist/types/plugins.ts';
+import type { Plugin } from '../../knip/src/types/plugins.js';
 import type { Root } from 'mdast';
 import type { Node } from 'unist';
 
