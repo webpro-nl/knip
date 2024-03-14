@@ -18,6 +18,10 @@ jobs:
       - uses: pnpm/action-setup@v2
         with:
           version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - run: cd packages/knip && npm install && npm run build && npm link
 
       - name: Test Knip against create-typescript-app
