@@ -40,7 +40,7 @@ be a dynamic `.js` or `.ts` file.
 The compiler function interface is straightforward. Text in, text out:
 
 ```ts
-(source: string) => string;
+(source: string, filename: string) => string;
 ```
 
 This may also be an `async` function.
