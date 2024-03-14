@@ -98,6 +98,7 @@ const pluginsSchema = z.object({
   linthtml: pluginSchema,
   markdownlint: pluginSchema,
   mocha: pluginSchema,
+  msw: pluginSchema,
   netlify: pluginSchema,
   next: pluginSchema,
   'node-test-runner': pluginSchema,

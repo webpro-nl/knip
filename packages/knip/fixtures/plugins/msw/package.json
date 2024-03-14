@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/msw",
+  "version": "*",
+  "knip": {
+    "msw": true
+  },
+  "devDependencies": {
+    "msw": "*"
+  },
+  "msw": {
+    "workerDirectory": "bob"
+  }
+}
