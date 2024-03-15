@@ -23,7 +23,7 @@ export default visit(
                 const callExpression = node.parent.parent;
                 if (ts.isCallExpression(callExpression) && ts.isFunctionLike(callExpression.arguments[0])) {
                   const arg = callExpression.arguments[0].parameters[0];
-                  if (ts.isIdentifier(arg.name)) {
+                  if (arg && ts.isIdentifier(arg.name)) {
                     const argName = arg.name.escapedText;
                     const accessExpressions = findDescendants<ts.PropertyAccessExpression>(
                       callExpression.arguments[0].body,

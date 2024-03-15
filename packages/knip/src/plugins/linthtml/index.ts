@@ -14,7 +14,14 @@ const enablers = ['@linthtml/linthtml'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.linthtmlrc', '.linthtmlrc.json', '.linthtmlrc.yml', '.linthtmlrc.{js,cjs}', 'package.json'];
+const config = [
+  '.linthtmlrc',
+  '.linthtmlrc.json',
+  '.linthtmlrc.yml',
+  '.linthtmlrc.{js,cjs}',
+  'linthtml.config.js',
+  'package.json',
+];
 
 const resolveConfig: ResolveConfig<PluginConfig> = config => {
   const extensions = [config.extends ?? []]

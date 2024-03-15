@@ -11,7 +11,19 @@ const load = async (filePath: string) => {
     const ext = extname(filePath);
     if (filePath.endsWith('rc')) {
       const contents = await loadFile(filePath);
-      return parseYAML(contents).catch(() => parseJSON(filePath, contents));
+      try {
+        return parseYAML(contents);
+      } catch {
+        return parseJSON(filePath, contents);
+      }
+    }
+
+    if (ext === '.yaml' || ext === '.yml') {
+      return await loadYAML(filePath);
+    }
+
+    if (ext === '' && isInternal(filePath)) {
+      return await loadFile(filePath);
     }
 
     if (ext === '' && isInternal(filePath)) {
@@ -19,15 +31,16 @@ const load = async (filePath: string) => {
     }
 
     if (ext === '.json' || ext === '.jsonc') {
-      return loadJSON(filePath);
+      return await loadJSON(filePath);
     }
 
-    if (ext === '.yaml' || ext === '.yml') {
-      return loadYAML(filePath);
+    if (typeof Bun !== 'undefined') {
+      const imported = await import(filePath);
+      return imported.default ?? imported;
     }
 
     if (ext === '.toml') {
-      return loadTOML(filePath);
+      return await loadTOML(filePath);
     }
 
     if (ext === '.mjs' || (ext === '.js' && isTypeModule(filePath))) {

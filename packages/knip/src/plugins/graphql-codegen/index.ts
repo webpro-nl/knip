@@ -24,7 +24,7 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<GraphqlCodegenTypes> = config => {
-  const generateSet = Object.values(config.generates);
+  const generateSet = config.generates ? Object.values(config.generates) : [];
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 

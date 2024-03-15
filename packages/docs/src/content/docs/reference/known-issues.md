@@ -28,15 +28,15 @@ Potential workarounds:
 - Turn the configuration file from TS into JS (e.g. `vitest.config.ts` →
   `vitest.config.js`). Knip loads modules directly using native `import()`
   calls. This is the recommended workaround.
-- Add the config file to the list of [ignore][2] patterns.
-- [Disable the plugin][3].
+- Use Bun: `bunx --bun knip` (Bun will execute the scripts instead of jiti)
+- [Disable the plugin][2].
 
 Use `knip --debug` in a monorepo to help locate where the error is coming from.
 
-Issues like [#72][4] and [#194][5] are hopefully fixed in [jiti v2][6]. By the
+Issues like [#72][3] and [#194][4] are hopefully fixed in [jiti v2][5]. By the
 way, nothing but love for jiti (it's awesome).
 
-[GitHub Issue #346][7]
+[GitHub Issue #346][6]
 
 ## Reflect.metadata is not a function
 
@@ -46,13 +46,12 @@ Similar to the previous known issue, this is caused through (not by) jiti:
 TypeError: Reflect.metadata is not a function
 ```
 
-[GitHub Issue #355][8]
+[GitHub Issue #355][7]
 
 [1]: https://github.com/unjs/jiti
-[2]: ./configuration.md#ignore
-[3]: ./configuration.md#plugins
-[4]: https://github.com/unjs/jiti/issues/72
-[5]: https://github.com/unjs/jiti/issues/194
-[6]: https://github.com/unjs/jiti/issues/174
-[7]: https://github.com/webpro/knip/issues/346
-[8]: https://github.com/webpro/knip/issues/355
+[2]: ./configuration.md#plugins
+[3]: https://github.com/unjs/jiti/issues/72
+[4]: https://github.com/unjs/jiti/issues/194
+[5]: https://github.com/unjs/jiti/issues/174
+[6]: https://github.com/webpro/knip/issues/346
+[7]: https://github.com/webpro/knip/issues/355

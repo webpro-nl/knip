@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { sanitizeSpecifier } from '../util/modules.js';
-import { dirname, extname, isAbsolute, isInternal, join } from '../util/path.js';
+import { basename, dirname, extname, format, isAbsolute, isInternal, join } from '../util/path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
@@ -14,6 +14,30 @@ const fileExists = (name: string, containingFile: string) => {
     return {
       resolvedFileName,
       extension: extname(name),
+      isExternalLibraryImport: false,
+      resolvedUsingTsExtension: false,
+    };
+  }
+};
+
+const DTS_EXTENSIONS_MAP = {
+  [ts.Extension.Dts]: ts.Extension.Js,
+  [ts.Extension.Dmts]: ts.Extension.Mjs,
+  [ts.Extension.Dcts]: ts.Extension.Cjs,
+} as const;
+
+const jsMatchingDeclarationFileExists = (resolveDtsFileName: string, dtsExtension: string) => {
+  const extension = DTS_EXTENSIONS_MAP[dtsExtension as keyof typeof DTS_EXTENSIONS_MAP];
+  const resolvedFileName = format({
+    ext: extension,
+    dir: dirname(resolveDtsFileName),
+    name: basename(resolveDtsFileName, dtsExtension),
+  });
+
+  if (existsSync(resolvedFileName)) {
+    return {
+      resolvedFileName,
+      extension,
       isExternalLibraryImport: false,
       resolvedUsingTsExtension: false,
     };
@@ -63,11 +87,17 @@ export function createCustomModuleResolver(
     // because there can be both module.d.ts and module.js and we want the latter.
     if (
       tsResolvedModule &&
-      isDeclarationFileExtension(tsResolvedModule?.extension) &&
+      isDeclarationFileExtension(tsResolvedModule.extension) &&
       isInternal(tsResolvedModule.resolvedFileName)
     ) {
-      const module = fileExists(sanitizedSpecifier, containingFile);
-      if (module) return module;
+      {
+        const module = jsMatchingDeclarationFileExists(tsResolvedModule.resolvedFileName, tsResolvedModule.extension);
+        if (module) return module;
+      }
+      {
+        const module = fileExists(sanitizedSpecifier, containingFile);
+        if (module) return module;
+      }
     }
 
     if (virtualFileExtensions.length === 0) return tsResolvedModule;
