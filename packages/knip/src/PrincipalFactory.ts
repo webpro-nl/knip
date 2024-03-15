@@ -17,6 +17,7 @@ export type PrincipalOptions = {
   pkgName: string;
   isGitIgnored: (path: string) => boolean;
   isIsolateWorkspaces: boolean;
+  isSkipLibs: boolean;
 };
 
 const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>

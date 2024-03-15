@@ -70,6 +70,7 @@ export class ProjectPrincipal {
   extensions: Set<string>;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
+  isSkipLibs: boolean;
 
   // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
   backend: {
@@ -83,7 +84,7 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isGitIgnored }: PrincipalOptions) {
+  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs }: PrincipalOptions) {
     this.cwd = cwd;
 
     this.isGitIgnored = isGitIgnored;
@@ -99,6 +100,7 @@ export class ProjectPrincipal {
     this.extensions = new Set([...DEFAULT_EXTENSIONS, ...getCompilerExtensions(compilers)]);
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
+    this.isSkipLibs = isSkipLibs;
   }
 
   init() {
@@ -109,6 +111,7 @@ export class ProjectPrincipal {
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
       compilers: [this.syncCompilers, this.asyncCompilers],
+      isSkipLibs: this.isSkipLibs,
     });
 
     this.backend = {

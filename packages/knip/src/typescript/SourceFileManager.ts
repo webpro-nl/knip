@@ -1,15 +1,22 @@
 import ts from 'typescript';
 import { debugLog } from '../util/debug.js';
-import { extname, isInternal } from '../util/path.js';
+import { extname, isInNodeModules, isInternal } from '../util/path.js';
 import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
 
+interface SourceFileManagerOptions {
+  isSkipLibs: boolean;
+  compilers: [SyncCompilers, AsyncCompilers];
+}
+
 export class SourceFileManager {
+  isSkipLibs: boolean;
   sourceFileCache = new Map<string, ts.SourceFile | undefined>();
   snapshotCache = new Map<string, ts.IScriptSnapshot | undefined>();
-  syncCompilers?: SyncCompilers;
-  asyncCompilers?: AsyncCompilers;
+  syncCompilers: SyncCompilers;
+  asyncCompilers: AsyncCompilers;
 
-  installCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
+  constructor({ compilers, isSkipLibs }: SourceFileManagerOptions) {
+    this.isSkipLibs = isSkipLibs;
     this.syncCompilers = compilers[0];
     this.asyncCompilers = compilers[1];
   }
@@ -22,6 +29,7 @@ export class SourceFileManager {
   }
 
   getSourceFile(filePath: string) {
+    if (this.isSkipLibs && isInNodeModules(filePath)) return undefined;
     if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const contents = ts.sys.readFile(filePath);
     if (typeof contents !== 'string') {

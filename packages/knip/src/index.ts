@@ -168,6 +168,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       pkgName,
       isGitIgnored,
       isIsolateWorkspaces,
+      isSkipLibs: !isReportClassMembers,
     });
 
     const worker = new WorkspaceWorker({

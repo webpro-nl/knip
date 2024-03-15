@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { sanitizeSpecifier } from '../util/modules.js';
-import { basename, dirname, extname, format, isAbsolute, isInternal, join } from '../util/path.js';
+import { basename, dirname, extname, format, isAbsolute, isInNodeModules, isInternal, join } from '../util/path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
@@ -66,6 +66,7 @@ export function createCustomModuleResolver(
 
     // No need to try and resolve builtins, bail out
     if (isBuiltin(sanitizedSpecifier)) return undefined;
+    if (isInNodeModules(name)) return undefined;
 
     const tsResolvedModule = ts.resolveModuleName(
       sanitizedSpecifier,

@@ -15,12 +15,11 @@ type CreateHostsOptions = {
   compilerOptions: ts.CompilerOptions;
   entryPaths: Set<string>;
   compilers: [SyncCompilers, AsyncCompilers];
+  isSkipLibs: boolean;
 };
 
-const fileManager = new SourceFileManager();
-
-export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers }: CreateHostsOptions) => {
-  fileManager.installCompilers(compilers);
+export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers, isSkipLibs }: CreateHostsOptions) => {
+  const fileManager = new SourceFileManager({ compilers, isSkipLibs });
   const virtualFileExtensions = getCompilerExtensions(compilers);
   const sys = createCustomSys(cwd, virtualFileExtensions);
   const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, virtualFileExtensions);
