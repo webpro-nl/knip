@@ -1,38 +1,31 @@
 import { join } from '../../util/path.js';
-import { basename } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import type { MSWConfig } from './types.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
+import type { IsPluginEnabled, ResolveEntryPaths } from '../../types/plugins.js';
 
 // https://mswjs.io/docs/integrations/browser
 
-const NAME = 'Mock Service Worker';
+const title = 'Mock Service Worker';
 
-const ENABLERS = ['msw'];
+const enablers = ['msw'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['package.json'];
+const config = ['package.json'];
 
-const ENTRY_FILE_PATTERNS = ['mockServiceWorker.js'];
+const entry = ['mockServiceWorker.js'];
 
-const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest } = options;
-
-  // @ts-expect-error Bug in TS? (see other plugins with `await load`)
-  const localConfig: MSWConfig | undefined = basename(configFilePath) === 'package.json' ? manifest.msw : undefined;
-
+const resolveEntryPaths: ResolveEntryPaths<MSWConfig> = async localConfig => {
   const workerDirectory = localConfig?.workerDirectory ?? '.';
-
-  return ENTRY_FILE_PATTERNS.map(pattern => toEntryPattern(join(workerDirectory, pattern)));
+  return entry.map(pattern => toEntryPattern(join(workerDirectory, pattern)));
 };
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  ENTRY_FILE_PATTERNS,
-  findDependencies,
+  config,
+  entry,
+  resolveEntryPaths,
 };
