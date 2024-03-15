@@ -20,25 +20,24 @@ const fileExists = (name: string, containingFile: string) => {
   }
 };
 
-const DECLARATION_EXTENSIONS_MAP = {
+const DTS_EXTENSIONS_MAP = {
   [ts.Extension.Dts]: ts.Extension.Js,
   [ts.Extension.Dmts]: ts.Extension.Mjs,
   [ts.Extension.Dcts]: ts.Extension.Cjs,
 } as const;
 
-const jsMatchingDeclarationFileExists = (resolveDtsFileName: string, declarationFileExtension: string) => {
-  const mappedExtension =
-    DECLARATION_EXTENSIONS_MAP[declarationFileExtension as keyof typeof DECLARATION_EXTENSIONS_MAP];
+const jsMatchingDeclarationFileExists = (resolveDtsFileName: string, dtsExtension: string) => {
+  const extension = DTS_EXTENSIONS_MAP[dtsExtension as keyof typeof DTS_EXTENSIONS_MAP];
   const resolvedFileName = format({
-    ext: mappedExtension,
+    ext: extension,
     dir: dirname(resolveDtsFileName),
-    name: basename(resolveDtsFileName, declarationFileExtension),
+    name: basename(resolveDtsFileName, dtsExtension),
   });
 
   if (existsSync(resolvedFileName)) {
     return {
       resolvedFileName,
-      extension: mappedExtension,
+      extension,
       isExternalLibraryImport: false,
       resolvedUsingTsExtension: false,
     };
@@ -88,7 +87,7 @@ export function createCustomModuleResolver(
     // because there can be both module.d.ts and module.js and we want the latter.
     if (
       tsResolvedModule &&
-      isDeclarationFileExtension(tsResolvedModule?.extension) &&
+      isDeclarationFileExtension(tsResolvedModule.extension) &&
       isInternal(tsResolvedModule.resolvedFileName)
     ) {
       {
