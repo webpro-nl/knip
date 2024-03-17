@@ -1,5 +1,4 @@
 {
-  "name": "@workspaces-plugin-config/root",
   "scripts": {
     "test": "jest"
   },

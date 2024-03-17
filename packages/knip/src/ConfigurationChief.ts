@@ -296,6 +296,7 @@ export class ConfigurationChief {
     return availableWorkspaceDirs.map(dir => {
       const manifest: PackageJson = _require(join(dir, 'package.json'));
       if (!manifest) throw new LoaderError(`Unable to load package.json for ${dir}`);
+      if (dir === this.cwd && !manifest.name) manifest.name = ROOT_WORKSPACE_NAME;
       return { dir, manifest };
     });
   }
