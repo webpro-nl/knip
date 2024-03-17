@@ -107,7 +107,12 @@ export function createCustomModuleResolver(
       return tsResolvedModule;
     }
 
-    const customResolvedModule = ts.resolveModuleName(name, containingFile, compilerOptions, customSys).resolvedModule;
+    const customResolvedModule = ts.resolveModuleName(
+      sanitizedSpecifier,
+      containingFile,
+      compilerOptions,
+      customSys
+    ).resolvedModule;
 
     if (!customResolvedModule || !isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
       return customResolvedModule;
