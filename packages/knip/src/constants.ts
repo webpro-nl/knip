@@ -54,6 +54,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'sh',
   'sudo',
   'test', // exception (node built-in module)
+  'touch',
   'true',
   'yarn',
   'xargs',
