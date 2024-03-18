@@ -12,8 +12,6 @@ export const extname = path.posix.extname;
 
 export const basename = path.posix.basename;
 
-export const format = path.posix.format;
-
 export const join = path.posix.join;
 
 export const toPosix = (value: string) => value.split(path.sep).join(path.posix.sep);
