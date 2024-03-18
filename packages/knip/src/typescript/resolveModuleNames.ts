@@ -68,25 +68,19 @@ export function createCustomModuleResolver(
       const base = tsResolvedModule.resolvedFileName.replace(/\.d\.ts$/, '');
       const baseExt = extname(base);
 
-      if (virtualFileExtensions.includes(baseExt)) {
+      if (baseExt && virtualFileExtensions.includes(baseExt)) {
         const resolvedFileName = ensureRealFilePath(base, virtualFileExtensions);
         return {
-          extension: ts.Extension.Js,
           resolvedFileName,
+          extension: ts.Extension.Js,
           isExternalLibraryImport: false,
           resolvedUsingTsExtension: false,
         };
       }
 
-      for (const e of ['.js', '.jsx']) {
-        if (existsSync(base + e)) {
-          return {
-            resolvedFileName: base + e,
-            extension: e,
-            isExternalLibraryImport: false,
-            resolvedUsingTsExtension: false,
-          };
-        }
+      for (const ext of ['.js', '.jsx']) {
+        const module = fileExists(base + ext, containingFile);
+        if (module) return module;
       }
 
       return tsResolvedModule;
