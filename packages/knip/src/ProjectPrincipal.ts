@@ -1,7 +1,6 @@
 import ts from 'typescript';
-import { dummyCompilers, getCompilerExtensions } from './compilers/index.js';
-import { DEFAULT_EXTENSIONS } from './constants.js';
-import { IGNORED_FILE_EXTENSIONS } from './constants.js';
+import { getCompilerExtensions } from './compilers/index.js';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
 import { createHosts } from './typescript/createHosts.js';
 import { _getImportsAndExports } from './typescript/getImportsAndExports.js';
 import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
@@ -104,8 +103,6 @@ export class ProjectPrincipal {
   }
 
   init() {
-    this.addCompilers([dummyCompilers, new Map()]);
-
     const { fileManager, compilerHost, resolveModuleNames, languageServiceHost } = createHosts({
       cwd: this.cwd,
       compilerOptions: this.compilerOptions,
@@ -253,7 +250,7 @@ export class ProjectPrincipal {
           const isIgnored = this.isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
           if (!isIgnored) {
             const ext = extname(sanitizedSpecifier);
-            const hasIgnoredExtension = IGNORED_FILE_EXTENSIONS.has(ext);
+            const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);
             if (!ext || (ext !== '.json' && !hasIgnoredExtension)) {
               unresolvedImports.add(unresolvedImport);
             }

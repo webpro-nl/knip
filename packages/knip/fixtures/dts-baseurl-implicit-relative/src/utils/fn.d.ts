@@ -1,1 +1,1 @@
-export const g: () => void;
+export const fn: () => void;

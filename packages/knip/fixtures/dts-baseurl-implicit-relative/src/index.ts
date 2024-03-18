@@ -1,5 +1,11 @@
 import h from 'dir/subdir';
-import { g } from 'utils/fn';
+import { fn } from 'utils/fn';
+import { obj } from 'utils/obj.cjs';
+import { str } from 'utils/str.mjs';
+import { Button } from 'components/Button';
 
 h;
-g;
+fn;
+obj;
+str;
+Button;

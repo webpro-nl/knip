@@ -15,7 +15,7 @@ test('Include js files referred by the declaration files', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    processed: 11,
+    total: 11,
   });
 });

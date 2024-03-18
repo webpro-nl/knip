@@ -1,4 +1,4 @@
-import { IGNORED_FILE_EXTENSIONS } from '../constants.js';
+import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import { compact } from '../util/array.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { extname, isInternal } from '../util/path.js';
@@ -20,7 +20,7 @@ const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, opti
       }
       if (isInternal(identifier)) {
         const ext = extname(identifier);
-        if (ext && IGNORED_FILE_EXTENSIONS.has(ext)) return;
+        if (ext && FOREIGN_FILE_EXTENSIONS.has(ext)) return;
         return identifier;
       }
       return getPackageNameFromModuleSpecifier(identifier);

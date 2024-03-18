@@ -1,0 +1,6 @@
+{
+  "name": "knip-issue-non-js-dts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module"
+}

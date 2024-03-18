@@ -1,4 +1,3 @@
-import { DUMMY_VIRTUAL_FILE_EXTENSIONS } from '../constants.js';
 import Astro from './astro.js';
 import MDX from './mdx.js';
 import Svelte from './svelte.js';
@@ -39,10 +38,6 @@ const compilers = new Map([
   ['.svelte', Svelte],
   ['.vue', Vue],
 ]);
-
-const dummyCompiler: SyncCompilerFn = () => '';
-
-export const dummyCompilers = new Map(Array.from(DUMMY_VIRTUAL_FILE_EXTENSIONS).map(ext => [ext, dummyCompiler]));
 
 export const getIncludedCompilers = (
   syncCompilers: SyncCompilers,

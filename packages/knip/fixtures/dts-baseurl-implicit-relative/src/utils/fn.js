@@ -1,1 +1,1 @@
-export const g = () => {};
+export const fn = () => {};
