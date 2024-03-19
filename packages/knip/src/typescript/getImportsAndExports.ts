@@ -353,14 +353,15 @@ const getImportsAndExports = (
   const setRefs = (item: SerializableExport | SerializableExportMember) => {
     if (!item.symbol) return;
     for (const match of sourceFile.text.matchAll(new RegExp(item.identifier.replace(/\$/g, '\\$'), 'g'))) {
-      const isDeclaration = match.index === item.pos || match.index === item.pos + 1; // off-by-one from `stripQuotes` but we don't want to change the `pos` either
-      if (
-        !isDeclaration &&
+      const isDeclaration = match.index === item.pos || match.index === item.pos + 1; // off-by-one from `stripQuotes`
+      if (!isDeclaration) {
         // @ts-expect-error ts.getTokenAtPosition is internal fn
-        typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, match.index)) === item.symbol
-      ) {
-        item.refs = 1;
-        break;
+        const smbl = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, match.index));
+        // @ts-expect-error Keep it cheap
+        if (smbl && (item.symbol === smbl || item.symbol === smbl.declarations?.[0]?.name?.flowNode?.node?.symbol)) {
+          item.refs = 1;
+          break;
+        }
       }
     }
   };
