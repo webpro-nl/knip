@@ -1,5 +1,5 @@
 import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
-import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { WireitConfig } from './types.js';
 
 // https://github.com/google/wireit
@@ -29,4 +29,4 @@ export default {
   packageJsonPath,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

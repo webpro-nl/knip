@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { IsPluginEnabled, Resolve } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '#p/types/plugins.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -35,4 +35,4 @@ export default {
   entry,
   production,
   resolve,
-} as const;
+} satisfies Plugin;

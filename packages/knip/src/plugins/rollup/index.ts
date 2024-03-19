@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { IsPluginEnabled } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 
 // https://rollupjs.org/guide/en/#configuration-files
 
@@ -16,4 +16,4 @@ export default {
   enablers,
   isEnabled,
   entry,
-} as const;
+} satisfies Plugin;

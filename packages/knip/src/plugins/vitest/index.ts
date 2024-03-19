@@ -3,7 +3,7 @@ import { hasDependency, tryResolve } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { PackageJson } from '#p/types/package-json.js';
-import type { IsPluginEnabled, PluginOptions, ResolveEntryPaths, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, PluginOptions, ResolveEntryPaths, ResolveConfig, Plugin } from '#p/types/plugins.js';
 import type { ViteConfigOrFn, VitestWorkspaceConfig, ViteConfig, MODE, COMMAND } from './types.js';
 
 // https://vitest.dev/config/
@@ -112,4 +112,4 @@ export default {
   entry,
   resolveEntryPaths,
   resolveConfig,
-};
+} satisfies Plugin;

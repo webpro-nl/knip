@@ -1,7 +1,7 @@
 import { join, relative } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
-import type { IsPluginEnabled, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { StorybookConfig } from './types.js';
 
 // https://storybook.js.org/docs/react/configure/overview
@@ -51,4 +51,4 @@ export default {
   project,
   resolveEntryPaths,
   resolveConfig,
-} as const;
+} satisfies Plugin;

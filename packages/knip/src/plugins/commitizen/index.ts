@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { CommitizenConfig } from './types.js';
 
 // https://github.com/commitizen/cz-cli
@@ -25,4 +25,4 @@ export default {
   packageJsonPath,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

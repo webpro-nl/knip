@@ -1,6 +1,6 @@
 import { hasDependency } from '#p/util/plugin.js';
 import { toProductionEntryPattern } from '#p/util/protocols.js';
-import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { Plugin, ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { DrizzleConfig } from './types.js';
 
 // https://orm.drizzle.team/kit-docs/overview
@@ -24,4 +24,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

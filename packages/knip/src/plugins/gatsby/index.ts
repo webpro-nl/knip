@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.js';
 
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/gatsby-project-structure.md
@@ -49,4 +49,4 @@ export default {
   config,
   production,
   resolveConfig,
-};
+} satisfies Plugin;

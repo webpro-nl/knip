@@ -1,6 +1,6 @@
 import { hasDependency } from '#p/util/plugin.js';
 import { resolveConfig, entry, resolveEntryPaths } from '../playwright/index.js';
-import type { IsPluginEnabled } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 
 // https://playwright.dev/docs/test-components
 
@@ -20,4 +20,4 @@ export default {
   entry,
   resolveEntryPaths,
   resolveConfig,
-};
+} satisfies Plugin;

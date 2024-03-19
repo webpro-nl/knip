@@ -3,7 +3,7 @@ import { getValuesByKeyDeep } from '#p/util/object.js';
 import { extname } from '#p/util/path.js';
 import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
 import { fromBinary } from '#p/util/protocols.js';
-import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 
 // https://github.com/evilmartians/lefthook
 
@@ -45,4 +45,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-};
+} satisfies Plugin;

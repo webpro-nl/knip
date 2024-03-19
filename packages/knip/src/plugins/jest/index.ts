@@ -1,7 +1,7 @@
 import { join, isInternal, toAbsolute, dirname } from '#p/util/path.js';
 import { hasDependency, load } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
-import type { IsPluginEnabled, PluginOptions, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { JestConfig, JestInitialOptions } from './types.js';
 
 // https://jestjs.io/docs/configuration
@@ -122,4 +122,4 @@ export default {
   entry,
   resolveEntryPaths,
   resolveConfig,
-};
+} satisfies Plugin;

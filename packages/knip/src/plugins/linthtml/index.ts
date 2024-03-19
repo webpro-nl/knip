@@ -1,7 +1,7 @@
 import { isInternal } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
-import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { PluginConfig } from './types.js';
 
 // https://linthtml.vercel.app/
@@ -39,4 +39,4 @@ export default {
   packageJsonPath,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

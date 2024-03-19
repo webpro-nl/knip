@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { NycConfig } from './types.js';
 
 // https://www.npmjs.com/package/nyc
@@ -22,4 +22,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

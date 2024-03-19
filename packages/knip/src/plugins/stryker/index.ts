@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { StrykerConfig } from './types.js';
 
 // https://stryker-mutator.io/docs/stryker-js/config-file/
@@ -28,4 +28,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

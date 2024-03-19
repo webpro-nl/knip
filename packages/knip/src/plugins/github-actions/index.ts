@@ -2,7 +2,7 @@ import { _firstGlob } from '#p/util/glob.js';
 import { getValuesByKeyDeep } from '#p/util/object.js';
 import { join } from '#p/util/path.js';
 import { getDependenciesFromScripts } from '#p/util/plugin.js';
-import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
@@ -38,4 +38,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-};
+} satisfies Plugin;

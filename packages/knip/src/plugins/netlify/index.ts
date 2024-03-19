@@ -2,7 +2,7 @@ import { join } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toProductionEntryPattern } from '../../util/protocols.js';
 import { extractFunctionsConfigProperty } from './helpers.js';
-import type { IsPluginEnabled, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { NetlifyConfig } from './types.js';
 
 // https://docs.netlify.com
@@ -45,4 +45,4 @@ export default {
   production,
   resolveEntryPaths,
   resolveConfig,
-};
+} satisfies Plugin;

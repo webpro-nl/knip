@@ -1,6 +1,6 @@
 import { hasDependency } from '#p/util/plugin.js';
 import type { IgnorePatterns } from '#p/types/config.js';
-import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { PluginConfig } from './types.js';
 
 // link to __PLUGIN_NAME__ docs
@@ -30,4 +30,4 @@ export default {
   entry,
   production,
   resolveConfig,
-};
+} satisfies Plugin;

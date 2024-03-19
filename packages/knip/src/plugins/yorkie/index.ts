@@ -1,5 +1,5 @@
 import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
-import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { LintStagedConfig } from '../lint-staged/types.js';
 
 // https://github.com/yyx990803/yorkie
@@ -33,4 +33,4 @@ export default {
   packageJsonPath,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

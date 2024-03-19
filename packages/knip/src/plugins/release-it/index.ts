@@ -1,5 +1,5 @@
 import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
-import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { ReleaseItConfig } from './types.js';
 
 // https://github.com/release-it/release-it/blob/master/docs/plugins.md#using-a-plugin
@@ -35,4 +35,4 @@ export default {
   packageJsonPath,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

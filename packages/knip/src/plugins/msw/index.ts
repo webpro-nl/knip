@@ -1,8 +1,8 @@
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import { join } from '#p/util/path.js';
+import { hasDependency } from '#p/util/plugin.js';
+import { toEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { MSWConfig } from './types.js';
-import type { IsPluginEnabled, ResolveEntryPaths } from '../../types/plugins.js';
 
 // https://mswjs.io/docs/integrations/browser
 
@@ -28,4 +28,4 @@ export default {
   config,
   entry,
   resolveEntryPaths,
-};
+} satisfies Plugin;

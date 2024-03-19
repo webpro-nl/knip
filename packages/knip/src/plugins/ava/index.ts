@@ -1,6 +1,6 @@
 import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
-import type { IsPluginEnabled, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { AvaConfig } from './types.js';
 
 // https://github.com/avajs/ava/blob/main/docs/06-configuration.md
@@ -51,4 +51,4 @@ export default {
   entry,
   resolveEntryPaths,
   resolveConfig,
-} as const;
+} satisfies Plugin;

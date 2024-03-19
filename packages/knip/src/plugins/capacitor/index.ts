@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { CapacitorConfig } from './types.js';
 
 // https://capacitorjs.com/docs/config
@@ -22,4 +22,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

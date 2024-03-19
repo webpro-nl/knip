@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { ChangesetsConfig } from './types.js';
 
 // https://github.com/changesets/changesets/blob/main/docs/config-file-options.md
@@ -26,4 +26,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

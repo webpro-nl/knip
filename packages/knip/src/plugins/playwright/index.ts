@@ -1,7 +1,7 @@
 import { join, relative } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
-import type { IsPluginEnabled, ResolveEntryPaths, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, ResolveEntryPaths, ResolveConfig, Plugin } from '#p/types/plugins.js';
 import type { PlaywrightTestConfig } from 'playwright/test';
 
 // https://playwright.dev/docs/test-configuration
@@ -53,4 +53,4 @@ export default {
   entry,
   resolveConfig,
   resolveEntryPaths,
-};
+} satisfies Plugin;

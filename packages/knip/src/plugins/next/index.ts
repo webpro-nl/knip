@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { IsPluginEnabled } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -33,4 +33,4 @@ export default {
   isEnabled,
   entry,
   production,
-};
+} satisfies Plugin;

@@ -1,6 +1,6 @@
 import { hasDependency } from '#p/util/plugin.js';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
-import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { VueConfig, WebpackConfiguration } from './types.js';
 
 // https://cli.vuejs.org/config/
@@ -53,4 +53,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-} as const;
+} satisfies Plugin;

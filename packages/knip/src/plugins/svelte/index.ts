@@ -1,6 +1,6 @@
 import { hasDependency } from '#p/util/plugin.js';
 import { config as viteConfig } from '../vite/index.js';
-import type { IsPluginEnabled } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 
 // https://kit.svelte.dev/docs
 
@@ -27,4 +27,4 @@ export default {
   entry,
   production,
   project,
-};
+} satisfies Plugin;

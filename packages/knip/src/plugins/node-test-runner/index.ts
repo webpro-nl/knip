@@ -1,4 +1,4 @@
-import type { IsPluginEnabled } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 
 // https://nodejs.dev/en/api/test/
 
@@ -19,4 +19,4 @@ export default {
   enablers,
   isEnabled,
   entry,
-};
+} satisfies Plugin;
