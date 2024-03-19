@@ -67,5 +67,15 @@ jobs:
         with:
           repository: argos-ci/argos
           path: argos
+      - run: cd argos && npm install && knip
+
+      - name: Test Knip against eslint
+        uses: actions/checkout@v4
+        with:
+          repository: eslint/eslint
+          path: eslint
       - run: |
-          cd argos && npm install && knip --max-issues 1
+          cd eslint
+          npm install --force
+          cd docs && npm install && cd -
+          knip
