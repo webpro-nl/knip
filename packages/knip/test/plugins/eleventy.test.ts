@@ -1,31 +1,21 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as eleventy } from '../../src/plugins/eleventy/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/eleventy');
-const options = buildOptions(cwd);
 
-test('Find dependencies in Eleventy configuration (static)', async () => {
-  const configFilePath = join(cwd, 'eleventy.config.cjs');
-  const dependencies = await eleventy.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    'production:_data/**/*.js',
-    'production:**/*.{11ty.js}',
-    'production:**/*.11tydata.js',
-  ]);
-});
+test('Find dependencies with the Eleventy plugin (1)', async () => {
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in Eleventy configuration (dynamic)', async () => {
-  const configFilePath = join(cwd, 'eleventy.config.dynamic.cjs');
-  const dependencies = await eleventy.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    'production:_data/**/*.js',
-    'production:content/**/*.{md,njk,html,liquid}',
-    'production:content/**/*.11tydata.js',
-    'production:./public/',
-    'production:./js/client/script.js',
-    './node_modules/prismjs/themes/prism-okaidia.css',
-  ]);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 2,
+    total: 2,
+  });
 });

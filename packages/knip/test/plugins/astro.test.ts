@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/astro');
 
-test('Find dependencies in Astro configuration', async () => {
+test('Find dependencies with the Astro plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

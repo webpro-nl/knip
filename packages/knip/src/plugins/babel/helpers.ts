@@ -1,4 +1,4 @@
-import { isAbsolute, isInternal } from '../../util/path.js';
+import { isAbsolute, isInternal } from '#p/util/path.js';
 
 export const resolveName = (identifier: string, namespace: 'preset' | 'plugin') => {
   if (isAbsolute(identifier) || isInternal(identifier)) return identifier;

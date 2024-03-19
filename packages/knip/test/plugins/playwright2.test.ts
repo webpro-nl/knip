@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/playwright2');
 
-test('Find dependencies in Playwright configuration', async () => {
+test('Find dependencies with the Playwright plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/postcss-next');
 
-test('Find dependencies in PostCSS configuration (implicit w/ Next.js)', async () => {
+test('Find dependencies with the PostCSS plugin (implicit w/ Next.js)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

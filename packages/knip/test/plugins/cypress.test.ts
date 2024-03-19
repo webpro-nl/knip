@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/cypress');
 
-test('Find dependencies in Cypress configuration', async () => {
+test('Find dependencies with the Cypress plugin', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

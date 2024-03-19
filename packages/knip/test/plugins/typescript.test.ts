@@ -1,55 +1,50 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as typescript } from '../../src/plugins/typescript/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/typescript');
-const options = buildOptions(cwd);
 
-test('Find dependencies in typescript configuration', async () => {
-  const configFilePath = join(cwd, 'tsconfig.json');
-  const dependencies = await typescript.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    '@tsconfig/node16/tsconfig.json',
-    'typescript-eslint-language-service',
-    'ts-graphql-plugin',
-    'tslib',
-  ]);
+test('Find dependencies with the TypeScript plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert(issues.unlisted['tsconfig.json']['@tsconfig/node16/tsconfig.json']);
+  assert(issues.unlisted['tsconfig.json']['typescript-eslint-language-service']);
+  assert(issues.unlisted['tsconfig.json']['ts-graphql-plugin']);
+  assert(issues.unlisted['tsconfig.json']['tslib']);
+  assert(issues.unlisted['tsconfig.base.json']['@tsconfig/node20/tsconfig.json']);
+  assert(issues.unlisted['tsconfig.ext.json']['@tsconfig/node20/tsconfig.json']);
+  assert(issues.unlisted['tsconfig.jsx-import-source-preact.json']['preact']);
+  assert(issues.unlisted['tsconfig.jsx-import-source-react.json']['vitest/globals']);
+  assert(issues.unlisted['tsconfig.jsx-import-source-react.json']['hastscript/svg']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    unlisted: 9,
+    processed: 0,
+    total: 0,
+  });
 });
 
-test('Find dependencies in typescript configuration (jsx-preserve)', async () => {
-  const configFilePath = join(cwd, 'tsconfig-jsx-preserve.json');
-  const dependencies = await typescript.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, []);
-});
+test('Find dependencies with the TypeScript plugin (production)', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    isProduction: true,
+  });
 
-test('Find dependencies in typescript configuration (jsx)', async () => {
-  const configFilePath = join(cwd, 'tsconfig-jsx.json');
-  const dependencies = await typescript.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, []);
-});
+  assert(issues.unlisted['tsconfig.jsx-import-source-preact.json']['preact']);
+  assert(issues.unlisted['tsconfig.jsx-import-source-react.json']['hastscript/svg']);
 
-test('Find dependencies in typescript configuration (jsx-import-source)', async () => {
-  const configFilePath = join(cwd, 'tsconfig-jsx-import-source.json');
-  const dependencies = await typescript.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['preact']);
-});
-
-test('Find dependencies in typescript configuration (extends)', async () => {
-  const configFilePath = join(cwd, 'tsconfig.base.json');
-  const dependencies = await typescript.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['@tsconfig/node20/tsconfig.json']);
-});
-
-test('Find dependencies in typescript configuration (jsxImportSource)', async () => {
-  const configFilePath = join(cwd, 'tsconfig-jsxImportSource.json');
-  const dependencies = await typescript.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['vitest/globals', 'hastscript/svg']);
-});
-
-test('Find dependencies in typescript configuration (jsxImportSource/production)', async () => {
-  const configFilePath = join(cwd, 'tsconfig-jsxImportSource.json');
-  const dependencies = await typescript.findDependencies(configFilePath, { ...options, isProduction: true });
-  assert.deepEqual(dependencies, ['hastscript/svg']);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    unlisted: 2,
+    processed: 0,
+    total: 0,
+  });
 });

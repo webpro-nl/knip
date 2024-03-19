@@ -1,20 +1,21 @@
-import { compact } from '../../util/array.js';
-import { dirname, isInternal, toAbsolute } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, loadJSON } from '../../util/plugin.js';
-import { loadTSConfig } from '../../util/tsconfig-loader.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { compact } from '#p/util/array.js';
+import { dirname, isInternal, join, toAbsolute } from '#p/util/path.js';
+import { hasDependency, loadJSON } from '#p/util/plugin.js';
+import { loadTSConfig } from '#p/util/tsconfig-loader.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { TsConfigJson } from 'type-fest';
 
 // https://www.typescriptlang.org/tsconfig
 
-const NAME = 'TypeScript';
+const title = 'TypeScript';
 
-const ENABLERS = ['typescript'];
+const enablers = ['typescript'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['tsconfig.json', 'tsconfig.*.json'];
+const config = ['tsconfig.json', 'tsconfig.*.json'];
+
+const production: string[] = [];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
   const filePath = configFilePath.replace(/(\.json)?$/, '.json');
@@ -22,24 +23,31 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
 
   if (!localConfig) return;
 
-  localConfig.extends = localConfig.extends ? [localConfig.extends].flat() : [];
-  if (localConfig?.extends) {
-    for (const extend of [localConfig.extends].flat()) {
-      if (isInternal(extend)) {
-        const presetConfigPath = toAbsolute(extend, dirname(configFilePath));
-        const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-        localConfig.extends.push(...(presetConfig?.extends ? [presetConfig.extends].flat() : []));
-      }
+  const extends_ = (localConfig.extends = localConfig.extends ? [localConfig.extends].flat() : []);
+  for (const extend of extends_) {
+    if (isInternal(extend)) {
+      const presetConfigPath = toAbsolute(extend, dirname(configFilePath));
+      const presetConfig = await resolveExtensibleConfig(presetConfigPath);
+      localConfig.extends.push(...(presetConfig?.extends ? [presetConfig.extends].flat() : []));
     }
   }
   return localConfig;
 };
 
-export const findTypeScriptDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { isProduction } = options;
+export const resolveConfig: ResolveConfig = async (localConfig, options) => {
+  const { isProduction, configFileDir, configFileName } = options;
 
+  const configFilePath = join(configFileDir, configFileName);
   const { compilerOptions } = await loadTSConfig(configFilePath);
-  const localConfig: TsConfigJson | undefined = await resolveExtensibleConfig(configFilePath); // Dual loader to get external `extends` dependencies
+
+  const extends_ = (localConfig.extends = localConfig.extends ? [localConfig.extends].flat() : []);
+  for (const extend of extends_) {
+    if (isInternal(extend)) {
+      const presetConfigPath = toAbsolute(extend, dirname(configFilePath));
+      const presetConfig = await resolveExtensibleConfig(presetConfigPath);
+      localConfig.extends.push(...(presetConfig?.extends ? [presetConfig.extends].flat() : []));
+    }
+  }
 
   if (!compilerOptions || !localConfig) return [];
 
@@ -57,12 +65,11 @@ export const findTypeScriptDependencies: GenericPluginCallback = async (configFi
   return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
 };
 
-const findDependencies = timerify(findTypeScriptDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  production,
+  resolveConfig,
+} satisfies Plugin;

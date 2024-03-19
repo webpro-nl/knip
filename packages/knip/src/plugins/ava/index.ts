@@ -1,21 +1,19 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency, load } from '../../util/plugin.js';
+import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { AvaConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/avajs/ava/blob/main/docs/06-configuration.md
 
-const NAME = 'Ava';
+const title = 'Ava';
 
-const ENABLERS = ['ava'];
+const enablers = ['ava'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['ava.config.{js,cjs,mjs}', 'package.json'];
+const config = ['ava.config.{js,cjs,mjs}', 'package.json'];
 
-const ENTRY_FILE_PATTERNS = [
+const entry = [
   `test.{js,cjs,mjs,ts}`,
   `{src,source}/test.{js,cjs,mjs,ts}`,
   `**/__tests__/**/*.{js,cjs,mjs,ts}`,
@@ -28,17 +26,13 @@ const ENTRY_FILE_PATTERNS = [
   '!**/test?(s)/**/{helper,fixture}?(s)/**/*',
 ];
 
-const findAvaDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction, config } = options;
-
-  let localConfig: AvaConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.ava : await load(configFilePath);
-
+const resolveEntryPaths: ResolveEntryPaths<AvaConfig> = localConfig => {
   if (typeof localConfig === 'function') localConfig = localConfig();
+  return (localConfig?.files ?? []).map(toEntryPattern);
+};
 
-  const entryPatterns = (config.entry ?? localConfig?.files ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
-
-  if (isProduction || !localConfig) return entryPatterns;
+const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => {
+  if (typeof localConfig === 'function') localConfig = localConfig();
 
   const nodeArgs = localConfig.nodeArguments ?? [];
   const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
@@ -46,16 +40,15 @@ const findAvaDependencies: GenericPluginCallback = async (configFilePath, option
 
   const dependencies = getDependenciesFromScripts([fakeCommand], { ...options, knownGlobalsOnly: true });
 
-  return [...entryPatterns, ...dependencies];
+  return [...dependencies];
 };
-
-const findDependencies = timerify(findAvaDependencies);
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  ENTRY_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  entry,
+  resolveEntryPaths,
+  resolveConfig,
+} as const;

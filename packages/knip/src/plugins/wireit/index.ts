@@ -1,28 +1,20 @@
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency } from '../../util/plugin.js';
+import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { WireitConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/google/wireit
 
-const NAME = 'Wireit';
+const title = 'Wireit';
 
-const ENABLERS = ['wireit'];
+const enablers = ['wireit'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const PACKAGE_JSON_PATH = 'wireit';
+const packageJsonPath = 'wireit';
 
-const CONFIG_FILE_PATTERNS = ['package.json'];
+const config = ['package.json'];
 
-const findWireItDependencies: GenericPluginCallback = async (_configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig = manifest[PACKAGE_JSON_PATH] as WireitConfig;
-  if (!localConfig) return [];
-
+const resolveConfig: ResolveConfig<WireitConfig> = (localConfig, options) => {
   const scripts = Object.values(localConfig).flatMap(({ command: script }) => (script ? [script] : []));
 
   const scriptDependencies = getDependenciesFromScripts(scripts, options);
@@ -30,13 +22,11 @@ const findWireItDependencies: GenericPluginCallback = async (_configFilePath, op
   return scriptDependencies;
 };
 
-const findDependencies = timerify(findWireItDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  PACKAGE_JSON_PATH,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  packageJsonPath,
+  config,
+  resolveConfig,
+} as const;

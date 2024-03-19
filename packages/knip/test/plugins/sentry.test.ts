@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/sentry');
 
-test('Find dependencies in Sentry configuration', async () => {
+test('Find dependencies with the Sentry plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

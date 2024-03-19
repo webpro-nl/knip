@@ -1,34 +1,25 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
 import type { CapacitorConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://capacitorjs.com/docs/config
 
-const NAME = 'Capacitor';
+const title = 'Capacitor';
 
-const ENABLERS = [/^@capacitor\//];
+const enablers = [/^@capacitor\//];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['capacitor.config.ts'];
+const config = ['capacitor.config.{json,ts}'];
 
-const findCapacitorDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
-  if (isProduction) return [];
-
-  const localConfig: CapacitorConfig | undefined = await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return localConfig.includePlugins ?? [];
+const resolveConfig: ResolveConfig<CapacitorConfig> = config => {
+  return config.includePlugins ?? [];
 };
-
-const findDependencies = timerify(findCapacitorDependencies);
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  resolveConfig,
+} as const;

@@ -1,33 +1,37 @@
 import assert from 'node:assert/strict';
-// eslint-disable-next-line n/no-restricted-import
-import path from 'node:path';
 import test from 'node:test';
-import { default as jest } from '../../src/plugins/jest/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { join, resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/jest');
-const options = buildOptions(cwd);
 
-test('Find dependencies in Jest configuration (jest.config.js)', async () => {
-  const configFilePath = join(cwd, 'jest.config.js');
-  const dependencies = await jest.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    'entry:**/*-test.[jt]s?(x)',
-    './local-preset/jest-preset.js',
-    'entry:**/*.js',
-    'jest-runner-eslint',
-    'jest-environment-jsdom',
-    'jest-silent-reporter',
-    'jest-junit',
-    path.join(cwd, 'node_modules/jest-watch-select-projects/index.js'),
-    join(cwd, 'jest.setup.js'),
-    '@nrwl/react/plugins/jest',
-    'babel-jest',
-    join(cwd, 'jest.transform.js'),
-    join(cwd, '__mocks__/fileMock.js'),
-    'identity-obj-proxy',
-    'jest-phabricator',
-    join(cwd, 'snapshotResolver.js'),
-  ]);
+test('Find dependencies with the Jest plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert(issues.unlisted['jest.config.js']['@jest/types']);
+  assert(issues.unlisted['jest.config.js']['@nrwl/react/plugins/jest']);
+  assert(issues.unlisted['jest.config.js']['babel-jest']);
+  assert(issues.unlisted['jest.config.js']['identity-obj-proxy']);
+  assert(issues.unlisted['jest.config.js']['jest-junit']);
+  assert(issues.unlisted['jest.config.js']['jest-phabricator']);
+  assert(issues.unlisted['jest.config.js']['jest-runner-eslint']);
+  assert(issues.unlisted['jest.config.js']['jest-silent-reporter']);
+  assert(issues.unlisted['jest.config.shared.js']['@jest/types']);
+  assert(issues.unlisted['jest.setup.js']['@testing-library/jest-dom/extend-expect']);
+
+  assert(issues.unresolved['jest.config.js'][join(cwd, '__mocks__/fileMock.js')]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unlisted: 10,
+    unresolved: 1,
+    processed: 6,
+    total: 6,
+  });
 });

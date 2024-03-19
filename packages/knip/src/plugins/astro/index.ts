@@ -1,25 +1,21 @@
-import { hasDependency } from '../../util/plugin.js';
-import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Resolve } from '#p/types/plugins.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
-const NAME = 'Astro';
+const title = 'Astro';
 
-const ENABLERS = ['astro'];
+const enablers = ['astro'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const ENTRY_FILE_PATTERNS = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts'];
+const entry = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts'];
 
-const PRODUCTION_ENTRY_FILE_PATTERNS = ['src/pages/**/*.{astro,mdx,js,ts}', 'src/content/**/*.mdx'];
+const production = ['src/pages/**/*.{astro,mdx,js,ts}', 'src/content/**/*.mdx'];
 
-const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { config, manifest, isProduction } = options;
-
-  const dependencies = config.entry
-    ? config.entry.map(toProductionEntryPattern)
-    : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
+const resolve: Resolve = options => {
+  const { isProduction, manifest } = options;
+  const dependencies = [];
 
   if (
     !isProduction &&
@@ -33,10 +29,10 @@ const findDependencies: GenericPluginCallback = async (configFilePath, options) 
 };
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  ENTRY_FILE_PATTERNS,
-  PRODUCTION_ENTRY_FILE_PATTERNS,
-  findDependencies,
-};
+  entry,
+  production,
+  resolve,
+} as const;

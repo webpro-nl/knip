@@ -36,7 +36,7 @@ export function breakText(str: string, maxLines: number, maxLineLen: number) {
 }
 
 const getPages = async () => {
-  const data = await import.meta.glob(['/src/content/**/*.{md,mdx}'], { eager: true });
+  const data = import.meta.glob(['/src/content/**/*.{md,mdx}'], { eager: true });
   const pages: Record<string, unknown> = {};
   for (const [filePath, page] of Object.entries(data)) {
     const imagePath = filePath.replace(/^\/src\/content\//, '').replace(/(\/index)?\.(md|mdx)$/, '.webp');

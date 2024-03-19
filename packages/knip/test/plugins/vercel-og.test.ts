@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/vercel-og');
 
-test('Find dependencies in @vercel/og configuration', async () => {
+test('Find dependencies with the @vercel/og plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

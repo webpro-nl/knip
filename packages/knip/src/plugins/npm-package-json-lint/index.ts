@@ -1,39 +1,28 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { NpmPkgJsonLintConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://npmpackagejsonlint.org/docs/
 
-const NAME = 'npm-package-json-lint';
+const title = 'npm-package-json-lint';
 
-const ENABLERS = ['npm-package-json-lint'];
+const enablers = ['npm-package-json-lint'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const PACKAGE_JSON_PATH = 'npmpackagejsonlint';
+const packageJsonPath = 'npmpackagejsonlint';
 
-const CONFIG_FILE_PATTERNS = ['.npmpackagejsonlintrc.json', 'npmpackagejsonlint.config.js', 'package.json'];
+const config = ['.npmpackagejsonlintrc.json', 'npmpackagejsonlint.config.js', 'package.json'];
 
-const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: NpmPkgJsonLintConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
-
+const resolveConfig: ResolveConfig<NpmPkgJsonLintConfig> = localConfig => {
   return localConfig?.extends ? [localConfig.extends] : [];
 };
 
-const findDependencies = timerify(findNpmPkgJsonLintConfigDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  PACKAGE_JSON_PATH,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  packageJsonPath,
+  config,
+  resolveConfig,
+} as const;

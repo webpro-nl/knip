@@ -1,39 +1,31 @@
 import { getGitHookPaths } from '../../util/git.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency, loadFile } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { getDependenciesFromScripts, hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, ResolveConfig } from '../../types/plugins.js';
 
 // https://typicode.github.io/husky
 
-const NAME = 'husky';
+const title = 'husky';
 
-const ENABLERS = ['husky'];
+const enablers = ['husky'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 // husky v9 registers hooks in .husky/_/, so need to set "false" here to get same lookup as in v8
 const gitHookPaths = getGitHookPaths('.husky', false);
 
-const CONFIG_FILE_PATTERNS = [...gitHookPaths];
+// Add patterns for both v8 and v9 because we can't know which version is installed at this point
+const config = [...gitHookPaths];
 
-const findHuskyDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { isProduction } = options;
-
-  if (isProduction) return [];
-
-  const script = await loadFile(configFilePath);
-
+const resolveConfig: ResolveConfig<string> = async (script, options) => {
   if (!script) return [];
 
   return getDependenciesFromScripts(String(script), { ...options, knownGlobalsOnly: true });
 };
 
-const findDependencies = timerify(findHuskyDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
+  config,
+  resolveConfig,
 };

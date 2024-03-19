@@ -1,25 +1,33 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as storybook } from '../../src/plugins/storybook/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/storybook');
-const options = buildOptions(cwd);
 
-test('Find dependencies in Storybook configuration (main.js)', async () => {
-  const configFilePath = join(cwd, 'main.js');
-  const dependencies = await storybook.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    'entry:.storybook/{manager,preview}.{js,jsx,ts,tsx}',
-    'entry:**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))',
-    '@storybook/addon-essentials',
-    '@storybook/addon-a11y',
-    '@storybook/addon-knobs/preset',
-    'storybook-addon-export-to-codesandbox',
-    './addon/register',
-    '@storybook/builder-webpack5',
-    '@storybook/manager-webpack5',
-    '@storybook/react-webpack5',
-  ]);
+test('Find dependencies with Storybook plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert(issues.devDependencies['package.json']['storybook-addon-performance']);
+  assert(issues.unlisted['main.js']['@storybook/addon-knobs/preset']);
+  assert(issues.unlisted['main.js']['@storybook/builder-webpack5']);
+  assert(issues.unlisted['main.js']['@storybook/manager-webpack5']);
+  assert(issues.unlisted['main.js']['@storybook/react-webpack5']);
+  assert(issues.unlisted['main.js']['storybook-addon-export-to-codesandbox']);
+  assert(issues.unlisted['preview.js']['cypress-storybook/react']);
+  assert(issues.binaries['package.json']['storybook']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unlisted: 6,
+    binaries: 1,
+    processed: 3,
+    total: 3,
+  });
 });

@@ -1,26 +1,19 @@
-import { compact } from '../../util/array.js';
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { compact } from '#p/util/array.js';
+import { hasDependency } from '#p/util/plugin.js';
 import { resolveName, api } from './helpers.js';
+import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
 import type { BabelConfig, BabelConfigObj } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://babeljs.io/docs/configuration
 // https://babeljs.io/docs/options#name-normalization
 
-const NAME = 'Babel';
+const title = 'Babel';
 
-const ENABLERS = [/^@babel\//];
+const enablers = [/^@babel\//];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = [
-  'babel.config.{json,js,cjs,mjs,cts}',
-  '.babelrc.{json,js,cjs,mjs,cts}',
-  '.babelrc',
-  'package.json',
-];
+const config = ['babel.config.{json,js,cjs,mjs,cts}', '.babelrc.{json,js,cjs,mjs,cts}', '.babelrc', 'package.json'];
 
 const getName = (value: string | [string, unknown]) =>
   typeof value === 'string' ? [value] : Array.isArray(value) ? [value[0]] : [];
@@ -32,25 +25,18 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): string[] => {
   return compact([...presets, ...plugins, ...nested]);
 };
 
-const findBabelDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
-  if (isProduction) return [];
+const resolveConfig: ResolveConfig<BabelConfig> = async config => {
+  if (typeof config === 'function') config = config(api);
 
-  let localConfig: BabelConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.babel : await load(configFilePath);
+  if (!config) return [];
 
-  if (typeof localConfig === 'function') localConfig = localConfig(api);
-
-  if (!localConfig) return [];
-
-  return getDependenciesFromConfig(localConfig);
+  return getDependenciesFromConfig(config);
 };
 
-const findDependencies = timerify(findBabelDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
+  config,
+  resolveConfig,
 };

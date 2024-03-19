@@ -1,51 +1,41 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as stryker } from '../../src/plugins/stryker/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/stryker');
-const options = buildOptions(cwd);
 
-test('Find dependencies in Stryker configuration (js)', async () => {
-  const configFilePath = join(cwd, '.stryker.conf.js');
-  const dependencies = await stryker.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    '@stryker-mutator/mocha-runner',
-    '@stryker-mutator/typescript-checker',
-    '@stryker-mutator/jasmine-framework',
-    '@stryker-mutator/karma-runner',
-  ]);
-});
+test('Find dependencies with the Stryker plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in Stryker configuration (mjs)', async () => {
-  const configFilePath = join(cwd, 'stryker.conf.mjs');
-  const dependencies = await stryker.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    '@stryker-mutator/mocha-runner',
-    '@stryker-mutator/typescript-checker',
-    '@stryker-mutator/jasmine-framework',
-    '@stryker-mutator/karma-runner',
-  ]);
-});
+  assert(issues.dependencies['package.json']['@stryker-mutator/core']);
+  assert(issues.unlisted['.stryker.conf.js']['@stryker-mutator/mocha-runner']);
+  assert(issues.unlisted['.stryker.conf.js']['@stryker-mutator/typescript-checker']);
+  assert(issues.unlisted['.stryker.conf.js']['@stryker-mutator/jasmine-framework']);
+  assert(issues.unlisted['.stryker.conf.js']['@stryker-mutator/karma-runner']);
+  assert(issues.unlisted['stryker.conf.cjs']['@stryker-mutator/mocha-runner']);
+  assert(issues.unlisted['stryker.conf.cjs']['@stryker-mutator/typescript-checker']);
+  assert(issues.unlisted['stryker.conf.cjs']['@stryker-mutator/jasmine-framework']);
+  assert(issues.unlisted['stryker.conf.cjs']['@stryker-mutator/karma-runner']);
+  assert(issues.unlisted['stryker.conf.json']['@stryker-mutator/karma-runner']);
+  assert(issues.unlisted['stryker.conf.json']['@stryker-mutator/typescript-checker']);
+  assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/mocha-runner']);
+  assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/typescript-checker']);
+  assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/jasmine-framework']);
+  assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/karma-runner']);
+  assert(issues.binaries['package.json']['stryker']);
 
-test('Find dependencies in Stryker configuration (cjs)', async () => {
-  const configFilePath = join(cwd, 'stryker.conf.cjs');
-  const dependencies = await stryker.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    '@stryker-mutator/mocha-runner',
-    '@stryker-mutator/typescript-checker',
-    '@stryker-mutator/jasmine-framework',
-    '@stryker-mutator/karma-runner',
-  ]);
-});
-
-test('Find dependencies in Stryker configuration (json)', async () => {
-  const configFilePath = join(cwd, 'stryker.conf.json');
-  const dependencies = await stryker.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, [
-    '@stryker-mutator/karma-runner',
-    '@stryker-mutator/typescript-checker',
-    '@stryker-mutator/karma-runner',
-  ]);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 1,
+    dependencies: 1,
+    unlisted: 14,
+    processed: 3,
+    total: 3,
+  });
 });

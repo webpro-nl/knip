@@ -1,33 +1,27 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toProductionEntryPattern } from '../../util/protocols.js';
+import { hasDependency } from '#p/util/plugin.js';
+import { toProductionEntryPattern } from '#p/util/protocols.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { DrizzleConfig } from './types.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://orm.drizzle.team/kit-docs/overview
 
-const NAME = 'Drizzle';
+const title = 'Drizzle';
 
-const ENABLERS = ['drizzle-kit'];
+const enablers = ['drizzle-kit'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['drizzle.config.{ts,js,json}'];
+const config = ['drizzle.config.{ts,js,json}'];
 
-const findDrizzleDependencies: GenericPluginCallback = async configFilePath => {
-  const localConfig: DrizzleConfig | undefined = await load(configFilePath);
-
-  if (!localConfig?.schema) return [];
-
-  return [localConfig.schema].flat().map(toProductionEntryPattern);
+const resolveConfig: ResolveConfig<DrizzleConfig> = config => {
+  if (!config.schema) return [];
+  return [config.schema].flat().map(toProductionEntryPattern);
 };
-
-const findDependencies = timerify(findDrizzleDependencies);
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  resolveConfig,
+} as const;

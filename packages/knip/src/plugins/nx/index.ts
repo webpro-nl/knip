@@ -1,23 +1,18 @@
-import { compact } from '../../util/array.js';
-import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency, load } from '../../util/plugin.js';
+import { compact } from '#p/util/array.js';
+import { getPackageNameFromModuleSpecifier } from '#p/util/modules.js';
+import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
 import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-const NAME = 'Nx';
+const title = 'Nx';
 
-const ENABLERS = ['nx', /^@nrwl\//, /^@nx\//];
+const enablers = ['nx', /^@nrwl\//, /^@nx\//];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['nx.json', 'project.json', '{apps,libs}/**/project.json'];
+const config = ['nx.json', 'project.json', '{apps,libs}/**/project.json'];
 
-const findNxDependenciesInNxJson: GenericPluginCallback = async configFilePath => {
-  const localConfig: NxConfigRoot | undefined = await load(configFilePath);
-
-  if (!localConfig) return [];
-
+const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfig => {
   const targetsDefault = localConfig.targetDefaults
     ? Object.keys(localConfig.targetDefaults)
         // Ensure we only grab executors from plugins instead of manual targets
@@ -42,20 +37,16 @@ const findNxDependenciesInNxJson: GenericPluginCallback = async configFilePath =
   return compact([...targetsDefault, ...plugins, ...generators]);
 };
 
-const findNxDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { isProduction } = options;
+const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = async (localConfig, options) => {
+  const { configFileName } = options;
 
-  if (isProduction) return [];
-
-  if (configFilePath.endsWith('nx.json')) {
-    return findNxDependenciesInNxJson(configFilePath, options);
+  if (configFileName === 'nx.json') {
+    return findNxDependenciesInNxJson(localConfig as NxConfigRoot, options);
   }
 
-  const localConfig: NxProjectConfiguration | undefined = await load(configFilePath);
+  const config = localConfig as NxProjectConfiguration;
 
-  if (!localConfig) return [];
-
-  const targets = localConfig.targets ? Object.values(localConfig.targets) : [];
+  const targets = config.targets ? Object.values(config.targets) : [];
 
   const executors = targets
     .map(target => target?.executor)
@@ -69,12 +60,10 @@ const findNxDependencies: GenericPluginCallback = async (configFilePath, options
   return compact([...executors, ...dependencies]);
 };
 
-const findDependencies = timerify(findNxDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
+  config,
+  resolveConfig,
 };

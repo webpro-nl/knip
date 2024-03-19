@@ -1,5 +1,11 @@
 {
   "name": "@fixtures/ava",
+  "devDependencies": {
+    "ava": "*"
+  },
+  "scripts": {
+    "test": "ava"
+  },
   "ava": {
     "files": [
       "**/*.test.*"

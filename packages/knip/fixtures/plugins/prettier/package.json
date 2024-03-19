@@ -1,3 +1,7 @@
 {
+  "name": "@fixtures/prettier",
+  "devDependencies": {
+    "prettier": "*"
+  },
   "prettier": "@company/prettier-config"
 }

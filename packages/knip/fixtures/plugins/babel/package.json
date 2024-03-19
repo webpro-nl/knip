@@ -14,10 +14,5 @@
     "presets": [
       "@babel/env"
     ]
-  },
-  "knip": {
-    "entry": [],
-    "project": [],
-    "babel": ".babelrc.js"
   }
 }

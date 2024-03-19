@@ -1,34 +1,29 @@
-import { compact } from '../../util/array.js';
-import { dirname, isAbsolute, join, relative } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load, tryResolve } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import { isAbsolute, join, relative } from '#p/util/path.js';
+import { hasDependency, tryResolve } from '#p/util/plugin.js';
+import { toEntryPattern } from '#p/util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
+import type { PackageJson } from '#p/types/package-json.js';
+import type { IsPluginEnabled, PluginOptions, ResolveEntryPaths, ResolveConfig } from '#p/types/plugins.js';
 import type { ViteConfigOrFn, VitestWorkspaceConfig, ViteConfig, MODE, COMMAND } from './types.js';
-import type { PackageJson } from '../../types/package-json.js';
-import type {
-  IsPluginEnabledCallback,
-  GenericPluginCallback,
-  GenericPluginCallbackOptions,
-} from '../../types/plugins.js';
 
 // https://vitest.dev/config/
 
-const NAME = 'Vitest';
+const title = 'Vitest';
 
-const ENABLERS = ['vitest'];
+const enablers = ['vitest'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['vitest*.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{ts,js,json}'];
+const config = ['vitest*.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{ts,js,json}'];
 
-const ENTRY_FILE_PATTERNS = ['**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)'];
+const entry = ['**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)'];
 
-// TODO: Promote to something more generic, other plugins may like it too
-const resolveEntry = (containingFilePath: string, specifier: string) => {
-  const dir = dirname(containingFilePath);
-  const resolvedPath = isAbsolute(specifier) ? specifier : tryResolve(join(dir, specifier), containingFilePath);
-  if (resolvedPath) return toEntryPattern(relative(dir, resolvedPath));
+const resolveEntry = (options: PluginOptions, specifier: string) => {
+  const { configFileDir, configFileName } = options;
+  const resolvedPath = isAbsolute(specifier)
+    ? specifier
+    : tryResolve(join(configFileDir, specifier), join(configFileDir, configFileName));
+  if (resolvedPath) return toEntryPattern(relative(configFileDir, resolvedPath));
   return specifier;
 };
 
@@ -41,17 +36,11 @@ const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
       })
     : false;
 
-const findConfigDependencies = (
-  configFilePath: string,
-  localConfig: ViteConfig,
-  options: GenericPluginCallbackOptions
-) => {
-  const { isProduction, config, manifest } = options;
+const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
+  const { manifest } = options;
   const testConfig = localConfig.test;
 
-  const entryPatterns = (config?.entry ?? testConfig?.include ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
-
-  if (!testConfig || isProduction) return entryPatterns;
+  if (!testConfig) return [];
 
   const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
   const reporters = getExternalReporters(testConfig.reporters);
@@ -60,61 +49,67 @@ const findConfigDependencies = (
     (testConfig.coverage && testConfig.coverage.enabled !== false) || hasScriptWithCoverage(manifest.scripts);
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
-  const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(configFilePath, v));
-  const globalSetup = [testConfig.globalSetup ?? []].flat().map(v => resolveEntry(configFilePath, v));
-  return [...entryPatterns, ...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup];
+  const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(options, v));
+  const globalSetup = [testConfig.globalSetup ?? []].flat().map(v => resolveEntry(options, v));
+  return [...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup];
 };
 
-export const findVitestDependencies = async (
-  configFilePath: string,
-  localConfig: ViteConfigOrFn,
-  options: GenericPluginCallbackOptions
-) => {
-  if (!localConfig) return [];
-
-  if (typeof localConfig === 'function') {
-    const dependencies = new Set<string>();
-    for (const command of ['dev', 'serve', 'build'] as COMMAND[]) {
-      for (const mode of ['development', 'production'] as MODE[]) {
-        const config = await localConfig({ command, mode, ssrBuild: undefined });
-        findConfigDependencies(configFilePath, config, options).forEach(dependency => dependencies.add(dependency));
-      }
-    }
-    return Array.from(dependencies);
-  }
-
-  const entry = localConfig.build?.lib?.entry ?? [];
-  const dependencies = (typeof entry === 'string' ? [entry] : Object.values(entry)).map(specifier =>
-    resolveEntry(configFilePath, specifier)
-  );
-
-  // When coming from the vite plugin we should not assume vitest is enabled
-  if (!options.enabledPlugins.includes('vitest')) return dependencies;
-
-  return compact([...dependencies, ...findConfigDependencies(configFilePath, localConfig, options)]);
-};
-
-const findVitestWorkspaceDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const localConfig: ViteConfigOrFn | VitestWorkspaceConfig | undefined = await load(configFilePath);
-
-  const dependencies = new Set<string>();
+const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) => {
+  const configs: ViteConfig[] = [];
   for (const config of [localConfig].flat()) {
     if (config && typeof config !== 'string') {
-      (await findVitestDependencies(configFilePath, config, options)).forEach(dependency =>
-        dependencies.add(dependency)
-      );
+      if (typeof config === 'function') {
+        for (const command of ['dev', 'serve', 'build'] as COMMAND[]) {
+          for (const mode of ['development', 'production'] as MODE[]) {
+            const cfg = await config({ command, mode, ssrBuild: undefined });
+            configs.push(cfg);
+          }
+        }
+      } else {
+        configs.push(config);
+      }
     }
   }
-  return compact(dependencies);
+  return configs;
 };
 
-const findDependencies = timerify(findVitestWorkspaceDependencies);
+export const resolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspaceConfig> = async (
+  localConfig,
+  options
+) => {
+  const dependencies = new Set<string>();
+  const configs = await getConfigs(localConfig);
+  for (const cfg of configs) {
+    if (cfg.test?.include) {
+      cfg.test.include.forEach(dependency => dependencies.add(dependency));
+    } else {
+      (options.config.entry ?? entry).forEach(dependency => dependencies.add(dependency));
+    }
+  }
+
+  return Array.from(dependencies).map(toEntryPattern);
+};
+
+export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig> = async (localConfig, options) => {
+  const dependencies = new Set<string>();
+  const configs = await getConfigs(localConfig);
+  for (const cfg of configs) {
+    findConfigDependencies(cfg, options).forEach(dependency => dependencies.add(dependency));
+    const entry = cfg.build?.lib?.entry ?? [];
+    const deps = (typeof entry === 'string' ? [entry] : Object.values(entry)).map(specifier =>
+      resolveEntry(options, specifier)
+    );
+    deps.forEach(dependency => dependencies.add(dependency));
+  }
+  return Array.from(dependencies);
+};
 
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  ENTRY_FILE_PATTERNS,
-  findDependencies,
+  config,
+  entry,
+  resolveEntryPaths,
+  resolveConfig,
 };

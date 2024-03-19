@@ -1,31 +1,23 @@
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { LintStagedConfig } from '../lint-staged/types.js';
 
 // https://github.com/yyx990803/yorkie
 
-const NAME = 'yorkie';
+const title = 'yorkie';
 
-const ENABLERS = ['yorkie'];
+const enablers = ['yorkie'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const PACKAGE_JSON_PATH = 'gitHooks';
+const packageJsonPath = 'gitHooks';
 
-const CONFIG_FILE_PATTERNS = ['package.json'];
+const config = ['package.json'];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig = manifest[PACKAGE_JSON_PATH];
-
-  if (!localConfig) return [];
-
+const resolveConfig: ResolveConfig<LintStagedConfig> = (config, options) => {
   const dependencies = new Set<string>();
 
-  for (const script of Object.values(localConfig).flat()) {
+  for (const script of Object.values(config).flat()) {
     const scripts = [script].flat();
     getDependenciesFromScripts(scripts, options).forEach(identifier => dependencies.add(identifier));
   }
@@ -34,13 +26,11 @@ const findPluginDependencies: GenericPluginCallback = async (configFilePath, opt
   return ['yorkie', ...dependencies];
 };
 
-const findDependencies = timerify(findPluginDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  PACKAGE_JSON_PATH,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  packageJsonPath,
+  config,
+  resolveConfig,
+} as const;

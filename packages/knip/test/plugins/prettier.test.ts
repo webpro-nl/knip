@@ -1,20 +1,27 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { default as prettier } from '../../src/plugins/prettier/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { buildOptions } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/prettier');
-const options = buildOptions(cwd);
 
-test('Find dependencies in Prettier configuration (.prettierrc)', async () => {
-  const configFilePath = join(cwd, '.prettierrc');
-  const dependencies = await prettier.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['prettier-plugin-xml']);
-});
+test('Find dependencies with the Prettier plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in Prettier configuration (package.json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await prettier.findDependencies(configFilePath, options);
-  assert.deepEqual(dependencies, ['@company/prettier-config']);
+  assert(issues.devDependencies['package.json']['prettier']);
+  assert(issues.unlisted['.prettierrc']['prettier-plugin-xml']);
+  assert(issues.unlisted['package.json']['@company/prettier-config']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unlisted: 2,
+    processed: 0,
+    total: 0,
+  });
 });

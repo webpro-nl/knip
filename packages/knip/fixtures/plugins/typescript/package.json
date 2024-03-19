@@ -1,3 +1,6 @@
 {
-  "name": "@fixtures/typescript"
+  "name": "@fixtures/typescript",
+  "devDependencies": {
+    "typescript": "*"
+  }
 }

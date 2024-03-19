@@ -1,31 +1,22 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import { hasDependency } from '#p/util/plugin.js';
+import { toEntryPattern } from '#p/util/protocols.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { TsupConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://paka.dev/npm/tsup/api
 
-const NAME = 'tsup';
+const title = 'tsup';
 
-const ENABLERS = ['tsup'];
+const enablers = ['tsup'];
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const CONFIG_FILE_PATTERNS = ['tsup.config.{js,ts,cjs,json}', 'package.json'];
+const config = ['tsup.config.{js,ts,cjs,json}', 'package.json'];
 
-const findTsupDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest } = options;
+const resolveConfig: ResolveConfig<TsupConfig> = async config => {
+  if (typeof config === 'function') config = await config({});
 
-  let localConfig: TsupConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.tsup : await load(configFilePath);
-
-  if (typeof localConfig === 'function') localConfig = await localConfig({});
-
-  if (!localConfig) return [];
-
-  const entryPatterns = [localConfig]
+  const entryPatterns = [config]
     .flat()
     .flatMap(config => {
       if (!config.entry) return [];
@@ -38,12 +29,10 @@ const findTsupDependencies: GenericPluginCallback = async (configFilePath, optio
   return entryPatterns;
 };
 
-const findDependencies = timerify(findTsupDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  resolveConfig,
+} as const;

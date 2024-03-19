@@ -1,41 +1,29 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, ResolveConfig } from '#p/types/plugins.js';
+import type { ChangesetsConfig } from './types.js';
 
 // https://github.com/changesets/changesets/blob/main/docs/config-file-options.md
 
-type ChangesetsConfig = {
-  changelog: string | string[];
-};
+const title = 'Changesets';
 
-const NAME = 'Changesets';
+const enablers = ['@changesets/cli'];
 
-const ENABLERS = ['@changesets/cli'];
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const config = ['.changeset/config.json'];
 
-const CONFIG_FILE_PATTERNS = ['.changeset/config.json'];
-
-const findChangesetsDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
-  if (isProduction) return [];
-
-  const localConfig: ChangesetsConfig | undefined = await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return Array.isArray(localConfig.changelog)
-    ? [localConfig.changelog[0]]
-    : typeof localConfig.changelog === 'string'
-      ? [localConfig.changelog]
+const resolveConfig: ResolveConfig<ChangesetsConfig> = config => {
+  return Array.isArray(config.changelog)
+    ? [config.changelog[0]]
+    : typeof config.changelog === 'string'
+      ? [config.changelog]
       : [];
 };
 
-const findDependencies = timerify(findChangesetsDependencies);
-
 export default {
-  NAME,
-  ENABLERS,
+  title,
+  enablers,
   isEnabled,
-  CONFIG_FILE_PATTERNS,
-  findDependencies,
-};
+  config,
+  resolveConfig,
+} as const;
