@@ -1,3 +1,4 @@
+import ts from 'typescript';
 import type { EnsuredPluginConfiguration, IgnorePatterns, WorkspaceConfiguration } from './config.js';
 import type { PackageJson } from './package-json.js';
 import type { DependencySet } from './workspace.js';
@@ -34,11 +35,22 @@ export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Prom
 
 export type Resolve = (options: PluginOptions) => Promise<string[]> | string[];
 
+export type ModuleResolver = (
+  id: string,
+  containingFile: string,
+  compilerOptions: ts.CompilerOptions,
+  sys: typeof ts.sys,
+  resolve: typeof ts.resolveModuleName
+) => undefined | ts.ResolvedModuleFull;
+
+export type NamedModuleResolver = [string, undefined | ModuleResolver];
+
 export interface Plugin {
   title: string;
   enablers: IgnorePatterns | string;
   packageJsonPath?: string;
   isEnabled: IsPluginEnabled;
+  getModuleResolvers?: (configFileDir: string) => Promise<Record<string, ModuleResolver>>;
   config?: string[];
   entry?: string[];
   production?: string[];

@@ -13,6 +13,7 @@ import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { SerializableExportMember } from './types/exports.js';
 import type { UnresolvedImport } from './types/imports.js';
+import type { NamedModuleResolver } from './types/plugins.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { ReferencedDependencies } from './WorkspaceWorker.js';
 
@@ -70,6 +71,7 @@ export class ProjectPrincipal {
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
   isSkipLibs: boolean;
+  moduleResolver: NamedModuleResolver;
 
   // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
   backend: {
@@ -83,7 +85,7 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs }: PrincipalOptions) {
+  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs, moduleResolver }: PrincipalOptions) {
     this.cwd = cwd;
 
     this.isGitIgnored = isGitIgnored;
@@ -100,6 +102,7 @@ export class ProjectPrincipal {
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
     this.isSkipLibs = isSkipLibs;
+    this.moduleResolver = moduleResolver;
   }
 
   init() {
@@ -109,6 +112,7 @@ export class ProjectPrincipal {
       entryPaths: this.entryPaths,
       compilers: [this.syncCompilers, this.asyncCompilers],
       isSkipLibs: this.isSkipLibs,
+      moduleResolver: this.moduleResolver,
     });
 
     this.backend = {

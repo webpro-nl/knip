@@ -8,6 +8,7 @@ import { createCustomModuleResolver } from './resolveModuleNames.js';
 import { SourceFileManager } from './SourceFileManager.js';
 import { createCustomSys } from './sys.js';
 import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
+import type { NamedModuleResolver } from '../types/plugins.js';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 
@@ -17,13 +18,21 @@ type CreateHostsOptions = {
   entryPaths: Set<string>;
   compilers: [SyncCompilers, AsyncCompilers];
   isSkipLibs: boolean;
+  moduleResolver: NamedModuleResolver;
 };
 
-export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers, isSkipLibs }: CreateHostsOptions) => {
+export const createHosts = ({
+  cwd,
+  compilerOptions,
+  entryPaths,
+  compilers,
+  isSkipLibs,
+  moduleResolver,
+}: CreateHostsOptions) => {
   const fileManager = new SourceFileManager({ compilers, isSkipLibs });
   const compilerExtensions = [...getCompilerExtensions(compilers), ...FOREIGN_FILE_EXTENSIONS];
   const sys = createCustomSys(cwd, compilerExtensions);
-  const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, compilerExtensions);
+  const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, compilerExtensions, moduleResolver);
 
   const languageServiceHost: ts.LanguageServiceHost = {
     getCompilationSettings: () => compilerOptions,

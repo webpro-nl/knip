@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/metro",
+  "version": "*",
+  "devDependencies": {
+    "react-native": "*"
+  },
+  "dependencies": {
+    "@react-native/metro-config": "^0.75.0-main",
+    "expo": "^50.0.13",
+    "metro-config": "^0.80.6",
+    "metro-resolver": "^0.80.6"
+  }
+}

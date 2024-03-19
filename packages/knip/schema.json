@@ -354,6 +354,10 @@
           "title": "markdownlint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/markdownlint/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "metro": {
+          "title": "metro plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/metro/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "mocha": {
           "title": "Mocha plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/mocha/README.md)",
           "$ref": "#/definitions/plugin"

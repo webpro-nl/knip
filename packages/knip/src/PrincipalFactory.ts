@@ -3,10 +3,17 @@ import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLog } from './util/debug.js';
 import { toAbsolute } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
+import type { NamedModuleResolver } from './types/plugins.js';
 
 type Paths = ts.CompilerOptions['paths'];
 
-type Principal = { principal: ProjectPrincipal; cwds: Set<string>; pathKeys: Set<string>; pkgNames: Set<string> };
+type Principal = {
+  principal: ProjectPrincipal;
+  cwds: Set<string>;
+  pathKeys: Set<string>;
+  pkgNames: Set<string>;
+  moduleResolver: NamedModuleResolver;
+};
 type Principals = Set<Principal>;
 
 export type PrincipalOptions = {
@@ -18,6 +25,7 @@ export type PrincipalOptions = {
   isGitIgnored: (path: string) => boolean;
   isIsolateWorkspaces: boolean;
   isSkipLibs: boolean;
+  moduleResolver: NamedModuleResolver;
 };
 
 const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>
@@ -44,9 +52,9 @@ export class PrincipalFactory {
   principals: Principals = new Set();
 
   public getPrincipal(options: PrincipalOptions) {
-    const { cwd, compilerOptions, paths, pkgName, isIsolateWorkspaces, compilers } = options;
+    const { cwd, compilerOptions, paths, pkgName, isIsolateWorkspaces, compilers, moduleResolver } = options;
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
-    const principal = this.findReusablePrincipal(compilerOptions);
+    const principal = this.findReusablePrincipal(compilerOptions, moduleResolver);
     if (!isIsolateWorkspaces && principal) {
       this.linkPrincipal(principal, cwd, compilerOptions, pkgName, compilers);
       return principal.principal;
@@ -58,9 +66,10 @@ export class PrincipalFactory {
   /**
    * Principals with shared `compilerOptions.baseUrl` and no `compilerOptions.paths` conflicts are reused.
    */
-  private findReusablePrincipal(compilerOptions: ts.CompilerOptions) {
+  private findReusablePrincipal(compilerOptions: ts.CompilerOptions, moduleResolver: NamedModuleResolver) {
     const workspacePaths = compilerOptions?.paths ? Object.keys(compilerOptions.paths) : [];
     const principal = Array.from(this.principals).find(principal => {
+      if (moduleResolver[0] !== principal.principal.moduleResolver[0]) return false;
       if (compilerOptions.pathsBasePath && principal.principal.compilerOptions.pathsBasePath) return false;
       if (compilerOptions.baseUrl === principal.principal.compilerOptions.baseUrl) {
         return workspacePaths.every(p => !principal.pathKeys.has(p));
@@ -87,10 +96,10 @@ export class PrincipalFactory {
   }
 
   private addNewPrincipal(options: PrincipalOptions) {
-    const { cwd, compilerOptions, pkgName } = options;
+    const { cwd, compilerOptions, pkgName, moduleResolver } = options;
     const pathKeys = new Set(Object.keys(compilerOptions?.paths ?? {}));
     const principal = new ProjectPrincipal(options);
-    this.principals.add({ principal, cwds: new Set([cwd]), pathKeys, pkgNames: new Set([pkgName]) });
+    this.principals.add({ principal, cwds: new Set([cwd]), pathKeys, pkgNames: new Set([pkgName]), moduleResolver });
     return principal;
   }
 

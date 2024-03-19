@@ -97,6 +97,7 @@ const pluginsSchema = z.object({
   'lint-staged': pluginSchema,
   linthtml: pluginSchema,
   markdownlint: pluginSchema,
+  metro: pluginSchema,
   mocha: pluginSchema,
   msw: pluginSchema,
   netlify: pluginSchema,

@@ -12,6 +12,7 @@ import {
 } from './util/protocols.js';
 import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';
+import type { NamedModuleResolver } from './types/plugins.js';
 import type { DependencySet } from './types/workspace.js';
 import type { Entries } from 'type-fest';
 
@@ -119,6 +120,18 @@ export class WorkspaceWorker {
     debugLogObject(this.name, 'Enabled plugins', enabledPluginTitles);
 
     return enabledPlugins;
+  }
+
+  public async getModuleResolvers() {
+    const resolvers = new Set<NamedModuleResolver>([['default', undefined]]);
+    for (const [, plugin] of Object.entries(plugins) as PluginEntries) {
+      if (typeof plugin.getModuleResolvers === 'function') {
+        for (const [key, resolver] of Object.entries(await plugin.getModuleResolvers(this.dir))) {
+          resolvers.add([key, resolver]);
+        }
+      }
+    }
+    return resolvers;
   }
 
   private getConfigForPlugin(pluginName: PluginName): EnsuredPluginConfiguration {

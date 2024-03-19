@@ -160,17 +160,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const { compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
 
-    const principal = factory.getPrincipal({
-      cwd: dir,
-      paths: config.paths,
-      compilerOptions,
-      compilers,
-      pkgName,
-      isGitIgnored,
-      isIsolateWorkspaces,
-      isSkipLibs: !isReportClassMembers,
-    });
-
     const worker = new WorkspaceWorker({
       name,
       dir,
@@ -187,96 +176,116 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     await worker.init();
 
-    principal.addEntryPaths(definitionPaths);
-    debugLogArray(name, `Definition paths`, definitionPaths);
-
     const ignore = worker.getIgnorePatterns();
     const sharedGlobOptions = { cwd, workingDir: dir, gitignore };
 
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
-    {
-      // Add dependencies from package.json
-      const options = { manifestScriptNames, cwd: dir, dependencies };
-      const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
-      principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
-    }
+    const moduleResolvers = await worker.getModuleResolvers();
 
-    {
-      // Add entry paths from package.json
-      const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
-      debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
-      principal.addEntryPaths(entryPathsFromManifest);
-    }
+    for (const resolver of moduleResolvers) {
+      streamer.cast(
+        `Analyzing workspace${name !== '.' ? ` ${name}` : ''}${resolver[0] === 'default' ? '' : ` (${resolver[0]})`}...`
+      );
 
-    const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } =
-      await worker.findDependenciesByPlugins();
-    enabledPluginsStore.set(name, enabledPlugins);
-    principal.addReferencedDependencies(name, referencedDependencies);
+      const principal = factory.getPrincipal({
+        cwd: dir,
+        paths: config.paths,
+        compilerOptions,
+        compilers,
+        pkgName,
+        isGitIgnored,
+        isIsolateWorkspaces,
+        isSkipLibs: !isReportClassMembers,
+        moduleResolver: resolver,
+      });
 
-    if (isProduction) {
-      const negatedEntryPatterns: string[] = Array.from(entryFilePatterns).map(negate);
+      principal.addEntryPaths(definitionPaths);
+      debugLogArray(name, `Definition paths`, definitionPaths);
 
       {
-        const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
-        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Entry paths`, workspaceEntryPaths);
-        principal.addEntryPaths(workspaceEntryPaths);
+        // Add dependencies from package.json
+        const options = { manifestScriptNames, cwd: dir, dependencies };
+        const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
+        principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
       }
 
       {
-        const patterns = Array.from(productionEntryFilePatterns);
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Production plugin entry paths`, pluginWorkspaceEntryPaths);
-        principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
+        // Add entry paths from package.json
+        const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
+        debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
+        principal.addEntryPaths(entryPathsFromManifest);
       }
 
-      {
-        const patterns = worker.getProductionProjectFilePatterns(negatedEntryPatterns);
-        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Project paths`, workspaceProjectPaths);
-        workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
-      }
-    } else {
-      {
-        const patterns = worker.getEntryFilePatterns();
-        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Entry paths`, workspaceEntryPaths);
-        principal.addEntryPaths(workspaceEntryPaths);
+      const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } =
+        await worker.findDependenciesByPlugins();
+      enabledPluginsStore.set(name, enabledPlugins);
+      principal.addReferencedDependencies(name, referencedDependencies);
+
+      if (isProduction) {
+        const negatedEntryPatterns: string[] = Array.from(entryFilePatterns).map(negate);
+
+        {
+          const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
+          const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+          debugLogArray(name, `Entry paths`, workspaceEntryPaths);
+          principal.addEntryPaths(workspaceEntryPaths);
+        }
+
+        {
+          const patterns = Array.from(productionEntryFilePatterns);
+          const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+          debugLogArray(name, `Production plugin entry paths`, pluginWorkspaceEntryPaths);
+          principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
+        }
+
+        {
+          const patterns = worker.getProductionProjectFilePatterns(negatedEntryPatterns);
+          const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
+          debugLogArray(name, `Project paths`, workspaceProjectPaths);
+          workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
+        }
+      } else {
+        {
+          const patterns = worker.getEntryFilePatterns();
+          const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+          debugLogArray(name, `Entry paths`, workspaceEntryPaths);
+          principal.addEntryPaths(workspaceEntryPaths);
+        }
+
+        {
+          const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns]);
+          const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
+          debugLogArray(name, `Project paths`, workspaceProjectPaths);
+          workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
+        }
+
+        {
+          const patterns = [...entryFilePatterns, ...productionEntryFilePatterns];
+          const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+          debugLogArray(name, `Plugin entry paths`, pluginWorkspaceEntryPaths);
+          principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
+        }
+
+        {
+          const patterns = worker.getPluginProjectFilePatterns();
+          const pluginWorkspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
+          debugLogArray(name, `Plugin project paths`, pluginWorkspaceProjectPaths);
+          pluginWorkspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
+        }
+
+        {
+          const patterns = worker.getPluginConfigPatterns();
+          const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+          debugLogArray(name, `Plugin configuration paths`, configurationEntryPaths);
+          principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
+        }
       }
 
-      {
-        const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns]);
-        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Project paths`, workspaceProjectPaths);
-        workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
+      // Add knip.ts (might import dependencies)
+      if (chief.resolvedConfigFilePath) {
+        principal.addEntryPath(chief.resolvedConfigFilePath, { skipExportsAnalysis: true });
       }
-
-      {
-        const patterns = [...entryFilePatterns, ...productionEntryFilePatterns];
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Plugin entry paths`, pluginWorkspaceEntryPaths);
-        principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
-      }
-
-      {
-        const patterns = worker.getPluginProjectFilePatterns();
-        const pluginWorkspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Plugin project paths`, pluginWorkspaceProjectPaths);
-        pluginWorkspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
-      }
-
-      {
-        const patterns = worker.getPluginConfigPatterns();
-        const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Plugin configuration paths`, configurationEntryPaths);
-        principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
-      }
-    }
-
-    // Add knip.ts (might import dependencies)
-    if (chief.resolvedConfigFilePath) {
-      principal.addEntryPath(chief.resolvedConfigFilePath, { skipExportsAnalysis: true });
     }
   }
 
@@ -377,7 +386,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     await principal.runAsyncCompilers();
 
-    streamer.cast('Connecting the dots...');
+    const [moduleResolverName] = principal.moduleResolver;
+
+    streamer.cast(`Connecting the dots...${moduleResolverName === 'default' ? '' : ` (${moduleResolverName})`}`);
 
     let size = principal.entryPaths.size;
     let round = 0;

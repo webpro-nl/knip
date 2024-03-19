@@ -5,6 +5,7 @@ import { sanitizeSpecifier } from '../util/modules.js';
 import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join } from '../util/path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
+import type { NamedModuleResolver } from '../types/plugins.js';
 
 const resolutionCache = new Map<string, ts.ResolvedModuleFull | undefined>();
 
@@ -23,13 +24,16 @@ const fileExists = (name: string, containingFile: string) => {
 export function createCustomModuleResolver(
   customSys: typeof ts.sys,
   compilerOptions: ts.CompilerOptions,
-  virtualFileExtensions: string[]
+  virtualFileExtensions: string[],
+  moduleResolver: NamedModuleResolver
 ) {
+  const [resolverName, customResolver] = moduleResolver;
+
   function resolveModuleNames(moduleNames: string[], containingFile: string): Array<ts.ResolvedModuleFull | undefined> {
     return moduleNames.map(moduleName => {
       const key = moduleName.startsWith('.')
-        ? join(dirname(containingFile), moduleName)
-        : `${containingFile}:${moduleName}`;
+        ? `${resolverName}:${join(dirname(containingFile), moduleName)}`
+        : `${resolverName}:${containingFile}:${moduleName}`;
       if (resolutionCache.has(key)) return resolutionCache.get(key)!;
       const resolvedModule = resolveModuleName(moduleName, containingFile);
       resolutionCache.set(key, resolvedModule);
@@ -43,12 +47,19 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins or externals, bail out
     if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
 
-    const tsResolvedModule = ts.resolveModuleName(
-      sanitizedSpecifier,
-      containingFile,
-      compilerOptions,
-      ts.sys
-    ).resolvedModule;
+    if (customResolver) {
+      const tsResolvedModule = customResolver(
+        sanitizedSpecifier,
+        containingFile,
+        compilerOptions,
+        ts.sys,
+        ts.resolveModuleName
+      );
+      if (!tsResolvedModule || isInNodeModules(tsResolvedModule.resolvedFileName)) return undefined;
+      return tsResolvedModule;
+    }
+
+    const tsResolvedModule = ts.resolveModuleName(name, containingFile, compilerOptions, ts.sys).resolvedModule;
 
     if (
       tsResolvedModule &&
