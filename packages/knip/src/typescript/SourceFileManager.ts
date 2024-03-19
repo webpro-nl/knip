@@ -2,6 +2,7 @@ import ts from 'typescript';
 import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import { debugLog } from '../util/debug.js';
 import { extname, isInNodeModules, isInternal } from '../util/path.js';
+import { isDeclarationFileExtension } from './ast-helpers.js';
 import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
 
 interface SourceFileManagerOptions {
@@ -31,7 +32,10 @@ export class SourceFileManager {
 
   getSourceFile(filePath: string) {
     if (FOREIGN_FILE_EXTENSIONS.has(extname(filePath))) return undefined;
-    if (this.isSkipLibs && isInNodeModules(filePath)) return undefined;
+    if (this.isSkipLibs && isInNodeModules(filePath)) {
+      if (isDeclarationFileExtension(extname(filePath))) return undefined;
+      return this.createSourceFile(filePath, '');
+    }
     if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const contents = ts.sys.readFile(filePath);
     if (typeof contents !== 'string') {
