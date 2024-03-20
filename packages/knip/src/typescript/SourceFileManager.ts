@@ -31,9 +31,11 @@ export class SourceFileManager {
   }
 
   getSourceFile(filePath: string) {
-    if (FOREIGN_FILE_EXTENSIONS.has(extname(filePath))) return undefined;
+    const ext = extname(filePath);
+    const compiler = this.syncCompilers.get(ext);
+    if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) return undefined;
     if (this.isSkipLibs && isInNodeModules(filePath)) {
-      if (isDeclarationFileExtension(extname(filePath))) return undefined;
+      if (isDeclarationFileExtension(ext)) return undefined;
       return this.createSourceFile(filePath, '');
     }
     if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
@@ -42,8 +44,6 @@ export class SourceFileManager {
       if (isInternal(filePath)) debugLog('*', `Unable to read ${filePath}`);
       return this.createSourceFile(filePath, '');
     }
-    const ext = extname(filePath);
-    const compiler = this.syncCompilers?.get(ext);
     const compiled = compiler ? compiler(contents, filePath) : contents;
     if (compiler) debugLog('*', `Compiled ${filePath}`);
     return this.createSourceFile(filePath, compiled);
@@ -62,7 +62,7 @@ export class SourceFileManager {
     const contents = ts.sys.readFile(filePath);
     if (typeof contents !== 'string') throw new Error(`Unable to read ${filePath}`);
     const ext = extname(filePath);
-    const compiler = this.asyncCompilers?.get(ext);
+    const compiler = this.asyncCompilers.get(ext);
     if (compiler) {
       const compiled = await compiler(contents, filePath);
       debugLog('*', `Compiled ${filePath}`);
