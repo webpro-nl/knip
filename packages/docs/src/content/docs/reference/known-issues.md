@@ -48,6 +48,24 @@ TypeError: Reflect.metadata is not a function
 
 [GitHub Issue #355][7]
 
+## Path aliases in config files
+
+```
+Analyzing workspace ....
+Error loading .../cypress.config.ts
+Reason: Cannot find module '@alias/name'
+Require stack:
+- .../cypress.config.ts
+```
+
+Some tools (such as Cypress and Jest) support using TypeScript path aliases in
+the configuration file. Unfortunately jiti does not seem to support this.
+
+Potential workarounds:
+
+- Rewrite the import the configuration to a relative import.
+- Use Bun: `bunx --bun knip` (Bun will execute the scripts instead of jiti)
+
 [1]: https://github.com/unjs/jiti
 [2]: ./configuration.md#plugins
 [3]: https://github.com/unjs/jiti/issues/72
