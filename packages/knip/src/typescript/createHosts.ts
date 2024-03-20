@@ -21,8 +21,8 @@ type CreateHostsOptions = {
 
 export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers, isSkipLibs }: CreateHostsOptions) => {
   const fileManager = new SourceFileManager({ compilers, isSkipLibs });
-  const compilerExtensions = [...getCompilerExtensions(compilers), ...FOREIGN_FILE_EXTENSIONS];
-  const sys = createCustomSys(cwd, compilerExtensions);
+  const compilerExtensions = getCompilerExtensions(compilers);
+  const sys = createCustomSys(cwd, [...compilerExtensions, ...FOREIGN_FILE_EXTENSIONS]);
   const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, compilerExtensions);
 
   const languageServiceHost: ts.LanguageServiceHost = {
