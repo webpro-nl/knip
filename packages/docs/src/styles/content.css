@@ -44,8 +44,9 @@ section.columns ul {
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.5rem;
+  gap: 1rem;
   white-space: nowrap;
+  margin-bottom: 3rem;
 }
 
 section.columns.min200 ul {
