@@ -550,7 +550,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (getReExportingEntryFile(importsForExport, identifier)) continue;
             }
 
-            exportLookupLog(-1, `Looking up export ${identifier} from`, filePath);
+            exportLookupLog(-1, `Looking up ${identifier} export from`, filePath);
             if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
               if (exportedItem.type === 'enum') {
                 exportedItem.members?.forEach(member => {

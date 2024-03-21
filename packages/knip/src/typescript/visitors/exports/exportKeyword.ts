@@ -114,10 +114,11 @@ export default visit(
       }
 
       if (ts.isTypeAliasDeclaration(node)) {
+        const identifier = defaultKeyword ? 'default' : node.name.getText();
         const fix: Fix = isFixTypes ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : undefined;
         return {
           node,
-          identifier: node.name.getText(),
+          identifier,
           type: SymbolType.TYPE,
           pos: node.name.getStart(),
           fix,
@@ -125,10 +126,11 @@ export default visit(
       }
 
       if (ts.isInterfaceDeclaration(node)) {
+        const identifier = defaultKeyword ? 'default' : node.name.getText();
         const fix: Fix = isFixTypes ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : undefined;
         return {
           node,
-          identifier: node.name.getText(),
+          identifier,
           type: SymbolType.INTERFACE,
           pos: node.name.getStart(),
           fix,
