@@ -117,6 +117,8 @@ export const getJSDocTags = (node: ts.Node) => {
     tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent.parent)];
   } else if (ts.isEnumMember(node) || ts.isClassElement(node)) {
     tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent)];
+  } else if (ts.isCallExpression(node)) {
+    tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent)];
   }
   for (const tagNode of tagNodes) {
     const match = tagNode.getText()?.match(/@\S+/);

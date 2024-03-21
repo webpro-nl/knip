@@ -309,6 +309,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
           isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
           ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
+          tags,
         });
         const { internal, external, unresolved } = imports;
         const { exported, duplicate } = exports;
@@ -538,7 +539,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           // Skip exports tagged `@alias`
           if (exportedItem.jsDocTags.includes('@alias')) continue;
 
-          if (shouldIgnore(exportedItem, tags)) continue;
+          if (shouldIgnore(exportedItem.jsDocTags, tags)) continue;
 
           // Skip exports tagged `@internal` in --production mode
           if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
@@ -553,7 +554,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
               if (exportedItem.type === 'enum') {
                 exportedItem.members?.forEach(member => {
-                  if (shouldIgnore(member, tags)) return;
+                  if (shouldIgnore(member.jsDocTags, tags)) return;
 
                   if (member.refs === 0) {
                     exportLookupLog(-1, `Looking up export member ${identifier}.${member.identifier} from`, filePath);
@@ -635,7 +636,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
       if (principal) {
-        const members = exportedItem.members.filter(member => !shouldIgnore(member, tags));
+        const members = exportedItem.members.filter(member => !shouldIgnore(member.jsDocTags, tags));
         principal.findUnusedMembers(filePath, members).forEach(member => {
           collector.addIssue({
             type: 'classMembers',

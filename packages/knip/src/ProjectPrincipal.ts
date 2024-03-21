@@ -2,7 +2,7 @@ import ts from 'typescript';
 import { getCompilerExtensions } from './compilers/index.js';
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
 import { createHosts } from './typescript/createHosts.js';
-import { _getImportsAndExports } from './typescript/getImportsAndExports.js';
+import { _getImportsAndExports, type GetImportsAndExportsOptions } from './typescript/getImportsAndExports.js';
 import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { compact } from './util/array.js';
@@ -36,13 +36,6 @@ const baseCompilerOptions = {
 };
 
 const tsCreateProgram = timerify(ts.createProgram);
-
-type AnalyzeSourceFileOptions = {
-  skipTypeOnly: boolean;
-  isFixExports: boolean;
-  isFixTypes: boolean;
-  ignoreExportsUsedInFile: boolean;
-};
 
 /**
  * This class aims to abstract away TypeScript specific things from the main flow.
@@ -202,7 +195,7 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(filePath: string, options: AnalyzeSourceFileOptions) {
+  public analyzeSourceFile(filePath: string, options: Omit<GetImportsAndExportsOptions, 'skipExports'>) {
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
     const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
 

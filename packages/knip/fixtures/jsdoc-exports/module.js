@@ -24,3 +24,12 @@ export function overloadFn(x: boolean): number;
 export function overloadFn(x: number | boolean): string | number {
   return '0';
 }
+
+/** @ignoreunresolved */
+import unresolvedAndIgnored from './unresolved';
+
+/** @ignoreunresolved */
+export * from './something.generated';
+
+/** @ignoreunresolved */
+const NS = require('./commmonjs');

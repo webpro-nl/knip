@@ -1,5 +1,4 @@
 import type { Tags } from '../types/cli.js';
-import type { SerializableExport, SerializableExportMember } from '../types/exports.js';
 
 export const splitTags = (tags: string[]) =>
   tags
@@ -14,9 +13,9 @@ export const splitTags = (tags: string[]) =>
 
 const hasTag = (tags: string[], jsDocTags: string[]) => tags.some(tag => jsDocTags.includes('@' + tag));
 
-export const shouldIgnore = (exportedItem: SerializableExport | SerializableExportMember, tags: Tags) => {
+export const shouldIgnore = (jsDocTags: string[], tags: Tags) => {
   const [includeJSDocTags, excludeJSDocTags] = tags;
-  if (includeJSDocTags.length > 0 && !hasTag(includeJSDocTags, exportedItem.jsDocTags)) return true;
-  if (excludeJSDocTags.length > 0 && hasTag(excludeJSDocTags, exportedItem.jsDocTags)) return true;
+  if (includeJSDocTags.length > 0 && !hasTag(includeJSDocTags, jsDocTags)) return true;
+  if (excludeJSDocTags.length > 0 && hasTag(excludeJSDocTags, jsDocTags)) return true;
   return false;
 };

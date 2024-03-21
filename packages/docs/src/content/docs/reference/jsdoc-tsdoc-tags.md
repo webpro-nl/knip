@@ -96,6 +96,9 @@ Example:
 ```ts
 /** @knipignore */
 export const myUnusedExport = 1;
+
+/** @knipignore */
+import Unresolved from './generated/lib.js';
 ```
 
 And then include (`+`) or exclude (`-`) these tagged exports from the report

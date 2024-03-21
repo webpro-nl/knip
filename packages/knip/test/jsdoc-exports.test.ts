@@ -11,6 +11,7 @@ test('Find exports from jsdoc @type tags', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
+    tags: [[], ['ignoreunresolved']],
   });
 
   assert(issues.exports['module.js']['alphaFn']);
@@ -31,6 +32,7 @@ test('Find exports from jsdoc @type tags (production)', async () => {
     ...baseArguments,
     cwd,
     isProduction: true,
+    tags: [[], ['ignoreunresolved']],
   });
 
   assert(issues.exports['module.js']['alphaFn']);

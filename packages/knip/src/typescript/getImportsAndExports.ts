@@ -3,6 +3,7 @@ import ts from 'typescript';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
 import { timerify } from '../util/Performance.js';
+import { shouldIgnore } from '../util/tag.js';
 import {
   isAccessExpression,
   getJSDocTags,
@@ -15,6 +16,7 @@ import { getJSXImplicitImportBase } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
+import type { Tags } from '../types/cli.js';
 import type {
   ExportNode,
   ExportNodeMember,
@@ -54,6 +56,7 @@ export type GetImportsAndExportsOptions = {
   isFixExports: boolean;
   isFixTypes: boolean;
   ignoreExportsUsedInFile: boolean;
+  tags: Tags;
 };
 
 interface AddInternalImportOptions extends ImportNode {
@@ -69,7 +72,7 @@ const getImportsAndExports = (
   typeChecker: ts.TypeChecker,
   options: GetImportsAndExportsOptions
 ) => {
-  const { skipTypeOnly } = options;
+  const { skipTypeOnly, tags } = options;
   const internalImports: SerializableImportMap = {};
   const externalImports = new Set<string>();
   const unresolvedImports = new Set<UnresolvedImport>();
@@ -118,7 +121,7 @@ const getImportsAndExports = (
     if (symbol) importedInternalSymbols.set(symbol, filePath);
   };
 
-  const addImport = (options: ImportNode) => {
+  const addImport = (options: ImportNode, node: ts.Node) => {
     const { specifier, isTypeOnly, pos, identifier = '__anonymous', isReExport = false } = options;
     if (isBuiltin(specifier)) return;
 
@@ -149,6 +152,7 @@ const getImportsAndExports = (
       }
     } else {
       if (skipTypeOnly && isTypeOnly) return;
+      if (shouldIgnore(getJSDocTags(node), tags)) return;
 
       if (typeof pos === 'number') {
         const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
@@ -262,7 +266,7 @@ const getImportsAndExports = (
   const visit = (node: ts.Node) => {
     for (const visitor of visitors.dynamicImport) {
       const result = visitor(node, options);
-      result && (Array.isArray(result) ? result.forEach(addImport) : addImport(result));
+      result && (Array.isArray(result) ? result.forEach(r => addImport(r, node)) : addImport(result, node));
     }
 
     // Skip some work by handling only top-level import/export assignments
@@ -271,7 +275,7 @@ const getImportsAndExports = (
     if (isTopLevel) {
       for (const visitor of visitors.import) {
         const result = visitor(node, options);
-        result && (Array.isArray(result) ? result.forEach(addImport) : addImport(result));
+        result && (Array.isArray(result) ? result.forEach(r => addImport(r, node)) : addImport(result, node));
       }
 
       for (const visitor of visitors.export) {
