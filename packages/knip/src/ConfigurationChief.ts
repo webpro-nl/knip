@@ -358,7 +358,7 @@ export class ConfigurationChief {
           name,
           pkgName,
           dir,
-          config: this.getConfigForWorkspace(name, DEFAULT_EXTENSIONS),
+          config: this.getConfigForWorkspace(name),
           ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
           manifestPath: join(dir, 'package.json'),
         };
@@ -415,7 +415,7 @@ export class ConfigurationChief {
     return { ignoreBinaries, ignoreDependencies };
   }
 
-  public getConfigForWorkspace(workspaceName: string, extensions: string[]) {
+  public getConfigForWorkspace(workspaceName: string, extensions?: string[]) {
     const baseConfig = getDefaultWorkspaceConfig(extensions);
     const key = this.getConfigKeyForWorkspace(workspaceName);
     const workspaces = this.rawConfig?.workspaces ?? {};
