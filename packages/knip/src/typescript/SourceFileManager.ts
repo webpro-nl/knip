@@ -31,6 +31,7 @@ export class SourceFileManager {
   }
 
   getSourceFile(filePath: string) {
+    if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const ext = extname(filePath);
     const compiler = this.syncCompilers.get(ext);
     if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) return undefined;
@@ -38,7 +39,6 @@ export class SourceFileManager {
       if (isDeclarationFileExtension(ext)) return undefined;
       return this.createSourceFile(filePath, '');
     }
-    if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const contents = ts.sys.readFile(filePath);
     if (typeof contents !== 'string') {
       if (isInternal(filePath)) debugLog('*', `Unable to read ${filePath}`);
