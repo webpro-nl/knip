@@ -66,6 +66,7 @@ export const IGNORED_RUNTIME_DEPENDENCIES = new Set(['bun']);
 
 export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.avif',
+  '.css',
   '.eot',
   '.gif',
   '.html',

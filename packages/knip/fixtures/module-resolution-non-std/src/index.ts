@@ -17,3 +17,6 @@ import SomePNG from 'common/image.png';
 
 import './globals.css';
 import 'styles/base.css';
+
+import '~/styles/aliased.css';
+import '~/common/aliased.svg';
