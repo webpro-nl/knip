@@ -53,8 +53,8 @@ export class IssueFixer {
           await readFile(filePath, 'utf-8')
         );
         const withoutEmptyReExports = sourceFileText
-          .replaceAll(/export \{[ ,]+\} from ('|")[^'"]+('|");?\n?/g, '')
-          .replaceAll(/export \{[ ,]+\};?\n?/g, '');
+          .replaceAll(/export \{[ ,]+\} from ('|")[^'"]+('|");?\r?\n?/g, '')
+          .replaceAll(/export \{[ ,]+\};?\r?\n?/g, '');
         await writeFile(filePath, withoutEmptyReExports);
       }
     }
