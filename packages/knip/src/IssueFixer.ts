@@ -52,7 +52,10 @@ export class IssueFixer {
           (text, [start, end]) => text.substring(0, start) + text.substring(end),
           await readFile(filePath, 'utf-8')
         );
-        await writeFile(filePath, sourceFileText);
+        const withoutEmptyReExports = sourceFileText
+          .replaceAll(/export \{[ ,]+\} from ('|")[^'"]+('|");?\n?/g, '')
+          .replaceAll(/export \{[ ,]+\};?\n?/g, '');
+        await writeFile(filePath, withoutEmptyReExports);
       }
     }
   }

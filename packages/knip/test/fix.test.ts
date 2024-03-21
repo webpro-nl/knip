@@ -49,6 +49,22 @@ module.exports = { identifier,  };
 `.replace(/\n/g, EOL),
     ],
     [
+      'reexports.js',
+      await readContents('reexports.js'),
+      `export { One } from './reexported';
+`.replace(/\n/g, EOL),
+    ],
+    [
+      'reexported.js',
+      await readContents('reexported.js'),
+      `const Two = 2;
+const Three = 2;
+
+
+export const One = 1;
+`.replace(/\n/g, EOL),
+    ],
+    [
       'package.json',
       await readContents('package.json'),
       `{

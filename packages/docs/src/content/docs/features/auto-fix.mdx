@@ -112,11 +112,9 @@ Nothing is set in stone, but some ideas include:
 - Add unlisted (dev) dependencies to `package.json`
 - Remove unused files
 - Remove unused class and enum members
-- Remove empty export declarations after the fact, e.g.:
+- Remove less common empty export declarations after the fact, e.g.:
 
 ```ts
-export {  }
-
 export const { ,  } = { a, b };
 
 export const [, ] = [c, d];
