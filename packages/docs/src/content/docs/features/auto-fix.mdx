@@ -35,13 +35,23 @@ knip --fix-type exports,types
 The `export` keyword for unused exports is removed:
 
 ```diff title="file.js"
+-export const unused = 1;
 -export default class MyClass {}
++const unused = 1
 +class MyClass {}
 ```
 
 Note that also the `default` keyword was removed here.
 
-Sometimes a line can be completely removed safely:
+Knip cleans up the whole or part of re-exports:
+
+```diff title="file.js"
+-export { Cat, Dog } from './pets';
+-export { Lion, Elephant } from './jungle';
++export { Elephant } from './jungle'
+```
+
+Sometimes lines can be removed completely:
 
 ```diff title="file.js"
 -module.exports.UNUSED = 1;
@@ -112,7 +122,7 @@ Nothing is set in stone, but some ideas include:
 - Add unlisted (dev) dependencies to `package.json`
 - Remove unused files
 - Remove unused class and enum members
-- Remove less common empty export declarations after the fact, e.g.:
+- Remove empty export declarations for less common cases, e.g.:
 
 ```ts
 export const { ,  } = { a, b };

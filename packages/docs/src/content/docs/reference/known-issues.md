@@ -66,6 +66,13 @@ Potential workarounds:
 - Rewrite the import the configuration to a relative import.
 - Use Bun: `bunx --bun knip` (Bun will execute the scripts instead of jiti)
 
+## Definitely Typed packages in `dependencies`
+
+Knip is strict in the divide between `dependencies` and `devDependencies`. Some
+projects are published with one or more Definitely Typed packages (`@types/*`)
+bundled. Knip does not detect/report such DT packages that are expected to be
+listed in `dependencies`.
+
 [1]: https://github.com/unjs/jiti
 [2]: ./configuration.md#plugins
 [3]: https://github.com/unjs/jiti/issues/72

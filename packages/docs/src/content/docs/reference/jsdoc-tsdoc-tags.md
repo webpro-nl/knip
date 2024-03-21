@@ -105,7 +105,7 @@ And then include (`+`) or exclude (`-`) these tagged exports from the report
 like so:
 
 ```shell
-knip --tags=-knipignore
+knip --tags=-knipignore,-internal
 ```
 
 [1]: ../reference/cli.md#--tags
