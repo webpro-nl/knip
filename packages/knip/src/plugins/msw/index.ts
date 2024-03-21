@@ -17,8 +17,9 @@ const config = ['package.json'];
 const entry = ['mockServiceWorker.js'];
 
 const resolveEntryPaths: ResolveEntryPaths<MSWConfig> = async localConfig => {
-  const workerDirectory = localConfig?.workerDirectory ?? '.';
-  return entry.map(pattern => toEntryPattern(join(workerDirectory, pattern)));
+  const workerDirectory = localConfig?.workerDirectory;
+  const dir = workerDirectory ? [workerDirectory].flat()[0] : '.';
+  return entry.map(pattern => toEntryPattern(join(dir, pattern)));
 };
 
 export default {
