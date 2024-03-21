@@ -11,13 +11,11 @@ hooks into JSDoc and TSDoc tags.
 :::caution
 
 Adding tags or excluding a certain type of issues from the report is usually not
-recommended. It means hiding issues, which is often a sign of code smell or
-ambiguity and ends up harder to maintain. It's usually better to refactor the
-code, or report an issue with Knip for false positives.
+recommended. It hides issues, which is often a sign of code smell or ambiguity
+and ends up harder to maintain. It's usually better to refactor the code (or
+report an issue with Knip for false positives).
 
 :::
-
-Also see [tags (experimental)][1] as an alternative way to ignore exports.
 
 JSDoc comments always start with `/**` (not `//`) and can be single or
 multi-line.
@@ -90,7 +88,24 @@ This tag can also be used to make exceptions in entry files when using
 
 [JSDoc: @public][8] and [TSDoc: @public][9]
 
-[1]: ../reference/cli.md#--experimental-tags
+## Tags (CLI)
+
+Use arbitrary [tags][1] to exclude or include tagged exports from the report.
+Example:
+
+```ts
+/** @knipignore */
+export const myUnusedExport = 1;
+```
+
+And then include (`+`) or exclude (`-`) these tagged exports from the report
+like so:
+
+```shell
+knip --tags=-knipignore
+```
+
+[1]: ../reference/cli.md#--tags
 [2]: https://jsdoc.app/tags-alias.html
 [3]: #public
 [4]: https://tsdoc.org/pages/tags/beta/

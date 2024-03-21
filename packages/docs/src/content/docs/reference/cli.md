@@ -202,6 +202,10 @@ Shortcut to include all types of export issues:
 
 ### `--experimental-tags`
 
+Deprecated. Use [--tags](#--tags) instead.
+
+### `--tags`
+
 Exports can be tagged with known or arbitrary JSDoc/TSDoc tags:
 
 ```ts
@@ -219,8 +223,8 @@ And then include (`+`) or exclude (`-`) these tagged exports from the report
 like so:
 
 ```shell
-knip --experimental-tags=+custom
-knip --experimental-tags=-custom,-internal
+knip --tags=+custom
+knip --tags=-custom,-internal
 ```
 
 This way, you can either focus on or ignore specific tagged exports with tags
@@ -231,7 +235,7 @@ notation below is valid and will report only exports tagged `@custom` or
 `@internal`:
 
 ```shell
-knip --experimental-tags @custom --experimental-tags @internal
+knip --tags @custom --tags @internal
 ```
 
 ## Reporters & Preprocessors

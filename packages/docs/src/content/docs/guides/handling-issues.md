@@ -247,7 +247,7 @@ few options:
 
 - [Ignore exports used in file][15] for exports used internally.
 - Individual exports can be [tagged as `@public`][16].
-- Individual exports can be excluded using arbitrary [tags (experimental)][17].
+- Individual exports can be excluded using arbitrary [tags][17].
 - Make sure the export ends up in an [entry file][2]:
   - Add the file to the `entry` file patterns array in the configuration
   - Move the export(s) to an entry file
@@ -326,6 +326,6 @@ positive), you can help your own project and help improve Knip by creating a
 [14]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [15]: ../reference/configuration.md#ignoreexportsusedinfile
 [16]: ../reference/jsdoc-tsdoc-tags.md#public
-[17]: ../reference/cli.md#--experimental-tags
+[17]: ../reference/cli.md#--tags
 [18]: ../reference/configuration.md#includeentryexports
 [19]: ../guides/troubleshooting.md#minimal-reproduction

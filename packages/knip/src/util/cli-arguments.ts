@@ -25,6 +25,7 @@ Options:
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
   --reporter               Select reporter: symbols, compact, codeowners, json, can be repeated (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
+  --tags                   Include or exclude tagged exports
   --no-config-hints        Suppress configuration hints
   --no-exit-code           Always exit with code zero (0)
   --max-issues             Maximum number of issues before non-zero exit code (default: 0)
@@ -43,6 +44,7 @@ $ knip --production
 $ knip --workspace packages/client --include files,dependencies
 $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
+$ knip --tags=-knipignore
 
 Website: https://knip.dev`;
 
@@ -56,6 +58,7 @@ try {
       directory: { type: 'string' },
       exclude: { type: 'string', multiple: true },
       exports: { type: 'boolean' },
+      tags: { type: 'string', multiple: true },
       'experimental-tags': { type: 'string', multiple: true },
       fix: { type: 'boolean' },
       'fix-type': { type: 'string', multiple: true },

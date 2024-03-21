@@ -1,4 +1,5 @@
 import './util/register.js';
+import picocolors from 'picocolors';
 import prettyMilliseconds from 'pretty-ms';
 import parsedArgValues, { helpText } from './util/cli-arguments.js';
 import { isKnownError, getKnownError, isConfigurationError, hasCause } from './util/errors.js';
@@ -30,7 +31,8 @@ const {
   'fix-type': fixTypes = [],
   tsConfig,
   version: isVersion,
-  'experimental-tags': tags = [],
+  'experimental-tags': experimentalTags = [],
+  tags = [],
 } = parsedArgValues;
 
 if (isHelp) {
@@ -58,7 +60,7 @@ const run = async () => {
       isShowProgress,
       isIncludeEntryExports,
       isIsolateWorkspaces,
-      tags: splitTags(tags),
+      tags: tags.length > 0 ? splitTags(tags) : splitTags(experimentalTags),
       isFix: isFix || fixTypes.length > 0,
       fixTypes: fixTypes.flatMap(type => type.split(',')),
     });
@@ -90,6 +92,12 @@ const run = async () => {
       const mem = Math.round((perfObserver.getMemHeapUsage() / 1024 / 1024) * 100) / 100;
       console.log('\nTotal running time:', prettyMilliseconds(perfObserver.getTotalTime()), `(mem: ${mem}MB)`);
       perfObserver.reset();
+    }
+
+    if (experimentalTags.length > 0) {
+      console.warn(
+        `\n${picocolors.yellow('DEPRECATION WARNING:')} --experimental-tags is deprecated, please start using --tags instead`
+      );
     }
 
     if (!noExitCode && totalErrorCount > Number(maxIssues)) {

@@ -90,8 +90,8 @@ so you can easily get rid of false positives? A variety of reasons:
 3. In the event you want to remove Knip, you only need to uninstall the `knip`
    dependency and delete the file to configure it.
 
-Knip v4 introduces [tags][3] (experimental), to filter the report to your needs.
+Knip v4 introduces [--tags][3], to filter the report to your needs.
 
 [1]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
 [2]: ../reference/jsdoc-tsdoc-tags.md
-[3]: ../reference/cli.md#--experimental-tags
+[3]: ../reference/cli.md#--tags
