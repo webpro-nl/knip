@@ -322,7 +322,7 @@ positive), you can help your own project and help improve Knip by creating a
 [10]: ../features/integrated-monorepos.md
 [11]: #unused-files
 [12]: #unlisted-binaries
-[13]: https://eslint.org/docs/head/use/configure/configuration-files-new
+[13]: https://eslint.org/docs/latest/use/configure/configuration-files-new
 [14]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [15]: ../reference/configuration.md#ignoreexportsusedinfile
 [16]: ../reference/jsdoc-tsdoc-tags.md#public
