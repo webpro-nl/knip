@@ -38,6 +38,7 @@ const {
   exclude = [],
   dependencies = false,
   exports = false,
+  files = false,
 } = parsedArgValues;
 
 const workspaceArg = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, '').replace(/\/$/, '') : undefined;
@@ -450,7 +451,7 @@ export class ConfigurationChief {
   }
 
   public getIncludedIssueTypes() {
-    const cliArgs = { include, exclude, dependencies, exports };
+    const cliArgs = { include, exclude, dependencies, exports, files };
     const excludesFromRules = getKeysByValue(this.config.rules, 'off');
     const config = {
       include: this.config.include ?? [],

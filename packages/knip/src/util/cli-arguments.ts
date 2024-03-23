@@ -60,6 +60,7 @@ try {
       exports: { type: 'boolean' },
       tags: { type: 'string', multiple: true },
       'experimental-tags': { type: 'string', multiple: true },
+      files: { type: 'boolean' },
       fix: { type: 'boolean' },
       'fix-type': { type: 'string', multiple: true },
       help: { type: 'boolean', short: 'h' },

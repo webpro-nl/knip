@@ -7,6 +7,7 @@ type CLIArguments = {
   exclude: string[];
   dependencies: boolean;
   exports: boolean;
+  files: boolean;
 };
 
 type Options = {
@@ -45,8 +46,10 @@ export const getIncludedIssueTypes = (
     incl = [...incl, 'dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
   }
   if (cliArgs.exports) {
-    const exports = ['exports', 'nsExports', 'classMembers', 'types', 'nsTypes', 'enumMembers', 'duplicates'];
-    incl = [...incl, ...exports];
+    incl = [...incl, 'exports', 'nsExports', 'classMembers', 'types', 'nsTypes', 'enumMembers', 'duplicates'];
+  }
+  if (cliArgs.files) {
+    incl = [...incl, 'files'];
   }
 
   const _include = [...incl, ...includes];
