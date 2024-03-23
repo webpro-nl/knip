@@ -1,4 +1,3 @@
-import micromatch from 'micromatch';
 import { _getDependenciesFromScripts } from './binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
@@ -12,30 +11,16 @@ import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLogObject, debugLogArray, debugLog, exportLookupLog } from './util/debug.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredFn } from './util/globby.js';
-import {
-  getEntryPathFromManifest,
-  getPackageNameFromFilePath,
-  getPackageNameFromModuleSpecifier,
-  normalizeSpecifierFromFilePath,
-} from './util/modules.js';
-import { dirname, isInNodeModules, join, isInternal } from './util/path.js';
-import { fromBinary, isBinary } from './util/protocols.js';
-import { _resolveSpecifier } from './util/require.js';
+import { getHandler } from './util/handleReferencedDependency.js';
+import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
+import { dirname, join } from './util/path.js';
 import { shouldIgnore } from './util/tag.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import { getType, getHasStrictlyNsReferences } from './util/type.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
-import type { Workspace } from './ConfigurationChief.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type { SerializableExport, SerializableExportMember, SerializableExportMap } from './types/exports.js';
 import type { SerializableImports, SerializableImportMap } from './types/imports.js';
-
-type HandleReferencedDependencyOptions = {
-  specifier: string;
-  containingFilePath: string;
-  principal: ProjectPrincipal;
-  workspace: Workspace;
-};
 
 export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
@@ -91,51 +76,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
   debugLogObject('*', 'Included workspace configs', o);
-
-  const handleReferencedDependency = ({
-    specifier,
-    containingFilePath,
-    principal,
-    workspace,
-  }: HandleReferencedDependencyOptions) => {
-    if (isInternal(specifier)) {
-      // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js, ./module.ts, ./module.d.ts
-      const filePath = principal.resolveModule(specifier, containingFilePath)?.resolvedFileName;
-      if (filePath) {
-        const ignorePatterns = workspace.config?.ignore.map(pattern => join(workspace.dir, pattern)) ?? [];
-        const isIgnored = micromatch.isMatch(filePath, ignorePatterns);
-        if (!isIgnored) principal.addEntryPath(filePath);
-      } else {
-        collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
-      }
-    } else {
-      if (isBinary(specifier)) {
-        const binaryName = fromBinary(specifier);
-        const isHandled = deputy.maybeAddReferencedBinary(workspace, binaryName);
-        if (!isHandled) collector.addIssue({ type: 'binaries', filePath: containingFilePath, symbol: binaryName });
-      } else {
-        const packageName = isInNodeModules(specifier)
-          ? getPackageNameFromFilePath(specifier) // Pattern: /abs/path/to/repo/node_modules/package/index.js
-          : getPackageNameFromModuleSpecifier(specifier); // Patterns: package, @any/package, @local/package, self-ref
-
-        const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
-        if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
-
-        // Patterns: @local/package/file, self-reference/file, ./node_modules/@scope/pkg/tsconfig.json
-        if (packageName && specifier !== packageName) {
-          const otherWorkspace = chief.availableWorkspaceManifests.find(w => w.manifest.name === packageName);
-          if (otherWorkspace) {
-            const filePath = _resolveSpecifier(otherWorkspace.dir, normalizeSpecifierFromFilePath(specifier));
-            if (filePath) {
-              principal.addEntryPath(filePath, { skipExportsAnalysis: true });
-            } else {
-              collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
-            }
-          }
-        }
-      }
-    }
-  };
 
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName, manifestPath } = workspace;
@@ -294,9 +234,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   for (const principal of principals) {
     principal.init();
 
+    const handleReferencedDependency = getHandler(collector, deputy, chief);
+
     principal.referencedDependencies.forEach(([containingFilePath, specifier, workspaceName]) => {
       const workspace = chief.findWorkspaceByName(workspaceName);
-      if (workspace) handleReferencedDependency({ specifier, containingFilePath, principal, workspace });
+      if (workspace) handleReferencedDependency(specifier, containingFilePath, workspace, principal);
     });
 
     const specifierFilePaths = new Set<string>();
@@ -369,7 +311,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           manifestScriptNames: new Set(),
           dependencies: deputy.getDependencies(workspace.name),
         }).forEach(specifier => {
-          handleReferencedDependency({ specifier, containingFilePath: filePath, principal: _principal, workspace });
+          handleReferencedDependency(specifier, filePath, workspace, _principal);
         });
       }
     };
