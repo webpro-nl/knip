@@ -77,6 +77,7 @@ export const pluginSchema = z.union([
 ]);
 
 const pluginsSchema = z.object({
+  wrangler: pluginSchema,
   astro: pluginSchema,
   angular: pluginSchema,
   ava: pluginSchema,

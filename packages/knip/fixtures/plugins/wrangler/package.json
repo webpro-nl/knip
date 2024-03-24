@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/wrangler",
+  "version": "*",
+  "dependencies": {
+    "wrangler": "^3.37.0"
+  }
+}
