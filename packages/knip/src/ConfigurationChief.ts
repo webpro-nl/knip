@@ -28,6 +28,7 @@ import type {
   PluginName,
   PluginsConfiguration,
   WorkspaceConfiguration,
+  IgnorePatterns,
 } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';
 
@@ -58,6 +59,7 @@ const defaultConfig: Configuration = {
   ignore: [],
   ignoreBinaries: [],
   ignoreDependencies: [],
+  ignoreMembers: [],
   ignoreExportsUsedInFile: false,
   ignoreWorkspaces: [],
   isIncludeEntryExports: false,
@@ -82,6 +84,7 @@ export type Workspace = {
   ancestors: string[];
   config: WorkspaceConfiguration;
   manifestPath: string;
+  ignoreMembers: IgnorePatterns;
 };
 
 /**
@@ -188,6 +191,7 @@ export class ConfigurationChief {
     const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
     const ignoreBinaries = (rawConfig.ignoreBinaries ?? []).map(toRegexOrString);
     const ignoreDependencies = (rawConfig.ignoreDependencies ?? []).map(toRegexOrString);
+    const ignoreMembers = (rawConfig.ignoreMembers ?? []).map(toRegexOrString);
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
@@ -210,6 +214,7 @@ export class ConfigurationChief {
       ignore,
       ignoreBinaries,
       ignoreDependencies,
+      ignoreMembers,
       ignoreExportsUsedInFile,
       ignoreWorkspaces,
       isIncludeEntryExports,
@@ -355,6 +360,8 @@ export class ConfigurationChief {
       .map((name): Workspace => {
         const dir = join(this.cwd, name);
         const pkgName = this.availableWorkspaceManifests.find(p => p.dir === dir)?.manifest.name ?? `NOT_FOUND_${name}`;
+        const workspaceConfig = this.getWorkspaceConfig(name);
+        const ignoreMembers = arrayify(workspaceConfig.ignoreMembers).map(toRegexOrString);
         return {
           name,
           pkgName,
@@ -362,6 +369,7 @@ export class ConfigurationChief {
           config: this.getConfigForWorkspace(name),
           ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
           manifestPath: join(dir, 'package.json'),
+          ignoreMembers,
         };
       });
   }
@@ -402,15 +410,20 @@ export class ConfigurationChief {
       .find(pattern => micromatch.isMatch(workspaceName, pattern));
   }
 
-  public getIgnores(workspaceName: string) {
+  public getWorkspaceConfig(workspaceName: string) {
     const key = this.getConfigKeyForWorkspace(workspaceName);
     const workspaces = this.rawConfig?.workspaces ?? {};
-    const workspaceConfig =
+    return (
       (key
         ? key === ROOT_WORKSPACE_NAME && !(ROOT_WORKSPACE_NAME in workspaces)
           ? this.rawConfig
           : workspaces[key]
-        : {}) ?? {};
+        : {}) ?? {}
+    );
+  }
+
+  public getIgnores(workspaceName: string) {
+    const workspaceConfig = this.getWorkspaceConfig(workspaceName);
     const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries).map(toRegexOrString);
     const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies).map(toRegexOrString);
     return { ignoreBinaries, ignoreDependencies };
@@ -418,14 +431,7 @@ export class ConfigurationChief {
 
   public getConfigForWorkspace(workspaceName: string, extensions?: string[]) {
     const baseConfig = getDefaultWorkspaceConfig(extensions);
-    const key = this.getConfigKeyForWorkspace(workspaceName);
-    const workspaces = this.rawConfig?.workspaces ?? {};
-    const workspaceConfig =
-      (key
-        ? key === ROOT_WORKSPACE_NAME && !(ROOT_WORKSPACE_NAME in workspaces)
-          ? this.rawConfig
-          : workspaces[key]
-        : {}) ?? {};
+    const workspaceConfig = this.getWorkspaceConfig(workspaceName);
 
     const entry = workspaceConfig.entry ? arrayify(workspaceConfig.entry) : baseConfig.entry;
     const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : baseConfig.project;

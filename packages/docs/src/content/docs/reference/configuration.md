@@ -106,6 +106,19 @@ export default {
 };
 ```
 
+## `ignoreMembers`
+
+Array of class and enum members to exclude from the report. Regular expressions
+allowed. Example:
+
+```json title="knip.json"
+{
+  "ignoreMembers": ["render", "on.+"]
+}
+```
+
+Actual regular expressions can be used in dynamic configurations.
+
 ## `ignoreExportsUsedInFile`
 
 In files with multiple exports, some of them might be used only internally. If

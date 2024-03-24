@@ -14,6 +14,7 @@ import { getGitIgnoredFn } from './util/globby.js';
 import { getHandler } from './util/handleReferencedDependency.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join } from './util/path.js';
+import { hasMatch } from './util/regex.js';
 import { shouldIgnore } from './util/tag.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import { getType, getHasStrictlyNsReferences } from './util/type.js';
@@ -499,6 +500,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
               if (exportedItem.type === 'enum') {
                 exportedItem.members?.forEach(member => {
+                  if (hasMatch(workspace.ignoreMembers, member.identifier)) return;
                   if (shouldIgnore(member.jsDocTags, tags)) return;
 
                   if (member.refs === 0) {
@@ -586,7 +588,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const workspace = chief.findWorkspaceByFilePath(filePath);
       const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
       if (principal) {
-        const members = exportedItem.members.filter(member => !shouldIgnore(member.jsDocTags, tags));
+        const members = exportedItem.members.filter(
+          member => !hasMatch(workspace.ignoreMembers, member.identifier) && !shouldIgnore(member.jsDocTags, tags)
+        );
         principal.findUnusedMembers(filePath, members).forEach(member => {
           collector.addIssue({
             type: 'classMembers',

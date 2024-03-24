@@ -46,6 +46,7 @@ export interface Configuration {
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
+  ignoreMembers: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
   syncCompilers: SyncCompilers;

@@ -79,6 +79,7 @@ The following options are available inside workspace configurations:
 - [ignore][3]
 - [ignoreBinaries][4]
 - [ignoreDependencies][5]
+- [ignoreMembers][9]
 - [includeEntryExports][6]
 
 [Plugins][7] can be configured separately per workspace.
@@ -106,9 +107,10 @@ mode][8].
 
 [1]: ../overview/configuration.md#defaults
 [2]: ./integrated-monorepos.md
-[3]: ../reference/configuration.md#ignore-files
-[4]: ../reference/configuration.md#ignore-binaries
-[5]: ../reference/configuration.md#ignore-dependencies
+[3]: ../reference/configuration.md#ignore
+[4]: ../reference/configuration.md#ignorebinaries
+[5]: ../reference/configuration.md#ignoredependencies
+[9]: ../reference/configuration.md#ignoremembers
 [6]: ../reference/configuration.md#includeentryexports
 [7]: ../reference/configuration.md#plugins
 [8]: ./production-mode.md#strict-mode
