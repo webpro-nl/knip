@@ -351,7 +351,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     principal.entryPaths.forEach(filePath => entryPaths.add(filePath));
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (!isReportClassMembers) factory.deletePrincipal(principal);
+    if (isSkipLibs) factory.deletePrincipal(principal);
   }
 
   const isIdentifierReferenced = (
