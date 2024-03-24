@@ -8,10 +8,12 @@ import { IssueFixer } from './IssueFixer.js';
 import { getFilteredScripts } from './manifest/helpers.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { debugLogObject, debugLogArray, debugLog, exportLookupLog } from './util/debug.js';
+import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
+import { getReExportingEntryFileHandler } from './util/get-reexporting-entry-file.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredFn } from './util/globby.js';
-import { getHandler } from './util/handleReferencedDependency.js';
+import { getHandler } from './util/handle-dependency.js';
+import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join } from './util/path.js';
 import { hasMatch } from './util/regex.js';
@@ -21,7 +23,7 @@ import { getType, getHasStrictlyNsReferences } from './util/type.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type { SerializableExport, SerializableExportMember, SerializableExportMap } from './types/exports.js';
-import type { SerializableImports, SerializableImportMap } from './types/imports.js';
+import type { SerializableImportMap } from './types/imports.js';
 
 export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
@@ -232,7 +234,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const importedSymbols: SerializableImportMap = {};
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
-  const exportedClasses = new Set<[string, SerializableExport]>();
 
   for (const principal of principals) {
     principal.init();
@@ -355,105 +356,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     if (isSkipLibs) factory.deletePrincipal(principal);
   }
 
-  const isIdentifierReferenced = (
-    filePath: string,
-    id: string,
-    importsForExport?: SerializableImports,
-    depth: number = 0
-  ): boolean => {
-    if (!importsForExport) {
-      exportLookupLog(depth, `no imports found from`, filePath);
-      return false;
-    }
+  const isIdentifierReferenced = getIsIdentifierReferencedHandler(importedSymbols);
 
-    if (importsForExport.identifiers.has(id)) {
-      exportLookupLog(depth, `imported from`, filePath);
-      return true;
-    }
-
-    for (const ns of importsForExport.importedNs) {
-      if (importsForExport.identifiers.has(`${ns}.${id}`)) {
-        exportLookupLog(depth, `imported on ${ns} from`, filePath);
-        return true;
-      }
-    }
-
-    if (importsForExport.isReExport) {
-      for (const filePath of importsForExport.isReExportedBy) {
-        if (isIdentifierReferenced(filePath, id, importedSymbols[filePath], depth + 1)) {
-          exportLookupLog(depth, `re-exported by`, filePath);
-          return true;
-        }
-      }
-
-      for (const [filePath, alias] of importsForExport.isReExportedAs) {
-        if (isIdentifierReferenced(filePath, alias, importedSymbols[filePath], depth + 1)) {
-          exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
-          return true;
-        }
-      }
-
-      for (const [filePath, ns] of importsForExport.isReExportedNs) {
-        if (isIdentifierReferenced(filePath, `${ns}.${id}`, importedSymbols[filePath], depth + 1)) {
-          exportLookupLog(depth, `re-exported on ${ns} by`, filePath);
-          return true;
-        }
-      }
-    }
-
-    exportLookupLog(depth, `not imported from`, filePath);
-    return false;
-  };
-
-  const getReExportingEntryFile = (
-    importedModule: SerializableImports | undefined,
-    id: string,
-    depth: number = 0
-  ): string | undefined => {
-    if (!importedModule) return undefined;
-
-    if (importedModule.isReExport) {
-      for (const filePath of importedModule.isReExportedBy) {
-        if (entryPaths.has(filePath)) {
-          if (filePath in exportedSymbols && id in exportedSymbols[filePath]) {
-            exportLookupLog(depth, `re-exported by entry`, filePath);
-            return filePath;
-          } else if (importedModule.hasStar) {
-            exportLookupLog(depth, `re-exported (*) by entry`, filePath);
-            return filePath;
-          }
-        } else {
-          exportLookupLog(depth, `re-exported by`, filePath);
-          const file = getReExportingEntryFile(importedSymbols[filePath], id, depth + 1);
-          if (file) return file;
-        }
-      }
-
-      for (const [filePath, namespace] of importedModule.isReExportedNs) {
-        if (entryPaths.has(filePath)) {
-          exportLookupLog(depth, `re-exported on ${namespace} by entry`, filePath);
-          return filePath;
-        } else {
-          exportLookupLog(depth, `re-exported on ${namespace} by`, filePath);
-          const file = getReExportingEntryFile(importedSymbols[filePath], namespace, depth + 1);
-          if (file) return file;
-        }
-      }
-
-      for (const [filePath, alias] of importedModule.isReExportedAs) {
-        if (entryPaths.has(filePath)) {
-          exportLookupLog(depth, `re-exported as ${alias} by entry`, filePath);
-          return filePath;
-        } else {
-          exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
-          const file = getReExportingEntryFile(importedSymbols[filePath], alias, depth + 1);
-          if (file) return file;
-        }
-      }
-    }
-
-    exportLookupLog(depth, `${id} is not re-exported by entry file`, '');
-  };
+  const getReExportingEntryFile = getReExportingEntryFileHandler(entryPaths, exportedSymbols, importedSymbols);
 
   const isExportedItemReferenced = (exportedItem: SerializableExport | SerializableExportMember) => {
     return (
@@ -469,6 +374,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     for (const [filePath, exportItems] of Object.entries(exportedSymbols)) {
       const workspace = chief.findWorkspaceByFilePath(filePath);
+      const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
 
       if (workspace) {
         const { isIncludeEntryExports } = workspace.config;
@@ -479,32 +385,24 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const importsForExport = importedSymbols[filePath];
 
         for (const [identifier, exportedItem] of Object.entries(exportItems)) {
-          // Skip exports tagged `@public` or `@beta`
+          // Skip tagged exports
           if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
-
-          // Skip exports tagged `@alias`
           if (exportedItem.jsDocTags.includes('@alias')) continue;
-
           if (shouldIgnore(exportedItem.jsDocTags, tags)) continue;
-
-          // Skip exports tagged `@internal` in --production mode
           if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
 
           if (importsForExport) {
             if (!isIncludeEntryExports) {
-              exportLookupLog(-1, `Looking up re-exporting file for ${identifier} from`, filePath);
-              if (getReExportingEntryFile(importsForExport, identifier)) continue;
+              if (getReExportingEntryFile(importsForExport, identifier, 0, filePath)) continue;
             }
 
-            exportLookupLog(-1, `Looking up ${identifier} export from`, filePath);
             if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
-              if (exportedItem.type === 'enum') {
+              if (report.enumMembers && exportedItem.type === 'enum') {
                 exportedItem.members?.forEach(member => {
                   if (hasMatch(workspace.ignoreMembers, member.identifier)) return;
                   if (shouldIgnore(member.jsDocTags, tags)) return;
 
                   if (member.refs === 0) {
-                    exportLookupLog(-1, `Looking up export member ${identifier}.${member.identifier} from`, filePath);
                     if (!isIdentifierReferenced(filePath, `${identifier}.${member.identifier}`, importsForExport)) {
                       collector.addIssue({
                         type: 'enumMembers',
@@ -521,7 +419,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               }
 
               if (isReportClassMembers && exportedItem.type === 'class') {
-                exportedClasses.add([filePath, exportedItem]);
+                const members = exportedItem.members.filter(
+                  member =>
+                    !hasMatch(workspace.ignoreMembers, member.identifier) && !shouldIgnore(member.jsDocTags, tags)
+                );
+                principal?.findUnusedMembers(filePath, members).forEach(member => {
+                  collector.addIssue({
+                    type: 'classMembers',
+                    filePath,
+                    symbol: member.identifier,
+                    parentSymbol: exportedItem.identifier,
+                    pos: member.pos,
+                    line: member.line,
+                    col: member.col,
+                  });
+                });
               }
 
               // This id was imported, so we bail out early
@@ -536,10 +448,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || (!report.nsExports && !isType))) continue;
 
           if (!isExportedItemReferenced(exportedItem)) {
-            if (!isSkipLibs) {
-              const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-              if (principal?.hasReferences(filePath, exportedItem)) continue;
-            }
+            if (!isSkipLibs && principal?.hasReferences(filePath, exportedItem)) continue;
 
             const type = getType(hasStrictlyNsReferences, isType);
             collector.addIssue({
@@ -581,30 +490,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   );
 
   const { issues, counters, configurationHints } = collector.getIssues();
-
-  if (isReportClassMembers) {
-    streamer.cast('Validating expensive classy memberships...');
-    for (const [filePath, exportedItem] of exportedClasses) {
-      const workspace = chief.findWorkspaceByFilePath(filePath);
-      const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
-      if (principal) {
-        const members = exportedItem.members.filter(
-          member => !hasMatch(workspace.ignoreMembers, member.identifier) && !shouldIgnore(member.jsDocTags, tags)
-        );
-        principal.findUnusedMembers(filePath, members).forEach(member => {
-          collector.addIssue({
-            type: 'classMembers',
-            filePath,
-            symbol: member.identifier,
-            parentSymbol: exportedItem.identifier,
-            pos: member.pos,
-            line: member.line,
-            col: member.col,
-          });
-        });
-      }
-    }
-  }
 
   if (isFix) {
     await fixer.fixIssues(issues);

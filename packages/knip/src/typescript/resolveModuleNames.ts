@@ -58,9 +58,7 @@ export function createCustomModuleResolver(
       if (tsResolvedModule.extension === '.d.mts') {
         const resolvedFileName = tsResolvedModule.resolvedFileName.replace(/\.d\.mts$/, '.mjs');
         return { resolvedFileName, extension: '.mjs', isExternalLibraryImport: false, resolvedUsingTsExtension: false };
-      }
-
-      if (tsResolvedModule.extension === '.d.cts') {
+      } else if (tsResolvedModule.extension === '.d.cts') {
         const resolvedFileName = tsResolvedModule.resolvedFileName.replace(/\.d\.cts$/, '.cjs');
         return { resolvedFileName, extension: '.cjs', isExternalLibraryImport: false, resolvedUsingTsExtension: false };
       }
