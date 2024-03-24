@@ -55,6 +55,7 @@ export type GetImportsAndExportsOptions = {
   skipExports: boolean;
   isFixExports: boolean;
   isFixTypes: boolean;
+  isReportClassMembers: boolean;
   ignoreExportsUsedInFile: boolean;
   tags: Tags;
 };

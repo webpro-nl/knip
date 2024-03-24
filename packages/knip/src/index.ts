@@ -253,6 +253,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
           isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
           ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
+          isReportClassMembers,
           tags,
         });
         const { internal, external, unresolved } = imports;
