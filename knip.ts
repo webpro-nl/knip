@@ -2,6 +2,7 @@ import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
   include: ['classMembers'],
+  ignore: ['templates/**'],
   workspaces: {
     '.': {
       ignoreBinaries: ['knip']

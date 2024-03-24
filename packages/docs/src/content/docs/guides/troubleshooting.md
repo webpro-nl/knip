@@ -78,8 +78,10 @@ to [open an issue on GitHub][5] or discuss it in [the Discord channel][13].
 [3]: ../guides/handling-issues.md
 [4]: ../reference/known-issues.md
 [5]: https://github.com/webpro/knip/issues
-[6]: https://codesandbox.io/p/devbox/knip-reproduction-lk5zqx
-[7]: https://stackblitz.com/edit/knip-case-repro?file=README.md&view=editor
+[6]:
+  https://codesandbox.io/p/devbox/github/webpro/knip/main/templates/issue-reproduction/basic
+[7]:
+  https://stackblitz.com/github/webpro/knip/tree/main/templates/issue-reproduction/basic
 [8]: ../explanations/entry-files.md
 [9]: ../explanations/plugins.md
 [10]: ../features/production-mode.md
