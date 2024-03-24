@@ -32,7 +32,7 @@
       "$ref": "#/definitions/list"
     },
     "ignoreMembers": {
-      "title": "Class members to ignore (regex allowed)",
+      "title": "Class and enum members to ignore (regex allowed)",
       "examples": ["render", "on.*"],
       "$ref": "#/definitions/list"
     },

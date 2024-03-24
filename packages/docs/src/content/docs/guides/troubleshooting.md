@@ -41,14 +41,18 @@ of the error.
 ## Minimal Reproduction
 
 If you encounter an issue or false positives when running Knip, you can [open an
-issue on GitHub][5]. Depending on the type of issue, it may be of great help (or
-you may be asked) to create a minimal reproduction. This is sometimes referred
-to as MNWE (minimal not-working example) or MRE (minimal reproducible example).
+issue on GitHub][5]. Depending on the type of issue, you might be asked to
+create a minimal reproduction: only the code and configuration required to
+demonstrate the issue.
 
 A convenient way to do so is by forking one of these templates:
 
 - [CodeSandbox][6]
 - [StackBlitz][7]
+
+Other solutions may work well too. For instance, many people choose to create a
+small repository on GitHub. The goal is to have an easy and common understanding
+and reproduction.
 
 :::tip
 
@@ -56,9 +60,6 @@ The optimal way is to add fixtures and/or failing tests to the Knip repository,
 and open a pull request to discuss the issue!
 
 :::
-
-Other solutions may work well too, the goal is to have an easy and common
-understanding and reproduction.
 
 ## Understanding Knip
 

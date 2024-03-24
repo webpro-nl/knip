@@ -70,7 +70,7 @@ Potential workarounds:
 
 Knip can report false positives when exports are consumed by external libraries.
 
-Please see [external libs](../guides/handling-issues.mdx#external-libs).
+Please see [external libs][8].
 
 ## Definitely Typed packages in `dependencies`
 
@@ -86,3 +86,4 @@ listed in `dependencies`.
 [5]: https://github.com/unjs/jiti/issues/174
 [6]: https://github.com/webpro/knip/issues/346
 [7]: https://github.com/webpro/knip/issues/355
+[8]: ../guides/handling-issues.mdx#external-libs

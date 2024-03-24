@@ -7,9 +7,14 @@ assignees: ''
 ---
 
 <!--
-No extensive forms or lists here. Use common sense and provide the necessary
-information that helps me or others to help you. Depending on the type of issue,
-it may be of great help (or you may be asked) to create a minimal reproduction.
+
+No extensive forms or lists here. Please make sure you have read the docs and
+are using the latest version of Knip. Use common sense and provide the necessary
+information that helps me or others to help you.
+
+Depending on the type of issue, you might be asked to create a minimal
+reproduction: only the code and configuration required to demonstrate the issue.
+
 Make sure you've read https://knip.dev/guides/troubleshooting
 
 - What's the latest version it worked properly for you?
