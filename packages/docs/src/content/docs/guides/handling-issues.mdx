@@ -4,6 +4,8 @@ sidebar:
   order: 2
 ---
 
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
 A long list of unused items can be frustrating. The list may contain false
 positives, but also things that can actually be removed from the codebase. You
 can get a lot of value out of Knip, but sometimes it requires some initial
@@ -264,6 +266,49 @@ knip --exports
 ```
 
 :::
+
+### External Libs
+
+Are the exports consumed or imported by an external library, resulting in a
+non-standard consumption of your exports? Here's an example:
+
+<Tabs>
+  <TabItem label="index.js">
+
+    ```ts
+    import loadable from '@loadable/component';
+
+    export const DynamicApple = dynamic(() =>
+      import('./components.js').then(mod => mod.Apple)
+    );
+
+    export const LoadableOrange = loadable(() => import('./components.js'), {
+      resolveComponent: components => components.Orange,
+    });
+    ```
+
+  </TabItem>
+  <TabItem label="components.js">
+
+    ```ts
+    export const Apple = () => 'Apple';
+    export const Orange = () => 'Orange';
+    ```
+
+  </TabItem>
+</Tabs>
+
+Knip understands `Apple` is used, since it's standard usage. But `Orange` is
+referenced though a function of an external library. To include the type
+definitions of external libraries, use the `--include-libs` flag:
+
+```shell
+knip --include-libs
+```
+
+This comes at a performance and memory penalty, but should give better results
+if you need it. This flag is implied when [classMembers](#class-members) are
+included (that feature comes with roughly the same performance penalty).
 
 ### Missing Exports?
 

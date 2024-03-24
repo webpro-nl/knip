@@ -124,6 +124,17 @@ knip --include-entry-exports
 
 Also see [includeEntryExports][3].
 
+### `--include-libs`
+
+If Knip report false positives for exports consumed by external libraries, you
+can try the `--include-libs` flag:
+
+```sh
+knip --include-libs
+```
+
+Also see [external libs](../guides/handling-issues.mdx#external-libs).
+
 ## Modes
 
 ### `--production`
