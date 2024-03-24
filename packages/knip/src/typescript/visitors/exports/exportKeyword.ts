@@ -97,7 +97,8 @@ export default visit(
               .map(member => ({
                 node: member,
                 identifier: member.name.getText(),
-                pos: member.name.getStart(),
+                // Naive, but [does.the.job()]
+                pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
                 type: SymbolType.MEMBER,
                 fix: undefined,
               }))
