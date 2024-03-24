@@ -34,6 +34,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isProduction,
     isShowProgress,
     isIncludeEntryExports,
+    isIncludeLibs,
     isIsolateWorkspaces,
     tags,
     isFix,
@@ -65,6 +66,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;
+  const isSkipLibs = !isIncludeLibs && !isReportClassMembers;
 
   const collector = new IssueCollector({ cwd, rules, filters });
 
@@ -108,7 +110,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       pkgName,
       isGitIgnored,
       isIsolateWorkspaces,
-      isSkipLibs: !isReportClassMembers,
+      isSkipLibs,
     });
 
     const worker = new WorkspaceWorker({
@@ -531,6 +533,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || (!report.nsExports && !isType))) continue;
 
           if (!isExportedItemReferenced(exportedItem)) {
+            if (!isSkipLibs) {
+              const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+              if (principal?.hasReferences(filePath, exportedItem)) continue;
+            }
+
             const type = getType(hasStrictlyNsReferences, isType);
             collector.addIssue({
               type,

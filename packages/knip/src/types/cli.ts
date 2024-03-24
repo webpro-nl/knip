@@ -6,6 +6,7 @@ export interface CommandLineOptions {
   isProduction: boolean;
   isShowProgress: boolean;
   isIncludeEntryExports: boolean;
+  isIncludeLibs: boolean;
   isIsolateWorkspaces: boolean;
   tags: Tags;
   isFix: boolean;

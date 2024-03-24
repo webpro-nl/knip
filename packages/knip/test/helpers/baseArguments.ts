@@ -7,6 +7,7 @@ const baseArguments = {
   isProduction: false,
   isShowProgress: false,
   isIncludeEntryExports: false,
+  isIncludeLibs: false,
   isIsolateWorkspaces: false,
   isFix: false,
   tags: [[], []],
