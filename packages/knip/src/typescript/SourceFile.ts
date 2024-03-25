@@ -9,7 +9,13 @@ type SymbolWithExports = ts.Symbol & {
   exports?: SymbolTable;
 };
 
-type PragmaMap = { arguments: { factory: string } };
+type PragmaMap = {
+  arguments: {
+    factory?: string;
+    path?: { value?: string; pos?: number };
+    types?: { value?: string; pos?: number };
+  };
+};
 
 export interface BoundSourceFile extends ts.SourceFile {
   // Used in `maybeAddAliasedExport`

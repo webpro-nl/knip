@@ -12,7 +12,7 @@ import {
 } from './ast-helpers.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
-import { getJSXImplicitImportBase } from './visitors/helpers.js';
+import { getImportsFromPragmas } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
@@ -82,10 +82,6 @@ const getImportsAndExports = (
   const scripts = new Set<string>();
 
   const importedInternalSymbols = new Map<ts.Symbol, string>();
-
-  // No file-level visitors yet, so let's keep it simple
-  const jsxImport = getJSXImplicitImportBase(sourceFile);
-  if (jsxImport) externalImports.add(jsxImport);
 
   const visitors = getVisitors(sourceFile);
 
@@ -354,6 +350,10 @@ const getImportsAndExports = (
   };
 
   visit(sourceFile);
+
+  // No file-level visitors yet, so let's keep it simple
+  const pragmaImports = getImportsFromPragmas(sourceFile);
+  if (pragmaImports) pragmaImports.forEach(node => addImport(node, sourceFile));
 
   const setRefs = (item: SerializableExport | SerializableExportMember) => {
     if (!item.symbol) return;
