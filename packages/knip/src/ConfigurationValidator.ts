@@ -77,7 +77,6 @@ export const pluginSchema = z.union([
 ]);
 
 const pluginsSchema = z.object({
-  wrangler: pluginSchema,
   astro: pluginSchema,
   angular: pluginSchema,
   ava: pluginSchema,
@@ -132,6 +131,7 @@ const pluginsSchema = z.object({
   vitest: pluginSchema,
   webpack: pluginSchema,
   wireit: pluginSchema,
+  wrangler: pluginSchema,
   yorkie: pluginSchema,
 });
 

@@ -8,12 +8,10 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/wrangler');
 
 test('Find dependencies with the wrangler plugin', async () => {
-  const { /* issues, */ counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
-
-  // console.log(issues);
 
   assert.deepEqual(counters, {
     ...baseCounters,
