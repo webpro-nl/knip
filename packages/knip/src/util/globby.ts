@@ -39,7 +39,7 @@ function convertGitignoreToMicromatch(pattern: string) {
   if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
 
   if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  else pattern = '**/' + pattern;
+  else if (!pattern.startsWith('**/')) pattern = '**/' + pattern;
 
   if (pattern.endsWith('/*')) extPattern = pattern;
   else if (pattern.endsWith('/')) extPattern = pattern + '**';
@@ -53,7 +53,7 @@ function parseGitignoreFile(filePath: string) {
   return file
     .split(/\r?\n/)
     .filter(line => line && !line.startsWith('#'))
-    .map(pattern => convertGitignoreToMicromatch(pattern));
+    .map(pattern => convertGitignoreToMicromatch(pattern.replace(/#.*/, '').trim()));
 }
 
 async function parseFindGitignores(options: Options): Promise<Gitignores> {
