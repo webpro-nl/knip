@@ -12,6 +12,8 @@ type NormalizedGlob = string[];
 
 export type IgnorePatterns = (string | RegExp)[];
 
+export type EnablerPatterns = IgnorePatterns;
+
 export type PluginName = keyof typeof Plugins;
 
 export type PluginMap = typeof Plugins;

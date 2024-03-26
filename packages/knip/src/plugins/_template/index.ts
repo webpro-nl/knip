@@ -1,5 +1,5 @@
 import { hasDependency } from '#p/util/plugin.js';
-import type { IgnorePatterns } from '#p/types/config.js';
+import type { EnablerPatterns } from '#p/types/config.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { PluginConfig } from './types.js';
 
@@ -7,7 +7,7 @@ import type { PluginConfig } from './types.js';
 
 const title = '_template';
 
-const enablers: IgnorePatterns = ['_template'];
+const enablers: EnablerPatterns = ['_template'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
