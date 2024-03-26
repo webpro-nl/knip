@@ -1,0 +1,2 @@
+name = 'test'
+main = 'worker-test-entry.ts'

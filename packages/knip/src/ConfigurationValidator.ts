@@ -131,6 +131,7 @@ const pluginsSchema = z.object({
   vitest: pluginSchema,
   webpack: pluginSchema,
   wireit: pluginSchema,
+  wrangler: pluginSchema,
   yorkie: pluginSchema,
 });
 
