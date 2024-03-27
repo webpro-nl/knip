@@ -1,0 +1,4 @@
+{
+  "$schema": "http://json.schemastore.org/package",
+  "name": "@fixture/typescript2-lib"
+}
