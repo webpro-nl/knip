@@ -7,7 +7,6 @@ import type { ViteConfig } from './types.js';
  */
 
 type BuiltinEnvironment = 'node' | 'jsdom' | 'happy-dom' | 'edge-runtime';
-type VitestEnvironment = BuiltinEnvironment | (string & Record<never, never>);
 
 const environments = {
   node: null,
@@ -22,10 +21,8 @@ const envPackageNames: Record<Exclude<keyof typeof environments, 'node'>, string
   'edge-runtime': '@edge-runtime/vm',
 };
 
-export const getEnvPackageName = (env: VitestEnvironment) => {
-  if (env === 'node') return null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (env in envPackageNames) return (envPackageNames as any)[env];
+export const getEnvPackageName = (env: string) => {
+  if (env in envPackageNames) return envPackageNames[env as Exclude<BuiltinEnvironment, 'node'>];
   return `vitest-environment-${env}`;
 };
 
@@ -33,5 +30,7 @@ const builtInReporters = ['default', 'verbose', 'dot', 'json', 'tap', 'tap-flat'
 
 export const getExternalReporters = (reporters?: ViteConfig['test']['reporters']) =>
   reporters
-    ? [reporters].flat().filter(reporter => typeof reporter === 'string' && !builtInReporters.includes(reporter))
+    ? [reporters]
+        .flat()
+        .filter((reporter): reporter is string => typeof reporter === 'string' && !builtInReporters.includes(reporter))
     : [];
