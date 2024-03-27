@@ -53,7 +53,7 @@ function parseGitignoreFile(filePath: string) {
   return file
     .split(/\r?\n/)
     .filter(line => line && !line.startsWith('#'))
-    .map(pattern => convertGitignoreToMicromatch(pattern.replace(/#.*/, '').trim()));
+    .map(pattern => convertGitignoreToMicromatch(pattern.replace(/(?<!\\)#.*/, '').trim()));
 }
 
 async function parseFindGitignores(options: Options): Promise<Gitignores> {
