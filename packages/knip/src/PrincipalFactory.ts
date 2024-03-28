@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import { debugLog } from './util/debug.js';
-import { toAbsolute } from './util/path.js';
+import { toAbsolute, toRelative } from './util/path.js';
 import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
 
 type Paths = ts.CompilerOptions['paths'];
@@ -105,7 +105,7 @@ export class PrincipalFactory {
   public deletePrincipal(principal: ProjectPrincipal) {
     const p = Array.from(this.principals).find(p => p.principal === principal);
     if (p) {
-      debugLog('*', `Deleting principal at ${[...p.cwds]} for ${[...p.pkgNames]}`);
+      debugLog('*', `Deleting principal at ${[...p.cwds].map(cwd => toRelative(cwd) || '.')} (${[...p.pkgNames]})`);
       this.principals.delete(p);
     }
   }
