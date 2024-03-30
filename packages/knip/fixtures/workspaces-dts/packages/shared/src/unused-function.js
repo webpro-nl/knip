@@ -1,1 +1,1 @@
-export const unusedFunction = () => "bar";
+export const unusedFunction = () => 'bar';
