@@ -4,7 +4,10 @@
   "private": true,
   "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
-  "repository": "github:webpro/knip",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webpro/knip"
+  },
   "bugs": "https://github.com/webpro/knip/issues",
   "license": "ISC",
   "type": "module",
