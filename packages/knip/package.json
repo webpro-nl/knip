@@ -5,7 +5,7 @@
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
-    "url": "github:webpro/knip",
+    "url": "https://github.com/webpro/knip",
     "directory": "packages/knip"
   },
   "bugs": "https://github.com/webpro/knip/issues",
