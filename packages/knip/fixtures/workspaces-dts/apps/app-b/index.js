@@ -1,3 +1,3 @@
-import { usedFunction } from "@kp/shared";
+import { usedFunction } from '@kp/shared';
 
 console.log(usedFunction());
