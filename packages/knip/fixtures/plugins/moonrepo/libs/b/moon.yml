@@ -1,0 +1,3 @@
+tasks:
+  start.prod:
+    command: 'vite-node ./server/server.ts'

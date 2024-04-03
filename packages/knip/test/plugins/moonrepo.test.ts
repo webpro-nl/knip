@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { main } from '../../src/index.js';
+import { resolve, join } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
+
+const cwd = resolve('fixtures/plugins/moonrepo');
+
+test('Find dependencies with the moonrepo plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert(issues.binaries['.moon/tasks.yml']['ls-lint']);
+  assert(issues.binaries['.moon/tasks/typescript.yml']['tsc']);
+  assert(issues.binaries['.moon/tasks/typescript.yml']['eslint']);
+  assert(issues.binaries['apps/a/moon.yml']['vite-node']);
+
+  assert(issues.files.has(join(cwd, 'tools/linters/lint-readme.ts')));
+  assert(issues.files.has(join(cwd, 'libs/b/server/server.ts')));
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    devDependencies: 4,
+    binaries: 5,
+    processed: 2,
+    total: 2,
+  });
+});

@@ -1,0 +1,3 @@
+tasks:
+  lint.readme:
+    command: 'vite-node $workspaceRoot/tools/linters/lint-readme.ts -- $projectRoot'
