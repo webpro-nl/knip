@@ -16,8 +16,9 @@
     "dev": "astro dev",
     "lint": "eslint scripts src",
     "format": "prettier scripts src --write",
-    "remark": "remark README.md 'src/content/docs/**/*.md' --verbose -o",
-    "postremark": "rg -l '^:::.+\\\\' | xargs sd '(:::.+)\\\\\\[(.+)]' '$1[$2]'",
+    "preremark": ". remark/preremark.sh",
+    "remark": "remark README.md 'src/content/docs/**/*.{md,mdx}' --verbose -o",
+    "postremark": ". remark/postremark.sh",
     "qa": "npm run build && npm run lint && npm run remark"
   },
   "dependencies": {
@@ -40,7 +41,7 @@
     "remark-directive": "3.0.0",
     "remark-frontmatter": "5.0.0",
     "remark-parse": "11.0.0",
-    "remark-preset-webpro": "1.0.0",
+    "remark-preset-webpro": "1.1.0",
     "remark-stringify": "11.0.0",
     "tsx": "4.7.1",
     "unified": "11.0.4",
