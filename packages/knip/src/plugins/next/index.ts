@@ -14,8 +14,8 @@ const entry = ['next.config.{js,ts,cjs,mjs}'];
 const productionEntryFilePatternsWithoutSrc = [
   '{instrumentation,middleware}.{js,ts}',
   'app/global-error.{js,jsx,ts,tsx}',
-  'app/**/{error,layout,loading,not-found,page,template}.{js,jsx,ts,tsx}',
-  'app/**/{route,default}.{js,ts}',
+  'app/**/{error,layout,loading,not-found,page,template,default}.{js,jsx,ts,tsx}',
+  'app/**/{route}.{js,ts}',
   'app/{manifest,sitemap,robots}.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
   'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',

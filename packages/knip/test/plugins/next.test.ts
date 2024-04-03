@@ -22,7 +22,7 @@ test('Find dependencies with the Next.js plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
+    files: 3,
     devDependencies: 0,
     unlisted: 6,
     processed: 10,
