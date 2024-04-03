@@ -58,7 +58,7 @@ Example:
 
 ```ts
 /** @internal */
-export const internalTestedFunction() {}
+export const internalTestedFunction = () => {};
 ```
 
 In general it's not recommended to expose and test implementation details, but
@@ -80,7 +80,7 @@ Example:
 /**
  * @public
  */
-export const unusedFunction() {}
+export const unusedFunction = () => {};
 ```
 
 This tag can also be used to make exceptions in entry files when using

@@ -60,7 +60,8 @@ tableOfContents: false
 - [Vue][53]
 - [Webpack][54]
 - [Wireit][55]
-- [yorkie][56]
+- [Wrangler][56]
+- [yorkie][57]
 
 :::
 
@@ -119,4 +120,5 @@ tableOfContents: false
 [53]: /reference/plugins/vue 'Vue'
 [54]: /reference/plugins/webpack 'Webpack'
 [55]: /reference/plugins/wireit 'Wireit'
-[56]: /reference/plugins/yorkie 'yorkie'
+[56]: /reference/plugins/wrangler 'Wrangler'
+[57]: /reference/plugins/yorkie 'yorkie'
