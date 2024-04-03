@@ -16,7 +16,13 @@ test('Find dependencies with the moonrepo plugin', async () => {
   assert(issues.binaries['.moon/tasks.yml']['ls-lint']);
   assert(issues.binaries['.moon/tasks/typescript.yml']['tsc']);
   assert(issues.binaries['.moon/tasks/typescript.yml']['eslint']);
+  assert(issues.binaries['libs/b/moon.yml']['vitest']);
   assert(issues.binaries['apps/a/moon.yml']['vite-node']);
+
+  assert(issues.devDependencies['package.json']['@moonrepo/cli']);
+  assert(issues.devDependencies['package.json']['vite-node']);
+  assert(issues.devDependencies['package.json']['eslint']);
+  assert(issues.devDependencies['libs/b/package.json']['vitest']);
 
   assert(issues.files.has(join(cwd, 'tools/linters/lint-readme.ts')));
   assert(issues.files.has(join(cwd, 'libs/b/server/server.ts')));

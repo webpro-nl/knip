@@ -11,14 +11,16 @@ const enablers: EnablerPatterns = ['@moonrepo/cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['**/moon.yml', '.moon/tasks.yml', '.moon/tasks/*.yml'];
+const config: string[] = ['moon.yml', '.moon/tasks.yml', '.moon/tasks/*.yml'];
 
 const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) => {
   const tasks = config.tasks ? Object.values(config.tasks) : [];
-  const dependencies = getDependenciesFromScripts(
-    tasks.map(task => task.command),
-    options
-  );
+  const commands = tasks
+    .map(task => task.command)
+    .filter(command => command)
+    .map(command => command.replace('$workspaceRoot', process.cwd()))
+    .map(command => command.replace('$projectRoot', options.configFileDir));
+  const dependencies = getDependenciesFromScripts(commands, options);
   return [...dependencies];
 };
 

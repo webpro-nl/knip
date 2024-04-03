@@ -3,7 +3,6 @@
   "devDependencies": {
     "@moonrepo/cli": "*",
     "vite-node": "*",
-    "vitest": "*",
     "eslint": "*"
   }
 }
