@@ -22,16 +22,16 @@
     "qa": "npm run build && npm run lint && npm run remark"
   },
   "dependencies": {
-    "@astro-community/astro-embed-youtube": "0.4.4",
-    "@astrojs/starlight": "0.21.1",
-    "sharp": "0.33.2"
+    "@astro-community/astro-embed-youtube": "0.5.1",
+    "@astrojs/starlight": "0.21.3",
+    "sharp": "0.33.3"
   },
   "devDependencies": {
-    "@astrojs/check": "0.5.7",
+    "@astrojs/check": "0.5.10",
     "@knip/eslint-config": "0.0.0",
     "@types/mdast": "4.0.3",
     "@types/unist": "3.0.2",
-    "astro": "4.5.1",
+    "astro": "4.5.15",
     "eslint": "8.57.0",
     "hastscript": "9.0.0",
     "kleur": "4.1.5",
@@ -43,7 +43,7 @@
     "remark-parse": "11.0.0",
     "remark-preset-webpro": "1.1.0",
     "remark-stringify": "11.0.0",
-    "tsx": "4.7.1",
+    "tsx": "^4.7.1",
     "unified": "11.0.4",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.0.0"
