@@ -10,6 +10,9 @@
     "url": "github:webpro/knip",
     "directory": "packages/docs"
   },
+  "engines": {
+    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+  },
   "scripts": {
     "prebuild": "tsx scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
