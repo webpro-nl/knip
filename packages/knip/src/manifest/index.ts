@@ -9,7 +9,7 @@ type Options = {
   cwd: string;
 };
 
-const _getDependencyMetaData = ({ cwd, dir, packageNames }: Options) => {
+const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
   const hostDependencies: HostDependencies = new Map();
 
   // Find all binaries for each dependency
@@ -61,4 +61,4 @@ const _getDependencyMetaData = ({ cwd, dir, packageNames }: Options) => {
   };
 };
 
-export const getDependencyMetaData = timerify(_getDependencyMetaData);
+export const getDependencyMetaData = timerify(getMetaDataFromPackageJson);

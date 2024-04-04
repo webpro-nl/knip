@@ -31,6 +31,11 @@
       "examples": ["husky", "lint-staged"],
       "$ref": "#/definitions/list"
     },
+    "ignoreMembers": {
+      "title": "Class and enum members to ignore (regex allowed)",
+      "examples": ["render", "on.*"],
+      "$ref": "#/definitions/list"
+    },
     "ignoreWorkspaces": {
       "title": "Workspaces to ignore",
       "examples": ["packages/ignore-me"],
@@ -484,6 +489,10 @@
         },
         "wireit": {
           "title": "Wireit plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/wireit/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
+        "wrangler": {
+          "title": "wrangler plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/wrangler/README.md)",
           "$ref": "#/definitions/plugin"
         },
         "yorkie": {

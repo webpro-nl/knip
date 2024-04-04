@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/wrangler",
+  "version": "*",
+  "scripts": {
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "wrangler": "^3.37.0"
+  }
+}

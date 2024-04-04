@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/typescript2",
+  "workspaces": [
+    "packages/*"
+  ]
+}

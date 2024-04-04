@@ -2,6 +2,7 @@ import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
   include: ['classMembers'],
+  ignore: ['templates/**'],
   workspaces: {
     '.': {
       ignoreBinaries: ['knip']
@@ -18,8 +19,7 @@ const config: KnipConfig = {
     },
     'packages/docs': {
       entry: ['{remark,scripts}/*.ts', 'src/components/{Head,Header,Footer}.astro!'],
-      ignore: 'config.ts',
-      ignoreBinaries: ['rg']
+      ignore: 'config.ts'
     }
   }
 };

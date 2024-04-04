@@ -16,8 +16,10 @@ Options:
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
   --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
+  --files                  Shortcut for --include files
   --fix                    Fix issues
   --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
+  --include-libs           Include type definitions from dependencies (default: false; implied with classMembers)
   --include-entry-exports  Include entry files when reporting unused exports
   --isolate-workspaces     Isolate workspaces into separate programs (default: false)
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
@@ -60,11 +62,13 @@ try {
       exports: { type: 'boolean' },
       tags: { type: 'string', multiple: true },
       'experimental-tags': { type: 'string', multiple: true },
+      files: { type: 'boolean' },
       fix: { type: 'boolean' },
       'fix-type': { type: 'string', multiple: true },
       help: { type: 'boolean', short: 'h' },
       'ignore-internal': { type: 'boolean' },
       include: { type: 'string', multiple: true },
+      'include-libs': { type: 'boolean' },
       'include-entry-exports': { type: 'boolean' },
       'isolate-workspaces': { type: 'boolean' },
       'max-issues': { type: 'string' },

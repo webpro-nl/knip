@@ -21,7 +21,7 @@ those exports explicitly:
 
 ```ts title="knip.js"
 export const version = 'v5';
-export const getRocket = () => 🚀;
+export const getRocket = () => '🚀';
 ```
 
 ```ts title="index.js"
@@ -107,7 +107,7 @@ Using one of the available JSDoc tags like `@public` or `@internal`:
 ```ts title="knip.js"
 export const version = 'v5';
 /** @public */
-export const getRocket = () => 🚀;
+export const getRocket = () => '🚀';
 ```
 
 Assuming only imported using a namespace (like in the example cases above), this
@@ -121,7 +121,7 @@ Another solution is to tag individual exports arbitrarily:
 ```ts title="knip.js"
 export const version = 'v5';
 /** @launch */
-export const getRocket = () => 🚀;
+export const getRocket = () => '🚀';
 ```
 
 And then exclude the tag like so:
@@ -165,6 +165,7 @@ What are you waiting for? Start using Knip v5 today!
     ```
 
   </TabItem>
+
   <TabItem label="pnpm">
 
     ```shell
@@ -172,6 +173,7 @@ What are you waiting for? Start using Knip v5 today!
     ```
 
   </TabItem>
+
   <TabItem label="bun">
 
     ```shell
@@ -179,6 +181,7 @@ What are you waiting for? Start using Knip v5 today!
     ```
 
   </TabItem>
+
   <TabItem label="yarn">
 
     ```shell

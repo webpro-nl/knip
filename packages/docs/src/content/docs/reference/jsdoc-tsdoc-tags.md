@@ -37,19 +37,19 @@ export default Component;
 An alternative solution is to use `--exclude duplicates` and exclude all
 duplicates from being reported.
 
-[JSDoc: @alias][2]
+[JSDoc: @alias][1]
 
 ## `@beta`
 
-Works identical to [`@public`][3]. Knip ignores other tags like `@alpha` and
+Works identical to [`@public`][2]. Knip ignores other tags like `@alpha` and
 `@experimental`.
 
-[TSDoc: @beta][4]
+[TSDoc: @beta][3]
 
 ## `@internal`
 
 Internal exports are not meant for public consumption, but only for internal
-usage such as tests. This means they would be reported in [production mode][5].
+usage such as tests. This means they would be reported in [production mode][4].
 
 Mark the export with `@internal` and Knip will not report the export in
 production mode.
@@ -58,7 +58,7 @@ Example:
 
 ```ts
 /** @internal */
-export const internalTestedFunction() {}
+export const internalTestedFunction = () => {};
 ```
 
 In general it's not recommended to expose and test implementation details, but
@@ -66,7 +66,7 @@ exceptions are possible. Those should not be reported as false positives, so
 when using production mode you'll need to help Knip out by tagging them as
 `@internal`.
 
-[TSDoc: @internal][6]
+[TSDoc: @internal][5]
 
 ## `@public`
 
@@ -80,17 +80,17 @@ Example:
 /**
  * @public
  */
-export const unusedFunction() {}
+export const unusedFunction = () => {};
 ```
 
 This tag can also be used to make exceptions in entry files when using
-[--include-entry-exports][7].
+[--include-entry-exports][6].
 
-[JSDoc: @public][8] and [TSDoc: @public][9]
+[JSDoc: @public][7] and [TSDoc: @public][8]
 
 ## Tags (CLI)
 
-Use arbitrary [tags][1] to exclude or include tagged exports from the report.
+Use arbitrary [tags][9] to exclude or include tagged exports from the report.
 Example:
 
 ```ts
@@ -108,12 +108,12 @@ like so:
 knip --tags=-knipignore,-internal
 ```
 
-[1]: ../reference/cli.md#--tags
-[2]: https://jsdoc.app/tags-alias.html
-[3]: #public
-[4]: https://tsdoc.org/pages/tags/beta/
-[5]: ../features/production-mode.md
-[6]: https://tsdoc.org/pages/tags/internal/
-[7]: ./cli.md#--include-entry-exports
-[8]: https://jsdoc.app/tags-public.html
-[9]: https://tsdoc.org/pages/tags/public/
+[1]: https://jsdoc.app/tags-alias.html
+[2]: #public
+[3]: https://tsdoc.org/pages/tags/beta/
+[4]: ../features/production-mode.md
+[5]: https://tsdoc.org/pages/tags/internal/
+[6]: ./cli.md#--include-entry-exports
+[7]: https://jsdoc.app/tags-public.html
+[8]: https://tsdoc.org/pages/tags/public/
+[9]: ../reference/cli.md#--tags

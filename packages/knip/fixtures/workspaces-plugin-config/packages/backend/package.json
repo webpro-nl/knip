@@ -6,7 +6,6 @@
   "devDependencies": {
     "eslint-plugin-no-secrets": "*",
     "eslint-plugin-prettier": "*",
-    "happy-dom": "*",
     "vitest": "^0.34.6"
   }
 }

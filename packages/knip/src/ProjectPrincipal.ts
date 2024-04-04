@@ -11,7 +11,7 @@ import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { timerify } from './util/Performance.js';
 import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
-import type { SerializableExportMember } from './types/exports.js';
+import type { SerializableExport, SerializableExportMember } from './types/exports.js';
 import type { UnresolvedImport } from './types/imports.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { ReferencedDependencies } from './WorkspaceWorker.js';
@@ -284,5 +284,22 @@ export class ProjectPrincipal {
       const externalRefs = files.filter(f => f !== filePath);
       return externalRefs.length === 0 && internalRefs.length === 0;
     });
+  }
+
+  public hasReferences(filePath: string, exportedItem: SerializableExport) {
+    if (exportedItem.jsDocTags.includes('@public')) return false;
+
+    if (!this.findReferences) {
+      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
+      this.findReferences = timerify(languageService.findReferences);
+    }
+
+    const referencedSymbols = this.findReferences!(filePath, exportedItem.pos);
+    const files = (referencedSymbols ?? [])
+      .flatMap(refs => refs.references)
+      .filter(ref => !ref.isDefinition)
+      .map(ref => ref.fileName);
+    const externalRefs = files.filter(f => f !== filePath);
+    return externalRefs.length > 0;
   }
 }

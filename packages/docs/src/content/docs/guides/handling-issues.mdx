@@ -4,6 +4,8 @@ sidebar:
   order: 2
 ---
 
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
 A long list of unused items can be frustrating. The list may contain false
 positives, but also things that can actually be removed from the codebase. You
 can get a lot of value out of Knip, but sometimes it requires some initial
@@ -265,10 +267,54 @@ knip --exports
 
 :::
 
+### External Libs
+
+Are the exports consumed or imported by an external library, resulting in a
+non-standard consumption of your exports? Here's an example:
+
+<Tabs>
+  <TabItem label="index.js">
+
+    ```ts
+    import loadable from '@loadable/component';
+
+    export const DynamicApple = dynamic(() =>
+      import('./components.js').then(mod => mod.Apple)
+    );
+
+    export const LoadableOrange = loadable(() => import('./components.js'), {
+      resolveComponent: components => components.Orange,
+    });
+    ```
+
+  </TabItem>
+
+  <TabItem label="components.js">
+
+    ```ts
+    export const Apple = () => 'Apple';
+    export const Orange = () => 'Orange';
+    ```
+
+  </TabItem>
+</Tabs>
+
+Knip understands `Apple` is used, since it's standard usage. But `Orange` is
+referenced though a function of an external library. To include the type
+definitions of external libraries, use the `--include-libs` flag:
+
+```shell
+knip --include-libs
+```
+
+This comes at a performance and memory penalty, but should give better results
+if you need it. This flag is implied when [classMembers][18] are included (that
+feature comes with roughly the same performance penalty).
+
 ### Missing Exports?
 
 Do you expect certain exports in the report, but are they missing? They might be
-exported from an entry file. Use [--include-entry-exports][18] to make Knip also
+exported from an entry file. Use [--include-entry-exports][19] to make Knip also
 report unused exports in entry files.
 
 ## Class Members
@@ -286,7 +332,7 @@ cases it may even run out of memory in large repositories).
 Individual class members can be [tagged as `@public`][16].
 
 Classes exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][18] to make Knip also report members of unused export
+[--include-entry-exports][19] to make Knip also report members of unused export
 in entry files.
 
 ## Enum Members
@@ -301,14 +347,14 @@ knip --exclude enumMembers
 Individual enum members can be [tagged as `@public`][16].
 
 Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][18] to make Knip also report members of unused exports
+[--include-entry-exports][19] to make Knip also report members of unused exports
 in entry files.
 
 ## False Positives
 
 If you believe Knip incorrectly reports something as unused (i.e. a false
 positive), you can help your own project and help improve Knip by creating a
-[minimal reproduction][19] and open an issue on GitHub.
+[minimal reproduction][20] and open an issue on GitHub.
 
 [1]: ../overview/configuration.md
 [2]: ../explanations/entry-files.md
@@ -327,5 +373,6 @@ positive), you can help your own project and help improve Knip by creating a
 [15]: ../reference/configuration.md#ignoreexportsusedinfile
 [16]: ../reference/jsdoc-tsdoc-tags.md#public
 [17]: ../reference/cli.md#--tags
-[18]: ../reference/configuration.md#includeentryexports
-[19]: ../guides/troubleshooting.md#minimal-reproduction
+[18]: #class-members
+[19]: ../reference/configuration.md#includeentryexports
+[20]: ../guides/troubleshooting.md#minimal-reproduction

@@ -1,4 +1,6 @@
 import { MyClass } from './members';
+import { AbstractClassGen, ExtendedClassGen } from './iterator-generator';
+import { AbstractClass, ExtendedClass } from './iterator';
 
 const instance = new MyClass();
 

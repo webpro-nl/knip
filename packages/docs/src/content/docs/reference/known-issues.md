@@ -66,6 +66,12 @@ Potential workarounds:
 - Rewrite the import the configuration to a relative import.
 - Use Bun: `bunx --bun knip` (Bun will execute the scripts instead of jiti)
 
+## False positives with external libs
+
+Knip can report false positives when exports are consumed by external libraries.
+
+Please see [external libs][8].
+
 ## Definitely Typed packages in `dependencies`
 
 Knip is strict in the divide between `dependencies` and `devDependencies`. Some
@@ -80,3 +86,4 @@ listed in `dependencies`.
 [5]: https://github.com/unjs/jiti/issues/174
 [6]: https://github.com/webpro/knip/issues/346
 [7]: https://github.com/webpro/knip/issues/355
+[8]: ../guides/handling-issues.mdx#external-libs

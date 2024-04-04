@@ -74,6 +74,8 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   ).filter(value => !/\$[0-9]/.test(value));
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
+  const testSequencer = config.testSequencer ? [config.testSequencer] : [];
+  const globalSetup = config.globalSetup ? [config.globalSetup] : [];
 
   return [
     ...presets,
@@ -89,6 +91,8 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     ...moduleNameMapper,
     ...testResultsProcessor,
     ...snapshotResolver,
+    ...testSequencer,
+    ...globalSetup,
   ];
 };
 

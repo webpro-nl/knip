@@ -124,6 +124,17 @@ knip --include-entry-exports
 
 Also see [includeEntryExports][3].
 
+### `--include-libs`
+
+If Knip report false positives for exports consumed by external libraries, you
+can try the `--include-libs` flag:
+
+```sh
+knip --include-libs
+```
+
+Also see [external libs][4].
+
 ## Modes
 
 ### `--production`
@@ -136,17 +147,17 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][4].
+Read more at [Production Mode][5].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies.
 
-Read more at [Production Mode][4].
+Read more at [Production Mode][5].
 
 ## Filters
 
-Available [issue types][5] when filtering output using `--include` or
+Available [issue types][6] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -202,7 +213,7 @@ Shortcut to include all types of export issues:
 
 ### `--experimental-tags`
 
-Deprecated. Use [--tags](#--tags) instead.
+Deprecated. Use [--tags][7] instead.
 
 ### `--tags`
 
@@ -256,7 +267,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][6].
+Also see [Reporters & Preprocessors][8].
 
 ### `--reporter-options [json]`
 
@@ -291,7 +302,7 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
-Also see [Reporters & Preprocessors][6].
+Also see [Reporters & Preprocessors][8].
 
 ## Exit code
 
@@ -314,6 +325,8 @@ Maximum number of issues before non-zero exit code. Default: `0`
 [1]: #--debug
 [2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [3]: ./configuration.md#includeentryexports
-[4]: ../features/production-mode.md
-[5]: ./issue-types.md
-[6]: ../features/reporters.md
+[4]: ../guides/handling-issues.mdx#external-libs
+[5]: ../features/production-mode.md
+[6]: ./issue-types.md
+[7]: #--tags
+[8]: ../features/reporters.md

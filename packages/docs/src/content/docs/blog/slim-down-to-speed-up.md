@@ -167,7 +167,7 @@ that's not easy to find. Here's an example of an export/import match that **is**
 easy to find:
 
 ```ts title="import.ts"
-import { MyThing } = './thing.ts';
+import { MyThing } from './thing.ts';
 ```
 
 ```ts title="export.ts"

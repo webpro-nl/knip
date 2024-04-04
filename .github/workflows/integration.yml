@@ -69,7 +69,7 @@ jobs:
           path: argos
       - run: cd argos && npm install && knip
 
-      - name: Test Knip against eslint
+      - name: Test Knip against ESLint
         uses: actions/checkout@v4
         with:
           repository: eslint/eslint
@@ -79,3 +79,11 @@ jobs:
           npm install --force
           cd docs && npm install && cd -
           knip
+
+      - name: Test Knip against TypeScript
+        uses: actions/checkout@v4
+        with:
+          repository: webpro/TypeScript
+          path: TypeScript
+          ref: remove-unused-exports
+      - run: cd TypeScript && npm install && knip --tags=-internal,-knipignore --exclude duplicates

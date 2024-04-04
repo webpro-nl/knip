@@ -42,7 +42,8 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
 
   if (!testConfig) return [];
 
-  const environments = testConfig.environment ? [getEnvPackageName(testConfig.environment)] : [];
+  const environments =
+    testConfig.environment && testConfig.environment !== 'node' ? [getEnvPackageName(testConfig.environment)] : [];
   const reporters = getExternalReporters(testConfig.reporters);
 
   const hasCoverageEnabled =

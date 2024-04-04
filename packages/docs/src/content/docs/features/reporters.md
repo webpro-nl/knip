@@ -118,7 +118,7 @@ supports a local JavaScript or TypeScript file or an external dependency.
 The default export of the reporter should be a function with this interface:
 
 ```ts
-type Reporter = async (options: ReporterOptions) => void;
+type Reporter = async (options: ReporterOptions): void;
 
 type ReporterOptions = {
   report: Report;

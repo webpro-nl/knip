@@ -12,6 +12,8 @@ type NormalizedGlob = string[];
 
 export type IgnorePatterns = (string | RegExp)[];
 
+export type EnablerPatterns = IgnorePatterns;
+
 export type PluginName = keyof typeof Plugins;
 
 export type PluginMap = typeof Plugins;
@@ -46,6 +48,7 @@ export interface Configuration {
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
+  ignoreMembers: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
   syncCompilers: SyncCompilers;

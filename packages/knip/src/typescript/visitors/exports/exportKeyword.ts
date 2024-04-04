@@ -7,7 +7,7 @@ import type { Fix } from '../../../types/exports.js';
 
 export default visit(
   () => true,
-  (node, { isFixExports, isFixTypes }) => {
+  (node, { isFixExports, isFixTypes, isReportClassMembers }) => {
     // @ts-expect-error TODO Property 'modifiers' does not exist on type 'Node'.
     const exportKeyword = (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.ExportKeyword);
 
@@ -85,21 +85,24 @@ export default visit(
         const identifier = defaultKeyword ? 'default' : node.name.getText();
 
         const pos = (node.name ?? node).getStart();
-        const members = node.members
-          .filter(
-            (member): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
-              (ts.isPropertyDeclaration(member) ||
-                ts.isMethodDeclaration(member) ||
-                isGetOrSetAccessorDeclaration(member)) &&
-              !isPrivateMember(member)
-          )
-          .map(member => ({
-            node: member,
-            identifier: member.name.getText(),
-            pos: member.name.getStart(),
-            type: SymbolType.MEMBER,
-            fix: undefined,
-          }));
+        const members = isReportClassMembers
+          ? node.members
+              .filter(
+                (member): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
+                  (ts.isPropertyDeclaration(member) ||
+                    ts.isMethodDeclaration(member) ||
+                    isGetOrSetAccessorDeclaration(member)) &&
+                  !isPrivateMember(member)
+              )
+              .map(member => ({
+                node: member,
+                identifier: member.name.getText(),
+                // Naive, but [does.the.job()]
+                pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
+                type: SymbolType.MEMBER,
+                fix: undefined,
+              }))
+          : [];
         const fix: Fix = isFixExports
           ? [exportKeyword.getStart(), (defaultKeyword ?? exportKeyword).getEnd() + 1]
           : undefined;

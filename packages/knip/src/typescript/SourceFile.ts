@@ -9,7 +9,13 @@ type SymbolWithExports = ts.Symbol & {
   exports?: SymbolTable;
 };
 
-type PragmaMap = { arguments: { factory: string } };
+type PragmaMap = {
+  arguments: {
+    factory?: string;
+    path?: { value?: string; pos?: number };
+    types?: { value?: string; pos?: number };
+  };
+};
 
 export interface BoundSourceFile extends ts.SourceFile {
   // Used in `maybeAddAliasedExport`
@@ -32,7 +38,7 @@ export interface BoundSourceFile extends ts.SourceFile {
 export interface ProgramMaybe53 extends ts.Program {
   // Only available in TypeScript =>5.3.0
   getResolvedModule?: (
-    f: ts.SourceFile,
+    sourceFile: ts.SourceFile,
     moduleName: string,
     mode: ts.ResolutionMode
   ) => ts.ResolvedModuleWithFailedLookupLocations | undefined;

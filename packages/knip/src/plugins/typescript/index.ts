@@ -17,21 +17,22 @@ const config = ['tsconfig.json', 'tsconfig.*.json'];
 
 const production: string[] = [];
 
-const resolveExtensibleConfig = async (configFilePath: string) => {
+const getExtends = async (configFilePath: string, internalExtends = new Set<string>()) => {
   const filePath = configFilePath.replace(/(\.json)?$/, '.json');
   const localConfig: TsConfigJson | undefined = await loadJSON(filePath);
 
-  if (!localConfig) return;
+  if (!localConfig) return internalExtends;
 
-  const extends_ = (localConfig.extends = localConfig.extends ? [localConfig.extends].flat() : []);
+  const extends_ = localConfig.extends ? [localConfig.extends].flat() : [];
   for (const extend of extends_) {
     if (isInternal(extend)) {
       const presetConfigPath = toAbsolute(extend, dirname(configFilePath));
-      const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-      localConfig.extends.push(...(presetConfig?.extends ? [presetConfig.extends].flat() : []));
+      await getExtends(presetConfigPath, internalExtends);
     }
   }
-  return localConfig;
+
+  extends_.forEach(extend => internalExtends.add(extend));
+  return internalExtends;
 };
 
 export const resolveConfig: ResolveConfig = async (localConfig, options) => {
@@ -40,14 +41,7 @@ export const resolveConfig: ResolveConfig = async (localConfig, options) => {
   const configFilePath = join(configFileDir, configFileName);
   const { compilerOptions } = await loadTSConfig(configFilePath);
 
-  const extends_ = (localConfig.extends = localConfig.extends ? [localConfig.extends].flat() : []);
-  for (const extend of extends_) {
-    if (isInternal(extend)) {
-      const presetConfigPath = toAbsolute(extend, dirname(configFilePath));
-      const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-      localConfig.extends.push(...(presetConfig?.extends ? [presetConfig.extends].flat() : []));
-    }
-  }
+  const extend = await getExtends(configFilePath);
 
   if (!compilerOptions || !localConfig) return [];
 
@@ -55,7 +49,6 @@ export const resolveConfig: ResolveConfig = async (localConfig, options) => {
 
   if (isProduction) return [...jsx];
 
-  const extend = localConfig.extends ? [localConfig.extends].flat().filter(extend => !isInternal(extend)) : [];
   const types = compilerOptions.types ?? [];
   const plugins = Array.isArray(compilerOptions?.plugins)
     ? compilerOptions.plugins.map(plugin => (typeof plugin === 'object' && 'name' in plugin ? plugin.name : ''))

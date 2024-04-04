@@ -52,6 +52,7 @@ const rootConfigurationSchema = z.object({
   ignore: globSchema.optional(),
   ignoreBinaries: stringOrRegexSchema.optional(),
   ignoreDependencies: stringOrRegexSchema.optional(),
+  ignoreMembers: stringOrRegexSchema.optional(),
   ignoreExportsUsedInFile: ignoreExportsUsedInFileSchema.optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
   includeEntryExports: z.boolean().optional(),
@@ -130,6 +131,7 @@ const pluginsSchema = z.object({
   vitest: pluginSchema,
   webpack: pluginSchema,
   wireit: pluginSchema,
+  wrangler: pluginSchema,
   yorkie: pluginSchema,
 });
 
@@ -140,6 +142,7 @@ const baseWorkspaceConfigurationSchema = z.object({
   ignore: globSchema.optional(),
   ignoreBinaries: stringOrRegexSchema.optional(),
   ignoreDependencies: stringOrRegexSchema.optional(),
+  ignoreMembers: stringOrRegexSchema.optional(),
   includeEntryExports: z.boolean().optional(),
 });
 

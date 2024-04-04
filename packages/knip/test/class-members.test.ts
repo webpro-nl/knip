@@ -14,6 +14,7 @@ test('Find unused class members', async () => {
   });
 
   assert.equal(Object.keys(issues.classMembers['members.ts']).length, 6);
+  assert(issues.classMembers['iterator-generator.ts']['unimplemented']);
   assert(issues.classMembers['members.ts']['bUnusedPublic']);
   assert(issues.classMembers['members.ts']['cUnusedProp']);
   assert(issues.classMembers['members.ts']['dUnusedMember']);
@@ -23,9 +24,9 @@ test('Find unused class members', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    classMembers: 6,
-    processed: 2,
-    total: 2,
+    classMembers: 7,
+    processed: 4,
+    total: 4,
   });
 });
 
@@ -37,6 +38,7 @@ test('Find unused class members (isIncludeEntryExports)', async () => {
   });
 
   assert.equal(Object.keys(issues.classMembers['members.ts']).length, 6);
+  assert(issues.classMembers['iterator-generator.ts']['unimplemented']);
   assert(issues.classMembers['index.ts']['unusedMemberInEntry']);
   assert(issues.classMembers['members.ts']['bUnusedPublic']);
   assert(issues.classMembers['members.ts']['cUnusedProp']);
@@ -47,8 +49,8 @@ test('Find unused class members (isIncludeEntryExports)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    classMembers: 7,
-    processed: 2,
-    total: 2,
+    classMembers: 8,
+    processed: 4,
+    total: 4,
   });
 });

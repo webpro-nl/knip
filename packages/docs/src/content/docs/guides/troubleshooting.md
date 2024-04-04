@@ -41,14 +41,18 @@ of the error.
 ## Minimal Reproduction
 
 If you encounter an issue or false positives when running Knip, you can [open an
-issue on GitHub][5]. Depending on the type of issue, it may be of great help (or
-you may be asked) to create a minimal reproduction. This is sometimes referred
-to as MNWE (minimal not-working example) or MRE (minimal reproducible example).
+issue on GitHub][5]. Depending on the type of issue, you might be asked to
+create a minimal reproduction: only the code and configuration required to
+demonstrate the issue.
 
 A convenient way to do so is by forking one of these templates:
 
 - [CodeSandbox][6]
 - [StackBlitz][7]
+
+Other solutions may work well too. For instance, many people choose to create a
+small repository on GitHub. The goal is to have an easy and common understanding
+and reproduction.
 
 :::tip
 
@@ -56,9 +60,6 @@ The optimal way is to add fixtures and/or failing tests to the Knip repository,
 and open a pull request to discuss the issue!
 
 :::
-
-Other solutions may work well too, the goal is to have an easy and common
-understanding and reproduction.
 
 ## Understanding Knip
 
@@ -78,8 +79,10 @@ to [open an issue on GitHub][5] or discuss it in [the Discord channel][13].
 [3]: ../guides/handling-issues.md
 [4]: ../reference/known-issues.md
 [5]: https://github.com/webpro/knip/issues
-[6]: https://codesandbox.io/p/devbox/knip-reproduction-lk5zqx
-[7]: https://stackblitz.com/edit/knip-case-repro?file=README.md&view=editor
+[6]:
+  https://codesandbox.io/p/devbox/github/webpro/knip/main/templates/issue-reproduction/basic
+[7]:
+  https://stackblitz.com/github/webpro/knip/tree/main/templates/issue-reproduction/basic
 [8]: ../explanations/entry-files.md
 [9]: ../explanations/plugins.md
 [10]: ../features/production-mode.md
