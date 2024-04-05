@@ -78,9 +78,9 @@ knip --reporter json
 
 ### Markdown
 
-The built-in `markdown` reporter output is meant to be saved to a markdown file.
+The built-in `markdown` reporter output is meant to be saved to a Markdown file.
 This allows following the changes in issues over time. It reports issues in
-markdown tables separated by issue types as headings, for example:
+Markdown tables separated by issue types as headings, for example:
 
 ```md
 # Knip report
