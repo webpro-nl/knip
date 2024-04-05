@@ -7,8 +7,8 @@
     "release": true,
     "comments": {
       "submit": true,
-      "issue": ":rocket: _This issue has been resolved in v${version}. See [${releaseName}](${releaseUrl}) for release notes.\n\nUsing Knip in a commercial project? Please consider [sponsoring me](https://github.com/sponsors/webpro)._",
-      "pr": ":rocket: _This pull request is included in v${version}. See [${releaseName}](${releaseUrl}) for release notes.\n\nUsing Knip in a commercial project? Please consider [sponsoring me](https://github.com/sponsors/webpro)._"
+      "issue": ":rocket: _This issue has been resolved in v${version}. See [${releaseName}](${releaseUrl}) for release notes._\n\n_Using Knip in a commercial project? Please consider [sponsoring me](https://github.com/sponsors/webpro)._",
+      "pr": ":rocket: _This pull request is included in v${version}. See [${releaseName}](${releaseUrl}) for release notes._\n\n_Using Knip in a commercial project? Please consider [sponsoring me](https://github.com/sponsors/webpro)._"
     }
   },
   "plugins": {
