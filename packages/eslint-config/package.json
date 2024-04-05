@@ -5,6 +5,9 @@
   "type": "module",
   "main": "./index.js",
   "types": "./index.d.ts",
+  "engines": {
+    "node": "^18.18.0 || >=20.0.0"
+  },
   "dependencies": {
     "@eslint/js": "^8.57.0",
     "@typescript-eslint/eslint-plugin": "^7.5.0",

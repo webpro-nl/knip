@@ -23,9 +23,12 @@
     "watch": "npm run watch --workspace packages/knip",
     "docs": "npm run dev --workspace packages/docs",
     "format": "npm run format --workspaces --if-present",
-    "test": "npm run qa --workspaces --if-present"
+    "test": "npm run qa --workspaces --if-present && installed-check --no-include-workspace-root --ignore-dev"
   },
   "peerDependencies": {
     "knip": "file:packages/knip"
+  },
+  "devDependencies": {
+    "installed-check": "^9.1.0"
   }
 }
