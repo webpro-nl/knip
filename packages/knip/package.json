@@ -112,31 +112,6 @@
     "node": ">=18.6.0"
   },
   "engineStrict": true,
-  "release-it": {
-    "hooks": {
-      "before:init": [
-        "npm run lint",
-        "npm run build",
-        "npm run knip",
-        "npm run knip:production",
-        "npm test"
-      ],
-      "after:bump": [
-        "git add ../../package-lock.json"
-      ]
-    },
-    "github": {
-      "release": true,
-      "comments": {
-        "submit": true
-      }
-    },
-    "plugins": {
-      "@release-it/bumper": {
-        "out": "{dist,src}/version.*"
-      }
-    }
-  },
   "keywords": [
     "analysis",
     "analyze",
