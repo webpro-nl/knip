@@ -1,5 +1,5 @@
 {
-  "name": "a",
+  "name": "b",
   "devDependencies": {
     "vitest": "*"
   }

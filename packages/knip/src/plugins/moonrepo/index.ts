@@ -15,12 +15,12 @@ const config: string[] = ['moon.yml', '.moon/tasks.yml', '.moon/tasks/*.yml'];
 
 const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) => {
   const tasks = config.tasks ? Object.values(config.tasks) : [];
-  const commands = tasks
+  const dependencies = tasks
     .map(task => task.command)
     .filter(command => command)
-    .map(command => command.replace('$workspaceRoot', process.cwd()))
-    .map(command => command.replace('$projectRoot', options.configFileDir));
-  const dependencies = getDependenciesFromScripts(commands, options);
+    .map(command => command.replace('$workspaceRoot', options.cwd))
+    .map(command => command.replace('$projectRoot', options.configFileDir))
+    .flatMap(command => getDependenciesFromScripts(command, options));
   return [...dependencies];
 };
 
