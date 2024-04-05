@@ -18,8 +18,8 @@ const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) 
   const dependencies = tasks
     .map(task => task.command)
     .filter(command => command)
-    .map(command => command.replace('$workspaceRoot', options.cwd))
-    .map(command => command.replace('$projectRoot', options.configFileDir))
+    .map(command => command.replace('$workspaceRoot', options.rootCwd!))
+    .map(command => command.replace('$projectRoot', options.cwd))
     .flatMap(command => getDependenciesFromScripts(command, options));
   return [...dependencies];
 };

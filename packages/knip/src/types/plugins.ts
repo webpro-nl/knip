@@ -3,6 +3,7 @@ import type { PackageJson } from './package-json.js';
 import type { DependencySet } from './workspace.js';
 
 export interface BaseOptions {
+  rootCwd?: string;
   cwd: string;
   manifestScriptNames: Set<string>;
   dependencies: DependencySet;

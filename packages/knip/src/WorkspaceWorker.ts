@@ -224,6 +224,7 @@ export class WorkspaceWorker {
     const cwd = this.dir;
 
     const baseOptions = {
+      rootCwd: this.cwd,
       cwd,
       manifest: this.manifest,
       manifestScriptNames: this.manifestScriptNames,
