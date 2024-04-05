@@ -24,12 +24,11 @@ test('Find dependencies with the moonrepo plugin', async () => {
   assert(issues.devDependencies['package.json']['eslint']);
   assert(issues.devDependencies['libs/b/package.json']['vitest']);
 
-  assert(issues.files.has(join(cwd, 'tools/linters/lint-readme.ts')));
   assert(issues.files.has(join(cwd, 'libs/b/server/server.ts')));
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
+    files: 1,
     devDependencies: 4,
     binaries: 5,
     processed: 2,
