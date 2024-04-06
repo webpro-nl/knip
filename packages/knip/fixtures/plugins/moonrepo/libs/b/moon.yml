@@ -1,0 +1,3 @@
+tasks:
+  start.prod:
+    command: 'vitest ./server/server.ts'

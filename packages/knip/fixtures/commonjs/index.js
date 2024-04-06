@@ -6,6 +6,7 @@ const defaultName = require('default-identifier');
 const { named } = require('named-object-binding');
 const all = require('./dir/mod');
 const { staticResolve } = require('./dir/mod');
+const { add } = require('./dir/exports');
 
 const dynamicRequire = value => {
   return require(`./dir/${value}`);

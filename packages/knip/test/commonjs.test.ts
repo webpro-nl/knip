@@ -13,6 +13,7 @@ test('Support CommonJS-style imports and exports', async () => {
     cwd,
   });
 
+  assert(issues.exports['dir/exports.js']['unused']);
   assert(issues.exports['dir/mod1.js']['identifier2']);
 
   assert(issues.unlisted['index.js']['side-effects']);
@@ -26,9 +27,9 @@ test('Support CommonJS-style imports and exports', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 1,
+    exports: 2,
     unlisted: 8,
-    processed: 6,
-    total: 6,
+    processed: 7,
+    total: 7,
   });
 });

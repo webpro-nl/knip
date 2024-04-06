@@ -363,6 +363,10 @@
           "title": "Mocha plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/mocha/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "moonrepo": {
+          "title": "moonrepo plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/moonrepo/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "msw": {
           "title": "Mocha plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/msw/README.md)",
           "$ref": "#/definitions/plugin"

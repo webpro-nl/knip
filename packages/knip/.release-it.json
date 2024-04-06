@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "before:init": ["npm run lint", "npm run build", "npm run knip", "npm run knip:production", "npm test"],
+    "after:bump": ["git add ../../package-lock.json"]
+  },
+  "github": {
+    "release": true,
+    "comments": {
+      "submit": true,
+      "issue": ":rocket: _This issue has been resolved in v${version}. See [${releaseName}](${releaseUrl}) for release notes._\n\n_Using Knip in a commercial project? Please consider [sponsoring me](https://github.com/sponsors/webpro)._",
+      "pr": ":rocket: _This pull request is included in v${version}. See [${releaseName}](${releaseUrl}) for release notes._\n\n_Using Knip in a commercial project? Please consider [sponsoring me](https://github.com/sponsors/webpro)._"
+    }
+  },
+  "plugins": {
+    "@release-it/bumper": {
+      "out": "{dist,src}/version.*"
+    }
+  }
+}

@@ -32,8 +32,8 @@ them however you like.
 ## Custom Compilers
 
 Additional custom compilers can be added, and built-in compilers can be
-overridden. Since compilers are functions, the Knip configuration file must to
-be a dynamic `.js` or `.ts` file.
+overridden. Since compilers are functions, the Knip configuration file must be a
+dynamic `.js` or `.ts` file.
 
 ### Interface
 

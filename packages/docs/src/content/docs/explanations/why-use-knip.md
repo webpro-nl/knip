@@ -52,7 +52,7 @@ synergy:
 - This approach is amplified in a monorepo setting. In fact, files and internal
   dependencies can recursively reference each other (across workspaces).
 
-The disadvantages of this strategy are not be dismissed: increased complexity
+The disadvantages of this strategy are not to be dismissed: increased complexity
 and less performance. In this early phase of the project completeness and
 correctness are valued over speed. Not in the least because the speed of
 automating this is still many times faster than the manual process. Both

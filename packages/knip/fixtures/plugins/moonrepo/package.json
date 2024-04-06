@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/moonrepo",
+  "devDependencies": {
+    "@moonrepo/cli": "*",
+    "vite-node": "*",
+    "eslint": "*"
+  }
+}

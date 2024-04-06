@@ -5,16 +5,19 @@
   "type": "module",
   "main": "./index.js",
   "types": "./index.d.ts",
+  "engines": {
+    "node": "^18.18.0 || >=20.0.0"
+  },
   "dependencies": {
     "@eslint/js": "^8.57.0",
-    "@typescript-eslint/eslint-plugin": "^7.2.0",
-    "@typescript-eslint/parser": "^7.2.0",
+    "@typescript-eslint/eslint-plugin": "^7.5.0",
+    "@typescript-eslint/parser": "^7.5.0",
     "eslint-import-resolver-typescript": "3.6.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
-    "globals": "^14.0.0"
+    "globals": "^15.0.0"
   },
   "devDependencies": {
-    "@types/eslint": "8.56.5"
+    "@types/eslint": "8.56.7"
   }
 }
