@@ -1,51 +1,45 @@
 import fs from "node:fs";
-import { resolve } from "../util/path.js";
+import { XMLBuilder } from "fast-xml-parser";
+import { resolve, dirname, toRelative } from "../util/path.js";
 import { getTitle } from './util.js';
 import type { ReporterOptions, IssueSet, IssueRecords, Issue } from '../types/issues.js';
 import type { Entries } from 'type-fest';
-
-type ExtraReporterOptions = {
-  path?: string;
-}
-
-const xmlBody = (content: string, failures: number) => `
-  <?xml version="1.0" encoding="UTF-8"?>
-  <testsuites name="Knip" failures="${failures}">
-    ${content}
-  </testsuites>
-`;
-
-const testSuiteBody = (title: string, failures: number, content: string) => `
-  <testsuite name="${title}" failures="${failures}">
-    ${content}
-  </testsuite>
-`;
-
-const testCaseBodySet = (title: string, entry: string) => `
-  <testcase name="${title}" classname="${entry}">
-    <failure message="${title}" type="${title}">
-      ${title}: ${entry}
-    </failure> 
-  </testcase>
-`;
-
-const testCaseBodyEntries = (title: string, entry: string, symbol: string) => `
-  <testcase name="${title}" classname="${entry}">
-    <failure message="${title} - ${symbol}" type="${title}">
-      ${title}: "${symbol}" inside ${entry}
-    </failure> 
-  </testcase>
-`;
 
 interface IssuesEntry {
   entry: string;
   issues: Issue[];
 }
 
+type ExtraReporterOptions = {
+  path?: string;
+}
+
+type Failure = {
+  "@_message": string;
+  "@_type": string;
+  "#text": string;
+}
+
+type TestCase = {
+  "@_tests": number;
+  "@_failures": number;
+  "@_name": string;
+  "@_classname": string;
+  failure: Failure;
+}
+
+type TestSuite = {
+  "@_name": string;
+  "@_tests": number;
+  "@_failures": number;
+  testcase: TestCase[];
+}
+
+
 export default ({ report, issues, counters, options }: ReporterOptions) => {
   let totalIssues = 0;
+  let testSuite: TestSuite[] = [];
 
-  let xmlContent = "";
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = getTitle(reportType);
@@ -60,43 +54,92 @@ export default ({ report, issues, counters, options }: ReporterOptions) => {
       });
 
       if (issuesForType.length > 0) {
-        let bodyCases = "";
+        let testCase: TestCase[] = [];
         if (isSet) {
-          const setTestCases = (issuesForType as string[]).map((issue) => {
-            return testCaseBodySet(title, issue)
-          }).join("");
-          bodyCases += setTestCases;
+          const setTestCases = (issuesForType as string[]).map((issue) => ({
+            "@_tests": 1,
+            "@_failures": 1,
+            "@_name": title,
+            "@_classname": toRelative(issue),
+            "failure": {
+              "@_message": title,
+              "@_type": title,
+              "#text": `${title}: ${toRelative(issue)}`
+            }       
+          }))
+          testCase = [...testCase, ...setTestCases];
         } else {
           const entriesTestCases = (issuesForType as IssuesEntry[]).flatMap((typeIssues) => typeIssues.issues.map((issue) => {
             let entry = typeIssues.entry;
             if ('line' in issue && 'col' in issue) {
               entry = `${typeIssues.entry}:${issue.line}:${issue.col}`
             }
-            return testCaseBodyEntries(title, entry, issue.symbol);
-          }));
-          console.log(entriesTestCases);
-          bodyCases += entriesTestCases.join("");
+            return {
+              "@_tests": 1,
+              "@_failures": 1,
+              "@_name": title,
+              "@_classname": entry,
+              "failure": {
+                "@_message": `${title} - ${issue.symbol}`,
+                "@_type": title,
+                "#text": `${title}: "${issue.symbol}" inside ${entry}`
+              }
+            }
+          }))
+          testCase = [...testCase, ...entriesTestCases];
         }
-        xmlContent += testSuiteBody(title, count, bodyCases)
-      } 
+        testSuite = [...testSuite, { "@_name": title, "@_tests": count, "@_failures": count, "testcase": testCase }]
 
-      totalIssues += count;
+        totalIssues += count;
+      }
     }
   }
 
   if (totalIssues > 0) {
-    const xml = xmlBody(xmlContent, totalIssues);
-    let opts: ExtraReporterOptions = {}
+    let opts: ExtraReporterOptions = {};
+
     try {
       opts = options ? JSON.parse(options) : opts;
     } catch (err) {
-      console.error("Error occurred while parsing options:", err);
+      console.error("Error occured while parsing options:", err);
     }
-    try {
-      fs.writeFileSync(resolve(opts.path ?? "knip.xml"), xml);
-      console.log("Knip results file successfully created.");
-    } catch (err) {
-      console.error("Error occurred while writing knip results file:", err);
+
+    const xml = {
+      "?xml": {
+        "@_version": "1.0",
+        "@_encoding": "UTF-8"
+      },
+      "testsuites": {
+        "@_name": "Knip report",
+        "@_tests": totalIssues,
+        "@_failures": totalIssues,
+        "testsuite": testSuite,
+      }
+    };
+
+    const builder = new XMLBuilder({
+      attributeNamePrefix: "@_",
+      format: true,
+      processEntities: false,
+      ignoreAttributes: false,
+    })
+    const outputXML = builder.build(xml)
+
+    if (opts.path) {
+      const dir = dirname(opts.path);
+
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true  });
+      }
+
+      try {
+        fs.writeFileSync(resolve(opts.path), outputXML, "utf-8");
+        console.log("Knip results file successfully written.");
+      } catch (err) {
+        console.error("Error occured while writing knip results file: ", err);
+      }
+    } else {
+      console.log(outputXML)
     }
   }
 };
