@@ -55,3 +55,4 @@ export { default as webpack } from './webpack/index.js';
 export { default as wireit } from './wireit/index.js';
 export { default as wrangler } from './wrangler/index.js';
 export { default as yorkie } from './yorkie/index.js';
+export { default as moonrepo } from './moonrepo/index.js';

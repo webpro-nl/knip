@@ -1,0 +1,9 @@
+tasks:
+  lint:
+    deps:
+      - lint.typecheck
+      - lint.code
+  lint.typecheck:
+    command: tsc --noEmit
+  lint.code:
+    command: eslint . --ignore-path $workspaceRoot/.gitignore --no-error-on-unmatched-pattern
