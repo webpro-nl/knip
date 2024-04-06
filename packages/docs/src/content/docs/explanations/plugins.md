@@ -42,7 +42,7 @@ In this case, the plugin will return the `eslint-config-airbnb`,
 Knip knows they should be listed in `package.json`.
 
 Some tools allow configuration to be stored in `package.json`, that's why some
-the relevant plugins contain `package.json` in the list of `config` files.
+of the relevant plugins contain `package.json` in the list of `config` files.
 
 :::tip[Summary]
 
@@ -69,7 +69,7 @@ configured.
 :::tip[Plugins result in less configuration]
 
 Plugins even consult the configuration files of these tools, in case alternative
-entry files should be used. So you need don't need to repeat this in your Knip
+entry files should be used. So you don't need to repeat this in your Knip
 configuration.
 
 :::
