@@ -10,6 +10,18 @@ export default defineConfig(configEnv =>
         globals: true,
         include: ['**/*.test.{ts,tsx}'],
         setupFiles: ['./src/setupTests.tsx'],
+        reporters: [
+          'basic',
+          'verbose',
+          'dot',
+          'junit',
+          'json',
+          'html',
+          'tap',
+          'tap-flat',
+          'hanging-process',
+          'github-actions',
+        ],
         mockReset: true,
         coverage: {
           provider: 'v8',
