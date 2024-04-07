@@ -1,1 +1,1 @@
-{ "extends": ["@commitlint/config-conventional"] }
+{ "extends": ["@commitlint/config-conventional"], "plugins": ["commitlint-plugin-tense"] }

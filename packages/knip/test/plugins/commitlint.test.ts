@@ -16,11 +16,14 @@ test('Find dependencies with the Commitizen plugin', async () => {
   assert(issues.unlisted['.commitlintrc.json']['@commitlint/config-conventional']);
   assert(issues.unlisted['commitlint.config.js']['@commitlint/config-conventional']);
   assert(issues.unlisted['package.json']['@commitlint/config-conventional']);
+  assert(issues.unlisted['.commitlintrc.json']['commitlint-plugin-tense']);
+  assert(issues.unlisted['commitlint.config.js']['commitlint-plugin-tense']);
+  assert(issues.unlisted['package.json']['commitlint-plugin-tense']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 3,
+    unlisted: 6,
     processed: 1,
     total: 1,
   });
