@@ -6,6 +6,7 @@ import type { Plugin, ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js
 
 type CommitLintConfig = {
   extends: string[];
+  plugins: string[];
 };
 
 const title = 'commitlint';
@@ -22,7 +23,9 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<CommitLintConfig> = config => {
-  return config.extends ? [config.extends].flat() : [];
+  const extendsConfigs = config.extends ? [config.extends].flat() : [];
+  const plugins = config.plugins ? [config.plugins].flat() : [];
+  return [...extendsConfigs, ...plugins];
 };
 
 export default {
