@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 // eslint-disable-next-line n/no-restricted-import
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import prettier from 'prettier';
 import remarkDirective from 'remark-directive';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkParse from 'remark-parse';
@@ -22,7 +21,6 @@ const directories = await fs.opendir(pluginsDir);
 const plugins = [];
 
 const prettierConfigPath = path.join(rootDir, '.prettierrc.json');
-const prettierOptions = await prettier.resolveConfig(prettierConfigPath);
 
 const parseFragment = (text: string) => {
   const tree = unified().use(remarkParse).parse(text);
@@ -40,8 +38,7 @@ const writeTree = async (tree: Node, filePath: string) => {
       })
       .stringify(file as Root);
 
-    const formattedMarkdown = await prettier.format(markdown, { ...prettierOptions, parser: 'markdown' });
-    await fs.writeFile(filePath, formattedMarkdown);
+    await fs.writeFile(filePath, markdown);
   } catch (err) {
     console.error(err);
   }

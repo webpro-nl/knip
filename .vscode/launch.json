@@ -2,18 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
+      "type": "bun",
       "request": "launch",
-      "name": "Run current test file",
-      "skipFiles": ["<node_internals>/**"],
-      "runtimeArgs": ["--loader", "tsx", "--test", "${file}"]
+      "name": "Debug Bun test",
+      "program": "${file}",
+      "args": ["test"],
+      "cwd": "${workspaceFolder}/packages/knip",
+      "runtime": "bun",
+      "runtimeArgs": ["test"]
     },
     {
-      "type": "node",
-      "request": "launch",
-      "name": "Run current test file with --test-only",
-      "skipFiles": ["<node_internals>/**"],
-      "runtimeArgs": ["--loader", "tsx", "--test-only", "${file}"]
+      "type": "bun",
+      "request": "attach",
+      "name": "Attach to Bun",
+      "url": "ws://localhost:6499/knip"
     }
   ]
 }

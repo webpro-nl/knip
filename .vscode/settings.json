@@ -1,6 +1,13 @@
 {
-  "eslint.experimental.useFlatConfig": true,
-  "eslint.workingDirectories": ["./packages/knip", "./packages/docs"],
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "cSpell.enabled": true,
   "cSpell.words": [
     "astro",

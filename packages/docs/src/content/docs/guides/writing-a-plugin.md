@@ -190,7 +190,7 @@ The easiest way to create a new plugin is to use the `create-plugin` script:
 
 ```sh
 cd packages/knip
-npm run create-plugin -- --name tool
+bun create-plugin --name tool
 ```
 
 This adds source and test files and fixtures to get you started. It also adds
@@ -199,7 +199,7 @@ the plugin to the JSON Schema and TypeScript types.
 Run the test for your new plugin:
 
 ```sh
-npx tsx test/plugins/tool.test.ts
+bun test test/plugins/tool.test.ts
 ```
 
 You're ready to implement and submit a new Knip plugin! 🆕 🎉
