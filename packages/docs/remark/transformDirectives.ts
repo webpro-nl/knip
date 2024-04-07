@@ -1,6 +1,6 @@
 import { h } from 'hastscript';
-import { visit, type Visitor } from 'unist-util-visit';
 import type { Node, Parent } from 'unist';
+import { type Visitor, visit } from 'unist-util-visit';
 
 interface DirectiveNode extends Node {
   type: 'textDirective' | 'leafDirective' | 'containerDirective';

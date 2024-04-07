@@ -2,16 +2,16 @@ import fs from 'node:fs/promises';
 // biome-ignore lint/nursery/noRestrictedImports: script
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { Root } from 'mdast';
 import remarkDirective from 'remark-directive';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
-import { u } from 'unist-builder';
-import { base } from '../config.js';
-import type { Plugin } from '../../knip/src/types/plugins.js';
-import type { Root } from 'mdast';
 import type { Node } from 'unist';
+import { u } from 'unist-builder';
+import type { Plugin } from '../../knip/src/types/plugins.js';
+import { base } from '../config.js';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const referenceDocsDir = path.join(rootDir, 'src/content/docs/reference');
@@ -98,7 +98,7 @@ for await (const dir of directories) {
 
 plugins.sort((a, b) => (a[1] < b[1] ? -1 : 1));
 
-const frontmatter = u('yaml', `title: Plugins\ntableOfContents: false`);
+const frontmatter = u('yaml', 'title: Plugins\ntableOfContents: false');
 
 const tree = u('root', [
   frontmatter,
@@ -108,7 +108,7 @@ const tree = u('root', [
       { spread: false, ordered: false },
       plugins.map(plugin =>
         u('listItem', [
-          u('link', { title: plugin[0], url: (base === '/' ? '' : base) + `/reference/plugins/${plugin[1]}` }, [
+          u('link', { title: plugin[0], url: `${base === '/' ? '' : base}/reference/plugins/${plugin[1]}` }, [
             u('text', plugin[0]),
           ]),
         ])
@@ -118,5 +118,5 @@ const tree = u('root', [
   ]),
 ]);
 
-console.log(`Writing plugin list to plugins.md`);
+console.log('Writing plugin list to plugins.md');
 await writeTree(tree, path.join(referenceDocsDir, 'plugins.md'));

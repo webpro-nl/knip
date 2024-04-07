@@ -1,6 +1,6 @@
 import { bold, cyan, dim } from 'kleur/colors';
-import { visit, type Visitor } from 'unist-util-visit';
 import type { Node, Parent } from 'unist';
+import { type Visitor, visit } from 'unist-util-visit';
 
 interface LinkNode extends Node {
   url: string;

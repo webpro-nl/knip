@@ -1,10 +1,6 @@
 ---
 import sprites from '../assets/sprites.svg';
-import {
-  replaceShortenedUrls,
-  type TweetWithUser,
-  formatTimestamp,
-} from '../util/tweet.js';
+import { type TweetWithUser, formatTimestamp, replaceShortenedUrls } from '../util/tweet.js';
 
 const tweet: TweetWithUser = replaceShortenedUrls(Astro.props.data);
 ---

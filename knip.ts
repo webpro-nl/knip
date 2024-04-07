@@ -5,7 +5,7 @@ const config: KnipConfig = {
   ignore: ['templates/**'],
   workspaces: {
     '.': {
-      ignoreBinaries: ['knip']
+      ignoreBinaries: ['knip'],
     },
     'packages/knip': {
       entry: ['src/{index,cli}.ts!', 'src/plugins/*/index.ts!'],
@@ -14,14 +14,14 @@ const config: KnipConfig = {
       ignoreDependencies: ['@pnpm/logger'],
       'node-test-runner': {
         entry: ['test/**/*.test.ts'],
-        project: ['test/**/*.ts']
-      }
+        project: ['test/**/*.ts'],
+      },
     },
     'packages/docs': {
       entry: ['{remark,scripts}/*.ts', 'src/components/{Head,Header,Footer}.astro!'],
-      ignore: 'config.ts'
-    }
-  }
+      ignore: 'config.ts',
+    },
+  },
 };
 
 export default config;

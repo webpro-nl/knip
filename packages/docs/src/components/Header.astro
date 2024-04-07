@@ -1,16 +1,14 @@
 ---
-import type { Props } from '@astrojs/starlight/props';
-import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
 import Search from '@astrojs/starlight/components/Search.astro';
+import Select from '@astrojs/starlight/components/Select.astro';
+import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
 import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro';
 import ThemeSelect from '@astrojs/starlight/components/ThemeSelect.astro';
-import Select from '@astrojs/starlight/components/Select.astro';
+import type { Props } from '@astrojs/starlight/props';
 import { defaultVersion, versions } from '../../config.js';
 
 const url = new URL(Astro.url);
-const currentVersion = /^\/v\d+/.test(url.pathname)
-  ? url.pathname.split('/')[1]
-  : defaultVersion;
+const currentVersion = /^\/v\d+/.test(url.pathname) ? url.pathname.split('/')[1] : defaultVersion;
 const options = versions.map(([version, label]) => ({
   label,
   selected: currentVersion === version,

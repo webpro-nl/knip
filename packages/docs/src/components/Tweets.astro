@@ -1,8 +1,8 @@
 ---
 import { readFile } from 'node:fs/promises';
-import Tweet from './Tweet.astro';
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import { type TweetsResponse, formatTimestamp } from '../util/tweet.js';
+import Tweet from './Tweet.astro';
 
 const BEARER_TOKEN = import.meta.env.BEARER_TOKEN;
 
@@ -28,24 +28,12 @@ const tweetIds = [
   '1692942539614028086',
 ];
 
-const tweet_url = new URL(`/2/tweets`, 'https://api.twitter.com');
+const tweet_url = new URL('/2/tweets', 'https://api.twitter.com');
 tweet_url.searchParams.set('ids', tweetIds.join(','));
-tweet_url.searchParams.set(
-  'expansions',
-  ['author_id', 'attachments.media_keys'].join(',')
-);
-tweet_url.searchParams.set(
-  'user.fields',
-  ['name', 'username', 'profile_image_url'].join(',')
-);
-tweet_url.searchParams.set(
-  'tweet.fields',
-  ['note_tweet', 'created_at', 'public_metrics', 'entities'].join(',')
-);
-tweet_url.searchParams.set(
-  'media.fields',
-  ['type', 'preview_image_url', 'url', 'alt_text', 'variants'].join(',')
-);
+tweet_url.searchParams.set('expansions', ['author_id', 'attachments.media_keys'].join(','));
+tweet_url.searchParams.set('user.fields', ['name', 'username', 'profile_image_url'].join(','));
+tweet_url.searchParams.set('tweet.fields', ['note_tweet', 'created_at', 'public_metrics', 'entities'].join(','));
+tweet_url.searchParams.set('media.fields', ['type', 'preview_image_url', 'url', 'alt_text', 'variants'].join(','));
 
 const tweets: TweetsResponse = isFetch
   ? await fetch(tweet_url.href, {
@@ -64,9 +52,7 @@ interface Testimonial {
   url: string;
 }
 
-const testimonials: Testimonial[] = JSON.parse(
-  await readFile('mock/testimonials.json', 'utf-8')
-);
+const testimonials: Testimonial[] = JSON.parse(await readFile('mock/testimonials.json', 'utf-8'));
 ---
 
 <style>

@@ -1,10 +1,10 @@
 import starlight from '@astrojs/starlight';
+import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 import { defineConfig } from 'astro/config';
 import remarkDirective from 'remark-directive';
 import { base } from './config.js';
 import { fixInternalLinks } from './remark/fixInternalLinks.ts';
 import { transformDirectives } from './remark/transformDirectives.ts';
-import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 
 const setForeground = (theme: ExpressiveCodeTheme, scope: string, value: string) => {
   const settings = theme.settings.find(setting => setting.scope?.includes(scope));

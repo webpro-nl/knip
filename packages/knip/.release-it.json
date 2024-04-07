@@ -1,6 +1,12 @@
 {
   "hooks": {
-    "before:init": ["npm run lint", "npm run build", "npm run knip", "npm run knip:production", "npm test"],
+    "before:init": [
+      "npm run lint",
+      "npm run build",
+      "npm run knip",
+      "npm run knip:production",
+      "npm test"
+    ],
     "after:bump": ["git add ../../package-lock.json"]
   },
   "github": {

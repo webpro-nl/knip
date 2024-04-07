@@ -2,7 +2,7 @@ export const replaceShortenedUrls = (tweet: TweetWithUser) => {
   let text = (tweet.note_tweet?.text ?? tweet.text).replace(/^(@[^ ]+ )*/, '');
   if (!tweet.entities.urls) return { ...tweet, text };
   tweet.entities.urls.sort((a, b) => b.start - a.start);
-  tweet.entities.urls.forEach(urlEntity => {
+  for (const urlEntity of tweet.entities.urls) {
     if (urlEntity.media_key) {
       const media = (tweet.media ?? []).find(media => media.media_key === urlEntity.media_key);
       if (media && media.type === 'photo') {
@@ -13,7 +13,7 @@ export const replaceShortenedUrls = (tweet: TweetWithUser) => {
     } else {
       text = text.replace(urlEntity.url, `<a href="${urlEntity.expanded_url}">${urlEntity.expanded_url}</a>`);
     }
-  });
+  }
   if (tweet.media && tweet.note_tweet?.text) {
     text = text + tweet.media.map(media => `<img src="${media.url}" alt="${media.alt_text}" />`).join('');
   }

@@ -14,7 +14,7 @@ export function breakText(str: string, maxLines: number, maxLineLen: number) {
   const segmenterTitle = new Intl.Segmenter('en-US', { granularity: 'word' });
   const segments = segmenterTitle.segment(str);
 
-  let linesOut = [''];
+  const linesOut = [''];
   let lineNo = 0;
   let offsetInLine = 0;
   for (const word of Array.from(segments)) {
@@ -58,7 +58,7 @@ const S = ({ title }: { title: string; description: string[] }) => {
   return template.replace('<!-- titleText -->', titleText);
 };
 
-export const GET = async function ({ params }: { params: { route: string } }) {
+export const GET = async ({ params }: { params: { route: string } }) => {
   const pages = await getPages();
   const pageEntry = pages[params.route];
   if (!pageEntry) return new Response('Page not found', { status: 404 });
@@ -81,7 +81,7 @@ export const GET = async function ({ params }: { params: { route: string } }) {
   });
 };
 
-export const getStaticPaths = async function () {
+export const getStaticPaths = async () => {
   const pages = await getPages();
   return Object.keys(pages).map(route => ({ params: { route } }));
 };
