@@ -1,7 +1,7 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { compact } from '#p/util/array.js';
 import { getPackageNameFromModuleSpecifier } from '#p/util/modules.js';
 import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
 
 const title = 'Nx';

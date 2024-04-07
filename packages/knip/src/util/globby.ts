@@ -1,14 +1,14 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { promisify } from 'node:util';
 import { walk as _walk } from '@nodelib/fs.walk';
-import { type Options as FastGlobOptions } from 'fast-glob';
+import type { Entry } from '@nodelib/fs.walk';
+import type { Options as FastGlobOptions } from 'fast-glob';
 import fastGlob from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
+import { timerify } from './Performance.js';
 import { debugLogObject } from './debug.js';
 import { dirname, join, relative, toPosix } from './path.js';
-import { timerify } from './Performance.js';
-import type { Entry } from '@nodelib/fs.walk';
 
 const walk = promisify(_walk);
 
@@ -29,21 +29,21 @@ type Gitignores = { ignores: string[]; unignores: string[] };
 const cachedIgnores = new Map<string, Gitignores>();
 
 function convertGitignoreToMicromatch(pattern: string) {
-  let negated = pattern[0] === '!';
+  const negated = pattern[0] === '!';
   if (negated) {
     pattern = pattern.slice(1);
   }
 
-  let extPattern;
+  let extPattern: string;
 
   if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
 
   if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  else if (!pattern.startsWith('**/')) pattern = '**/' + pattern;
+  else if (!pattern.startsWith('**/')) pattern = `**/${pattern}`;
 
   if (pattern.endsWith('/*')) extPattern = pattern;
-  else if (pattern.endsWith('/')) extPattern = pattern + '**';
-  else extPattern = pattern + '/**';
+  else if (pattern.endsWith('/')) extPattern = `${pattern}**`;
+  else extPattern = `${pattern}/**`;
 
   return { negated, patterns: [pattern, extPattern] };
 }
@@ -88,7 +88,7 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
           if (base === '') {
             if (!unignores.includes(ext)) dirUnignores.push(...rule.patterns);
           } else {
-            if (!unignores.includes(ext.startsWith('**/') ? ext : '**/' + ext)) {
+            if (!unignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
               dirUnignores.push(join(base, p), join(base, ext));
             }
           }
@@ -96,7 +96,7 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
           if (base === '') {
             if (!ignores.includes(ext)) dirIgnores.push(...rule.patterns);
           } else {
-            if (!ignores.includes(ext.startsWith('**/') ? ext : '**/' + ext)) {
+            if (!ignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
               dirIgnores.push(join(base, p), join(base, ext));
             }
           }
@@ -132,7 +132,7 @@ export async function globby(patterns: string | string[], options: GlobOptions):
       const i = cachedIgnores.get(dir);
       if (i) {
         ignore.push(...i.ignores);
-        ignore.push(...i.unignores.map(e => '!' + e));
+        ignore.push(...i.unignores.map(e => `!${e}`));
       }
       dir = dirname(dir);
     }
@@ -142,7 +142,7 @@ export async function globby(patterns: string | string[], options: GlobOptions):
 
   const { dir, ...fastGlobOptions } = { ...options, ignore };
 
-  debugLogObject(relative(options.cwd, dir) || ROOT_WORKSPACE_NAME, `Glob options`, { patterns, ...options });
+  debugLogObject(relative(options.cwd, dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...options });
 
   return fastGlob(patterns, fastGlobOptions);
 }

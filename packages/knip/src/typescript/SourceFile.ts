@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 
 // The members of ts.SourceFile below are added by binding and not public, so we add them here
 

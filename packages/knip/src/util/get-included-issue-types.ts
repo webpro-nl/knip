@@ -1,6 +1,6 @@
 import { ISSUE_TYPES } from '../constants.js';
-import { ConfigurationError } from './errors.js';
 import type { Report } from '../types/issues.js';
+import { ConfigurationError } from './errors.js';
 
 type CLIArguments = {
   include: string[];
@@ -22,7 +22,7 @@ type Options = {
 export const defaultExcludedIssueTypes = ['classMembers', 'nsExports', 'nsTypes'];
 const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.includes(type));
 
-const normalize = (values: string[]) => values.map(value => value.split(',')).flat();
+const normalize = (values: string[]) => values.flatMap(value => value.split(','));
 
 export const getIncludedIssueTypes = (
   cliArgs: CLIArguments,
@@ -30,13 +30,13 @@ export const getIncludedIssueTypes = (
 ) => {
   // Allow space-separated argument values (--include files,dependencies)
   let incl = normalize(cliArgs.include);
-  let excl = normalize(cliArgs.exclude);
+  const excl = normalize(cliArgs.exclude);
 
   // Naming is hard...
-  [...incl, ...excl, ...include, ...exclude].forEach(type => {
+  for (const type of [...incl, ...excl, ...include, ...exclude]) {
     // @ts-expect-error The point is that we're checking for invalid issue types
     if (!ISSUE_TYPES.includes(type)) throw new ConfigurationError(`Invalid issue type: ${type}`);
-  });
+  }
 
   // CLI arguments override local options
   const excludes = exclude.filter(exclude => !incl.includes(exclude));
@@ -72,5 +72,8 @@ export const getIncludedIssueTypes = (
       : defaultIssueTypes
   ).filter(group => !_exclude.includes(group));
 
-  return ISSUE_TYPES.reduce((types, group) => ((types[group] = included.includes(group)), types), {} as Report);
+  return ISSUE_TYPES.reduce((types, group) => {
+    types[group] = included.includes(group);
+    return types;
+  }, {} as Report);
 };

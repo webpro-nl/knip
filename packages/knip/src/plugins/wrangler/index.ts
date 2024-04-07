@@ -1,5 +1,5 @@
-import { hasDependency } from '#p/util/plugin.js';
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
 import type { WranglerConfig } from './types.js';
 
 // https://developers.cloudflare.com/workers/wrangler/configuration/

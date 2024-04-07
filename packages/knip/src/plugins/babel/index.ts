@@ -1,7 +1,7 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { compact } from '#p/util/array.js';
 import { hasDependency } from '#p/util/plugin.js';
-import { resolveName, api } from './helpers.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
+import { api, resolveName } from './helpers.js';
 import type { BabelConfig, BabelConfigObj } from './types.js';
 
 // https://babeljs.io/docs/configuration

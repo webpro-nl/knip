@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 import type { SymbolType } from './issues.js';
 
 type FilePath = string;

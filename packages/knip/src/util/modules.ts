@@ -1,8 +1,8 @@
-import { isBuiltin } from 'module';
+import { isBuiltin } from 'node:module';
+import type { PackageJson } from '../types/package-json.js';
 import { _glob } from './glob.js';
 import { getStringValues } from './object.js';
 import { isAbsolute, toPosix } from './path.js';
-import type { PackageJson } from '../types/package-json.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   if (!isStartsLikePackageName(moduleSpecifier)) return;
@@ -28,8 +28,8 @@ export const isDefinitelyTyped = (packageName: string) => packageName.startsWith
 
 export const getDefinitelyTypedFor = (packageName: string) => {
   if (isDefinitelyTyped(packageName)) return packageName;
-  if (packageName.startsWith('@')) return '@types/' + packageName.slice(1).replace('/', '__');
-  return '@types/' + packageName;
+  if (packageName.startsWith('@')) return `@types/${packageName.slice(1).replace('/', '__')}`;
+  return `@types/${packageName}`;
 };
 
 export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
@@ -52,11 +52,11 @@ export const getEntryPathFromManifest = (
 
   if (bin) {
     if (typeof bin === 'string') entryPaths.add(bin);
-    if (typeof bin === 'object') Object.values(bin).forEach(bin => entryPaths.add(bin));
+    if (typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
   }
 
   if (exports) {
-    getStringValues(exports).forEach(item => entryPaths.add(item));
+    for (const item of getStringValues(exports)) entryPaths.add(item);
   }
 
   // Use glob, as we only want source files that:

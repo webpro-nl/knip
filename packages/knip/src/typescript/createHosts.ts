@@ -1,13 +1,13 @@
 import { EOL } from 'node:os';
-// eslint-disable-next-line n/no-restricted-import
+// biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 import ts from 'typescript';
 import { getCompilerExtensions } from '../compilers/index.js';
+import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
-import { createCustomModuleResolver } from './resolveModuleNames.js';
 import { SourceFileManager } from './SourceFileManager.js';
+import { createCustomModuleResolver } from './resolveModuleNames.js';
 import { createCustomSys } from './sys.js';
-import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 

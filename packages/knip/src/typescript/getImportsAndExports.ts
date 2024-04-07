@@ -1,21 +1,5 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { isInNodeModules } from '../util/path.js';
-import { timerify } from '../util/Performance.js';
-import { shouldIgnore } from '../util/tag.js';
-import {
-  isAccessExpression,
-  getJSDocTags,
-  getLineAndCharacterOfPosition,
-  getMemberStringLiterals,
-} from './ast-helpers.js';
-import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
-import getExportVisitors from './visitors/exports/index.js';
-import { getImportsFromPragmas } from './visitors/helpers.js';
-import getImportVisitors from './visitors/imports/index.js';
-import getScriptVisitors from './visitors/scripts/index.js';
-import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
 import type { Tags } from '../types/cli.js';
 import type {
   ExportNode,
@@ -26,6 +10,22 @@ import type {
 } from '../types/exports.js';
 import type { ImportNode, SerializableImportMap, UnresolvedImport } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
+import { timerify } from '../util/Performance.js';
+import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
+import { isInNodeModules } from '../util/path.js';
+import { shouldIgnore } from '../util/tag.js';
+import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
+import {
+  getJSDocTags,
+  getLineAndCharacterOfPosition,
+  getMemberStringLiterals,
+  isAccessExpression,
+} from './ast-helpers.js';
+import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
+import getExportVisitors from './visitors/exports/index.js';
+import { getImportsFromPragmas } from './visitors/helpers.js';
+import getImportVisitors from './visitors/imports/index.js';
+import getScriptVisitors from './visitors/scripts/index.js';
 
 const getVisitors = (sourceFile: ts.SourceFile) => ({
   export: getExportVisitors(sourceFile),
@@ -90,6 +90,7 @@ const getImportsAndExports = (
 
     const isStar = identifier === '*';
 
+    // biome-ignore lint/suspicious/noAssignInExpressions: TODO
     const internalImport = (internalImports[filePath] = internalImports[filePath] ?? {
       specifier,
       hasStar: isStar,
@@ -167,7 +168,7 @@ const getImportsAndExports = (
       if (importedSymbolFilePath) {
         const internalImport = internalImports[importedSymbolFilePath];
         if (typeof member === 'string') internalImport.identifiers.add(`${namespace}.${member}`);
-        else member.forEach(member => internalImport.identifiers.add(`${namespace}.${member}`));
+        else for (const m of member) internalImport.identifiers.add(`${namespace}.${m}`);
       }
     }
   };
@@ -246,7 +247,7 @@ const getImportsAndExports = (
     const identifier = node?.getText();
     if (node && identifier) {
       const symbol = sourceFile.symbol?.exports?.get(identifier);
-      if (symbol && symbol.valueDeclaration) {
+      if (symbol?.valueDeclaration) {
         if (!aliasedExports.has(identifier)) {
           const pos = getLineAndCharacterOfPosition(symbol.valueDeclaration, symbol.valueDeclaration.pos);
           aliasedExports.set(identifier, [{ symbol: identifier, ...pos }]);
@@ -261,9 +262,11 @@ const getImportsAndExports = (
   };
 
   const visit = (node: ts.Node) => {
+    const addImportWithNode = (result: ImportNode) => addImport(result, node);
+
     for (const visitor of visitors.dynamicImport) {
       const result = visitor(node, options);
-      result && (Array.isArray(result) ? result.forEach(r => addImport(r, node)) : addImport(result, node));
+      result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
     }
 
     // Skip some work by handling only top-level import/export assignments
@@ -272,7 +275,7 @@ const getImportsAndExports = (
     if (isTopLevel) {
       for (const visitor of visitors.import) {
         const result = visitor(node, options);
-        result && (Array.isArray(result) ? result.forEach(r => addImport(r, node)) : addImport(result, node));
+        result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
       }
 
       for (const visitor of visitors.export) {
@@ -353,7 +356,7 @@ const getImportsAndExports = (
 
   // No file-level visitors yet, so let's keep it simple
   const pragmaImports = getImportsFromPragmas(sourceFile);
-  if (pragmaImports) pragmaImports.forEach(node => addImport(node, sourceFile));
+  if (pragmaImports) for (const node of pragmaImports) addImport(node, sourceFile);
 
   const setRefs = (item: SerializableExport | SerializableExportMember) => {
     if (!item.symbol) return;
@@ -371,14 +374,14 @@ const getImportsAndExports = (
     }
   };
 
-  for (let key in exports) {
+  for (const key in exports) {
     const item = exports[key];
     if (options.ignoreExportsUsedInFile) setRefs(item);
-    item.members.forEach(member => {
+    for (const member of item.members) {
       setRefs(member);
-      delete member.symbol;
-    });
-    delete item.symbol;
+      member.symbol = undefined;
+    }
+    item.symbol = undefined;
   }
 
   return {

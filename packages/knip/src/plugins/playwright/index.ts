@@ -1,8 +1,8 @@
+import type { PlaywrightTestConfig } from 'playwright/test';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import { join, relative } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
-import type { IsPluginEnabled, ResolveEntryPaths, ResolveConfig, Plugin } from '#p/types/plugins.js';
-import type { PlaywrightTestConfig } from 'playwright/test';
 
 // https://playwright.dev/docs/test-configuration
 

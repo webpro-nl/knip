@@ -10,7 +10,8 @@ export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleS
       const resolvedFilePath = _tryResolve(filePath, cwd);
       if (resolvedFilePath) {
         return resolvedFilePath;
-      } else if (acceptModuleSpecifier) {
+      }
+      if (acceptModuleSpecifier) {
         return getPackageNameFromModuleSpecifier(specifier);
       }
     } else if (specifier.includes('node_modules/.bin')) {

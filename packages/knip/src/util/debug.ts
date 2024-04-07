@@ -47,7 +47,7 @@ export const debugLogArray = IS_DEBUG_ENABLED
 const levels = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨'];
 export const exportLookupLog = IS_TRACE_ENABLED
   ? (depth: number, message: string, filePath: string) => {
-      if (depth === -1) console.log('\n' + message, relative(filePath));
+      if (depth === -1) console.log(`\n${message}`, relative(filePath));
       else console.log(new Array(depth + 1).join('  '), levels[depth], message, relative(filePath));
     }
   : noop;

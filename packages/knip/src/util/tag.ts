@@ -5,13 +5,14 @@ export const splitTags = (tags: string[]) =>
     .flatMap(tag => tag.split(','))
     .reduce<Tags>(
       ([incl, excl], tag) => {
-        (tag.startsWith('-') ? excl : incl).push(tag.match(/[a-zA-Z]+/)![0]);
+        const match = tag.match(/[a-zA-Z]+/);
+        if (match) (tag.startsWith('-') ? excl : incl).push(match[0]);
         return [incl, excl];
       },
       [[], []]
     );
 
-const hasTag = (tags: string[], jsDocTags: string[]) => tags.some(tag => jsDocTags.includes('@' + tag));
+const hasTag = (tags: string[], jsDocTags: string[]) => tags.some(tag => jsDocTags.includes(`@${tag}`));
 
 export const shouldIgnore = (jsDocTags: string[], tags: Tags) => {
   const [includeJSDocTags, excludeJSDocTags] = tags;

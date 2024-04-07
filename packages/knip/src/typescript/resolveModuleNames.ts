@@ -34,7 +34,7 @@ export function createCustomModuleResolver(
       const key = moduleName.startsWith('.')
         ? join(dirname(containingFile), moduleName)
         : `${containingFile}:${moduleName}`;
-      if (resolutionCache.has(key)) return resolutionCache.get(key)!;
+      if (resolutionCache.has(key)) return resolutionCache.get(key);
       const resolvedModule = resolveModuleName(moduleName, containingFile);
       resolutionCache.set(key, resolvedModule);
       return resolvedModule;
@@ -83,7 +83,9 @@ export function createCustomModuleResolver(
       if (tsResolvedModule.extension === '.d.mts') {
         const resolvedFileName = tsResolvedModule.resolvedFileName.replace(/\.d\.mts$/, '.mjs');
         return { resolvedFileName, extension: '.mjs', isExternalLibraryImport: false, resolvedUsingTsExtension: false };
-      } else if (tsResolvedModule.extension === '.d.cts') {
+      }
+
+      if (tsResolvedModule.extension === '.d.cts') {
         const resolvedFileName = tsResolvedModule.resolvedFileName.replace(/\.d\.cts$/, '.cjs');
         return { resolvedFileName, extension: '.cjs', isExternalLibraryImport: false, resolvedUsingTsExtension: false };
       }
@@ -120,7 +122,7 @@ export function createCustomModuleResolver(
       customSys
     ).resolvedModule;
 
-    if (!customResolvedModule || !isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
+    if (!(customResolvedModule && isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions))) {
       const module = fileExists(sanitizedSpecifier, containingFile);
       if (module) return module;
       return customResolvedModule;

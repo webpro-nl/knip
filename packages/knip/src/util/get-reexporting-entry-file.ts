@@ -1,6 +1,6 @@
-import { exportLookupLog } from './debug.js';
 import type { SerializableExportMap } from '../types/exports.js';
 import type { SerializableImportMap, SerializableImports } from '../types/imports.js';
+import { exportLookupLog } from './debug.js';
 
 export const getReExportingEntryFileHandler = (
   entryPaths: Set<string>,
@@ -10,7 +10,7 @@ export const getReExportingEntryFileHandler = (
   const getReExportingEntryFile = (
     importedModule: SerializableImports | undefined,
     id: string,
-    depth: number = 0,
+    depth = 0,
     filePath?: string
   ): string | undefined => {
     if (depth === 0 && filePath) exportLookupLog(-1, `Looking up re-exporting file for ${id} from`, filePath);
@@ -21,14 +21,15 @@ export const getReExportingEntryFileHandler = (
       for (const filePath of importedModule.isReExportedBy) {
         if (entryPaths.has(filePath)) {
           if (filePath in exportedSymbols && id in exportedSymbols[filePath]) {
-            exportLookupLog(depth, `re-exported by entry`, filePath);
+            exportLookupLog(depth, 're-exported by entry', filePath);
             return filePath;
-          } else if (importedModule.hasStar) {
-            exportLookupLog(depth, `re-exported (*) by entry`, filePath);
+          }
+          if (importedModule.hasStar) {
+            exportLookupLog(depth, 're-exported (*) by entry', filePath);
             return filePath;
           }
         } else {
-          exportLookupLog(depth, `re-exported by`, filePath);
+          exportLookupLog(depth, 're-exported by', filePath);
           const file = getReExportingEntryFile(importedSymbols[filePath], id, depth + 1);
           if (file) return file;
         }
@@ -38,22 +39,20 @@ export const getReExportingEntryFileHandler = (
         if (entryPaths.has(filePath)) {
           exportLookupLog(depth, `re-exported on ${namespace} by entry`, filePath);
           return filePath;
-        } else {
-          exportLookupLog(depth, `re-exported on ${namespace} by`, filePath);
-          const file = getReExportingEntryFile(importedSymbols[filePath], namespace, depth + 1);
-          if (file) return file;
         }
+        exportLookupLog(depth, `re-exported on ${namespace} by`, filePath);
+        const file = getReExportingEntryFile(importedSymbols[filePath], namespace, depth + 1);
+        if (file) return file;
       }
 
       for (const [filePath, alias] of importedModule.isReExportedAs) {
         if (entryPaths.has(filePath)) {
           exportLookupLog(depth, `re-exported as ${alias} by entry`, filePath);
           return filePath;
-        } else {
-          exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
-          const file = getReExportingEntryFile(importedSymbols[filePath], alias, depth + 1);
-          if (file) return file;
         }
+        exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
+        const file = getReExportingEntryFile(importedSymbols[filePath], alias, depth + 1);
+        if (file) return file;
       }
     }
 

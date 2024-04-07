@@ -1,20 +1,20 @@
 import ts from 'typescript';
-import { getCompilerExtensions } from './compilers/index.js';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
-import { createHosts } from './typescript/createHosts.js';
-import { _getImportsAndExports, type GetImportsAndExportsOptions } from './typescript/getImportsAndExports.js';
-import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
-import { SourceFileManager } from './typescript/SourceFileManager.js';
-import { compact } from './util/array.js';
-import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
-import { dirname, extname, isInNodeModules, join } from './util/path.js';
-import { timerify } from './util/Performance.js';
-import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
+import type { ReferencedDependencies } from './WorkspaceWorker.js';
+import { getCompilerExtensions } from './compilers/index.js';
+import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
 import type { SerializableExport, SerializableExportMember } from './types/exports.js';
 import type { UnresolvedImport } from './types/imports.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
-import type { ReferencedDependencies } from './WorkspaceWorker.js';
+import type { SourceFileManager } from './typescript/SourceFileManager.js';
+import { createHosts } from './typescript/createHosts.js';
+import { type GetImportsAndExportsOptions, _getImportsAndExports } from './typescript/getImportsAndExports.js';
+import type { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
+import { timerify } from './util/Performance.js';
+import { compact } from './util/array.js';
+import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
+import { dirname, extname, isInNodeModules, join } from './util/path.js';
 
 // These compiler options override local options
 const baseCompilerOptions = {
@@ -151,7 +151,7 @@ export class ProjectPrincipal {
   }
 
   public addEntryPaths(filePaths: Set<string> | string[], options?: { skipExportsAnalysis: boolean }) {
-    filePaths.forEach(filePath => this.addEntryPath(filePath, options));
+    for (const filePath of filePaths) this.addEntryPath(filePath, options);
   }
 
   public addProjectPath(filePath: string) {
@@ -161,9 +161,8 @@ export class ProjectPrincipal {
   }
 
   public addReferencedDependencies(workspaceName: string, referencedDependencies: ReferencedDependencies) {
-    referencedDependencies.forEach(referencedDependency =>
-      this.referencedDependencies.add([...referencedDependency, workspaceName])
-    );
+    for (const referencedDependency of referencedDependencies)
+      this.referencedDependencies.add([...referencedDependency, workspaceName]);
   }
 
   /**
@@ -196,6 +195,8 @@ export class ProjectPrincipal {
   }
 
   public analyzeSourceFile(filePath: string, options: Omit<GetImportsAndExportsOptions, 'skipExports'>) {
+    if (!this.backend.typeChecker) throw new Error('Must initialize TypeChecker before source file analysis');
+
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
     const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
 
@@ -211,7 +212,7 @@ export class ProjectPrincipal {
     const { imports, exports, scripts } = _getImportsAndExports(
       sourceFile,
       getResolvedModule,
-      this.backend.typeChecker!,
+      this.backend.typeChecker,
       { ...options, skipExports }
     );
 
@@ -219,11 +220,11 @@ export class ProjectPrincipal {
 
     const unresolvedImports = new Set<UnresolvedImport>();
 
-    unresolved.forEach(unresolvedImport => {
+    for (const unresolvedImport of unresolved) {
       const { specifier } = unresolvedImport;
       if (specifier.startsWith('http')) {
         // Ignore Deno style http import specifiers.
-        return;
+        continue;
       }
       const resolvedModule = this.resolveModule(specifier, filePath);
       if (resolvedModule) {
@@ -250,7 +251,7 @@ export class ProjectPrincipal {
           }
         }
       }
-    });
+    }
 
     return {
       imports: {
@@ -275,7 +276,7 @@ export class ProjectPrincipal {
 
     return members.filter(member => {
       if (member.jsDocTags.includes('@public')) return false;
-      const referencedSymbols = this.findReferences!(filePath, member.pos);
+      const referencedSymbols = this.findReferences?.(filePath, member.pos);
       const files = (referencedSymbols ?? [])
         .flatMap(refs => refs.references)
         .filter(ref => !ref.isDefinition)
@@ -294,7 +295,7 @@ export class ProjectPrincipal {
       this.findReferences = timerify(languageService.findReferences);
     }
 
-    const referencedSymbols = this.findReferences!(filePath, exportedItem.pos);
+    const referencedSymbols = this.findReferences?.(filePath, exportedItem.pos);
     const files = (referencedSymbols ?? [])
       .flatMap(refs => refs.references)
       .filter(ref => !ref.isDefinition)

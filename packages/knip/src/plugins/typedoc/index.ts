@@ -1,5 +1,5 @@
-import { hasDependency } from '#p/util/plugin.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
 import type { TypeDocConfig } from './types.js';
 
 // https://typedoc.org/guides/overview/

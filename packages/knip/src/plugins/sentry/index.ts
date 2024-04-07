@@ -1,5 +1,5 @@
-import { hasDependency } from '#p/util/plugin.js';
 import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
 
 // https://docs.sentry.io/platforms/javascript/configuration/
 

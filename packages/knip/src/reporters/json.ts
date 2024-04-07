@@ -1,9 +1,9 @@
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
+import type { Entries } from 'type-fest';
+import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issues.js';
 import { isFile } from '../util/fs.js';
 import { relative, resolve } from '../util/path.js';
 import { convert } from './util.js';
-import type { Report, ReporterOptions, IssueRecords, Issue } from '../types/issues.js';
-import type { Entries } from 'type-fest';
 
 type ExtraReporterOptions = {
   codeowners?: string;
@@ -13,7 +13,7 @@ type Item = { name: string; pos?: number; line?: number; col?: number };
 
 type Row = {
   file: string;
-  owners: Array<{ name: string }>;
+  owners?: Array<{ name: string }>;
   dependencies?: Array<{ name: string }>;
   devDependencies?: Array<{ name: string }>;
   optionalPeerDependencies?: Array<{ name: string }>;
@@ -70,7 +70,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
       if (type === 'files') {
         // Ignore
       } else {
-        flatten(issues[type] as IssueRecords).forEach(issue => {
+        for (const issue of flatten(issues[type] as IssueRecords)) {
           const { filePath, symbol, symbols, parentSymbol } = issue;
           json[filePath] = json[filePath] ?? initRow(filePath);
           if (type === 'duplicates') {
@@ -88,7 +88,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
               json[filePath][type]?.push({ name: symbol });
             }
           }
-        });
+        }
       }
     }
   }
@@ -101,5 +101,5 @@ export default async ({ report, issues, options }: ReporterOptions) => {
   // See: https://github.com/nodejs/node/issues/6379
   // @ts-expect-error _handle is private
   process.stdout._handle?.setBlocking?.(true);
-  process.stdout.write(output + '\n');
+  process.stdout.write(`${output}\n`);
 };

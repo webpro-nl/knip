@@ -27,10 +27,10 @@ export interface PluginOptions extends BaseOptions {
   enabledPlugins: string[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: TODO
 export type ResolveEntryPaths<T = any> = (config: T, options: PluginOptions) => Promise<string[]> | string[];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: TODO
 export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<string[]> | string[];
 
 export type Resolve = (options: PluginOptions) => Promise<string[]> | string[];

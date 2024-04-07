@@ -1,8 +1,8 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
+import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { debugLog } from './util/debug.js';
 import { toAbsolute, toRelative } from './util/path.js';
-import type { SyncCompilers, AsyncCompilers } from './compilers/types.js';
 
 type Paths = ts.CompilerOptions['paths'];
 
@@ -21,10 +21,13 @@ export type PrincipalOptions = {
 };
 
 const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>
-  Object.keys(paths).reduce((result, key) => {
-    result[key] = paths[key].map(entry => toAbsolute(entry, cwd));
-    return result;
-  }, {} as NonNullable<Paths>);
+  Object.keys(paths).reduce(
+    (result, key) => {
+      result[key] = paths[key].map(entry => toAbsolute(entry, cwd));
+      return result;
+    },
+    {} as NonNullable<Paths>
+  );
 
 const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Paths = {}) => {
   const compilerPaths =
@@ -50,9 +53,8 @@ export class PrincipalFactory {
     if (!isIsolateWorkspaces && principal) {
       this.linkPrincipal(principal, cwd, compilerOptions, pkgName, compilers);
       return principal.principal;
-    } else {
-      return this.addNewPrincipal(options);
     }
+    return this.addNewPrincipal(options);
   }
 
   /**
@@ -79,7 +81,7 @@ export class PrincipalFactory {
   ) {
     const { pathsBasePath, paths } = compilerOptions;
     if (pathsBasePath) principal.principal.compilerOptions.pathsBasePath = pathsBasePath;
-    Object.keys(paths ?? {}).forEach(p => principal.pathKeys.add(p));
+    for (const p of Object.keys(paths ?? {})) principal.pathKeys.add(p);
     principal.principal.addPaths(paths);
     principal.principal.addCompilers(compilers);
     principal.cwds.add(cwd);

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-// eslint-disable-next-line import/order, n/no-restricted-import
+// biome-ignore lint/nursery/noRestrictedImports: ignore
 import { resolve } from 'node:path';
 
 // We can't import sharp normally because it's a CJS thing and those don't seems to work well with Astro, Vite, everyone

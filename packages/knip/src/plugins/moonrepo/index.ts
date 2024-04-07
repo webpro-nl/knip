@@ -18,6 +18,7 @@ const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) 
   const dependencies = tasks
     .map(task => task.command)
     .filter(command => command)
+    // biome-ignore lint/style/noNonNullAssertion: TODO
     .map(command => command.replace('$workspaceRoot', options.rootCwd!))
     .map(command => command.replace('$projectRoot', options.cwd))
     .flatMap(command => getDependenciesFromScripts(command, options));

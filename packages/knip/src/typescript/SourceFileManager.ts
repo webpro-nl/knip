@@ -1,9 +1,9 @@
 import ts from 'typescript';
+import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import { debugLog } from '../util/debug.js';
 import { extname, isInNodeModules, isInternal } from '../util/path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
-import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
 
 interface SourceFileManagerOptions {
   isSkipLibs: boolean;

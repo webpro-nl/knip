@@ -1,8 +1,8 @@
 import parseArgs from 'minimist';
-import { tryResolveFilePath } from '../util.js';
 import type { Resolver } from '../types.js';
+import { tryResolveFilePath } from '../util.js';
 
-const commands = ['add', 'create', 'init', 'install', 'link', 'pm', 'remove', 'run', 'update'];
+const commands = ['add', 'create', 'init', 'install', 'link', 'pm', 'remove', 'run', 'test', 'update'];
 
 export const resolve: Resolver = (_binary, args, { manifestScriptNames, cwd, fromArgs }) => {
   const parsed = parseArgs(args);

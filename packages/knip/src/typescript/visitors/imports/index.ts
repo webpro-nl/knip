@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 import importDeclaration from './importDeclaration.js';
 import importEqualsDeclaration from './importEqualsDeclaration.js';
 import reExportDeclaration from './reExportDeclaration.js';

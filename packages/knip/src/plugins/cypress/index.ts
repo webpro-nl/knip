@@ -1,6 +1,6 @@
+import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
 
 // https://docs.cypress.io/guides/references/configuration
 

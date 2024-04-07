@@ -1,16 +1,16 @@
 import micromatch from 'micromatch';
-import { ProjectPrincipal } from '../ProjectPrincipal.js';
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
+import type { DependencyDeputy } from '../DependencyDeputy.js';
+import type { IssueCollector } from '../IssueCollector.js';
+import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
   normalizeSpecifierFromFilePath,
 } from './modules.js';
-import { isInNodeModules, join, isInternal } from './path.js';
+import { isInNodeModules, isInternal, join } from './path.js';
 import { fromBinary, isBinary } from './protocols.js';
 import { _resolveSpecifier } from './require.js';
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
-import type { DependencyDeputy } from '../DependencyDeputy.js';
-import type { IssueCollector } from '../IssueCollector.js';
 
 export const getHandler =
   (collector: IssueCollector, deputy: DependencyDeputy, chief: ConfigurationChief) =>

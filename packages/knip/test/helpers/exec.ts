@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-// eslint-disable-next-line n/no-restricted-import
+// biome-ignore lint/nursery/noRestrictedImports: ignore
 import { resolve } from 'node:path';
 
 const cliPath = resolve('dist/cli.js');

@@ -1,9 +1,9 @@
+import type { TsConfigJson } from 'type-fest';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { compact } from '#p/util/array.js';
 import { dirname, isInternal, join, toAbsolute } from '#p/util/path.js';
 import { hasDependency, loadJSON } from '#p/util/plugin.js';
 import { loadTSConfig } from '#p/util/tsconfig-loader.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import type { TsConfigJson } from 'type-fest';
 
 // https://www.typescriptlang.org/tsconfig
 
@@ -31,7 +31,7 @@ const getExtends = async (configFilePath: string, internalExtends = new Set<stri
     }
   }
 
-  extends_.forEach(extend => internalExtends.add(extend));
+  for (const extend of extends_) internalExtends.add(extend);
   return internalExtends;
 };
 
@@ -43,7 +43,7 @@ export const resolveConfig: ResolveConfig = async (localConfig, options) => {
 
   const extend = await getExtends(configFilePath);
 
-  if (!compilerOptions || !localConfig) return [];
+  if (!(compilerOptions && localConfig)) return [];
 
   const jsx = compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : [];
 

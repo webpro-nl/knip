@@ -1,10 +1,10 @@
+import type { PackageJson } from '#p/types/package-json.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import { isAbsolute, join, relative } from '#p/util/path.js';
 import { hasDependency, tryResolve } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
-import type { PackageJson } from '#p/types/package-json.js';
-import type { IsPluginEnabled, PluginOptions, ResolveEntryPaths, ResolveConfig, Plugin } from '#p/types/plugins.js';
-import type { ViteConfigOrFn, VitestWorkspaceConfig, ViteConfig, MODE, COMMAND } from './types.js';
+import type { COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
 
 // https://vitest.dev/config/
 
@@ -82,9 +82,9 @@ export const resolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspa
   const configs = await getConfigs(localConfig);
   for (const cfg of configs) {
     if (cfg.test?.include) {
-      cfg.test.include.forEach(dependency => dependencies.add(dependency));
+      for (const dependency of cfg.test.include) dependencies.add(dependency);
     } else {
-      (options.config.entry ?? entry).forEach(dependency => dependencies.add(dependency));
+      for (const dependency of options.config.entry ?? entry) dependencies.add(dependency);
     }
   }
 
@@ -95,12 +95,12 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   const dependencies = new Set<string>();
   const configs = await getConfigs(localConfig);
   for (const cfg of configs) {
-    findConfigDependencies(cfg, options).forEach(dependency => dependencies.add(dependency));
+    for (const dependency of findConfigDependencies(cfg, options)) dependencies.add(dependency);
     const entry = cfg.build?.lib?.entry ?? [];
     const deps = (typeof entry === 'string' ? [entry] : Object.values(entry)).map(specifier =>
       resolveEntry(options, specifier)
     );
-    deps.forEach(dependency => dependencies.add(dependency));
+    for (const dependency of deps) dependencies.add(dependency);
   }
   return Array.from(dependencies);
 };

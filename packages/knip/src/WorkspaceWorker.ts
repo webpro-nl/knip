@@ -1,6 +1,10 @@
+import type { Entries } from 'type-fest';
 import { plugins } from './plugins.js';
+import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
+import type { PackageJson } from './types/package-json.js';
+import type { DependencySet } from './types/workspace.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
-import { _pureGlob, negate, hasProductionSuffix, hasNoProductionSuffix, prependDirToPattern } from './util/glob.js';
+import { _pureGlob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
 import { get, getKeysByValue } from './util/object.js';
 import { basename, dirname, join, toPosix } from './util/path.js';
 import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
@@ -10,10 +14,6 @@ import {
   isEntryPattern,
   isProductionEntryPattern,
 } from './util/protocols.js';
-import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
-import type { PackageJson } from './types/package-json.js';
-import type { DependencySet } from './types/workspace.js';
-import type { Entries } from 'type-fest';
 
 type PluginEntries = Entries<typeof plugins>;
 
@@ -37,6 +37,7 @@ const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, proj
 
 const initEnabledPluginsMap = () =>
   Object.keys(plugins).reduce(
+    // biome-ignore lint/performance/noAccumulatingSpread: TODO
     (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
     {} as Record<PluginName, boolean>
   );
@@ -185,7 +186,7 @@ export class WorkspaceWorker {
     const project = this.config.project;
     if (project.length === 0) return this.getProductionEntryFilePatterns(negatedTestFilePatterns);
     const _project = this.config.project.map(pattern => {
-      if (!pattern.endsWith('!') && !pattern.startsWith('!')) return negate(pattern);
+      if (!(pattern.endsWith('!') || pattern.startsWith('!'))) return negate(pattern);
       return pattern;
     });
     const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
@@ -276,23 +277,23 @@ export class WorkspaceWorker {
             const config = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
             if (config) {
               if (hasResolveEntryPaths) {
-                const dependencies = await plugin.resolveEntryPaths!(config, opts);
-                dependencies.forEach(id => configEntryPaths.push(id));
+                const dependencies = (await plugin.resolveEntryPaths?.(config, opts)) ?? [];
+                for (const id of dependencies) configEntryPaths.push(id);
               }
               if (shouldRunConfigResolver) {
-                const dependencies = await plugin.resolveConfig!(config, opts);
-                dependencies.forEach(id => addDependency(id, configFilePath));
+                const dependencies = (await plugin.resolveConfig?.(config, opts)) ?? [];
+                for (const id of dependencies) addDependency(id, configFilePath);
               }
             }
           }
         }
 
         const finalEntryPaths = getFinalEntryPaths(plugin, options, configEntryPaths);
-        finalEntryPaths.forEach(id => addDependency(id));
+        for (const id of finalEntryPaths) addDependency(id);
 
         if (hasResolve) {
-          const dependencies = await plugin.resolve!(options);
-          dependencies.forEach(id => addDependency(id, join(cwd, 'package.json')));
+          const dependencies = (await plugin.resolve?.(options)) ?? [];
+          for (const id of dependencies) addDependency(id, join(cwd, 'package.json'));
         }
 
         debugLogArray([name, plugin.title], 'dependencies', pluginDependencies);

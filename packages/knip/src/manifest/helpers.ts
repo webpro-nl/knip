@@ -1,6 +1,6 @@
+import type { Scripts } from '../types/package-json.js';
 import { join } from '../util/path.js';
 import { _require } from '../util/require.js';
-import type { Scripts } from '../types/package-json.js';
 
 type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 
@@ -33,7 +33,7 @@ export const getFilteredScripts = ({ isProduction, scripts }: GetFilteredScripts
   const scriptFilter = new Set(['start', 'postinstall']);
   const filteredScripts: Scripts = {};
 
-  for (let scriptName in scripts) {
+  for (const scriptName in scripts) {
     if (scriptFilter.has(scriptName)) filteredScripts[scriptName] = scripts[scriptName];
   }
 

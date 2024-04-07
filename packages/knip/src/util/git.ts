@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 import { join } from './path.js';
 
 // TODO More hooks exists, but is it worth adding all of them?
@@ -6,10 +6,10 @@ import { join } from './path.js';
 // https://github.com/fisker/git-hooks-list/blob/main/index.json
 
 const hookFileNames = [
-  `prepare-commit-msg`,
-  `commit-msg`,
-  `pre-{applypatch,commit,merge-commit,push,rebase,receive}`,
-  `post-{checkout,commit,merge,rewrite}`,
+  'prepare-commit-msg',
+  'commit-msg',
+  'pre-{applypatch,commit,merge-commit,push,rebase,receive}',
+  'post-{checkout,commit,merge,rewrite}',
 ];
 
 const getGitHooksPath = (defaultPath = '.git/hooks') => {

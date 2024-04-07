@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 import importCall from './importCall.js';
 import importType from './importType.js';
 import jsDocType from './jsDocType.js';

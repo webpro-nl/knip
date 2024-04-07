@@ -1,6 +1,6 @@
-import { getTitle, logTitle, logIssueLine, logIssueSet } from './util.js';
-import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types/issues.js';
 import type { Entries } from 'type-fest';
+import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.js';
+import { getTitle, logIssueLine, logIssueSet, logTitle } from './util.js';
 
 const logIssueRecord = (issues: Issue[]) => {
   const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));

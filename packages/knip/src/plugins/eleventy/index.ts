@@ -1,10 +1,10 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import { isDirectory } from '#p/util/fs.js';
 import { isInNodeModules, join } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toProductionEntryPattern } from '#p/util/protocols.js';
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { EleventyConfig } from './types.js';
 
 // https://www.11ty.dev/docs/

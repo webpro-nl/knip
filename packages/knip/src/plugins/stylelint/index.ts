@@ -1,6 +1,6 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { isInternal } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
-import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { BaseStyleLintConfig, StyleLintConfig } from './types.js';
 
 // https://stylelint.io/user-guide/configure/

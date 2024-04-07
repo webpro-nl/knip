@@ -1,17 +1,17 @@
 import EasyTable from 'easy-table';
 import picocolors from 'picocolors';
-import { ROOT_WORKSPACE_NAME } from '../constants.js';
-import { relative } from '../util/path.js';
-import { getTitle, logTitle, logIssueSet, identity } from './util.js';
-import type { Issue, ReporterOptions, IssueSet } from '../types/issues.js';
 import type { Entries } from 'type-fest';
+import { ROOT_WORKSPACE_NAME } from '../constants.js';
+import type { Issue, IssueSet, ReporterOptions } from '../types/issues.js';
+import { relative } from '../util/path.js';
+import { getTitle, identity, logIssueSet, logTitle } from './util.js';
 
 const TRUNCATE_WIDTH = 40;
-const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? text.slice(0, TRUNCATE_WIDTH - 3) + '...' : text);
+const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? `${text.slice(0, TRUNCATE_WIDTH - 3)}...` : text);
 
 const logIssueRecord = (issues: Issue[]) => {
   const table = new EasyTable();
-  issues.forEach(issue => {
+  for (const issue of issues) {
     const print = issue.severity === 'warn' ? picocolors.gray : identity;
     table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.map(s => s.symbol).join(', ')) : issue.symbol));
     issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
@@ -21,7 +21,7 @@ const logIssueRecord = (issues: Issue[]) => {
     }`;
     table.cell('filePath', print(filePath));
     table.newRow();
-  });
+  }
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
 };
 
@@ -35,7 +35,7 @@ export default ({ report, issues, configurationHints, noConfigHints, isShowProgr
       const isSet = issues[reportType] instanceof Set;
       const issuesForType = isSet
         ? Array.from(issues[reportType] as IssueSet)
-        : Object.values(issues[reportType]).map(Object.values).flat();
+        : Object.values(issues[reportType]).flatMap(Object.values);
 
       if (issuesForType.length > 0) {
         title && logTitle(title, issuesForType.length);
@@ -52,12 +52,12 @@ export default ({ report, issues, configurationHints, noConfigHints, isShowProgr
 
   if (!noConfigHints && configurationHints.size > 0) {
     logTitle('Configuration issues', configurationHints.size);
-    configurationHints.forEach(hint => {
+    for (const hint of configurationHints) {
       const { type, workspaceName, identifier } = hint;
       const message = `Unused item in ${type}`;
-      const workspace = workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : ``;
+      const workspace = workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : '';
       console.warn(picocolors.gray(`${message}${workspace}:`), identifier);
-    });
+    }
   }
 
   if (totalIssues === 0 && isShowProgress) {

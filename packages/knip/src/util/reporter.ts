@@ -1,8 +1,8 @@
 import internalReporters from '../reporters/index.js';
+import type { ReporterOptions } from '../types/issues.js';
 import parsedArgValues from '../util/cli-arguments.js';
 import { _load } from './loader.js';
 import { isInternal, resolve } from './path.js';
-import type { ReporterOptions } from '../types/issues.js';
 
 const { preprocessor = [], reporter = ['symbols'] } = parsedArgValues;
 

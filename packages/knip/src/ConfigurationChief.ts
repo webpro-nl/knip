@@ -2,11 +2,21 @@ import { existsSync } from 'node:fs';
 import mapWorkspaces from '@npmcli/map-workspaces';
 import { createPkgGraph } from '@pnpm/workspace.pkgs-graph';
 import micromatch from 'micromatch';
-import { partitionCompilers } from './compilers/index.js';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
-import { ROOT_WORKSPACE_NAME, DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS } from './constants.js';
+import { partitionCompilers } from './compilers/index.js';
+import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
 import { defaultRules } from './issues/initializers.js';
 import * as plugins from './plugins/index.js';
+import type {
+  Configuration,
+  IgnorePatterns,
+  PluginName,
+  PluginsConfiguration,
+  RawConfiguration,
+  RawPluginConfiguration,
+  WorkspaceConfiguration,
+} from './types/config.js';
+import type { PackageJson } from './types/package-json.js';
 import { arrayify } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { ConfigurationError, LoaderError } from './util/errors.js';
@@ -21,16 +31,6 @@ import { toRegexOrString } from './util/regex.js';
 import { _require } from './util/require.js';
 import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
-import type {
-  RawConfiguration,
-  RawPluginConfiguration,
-  Configuration,
-  PluginName,
-  PluginsConfiguration,
-  WorkspaceConfiguration,
-  IgnorePatterns,
-} from './types/config.js';
-import type { PackageJson } from './types/package-json.js';
 
 const {
   config: rawConfigArg,
@@ -117,7 +117,7 @@ export class ConfigurationChief {
 
   resolvedConfigFilePath?: string;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: raw incoming user data
   rawConfig?: any;
 
   constructor({ cwd, isProduction, isStrict, isIncludeEntryExports }: ConfigurationManagerOptions) {
@@ -132,7 +132,7 @@ export class ConfigurationChief {
     const manifestPath = findFile(this.cwd, 'package.json');
     const manifest = manifestPath && (await loadJSON(manifestPath));
 
-    if (!manifestPath || !manifest) {
+    if (!(manifestPath && manifest)) {
       throw new ConfigurationError('Unable to find package.json');
     }
 
@@ -324,7 +324,7 @@ export class ConfigurationChief {
 
     const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
       if (name === ancestorName) return ancestors;
-      if (ancestorName === ROOT_WORKSPACE_NAME || name.startsWith(ancestorName + '/')) ancestors.push(ancestorName);
+      if (ancestorName === ROOT_WORKSPACE_NAME || name.startsWith(`${ancestorName}/`)) ancestors.push(ancestorName);
       return ancestors;
     };
 
@@ -350,9 +350,9 @@ export class ConfigurationChief {
         deps.filter(dir => !seen.has(dir)).forEach(addDependents);
       };
       this.availableWorkspaceNames.map(name => join(this.cwd, name)).forEach(addDependents);
-      workspaceDirsWithDependents.forEach(dir => ws.add(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME));
+      for (const dir of workspaceDirsWithDependents) ws.add(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME);
     } else {
-      workspaceNames.forEach(name => ws.add(name));
+      for (const name of workspaceNames) ws.add(name);
     }
 
     return Array.from(ws)
@@ -385,7 +385,7 @@ export class ConfigurationChief {
   private getDescendentWorkspaces(name: string) {
     return this.availableWorkspaceNames
       .filter(workspaceName => workspaceName !== name)
-      .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name + '/'));
+      .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(`${name}/`));
   }
 
   private getIgnoredWorkspacesFor(name: string) {
@@ -468,7 +468,7 @@ export class ConfigurationChief {
   }
 
   public findWorkspaceByFilePath(filePath: string) {
-    const workspaceDir = this.availableWorkspaceDirs.find(workspaceDir => filePath.startsWith(workspaceDir + '/'));
+    const workspaceDir = this.availableWorkspaceDirs.find(workspaceDir => filePath.startsWith(`${workspaceDir}/`));
     return this.includedWorkspaces.find(workspace => workspace.dir === workspaceDir);
   }
 

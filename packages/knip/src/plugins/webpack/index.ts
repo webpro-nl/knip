@@ -1,12 +1,12 @@
+import type { RuleSetRule, RuleSetUseItem } from 'webpack';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { compact } from '#p/util/array.js';
 import { isInternal, join, relative } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern, toProductionEntryPattern } from '#p/util/protocols.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import type { WebpackConfig, Env, Argv } from './types.js';
 import type { BabelConfigObj } from '../babel/types.js';
-import type { RuleSetRule, RuleSetUseItem } from 'webpack';
+import type { Argv, Env, WebpackConfig } from './types.js';
 
 // https://webpack.js.org/configuration/
 
@@ -77,15 +77,15 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
       if (typeof options.entry === 'string') entries.push(options.entry);
       else if (Array.isArray(options.entry)) entries.push(...options.entry);
       else if (typeof options.entry === 'object') {
-        Object.values(options.entry).forEach(entry => {
+        for (const entry of Object.values(options.entry)) {
           if (typeof entry === 'string') entries.push(entry);
           else if (Array.isArray(entry)) entries.push(...entry);
           else if (typeof entry === 'function') entries.push((entry as () => string)());
           else if (entry && typeof entry === 'object' && 'filename' in entry) entries.push(entry['filename'] as string);
-        });
+        }
       }
 
-      entries.forEach(entry => {
+      for (const entry of entries) {
         if (!isInternal(entry)) {
           dependencies.add(entry);
         } else {
@@ -93,7 +93,7 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
           const value = options.mode === 'development' ? toEntryPattern(item) : toProductionEntryPattern(item);
           entryPatterns.add(value);
         }
-      });
+      }
     }
   }
 

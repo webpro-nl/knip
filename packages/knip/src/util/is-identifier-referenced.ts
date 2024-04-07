@@ -1,22 +1,22 @@
-import { exportLookupLog } from './debug.js';
 import type { SerializableImportMap, SerializableImports } from '../types/imports.js';
+import { exportLookupLog } from './debug.js';
 
 export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableImportMap) => {
   const isIdentifierReferenced = (
     filePath: string,
     id: string,
     importsForExport?: SerializableImports,
-    depth: number = 0
+    depth = 0
   ): boolean => {
     if (depth === 0) exportLookupLog(-1, `Looking up export "${id}" from`, filePath);
 
     if (!importsForExport) {
-      exportLookupLog(depth, `no imports found from`, filePath);
+      exportLookupLog(depth, 'no imports found from', filePath);
       return false;
     }
 
     if (importsForExport.identifiers.has(id)) {
-      exportLookupLog(depth, `imported from`, filePath);
+      exportLookupLog(depth, 'imported from', filePath);
       return true;
     }
 
@@ -30,7 +30,7 @@ export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableIm
     if (importsForExport.isReExport) {
       for (const filePath of importsForExport.isReExportedBy) {
         if (isIdentifierReferenced(filePath, id, importedSymbols[filePath], depth + 1)) {
-          exportLookupLog(depth, `re-exported by`, filePath);
+          exportLookupLog(depth, 're-exported by', filePath);
           return true;
         }
       }
@@ -50,7 +50,7 @@ export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableIm
       }
     }
 
-    exportLookupLog(depth, `not imported from`, filePath);
+    exportLookupLog(depth, 'not imported from', filePath);
     return false;
   };
 

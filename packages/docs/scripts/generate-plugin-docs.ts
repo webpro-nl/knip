@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-// eslint-disable-next-line n/no-restricted-import
+// biome-ignore lint/nursery/noRestrictedImports: script
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import remarkDirective from 'remark-directive';

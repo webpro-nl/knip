@@ -1,5 +1,5 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
-import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { LintStagedConfig } from '../lint-staged/types.js';
 
 // https://github.com/yyx990803/yorkie
@@ -19,7 +19,7 @@ const resolveConfig: ResolveConfig<LintStagedConfig> = (config, options) => {
 
   for (const script of Object.values(config).flat()) {
     const scripts = [script].flat();
-    getDependenciesFromScripts(scripts, options).forEach(identifier => dependencies.add(identifier));
+    for (const identifier of getDependenciesFromScripts(scripts, options)) dependencies.add(identifier);
   }
 
   // Looks like the idea is to have lint-staged installed too, so there are no refs to yorkie

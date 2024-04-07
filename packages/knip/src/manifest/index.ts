@@ -1,7 +1,7 @@
-import { isDefinitelyTyped } from '../util/modules.js';
+import type { HostDependencies, InstalledBinaries } from '../types/workspace.js';
 import { timerify } from '../util/Performance.js';
+import { isDefinitelyTyped } from '../util/modules.js';
 import { loadPackageManifest } from './helpers.js';
-import type { InstalledBinaries, HostDependencies } from '../types/workspace.js';
 
 type Options = {
   packageNames: string[];
@@ -23,7 +23,7 @@ const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
       // Read and store installed binaries
       const binaryName = packageName.replace(/^@[^/]+\//, '');
       const binaries = typeof manifest.bin === 'string' ? [binaryName] : Object.keys(manifest.bin ?? {});
-      binaries.forEach(binaryName => {
+      for (const binaryName of binaries) {
         if (installedBinaries.has(binaryName)) {
           installedBinaries.get(binaryName)?.add(packageName);
         } else {
@@ -34,7 +34,7 @@ const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
         } else {
           installedBinaries.set(packageName, new Set([binaryName]));
         }
-      });
+      }
 
       // Read and store peer dependencies
       const packagePeerDependencies = Object.keys(manifest.peerDependencies ?? {});
@@ -44,7 +44,7 @@ const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
           isPeerOptional: manifest.peerDependenciesMeta?.[packagePeerDependency]?.optional ?? false,
         };
         if (hostDependencies.has(packagePeerDependency)) {
-          hostDependencies.get(packagePeerDependency)!.push(hostDependency);
+          hostDependencies.get(packagePeerDependency)?.push(hostDependency);
         } else {
           hostDependencies.set(packagePeerDependency, [hostDependency]);
         }

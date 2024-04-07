@@ -1,5 +1,5 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
-import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { NpmPkgJsonLintConfig } from './types.js';
 
 // https://npmpackagejsonlint.org/docs/

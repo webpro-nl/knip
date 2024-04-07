@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 import exportAssignment from './exportAssignment.js';
 import exportDeclaration from './exportDeclaration.js';
 import exportKeyword from './exportKeyword.js';

@@ -1,8 +1,8 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { _firstGlob } from '#p/util/glob.js';
 import { getValuesByKeyDeep } from '#p/util/object.js';
 import { join } from '#p/util/path.js';
 import { getDependenciesFromScripts } from '#p/util/plugin.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
@@ -24,7 +24,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
 
   const getActionDependencies = () => {
     const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
-    if (!isActionManifest || !config?.runs?.using?.startsWith('node')) return [];
+    if (!(isActionManifest && config?.runs?.using?.startsWith('node'))) return [];
     const scripts = [config.runs.pre, config.runs.main, config.runs.post].filter(isString);
     return scripts.map(script => join(configFileDir, script));
   };

@@ -25,7 +25,7 @@ export class ConsoleStreamer {
 
   private update(messages: string[]) {
     this.resetLines();
-    process.stdout.write(messages.join('\n') + '\n');
+    process.stdout.write(`${messages.join('\n')}\n`);
     this.lines = messages.length;
   }
 

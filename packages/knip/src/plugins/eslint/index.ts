@@ -1,6 +1,6 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { getDependenciesDeep } from './helpers.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import type { ESLintConfig } from './types.js';
 
 // Old: https://eslint.org/docs/latest/use/configure/configuration-files

@@ -1,6 +1,6 @@
 import { platform } from 'node:os';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: ignore
 export const updatePos = (obj: any) => {
   // Add line - 1 to every pos (each EOL is one more char)
   if (platform() === 'win32') {

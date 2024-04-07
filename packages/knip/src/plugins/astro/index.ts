@@ -1,5 +1,5 @@
-import { hasDependency } from '#p/util/plugin.js';
 import type { IsPluginEnabled, Plugin, Resolve } from '#p/types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 

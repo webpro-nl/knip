@@ -1,6 +1,6 @@
 import ts from 'typescript';
-import { importVisitor as visit } from '../index.js';
 import type { ImportNode } from '../../../types/imports.js';
+import { importVisitor as visit } from '../index.js';
 
 const getImportSpecifiers = (node: ts.JSDocTag) => {
   const imports: ImportNode[] = [];

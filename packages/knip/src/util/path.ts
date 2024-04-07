@@ -1,4 +1,4 @@
-// eslint-disable-next-line n/no-restricted-import
+// biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 import parsedArgValues from './cli-arguments.js';
 

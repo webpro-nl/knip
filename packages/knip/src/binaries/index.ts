@@ -1,8 +1,8 @@
 import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
+import { timerify } from '../util/Performance.js';
 import { compact } from '../util/array.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { extname, isInternal } from '../util/path.js';
-import { timerify } from '../util/Performance.js';
 import { fromBinary, isBinary } from '../util/protocols.js';
 import { getBinariesFromScript } from './bash-parser.js';
 import type { GetDependenciesFromScripts } from './types.js';

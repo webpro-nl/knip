@@ -50,6 +50,7 @@ $ knip --tags=-knipignore
 
 Website: https://knip.dev`;
 
+// biome-ignore lint/suspicious/noImplicitAnyLet: TODO
 let parsedArgs;
 try {
   parsedArgs = parseArgs({
@@ -92,7 +93,7 @@ try {
 } catch (error: unknown) {
   if (error instanceof Error) {
     console.error(error.message);
-    console.log('\n' + helpText);
+    console.log(`\n${helpText}`);
     process.exit(1);
   }
   throw error;

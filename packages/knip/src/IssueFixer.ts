@@ -1,8 +1,8 @@
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import NPMCliPackageJson, { type PackageJson } from '@npmcli/package-json';
-import { dirname, join } from './util/path.js';
 import type { Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
+import { dirname, join } from './util/path.js';
 
 export class IssueFixer {
   isEnabled = false;
@@ -24,13 +24,13 @@ export class IssueFixer {
 
   public addUnusedTypeNode(filePath: string, fixes: Fixes | undefined) {
     if (!fixes || fixes.length === 0) return;
-    if (this.unusedTypeNodes.has(filePath)) fixes.forEach(fix => this.unusedTypeNodes.get(filePath)!.add(fix));
+    if (this.unusedTypeNodes.has(filePath)) for (const fix of fixes) this.unusedTypeNodes.get(filePath)?.add(fix);
     else this.unusedTypeNodes.set(filePath, new Set(fixes));
   }
 
   public addUnusedExportNode(filePath: string, fixes: Fixes | undefined) {
     if (!fixes || fixes.length === 0) return;
-    if (this.unusedExportNodes.has(filePath)) fixes.forEach(fix => this.unusedExportNodes.get(filePath)!.add(fix));
+    if (this.unusedExportNodes.has(filePath)) for (const fix of fixes) this.unusedExportNodes.get(filePath)?.add(fix);
     else this.unusedExportNodes.set(filePath, new Set(fixes));
   }
 
@@ -70,15 +70,15 @@ export class IssueFixer {
       const pkg: PackageJson = manifest.content;
 
       if (filePath in issues.dependencies) {
-        Object.keys(issues.dependencies[filePath]).forEach(dependency => {
+        for (const dependency of Object.keys(issues.dependencies[filePath])) {
           if (pkg.dependencies) delete pkg.dependencies[dependency];
-        });
+        }
       }
 
       if (filePath in issues.devDependencies) {
-        Object.keys(issues.devDependencies[filePath]).forEach(dependency => {
+        for (const dependency of Object.keys(issues.devDependencies[filePath])) {
           if (pkg.devDependencies) delete pkg.devDependencies[dependency];
-        });
+        }
       }
 
       await manifest.save();

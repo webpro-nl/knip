@@ -1,24 +1,24 @@
 import { isBuiltin } from 'node:module';
+import type { Workspace } from './ConfigurationChief.js';
 import {
-  IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
   IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
+  IGNORE_DEFINITELY_TYPED,
   ROOT_WORKSPACE_NAME,
 } from './constants.js';
 import { getDependencyMetaData } from './manifest/index.js';
-import { isDefinitelyTyped, getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from './util/modules.js';
-import { hasMatch, hasMatchInSet, toRegexOrString, findKey } from './util/regex.js';
-import type { Workspace } from './ConfigurationChief.js';
 import type { ConfigurationHints, Issue } from './types/issues.js';
 import type { PackageJson } from './types/package-json.js';
 import type {
-  WorkspaceManifests,
+  DependencyArray,
+  DependencySet,
   HostDependencies,
   InstalledBinaries,
-  DependencySet,
-  DependencyArray,
+  WorkspaceManifests,
 } from './types/workspace.js';
+import { getDefinitelyTypedFor, getPackageFromDefinitelyTyped, isDefinitelyTyped } from './util/modules.js';
+import { findKey, hasMatch, hasMatchInSet, toRegexOrString } from './util/regex.js';
 
 type Options = {
   isProduction: boolean;
@@ -213,9 +213,8 @@ export class DependencyDeputy {
       closestWorkspaceName && this.addReferencedDependency(closestWorkspaceName, packageName);
       closestWorkspaceNameForTypes && this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
       return true;
-    } else {
-      this.addReferencedDependency(workspace.name, packageName);
     }
+    this.addReferencedDependency(workspace.name, packageName);
 
     if (hasMatch(this.getWorkspaceManifest(workspace.name)?.ignoreDependencies, packageName)) return true;
     if (hasMatch(this.ignoreDependencies, packageName)) return true;
@@ -235,7 +234,7 @@ export class DependencyDeputy {
       if (binaries?.has(binaryName)) {
         const dependencies = binaries.get(binaryName);
         if (dependencies?.size) {
-          dependencies.forEach(dependency => this.addReferencedDependency(name, dependency));
+          for (const dependency of dependencies) this.addReferencedDependency(name, dependency);
           return true;
         }
       }
@@ -322,7 +321,10 @@ export class DependencyDeputy {
         // Except if the host has this dependency as an optional peer dep itself.
         const hostDependencies = this.getHostDependenciesFor(workspaceName, dependency);
 
-        hostDependencies.forEach(({ name }) => (!peerDepRecs[name] ? (peerDepRecs[name] = 1) : peerDepRecs[name]++));
+        for (const { name } of hostDependencies) {
+          if (!peerDepRecs[name]) peerDepRecs[name] = 1;
+          else peerDepRecs[name]++;
+        }
 
         return hostDependencies.some(
           hostDependency =>
@@ -336,16 +338,19 @@ export class DependencyDeputy {
       const dd = this.getDevDependencies(workspaceName);
       const od = this.getOptionalPeerDependencies(workspaceName);
 
+      // biome-ignore lint/complexity/noForEach: TODO
       pd.filter(isNotIgnoredDependency)
         .filter(isNotIgnoredBinary)
         .filter(isNotReferencedDependency)
         .forEach(symbol => dependencyIssues.push({ type: 'dependencies', filePath: manifestPath, symbol }));
 
+      // biome-ignore lint/complexity/noForEach: TODO
       dd.filter(isNotIgnoredDependency)
         .filter(isNotIgnoredBinary)
         .filter(isNotReferencedDependency)
         .forEach(symbol => devDependencyIssues.push({ type: 'devDependencies', filePath: manifestPath, symbol }));
 
+      // biome-ignore lint/complexity/noForEach: TODO
       od.filter(isNotIgnoredDependency)
         .filter(isNotIgnoredBinary)
         .filter(p => isReferencedDependency(p))
@@ -372,54 +377,58 @@ export class DependencyDeputy {
       const ignoredBinaries = this._manifests.get(workspaceName)?.ignoreBinaries ?? [];
       const ignoredDependencies = this._manifests.get(workspaceName)?.ignoreDependencies ?? [];
 
-      referencedDependencies?.forEach(pkg => {
+      for (const pkg of referencedDependencies ?? []) {
         for (const key of [...ignoredDependencies, ...rootIgnoreDependencies.keys()]) {
           if ((typeof key === 'string' && key === pkg) || (key instanceof RegExp && key.test(pkg))) {
             const rootKey = typeof key === 'string' ? key : findKey(rootIgnoreDependencies, key);
             if (rootKey && rootIgnoreDependencies.has(rootKey)) {
+              // biome-ignore lint/style/noNonNullAssertion: assert number
               rootIgnoreDependencies.set(rootKey, rootIgnoreDependencies.get(rootKey)! + 1);
-              return;
+              break;
             }
           }
         }
-      });
+      }
 
-      referencedBinaries?.forEach(binaryName => {
+      for (const binaryName of referencedBinaries ?? []) {
         for (const key of [...ignoredBinaries, ...rootIgnoreBinaries.keys()]) {
           if ((typeof key === 'string' && key === binaryName) || (key instanceof RegExp && key.test(binaryName))) {
             const rootKey = typeof key === 'string' ? key : findKey(rootIgnoreBinaries, key);
             if (rootKey && rootIgnoreBinaries.has(rootKey)) {
+              // biome-ignore lint/style/noNonNullAssertion: assert number
               rootIgnoreBinaries.set(rootKey, rootIgnoreBinaries.get(rootKey)! + 1);
-              return;
+              break;
             }
           }
         }
-      });
+      }
 
       if (workspaceName === ROOT_WORKSPACE_NAME) continue;
 
       const dependencies = this.getDependencies(workspaceName);
       const peerDependencies = this.getPeerDependencies(workspaceName);
 
+      // biome-ignore lint/complexity/noForEach: TODO
       ignoreDependencies
         .filter(packageName => {
           if (hasMatchInSet(IGNORED_DEPENDENCIES, packageName)) return true;
           if (this.ignoreDependencies.includes(packageName)) return true;
           const isReferenced = hasMatchInSet(referencedDependencies, packageName);
           const isListed = hasMatchInSet(dependencies, packageName) && !hasMatchInSet(peerDependencies, packageName);
-          return (isListed && isReferenced) || (!this.isProduction && !isReferenced && !isListed);
+          return (isListed && isReferenced) || !(this.isProduction || isReferenced || isListed);
         })
         .forEach(identifier => {
           configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' });
         });
 
+      // biome-ignore lint/complexity/noForEach: TODO
       ignoreBinaries
         .filter(binaryName => {
           if (hasMatchInSet(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
           if (this.ignoreBinaries.includes(binaryName)) return true;
           const isReferenced = hasMatchInSet(referencedBinaries, binaryName);
           const isInstalled = hasMatchInSet(installedBinaryNames, binaryName);
-          return (isReferenced && isInstalled) || (!this.isProduction && !isInstalled && !isReferenced);
+          return (isReferenced && isInstalled) || !(this.isProduction || isInstalled || isReferenced);
         })
         .forEach(identifier => configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' }));
     }
@@ -428,23 +437,25 @@ export class DependencyDeputy {
     const dependencies = this.getDependencies(ROOT_WORKSPACE_NAME);
     const peerDependencies = this.getPeerDependencies(ROOT_WORKSPACE_NAME);
 
+    // biome-ignore lint/complexity/noForEach: TODO
     Array.from(rootIgnoreDependencies.keys())
       .filter(packageName => {
         if (hasMatchInSet(IGNORED_DEPENDENCIES, packageName)) return true;
         const isReferenced = rootIgnoreDependencies.get(packageName) !== 0;
         const isListed = hasMatchInSet(dependencies, packageName) && !hasMatchInSet(peerDependencies, packageName);
-        return (isReferenced && isListed) || (!this.isProduction && !isReferenced && !isListed);
+        return (isReferenced && isListed) || !(this.isProduction || isReferenced || isListed);
       })
       .forEach(identifier =>
         configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreDependencies' })
       );
 
+    // biome-ignore lint/complexity/noForEach: TODO
     Array.from(rootIgnoreBinaries.keys())
       .filter(binaryName => {
         if (hasMatchInSet(IGNORED_GLOBAL_BINARIES, binaryName)) return true;
         const isReferenced = rootIgnoreBinaries.get(binaryName) !== 0;
         const isInstalled = hasMatchInSet(installedBinaryNames, binaryName);
-        return (isReferenced && isInstalled) || (!this.isProduction && !isReferenced && !isInstalled);
+        return (isReferenced && isInstalled) || !(this.isProduction || isReferenced || isInstalled);
       })
       .forEach(identifier =>
         configurationHints.add({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreBinaries' })

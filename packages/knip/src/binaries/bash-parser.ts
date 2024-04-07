@@ -1,10 +1,10 @@
 import parse from '@ericcornelissen/bash-parser';
+import type { Node } from '@ericcornelissen/bash-parser';
 import { debugLogObject } from '../util/debug.js';
 import * as FallbackResolver from './resolvers/fallback.js';
 import KnownResolvers from './resolvers/index.js';
-import { stripBinaryPath } from './util.js';
 import type { GetDependenciesFromScriptsOptions } from './types.js';
-import type { Node } from '@ericcornelissen/bash-parser';
+import { stripBinaryPath } from './util.js';
 
 // https://vorpaljs.github.io/bash-parser-playground/
 

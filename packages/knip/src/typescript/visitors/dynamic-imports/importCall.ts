@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { isImportCall, findDescendants, findAncestor, isAccessExpression, stripQuotes } from '../../ast-helpers.js';
+import { findAncestor, findDescendants, isAccessExpression, isImportCall, stripQuotes } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -64,46 +64,43 @@ export default visit(
               if (ts.isIdentifier(variableDeclaration.name)) {
                 // Pattern: const identifier = await import('specifier');
                 return { identifier: 'default', specifier, pos: node.arguments[0].pos };
-              } else {
-                const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
-                if (bindings.length > 0) {
-                  // Pattern: const { identifier } = await import('specifier');
-                  return bindings.map(element => {
-                    const identifier = (element.propertyName ?? element.name).getText();
-                    return { identifier, specifier, pos: element.pos };
-                  });
-                } else {
-                  // Pattern: import('specifier')
-                  return { identifier: 'default', specifier, pos: node.arguments[0].pos };
-                }
               }
-            } else {
-              const arrayLiteralExpression = node.parent;
-              const variableDeclaration = node.parent.parent?.parent?.parent;
-              if (
-                ts.isArrayLiteralExpression(arrayLiteralExpression) &&
-                variableDeclaration &&
-                ts.isVariableDeclarationList(variableDeclaration.parent) &&
-                ts.isVariableDeclaration(variableDeclaration) &&
-                ts.isArrayBindingPattern(variableDeclaration.name)
-              ) {
-                const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
-                const element = variableDeclaration.name.elements[index];
-                if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
-                  // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
-                  return element.name.elements.map(element => {
-                    const identifier = (element.propertyName ?? element.name).getText();
-                    return { identifier, specifier, pos: element.pos };
-                  });
-                }
-
-                // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
-                return { identifier: 'default', specifier, pos: element.pos };
+              const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
+              if (bindings.length > 0) {
+                // Pattern: const { identifier } = await import('specifier');
+                return bindings.map(element => {
+                  const identifier = (element.propertyName ?? element.name).getText();
+                  return { identifier, specifier, pos: element.pos };
+                });
               }
-
-              // Pattern: import('side-effects')
+              // Pattern: import('specifier')
               return { identifier: 'default', specifier, pos: node.arguments[0].pos };
             }
+            const arrayLiteralExpression = node.parent;
+            const variableDeclarationParent = node.parent.parent?.parent?.parent;
+            if (
+              ts.isArrayLiteralExpression(arrayLiteralExpression) &&
+              variableDeclarationParent &&
+              ts.isVariableDeclarationList(variableDeclarationParent.parent) &&
+              ts.isVariableDeclaration(variableDeclarationParent) &&
+              ts.isArrayBindingPattern(variableDeclarationParent.name)
+            ) {
+              const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
+              const element = variableDeclarationParent.name.elements[index];
+              if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
+                // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
+                return element.name.elements.map(element => {
+                  const identifier = (element.propertyName ?? element.name).getText();
+                  return { identifier, specifier, pos: element.pos };
+                });
+              }
+
+              // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
+              return { identifier: 'default', specifier, pos: element.pos };
+            }
+
+            // Pattern: import('side-effects')
+            return { identifier: 'default', specifier, pos: node.arguments[0].pos };
           }
         }
 

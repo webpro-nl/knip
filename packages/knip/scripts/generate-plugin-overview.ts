@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+// biome-ignore lint/nursery/noRestrictedImports: script
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Table from 'easy-table';
@@ -30,9 +31,9 @@ for await (const dir of directories) {
   }
 }
 
-var t = new Table();
+const t = new Table();
 
-data.forEach(plugin => {
+for (const plugin of data) {
   t.cell('Plugin', plugin.title);
   t.cell('config', plugin.config, Table.number(0));
   t.cell('entry', plugin.entry, Table.number(0));
@@ -42,7 +43,7 @@ data.forEach(plugin => {
   t.cell('resolveConfig', plugin.resolveConfig, Table.number(0));
   t.cell('n', plugin.n, Table.number(0));
   t.newRow();
-});
+}
 
 t.sort(['Plugin']);
 

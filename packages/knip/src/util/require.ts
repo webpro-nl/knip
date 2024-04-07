@@ -2,12 +2,19 @@ import { createRequire as nodeCreateRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import createJITI from 'jiti';
 import transform from 'jiti/dist/babel.js';
+import type { TransformOptions } from 'jiti/dist/types.js';
+import { timerify } from './Performance.js';
 import { debugLog } from './debug.js';
 import { getPackageNameFromModuleSpecifier } from './modules.js';
-import { cwd, toPosix, join } from './path.js';
-import { timerify } from './Performance.js';
+import { cwd, join, toPosix } from './path.js';
 import { jitiCJS } from './register.js';
-import type { TransformOptions } from 'jiti/dist/types.js';
+
+/*
+ * package.json#exports + self-referencing not supported in `resolve` package nor Bun:
+ * - https://github.com/browserify/resolve/issues/289
+ * - https://github.com/oven-sh/bun/issues/1137
+ * - https://github.com/oven-sh/bun/issues/7644
+ */
 
 const createRequire = (path?: string) => nodeCreateRequire(pathToFileURL(path ?? cwd));
 const require = createRequire();

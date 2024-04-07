@@ -56,7 +56,7 @@ export function stripQuotes(name: string) {
   return name;
 }
 
-const enum CharacterCodes {
+enum CharacterCodes {
   backtick = 0x60,
   doubleQuote = 0x22,
   singleQuote = 0x27,
@@ -79,7 +79,8 @@ export function findAncestor<T>(
     const result = callback(node);
     if (result === 'STOP') {
       return undefined;
-    } else if (result) {
+    }
+    if (result) {
       return node as T;
     }
     node = node.parent;
@@ -96,7 +97,8 @@ export function findDescendants<T>(node: ts.Node | undefined, callback: (element
     const result = callback(node);
     if (result === 'STOP') {
       return;
-    } else if (result) {
+    }
+    if (result) {
       results.push(node as T);
     }
     ts.forEachChild(node, visit);

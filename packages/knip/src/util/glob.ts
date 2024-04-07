@@ -1,12 +1,12 @@
 import fg from 'fast-glob';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
+import { timerify } from './Performance.js';
 import { compact } from './array.js';
 import { globby } from './globby.js';
 import { join, relative } from './path.js';
-import { timerify } from './Performance.js';
 
 export const prependDirToPattern = (workingDir: string, pattern: string) => {
-  if (pattern.startsWith('!')) return '!' + join(workingDir, pattern.slice(1));
+  if (pattern.startsWith('!')) return `!${join(workingDir, pattern.slice(1))}`;
   return join(workingDir, pattern);
 };
 

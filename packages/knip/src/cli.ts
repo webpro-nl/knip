@@ -1,15 +1,15 @@
-import './util/register.js';
 import picocolors from 'picocolors';
 import prettyMilliseconds from 'pretty-ms';
-import parsedArgValues, { helpText } from './util/cli-arguments.js';
-import { isKnownError, getKnownError, isConfigurationError, hasCause } from './util/errors.js';
-import { cwd } from './util/path.js';
+import { main } from './index.js';
+import type { IssueType, ReporterOptions } from './types/issues.js';
 import { Performance } from './util/Performance.js';
+import parsedArgValues, { helpText } from './util/cli-arguments.js';
+import { getKnownError, hasCause, isConfigurationError, isKnownError } from './util/errors.js';
+import { cwd } from './util/path.js';
+import './util/register.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { splitTags } from './util/tag.js';
 import { version } from './version.js';
-import { main } from './index.js';
-import type { ReporterOptions, IssueType } from './types/issues.js';
 
 const {
   debug: isDebug = false,
@@ -19,7 +19,7 @@ const {
   'no-config-hints': noConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
-  'no-progress': isNoProgress = isDebug || isTrace || false,
+  'no-progress': isNoProgress = isDebug || isTrace,
   'include-entry-exports': isIncludeEntryExports = false,
   'include-libs': isIncludeLibs = false,
   'isolate-workspaces': isIsolateWorkspaces = false,
@@ -90,16 +90,15 @@ const run = async () => {
 
     if (isObservePerf) {
       await perfObserver.finalize();
-      console.log('\n' + perfObserver.getTable());
+      console.log(`\n${perfObserver.getTable()}`);
       const mem = Math.round((perfObserver.getMemHeapUsage() / 1024 / 1024) * 100) / 100;
       console.log('\nTotal running time:', prettyMilliseconds(perfObserver.getTotalTime()), `(mem: ${mem}MB)`);
       perfObserver.reset();
     }
 
     if (experimentalTags.length > 0) {
-      console.warn(
-        `\n${picocolors.yellow('DEPRECATION WARNING:')} --experimental-tags is deprecated, please start using --tags instead`
-      );
+      const prefix = `${picocolors.yellow('DEPRECATION WARNING:')}`;
+      console.warn(`\n${prefix} --experimental-tags is deprecated, please start using --tags instead`);
     }
 
     if (!noExitCode && totalErrorCount > Number(maxIssues)) {
@@ -111,7 +110,7 @@ const run = async () => {
       const knownError = getKnownError(error);
       console.error(knownError.message);
       if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
-      if (isConfigurationError(knownError)) console.log('\n' + helpText);
+      if (isConfigurationError(knownError)) console.log(`\n${helpText}`);
       process.exit(2);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw

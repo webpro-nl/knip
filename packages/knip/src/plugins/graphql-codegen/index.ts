@@ -1,8 +1,8 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { isInternal } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
 import { isConfigurationOutput } from './types.js';
-import type { Plugin, ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { ConfiguredPlugin, GraphqlCodegenTypes, PresetNames } from './types.js';
 
 // https://the-guild.dev/graphql/codegen/docs/config-reference/codegen-config

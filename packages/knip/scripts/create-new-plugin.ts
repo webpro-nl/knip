@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+// biome-ignore lint/nursery/noRestrictedImports: script
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -53,7 +54,7 @@ await fs.cp(templateDir, newPluginDir, {
 const barrelFile = String(await fs.readFile(pluginsBarrelFilePath));
 await fs.writeFile(
   pluginsBarrelFilePath,
-  barrelFile + `export { default as ${camelCasedName} } from './${name}/index.js';`
+  `${barrelFile}export { default as ${camelCasedName} } from './${name}/index.js';`
 );
 
 // Add plugin to Zod validator
@@ -93,6 +94,7 @@ properties[name] = {
 
 plugins.properties = Object.keys(properties)
   .sort()
+  // biome-ignore lint/performance/noAccumulatingSpread: ignore
   .reduce((props, key) => ({ ...props, [key]: properties[key] }), {});
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));
