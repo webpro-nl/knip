@@ -39,8 +39,5 @@ jobs:
       - name: Run knip (production/strict)
         run: npx knip --production --strict
       - name: Test knip
-        run: npm run test
+        run: npm run test:node
         working-directory: packages/knip
-      - name: Build docs
-        run: npm run build
-        working-directory: packages/docs

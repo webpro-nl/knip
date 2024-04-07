@@ -22,10 +22,8 @@ jobs:
       - name: Build knip
         run: npm run build
         working-directory: packages/knip
-      - name: QA (format, lint, organize imports)
-        run: npm run ci
       - name: Test knip
-        run: npm run test
+        run: npm run test:node
         working-directory: packages/knip
       - name: Run knip
         run: npx knip

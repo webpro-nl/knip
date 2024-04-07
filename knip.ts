@@ -11,6 +11,7 @@ const config: KnipConfig = {
       entry: ['src/{index,cli}.ts!', 'src/plugins/*/index.ts!'],
       project: ['src/**/*.ts!'],
       ignore: ['**/fixtures/**', '**/_template/**', '**/dist/**'],
+      ignoreBinaries: ['tsx'],
       ignoreDependencies: ['@pnpm/logger'],
       'node-test-runner': {
         entry: ['test/**/*.test.ts'],
