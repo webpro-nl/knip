@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { helpText } from '../src/util/cli-arguments.js';
 import { loadJSON } from '../src/util/fs.js';
 import { resolve } from '../src/util/path.js';

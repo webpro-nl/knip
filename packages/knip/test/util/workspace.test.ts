@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { byPathDepth } from '../../src/util/workspace.js';
 
 test('Sort workspaces by path depth', () => {

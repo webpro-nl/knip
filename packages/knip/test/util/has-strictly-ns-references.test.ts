@@ -1,7 +1,7 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import { getHasStrictlyNsReferences } from '../../src/util/type.js';
 import type { SerializableImports } from '../../src/types/imports.js';
+import { getHasStrictlyNsReferences } from '../../src/util/type.js';
 
 const base: SerializableImports = {
   specifier: '',

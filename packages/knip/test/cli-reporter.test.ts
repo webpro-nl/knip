@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { resolve } from '../src/util/path.js';
 import { execFactory } from './helpers/exec.js';
 

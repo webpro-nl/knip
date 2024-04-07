@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { resolve } from '../src/util/path.js';
 import { execFactory } from './helpers/exec.js';
 import { updatePos } from './helpers/index.js';
@@ -124,5 +124,5 @@ test('knip --reporter json (exports & types)', () => {
   // Add line - 1 to every pos (each EOL is one more char)
   updatePos(json);
 
-  assert.equal(exec('knip --reporter json').stdout, JSON.stringify(json) + '\n');
+  assert.equal(exec('knip --reporter json').stdout, `${JSON.stringify(json)}\n`);
 });

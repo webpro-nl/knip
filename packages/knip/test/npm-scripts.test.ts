@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { getDependencyMetaData } from '../src/manifest/index.js';
 import { join, resolve } from '../src/util/path.js';

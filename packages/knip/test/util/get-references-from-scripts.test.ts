@@ -1,6 +1,5 @@
-import '../../src/util/register.js'; // to resolve .ts files
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
 import { join, resolve } from '../../src/util/path.js';
 

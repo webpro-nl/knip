@@ -1,4 +1,4 @@
-import test from 'node:test';
+import { test } from 'bun:test';
 
 import { publicFn, internalTestedFn } from './module';
 
