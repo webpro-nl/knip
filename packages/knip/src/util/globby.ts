@@ -52,7 +52,7 @@ function parseGitignoreFile(filePath: string) {
   const file = fs.readFileSync(filePath, 'utf8');
   return file
     .split(/\r?\n/)
-    .filter(line => line && !line.startsWith('#'))
+    .filter(line => line.trim() && !line.startsWith('#'))
     .map(pattern => convertGitignoreToMicromatch(pattern.replace(/(?<!\\)#.*/, '').trim()));
 }
 
