@@ -151,13 +151,18 @@ Read more at [Production Mode][5].
 
 ### `--strict`
 
-Isolate workspaces and consider only direct dependencies.
+Isolate workspaces and consider only direct dependencies. Implies [production
+mode][6].
 
 Read more at [Production Mode][5].
 
+### `--fix`
+
+Read more at [auto-fix][7].
+
 ## Filters
 
-Available [issue types][6] when filtering output using `--include` or
+Available [issue types][8] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -213,7 +218,7 @@ Shortcut to include all types of export issues:
 
 ### `--experimental-tags`
 
-Deprecated. Use [--tags][7] instead.
+Deprecated. Use [--tags][9] instead.
 
 ### `--tags`
 
@@ -267,7 +272,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][8].
+Also see [Reporters & Preprocessors][10].
 
 ### `--reporter-options [json]`
 
@@ -302,7 +307,7 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
-Also see [Reporters & Preprocessors][8].
+Also see [Reporters & Preprocessors][10].
 
 ## Exit code
 
@@ -327,6 +332,8 @@ Maximum number of issues before non-zero exit code. Default: `0`
 [3]: ./configuration.md#includeentryexports
 [4]: ../guides/handling-issues.mdx#external-libs
 [5]: ../features/production-mode.md
-[6]: ./issue-types.md
-[7]: #--tags
-[8]: ../features/reporters.md
+[6]: #--production
+[7]: ../features/auto-fix.mdx
+[8]: ./issue-types.md
+[9]: #--tags
+[10]: ../features/reporters.md

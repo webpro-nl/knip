@@ -37,13 +37,17 @@ to handle them.
 
 :::tip
 
-Use `--include files` to [filter][5] the report by unused files:
+Use `--include files` to [filter the report][5] by unused files:
 
 ```sh
 knip --include files
 ```
 
 :::
+
+This works and might help with any other issue type as well. For instance, use
+`--dependencies` to focus only on dependencies and omit issues related to unused
+files and exports.
 
 ### Mocks and other implicit imports
 
@@ -353,8 +357,14 @@ in entry files.
 ## False Positives
 
 If you believe Knip incorrectly reports something as unused (i.e. a false
-positive), you can help your own project and help improve Knip by creating a
-[minimal reproduction][20] and open an issue on GitHub.
+positive), this could be caused by one of multiple reasons:
+
+- Knip requires additional configuration, for instance additional [entry
+  files][2] or [paths][20] should be added.
+- Knip has a bug. You can help your own project and Knip by creating a [minimal
+  reproduction][21] and open an issue on GitHub.
+
+Also see [troubleshooting][22] if you haven't already.
 
 [1]: ../overview/configuration.md
 [2]: ../explanations/entry-files.md
@@ -375,4 +385,6 @@ positive), you can help your own project and help improve Knip by creating a
 [17]: ../reference/cli.md#--tags
 [18]: #class-members
 [19]: ../reference/configuration.md#includeentryexports
-[20]: ../guides/troubleshooting.md#minimal-reproduction
+[20]: ../reference/configuration.md#paths
+[21]: ../guides/troubleshooting.md#minimal-reproduction
+[22]: ./troubleshooting.md

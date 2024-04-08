@@ -47,8 +47,14 @@ From this example, Knip automatically adds the following files as entry files:
 - `src/entry.ts`
 - `server.ts`
 
-By the way, Knip would not add the `exports` if the `dist` folder is matching a
-pattern in a relevant `.gitignore` file or `ignore` option.
+### Excluded files
+
+Knip would not add the `exports` if the `dist` folder is matching a pattern in a
+relevant `.gitignore` file or `ignore` option.
+
+Knip does not add scripts without a standard extension. For instance, the
+`bin/tool` file might be a valid executable for Node.js, but wouldn't be added
+or parsed by Knip.
 
 ### Scripts parsing
 

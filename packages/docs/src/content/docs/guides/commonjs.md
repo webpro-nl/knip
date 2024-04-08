@@ -6,10 +6,13 @@ CommonJS is the JavaScript module system using `require()` and `module.exports`
 statements.
 
 Knip works well with CommonJS. You don't need to use ES Modules or a
-`tsconfig.json` to use Knip. But due to the dynamic nature of CommonJS, we'll
-have to agree on a few conventions. Those conventions are designed to minimize
-impact on existing codebases, improve consistency, and ease migration to ES
-Modules or TypeScript.
+`tsconfig.json` to use Knip.
+
+The dynamic nature of CommonJS leaves room for ambiguity: it's sometimes unclear
+whether an export is a default or a named export (and thus how it should be
+imported). So we'll have to agree on a few conventions to prevent false
+positives. Those conventions are designed to minimize impact on existing
+codebases, improve consistency, and ease migration to ES Modules or TypeScript.
 
 For **named exports**, the recommendation is to assign keys to `module.exports`:
 

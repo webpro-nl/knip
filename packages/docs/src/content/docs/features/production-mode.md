@@ -42,6 +42,10 @@ Here's what's included in production mode:
 - Only the `start` and `postinstall` scripts
 - Ignore exports with the [`@internal` tag][1]
 
+The production run does not replace the default run. Depending on your needs you
+can run either of them or both separately. Usually both modes can share the same
+configuration.
+
 ## Strict Mode
 
 Additionally, the `--strict` flag can be added to:
@@ -55,6 +59,8 @@ Additionally, the `--strict` flag can be added to:
 ```sh
 knip --production --strict
 ```
+
+Using `--strict` implies `--production`, so the latter can be omitted.
 
 ## Types
 

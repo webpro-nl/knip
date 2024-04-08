@@ -48,8 +48,22 @@ more details.
 
 ## Ignored Files
 
-Knip respects `.gitignore` files and the `ignore` config option to prevent
-matching files from being added as entry file.
+Knip respects `.gitignore` files. By default, ignored files are not added as
+entry files. This behavior can be disabled by using the [`--no-gitignore`][3]
+flag on the CLI.
+
+Glob patterns can also be negated, for example:
+
+```json
+{
+  "entry": ["lib/entry-*.js", "!lib/entry-excluded.js"]
+}
+```
+
+If issues for a certain file should not be reported, use the [ignore][4]
+configuration option.
 
 [1]: ../overview/configuration.md#defaults
 [2]: ../features/script-parser.md
+[3]: ../reference/cli.md#--no-gitignore
+[4]: ../reference/configuration.md#ignore

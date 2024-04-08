@@ -5,8 +5,10 @@ description: config
 
 ## Defaults
 
-Knip has good defaults and aims for no or minimal configuration. This is a
-simplified version of the default configuration:
+Knip has good defaults and aims for "zero config". But sometimes Knip will need
+some help to not report incorrect things.
+
+Here's a simplified version of the default configuration:
 
 ```json
 {
@@ -94,7 +96,7 @@ here's what you might be looking for:
   `.astro` or `.vue` files.
 - Find [more options to configure Knip][4].
 - Learn more about [production mode][5].
-- Getting lots of output? Find out how to [handle issues][6].
+- Getting lots of output or false positives? Find out how to [handle issues][6].
 
 You can always search this website using the search bar at the top (`Ctrl+/` or
 `Ctrl+K`)
