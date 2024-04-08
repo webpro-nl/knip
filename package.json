@@ -29,6 +29,6 @@
     "knip": "file:packages/knip"
   },
   "devDependencies": {
-    "installed-check": "^9.1.0"
+    "installed-check": "^9.3.0"
   }
 }
