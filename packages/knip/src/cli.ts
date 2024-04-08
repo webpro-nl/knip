@@ -56,7 +56,7 @@ const run = async () => {
       cwd,
       tsConfigFile: tsConfig,
       gitignore: !isNoGitIgnore,
-      isProduction,
+      isProduction: isStrict || isProduction,
       isStrict,
       isShowProgress,
       isIncludeEntryExports,
