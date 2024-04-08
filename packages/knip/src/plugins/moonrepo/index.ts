@@ -1,6 +1,6 @@
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
 import type { EnablerPatterns } from '#p/types/config.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
+import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
 import type { MoonConfiguration } from './types.js';
 
 // link to moonrepo docs: https://moonrepo.dev/docs
