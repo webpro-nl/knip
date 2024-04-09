@@ -6,8 +6,7 @@
       "bun run knip",
       "bun run knip:production",
       "bun run test"
-    ],
-    "after:bump": ["git add ../../package-lock.json"]
+    ]
   },
   "github": {
     "release": true,
