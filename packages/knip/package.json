@@ -26,7 +26,8 @@
   ],
   "main": "./dist/index.js",
   "bin": {
-    "knip": "./bin/knip.js"
+    "knip": "./bin/knip.js",
+    "knip-bun": "./bin/knip-bun.js"
   },
   "type": "module",
   "types": "./dist/index.d.ts",
