@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install -D typescript@latest @types/node@20
+      - run: npm install typescript@latest @types/node@20 --ignore-scripts
       - name: Build knip
         run: npm run build
         working-directory: packages/knip

@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
-        run: npm install typescript@5.0.4 @types/node@18
+        run: npm install typescript@5.0.4 @types/node@18 --ignore-scripts
       - name: Build knip
         run: npm run build
         working-directory: packages/knip

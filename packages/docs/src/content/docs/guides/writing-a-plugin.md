@@ -89,9 +89,9 @@ configuration object.
 Here's the full source code of the `nyc` plugin:
 
 ```ts
-import { hasDependency } from '~/util/plugin.js';
+import { hasDependency } from '#p/util/plugin.js';
 import type { NycConfig } from './types.js';
-import type { ResolveConfig, IsPluginEnabled } from '~/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 
 const title = 'nyc';
 

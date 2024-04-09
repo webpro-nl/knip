@@ -18,7 +18,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies, manifest, config }) =>
   'eslint' in config ||
   Boolean(manifest.name && /(^eslint-config|\/eslint-config)/.test(manifest.name));
 
-export const packageJsonPath = 'eslintConfig';
+const packageJsonPath = 'eslintConfig';
 
 const entry = ['eslint.config.{js,cjs,mjs}'];
 

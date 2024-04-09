@@ -35,7 +35,7 @@ const getExtends = async (configFilePath: string, internalExtends = new Set<stri
   return internalExtends;
 };
 
-export const resolveConfig: ResolveConfig = async (localConfig, options) => {
+const resolveConfig: ResolveConfig = async (localConfig, options) => {
   const { isProduction, configFileDir, configFileName } = options;
 
   const configFilePath = join(configFileDir, configFileName);
