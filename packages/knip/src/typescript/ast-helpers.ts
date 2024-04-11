@@ -113,7 +113,7 @@ export const isDeclarationFileExtension = (extension: string) =>
   extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
 
 export const getJSDocTags = (node: ts.Node) => {
-  const tags = new Array<string>();
+  const tags = new Set<string>();
   let tagNodes = ts.getJSDocTags(node);
   if (ts.isExportSpecifier(node) || ts.isBindingElement(node)) {
     tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent.parent)];
@@ -124,7 +124,7 @@ export const getJSDocTags = (node: ts.Node) => {
   }
   for (const tagNode of tagNodes) {
     const match = tagNode.getText()?.match(/@\S+/);
-    if (match) tags.push(match[0]);
+    if (match) tags.add(match[0]);
   }
   return tags;
 };

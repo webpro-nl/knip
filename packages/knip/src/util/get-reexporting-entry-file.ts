@@ -1,12 +1,7 @@
-import type { SerializableExportMap } from '../types/exports.js';
-import type { SerializableImportMap, SerializableImports } from '../types/imports.js';
+import type { SerializableImports, SerializableMap } from '../types/map.js';
 import { exportLookupLog } from './debug.js';
 
-export const getReExportingEntryFileHandler = (
-  entryPaths: Set<string>,
-  exportedSymbols: SerializableExportMap,
-  importedSymbols: SerializableImportMap
-) => {
+export const getReExportingEntryFileHandler = (entryPaths: Set<string>, serializableMap: SerializableMap) => {
   const getReExportingEntryFile = (
     importedModule: SerializableImports | undefined,
     id: string,
@@ -20,7 +15,7 @@ export const getReExportingEntryFileHandler = (
     if (importedModule.isReExport) {
       for (const filePath of importedModule.isReExportedBy) {
         if (entryPaths.has(filePath)) {
-          if (filePath in exportedSymbols && id in exportedSymbols[filePath]) {
+          if (filePath in serializableMap && id in serializableMap[filePath].exports) {
             exportLookupLog(depth, 're-exported by entry', filePath);
             return filePath;
           }
@@ -30,7 +25,7 @@ export const getReExportingEntryFileHandler = (
           }
         } else {
           exportLookupLog(depth, 're-exported by', filePath);
-          const file = getReExportingEntryFile(importedSymbols[filePath], id, depth + 1);
+          const file = getReExportingEntryFile(serializableMap[filePath].imported, id, depth + 1);
           if (file) return file;
         }
       }
@@ -41,7 +36,7 @@ export const getReExportingEntryFileHandler = (
           return filePath;
         }
         exportLookupLog(depth, `re-exported on ${namespace} by`, filePath);
-        const file = getReExportingEntryFile(importedSymbols[filePath], namespace, depth + 1);
+        const file = getReExportingEntryFile(serializableMap[filePath].imported, namespace, depth + 1);
         if (file) return file;
       }
 
@@ -51,7 +46,7 @@ export const getReExportingEntryFileHandler = (
           return filePath;
         }
         exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
-        const file = getReExportingEntryFile(importedSymbols[filePath], alias, depth + 1);
+        const file = getReExportingEntryFile(serializableMap[filePath].imported, alias, depth + 1);
         if (file) return file;
       }
     }

@@ -5,8 +5,13 @@ import type { ReferencedDependencies } from './WorkspaceWorker.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
-import type { SerializableExport, SerializableExportMember } from './types/exports.js';
-import type { UnresolvedImport } from './types/imports.js';
+import type {
+  SerializableExport,
+  SerializableExportMember,
+  SerializableFile,
+  SerializableMap,
+  UnresolvedImport,
+} from './types/map.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/createHosts.js';
@@ -284,7 +289,7 @@ export class ProjectPrincipal {
     }
 
     return members.filter(member => {
-      if (member.jsDocTags.includes('@public')) return false;
+      if (member.jsDocTags.has('@public')) return false;
       const referencedSymbols = this.findReferences?.(filePath, member.pos);
       const files = (referencedSymbols ?? [])
         .flatMap(refs => refs.references)
@@ -297,7 +302,7 @@ export class ProjectPrincipal {
   }
 
   public hasReferences(filePath: string, exportedItem: SerializableExport) {
-    if (exportedItem.jsDocTags.includes('@public')) return false;
+    if (exportedItem.jsDocTags.has('@public')) return false;
 
     if (!this.findReferences) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());

@@ -1,15 +1,16 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import type { Tags } from '../types/cli.js';
+import type { ExportNode, ExportNodeMember } from '../types/exports.js';
+import type { ImportNode } from '../types/imports.js';
+import type { IssueSymbol } from '../types/issues.js';
 import type {
-  ExportNode,
-  ExportNodeMember,
   SerializableExport,
   SerializableExportMember,
   SerializableExports,
-} from '../types/exports.js';
-import type { ImportNode, SerializableImportMap, UnresolvedImport } from '../types/imports.js';
-import type { IssueSymbol } from '../types/issues.js';
+  SerializableImportMap,
+  UnresolvedImport,
+} from '../types/map.js';
 import { timerify } from '../util/Performance.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
@@ -100,7 +101,10 @@ const getImportsAndExports = (
       isReExportedNs: new Set(),
       importedNs: new Set(),
       identifiers: new Set(),
+      by: new Set(),
     });
+
+    internalImport.by.add(sourceFile.fileName);
 
     if (isReExport) {
       internalImport.isReExport = true;
@@ -215,7 +219,7 @@ const getImportsAndExports = (
     if (exports[identifier]) {
       const item = exports[identifier];
       const members = [...(item.members ?? []), ...serializedMembers];
-      const tags = [...(item.jsDocTags ?? []), ...jsDocTags];
+      const tags = new Set([...(item.jsDocTags ?? []), ...jsDocTags]);
       const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
       exports[identifier] = { ...item, members, jsDocTags: tags, fixes };
     } else {
@@ -235,7 +239,7 @@ const getImportsAndExports = (
       };
     }
 
-    if (!jsDocTags.includes('@alias')) {
+    if (!jsDocTags.has('@alias')) {
       if (ts.isExportAssignment(node)) maybeAddAliasedExport(node.expression, 'default');
       if (ts.isVariableDeclaration(node)) maybeAddAliasedExport(node.initializer, identifier);
     }

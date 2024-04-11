@@ -11,8 +11,13 @@ import { _getDependenciesFromScripts } from './binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
 import { getFilteredScripts } from './manifest/helpers.js';
 import type { CommandLineOptions } from './types/cli.js';
-import type { SerializableExport, SerializableExportMap, SerializableExportMember } from './types/exports.js';
-import type { SerializableImportMap } from './types/imports.js';
+import type {
+  SerializableExport,
+  SerializableExportMember,
+  SerializableImportMap,
+  SerializableImports,
+  SerializableMap,
+} from './types/map.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { getReExportingEntryFileHandler } from './util/get-reexporting-entry-file.js';
 import { _glob, negate } from './util/glob.js';
@@ -233,8 +238,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
   const analyzedFiles = new Set<string>();
-  const exportedSymbols: SerializableExportMap = {};
-  const importedSymbols: SerializableImportMap = {};
+  let serializableMap: SerializableMap = {};
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
 
