@@ -23,7 +23,7 @@ Options:
   --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
   --include-libs           Include type definitions from dependencies (default: false; implied with classMembers)
   --include-entry-exports  Include entry files when reporting unused exports
-  --isolate-workspaces     Isolate workspaces into separate programs (default: false)
+  --isolate-workspaces     Isolate workspaces into separate programs
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
