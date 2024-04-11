@@ -16,26 +16,6 @@ Shortcut: `-V`
 
 Print the version number.
 
-### `--debug`
-
-Shortcut: `-d`
-
-Show debug output.
-
-### `--cache`
-
-Enable caching.
-
-Consecutive runs are 10-40% faster as the results of file analysis (AST
-traversal) are cached. Conservative. Cache strategy based on file meta data
-(modification time + file size).
-
-### `--cache-location`
-
-Provide alternative cache location.
-
-Default location: `./node_modules/.cache/knip`
-
 ### `--no-progress`
 
 Shortcut: `-n`
@@ -46,6 +26,22 @@ environments.
 ### `--no-config-hints`
 
 Suppress configuration hints.
+
+### `knip-bun`
+
+Run Knip using the Bun runtime (instead of Node.js).
+
+```shell
+knip-bun
+```
+
+## Troubleshooting
+
+### `--debug`
+
+Shortcut: `-d`
+
+Show debug output.
 
 ### `--performance`
 
@@ -76,14 +72,6 @@ Total running time: 5s (mem: 631.27MB)
 This is not yet available in Bun, since it does not support
 `performance.timerify`
 ([GitHub issue](https://github.com/oven-sh/bun/issues/9271)).
-
-### `knip-bun`
-
-Run Knip using the Bun runtime (instead of Node.js).
-
-```shell
-knip-bun
-```
 
 ## Configuration
 
@@ -146,6 +134,21 @@ knip --include-libs
 
 Also see [external libs][4].
 
+### `--isolate-workspaces`
+
+By default, Knip optimizes performance by adding eligible workspaces to existing
+TypeScript programs, based on the compatibility of their `compilerOptions`. Use
+this flag to disable this behavior and create one program per workspace.
+
+You can see the behavior in action in [debug mode][1]. Look for messages like
+this:
+
+```sh
+[*] Installed 4 programs for 18 workspaces
+...
+[*] Analyzing used resolved files [P1/1] (78)
+```
+
 ## Modes
 
 ### `--production`
@@ -167,24 +170,23 @@ mode][6].
 
 Read more at [Production Mode][5].
 
-### `--isolate-workspaces`
-
-By default, Knip optimizes performance by adding eligible workspaces to existing
-TypeScript programs, based on the compatibility of their `compilerOptions`. Use
-this flag to disable this behavior and create one program per workspace.
-
-You can see the behavior in action in [debug mode][1]. Look for messages like
-this:
-
-```sh
-[*] Installed 4 programs for 18 workspaces
-...
-[*] Analyzing used resolved files [P1/1] (78)
-```
-
 ### `--fix`
 
 Read more at [auto-fix][7].
+
+### `--cache`
+
+Enable caching.
+
+Consecutive runs are 10-40% faster as the results of file analysis (AST
+traversal) are cached. Conservative. Cache strategy based on file meta data
+(modification time + file size).
+
+### `--cache-location`
+
+Provide alternative cache location.
+
+Default location: `./node_modules/.cache/knip`
 
 ### `--watch`
 

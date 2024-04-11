@@ -28,7 +28,7 @@ Potential workarounds:
 - Turn the configuration file from TS into JS (e.g. `vitest.config.ts` →
   `vitest.config.js`). Knip loads modules directly using native `import()`
   calls. This is the recommended workaround.
-- Use Bun: `bunx --bun knip` (Bun will execute the scripts instead of jiti)
+- Use Bun: `knip-bun` (Bun will execute the scripts instead of jiti)
 - [Disable the plugin][2].
 
 Use `knip --debug` in a monorepo to help locate where the error is coming from.
@@ -64,7 +64,7 @@ the configuration file. Unfortunately jiti does not seem to support this.
 Potential workarounds:
 
 - Rewrite the import the configuration to a relative import.
-- Use Bun: `bunx --bun knip` (Bun will execute the scripts instead of jiti)
+- Use Bun: `knip-bun` (Bun will execute the scripts instead of jiti)
 
 ## False positives with external libs
 
