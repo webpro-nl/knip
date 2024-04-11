@@ -1,9 +1,9 @@
 {
-  "name": "@kp/app-b",
+  "name": "@workspaces-dts/client",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@kp/shared": "*"
+    "@workspaces-dts/shared": "*"
   }
 }
