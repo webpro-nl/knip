@@ -125,6 +125,7 @@ const _parseFindGitignores = timerify(parseFindGitignores);
 
 /** simpler and faster replacement for the globby npm library */
 export async function globby(patterns: string | string[], options: GlobOptions): Promise<string[]> {
+  if (Array.isArray(patterns) && patterns.length === 0) return [];
   const ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
   if (options.gitignore) {
     let dir = options.dir;
