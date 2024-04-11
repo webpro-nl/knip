@@ -1,40 +1,32 @@
-import micromatch from 'micromatch';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
-import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
   normalizeSpecifierFromFilePath,
 } from './modules.js';
-import { isInNodeModules, isInternal, join } from './path.js';
+import { isInNodeModules, isInternal } from './path.js';
 import { fromBinary, isBinary } from './protocols.js';
 import { _resolveSpecifier } from './require.js';
+import { resolveSync } from './resolve.js';
 
 export const getHandler =
   (collector: IssueCollector, deputy: DependencyDeputy, chief: ConfigurationChief) =>
-  (specifier: string, containingFilePath: string, workspace: Workspace, principal: ProjectPrincipal) => {
-    if (isInternal(specifier)) {
-      // Pattern: ./module.js, /abs/path/to/module.js, /abs/path/to/module/index.js, ./module.ts, ./module.d.ts
-      const filePath = principal.resolveModule(specifier, containingFilePath)?.resolvedFileName;
-      if (filePath) {
-        const ignorePatterns = workspace.config?.ignore.map(pattern => join(workspace.dir, pattern)) ?? [];
-        const isIgnored = micromatch.isMatch(filePath, ignorePatterns);
-        if (!isIgnored) principal.addEntryPath(filePath);
-      } else {
-        collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
-      }
+  (specifier: string, containingFilePath: string, workspace: Workspace) => {
+    if (isBinary(specifier)) {
+      const binaryName = fromBinary(specifier);
+      const isHandled = deputy.maybeAddReferencedBinary(workspace, binaryName);
+      if (!isHandled) collector.addIssue({ type: 'binaries', filePath: containingFilePath, symbol: binaryName });
     } else {
-      if (isBinary(specifier)) {
-        const binaryName = fromBinary(specifier);
-        const isHandled = deputy.maybeAddReferencedBinary(workspace, binaryName);
-        if (!isHandled) collector.addIssue({ type: 'binaries', filePath: containingFilePath, symbol: binaryName });
+      if (isInternal(specifier)) {
+        const resolvedFilePath = resolveSync(specifier, containingFilePath);
+        if (resolvedFilePath) return resolvedFilePath;
+        collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
       } else {
         const packageName = isInNodeModules(specifier)
           ? getPackageNameFromFilePath(specifier) // Pattern: /abs/path/to/repo/node_modules/package/index.js
           : getPackageNameFromModuleSpecifier(specifier); // Patterns: package, @any/package, @local/package, self-ref
-
         const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
         if (!isHandled) collector.addIssue({ type: 'unlisted', filePath: containingFilePath, symbol: specifier });
 
@@ -43,11 +35,8 @@ export const getHandler =
           const otherWorkspace = chief.availableWorkspaceManifests.find(w => w.manifest.name === packageName);
           if (otherWorkspace) {
             const filePath = _resolveSpecifier(otherWorkspace.dir, normalizeSpecifierFromFilePath(specifier));
-            if (filePath) {
-              principal.addEntryPath(filePath, { skipExportsAnalysis: true });
-            } else {
-              collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
-            }
+            if (filePath) return filePath;
+            collector.addIssue({ type: 'unresolved', filePath: containingFilePath, symbol: specifier });
           }
         }
       }

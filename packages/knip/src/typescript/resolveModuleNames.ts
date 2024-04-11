@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
-import resolve from 'resolve';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { sanitizeSpecifier } from '../util/modules.js';
 import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, toPosix } from '../util/path.js';
+import { resolveSync } from '../util/resolve.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
@@ -25,12 +25,14 @@ const fileExists = (name: string, containingFile: string) => {
 export function createCustomModuleResolver(
   customSys: typeof ts.sys,
   compilerOptions: ts.CompilerOptions,
-  virtualFileExtensions: string[]
+  virtualFileExtensions: string[],
+  useCache = true
 ) {
   const extensions = [...DEFAULT_EXTENSIONS, ...virtualFileExtensions];
 
   function resolveModuleNames(moduleNames: string[], containingFile: string): Array<ts.ResolvedModuleFull | undefined> {
     return moduleNames.map(moduleName => {
+      if (!useCache) return resolveModuleName(moduleName, containingFile);
       const key = moduleName.startsWith('.')
         ? join(dirname(containingFile), moduleName)
         : `${containingFile}:${moduleName}`;
@@ -47,25 +49,18 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins or externals, bail out
     if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
 
-    try {
-      const resolved = resolve.sync(sanitizedSpecifier, {
-        basedir: dirname(containingFile),
-        extensions,
-        preserveSymlinks: false,
-      });
-
-      const resolvedFileName = toPosix(resolved);
-      const ext = extname(resolved);
-      const extension = virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext;
-
-      return {
-        resolvedFileName,
-        extension,
-        isExternalLibraryImport: isInNodeModules(resolvedFileName),
-        resolvedUsingTsExtension: false,
-      };
-    } catch (err) {
-      // Intentional slip-through, plenty of cases left in TS context
+    {
+      const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
+      if (resolvedFileName) {
+        const ext = extname(resolvedFileName);
+        const extension = virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext;
+        return {
+          resolvedFileName: resolvedFileName,
+          extension,
+          isExternalLibraryImport: isInNodeModules(resolvedFileName),
+          resolvedUsingTsExtension: false,
+        };
+      }
     }
 
     const tsResolvedModule = ts.resolveModuleName(
