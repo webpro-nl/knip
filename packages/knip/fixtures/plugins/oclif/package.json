@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/oclif",
+  "version": "*",
+  "scripts": {
+    "start": "oclif"
+  },
+  "dependencies": {
+    "oclif": "*"
+  }
+}

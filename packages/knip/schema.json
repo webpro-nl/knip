@@ -399,6 +399,10 @@
           "title": "nyc plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/nyc/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "oclif": {
+          "title": "oclif plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/oclif/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "playwright": {
           "title": "Playwright plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/playwright/README.md)",
           "$ref": "#/definitions/plugin"

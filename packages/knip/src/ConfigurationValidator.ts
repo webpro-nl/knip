@@ -108,6 +108,7 @@ const pluginsSchema = z.object({
   'npm-package-json-lint': pluginSchema,
   nx: pluginSchema,
   nyc: pluginSchema,
+  oclif: pluginSchema,
   playwright: pluginSchema,
   'playwright-ct': pluginSchema,
   postcss: pluginSchema,
