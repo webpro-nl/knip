@@ -8,33 +8,44 @@ improve it.
 Knip does not want to tell you how to structure files or how to write your code,
 but it might still be good to understand inefficient patterns for Knip.
 
-## Star Imports and Barrel Files
+Use the `--debug` and `--performance` flags to find potential bottlenecks.
 
-Knip builds up a simplified graph of imports and exports and can quickly match
-them against each other to find unused exports. However, there might not be a
-literal match for exports that are imported using the `import *` syntax. In this
-case, Knip will ask the TypeScript compiler to find references, which is a lot
-more work. More levels of re-exports and star imports are more expensive.
+## Ignoring Files
 
-Barrel files with re-exports look like this:
+Files matching the `ignore` patterns are not excluded from the analysis. They're
+simply not printed in the report. Use negated `project` patterns to exclude
+files from the analysis whenever possible.
 
-```ts
-export * from './model';
-export * from './util';
+Here's a little guide:
+
+1. Set `entry` files if necessary.
+2. Override the default `project` setting to cover all source files (default:
+   `**/*.{js,ts}`)
+3. If needed, use additional negated `entry` and `project` patterns to exclude
+   files from the analysis.
+4. Then use `ignore` patterns for the remaining issues in the reports.
+
+❌ Don't do this:
+
+```json title="knip.json"
+{
+  "entry": ["src/index.ts", "scripts/*.ts"],
+  "ignore": ["build/**", "dist/**", "src/generated.ts"]
+}
 ```
 
-Example of a star import:
+✅ Do this:
 
-```ts
-import * as MyNamespace from './helpers';
+```json title="knip.json"
+{
+  "entry": ["src/index.ts", "scripts/*.ts"],
+  "project": ["src/**", "scripts/**"],
+  "ignore": ["src/generated.ts"]
+}
 ```
 
-Use the `--performance` flag to see how often [`findReferences`][1] is used and
-how much time is spent there.
-
-This article explains the issue in more detail: [Speeding up the JavaScript
-ecosystem - The barrel file debacle][2]. The conclusion: "Get rid of all barrel
-files".
+This way, the `project` files cover all source files, and most other files don't
+even need to be ignored anymore.
 
 ## Workspace Sharing
 
