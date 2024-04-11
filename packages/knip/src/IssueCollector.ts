@@ -2,6 +2,7 @@ import micromatch from 'micromatch';
 import { initCounters, initIssues } from './issues/initializers.js';
 import type { ConfigurationHint, Issue, Rules } from './types/issues.js';
 import { relative } from './util/path.js';
+import { timerify } from './util/Performance.js';
 
 type Filters = Partial<{
   dir: string;
@@ -17,6 +18,8 @@ const hasHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>
   Array.from(hints).some(
     item => item.identifier === hint.identifier && item.type === hint.type && item.workspaceName === hint.workspaceName
   );
+
+const isMatch = timerify(micromatch.isMatch, 'isMatch');
 
 /**
  * - Collects issues and counts them
@@ -43,7 +46,7 @@ export class IssueCollector {
   addIgnorePatterns(patterns: string[]) {
     for (const pattern of patterns) this.ignorePatterns.add(pattern);
     const p = [...this.ignorePatterns];
-    this.isMatch = (filePath: string) => micromatch.isMatch(filePath, p, { dot: true });
+    this.isMatch = (filePath: string) => isMatch(filePath, p, { dot: true });
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
