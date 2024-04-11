@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { CacheConsultant } from './CacheConsultant.js';
 import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { ReferencedDependencies } from './WorkspaceWorker.js';
 import { getCompilerExtensions } from './compilers/index.js';
@@ -15,6 +16,7 @@ import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
+import { deserialize, serialize } from './util/serialize.js';
 
 // These compiler options override local options
 const baseCompilerOptions = {
@@ -64,6 +66,8 @@ export class ProjectPrincipal {
   asyncCompilers: AsyncCompilers;
   isSkipLibs: boolean;
 
+  cache: CacheConsultant<SerializableFile>;
+
   // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
   backend: {
     fileManager: SourceFileManager;
@@ -76,7 +80,7 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs }: PrincipalOptions) {
+  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs }: PrincipalOptions, n: number) {
     this.cwd = cwd;
 
     this.isGitIgnored = isGitIgnored;
@@ -93,6 +97,8 @@ export class ProjectPrincipal {
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
     this.isSkipLibs = isSkipLibs;
+
+    this.cache = new CacheConsultant(`project-${n}`);
   }
 
   init() {
@@ -195,6 +201,9 @@ export class ProjectPrincipal {
   }
 
   public analyzeSourceFile(filePath: string, options: Omit<GetImportsAndExportsOptions, 'skipExports'>) {
+    const fd = this.cache.getFileDescriptor(filePath);
+    if (!fd.changed && fd.meta?.data) return deserialize(fd.meta.data);
+
     if (!this.backend.typeChecker) throw new Error('Must initialize TypeChecker before source file analysis');
 
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
@@ -302,5 +311,14 @@ export class ProjectPrincipal {
       .map(ref => ref.fileName);
     const externalRefs = files.filter(f => f !== filePath);
     return externalRefs.length > 0;
+  }
+
+  reconcileCache(serializableMap: SerializableMap) {
+    for (const filePath in serializableMap) {
+      const fd = this.cache.getFileDescriptor(filePath);
+      if (!fd || !fd.meta) continue;
+      fd.meta.data = serialize(serializableMap[filePath]);
+    }
+    this.cache.reconcile();
   }
 }

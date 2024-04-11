@@ -8,6 +8,8 @@ export interface CommandLineOptions {
   isIncludeEntryExports: boolean;
   isIncludeLibs: boolean;
   isIsolateWorkspaces: boolean;
+  isCache?: boolean;
+  cacheLocation?: string;
   tags: Tags;
   isFix: boolean;
   fixTypes: string[];

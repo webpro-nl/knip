@@ -1,4 +1,5 @@
 import type { Entries } from 'type-fest';
+import { CacheConsultant } from './CacheConsultant.js';
 import { plugins } from './plugins.js';
 import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceConfiguration } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';
@@ -64,6 +65,8 @@ export class WorkspaceWorker {
   enabledPlugins: PluginName[] = [];
   enabledPluginsInAncestors: string[];
 
+  cache: CacheConsultant<unknown>;
+
   constructor({
     name,
     dir,
@@ -89,6 +92,8 @@ export class WorkspaceWorker {
     this.rootIgnore = rootIgnore;
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
+
+    this.cache = new CacheConsultant(`plugins-${name}`);
   }
 
   public async init() {
@@ -274,7 +279,11 @@ export class WorkspaceWorker {
         for (const configFilePath of configFilePaths) {
           const opts = { ...options, configFileDir: dirname(configFilePath), configFileName: basename(configFilePath) };
           if (hasResolveEntryPaths || shouldRunConfigResolver) {
-            const config = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
+            const fd = this.cache.getFileDescriptor(configFilePath);
+            const config =
+              !fd.changed && fd.meta?.data
+                ? fd.meta.data
+                : await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
             if (config) {
               if (hasResolveEntryPaths) {
                 const dependencies = (await plugin.resolveEntryPaths?.(config, opts)) ?? [];
@@ -284,6 +293,8 @@ export class WorkspaceWorker {
                 const dependencies = (await plugin.resolveConfig?.(config, opts)) ?? [];
                 for (const id of dependencies) addDependency(id, configFilePath);
               }
+
+              if (fd.changed && fd.meta) fd.meta.data = config;
             }
           }
         }
@@ -306,5 +317,9 @@ export class WorkspaceWorker {
       referencedDependencies,
       enabledPlugins: this.enabledPlugins,
     };
+  }
+
+  public onDispose() {
+    this.cache.reconcile();
   }
 }

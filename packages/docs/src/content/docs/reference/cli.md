@@ -22,6 +22,20 @@ Shortcut: `-d`
 
 Show debug output.
 
+### `--cache`
+
+Enable caching.
+
+Consecutive runs are 10-40% faster as the results of file analysis (AST
+traversal) are cached. Conservative. Cache strategy based on file meta data
+(modification time + file size).
+
+### `--cache-location`
+
+Provide alternative cache location.
+
+Default location: `./node_modules/.cache/knip`
+
 ### `--no-progress`
 
 Shortcut: `-n`

@@ -1,3 +1,4 @@
+import { CacheConsultant } from './CacheConsultant.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
@@ -223,6 +224,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     if (chief.resolvedConfigFilePath) {
       principal.addEntryPath(chief.resolvedConfigFilePath, { skipExportsAnalysis: true });
     }
+
+    worker.onDispose();
   }
 
   const principals = factory.getPrincipals();
@@ -351,6 +354,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
     for (const filePath of principal.entryPaths) entryPaths.add(filePath);
+
+    principal.reconcileCache(serializableMap);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
     if (isSkipLibs) factory.deletePrincipal(principal);

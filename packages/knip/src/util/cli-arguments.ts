@@ -11,6 +11,8 @@ Options:
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
   -W, --workspace [dir]    Analyze a single workspace (default: analyze all configured workspaces)
   --directory [dir]        Run process from a different directory (default: cwd)
+  --cache                  Enable caching
+  --cache-location         Change cache location (default: node_modules/.cache/knip)
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
@@ -55,6 +57,8 @@ let parsedArgs;
 try {
   parsedArgs = parseArgs({
     options: {
+      cache: { type: 'boolean' },
+      cacheLocation: { type: 'string' },
       config: { type: 'string', short: 'c' },
       debug: { type: 'boolean', short: 'd' },
       dependencies: { type: 'boolean' },
