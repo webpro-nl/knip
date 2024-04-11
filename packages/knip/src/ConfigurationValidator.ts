@@ -77,7 +77,6 @@ export const pluginSchema = z.union([
 ]);
 
 const pluginsSchema = z.object({
-  moonrepo: pluginSchema,
   astro: pluginSchema,
   angular: pluginSchema,
   ava: pluginSchema,
@@ -87,6 +86,7 @@ const pluginsSchema = z.object({
   commitizen: pluginSchema,
   commitlint: pluginSchema,
   cspell: pluginSchema,
+  cucumber: pluginSchema,
   cypress: pluginSchema,
   eleventy: pluginSchema,
   eslint: pluginSchema,
@@ -100,6 +100,7 @@ const pluginsSchema = z.object({
   linthtml: pluginSchema,
   markdownlint: pluginSchema,
   mocha: pluginSchema,
+  moonrepo: pluginSchema,
   msw: pluginSchema,
   netlify: pluginSchema,
   next: pluginSchema,

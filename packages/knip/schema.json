@@ -307,6 +307,10 @@
           "title": "cspell plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/cspell/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "cucumber": {
+          "title": "cucumber plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/cucumber/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "cypress": {
           "title": "Cypress plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/cypress/README.md)",
           "$ref": "#/definitions/plugin"
