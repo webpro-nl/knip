@@ -9,6 +9,8 @@ const baseArguments = {
   isIncludeEntryExports: false,
   isIncludeLibs: false,
   isIsolateWorkspaces: false,
+  isDebug: false,
+  isWatch: false,
   isFix: false,
   tags: [[], []],
   fixTypes: [],

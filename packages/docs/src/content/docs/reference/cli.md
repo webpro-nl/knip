@@ -73,19 +73,16 @@ Total running time: 5s (mem: 631.27MB)
 - `median`: the median invocation
 - `sum` the accumulated time of all invocations
 
-### `--isolate-workspaces`
+This is not yet available in Bun, since it does not support
+`performance.timerify`
+([GitHub issue](https://github.com/oven-sh/bun/issues/9271)).
 
-By default, Knip optimizes performance by adding eligible workspaces to existing
-TypeScript programs, based on the compatibility of their `compilerOptions`. Use
-this flag to disable this behavior and create one program per workspace.
+### `knip-bun`
 
-You can see the behavior in action in [debug mode][1]. Look for messages like
-this:
+Run Knip using the Bun runtime (instead of Node.js).
 
-```sh
-[*] Installed 4 programs for 18 workspaces
-...
-[*] Analyzing used resolved files [P1/1] (78)
+```shell
+knip-bun
 ```
 
 ## Configuration
@@ -170,9 +167,32 @@ mode][6].
 
 Read more at [Production Mode][5].
 
+### `--isolate-workspaces`
+
+By default, Knip optimizes performance by adding eligible workspaces to existing
+TypeScript programs, based on the compatibility of their `compilerOptions`. Use
+this flag to disable this behavior and create one program per workspace.
+
+You can see the behavior in action in [debug mode][1]. Look for messages like
+this:
+
+```sh
+[*] Installed 4 programs for 18 workspaces
+...
+[*] Analyzing used resolved files [P1/1] (78)
+```
+
 ### `--fix`
 
 Read more at [auto-fix][7].
+
+### `--watch`
+
+Watch current directory, and update reported issues when a file is modified,
+added or deleted.
+
+Watch mode focuses on imports and exports in source files. During watch mode,
+changes in `package.json` and/or `node_modules` are not supported.
 
 ## Filters
 

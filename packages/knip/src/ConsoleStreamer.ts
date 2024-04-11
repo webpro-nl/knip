@@ -29,9 +29,10 @@ export class ConsoleStreamer {
     this.lines = messages.length;
   }
 
-  cast(message: string) {
+  cast(message: string | string[]) {
     if (!this.isEnabled) return;
-    this.update([message]);
+    if (Array.isArray(message)) this.update(message);
+    else this.update([message]);
   }
 
   clear() {

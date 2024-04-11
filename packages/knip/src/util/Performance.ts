@@ -15,7 +15,7 @@ export const timerify = <T extends (...params: any[]) => any>(fn: T, name: strin
   return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));
 };
 
-export class Performance {
+class Performance {
   isEnabled: boolean;
   startTime = 0;
   endTime = 0;
@@ -24,7 +24,6 @@ export class Performance {
   fnObserver?: PerformanceObserver;
   gcObserver?: PerformanceObserver;
   memoryUsageStart?: ReturnType<typeof memoryUsage>;
-  memoryUsageEnd?: ReturnType<typeof memoryUsage>;
 
   constructor(isEnabled: boolean) {
     if (isEnabled) {
@@ -102,18 +101,20 @@ export class Performance {
     return table.toString().trim();
   }
 
-  getTotalTime() {
-    return this.endTime - this.startTime;
+  getCurrentDurationInMs(startTime?: number) {
+    return performance.now() - (startTime ?? this.startTime);
   }
 
   getMemHeapUsage() {
-    return (this.memoryUsageEnd?.heapUsed ?? 0) - (this.memoryUsageStart?.heapUsed ?? 0);
+    return (memoryUsage().heapUsed ?? 0) - (this.memoryUsageStart?.heapUsed ?? 0);
+  }
+
+  getCurrentMemUsageInMb() {
+    return Math.round((this.getMemHeapUsage() / 1024 / 1024) * 100) / 100;
   }
 
   public async finalize() {
     if (!this.isEnabled) return;
-    this.endTime = performance.now();
-    this.memoryUsageEnd = memoryUsage();
     // Workaround to get all entries
     await this.flush();
   }
@@ -123,3 +124,5 @@ export class Performance {
     this.fnObserver?.disconnect();
   }
 }
+
+export const perfObserver = new Performance(isEnabled);

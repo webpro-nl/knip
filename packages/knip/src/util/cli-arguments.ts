@@ -13,6 +13,7 @@ Options:
   --directory [dir]        Run process from a different directory (default: cwd)
   --cache                  Enable caching
   --cache-location         Change cache location (default: node_modules/.cache/knip)
+  --watch                  Watch mode
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
@@ -91,6 +92,7 @@ try {
       trace: { type: 'boolean' },
       tsConfig: { type: 'string', short: 't' },
       version: { type: 'boolean', short: 'V' },
+      watch: { type: 'boolean' },
       workspace: { type: 'string', short: 'W' },
     },
   });

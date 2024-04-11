@@ -70,6 +70,7 @@ export class ProjectPrincipal {
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
   isSkipLibs: boolean;
+  isWatch: boolean;
 
   cache: CacheConsultant<SerializableFile>;
 
@@ -85,7 +86,7 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs }: PrincipalOptions, n: number) {
+  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs, isWatch }: PrincipalOptions, n: number) {
     this.cwd = cwd;
 
     this.isGitIgnored = isGitIgnored;
@@ -102,6 +103,7 @@ export class ProjectPrincipal {
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
     this.isSkipLibs = isSkipLibs;
+    this.isWatch = isWatch;
 
     this.cache = new CacheConsultant(`project-${n}`);
   }
@@ -113,6 +115,7 @@ export class ProjectPrincipal {
       entryPaths: this.entryPaths,
       compilers: [this.syncCompilers, this.asyncCompilers],
       isSkipLibs: this.isSkipLibs,
+      useResolverCache: !this.isWatch,
     });
 
     this.backend = {
@@ -168,7 +171,17 @@ export class ProjectPrincipal {
   public addProjectPath(filePath: string) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
       this.projectPaths.add(filePath);
+      this.deletedFiles.delete(filePath);
     }
+  }
+
+  // TODO Organize better
+  deletedFiles = new Set();
+  public removeProjectPath(filePath: string) {
+    this.entryPaths.delete(filePath);
+    this.projectPaths.delete(filePath);
+    this.invalidateFile(filePath);
+    this.deletedFiles.add(filePath);
   }
 
   public addReferencedDependencies(workspaceName: string, referencedDependencies: ReferencedDependencies) {
@@ -205,6 +218,21 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
+  private getResolvedModuleHandler(sourceFile: BoundSourceFile) {
+    const getResolvedModule = this.backend.program?.getResolvedModule;
+    const resolver = getResolvedModule
+      ? (specifier: string) => getResolvedModule(sourceFile, specifier, /* mode */ undefined)
+      : (specifier: string) => sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
+    if (!this.isWatch) return resolver;
+
+    // TODO It's either this awkward bit in watch mode to handle deleted files, or some large refactoring
+    return (specifier: string) => {
+      const m = resolver(specifier);
+      if (m?.resolvedModule?.resolvedFileName && this.deletedFiles.has(m.resolvedModule.resolvedFileName)) return;
+      return m;
+    };
+  }
+
   public analyzeSourceFile(filePath: string, options: Omit<GetImportsAndExportsOptions, 'skipExports'>) {
     const fd = this.cache.getFileDescriptor(filePath);
     if (!fd.changed && fd.meta?.data) return deserialize(fd.meta.data);
@@ -218,14 +246,9 @@ export class ProjectPrincipal {
 
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
-    const getResolvedModule: GetResolvedModule = specifier =>
-      this.backend.program?.getResolvedModule
-        ? this.backend.program.getResolvedModule(sourceFile, specifier, /* mode */ undefined)
-        : sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
-
     const { imports, exports, scripts } = _getImportsAndExports(
       sourceFile,
-      getResolvedModule,
+      this.getResolvedModuleHandler(sourceFile),
       this.backend.typeChecker,
       { ...options, skipExports }
     );
@@ -278,6 +301,11 @@ export class ProjectPrincipal {
     };
   }
 
+  invalidateFile(filePath: string) {
+    this.backend.fileManager.snapshotCache.delete(filePath);
+    this.backend.fileManager.sourceFileCache.delete(filePath);
+  }
+
   public resolveModule(specifier: string, filePath: string = specifier) {
     return this.backend.resolveModuleNames([specifier], filePath)[0];
   }
@@ -321,7 +349,7 @@ export class ProjectPrincipal {
   reconcileCache(serializableMap: SerializableMap) {
     for (const filePath in serializableMap) {
       const fd = this.cache.getFileDescriptor(filePath);
-      if (!fd || !fd.meta) continue;
+      if (!(fd?.meta)) continue;
       fd.meta.data = serialize(serializableMap[filePath]);
     }
     this.cache.reconcile();

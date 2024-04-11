@@ -2,11 +2,10 @@ import picocolors from 'picocolors';
 import prettyMilliseconds from 'pretty-ms';
 import { main } from './index.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
-import { Performance } from './util/Performance.js';
+import { perfObserver } from './util/Performance.js';
 import parsedArgValues, { helpText } from './util/cli-arguments.js';
 import { getKnownError, hasCause, isConfigurationError, isKnownError } from './util/errors.js';
 import { cwd } from './util/path.js';
-import './util/register.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { splitTags } from './util/tag.js';
 import { version } from './version.js';
@@ -23,7 +22,6 @@ const {
   'include-entry-exports': isIncludeEntryExports = false,
   'include-libs': isIncludeLibs = false,
   'isolate-workspaces': isIsolateWorkspaces = false,
-  performance: isObservePerf = false,
   production: isProduction = false,
   'reporter-options': reporterOptions = '',
   'preprocessor-options': preprocessorOptions = '',
@@ -34,6 +32,7 @@ const {
   version: isVersion,
   'experimental-tags': experimentalTags = [],
   tags = [],
+  watch: isWatch = false,
 } = parsedArgValues;
 
 if (isHelp) {
@@ -50,22 +49,24 @@ const isShowProgress = isNoProgress === false && process.stdout.isTTY && typeof 
 
 const run = async () => {
   try {
-    const perfObserver = new Performance(isObservePerf);
-
     const { report, issues, counters, rules, configurationHints } = await main({
       cwd,
       tsConfigFile: tsConfig,
       gitignore: !isNoGitIgnore,
+      isDebug,
       isProduction: isStrict || isProduction,
       isStrict,
       isShowProgress,
       isIncludeEntryExports,
       isIncludeLibs,
       isIsolateWorkspaces,
+      isWatch,
       tags: tags.length > 0 ? splitTags(tags) : splitTags(experimentalTags),
       isFix: isFix || fixTypes.length > 0,
       fixTypes: fixTypes.flatMap(type => type.split(',')),
     });
+
+    if (isWatch) return;
 
     const initialData: ReporterOptions = {
       report,
@@ -88,11 +89,12 @@ const run = async () => {
       .filter(reportGroup => finalData.report[reportGroup] && rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
-    if (isObservePerf) {
+    if (perfObserver.isEnabled) {
       await perfObserver.finalize();
       console.log(`\n${perfObserver.getTable()}`);
-      const mem = Math.round((perfObserver.getMemHeapUsage() / 1024 / 1024) * 100) / 100;
-      console.log('\nTotal running time:', prettyMilliseconds(perfObserver.getTotalTime()), `(mem: ${mem}MB)`);
+      const mem = perfObserver.getCurrentMemUsageInMb();
+      const duration = perfObserver.getCurrentDurationInMs();
+      console.log('\nTotal running time:', prettyMilliseconds(duration), `(mem: ${mem}MB)`);
       perfObserver.reset();
     }
 

@@ -1,8 +1,8 @@
 import micromatch from 'micromatch';
 import { initCounters, initIssues } from './issues/initializers.js';
 import type { ConfigurationHint, Issue, Rules } from './types/issues.js';
-import { relative } from './util/path.js';
 import { timerify } from './util/Performance.js';
+import { relative } from './util/path.js';
 
 type Filters = Partial<{
   dir: string;
@@ -81,6 +81,13 @@ export class IssueCollector {
     if (!hasHint(this.configurationHints, issue)) {
       this.configurationHints.add(issue);
     }
+  }
+
+  purge() {
+    const unusedFiles = this.issues.files;
+    this.issues = initIssues();
+    this.counters = initCounters();
+    return unusedFiles;
   }
 
   getIssues() {

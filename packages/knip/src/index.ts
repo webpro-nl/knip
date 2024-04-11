@@ -1,3 +1,4 @@
+import { watch } from 'node:fs';
 import { CacheConsultant } from './CacheConsultant.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
@@ -10,6 +11,7 @@ import { WorkspaceWorker } from './WorkspaceWorker.js';
 import { _getDependenciesFromScripts } from './binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
 import { getFilteredScripts } from './manifest/helpers.js';
+import watchReporter from './reporters/watch.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type {
   SerializableExport,
@@ -19,6 +21,7 @@ import type {
   SerializableMap,
 } from './types/map.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
+import { isFile } from './util/fs.js';
 import { getReExportingEntryFileHandler } from './util/get-reexporting-entry-file.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredFn } from './util/globby.js';
@@ -45,6 +48,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isIncludeEntryExports,
     isIncludeLibs,
     isIsolateWorkspaces,
+    isDebug,
+    isWatch,
     tags,
     isFix,
     fixTypes,
@@ -120,6 +125,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       isGitIgnored,
       isIsolateWorkspaces,
       isSkipLibs,
+      isWatch,
     });
 
     const worker = new WorkspaceWorker({
@@ -242,97 +248,102 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
 
+  const handleReferencedDependency = getHandler(collector, deputy, chief);
+
+  const updateImports = (importedModule: SerializableImports, importItems: SerializableImports) => {
+    for (const id of importItems.identifiers) importedModule.identifiers.add(id);
+    for (const id of importItems.importedNs) importedModule.importedNs.add(id);
+    for (const id of importItems.isReExportedBy) importedModule.isReExportedBy.add(id);
+    for (const id of importItems.isReExportedNs) importedModule.isReExportedNs.add(id);
+    for (const id of importItems.by) importedModule.by.add(id);
+    if (importItems.hasStar) importedModule.hasStar = true;
+    if (importItems.isReExport) importedModule.isReExport = true;
+  };
+
+  const updateImported = (filePath: string, importItems: SerializableImports) => {
+    serializableMap[filePath] = serializableMap[filePath] || {};
+    const importedFile = serializableMap[filePath];
+    if (!importedFile.imported) importedFile.imported = importItems;
+    else updateImports(importedFile.imported, importItems);
+  };
+
+  const setInternalImports = (filePath: string, internalImports: SerializableImportMap) => {
+    for (const [specifierFilePath, importItems] of Object.entries(internalImports)) {
+      const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
+      if (packageName && chief.availableWorkspacePkgNames.has(packageName)) {
+        // Mark "external" imports from other local workspaces as used dependency
+        serializableMap[filePath].imports.external.add(packageName);
+        const workspace = chief.findWorkspaceByFilePath(specifierFilePath);
+        if (workspace) {
+          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+          if (principal && !isGitIgnored(specifierFilePath)) {
+            // Defer to outside loop to prevent potential duplicate analysis and/or infinite recursion
+            internalWorkspaceFilePaths.add(specifierFilePath);
+          }
+        }
+      }
+
+      const s = serializableMap[filePath];
+      if (!s.imports.internal[specifierFilePath]) s.imports.internal[specifierFilePath] = importItems;
+      else updateImports(s.imports.internal[specifierFilePath], importItems);
+
+      updateImported(specifierFilePath, importItems);
+    }
+  };
+
+  const internalWorkspaceFilePaths = new Set<string>();
+
+  const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
+    const workspace = chief.findWorkspaceByFilePath(filePath);
+    if (workspace) {
+      const { imports, exports, scripts } = principal.analyzeSourceFile(filePath, {
+        skipTypeOnly: isStrict,
+        isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
+        isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
+        ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
+        isReportClassMembers,
+        tags,
+      });
+
+      serializableMap[filePath] = serializableMap[filePath] || {};
+      serializableMap[filePath].internalImportCache = imports.internal;
+      serializableMap[filePath].imports = { ...imports, internal: {} };
+      serializableMap[filePath].exports = exports;
+      serializableMap[filePath].scripts = scripts;
+
+      setInternalImports(filePath, imports.internal);
+
+      if (scripts.size > 0) {
+        const cwd = dirname(filePath);
+        const dependencies = deputy.getDependencies(workspace.name);
+        const manifestScriptNames = new Set<string>();
+        const specifiers = _getDependenciesFromScripts(scripts, { cwd, manifestScriptNames, dependencies });
+        for (const specifier of specifiers) {
+          const specifierFilePath = handleReferencedDependency(specifier, filePath, workspace);
+          if (specifierFilePath) internalWorkspaceFilePaths.add(specifierFilePath);
+        }
+      }
+
+      analyzedFiles.add(filePath);
+    }
+  };
+
   for (const principal of principals) {
     principal.init();
 
-    const handleReferencedDependency = getHandler(collector, deputy, chief);
-
     for (const [containingFilePath, specifier, workspaceName] of principal.referencedDependencies) {
       const workspace = chief.findWorkspaceByName(workspaceName);
-      if (workspace) handleReferencedDependency(specifier, containingFilePath, workspace, principal);
-    }
-
-    const specifierFilePaths = new Set<string>();
-
-    const analyzeSourceFile = (filePath: string, _principal: ProjectPrincipal = principal) => {
-      const workspace = chief.findWorkspaceByFilePath(filePath);
       if (workspace) {
-        const { imports, exports, scripts } = _principal.analyzeSourceFile(filePath, {
-          skipTypeOnly: isStrict,
-          isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
-          isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
-          ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
-          isReportClassMembers,
-          tags,
-        });
-        const { internal, external, unresolved } = imports;
-        const { exported, duplicate } = exports;
-
-        if (Object.keys(exported).length > 0) exportedSymbols[filePath] = exported;
-
-        for (const [specifierFilePath, importItems] of Object.entries(internal)) {
-          const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
-          if (packageName && chief.availableWorkspacePkgNames.has(packageName)) {
-            // Mark "external" imports from other local workspaces as used dependency
-            external.add(packageName);
-            if (_principal === principal) {
-              const workspace = chief.findWorkspaceByFilePath(specifierFilePath);
-              if (workspace) {
-                const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-                if (principal && !isGitIgnored(specifierFilePath)) {
-                  // Defer to outside loop to prevent potential duplicate analysis and/or infinite recursion
-                  specifierFilePaths.add(specifierFilePath);
-                }
-              }
-            }
-          }
-
-          if (!importedSymbols[specifierFilePath]) {
-            importedSymbols[specifierFilePath] = importItems;
-          } else {
-            const importedModule = importedSymbols[specifierFilePath];
-            for (const id of importItems.identifiers) importedModule.identifiers.add(id);
-            for (const id of importItems.importedNs) importedModule.importedNs.add(id);
-            for (const id of importItems.isReExportedBy) importedModule.isReExportedBy.add(id);
-            for (const id of importItems.isReExportedNs) importedModule.isReExportedNs.add(id);
-            if (importItems.hasStar) importedModule.hasStar = true;
-            if (importItems.isReExport) importedModule.isReExport = true;
-          }
-        }
-
-        for (const symbols of duplicate) {
-          if (symbols.length > 1) {
-            const symbol = symbols.map(s => s.symbol).join('|');
-            collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
-          }
-        }
-
-        for (const specifier of external) {
-          const packageName = getPackageNameFromModuleSpecifier(specifier);
-          const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
-          if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
-        }
-
-        for (const unresolvedImport of unresolved) {
-          const { specifier, pos, line, col } = unresolvedImport;
-          collector.addIssue({ type: 'unresolved', filePath, symbol: specifier, pos, line, col });
-        }
-
-        for (const specifier of _getDependenciesFromScripts(scripts, {
-          cwd: dirname(filePath),
-          manifestScriptNames: new Set(),
-          dependencies: deputy.getDependencies(workspace.name),
-        })) {
-          handleReferencedDependency(specifier, filePath, workspace, _principal);
-        }
+        const specifierFilePath = handleReferencedDependency(specifier, containingFilePath, workspace);
+        if (specifierFilePath) principal.addEntryPath(specifierFilePath);
       }
-    };
+    }
 
     streamer.cast('Running async compilers...');
 
     await principal.runAsyncCompilers();
 
-    streamer.cast('Connecting the dots...');
+    streamer.cast('Analyzing source files...');
 
     let size = principal.entryPaths.size;
     let round = 0;
@@ -344,14 +355,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       debugLogArray('*', `Analyzing used resolved files [P${principals.indexOf(principal) + 1}/${++round}]`, files);
       for (const filePath of files) {
-        analyzeSourceFile(filePath);
-        analyzedFiles.add(filePath);
+        analyzeSourceFile(filePath, principal);
       }
     } while (size !== principal.entryPaths.size);
 
-    for (const specifierFilePath of specifierFilePaths) {
+    for (const specifierFilePath of internalWorkspaceFilePaths) {
       if (!analyzedFiles.has(specifierFilePath)) {
-        analyzedFiles.add(specifierFilePath);
         analyzeSourceFile(specifierFilePath, principal);
       }
     }
@@ -362,12 +371,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     principal.reconcileCache(serializableMap);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (isSkipLibs) factory.deletePrincipal(principal);
+    if (isSkipLibs && !isWatch) factory.deletePrincipal(principal);
   }
 
-  const isIdentifierReferenced = getIsIdentifierReferencedHandler(importedSymbols);
+  const isIdentifierReferenced = getIsIdentifierReferencedHandler(serializableMap);
 
-  const getReExportingEntryFile = getReExportingEntryFileHandler(entryPaths, exportedSymbols, importedSymbols);
+  const getReExportingEntryFile = getReExportingEntryFileHandler(entryPaths, serializableMap);
 
   const isExportedItemReferenced = (exportedItem: SerializableExport | SerializableExportMember) =>
     exportedItem.refs > 0 &&
@@ -375,125 +384,245 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
       : chief.config.ignoreExportsUsedInFile);
 
-  if (isReportValues || isReportTypes) {
-    streamer.cast('Analyzing source files...');
+  const findUnusedExports = async () => {
+    if (isReportValues || isReportTypes) {
+      streamer.cast('Connecting the dots...');
 
-    for (const [filePath, exportItems] of Object.entries(exportedSymbols)) {
-      const workspace = chief.findWorkspaceByFilePath(filePath);
-      const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
+      for (const [filePath, file] of Object.entries(serializableMap)) {
+        const exportItems = file.exports?.exported;
+        if (!exportItems) continue;
+        const workspace = chief.findWorkspaceByFilePath(filePath);
+        const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
 
-      if (workspace) {
-        const { isIncludeEntryExports } = workspace.config;
+        if (workspace) {
+          const { isIncludeEntryExports } = workspace.config;
 
-        // Bail out when in entry file (unless `isIncludeEntryExports`)
-        if (!isIncludeEntryExports && entryPaths.has(filePath)) continue;
+          // Bail out when in entry file (unless `isIncludeEntryExports`)
+          if (!isIncludeEntryExports && entryPaths.has(filePath)) continue;
 
-        const importsForExport = importedSymbols[filePath];
+          const importsForExport = file.imported;
 
-        for (const [identifier, exportedItem] of Object.entries(exportItems)) {
-          // Skip tagged exports
-          if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
-          if (exportedItem.jsDocTags.includes('@alias')) continue;
-          if (shouldIgnore(exportedItem.jsDocTags, tags)) continue;
-          if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
+          for (const [identifier, exportedItem] of Object.entries(exportItems)) {
+            // Skip tagged exports
+            if (exportedItem.jsDocTags.has('@public') || exportedItem.jsDocTags.has('@beta')) continue;
+            if (exportedItem.jsDocTags.has('@alias')) continue;
+            if (shouldIgnore(exportedItem.jsDocTags, tags)) continue;
+            if (isProduction && exportedItem.jsDocTags.has('@internal')) continue;
 
-          if (importsForExport) {
-            if (!isIncludeEntryExports) {
-              if (getReExportingEntryFile(importsForExport, identifier, 0, filePath)) continue;
-            }
+            if (importsForExport) {
+              if (!isIncludeEntryExports) {
+                if (getReExportingEntryFile(importsForExport, identifier, 0, filePath)) continue;
+              }
 
-            if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
-              if (report.enumMembers && exportedItem.type === 'enum') {
-                for (const member of exportedItem.members) {
-                  if (hasMatch(workspace.ignoreMembers, member.identifier)) continue;
-                  if (shouldIgnore(member.jsDocTags, tags)) continue;
+              if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
+                if (report.enumMembers && exportedItem.type === 'enum') {
+                  for (const member of exportedItem.members) {
+                    if (hasMatch(workspace.ignoreMembers, member.identifier)) continue;
+                    if (shouldIgnore(member.jsDocTags, tags)) continue;
 
-                  if (member.refs === 0) {
-                    if (!isIdentifierReferenced(filePath, `${identifier}.${member.identifier}`, importsForExport)) {
-                      collector.addIssue({
-                        type: 'enumMembers',
-                        filePath,
-                        symbol: member.identifier,
-                        parentSymbol: identifier,
-                        pos: member.pos,
-                        line: member.line,
-                        col: member.col,
-                      });
+                    if (member.refs === 0) {
+                      if (!isIdentifierReferenced(filePath, `${identifier}.${member.identifier}`, importsForExport)) {
+                        collector.addIssue({
+                          type: 'enumMembers',
+                          filePath,
+                          symbol: member.identifier,
+                          parentSymbol: identifier,
+                          pos: member.pos,
+                          line: member.line,
+                          col: member.col,
+                        });
+                      }
                     }
                   }
                 }
-              }
 
-              if (principal && isReportClassMembers && exportedItem.type === 'class') {
-                const members = exportedItem.members.filter(
-                  member =>
-                    !(hasMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags, tags))
-                );
-                for (const member of principal.findUnusedMembers(filePath, members)) {
-                  collector.addIssue({
-                    type: 'classMembers',
-                    filePath,
-                    symbol: member.identifier,
-                    parentSymbol: exportedItem.identifier,
-                    pos: member.pos,
-                    line: member.line,
-                    col: member.col,
-                  });
+                if (principal && isReportClassMembers && exportedItem.type === 'class') {
+                  const members = exportedItem.members.filter(
+                    member =>
+                      !(hasMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags, tags))
+                  );
+                  for (const member of principal.findUnusedMembers(filePath, members)) {
+                    collector.addIssue({
+                      type: 'classMembers',
+                      filePath,
+                      symbol: member.identifier,
+                      parentSymbol: exportedItem.identifier,
+                      pos: member.pos,
+                      line: member.line,
+                      col: member.col,
+                    });
+                  }
                 }
+
+                // This id was imported, so we bail out early
+                continue;
               }
-
-              // This id was imported, so we bail out early
-              continue;
             }
-          }
 
-          const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(importsForExport);
+            const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(importsForExport);
 
-          const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
+            const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
-          if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || !(report.nsExports || isType))) continue;
+            if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || !(report.nsExports || isType))) continue;
 
-          if (!isExportedItemReferenced(exportedItem)) {
-            if (!isSkipLibs && principal?.hasReferences(filePath, exportedItem)) continue;
+            if (!isExportedItemReferenced(exportedItem)) {
+              if (!isSkipLibs && principal?.hasReferences(filePath, exportedItem)) continue;
 
-            const type = getType(hasStrictlyNsReferences, isType);
-            collector.addIssue({
-              type,
-              filePath,
-              symbol: identifier,
-              symbolType: exportedItem.type,
-              parentSymbol: namespace,
-              pos: exportedItem.pos,
-              line: exportedItem.line,
-              col: exportedItem.col,
-            });
-            if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
-            else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+              const type = getType(hasStrictlyNsReferences, isType);
+              collector.addIssue({
+                type,
+                filePath,
+                symbol: identifier,
+                symbolType: exportedItem.type,
+                parentSymbol: namespace,
+                pos: exportedItem.pos,
+                line: exportedItem.line,
+                col: exportedItem.col,
+              });
+              if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
+              else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+            }
           }
         }
       }
     }
+
+    for (const [filePath, file] of Object.entries(serializableMap)) {
+      if (file.exports?.duplicate) {
+        for (const symbols of file.exports.duplicate) {
+          if (symbols.length > 1) {
+            const symbol = symbols.map(s => s.symbol).join('|');
+            collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
+          }
+        }
+      }
+
+      if (file.imports?.external) {
+        const workspace = chief.findWorkspaceByFilePath(filePath);
+        if (workspace) {
+          for (const specifier of file.imports.external) {
+            const packageName = getPackageNameFromModuleSpecifier(specifier);
+            const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
+            if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
+          }
+        }
+      }
+
+      if (file.imports?.unresolved) {
+        for (const unresolvedImport of file.imports.unresolved) {
+          const { specifier, pos, line, col } = unresolvedImport;
+          collector.addIssue({ type: 'unresolved', filePath, symbol: specifier, pos, line, col });
+        }
+      }
+    }
+
+    const unusedFiles = [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath));
+
+    collector.addFilesIssues(unusedFiles);
+
+    collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
+
+    if (isReportDependencies) {
+      const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
+      const { configurationHints } = deputy.getConfigurationHints();
+      for (const issue of dependencyIssues) collector.addIssue(issue);
+      if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
+      for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
+      for (const hint of configurationHints) collector.addConfigurationHint(hint);
+    }
+
+    const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
+    for (const identifier of unusedIgnoredWorkspaces) {
+      collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
+    }
+  };
+
+  if (isWatch) {
+    watch('.', { recursive: true }, async (eventType, filename) => {
+      if (filename) {
+        const startTime = performance.now();
+        const filePath = join(cwd, filename);
+
+        if (filename.startsWith(CacheConsultant.getCacheLocation())) return;
+        if (isGitIgnored(filePath)) return;
+
+        const workspace = chief.findWorkspaceByFilePath(filePath);
+        if (workspace) {
+          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+          if (principal) {
+            const event = eventType === 'rename' ? (isFile(filePath) ? 'added' : 'deleted') : 'modified';
+
+            principal.invalidateFile(filePath);
+            internalWorkspaceFilePaths.clear();
+            unreferencedFiles.clear();
+            const cachedUnusedFiles = collector.purge();
+
+            switch (event) {
+              case 'added':
+                principal.addProjectPath(filePath);
+                principal.deletedFiles.delete(filePath);
+                cachedUnusedFiles.add(filePath);
+                debugLog(workspace.name, `Watcher: + ${filename}`);
+                break;
+              case 'deleted':
+                analyzedFiles.delete(filePath);
+                principal.removeProjectPath(filePath);
+                cachedUnusedFiles.delete(filePath);
+                debugLog(workspace.name, `Watcher: - ${filename}`);
+                break;
+              case 'modified':
+                debugLog(workspace.name, `Watcher: ± ${filename}`);
+                break;
+            }
+
+            const filePaths = principal.getUsedResolvedFiles();
+
+            if (event === 'added' || event === 'deleted') {
+              // Flush, any file might contain (un)resolved imports to added/deleted files
+              serializableMap = {};
+              for (const filePath of filePaths) analyzeSourceFile(filePath, principal);
+            } else {
+              for (const filePath in serializableMap) {
+                if (filePaths.includes(filePath)) {
+                  // Reset dep graph
+                  serializableMap[filePath].imported = undefined;
+                } else {
+                  // Remove files no longer referenced
+                  delete serializableMap[filePath];
+                  analyzedFiles.delete(filePath);
+                }
+              }
+
+              // Add existing files that were not yet part of the program
+              for (const filePath of filePaths) if (!serializableMap[filePath]) analyzeSourceFile(filePath, principal);
+
+              analyzeSourceFile(filePath, principal);
+
+              // Rebuild dep graph
+              for (const filePath of filePaths) {
+                if (serializableMap[filePath]?.internalImportCache) {
+                  // biome-ignore lint/style/noNonNullAssertion: ignore
+                  setInternalImports(filePath, serializableMap[filePath].internalImportCache!);
+                }
+              }
+            }
+
+            await findUnusedExports();
+
+            const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
+            collector.addFilesIssues(unusedFiles);
+            collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
+
+            const { issues } = collector.getIssues();
+
+            watchReporter({ report, issues, streamer, startTime, size: analyzedFiles.size, isDebug });
+          }
+        }
+      }
+    });
   }
 
-  const unusedFiles = [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath));
-
-  collector.addFilesIssues(unusedFiles);
-
-  collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
-
-  if (isReportDependencies) {
-    const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
-    const { configurationHints } = deputy.getConfigurationHints();
-    for (const issue of dependencyIssues) collector.addIssue(issue);
-    if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
-    for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
-    for (const hint of configurationHints) collector.addConfigurationHint(hint);
-  }
-
-  const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
-  for (const identifier of unusedIgnoredWorkspaces) {
-    collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
-  }
+  await findUnusedExports();
 
   const { issues, counters, configurationHints } = collector.getIssues();
 
@@ -501,7 +630,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     await fixer.fixIssues(issues);
   }
 
-  streamer.clear();
+  if (isWatch) watchReporter({ report, issues, streamer, size: analyzedFiles.size, isDebug });
+  else streamer.clear();
 
   return { report, issues, counters, rules, configurationHints };
 };

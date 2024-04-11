@@ -17,13 +17,21 @@ type CreateHostsOptions = {
   entryPaths: Set<string>;
   compilers: [SyncCompilers, AsyncCompilers];
   isSkipLibs: boolean;
+  useResolverCache: boolean;
 };
 
-export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers, isSkipLibs }: CreateHostsOptions) => {
+export const createHosts = ({
+  cwd,
+  compilerOptions,
+  entryPaths,
+  compilers,
+  isSkipLibs,
+  useResolverCache,
+}: CreateHostsOptions) => {
   const fileManager = new SourceFileManager({ compilers, isSkipLibs });
   const compilerExtensions = getCompilerExtensions(compilers);
   const sys = createCustomSys(cwd, [...compilerExtensions, ...FOREIGN_FILE_EXTENSIONS]);
-  const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, compilerExtensions);
+  const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, compilerExtensions, useResolverCache);
 
   const languageServiceHost: ts.LanguageServiceHost = {
     getCompilationSettings: () => compilerOptions,
