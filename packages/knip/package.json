@@ -57,8 +57,8 @@
   "dependencies": {
     "@ericcornelissen/bash-parser": "0.5.2",
     "@nodelib/fs.walk": "2.0.0",
-    "@npmcli/map-workspaces": "3.0.4",
-    "@npmcli/package-json": "5.0.0",
+    "@npmcli/map-workspaces": "^3.0.4",
+    "@npmcli/package-json": "^5.0.0",
     "@pnpm/logger": "5.0.0",
     "@pnpm/workspace.pkgs-graph": "2.0.14",
     "@snyk/github-codeowners": "1.1.0",
