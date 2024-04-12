@@ -14,7 +14,7 @@
     "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
   },
   "scripts": {
-    "prebuild": "bun ./scripts/generate-plugin-docs.ts",
+    "prebuild": "npx -y tsx@4.7.1 ./scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
     "postbuild": "biome format --write --no-errors-on-unmatched src/content/docs/reference/plugins.md src/content/docs/reference/plugins/*.md",
     "dev": "astro dev",

@@ -70,8 +70,7 @@ Total running time: 5s (mem: 631.27MB)
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify`
-([GitHub issue](https://github.com/oven-sh/bun/issues/9271)).
+`performance.timerify` ([GitHub issue][1]).
 
 ## Configuration
 
@@ -140,7 +139,7 @@ By default, Knip optimizes performance by adding eligible workspaces to existing
 TypeScript programs, based on the compatibility of their `compilerOptions`. Use
 this flag to disable this behavior and create one program per workspace.
 
-You can see the behavior in action in [debug mode][1]. Look for messages like
+You can see the behavior in action in [debug mode][5]. Look for messages like
 this:
 
 ```sh
@@ -161,18 +160,18 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][5].
+Read more at [Production Mode][6].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][6].
+mode][7].
 
-Read more at [Production Mode][5].
+Read more at [Production Mode][6].
 
 ### `--fix`
 
-Read more at [auto-fix][7].
+Read more at [auto-fix][8].
 
 ### `--cache`
 
@@ -198,7 +197,7 @@ changes in `package.json` and/or `node_modules` are not supported.
 
 ## Filters
 
-Available [issue types][8] when filtering output using `--include` or
+Available [issue types][9] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -254,7 +253,7 @@ Shortcut to include all types of export issues:
 
 ### `--experimental-tags`
 
-Deprecated. Use [--tags][9] instead.
+Deprecated. Use [--tags][10] instead.
 
 ### `--tags`
 
@@ -308,7 +307,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][10].
+Also see [Reporters & Preprocessors][11].
 
 ### `--reporter-options [json]`
 
@@ -343,7 +342,7 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
-Also see [Reporters & Preprocessors][10].
+Also see [Reporters & Preprocessors][11].
 
 ## Exit code
 
@@ -363,13 +362,14 @@ Always exit with code zero (`0`), even when there are lint errors.
 
 Maximum number of issues before non-zero exit code. Default: `0`
 
-[1]: #--debug
+[1]: https://github.com/oven-sh/bun/issues/9271
 [2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [3]: ./configuration.md#includeentryexports
 [4]: ../guides/handling-issues.mdx#external-libs
-[5]: ../features/production-mode.md
-[6]: #--production
-[7]: ../features/auto-fix.mdx
-[8]: ./issue-types.md
-[9]: #--tags
-[10]: ../features/reporters.md
+[5]: #--debug
+[6]: ../features/production-mode.md
+[7]: #--production
+[8]: ../features/auto-fix.mdx
+[9]: ./issue-types.md
+[10]: #--tags
+[11]: ../features/reporters.md

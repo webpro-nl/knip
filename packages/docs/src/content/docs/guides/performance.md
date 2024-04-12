@@ -93,8 +93,6 @@ up symbols and caching.
 ## A Last Resort
 
 In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][3].
+individual workspaces][1].
 
-[1]: #findreferences
-[2]: https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
-[3]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[1]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
