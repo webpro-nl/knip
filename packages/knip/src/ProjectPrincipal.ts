@@ -349,7 +349,7 @@ export class ProjectPrincipal {
   reconcileCache(serializableMap: SerializableMap) {
     for (const filePath in serializableMap) {
       const fd = this.cache.getFileDescriptor(filePath);
-      if (!(fd?.meta)) continue;
+      if (!fd?.meta) continue;
       fd.meta.data = serialize(serializableMap[filePath]);
     }
     this.cache.reconcile();

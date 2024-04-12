@@ -1,6 +1,6 @@
 import { watch } from 'node:fs';
 import { CacheConsultant } from './CacheConsultant.js';
-import { ConfigurationChief } from './ConfigurationChief.js';
+import { ConfigurationChief, type Workspace } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
@@ -152,20 +152,17 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
-    {
-      // Add dependencies from package.json
-      const options = { manifestScriptNames, cwd: dir, dependencies };
-      const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
-      principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
-    }
+    // Add dependencies from package.json
+    const options = { manifestScriptNames, cwd: dir, dependencies };
+    const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
+    principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
 
-    {
-      // Add entry paths from package.json
-      const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
-      debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
-      principal.addEntryPaths(entryPathsFromManifest);
-    }
+    // Add entry paths from package.json
+    const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
+    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
+    principal.addEntryPaths(entryPathsFromManifest);
 
+    // Run plugins
     const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } =
       await worker.findDependenciesByPlugins();
     enabledPluginsStore.set(name, enabledPlugins);
@@ -243,10 +240,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
-  const analyzedFiles = new Set<string>();
   let serializableMap: SerializableMap = {};
+  const analyzedFiles = new Set<string>();
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
+  const internalWorkspaceFilePaths = new Set<string>();
 
   const handleReferencedDependency = getHandler(collector, deputy, chief);
 
@@ -269,29 +267,29 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const setInternalImports = (filePath: string, internalImports: SerializableImportMap) => {
     for (const [specifierFilePath, importItems] of Object.entries(internalImports)) {
+      // Update import stats for current module
+      const file = serializableMap[filePath];
+      if (!file.imports.internal[specifierFilePath]) file.imports.internal[specifierFilePath] = importItems;
+      else updateImports(file.imports.internal[specifierFilePath], importItems);
+
+      // Update import stats for imported module
+      updateImported(specifierFilePath, importItems);
+
+      // Handle "external" imports from internal workspaces
       const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
       if (packageName && chief.availableWorkspacePkgNames.has(packageName)) {
-        // Mark "external" imports from other local workspaces as used dependency
         serializableMap[filePath].imports.external.add(packageName);
         const workspace = chief.findWorkspaceByFilePath(specifierFilePath);
         if (workspace) {
           const principal = factory.getPrincipalByPackageName(workspace.pkgName);
           if (principal && !isGitIgnored(specifierFilePath)) {
-            // Defer to outside loop to prevent potential duplicate analysis and/or infinite recursion
+            // Defer to prevent potential duplicate analysis and infinite recursion
             internalWorkspaceFilePaths.add(specifierFilePath);
           }
         }
       }
-
-      const s = serializableMap[filePath];
-      if (!s.imports.internal[specifierFilePath]) s.imports.internal[specifierFilePath] = importItems;
-      else updateImports(s.imports.internal[specifierFilePath], importItems);
-
-      updateImported(specifierFilePath, importItems);
     }
   };
-
-  const internalWorkspaceFilePaths = new Set<string>();
 
   const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -313,6 +311,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       setInternalImports(filePath, imports.internal);
 
+      // Handle scripts here since they might lead to more entry files
       if (scripts.size > 0) {
         const cwd = dirname(filePath);
         const dependencies = deputy.getDependencies(workspace.name);
