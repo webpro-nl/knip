@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
 sidebar:
-  order: 1
+  order: 2
 ---
 
 We can distinguish two types of issues:
@@ -9,7 +9,7 @@ We can distinguish two types of issues:
 - [Issues reported by Knip][1]
 - [Exceptions thrown by Knip][2]
 
-## Issues Reported by Knip
+## Issues reported by Knip
 
 This indicates a successful run, but there are unused items. Continue with
 [handling issues][3] to deal with unused items reported by Knip.
@@ -38,7 +38,7 @@ resulting in an unsuccessful run. You might be encountering a [known issue][4].
 Add `--debug` to the command for more error details to better locate the cause
 of the error.
 
-## Minimal Reproduction
+## Minimal reproduction
 
 If you encounter an issue or false positives when running Knip, you can [open an
 issue on GitHub][5]. Depending on the type of issue, you might be asked to
@@ -69,7 +69,7 @@ check out features like [production mode][10] and [monorepos & workspaces][11].
 
 In a more general sense, [Why use Knip?][12] explains what Knip can do for you.
 
-## Ask for Help
+## Asking for help
 
 If you can't find your answer in any of the aforementioned resources, feel free
 to [open an issue on GitHub][5] or discuss it in [the Discord channel][13].

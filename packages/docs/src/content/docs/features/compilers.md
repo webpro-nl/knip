@@ -8,7 +8,7 @@ like `.mdx`, `.astro`, `.vue` and `.svelte` may also import other source files
 and external dependencies. So ideally, these files are included when linting the
 project. That's why Knip supports compilers.
 
-## Built-in Compilers
+## Built-in compilers
 
 Knip has built-in "compilers" for the following file extensions:
 
@@ -29,7 +29,7 @@ reported as unused by Knip.
 In short, the built-in functions seem to do a decent job, but you can override
 them however you like.
 
-## Custom Compilers
+## Custom compilers
 
 Additional custom compilers can be added, and built-in compilers can be
 overridden. Since compilers are functions, the Knip configuration file must be a

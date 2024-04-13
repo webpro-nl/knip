@@ -2,8 +2,6 @@
 title: Writing A Plugin
 ---
 
-## Introduction
-
 Plugins provide Knip with entry files and dependencies it would be unable to
 find otherwise. Plugins always do at least one of the following:
 
@@ -167,7 +165,6 @@ Here's an example from the Ava test runner plugin:
 
 ```ts
 const resolveEntryPaths: ResolveEntryPaths<AvaConfig> = localConfig => {
-  if (typeof localConfig === 'function') localConfig = localConfig();
   return localConfig?.files ?? [];
 };
 ```

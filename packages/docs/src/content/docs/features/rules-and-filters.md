@@ -72,7 +72,7 @@ Also see the [issue types overview][1].
 The rules are modeled after the ESLint `rules` configuration, and could be
 extended in the future.
 
-## Rules or Filters?
+## Rules or filters?
 
 Filters are meant to be used as command-line flags, rules allow for more
 fine-grained configuration.

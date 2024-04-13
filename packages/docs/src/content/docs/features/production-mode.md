@@ -4,8 +4,6 @@ sidebar:
   order: 1
 ---
 
-## Introduction
-
 The default mode for Knip is comprehensive and targets all project code,
 including configuration files, test files, Storybook stories, and so on. Test
 files usually import production files. This prevents production files or their

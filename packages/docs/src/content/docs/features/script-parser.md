@@ -2,8 +2,6 @@
 title: Script Parser
 ---
 
-## Introduction
-
 Knip parses scripts to find additional dependencies and entry files in various
 places:
 

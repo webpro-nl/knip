@@ -10,20 +10,22 @@ but it might still be good to understand inefficient patterns for Knip.
 
 Use the `--debug` and `--performance` flags to find potential bottlenecks.
 
-## Ignoring Files
+## Ignoring files
 
 Files matching the `ignore` patterns are not excluded from the analysis. They're
-simply not printed in the report. Use negated `project` patterns to exclude
-files from the analysis whenever possible.
+just not printed in the report. Use negated `entry` patterns to exclude files
+from the analysis whenever possible.
 
 Here's a little guide:
 
 1. Set `entry` files if necessary.
 2. Override the default `project` setting to cover all source files (default:
    `**/*.{js,ts}`)
-3. If needed, use additional negated `entry` and `project` patterns to exclude
-   files from the analysis.
-4. Then use `ignore` patterns for the remaining issues in the reports.
+3. If needed, use additional negated `entry` patterns to exclude files from the
+   analysis.
+4. If needed, use additional negated `project` files to narrow down the set of
+   all files to find unused files.
+5. Then use `ignore` patterns for the remaining issues in the reports.
 
 ❌ Don't do this:
 
@@ -45,9 +47,10 @@ Here's a little guide:
 ```
 
 This way, the `project` files cover all source files, and most other files don't
-even need to be ignored anymore.
+even need to be ignored anymore. This may have a significant impact on
+performance.
 
-## Workspace Sharing
+## Workspace sharing
 
 Knip shares files from separate workspaces if the configuration in
 `tsconfig.json` allows this. This reduces memory consumption and run duration.
@@ -90,7 +93,7 @@ knip --include classMembers --performance
 The first invocation (per program) is especially expensive, as TypeScript sets
 up symbols and caching.
 
-## A Last Resort
+## A last resort
 
 In case Knip is unbearable slow (or even crashes), you could resort to [lint
 individual workspaces][1].

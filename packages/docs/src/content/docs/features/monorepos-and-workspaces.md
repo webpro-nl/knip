@@ -46,8 +46,8 @@ above).
 
 :::caution
 
-In a project with workspaces, customized `entry` and `project` options at the
-root level are ignored, they must be moved to the `"."` workspace.
+In a project with workspaces, the `entry` and `project` options at the root
+level are ignored. Use the workspace named `"."` for those.
 
 :::
 

@@ -1,5 +1,5 @@
 ---
-title: JS/TSDoc Tags
+title: JSDoc & TSDoc Tags
 ---
 
 JSDoc or TSDoc tags can be used to make exceptions for unused or duplicate

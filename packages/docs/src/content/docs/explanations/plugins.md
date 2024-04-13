@@ -4,8 +4,6 @@ sidebar:
   order: 2
 ---
 
-## Introduction
-
 This page describes why Knip uses plugins and the difference between `config`
 and `entry` files.
 
@@ -18,7 +16,7 @@ Plugins are enabled if the related package is listed in the list of dependencies
 in `package.json`. For instance, if `astro` is listed in `dependencies` or
 `devDependencies`, then the Astro plugin is enabled.
 
-## Configuration Files
+## Configuration files
 
 Knip uses [entry files][2] as starting points to scan your source code and
 resolve other internal files and external dependencies. The dependency graph can
@@ -54,7 +52,7 @@ this to determine the unused and unlisted dependencies.
 
 :::
 
-## Entry Files
+## Entry files
 
 Many plugins have default `entry` files configured. When the plugin is enabled,
 Knip will add entry files as configured by the plugin to resolve used files and
@@ -113,7 +111,7 @@ Plugins try hard to automatically add the correct entry files.
 
 :::
 
-## Entry Files From Config Files
+## Entry files from config files
 
 Entry files are part of plugin configuration (as described in the previous
 section). Yet plugins can also return additional entry files after parsing
@@ -201,7 +199,7 @@ Plugins can find additional entry files when parsing config files.
 
 :::
 
-## Bringing It All Together
+## Bringing it all together
 
 Sometimes a configuration file is a JavaScript or TypeScript file that imports
 dependencies, but also contains configuration that needs to be parsed by a
