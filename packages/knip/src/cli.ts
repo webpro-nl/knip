@@ -110,7 +110,8 @@ const run = async () => {
     process.exitCode = 2;
     if (!isDebug && error instanceof Error && isKnownError(error)) {
       const knownError = getKnownError(error);
-      console.error(knownError.message);
+      const prefix = `${picocolors.red('ERROR:')}`;
+      console.error(`${prefix} ${knownError.message}`);
       if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
       if (isConfigurationError(knownError)) console.log(`\n${helpText}`);
       process.exit(2);
