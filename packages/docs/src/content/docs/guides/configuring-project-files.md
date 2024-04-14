@@ -10,15 +10,12 @@ out of Knip.
 
 The key takeaways of this page include:
 
-- Start out by defining targeted `entry` and `project` files (if the defaults
-  aren't good enough).
+- If the defaults need adjustment, define targeted `entry` file patterns.
+- To find unused files, narrow down and add negated `project` patterns.
 - To exclude test and other non-production files, use production mode.
-- Don't use `ignore` to exclude files from the analysis, but add negated `entry`
-  and `project` files instead.
-- Use `ignore` patterns only to exclude issues in matching files from the
-  report.
+- Use `ignore` patterns to exclude issues in matching files from the report.
 
-Let's dive in and take a look at a few examples.
+Let's dive in and expand on all of these.
 
 ## Unused files
 
@@ -26,17 +23,17 @@ Files are reported as unused if they are in the set of project files, but not in
 the set of files resolved from the entry files:
 
 ```
-project files - (entry files + resolved files) = unused files
+unused files = project files - (entry files + resolved files)
 ```
 
-You may want to read the [entry files][1] explainer first to learn how and where
-Knip looks for entry files.
+See [entry files][1] to see where Knip looks for entry files. Read on to learn
+how to fine-tune the sets of entry and project files.
 
 ## Negated patterns
 
-Let's take a look at using negated patterns in `entry` and `project` patterns.
-If there are too many files in the analysis, this could be the first step in
-getting the right files in the analysis.
+Let's take a look at using negated patterns for `entry` and `project` files. If
+you think there are too many files in the analysis, this could be the first step
+in selecting the right files for the analysis.
 
 Say we need to explicitly add route files as entry files, except those starting
 with an underscore. Then we can use a negated pattern like so:
@@ -47,8 +44,8 @@ with an underscore. Then we can use a negated pattern like so:
 }
 ```
 
-If certain files are not part of our project files and are unwantedly reported
-as unused files, we can use negated `project` patterns:
+If certain files are not part of our project source files and are unwantedly
+reported as unused files, we can use negated `project` patterns:
 
 ```json
 {
@@ -84,10 +81,10 @@ In default mode, Knip includes all test files and other non-production files in
 the analysis. To find out what files, dependencies and exports are unused in
 production source files, use [production mode][2].
 
-How NOT to exclude test files from the analysis? To better understand how Knip
-works, here's a list of options that don't work, and why.
+How NOT to exclude test files from the analysis? For a better understanding of
+how Knip works, here's a list of options that don't work, and why:
 
-❌ Don't do this:
+❌   Don't do this:
 
 ```json
 {
@@ -101,7 +98,7 @@ not excluded from the analysis, only their issues are not reported. This also
 hurts performance, since the files are first analyzed, and eventually filtered
 out.
 
-❌ Also don't do this:
+❌   Also don't do this:
 
 ```json
 {
@@ -113,7 +110,7 @@ This won't help if dependencies like Vitest or Ava are listed, because their
 plugins will add test files as entry files anyway, which you can't and shouldn't
 undo or override here.
 
-❌ Also don't do this:
+❌   Also don't do this:
 
 ```json
 {
@@ -129,7 +126,7 @@ This won't help either:
    remains unaffected. You'd need to disable the plugin or override its
    configuration instead.
 
-✅ Do this:
+✅   Do this:
 
 ```shell
 knip --production
@@ -152,9 +149,9 @@ then be excluded in production mode:
 Remember to keep adding the exclamation mark `suffix!` for production file
 patterns.
 
-In large projects where a single configuration for both default and production
-mode gets unwieldy, it might be interesting to consider using a separate
-configuration file for production mode:
+In rare occasions, for large projects where a single configuration for both
+default and production mode gets unwieldy, it might be interesting to consider
+using a separate configuration file for production mode:
 
 ```shell
 knip --production --config knip.production.json

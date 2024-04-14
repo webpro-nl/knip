@@ -24,7 +24,8 @@ set of `project` files to determine which files are unused.
 :::tip
 
 Run Knip without any configuration to see if a configuration file with custom
-`entry` and `project` file patterns is necessary.
+`entry` and `project` file patterns is necessary. You might need to [configure
+project files][1].
 
 :::
 
@@ -83,27 +84,31 @@ In the example above, the file `scripts/build.js` might be referenced like so:
 ```
 
 In that case, Knip will automatically add it as an entry file. Learn more about
-this in the next page about [entry files][1].
+this in the next page about [entry files][2].
 
-## What's Next?
+## What's next?
 
 The best way to understand Knip and what it can do for you is to read the pages
-in the "Understanding Knip" sections, starting with [entry files][1]. Otherwise,
-here's what you might be looking for:
+in the "Understanding Knip" sections, starting with [entry files][2].
 
-- Working with [monorepos & workspaces][2].
-- Using a framework like Astro, Svelte or Nuxt? See [compilers][3] to include
+Want to learn more about some of the main features?
+
+- Working with [monorepos & workspaces][3].
+- Using a framework like Astro, Svelte or Nuxt? See [compilers][4] to include
   `.astro` or `.vue` files.
-- Find [more options to configure Knip][4].
 - Learn more about [production mode][5].
-- Getting lots of output or false positives? Find out how to [handle issues][6].
 
-You can always search this website using the search bar at the top (`Ctrl+/` or
+Having troubles configuring Knip?
+
+- [Configuring project files][1]
+- [Handling issues][6]
+
+This website can be searched using the search bar at the top (`Ctrl+/` or
 `Ctrl+K`)
 
-[1]: ../explanations/entry-files.md
-[2]: ../features/monorepos-and-workspaces.md
-[3]: ../features/compilers.md
-[4]: ../reference/configuration.md
+[1]: ../guides/configuring-project-files.md
+[2]: ../explanations/entry-files.md
+[3]: ../features/monorepos-and-workspaces.md
+[4]: ../features/compilers.md
 [5]: ../features/production-mode.md
 [6]: ../guides/handling-issues.md

@@ -38,7 +38,13 @@ start? Knip contains a lot of standards and heuristics to search for things that
 can be deleted. Knip is not without flaws. But even a list of results with a few
 false positives is many times better and faster than trying to do it manually.
 
-Knip not only finds unused things, it can also [fix issues][2]!
+:::tip
+
+Knip not only finds unused things, it can also [fix issues][2]! Use Knip next to
+a linter like ESLint or Biome: after removing unused variables inside files,
+Knip might find even more unused code. Rinse and repeat!
+
+:::
 
 ## Comprehensive
 
@@ -54,17 +60,17 @@ synergy:
 - This approach is amplified in a monorepo setting. In fact, files and internal
   dependencies can recursively reference each other (across workspaces).
 
-The disadvantages of this strategy are not to be dismissed: increased complexity
-and less performance. In this early phase of the project completeness and
-correctness are valued over speed. Not in the least because the speed of
-automating this is still many times faster than the manual process. Both
-complexity and performance can be optimized further down the road.
-
 ## Greenfield or Legacy
 
 Installing Knip in greenfield projects ensures the project stays neat and tidy
 from the start. Add it to your CI workflow and prevent any regressions from
 entering the codebase.
+
+:::tip
+
+Use Knip in a CI environment to prevent future regressions.
+
+:::
 
 In large and/or legacy projects, Knip may report false positives and require
 some configuration. Yet it can be a great assistant when cleaning up parts of

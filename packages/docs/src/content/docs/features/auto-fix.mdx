@@ -83,8 +83,9 @@ Unused dependencies are removed from `package.json`:
 
 ## Post-fix
 
-- You may want to run tools like `eslint --fix` or `prettier --write` to fix the
-  remaining issues.
+- You may want to run tools like `eslint --fix` or `biome lint --apply` to fix
+  the remaining issues inside files. This may result in more deleted code, and
+  Knip may then find more unused code. Rinse and repeat!
 - Verify changes in `package.json` and update dependencies using your package
   manager:
 
