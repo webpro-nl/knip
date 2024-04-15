@@ -32,7 +32,7 @@ export const getHandler =
 
         // Patterns: @local/package/file, self-reference/file, ./node_modules/@scope/pkg/tsconfig.json
         if (packageName && specifier !== packageName) {
-          const otherWorkspace = chief.availableWorkspaceManifests.find(w => w.manifest.name === packageName);
+          const otherWorkspace = chief.workspacePackagesByName.get(packageName);
           if (otherWorkspace) {
             const filePath = _resolveSpecifier(otherWorkspace.dir, normalizeSpecifierFromFilePath(specifier));
             if (filePath) return filePath;

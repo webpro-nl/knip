@@ -98,7 +98,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     streamer.cast(`Analyzing workspace ${name}...`);
 
-    const manifest = chief.getManifestForWorkspace(dir);
+    const manifest = chief.getManifestForWorkspace(name);
     const { ignoreBinaries, ignoreDependencies } = chief.getIgnores(name);
 
     if (!manifest) continue;

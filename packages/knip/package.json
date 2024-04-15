@@ -54,7 +54,6 @@
   "dependencies": {
     "@ericcornelissen/bash-parser": "0.5.2",
     "@nodelib/fs.walk": "2.0.0",
-    "@npmcli/map-workspaces": "^3.0.4",
     "@snyk/github-codeowners": "1.1.0",
     "easy-table": "1.2.0",
     "fast-glob": "3.3.2",
@@ -85,7 +84,6 @@
     "@types/js-yaml": "^4.0.9",
     "@types/micromatch": "^4.0.6",
     "@types/minimist": "^1.2.5",
-    "@types/npmcli__map-workspaces": "^3.0.4",
     "@types/picomatch": "2.3.3",
     "@types/resolve": "^1.20.6",
     "@types/webpack": "^5.28.5",
