@@ -1,4 +1,4 @@
-import micromatch from 'micromatch';
+import picomatch from 'picomatch';
 import { initCounters, initIssues } from './issues/initializers.js';
 import type { ConfigurationHint, Issue, Rules } from './types/issues.js';
 import { timerify } from './util/Performance.js';
@@ -19,7 +19,7 @@ const hasHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>
     item => item.identifier === hint.identifier && item.type === hint.type && item.workspaceName === hint.workspaceName
   );
 
-const isMatch = timerify(micromatch.isMatch, 'isMatch');
+const isMatch = timerify(picomatch.isMatch, 'isMatch');
 
 /**
  * - Collects issues and counts them

@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import mapWorkspaces from './util/map-workspaces.js';
 import { createPkgGraph, type Graph } from './util/pkgs-graph.js';
-import micromatch from 'micromatch';
+import picomatch from 'picomatch';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { partitionCompilers } from './compilers/index.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
@@ -300,14 +300,14 @@ export class ConfigurationChief {
         name =>
           name !== ROOT_WORKSPACE_NAME &&
           !this.workspacePackages.has(name) &&
-          !micromatch.isMatch(name, this.ignoredWorkspacePatterns)
+          !picomatch.isMatch(name, this.ignoredWorkspacePatterns)
       )
     );
   }
 
   private getAvailableWorkspaceNames(names: Iterable<string>) {
     return [...names, ...this.additionalWorkspaceNames].filter(
-      name => !micromatch.isMatch(name, this.ignoredWorkspacePatterns)
+      name => !picomatch.isMatch(name, this.ignoredWorkspacePatterns)
     );
   }
 
@@ -411,7 +411,7 @@ export class ConfigurationChief {
     return this.getConfiguredWorkspaceKeys()
       .sort(byPathDepth)
       .reverse()
-      .find(pattern => micromatch.isMatch(workspaceName, pattern));
+      .find(pattern => picomatch.isMatch(workspaceName, pattern));
   }
 
   public getWorkspaceConfig(workspaceName: string) {
@@ -484,7 +484,7 @@ export class ConfigurationChief {
     const ignoredWorkspaceNames = this.config.ignoreWorkspaces;
     const workspaceNames = [...this.workspacePackages.keys(), ...this.additionalWorkspaceNames];
     return ignoredWorkspaceNames
-      .filter(ignoredWorkspaceName => !workspaceNames.some(name => micromatch.isMatch(name, ignoredWorkspaceName)))
+      .filter(ignoredWorkspaceName => !workspaceNames.some(name => picomatch.isMatch(name, ignoredWorkspaceName)))
       .filter(ignoredWorkspaceName => {
         const dir = join(this.cwd, ignoredWorkspaceName);
         return !isDirectory(dir) || isFile(join(dir, 'package.json'));

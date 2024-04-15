@@ -28,7 +28,7 @@ type Gitignores = { ignores: string[]; unignores: string[] };
 
 const cachedIgnores = new Map<string, Gitignores>();
 
-function convertGitignoreToMicromatch(pattern: string) {
+function convertGitignoreToPicomatch(pattern: string) {
   const negated = pattern[0] === '!';
   if (negated) {
     pattern = pattern.slice(1);
@@ -53,7 +53,7 @@ function parseGitignoreFile(filePath: string) {
   return file
     .split(/\r?\n/)
     .filter(line => line.trim() && !line.startsWith('#'))
-    .map(pattern => convertGitignoreToMicromatch(pattern.replace(/(?<!\\)#.*/, '').trim()));
+    .map(pattern => convertGitignoreToPicomatch(pattern.replace(/(?<!\\)#.*/, '').trim()));
 }
 
 async function parseFindGitignores(options: Options): Promise<Gitignores> {
