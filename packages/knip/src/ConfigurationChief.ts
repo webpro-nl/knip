@@ -1,6 +1,4 @@
 import { existsSync } from 'node:fs';
-import mapWorkspaces from './util/map-workspaces.js';
-import { createPkgGraph, type Graph } from './util/pkgs-graph.js';
 import picomatch from 'picomatch';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { partitionCompilers } from './compilers/index.js';
@@ -24,8 +22,10 @@ import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
 import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
+import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
 import { join, relative, toPosix } from './util/path.js';
+import { type Graph, createPkgGraph } from './util/pkgs-graph.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { _require } from './util/require.js';

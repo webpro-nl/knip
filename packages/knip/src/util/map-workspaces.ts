@@ -1,11 +1,11 @@
+import fastGlob from 'fast-glob';
+import type { Package } from '../ConfigurationChief.js';
 import type { PackageJson } from '../types/package-json.js';
+import { debugLog } from './debug.js';
+import { ConfigurationError } from './errors.js';
 import { getPackageName } from './package-name.js';
 import { join } from './path.js';
-import fastGlob from 'fast-glob';
 import { _require } from './require.js';
-import type { Package } from '../ConfigurationChief.js';
-import { ConfigurationError, LoaderError } from './errors.js';
-import { debugLog } from './debug.js';
 
 const partition = <T>(collection: T[], predicate: (item: T) => unknown) => {
   const results: [T[], T[]] = [[], []];

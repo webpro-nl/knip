@@ -1,5 +1,5 @@
 import type { PackageJson } from '../types/package-json.js';
-import { dirname, basename } from './path.js';
+import { basename, dirname } from './path.js';
 
 const getName2 = (parent: string, base: string) => (parent.charAt(0) === '@' ? `${parent}/${base}` : base);
 

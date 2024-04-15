@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import type { Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
-import { join } from './util/path.js';
 import { load, save } from './util/package-json.js';
+import { join } from './util/path.js';
 
 export class IssueFixer {
   isEnabled = false;
