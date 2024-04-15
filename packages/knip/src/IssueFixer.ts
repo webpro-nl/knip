@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import NPMCliPackageJson, { type PackageJson } from '@npmcli/package-json';
 import type { Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
-import { dirname, join } from './util/path.js';
+import { join } from './util/path.js';
+import { load, save } from './util/package-json.js';
 
 export class IssueFixer {
   isEnabled = false;
@@ -66,8 +66,8 @@ export class IssueFixer {
     const filePaths = new Set([...Object.keys(issues.dependencies), ...Object.keys(issues.devDependencies)]);
 
     for (const filePath of filePaths) {
-      const manifest = await NPMCliPackageJson.load(dirname(join(this.cwd, filePath)));
-      const pkg: PackageJson = manifest.content;
+      const absFilePath = join(this.cwd, filePath);
+      const pkg = await load(absFilePath);
 
       if (filePath in issues.dependencies) {
         for (const dependency of Object.keys(issues.dependencies[filePath])) {
@@ -81,7 +81,7 @@ export class IssueFixer {
         }
       }
 
-      await manifest.save();
+      await save(absFilePath, pkg);
     }
   }
 }
