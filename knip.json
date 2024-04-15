@@ -9,8 +9,6 @@
     "packages/knip": {
       "project": ["src/**/*.ts!"],
       "ignore": ["**/fixtures/**", "**/_template/**", "**/dist/**"],
-      "ignoreBinaries": ["tsx"],
-      "ignoreDependencies": ["@pnpm/logger"],
       "node-test-runner": {
         "entry": ["test/**/*.test.ts"],
         "project": ["test/**/*.ts"]

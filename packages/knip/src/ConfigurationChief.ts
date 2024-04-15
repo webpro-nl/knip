@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import mapWorkspaces from '@npmcli/map-workspaces';
-import { createPkgGraph } from '@pnpm/workspace.pkgs-graph';
+import { createPkgGraph, type Graph } from './util/pkgs-graph.js';
 import micromatch from 'micromatch';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { partitionCompilers } from './compilers/index.js';
@@ -109,10 +109,10 @@ export class ConfigurationChief {
   workspaceManifests = new Map<string, string>();
   additionalWorkspaceNames = new Set<string>();
   availableWorkspaceNames: string[] = [];
-  availableWorkspacePkgNames = new Set<string | undefined>();
+  availableWorkspacePkgNames = new Set<string>();
   availableWorkspaceDirs: string[] = [];
   availableWorkspaceManifests: { dir: string; manifest: PackageJson }[] = [];
-  packageGraph: ReturnType<typeof createPkgGraph> | undefined;
+  packageGraph: Graph | undefined;
   includedWorkspaces: Workspace[] = [];
 
   resolvedConfigFilePath?: string;
@@ -180,7 +180,7 @@ export class ConfigurationChief {
   }
 
   public getFilters() {
-    if (this.packageGraph?.graph && workspaceArg) return { dir: join(this.cwd, workspaceArg) };
+    if (this.packageGraph && workspaceArg) return { dir: join(this.cwd, workspaceArg) };
     return {};
   }
 
@@ -236,7 +236,7 @@ export class ConfigurationChief {
 
     this.availableWorkspaceManifests = this.getAvailableWorkspaceManifests(this.availableWorkspaceDirs);
     this.availableWorkspacePkgNames = this.getAvailableWorkspacePkgNames(this.availableWorkspaceManifests);
-    this.packageGraph = createPkgGraph(this.availableWorkspaceManifests);
+    this.packageGraph = createPkgGraph(this.availableWorkspacePkgNames, this.availableWorkspaceManifests);
     this.includedWorkspaces = this.determineIncludedWorkspaces();
   }
 
@@ -332,25 +332,26 @@ export class ConfigurationChief {
       ? [...this.availableWorkspaceNames.reduce(getAncestors(workspaceArg), []), workspaceArg]
       : this.availableWorkspaceNames;
 
-    const graph = this.packageGraph?.graph;
     const ws = new Set<string>();
 
     if (workspaceArg && this.isStrict) {
       ws.add(workspaceArg);
-    } else if (graph && workspaceArg) {
-      const seen = new Set<string>();
-      const initialWorkspaces = new Set(workspaceNames.map(name => join(this.cwd, name)));
-      const workspaceDirsWithDependents = new Set(initialWorkspaces);
-      const addDependents = (dir: string) => {
-        seen.add(dir);
-        const deps = graph[dir]?.dependencies ?? [];
-        if (deps.length > 0 && Array.from(initialWorkspaces).some(dir => deps.includes(dir))) {
-          workspaceDirsWithDependents.add(dir);
-        }
-        deps.filter(dir => !seen.has(dir)).forEach(addDependents);
-      };
-      this.availableWorkspaceNames.map(name => join(this.cwd, name)).forEach(addDependents);
-      for (const dir of workspaceDirsWithDependents) ws.add(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME);
+    } else if (workspaceArg) {
+      const graph = this.packageGraph;
+      if (graph) {
+        const seen = new Set<string>();
+        const initialWorkspaces = workspaceNames.map(name => join(this.cwd, name));
+        const workspaceDirsWithDependents = new Set(initialWorkspaces);
+        const addDependents = (dir: string) => {
+          seen.add(dir);
+          if (!graph[dir] || graph[dir].size === 0) return;
+          const dirs = graph[dir];
+          if (initialWorkspaces.some(dir => dirs.has(dir))) workspaceDirsWithDependents.add(dir);
+          for (const dir of dirs) if (!seen.has(dir)) addDependents(dir);
+        };
+        this.availableWorkspaceNames.map(name => join(this.cwd, name)).forEach(addDependents);
+        for (const dir of workspaceDirsWithDependents) ws.add(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME);
+      }
     } else {
       for (const name of workspaceNames) ws.add(name);
     }
