@@ -9,7 +9,7 @@ import type { IsPluginEnabled, ModuleResolver, Plugin } from '#p/types/plugins.j
 
 const title = 'Metro';
 
-const enablers: IgnorePatterns = ['@react-native/metro-config'];
+const enablers: IgnorePatterns = ['@react-native/metro-config', '@expo/metro-config'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
