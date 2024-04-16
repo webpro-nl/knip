@@ -293,7 +293,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
-  const analyzedFiles = new Set<string>();
+  const analyzed = new Map<string, Set<string>>();
   const exportedSymbols: SerializableExportMap = {};
   const importedSymbols: SerializableImportMap = {};
   const unreferencedFiles = new Set<string>();
@@ -302,6 +302,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   for (const principal of principals) {
     principal.init();
+
+    const [moduleResolverName] = principal.moduleResolver;
+
+    if (!analyzed.has(moduleResolverName)) analyzed.set(moduleResolverName, new Set<string>());
+    const analyzedFiles = analyzed.get(moduleResolverName)!;
 
     principal.referencedDependencies.forEach(([containingFilePath, specifier, workspaceName]) => {
       const workspace = chief.findWorkspaceByName(workspaceName);
@@ -385,8 +390,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     streamer.cast('Running async compilers...');
 
     await principal.runAsyncCompilers();
-
-    const [moduleResolverName] = principal.moduleResolver;
 
     streamer.cast(`Connecting the dots...${moduleResolverName === 'default' ? '' : ` (${moduleResolverName})`}`);
 
@@ -617,6 +620,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
     }
   }
+
+  const analyzedFiles = new Set<string>();
+  for (const files of analyzed.values()) for (const filePath of files.values()) analyzedFiles.add(filePath);
 
   const unusedFiles = [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath));
 
