@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - uses: oven-sh/setup-bun@v1
 
       - run: cd packages/knip && npm install && npm run build && npm link
 
@@ -87,3 +88,16 @@ jobs:
           path: TypeScript
           ref: remove-unused-exports
       - run: cd TypeScript && npm install && knip --tags=-internal,-knipignore --exclude duplicates
+
+      - name: Test Knip against InvokeAI
+        uses: actions/checkout@v4
+        with:
+          repository: invoke-ai/InvokeAI
+          path: InvokeAI
+          sparse-checkout: invokeai/frontend/web
+      - run: |
+          cd InvokeAI/invokeai/frontend/web
+          pnpm install
+          knip-bun
+          knip-bun --production --fix --no-exit-code
+          knip-bun --production
