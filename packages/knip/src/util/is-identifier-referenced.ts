@@ -10,6 +10,12 @@ export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableMa
   ): boolean => {
     if (depth === 0) exportLookupLog(-1, `Looking up export "${id}" from`, filePath);
 
+    const ids = id.split('.');
+    if (new Set(ids).size !== ids.length) {
+      exportLookupLog(depth, 'circular reference', filePath);
+      return false;
+    }
+
     if (!importsForExport) {
       exportLookupLog(depth, 'no imports found from', filePath);
       return false;
