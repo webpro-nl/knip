@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/import-equals",
+  "dependencies": {
+    "external": "*"
+  }
+}

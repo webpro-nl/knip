@@ -347,6 +347,17 @@ const getImportsAndExports = (
       }
     }
 
+    if (
+      isTopLevel &&
+      ts.isImportEqualsDeclaration(node) &&
+      ts.isQualifiedName(node.moduleReference) &&
+      ts.isIdentifier(node.moduleReference.left)
+    ) {
+      // Pattern: import name = NS.identifier
+      const { left, right } = node.moduleReference;
+      if (sourceFile.locals?.get(left.text)) maybeAddAccessExpressionAsNsImport(left.text, right.text);
+    }
+
     if (ts.isTypeReferenceNode(node) && ts.isQualifiedName(node.typeName)) {
       const [ns, ...right] = [node.typeName.left.getText(), node.typeName.right.getText()].join('.').split('.');
       const members = right.map((_r, index) => right.slice(0, index + 1).join('.'));
