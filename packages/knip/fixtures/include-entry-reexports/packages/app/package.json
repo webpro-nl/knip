@@ -1,10 +1,10 @@
 {
-  "name": "@kp/app",
+  "name": "@include-entry-reexports/app",
   "version": "0.0.0",
   "private": true,
   "main": "index.mjs",
   "type": "module",
   "dependencies": {
-    "@kp/shared": "*"
+    "@include-entry-reexports/shared": "*"
   }
 }

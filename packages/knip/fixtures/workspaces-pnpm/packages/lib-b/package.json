@@ -1,4 +1,4 @@
 {
-  "name": "@scoped/lib-b",
+  "name": "@workspaces-pnpm/lib-b",
   "main": "./index.js"
 }

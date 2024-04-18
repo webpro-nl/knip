@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/include-entry-reexports",
+  "name": "@include-entry-reexports/root",
   "version": "1.0.0",
   "private": true,
   "type": "module",

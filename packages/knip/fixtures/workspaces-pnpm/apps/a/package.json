@@ -1,8 +1,8 @@
 {
-  "name": "@scoped/app-a",
+  "name": "@workspaces-pnpm/app-a",
   "main": "./index.js",
   "dependencies": {
-    "@scoped/lib-a": "*",
-    "@scoped/lib-b": "*"
+    "@workspaces-pnpm/lib-a": "*",
+    "@workspaces-pnpm/lib-b": "*"
   }
 }

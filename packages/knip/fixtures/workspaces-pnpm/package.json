@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/workspaces-pnpm",
+  "name": "@workspaces-pnpm/root",
   "knip": {
     "workspaces": {
       "{apps,packages}/*": {
