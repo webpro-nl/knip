@@ -87,7 +87,7 @@ jobs:
           repository: webpro/TypeScript
           path: TypeScript
           ref: remove-unused-exports
-      - run: cd TypeScript && npm install && knip --tags=-internal,-knipignore --exclude duplicates
+      - run: cd TypeScript && npm install && knip --tags=+internal,-knipignore --exclude=duplicates,enumMembers
 
       - name: Test Knip against InvokeAI
         uses: actions/checkout@v4
