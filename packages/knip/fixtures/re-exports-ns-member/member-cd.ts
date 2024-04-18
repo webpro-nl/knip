@@ -1,0 +1,2 @@
+export const memberC = 1;
+export const memberD = 1;

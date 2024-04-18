@@ -298,17 +298,29 @@ const getImportsAndExports = (
         const symbol = sourceFile.locals?.get(String(node.escapedText));
         if (symbol) {
           if (importedInternalSymbols.has(symbol)) {
-            let members: string[] = [];
-            let current: ts.Node = node.parent;
-            while (current) {
-              const ms = getMemberStringLiterals(typeChecker, current);
-              if (!ms) break;
-              members = members.concat(
-                ms.flatMap(id => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`)))
-              );
-              current = current.parent;
+            if (
+              ts.isVariableDeclarationList(node.parent.parent.parent) &&
+              ts.isVariableDeclaration(node.parent.parent) &&
+              ts.isObjectBindingPattern(node.parent.parent.name) &&
+              ts.isPropertyAccessExpression(node.parent)
+            ) {
+              const ns = String(symbol.escapedName);
+              const key = String(node.parent.name.escapedText);
+              const members = node.parent.parent.name.elements.map(element => `${key}.${element.name.getText()}`);
+              maybeAddAccessExpressionAsNsImport(ns, key);
+              maybeAddAccessExpressionAsNsImport(ns, members);
+            } else {
+              let members: string[] = [];
+              let current: ts.Node = node.parent;
+              while (current) {
+                const ms = getMemberStringLiterals(typeChecker, current);
+                if (!ms) break;
+                const joinIds = (id: string) => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`));
+                members = members.concat(ms.flatMap(joinIds));
+                current = current.parent;
+              }
+              maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
             }
-            maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
           }
         }
       } else if (
@@ -331,7 +343,7 @@ const getImportsAndExports = (
           if (symbol) {
             const importedSymbolFilePath = importedInternalSymbols.get(symbol);
             if (importedSymbolFilePath) {
-              const members = node.parent.name.elements.flatMap(decl => decl.name.getText());
+              const members = node.parent.name.elements.map(element => element.name.getText());
               maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
             }
           }
