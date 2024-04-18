@@ -2,7 +2,7 @@
   "name": "@workspaces-pnpm/app-b",
   "main": "./index.js",
   "dependencies": {
-    "@workspaces-pnpm//lib-a": "*",
-    "@workspaces-pnpm//lib-b": "*"
+    "@workspaces-pnpm/lib-a": "*",
+    "@workspaces-pnpm/lib-b": "*"
   }
 }
