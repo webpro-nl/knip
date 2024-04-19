@@ -11,7 +11,7 @@ export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableMa
     if (depth === 0) exportLookupLog(-1, `Looking up export "${id}" from`, filePath);
 
     const ids = id.split('.');
-    if (new Set(ids).size !== ids.length) {
+    if (ids.length > 2 && ids.length !== new Set(ids).size) {
       exportLookupLog(depth, 'circular reference', filePath);
       return false;
     }
@@ -35,21 +35,24 @@ export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableMa
 
     if (importsForExport.isReExport) {
       for (const filePath of importsForExport.isReExportedBy) {
-        if (isIdentifierReferenced(filePath, id, importedSymbols[filePath].imported, depth + 1)) {
+        const file = importedSymbols[filePath];
+        if (file && isIdentifierReferenced(filePath, id, file.imported, depth + 1)) {
           exportLookupLog(depth, 're-exported by', filePath);
           return true;
         }
       }
 
       for (const [filePath, alias] of importsForExport.isReExportedAs) {
-        if (isIdentifierReferenced(filePath, alias, importedSymbols[filePath].imported, depth + 1)) {
+        const file = importedSymbols[filePath];
+        if (file && isIdentifierReferenced(filePath, alias, file.imported, depth + 1)) {
           exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
           return true;
         }
       }
 
       for (const [filePath, ns] of importsForExport.isReExportedNs) {
-        if (isIdentifierReferenced(filePath, `${ns}.${id}`, importedSymbols[filePath].imported, depth + 1)) {
+        const file = importedSymbols[filePath];
+        if (file && isIdentifierReferenced(filePath, `${ns}.${id}`, file.imported, depth + 1)) {
           exportLookupLog(depth, `re-exported on ${ns} by`, filePath);
           return true;
         }
