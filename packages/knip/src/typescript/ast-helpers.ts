@@ -134,7 +134,7 @@ export const getLineAndCharacterOfPosition = (node: ts.Node, pos: number) => {
   return { line: line + 1, col: character + 1, pos };
 };
 
-export const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => {
+const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => {
   if (ts.isElementAccessExpression(node)) {
     if (ts.isStringLiteral(node.argumentExpression)) return [node.argumentExpression.text];
     const type = typeChecker.getTypeAtLocation(node.argumentExpression);
@@ -145,3 +145,32 @@ export const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.No
     return [node.name.escapedText as string];
   }
 };
+
+export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Identifier) => {
+  let members: string[] = [];
+  let current: ts.Node = node.parent;
+  while (current) {
+    const ms = getMemberStringLiterals(typeChecker, current);
+    if (!ms) break;
+    const joinIds = (id: string) => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`));
+    members = members.concat(ms.flatMap(joinIds));
+    current = current.parent;
+  }
+  return members;
+};
+
+export const isDestructuring = (node: ts.Node) =>
+  node.parent &&
+  ts.isVariableDeclaration(node.parent) &&
+  ts.isVariableDeclarationList(node.parent.parent) &&
+  ts.isObjectBindingPattern(node.parent.name);
+
+export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
+  name.elements.map(element => element.name.getText());
+
+export const isConsiderReferencedNS = (node: ts.Identifier) =>
+  ts.isShorthandPropertyAssignment(node.parent) ||
+  (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
+  ts.isSpreadAssignment(node.parent) ||
+  ts.isExportAssignment(node.parent) ||
+  (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node);
