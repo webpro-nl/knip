@@ -253,7 +253,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     for (const id of importItems.importedNs) importedModule.importedNs.add(id);
     for (const id of importItems.isReExportedBy) importedModule.isReExportedBy.add(id);
     for (const id of importItems.isReExportedNs) importedModule.isReExportedNs.add(id);
-    for (const id of importItems.by) importedModule.by.add(id);
     if (importItems.hasStar) importedModule.hasStar = true;
     if (importItems.isReExport) importedModule.isReExport = true;
   };

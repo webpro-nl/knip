@@ -104,10 +104,7 @@ const getImportsAndExports = (
       isReExportedNs: new Set(),
       importedNs: new Set(),
       identifiers: new Set(),
-      by: new Set(),
     });
-
-    internalImport.by.add(sourceFile.fileName);
 
     if (isReExport) {
       internalImport.isReExport = true;

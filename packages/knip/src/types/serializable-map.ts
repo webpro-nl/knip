@@ -17,7 +17,6 @@ export type SerializableImports = {
   isReExportedBy: Set<string>;
   isReExportedAs: Set<[string, string]>;
   isReExportedNs: Set<[string, string]>;
-  by: Set<string>;
 };
 
 export type SerializableImportMap = Record<FilePath, SerializableImports>;
