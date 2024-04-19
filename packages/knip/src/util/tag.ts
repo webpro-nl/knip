@@ -1,16 +1,16 @@
 import type { Tags } from '../types/cli.js';
 
-export const splitTags = (tags: string[]) =>
-  tags
-    .flatMap(tag => tag.split(','))
-    .reduce<Tags>(
-      ([incl, excl], tag) => {
-        const match = tag.match(/[a-zA-Z]+/);
-        if (match) (tag.startsWith('-') ? excl : incl).push(match[0]);
-        return [incl, excl];
-      },
-      [[], []]
-    );
+export const splitTags = (rawTags: string[]) => {
+  const tags = rawTags.flatMap(tag => tag.split(','));
+  return tags.reduce<Tags>(
+    ([incl, excl], tag) => {
+      const match = tag.match(/[a-zA-Z]+/);
+      if (match) (tag.startsWith('-') ? excl : incl).push(match[0]);
+      return [incl, excl];
+    },
+    [[], []]
+  );
+};
 
 const hasTag = (tags: string[], jsDocTags: Set<string>) => tags.some(tag => jsDocTags.has(`@${tag}`));
 

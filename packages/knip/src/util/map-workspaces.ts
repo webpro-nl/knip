@@ -1,17 +1,12 @@
 import fastGlob from 'fast-glob';
 import type { Package } from '../ConfigurationChief.js';
 import type { PackageJson } from '../types/package-json.js';
+import { partition } from './array.js';
 import { debugLog } from './debug.js';
 import { ConfigurationError } from './errors.js';
 import { getPackageName } from './package-name.js';
 import { join } from './path.js';
 import { _require } from './require.js';
-
-const partition = <T>(collection: T[], predicate: (item: T) => unknown) => {
-  const results: [T[], T[]] = [[], []];
-  for (const item of collection) results[predicate(item) ? 0 : 1].push(item);
-  return results;
-};
 
 export default async function mapWorkspaces(cwd: string, workspaces: string[]) {
   const [negatedPatterns, patterns] = partition(workspaces, p => p.match(/^!+/));
