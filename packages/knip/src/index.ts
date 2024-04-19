@@ -19,7 +19,7 @@ import type {
   SerializableImportMap,
   SerializableImports,
   SerializableMap,
-} from './types/map.js';
+} from './types/serializable-map.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { isFile } from './util/fs.js';
 import { getReExportingEntryFileHandler } from './util/get-reexporting-entry-file.js';

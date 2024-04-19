@@ -6,7 +6,7 @@ import { sanitizeSpecifier } from '../util/modules.js';
 import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, toPosix } from '../util/path.js';
 import { resolveSync } from '../util/resolve.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
-import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
+import { ensureRealFilePath, isVirtualFilePath } from './sys.js';
 
 const resolutionCache = new Map<string, ts.ResolvedModuleFull | undefined>();
 

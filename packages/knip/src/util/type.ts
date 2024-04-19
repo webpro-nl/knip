@@ -1,4 +1,4 @@
-import type { SerializableImports } from '../types/map.js';
+import type { SerializableImports } from '../types/serializable-map.js';
 
 export const getHasStrictlyNsReferences = (importsForExport?: SerializableImports): [boolean, string?] => {
   if (!importsForExport?.hasStar || importsForExport.importedNs.size === 0) return [false];

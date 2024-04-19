@@ -1,5 +1,4 @@
 import ts from 'typescript';
-import { ensureRealFilePath } from './utils.js';
 
 export function createCustomSys(cwd: string, virtualFileExtensions: string[]) {
   const sys = {
@@ -15,4 +14,16 @@ export function createCustomSys(cwd: string, virtualFileExtensions: string[]) {
       return ts.sys.fileExists(ensureRealFilePath(path, virtualFileExtensions));
     },
   };
+}
+
+function toRealFilePath(filePath: string) {
+  return filePath.slice(0, -'.ts'.length);
+}
+
+export function isVirtualFilePath(filePath: string, extensions: string[]) {
+  return extensions.some(extension => filePath.endsWith(`${extension}.ts`));
+}
+
+export function ensureRealFilePath(filePath: string, extensions: string[]) {
+  return isVirtualFilePath(filePath, extensions) ? toRealFilePath(filePath) : filePath;
 }

@@ -1,4 +1,4 @@
-import type { SerializableFile } from '../types/map.js';
+import type { SerializableFile } from '../types/serializable-map.js';
 
 // biome-ignore lint/suspicious/noExplicitAny: TODO
 const setisfy = (obj: any) => {

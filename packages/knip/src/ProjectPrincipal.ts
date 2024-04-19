@@ -11,7 +11,7 @@ import type {
   SerializableFile,
   SerializableMap,
   UnresolvedImport,
-} from './types/map.js';
+} from './types/serializable-map.js';
 import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/createHosts.js';

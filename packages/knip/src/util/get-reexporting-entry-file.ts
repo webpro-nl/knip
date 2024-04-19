@@ -1,4 +1,4 @@
-import type { SerializableImports, SerializableMap } from '../types/map.js';
+import type { SerializableImports, SerializableMap } from '../types/serializable-map.js';
 import { exportLookupLog } from './debug.js';
 
 export const getReExportingEntryFileHandler = (entryPaths: Set<string>, serializableMap: SerializableMap) => {

@@ -10,7 +10,7 @@ import type {
   SerializableExports,
   SerializableImportMap,
   UnresolvedImport,
-} from '../types/map.js';
+} from '../types/serializable-map.js';
 import { timerify } from '../util/Performance.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { isInNodeModules } from '../util/path.js';
@@ -38,7 +38,7 @@ const getVisitors = (sourceFile: ts.SourceFile) => ({
 const createSerializableMember = (node: ts.Node, member: ExportNodeMember, pos: number): SerializableExportMember => {
   const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
   return {
-    // @ts-expect-error TODO
+    // @ts-expect-error ref will be unset later
     symbol: member.node.symbol,
     identifier: member.identifier,
     type: member.type,
@@ -185,7 +185,7 @@ const getImportsAndExports = (
 
     if (isExportSpecifier || isExportAssignment) {
       // Re-exports are handled in import visitors (because module resolution),
-      // but in other export declarations we can't (easily) get the imported symbol for indirect/mediated re-exports
+      // but in other export declarations we can't (easily) get the imported symbol for pseudo re-exports
       if (isExportSpecifier && node.propertyName) {
         // TODO Tried to sort it out in visitors/exports/exportDeclaration.ts,
         // but seems we need `typeChecker.getSymbolAtLocation` which isn't available over there
@@ -226,7 +226,7 @@ const getImportsAndExports = (
       const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
       exports[identifier] = {
         identifier,
-        // @ts-expect-error TODO
+        // @ts-expect-error ref will be unset later
         symbol: node.symbol,
         type,
         members: serializedMembers,
