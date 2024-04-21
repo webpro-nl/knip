@@ -7,7 +7,7 @@ Usage: knip [options]
 Options:
   -c, --config [file]      Configuration file path (default: [.]knip.json[c], knip.js, knip.ts or package.json#knip)
   -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
-  --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
+  --production             Analyze only production source files (e.g. no test files, devDependencies)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
   -W, --workspace [dir]    Analyze a single workspace (default: analyze all configured workspaces)
   --directory [dir]        Run process from a different directory (default: cwd)
