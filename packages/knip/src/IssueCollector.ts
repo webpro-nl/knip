@@ -60,6 +60,8 @@ export class IssueCollector {
       if (this.referencedFiles.has(filePath)) continue;
       if (this.isMatch(filePath)) continue;
       this.issues.files.add(filePath);
+      // @ts-expect-error TODO Fix up in next major
+      this.issues._files.add({ type: 'files', filePath, symbol: relative(filePath) });
       this.counters.files++;
       this.counters.processed++;
     }

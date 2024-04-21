@@ -53,6 +53,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     tags,
     isFix,
     fixTypes,
+    isRemoveFiles,
   } = unresolvedConfiguration;
 
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
@@ -72,7 +73,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const report = chief.getIncludedIssueTypes();
   const rules = chief.getRules();
   const filters = chief.getFilters();
-  const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes });
+  const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes, isRemoveFiles });
 
   debugLogObject('*', 'Included issue types', report);
 

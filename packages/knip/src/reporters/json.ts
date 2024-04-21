@@ -67,7 +67,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (isReportType) {
-      if (type === 'files') {
+      if (type === 'files' || type === '_files') {
         // Ignore
       } else {
         for (const issue of flatten(issues[type] as IssueRecords)) {

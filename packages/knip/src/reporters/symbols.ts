@@ -30,6 +30,8 @@ export default ({ report, issues, configurationHints, noConfigHints, isShowProgr
   let totalIssues = 0;
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+    if (reportType === 'files') continue;
+
     if (isReportType) {
       const title = reportMultipleGroups && getTitle(reportType);
       const isSet = issues[reportType] instanceof Set;

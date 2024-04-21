@@ -21,6 +21,8 @@ export default ({ report, issues, streamer, startTime, size, isDebug }: WatchRep
   let totalIssues = 0;
   const lines: string[] = [];
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+    if (reportType === '_files') continue;
+
     if (isReportType) {
       const title = reportMultipleGroups && getTitle(reportType);
       const isSet = issues[reportType] instanceof Set;

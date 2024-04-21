@@ -29,6 +29,7 @@ export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export type Issues = {
   files: IssueSet;
+  _files: Set<Issue>;
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
   optionalPeerDependencies: IssueRecords;
@@ -46,7 +47,7 @@ export type Issues = {
 
 export type IssueType = keyof Issues;
 
-type SymbolIssueType = Exclude<IssueType, 'files'>;
+type SymbolIssueType = Exclude<IssueType, 'files' | '_files'>;
 
 export type Report = {
   [key in keyof Issues]: boolean;

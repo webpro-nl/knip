@@ -15,6 +15,7 @@ export interface CommandLineOptions {
   tags: Tags;
   isFix: boolean;
   fixTypes: string[];
+  isRemoveFiles: boolean;
 }
 
 export type Tags = [string[], string[]];

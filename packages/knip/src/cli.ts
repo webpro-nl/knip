@@ -28,6 +28,7 @@ const {
   strict: isStrict = false,
   fix: isFix = false,
   'fix-type': fixTypes = [],
+  'allow-remove-files': isRemoveFiles = false,
   tsConfig,
   version: isVersion,
   'experimental-tags': experimentalTags = [],
@@ -64,6 +65,7 @@ const run = async () => {
       tags: tags.length > 0 ? splitTags(tags) : splitTags(experimentalTags),
       isFix: isFix || fixTypes.length > 0,
       fixTypes: fixTypes.flatMap(type => type.split(',')),
+      isRemoveFiles,
     });
 
     if (isWatch) return;

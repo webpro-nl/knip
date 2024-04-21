@@ -110,6 +110,7 @@ export const ISSUE_TYPES: IssueType[] = [
 
 export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   files: 'Unused files',
+  _files: 'Unused files',
   dependencies: 'Unused dependencies',
   devDependencies: 'Unused devDependencies',
   optionalPeerDependencies: 'Referenced optional peerDependencies',

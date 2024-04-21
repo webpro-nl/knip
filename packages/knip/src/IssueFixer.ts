@@ -4,9 +4,17 @@ import type { Issues } from './types/issues.js';
 import { load, save } from './util/package-json.js';
 import { join } from './util/path.js';
 
+interface Fixer {
+  isEnabled: boolean;
+  cwd: string;
+  fixTypes: string[];
+  isRemoveFiles: boolean;
+}
+
 export class IssueFixer {
   isEnabled = false;
   cwd: string = process.cwd();
+  isFixFiles = true;
   isFixDependencies = true;
   isFixUnusedTypes = true;
   isFixUnusedExports = true;
@@ -14,9 +22,10 @@ export class IssueFixer {
   unusedTypeNodes: Map<string, Set<[number, number]>> = new Map();
   unusedExportNodes: Map<string, Set<[number, number]>> = new Map();
 
-  constructor({ isEnabled, cwd, fixTypes = [] }: { isEnabled: boolean; cwd: string; fixTypes: string[] }) {
+  constructor({ isEnabled, cwd, fixTypes = [], isRemoveFiles }: Fixer) {
     this.isEnabled = isEnabled;
     this.cwd = cwd;
+    this.isFixFiles = isRemoveFiles && (fixTypes.length === 0 || fixTypes.includes('files'));
     this.isFixDependencies = fixTypes.length === 0 || fixTypes.includes('dependencies');
     this.isFixUnusedTypes = fixTypes.length === 0 || fixTypes.includes('types');
     this.isFixUnusedExports = fixTypes.length === 0 || fixTypes.includes('exports');
@@ -36,10 +45,20 @@ export class IssueFixer {
 
   public async fixIssues(issues: Issues) {
     await this.removeUnusedExportKeywords();
+    await this.removeUnusedFiles(issues);
     await this.removeUnusedDependencies(issues);
   }
 
   private async removeUnusedExportKeywords() {
+  private async removeUnusedFiles(issues: Issues) {
+    if (!this.isFixFiles) return;
+
+    for (const issue of issues._files) {
+      await rm(issue.filePath);
+      issue.isFixed = true;
+    }
+  }
+
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
       const exportPositions: Fixes = [
