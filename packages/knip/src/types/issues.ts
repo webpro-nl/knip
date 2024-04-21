@@ -21,6 +21,7 @@ export type Issue = {
   pos?: number;
   line?: number;
   col?: number;
+  isFixed?: boolean;
 };
 
 export type IssueSet = Set<string>;
