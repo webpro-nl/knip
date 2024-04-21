@@ -1,0 +1,11 @@
+{
+  "name": "@knip/templates-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "knip": "^5.4.0",
+    "typescript": "^5.4.3"
+  }
+}
