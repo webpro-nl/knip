@@ -595,7 +595,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               // Add existing files that were not yet part of the program
               for (const filePath of filePaths) if (!serializableMap[filePath]) analyzeSourceFile(filePath, principal);
 
-              analyzeSourceFile(filePath, principal);
+              if (!cachedUnusedFiles.has(filePath)) analyzeSourceFile(filePath, principal);
 
               // Rebuild dep graph
               for (const filePath of filePaths) {
