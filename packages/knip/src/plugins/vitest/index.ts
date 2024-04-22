@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['vitest*.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{ts,js,json}'];
 
-const entry = ['**/*.{test,test-d,spec}.?(c|m)[jt]s?(x)'];
+const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)'];
 
 const resolveEntry = (options: PluginOptions, specifier: string) => {
   const { configFileDir, configFileName } = options;
