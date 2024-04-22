@@ -45,7 +45,7 @@
     "watch": "npm link && tsc --watch",
     "prebuild": "node rmdir.js dist",
     "build": "tsc",
-    "ci": "bun run lint && bun run build && bun run knip && bun run knip:production && bun run test",
+    "qa": "bun lint && bun run build && bun knip && bun knip:production && bun run test",
     "release": "release-it",
     "create-plugin": "bun ./scripts/create-new-plugin.ts",
     "postcreate-plugin": "biome format --write schema.json schema-jsonc.json src/ConfigurationValidator.ts"

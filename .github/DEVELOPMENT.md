@@ -97,7 +97,7 @@ bun run knip:production
 bun run test
 ```
 
-To run all commands in sequence: `bun run ci`
+To run all commands in sequence: `bun run qa`
 
 ## GitHub Action
 

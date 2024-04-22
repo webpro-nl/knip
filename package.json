@@ -21,7 +21,7 @@
     "docs": "bun run --cwd packages/docs dev",
     "format": "biome format .",
     "lint": "biome lint .",
-    "ci": "biome ci . && bun run --cwd packages/knip ci && installed-check --no-include-workspace-root --ignore-dev"
+    "ci": "biome ci . && installed-check --no-include-workspace-root --ignore-dev"
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.4",
