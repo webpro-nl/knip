@@ -28,7 +28,7 @@ import { getGitIgnoredFn } from './util/globby.js';
 import { getHandler } from './util/handle-dependency.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
-import { dirname, join } from './util/path.js';
+import { dirname, join, toPosix } from './util/path.js';
 import { hasMatch } from './util/regex.js';
 import { shouldIgnore } from './util/tag.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
@@ -542,7 +542,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       if (filename) {
         const startTime = performance.now();
-        const filePath = join(cwd, filename);
+        const filePath = join(cwd, toPosix(filename));
 
         if (filename.startsWith(CacheConsultant.getCacheLocation())) return;
         if (isGitIgnored(filePath)) return;
