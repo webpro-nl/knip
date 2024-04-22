@@ -30,13 +30,13 @@ export default ({ report, issues, configurationHints, noConfigHints, isShowProgr
   let totalIssues = 0;
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
-    if (reportType === 'files') continue;
+    if (reportType === '_files') continue;
 
     if (isReportType) {
       const title = reportMultipleGroups && getTitle(reportType);
 
-      if (reportType === '_files') {
-        const issuesForType = Array.from(issues[reportType]);
+      if (reportType === 'files') {
+        const issuesForType = Array.from(issues._files);
         if (issuesForType.length > 0) {
           title && logTitle(title, issuesForType.length);
           for (const issue of issuesForType) {

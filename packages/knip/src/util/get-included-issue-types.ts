@@ -72,7 +72,7 @@ export const getIncludedIssueTypes = (
       : defaultIssueTypes
   ).filter(group => !_exclude.includes(group));
 
-  return ISSUE_TYPES.reduce((types, group) => {
+  return ISSUE_TYPES.filter(i => i !== '_files').reduce((types, group) => {
     types[group] = included.includes(group);
     return types;
   }, {} as Report);
