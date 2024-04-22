@@ -538,6 +538,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   if (isWatch) {
     watch('.', { recursive: true }, async (eventType, filename) => {
+      debugLog('*', `(raw) ${eventType} ${filename}`);
+
       if (filename) {
         const startTime = performance.now();
         const filePath = join(cwd, filename);

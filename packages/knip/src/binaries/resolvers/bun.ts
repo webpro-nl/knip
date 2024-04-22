@@ -8,7 +8,7 @@ export const resolve: Resolver = (_binary, args, { manifestScriptNames, cwd, fro
   const parsed = parseArgs(args);
   const [command, script] = parsed._;
   if (command === 'run' && manifestScriptNames.has(script)) return [];
-  if (commands.includes(command)) return [];
+  if (manifestScriptNames.has(command) || commands.includes(command)) return [];
   const filePath = command === 'run' ? script : command;
   const specifier = tryResolveFilePath(cwd, filePath);
   if (specifier) return [specifier];
