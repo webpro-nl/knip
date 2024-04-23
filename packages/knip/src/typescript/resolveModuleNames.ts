@@ -3,7 +3,7 @@ import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { sanitizeSpecifier } from '../util/modules.js';
-import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, toPosix } from '../util/path.js';
+import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join } from '../util/path.js';
 import { resolveSync } from '../util/resolve.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 import { ensureRealFilePath, isVirtualFilePath } from './sys.js';

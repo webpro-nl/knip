@@ -10,5 +10,5 @@ export const resolveSync = (specifier: string, containingFile: string, extension
       preserveSymlinks: false,
     });
     return toPosix(resolved);
-  } catch (err) {}
+  } catch (_error) {}
 };

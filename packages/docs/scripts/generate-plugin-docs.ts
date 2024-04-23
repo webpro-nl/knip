@@ -20,8 +20,6 @@ const pluginsDir = path.join(knipDir, 'src/plugins');
 const directories = await fs.opendir(pluginsDir);
 const plugins = [];
 
-const prettierConfigPath = path.join(rootDir, '.prettierrc.json');
-
 const parseFragment = (text: string) => {
   const tree = unified().use(remarkParse).parse(text);
   return tree.children;

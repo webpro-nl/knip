@@ -1,6 +1,6 @@
 import { watch } from 'node:fs';
 import { CacheConsultant } from './CacheConsultant.js';
-import { ConfigurationChief, type Workspace } from './ConfigurationChief.js';
+import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';

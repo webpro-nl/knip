@@ -10,6 +10,10 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
       "complexity": {
         "useLiteralKeys": "off",
         "useSimplifiedLogicExpression": "error"
@@ -48,5 +52,18 @@
     "formatter": {
       "lineWidth": 80
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": ["*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    }
+  ]
 }

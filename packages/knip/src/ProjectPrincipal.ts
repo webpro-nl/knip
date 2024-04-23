@@ -12,7 +12,7 @@ import type {
   SerializableMap,
   UnresolvedImport,
 } from './types/serializable-map.js';
-import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
+import type { BoundSourceFile, ProgramMaybe53 } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/createHosts.js';
 import { type GetImportsAndExportsOptions, _getImportsAndExports } from './typescript/getImportsAndExports.js';

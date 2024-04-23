@@ -28,7 +28,6 @@ import { join, relative, toPosix } from './util/path.js';
 import { type Graph, createPkgGraph } from './util/pkgs-graph.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
-import { _require } from './util/require.js';
 import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
 
@@ -172,7 +171,7 @@ export class ConfigurationChief {
     const loadedValue = await _load(configPath);
     try {
       return await unwrapFunction(loadedValue);
-    } catch (e) {
+    } catch (_error) {
       throw new ConfigurationError(`Error running the function from ${configPath}`);
     }
   }
