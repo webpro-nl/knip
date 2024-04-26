@@ -5,6 +5,7 @@
   },
   "devDependencies": {
     "ava": "^5.3.1",
-    "webpack": "*"
+    "webpack": "*",
+    "@storybook/builder-vite": "*"
   }
 }

@@ -35,9 +35,14 @@ const resolveEntryPaths: ResolveEntryPaths<StorybookConfig> = async (localConfig
 
 const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {
   const addons = localConfig.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
-  const builder = localConfig?.core?.builder;
-  const builderPackages =
-    builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
+  const builder =
+    localConfig?.core?.builder &&
+    (typeof localConfig.core.builder === 'string' ? localConfig.core.builder : localConfig.core.builder.name);
+  const builderPackages = builder
+    ? builder.startsWith('webpack')
+      ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`]
+      : [builder]
+    : [];
   const frameworks = localConfig.framework?.name ? [localConfig.framework.name] : [];
   return [...addons, ...builderPackages, ...frameworks];
 };
