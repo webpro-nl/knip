@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "5.10.0",
+  "version": "5.10.1",
   "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
   "repository": {
@@ -50,7 +50,11 @@
     "create-plugin": "bun ./scripts/create-new-plugin.ts",
     "postcreate-plugin": "biome format --write schema.json schema-jsonc.json src/ConfigurationValidator.ts"
   },
-  "files": ["dist", "schema.json", "schema-jsonc.json"],
+  "files": [
+    "dist",
+    "schema.json",
+    "schema-jsonc.json"
+  ],
   "dependencies": {
     "@ericcornelissen/bash-parser": "0.5.2",
     "@nodelib/fs.walk": "2.0.0",
