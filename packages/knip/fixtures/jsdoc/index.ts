@@ -16,5 +16,23 @@ function fn() {
   const obj = {};
 }
 
+/** @import { SomeType } from "some-module" */
+
+/**
+ * @param {SomeType} myValue
+ */
+function doSomething1(myValue) {
+  // ...
+}
+
+/** @import * as someModule from "some-other-module" */
+
+/**
+ * @param {someModule.SomeType} myValue
+ */
+function doSomething2(myValue) {
+  // ...
+}
+
 /** @type {import('@jest/types')} */
 module.exports = {};

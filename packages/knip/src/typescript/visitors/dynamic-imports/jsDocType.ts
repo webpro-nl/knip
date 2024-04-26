@@ -2,6 +2,8 @@ import ts from 'typescript';
 import type { ImportNode } from '../../../types/imports.js';
 import { importVisitor as visit } from '../index.js';
 
+const supportsJSDocImportTag = 'isJSDocImportTag' in ts;
+
 const getImportSpecifiers = (node: ts.JSDocTag) => {
   const imports: ImportNode[] = [];
 
@@ -14,6 +16,14 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
         imports.push({ specifier: importClause.literal.text, identifier, pos: importClause.literal.pos });
       }
     }
+
+    // @ts-ignore - added in TS v5.5.0
+    if (supportsJSDocImportTag && ts.isJSDocImportTag(node) && ts.isStringLiteralLike(node.moduleSpecifier)) {
+      // @ts-ignore - added in TS v5.5.0
+      const moduleSpecifier = node.moduleSpecifier;
+      imports.push({ specifier: moduleSpecifier.text, identifier: undefined, pos: moduleSpecifier.pos });
+    }
+
     ts.forEachChild(node, visit);
   }
 
