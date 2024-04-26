@@ -14,6 +14,7 @@ const baseArguments = {
   isFix: false,
   tags: [[], []],
   fixTypes: [],
+  isRemoveFiles: false,
 } satisfies CommandLineOptions;
 
 export default baseArguments;
