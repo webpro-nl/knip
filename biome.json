@@ -1,7 +1,13 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.7.1/schema.json",
   "files": {
-    "ignore": ["**/dist", "**/tmp", "**/fixtures", "packages/docs/.astro"]
+    "ignore": [
+      "**/dist",
+      "**/tmp",
+      "**/fixtures",
+      "packages/knip/package.json",
+      "packages/docs/.astro"
+    ]
   },
   "organizeImports": {
     "enabled": true
