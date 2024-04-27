@@ -24,6 +24,7 @@ export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 export const IGNORED_GLOBAL_BINARIES = new Set([
   'bash',
   'bun',
+  'bundle',
   'bunx',
   'cat',
   'cd',
@@ -35,12 +36,15 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'dirname',
   'docker',
   'echo',
+  'env',
   'exec',
   'exit',
   'find',
+  'gem',
   'git',
   'grep',
   'gzip',
+  'ln',
   'ls',
   'mkdir',
   'mv',
@@ -58,6 +62,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'true',
   'yarn',
   'xargs',
+  'xcodebuild',
 ]);
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
