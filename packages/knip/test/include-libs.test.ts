@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/imports-external-libs');
+const cwd = resolve('fixtures/include-libs');
 
 test('Find used exports through external lib definitions', async () => {
   const { counters } = await main({
