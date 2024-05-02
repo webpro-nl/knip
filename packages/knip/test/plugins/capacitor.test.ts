@@ -15,6 +15,7 @@ test('Find dependencies with the Capacitor plugin', async () => {
 
   assert(issues.unlisted['capacitor.config.json']['@capacitor-community/http']);
   assert(issues.unlisted['capacitor.config.json']['@capacitor/android']);
+  assert(issues.unlisted['capacitor.config.json']['@capacitor/ios']);
   assert(issues.unlisted['capacitor.config.json']['@capacitor/app']);
   assert(issues.unlisted['capacitor.config.json']['@capacitor/splash-screen']);
   assert(issues.unlisted['capacitor.config.json']['@capacitor/status-bar']);
@@ -23,6 +24,7 @@ test('Find dependencies with the Capacitor plugin', async () => {
 
   assert(issues.unlisted['capacitor.config.ts']['@capacitor-community/http']);
   assert(issues.unlisted['capacitor.config.ts']['@capacitor/app']);
+  assert(issues.unlisted['capacitor.config.ts']['@capacitor/android']);
   assert(issues.unlisted['capacitor.config.ts']['@capacitor/ios']);
   assert(issues.unlisted['capacitor.config.ts']['@capacitor/splash-screen']);
   assert(issues.unlisted['capacitor.config.ts']['@capacitor/status-bar']);
@@ -31,7 +33,7 @@ test('Find dependencies with the Capacitor plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 14,
+    unlisted: 16,
     processed: 1,
     total: 1,
   });
