@@ -9,7 +9,7 @@ import { join } from './path.js';
 import { _require } from './require.js';
 
 export default async function mapWorkspaces(cwd: string, workspaces: string[]) {
-  const [negatedPatterns, patterns] = partition(workspaces, p => p.match(/^!+/));
+  const [negatedPatterns, patterns] = partition(workspaces, p => p.match(/^!/));
   const byPkgDir = new Map<string, Package>();
   const byPkgName = new Map<string, Package>();
 

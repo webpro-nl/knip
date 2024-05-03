@@ -267,11 +267,12 @@ export class ConfigurationChief {
   }
 
   private getListedWorkspaces() {
-    return this.manifest?.workspaces
+    const workspaces = this.manifest?.workspaces
       ? Array.isArray(this.manifest.workspaces)
         ? this.manifest.workspaces
         : this.manifest.workspaces.packages ?? []
       : [];
+    return workspaces.map(pattern => pattern.replace(/(?<=!?)\.\//, ''));
   }
 
   private getIgnoredWorkspacePatterns() {
