@@ -1,6 +1,6 @@
 import { compact } from '#p/util/array.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '#p/util/modules.js';
-import { isAbsolute, isInternal, toAbsolute } from '#p/util/path.js';
+import { basename, dirname, isAbsolute, isInternal, toAbsolute } from '#p/util/path.js';
 import { load } from '#p/util/plugin.js';
 import { _resolve } from '#p/util/require.js';
 import type { PluginOptions } from '../../types/plugins.js';
@@ -40,11 +40,11 @@ export const getDependenciesDeep: GetDependenciesDeep = async (localConfig, opti
     if (localConfig.extends) {
       for (const extend of [localConfig.extends].flat()) {
         if (isInternal(extend)) {
-          const filePath = toAbsolute(extend, configFileDir);
-          const extendConfigFilePath = _resolve(filePath);
-          dependencies.add(extendConfigFilePath);
-          const localConfig: ESLintConfig = await load(extendConfigFilePath);
-          addAll(await getDependenciesDeep(localConfig, options, dependencies));
+          const filePath = _resolve(toAbsolute(extend, configFileDir));
+          dependencies.add(filePath);
+          const localConfig: ESLintConfig = await load(filePath);
+          const opts = { ...options, configFileDir: dirname(filePath), configFileName: basename(filePath) };
+          addAll(await getDependenciesDeep(localConfig, opts, dependencies));
         }
       }
     }
