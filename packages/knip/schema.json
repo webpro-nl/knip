@@ -507,6 +507,10 @@
           "title": "wrangler plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/wrangler/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "xo": {
+          "title": "xo plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/xo/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "yorkie": {
           "title": "yorkie plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/yorkie/README.md)",
           "$ref": "#/definitions/plugin"
