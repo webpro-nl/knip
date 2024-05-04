@@ -357,15 +357,31 @@ const getImportsAndExports = (
 
   const setRefs = (item: SerializableExport | SerializableExportMember) => {
     if (!item.symbol) return;
+    const symbols = new Set<ts.Symbol>();
     for (const match of sourceFile.text.matchAll(new RegExp(item.identifier.replace(/\$/g, '\\$'), 'g'))) {
       const isDeclaration = match.index === item.pos || match.index === item.pos + 1; // off-by-one from `stripQuotes`
       if (!isDeclaration) {
         // @ts-expect-error ts.getTokenAtPosition is internal fn
-        const smbl = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, match.index));
-        // @ts-expect-error Keep it cheap
-        if (smbl && (item.symbol === smbl || item.symbol === smbl.declarations?.[0]?.name?.flowNode?.node?.symbol)) {
-          item.refs = 1;
-          break;
+        const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, match.index));
+        if (symbol) {
+          if (item.symbol === symbol) {
+            item.refs = 1;
+            break;
+          }
+          // @ts-expect-error Keep it cheap
+          const declaration = symbol.declarations?.[0];
+          if (declaration) {
+            if (item.symbol === declaration.name?.flowNode?.node?.symbol) {
+              item.refs = 1;
+              break;
+            }
+            if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
+              // re-exported symbol is referenced
+              item.refs = 1;
+              break;
+            }
+          }
+          symbols.add(symbol);
         }
       }
     }
