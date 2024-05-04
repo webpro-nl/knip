@@ -44,7 +44,7 @@ export const getEntryPathFromManifest = (
   manifest: PackageJson,
   sharedGlobOptions: { cwd: string; workingDir: string; gitignore: boolean; ignore: string[] }
 ) => {
-  const { main, bin, exports } = manifest;
+  const { main, bin, exports, types, typings } = manifest;
 
   const entryPaths = new Set<string>();
 
@@ -58,6 +58,9 @@ export const getEntryPathFromManifest = (
   if (exports) {
     for (const item of getStringValues(exports)) entryPaths.add(item);
   }
+
+  if (typeof types === 'string') entryPaths.add(types);
+  if (typeof typings === 'string') entryPaths.add(typings);
 
   // Use glob, as we only want source files that:
   // - exist
