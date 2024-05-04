@@ -38,6 +38,9 @@
       "style": {
         "noParameterAssign": "off",
         "useNodeAssertStrict": "error"
+      },
+      "suspicious": {
+        "noConsoleLog": "error"
       }
     }
   },
@@ -67,6 +70,23 @@
           "correctness": {
             "noUnusedVariables": "off",
             "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": [
+        "packages/docs",
+        "packages/knip/scripts",
+        "packages/knip/src/cli.ts",
+        "packages/knip/src/reporters",
+        "packages/knip/src/util/cli-arguments.ts",
+        "packages/knip/src/util/debug.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "off"
           }
         }
       }
