@@ -38,7 +38,7 @@
   "scripts": {
     "knip": "node ./dist/cli.js --directory ../..",
     "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
-    "lint": "biome lint .",
+    "lint": "biome lint ../..",
     "format": "biome format --write .",
     "test": "bun test test/*.test.ts test/**/*.test.ts",
     "test:node": "glob -c \"npx -y tsx@4.7.1 --test --import ./transform-test.js\" \"test/**/*.test.ts\"",
