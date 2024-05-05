@@ -41,15 +41,15 @@ This is where Knip looks for a configuration file:
 - `knip.js`
 - `knip.config.ts`
 - `knip.config.js`
-- `knip` in `package.json`
+- `"knip"` property in `package.json`
 
-Use `--config path/to/knip.config.json` for a different file path.
+Use `--config path/to/knip.json` for a different file path.
 
 ## Customize
 
-If your project structure does not match the default `entry` and `project`
-files, you can customize them. Here's an example configuration to include `.js`
-files in the `scripts` folder:
+Maybe your project structure does not match the default `entry` and `project`
+files. Here's an example custom configuration to include `.js` files in the
+`scripts` folder:
 
 ```json title="knip.json"
 {
@@ -60,8 +60,8 @@ files in the `scripts` folder:
 ```
 
 If you override the `entry` file patterns, you may also want to override
-`project` file patterns. Project files are used to determine what files are
-unused.
+`project` file patterns. The set of project files is used to determine what
+files are unused.
 
 The values you set override the default values, they are not merged.
 
@@ -70,21 +70,13 @@ The values you set override the default values, they are not merged.
 Be specific with `entry` files. Minimize the number of entry files and wildcards
 for better results.
 
+Plugins set entry files for you, such as those for Next.js, Remix, Vitest, and
+many more.
+
 :::
 
-In the example above, the file `scripts/build.js` might be referenced like so:
-
-```json title="package.json"
-{
-  "name": "my-package",
-  "scripts": {
-    "build": "node scripts/build.js"
-  }
-}
-```
-
-In that case, Knip will automatically add it as an entry file. Learn more about
-this in the next page about [entry files][2].
+Knip looks in many places for entry files. Learn more about this in the next
+page about [entry files][2].
 
 ## What's next?
 

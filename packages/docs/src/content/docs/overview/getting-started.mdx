@@ -12,13 +12,13 @@ Knip v5 requires Node.js v18.6 or higher. Or Bun.
 
 ## Installation
 
-The recommended way to install Knip is by using your package manager:
+This is the easiest and recommended way to install Knip:
 
 <Tabs>
   <TabItem label="npm">
 
     ```shell
-    npm install -D knip typescript @types/node
+    npm init @knip/config
     ```
 
   </TabItem>
@@ -26,15 +26,7 @@ The recommended way to install Knip is by using your package manager:
   <TabItem label="pnpm">
 
     ```shell
-    pnpm add -D knip typescript @types/node
-    ```
-
-  </TabItem>
-
-  <TabItem label="bun">
-
-    ```shell
-    bun add -D knip typescript @types/node
+    pnpm create @knip/config
     ```
 
   </TabItem>
@@ -42,28 +34,11 @@ The recommended way to install Knip is by using your package manager:
   <TabItem label="yarn">
 
     ```shell
-    yarn add -D knip typescript @types/node
+    yarn create @knip/config
     ```
 
   </TabItem>
 </Tabs>
-
-Knip uses `typescript` and ` @types/node` as peer dependencies to increase
-compatibility with your project (they are likely already in your `node_modules`
-anyway).
-
-Add a `knip` script to your `package.json`:
-
-```json title="package.json"
-{
-  "name": "my-project",
-  "scripts": {
-    "knip": "knip"
-  }
-}
-```
-
-## Run Knip
 
 Now you can run Knip to lint your project:
 
@@ -103,7 +78,62 @@ Now you can run Knip to lint your project:
 
 Knip will lint your project and report unused files, dependencies and exports.
 
-## Without Installation
+You can skip the rest of this page and go to [configuration][1].
+
+## Manual
+
+Alternatively, you can manually install Knip using your package manager:
+
+<Tabs>
+  <TabItem label="npm">
+
+    ```shell
+    npm install -D knip typescript @types/node
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm add -D knip typescript @types/node
+    ```
+
+  </TabItem>
+
+  <TabItem label="bun">
+
+    ```shell
+    bun add -D knip typescript @types/node
+    ```
+
+  </TabItem>
+
+  <TabItem label="yarn">
+
+    ```shell
+    yarn add -D knip typescript @types/node
+    ```
+
+  </TabItem>
+</Tabs>
+
+Knip uses `typescript` and ` @types/node` as peer dependencies to increase
+compatibility with your project. No worries, they're probably in your
+`node_modules` already.
+
+Then add a `knip` script to your `package.json`:
+
+```json title="package.json"
+{
+  "name": "my-project",
+  "scripts": {
+    "knip": "knip"
+  }
+}
+```
+
+## Without installation
 
 To run Knip without adding it to your project:
 
@@ -135,3 +165,5 @@ To run Knip without adding it to your project:
 
 In this scenario `typescript` and `@types/node` are expected to be installed
 already.
+
+[1]: ./configuration.md

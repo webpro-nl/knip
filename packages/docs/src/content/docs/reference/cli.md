@@ -365,7 +365,7 @@ Maximum number of issues before non-zero exit code. Default: `0`
 [1]: https://github.com/oven-sh/bun/issues/9271
 [2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [3]: ./configuration.md#includeentryexports
-[4]: ../guides/handling-issues.mdx#external-libs
+[4]: ../guides/handling-issues.mdx#external-libraries
 [5]: #--debug
 [6]: ../features/production-mode.md
 [7]: #--production

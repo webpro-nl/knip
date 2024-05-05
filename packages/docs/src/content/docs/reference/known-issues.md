@@ -86,4 +86,4 @@ listed in `dependencies`.
 [5]: https://github.com/unjs/jiti/issues/174
 [6]: https://github.com/webpro/knip/issues/346
 [7]: https://github.com/webpro/knip/issues/355
-[8]: ../guides/handling-issues.mdx#external-libs
+[8]: ../guides/handling-issues.mdx#external-libraries

@@ -2,14 +2,14 @@
 title: Script Parser
 ---
 
-Knip parses scripts to find additional dependencies and entry files in various
-places:
+Knip parses shell commands and scripts to find additional dependencies and entry
+files in various places:
 
 - In [`package.json`][1]
 - In specific [`config` files][2]
 - In [source code][3]
 
-Any shell script Knip finds is read and statically analyzed, but not executed.
+Shell scripts can be read and statically analyzed, but not executed.
 
 ## package.json
 
@@ -56,9 +56,20 @@ or parsed by Knip.
 
 ### Scripts parsing
 
-When parsing `scripts` entry of `package.json`, `knip` also detects as
-dependencies parameters that follow `-r`, `--require` or `--loader`. This is
-done to correctly detect usage of, say, `dotenv` or `tsconfig-paths` packages.
+When parsing the `scripts` entries of `package.json`, `knip` also detect
+dependencies of `-r`, `--require`, `--loader` or `--import` arguments. Example:
+
+```json
+{
+  "name": "my-lib",
+  "scripts": {
+    "start": "node --import tsx/esm run.ts"
+  }
+}
+```
+
+This will have `tsx` marked as a referenced dependency, and adds `run.ts` as an
+entry file.
 
 ## Plugins
 

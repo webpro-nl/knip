@@ -36,6 +36,11 @@ p code {
   white-space: nowrap;
 }
 
+.sl-markdown-content a code {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 blockquote {
   border-inline-start-color: var(--sl-color-gray-1);
 }
