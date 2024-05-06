@@ -5,7 +5,9 @@ import { cwd, join } from './util/path.js';
 
 const defaultCacheLocation = join(cwd, 'node_modules', '.cache', 'knip');
 
-const { cache: isCache = false, cacheLocation = defaultCacheLocation, watch: isWatch = false } = parsedArgValues;
+const { cache: isCache = false, watch: isWatch = false } = parsedArgValues;
+
+const cacheLocation = parsedArgValues['cache-location'] ?? defaultCacheLocation;
 
 interface FD<T> extends FileDescriptor {
   readonly meta?: {

@@ -60,7 +60,7 @@ try {
   parsedArgs = parseArgs({
     options: {
       cache: { type: 'boolean' },
-      cacheLocation: { type: 'string' },
+      'cache-location': { type: 'string' },
       config: { type: 'string', short: 'c' },
       debug: { type: 'boolean', short: 'd' },
       dependencies: { type: 'boolean' },
