@@ -24,7 +24,7 @@
     "ci": "biome ci . && installed-check --no-include-workspace-root --ignore-dev"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.7.1",
+    "@biomejs/biome": "1.7.3",
     "installed-check": "^9.3.0"
   }
 }

@@ -82,7 +82,7 @@
   "devDependencies": {
     "@jest/types": "^29.6.3",
     "@release-it/bumper": "^6.0.1",
-    "@types/bun": "^1.1.0",
+    "@types/bun": "^1.1.1",
     "@types/file-entry-cache": "5.0.4",
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
@@ -91,7 +91,7 @@
     "@types/webpack": "^5.28.5",
     "glob": "^10.3.12",
     "playwright": "^1.43.1",
-    "release-it": "^17.2.0",
+    "release-it": "^17.2.1",
     "type-fest": "^4.17.0",
     "typescript": "^5.4.2"
   },
