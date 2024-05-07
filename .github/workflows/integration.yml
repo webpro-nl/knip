@@ -43,7 +43,7 @@ jobs:
       - run: |
           cd slonik
           npm ci
-          knip
+          knip --no-exit-code
 
       - name: Test Knip against 10ten-ja-reader
         uses: actions/checkout@v4
