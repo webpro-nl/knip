@@ -1,7 +1,7 @@
 {
   "name": "@fixtures/xo",
   "scripts": {
-    "test": "xo && ava"
+    "test": "xo"
   },
   "devDependencies": {
     "xo": "^0.24.0"

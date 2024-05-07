@@ -19,7 +19,6 @@ test('Find dependencies with the xo plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     processed: 2,
     unlisted: 3,
     total: 2,
