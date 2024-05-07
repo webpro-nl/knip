@@ -43,6 +43,10 @@ export function createCustomModuleResolver(
     });
   }
 
+  /**
+   * - Virtual files have built-in or custom compiler, return as JS
+   * - Foreign files have path resolved verbatim (file manager will return empty source file)
+   */
   function resolveModuleName(name: string, containingFile: string): ts.ResolvedModuleFull | undefined {
     const sanitizedSpecifier = sanitizeSpecifier(name);
 

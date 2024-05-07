@@ -34,7 +34,7 @@ export class SourceFileManager {
     if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const ext = extname(filePath);
     const compiler = this.syncCompilers.get(ext);
-    if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) return undefined;
+    if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) return this.createSourceFile(filePath, '');
     if (this.isSkipLibs && isInNodeModules(filePath)) {
       if (isDeclarationFileExtension(ext)) return undefined;
       return this.createSourceFile(filePath, '');
