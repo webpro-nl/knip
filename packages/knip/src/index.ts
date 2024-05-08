@@ -250,7 +250,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const handleReferencedDependency = getHandler(collector, deputy, chief);
 
   const updateImports = (importedModule: SerializableImports, importItems: SerializableImports) => {
-    for (const id of importItems.identifiers) importedModule.identifiers.add(id);
+    for (const id of importItems.refs) importedModule.refs.add(id);
+    for (const id of importItems.importedAs) importedModule.importedAs.add(id);
     for (const id of importItems.importedNs) importedModule.importedNs.add(id);
     for (const id of importItems.isReExportedBy) importedModule.isReExportedBy.add(id);
     for (const id of importItems.isReExportedNs) importedModule.isReExportedNs.add(id);

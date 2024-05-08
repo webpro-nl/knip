@@ -17,6 +17,8 @@ async function main() {
   import('./side-effects-call');
   await import('./await-import-call');
   const { default: defaultName, identifier11: renamedIdentifier, identifier12 } = await import('./object-bindings');
+
+  [defaultName, renamedIdentifier, identifier12];
 }
 
 const dynamicImport = (value: string) => {
@@ -42,6 +44,8 @@ function promiseAll() {
         import('./import-a'),
         import('./dir/import-b'),
       ]);
+
+      [identifierA, identifierB];
     },
   };
 }
@@ -72,3 +76,21 @@ export default fn({
     child3: import('./import-e'),
   },
 });
+
+[
+  topLevel,
+  top,
+  dynamic,
+  defaultName1,
+  defaultName2,
+  defaultName3,
+  defaultName4,
+  defaultName5,
+  renamed,
+  renamed2,
+  renamed3,
+  renamedIdentifier,
+  renamedIdentifier2,
+  namedC,
+  identifier14,
+];

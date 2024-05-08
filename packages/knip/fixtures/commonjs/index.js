@@ -19,6 +19,9 @@ const templateStringExternal = value => {
 const templateStringInternal = value => {
   const baz = require(`./dir/mod1`);
   const { identifier } = require(`./dir/mod1`);
+
+  baz;
+  identifier;
 };
 
 const requireResolve = value => {
@@ -27,6 +30,7 @@ const requireResolve = value => {
 
 const requireExportedShorthandsHeuristic = value => {
   const { identifier9, identifier10 } = require('./dir/mod3');
+  [identifier9, identifier10];
 };
 
 const staticResolve = () => {
@@ -36,3 +40,10 @@ const staticResolve = () => {
 const dynamicResolve = () => {
   return require.resolve(path.join(process.cwd(), 'package.json'));
 };
+
+renamed;
+defaultName;
+named;
+all;
+staticResolve;
+add;

@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/imports-namespace-with-nsexports');
 
-test('Ignore namespace re-export by entry file', async () => {
+test('Ignore namespace re-export by entry file (nsExports', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

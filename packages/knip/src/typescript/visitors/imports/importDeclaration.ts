@@ -15,7 +15,14 @@ export default visit(
 
       if (isDefaultImport(node)) {
         // Pattern: import identifier from 'specifier'
-        imports.push({ specifier, identifier: 'default', pos: node.moduleSpecifier.pos });
+        imports.push({
+          identifier: 'default',
+          alias: String(node.importClause.name?.escapedText),
+          specifier,
+          // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportClause'.
+          symbol: node.importClause.symbol,
+          pos: node.moduleSpecifier.pos,
+        });
       }
 
       if (node.importClause?.namedBindings) {
@@ -30,11 +37,11 @@ export default visit(
           for (const element of node.importClause.namedBindings.elements) {
             const identifier = (element.propertyName ?? element.name).getText();
             imports.push({
+              identifier,
+              specifier,
               // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportSpecifier'.
               symbol: element.symbol,
               isTypeOnly: node.importClause?.isTypeOnly,
-              specifier,
-              identifier,
               pos: element.pos,
             });
           }

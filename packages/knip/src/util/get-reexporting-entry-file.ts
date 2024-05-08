@@ -8,7 +8,7 @@ export const getReExportingEntryFileHandler = (entryPaths: Set<string>, serializ
     depth = 0,
     filePath?: string
   ): string | undefined => {
-    if (depth === 0 && filePath) exportLookupLog(-1, `Looking up re-exporting file for ${id} from`, filePath);
+    if (depth === 0 && filePath) exportLookupLog(-1, `Looking up re-exporting file for "${id}" from`, filePath);
 
     if (!importedModule) return undefined;
 

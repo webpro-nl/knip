@@ -168,9 +168,12 @@ export const isDestructuring = (node: ts.Node) =>
 export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
   name.elements.map(element => element.name.getText());
 
-export const isConsiderReferencedNS = (node: ts.Identifier) =>
+export const isConsiderReferenced = (node: ts.Identifier) =>
   ts.isShorthandPropertyAssignment(node.parent) ||
   (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
   ts.isSpreadAssignment(node.parent) ||
   ts.isExportAssignment(node.parent) ||
   (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node);
+
+export const isTopLevel = (node: ts.Node) =>
+  ts.isSourceFile(node.parent) || (node.parent && ts.isSourceFile(node.parent.parent));

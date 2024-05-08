@@ -4,9 +4,9 @@ export const getHasStrictlyNsReferences = (importsForExport?: SerializableImport
   if (!importsForExport?.hasStar || importsForExport.importedNs.size === 0) return [false];
   let namespace: string | undefined;
   for (const ns of importsForExport.importedNs) {
-    const hasNs = importsForExport.identifiers.has(ns);
+    const hasNs = importsForExport.refs.has(ns);
     if (!hasNs) return [false, ns];
-    for (const id of importsForExport.identifiers) if (id.startsWith(`${ns}.`)) return [false, ns];
+    for (const id of importsForExport.refs) if (id.startsWith(`${ns}.`)) return [false, ns];
     namespace = ns;
   }
   return [true, namespace];

@@ -4,14 +4,15 @@ import type { IssueSymbol, SymbolType } from './issues.js';
 
 type FilePath = string;
 type Specifier = string;
-type Identifier = string;
-type Identifiers = Set<Identifier>;
+type Reference = string;
+type References = Set<Reference>;
 type Tags = Set<string>;
 
 export type SerializableImports = {
   specifier: Specifier;
-  identifiers: Identifiers;
+  refs: References;
   hasStar: boolean;
+  importedAs: Set<[string, string]>;
   importedNs: Set<string>;
   isReExport: boolean;
   isReExportedBy: Set<string>;
@@ -24,7 +25,7 @@ export type SerializableImportMap = Record<FilePath, SerializableImports>;
 export type UnresolvedImport = { specifier: string; pos?: number; line?: number; col?: number };
 
 export interface SerializableExport {
-  identifier: Identifier;
+  identifier: Reference;
   pos: number;
   line: number;
   col: number;
@@ -37,7 +38,7 @@ export interface SerializableExport {
 }
 
 export type SerializableExportMember = {
-  identifier: Identifier;
+  identifier: Reference;
   pos: number;
   line: number;
   col: number;
@@ -48,7 +49,7 @@ export type SerializableExportMember = {
   jsDocTags: Tags;
 };
 
-export type SerializableExports = Record<Identifier, SerializableExport>;
+export type SerializableExports = Record<Reference, SerializableExport>;
 
 export type SerializableFile = {
   internalImportCache?: SerializableImportMap;

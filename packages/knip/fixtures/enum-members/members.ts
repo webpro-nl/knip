@@ -12,3 +12,5 @@ export enum MyEnum {
 }
 
 const myNumber: MyEnum.C_UsedInternal = 1;
+
+type Used = EntryEnum;

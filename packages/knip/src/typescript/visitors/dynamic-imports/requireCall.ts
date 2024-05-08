@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { findAncestor, findDescendants, isRequireCall } from '../../ast-helpers.js';
+import { findAncestor, findDescendants, isRequireCall, isTopLevel } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -25,16 +25,27 @@ export default visit(
             ts.isVariableDeclaration(variableDeclaration) &&
             ts.isVariableDeclarationList(variableDeclaration.parent)
           ) {
+            const isTLA = isTopLevel(variableDeclaration.parent);
             if (ts.isIdentifier(variableDeclaration.name)) {
               // Pattern: identifier = require('specifier')
-              return { identifier: 'default', specifier, pos: node.arguments[0].pos };
+              const alias = String(variableDeclaration.name.escapedText);
+              return {
+                identifier: 'default',
+                alias,
+                // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'VariableDeclaration'.
+                symbol: isTLA ? variableDeclaration.symbol : undefined,
+                specifier,
+                pos: node.arguments[0].pos,
+              };
             }
             const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
             if (bindings.length > 0) {
               // Pattern: { identifier } = require('specifier')
               return bindings.map(element => {
                 const identifier = (element.propertyName ?? element.name).getText();
-                return { identifier, specifier, pos: element.pos };
+                const alias = element.propertyName ? element.name.getText() : undefined;
+                // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
+                return { identifier, specifier, alias, symbol: isTLA ? element.symbol : undefined, pos: element.pos };
               });
             }
             // Pattern: require('specifier')

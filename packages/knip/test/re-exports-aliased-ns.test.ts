@@ -5,21 +5,20 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/re-exports-ns-member');
+const cwd = resolve('fixtures/re-exports-aliased-ns');
 
-test('Find destructured props of member-accessed imported symbol', async () => {
+test('Find exports through re-exported aliased namespace', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(issues.exports['member-ab.ts']['unusedMemberA']);
-  assert(issues.exports['member-cd.ts']['unusedMemberC']);
+  assert(issues.exports['2-second.ts']['second']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
-    processed: 6,
-    total: 6,
+    exports: 1,
+    processed: 5,
+    total: 5,
   });
 });

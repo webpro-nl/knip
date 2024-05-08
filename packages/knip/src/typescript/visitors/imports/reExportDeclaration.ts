@@ -15,7 +15,7 @@ export default visit(
           // Pattern: export * as namespace from 'specifier';
           return {
             identifier: '*',
-            namespace: node.exportClause.name.escapedText,
+            namespace: String(node.exportClause.name.escapedText),
             specifier: node.moduleSpecifier.text,
             isReExport: true,
             pos: node.exportClause.name.pos,
@@ -26,8 +26,8 @@ export default visit(
           if (element.propertyName && element.name) {
             // Pattern: export { identifier as otherIdentifier } from 'specifier';
             return {
-              identifier: String(element.name.escapedText),
-              namespace: element.propertyName.escapedText,
+              identifier: String(element.propertyName.escapedText),
+              alias: String(element.name.escapedText),
               specifier: specifier.text,
               isReExport: true,
               pos: element.pos,

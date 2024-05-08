@@ -21,8 +21,7 @@
         "noUnusedImports": "error"
       },
       "complexity": {
-        "useLiteralKeys": "off",
-        "useSimplifiedLogicExpression": "error"
+        "useLiteralKeys": "off"
       },
       "nursery": {
         "noRestrictedImports": {
@@ -87,6 +86,23 @@
         "rules": {
           "suspicious": {
             "noConsoleLog": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["packages/knip/fixtures"],
+      "organizeImports": {
+        "enabled": false
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          },
+          "style": {
+            "useImportType": "off"
           }
         }
       }

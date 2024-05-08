@@ -1,2 +1,3 @@
-import { A as x } from './fileB.js';
-console.log(x.afoo);
+import { B as C } from './fileB.js';
+
+C.A;

@@ -11,7 +11,7 @@ const base: SerializableImports = {
   isReExportedNs: new Set(),
   hasStar: false,
   importedNs: new Set(),
-  identifiers: new Set(),
+  refs: new Set(),
 };
 
 test('Strictly namespace refs (no namespaces)', () => {
@@ -24,7 +24,7 @@ test('Strictly namespace refs (single ns)', () => {
       ...base,
       hasStar: true,
       importedNs: new Set(['ns']),
-      identifiers: new Set(['ns']),
+      refs: new Set(['ns']),
     }),
     [true, 'ns']
   );
@@ -36,7 +36,7 @@ test('Strictly namespace refs (no id)', () => {
       ...base,
       hasStar: true,
       importedNs: new Set(['ns']),
-      identifiers: new Set([]),
+      refs: new Set([]),
     }),
     [false, 'ns']
   );
@@ -48,7 +48,7 @@ test('Strictly namespace refs (single ns, no id)', () => {
       ...base,
       hasStar: true,
       importedNs: new Set([]),
-      identifiers: new Set(['ns']),
+      refs: new Set(['ns']),
     }),
     [false]
   );
@@ -60,7 +60,7 @@ test('Strictly namespace refs (multiple ns, no id)', () => {
       ...base,
       hasStar: true,
       importedNs: new Set(['ns', 'ns2']),
-      identifiers: new Set(['ns']),
+      refs: new Set(['ns']),
     }),
     [false, 'ns2']
   );
@@ -72,7 +72,7 @@ test('Strictly namespace refs (member access)', () => {
       ...base,
       hasStar: true,
       importedNs: new Set(['ns']),
-      identifiers: new Set(['ns', 'ns.prop']),
+      refs: new Set(['ns', 'ns.prop']),
     }),
     [false, 'ns']
   );
@@ -84,7 +84,7 @@ test('Strictly namespace refs (no star)', () => {
       ...base,
       hasStar: false,
       importedNs: new Set(['ns']),
-      identifiers: new Set(['ns']),
+      refs: new Set(['ns']),
     }),
     [false]
   );

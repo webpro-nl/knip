@@ -21,16 +21,16 @@ test('knip --reporter json (exports & types)', () => {
         binaries: [],
         unresolved: [],
         exports: [
-          { name: 'unusedNumber', line: 14, col: 14, pos: 562 },
-          { name: 'unusedFunction', line: 15, col: 14, pos: 593 },
-          { name: 'default', line: 21, col: 8, pos: 727 },
+          { name: 'unusedNumber', line: 23, col: 14, pos: 682 },
+          { name: 'unusedFunction', line: 24, col: 14, pos: 713 },
+          { name: 'default', line: 30, col: 8, pos: 847 },
         ],
-        types: [{ name: 'MyAnyType', line: 19, col: 13, pos: 702 }],
+        types: [{ name: 'MyAnyType', line: 28, col: 13, pos: 822 }],
         enumMembers: {},
         duplicates: [
           [
-            { name: 'exportedResult', line: 17, col: 13, pos: 649 },
-            { name: 'default', line: 21, col: 15, pos: 734 },
+            { name: 'exportedResult', line: 26, col: 13, pos: 769 },
+            { name: 'default', line: 30, col: 15, pos: 854 },
           ],
         ],
       },

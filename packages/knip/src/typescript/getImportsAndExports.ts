@@ -1,5 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
+import { DEFAULT_EXTENSIONS } from '../constants.js';
 import type { Tags } from '../types/cli.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
@@ -13,7 +14,7 @@ import type {
 } from '../types/serializable-map.js';
 import { timerify } from '../util/Performance.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { isInNodeModules } from '../util/path.js';
+import { extname, isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
 import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
 import {
@@ -22,7 +23,7 @@ import {
   getJSDocTags,
   getLineAndCharacterOfPosition,
   isAccessExpression,
-  isConsiderReferencedNS,
+  isConsiderReferenced,
   isDestructuring,
 } from './ast-helpers.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -102,25 +103,38 @@ const getImportsAndExports = (
       isReExportedBy: new Set(),
       isReExportedAs: new Set(),
       isReExportedNs: new Set(),
+      importedAs: new Set(),
       importedNs: new Set(),
-      identifiers: new Set(),
+      refs: new Set(),
     });
+
+    if (isStar) internalImport.hasStar = true;
 
     if (isReExport) {
       internalImport.isReExport = true;
-      if (namespace && isStar) internalImport.isReExportedAs.add([sourceFile.fileName, namespace]);
-      else if (namespace) internalImport.isReExportedNs.add([sourceFile.fileName, namespace]);
-      else internalImport.isReExportedBy.add(sourceFile.fileName);
+      if (namespace && isStar) {
+        internalImport.isReExportedNs.add([sourceFile.fileName, namespace]);
+      } else if (namespace) {
+        internalImport.isReExportedAs.add([sourceFile.fileName, namespace]);
+      } else {
+        internalImport.isReExportedBy.add(sourceFile.fileName);
+      }
     }
 
-    if (isStar) {
-      internalImport.hasStar = true;
-      if (symbol) internalImport.importedNs.add(String(symbol.escapedName));
+    const alias = symbol ? String(symbol.escapedName) : options.alias;
+    if (alias && alias !== identifier) {
+      if (isStar) {
+        internalImport.importedNs.add(alias);
+      } else {
+        internalImport.importedAs.add([identifier, alias]);
+      }
+    }
+
+    if (symbol && DEFAULT_EXTENSIONS.includes(extname(sourceFile.fileName))) {
+      importedInternalSymbols.set(symbol, filePath);
     } else {
-      internalImport.identifiers.add(namespace ?? identifier);
+      internalImport.refs.add(namespace ?? identifier);
     }
-
-    if (symbol) importedInternalSymbols.set(symbol, filePath);
   };
 
   const addImport = (options: ImportNode, node: ts.Node) => {
@@ -171,8 +185,8 @@ const getImportsAndExports = (
       const importedSymbolFilePath = importedInternalSymbols.get(symbol);
       if (importedSymbolFilePath) {
         const internalImport = internalImports[importedSymbolFilePath];
-        if (typeof member === 'string') internalImport.identifiers.add(`${namespace}.${member}`);
-        else for (const m of member) internalImport.identifiers.add(`${namespace}.${m}`);
+        if (typeof member === 'string') internalImport.refs.add(`${namespace}.${member}`);
+        else for (const m of member) internalImport.refs.add(`${namespace}.${m}`);
       }
     }
   };
@@ -195,7 +209,11 @@ const getImportsAndExports = (
           if (importedSymbolFilePath) {
             const internalImport = internalImports[importedSymbolFilePath];
             internalImport.isReExport = true;
-            internalImport.isReExportedAs.add([sourceFile.fileName, node.name.getText()]);
+            if (symbol.declarations && ts.isNamespaceImport(symbol.declarations[0])) {
+              internalImport.isReExportedNs.add([sourceFile.fileName, node.name.getText()]);
+            } else {
+              internalImport.isReExportedAs.add([sourceFile.fileName, node.name.getText()]);
+            }
           }
         }
       } else if (symbol) {
@@ -296,34 +314,43 @@ const getImportsAndExports = (
     if (ts.isIdentifier(node)) {
       const symbol = sourceFile.locals?.get(String(node.escapedText));
       if (symbol) {
-        // TODO Ideally we store imported symbols and check directly against those, but can't get symbols to match
         const importedSymbolFilePath = importedInternalSymbols.get(symbol);
         if (importedSymbolFilePath) {
-          if (isAccessExpression(node.parent)) {
-            if (isDestructuring(node.parent)) {
-              if (ts.isPropertyAccessExpression(node.parent)) {
-                // Pattern: const { a, b } = NS.sub;
-                const ns = String(symbol.escapedName);
-                const key = String(node.parent.name.escapedText);
-                // @ts-expect-error safe after isDestructuring
-                const members = getDestructuredIds(node.parent.parent.name).map(n => `${key}.${n}`);
-                maybeAddAccessExpressionAsNsImport(ns, key);
-                maybeAddAccessExpressionAsNsImport(ns, members);
+          if (
+            !ts.isImportSpecifier(node.parent) &&
+            !ts.isImportEqualsDeclaration(node.parent) &&
+            !ts.isImportClause(node.parent) &&
+            !ts.isNamespaceImport(node.parent)
+          ) {
+            if (
+              !internalImports[importedSymbolFilePath].importedNs.has(String(node.escapedText)) ||
+              isConsiderReferenced(node)
+            ) {
+              internalImports[importedSymbolFilePath].refs.add(String(node.escapedText));
+            }
+
+            if (isAccessExpression(node.parent)) {
+              if (isDestructuring(node.parent)) {
+                if (ts.isPropertyAccessExpression(node.parent)) {
+                  // Pattern: const { a, b } = NS.sub;
+                  const ns = String(symbol.escapedName);
+                  const key = String(node.parent.name.escapedText);
+                  // @ts-expect-error safe after isDestructuring
+                  const members = getDestructuredIds(node.parent.parent.name).map(n => `${key}.${n}`);
+                  maybeAddAccessExpressionAsNsImport(ns, key);
+                  maybeAddAccessExpressionAsNsImport(ns, members);
+                }
+              } else {
+                // Patterns: NS.id, NS['id'], NS.sub.id, NS[type], etc.
+                const members = getAccessMembers(typeChecker, node);
+                maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
               }
-            } else {
-              // Patterns: NS.id, NS['id'], NS.sub.id, NS[type], etc.
-              const members = getAccessMembers(typeChecker, node);
+            } else if (isDestructuring(node)) {
+              // Pattern: const { a, b } = NS;
+              // @ts-expect-error safe after isDestructuring
+              const members = getDestructuredIds(node.parent.name);
               maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
             }
-          } else if (isDestructuring(node)) {
-            // Pattern: const { a, b } = NS;
-            // @ts-expect-error safe after isDestructuring
-            const members = getDestructuredIds(node.parent.name);
-            maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
-          } else if (isConsiderReferencedNS(node)) {
-            // Patterns: const a = { NS }; fn(NS); const a = { ...NS }; export = NS; ; const ns = NS;
-            // Heuristic indicating imported symbol itself is consumed, which results in its members not being reported
-            internalImports[importedSymbolFilePath].identifiers.add(String(node.escapedText));
           }
         }
       }

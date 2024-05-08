@@ -1,1 +1,1 @@
-export * as A from './fileA.js';
+export * as B from './fileA.js';
