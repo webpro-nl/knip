@@ -33,7 +33,7 @@
     "@types/unist": "3.0.2",
     "astro": "4.7.1",
     "hastscript": "9.0.0",
-    "kleur": "4.1.5",
+    "picocolors": "^1.0.0",
     "remark-cli": "12.0.1",
     "remark-directive": "3.0.0",
     "remark-frontmatter": "5.0.0",
