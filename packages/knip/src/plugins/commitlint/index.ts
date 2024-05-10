@@ -1,13 +1,9 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
+import type { CommitLintConfig } from './types.js';
 
 // https://commitlint.js.org
 // https://github.com/conventional-changelog/commitlint#config
-
-type CommitLintConfig = {
-  extends: string[];
-  plugins: string[];
-};
 
 const title = 'commitlint';
 
@@ -23,9 +19,15 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<CommitLintConfig> = config => {
-  const extendsConfigs = config.extends ? [config.extends].flat() : [];
-  const plugins = config.plugins ? [config.plugins].flat() : [];
-  return [...extendsConfigs, ...plugins];
+  const extendsConfigs = config.extends
+    ? [config.extends]
+        .flat()
+        .map(id => (id.startsWith('@') || id.startsWith('commitlint-config-') ? id : `commitlint-config-${id}`))
+    : [];
+  const plugins = config.plugins ? [config.plugins].flat().filter(s => typeof s === 'string') : [];
+  const formatter = config.formatter ? [config.formatter] : [];
+  const parserPreset = config.parserPreset ? [config.parserPreset] : [];
+  return [...extendsConfigs, ...plugins, ...formatter, ...parserPreset];
 };
 
 export default {
