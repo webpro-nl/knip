@@ -40,7 +40,7 @@ export default defineConfig({
       },
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
       editLink: {
-        baseUrl: 'https://github.com/webpro/knip/edit/v3/packages/docs/',
+        baseUrl: 'https://github.com/webpro/knip/edit/main/packages/docs/',
       },
       sidebar: [
         {
