@@ -8,6 +8,7 @@ import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
 import { debugLogObject } from './debug.js';
+import { isFile } from './fs.js';
 import { dirname, join, relative, toPosix } from './path.js';
 
 const walk = promisify(_walk);
@@ -73,41 +74,46 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
     return false;
   };
 
-  const entryFilter = (entry: Entry) => {
-    if (entry.dirent.isFile() && entry.name === '.gitignore') {
-      gitignoreFiles.push(entry.path);
+  const addFile = (filePath: string) => {
+    gitignoreFiles.push(filePath);
 
-      const dir = dirname(toPosix(entry.path));
-      const base = relative(options.cwd, dir);
-      const dirIgnores = base === '' ? ['.git', ...GLOBAL_IGNORE_PATTERNS] : [];
-      const dirUnignores = [];
+    const dir = dirname(toPosix(filePath));
+    const base = relative(options.cwd, dir);
+    const dirIgnores = base === '' ? ['.git', ...GLOBAL_IGNORE_PATTERNS] : [];
+    const dirUnignores = [];
 
-      for (const rule of parseGitignoreFile(entry.path)) {
-        const [p, ext] = rule.patterns;
-        if (rule.negated) {
-          if (base === '') {
-            if (!unignores.includes(ext)) dirUnignores.push(...rule.patterns);
-          } else {
-            if (!unignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
-              dirUnignores.push(join(base, p), join(base, ext));
-            }
-          }
+    for (const rule of parseGitignoreFile(filePath)) {
+      const [p, ext] = rule.patterns;
+      if (rule.negated) {
+        if (base === '') {
+          if (!unignores.includes(ext)) dirUnignores.push(...rule.patterns);
         } else {
-          if (base === '') {
-            if (!ignores.includes(ext)) dirIgnores.push(...rule.patterns);
-          } else {
-            if (!ignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
-              dirIgnores.push(join(base, p), join(base, ext));
-            }
+          if (!unignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
+            dirUnignores.push(join(base, p), join(base, ext));
+          }
+        }
+      } else {
+        if (base === '') {
+          if (!ignores.includes(ext)) dirIgnores.push(...rule.patterns);
+        } else {
+          if (!ignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
+            dirIgnores.push(join(base, p), join(base, ext));
           }
         }
       }
+    }
 
-      ignores.push(...dirIgnores);
-      unignores.push(...dirUnignores);
-      cachedIgnores.set(dir, { ignores: dirIgnores, unignores: dirUnignores });
-      matchers.push(...dirIgnores.map(ignore => _picomatch(ignore, pmOptions)));
+    ignores.push(...dirIgnores);
+    unignores.push(...dirUnignores);
+    cachedIgnores.set(dir, { ignores: dirIgnores, unignores: dirUnignores });
+    matchers.push(...dirIgnores.map(ignore => _picomatch(ignore, pmOptions)));
+  };
 
+  if (isFile('.git/info/exclude')) addFile('.git/info/exclude');
+
+  const entryFilter = (entry: Entry) => {
+    if (entry.dirent.isFile() && entry.name === '.gitignore') {
+      addFile(entry.path);
       return true;
     }
     return false;
