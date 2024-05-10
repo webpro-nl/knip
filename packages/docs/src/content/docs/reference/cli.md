@@ -299,7 +299,7 @@ Available reporters:
 - `compact`
 - `codeowners`
 - `json`
-- `jsonExt`
+- `markdown`
 
 Can be repeated. Example:
 
