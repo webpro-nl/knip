@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/lost-pixel",
+  "version": "*",
+  "devDependencies": {
+    "lost-pixel": "*"
+  }
+}

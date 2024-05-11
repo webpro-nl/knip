@@ -359,6 +359,10 @@
           "title": "linthtml plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/linthtml/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "lost-pixel": {
+          "title": "lost-pixel plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/lost-pixel/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "markdownlint": {
           "title": "markdownlint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/markdownlint/README.md)",
           "$ref": "#/definitions/plugin"
