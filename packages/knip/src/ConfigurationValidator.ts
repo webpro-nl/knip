@@ -123,6 +123,7 @@ const pluginsSchema = z.object({
   stryker: pluginSchema,
   stylelint: pluginSchema,
   svelte: pluginSchema,
+  syncpack: pluginSchema,
   tailwind: pluginSchema,
   tsup: pluginSchema,
   typedoc: pluginSchema,
