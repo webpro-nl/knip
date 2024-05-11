@@ -459,6 +459,10 @@
           "title": "svelte plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/svelte/README.md)",
           "$ref": "#/definitions/plugin"
         },
+        "syncpack": {
+          "title": "syncpack plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/syncpack/README.md)",
+          "$ref": "#/definitions/plugin"
+        },
         "tailwind": {
           "title": "tailwind plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/tailwind/README.md)",
           "$ref": "#/definitions/plugin"

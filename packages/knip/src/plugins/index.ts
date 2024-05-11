@@ -45,6 +45,7 @@ export { default as storybook } from './storybook/index.js';
 export { default as stryker } from './stryker/index.js';
 export { default as stylelint } from './stylelint/index.js';
 export { default as svelte } from './svelte/index.js';
+export { default as syncpack } from './syncpack/index.js';
 export { default as tailwind } from './tailwind/index.js';
 export { default as tsup } from './tsup/index.js';
 export { default as typedoc } from './typedoc/index.js';
