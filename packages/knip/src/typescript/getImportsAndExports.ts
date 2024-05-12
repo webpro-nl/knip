@@ -23,7 +23,7 @@ import {
   getJSDocTags,
   getLineAndCharacterOfPosition,
   isAccessExpression,
-  isConsiderReferenced,
+  isConsiderReferencedNS,
   isDestructuring,
 } from './ast-helpers.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -324,7 +324,7 @@ const getImportsAndExports = (
           ) {
             if (
               !internalImports[importedSymbolFilePath].importedNs.has(String(node.escapedText)) ||
-              isConsiderReferenced(node)
+              isConsiderReferencedNS(node)
             ) {
               internalImports[importedSymbolFilePath].refs.add(String(node.escapedText));
             }
