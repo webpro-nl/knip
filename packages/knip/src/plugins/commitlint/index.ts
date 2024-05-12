@@ -18,7 +18,7 @@ const config = [
   'package.json',
 ];
 
-const resolveConfig: ResolveConfig<CommitLintConfig> = config => {
+const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
   const extendsConfigs = config.extends
     ? [config.extends]
         .flat()
@@ -26,8 +26,15 @@ const resolveConfig: ResolveConfig<CommitLintConfig> = config => {
     : [];
   const plugins = config.plugins ? [config.plugins].flat().filter(s => typeof s === 'string') : [];
   const formatter = config.formatter ? [config.formatter] : [];
-  const parserPreset = config.parserPreset ? [config.parserPreset] : [];
-  return [...extendsConfigs, ...plugins, ...formatter, ...parserPreset];
+  const parserPreset = await config.parserPreset;
+  const parserPresetPaths: string[] = parserPreset
+    ? typeof parserPreset === 'string'
+      ? [parserPreset]
+      : parserPreset.path
+        ? [parserPreset.path ?? parserPreset]
+        : []
+    : [];
+  return [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths];
 };
 
 export default {
