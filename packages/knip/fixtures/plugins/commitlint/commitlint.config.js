@@ -1,6 +1,10 @@
 module.exports = {
   extends: ['lerna', '@commitlint/config-conventional'],
-  parserPreset: 'conventional-changelog-atom',
+  parserPreset: {
+    parserOpts: {
+      headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/u,
+    },
+  },
   formatter: '@commitlint/format',
   plugins: [
     {
