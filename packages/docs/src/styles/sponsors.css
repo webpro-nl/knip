@@ -15,6 +15,11 @@
   border-bottom: none;
 }
 
+.sponsors img {
+  border: 1px solid var(--sl-color-white);
+  border-radius: 16px;
+}
+
 .sponsors .w500 {
   width: 500px;
 }
