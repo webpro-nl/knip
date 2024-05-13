@@ -10,7 +10,7 @@ const enablers: EnablerPatterns = ['lost-pixel'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['lost-pixel.config.{js|ts}'];
+const config = ['lost-pixel.config.{js,ts}'];
 
 export default {
   title,
