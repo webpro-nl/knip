@@ -79,6 +79,20 @@ projects are published with one or more Definitely Typed packages (`@types/*`)
 bundled. Knip does not detect/report such DT packages that are expected to be
 listed in `dependencies`.
 
+## Extensionless imports
+
+Knip does not support extensionless imports for non-standard extensions, such as
+for `.vue` or `.svg` files. Bundlers like Webpack may support this, but Knip
+does not. Examples:
+
+```ts title="App.vue"
+import Component from './Component'; // → Does not resolve to ./Component.vue
+import ArrowIcon from '../icons/Arrow'; // → Does not resolve to ../icons/Arrow.svg
+```
+
+The recommendation is to add the extension when importing such files, similar to
+how standard ES Modules work.
+
 [1]: https://github.com/unjs/jiti
 [2]: ./configuration.md#plugins
 [3]: https://github.com/unjs/jiti/issues/72

@@ -264,13 +264,12 @@ listed.
 
 By default, Knip does not report unused exports of `entry` files.
 
-When unused exports are reported, and you want to keep exporting it, there are a
-few options:
+When unused exports are reported, and you want to keep exporting those, there
+are a few options:
 
 - [Ignore exports used in file][19] for exports used internally.
-- Individual exports can be [tagged as `@public`][20].
-- Individual exports can be excluded using arbitrary [tags][21].
-- Make sure the export ends up in an [entry file][2]:
+- Individual exports can be [tagged using JSDoc syntax][20].
+- Have the export in or re-exported by an [entry file][2]:
   - Add the file to the `entry` file patterns array in the configuration
   - Move the export(s) to an entry file
   - Re-export the unused export(s) from an entry file
@@ -278,8 +277,8 @@ few options:
 
 :::tip
 
-Use the `--exports` flag to [filter][5] and focus only on exports related
-issues:
+Use the `--exports` flag to [filter][5] and focus only on issues related to
+exports:
 
 ```sh
 knip --exports
@@ -290,7 +289,9 @@ knip --exports
 ### External libraries
 
 Are the exports consumed or imported by an external library, resulting in a
-non-standard consumption of your exports? Here's an example:
+non-standard consumption of your exports? Try the `--include-libs` flag.
+
+Here's an example:
 
 <Tabs>
   <TabItem label="index.js">
@@ -320,8 +321,12 @@ non-standard consumption of your exports? Here's an example:
 </Tabs>
 
 Knip understands `Apple` is used, since it's standard usage. But `Orange` is
-referenced though a function of an external library. To include the type
-definitions of external libraries, use the `--include-libs` flag:
+referenced through a function of an external library. For performance reasons,
+Knip does not include external type definitions by default so it won't see the
+export being referenced.
+
+To include the type definitions of external libraries, use the
+[--include-libs][21] flag:
 
 ```shell
 knip --include-libs
@@ -349,10 +354,10 @@ This option is also available in the Knip configuration file. Note that this
 feature comes at a cost: linting will take more time and more memory (in rare
 cases it may even run out of memory in large repositories).
 
-Individual class members can be [tagged as `@public`][20].
+Individual class members can be [tagged using JSDoc syntax][20].
 
 Classes exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][23] to make Knip also report members of unused export
+[--include-entry-exports][23] to make Knip also report members of unused exports
 in entry files.
 
 ## Enum members
@@ -364,7 +369,7 @@ members can also be disabled altogether, for example:
 knip --exclude enumMembers
 ```
 
-Individual enum members can be [tagged as `@public`][20].
+Individual enum members can be [tagged using JSDoc syntax][20].
 
 Enums exported from entry files are ignored, and so are their members. Use
 [--include-entry-exports][23] to make Knip also report members of unused exports
@@ -401,8 +406,8 @@ Also see [troubleshooting][26] if you haven't already.
 [17]: https://eslint.org/docs/latest/use/configure/configuration-files-new
 [18]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [19]: ../reference/configuration.md#ignoreexportsusedinfile
-[20]: ../reference/jsdoc-tsdoc-tags.md#public
-[21]: ../reference/cli.md#--tags
+[20]: ../reference/jsdoc-tsdoc-tags.md
+[21]: ../reference/cli#--include-libs
 [22]: #class-members
 [23]: ../reference/configuration.md#includeentryexports
 [24]: ../reference/configuration.md#paths

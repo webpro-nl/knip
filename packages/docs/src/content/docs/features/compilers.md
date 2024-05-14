@@ -53,6 +53,27 @@ to Knip. This means you don't need to add something like `**/*.{ts,css}` to the
 
 :::
 
+### Svelte
+
+In a project with Svelte, the compiler is automatically enabled, but you may
+have unresolved imports starting with `$app/`:
+
+```shell
+Unresolved imports (5)
+$app/stores       src/routes/Header.svelte:1:9
+$app/environment  src/routes/about/+page.ts:1:9
+```
+
+In this case, you can manually add the `$app` path alias:
+
+```json title="knip.json"
+{
+  "paths": {
+    "$app/*": ["node_modules/@sveltejs/kit/src/runtime/app/*"]
+  }
+}
+```
+
 ### CSS
 
 Here's an example, minimal compiler for CSS files:

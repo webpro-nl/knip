@@ -50,6 +50,8 @@ This way, the `project` files cover all source files, and most other files don't
 even need to be ignored anymore. This may have a significant impact on
 performance.
 
+Also see [configuring project files][1].
+
 ## Workspace sharing
 
 Knip shares files from separate workspaces if the configuration in
@@ -96,6 +98,7 @@ up symbols and caching.
 ## A last resort
 
 In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][1].
+individual workspaces][2].
 
-[1]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[1]: ./configuring-project-files.md
+[2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace

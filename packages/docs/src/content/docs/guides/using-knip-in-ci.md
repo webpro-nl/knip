@@ -33,16 +33,22 @@ jobs:
 
 ## Notes
 
-In CI environments, the [--no-progress](../reference/cli.md#--no-progress) flag
-is set automatically.
+In CI environments, the [--no-progress][1] flag is set automatically.
 
 ## Related features
 
-- [--cache](../reference/cli.md#--cache)
-- [--max-issues](../reference/cli.md#--max-issues)
-- [--no-exit-code](../reference/cli.md#--no-exit-code)
-- [--reporter](../reference/cli.md#--reporter-reporter)
+- [--cache][2]
+- [--max-issues][3]
+- [--no-exit-code][4]
+- [--reporter][5]
 
 ## Related reading
 
-- [Why use Knip?](../explanations/why-use-knip.md)
+- [Why use Knip?][6]
+
+[1]: ../reference/cli.md#--no-progress
+[2]: ../reference/cli.md#--cache
+[3]: ../reference/cli.md#--max-issues
+[4]: ../reference/cli.md#--no-exit-code
+[5]: ../reference/cli.md#--reporter-reporter
+[6]: ../explanations/why-use-knip.md

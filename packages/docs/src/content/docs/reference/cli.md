@@ -124,8 +124,8 @@ Also see [includeEntryExports][3].
 
 ### `--include-libs`
 
-If Knip report false positives for exports consumed by external libraries, you
-can try the `--include-libs` flag:
+Getting false positives for exports consumed by external libraries? Try the
+`--include-libs` flag:
 
 ```sh
 knip --include-libs
