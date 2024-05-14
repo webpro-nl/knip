@@ -20,6 +20,7 @@ export { default as jest } from './jest/index.js';
 export { default as lefthook } from './lefthook/index.js';
 export { default as lintStaged } from './lint-staged/index.js';
 export { default as linthtml } from './linthtml/index.js';
+export { default as lostPixel } from './lost-pixel/index.js';
 export { default as markdownlint } from './markdownlint/index.js';
 export { default as mocha } from './mocha/index.js';
 export { default as moonrepo } from './moonrepo/index.js';
