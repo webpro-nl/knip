@@ -8,13 +8,19 @@ import { LoaderError } from './errors.js';
 import { dirname, join } from './path.js';
 
 export const isDirectory = (filePath: string) => {
-  const stat = statSync(filePath, { throwIfNoEntry: false });
-  return stat?.isDirectory();
+  try {
+    return statSync(filePath).isDirectory();
+  } catch (_error) {
+    return false;
+  }
 };
 
 export const isFile = (filePath: string) => {
-  const stat = statSync(filePath, { throwIfNoEntry: false });
-  return stat?.isFile();
+  try {
+    return statSync(filePath).isFile();
+  } catch (_error) {
+    return false;
+  }
 };
 
 export const findFile = (workingDir: string, fileName: string) => {
