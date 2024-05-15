@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { DEFAULT_EXTENSIONS } from '../constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS } from '../constants.js';
 import type { Tags } from '../types/cli.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
@@ -138,7 +138,7 @@ const getImportsAndExports = (
   };
 
   const addImport = (options: ImportNode, node: ts.Node) => {
-    const { specifier, isTypeOnly, pos, identifier = '__anonymous', isReExport = false } = options;
+    const { specifier, isTypeOnly, pos, identifier = ANONYMOUS, isReExport = false } = options;
     if (isBuiltin(specifier)) return;
 
     const module = getResolvedModule(specifier);

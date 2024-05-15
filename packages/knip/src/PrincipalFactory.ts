@@ -92,7 +92,7 @@ export class PrincipalFactory {
   private addNewPrincipal(options: PrincipalOptions) {
     const { cwd, compilerOptions, pkgName } = options;
     const pathKeys = new Set(Object.keys(compilerOptions?.paths ?? {}));
-    const principal = new ProjectPrincipal(options, this.principals.size + 1);
+    const principal = new ProjectPrincipal(options);
     this.principals.add({ principal, cwds: new Set([cwd]), pathKeys, pkgNames: new Set([pkgName]) });
     return principal;
   }

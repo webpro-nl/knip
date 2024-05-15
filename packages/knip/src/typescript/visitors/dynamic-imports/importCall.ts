@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { ANONYMOUS } from '../../../constants.js';
 import {
   findAncestor,
   findDescendants,
@@ -104,7 +105,7 @@ export default visit(
                 });
               }
               // Pattern: import('specifier')
-              return { identifier: '__anonymous', specifier, pos: node.arguments[0].pos };
+              return { identifier: ANONYMOUS, specifier, pos: node.arguments[0].pos };
             }
             const arrayLiteralExpression = node.parent;
             const variableDeclarationParent = node.parent.parent?.parent?.parent;

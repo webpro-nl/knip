@@ -4,7 +4,7 @@ import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { ReferencedDependencies } from './WorkspaceWorker.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
 import type {
   SerializableExport,
   SerializableExportMember,
@@ -86,7 +86,7 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs, isWatch }: PrincipalOptions, n: number) {
+  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs, isWatch, pkgName }: PrincipalOptions) {
     this.cwd = cwd;
 
     this.isGitIgnored = isGitIgnored;
@@ -104,8 +104,7 @@ export class ProjectPrincipal {
     this.asyncCompilers = asyncCompilers;
     this.isSkipLibs = isSkipLibs;
     this.isWatch = isWatch;
-
-    this.cache = new CacheConsultant(`project-${n}`);
+    this.cache = new CacheConsultant(pkgName || ANONYMOUS);
   }
 
   init() {
