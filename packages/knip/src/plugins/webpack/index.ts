@@ -89,7 +89,7 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
         if (!isInternal(entry)) {
           dependencies.add(entry);
         } else {
-          const absoluteEntry = isAbsolute(entry) ? entry : join(options.context ? options.context : cwd);
+          const absoluteEntry = isAbsolute(entry) ? entry : join(options.context ? options.context : cwd, entry);
           const item = relative(cwd, absoluteEntry);
           const value = options.mode === 'development' ? toEntryPattern(item) : toProductionEntryPattern(item);
           entryPatterns.add(value);
