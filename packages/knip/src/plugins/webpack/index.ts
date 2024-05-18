@@ -30,7 +30,7 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
 
 const info = { compiler: '', issuer: '', realResource: '', resource: '', resourceQuery: '' };
 
-const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | '') => {
+const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | ''): string[] => {
   if (!rule || typeof rule === 'string') return [];
   if (typeof rule.use === 'string') return [rule.use];
   let useItem = rule.use ?? rule.loader ?? rule;
@@ -38,11 +38,12 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
   if (typeof useItem === 'string' && hasBabelOptions(rule)) {
     return [useItem, ...getDependenciesFromConfig((rule as { options: BabelConfigObj }).options)];
   }
-  return [useItem].flat().flatMap((item: RuleSetUseItem | undefined | null | false | 0) => {
+  return [useItem].flat().flatMap((item: RuleSetRule | RuleSetUseItem | undefined | null | false | 0) => {
     if (!item) return [];
     if (hasBabelOptions(item)) {
       return [...resolveUseItem(item), ...getDependenciesFromConfig((item as { options: BabelConfigObj }).options)];
     }
+    if (typeof item !== 'string' && 'oneOf' in item) return item.oneOf?.flatMap(resolveRuleSetDependencies) ?? [];
     return resolveUseItem(item);
   });
 };
