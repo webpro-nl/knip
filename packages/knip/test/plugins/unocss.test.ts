@@ -8,7 +8,7 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/unocss');
 
 test('Find dependencies with the unocss plugin', async () => {
-  const { /* issues, */ counters } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
@@ -17,7 +17,9 @@ test('Find dependencies with the unocss plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unlisted: 1,
     processed: 2,
     total: 2,
   });
+  assert(issues.unlisted['main.ts']['virtual:uno.css']);
 });
