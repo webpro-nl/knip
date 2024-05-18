@@ -19,11 +19,13 @@
     "css-loader": "*",
     "esbuild": "*",
     "esbuild-loader": "*",
+    "file-loader": "*",
     "html-minimizer-webpack-plugin": "*",
     "less-loader": "*",
     "mini-css-extract-plugin": "*",
     "svg-url-loader": "*",
     "ts-loader": "*",
+    "url-loader": "*",
     "webpack": "*",
     "webpack-cli": "*",
     "webpack-dev-server": "*"
