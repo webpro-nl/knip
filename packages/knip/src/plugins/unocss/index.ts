@@ -6,7 +6,7 @@ import { hasDependency } from '#p/util/plugin.js';
 
 const title = 'UnoCSS';
 
-const enablers: EnablerPatterns = ['unocss', /^@unocss\//];
+const enablers: EnablerPatterns = ['unocss'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
