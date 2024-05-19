@@ -16,11 +16,11 @@ import type {
 
 const title = 'GraphQL Codegen';
 
-const enablers = [/^@graphql-codegen\//];
+const enablers = [/^@graphql-codegen\//, 'graphql-config'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const packageJsonPath = 'codegen';
+const packageJsonPath = ['codegen', 'graphql'];
 
 const config = [
   'codegen.{json,yml,yaml,js,ts,mjs,cts}',

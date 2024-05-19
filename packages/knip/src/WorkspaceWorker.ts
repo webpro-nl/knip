@@ -253,8 +253,16 @@ export class WorkspaceWorker {
         const patterns = this.getConfigurationFilePatterns(pluginName);
         const allConfigFilePaths = await _pureGlob({ patterns, cwd, gitignore: false });
 
+        const { packageJsonPath } = plugin;
         const configFilePaths = allConfigFilePaths.filter(
-          filePath => basename(filePath) !== 'package.json' || get(this.manifest, plugin.packageJsonPath ?? pluginName)
+          filePath =>
+            basename(filePath) !== 'package.json' ||
+            get(
+              this.manifest,
+              (Array.isArray(packageJsonPath)
+                ? packageJsonPath.find(path => get(this.manifest, path))
+                : packageJsonPath) ?? pluginName
+            )
         );
 
         debugLogArray([name, plugin.title], 'config file paths', configFilePaths);
