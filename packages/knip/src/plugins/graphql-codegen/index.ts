@@ -23,10 +23,12 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const packageJsonPath = ['codegen', 'graphql'];
 
 const config = [
+  'package.json',
+  // graphql-codegen config files
   'codegen.{json,yml,yaml,js,ts,mjs,cts}',
   '.codegenrc.{json,yml,yaml,js,ts}',
   'codegen.config.js',
-  'package.json',
+  // graphql-config config files
   // https://the-guild.dev/graphql/config/docs/user/usage#config-search-places
   '.graphqlrc',
   '.graphqlrc.{json,yml,yaml,toml,js,ts}',
