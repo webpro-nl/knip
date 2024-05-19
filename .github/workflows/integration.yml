@@ -117,5 +117,5 @@ jobs:
           cd InvokeAI/invokeai/frontend/web
           pnpm install
           knip-bun
-          knip-bun --production --fix --no-exit-code
+          knip-bun --production --fix --no-exit-code --allow-remove-files
           knip-bun --production
