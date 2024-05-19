@@ -1,7 +1,7 @@
 import type { RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { compact } from '#p/util/array.js';
-import { isInternal, join, relative } from '#p/util/path.js';
+import { isAbsolute, isInternal, join, relative } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern, toProductionEntryPattern } from '#p/util/protocols.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
@@ -90,7 +90,8 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
         if (!isInternal(entry)) {
           dependencies.add(entry);
         } else {
-          const item = relative(cwd, join(options.context ? options.context : cwd, entry));
+          const absoluteEntry = isAbsolute(entry) ? entry : join(options.context ? options.context : cwd, entry);
+          const item = relative(cwd, absoluteEntry);
           const value = options.mode === 'development' ? toEntryPattern(item) : toProductionEntryPattern(item);
           entryPatterns.add(value);
         }
