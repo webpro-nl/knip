@@ -28,10 +28,18 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
 
   assert(issues.unlisted['package.json']['@graphql-codegen/client-preset']);
 
+  assert(issues.unlisted['.graphqlrc']['@graphql-codegen/introspection']);
+  assert(issues.unlisted['.graphqlrc']['@graphql-codegen/schema-ast']);
+
+  assert(issues.unlisted['graphql.config.ts']['@graphql-codegen/schema-ast']);
+  assert(issues.unlisted['graphql.config.ts']['@graphql-codegen/near-operation-file-preset']);
+  assert(issues.unlisted['graphql.config.ts']['@graphql-codegen/typescript-operations']);
+  assert(issues.unlisted['graphql.config.ts']['@graphql-codegen/typescript-msw']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 12,
-    processed: 1,
-    total: 1,
+    unlisted: 18,
+    processed: 2,
+    total: 2,
   });
 });

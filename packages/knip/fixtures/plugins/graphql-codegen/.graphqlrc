@@ -1,0 +1,23 @@
+projects:
+  app:
+    schema: schema.graphql
+    documents:
+      - 'src/**/*.tsx'
+      - '!src/gql/**/*'
+    extensions:
+      codegen:
+        overwrite: true
+        generates:
+          ./graphql.schema.json:
+            plugins: introspection
+  server:
+    schema: schema.graphql
+    documents:
+      - 'src/**/*.ts'
+      - '!src/gql/**/*'
+    extensions:
+      codegen:
+        overwrite: true
+        generates:
+          ./graphql.schema.graphql:
+            schema-ast:
