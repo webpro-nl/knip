@@ -15,7 +15,7 @@ import type {
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';
-import { arrayify } from './util/array.js';
+import { arrayify, compact } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
@@ -190,9 +190,9 @@ export class ConfigurationChief {
     const include = rawConfig.include ?? defaultConfig.include;
     const exclude = rawConfig.exclude ?? defaultConfig.exclude;
     const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
-    const ignoreBinaries = (rawConfig.ignoreBinaries ?? []).map(toRegexOrString);
-    const ignoreDependencies = (rawConfig.ignoreDependencies ?? []).map(toRegexOrString);
-    const ignoreMembers = (rawConfig.ignoreMembers ?? []).map(toRegexOrString);
+    const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
+    const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
+    const ignoreMembers = rawConfig.ignoreMembers ?? [];
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
@@ -428,8 +428,15 @@ export class ConfigurationChief {
 
   public getIgnores(workspaceName: string) {
     const workspaceConfig = this.getWorkspaceConfig(workspaceName);
-    const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries).map(toRegexOrString);
-    const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies).map(toRegexOrString);
+    const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries);
+    const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies);
+    if (workspaceName === ROOT_WORKSPACE_NAME) {
+      const { ignoreBinaries: rootIgnoreBinaries, ignoreDependencies: rootIgnoreDependencies } = this.rawConfig ?? {};
+      return {
+        ignoreBinaries: compact([...ignoreBinaries, ...(rootIgnoreBinaries ?? [])]),
+        ignoreDependencies: compact([...ignoreDependencies, ...(rootIgnoreDependencies ?? [])]),
+      };
+    }
     return { ignoreBinaries, ignoreDependencies };
   }
 

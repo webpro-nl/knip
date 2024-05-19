@@ -103,11 +103,5 @@ test('Unused dependencies in npm scripts (strict)', async () => {
     total: 2,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
-    ])
-  );
+  assert.deepEqual(configurationHints, new Set());
 });

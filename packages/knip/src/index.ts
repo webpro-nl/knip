@@ -87,9 +87,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const enabledPluginsStore = new Map<string, string[]>();
 
-  // TODO Organize better
-  deputy.setIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
-
   const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
   debugLogObject('*', 'Included workspace configs', o);
@@ -524,7 +521,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (isReportDependencies) {
       const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
-      const { configurationHints } = deputy.getConfigurationHints();
+      const configurationHints = deputy.getConfigurationHints();
       for (const issue of dependencyIssues) collector.addIssue(issue);
       if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
       for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
