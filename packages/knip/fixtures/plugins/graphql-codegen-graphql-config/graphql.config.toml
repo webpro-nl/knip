@@ -1,0 +1,34 @@
+[projects.app]
+schema = "schema.graphql"
+
+[projects.app.extensions.codegen]
+overwrite = true
+
+[projects.app.extensions.codegen.generates."../../packages/graphql-types/src/types.ts"]
+config.documents = "src/documents/**/*.graphql"
+config.skipGraphQLImport = false
+plugins = [
+    "typescript",
+    "typescript-operations",
+    "typed-document-node",
+    "./codegen/UserErrorsPlugin.cjs",
+    { add = { content = "/* cSpell:disable */\nimport { type SerializedMoney } from '@contra/money';" } }
+]
+
+[projects.server]
+schema = "schema.graphql"
+
+[projects.server.extensions.codegen]
+overwrite = true
+
+[projects.server.extensions.codegen.generates."src/contra-api/__generated__/types.ts"]
+config.contextType = "../types.js#ResolverContext"
+config.mappers.ActivePaidProjectAnalytics = "../types.js#ActivePaidProjectAnalytics"
+config.mappers.Workspace = "@contra/temporary-common/domain/workspace/WorkspaceService.js#Workspace"
+plugins = [
+    "typescript",
+    "typescript-resolvers",
+    "./codegen/UserErrorsPlugin.cjs",
+    "./codegen/GraphQLResolverBuilderPlugin.cjs",
+    { add = { content = "/* cSpell:disable */\nimport type { DeepPartial } from 'utility-types';\nimport { type Money as ContraMoney, type USD } from '@contra/money';" } }
+]
