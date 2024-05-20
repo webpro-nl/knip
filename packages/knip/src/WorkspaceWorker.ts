@@ -257,12 +257,9 @@ export class WorkspaceWorker {
         const configFilePaths = allConfigFilePaths.filter(
           filePath =>
             basename(filePath) !== 'package.json' ||
-            get(
-              this.manifest,
-              (Array.isArray(packageJsonPath)
-                ? packageJsonPath.find(path => get(this.manifest, path))
-                : packageJsonPath) ?? pluginName
-            )
+            (typeof packageJsonPath === 'function'
+              ? packageJsonPath(this.manifest)
+              : get(this.manifest, packageJsonPath ?? pluginName))
         );
 
         debugLogArray([name, plugin.title], 'config file paths', configFilePaths);

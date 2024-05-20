@@ -1,4 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
+import { get } from '#p/util/object.js';
 import { isInternal } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
@@ -20,7 +21,7 @@ const enablers = [/^@graphql-codegen\//, 'graphql-config'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const packageJsonPath = ['codegen', 'graphql'];
+const packageJsonPath: Plugin['packageJsonPath'] = manifest => get(manifest, 'codegen') ?? get(manifest, 'graphql');
 
 const config = [
   'package.json',
