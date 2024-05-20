@@ -45,10 +45,13 @@ issue on GitHub][5]. Depending on the type of issue, you might be asked to
 create a minimal reproduction: only the code and configuration required to
 demonstrate the issue.
 
-A convenient way to do so is by forking one of these templates:
+A convenient way to do so is by starting with one of these templates in
+CodeSandbox or StackBlitz:
 
-- [CodeSandbox][6]
-- [StackBlitz][7]
+| Template |                  |                 |
+| :------- | ---------------- | --------------- |
+| Basic    | [CodeSandbox][6] | [StackBlitz][7] |
+| Monorepo | [CodeSandbox][8] | [StackBlitz][9] |
 
 Other solutions may work well too. For instance, many people choose to create a
 small repository on GitHub. The goal is to have an easy and common understanding
@@ -63,16 +66,16 @@ and open a pull request to discuss the issue!
 
 ## Understanding Knip
 
-Looking to better understand how Knip works? The [entry files][8] and
-[plugins][9] explanations cover two core concepts. After this you might want to
-check out features like [production mode][10] and [monorepos & workspaces][11].
+Looking to better understand how Knip works? The [entry files][10] and
+[plugins][11] explanations cover two core concepts. After this you might want to
+check out features like [production mode][12] and [monorepos & workspaces][13].
 
-In a more general sense, [Why use Knip?][12] explains what Knip can do for you.
+In a more general sense, [Why use Knip?][14] explains what Knip can do for you.
 
 ## Asking for help
 
 If you can't find your answer in any of the aforementioned resources, feel free
-to [open an issue on GitHub][5] or discuss it in [the Discord channel][13].
+to [open an issue on GitHub][5] or discuss it in [the Discord channel][15].
 
 [1]: #issues-reported-by-knip
 [2]: #exceptions-thrown-by-knip
@@ -83,9 +86,13 @@ to [open an issue on GitHub][5] or discuss it in [the Discord channel][13].
   https://codesandbox.io/p/devbox/github/webpro/knip/main/templates/issue-reproduction/basic
 [7]:
   https://stackblitz.com/github/webpro/knip/tree/main/templates/issue-reproduction/basic
-[8]: ../explanations/entry-files.md
-[9]: ../explanations/plugins.md
-[10]: ../features/production-mode.md
-[11]: ../features/monorepos-and-workspaces.md
-[12]: ../explanations/why-use-knip.md
-[13]: https://discord.gg/r5uXTtbTpc
+[8]:
+  https://codesandbox.io/p/devbox/github/webpro/knip/main/templates/issue-reproduction/monorepo
+[9]:
+  https://stackblitz.com/github/webpro/knip/tree/main/templates/issue-reproduction/monorepo
+[10]: ../explanations/entry-files.md
+[11]: ../explanations/plugins.md
+[12]: ../features/production-mode.md
+[13]: ../features/monorepos-and-workspaces.md
+[14]: ../explanations/why-use-knip.md
+[15]: https://discord.gg/r5uXTtbTpc
