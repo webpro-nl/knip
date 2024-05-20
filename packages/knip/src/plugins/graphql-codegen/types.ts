@@ -51,3 +51,28 @@ export interface GraphqlCodegenTypes {
     [outputPath: string]: ConfiguredOutput | ConfiguredPlugin[];
   };
 }
+
+export const isGraphqlConfigTypes = (
+  config: GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes
+): config is GraphqlConfigTypes => {
+  return 'extensions' in config;
+};
+
+// Extracted from https://github.com/kamilkisiela/graphql-config/blob/master/src/types.ts
+export interface GraphqlConfigTypes {
+  extensions?: {
+    codegen?: GraphqlCodegenTypes;
+  };
+}
+
+export const isGraphqlProjectsConfigTypes = (
+  config: GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes
+): config is GraphqlProjectsConfigTypes => {
+  return 'projects' in config;
+};
+
+export interface GraphqlProjectsConfigTypes {
+  projects: {
+    [projectName: string]: GraphqlConfigTypes;
+  };
+}

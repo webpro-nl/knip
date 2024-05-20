@@ -38,7 +38,7 @@ export type Resolve = (options: PluginOptions) => Promise<string[]> | string[];
 export interface Plugin {
   title: string;
   enablers: IgnorePatterns | string;
-  packageJsonPath?: string;
+  packageJsonPath?: string | ((manifest: PackageJson) => string);
   isEnabled: IsPluginEnabled;
   config?: string[];
   entry?: string[];

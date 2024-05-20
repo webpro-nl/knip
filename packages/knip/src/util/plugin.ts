@@ -55,7 +55,9 @@ export const loadConfigForPlugin = async (
 
   const localConfig =
     basename(configFilePath) === 'package.json'
-      ? get(manifest, packageJsonPath ?? pluginName)
+      ? typeof packageJsonPath === 'function'
+        ? packageJsonPath(manifest)
+        : get(manifest, packageJsonPath ?? pluginName)
       : // TODO Leftover from plugin API streamline refactor
         plugin.title === 'ESLint' && !/(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
         ? await loadESLintConfig(configFilePath)
