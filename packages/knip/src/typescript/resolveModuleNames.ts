@@ -98,22 +98,20 @@ export function createCustomModuleResolver(
       ts.sys
     ).resolvedModule;
 
-    if (tsResolvedModule && isDeclarationFileExtension(tsResolvedModule.extension)) {
-      const srcFilePath = toSourceFilePath(tsResolvedModule.resolvedFileName);
+    if (tsResolvedModule) {
+      if (isDeclarationFileExtension(tsResolvedModule.extension)) {
+        const srcFilePath = toSourceFilePath(tsResolvedModule.resolvedFileName);
 
-      if (srcFilePath) {
-        return {
-          resolvedFileName: srcFilePath,
-          extension: extname(srcFilePath),
-          isExternalLibraryImport: false,
-          resolvedUsingTsExtension: false,
-        };
+        if (srcFilePath) {
+          return {
+            resolvedFileName: srcFilePath,
+            extension: extname(srcFilePath),
+            isExternalLibraryImport: false,
+            resolvedUsingTsExtension: false,
+          };
+        }
       }
 
-      return tsResolvedModule;
-    }
-
-    if (tsResolvedModule && !isVirtualFilePath(tsResolvedModule.resolvedFileName, virtualFileExtensions)) {
       return tsResolvedModule;
     }
 
@@ -124,7 +122,7 @@ export function createCustomModuleResolver(
       customSys
     ).resolvedModule;
 
-    if (!(customResolvedModule && isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions))) {
+    if (!customResolvedModule || !isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
       const module = fileExists(sanitizedSpecifier, containingFile);
       if (module) return module;
       return customResolvedModule;
