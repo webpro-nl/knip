@@ -213,60 +213,31 @@ const getImportsAndExports = (
   const addExport = ({ node, symbol, identifier, type, pos, members = [], fix }: ExportNode) => {
     if (options.skipExports) return;
 
-    const isExportSpecifier = ts.isExportSpecifier(node);
-    const isExportAssignment = ts.isExportAssignment(node);
-
-    if (isExportSpecifier || isExportAssignment) {
-      // Re-exports are handled in import visitors (because module resolution),
-      // but in other export declarations we can't (easily) get the imported symbol for pseudo re-exports
-      if (isExportSpecifier && node.propertyName) {
-        // TODO Tried to sort it out in visitors/exports/exportDeclaration.ts,
-        // but seems we need `typeChecker.getSymbolAtLocation` which isn't available over there
-        const symbol = typeChecker.getSymbolAtLocation(node.propertyName);
-        if (symbol) {
-          const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-          if (importedSymbolFilePath) {
-            const internalImport = internalImports[importedSymbolFilePath];
-            if (symbol.declarations && ts.isNamespaceImport(symbol.declarations[0])) {
-              // import { id } from 'specifier';
-              // export { id }
-              if (internalImport.reExportedNs.has(identifier)) {
-                internalImport.reExportedNs.get(identifier)?.add(sourceFile.fileName);
-              } else {
-                internalImport.reExportedNs.set(identifier, new Set([sourceFile.fileName]));
-              }
-            } else {
-              const identifier = String(symbol.escapedName);
-              if (internalImport.reExportedAs.has(identifier)) {
-                internalImport.reExportedAs.get(identifier)?.add([node.name.getText(), sourceFile.fileName]);
-              } else {
-                internalImport.reExportedAs.set(identifier, new Set([[node.name.getText(), sourceFile.fileName]]));
-              }
-            }
-          }
-        }
-      } else if (symbol) {
-        const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-        if (importedSymbolFilePath) {
-          const internalImport = internalImports[importedSymbolFilePath];
-          if (isExportAssignment) {
-            // import { id } from 'specifier';
-            // export = id
-            const identifier = String(symbol.escapedName);
-            if (internalImport.reExportedAs.has(identifier)) {
-              internalImport.reExportedAs.get(identifier)?.add(['default', sourceFile.fileName]);
-            } else {
-              internalImport.reExportedAs.set(identifier, new Set([['default', sourceFile.fileName]]));
-            }
+    if (symbol) {
+      const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+      if (importedSymbolFilePath) {
+        const importId = String(symbol.escapedName);
+        const internalImport = internalImports[importedSymbolFilePath];
+        if (symbol.declarations && ts.isNamespaceImport(symbol.declarations[0])) {
+          // import * as NS from 'specifier'; export { NS }; export { NS as aliased }
+          if (internalImport.reExportedNs.has(identifier)) {
+            internalImport.reExportedNs.get(identifier)?.add(sourceFile.fileName);
           } else {
-            // import * as NS from './3-branch';
-            // export { NS };
-            const identifier = String(symbol.escapedName);
-            if (internalImport.reExportedNs.has(identifier)) {
-              internalImport.reExportedNs.get(identifier)?.add(sourceFile.fileName);
-            } else {
-              internalImport.reExportedNs.set(identifier, new Set([sourceFile.fileName]));
-            }
+            internalImport.reExportedNs.set(identifier, new Set([sourceFile.fileName]));
+          }
+        } else if (importId === identifier) {
+          // import { id } from 'specifier'; export { id };
+          if (internalImport.reExportedBy.has(importId)) {
+            internalImport.reExportedBy.get(importId)?.add(sourceFile.fileName);
+          } else {
+            internalImport.reExportedBy.set(importId, new Set([sourceFile.fileName]));
+          }
+        } else {
+          // import { id } from 'specifier'; export = id; export default id;
+          if (internalImport.reExportedAs.has(importId)) {
+            internalImport.reExportedAs.get(importId)?.add(['default', sourceFile.fileName]);
+          } else {
+            internalImport.reExportedAs.set(importId, new Set([['default', sourceFile.fileName]]));
           }
         }
       }
