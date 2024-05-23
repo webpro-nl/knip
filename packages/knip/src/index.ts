@@ -253,8 +253,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const updateImports = (importedModule: SerializableImports, importItems: SerializableImports) => {
     for (const id of importItems.refs) importedModule.refs.add(id);
     for (const id of importItems.imported) importedModule.imported.add(id);
-    for (const id of importItems.importedAs) importedModule.importedAs.add(id);
     for (const id of importItems.importedNs) importedModule.importedNs.add(id);
+
+    for (const [id, value] of importItems.importedAs.entries()) {
+      if (importedModule.importedAs.has(id)) {
+        for (const v of value) importedModule.importedAs.get(id)?.add(v);
+      } else {
+        importedModule.importedAs.set(id, value);
+      }
+    }
 
     for (const [id, value] of importItems.reExportedNs.entries()) {
       if (importedModule.reExportedNs.has(id)) {

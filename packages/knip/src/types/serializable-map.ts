@@ -12,7 +12,7 @@ export type SerializableImports = {
   specifier: Specifier;
   refs: References;
   imported: Set<string>;
-  importedAs: Set<[string, string]>;
+  importedAs: Map<string, Set<string>>;
   importedNs: Set<string>;
   reExportedBy: Map<string, Set<string>>;
   reExportedAs: Map<string, Set<[string, string]>>;

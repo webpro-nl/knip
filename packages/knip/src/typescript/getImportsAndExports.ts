@@ -103,7 +103,7 @@ const getImportsAndExports = (
       reExportedAs: new Map(),
       reExportedNs: new Map(),
       imported: new Set(),
-      importedAs: new Set(),
+      importedAs: new Map(),
       importedNs: new Set(),
       refs: new Set(),
     });
@@ -139,7 +139,8 @@ const getImportsAndExports = (
       if (isStar) {
         imports.importedNs.add(alias);
       } else {
-        imports.importedAs.add([identifier, alias]);
+        if (imports.importedAs.has(alias)) imports.importedAs.get(alias)?.add(identifier);
+        else imports.importedAs.set(alias, new Set([identifier]));
       }
     } else if (identifier !== ANONYMOUS && identifier !== '*') {
       imports.imported.add(identifier);
@@ -365,6 +366,7 @@ const getImportsAndExports = (
           ) {
             if (
               (!internalImports[importedSymbolFilePath].importedNs.has(String(node.escapedText)) &&
+                !internalImports[importedSymbolFilePath].importedAs.has(String(node.escapedText)) &&
                 !internalImports[importedSymbolFilePath].imported.has(String(node.escapedText))) ||
               isConsiderReferencedNS(node)
             ) {

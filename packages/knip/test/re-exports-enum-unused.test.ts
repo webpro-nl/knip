@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/re-exports-enum');
+const cwd = resolve('fixtures/re-exports-enum-unused');
 
-test('Find default re-exported enum', async () => {
+test('Find default re-exported unused enum', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -15,7 +15,8 @@ test('Find default re-exported enum', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    enumMembers: 2,
+    processed: 3,
+    total: 3,
   });
 });

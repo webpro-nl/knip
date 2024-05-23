@@ -33,10 +33,19 @@ export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableMa
       return true;
     }
 
-    for (const [_id, alias] of importsForExport.importedAs) {
-      if (ids[0] === _id) {
-        exportLookupLog(depth, `imported ${id} as ${alias} by`, filePath);
-        return true;
+    for (const [_id, alias] of importsForExport.importedAs.entries()) {
+      if (alias.has(ids[0])) {
+        if (ids.length > 1) {
+          const [_name, ...rest] = ids;
+          const id = [_id, ...rest].join('.');
+          if (importsForExport.refs.has(id)) {
+            exportLookupLog(depth, `imported ${id} from`, filePath);
+            return true;
+          }
+        } else {
+          exportLookupLog(depth, `imported ${id} as ${_id} from`, filePath);
+          return true;
+        }
       }
     }
 
@@ -71,7 +80,7 @@ export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableMa
       }
     }
 
-    const reExportedBy = importsForExport.reExportedBy.get(id) ?? importsForExport.reExportedBy.get('*');
+    const reExportedBy = importsForExport.reExportedBy.get(ids[0]) ?? importsForExport.reExportedBy.get('*');
 
     if (reExportedBy) {
       for (const filePath of reExportedBy) {
