@@ -13,6 +13,7 @@ export type IssueSymbol = { symbol: string; pos?: number; line?: number; col?: n
 export type Issue = {
   type: SymbolIssueType;
   filePath: string;
+  workspace: string;
   symbol: string;
   symbols?: IssueSymbol[];
   symbolType?: SymbolType;
@@ -48,7 +49,7 @@ export type Issues = {
 
 export type IssueType = keyof Issues;
 
-type SymbolIssueType = Exclude<IssueType, 'files' | '_files'>;
+export type SymbolIssueType = Exclude<IssueType, 'files' | '_files'>;
 
 export type Report = {
   [key in keyof Issues]: boolean;

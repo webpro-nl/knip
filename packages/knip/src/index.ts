@@ -29,7 +29,7 @@ import { getHandler } from './util/handle-dependency.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join, toPosix } from './util/path.js';
-import { hasMatch } from './util/regex.js';
+import { findMatch } from './util/regex.js';
 import { shouldIgnore } from './util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
@@ -457,7 +457,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
                 if (report.enumMembers && exportedItem.type === 'enum') {
                   for (const member of exportedItem.members) {
-                    if (hasMatch(workspace.ignoreMembers, member.identifier)) continue;
+                    if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
                     if (shouldIgnore(member.jsDocTags, tags)) continue;
 
                     if (member.refs === 0) {
@@ -465,6 +465,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                         collector.addIssue({
                           type: 'enumMembers',
                           filePath,
+                          workspace: workspace.name,
                           symbol: member.identifier,
                           parentSymbol: identifier,
                           pos: member.pos,
@@ -479,12 +480,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                 if (principal && isReportClassMembers && exportedItem.type === 'class') {
                   const members = exportedItem.members.filter(
                     member =>
-                      !(hasMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags, tags))
+                      !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags, tags))
                   );
                   for (const member of principal.findUnusedMembers(filePath, members)) {
                     collector.addIssue({
                       type: 'classMembers',
                       filePath,
+                      workspace: workspace.name,
                       symbol: member.identifier,
                       parentSymbol: exportedItem.identifier,
                       pos: member.pos,
@@ -512,6 +514,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               collector.addIssue({
                 type,
                 filePath,
+                workspace: workspace.name,
                 symbol: identifier,
                 symbolType: exportedItem.type,
                 parentSymbol: namespace,
@@ -528,30 +531,31 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
 
     for (const [filePath, file] of Object.entries(serializableMap)) {
-      if (file.exports?.duplicate) {
-        for (const symbols of file.exports.duplicate) {
-          if (symbols.length > 1) {
-            const symbol = symbols.map(s => s.symbol).join('|');
-            collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
+      const ws = chief.findWorkspaceByFilePath(filePath);
+
+      if (ws) {
+        if (file.exports?.duplicate) {
+          for (const symbols of file.exports.duplicate) {
+            if (symbols.length > 1) {
+              const symbol = symbols.map(s => s.symbol).join('|');
+              collector.addIssue({ type: 'duplicates', filePath, workspace: ws.name, symbol, symbols });
+            }
           }
         }
-      }
 
-      if (file.imports?.external) {
-        const workspace = chief.findWorkspaceByFilePath(filePath);
-        if (workspace) {
+        if (file.imports?.external) {
           for (const specifier of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(specifier);
-            const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
-            if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
+            const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(ws, packageName);
+            if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, workspace: ws.name, symbol: specifier });
           }
         }
-      }
 
-      if (file.imports?.unresolved) {
-        for (const unresolvedImport of file.imports.unresolved) {
-          const { specifier, pos, line, col } = unresolvedImport;
-          collector.addIssue({ type: 'unresolved', filePath, symbol: specifier, pos, line, col });
+        if (file.imports?.unresolved) {
+          for (const unresolvedImport of file.imports.unresolved) {
+            const { specifier, pos, line, col } = unresolvedImport;
+            collector.addIssue({ type: 'unresolved', filePath, workspace: ws.name, symbol: specifier, pos, line, col });
+          }
         }
       }
     }
@@ -564,10 +568,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     if (isReportDependencies) {
       const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
-      const configurationHints = deputy.getConfigurationHints();
       for (const issue of dependencyIssues) collector.addIssue(issue);
       if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
       for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
+      const configurationHints = deputy.getConfigurationHints(collector.getIssues());
       for (const hint of configurationHints) collector.addConfigurationHint(hint);
     }
 
