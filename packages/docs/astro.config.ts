@@ -29,7 +29,7 @@ export default defineConfig({
         replacesTitle: true,
       },
       social: {
-        github: 'https://github.com/webpro/knip',
+        github: 'https://github.com/webpro-nl/knip',
         discord: 'https://discord.gg/r5uXTtbTpc',
         'x.com': 'https://x.com/webprolific',
       },
@@ -40,7 +40,7 @@ export default defineConfig({
       },
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
       editLink: {
-        baseUrl: 'https://github.com/webpro/knip/edit/main/packages/docs/',
+        baseUrl: 'https://github.com/webpro-nl/knip/edit/main/packages/docs/',
       },
       sidebar: [
         {

@@ -4,10 +4,10 @@
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/webpro/knip",
+    "url": "https://github.com/webpro-nl/knip",
     "directory": "packages/create-config"
   },
-  "bugs": "https://github.com/webpro/knip/issues",
+  "bugs": "https://github.com/webpro-nl/knip/issues",
   "license": "ISC",
   "author": {
     "name": "Lars Kappert",

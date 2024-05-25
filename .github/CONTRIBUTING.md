@@ -32,7 +32,7 @@ Feel free to open an issue for things like this:
 
 Before you open an issue:
 
-- Make sure you're using the **latest** version of Knip (see [https://github.com/webpro/knip/releases][5])
+- Make sure you're using the **latest** version of Knip (see [https://github.com/webpro-nl/knip/releases][5])
 - Use GitHub search to find related questions, known issues, etc.
 - If relevant, use the `--debug` flag which might reveal errors, potential issues with configuration, etc.
 
@@ -53,6 +53,6 @@ Please consider this before opening a pull request:
 [2]: https://knip.dev
 [3]: #open-an-issue
 [4]: #open-a-pull-request
-[5]: https://github.com/webpro/knip/releases
+[5]: https://github.com/webpro-nl/knip/releases
 [6]: ./DEVELOPMENT.md
 [7]: https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request

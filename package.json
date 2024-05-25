@@ -6,9 +6,9 @@
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/webpro/knip"
+    "url": "https://github.com/webpro-nl/knip"
   },
-  "bugs": "https://github.com/webpro/knip/issues",
+  "bugs": "https://github.com/webpro-nl/knip/issues",
   "license": "ISC",
   "type": "module",
   "author": {

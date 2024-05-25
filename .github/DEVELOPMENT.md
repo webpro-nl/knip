@@ -19,7 +19,7 @@ This guide assumes familiarity with concepts like [forking][1] and [cloning a re
 Example terminal commands:
 
 ```shell
-gh repo fork webpro/knip --clone
+gh repo fork webpro-nl/knip --clone
 cd knip
 bun install
 cd packages/knip
@@ -106,9 +106,9 @@ can be merged. Another workflow acts as [integration test][8] against repositori
 
 [1]: https://docs.github.com/get-started/quickstart/fork-a-repo
 [2]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
-[3]: https://github.com/webpro/knip
+[3]: https://github.com/webpro-nl/knip
 [4]: https://cli.github.com/
 [5]: https://knip.dev/guides/writing-a-plugin/
 [6]: ../.vscode/launch.json
-[7]: https://github.com/webpro/knip/actions/workflows/test.yml
-[8]: https://github.com/webpro/knip/actions/workflows/integration.yml
+[7]: https://github.com/webpro-nl/knip/actions/workflows/test.yml
+[8]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml

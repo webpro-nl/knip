@@ -81,15 +81,15 @@ to [open an issue on GitHub][5] or discuss it in [the Discord channel][15].
 [2]: #exceptions-thrown-by-knip
 [3]: ../guides/handling-issues.md
 [4]: ../reference/known-issues.md
-[5]: https://github.com/webpro/knip/issues
+[5]: https://github.com/webpro-nl/knip/issues
 [6]:
-  https://codesandbox.io/p/devbox/github/webpro/knip/main/templates/issue-reproduction/basic
+  https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/basic
 [7]:
-  https://stackblitz.com/github/webpro/knip/tree/main/templates/issue-reproduction/basic
+  https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/basic
 [8]:
-  https://codesandbox.io/p/devbox/github/webpro/knip/main/templates/issue-reproduction/monorepo
+  https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/monorepo
 [9]:
-  https://stackblitz.com/github/webpro/knip/tree/main/templates/issue-reproduction/monorepo
+  https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/monorepo
 [10]: ../explanations/entry-files.md
 [11]: ../explanations/plugins.md
 [12]: ../features/production-mode.md

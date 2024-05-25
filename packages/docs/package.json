@@ -7,7 +7,7 @@
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
-    "url": "github:webpro/knip",
+    "url": "github:webpro-nl/knip",
     "directory": "packages/docs"
   },
   "engines": {
