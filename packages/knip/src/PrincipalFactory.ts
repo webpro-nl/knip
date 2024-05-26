@@ -15,7 +15,6 @@ export type PrincipalOptions = {
   paths: Paths;
   compilers: [SyncCompilers, AsyncCompilers];
   pkgName: string;
-  isGitIgnored: (path: string) => boolean;
   isIsolateWorkspaces: boolean;
   isSkipLibs: boolean;
   isWatch: boolean;

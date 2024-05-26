@@ -66,7 +66,6 @@ export class ProjectPrincipal {
   // We don't want to report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
 
-  isGitIgnored: (path: string) => boolean;
   cwd: string;
   compilerOptions: ts.CompilerOptions;
   extensions: Set<string>;
@@ -89,10 +88,8 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isGitIgnored, isSkipLibs, isWatch, pkgName }: PrincipalOptions) {
+  constructor({ compilerOptions, cwd, compilers, isSkipLibs, isWatch, pkgName }: PrincipalOptions) {
     this.cwd = cwd;
-
-    this.isGitIgnored = isGitIgnored;
 
     this.compilerOptions = {
       ...compilerOptions,
@@ -230,6 +227,7 @@ export class ProjectPrincipal {
   public analyzeSourceFile(
     filePath: string,
     options: Omit<GetImportsAndExportsOptions, 'skipExports'>,
+    isGitIgnored: (filePath: string) => boolean,
     isPackageNameInternalWorkspace: (packageName: string) => boolean,
     getPrincipalByFilePath: (filePath: string) => undefined | ProjectPrincipal
   ) {
@@ -261,12 +259,12 @@ export class ProjectPrincipal {
       if (packageName && isPackageNameInternalWorkspace(packageName)) {
         external.add(packageName);
         const principal = getPrincipalByFilePath(specifierFilePath);
-        if (principal && !this.isGitIgnored(specifierFilePath)) principal.addNonEntryPath(specifierFilePath);
+        if (principal && !isGitIgnored(specifierFilePath)) principal.addNonEntryPath(specifierFilePath);
       }
     }
 
     for (const filePath of resolved) {
-      const isIgnored = this.isGitIgnored(filePath);
+      const isIgnored = isGitIgnored(filePath);
       if (!isIgnored) this.addEntryPath(filePath, { skipExportsAnalysis: true });
     }
 
@@ -280,7 +278,7 @@ export class ProjectPrincipal {
       if (isStartsLikePackageName(sanitizedSpecifier)) {
         external.add(sanitizedSpecifier);
       } else {
-        const isIgnored = this.isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
+        const isIgnored = isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
         if (!isIgnored) {
           const ext = extname(sanitizedSpecifier);
           const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);

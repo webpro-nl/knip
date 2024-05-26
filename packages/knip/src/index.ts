@@ -124,7 +124,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       compilerOptions,
       compilers,
       pkgName,
-      isGitIgnored,
       isIsolateWorkspaces,
       isSkipLibs,
       isWatch,
@@ -329,6 +328,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           isReportClassMembers,
           tags,
         },
+        isGitIgnored,
         isPackageNameInternalWorkspace,
         getPrincipalByFilePath
       );
