@@ -509,7 +509,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (!isSkipLibs && principal?.hasReferences(filePath, exportedItem)) continue;
 
               const type = getType(hasStrictlyNsReferences, isType);
-              collector.addIssue({
+              const issue = collector.addIssue({
                 type,
                 filePath,
                 symbol: identifier,
@@ -519,8 +519,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                 line: exportedItem.line,
                 col: exportedItem.col,
               });
-              if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
-              else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+              if (issue) {
+                if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
+                else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+              }
             }
           }
         }

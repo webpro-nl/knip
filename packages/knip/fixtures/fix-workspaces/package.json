@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/fix-workspaces",
+  "dependencies": {
+    "unused": "*",
+    "ignored": "*"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

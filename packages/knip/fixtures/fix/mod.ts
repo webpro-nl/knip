@@ -12,3 +12,6 @@ export const { a, b } = { a: 1, b: 1 };
 export const [c, d] = [1, 2];
 
 export default class MyClass {}
+
+/** @knipignore */
+export type U = number;
