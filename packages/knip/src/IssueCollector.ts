@@ -77,6 +77,7 @@ export class IssueCollector {
       this.issues[issue.type][key][issue.symbol] = issue;
       this.counters[issue.type]++;
     }
+    return issue;
   }
 
   addConfigurationHint(issue: ConfigurationHint) {

@@ -1,0 +1,6 @@
+{
+  "name": "@org/ignored",
+  "dependencies": {
+    "unused": "*"
+  }
+}

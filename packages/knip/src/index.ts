@@ -511,7 +511,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (!isSkipLibs && principal?.hasReferences(filePath, exportedItem)) continue;
 
               const type = getType(hasStrictlyNsReferences, isType);
-              collector.addIssue({
+              const isIssueAdded = collector.addIssue({
                 type,
                 filePath,
                 workspace: workspace.name,
@@ -522,8 +522,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                 line: exportedItem.line,
                 col: exportedItem.col,
               });
-              if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
-              else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+              if (isIssueAdded) {
+                if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
+                else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+              }
             }
           }
         }
