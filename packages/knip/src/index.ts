@@ -430,12 +430,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       for (const [filePath, file] of Object.entries(serializableMap)) {
         const exportItems = file.exports?.exported;
-        if (!exportItems) continue;
+
+        if (!exportItems || Object.keys(exportItems).length === 0) continue;
+
         const workspace = chief.findWorkspaceByFilePath(filePath);
-        const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
 
         if (workspace) {
           const { isIncludeEntryExports } = workspace.config;
+
+          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
 
           // Bail out when in entry file (unless `isIncludeEntryExports`)
           if (!isIncludeEntryExports && entryPaths.has(filePath)) continue;
