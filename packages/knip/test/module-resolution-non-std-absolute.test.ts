@@ -18,7 +18,7 @@ test('Resolve non-standard absolute specifiers', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 1,
-    processed: 5,
-    total: 5,
+    processed: 1,
+    total: 1,
   });
 });

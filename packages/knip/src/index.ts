@@ -246,7 +246,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const analyzedFiles = new Set<string>();
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
-  const internalWorkspaceFilePaths = new Set<string>();
 
   const handleReferencedDependency = getHandler(collector, deputy, chief);
 
@@ -304,21 +303,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       // Update import stats for imported module
       updateImported(specifierFilePath, importItems);
-
-      // Handle "external" imports from internal workspaces
-      const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
-      if (packageName && chief.availableWorkspacePkgNames.has(packageName)) {
-        serializableMap[filePath].imports.external.add(packageName);
-        const workspace = chief.findWorkspaceByFilePath(specifierFilePath);
-        if (workspace) {
-          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-          if (principal && !isGitIgnored(specifierFilePath)) {
-            // Defer to prevent potential duplicate analysis and infinite recursion
-            internalWorkspaceFilePaths.add(specifierFilePath);
-          }
-        }
-      }
     }
+  };
+
+  const isPackageNameInternalWorkspace = (packageName: string) => chief.availableWorkspacePkgNames.has(packageName);
+
+  const getPrincipalByFilePath = (filePath: string) => {
+    const workspace = chief.findWorkspaceByFilePath(filePath);
+    if (workspace) return factory.getPrincipalByPackageName(workspace.pkgName);
   };
 
   const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
@@ -327,14 +319,19 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
     if (workspace) {
-      const { imports, exports, scripts } = principal.analyzeSourceFile(filePath, {
-        skipTypeOnly: isStrict,
-        isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
-        isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
-        ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
-        isReportClassMembers,
-        tags,
-      });
+      const { imports, exports, scripts } = principal.analyzeSourceFile(
+        filePath,
+        {
+          skipTypeOnly: isStrict,
+          isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
+          isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
+          ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
+          isReportClassMembers,
+          tags,
+        },
+        isPackageNameInternalWorkspace,
+        getPrincipalByFilePath
+      );
 
       serializableMap[filePath] = serializableMap[filePath] || {};
       serializableMap[filePath].internalImportCache = imports.internal;
@@ -389,10 +386,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
     } while (size !== principal.entryPaths.size);
 
-    if (!isIsolateWorkspaces) {
-      for (const specifierFilePath of internalWorkspaceFilePaths) analyzeSourceFile(specifierFilePath, principal);
-    }
-
     for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
     for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
@@ -402,17 +395,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     if (!isIsolateWorkspaces && isSkipLibs && !isWatch) factory.deletePrincipal(principal);
   }
 
-  if (isIsolateWorkspaces) {
-    // Re-analyze files from local workspaces that were referenced, but have not yet been successfully resolved
-    for (const specifierFilePath of internalWorkspaceFilePaths) {
-      const workspace = chief.findWorkspaceByFilePath(specifierFilePath);
-      if (workspace) {
-        const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-        if (principal) analyzeSourceFile(specifierFilePath, principal);
-      }
-    }
-    for (const principal of principals) factory.deletePrincipal(principal);
-  }
+  if (isIsolateWorkspaces) for (const principal of principals) factory.deletePrincipal(principal);
 
   const isIdentifierReferenced = getIsIdentifierReferencedHandler(serializableMap);
 
@@ -604,7 +587,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             const event = eventType === 'rename' ? (isFile(filePath) ? 'added' : 'deleted') : 'modified';
 
             principal.invalidateFile(filePath);
-            internalWorkspaceFilePaths.clear();
             unreferencedFiles.clear();
             const cachedUnusedFiles = collector.purge();
 

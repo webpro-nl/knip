@@ -19,7 +19,7 @@ import { type GetImportsAndExportsOptions, _getImportsAndExports } from './types
 import type { ResolveModuleNames } from './typescript/resolveModuleNames.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
-import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
+import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import { deserialize, serialize } from './util/serialize.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
@@ -59,6 +59,8 @@ export class ProjectPrincipal {
   // Configured by user and returned from plugins
   entryPaths = new Set<string>();
   projectPaths = new Set<string>();
+  nonEntryPaths = new Set<string>();
+
   referencedDependencies: Set<[string, string, string]> = new Set();
 
   // We don't want to report unused exports of config/plugin entry files
@@ -143,7 +145,7 @@ export class ProjectPrincipal {
    */
   private createProgram() {
     this.backend.program = tsCreateProgram(
-      Array.from(this.entryPaths),
+      [...this.entryPaths, ...this.nonEntryPaths],
       this.compilerOptions,
       this.backend.compilerHost,
       this.backend.program
@@ -167,6 +169,12 @@ export class ProjectPrincipal {
 
   public addEntryPaths(filePaths: Set<string> | string[], options?: { skipExportsAnalysis: boolean }) {
     for (const filePath of filePaths) this.addEntryPath(filePath, options);
+  }
+
+  public addNonEntryPath(filePath: string) {
+    if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
+      this.nonEntryPaths.add(filePath);
+    }
   }
 
   public addProjectPath(filePath: string) {
@@ -219,7 +227,12 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(filePath: string, options: Omit<GetImportsAndExportsOptions, 'skipExports'>) {
+  public analyzeSourceFile(
+    filePath: string,
+    options: Omit<GetImportsAndExportsOptions, 'skipExports'>,
+    isPackageNameInternalWorkspace: (packageName: string) => boolean,
+    getPrincipalByFilePath: (filePath: string) => undefined | ProjectPrincipal
+  ) {
     const fd = this.cache.getFileDescriptor(filePath);
     if (!fd.changed && fd.meta?.data) return deserialize(fd.meta.data);
 
@@ -242,6 +255,15 @@ export class ProjectPrincipal {
     const { internal, resolved, unresolved, external } = imports;
 
     const unresolvedImports = new Set<UnresolvedImport>();
+
+    for (const [specifierFilePath, importItem] of Object.entries(imports.internal)) {
+      const packageName = getPackageNameFromModuleSpecifier(importItem.specifier);
+      if (packageName && isPackageNameInternalWorkspace(packageName)) {
+        external.add(packageName);
+        const principal = getPrincipalByFilePath(specifierFilePath);
+        if (principal && !this.isGitIgnored(specifierFilePath)) principal.addNonEntryPath(specifierFilePath);
+      }
+    }
 
     for (const filePath of resolved) {
       const isIgnored = this.isGitIgnored(filePath);
