@@ -73,7 +73,8 @@ jobs:
       - run: |
           cd query
           pnpm install
-          knip
+          knip --cache
+          knip --cache
 
       - name: Test Knip against argos-ci/argos
         uses: actions/checkout@v4
