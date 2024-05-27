@@ -1,3 +1,6 @@
 {
-  "name": "@fixtures/commonjs"
+  "name": "@fixtures/commonjs",
+  "dependencies": {
+    "resolved": "*"
+  }
 }

@@ -37,6 +37,10 @@ const staticResolve = () => {
   return require.resolve('string-literal-resolve');
 };
 
+const staticResolved = () => {
+  return require.resolve('resolved');
+};
+
 const dynamicResolve = () => {
   return require.resolve(path.join(process.cwd(), 'package.json'));
 };

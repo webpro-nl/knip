@@ -160,7 +160,7 @@ const getImportsAndExports = (
     if (module) {
       const filePath = module.resolvedFileName;
       if (filePath) {
-        if (options.resolve) {
+        if (options.resolve && !isInNodeModules(filePath)) {
           resolved.add(filePath);
           return;
         }
