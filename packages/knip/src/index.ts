@@ -313,7 +313,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
-    if (analyzedFiles.has(filePath)) return;
+    if (!isWatch && analyzedFiles.has(filePath)) return;
     analyzedFiles.add(filePath);
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
