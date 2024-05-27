@@ -3,7 +3,7 @@ import type { SerializableFile } from '../types/serializable-map.js';
 const keys = new Set(['importedAs', 'reExportedBy', 'reExportedAs', 'reExportedNs']);
 
 // biome-ignore lint/suspicious/noExplicitAny: TODO
-const setisfy = (obj: any) => {
+const setisfy = (obj: any): any => {
   if (obj instanceof Set) return Array.from(obj);
   if (obj instanceof Map) return setisfy(Object.fromEntries(obj.entries()));
   if (typeof obj === 'object')
