@@ -43,8 +43,8 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
       ? [config.extensions?.codegen]
       : [config];
   const generateSet = codegenConfigs
-    .filter((config): config is GraphqlCodegenTypes => config !== undefined)
-    .flatMap(config => Object.values(config?.generates));
+    .filter((config): config is GraphqlCodegenTypes => Boolean(config?.generates))
+    .flatMap(config => Object.values(config.generates));
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 
