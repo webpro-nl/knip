@@ -487,7 +487,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               }
             }
 
-            const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(importsForExport);
+            const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(serializableMap, importsForExport);
 
             const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 

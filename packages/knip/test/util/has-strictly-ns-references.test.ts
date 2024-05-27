@@ -1,25 +1,28 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import type { SerializableImports } from '../../src/types/imports.js';
+import type { SerializableImports, SerializableMap } from '../../src/types/serializable-map.js';
 import { getHasStrictlyNsReferences } from '../../src/util/type.js';
+
+const map: SerializableMap = {};
 
 const base: SerializableImports = {
   specifier: '',
-  isReExport: false,
-  reExportedBy: new Set(),
-  reExportedAs: new Set(),
-  reExportedNs: new Set(),
+  reExportedBy: new Map(),
+  reExportedAs: new Map(),
+  reExportedNs: new Map(),
+  imported: new Set(),
+  importedAs: new Map(),
   importedNs: new Set(),
   refs: new Set(),
 };
 
 test('Strictly namespace refs (no namespaces)', () => {
-  assert.deepStrictEqual(getHasStrictlyNsReferences(base), [false]);
+  assert.deepStrictEqual(getHasStrictlyNsReferences(map, base), [false]);
 });
 
 test('Strictly namespace refs (single ns)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences({
+    getHasStrictlyNsReferences(map, {
       ...base,
       importedNs: new Set(['ns']),
       refs: new Set(['ns']),
@@ -30,7 +33,7 @@ test('Strictly namespace refs (single ns)', () => {
 
 test('Strictly namespace refs (no id)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences({
+    getHasStrictlyNsReferences(map, {
       ...base,
       importedNs: new Set(['ns']),
       refs: new Set([]),
@@ -41,9 +44,8 @@ test('Strictly namespace refs (no id)', () => {
 
 test('Strictly namespace refs (single ns, no id)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences({
+    getHasStrictlyNsReferences(map, {
       ...base,
-      hasStar: true,
       importedNs: new Set([]),
       refs: new Set(['ns']),
     }),
@@ -53,7 +55,7 @@ test('Strictly namespace refs (single ns, no id)', () => {
 
 test('Strictly namespace refs (multiple ns, no id)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences({
+    getHasStrictlyNsReferences(map, {
       ...base,
       importedNs: new Set(['ns', 'ns2']),
       refs: new Set(['ns']),
@@ -64,7 +66,7 @@ test('Strictly namespace refs (multiple ns, no id)', () => {
 
 test('Strictly namespace refs (member access)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences({
+    getHasStrictlyNsReferences(map, {
       ...base,
       importedNs: new Set(['ns']),
       refs: new Set(['ns', 'ns.prop']),
