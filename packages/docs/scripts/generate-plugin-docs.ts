@@ -11,7 +11,6 @@ import { unified } from 'unified';
 import type { Node } from 'unist';
 import { u } from 'unist-builder';
 import type { Plugin } from '../../knip/src/types/plugins.js';
-import { base } from '../config.js';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const referenceDocsDir = path.join(rootDir, 'src/content/docs/reference');
@@ -105,11 +104,7 @@ const tree = u('root', [
       'list',
       { spread: false, ordered: false },
       plugins.map(plugin =>
-        u('listItem', [
-          u('link', { title: plugin[0], url: `${base === '/' ? '' : base}/reference/plugins/${plugin[1]}` }, [
-            u('text', plugin[0]),
-          ]),
-        ])
+        u('listItem', [u('link', { title: plugin[0], url: `/reference/plugins/${plugin[1]}` }, [u('text', plugin[0])])])
       )
     ),
     u('paragraph'),
