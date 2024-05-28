@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ANONYMOUS, DEFAULT_EXTENSIONS } from '../constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
 import type { Tags } from '../types/cli.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
@@ -95,7 +95,7 @@ const getImportsAndExports = (
   const addInternalImport = (options: AddInternalImportOptions) => {
     const { identifier, symbol, filePath, namespace, specifier, isReExport } = options;
 
-    const isStar = identifier === '*';
+    const isStar = identifier === IMPORT_STAR;
 
     specifiers.add([specifier, filePath]);
 
@@ -144,7 +144,7 @@ const getImportsAndExports = (
         if (imports.importedAs.has(alias)) imports.importedAs.get(alias)?.add(identifier);
         else imports.importedAs.set(alias, new Set([identifier]));
       }
-    } else if (identifier !== ANONYMOUS && identifier !== '*') {
+    } else if (identifier !== ANONYMOUS && identifier !== IMPORT_STAR) {
       imports.imported.add(identifier);
     }
 

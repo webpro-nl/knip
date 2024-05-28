@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { IMPORT_STAR } from '../../../constants.js';
 import { isDefaultImport } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -30,7 +31,7 @@ export default visit(
           // Pattern: import * as NS from 'specifier'
           // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'NamespaceImport'.
           const symbol = node.importClause.namedBindings.symbol;
-          imports.push({ symbol, specifier, identifier: '*', pos: symbol?.declarations[0]?.pos ?? node.pos });
+          imports.push({ symbol, specifier, identifier: IMPORT_STAR, pos: symbol?.declarations[0]?.pos ?? node.pos });
         }
         if (ts.isNamedImports(node.importClause.namedBindings)) {
           // Pattern: import { identifier as NS } from 'specifier'

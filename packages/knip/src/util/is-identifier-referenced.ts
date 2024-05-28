@@ -1,3 +1,4 @@
+import { IMPORT_STAR } from '../constants.js';
 import type { SerializableImports, SerializableMap } from '../types/serializable-map.js';
 import { exportLookupLog } from './debug.js';
 
@@ -80,7 +81,7 @@ export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableMa
       }
     }
 
-    const reExportedBy = importsForExport.reExportedBy.get(ids[0]) ?? importsForExport.reExportedBy.get('*');
+    const reExportedBy = importsForExport.reExportedBy.get(ids[0]) ?? importsForExport.reExportedBy.get(IMPORT_STAR);
 
     if (reExportedBy) {
       for (const filePath of reExportedBy) {

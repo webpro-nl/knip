@@ -1,10 +1,14 @@
+import { IMPORT_STAR } from '../constants.js';
 import type { SerializableImports, SerializableMap } from '../types/serializable-map.js';
 
 export const getHasStrictlyNsReferences = (
   serializableMap: SerializableMap,
   importsForExport?: SerializableImports
 ): [boolean, string?] => {
-  if (!importsForExport || (importsForExport.importedNs.size === 0 && !importsForExport.reExportedBy.has('*'))) {
+  if (
+    !importsForExport ||
+    (importsForExport.importedNs.size === 0 && !importsForExport.reExportedBy.has(IMPORT_STAR))
+  ) {
     return [false];
   }
 
@@ -17,7 +21,7 @@ export const getHasStrictlyNsReferences = (
     namespace = ns;
   }
 
-  const reExports = importsForExport.reExportedBy.get('*');
+  const reExports = importsForExport.reExportedBy.get(IMPORT_STAR);
   if (reExports) {
     for (const filePath of reExports) {
       const result = getHasStrictlyNsReferences(serializableMap, serializableMap[filePath].imported);

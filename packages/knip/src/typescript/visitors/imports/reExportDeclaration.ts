@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { IMPORT_STAR } from '../../../constants.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -9,12 +10,12 @@ export default visit(
         // Re-exports
         if (!node.exportClause) {
           // Pattern: export * from 'specifier';
-          return { identifier: '*', specifier: node.moduleSpecifier.text, isReExport: true, pos: node.pos };
+          return { identifier: IMPORT_STAR, specifier: node.moduleSpecifier.text, isReExport: true, pos: node.pos };
         }
         if (node.exportClause.kind === ts.SyntaxKind.NamespaceExport) {
           // Pattern: export * as namespace from 'specifier';
           return {
-            identifier: '*',
+            identifier: IMPORT_STAR,
             namespace: String(node.exportClause.name.escapedText),
             specifier: node.moduleSpecifier.text,
             isReExport: true,
