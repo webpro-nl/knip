@@ -46,6 +46,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'git',
   'grep',
   'gzip',
+  'kill',
   'ln',
   'ls',
   'mkdir',
@@ -58,6 +59,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'rm',
   'set',
   'sh',
+  'ssh',
   'sudo',
   'test', // exception (node built-in module)
   'touch',
