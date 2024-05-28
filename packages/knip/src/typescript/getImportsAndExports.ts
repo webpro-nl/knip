@@ -83,6 +83,7 @@ const getImportsAndExports = (
   const externalImports = new Set<string>();
   const unresolvedImports = new Set<UnresolvedImport>();
   const resolved = new Set<string>();
+  const specifiers = new Set<[string, string]>();
   const exports: SerializableExports = {};
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
@@ -96,9 +97,10 @@ const getImportsAndExports = (
 
     const isStar = identifier === '*';
 
+    specifiers.add([specifier, filePath]);
+
     // biome-ignore lint/suspicious/noAssignInExpressions: TODO
     const imports = (internalImports[filePath] = internalImports[filePath] ?? {
-      specifier,
       reExportedBy: new Map(),
       reExportedAs: new Map(),
       reExportedNs: new Map(),
@@ -444,6 +446,7 @@ const getImportsAndExports = (
       internal: internalImports,
       external: externalImports,
       resolved,
+      specifiers,
       unresolved: unresolvedImports,
     },
     exports: {

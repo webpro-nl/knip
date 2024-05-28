@@ -3,13 +3,11 @@ import type { Fix, Fixes } from './exports.js';
 import type { IssueSymbol, SymbolType } from './issues.js';
 
 type FilePath = string;
-type Specifier = string;
 type Reference = string;
 type References = Set<Reference>;
 type Tags = Set<string>;
 
 export type SerializableImports = {
-  specifier: Specifier;
   refs: References;
   imported: Set<string>;
   importedAs: Map<string, Set<string>>;

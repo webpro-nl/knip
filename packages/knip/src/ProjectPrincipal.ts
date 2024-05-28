@@ -250,12 +250,12 @@ export class ProjectPrincipal {
       skipExports,
     });
 
-    const { internal, resolved, unresolved, external } = imports;
+    const { internal, resolved, specifiers, unresolved, external } = imports;
 
     const unresolvedImports = new Set<UnresolvedImport>();
 
-    for (const [specifierFilePath, importItem] of Object.entries(imports.internal)) {
-      const packageName = getPackageNameFromModuleSpecifier(importItem.specifier);
+    for (const [specifier, specifierFilePath] of specifiers) {
+      const packageName = getPackageNameFromModuleSpecifier(specifier);
       if (packageName && isPackageNameInternalWorkspace(packageName)) {
         external.add(packageName);
         const principal = getPrincipalByFilePath(specifierFilePath);
