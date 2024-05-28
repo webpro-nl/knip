@@ -65,4 +65,6 @@ export type SerializableFile = {
   imported?: SerializableImports;
 };
 
+export type SerializedFile = SerializableFile;
+
 export type SerializableMap = Record<FilePath, SerializableFile>;

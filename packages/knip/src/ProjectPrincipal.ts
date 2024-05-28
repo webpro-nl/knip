@@ -21,7 +21,7 @@ import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
-import { deserialize, serialize } from './util/serialize.js';
+import { _deserialize, _serialize } from './util/serialize.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
 // These compiler options override local options
@@ -232,7 +232,7 @@ export class ProjectPrincipal {
     getPrincipalByFilePath: (filePath: string) => undefined | ProjectPrincipal
   ) {
     const fd = this.cache.getFileDescriptor(filePath);
-    if (!fd.changed && fd.meta?.data) return deserialize(fd.meta.data);
+    if (!fd.changed && fd.meta?.data) return _deserialize(fd.meta.data);
 
     if (!this.backend.typeChecker) throw new Error('Must initialize TypeChecker before source file analysis');
 
@@ -345,7 +345,7 @@ export class ProjectPrincipal {
     for (const filePath in serializableMap) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;
-      fd.meta.data = serialize(serializableMap[filePath]);
+      fd.meta.data = _serialize(serializableMap[filePath]);
     }
     this.cache.reconcile();
   }
