@@ -72,6 +72,42 @@ A workspace must have a `package.json` file.
 For projects with only a root `package.json`, please see [integrated
 monorepos][2].
 
+## Source mapping
+
+Let's say we have this module in a monorepo that imports `helper` from another
+workspace in the same monorepo:
+
+```ts title="index.js"
+import { helper } from '@org/shared';
+```
+
+The target workspace `@org/shared` has this `package.json`:
+
+```json title="package.json"
+{
+  "name": "@org/shared",
+  "main": "dist/index.js"
+}
+```
+
+The module resolver will resolve `@org/shared` to `dist/index.js`. That file is
+usually compiled and git-ignored, while Knip wants the source file instead. If
+the target workspace has a `tsconfig.json` file with an `outDir` option, Knip
+will try to map the "dist" file to the "src" file:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "dist"
+  }
+}
+```
+
+If `src/index.ts` exists, Knip will use that file instead of `dist/index.js`.
+Currently this only works based on `tsconfig.json`, in the future more source
+mappings may be added.
+
 ## Additional options
 
 The following options are available inside workspace configurations:

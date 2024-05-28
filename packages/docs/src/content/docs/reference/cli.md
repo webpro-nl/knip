@@ -29,11 +29,14 @@ Suppress configuration hints.
 
 ### `knip-bun`
 
-Run Knip using the Bun runtime (instead of Node.js).
+Run Knip using the Bun runtime (instead of Node.js + jiti).
 
 ```shell
 knip-bun
 ```
+
+Requires [Bun][1] to be installed. Also see [known issues][2] for the type of
+issues this might help with.
 
 ## Troubleshooting
 
@@ -70,7 +73,7 @@ Total running time: 5s (mem: 631.27MB)
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][1]).
+`performance.timerify` ([GitHub issue][3]).
 
 ## Configuration
 
@@ -96,7 +99,7 @@ Default location: `tsconfig.json`
 
 ### `--workspace [dir]`
 
-[Lint a single workspace][2] including its ancestor and dependent workspaces.
+[Lint a single workspace][4] including its ancestor and dependent workspaces.
 The default behavior is to lint all configured workspaces.
 
 Shortcut: `-W`
@@ -120,7 +123,7 @@ files when reporting unused exports:
 knip --include-entry-exports
 ```
 
-Also see [includeEntryExports][3].
+Also see [includeEntryExports][5].
 
 ### `--include-libs`
 
@@ -131,7 +134,7 @@ Getting false positives for exports consumed by external libraries? Try the
 knip --include-libs
 ```
 
-Also see [external libs][4].
+Also see [external libs][6].
 
 ### `--isolate-workspaces`
 
@@ -139,7 +142,7 @@ By default, Knip optimizes performance by adding eligible workspaces to existing
 TypeScript programs, based on the compatibility of their `compilerOptions`. Use
 this flag to disable this behavior and create one program per workspace.
 
-You can see the behavior in action in [debug mode][5]. Look for messages like
+You can see the behavior in action in [debug mode][7]. Look for messages like
 this:
 
 ```sh
@@ -160,18 +163,18 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][6].
+Read more at [Production Mode][8].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][7].
+mode][9].
 
-Read more at [Production Mode][6].
+Read more at [Production Mode][8].
 
 ### `--fix`
 
-Read more at [auto-fix][8].
+Read more at [auto-fix][10].
 
 ### `--cache`
 
@@ -197,7 +200,7 @@ changes in `package.json` and/or `node_modules` are not supported.
 
 ## Filters
 
-Available [issue types][9] when filtering output using `--include` or
+Available [issue types][11] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -253,7 +256,7 @@ Shortcut to include all types of export issues:
 
 ### `--experimental-tags`
 
-Deprecated. Use [--tags][10] instead.
+Deprecated. Use [--tags][12] instead.
 
 ### `--tags`
 
@@ -307,7 +310,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][11].
+Also see [Reporters & Preprocessors][13].
 
 ### `--reporter-options [json]`
 
@@ -342,7 +345,7 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
-Also see [Reporters & Preprocessors][11].
+Also see [Reporters & Preprocessors][13].
 
 ## Exit code
 
@@ -362,14 +365,16 @@ Always exit with code zero (`0`), even when there are lint errors.
 
 Maximum number of issues before non-zero exit code. Default: `0`
 
-[1]: https://github.com/oven-sh/bun/issues/9271
-[2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[3]: ./configuration.md#includeentryexports
-[4]: ../guides/handling-issues.mdx#external-libraries
-[5]: #--debug
-[6]: ../features/production-mode.md
-[7]: #--production
-[8]: ../features/auto-fix.mdx
-[9]: ./issue-types.md
-[10]: #--tags
-[11]: ../features/reporters.md
+[1]: https://bun.sh
+[2]: ../reference/known-issues.md
+[3]: https://github.com/oven-sh/bun/issues/9271
+[4]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[5]: ./configuration.md#includeentryexports
+[6]: ../guides/handling-issues.mdx#external-libraries
+[7]: #--debug
+[8]: ../features/production-mode.md
+[9]: #--production
+[10]: ../features/auto-fix.mdx
+[11]: ./issue-types.md
+[12]: #--tags
+[13]: ../features/reporters.md
