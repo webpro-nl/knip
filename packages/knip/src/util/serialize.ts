@@ -1,7 +1,7 @@
 import type { SerializableFile, SerializedFile } from '../types/serializable-map.js';
 import { timerify } from './Performance.js';
 
-const mapKeys = new Set(['importedAs', 'reExportedBy', 'reExportedAs', 'reExportedNs']);
+const mapKeys = new Set(['exported', 'importedAs', 'internal', 'reExportedAs', 'reExportedBy', 'reExportedNs']);
 
 // biome-ignore lint/suspicious/noExplicitAny: TODO
 const serializeObj = (obj: any): any => {

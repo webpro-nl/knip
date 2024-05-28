@@ -3,115 +3,110 @@ import type { SerializableImports, SerializableMap } from '../types/serializable
 import { exportLookupLog } from './debug.js';
 
 export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableMap) => {
-  const isIdentifierReferenced = (
-    filePath: string,
-    id: string,
-    importsForExport?: SerializableImports,
-    depth = 0
-  ): boolean => {
+  const isIdentifierReferenced = (filePath: string, id: string, imports?: SerializableImports, depth = 0): boolean => {
     if (depth === 0) exportLookupLog(-1, `Looking up export "${id}" from`, filePath);
 
     const ids = id.split('.');
+    const [identifier, ...rest] = ids;
+
     if (ids.length > 2 && ids.length !== new Set(ids).size) {
       exportLookupLog(depth, 'circular reference', filePath);
       return false;
     }
 
-    if (!importsForExport) {
+    if (!imports) {
       exportLookupLog(depth, 'no imports found from', filePath);
       return false;
     }
 
     if (ids.length > 1) {
-      if (importsForExport.refs.has(id)) {
+      if (imports.refs.has(id)) {
         exportLookupLog(depth, `referenced ${id} from`, filePath);
         return true;
       }
     }
 
-    if (importsForExport.imported.has(id)) {
+    if (imports.imported.has(id)) {
       exportLookupLog(depth, `imported ${id} from`, filePath);
       return true;
     }
 
-    for (const [_id, alias] of importsForExport.importedAs.entries()) {
-      if (alias.has(ids[0])) {
+    for (const [importId, aliases] of imports.importedAs.entries()) {
+      if (aliases.has(identifier)) {
         if (ids.length > 1) {
-          const [_name, ...rest] = ids;
-          const id = [_id, ...rest].join('.');
-          if (importsForExport.refs.has(id)) {
-            exportLookupLog(depth, `imported ${id} from`, filePath);
+          const aliasedRef = [importId, ...rest].join('.');
+          if (imports.refs.has(aliasedRef)) {
+            exportLookupLog(depth, `imported ${aliasedRef} from`, filePath);
             return true;
           }
         } else {
-          exportLookupLog(depth, `imported ${id} as ${_id} from`, filePath);
+          exportLookupLog(depth, `imported ${id} as ${importId} from`, filePath);
           return true;
         }
       }
     }
 
-    for (const ns of importsForExport.importedNs) {
-      if (importsForExport.refs.has(`${ns}.${id}`)) {
-        exportLookupLog(depth, `imported ${id} on ${ns} from`, filePath);
+    for (const namespace of imports.importedNs) {
+      if (imports.refs.has(`${namespace}.${id}`)) {
+        exportLookupLog(depth, `imported ${id} on ${namespace} from`, filePath);
         return true;
       }
 
-      const reExportedAs = importsForExport.reExportedAs.get(ns);
+      const reExportedAs = imports.reExportedAs.get(namespace);
 
       if (reExportedAs) {
-        for (const [alias, filePath] of reExportedAs) {
-          const file = importedSymbols[filePath];
-          if (file && isIdentifierReferenced(filePath, alias, file.imported, depth + 1)) {
-            exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
+        for (const [alias, byFilePath] of reExportedAs) {
+          const importsFor = importedSymbols.get(byFilePath);
+          if (importsFor && isIdentifierReferenced(byFilePath, alias, importsFor.imported, depth + 1)) {
+            exportLookupLog(depth, `re-exported as ${alias} by`, byFilePath);
             return true;
           }
         }
       }
 
-      const reExportedNs = importsForExport.reExportedNs.get(ns);
+      const reExportedNs = imports.reExportedNs.get(namespace);
 
       if (reExportedNs) {
-        for (const filePath of reExportedNs) {
-          const file = importedSymbols[filePath];
-          if (file && isIdentifierReferenced(filePath, `${ns}.${id}`, file.imported, depth + 1)) {
-            exportLookupLog(depth, `re-exported on ${ns} by`, filePath);
+        for (const byFilePath of reExportedNs) {
+          const importsFor = importedSymbols.get(byFilePath);
+          if (importsFor && isIdentifierReferenced(byFilePath, `${namespace}.${id}`, importsFor.imported, depth + 1)) {
+            exportLookupLog(depth, `re-exported on ${namespace} by`, byFilePath);
             return true;
           }
         }
       }
     }
 
-    const reExportedBy = importsForExport.reExportedBy.get(ids[0]) ?? importsForExport.reExportedBy.get(IMPORT_STAR);
+    const reExportedBy = imports.reExportedBy.get(identifier) ?? imports.reExportedBy.get(IMPORT_STAR);
 
     if (reExportedBy) {
-      for (const filePath of reExportedBy) {
-        const file = importedSymbols[filePath];
-        if (file && isIdentifierReferenced(filePath, id, file.imported, depth + 1)) {
-          exportLookupLog(depth, `re-exported ${id} by`, filePath);
+      for (const byFilePath of reExportedBy) {
+        const importsFor = importedSymbols.get(byFilePath);
+        if (importsFor && isIdentifierReferenced(byFilePath, id, importsFor.imported, depth + 1)) {
+          exportLookupLog(depth, `re-exported ${id} by`, byFilePath);
           return true;
         }
       }
     }
 
-    const reExportedAs = importsForExport.reExportedAs.get(ids[0]);
+    const reExportedAs = imports.reExportedAs.get(identifier);
 
     if (reExportedAs) {
-      for (const [alias, filePath] of reExportedAs) {
-        const [_name, ...rest] = ids;
-        const id = [alias, ...rest].join('.');
-        const file = importedSymbols[filePath];
-        if (file && isIdentifierReferenced(filePath, id, file.imported, depth + 1)) {
-          exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
+      for (const [alias, byFilePath] of reExportedAs) {
+        const aliasedRef = [alias, ...rest].join('.');
+        const importsFor = importedSymbols.get(byFilePath);
+        if (importsFor && isIdentifierReferenced(byFilePath, aliasedRef, importsFor.imported, depth + 1)) {
+          exportLookupLog(depth, `re-exported as ${alias} by`, byFilePath);
           return true;
         }
       }
     }
 
-    for (const [ns, filePaths] of importsForExport.reExportedNs.entries()) {
-      for (const filePath of filePaths) {
-        const file = importedSymbols[filePath];
-        if (file && isIdentifierReferenced(filePath, `${ns}.${id}`, file.imported, depth + 1)) {
-          exportLookupLog(depth, `re-exported on ${ns} by`, filePath);
+    for (const [namespace, filePaths] of imports.reExportedNs.entries()) {
+      for (const byFilePath of filePaths) {
+        const importsFor = importedSymbols.get(byFilePath);
+        if (importsFor && isIdentifierReferenced(byFilePath, `${namespace}.${id}`, importsFor.imported, depth + 1)) {
+          exportLookupLog(depth, `re-exported on ${namespace} by`, byFilePath);
           return true;
         }
       }

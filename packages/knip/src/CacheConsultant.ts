@@ -24,7 +24,7 @@ const dummyFileDescriptor = { key: '', changed: true, notFound: true, meta: unde
 
 const isEnabled = isCache || isWatch;
 
-const version = '3';
+const version = '4';
 
 export class CacheConsultant<T> {
   private cache: undefined | FileEntryCache;

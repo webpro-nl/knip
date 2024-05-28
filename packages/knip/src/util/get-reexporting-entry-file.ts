@@ -15,13 +15,13 @@ export const getReExportingEntryFileHandler = (entryPaths: Set<string>, serializ
     const reExportedBy = importedModule.reExportedBy.get(id) ?? importedModule.reExportedBy.get('*');
 
     if (reExportedBy) {
-      for (const filePath of reExportedBy) {
-        if (entryPaths.has(filePath)) {
-          exportLookupLog(depth, 're-exported by entry', filePath);
-          return filePath;
+      for (const byFilePath of reExportedBy) {
+        if (entryPaths.has(byFilePath)) {
+          exportLookupLog(depth, 're-exported by entry', byFilePath);
+          return byFilePath;
         }
-        exportLookupLog(depth, 're-exported by', filePath);
-        const file = getReExportingEntryFile(serializableMap[filePath].imported, id, depth + 1);
+        exportLookupLog(depth, 're-exported by', byFilePath);
+        const file = getReExportingEntryFile(serializableMap.get(byFilePath)?.imported, id, depth + 1);
         if (file) return file;
       }
     }
@@ -29,12 +29,12 @@ export const getReExportingEntryFileHandler = (entryPaths: Set<string>, serializ
     const reExportedAs = importedModule.reExportedAs.get(id);
 
     if (reExportedAs) {
-      for (const [alias, filePath] of reExportedAs) {
-        if (entryPaths.has(filePath)) {
-          exportLookupLog(depth, `re-exported as ${alias} by entry`, filePath);
-          return filePath;
+      for (const [alias, byFilePath] of reExportedAs) {
+        if (entryPaths.has(byFilePath)) {
+          exportLookupLog(depth, `re-exported as ${alias} by entry`, byFilePath);
+          return byFilePath;
         }
-        const file = getReExportingEntryFile(serializableMap[filePath].imported, alias, depth + 1);
+        const file = getReExportingEntryFile(serializableMap.get(byFilePath)?.imported, alias, depth + 1);
         if (file) return file;
       }
     }
@@ -43,12 +43,12 @@ export const getReExportingEntryFileHandler = (entryPaths: Set<string>, serializ
       const reExportedAs = importedModule.reExportedAs.get(ns);
 
       if (reExportedAs) {
-        for (const [alias, filePath] of reExportedAs) {
-          if (entryPaths.has(filePath)) {
-            exportLookupLog(depth, `re-exported as ${alias} by entry`, filePath);
-            return filePath;
+        for (const [alias, byFilePath] of reExportedAs) {
+          if (entryPaths.has(byFilePath)) {
+            exportLookupLog(depth, `re-exported as ${alias} by entry`, byFilePath);
+            return byFilePath;
           }
-          const file = getReExportingEntryFile(serializableMap[filePath].imported, alias, depth + 1);
+          const file = getReExportingEntryFile(serializableMap.get(byFilePath)?.imported, alias, depth + 1);
           if (file) return file;
         }
       }
@@ -61,7 +61,7 @@ export const getReExportingEntryFileHandler = (entryPaths: Set<string>, serializ
             exportLookupLog(depth, `re-exported on ${ns} by entry`, filePath);
             return filePath;
           }
-          const file = getReExportingEntryFile(serializableMap[filePath].imported, `${ns}.${id}`, depth + 1);
+          const file = getReExportingEntryFile(serializableMap.get(filePath)?.imported, `${ns}.${id}`, depth + 1);
           if (file) return file;
         }
       }

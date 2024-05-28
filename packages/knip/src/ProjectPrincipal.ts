@@ -313,18 +313,13 @@ export class ProjectPrincipal {
 
     return members.filter(member => {
       if (member.jsDocTags.has('@public')) return false;
-      const referencedSymbols = this.findReferences?.(filePath, member.pos);
-      const files = (referencedSymbols ?? [])
-        .flatMap(refs => refs.references)
-        .filter(ref => !ref.isDefinition)
-        .map(ref => ref.fileName);
-      const internalRefs = files.filter(f => f === filePath);
-      const externalRefs = files.filter(f => f !== filePath);
-      return externalRefs.length === 0 && internalRefs.length === 0;
+      const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+      const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
+      return refs.length === 0;
     });
   }
 
-  public hasReferences(filePath: string, exportedItem: SerializableExport) {
+  public hasExternalReferences(filePath: string, exportedItem: SerializableExport) {
     if (exportedItem.jsDocTags.has('@public')) return false;
 
     if (!this.findReferences) {
@@ -332,20 +327,22 @@ export class ProjectPrincipal {
       this.findReferences = timerify(languageService.findReferences);
     }
 
-    const referencedSymbols = this.findReferences?.(filePath, exportedItem.pos);
-    const files = (referencedSymbols ?? [])
+    const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
+
+    if (!referencedSymbols?.length) return false;
+
+    const externalRefs = referencedSymbols
       .flatMap(refs => refs.references)
-      .filter(ref => !ref.isDefinition)
-      .map(ref => ref.fileName);
-    const externalRefs = files.filter(f => f !== filePath);
+      .filter(ref => !ref.isDefinition && ref.fileName !== filePath);
+
     return externalRefs.length > 0;
   }
 
   reconcileCache(serializableMap: SerializableMap) {
-    for (const filePath in serializableMap) {
+    for (const [filePath, file] of serializableMap.entries()) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;
-      fd.meta.data = _serialize(serializableMap[filePath]);
+      fd.meta.data = _serialize(file);
     }
     this.cache.reconcile();
   }

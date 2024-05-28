@@ -17,7 +17,7 @@ export type SerializableImports = {
   reExportedNs: Map<string, Set<string>>;
 };
 
-export type SerializableImportMap = Record<FilePath, SerializableImports>;
+export type SerializableImportMap = Map<FilePath, SerializableImports>;
 
 export type UnresolvedImport = { specifier: string; pos?: number; line?: number; col?: number };
 
@@ -46,23 +46,23 @@ export type SerializableExportMember = {
   jsDocTags: Tags;
 };
 
-export type SerializableExports = Record<Reference, SerializableExport>;
+export type SerializableExports = Map<Reference, SerializableExport>;
 
 export type SerializableFile = {
   internalImportCache?: SerializableImportMap;
-  imports: {
+  imports?: {
     internal: SerializableImportMap;
     external: Set<string>;
     unresolved: Set<UnresolvedImport>;
   };
-  exports: {
+  exports?: {
     exported: SerializableExports;
-    duplicate: IssueSymbol[][];
+    duplicate: Array<Array<IssueSymbol>>;
   };
-  scripts: Set<string>;
+  scripts?: Set<string>;
   imported?: SerializableImports;
 };
 
 export type SerializedFile = SerializableFile;
 
-export type SerializableMap = Record<FilePath, SerializableFile>;
+export type SerializableMap = Map<FilePath, SerializableFile>;

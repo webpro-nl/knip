@@ -3,12 +3,11 @@ import type { SerializableImports, SerializableMap } from '../types/serializable
 
 export const getHasStrictlyNsReferences = (
   serializableMap: SerializableMap,
-  importsForExport?: SerializableImports
+  importsForExport: SerializableImports | undefined
 ): [boolean, string?] => {
-  if (
-    !importsForExport ||
-    (importsForExport.importedNs.size === 0 && !importsForExport.reExportedBy.has(IMPORT_STAR))
-  ) {
+  if (!importsForExport) return [false];
+
+  if (importsForExport.importedNs.size === 0 && !importsForExport.reExportedBy.has(IMPORT_STAR)) {
     return [false];
   }
 
@@ -24,8 +23,9 @@ export const getHasStrictlyNsReferences = (
   const reExports = importsForExport.reExportedBy.get(IMPORT_STAR);
   if (reExports) {
     for (const filePath of reExports) {
-      const result = getHasStrictlyNsReferences(serializableMap, serializableMap[filePath].imported);
-      if (!result[0]) return result;
+      const file = serializableMap.get(filePath);
+      const hasStrictlyNsReferences = getHasStrictlyNsReferences(serializableMap, file?.imported);
+      if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
     }
   }
 

@@ -16,6 +16,7 @@ import type { CommandLineOptions } from './types/cli.js';
 import type {
   SerializableExport,
   SerializableExportMember,
+  SerializableFile,
   SerializableImportMap,
   SerializableImports,
   SerializableMap,
@@ -241,7 +242,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
-  let serializableMap: SerializableMap = {};
+  const serializableMap: SerializableMap = new Map();
   const analyzedFiles = new Set<string>();
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
@@ -287,18 +288,24 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   const updateImported = (filePath: string, importItems: SerializableImports) => {
-    serializableMap[filePath] = serializableMap[filePath] || {};
-    const importedFile = serializableMap[filePath];
-    if (!importedFile.imported) importedFile.imported = importItems;
-    else updateImports(importedFile.imported, importItems);
+    const file: SerializableFile = serializableMap.get(filePath) ?? {};
+
+    if (!file.imported) file.imported = importItems;
+    else updateImports(file.imported, importItems);
+
+    serializableMap.set(filePath, file);
   };
 
   const setInternalImports = (filePath: string, internalImports: SerializableImportMap) => {
-    for (const [specifierFilePath, importItems] of Object.entries(internalImports)) {
-      // Update import stats for current module
-      const file = serializableMap[filePath];
-      if (!file.imports.internal[specifierFilePath]) file.imports.internal[specifierFilePath] = importItems;
-      else updateImports(file.imports.internal[specifierFilePath], importItems);
+    for (const [specifierFilePath, importItems] of internalImports.entries()) {
+      // Update imports for current module
+      const file = serializableMap.get(filePath) ?? {};
+
+      if (file.imports) {
+        const importedFile = file.imports.internal.get(specifierFilePath);
+        if (!importedFile) file.imports.internal.set(specifierFilePath, importItems);
+        else updateImports(importedFile, importItems);
+      }
 
       // Update import stats for imported module
       updateImported(specifierFilePath, importItems);
@@ -333,16 +340,22 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         getPrincipalByFilePath
       );
 
-      serializableMap[filePath] = serializableMap[filePath] || {};
-      serializableMap[filePath].internalImportCache = imports.internal;
-      serializableMap[filePath].imports = { ...imports, internal: {} };
-      serializableMap[filePath].exports = exports;
-      serializableMap[filePath].scripts = scripts;
+      const file = serializableMap.get(filePath) ?? {};
 
-      setInternalImports(filePath, imports.internal);
+      if (imports) file.imports = { ...imports, internal: new Map<string, SerializableImports>() };
+
+      file.exports = exports;
+      file.scripts = scripts;
+
+      if (imports?.internal) {
+        file.internalImportCache = imports.internal;
+        setInternalImports(filePath, imports.internal);
+      }
+
+      serializableMap.set(filePath, file);
 
       // Handle scripts here since they might lead to more entry files
-      if (scripts.size > 0) {
+      if (scripts && scripts.size > 0) {
         const cwd = dirname(filePath);
         const dependencies = deputy.getDependencies(workspace.name);
         const manifestScriptNames = new Set<string>();
@@ -411,10 +424,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     if (isReportValues || isReportTypes) {
       streamer.cast('Connecting the dots...');
 
-      for (const [filePath, file] of Object.entries(serializableMap)) {
+      for (const [filePath, file] of serializableMap.entries()) {
         const exportItems = file.exports?.exported;
 
-        if (!exportItems || Object.keys(exportItems).length === 0) continue;
+        if (!exportItems || exportItems.size === 0) continue;
 
         const workspace = chief.findWorkspaceByFilePath(filePath);
 
@@ -428,7 +441,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           const importsForExport = file.imported;
 
-          for (const [identifier, exportedItem] of Object.entries(exportItems)) {
+          for (const [identifier, exportedItem] of exportItems.entries()) {
             // Skip tagged exports
             if (exportedItem.jsDocTags.has('@public') || exportedItem.jsDocTags.has('@beta')) continue;
             if (exportedItem.jsDocTags.has('@alias')) continue;
@@ -494,7 +507,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || !(report.nsExports || isType))) continue;
 
             if (!isExportedItemReferenced(exportedItem)) {
-              if (!isSkipLibs && principal?.hasReferences(filePath, exportedItem)) continue;
+              if (!isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
 
               const type = getType(hasStrictlyNsReferences, isType);
               const isIssueAdded = collector.addIssue({
@@ -518,7 +531,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
     }
 
-    for (const [filePath, file] of Object.entries(serializableMap)) {
+    for (const [filePath, file] of serializableMap.entries()) {
       const ws = chief.findWorkspaceByFilePath(filePath);
 
       if (ws) {
@@ -612,30 +625,32 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
             if (event === 'added' || event === 'deleted') {
               // Flush, any file might contain (un)resolved imports to added/deleted files
-              serializableMap = {};
+              serializableMap.clear();
               for (const filePath of filePaths) analyzeSourceFile(filePath, principal);
             } else {
               for (const filePath in serializableMap) {
                 if (filePaths.includes(filePath)) {
                   // Reset dep graph
-                  serializableMap[filePath].imported = undefined;
+                  const file = serializableMap.get(filePath);
+                  if (file) file.imported = undefined;
                 } else {
                   // Remove files no longer referenced
-                  delete serializableMap[filePath];
+                  serializableMap.delete(filePath);
                   analyzedFiles.delete(filePath);
                 }
               }
 
               // Add existing files that were not yet part of the program
-              for (const filePath of filePaths) if (!serializableMap[filePath]) analyzeSourceFile(filePath, principal);
+              for (const filePath of filePaths)
+                if (!serializableMap.has(filePath)) analyzeSourceFile(filePath, principal);
 
               if (!cachedUnusedFiles.has(filePath)) analyzeSourceFile(filePath, principal);
 
               // Rebuild dep graph
               for (const filePath of filePaths) {
-                if (serializableMap[filePath]?.internalImportCache) {
+                if (serializableMap.get(filePath)?.internalImportCache) {
                   // biome-ignore lint/style/noNonNullAssertion: ignore
-                  setInternalImports(filePath, serializableMap[filePath].internalImportCache!);
+                  setInternalImports(filePath, serializableMap.get(filePath)?.internalImportCache!);
                 }
               }
             }
