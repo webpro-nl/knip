@@ -24,6 +24,7 @@ export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 // In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
 // Package may exist in npm registry, but last publish is at least 6 years ago
 export const IGNORED_GLOBAL_BINARIES = new Set([
+  'aws',
   'bash',
   'bun',
   'bundle',
