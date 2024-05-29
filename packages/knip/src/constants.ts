@@ -68,6 +68,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'yarn',
   'xargs',
   'xcodebuild',
+  'xvfb-run',
 ]);
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
