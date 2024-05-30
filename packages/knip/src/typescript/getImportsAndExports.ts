@@ -13,6 +13,7 @@ import type {
   UnresolvedImport,
 } from '../types/serializable-map.js';
 import { timerify } from '../util/Performance.js';
+import { escapeRegex } from '../util/regex.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { extname, isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
@@ -400,7 +401,7 @@ const getImportsAndExports = (
   const setRefs = (item: SerializableExport | SerializableExportMember) => {
     if (!item.symbol) return;
     const symbols = new Set<ts.Symbol>();
-    for (const match of sourceFile.text.matchAll(new RegExp(item.identifier.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'))) {
+    for (const match of sourceFile.text.matchAll(new RegExp(escapeRegex(item.identifier), 'g'))) {
       const isDeclaration = match.index === item.pos || match.index === item.pos + 1; // off-by-one from `stripQuotes`
       if (!isDeclaration) {
         // @ts-expect-error ts.getTokenAtPosition is internal fn
