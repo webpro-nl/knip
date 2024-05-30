@@ -31,6 +31,7 @@ import getExportVisitors from './visitors/exports/index.js';
 import { getImportsFromPragmas } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
+import { escapeRegExp } from '#p/util/regex.ts';
 
 const getVisitors = (sourceFile: ts.SourceFile) => ({
   export: getExportVisitors(sourceFile),
@@ -400,7 +401,7 @@ const getImportsAndExports = (
   const setRefs = (item: SerializableExport | SerializableExportMember) => {
     if (!item.symbol) return;
     const symbols = new Set<ts.Symbol>();
-    for (const match of sourceFile.text.matchAll(new RegExp(item.identifier.replace(/\$/g, '\\$'), 'g'))) {
+    for (const match of sourceFile.text.matchAll(new RegExp(escapeRegExp(item.identifier), 'g'))) {
       const isDeclaration = match.index === item.pos || match.index === item.pos + 1; // off-by-one from `stripQuotes`
       if (!isDeclaration) {
         // @ts-expect-error ts.getTokenAtPosition is internal fn
