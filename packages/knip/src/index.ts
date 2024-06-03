@@ -648,10 +648,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
               // Rebuild dep graph
               for (const filePath of filePaths) {
-                if (serializableMap.get(filePath)?.internalImportCache) {
-                  // biome-ignore lint/style/noNonNullAssertion: ignore
-                  setInternalImports(filePath, serializableMap.get(filePath)?.internalImportCache!);
-                }
+                const cache = serializableMap.get(filePath)?.internalImportCache;
+                if (cache) setInternalImports(filePath, cache);
               }
             }
 
