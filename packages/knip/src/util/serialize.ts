@@ -25,7 +25,12 @@ const deserializeObj = (obj: any) => {
   return obj;
 };
 
-const serialize = (data: SerializableFile): SerializedFile => serializeObj(structuredClone(data));
+const serialize = (data: SerializableFile): SerializedFile => {
+  const clone = structuredClone(data);
+  clone.imported = undefined;
+  clone.internalImportCache = undefined;
+  return serializeObj(clone);
+};
 
 const deserialize = (data: SerializedFile): SerializableFile => deserializeObj(data);
 

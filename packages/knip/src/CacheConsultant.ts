@@ -2,6 +2,7 @@ import fileEntryCache, { type FileEntryCache, type FileDescriptor } from 'file-e
 import { timerify } from './util/Performance.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { cwd, join } from './util/path.js';
+import { version } from './version.js';
 
 const defaultCacheLocation = join(cwd, 'node_modules', '.cache', 'knip');
 
@@ -23,8 +24,6 @@ const create = timerify(fileEntryCache.create, 'createCache');
 const dummyFileDescriptor = { key: '', changed: true, notFound: true, meta: undefined };
 
 const isEnabled = isCache || isWatch;
-
-const version = '4';
 
 export class CacheConsultant<T> {
   private cache: undefined | FileEntryCache;

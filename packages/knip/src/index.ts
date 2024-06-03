@@ -342,8 +342,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       const file = serializableMap.get(filePath) ?? {};
 
-      if (imports) file.imports = { ...imports, internal: new Map<string, SerializableImports>() };
-
+      file.imports = imports;
       file.exports = exports;
       file.scripts = scripts;
 
