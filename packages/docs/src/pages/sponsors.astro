@@ -3,13 +3,48 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import SponsorsComponent from '../components/Sponsors.astro';
 ---
 
-<StarlightPage frontmatter={{ title: 'Sponsors Overview', template: 'splash' }}>
-  <p>To all sponsors: THANK YOU! 🧡</p>
+<StarlightPage frontmatter={{ title: 'Become a sponsor!', template: 'splash' }}>
+  <article class="sponsors-body">
+    <div class="column">
+      <p>
+        This project has been a labor of love and dedication. While Knip
+        wouldn't be nearly as good as it is today without the contributions of
+        many awesome developers, I remain the solo creator and driving force
+        behind its development.
+      </p>
 
-  <p>
-    Your company on this page? Using Knip in a commercial project?
-    <a href="https://github.com/sponsors/webpro">Become a sponsor</a>!
-  </p>
+      <p>
+        Currently, sponsorships total around $200 per month. While I love to
+        give something back to the open source community, this isn't enough for
+        sustainable development. Your support is invaluable and helps me
+        continue to improve Knip, ensuring it remains a reliable and powerful
+        tool for the JavaScript and TypeScript community.
+      </p>
 
-  <SponsorsComponent showAll={true} />
+      <p>
+        If you think Knip is useful in your company, please consider supporting
+        me! The following channels are available to support me:
+      </p>
+
+      <ul>
+        <li><a href="https://github.com/sponsors/webpro">GitHub Sponsors</a></li>
+        <li><a href="https://opencollective.com/webpro">OpenCollective</a></li>
+        <li><a href="https://polar.sh/webpro-nl">Polar</a></li>
+      </ul>
+
+      <p>
+        You or your company logo will be added to this page if you decide to
+        support the project on an ongoing basis. Eternal gratitude to the
+        companies and people that are already sponsoring me:
+      </p>
+
+    </div>
+
+    <div class="column">
+
+      <SponsorsComponent showAll={true} />
+
+    </div>
+
+  </div>
 </StarlightPage>
