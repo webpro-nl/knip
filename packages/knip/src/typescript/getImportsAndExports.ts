@@ -411,11 +411,13 @@ const getImportsAndExports = (
   const setRefs = (item: SerializableExport | SerializableExportMember) => {
     if (!item.symbol) return;
     const symbols = new Set<ts.Symbol>();
-    for (const match of sourceFile.text.matchAll(new RegExp(item.identifier.replace(/\$/g, '\\$'), 'g'))) {
-      const isDeclaration = match.index === item.pos || match.index === item.pos + 1; // off-by-one from `stripQuotes`
+    let index = 0;
+    // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+    while (index < sourceFile.text.length && (index = sourceFile.text.indexOf(item.identifier, index)) !== -1) {
+      const isDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
       if (!isDeclaration) {
         // @ts-expect-error ts.getTokenAtPosition is internal fn
-        const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, match.index));
+        const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
         if (symbol) {
           if (item.symbol === symbol) {
             item.refs = 1;
@@ -437,6 +439,7 @@ const getImportsAndExports = (
           symbols.add(symbol);
         }
       }
+      index += item.identifier.length;
     }
   };
 
