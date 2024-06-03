@@ -21,6 +21,10 @@
     {
       "type": "opencollective",
       "url": "https://opencollective.com/webpro"
+    },
+    {
+      "type": "polar",
+      "url": "https://polar.sh/webpro-nl"
     }
   ],
   "bin": "index.js",
