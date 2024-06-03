@@ -165,8 +165,8 @@ in `entry` and `project` glob patterns.
 
 ### `ignoreBinaries`
 
-Array of binaries to exclude from the report. Regular expressions allowed.
-Example:
+Exclude binaries that are used but not provided by any dependency from the
+report. Value is an array of binary names or regular expressions. Example:
 
 ```json title="knip.json"
 {
