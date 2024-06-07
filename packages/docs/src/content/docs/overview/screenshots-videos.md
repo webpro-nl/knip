@@ -8,9 +8,9 @@ This video demonstrates using the `--watch` and `--fix` options inside Visual
 Studio Code:
 
 <video controls width="500">
-  <source src="/examples/watch-fix.mp4" type="video/mp4" />
+  <source src="/screenshots/watch-fix.mp4" type="video/mp4" />
 
-  <source src="/examples/watch-fix.webm" type="video/webm" />
+  <source src="/screenshots/watch-fix.webm" type="video/webm" />
 </video>
 
 See [--watch][1] and [auto-fix][2] for more details.
@@ -20,9 +20,17 @@ See [--watch][1] and [auto-fix][2] for more details.
 Here's an example screenshot that traces the `mapIterator` export in the
 TypeScript codebase:
 
-<img src="/examples/trace.png" alt="trace" class="mw500" />
+<img src="/screenshots/trace.png" alt="trace" class="mw500" />
 
 See [Trace][3] for more details.
+
+## Performance
+
+An example screenshot showing `--performance` output for the Knip codebase:
+
+<img src="/screenshots/performance.png" alt="performance" class="mw500" />
+
+Also see [--performance](../reference/cli.md#--performance).
 
 [1]: ../reference/cli.md#--watch
 [2]: ../features/auto-fix.mdx
