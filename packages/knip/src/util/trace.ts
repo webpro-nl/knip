@@ -27,13 +27,13 @@ export type TraceNode = {
 
 export { isTrace };
 
-export const getPadding = (level: number, levels: Set<number>) => {
+const getPadding = (level: number, levels: Set<number>) => {
   let padding = '';
   for (let i = 0; i < level; i++) padding += levels.has(i) ? `${picocolors.dim('│')}  ` : '   ';
   return padding;
 };
 
-export const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => {
+const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => {
   let index = 0;
   const size = node.children.size;
   const padding = getPadding(level, levels);
