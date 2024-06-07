@@ -21,8 +21,9 @@ Overview of features supported by Knip (A-Z):
 | [Reporters][13] (built-in/custom)         | Use a custom `--reporter ./custom-output.ts`               |
 | [Rules][14]                               | Exclude or focus on issue types                            |
 | [Script parser][15]                       | Scripts contain dependencies and entry paths               |
-| [Watch mode][16]                          | Use `--watch` to update the reporter on file changes       |
-| [Workspace][17]                           | Lint only a single workspace in a monorepo                 |
+| [Trace][16]                               | Trace exports to find where they are used                  |
+| [Watch mode][17]                          | Use `--watch` to update the reporter on file changes       |
+| [Workspace][18]                           | Lint only a single workspace in a monorepo                 |
 
 [1]: ../features/auto-fix.mdx
 [2]: ../reference/cli.md#--cache
@@ -39,5 +40,6 @@ Overview of features supported by Knip (A-Z):
 [13]: ../features/reporters.md
 [14]: ../features/rules-and-filters.md#rules
 [15]: ../features/script-parser.md
-[16]: ../reference/cli.md#--watch
-[17]: ../features/monorepos-and-workspaces#lint-a-single-workspace
+[16]: ../guides/troubleshooting.md#trace
+[17]: ../reference/cli.md#--watch
+[18]: ../features/monorepos-and-workspaces#lint-a-single-workspace

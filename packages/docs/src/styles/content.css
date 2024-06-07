@@ -90,3 +90,7 @@ section.plugins li {
   --sl-color-border-badge: var(--sl-color-orange);
   color: var(--sl-color-white);
 }
+
+.sl-markdown-content .mw500 {
+  max-width: 500px;
+}
