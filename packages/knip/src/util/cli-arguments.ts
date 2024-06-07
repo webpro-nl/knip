@@ -92,6 +92,8 @@ try {
       'reporter-options': { type: 'string' },
       strict: { type: 'boolean' },
       trace: { type: 'boolean' },
+      'trace-export': { type: 'string' },
+      'trace-file': { type: 'string' },
       tsConfig: { type: 'string', short: 't' },
       version: { type: 'boolean', short: 'V' },
       watch: { type: 'boolean' },

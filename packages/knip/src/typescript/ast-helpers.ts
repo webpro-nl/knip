@@ -178,3 +178,15 @@ export const isConsiderReferencedNS = (node: ts.Identifier) =>
 
 export const isTopLevel = (node: ts.Node) =>
   ts.isSourceFile(node.parent) || (node.parent && ts.isSourceFile(node.parent.parent));
+
+export const getTypeName = (node: ts.Identifier) => {
+  if (!node.parent?.parent) return;
+  const typeRef = findAncestor<ts.TypeReferenceNode>(node, _node => ts.isTypeReferenceNode(_node));
+  if (typeRef && ts.isQualifiedName(typeRef.typeName)) return typeRef.typeName;
+};
+
+export const isImportSpecifier = (node: ts.Node) =>
+  ts.isImportSpecifier(node.parent) ||
+  ts.isImportEqualsDeclaration(node.parent) ||
+  ts.isImportClause(node.parent) ||
+  ts.isNamespaceImport(node.parent);

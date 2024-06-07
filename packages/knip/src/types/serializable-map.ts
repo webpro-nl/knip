@@ -7,14 +7,17 @@ type Reference = string;
 type References = Set<Reference>;
 type Tags = Set<string>;
 
+export type IdMap = Map<string, Set<FilePath>>;
+export type IdMapNs = Map<string, IdMap>; // ns or alias
+
 export type SerializableImports = {
   refs: References;
-  imported: Set<string>;
-  importedAs: Map<string, Set<string>>;
-  importedNs: Set<string>;
-  reExportedBy: Map<string, Set<string>>;
-  reExportedAs: Map<string, Set<[string, string]>>;
-  reExportedNs: Map<string, Set<string>>;
+  imported: IdMap;
+  importedAs: IdMapNs;
+  importedNs: IdMap;
+  reExportedBy: IdMap;
+  reExportedAs: IdMapNs;
+  reExportedNs: IdMap;
 };
 
 export type SerializableImportMap = Map<FilePath, SerializableImports>;
@@ -61,6 +64,7 @@ export type SerializableFile = {
   };
   scripts?: Set<string>;
   imported?: SerializableImports;
+  traceRefs?: References;
 };
 
 export type SerializedFile = SerializableFile;

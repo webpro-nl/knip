@@ -8,11 +8,11 @@ import { getKnownError, hasCause, isConfigurationError, isKnownError } from './u
 import { cwd } from './util/path.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { splitTags } from './util/tag.js';
+import { isTrace } from './util/trace.js';
 import { version } from './version.js';
 
 const {
   debug: isDebug = false,
-  trace: isTrace = false,
   help: isHelp,
   'max-issues': maxIssues = '0',
   'no-config-hints': noConfigHints = false,

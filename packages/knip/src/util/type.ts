@@ -13,19 +13,46 @@ export const getHasStrictlyNsReferences = (
 
   let namespace: string | undefined;
 
-  for (const ns of importsForExport.importedNs) {
+  for (const ns of importsForExport.importedNs.keys()) {
     const hasNs = importsForExport.refs.has(ns);
     if (!hasNs) return [false, ns];
     for (const id of importsForExport.refs) if (id.startsWith(`${ns}.`)) return [false, ns];
+
+    const byFilePaths = importsForExport.reExportedNs.get(ns);
+    if (byFilePaths) {
+      for (const filePath of byFilePaths) {
+        const file = serializableMap.get(filePath);
+        if (file?.imported) {
+          const hasStrictlyNsReferences = getHasStrictlyNsReferences(serializableMap, file.imported);
+          if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+        }
+      }
+    }
+
+    const reExportedAs = importsForExport.reExportedAs.get(ns);
+    if (reExportedAs) {
+      for (const byFilePaths of reExportedAs.values()) {
+        for (const filePath of byFilePaths) {
+          const file = serializableMap.get(filePath);
+          if (file?.imported) {
+            const hasStrictlyNsReferences = getHasStrictlyNsReferences(serializableMap, file.imported);
+            if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+          }
+        }
+      }
+    }
+
     namespace = ns;
   }
 
-  const reExports = importsForExport.reExportedBy.get(IMPORT_STAR);
-  if (reExports) {
-    for (const filePath of reExports) {
+  const byFilePaths = importsForExport.reExportedBy.get(IMPORT_STAR);
+  if (byFilePaths) {
+    for (const filePath of byFilePaths) {
       const file = serializableMap.get(filePath);
-      const hasStrictlyNsReferences = getHasStrictlyNsReferences(serializableMap, file?.imported);
-      if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+      if (file?.imported) {
+        const hasStrictlyNsReferences = getHasStrictlyNsReferences(serializableMap, file.imported);
+        if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+      }
     }
   }
 

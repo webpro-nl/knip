@@ -23,16 +23,17 @@ import type {
 } from './types/serializable-map.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { isFile } from './util/fs.js';
-import { getReExportingEntryFileHandler } from './util/get-reexporting-entry-file.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredFn } from './util/globby.js';
 import { getHandler } from './util/handle-dependency.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
+import { addNsValues, addValues } from './util/map.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join, toPosix } from './util/path.js';
 import { findMatch } from './util/regex.js';
 import { shouldIgnore } from './util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
+import { createAndPrintTrace, printTrace } from './util/trace.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
 import { getHasStrictlyNsReferences, getType } from './util/type.js';
 
@@ -247,48 +248,22 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
 
+  const getFile = (filePath: string) => serializableMap.get(filePath) ?? ({} as Partial<SerializableFile>);
+
   const handleReferencedDependency = getHandler(collector, deputy, chief);
 
   const updateImports = (importedModule: SerializableImports, importItems: SerializableImports) => {
     for (const id of importItems.refs) importedModule.refs.add(id);
-    for (const id of importItems.imported) importedModule.imported.add(id);
-    for (const id of importItems.importedNs) importedModule.importedNs.add(id);
-
-    for (const [id, value] of importItems.importedAs.entries()) {
-      if (importedModule.importedAs.has(id)) {
-        for (const v of value) importedModule.importedAs.get(id)?.add(v);
-      } else {
-        importedModule.importedAs.set(id, value);
-      }
-    }
-
-    for (const [id, value] of importItems.reExportedNs.entries()) {
-      if (importedModule.reExportedNs.has(id)) {
-        for (const v of value) importedModule.reExportedNs.get(id)?.add(v);
-      } else {
-        importedModule.reExportedNs.set(id, value);
-      }
-    }
-
-    for (const [id, value] of importItems.reExportedAs.entries()) {
-      if (importedModule.reExportedAs.has(id)) {
-        for (const v of value) importedModule.reExportedAs.get(id)?.add(v);
-      } else {
-        importedModule.reExportedAs.set(id, value);
-      }
-    }
-
-    for (const [id, value] of importItems.reExportedBy.entries()) {
-      if (importedModule.reExportedBy.has(id)) {
-        for (const v of value) importedModule.reExportedBy.get(id)?.add(v);
-      } else {
-        importedModule.reExportedBy.set(id, value);
-      }
-    }
+    for (const [id, v] of importItems.imported.entries()) addValues(importedModule.imported, id, v);
+    for (const [id, v] of importItems.importedNs.entries()) addValues(importedModule.importedNs, id, v);
+    for (const [id, v] of importItems.importedAs.entries()) addNsValues(importedModule.importedAs, id, v);
+    for (const [id, v] of importItems.reExportedNs.entries()) addValues(importedModule.reExportedNs, id, v);
+    for (const [id, v] of importItems.reExportedAs.entries()) addNsValues(importedModule.reExportedAs, id, v);
+    for (const [id, v] of importItems.reExportedBy.entries()) addValues(importedModule.reExportedBy, id, v);
   };
 
   const updateImported = (filePath: string, importItems: SerializableImports) => {
-    const file: SerializableFile = serializableMap.get(filePath) ?? {};
+    const file = getFile(filePath);
 
     if (!file.imported) file.imported = importItems;
     else updateImports(file.imported, importItems);
@@ -299,7 +274,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const setInternalImports = (filePath: string, internalImports: SerializableImportMap) => {
     for (const [specifierFilePath, importItems] of internalImports.entries()) {
       // Update imports for current module
-      const file = serializableMap.get(filePath) ?? {};
+      const file = getFile(filePath);
 
       if (file.imports) {
         const importedFile = file.imports.internal.get(specifierFilePath);
@@ -325,7 +300,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
     if (workspace) {
-      const { imports, exports, scripts } = principal.analyzeSourceFile(
+      const { imports, exports, scripts, traceRefs } = principal.analyzeSourceFile(
         filePath,
         {
           skipTypeOnly: isStrict,
@@ -340,11 +315,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         getPrincipalByFilePath
       );
 
-      const file = serializableMap.get(filePath) ?? {};
+      const file = getFile(filePath);
 
       file.imports = imports;
       file.exports = exports;
       file.scripts = scripts;
+      file.traceRefs = traceRefs;
 
       if (imports?.internal) {
         file.internalImportCache = imports.internal;
@@ -409,9 +385,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   if (isIsolateWorkspaces) for (const principal of principals) factory.deletePrincipal(principal);
 
-  const isIdentifierReferenced = getIsIdentifierReferencedHandler(serializableMap);
-
-  const getReExportingEntryFile = getReExportingEntryFileHandler(entryPaths, serializableMap);
+  const isIdentifierReferenced = getIsIdentifierReferencedHandler(serializableMap, entryPaths);
 
   const isExportedItemReferenced = (exportedItem: SerializableExport | SerializableExportMember) =>
     exportedItem.refs > 0 &&
@@ -435,8 +409,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           const principal = factory.getPrincipalByPackageName(workspace.pkgName);
 
+          const isEntry = entryPaths.has(filePath);
+
           // Bail out when in entry file (unless `isIncludeEntryExports`)
-          if (!isIncludeEntryExports && entryPaths.has(filePath)) continue;
+          if (!isIncludeEntryExports && isEntry) {
+            createAndPrintTrace(filePath, { isEntry });
+            continue;
+          }
 
           const importsForExport = file.imported;
 
@@ -448,18 +427,30 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (isProduction && exportedItem.jsDocTags.has('@internal')) continue;
 
             if (importsForExport) {
-              if (!isIncludeEntryExports) {
-                if (getReExportingEntryFile(importsForExport, identifier, 0, filePath)) continue;
+              const { isReferenced, hasReExportingEntryFile, traceNode } = isIdentifierReferenced(
+                filePath,
+                identifier,
+                isIncludeEntryExports
+              );
+
+              if (!isIncludeEntryExports && hasReExportingEntryFile) {
+                createAndPrintTrace(filePath, { isEntry, hasRef: isReferenced });
+                continue;
               }
 
-              if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
+              if (traceNode) printTrace(traceNode, filePath, identifier);
+
+              if (isReferenced) {
                 if (report.enumMembers && exportedItem.type === 'enum') {
                   for (const member of exportedItem.members) {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
                     if (shouldIgnore(member.jsDocTags, tags)) continue;
 
                     if (member.refs === 0) {
-                      if (!isIdentifierReferenced(filePath, `${identifier}.${member.identifier}`, importsForExport)) {
+                      const id = `${identifier}.${member.identifier}`;
+                      const { isReferenced } = isIdentifierReferenced(filePath, id);
+
+                      if (!isReferenced) {
                         collector.addIssue({
                           type: 'enumMembers',
                           filePath,

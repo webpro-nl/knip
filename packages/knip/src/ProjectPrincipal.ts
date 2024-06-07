@@ -234,7 +234,9 @@ export class ProjectPrincipal {
     const fd = this.cache.getFileDescriptor(filePath);
     if (!fd.changed && fd.meta?.data) return _deserialize(fd.meta.data);
 
-    if (!this.backend.typeChecker) throw new Error('Must initialize TypeChecker before source file analysis');
+    const typeChecker = this.backend.typeChecker;
+
+    if (!typeChecker) throw new Error('Must initialize TypeChecker before source file analysis');
 
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
     const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
@@ -245,7 +247,7 @@ export class ProjectPrincipal {
 
     const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
-    const { imports, exports, scripts } = _getImportsAndExports(sourceFile, resolve, this.backend.typeChecker, {
+    const { imports, exports, scripts, traceRefs } = _getImportsAndExports(sourceFile, resolve, typeChecker, {
       ...options,
       skipExports,
     });
@@ -297,6 +299,7 @@ export class ProjectPrincipal {
       },
       exports,
       scripts,
+      traceRefs,
     };
   }
 

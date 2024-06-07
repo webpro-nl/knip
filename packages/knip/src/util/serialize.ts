@@ -1,27 +1,27 @@
 import type { SerializableFile, SerializedFile } from '../types/serializable-map.js';
 import { timerify } from './Performance.js';
 
-const mapKeys = new Set(['exported', 'importedAs', 'internal', 'reExportedAs', 'reExportedBy', 'reExportedNs']);
-
 // biome-ignore lint/suspicious/noExplicitAny: TODO
 const serializeObj = (obj: any): any => {
   if (obj instanceof Set) return Array.from(obj);
-  if (obj instanceof Map) return serializeObj(Object.fromEntries(obj.entries()));
+  if (obj instanceof Map) {
+    const o = serializeObj(Object.fromEntries(obj.entries()));
+    o._m = 1;
+    return o;
+  }
   if (typeof obj === 'object') for (const key in obj) obj[key] = serializeObj(obj[key]);
   return obj;
 };
 
 // biome-ignore lint/suspicious/noExplicitAny: TODO
-const deserializeObj = (obj: any) => {
+const deserializeObj = (obj: Record<string, any>): Record<string, any> => {
   if (Array.isArray(obj)) return new Set(obj);
-  if (typeof obj === 'object') {
-    for (const key in obj) {
-      if (mapKeys.has(key)) {
-        if (!(obj[key] instanceof Map))
-          obj[key] = new Map(Object.entries(obj[key]).map(v => [v[0], deserializeObj(v[1])]));
-      } else obj[key] = deserializeObj(obj[key]);
-    }
+  if (obj._m) {
+    // biome-ignore lint/performance/noDelete: _m needs to go
+    delete obj._m;
+    return new Map(Object.entries(obj).map(v => [v[0], deserializeObj(v[1])]));
   }
+  if (typeof obj === 'object') for (const key in obj) obj[key] = deserializeObj(obj[key]);
   return obj;
 };
 
