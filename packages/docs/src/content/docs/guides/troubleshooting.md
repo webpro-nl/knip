@@ -59,7 +59,7 @@ export of a certain file.
 This works across re-exports, barrel files and workspaces. Here's an example
 screenshot:
 
-<img src="/examples/trace.png" alt="trace" class="mw500" />
+<img src="/screenshots/trace.png" alt="trace" class="mw500" />
 
 #### Legend
 
