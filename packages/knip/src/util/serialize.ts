@@ -1,4 +1,4 @@
-import type { SerializableFile, SerializedFile } from '../types/serializable-map.js';
+import type { FileNode } from '../types/dependency-graph.js';
 import { timerify } from './Performance.js';
 
 // biome-ignore lint/suspicious/noExplicitAny: deal with it
@@ -27,14 +27,14 @@ const deserializeObj = (obj: any): any => {
   return obj;
 };
 
-const serialize = (data: SerializableFile): SerializedFile => {
+const serialize = (data: FileNode): FileNode => {
   const clone = structuredClone(data);
   clone.imported = undefined;
   clone.internalImportCache = undefined;
   return serializeObj(clone);
 };
 
-const deserialize = (data: SerializedFile): SerializableFile => deserializeObj(data);
+const deserialize = (data: FileNode): FileNode => deserializeObj(data);
 
 export const _serialize = timerify(serialize);
 

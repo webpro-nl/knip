@@ -5,13 +5,7 @@ import type { ReferencedDependencies } from './WorkspaceWorker.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
-import type {
-  SerializableExport,
-  SerializableExportMember,
-  SerializableFile,
-  SerializableMap,
-  UnresolvedImport,
-} from './types/serializable-map.js';
+import type { DependencyGraph, Export, ExportMember, FileNode, UnresolvedImport } from './types/dependency-graph.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/createHosts.js';
@@ -74,7 +68,7 @@ export class ProjectPrincipal {
   isSkipLibs: boolean;
   isWatch: boolean;
 
-  cache: CacheConsultant<SerializableFile>;
+  cache: CacheConsultant<FileNode>;
 
   // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
   backend: {
@@ -308,7 +302,7 @@ export class ProjectPrincipal {
     this.backend.fileManager.sourceFileCache.delete(filePath);
   }
 
-  public findUnusedMembers(filePath: string, members: SerializableExportMember[]) {
+  public findUnusedMembers(filePath: string, members: ExportMember[]) {
     if (!this.findReferences) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
       this.findReferences = timerify(languageService.findReferences);
@@ -322,7 +316,7 @@ export class ProjectPrincipal {
     });
   }
 
-  public hasExternalReferences(filePath: string, exportedItem: SerializableExport) {
+  public hasExternalReferences(filePath: string, exportedItem: Export) {
     if (exportedItem.jsDocTags.has('@public')) return false;
 
     if (!this.findReferences) {
@@ -341,8 +335,8 @@ export class ProjectPrincipal {
     return externalRefs.length > 0;
   }
 
-  reconcileCache(serializableMap: SerializableMap) {
-    for (const [filePath, file] of serializableMap.entries()) {
+  reconcileCache(graph: DependencyGraph) {
+    for (const [filePath, file] of graph.entries()) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;
       fd.meta.data = _serialize(file);

@@ -1,13 +1,13 @@
 import { IMPORT_STAR } from '../constants.js';
-import type { SerializableImports, SerializableMap } from '../types/serializable-map.js';
+import type { DependencyGraph, ImportDetails } from '../types/dependency-graph.js';
 
 export const getHasStrictlyNsReferences = (
-  serializableMap: SerializableMap,
-  importsForExport: SerializableImports | undefined
+  graph: DependencyGraph,
+  importsForExport: ImportDetails | undefined
 ): [boolean, string?] => {
   if (!importsForExport) return [false];
 
-  if (importsForExport.importedNs.size === 0 && !importsForExport.reExportedBy.has(IMPORT_STAR)) {
+  if (importsForExport.importedNs.size === 0 && !importsForExport.reExported.has(IMPORT_STAR)) {
     return [false];
   }
 
@@ -21,9 +21,9 @@ export const getHasStrictlyNsReferences = (
     const byFilePaths = importsForExport.reExportedNs.get(ns);
     if (byFilePaths) {
       for (const filePath of byFilePaths) {
-        const file = serializableMap.get(filePath);
+        const file = graph.get(filePath);
         if (file?.imported) {
-          const hasStrictlyNsReferences = getHasStrictlyNsReferences(serializableMap, file.imported);
+          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported);
           if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
         }
       }
@@ -33,9 +33,9 @@ export const getHasStrictlyNsReferences = (
     if (reExportedAs) {
       for (const byFilePaths of reExportedAs.values()) {
         for (const filePath of byFilePaths) {
-          const file = serializableMap.get(filePath);
+          const file = graph.get(filePath);
           if (file?.imported) {
-            const hasStrictlyNsReferences = getHasStrictlyNsReferences(serializableMap, file.imported);
+            const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported);
             if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
           }
         }
@@ -45,12 +45,12 @@ export const getHasStrictlyNsReferences = (
     namespace = ns;
   }
 
-  const byFilePaths = importsForExport.reExportedBy.get(IMPORT_STAR);
+  const byFilePaths = importsForExport.reExported.get(IMPORT_STAR);
   if (byFilePaths) {
     for (const filePath of byFilePaths) {
-      const file = serializableMap.get(filePath);
+      const file = graph.get(filePath);
       if (file?.imported) {
-        const hasStrictlyNsReferences = getHasStrictlyNsReferences(serializableMap, file.imported);
+        const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported);
         if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
       }
     }

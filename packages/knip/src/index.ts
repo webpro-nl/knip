@@ -14,20 +14,20 @@ import { getFilteredScripts } from './manifest/helpers.js';
 import watchReporter from './reporters/watch.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type {
-  SerializableExport,
-  SerializableExportMember,
-  SerializableFile,
-  SerializableImportMap,
-  SerializableImports,
-  SerializableMap,
-} from './types/serializable-map.js';
+  DependencyGraph,
+  Export,
+  ExportMember,
+  FileNode,
+  ImportDetails,
+  ImportMap,
+} from './types/dependency-graph.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
+import { addNsValues, addValues, createFileNode } from './util/dependency-graph.js';
 import { isFile } from './util/fs.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredFn } from './util/globby.js';
 import { getHandler } from './util/handle-dependency.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
-import { addNsValues, addValues } from './util/map.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join, toPosix } from './util/path.js';
 import { findMatch } from './util/regex.js';
@@ -243,47 +243,35 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
-  const serializableMap: SerializableMap = new Map();
+  const graph: DependencyGraph = new Map();
   const analyzedFiles = new Set<string>();
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
 
-  const getFile = (filePath: string) => serializableMap.get(filePath) ?? ({} as Partial<SerializableFile>);
+  const getFileNode = (filePath: string) => graph.get(filePath) ?? createFileNode();
 
   const handleReferencedDependency = getHandler(collector, deputy, chief);
 
-  const updateImports = (importedModule: SerializableImports, importItems: SerializableImports) => {
+  const updateImportDetails = (importedModule: ImportDetails, importItems: ImportDetails) => {
     for (const id of importItems.refs) importedModule.refs.add(id);
     for (const [id, v] of importItems.imported.entries()) addValues(importedModule.imported, id, v);
-    for (const [id, v] of importItems.importedNs.entries()) addValues(importedModule.importedNs, id, v);
     for (const [id, v] of importItems.importedAs.entries()) addNsValues(importedModule.importedAs, id, v);
-    for (const [id, v] of importItems.reExportedNs.entries()) addValues(importedModule.reExportedNs, id, v);
+    for (const [id, v] of importItems.importedNs.entries()) addValues(importedModule.importedNs, id, v);
+    for (const [id, v] of importItems.reExported.entries()) addValues(importedModule.reExported, id, v);
     for (const [id, v] of importItems.reExportedAs.entries()) addNsValues(importedModule.reExportedAs, id, v);
-    for (const [id, v] of importItems.reExportedBy.entries()) addValues(importedModule.reExportedBy, id, v);
+    for (const [id, v] of importItems.reExportedNs.entries()) addValues(importedModule.reExportedNs, id, v);
   };
 
-  const updateImported = (filePath: string, importItems: SerializableImports) => {
-    const file = getFile(filePath);
+  const updateImportMap = (file: FileNode, importMap: ImportMap) => {
+    for (const [importedFilePath, importDetails] of importMap.entries()) {
+      const importedFileImports = file.imports.internal.get(importedFilePath);
+      if (!importedFileImports) file.imports.internal.set(importedFilePath, importDetails);
+      else updateImportDetails(importedFileImports, importDetails);
 
-    if (!file.imported) file.imported = importItems;
-    else updateImports(file.imported, importItems);
-
-    serializableMap.set(filePath, file);
-  };
-
-  const setInternalImports = (filePath: string, internalImports: SerializableImportMap) => {
-    for (const [specifierFilePath, importItems] of internalImports.entries()) {
-      // Update imports for current module
-      const file = getFile(filePath);
-
-      if (file.imports) {
-        const importedFile = file.imports.internal.get(specifierFilePath);
-        if (!importedFile) file.imports.internal.set(specifierFilePath, importItems);
-        else updateImports(importedFile, importItems);
-      }
-
-      // Update import stats for imported module
-      updateImported(specifierFilePath, importItems);
+      const importedFile = getFileNode(importedFilePath);
+      if (!importedFile.imported) importedFile.imported = importDetails;
+      else updateImportDetails(importedFile.imported, importDetails);
+      graph.set(importedFilePath, importedFile);
     }
   };
 
@@ -315,19 +303,17 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         getPrincipalByFilePath
       );
 
-      const file = getFile(filePath);
+      const file = getFileNode(filePath);
 
       file.imports = imports;
       file.exports = exports;
       file.scripts = scripts;
       file.traceRefs = traceRefs;
 
-      if (imports?.internal) {
-        file.internalImportCache = imports.internal;
-        setInternalImports(filePath, imports.internal);
-      }
+      updateImportMap(file, imports.internal);
+      file.internalImportCache = imports.internal;
 
-      serializableMap.set(filePath, file);
+      graph.set(filePath, file);
 
       // Handle scripts here since they might lead to more entry files
       if (scripts && scripts.size > 0) {
@@ -377,7 +363,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
     for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
-    principal.reconcileCache(serializableMap);
+    principal.reconcileCache(graph);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
     if (!isIsolateWorkspaces && isSkipLibs && !isWatch) factory.deletePrincipal(principal);
@@ -385,9 +371,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   if (isIsolateWorkspaces) for (const principal of principals) factory.deletePrincipal(principal);
 
-  const isIdentifierReferenced = getIsIdentifierReferencedHandler(serializableMap, entryPaths);
+  const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
 
-  const isExportedItemReferenced = (exportedItem: SerializableExport | SerializableExportMember) =>
+  const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
     exportedItem.refs > 0 &&
     (typeof chief.config.ignoreExportsUsedInFile === 'object'
       ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
@@ -397,7 +383,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     if (isReportValues || isReportTypes) {
       streamer.cast('Connecting the dots...');
 
-      for (const [filePath, file] of serializableMap.entries()) {
+      for (const [filePath, file] of graph.entries()) {
         const exportItems = file.exports?.exported;
 
         if (!exportItems || exportItems.size === 0) continue;
@@ -490,7 +476,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               }
             }
 
-            const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(serializableMap, importsForExport);
+            const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(graph, importsForExport);
 
             const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
@@ -521,7 +507,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
     }
 
-    for (const [filePath, file] of serializableMap.entries()) {
+    for (const [filePath, file] of graph.entries()) {
       const ws = chief.findWorkspaceByFilePath(filePath);
 
       if (ws) {
@@ -573,6 +559,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   if (isWatch) {
+    const cacheLocation = CacheConsultant.getCacheLocation();
+
     watch('.', { recursive: true }, async (eventType, filename) => {
       debugLog('*', `(raw) ${eventType} ${filename}`);
 
@@ -580,8 +568,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const startTime = performance.now();
         const filePath = join(cwd, toPosix(filename));
 
-        if (filename.startsWith(CacheConsultant.getCacheLocation())) return;
-        if (isGitIgnored(filePath)) return;
+        if (filename.startsWith(cacheLocation) || filename.startsWith('.git/') || isGitIgnored(filePath)) {
+          debugLog('*', `ignoring ${eventType} ${filename}`);
+          return;
+        }
 
         const workspace = chief.findWorkspaceByFilePath(filePath);
         if (workspace) {
@@ -615,31 +605,30 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
             if (event === 'added' || event === 'deleted') {
               // Flush, any file might contain (un)resolved imports to added/deleted files
-              serializableMap.clear();
+              graph.clear();
               for (const filePath of filePaths) analyzeSourceFile(filePath, principal);
             } else {
-              for (const filePath in serializableMap) {
+              for (const [filePath, file] of graph) {
                 if (filePaths.includes(filePath)) {
                   // Reset dep graph
-                  const file = serializableMap.get(filePath);
-                  if (file) file.imported = undefined;
+                  file.imported = undefined;
                 } else {
                   // Remove files no longer referenced
-                  serializableMap.delete(filePath);
+                  graph.delete(filePath);
                   analyzedFiles.delete(filePath);
+                  cachedUnusedFiles.add(filePath);
                 }
               }
 
               // Add existing files that were not yet part of the program
-              for (const filePath of filePaths)
-                if (!serializableMap.has(filePath)) analyzeSourceFile(filePath, principal);
+              for (const filePath of filePaths) if (!graph.has(filePath)) analyzeSourceFile(filePath, principal);
 
               if (!cachedUnusedFiles.has(filePath)) analyzeSourceFile(filePath, principal);
 
               // Rebuild dep graph
               for (const filePath of filePaths) {
-                const cache = serializableMap.get(filePath)?.internalImportCache;
-                if (cache) setInternalImports(filePath, cache);
+                const file = graph.get(filePath);
+                if (file?.internalImportCache) updateImportMap(file, file.internalImportCache);
               }
             }
 

@@ -15,7 +15,7 @@ test('Should serialize and deserialize file back to original', () => {
             imported: new Map([['name', new Set(['file', 'file2'])]]),
             importedAs: new Map([['name', new Map([['alias', new Set(['file', 'file2'])]])]]),
             importedNs: new Map([['namespace', new Set(['file', 'file2'])]]),
-            reExportedBy: new Map([['*', new Set(['file', 'file2'])]]),
+            reExported: new Map([['*', new Set(['file', 'file2'])]]),
             reExportedAs: new Map([['name', new Map([['alias', new Set(['file', 'file2'])]])]]),
             reExportedNs: new Map([['namespace', new Set(['file', 'file2'])]]),
           },
@@ -35,7 +35,7 @@ test('Should serialize and deserialize file back to original', () => {
               ],
             ]),
             importedNs: new Map([['namespace', new Set(['file', 'file2'])]]),
-            reExportedBy: new Map([
+            reExported: new Map([
               ['*', new Set(['file', 'file2'])],
               ['id', new Set(['file', 'file2'])],
             ]),

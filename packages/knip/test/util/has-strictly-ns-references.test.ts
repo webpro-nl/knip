@@ -1,18 +1,18 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import type { SerializableImports, SerializableMap } from '../../src/types/serializable-map.js';
+import type { DependencyGraph, ImportDetails } from '../../src/types/dependency-graph.js';
 import { getHasStrictlyNsReferences } from '../../src/util/type.js';
 
-const map: SerializableMap = new Map();
+const map: DependencyGraph = new Map();
 
-const base: SerializableImports = {
-  reExportedBy: new Map(),
-  reExportedAs: new Map(),
-  reExportedNs: new Map(),
+const base: ImportDetails = {
+  refs: new Set(),
   imported: new Map(),
   importedAs: new Map(),
   importedNs: new Map(),
-  refs: new Set(),
+  reExported: new Map(),
+  reExportedAs: new Map(),
+  reExportedNs: new Map(),
 };
 
 test('Strictly namespace refs (no namespaces)', () => {

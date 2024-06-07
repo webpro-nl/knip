@@ -1,5 +1,5 @@
 import { IMPORT_STAR } from '../constants.js';
-import type { SerializableMap } from '../types/serializable-map.js';
+import type { DependencyGraph } from '../types/dependency-graph.js';
 import { type TraceNode, addNodes, createNode, isTrace } from './trace.js';
 
 type Result = {
@@ -8,7 +8,7 @@ type Result = {
   traceNode: TraceNode;
 };
 
-export const getIsIdentifierReferencedHandler = (serializableMap: SerializableMap, entryPaths: Set<string>) => {
+export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPaths: Set<string>) => {
   const isIdentifierReferenced = (
     filePath: string,
     id: string,
@@ -28,7 +28,7 @@ export const getIsIdentifierReferencedHandler = (serializableMap: SerializableMa
     const ids = id.split('.');
     const [identifier, ...rest] = ids;
 
-    const file = serializableMap.get(filePath)?.imported;
+    const file = graph.get(filePath)?.imported;
 
     if (!file) return { isReferenced, hasReExportingEntryFile, traceNode };
 
@@ -38,7 +38,7 @@ export const getIsIdentifierReferencedHandler = (serializableMap: SerializableMa
     ) {
       isReferenced = true;
       if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
-      addNodes(traceNode, id, serializableMap, file.imported.get(identifier));
+      addNodes(traceNode, id, graph, file.imported.get(identifier));
     }
 
     for (const [exportId, aliases] of file.importedAs.entries()) {
@@ -48,7 +48,7 @@ export const getIsIdentifierReferencedHandler = (serializableMap: SerializableMa
           if (file.refs.has(aliasedRef)) {
             isReferenced = true;
             if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
-            addNodes(traceNode, aliasedRef, serializableMap, aliases.get(alias));
+            addNodes(traceNode, aliasedRef, graph, aliases.get(alias));
           }
         }
       }
@@ -58,7 +58,7 @@ export const getIsIdentifierReferencedHandler = (serializableMap: SerializableMa
       if (file.refs.has(`${namespace}.${id}`)) {
         isReferenced = true;
         if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
-        addNodes(traceNode, `${namespace}.${id}`, serializableMap, byFilePaths);
+        addNodes(traceNode, `${namespace}.${id}`, graph, byFilePaths);
       }
 
       const reExportedAs = file.reExportedAs.get(namespace);
@@ -98,10 +98,10 @@ export const getIsIdentifierReferencedHandler = (serializableMap: SerializableMa
       }
     }
 
-    const reExportedBy = file.reExportedBy.get(identifier) ?? file.reExportedBy.get(IMPORT_STAR);
+    const reExported = file.reExported.get(identifier) ?? file.reExported.get(IMPORT_STAR);
 
-    if (reExportedBy) {
-      for (const byFilePath of reExportedBy) {
+    if (reExported) {
+      for (const byFilePath of reExported) {
         if (!seen.has(byFilePath)) {
           const child = createNode(byFilePath);
           traceNode.children.add(child);

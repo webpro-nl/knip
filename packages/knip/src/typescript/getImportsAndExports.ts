@@ -2,18 +2,12 @@ import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
 import type { Tags } from '../types/cli.js';
+import type { Export, ExportMap, ExportMember, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
-import type {
-  SerializableExport,
-  SerializableExportMember,
-  SerializableExports,
-  SerializableImportMap,
-  UnresolvedImport,
-} from '../types/serializable-map.js';
 import { timerify } from '../util/Performance.js';
-import { addNsValue, addValue } from '../util/map.js';
+import { addNsValue, addValue, createImports } from '../util/dependency-graph.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { extname, isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
@@ -42,7 +36,7 @@ const getVisitors = (sourceFile: ts.SourceFile) => ({
   script: getScriptVisitors(sourceFile),
 });
 
-const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): SerializableExportMember => {
+const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): ExportMember => {
   const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
   return {
     // @ts-expect-error ref will be unset later
@@ -82,12 +76,12 @@ const getImportsAndExports = (
   options: GetImportsAndExportsOptions
 ) => {
   const { skipTypeOnly, tags } = options;
-  const internalImports: SerializableImportMap = new Map();
+  const internalImports: ImportMap = new Map();
   const externalImports = new Set<string>();
   const unresolvedImports = new Set<UnresolvedImport>();
   const resolved = new Set<string>();
   const specifiers = new Set<[string, string]>();
-  const exports: SerializableExports = new Map();
+  const exports: ExportMap = new Map();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
   const traceRefs = new Set<string>();
@@ -105,15 +99,7 @@ const getImportsAndExports = (
 
     const file = internalImports.get(filePath);
 
-    const imports = file ?? {
-      reExportedBy: new Map(),
-      reExportedAs: new Map(),
-      reExportedNs: new Map(),
-      imported: new Map(),
-      importedAs: new Map(),
-      importedNs: new Map(),
-      refs: new Set(),
-    };
+    const imports = file ?? createImports();
 
     if (!file) internalImports.set(filePath, imports);
 
@@ -128,7 +114,7 @@ const getImportsAndExports = (
         // Patterns:
         // export { id } from 'specifier';
         // export * from 'specifier';
-        addValue(imports.reExportedBy, identifier, sourceFile.fileName);
+        addValue(imports.reExported, identifier, sourceFile.fileName);
       }
     }
 
@@ -232,7 +218,7 @@ const getImportsAndExports = (
             addValue(internalImport.reExportedNs, identifier, sourceFile.fileName);
           } else {
             // Pattern: import { id } from 'specifier'; export { id };
-            addValue(internalImport.reExportedBy, importId, sourceFile.fileName);
+            addValue(internalImport.reExported, importId, sourceFile.fileName);
           }
         }
       }
@@ -240,11 +226,11 @@ const getImportsAndExports = (
 
     const jsDocTags = getJSDocTags(node);
 
-    const serializedMembers = members.map(member => createMember(node, member, member.pos));
+    const exportMembers = members.map(member => createMember(node, member, member.pos));
 
     const item = exports.get(identifier);
     if (item) {
-      const members = [...(item.members ?? []), ...serializedMembers];
+      const members = [...(item.members ?? []), ...exportMembers];
       const tags = new Set([...(item.jsDocTags ?? []), ...jsDocTags]);
       const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
       exports.set(identifier, { ...item, members, jsDocTags: tags, fixes });
@@ -255,7 +241,7 @@ const getImportsAndExports = (
         // @ts-expect-error ref will be unset later
         symbol: node.symbol,
         type,
-        members: serializedMembers,
+        members: exportMembers,
         jsDocTags,
         pos,
         line: line + 1,
@@ -388,7 +374,7 @@ const getImportsAndExports = (
   const pragmaImports = getImportsFromPragmas(sourceFile);
   if (pragmaImports) for (const node of pragmaImports) addImport(node, sourceFile);
 
-  const setRefs = (item: SerializableExport | SerializableExportMember) => {
+  const setRefs = (item: Export | ExportMember) => {
     if (!item.symbol) return;
     const symbols = new Set<ts.Symbol>();
     let index = 0;
