@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/imports');
+const cwd = resolve('fixtures/imports-self');
 
 test('Support various ways to import modules', async () => {
   const { counters } = await main({
@@ -15,7 +15,7 @@ test('Support various ways to import modules', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 22,
-    total: 22,
+    processed: 2,
+    total: 2,
   });
 });
