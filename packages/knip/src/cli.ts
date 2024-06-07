@@ -68,7 +68,7 @@ const run = async () => {
       isRemoveFiles,
     });
 
-    if (isWatch) return;
+    if (isWatch || isTrace) return;
 
     const initialData: ReporterOptions = {
       report,
