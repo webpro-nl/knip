@@ -14,7 +14,11 @@ We can distinguish two types of issues:
 This indicates a successful run, but there are unused items. Continue with
 [handling issues][3] to deal with unused items reported by Knip.
 
+:::tip
+
 Use [--debug][4] and [--trace][5] to troubleshoot issues.
+
+:::
 
 ## Exceptions thrown by Knip
 
