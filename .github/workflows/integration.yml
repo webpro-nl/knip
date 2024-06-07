@@ -95,7 +95,8 @@ jobs:
           cd eslint
           npm install --force
           cd docs && npm install && cd -
-          knip
+          knip --cache
+          knip --cache
 
       - name: Test Knip against TypeScript
         uses: actions/checkout@v4
