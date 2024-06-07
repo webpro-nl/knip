@@ -284,9 +284,10 @@ export class WorkspaceWorker {
         for (const configFilePath of configFilePaths) {
           const opts = { ...options, configFileDir: dirname(configFilePath), configFileName: basename(configFilePath) };
           if (hasResolveEntryPaths || shouldRunConfigResolver) {
-            const fd = this.cache.getFileDescriptor(configFilePath);
+            const isManifest = basename(configFilePath) === 'package.json';
+            const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
             const config =
-              !fd.changed && fd.meta?.data
+              fd?.meta?.data && !fd.changed
                 ? fd.meta.data
                 : await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
             if (config) {
@@ -299,7 +300,7 @@ export class WorkspaceWorker {
                 for (const id of dependencies) addDependency(id, configFilePath);
               }
 
-              if (fd.changed && fd.meta) fd.meta.data = config;
+              if (!isManifest && fd?.changed && fd.meta) fd.meta.data = config;
             }
           }
         }
