@@ -1,8 +1,8 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import os from 'node:os';
-import { resolve } from '../src/util/path.js';
-import { execFactory } from './helpers/exec.js';
+import { resolve } from '../../src/util/path.js';
+import { execFactory } from '../helpers/exec.js';
 
 const skipIf = typeof Bun !== 'undefined' && os.platform() === 'win32' ? test.skip : test;
 

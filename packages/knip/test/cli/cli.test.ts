@@ -1,10 +1,10 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { helpText } from '../src/util/cli-arguments.js';
-import { loadJSON } from '../src/util/fs.js';
-import { resolve } from '../src/util/path.js';
-import { version } from '../src/version.js';
-import { execFactory } from './helpers/exec.js';
+import { helpText } from '../../src/util/cli-arguments.js';
+import { loadJSON } from '../../src/util/fs.js';
+import { resolve } from '../../src/util/path.js';
+import { version } from '../../src/version.js';
+import { execFactory } from '../helpers/exec.js';
 
 const cwd = resolve('fixtures/cli');
 
