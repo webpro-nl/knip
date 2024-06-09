@@ -4,7 +4,7 @@ import { type TraceNode, addNodes, createNode, isTrace } from './trace.js';
 
 type Result = {
   isReferenced: boolean;
-  hasReExportingEntryFile: boolean;
+  reExportingEntryFile: undefined | string;
   traceNode: TraceNode;
 };
 
@@ -17,11 +17,11 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
     seen = new Set<string>()
   ): Result => {
     let isReferenced = false;
-    let hasReExportingEntryFile = entryPaths.has(filePath);
+    let reExportingEntryFile = entryPaths.has(filePath) ? filePath : undefined;
 
-    if (hasReExportingEntryFile) traceNode.isEntry = true;
+    if (reExportingEntryFile) traceNode.isEntry = true;
 
-    if (!isIncludeEntryExports && hasReExportingEntryFile) return { isReferenced, hasReExportingEntryFile, traceNode };
+    if (!isIncludeEntryExports && reExportingEntryFile) return { isReferenced, reExportingEntryFile, traceNode };
 
     seen.add(filePath);
 
@@ -30,14 +30,14 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
 
     const file = graph.get(filePath)?.imported;
 
-    if (!file) return { isReferenced, hasReExportingEntryFile, traceNode };
+    if (!file) return { isReferenced, reExportingEntryFile, traceNode };
 
     if (
       ((identifier !== id && file.refs.has(id)) || identifier === id) &&
       (file.imported.has(identifier) || file.importedAs.has(identifier))
     ) {
       isReferenced = true;
-      if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
+      if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
       addNodes(traceNode, id, graph, file.imported.get(identifier));
     }
 
@@ -47,7 +47,7 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
           const aliasedRef = [alias, ...rest].join('.');
           if (file.refs.has(aliasedRef)) {
             isReferenced = true;
-            if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
+            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
             addNodes(traceNode, aliasedRef, graph, aliases.get(alias));
           }
         }
@@ -57,7 +57,7 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
     for (const [namespace, byFilePaths] of file.importedNs) {
       if (file.refs.has(`${namespace}.${id}`)) {
         isReferenced = true;
-        if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
+        if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
         addNodes(traceNode, `${namespace}.${id}`, graph, byFilePaths);
       }
 
@@ -70,10 +70,10 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
               const child = createNode(byFilePath);
               traceNode.children.add(child);
               const result = isIdentifierReferenced(byFilePath, `${alias}.${id}`, isIncludeEntryExports, child, seen);
-              if (result.hasReExportingEntryFile) hasReExportingEntryFile = true;
+              if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
               if (result.isReferenced) {
                 isReferenced = true;
-                if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
+                if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
               }
             }
           }
@@ -88,10 +88,10 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
             const child = createNode(byFilePath);
             traceNode.children.add(child);
             const result = isIdentifierReferenced(byFilePath, `${namespace}.${id}`, isIncludeEntryExports, child, seen);
-            if (result.hasReExportingEntryFile) hasReExportingEntryFile = true;
+            if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
             if (result.isReferenced) {
               isReferenced = true;
-              if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
+              if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
             }
           }
         }
@@ -106,10 +106,10 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
           const child = createNode(byFilePath);
           traceNode.children.add(child);
           const result = isIdentifierReferenced(byFilePath, id, isIncludeEntryExports, child, seen);
-          if (result.hasReExportingEntryFile) hasReExportingEntryFile = true;
+          if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
           if (result.isReferenced) {
             isReferenced = true;
-            if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
+            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
           }
         }
       }
@@ -125,10 +125,10 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
             traceNode.children.add(child);
             const ref = [alias, ...rest].join('.');
             const result = isIdentifierReferenced(byFilePath, ref, isIncludeEntryExports, child, seen);
-            if (result.hasReExportingEntryFile) hasReExportingEntryFile = true;
+            if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
             if (result.isReferenced) {
               isReferenced = true;
-              if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
+              if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
             }
           }
         }
@@ -141,16 +141,16 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
           const child = createNode(byFilePath);
           traceNode.children.add(child);
           const result = isIdentifierReferenced(byFilePath, `${namespace}.${id}`, isIncludeEntryExports, child, seen);
-          if (result.hasReExportingEntryFile) hasReExportingEntryFile = true;
+          if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
           if (result.isReferenced) {
             isReferenced = true;
-            if (!isTrace) return { isReferenced, hasReExportingEntryFile, traceNode };
+            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
           }
         }
       }
     }
 
-    return { isReferenced, hasReExportingEntryFile, traceNode };
+    return { isReferenced, reExportingEntryFile, traceNode };
   };
 
   return isIdentifierReferenced;

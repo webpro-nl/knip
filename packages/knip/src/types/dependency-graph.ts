@@ -39,6 +39,7 @@ export interface Export {
   refs: number;
   fixes: Fixes;
   symbol?: ts.Symbol;
+  isReExport: boolean;
 }
 
 export type ExportMember = {

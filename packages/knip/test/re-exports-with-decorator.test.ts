@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/re-exports-with-decorator');
 
-test('Ignore re-exports from entry files', async () => {
+test('Ignore re-exports from entry file (w/ decorator)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

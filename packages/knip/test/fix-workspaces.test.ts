@@ -10,7 +10,7 @@ const cwd = resolve('fixtures/fix-workspaces');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-test('Remove exports and dependencies', async () => {
+test('Remove exports and dependencies (workspaces)', async () => {
   const tests = [
     [
       'exports.ts',

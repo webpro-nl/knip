@@ -27,7 +27,7 @@ test('Ignore re-exports from entry files (include entry + ignore @public)', asyn
     isIncludeEntryExports: true,
   });
 
-  assert(issues.exports['1-entry.ts']['somethingNotToIgnore']);
+  assert(issues.exports['4-my-module.ts']['somethingNotToIgnore']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

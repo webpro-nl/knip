@@ -103,34 +103,35 @@ const getImportsAndExports = (
 
     if (!file) internalImports.set(filePath, imports);
 
+    const nsOrAlias = symbol ? String(symbol.escapedName) : options.alias;
+
     if (isReExport) {
       if (isStar && namespace) {
         // Pattern: export * as NS from 'specifier';
         addValue(imports.reExportedNs, namespace, sourceFile.fileName);
-      } else if (namespace) {
+      } else if (nsOrAlias) {
         // Pattern: export { id as alias } from 'specifier';
-        addNsValue(imports.reExportedAs, identifier, namespace, sourceFile.fileName);
+        addNsValue(imports.reExportedAs, identifier, nsOrAlias, sourceFile.fileName);
       } else {
         // Patterns:
         // export { id } from 'specifier';
         // export * from 'specifier';
         addValue(imports.reExported, identifier, sourceFile.fileName);
       }
-    }
-
-    const nsOrAlias = symbol ? String(symbol.escapedName) : options.alias;
-    if (nsOrAlias && nsOrAlias !== identifier) {
-      if (isStar) {
-        addValue(imports.importedNs, nsOrAlias, sourceFile.fileName);
-      } else {
-        addNsValue(imports.importedAs, identifier, nsOrAlias, sourceFile.fileName);
+    } else {
+      if (nsOrAlias && nsOrAlias !== identifier) {
+        if (isStar) {
+          addValue(imports.importedNs, nsOrAlias, sourceFile.fileName);
+        } else {
+          addNsValue(imports.importedAs, identifier, nsOrAlias, sourceFile.fileName);
+        }
+      } else if (identifier !== ANONYMOUS && identifier !== IMPORT_STAR) {
+        addValue(imports.imported, identifier, sourceFile.fileName);
       }
-    } else if (identifier !== ANONYMOUS && identifier !== IMPORT_STAR) {
-      addValue(imports.imported, identifier, sourceFile.fileName);
-    }
 
-    if (symbol && DEFAULT_EXTENSIONS.includes(extname(sourceFile.fileName))) {
-      importedInternalSymbols.set(symbol, filePath);
+      if (symbol && DEFAULT_EXTENSIONS.includes(extname(sourceFile.fileName))) {
+        importedInternalSymbols.set(symbol, filePath);
+      }
     }
   };
 
@@ -228,12 +229,17 @@ const getImportsAndExports = (
 
     const exportMembers = members.map(member => createMember(node, member, member.pos));
 
+    const isReExport = Boolean(
+      node.parent?.parent && ts.isExportDeclaration(node.parent.parent) && node.parent.parent.moduleSpecifier
+    );
+
     const item = exports.get(identifier);
     if (item) {
+      // Code path for fn overloads, simple merge
       const members = [...(item.members ?? []), ...exportMembers];
       const tags = new Set([...(item.jsDocTags ?? []), ...jsDocTags]);
       const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
-      exports.set(identifier, { ...item, members, jsDocTags: tags, fixes });
+      exports.set(identifier, { ...item, members, jsDocTags: tags, fixes, isReExport });
     } else {
       const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
       exports.set(identifier, {
@@ -248,6 +254,7 @@ const getImportsAndExports = (
         col: character + 1,
         fixes: fix ? [fix] : [],
         refs: 0,
+        isReExport,
       });
     }
 

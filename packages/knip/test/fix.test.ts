@@ -54,7 +54,11 @@ module.exports = { identifier,  };
     [
       'reexports.js',
       await readContents('reexports.js'),
-      `export { One } from './reexported';
+      `export { RangeSlider } from './reexported';
+export { Rating } from './reexported';
+export { One } from './reexported';
+export { Col, Col as KCol } from './reexported';
+export { Row as KRow, Row } from './reexported';
 `.replace(/\n/g, EOL),
     ],
     [
@@ -89,14 +93,18 @@ export const One = 1;
     tags: [[], ['knipignore']],
   });
 
-  assert(issues.exports['access.js']['ACCESS']);
   assert(issues.exports['access.js']['UNUSED']);
+  assert(issues.exports['access.js']['ACCESS']);
   assert(issues.exports['exports.js']['identifier2']);
   assert(issues.exports['mod.ts']['a']);
   assert(issues.exports['mod.ts']['b']);
+  assert(issues.exports['mod.ts']['c']);
+  assert(issues.exports['mod.ts']['d']);
   assert(issues.exports['mod.ts']['default']);
   assert(issues.exports['mod.ts']['x']);
   assert(issues.exports['mod.ts']['y']);
+  assert(issues.exports['reexported.js']['Three']);
+  assert(issues.exports['reexported.js']['Two']);
 
   // check ignore
   assert(issues.exports['ignored.ts'] === undefined);

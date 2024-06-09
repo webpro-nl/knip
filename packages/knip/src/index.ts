@@ -408,19 +408,26 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           const importsForExport = file.imported;
 
           for (const [identifier, exportedItem] of exportItems.entries()) {
+            if (exportedItem.isReExport) continue;
+
             // Skip tagged exports
             if (shouldIgnore(exportedItem.jsDocTags)) continue;
 
             if (importsForExport) {
-              const { isReferenced, hasReExportingEntryFile, traceNode } = isIdentifierReferenced(
+              const { isReferenced, reExportingEntryFile, traceNode } = isIdentifierReferenced(
                 filePath,
                 identifier,
                 isIncludeEntryExports
               );
 
-              if (!isIncludeEntryExports && hasReExportingEntryFile) {
-                createAndPrintTrace(filePath, { identifier, isEntry, hasRef: isReferenced });
-                continue;
+              if (reExportingEntryFile) {
+                if (!isIncludeEntryExports) {
+                  createAndPrintTrace(filePath, { identifier, isEntry, hasRef: isReferenced });
+                  continue;
+                }
+                // Skip exports if re-exported from entry file and tagged
+                const reExportedItem = graph.get(reExportingEntryFile)?.exports.exported.get(identifier);
+                if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
               }
 
               if (traceNode) printTrace(traceNode, filePath, identifier);
