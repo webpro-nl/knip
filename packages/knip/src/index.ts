@@ -419,7 +419,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               );
 
               if (!isIncludeEntryExports && hasReExportingEntryFile) {
-                createAndPrintTrace(filePath, { isEntry, hasRef: isReferenced });
+                createAndPrintTrace(filePath, { identifier, isEntry, hasRef: isReferenced });
                 continue;
               }
 

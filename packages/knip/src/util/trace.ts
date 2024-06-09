@@ -12,6 +12,7 @@ const { 'trace-export': traceExport, 'trace-file': traceFile, trace } = parsedAr
 const isTrace = Boolean(trace || traceExport || traceFile);
 
 type CreateNode = {
+  identifier?: string;
   hasRef?: boolean;
   isEntry?: boolean;
 };
@@ -20,6 +21,7 @@ type Create = (filePath: string, options?: CreateNode) => TraceNode;
 
 export type TraceNode = {
   filePath: string;
+  identifier?: string;
   hasRef: boolean;
   isEntry: boolean;
   children: Set<TraceNode>;
@@ -68,8 +70,9 @@ export const printTrace = isTrace
     }
   : () => {};
 
-export const createNode: Create = (filePath, { hasRef = false, isEntry = false } = {}) => ({
+export const createNode: Create = (filePath, { hasRef = false, isEntry = false, identifier } = {}) => ({
   filePath,
+  identifier,
   hasRef,
   isEntry,
   children: new Set<TraceNode>(),
@@ -91,5 +94,5 @@ export const addNodes = (node: TraceNode, id: string, importedSymbols: Dependenc
 export const createAndPrintTrace = (filePath: string, options: CreateNode = {}) => {
   if (!isTrace || traceExport || traceFile) return;
   const traceNode = createNode(filePath, options);
-  printTrace(traceNode, filePath);
+  printTrace(traceNode, filePath, options.identifier);
 };
