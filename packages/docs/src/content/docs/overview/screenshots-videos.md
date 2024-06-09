@@ -13,7 +13,7 @@ Studio Code:
   <source src="/screenshots/watch-fix.webm" type="video/webm" />
 </video>
 
-See [--watch][1] and [auto-fix][2] for more details.
+This works in any terminal. See [--watch][1] and [auto-fix][2] for more details.
 
 ## Trace
 
