@@ -31,7 +31,7 @@ import { getIsIdentifierReferencedHandler } from './util/is-identifier-reference
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join, toPosix } from './util/path.js';
 import { findMatch } from './util/regex.js';
-import { shouldIgnore } from './util/tag.js';
+import { getShouldIgnoreHandler } from './util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
 import { createAndPrintTrace, printTrace } from './util/trace.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
@@ -371,6 +371,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   if (isIsolateWorkspaces) for (const principal of principals) factory.deletePrincipal(principal);
 
+  const shouldIgnore = getShouldIgnoreHandler(tags, isProduction);
+
   const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
 
   const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
@@ -407,10 +409,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
           for (const [identifier, exportedItem] of exportItems.entries()) {
             // Skip tagged exports
-            if (exportedItem.jsDocTags.has('@public') || exportedItem.jsDocTags.has('@beta')) continue;
-            if (exportedItem.jsDocTags.has('@alias')) continue;
-            if (shouldIgnore(exportedItem.jsDocTags, tags)) continue;
-            if (isProduction && exportedItem.jsDocTags.has('@internal')) continue;
+            if (shouldIgnore(exportedItem.jsDocTags)) continue;
 
             if (importsForExport) {
               const { isReferenced, hasReExportingEntryFile, traceNode } = isIdentifierReferenced(
@@ -430,7 +429,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                 if (report.enumMembers && exportedItem.type === 'enum') {
                   for (const member of exportedItem.members) {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
-                    if (shouldIgnore(member.jsDocTags, tags)) continue;
+                    if (shouldIgnore(member.jsDocTags)) continue;
 
                     if (member.refs === 0) {
                       const id = `${identifier}.${member.identifier}`;
@@ -454,8 +453,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
                 if (principal && isReportClassMembers && exportedItem.type === 'class') {
                   const members = exportedItem.members.filter(
-                    member =>
-                      !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags, tags))
+                    member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
                   );
                   for (const member of principal.findUnusedMembers(filePath, members)) {
                     collector.addIssue({
