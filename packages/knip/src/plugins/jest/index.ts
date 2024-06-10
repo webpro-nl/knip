@@ -76,6 +76,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
   const testSequencer = config.testSequencer ? [config.testSequencer] : [];
   const globalSetup = config.globalSetup ? [config.globalSetup] : [];
+  const globalTeardown = config.globalTeardown ? [config.globalTeardown] : [];
 
   return [
     ...presets,
@@ -93,6 +94,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     ...snapshotResolver,
     ...testSequencer,
     ...globalSetup,
+    ...globalTeardown,
   ];
 };
 
