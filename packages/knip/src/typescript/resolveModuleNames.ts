@@ -69,7 +69,6 @@ export function createCustomModuleResolver(
       const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
       if (resolvedFileName) {
         const ext = extname(resolvedFileName);
-        const extension = virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext;
 
         if (!virtualFileExtensions.includes(ext) && !FOREIGN_FILE_EXTENSIONS.has(ext)) {
           const srcFilePath = toSourceFilePath(resolvedFileName);
@@ -85,7 +84,7 @@ export function createCustomModuleResolver(
 
         return {
           resolvedFileName,
-          extension,
+          extension: virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext,
           isExternalLibraryImport: isInNodeModules(resolvedFileName),
           resolvedUsingTsExtension: false,
         };
