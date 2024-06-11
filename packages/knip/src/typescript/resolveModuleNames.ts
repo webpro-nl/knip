@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
+import { timerify } from '../util/Performance.js';
 import { sanitizeSpecifier } from '../util/modules.js';
 import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.js';
 import { resolveSync } from '../util/resolve.js';
@@ -139,5 +140,5 @@ export function createCustomModuleResolver(
     return resolvedModule;
   }
 
-  return resolveModuleNames;
+  return timerify(resolveModuleNames);
 }
