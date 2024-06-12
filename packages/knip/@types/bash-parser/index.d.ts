@@ -16,9 +16,7 @@ declare module '@ericcornelissen/bash-parser' {
     prefix?: Prefix[];
   };
 
-  type Prefix = {
-    expansion?: Expansion[];
-  };
+  export type Prefix = ExpansionNode | Assignment;
 
   type LogicalExpression = {
     type: 'LogicalExpression';
@@ -46,6 +44,10 @@ declare module '@ericcornelissen/bash-parser' {
     body: CompoundList;
   };
 
+  export type ExpansionNode = {
+    expansion: Expansion[];
+  };
+
   type Expansion = {
     type: 'CommandExpansion';
     commandAST: AST;
@@ -54,6 +56,11 @@ declare module '@ericcornelissen/bash-parser' {
   type Pipeline = {
     type: 'Pipeline';
     commands: Command[];
+  };
+
+  export type Assignment = {
+    type: 'AssignmentWord';
+    text: string;
   };
 
   export type Node = CompoundList | Command | LogicalExpression | If | For | Function_ | Pipeline;
