@@ -115,7 +115,7 @@ const run = async () => {
       const prefix = `${picocolors.red('ERROR:')}`;
       console.error(`${prefix} ${knownError.message}`);
       if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
-      if (isConfigurationError(knownError)) console.log(`\n${helpText}`);
+      if (isConfigurationError(knownError)) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
