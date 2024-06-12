@@ -42,7 +42,7 @@ jobs:
           path: slonik
       - run: |
           cd slonik
-          npm ci
+          pnpm install
           knip
 
       - name: Test Knip against 10ten-ja-reader
