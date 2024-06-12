@@ -37,6 +37,10 @@ const templateStringInternal = () => {
   return import('./dir/mod');
 };
 
+const importMetaResolve = () => {
+  return import.meta.resolve('./import-meta-resolve.js');
+};
+
 function promiseAll() {
   return {
     async fn() {

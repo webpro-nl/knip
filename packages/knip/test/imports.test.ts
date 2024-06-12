@@ -15,7 +15,7 @@ test('Support various ways to import modules', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 22,
-    total: 22,
+    processed: 23,
+    total: 23,
   });
 });
