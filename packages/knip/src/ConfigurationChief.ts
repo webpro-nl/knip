@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { partitionCompilers } from './compilers/index.js';
@@ -24,7 +23,7 @@ import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
-import { join, relative, toPosix } from './util/path.js';
+import { join, relative, resolve, toPosix } from './util/path.js';
 import { type Graph, createPkgGraph } from './util/pkgs-graph.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
@@ -323,8 +322,10 @@ export class ConfigurationChief {
   }
 
   private determineIncludedWorkspaces() {
-    if (workspaceArg && !existsSync(workspaceArg)) {
-      throw new ConfigurationError(`Directory does not exist: ${workspaceArg}`);
+    if (workspaceArg) {
+      const dir = resolve(workspaceArg);
+      if (!isDirectory(dir)) throw new ConfigurationError('Workspace is not a directory');
+      if (!isFile(join(dir, 'package.json'))) throw new ConfigurationError('Unable to find package.json in workspace');
     }
 
     const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
