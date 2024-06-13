@@ -4,11 +4,9 @@ import path from 'node:path';
 import ts from 'typescript';
 import { getCompilerExtensions } from '../compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { SourceFileManager } from './SourceFileManager.js';
 import { createCustomModuleResolver } from './resolveModuleNames.js';
-import { createCustomSys } from './sys.js';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 
@@ -33,9 +31,7 @@ export const createHosts = ({
 }: CreateHostsOptions) => {
   const fileManager = new SourceFileManager({ compilers, isSkipLibs });
   const compilerExtensions = getCompilerExtensions(compilers);
-  const sys = createCustomSys(cwd, [...compilerExtensions, ...FOREIGN_FILE_EXTENSIONS]);
   const resolveModuleNames = createCustomModuleResolver(
-    sys,
     compilerOptions,
     compilerExtensions,
     toSourceFilePath,
@@ -47,10 +43,10 @@ export const createHosts = ({
     getScriptFileNames: () => Array.from(entryPaths),
     getScriptVersion: () => '0',
     getScriptSnapshot: (fileName: string) => fileManager.getSnapshot(fileName),
-    getCurrentDirectory: sys.getCurrentDirectory,
+    getCurrentDirectory: () => cwd,
     getDefaultLibFileName: ts.getDefaultLibFilePath,
-    readFile: sys.readFile,
-    fileExists: sys.fileExists,
+    readFile: ts.sys.readFile,
+    fileExists: ts.sys.fileExists,
     resolveModuleNames,
   };
 
