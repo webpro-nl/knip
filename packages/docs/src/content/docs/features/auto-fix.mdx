@@ -8,13 +8,17 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Run Knip as you normally would, and then run it again with the `--fix` flag to
-let Knip automatically apply fixes. Currently includes:
+Run Knip as you normally would, and if the report looks good then run it again
+with the `--fix` flag to let Knip automatically apply fixes.
+
+Knip currently can fix these [issue types][1]:
 
 - Remove `export` keyword for unused exports and exported types
 - Remove unused `dependencies` and `devDependencies` from `package.json`
 - Remove unused files
 - Works across workspaces in a monorepo
+
+## Flags
 
 Add the `--fix` flag to remove unused exports and dependencies:
 
@@ -28,11 +32,18 @@ Add `--allow-remove-files` to allow Knip to remove unused files:
 knip --fix --allow-remove-files
 ```
 
-Use `--fix-type` to fix only specific issue types (`files`, `exports`, `types`
-and/or `dependencies`). Example:
+Use `--fix-type` to fix only specific issue types:
+
+- `files`
+- `exports`
+- `types`
+- `dependencies`
+
+Example:
 
 ```sh
 knip --fix-type exports,types
+knip --fix-type exports --fix-type types   # same as above
 ```
 
 Use VCS/Git to review and undo changes if necessary.
@@ -41,11 +52,16 @@ Use VCS/Git to review and undo changes if necessary.
 
 After Knip has fixed issues, there are two things to consider:
 
-1. Use tools like ESLint or Biome to find and remove unused variables inside
-   files. This may result in more deleted code, and Knip may then find more
-   unused code. Rinse and repeat!
-2. Verify changes in `package.json` and update dependencies using your package
-   manager:
+### Unused variables
+
+Use tools like ESLint or Biome to find and remove unused variables inside files.
+This may result in more deleted code, and Knip may then find more unused code.
+Rinse and repeat!
+
+### Unused dependencies
+
+Verify changes in `package.json` and update dependencies using your package
+manager:
 
 <Tabs>
   <TabItem label="npm">
@@ -141,3 +157,5 @@ export const { ,  } = { a, b };
 
 export const [, ] = [c, d];
 ```
+
+[1]: ../reference/issue-types.md

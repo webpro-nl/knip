@@ -19,15 +19,16 @@ Knip has built-in "compilers" for the following file extensions:
 
 Note that "compilers" is quoted, as they are not real compilers, but regular
 expressions to collect `import` statements from files with those extensions.
-This allows Knip to build the dependency graph.
+This is fast, requires no dependencies, and enough for Knip to build the
+dependency graph.
 
 On the other hand, real compilers may expose their own challenges in the context
 of Knip. For instance, the Svelte compiler keeps `exports` intact, while they
 might represent component properties. This results in those exports being
 reported as unused by Knip.
 
-In short, the built-in functions seem to do a decent job, but you can override
-them however you like.
+The built-in functions seem to do a decent job, but you can override them
+however you like.
 
 ## Custom compilers
 

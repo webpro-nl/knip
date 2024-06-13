@@ -7,7 +7,7 @@ Knip reports the following types of issues:
 
 | Title                                | Description                                                |     | Key            |
 | :----------------------------------- | :--------------------------------------------------------- | --- | :------------- |
-| Unused files                         | Unable to find a reference to this file                    |     | `files`        |
+| Unused files                         | Unable to find a reference to this file                    | 🔧  | `files`        |
 | Unused dependencies                  | Unable to find a reference to this dependency              | 🔧  | `dependencies` |
 | Unused devDependencies               | Unable to find a reference to this devDependency           | 🔧  | `dependencies` |
 | Referenced optional peerDependencies | Optional peer dependency is referenced                     |     | `dependencies` |

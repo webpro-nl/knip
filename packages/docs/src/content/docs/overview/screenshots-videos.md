@@ -30,8 +30,9 @@ An example screenshot showing `--performance` output for the Knip codebase:
 
 <img src="/screenshots/performance.png" alt="performance" class="mw500" />
 
-Also see [--performance](../reference/cli.md#--performance).
+Also see [--performance][4].
 
 [1]: ../reference/cli.md#--watch
 [2]: ../features/auto-fix.mdx
 [3]: ../guides/troubleshooting.md#trace
+[4]: ../reference/cli.md#--performance
