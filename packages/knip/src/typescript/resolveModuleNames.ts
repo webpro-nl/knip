@@ -65,30 +65,28 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins or externals, bail out
     if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
 
-    {
-      const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
-      if (resolvedFileName) {
-        const ext = extname(resolvedFileName);
+    const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
+    if (resolvedFileName) {
+      const ext = extname(resolvedFileName);
 
-        if (!virtualFileExtensions.includes(ext) && !FOREIGN_FILE_EXTENSIONS.has(ext)) {
-          const srcFilePath = toSourceFilePath(resolvedFileName);
-          if (srcFilePath) {
-            return {
-              resolvedFileName: srcFilePath,
-              extension: extname(srcFilePath),
-              isExternalLibraryImport: false,
-              resolvedUsingTsExtension: false,
-            };
-          }
+      if (!virtualFileExtensions.includes(ext) && !FOREIGN_FILE_EXTENSIONS.has(ext)) {
+        const srcFilePath = toSourceFilePath(resolvedFileName);
+        if (srcFilePath) {
+          return {
+            resolvedFileName: srcFilePath,
+            extension: extname(srcFilePath),
+            isExternalLibraryImport: false,
+            resolvedUsingTsExtension: false,
+          };
         }
-
-        return {
-          resolvedFileName,
-          extension: virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext,
-          isExternalLibraryImport: isInNodeModules(resolvedFileName),
-          resolvedUsingTsExtension: false,
-        };
       }
+
+      return {
+        resolvedFileName,
+        extension: virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext,
+        isExternalLibraryImport: isInNodeModules(resolvedFileName),
+        resolvedUsingTsExtension: false,
+      };
     }
 
     const tsResolvedModule = ts.resolveModuleName(
@@ -122,21 +120,24 @@ export function createCustomModuleResolver(
       customSys
     ).resolvedModule;
 
-    if (!customResolvedModule || !isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
-      const module = fileExists(sanitizedSpecifier, containingFile);
-      if (module) return module;
+    if (customResolvedModule) {
+      if (isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
+        const resolvedFileName = ensureRealFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions);
+
+        return {
+          extension: ts.Extension.Js,
+          resolvedFileName,
+          isExternalLibraryImport: customResolvedModule.isExternalLibraryImport,
+        };
+      }
+
       return customResolvedModule;
     }
 
-    const resolvedFileName = ensureRealFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions);
+    const module = fileExists(sanitizedSpecifier, containingFile);
+    if (module) return module;
 
-    const resolvedModule: ts.ResolvedModuleFull = {
-      extension: ts.Extension.Js,
-      resolvedFileName,
-      isExternalLibraryImport: customResolvedModule.isExternalLibraryImport,
-    };
-
-    return resolvedModule;
+    return undefined;
   }
 
   return timerify(resolveModuleNames);
