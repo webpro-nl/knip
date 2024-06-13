@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
+import { createMatchPath } from 'tsconfig-paths';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import { timerify } from '../util/Performance.js';
@@ -53,6 +54,13 @@ export function createCustomModuleResolver(
       return resolvedModule;
     });
   }
+
+  const tsMatchPath = createMatchPath(
+    // If `baseUrl` is undefined we have already modified `paths` so that all
+    // entries are absolute. See `mergePaths` in `src/PrincipalFactory.ts`.
+    compilerOptions.baseUrl ?? '/',
+    compilerOptions.paths || {}
+  );
 
   /**
    * - Virtual files have built-in or custom compiler, return as JS
@@ -136,6 +144,24 @@ export function createCustomModuleResolver(
 
     const module = fileExists(sanitizedSpecifier, containingFile);
     if (module) return module;
+
+    const resolvedPathMap = tsMatchPath(
+      sanitizedSpecifier,
+      undefined,
+      undefined,
+      // Leave extensions empty. When resolving "@foo/bar.ext",
+      // "@foo/bar.ext.js" will not be tried if "./foo/bar.ext" does not exist.
+      // This case has been handled by the resolvers above. This makes the
+      // resolution faster.
+      []
+    );
+    if (resolvedPathMap) {
+      return {
+        resolvedFileName: resolvedPathMap,
+        extension: extname(resolvedPathMap),
+        isExternalLibraryImport: false,
+      };
+    }
 
     return undefined;
   }
