@@ -83,7 +83,7 @@
   "devDependencies": {
     "@jest/types": "^29.6.3",
     "@release-it/bumper": "^6.0.1",
-    "@types/bun": "^1.1.3",
+    "@types/bun": "^1.1.4",
     "@types/file-entry-cache": "5.0.4",
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
