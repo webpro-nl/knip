@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
+import { createMatchPath } from 'tsconfig-paths';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import { timerify } from '../util/Performance.js';
@@ -54,6 +55,13 @@ export function createCustomModuleResolver(
     });
   }
 
+  const tsMatchPath = createMatchPath(
+    // If `baseUrl` is undefined we have already modified `paths` so that all
+    // entries are absolute. See `mergePaths` in `src/PrincipalFactory.ts`.
+    compilerOptions.baseUrl ?? '/',
+    compilerOptions.paths || {}
+  );
+
   /**
    * - Virtual files have built-in or custom compiler, return as JS
    * - Foreign files have path resolved verbatim (file manager will return empty source file)
@@ -65,30 +73,28 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins or externals, bail out
     if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
 
-    {
-      const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
-      if (resolvedFileName) {
-        const ext = extname(resolvedFileName);
+    const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
+    if (resolvedFileName) {
+      const ext = extname(resolvedFileName);
 
-        if (!virtualFileExtensions.includes(ext) && !FOREIGN_FILE_EXTENSIONS.has(ext)) {
-          const srcFilePath = toSourceFilePath(resolvedFileName);
-          if (srcFilePath) {
-            return {
-              resolvedFileName: srcFilePath,
-              extension: extname(srcFilePath),
-              isExternalLibraryImport: false,
-              resolvedUsingTsExtension: false,
-            };
-          }
+      if (!virtualFileExtensions.includes(ext) && !FOREIGN_FILE_EXTENSIONS.has(ext)) {
+        const srcFilePath = toSourceFilePath(resolvedFileName);
+        if (srcFilePath) {
+          return {
+            resolvedFileName: srcFilePath,
+            extension: extname(srcFilePath),
+            isExternalLibraryImport: false,
+            resolvedUsingTsExtension: false,
+          };
         }
-
-        return {
-          resolvedFileName,
-          extension: virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext,
-          isExternalLibraryImport: isInNodeModules(resolvedFileName),
-          resolvedUsingTsExtension: false,
-        };
       }
+
+      return {
+        resolvedFileName,
+        extension: virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext,
+        isExternalLibraryImport: isInNodeModules(resolvedFileName),
+        resolvedUsingTsExtension: false,
+      };
     }
 
     const tsResolvedModule = ts.resolveModuleName(
@@ -122,21 +128,42 @@ export function createCustomModuleResolver(
       customSys
     ).resolvedModule;
 
-    if (!customResolvedModule || !isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
-      const module = fileExists(sanitizedSpecifier, containingFile);
-      if (module) return module;
+    if (customResolvedModule) {
+      if (isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
+        const resolvedFileName = ensureRealFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions);
+
+        return {
+          extension: ts.Extension.Js,
+          resolvedFileName,
+          isExternalLibraryImport: customResolvedModule.isExternalLibraryImport,
+        };
+      }
+
       return customResolvedModule;
     }
 
-    const resolvedFileName = ensureRealFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions);
+    const module = fileExists(sanitizedSpecifier, containingFile);
+    if (module) return module;
 
-    const resolvedModule: ts.ResolvedModuleFull = {
-      extension: ts.Extension.Js,
-      resolvedFileName,
-      isExternalLibraryImport: customResolvedModule.isExternalLibraryImport,
-    };
+    const resolvedPathMap = tsMatchPath(
+      sanitizedSpecifier,
+      undefined,
+      undefined,
+      // Leave extensions empty. When resolving "@foo/bar.ext",
+      // "@foo/bar.ext.js" will not be tried if "./foo/bar.ext" does not exist.
+      // This case has been handled by the resolvers above. This makes the
+      // resolution faster.
+      []
+    );
+    if (resolvedPathMap) {
+      return {
+        resolvedFileName: resolvedPathMap,
+        extension: extname(resolvedPathMap),
+        isExternalLibraryImport: false,
+      };
+    }
 
-    return resolvedModule;
+    return undefined;
   }
 
   return timerify(resolveModuleNames);
