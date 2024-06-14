@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/simple-git-hooks",
+  "devDependencies": {
+    "simple-git-hooks": "*",
+    "lint-staged": "*"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
+  }
+}
