@@ -26,10 +26,6 @@ const load = async (filePath: string) => {
       return await loadFile(filePath);
     }
 
-    if (ext === '' && isInternal(filePath)) {
-      return await loadFile(filePath);
-    }
-
     if (ext === '.json' || ext === '.jsonc') {
       return await loadJSON(filePath);
     }
