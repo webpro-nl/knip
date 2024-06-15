@@ -18,11 +18,11 @@ const config = ['vitest*.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,pro
 
 const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)'];
 
-const resolveEntry = (options: PluginOptions, specifier: string) => {
+const resolveEntry = (options: PluginOptions, rootDir: string, specifier: string) => {
   const { configFileDir, configFileName } = options;
   const resolvedPath = isAbsolute(specifier)
     ? specifier
-    : tryResolve(join(configFileDir, specifier), join(configFileDir, configFileName));
+    : tryResolve(join(configFileDir, rootDir, specifier), join(configFileDir, rootDir, configFileName));
   if (resolvedPath) return toEntryPattern(relative(configFileDir, resolvedPath));
   return specifier;
 };
@@ -50,8 +50,9 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
     (testConfig.coverage && testConfig.coverage.enabled !== false) || hasScriptWithCoverage(manifest.scripts);
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
-  const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(options, v));
-  const globalSetup = [testConfig.globalSetup ?? []].flat().map(v => resolveEntry(options, v));
+  const rootDir = testConfig.root ?? '.';
+  const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(options, rootDir, v));
+  const globalSetup = [testConfig.globalSetup ?? []].flat().map(v => resolveEntry(options, rootDir, v));
   return [...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup];
 };
 
@@ -81,10 +82,11 @@ export const resolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspa
   const dependencies = new Set<string>();
   const configs = await getConfigs(localConfig);
   for (const cfg of configs) {
+    const rootDir = cfg.test?.root ?? '.';
     if (cfg.test?.include) {
-      for (const dependency of cfg.test.include) dependencies.add(dependency);
+      for (const dependency of cfg.test.include) dependencies.add(join(rootDir, dependency));
     } else {
-      for (const dependency of options.config.entry ?? entry) dependencies.add(dependency);
+      for (const dependency of options.config.entry ?? entry) dependencies.add(join(rootDir, dependency));
     }
   }
 
@@ -97,8 +99,9 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   for (const cfg of configs) {
     for (const dependency of findConfigDependencies(cfg, options)) dependencies.add(dependency);
     const entry = cfg.build?.lib?.entry ?? [];
+    const rootDir = cfg.test?.root ?? '.';
     const deps = (typeof entry === 'string' ? [entry] : Object.values(entry)).map(specifier =>
-      resolveEntry(options, specifier)
+      resolveEntry(options, rootDir, specifier)
     );
     for (const dependency of deps) dependencies.add(dependency);
   }
