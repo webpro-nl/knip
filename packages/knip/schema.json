@@ -447,6 +447,10 @@
           "title": "Sentry plugin configuration (https://knip.dev/reference/plugins/sentry)",
           "$ref": "#/definitions/plugin"
         },
+        "simple-git-hooks": {
+          "title": "simple-git-hooks plugin configuration (https://knip.dev/reference/plugins/simple-git-hooks)",
+          "$ref": "#/definitions/plugin"
+        },
         "storybook": {
           "title": "Storybook plugin configuration (https://knip.dev/reference/plugins/storybook)",
           "$ref": "#/definitions/plugin"

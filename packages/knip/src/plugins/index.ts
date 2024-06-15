@@ -62,3 +62,4 @@ export { default as wrangler } from './wrangler/index.js';
 export { default as yorkie } from './yorkie/index.js';
 export { default as xo } from './xo/index.js';
 export { default as unocss } from './unocss/index.js';
+export { default as simpleGitHooks } from './simple-git-hooks/index.js';
