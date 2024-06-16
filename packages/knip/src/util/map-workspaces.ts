@@ -1,4 +1,4 @@
-import fastGlob from 'fast-glob';
+import fg from 'fast-glob';
 import type { Package } from '../ConfigurationChief.js';
 import type { PackageJson } from '../types/package-json.js';
 import { partition } from './array.js';
@@ -15,7 +15,7 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]) {
 
   if (patterns.length === 0 && negatedPatterns.length === 0) return [byPkgDir, byPkgName];
 
-  const matches = await fastGlob(patterns, {
+  const matches = await fg.glob(patterns, {
     cwd,
     onlyDirectories: true,
     ignore: ['**/node_modules/**', ...negatedPatterns],

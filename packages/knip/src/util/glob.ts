@@ -60,7 +60,7 @@ const pureGlob = async ({ cwd, patterns, gitignore = true }: BaseGlobOptions) =>
 };
 
 const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
-  const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd, ignore: GLOBAL_IGNORE_PATTERNS });
+  const stream = fg.globStream(patterns.map(removeProductionSuffix), { cwd, ignore: GLOBAL_IGNORE_PATTERNS });
   for await (const entry of stream) {
     return entry;
   }

@@ -1,9 +1,9 @@
-import * as fs from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
 import { walk as _walk } from '@nodelib/fs.walk';
 import type { Entry } from '@nodelib/fs.walk';
 import type { Options as FastGlobOptions } from 'fast-glob';
-import fastGlob from 'fast-glob';
+import fg from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
@@ -50,7 +50,7 @@ function convertGitignoreToPicomatch(pattern: string) {
 }
 
 function parseGitignoreFile(filePath: string) {
-  const file = fs.readFileSync(filePath, 'utf8');
+  const file = readFileSync(filePath, 'utf8');
   return file
     .split(/\r?\n/)
     .filter(line => line.trim() && !line.startsWith('#'))
@@ -118,21 +118,26 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
     }
     return false;
   };
+
   const deepFilter = (entry: Entry) => !matcher(relative(options.cwd, entry.path));
+
   await walk(options.cwd, {
     entryFilter: timerify(entryFilter),
     deepFilter: timerify(deepFilter),
   });
+
   debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles, ignores, unignores });
+
   return { ignores, unignores };
 }
 
 const _parseFindGitignores = timerify(parseFindGitignores);
 
-/** simpler and faster replacement for the globby npm library */
 export async function globby(patterns: string | string[], options: GlobOptions): Promise<string[]> {
   if (Array.isArray(patterns) && patterns.length === 0) return [];
+
   const ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
+
   if (options.gitignore) {
     let dir = options.dir;
     while (dir !== options.cwd) {
@@ -151,19 +156,18 @@ export async function globby(patterns: string | string[], options: GlobOptions):
 
   debugLogObject(relative(options.cwd, dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...options });
 
-  return fastGlob(patterns, fastGlobOptions);
+  return fg.glob(patterns, fastGlobOptions);
 }
 
-/** create a function that should be equivalent to `git check-ignored` */
 export async function getGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
   cachedIgnores.clear();
+
   if (options.gitignore === false) return () => false;
+
   const gitignore = await _parseFindGitignores(options);
   const matcher = _picomatch(gitignore.ignores, { ignore: gitignore.unignores });
-  const isGitIgnored = (filePath: string) => {
-    const ret = matcher(relative(options.cwd, filePath));
-    // debugLogObject(filePath, 'isGitIgnored', { path: relative(options.cwd, filePath), gitignore });
-    return ret;
-  };
+
+  const isGitIgnored = (filePath: string) => matcher(relative(options.cwd, filePath));
+
   return timerify(isGitIgnored);
 }
