@@ -2,14 +2,13 @@ import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import { createMatchPath } from 'tsconfig-paths';
 import ts from 'typescript';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
+import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { timerify } from '../util/Performance.js';
 import { sanitizeSpecifier } from '../util/modules.js';
-import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.js';
+import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.js';
 import { resolveSync } from '../util/resolve.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
-import { ensureRealFilePath, isVirtualFilePath } from './sys.js';
 
 const resolutionCache = new Map<string, ts.ResolvedModuleFull | undefined>();
 
@@ -28,13 +27,13 @@ const fileExists = (name: string, containingFile: string) => {
 export type ResolveModuleNames = ReturnType<typeof createCustomModuleResolver>;
 
 export function createCustomModuleResolver(
-  customSys: typeof ts.sys,
   compilerOptions: ts.CompilerOptions,
-  virtualFileExtensions: string[],
+  customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
   useCache = true
 ) {
-  const extensions = [...DEFAULT_EXTENSIONS, ...virtualFileExtensions];
+  const customCompilerExtensionsSet = new Set(customCompilerExtensions);
+  const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
 
   function resolveModuleNames(moduleNames: string[], containingFile: string): Array<ts.ResolvedModuleFull | undefined> {
     return moduleNames.map(moduleName => {
@@ -74,10 +73,11 @@ export function createCustomModuleResolver(
     if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
 
     const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
+
     if (resolvedFileName) {
       const ext = extname(resolvedFileName);
 
-      if (!virtualFileExtensions.includes(ext) && !FOREIGN_FILE_EXTENSIONS.has(ext)) {
+      if (!customCompilerExtensionsSet.has(ext)) {
         const srcFilePath = toSourceFilePath(resolvedFileName);
         if (srcFilePath) {
           return {
@@ -91,9 +91,27 @@ export function createCustomModuleResolver(
 
       return {
         resolvedFileName,
-        extension: virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext,
+        extension: customCompilerExtensionsSet.has(ext) ? ts.Extension.Js : ext,
         isExternalLibraryImport: isInNodeModules(resolvedFileName),
         resolvedUsingTsExtension: false,
+      };
+    }
+
+    const pathMappedFileName = tsMatchPath(
+      sanitizedSpecifier,
+      undefined,
+      undefined,
+      // Leave extensions empty and let `ts.resolveModuleName()` handle that.
+      // `tsMatchPath` will strip extensions from the returned specifier which
+      // means we don’t get the actual file path.
+      []
+    );
+    if (pathMappedFileName) {
+      const ext = extname(pathMappedFileName);
+      return {
+        resolvedFileName: toPosix(pathMappedFileName),
+        extension: customCompilerExtensionsSet.has(ext) ? ts.Extension.Js : ext,
+        isExternalLibraryImport: false,
       };
     }
 
@@ -121,47 +139,8 @@ export function createCustomModuleResolver(
       return tsResolvedModule;
     }
 
-    const customResolvedModule = ts.resolveModuleName(
-      sanitizedSpecifier,
-      containingFile,
-      compilerOptions,
-      customSys
-    ).resolvedModule;
-
-    if (customResolvedModule) {
-      if (isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
-        const resolvedFileName = ensureRealFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions);
-
-        return {
-          extension: ts.Extension.Js,
-          resolvedFileName,
-          isExternalLibraryImport: customResolvedModule.isExternalLibraryImport,
-        };
-      }
-
-      return customResolvedModule;
-    }
-
     const module = fileExists(sanitizedSpecifier, containingFile);
     if (module) return module;
-
-    const resolvedPathMap = tsMatchPath(
-      sanitizedSpecifier,
-      undefined,
-      undefined,
-      // Leave extensions empty. When resolving "@foo/bar.ext",
-      // "@foo/bar.ext.js" will not be tried if "./foo/bar.ext" does not exist.
-      // This case has been handled by the resolvers above. This makes the
-      // resolution faster.
-      []
-    );
-    if (resolvedPathMap) {
-      return {
-        resolvedFileName: resolvedPathMap,
-        extension: extname(resolvedPathMap),
-        isExternalLibraryImport: false,
-      };
-    }
 
     return undefined;
   }
