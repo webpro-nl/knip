@@ -86,9 +86,8 @@ Please see [external libs][8].
 ## Definitely Typed packages in `dependencies`
 
 Knip is strict in the divide between `dependencies` and `devDependencies`. Some
-projects are published with one or more Definitely Typed packages (`@types/*`)
-bundled. Knip does not detect/report such DT packages that are expected to be
-listed in `dependencies`.
+projects are published with one or more DT packages bundled. Knip does not make
+exceptions for such DT packages (`@types/*`) listed in `dependencies`.
 
 ## Extensionless imports
 
