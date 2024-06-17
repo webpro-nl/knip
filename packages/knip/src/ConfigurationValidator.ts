@@ -98,6 +98,7 @@ const pluginsSchema = z.object({
   lefthook: pluginSchema,
   'lint-staged': pluginSchema,
   linthtml: pluginSchema,
+  'lockfile-lint': pluginSchema,
   'lost-pixel': pluginSchema,
   markdownlint: pluginSchema,
   mocha: pluginSchema,

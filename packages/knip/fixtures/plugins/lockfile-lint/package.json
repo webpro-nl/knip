@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/lockfile-lint",
+  "version": "*",
+  "scripts": {
+    "lockfile-lint": "lockfile-lint"
+  },
+  "dependencies": {
+    "lockfile-lint": "*"
+  }
+}

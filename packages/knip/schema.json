@@ -359,6 +359,10 @@
           "title": "linthtml plugin configuration (https://knip.dev/reference/plugins/linthtml)",
           "$ref": "#/definitions/plugin"
         },
+        "lockfile-lint": {
+          "title": "lockfile-lint plugin configuration (https://knip.dev/reference/plugins/lockfile-lint)",
+          "$ref": "#/definitions/plugin"
+        },
         "lost-pixel": {
           "title": "lost-pixel plugin configuration (https://knip.dev/reference/plugins/lost-pixel)",
           "$ref": "#/definitions/plugin"
