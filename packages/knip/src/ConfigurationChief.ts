@@ -366,7 +366,7 @@ export class ConfigurationChief {
       .sort(byPathDepth)
       .map((name): Workspace => {
         const dir = join(this.cwd, name);
-        const pkgName = this.workspacePackages.get(name)?.pkgName ?? `NOT_FOUND_${name}`;
+        const pkgName = this.workspacePackages.get(name)?.pkgName ?? `KNIP_ADDED_${name}`;
         const workspaceConfig = this.getWorkspaceConfig(name);
         const ignoreMembers = arrayify(workspaceConfig.ignoreMembers).map(toRegexOrString);
         return {
