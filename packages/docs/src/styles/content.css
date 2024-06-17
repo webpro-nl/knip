@@ -2,6 +2,10 @@
   border: unset;
 }
 
+.sl-container .sl-markdown-content ul li p {
+  margin: 0;
+}
+
 .sl-markdown-content table {
   overflow: unset;
 }

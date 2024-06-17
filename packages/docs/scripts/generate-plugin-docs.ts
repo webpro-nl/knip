@@ -86,6 +86,7 @@ for await (const dir of directories) {
         value: JSON.stringify({ [pluginName]: defaults }, null, 2),
       }),
       ...parseFragment('Custom `config` or `entry` configuration overrides the defaults, they are not merged.'),
+      ...parseFragment('See [Plugins](../../explanations/plugins) for more details.'),
     ]);
 
     console.log(`Writing ${pluginName} docs to plugins/${pluginName}.md`);
