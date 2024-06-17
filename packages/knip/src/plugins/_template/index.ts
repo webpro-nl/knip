@@ -7,7 +7,7 @@ import type { PluginConfig } from './types.js';
 
 const title = '_template';
 
-const enablers: EnablerPatterns = ['_template'];
+const enablers: EnablerPatterns = ['__PLUGIN_NAME__'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

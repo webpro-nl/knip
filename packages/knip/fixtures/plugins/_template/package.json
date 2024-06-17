@@ -1,4 +1,4 @@
 {
-  "name": "@fixtures/_template",
+  "name": "@fixtures/__PLUGIN_NAME__",
   "version": "*"
 }
