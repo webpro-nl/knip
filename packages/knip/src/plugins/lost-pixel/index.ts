@@ -2,7 +2,7 @@ import type { EnablerPatterns } from '#p/types/config.js';
 import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
 
-// link to lost-pixel docs https://docs.lost-pixel.com/user-docs/api-reference/lost-pixel.config.js-or-ts
+// https://docs.lost-pixel.com/user-docs/api-reference/lost-pixel.config.js-or-ts
 
 const title = 'Lost Pixel';
 

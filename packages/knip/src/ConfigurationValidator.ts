@@ -77,8 +77,6 @@ export const pluginSchema = z.union([
 ]);
 
 const pluginsSchema = z.object({
-  'simple-git-hooks': pluginSchema,
-  unocss: pluginSchema,
   astro: pluginSchema,
   angular: pluginSchema,
   ava: pluginSchema,
@@ -122,6 +120,7 @@ const pluginsSchema = z.object({
   rollup: pluginSchema,
   'semantic-release': pluginSchema,
   sentry: pluginSchema,
+  'simple-git-hooks': pluginSchema,
   storybook: pluginSchema,
   stryker: pluginSchema,
   stylelint: pluginSchema,
@@ -132,6 +131,7 @@ const pluginsSchema = z.object({
   typedoc: pluginSchema,
   typescript: pluginSchema,
   unbuild: pluginSchema,
+  unocss: pluginSchema,
   'vercel-og': pluginSchema,
   vue: pluginSchema,
   vite: pluginSchema,
