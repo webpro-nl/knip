@@ -60,6 +60,7 @@ export { default as vercelOg } from './vercel-og/index.js';
 export { default as vite } from './vite/index.js';
 export { default as vitest } from './vitest/index.js';
 export { default as vue } from './vue/index.js';
+export { default as webdriverIo } from './webdriver-io/index.js';
 export { default as webpack } from './webpack/index.js';
 export { default as wireit } from './wireit/index.js';
 export { default as wrangler } from './wrangler/index.js';

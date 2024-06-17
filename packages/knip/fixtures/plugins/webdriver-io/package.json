@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/webdriver-io",
+  "version": "*",
+  "scripts": {
+    "test": "wdio"
+  },
+  "dependencies": {
+    "@wdio/cli": "*",
+    "@wdio/mocha-framework": "*",
+    "@wdio/concise-reporter": "*",
+    "@wdio/browser-runner": "*"
+  }
+}

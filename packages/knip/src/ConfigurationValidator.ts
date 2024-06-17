@@ -138,6 +138,7 @@ const pluginsSchema = z.object({
   vue: pluginSchema,
   vite: pluginSchema,
   vitest: pluginSchema,
+  'webdriver-io': pluginSchema,
   webpack: pluginSchema,
   wireit: pluginSchema,
   wrangler: pluginSchema,

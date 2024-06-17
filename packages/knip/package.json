@@ -90,6 +90,7 @@
     "@types/picomatch": "2.3.3",
     "@types/resolve": "^1.20.6",
     "@types/webpack": "^5.28.5",
+    "@wdio/types": "^8.38.2",
     "glob": "^10.3.12",
     "playwright": "^1.44.1",
     "release-it": "^17.3.0",

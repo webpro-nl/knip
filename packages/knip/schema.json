@@ -519,6 +519,10 @@
           "title": "vue plugin configuration (https://knip.dev/reference/plugins/vue)",
           "$ref": "#/definitions/plugin"
         },
+        "webdriver-io": {
+          "title": "webdriver-io plugin configuration (https://knip.dev/reference/plugins/webdriver-io)",
+          "$ref": "#/definitions/plugin"
+        },
         "webpack": {
           "title": "Webpack plugin configuration (https://knip.dev/reference/plugins/webpack)",
           "$ref": "#/definitions/plugin"
