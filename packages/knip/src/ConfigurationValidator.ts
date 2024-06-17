@@ -122,6 +122,7 @@ const pluginsSchema = z.object({
   'semantic-release': pluginSchema,
   sentry: pluginSchema,
   'simple-git-hooks': pluginSchema,
+  'size-limit': pluginSchema,
   storybook: pluginSchema,
   stryker: pluginSchema,
   stylelint: pluginSchema,

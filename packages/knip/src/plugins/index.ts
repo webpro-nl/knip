@@ -43,6 +43,7 @@ export { default as remix } from './remix/index.js';
 export { default as rollup } from './rollup/index.js';
 export { default as semanticRelease } from './semantic-release/index.js';
 export { default as sentry } from './sentry/index.js';
+export { default as sizeLimit } from './size-limit/index.js';
 export { default as storybook } from './storybook/index.js';
 export { default as stryker } from './stryker/index.js';
 export { default as stylelint } from './stylelint/index.js';
