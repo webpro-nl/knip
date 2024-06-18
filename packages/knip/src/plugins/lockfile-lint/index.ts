@@ -10,7 +10,7 @@ const enablers: EnablerPatterns = ['lockfile-lint'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.lockfile-lintrc', '.lockfile-lint.{js,toml}', '.lockfile-lint.config.js', 'package.json'];
+const config = ['.lockfile-lintrc', '.lockfile-lint.{js,toml}', 'lockfile-lint.config.js', 'package.json'];
 
 export default {
   title,
