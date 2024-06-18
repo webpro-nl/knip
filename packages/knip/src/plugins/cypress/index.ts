@@ -24,7 +24,7 @@ const entry = [...TEST_FILE_PATTERNS, ...SUPPORT_FILE_PATTERNS];
 
 const resolveEntryPaths: ResolveEntryPaths = async localConfig => {
   const specPatterns = [localConfig.e2e?.specPattern ?? [], localConfig.component?.specPattern ?? []].flat();
-  const supportFiles = [localConfig.e2e?.supportFile ?? [], localConfig.component?.supportFile ?? []].flat();
+  const supportFiles = [localConfig.e2e?.supportFile || [], localConfig.component?.supportFile || []].flat();
   return [
     ...(specPatterns.length > 0 ? specPatterns : TEST_FILE_PATTERNS),
     ...(supportFiles.length > 0 ? supportFiles : SUPPORT_FILE_PATTERNS),
