@@ -34,6 +34,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'cat',
   'cd',
   'chmod',
+  'command',
   'corepack',
   'cp',
   'curl',
