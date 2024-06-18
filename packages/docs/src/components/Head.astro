@@ -5,7 +5,7 @@ import type { Props } from '@astrojs/starlight/props';
 const slug = Astro.props.slug;
 const url = new URL(Astro.url);
 url.pathname = `/og/docs${slug ? `/${slug}` : ''}.webp`;
-url.searchParams.append('v', '2');
+url.searchParams.append('v', '3');
 ---
 
 <Default {...Astro.props} />

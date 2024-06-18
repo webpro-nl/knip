@@ -42,10 +42,15 @@ const getPages = async () => {
     const imagePath = filePath.replace(/^\/src\/content\//, '').replace(/(\/index)?\.(md|mdx)$/, '.webp');
     pages[imagePath] = page;
   }
+
+  pages['docs/sponsors.webp'] = {
+    frontmatter: { title: 'Become a sponsor!', description: 'Become a sponsor of Knip' },
+  };
+
   return pages;
 };
 
-const S = ({ title }: { title: string; description: string[] }) => {
+const renderSVG = ({ title }: { title: string; description: string[] }) => {
   const titleText = breakText(title, 2, 45)
     .map((text, i, texts) => {
       const m = (texts.length === 1 ? 0 : -75) / 2;
@@ -64,7 +69,7 @@ export const GET = async ({ params }: { params: { route: string } }) => {
   if (!pageEntry) return new Response('Page not found', { status: 404 });
 
   const svgBuffer = Buffer.from(
-    S({
+    renderSVG({
       // @ts-expect-error TODO type properly
       title: pageEntry.frontmatter.hero?.tagline ?? pageEntry.frontmatter.title,
       // @ts-expect-error TODO type properly
