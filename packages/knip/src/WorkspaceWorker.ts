@@ -34,6 +34,8 @@ type WorkspaceManagerOptions = {
 
 export type ReferencedDependencies = Set<[string, string]>;
 
+type CacheItem = { resolveEntryPaths?: string[]; resolveConfig?: string[] };
+
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
 const initEnabledPluginsMap = () =>
@@ -65,7 +67,7 @@ export class WorkspaceWorker {
   enabledPlugins: PluginName[] = [];
   enabledPluginsInAncestors: string[];
 
-  cache: CacheConsultant<unknown>;
+  cache: CacheConsultant<CacheItem>;
 
   constructor({
     name,
@@ -286,21 +288,28 @@ export class WorkspaceWorker {
           if (hasResolveEntryPaths || shouldRunConfigResolver) {
             const isManifest = basename(configFilePath) === 'package.json';
             const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
-            const config =
-              fd?.meta?.data && !fd.changed
-                ? fd.meta.data
-                : await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
-            if (config) {
-              if (hasResolveEntryPaths) {
-                const dependencies = (await plugin.resolveEntryPaths?.(config, opts)) ?? [];
-                for (const id of dependencies) configEntryPaths.push(id);
-              }
-              if (shouldRunConfigResolver) {
-                const dependencies = (await plugin.resolveConfig?.(config, opts)) ?? [];
-                for (const id of dependencies) addDependency(id, configFilePath);
-              }
 
-              if (!isManifest && fd?.changed && fd.meta) fd.meta.data = config;
+            if (fd?.meta?.data && !fd.changed) {
+              if (fd.meta.data.resolveEntryPaths)
+                for (const id of fd.meta.data.resolveEntryPaths) configEntryPaths.push(id);
+              if (fd.meta.data.resolveConfig)
+                for (const id of fd.meta.data.resolveConfig) addDependency(id, configFilePath);
+            } else {
+              const config = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
+              const data: CacheItem = {};
+              if (config) {
+                if (hasResolveEntryPaths) {
+                  const dependencies = (await plugin.resolveEntryPaths?.(config, opts)) ?? [];
+                  for (const id of dependencies) configEntryPaths.push(id);
+                  data.resolveEntryPaths = dependencies;
+                }
+                if (shouldRunConfigResolver) {
+                  const dependencies = (await plugin.resolveConfig?.(config, opts)) ?? [];
+                  for (const id of dependencies) addDependency(id, configFilePath);
+                  data.resolveConfig = dependencies;
+                }
+                if (!isManifest && fd?.changed && fd.meta) fd.meta.data = data;
+              }
             }
           }
         }

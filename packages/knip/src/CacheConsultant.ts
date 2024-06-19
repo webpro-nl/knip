@@ -1,6 +1,6 @@
-import fileEntryCache, { type FileEntryCache, type FileDescriptor } from 'file-entry-cache';
 import { timerify } from './util/Performance.js';
 import parsedArgValues from './util/cli-arguments.js';
+import { type FileDescriptor, FileEntryCache } from './util/file-entry-cache.js';
 import { cwd, join } from './util/path.js';
 import { version } from './version.js';
 
@@ -10,27 +10,17 @@ const { cache: isCache = false, watch: isWatch = false } = parsedArgValues;
 
 const cacheLocation = parsedArgValues['cache-location'] ?? defaultCacheLocation;
 
-interface FD<T> extends FileDescriptor {
-  readonly meta?: {
-    readonly size?: number;
-    readonly mtime?: number;
-    readonly hash?: string;
-    data?: T;
-  };
-}
-
-const create = timerify(fileEntryCache.create, 'createCache');
-
-const dummyFileDescriptor = { key: '', changed: true, notFound: true, meta: undefined };
+// biome-ignore lint/suspicious/noExplicitAny: deal with it
+const dummyFileDescriptor: FileDescriptor<any> = { key: '', changed: true, notFound: true };
 
 const isEnabled = isCache || isWatch;
 
 export class CacheConsultant<T> {
-  private cache: undefined | FileEntryCache;
+  private cache: undefined | FileEntryCache<T>;
   constructor(name: string) {
     if (isCache) {
       const cacheName = `${name.replace(/[^a-z0-9]/g, '-').replace(/-*$/, '')}-${version}`;
-      this.cache = create(cacheName, cacheLocation);
+      this.cache = new FileEntryCache(cacheName, cacheLocation);
       this.reconcile = timerify(this.cache.reconcile).bind(this.cache);
       this.getFileDescriptor = timerify(this.cache.getFileDescriptor).bind(this.cache);
     }
@@ -38,7 +28,7 @@ export class CacheConsultant<T> {
   static getCacheLocation() {
     return cacheLocation;
   }
-  public getFileDescriptor(file: string): FD<T> {
+  public getFileDescriptor(file: string): FileDescriptor<T> {
     if (isEnabled && this.cache) return this.cache?.getFileDescriptor(file);
     return dummyFileDescriptor;
   }

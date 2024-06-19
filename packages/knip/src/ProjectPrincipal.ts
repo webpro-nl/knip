@@ -15,7 +15,6 @@ import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
 import { dirname, extname, isInNodeModules, join } from './util/path.js';
-import { _deserialize, _serialize } from './util/serialize.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
 // These compiler options override local options
@@ -226,7 +225,7 @@ export class ProjectPrincipal {
     getPrincipalByFilePath: (filePath: string) => undefined | ProjectPrincipal
   ) {
     const fd = this.cache.getFileDescriptor(filePath);
-    if (!fd.changed && fd.meta?.data) return _deserialize(fd.meta.data);
+    if (!fd.changed && fd.meta?.data) return fd.meta.data;
 
     const typeChecker = this.backend.typeChecker;
 
@@ -339,7 +338,8 @@ export class ProjectPrincipal {
     for (const [filePath, file] of graph.entries()) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;
-      fd.meta.data = _serialize(file);
+      const { imported, internalImportCache, ...clone } = file;
+      fd.meta.data = clone;
     }
     this.cache.reconcile();
   }

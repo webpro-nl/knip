@@ -1,6 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { _deserialize, _serialize } from '../../src/util/serialize.js';
+import { deserialize, serialize } from '../../src/util/serialize.js';
 
 test('Should serialize and deserialize file back to original', () => {
   const file = {
@@ -63,5 +63,5 @@ test('Should serialize and deserialize file back to original', () => {
     traceRefs: new Set(['ref']),
   };
 
-  assert.deepEqual(_deserialize(_serialize(file)), file);
+  assert.deepEqual(deserialize(serialize(file)), file);
 });
