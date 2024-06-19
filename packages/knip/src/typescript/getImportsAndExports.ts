@@ -1,31 +1,33 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { isInNodeModules } from '../util/path.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
+import type { Tags } from '../types/cli.js';
+import type { Export, ExportMap, ExportMember, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
+import type { ExportNode, ExportNodeMember } from '../types/exports.js';
+import type { ImportNode } from '../types/imports.js';
+import type { IssueSymbol } from '../types/issues.js';
 import { timerify } from '../util/Performance.js';
+import { addNsValue, addValue, createImports } from '../util/dependency-graph.js';
+import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
+import { extname, isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
+import type { BoundSourceFile } from './SourceFile.js';
 import {
-  isAccessExpression,
+  getAccessMembers,
+  getDestructuredIds,
   getJSDocTags,
   getLineAndCharacterOfPosition,
-  getMemberStringLiterals,
+  getTypeName,
+  isAccessExpression,
+  isConsiderReferencedNS,
+  isDestructuring,
+  isImportSpecifier,
 } from './ast-helpers.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getImportsFromPragmas } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
-import type { BoundSourceFile, GetResolvedModule } from './SourceFile.js';
-import type { Tags } from '../types/cli.js';
-import type {
-  ExportNode,
-  ExportNodeMember,
-  SerializableExport,
-  SerializableExportMember,
-  SerializableExports,
-} from '../types/exports.js';
-import type { ImportNode, SerializableImportMap, UnresolvedImport } from '../types/imports.js';
-import type { IssueSymbol } from '../types/issues.js';
 
 const getVisitors = (sourceFile: ts.SourceFile) => ({
   export: getExportVisitors(sourceFile),
@@ -34,10 +36,10 @@ const getVisitors = (sourceFile: ts.SourceFile) => ({
   script: getScriptVisitors(sourceFile),
 });
 
-const createSerializableMember = (node: ts.Node, member: ExportNodeMember, pos: number): SerializableExportMember => {
+const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): ExportMember => {
   const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
   return {
-    // @ts-expect-error TODO
+    // @ts-expect-error ref will be unset later
     symbol: member.node.symbol,
     identifier: member.identifier,
     type: member.type,
@@ -69,69 +71,89 @@ interface AddInternalImportOptions extends ImportNode {
 
 const getImportsAndExports = (
   sourceFile: BoundSourceFile,
-  getResolvedModule: GetResolvedModule,
+  resolveModule: (specifier: string) => ts.ResolvedModuleFull | undefined,
   typeChecker: ts.TypeChecker,
   options: GetImportsAndExportsOptions
 ) => {
   const { skipTypeOnly, tags } = options;
-  const internalImports: SerializableImportMap = {};
+  const internalImports: ImportMap = new Map();
   const externalImports = new Set<string>();
   const unresolvedImports = new Set<UnresolvedImport>();
-  const exports: SerializableExports = {};
+  const resolved = new Set<string>();
+  const specifiers = new Set<[string, string]>();
+  const exports: ExportMap = new Map();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
+  const traceRefs = new Set<string>();
 
   const importedInternalSymbols = new Map<ts.Symbol, string>();
 
   const visitors = getVisitors(sourceFile);
 
   const addInternalImport = (options: AddInternalImportOptions) => {
-    const { identifier, specifier, symbol, filePath, namespace, isReExport } = options;
+    const { identifier, symbol, filePath, namespace, specifier, isReExport } = options;
 
-    const isStar = identifier === '*';
+    const isStar = identifier === IMPORT_STAR;
 
-    const internalImport = (internalImports[filePath] = internalImports[filePath] ?? {
-      specifier,
-      hasStar: isStar,
-      isReExport,
-      isReExportedBy: new Set(),
-      isReExportedAs: new Set(),
-      isReExportedNs: new Set(),
-      importedNs: new Set(),
-      identifiers: new Set(),
-    });
+    specifiers.add([specifier, filePath]);
+
+    const file = internalImports.get(filePath);
+
+    const imports = file ?? createImports();
+
+    if (!file) internalImports.set(filePath, imports);
+
+    const nsOrAlias = symbol ? String(symbol.escapedName) : options.alias;
 
     if (isReExport) {
-      internalImport.isReExport = true;
-      if (namespace && isStar) internalImport.isReExportedAs.add([sourceFile.fileName, namespace]);
-      else if (namespace) internalImport.isReExportedNs.add([sourceFile.fileName, namespace]);
-      else internalImport.isReExportedBy.add(sourceFile.fileName);
-    }
-
-    if (isStar) {
-      internalImport.hasStar = true;
-      if (symbol) internalImport.importedNs.add(String(symbol.escapedName));
+      if (isStar && namespace) {
+        // Pattern: export * as NS from 'specifier';
+        addValue(imports.reExportedNs, namespace, sourceFile.fileName);
+      } else if (nsOrAlias) {
+        // Pattern: export { id as alias } from 'specifier';
+        addNsValue(imports.reExportedAs, identifier, nsOrAlias, sourceFile.fileName);
+      } else {
+        // Patterns:
+        // export { id } from 'specifier';
+        // export * from 'specifier';
+        addValue(imports.reExported, identifier, sourceFile.fileName);
+      }
     } else {
-      internalImport.identifiers.add(namespace ?? identifier);
-    }
+      if (nsOrAlias && nsOrAlias !== identifier) {
+        if (isStar) {
+          addValue(imports.importedNs, nsOrAlias, sourceFile.fileName);
+        } else {
+          addNsValue(imports.importedAs, identifier, nsOrAlias, sourceFile.fileName);
+        }
+      } else if (identifier !== ANONYMOUS && identifier !== IMPORT_STAR) {
+        addValue(imports.imported, identifier, sourceFile.fileName);
+      }
 
-    if (symbol) importedInternalSymbols.set(symbol, filePath);
+      if (symbol && DEFAULT_EXTENSIONS.includes(extname(sourceFile.fileName))) {
+        importedInternalSymbols.set(symbol, filePath);
+      }
+    }
   };
 
   const addImport = (options: ImportNode, node: ts.Node) => {
-    const { specifier, isTypeOnly, pos, identifier = '__anonymous', isReExport = false } = options;
+    const { specifier, isTypeOnly, pos, identifier = ANONYMOUS, isReExport = false } = options;
     if (isBuiltin(specifier)) return;
 
-    const module = getResolvedModule(specifier);
+    const module = resolveModule(specifier);
 
-    if (module?.resolvedModule) {
-      const filePath = module.resolvedModule.resolvedFileName;
+    if (module) {
+      const filePath = module.resolvedFileName;
       if (filePath) {
-        if (module.resolvedModule.isExternalLibraryImport) {
-          if (!isInNodeModules(filePath)) {
-            addInternalImport({ ...options, identifier, filePath, isReExport });
-          }
+        if (options.resolve && !isInNodeModules(filePath)) {
+          resolved.add(filePath);
+          return;
+        }
 
+        if (!module.isExternalLibraryImport || !isInNodeModules(filePath)) {
+          addInternalImport({ ...options, identifier, filePath, isReExport });
+        }
+
+        if (module.isExternalLibraryImport) {
           if (skipTypeOnly && isTypeOnly) return;
 
           const sanitizedSpecifier = sanitizeSpecifier(specifier);
@@ -140,11 +162,9 @@ const getImportsAndExports = (
             return;
           }
 
-          // TypeScript module resolution may return DTS references or unaliased npm package names,
+          // Module resolver may return DTS references or unaliased npm package names,
           // but in the rest of the program we want the package name based on the original specifier.
           externalImports.add(sanitizedSpecifier);
-        } else {
-          addInternalImport({ ...options, identifier, filePath, isReExport });
         }
       }
     } else {
@@ -165,9 +185,18 @@ const getImportsAndExports = (
     if (symbol) {
       const importedSymbolFilePath = importedInternalSymbols.get(symbol);
       if (importedSymbolFilePath) {
-        const internalImport = internalImports[importedSymbolFilePath];
-        if (typeof member === 'string') internalImport.identifiers.add(`${namespace}.${member}`);
-        else member.forEach(member => internalImport.identifiers.add(`${namespace}.${member}`));
+        const internalImport = internalImports.get(importedSymbolFilePath);
+        if (internalImport) {
+          if (typeof member === 'string') {
+            internalImport.refs.add(`${namespace}.${member}`);
+            traceRefs.add(`${namespace}.${member}`);
+          } else {
+            for (const m of member) {
+              internalImport.refs.add(`${namespace}.${m}`);
+              traceRefs.add(`${namespace}.${m}`);
+            }
+          }
+        }
       }
     }
   };
@@ -175,33 +204,22 @@ const getImportsAndExports = (
   const addExport = ({ node, symbol, identifier, type, pos, members = [], fix }: ExportNode) => {
     if (options.skipExports) return;
 
-    const isExportSpecifier = ts.isExportSpecifier(node);
-    const isExportAssignment = ts.isExportAssignment(node);
-
-    if (isExportSpecifier || isExportAssignment) {
-      // Re-exports are handled in import visitors (because module resolution),
-      // but in other export declarations we can't (easily) get the imported symbol for indirect/mediated re-exports
-      if (isExportSpecifier && node.propertyName) {
-        // TODO Tried to sort it out in visitors/exports/exportDeclaration.ts,
-        // but seems we need `typeChecker.getSymbolAtLocation` which isn't available over there
-        const symbol = typeChecker.getSymbolAtLocation(node.propertyName);
-        if (symbol) {
-          const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-          if (importedSymbolFilePath) {
-            const internalImport = internalImports[importedSymbolFilePath];
-            internalImport.isReExport = true;
-            internalImport.isReExportedAs.add([sourceFile.fileName, node.name.getText()]);
-          }
-        }
-      } else if (symbol) {
-        const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-        if (importedSymbolFilePath) {
-          const internalImport = internalImports[importedSymbolFilePath];
-          internalImport.isReExport = true;
-          if (isExportAssignment) {
-            internalImport.isReExportedAs.add([sourceFile.fileName, 'default']);
+    if (symbol) {
+      const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+      if (importedSymbolFilePath) {
+        const importId = String(symbol.escapedName);
+        const internalImport = internalImports.get(importedSymbolFilePath);
+        if (internalImport) {
+          if (importId !== identifier) {
+            // Pattern: import { id as alias } from 'specifier'; export = id; export default id;
+            // Pattern: import * as NS from 'specifier'; export { NS as aliased }
+            addNsValue(internalImport.reExportedAs, importId, identifier, sourceFile.fileName);
+          } else if (symbol.declarations && ts.isNamespaceImport(symbol.declarations[0])) {
+            // Pattern: import * as NS from 'specifier'; export { NS };
+            addValue(internalImport.reExportedNs, identifier, sourceFile.fileName);
           } else {
-            internalImport.isReExportedNs.add([sourceFile.fileName, identifier]);
+            // Pattern: import { id } from 'specifier'; export { id };
+            addValue(internalImport.reExported, importId, sourceFile.fileName);
           }
         }
       }
@@ -209,32 +227,38 @@ const getImportsAndExports = (
 
     const jsDocTags = getJSDocTags(node);
 
-    const serializedMembers = members.map(member => createSerializableMember(node, member, member.pos));
+    const exportMembers = members.map(member => createMember(node, member, member.pos));
 
-    if (exports[identifier]) {
-      const item = exports[identifier];
-      const members = [...(item.members ?? []), ...serializedMembers];
-      const tags = [...(item.jsDocTags ?? []), ...jsDocTags];
+    const isReExport = Boolean(
+      node.parent?.parent && ts.isExportDeclaration(node.parent.parent) && node.parent.parent.moduleSpecifier
+    );
+
+    const item = exports.get(identifier);
+    if (item) {
+      // Code path for fn overloads, simple merge
+      const members = [...(item.members ?? []), ...exportMembers];
+      const tags = new Set([...(item.jsDocTags ?? []), ...jsDocTags]);
       const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
-      exports[identifier] = { ...item, members, jsDocTags: tags, fixes };
+      exports.set(identifier, { ...item, members, jsDocTags: tags, fixes, isReExport });
     } else {
       const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
-      exports[identifier] = {
+      exports.set(identifier, {
         identifier,
-        // @ts-expect-error TODO
+        // @ts-expect-error ref will be unset later
         symbol: node.symbol,
         type,
-        members: serializedMembers,
+        members: exportMembers,
         jsDocTags,
         pos,
         line: line + 1,
         col: character + 1,
         fixes: fix ? [fix] : [],
         refs: 0,
-      };
+        isReExport,
+      });
     }
 
-    if (!jsDocTags.includes('@alias')) {
+    if (!jsDocTags.has('@alias')) {
       if (ts.isExportAssignment(node)) maybeAddAliasedExport(node.expression, 'default');
       if (ts.isVariableDeclaration(node)) maybeAddAliasedExport(node.initializer, identifier);
     }
@@ -246,7 +270,7 @@ const getImportsAndExports = (
     const identifier = node?.getText();
     if (node && identifier) {
       const symbol = sourceFile.symbol?.exports?.get(identifier);
-      if (symbol && symbol.valueDeclaration) {
+      if (symbol?.valueDeclaration) {
         if (!aliasedExports.has(identifier)) {
           const pos = getLineAndCharacterOfPosition(symbol.valueDeclaration, symbol.valueDeclaration.pos);
           aliasedExports.set(identifier, [{ symbol: identifier, ...pos }]);
@@ -261,9 +285,11 @@ const getImportsAndExports = (
   };
 
   const visit = (node: ts.Node) => {
+    const addImportWithNode = (result: ImportNode) => addImport(result, node);
+
     for (const visitor of visitors.dynamicImport) {
       const result = visitor(node, options);
-      result && (Array.isArray(result) ? result.forEach(r => addImport(r, node)) : addImport(result, node));
+      result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
     }
 
     // Skip some work by handling only top-level import/export assignments
@@ -272,7 +298,7 @@ const getImportsAndExports = (
     if (isTopLevel) {
       for (const visitor of visitors.import) {
         const result = visitor(node, options);
-        result && (Array.isArray(result) ? result.forEach(r => addImport(r, node)) : addImport(result, node));
+        result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
       }
 
       for (const visitor of visitors.export) {
@@ -287,63 +313,63 @@ const getImportsAndExports = (
     }
 
     if (ts.isIdentifier(node)) {
-      if (isAccessExpression(node.parent)) {
-        const symbol = sourceFile.locals?.get(String(node.escapedText));
-        if (symbol) {
-          if (importedInternalSymbols.has(symbol)) {
-            let members: string[] = [];
-            let current: ts.Node = node.parent;
-            while (current) {
-              const ms = getMemberStringLiterals(typeChecker, current);
-              if (!ms) break;
-              members = members.concat(
-                ms.flatMap(id => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`)))
-              );
-              current = current.parent;
-            }
-            maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
-          }
-        }
-      } else if (
-        // TODO Ideally we store NamespaceImport symbols and check directly against those, but can't get symbols to match
-        ts.isShorthandPropertyAssignment(node.parent) ||
-        (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
-        ts.isSpreadAssignment(node.parent) ||
-        ts.isExportAssignment(node.parent)
-      ) {
-        const symbol = sourceFile.locals?.get(String(node.escapedText));
-        if (symbol) {
-          const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-          if (importedSymbolFilePath) {
-            internalImports[importedSymbolFilePath].identifiers.add(String(node.escapedText));
-          }
-        }
-      } else if (ts.isVariableDeclaration(node.parent)) {
-        if (ts.isVariableDeclarationList(node.parent.parent) && ts.isObjectBindingPattern(node.parent.name)) {
-          const symbol = sourceFile.locals?.get(String(node.escapedText));
-          if (symbol) {
-            const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-            if (importedSymbolFilePath) {
-              const members = node.parent.name.elements.flatMap(decl => decl.name.getText());
-              maybeAddAccessExpressionAsNsImport(String(node.escapedText), members);
-            }
-          }
-        } else if (node.parent.initializer === node) {
-          const symbol = sourceFile.locals?.get(String(node.escapedText));
-          if (symbol) {
-            const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-            if (importedSymbolFilePath) {
-              internalImports[importedSymbolFilePath].identifiers.add(String(node.escapedText));
+      const id = String(node.escapedText);
+      const symbol = sourceFile.locals?.get(id);
+      if (symbol) {
+        const importedSymbolFilePath = importedInternalSymbols.get(symbol);
+        if (importedSymbolFilePath) {
+          if (!isImportSpecifier(node)) {
+            const imports = internalImports.get(importedSymbolFilePath);
+            if (imports) {
+              traceRefs.add(id);
+              if (isAccessExpression(node.parent)) {
+                if (isDestructuring(node.parent)) {
+                  if (ts.isPropertyAccessExpression(node.parent)) {
+                    // Pattern: const { a, b } = NS.sub;
+                    const ns = String(symbol.escapedName);
+                    const key = String(node.parent.name.escapedText);
+                    // @ts-expect-error safe after isDestructuring
+                    const members = getDestructuredIds(node.parent.parent.name).map(n => `${key}.${n}`);
+                    maybeAddAccessExpressionAsNsImport(ns, key);
+                    maybeAddAccessExpressionAsNsImport(ns, members);
+                  }
+                } else {
+                  // Patterns: NS.id, NS['id'], NS.sub.id, NS[type], etc.
+                  const members = getAccessMembers(typeChecker, node);
+                  maybeAddAccessExpressionAsNsImport(id, members);
+                }
+              } else if (isDestructuring(node)) {
+                // Pattern: const { a, b } = NS;
+                // @ts-expect-error safe after isDestructuring
+                const members = getDestructuredIds(node.parent.name);
+                maybeAddAccessExpressionAsNsImport(id, members);
+              } else {
+                const typeName = getTypeName(node);
+                if (typeName) {
+                  const [ns, ...right] = [typeName.left.getText(), typeName.right.getText()].join('.').split('.');
+                  const members = right.map((_r, index) => right.slice(0, index + 1).join('.'));
+                  maybeAddAccessExpressionAsNsImport(ns, members);
+                } else if (imports.importedNs.has(id) && isConsiderReferencedNS(node)) {
+                  imports.refs.add(id);
+                } else {
+                  imports.refs.add(id);
+                }
+              }
             }
           }
         }
       }
     }
 
-    if (ts.isTypeReferenceNode(node) && ts.isQualifiedName(node.typeName)) {
-      const [ns, ...right] = [node.typeName.left.getText(), node.typeName.right.getText()].join('.').split('.');
-      const members = right.map((_r, index) => right.slice(0, index + 1).join('.'));
-      maybeAddAccessExpressionAsNsImport(ns, members);
+    if (
+      isTopLevel &&
+      ts.isImportEqualsDeclaration(node) &&
+      ts.isQualifiedName(node.moduleReference) &&
+      ts.isIdentifier(node.moduleReference.left)
+    ) {
+      // Pattern: import name = NS.identifier
+      const { left, right } = node.moduleReference;
+      if (sourceFile.locals?.get(left.text)) maybeAddAccessExpressionAsNsImport(left.text, right.text);
     }
 
     ts.forEachChild(node, visit);
@@ -353,38 +379,58 @@ const getImportsAndExports = (
 
   // No file-level visitors yet, so let's keep it simple
   const pragmaImports = getImportsFromPragmas(sourceFile);
-  if (pragmaImports) pragmaImports.forEach(node => addImport(node, sourceFile));
+  if (pragmaImports) for (const node of pragmaImports) addImport(node, sourceFile);
 
-  const setRefs = (item: SerializableExport | SerializableExportMember) => {
+  const setRefs = (item: Export | ExportMember) => {
     if (!item.symbol) return;
-    for (const match of sourceFile.text.matchAll(new RegExp(item.identifier.replace(/\$/g, '\\$'), 'g'))) {
-      const isDeclaration = match.index === item.pos || match.index === item.pos + 1; // off-by-one from `stripQuotes`
+    const symbols = new Set<ts.Symbol>();
+    let index = 0;
+    // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+    while (index < sourceFile.text.length && (index = sourceFile.text.indexOf(item.identifier, index)) !== -1) {
+      const isDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
       if (!isDeclaration) {
         // @ts-expect-error ts.getTokenAtPosition is internal fn
-        const smbl = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, match.index));
-        // @ts-expect-error Keep it cheap
-        if (smbl && (item.symbol === smbl || item.symbol === smbl.declarations?.[0]?.name?.flowNode?.node?.symbol)) {
-          item.refs = 1;
-          break;
+        const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
+        if (symbol) {
+          if (item.symbol === symbol) {
+            item.refs = 1;
+            break;
+          }
+          // @ts-expect-error Keep it cheap
+          const declaration = symbol.declarations?.[0];
+          if (declaration) {
+            if (item.symbol === declaration.name?.flowNode?.node?.symbol) {
+              item.refs = 1;
+              break;
+            }
+            if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
+              // re-exported symbol is referenced
+              item.refs = 1;
+              break;
+            }
+          }
+          symbols.add(symbol);
         }
       }
+      index += item.identifier.length;
     }
   };
 
-  for (let key in exports) {
-    const item = exports[key];
+  for (const item of exports.values()) {
     if (options.ignoreExportsUsedInFile) setRefs(item);
-    item.members.forEach(member => {
+    for (const member of item.members) {
       setRefs(member);
-      delete member.symbol;
-    });
-    delete item.symbol;
+      member.symbol = undefined;
+    }
+    item.symbol = undefined;
   }
 
   return {
     imports: {
       internal: internalImports,
       external: externalImports,
+      resolved,
+      specifiers,
       unresolved: unresolvedImports,
     },
     exports: {
@@ -392,6 +438,7 @@ const getImportsAndExports = (
       duplicate: [...aliasedExports.values()],
     },
     scripts,
+    traceRefs,
   };
 };
 

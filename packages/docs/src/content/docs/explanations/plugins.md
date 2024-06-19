@@ -4,10 +4,11 @@ sidebar:
   order: 2
 ---
 
-## Introduction
-
 This page describes why Knip uses plugins and the difference between `config`
 and `entry` files.
+
+Knip has an extensive and growing [list of built-in plugins][1]. It's currently
+not possible to add custom plugins.
 
 ## Enabled
 
@@ -15,16 +16,16 @@ Plugins are enabled if the related package is listed in the list of dependencies
 in `package.json`. For instance, if `astro` is listed in `dependencies` or
 `devDependencies`, then the Astro plugin is enabled.
 
-## Configuration Files
+## Configuration files
 
-Knip uses [entry files][1] as starting points to scan your source code and
+Knip uses [entry files][2] as starting points to scan your source code and
 resolve other internal files and external dependencies. The dependency graph can
 be statically resolved through the `require` and `import` statements in those
 source files. However, configuration files often reference external dependencies
 in different ways. Knip uses plugins to parse configuration files to find those
 dependencies.
 
-In this example we look at [Knip's ESLint plugin][2]. The default `config` file
+In this example we look at [Knip's ESLint plugin][3]. The default `config` file
 patterns include `.eslintrc.json`. Here's a minimal example:
 
 ```json title=".eslintrc.json"
@@ -51,7 +52,7 @@ this to determine the unused and unlisted dependencies.
 
 :::
 
-## Entry Files
+## Entry files
 
 Many plugins have default `entry` files configured. When the plugin is enabled,
 Knip will add entry files as configured by the plugin to resolve used files and
@@ -74,7 +75,7 @@ configuration.
 
 :::
 
-For example, if your Playwright configuration contains the following:
+For example, let's say your Playwright configuration contains the following:
 
 ```ts title="playwright.config.ts"
 import type { PlaywrightTestConfig } from '@playwright/test';
@@ -87,8 +88,8 @@ const config: PlaywrightTestConfig = {
 export default config;
 ```
 
-Then the plugin will inform Knip that not its default entry patterns, but
-`integration/**/*-test.ts` should be added as entry files.
+The plugin will read this configuration file and return those entry patterns
+(`integration/**/*-test.ts`). Knip will then not use the default entry patterns.
 
 If that's not correct or in some way doesn't work, you can override this
 behavior in your Knip configuration:
@@ -110,7 +111,7 @@ Plugins try hard to automatically add the correct entry files.
 
 :::
 
-## Entry Files From Config Files
+## Entry files from config files
 
 Entry files are part of plugin configuration (as described in the previous
 section). Yet plugins can also return additional entry files after parsing
@@ -163,7 +164,7 @@ jobs:
 From these scripts, the `scripts/build.js` and `scripts/deploy.ts` files will be
 added as entry files by the GitHub Actions plugin.
 
-You can read more about this in [Script Parser][3].
+You can read more about this in [Script Parser][4].
 
 ### webpack
 
@@ -198,7 +199,7 @@ Plugins can find additional entry files when parsing config files.
 
 :::
 
-## Bringing It All Together
+## Bringing it all together
 
 Sometimes a configuration file is a JavaScript or TypeScript file that imports
 dependencies, but also contains configuration that needs to be parsed by a
@@ -246,6 +247,7 @@ Plugins are configured with two distinct types of files:
 
 :::
 
-[1]: ./entry-files.md
-[2]: ../reference/plugins/eslint.md
-[3]: ../features/script-parser.md
+[1]: ../reference/plugins.md
+[2]: ./entry-files.md
+[3]: ../reference/plugins/eslint.md
+[4]: ../features/script-parser.md

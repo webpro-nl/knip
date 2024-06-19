@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../../src/index.js';
 import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
@@ -24,7 +24,7 @@ test('Find dependencies with Vitest plugin', async () => {
     ...baseCounters,
     files: 1,
     unlisted: 6,
-    processed: 6,
-    total: 6,
+    processed: 7,
+    total: 7,
   });
 });

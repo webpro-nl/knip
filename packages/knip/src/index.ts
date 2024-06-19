@@ -1,29 +1,41 @@
-import { _getDependenciesFromScripts } from './binaries/index.js';
-import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
+import { watch } from 'node:fs';
+import { CacheConsultant } from './CacheConsultant.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
 import { IssueCollector } from './IssueCollector.js';
 import { IssueFixer } from './IssueFixer.js';
-import { getFilteredScripts } from './manifest/helpers.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
-import { ProjectPrincipal } from './ProjectPrincipal.js';
-import { debugLogObject, debugLogArray, debugLog } from './util/debug.js';
-import { getReExportingEntryFileHandler } from './util/get-reexporting-entry-file.js';
+import type { ProjectPrincipal } from './ProjectPrincipal.js';
+import { WorkspaceWorker } from './WorkspaceWorker.js';
+import { _getDependenciesFromScripts } from './binaries/index.js';
+import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
+import { getFilteredScripts } from './manifest/helpers.js';
+import watchReporter from './reporters/watch.js';
+import type { CommandLineOptions } from './types/cli.js';
+import type {
+  DependencyGraph,
+  Export,
+  ExportMember,
+  FileNode,
+  ImportDetails,
+  ImportMap,
+} from './types/dependency-graph.js';
+import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
+import { addNsValues, addValues, createFileNode } from './util/dependency-graph.js';
+import { isFile } from './util/fs.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredFn } from './util/globby.js';
 import { getHandler } from './util/handle-dependency.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
-import { dirname, join } from './util/path.js';
-import { hasMatch } from './util/regex.js';
-import { shouldIgnore } from './util/tag.js';
+import { dirname, join, toPosix } from './util/path.js';
+import { findMatch } from './util/regex.js';
+import { getShouldIgnoreHandler } from './util/tag.js';
+import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
+import { createAndPrintTrace, printTrace } from './util/trace.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
-import { getType, getHasStrictlyNsReferences } from './util/type.js';
-import { WorkspaceWorker } from './WorkspaceWorker.js';
-import type { CommandLineOptions } from './types/cli.js';
-import type { SerializableExport, SerializableExportMember, SerializableExportMap } from './types/exports.js';
-import type { SerializableImportMap } from './types/imports.js';
+import { getHasStrictlyNsReferences, getType } from './util/type.js';
 
 export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
@@ -39,9 +51,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isIncludeEntryExports,
     isIncludeLibs,
     isIsolateWorkspaces,
+    isDebug,
+    isWatch,
     tags,
     isFix,
     fixTypes,
+    isRemoveFiles,
   } = unresolvedConfiguration;
 
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
@@ -52,6 +67,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
   const isGitIgnored = await getGitIgnoredFn({ cwd, gitignore });
+  const toSourceFilePath = getToSourcePathHandler(chief);
 
   streamer.cast('Reading workspace configuration(s)...');
 
@@ -61,7 +77,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const report = chief.getIncludedIssueTypes();
   const rules = chief.getRules();
   const filters = chief.getFilters();
-  const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes });
+  const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes, isRemoveFiles });
 
   debugLogObject('*', 'Included issue types', report);
 
@@ -69,14 +85,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;
-  const isSkipLibs = !isIncludeLibs && !isReportClassMembers;
+  const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
 
   const collector = new IssueCollector({ cwd, rules, filters });
 
   const enabledPluginsStore = new Map<string, string[]>();
-
-  // TODO Organize better
-  deputy.setIgnored(chief.config.ignoreBinaries, chief.config.ignoreDependencies);
 
   const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
@@ -87,7 +100,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     streamer.cast(`Analyzing workspace ${name}...`);
 
-    const manifest = chief.getManifestForWorkspace(dir);
+    const manifest = chief.getManifestForWorkspace(name);
     const { ignoreBinaries, ignoreDependencies } = chief.getIgnores(name);
 
     if (!manifest) continue;
@@ -103,7 +116,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const manifestScripts = Object.values(filteredScripts);
     const manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
 
-    const { compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
+    const { isFile, compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
+
+    if (isFile) augmentWorkspace(workspace, dir, compilerOptions);
 
     const principal = factory.getPrincipal({
       cwd: dir,
@@ -111,9 +126,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       compilerOptions,
       compilers,
       pkgName,
-      isGitIgnored,
       isIsolateWorkspaces,
       isSkipLibs,
+      isWatch,
     });
 
     const worker = new WorkspaceWorker({
@@ -133,27 +148,24 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     await worker.init();
 
     principal.addEntryPaths(definitionPaths);
-    debugLogArray(name, `Definition paths`, definitionPaths);
+    debugLogArray(name, 'Definition paths', definitionPaths);
 
     const ignore = worker.getIgnorePatterns();
     const sharedGlobOptions = { cwd, workingDir: dir, gitignore };
 
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
-    {
-      // Add dependencies from package.json
-      const options = { manifestScriptNames, cwd: dir, dependencies };
-      const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
-      principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
-    }
+    // Add dependencies from package.json
+    const options = { manifestScriptNames, cwd: dir, dependencies };
+    const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
+    principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
 
-    {
-      // Add entry paths from package.json
-      const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
-      debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
-      principal.addEntryPaths(entryPathsFromManifest);
-    }
+    // Add entry paths from package.json
+    const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
+    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
+    principal.addEntryPaths(entryPathsFromManifest);
 
+    // Run plugins
     const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } =
       await worker.findDependenciesByPlugins();
     enabledPluginsStore.set(name, enabledPlugins);
@@ -165,56 +177,56 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       {
         const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
         const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Entry paths`, workspaceEntryPaths);
+        debugLogArray(name, 'Entry paths', workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
       }
 
       {
         const patterns = Array.from(productionEntryFilePatterns);
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Production plugin entry paths`, pluginWorkspaceEntryPaths);
+        debugLogArray(name, 'Production plugin entry paths', pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
         const patterns = worker.getProductionProjectFilePatterns(negatedEntryPatterns);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Project paths`, workspaceProjectPaths);
-        workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
+        debugLogArray(name, 'Project paths', workspaceProjectPaths);
+        for (const projectPath of workspaceProjectPaths) principal.addProjectPath(projectPath);
       }
     } else {
       {
         const patterns = worker.getEntryFilePatterns();
         const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Entry paths`, workspaceEntryPaths);
+        debugLogArray(name, 'Entry paths', workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
       }
 
       {
         const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns]);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Project paths`, workspaceProjectPaths);
-        workspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
+        debugLogArray(name, 'Project paths', workspaceProjectPaths);
+        for (const projectPath of workspaceProjectPaths) principal.addProjectPath(projectPath);
       }
 
       {
         const patterns = [...entryFilePatterns, ...productionEntryFilePatterns];
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Plugin entry paths`, pluginWorkspaceEntryPaths);
+        debugLogArray(name, 'Plugin entry paths', pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
         const patterns = worker.getPluginProjectFilePatterns();
         const pluginWorkspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Plugin project paths`, pluginWorkspaceProjectPaths);
-        pluginWorkspaceProjectPaths.forEach(projectPath => principal.addProjectPath(projectPath));
+        debugLogArray(name, 'Plugin project paths', pluginWorkspaceProjectPaths);
+        for (const projectPath of pluginWorkspaceProjectPaths) principal.addProjectPath(projectPath);
       }
 
       {
         const patterns = worker.getPluginConfigPatterns();
         const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, `Plugin configuration paths`, configurationEntryPaths);
+        debugLogArray(name, 'Plugin configuration paths', configurationEntryPaths);
         principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
       }
     }
@@ -223,109 +235,116 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     if (chief.resolvedConfigFilePath) {
       principal.addEntryPath(chief.resolvedConfigFilePath, { skipExportsAnalysis: true });
     }
+
+    worker.onDispose();
   }
 
   const principals = factory.getPrincipals();
 
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
+  const graph: DependencyGraph = new Map();
   const analyzedFiles = new Set<string>();
-  const exportedSymbols: SerializableExportMap = {};
-  const importedSymbols: SerializableImportMap = {};
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
 
-  for (const principal of principals) {
-    principal.init();
+  const getFileNode = (filePath: string) => graph.get(filePath) ?? createFileNode();
 
-    const handleReferencedDependency = getHandler(collector, deputy, chief);
+  const handleReferencedDependency = getHandler(collector, deputy, chief);
 
-    principal.referencedDependencies.forEach(([containingFilePath, specifier, workspaceName]) => {
-      const workspace = chief.findWorkspaceByName(workspaceName);
-      if (workspace) handleReferencedDependency(specifier, containingFilePath, workspace, principal);
-    });
+  const updateImportDetails = (importedModule: ImportDetails, importItems: ImportDetails) => {
+    for (const id of importItems.refs) importedModule.refs.add(id);
+    for (const [id, v] of importItems.imported.entries()) addValues(importedModule.imported, id, v);
+    for (const [id, v] of importItems.importedAs.entries()) addNsValues(importedModule.importedAs, id, v);
+    for (const [id, v] of importItems.importedNs.entries()) addValues(importedModule.importedNs, id, v);
+    for (const [id, v] of importItems.reExported.entries()) addValues(importedModule.reExported, id, v);
+    for (const [id, v] of importItems.reExportedAs.entries()) addNsValues(importedModule.reExportedAs, id, v);
+    for (const [id, v] of importItems.reExportedNs.entries()) addValues(importedModule.reExportedNs, id, v);
+  };
 
-    const specifierFilePaths = new Set<string>();
+  const updateImportMap = (file: FileNode, importMap: ImportMap) => {
+    for (const [importedFilePath, importDetails] of importMap.entries()) {
+      const importedFileImports = file.imports.internal.get(importedFilePath);
+      if (!importedFileImports) file.imports.internal.set(importedFilePath, importDetails);
+      else updateImportDetails(importedFileImports, importDetails);
 
-    const analyzeSourceFile = (filePath: string, _principal: ProjectPrincipal = principal) => {
-      const workspace = chief.findWorkspaceByFilePath(filePath);
-      if (workspace) {
-        const { imports, exports, scripts } = _principal.analyzeSourceFile(filePath, {
+      const importedFile = getFileNode(importedFilePath);
+      if (!importedFile.imported) importedFile.imported = importDetails;
+      else updateImportDetails(importedFile.imported, importDetails);
+      graph.set(importedFilePath, importedFile);
+    }
+  };
+
+  const isPackageNameInternalWorkspace = (packageName: string) => chief.availableWorkspacePkgNames.has(packageName);
+
+  const getPrincipalByFilePath = (filePath: string) => {
+    const workspace = chief.findWorkspaceByFilePath(filePath);
+    if (workspace) return factory.getPrincipalByPackageName(workspace.pkgName);
+  };
+
+  const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
+    if (!isWatch && analyzedFiles.has(filePath)) return;
+    analyzedFiles.add(filePath);
+
+    const workspace = chief.findWorkspaceByFilePath(filePath);
+    if (workspace) {
+      const { imports, exports, scripts, traceRefs } = principal.analyzeSourceFile(
+        filePath,
+        {
           skipTypeOnly: isStrict,
           isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
           isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
           ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
           isReportClassMembers,
           tags,
-        });
-        const { internal, external, unresolved } = imports;
-        const { exported, duplicate } = exports;
+        },
+        isGitIgnored,
+        isPackageNameInternalWorkspace,
+        getPrincipalByFilePath
+      );
 
-        if (Object.keys(exported).length > 0) exportedSymbols[filePath] = exported;
+      const file = getFileNode(filePath);
 
-        for (const [specifierFilePath, importItems] of Object.entries(internal)) {
-          const packageName = getPackageNameFromModuleSpecifier(importItems.specifier);
-          if (packageName && chief.availableWorkspacePkgNames.has(packageName)) {
-            // Mark "external" imports from other local workspaces as used dependency
-            external.add(packageName);
-            if (_principal === principal) {
-              const workspace = chief.findWorkspaceByFilePath(specifierFilePath);
-              if (workspace) {
-                const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-                if (principal && !isGitIgnored(specifierFilePath)) {
-                  // Defer to outside loop to prevent potential duplicate analysis and/or infinite recursion
-                  specifierFilePaths.add(specifierFilePath);
-                }
-              }
-            }
-          }
+      file.imports = imports;
+      file.exports = exports;
+      file.scripts = scripts;
+      file.traceRefs = traceRefs;
 
-          if (!importedSymbols[specifierFilePath]) {
-            importedSymbols[specifierFilePath] = importItems;
-          } else {
-            const importedModule = importedSymbols[specifierFilePath];
-            for (const id of importItems.identifiers) importedModule.identifiers.add(id);
-            for (const id of importItems.importedNs) importedModule.importedNs.add(id);
-            for (const id of importItems.isReExportedBy) importedModule.isReExportedBy.add(id);
-            for (const id of importItems.isReExportedNs) importedModule.isReExportedNs.add(id);
-            if (importItems.hasStar) importedModule.hasStar = true;
-            if (importItems.isReExport) importedModule.isReExport = true;
-          }
+      updateImportMap(file, imports.internal);
+      file.internalImportCache = imports.internal;
+
+      graph.set(filePath, file);
+
+      // Handle scripts here since they might lead to more entry files
+      if (scripts && scripts.size > 0) {
+        const cwd = dirname(filePath);
+        const dependencies = deputy.getDependencies(workspace.name);
+        const manifestScriptNames = new Set<string>();
+        const specifiers = _getDependenciesFromScripts(scripts, { cwd, manifestScriptNames, dependencies });
+        for (const specifier of specifiers) {
+          const specifierFilePath = handleReferencedDependency(specifier, filePath, workspace);
+          if (specifierFilePath) analyzeSourceFile(specifierFilePath, principal);
         }
-
-        duplicate.forEach(symbols => {
-          if (symbols.length > 1) {
-            const symbol = symbols.map(s => s.symbol).join('|');
-            collector.addIssue({ type: 'duplicates', filePath, symbol, symbols });
-          }
-        });
-
-        external.forEach(specifier => {
-          const packageName = getPackageNameFromModuleSpecifier(specifier);
-          const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(workspace, packageName);
-          if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, symbol: specifier });
-        });
-
-        unresolved.forEach(unresolvedImport => {
-          const { specifier, pos, line, col } = unresolvedImport;
-          collector.addIssue({ type: 'unresolved', filePath, symbol: specifier, pos, line, col });
-        });
-
-        _getDependenciesFromScripts(scripts, {
-          cwd: dirname(filePath),
-          manifestScriptNames: new Set(),
-          dependencies: deputy.getDependencies(workspace.name),
-        }).forEach(specifier => {
-          handleReferencedDependency(specifier, filePath, workspace, _principal);
-        });
       }
-    };
+    }
+  };
+
+  for (const principal of principals) {
+    principal.init(toSourceFilePath);
+
+    for (const [containingFilePath, specifier, workspaceName] of principal.referencedDependencies) {
+      const workspace = chief.findWorkspaceByName(workspaceName);
+      if (workspace) {
+        const specifierFilePath = handleReferencedDependency(specifier, containingFilePath, workspace);
+        if (specifierFilePath) principal.addEntryPath(specifierFilePath);
+      }
+    }
 
     streamer.cast('Running async compilers...');
 
     await principal.runAsyncCompilers();
 
-    streamer.cast('Connecting the dots...');
+    streamer.cast('Analyzing source files...');
 
     let size = principal.entryPaths.size;
     let round = 0;
@@ -336,158 +355,304 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const files = resolvedFiles.filter(filePath => !analyzedFiles.has(filePath));
 
       debugLogArray('*', `Analyzing used resolved files [P${principals.indexOf(principal) + 1}/${++round}]`, files);
-      files.forEach(filePath => {
-        analyzeSourceFile(filePath);
-        analyzedFiles.add(filePath);
-      });
+      for (const filePath of files) {
+        analyzeSourceFile(filePath, principal);
+      }
     } while (size !== principal.entryPaths.size);
 
-    specifierFilePaths.forEach(specifierFilePath => {
-      if (!analyzedFiles.has(specifierFilePath)) {
-        analyzedFiles.add(specifierFilePath);
-        analyzeSourceFile(specifierFilePath, principal);
-      }
-    });
+    for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
+    for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
-    principal.getUnreferencedFiles().forEach(filePath => unreferencedFiles.add(filePath));
-    principal.entryPaths.forEach(filePath => entryPaths.add(filePath));
+    principal.reconcileCache(graph);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (isSkipLibs) factory.deletePrincipal(principal);
+    if (!isIsolateWorkspaces && isSkipLibs && !isWatch) factory.deletePrincipal(principal);
   }
 
-  const isIdentifierReferenced = getIsIdentifierReferencedHandler(importedSymbols);
+  if (isIsolateWorkspaces) for (const principal of principals) factory.deletePrincipal(principal);
 
-  const getReExportingEntryFile = getReExportingEntryFileHandler(entryPaths, exportedSymbols, importedSymbols);
+  const shouldIgnore = getShouldIgnoreHandler(tags, isProduction);
 
-  const isExportedItemReferenced = (exportedItem: SerializableExport | SerializableExportMember) => {
-    return (
-      exportedItem.refs > 0 &&
-      (typeof chief.config.ignoreExportsUsedInFile === 'object'
-        ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
-        : chief.config.ignoreExportsUsedInFile)
-    );
-  };
+  const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
 
-  if (isReportValues || isReportTypes) {
-    streamer.cast('Analyzing source files...');
+  const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
+    exportedItem.refs > 0 &&
+    (typeof chief.config.ignoreExportsUsedInFile === 'object'
+      ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
+      : chief.config.ignoreExportsUsedInFile);
 
-    for (const [filePath, exportItems] of Object.entries(exportedSymbols)) {
-      const workspace = chief.findWorkspaceByFilePath(filePath);
-      const principal = workspace && factory.getPrincipalByPackageName(workspace.pkgName);
+  const findUnusedExports = async () => {
+    if (isReportValues || isReportTypes) {
+      streamer.cast('Connecting the dots...');
 
-      if (workspace) {
-        const { isIncludeEntryExports } = workspace.config;
+      for (const [filePath, file] of graph.entries()) {
+        const exportItems = file.exports?.exported;
 
-        // Bail out when in entry file (unless `isIncludeEntryExports`)
-        if (!isIncludeEntryExports && entryPaths.has(filePath)) continue;
+        if (!exportItems || exportItems.size === 0) continue;
 
-        const importsForExport = importedSymbols[filePath];
+        const workspace = chief.findWorkspaceByFilePath(filePath);
 
-        for (const [identifier, exportedItem] of Object.entries(exportItems)) {
-          // Skip tagged exports
-          if (exportedItem.jsDocTags.includes('@public') || exportedItem.jsDocTags.includes('@beta')) continue;
-          if (exportedItem.jsDocTags.includes('@alias')) continue;
-          if (shouldIgnore(exportedItem.jsDocTags, tags)) continue;
-          if (isProduction && exportedItem.jsDocTags.includes('@internal')) continue;
+        if (workspace) {
+          const { isIncludeEntryExports } = workspace.config;
 
-          if (importsForExport) {
-            if (!isIncludeEntryExports) {
-              if (getReExportingEntryFile(importsForExport, identifier, 0, filePath)) continue;
-            }
+          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
 
-            if (isIdentifierReferenced(filePath, identifier, importsForExport)) {
-              if (report.enumMembers && exportedItem.type === 'enum') {
-                exportedItem.members?.forEach(member => {
-                  if (hasMatch(workspace.ignoreMembers, member.identifier)) return;
-                  if (shouldIgnore(member.jsDocTags, tags)) return;
+          const isEntry = entryPaths.has(filePath);
 
-                  if (member.refs === 0) {
-                    if (!isIdentifierReferenced(filePath, `${identifier}.${member.identifier}`, importsForExport)) {
-                      collector.addIssue({
-                        type: 'enumMembers',
-                        filePath,
-                        symbol: member.identifier,
-                        parentSymbol: identifier,
-                        pos: member.pos,
-                        line: member.line,
-                        col: member.col,
-                      });
-                    }
-                  }
-                });
-              }
-
-              if (isReportClassMembers && exportedItem.type === 'class') {
-                const members = exportedItem.members.filter(
-                  member =>
-                    !hasMatch(workspace.ignoreMembers, member.identifier) && !shouldIgnore(member.jsDocTags, tags)
-                );
-                principal?.findUnusedMembers(filePath, members).forEach(member => {
-                  collector.addIssue({
-                    type: 'classMembers',
-                    filePath,
-                    symbol: member.identifier,
-                    parentSymbol: exportedItem.identifier,
-                    pos: member.pos,
-                    line: member.line,
-                    col: member.col,
-                  });
-                });
-              }
-
-              // This id was imported, so we bail out early
-              continue;
-            }
+          // Bail out when in entry file (unless `isIncludeEntryExports`)
+          if (!isIncludeEntryExports && isEntry) {
+            createAndPrintTrace(filePath, { isEntry });
+            continue;
           }
 
-          const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(importsForExport);
+          const importsForExport = file.imported;
 
-          const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
+          for (const [identifier, exportedItem] of exportItems.entries()) {
+            if (exportedItem.isReExport) continue;
 
-          if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || (!report.nsExports && !isType))) continue;
+            // Skip tagged exports
+            if (shouldIgnore(exportedItem.jsDocTags)) continue;
 
-          if (!isExportedItemReferenced(exportedItem)) {
-            if (!isSkipLibs && principal?.hasReferences(filePath, exportedItem)) continue;
+            if (importsForExport) {
+              const { isReferenced, reExportingEntryFile, traceNode } = isIdentifierReferenced(
+                filePath,
+                identifier,
+                isIncludeEntryExports
+              );
 
-            const type = getType(hasStrictlyNsReferences, isType);
-            collector.addIssue({
-              type,
-              filePath,
-              symbol: identifier,
-              symbolType: exportedItem.type,
-              parentSymbol: namespace,
-              pos: exportedItem.pos,
-              line: exportedItem.line,
-              col: exportedItem.col,
-            });
-            if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
-            else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+              if (reExportingEntryFile) {
+                if (!isIncludeEntryExports) {
+                  createAndPrintTrace(filePath, { identifier, isEntry, hasRef: isReferenced });
+                  continue;
+                }
+                // Skip exports if re-exported from entry file and tagged
+                const reExportedItem = graph.get(reExportingEntryFile)?.exports.exported.get(identifier);
+                if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
+              }
+
+              if (traceNode) printTrace(traceNode, filePath, identifier);
+
+              if (isReferenced) {
+                if (report.enumMembers && exportedItem.type === 'enum') {
+                  for (const member of exportedItem.members) {
+                    if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
+                    if (shouldIgnore(member.jsDocTags)) continue;
+
+                    if (member.refs === 0) {
+                      const id = `${identifier}.${member.identifier}`;
+                      const { isReferenced } = isIdentifierReferenced(filePath, id);
+
+                      if (!isReferenced) {
+                        collector.addIssue({
+                          type: 'enumMembers',
+                          filePath,
+                          workspace: workspace.name,
+                          symbol: member.identifier,
+                          parentSymbol: identifier,
+                          pos: member.pos,
+                          line: member.line,
+                          col: member.col,
+                        });
+                      }
+                    }
+                  }
+                }
+
+                if (principal && isReportClassMembers && exportedItem.type === 'class') {
+                  const members = exportedItem.members.filter(
+                    member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
+                  );
+                  for (const member of principal.findUnusedMembers(filePath, members)) {
+                    collector.addIssue({
+                      type: 'classMembers',
+                      filePath,
+                      workspace: workspace.name,
+                      symbol: member.identifier,
+                      parentSymbol: exportedItem.identifier,
+                      pos: member.pos,
+                      line: member.line,
+                      col: member.col,
+                    });
+                  }
+                }
+
+                // This id was imported, so we bail out early
+                continue;
+              }
+            }
+
+            const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(graph, importsForExport);
+
+            const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
+
+            if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || !(report.nsExports || isType))) continue;
+
+            if (!isExportedItemReferenced(exportedItem)) {
+              if (!isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
+
+              const type = getType(hasStrictlyNsReferences, isType);
+              const isIssueAdded = collector.addIssue({
+                type,
+                filePath,
+                workspace: workspace.name,
+                symbol: identifier,
+                symbolType: exportedItem.type,
+                parentSymbol: namespace,
+                pos: exportedItem.pos,
+                line: exportedItem.line,
+                col: exportedItem.col,
+              });
+              if (isIssueAdded) {
+                if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
+                else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+              }
+            }
           }
         }
       }
     }
+
+    for (const [filePath, file] of graph.entries()) {
+      const ws = chief.findWorkspaceByFilePath(filePath);
+
+      if (ws) {
+        if (file.exports?.duplicate) {
+          for (const symbols of file.exports.duplicate) {
+            if (symbols.length > 1) {
+              const symbol = symbols.map(s => s.symbol).join('|');
+              collector.addIssue({ type: 'duplicates', filePath, workspace: ws.name, symbol, symbols });
+            }
+          }
+        }
+
+        if (file.imports?.external) {
+          for (const specifier of file.imports.external) {
+            const packageName = getPackageNameFromModuleSpecifier(specifier);
+            const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(ws, packageName);
+            if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, workspace: ws.name, symbol: specifier });
+          }
+        }
+
+        if (file.imports?.unresolved) {
+          for (const unresolvedImport of file.imports.unresolved) {
+            const { specifier, pos, line, col } = unresolvedImport;
+            collector.addIssue({ type: 'unresolved', filePath, workspace: ws.name, symbol: specifier, pos, line, col });
+          }
+        }
+      }
+    }
+
+    const unusedFiles = [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath));
+
+    collector.addFilesIssues(unusedFiles);
+
+    collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
+
+    if (isReportDependencies) {
+      const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
+      for (const issue of dependencyIssues) collector.addIssue(issue);
+      if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
+      for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
+      const configurationHints = deputy.getConfigurationHints(collector.getIssues());
+      for (const hint of configurationHints) collector.addConfigurationHint(hint);
+    }
+
+    const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
+    for (const identifier of unusedIgnoredWorkspaces) {
+      collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
+    }
+  };
+
+  if (isWatch) {
+    const cacheLocation = CacheConsultant.getCacheLocation();
+
+    watch('.', { recursive: true }, async (eventType, filename) => {
+      debugLog('*', `(raw) ${eventType} ${filename}`);
+
+      if (filename) {
+        const startTime = performance.now();
+        const filePath = join(cwd, toPosix(filename));
+
+        if (filename.startsWith(cacheLocation) || filename.startsWith('.git/') || isGitIgnored(filePath)) {
+          debugLog('*', `ignoring ${eventType} ${filename}`);
+          return;
+        }
+
+        const workspace = chief.findWorkspaceByFilePath(filePath);
+        if (workspace) {
+          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+          if (principal) {
+            const event = eventType === 'rename' ? (isFile(filePath) ? 'added' : 'deleted') : 'modified';
+
+            principal.invalidateFile(filePath);
+            unreferencedFiles.clear();
+            const cachedUnusedFiles = collector.purge();
+
+            switch (event) {
+              case 'added':
+                principal.addProjectPath(filePath);
+                principal.deletedFiles.delete(filePath);
+                cachedUnusedFiles.add(filePath);
+                debugLog(workspace.name, `Watcher: + ${filename}`);
+                break;
+              case 'deleted':
+                analyzedFiles.delete(filePath);
+                principal.removeProjectPath(filePath);
+                cachedUnusedFiles.delete(filePath);
+                debugLog(workspace.name, `Watcher: - ${filename}`);
+                break;
+              case 'modified':
+                debugLog(workspace.name, `Watcher: ± ${filename}`);
+                break;
+            }
+
+            const filePaths = principal.getUsedResolvedFiles();
+
+            if (event === 'added' || event === 'deleted') {
+              // Flush, any file might contain (un)resolved imports to added/deleted files
+              graph.clear();
+              for (const filePath of filePaths) analyzeSourceFile(filePath, principal);
+            } else {
+              for (const [filePath, file] of graph) {
+                if (filePaths.includes(filePath)) {
+                  // Reset dep graph
+                  file.imported = undefined;
+                } else {
+                  // Remove files no longer referenced
+                  graph.delete(filePath);
+                  analyzedFiles.delete(filePath);
+                  cachedUnusedFiles.add(filePath);
+                }
+              }
+
+              // Add existing files that were not yet part of the program
+              for (const filePath of filePaths) if (!graph.has(filePath)) analyzeSourceFile(filePath, principal);
+
+              if (!cachedUnusedFiles.has(filePath)) analyzeSourceFile(filePath, principal);
+
+              // Rebuild dep graph
+              for (const filePath of filePaths) {
+                const file = graph.get(filePath);
+                if (file?.internalImportCache) updateImportMap(file, file.internalImportCache);
+              }
+            }
+
+            await findUnusedExports();
+
+            const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
+            collector.addFilesIssues(unusedFiles);
+            collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
+
+            const { issues } = collector.getIssues();
+
+            watchReporter({ report, issues, streamer, startTime, size: analyzedFiles.size, isDebug });
+          }
+        }
+      }
+    });
   }
 
-  const unusedFiles = [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath));
-
-  collector.addFilesIssues(unusedFiles);
-
-  collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
-
-  if (isReportDependencies) {
-    const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
-    const { configurationHints } = deputy.getConfigurationHints();
-    dependencyIssues.forEach(issue => collector.addIssue(issue));
-    if (!isProduction) devDependencyIssues.forEach(issue => collector.addIssue(issue));
-    optionalPeerDependencyIssues.forEach(issue => collector.addIssue(issue));
-    configurationHints.forEach(hint => collector.addConfigurationHint(hint));
-  }
-
-  const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
-  unusedIgnoredWorkspaces.forEach(identifier =>
-    collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier })
-  );
+  await findUnusedExports();
 
   const { issues, counters, configurationHints } = collector.getIssues();
 
@@ -495,7 +660,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     await fixer.fixIssues(issues);
   }
 
-  streamer.clear();
+  if (isWatch) watchReporter({ report, issues, streamer, size: analyzedFiles.size, isDebug });
+  else streamer.clear();
 
   return { report, issues, counters, rules, configurationHints };
 };

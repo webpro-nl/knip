@@ -5,7 +5,7 @@ const cypressJsonConfig = {};
 
 export default defineConfig({
   e2e: {
-    ...nxE2EPreset(__dirname),
+    ...nxE2EPreset(__dirname, {}),
     ...cypressJsonConfig,
   },
 });

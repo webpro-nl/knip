@@ -1,7 +1,7 @@
-import { join, isInternal, toAbsolute, dirname } from '#p/util/path.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
+import { dirname, isInternal, join, toAbsolute } from '#p/util/path.js';
 import { hasDependency, load } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { JestConfig, JestInitialOptions } from './types.js';
 
 // https://jestjs.io/docs/configuration
@@ -49,7 +49,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
       projects.push(project);
     } else {
       const dependencies = await resolveDependencies(project, options);
-      dependencies.forEach(dependency => projects.push(dependency));
+      for (const dependency of dependencies) projects.push(dependency);
     }
   }
   const runner = config.runner ? [config.runner] : [];
@@ -76,6 +76,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
   const testSequencer = config.testSequencer ? [config.testSequencer] : [];
   const globalSetup = config.globalSetup ? [config.globalSetup] : [];
+  const globalTeardown = config.globalTeardown ? [config.globalTeardown] : [];
 
   return [
     ...presets,
@@ -93,6 +94,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     ...snapshotResolver,
     ...testSequencer,
     ...globalSetup,
+    ...globalTeardown,
   ];
 };
 
@@ -101,7 +103,7 @@ const resolveEntryPaths: ResolveEntryPaths<JestConfig> = async (localConfig, opt
   if (typeof localConfig === 'function') localConfig = await localConfig();
   const rootDir = localConfig.rootDir ? join(configFileDir, localConfig.rootDir) : configFileDir;
   const replaceRootDir = (name: string) => (name.includes('<rootDir>') ? name.replace(/<rootDir>/, rootDir) : name);
-  const matchCwd = new RegExp('^' + toEntryPattern(cwd) + '/');
+  const matchCwd = new RegExp(`^${toEntryPattern(cwd)}/`);
   return (localConfig.testMatch ?? [])
     .map(replaceRootDir)
     .map(dependency => dependency.replace(matchCwd, toEntryPattern('')))
@@ -114,7 +116,7 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
   const rootDir = localConfig.rootDir ? join(configFileDir, localConfig.rootDir) : configFileDir;
   const replaceRootDir = (name: string) => (name.includes('<rootDir>') ? name.replace(/<rootDir>/, rootDir) : name);
   const dependencies = await resolveDependencies(localConfig, options);
-  const matchCwd = new RegExp('^' + toEntryPattern(cwd) + '/');
+  const matchCwd = new RegExp(`^${toEntryPattern(cwd)}/`);
   return dependencies.map(replaceRootDir).map(dependency => dependency.replace(matchCwd, toEntryPattern('')));
 };
 

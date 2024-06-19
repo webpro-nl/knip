@@ -38,6 +38,14 @@ start? Knip contains a lot of standards and heuristics to search for things that
 can be deleted. Knip is not without flaws. But even a list of results with a few
 false positives is many times better and faster than trying to do it manually.
 
+:::tip
+
+Knip not only finds unused things, it can also [fix issues][2]! Use Knip next to
+a linter like ESLint or Biome: after removing unused variables inside files,
+Knip might find even more unused code. Rinse and repeat!
+
+:::
+
 ## Comprehensive
 
 You can use alternative tools that do the same. However, the advantage of a
@@ -52,17 +60,17 @@ synergy:
 - This approach is amplified in a monorepo setting. In fact, files and internal
   dependencies can recursively reference each other (across workspaces).
 
-The disadvantages of this strategy are not to be dismissed: increased complexity
-and less performance. In this early phase of the project completeness and
-correctness are valued over speed. Not in the least because the speed of
-automating this is still many times faster than the manual process. Both
-complexity and performance can be optimized further down the road.
-
 ## Greenfield or Legacy
 
 Installing Knip in greenfield projects ensures the project stays neat and tidy
 from the start. Add it to your CI workflow and prevent any regressions from
 entering the codebase.
+
+:::tip
+
+Use Knip in a CI environment to prevent future regressions.
+
+:::
 
 In large and/or legacy projects, Knip may report false positives and require
 some configuration. Yet it can be a great assistant when cleaning up parts of
@@ -85,13 +93,15 @@ so you can easily get rid of false positives? A variety of reasons:
 
 1. A false positive may be a bug in Knip, and should be reported (not easily
    dismissed).
-2. The [documentation makes you think twice][2] before using syntax like
-   `@public` or `@internal` tags.
+2. Instead of proprietary comments, use [standardized annotations][3] serving as
+   documentation as well.
 3. In the event you want to remove Knip, you only need to uninstall the `knip`
-   dependency and delete the file to configure it.
+   dependency and delete the file to configure it (and not countless useless
+   comments scattered throughout the codebase).
 
-Knip v4 introduces [--tags][3], to filter the report to your needs.
+Knip v4 introduces [--tags][4], to filter the report to your needs.
 
 [1]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
-[2]: ../reference/jsdoc-tsdoc-tags.md
-[3]: ../reference/cli.md#--tags
+[2]: ../features/auto-fix.mdx
+[3]: ../reference/jsdoc-tsdoc-tags.md
+[4]: ../reference/cli.md#--tags

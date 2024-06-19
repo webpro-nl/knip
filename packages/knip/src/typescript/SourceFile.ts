@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 
 // The members of ts.SourceFile below are added by binding and not public, so we add them here
 
@@ -34,14 +34,3 @@ export interface BoundSourceFile extends ts.SourceFile {
 
   pragmas?: Map<string, PragmaMap | PragmaMap[]>;
 }
-
-export interface ProgramMaybe53 extends ts.Program {
-  // Only available in TypeScript =>5.3.0
-  getResolvedModule?: (
-    sourceFile: ts.SourceFile,
-    moduleName: string,
-    mode: ts.ResolutionMode
-  ) => ts.ResolvedModuleWithFailedLookupLocations | undefined;
-}
-
-export type GetResolvedModule = (name: string) => ts.ResolvedModuleWithFailedLookupLocations | undefined;

@@ -8,6 +8,15 @@ import defaultNamedGenFn from './default-named-generator-function';
 import _default from './default.js';
 import * as MyNamespace from './my-namespace.js';
 
+defaultArrowFn;
+defaultClass;
+defaultFn;
+defaultGenFn;
+defaultNamedClass;
+defaultNamedFn;
+defaultNamedGenFn;
+_default;
+
 const nsNumber = MyNamespace.nsNumber;
 const nsFunction = MyNamespace.nsFunction;
 

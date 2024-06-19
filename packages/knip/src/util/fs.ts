@@ -3,18 +3,24 @@ import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
+import { timerify } from './Performance.js';
 import { LoaderError } from './errors.js';
 import { dirname, join } from './path.js';
-import { timerify } from './Performance.js';
 
 export const isDirectory = (filePath: string) => {
-  const stat = statSync(filePath, { throwIfNoEntry: false });
-  return stat !== undefined && stat.isDirectory();
+  try {
+    return statSync(filePath).isDirectory();
+  } catch (_error) {
+    return false;
+  }
 };
 
 export const isFile = (filePath: string) => {
-  const stat = statSync(filePath, { throwIfNoEntry: false });
-  return stat !== undefined && stat.isFile();
+  try {
+    return statSync(filePath).isFile();
+  } catch (_error) {
+    return false;
+  }
 };
 
 export const findFile = (workingDir: string, fileName: string) => {
@@ -65,10 +71,8 @@ export function isTypeModule(path: string) {
       const pkg = readFileSync(join(path, 'package.json'), 'utf-8');
       try {
         return JSON.parse(pkg).type === 'module';
-        // eslint-disable-next-line no-empty
       } catch {}
       break;
-      // eslint-disable-next-line no-empty
     } catch {}
   }
   return false;

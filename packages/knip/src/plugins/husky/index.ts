@@ -1,6 +1,6 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/plugins.js';
 import { getGitHookPaths } from '../../util/git.js';
 import { getDependenciesFromScripts, hasDependency } from '../../util/plugin.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/plugins.js';
 
 // https://typicode.github.io/husky
 

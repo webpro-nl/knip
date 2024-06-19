@@ -1,6 +1,6 @@
-import { hasDependency } from '#p/util/plugin.js';
-import { resolveEntryPaths, resolveConfig } from '../vitest/index.js';
 import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
+import { resolveConfig, resolveEntryPaths } from '../vitest/index.js';
 
 // https://vitejs.dev/config/
 

@@ -1,4 +1,4 @@
-import 'webpack';
+require('webpack');
 
 const config = [
   {

@@ -1,4 +1,4 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.company.name',
@@ -6,7 +6,6 @@ const config: CapacitorConfig = {
   includePlugins: [
     '@capacitor-community/http',
     '@capacitor/app',
-    '@capacitor/ios',
     '@capacitor/splash-screen',
     '@capacitor/status-bar',
     '@capacitor/storage',

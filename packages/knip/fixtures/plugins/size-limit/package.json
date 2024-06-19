@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/size-limit",
+  "version": "*",
+  "scripts": {
+    "size": "size-limit"
+  },
+  "dependencies": {
+    "size-limit": "*"
+  }
+}

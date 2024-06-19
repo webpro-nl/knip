@@ -1,8 +1,8 @@
 import ts from 'typescript';
-import { SymbolType } from '../../../types/issues.js';
-import { exportVisitor as visit } from '../index.js';
 import type { Fix } from '../../../types/exports.js';
+import { SymbolType } from '../../../types/issues.js';
 import type { BoundSourceFile } from '../../SourceFile.js';
+import { exportVisitor as visit } from '../index.js';
 
 export default visit(
   () => true,
@@ -17,11 +17,13 @@ export default visit(
         const declarations = sourceFile.getNamedDeclarations?.();
         return node.exportClause.elements.map(element => {
           const identifier = String(element.name.escapedText);
-          const declaration = declarations?.get(identifier)?.find((d: ts.Node) => d !== element);
+          const propName = element.propertyName?.escapedText;
+          // @ts-expect-error TODO Fix (convenience in addExport)
+          // const symbol = element.symbol ?? declarations?.get(identifier)?.find((d: ts.Node) => d !== element)?.symbol;
+          const symbol = declarations?.get(propName ?? identifier)?.[0]?.symbol;
           const pos = element.name.pos;
           const fix: Fix = isFixExports || isFixTypes ? [element.getStart(), element.getEnd()] : undefined;
-          // @ts-expect-error TODO Fix (convenience in addExport)
-          return { node: element, symbol: declaration?.symbol, identifier, type, pos, fix };
+          return { node: element, symbol, identifier, type, pos, fix };
         });
       }
     }

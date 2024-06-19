@@ -1,9 +1,9 @@
 import ts from 'typescript';
+import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import { compact } from '../../../util/array.js';
 import { isGetOrSetAccessorDeclaration, isPrivateMember, stripQuotes } from '../../ast-helpers.js';
 import { exportVisitor as visit } from '../index.js';
-import type { Fix } from '../../../types/exports.js';
 
 export default visit(
   () => true,
@@ -31,7 +31,8 @@ export default visit(
                 }
               })
             );
-          } else if (ts.isArrayBindingPattern(declaration.name)) {
+          }
+          if (ts.isArrayBindingPattern(declaration.name)) {
             // Pattern: export const [name1, name2] = [];
             return compact(
               declaration.name.elements.map(element => {
@@ -47,18 +48,17 @@ export default visit(
                 }
               })
             );
-          } else {
-            // Pattern: export const MyVar = 1;
-            const identifier = declaration.name.getText();
-            const fix: Fix = isFixExports ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : undefined;
-            return {
-              node: declaration,
-              identifier,
-              type: SymbolType.UNKNOWN,
-              pos: declaration.name.getStart(),
-              fix,
-            };
           }
+          // Pattern: export const MyVar = 1;
+          const identifier = declaration.name.getText();
+          const fix: Fix = isFixExports ? [exportKeyword.getStart(), exportKeyword.getEnd() + 1] : undefined;
+          return {
+            node: declaration,
+            identifier,
+            type: SymbolType.UNKNOWN,
+            pos: declaration.name.getStart(),
+            fix,
+          };
         });
       }
 

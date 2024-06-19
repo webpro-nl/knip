@@ -1,5 +1,5 @@
-import defaultA, { usedExportFromLibA } from '@scoped/lib-a';
-import defaultB, { usedExportFromLibB } from '@scoped/lib-b';
+import defaultA, { usedExportFromLibA } from '@workspaces-pnpm/lib-a';
+import defaultB, { usedExportFromLibB } from '@workspaces-pnpm/lib-b';
 import { c } from 'unlisted';
 
 defaultA;

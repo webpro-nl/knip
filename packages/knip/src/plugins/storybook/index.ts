@@ -1,7 +1,7 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import { join, relative } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { StorybookConfig } from './types.js';
 
 // https://storybook.js.org/docs/react/configure/overview
@@ -35,9 +35,14 @@ const resolveEntryPaths: ResolveEntryPaths<StorybookConfig> = async (localConfig
 
 const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {
   const addons = localConfig.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
-  const builder = localConfig?.core?.builder;
-  const builderPackages =
-    builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
+  const builder =
+    localConfig?.core?.builder &&
+    (typeof localConfig.core.builder === 'string' ? localConfig.core.builder : localConfig.core.builder.name);
+  const builderPackages = builder
+    ? builder.startsWith('webpack')
+      ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`]
+      : [builder]
+    : [];
   const frameworks = localConfig.framework?.name ? [localConfig.framework.name] : [];
   return [...addons, ...builderPackages, ...frameworks];
 };

@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../../src/index.js';
 import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
@@ -19,7 +19,7 @@ test('Use compilers (svelte)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 2,
-    processed: 14, // This includes .svelte and .css files
-    total: 14,
+    processed: 16,
+    total: 16,
   });
 });

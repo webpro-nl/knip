@@ -1,5 +1,5 @@
-import { hasDependency } from '#p/util/plugin.js';
 import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
+import { hasDependency } from '#p/util/plugin.js';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -15,7 +15,7 @@ const productionEntryFilePatternsWithoutSrc = [
   '{instrumentation,middleware}.{js,ts}',
   'app/global-error.{js,jsx,ts,tsx}',
   'app/**/{error,layout,loading,not-found,page,template,default}.{js,jsx,ts,tsx}',
-  'app/**/route.{js,ts}',
+  'app/**/route.{js,jsx,ts,tsx}',
   'app/{manifest,sitemap,robots}.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
   'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',

@@ -1,7 +1,7 @@
+import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
 import { join } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
 import type { MSWConfig } from './types.js';
 
 // https://mswjs.io/docs/integrations/browser

@@ -2,6 +2,11 @@ import { MyClass } from './members';
 import { AbstractClassGen, ExtendedClassGen } from './iterator-generator';
 import { AbstractClass, ExtendedClass } from './iterator';
 
+AbstractClassGen;
+ExtendedClassGen;
+AbstractClass;
+ExtendedClass;
+
 const instance = new MyClass();
 
 export class Parent {

@@ -1,12 +1,14 @@
 import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
-import resolve from 'resolve';
+import { createMatchPath } from 'tsconfig-paths';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from '../constants.js';
+import { timerify } from '../util/Performance.js';
 import { sanitizeSpecifier } from '../util/modules.js';
-import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, toPosix } from '../util/path.js';
+import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.js';
+import { resolveSync } from '../util/resolve.js';
+import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
-import { ensureRealFilePath, isVirtualFilePath } from './utils.js';
 
 const resolutionCache = new Map<string, ts.ResolvedModuleFull | undefined>();
 
@@ -22,50 +24,95 @@ const fileExists = (name: string, containingFile: string) => {
   }
 };
 
+export type ResolveModuleNames = ReturnType<typeof createCustomModuleResolver>;
+
 export function createCustomModuleResolver(
-  customSys: typeof ts.sys,
   compilerOptions: ts.CompilerOptions,
-  virtualFileExtensions: string[]
+  customCompilerExtensions: string[],
+  toSourceFilePath: ToSourceFilePath,
+  useCache = true
 ) {
-  const extensions = [...DEFAULT_EXTENSIONS, ...virtualFileExtensions];
+  const customCompilerExtensionsSet = new Set(customCompilerExtensions);
+  const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
 
   function resolveModuleNames(moduleNames: string[], containingFile: string): Array<ts.ResolvedModuleFull | undefined> {
     return moduleNames.map(moduleName => {
+      if (!useCache) return resolveModuleName(moduleName, containingFile);
+
       const key = moduleName.startsWith('.')
         ? join(dirname(containingFile), moduleName)
         : `${containingFile}:${moduleName}`;
-      if (resolutionCache.has(key)) return resolutionCache.get(key)!;
+
+      if (resolutionCache.has(key)) return resolutionCache.get(key);
+
       const resolvedModule = resolveModuleName(moduleName, containingFile);
-      resolutionCache.set(key, resolvedModule);
+
+      // Don't save resolution misses, because it might be resolved later under a different principal
+      if (resolvedModule) resolutionCache.set(key, resolvedModule);
+
       return resolvedModule;
     });
   }
 
+  const tsMatchPath = createMatchPath(
+    // If `baseUrl` is undefined we have already modified `paths` so that all
+    // entries are absolute. See `mergePaths` in `src/PrincipalFactory.ts`.
+    compilerOptions.baseUrl ?? '/',
+    compilerOptions.paths || {}
+  );
+
+  /**
+   * - Virtual files have built-in or custom compiler, return as JS
+   * - Foreign files have path resolved verbatim (file manager will return empty source file)
+   * - For dist/outDir and DTS files an attempt is made to resolve to src path
+   */
   function resolveModuleName(name: string, containingFile: string): ts.ResolvedModuleFull | undefined {
     const sanitizedSpecifier = sanitizeSpecifier(name);
 
     // No need to try and resolve builtins or externals, bail out
     if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
 
-    try {
-      const resolved = resolve.sync(sanitizedSpecifier, {
-        basedir: dirname(containingFile),
-        extensions,
-        preserveSymlinks: false,
-      });
+    const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
 
-      const resolvedFileName = toPosix(resolved);
-      const ext = extname(resolved);
-      const extension = virtualFileExtensions.includes(ext) ? ts.Extension.Js : ext;
+    if (resolvedFileName) {
+      const ext = extname(resolvedFileName);
+
+      if (!customCompilerExtensionsSet.has(ext)) {
+        const srcFilePath = toSourceFilePath(resolvedFileName);
+        if (srcFilePath) {
+          return {
+            resolvedFileName: srcFilePath,
+            extension: extname(srcFilePath),
+            isExternalLibraryImport: false,
+            resolvedUsingTsExtension: false,
+          };
+        }
+      }
 
       return {
         resolvedFileName,
-        extension,
+        extension: customCompilerExtensionsSet.has(ext) ? ts.Extension.Js : ext,
         isExternalLibraryImport: isInNodeModules(resolvedFileName),
         resolvedUsingTsExtension: false,
       };
-    } catch (err) {
-      // Intentional slip-through, plenty of cases left in TS context
+    }
+
+    const pathMappedFileName = tsMatchPath(
+      sanitizedSpecifier,
+      undefined,
+      undefined,
+      // Leave extensions empty and let `ts.resolveModuleName()` handle that.
+      // `tsMatchPath` will strip extensions from the returned specifier which
+      // means we don’t get the actual file path.
+      []
+    );
+    if (pathMappedFileName) {
+      const ext = extname(pathMappedFileName);
+      return {
+        resolvedFileName: toPosix(pathMappedFileName),
+        extension: customCompilerExtensionsSet.has(ext) ? ts.Extension.Js : ext,
+        isExternalLibraryImport: false,
+      };
     }
 
     const tsResolvedModule = ts.resolveModuleName(
@@ -75,67 +122,28 @@ export function createCustomModuleResolver(
       ts.sys
     ).resolvedModule;
 
-    if (
-      tsResolvedModule &&
-      isDeclarationFileExtension(tsResolvedModule.extension) &&
-      isInternal(tsResolvedModule.resolvedFileName)
-    ) {
-      if (tsResolvedModule.extension === '.d.mts') {
-        const resolvedFileName = tsResolvedModule.resolvedFileName.replace(/\.d\.mts$/, '.mjs');
-        return { resolvedFileName, extension: '.mjs', isExternalLibraryImport: false, resolvedUsingTsExtension: false };
-      } else if (tsResolvedModule.extension === '.d.cts') {
-        const resolvedFileName = tsResolvedModule.resolvedFileName.replace(/\.d\.cts$/, '.cjs');
-        return { resolvedFileName, extension: '.cjs', isExternalLibraryImport: false, resolvedUsingTsExtension: false };
-      }
+    if (tsResolvedModule) {
+      if (isDeclarationFileExtension(tsResolvedModule.extension)) {
+        const srcFilePath = toSourceFilePath(tsResolvedModule.resolvedFileName);
 
-      const base = tsResolvedModule.resolvedFileName.replace(/\.d\.ts$/, '');
-      const baseExt = extname(base);
-
-      if (baseExt && virtualFileExtensions.includes(baseExt)) {
-        const resolvedFileName = ensureRealFilePath(base, virtualFileExtensions);
-        return {
-          resolvedFileName,
-          extension: ts.Extension.Js,
-          isExternalLibraryImport: false,
-          resolvedUsingTsExtension: false,
-        };
-      }
-
-      for (const ext of ['.js', '.jsx']) {
-        const module = fileExists(base + ext, containingFile);
-        if (module) return module;
+        if (srcFilePath) {
+          return {
+            resolvedFileName: srcFilePath,
+            extension: extname(srcFilePath),
+            isExternalLibraryImport: false,
+            resolvedUsingTsExtension: false,
+          };
+        }
       }
 
       return tsResolvedModule;
     }
 
-    if (tsResolvedModule && !isVirtualFilePath(tsResolvedModule.resolvedFileName, virtualFileExtensions)) {
-      return tsResolvedModule;
-    }
+    const module = fileExists(sanitizedSpecifier, containingFile);
+    if (module) return module;
 
-    const customResolvedModule = ts.resolveModuleName(
-      sanitizedSpecifier,
-      containingFile,
-      compilerOptions,
-      customSys
-    ).resolvedModule;
-
-    if (!customResolvedModule || !isVirtualFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions)) {
-      const module = fileExists(sanitizedSpecifier, containingFile);
-      if (module) return module;
-      return customResolvedModule;
-    }
-
-    const resolvedFileName = ensureRealFilePath(customResolvedModule.resolvedFileName, virtualFileExtensions);
-
-    const resolvedModule: ts.ResolvedModuleFull = {
-      extension: ts.Extension.Js,
-      resolvedFileName,
-      isExternalLibraryImport: customResolvedModule.isExternalLibraryImport,
-    };
-
-    return resolvedModule;
+    return undefined;
   }
 
-  return resolveModuleNames;
+  return timerify(resolveModuleNames);
 }

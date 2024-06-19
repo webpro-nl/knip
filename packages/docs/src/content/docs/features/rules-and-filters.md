@@ -8,9 +8,11 @@ Use rules or filters to customize Knip's output. This has various use cases, a
 few examples:
 
 - Temporarily focus on a specific issue type.
-- You don't want to see `type`, `interface` and `enum` exports reported.
+- You don't want to see unused `type`, `interface` and `enum` exports reported.
 - Specific issue types should be printed, but not counted against the total
   error count.
+
+If you're looking to handle one-off exceptions, also see [JSDoc tags][1].
 
 ## Filters
 
@@ -33,7 +35,7 @@ interested in:
 knip --include files --exclude enumMembers,duplicates
 ```
 
-Also see the [list of issue types][1].
+Also see the [list of issue types][2].
 
 ### Shorthands
 
@@ -67,12 +69,12 @@ Example:
 }
 ```
 
-Also see the [issue types overview][1].
+Also see the [issue types overview][2].
 
 The rules are modeled after the ESLint `rules` configuration, and could be
 extended in the future.
 
-## Rules or Filters?
+## Rules or filters?
 
 Filters are meant to be used as command-line flags, rules allow for more
 fine-grained configuration.
@@ -83,4 +85,5 @@ fine-grained configuration.
   configuration).
 - Filters have shorthands (rules don't have this).
 
-[1]: ../reference/issue-types.md
+[1]: ../reference/jsdoc-tsdoc-tags.md
+[2]: ../reference/issue-types.md

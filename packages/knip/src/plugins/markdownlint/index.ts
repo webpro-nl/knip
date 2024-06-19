@@ -1,6 +1,6 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { getArgumentValues } from './helpers.js';
-import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { MarkdownlintConfig } from './types.js';
 
 // https://github.com/igorshubovych/markdownlint-cli

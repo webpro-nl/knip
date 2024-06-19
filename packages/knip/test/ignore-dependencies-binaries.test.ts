@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -25,7 +25,6 @@ test('Respect ignored binaries and dependencies, including regex, show config hi
   assert.deepEqual(
     configurationHints,
     new Set([
-      { type: 'ignoreBinaries', workspaceName: '.', identifier: /^ts.+/ },
       { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
       { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
       { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },

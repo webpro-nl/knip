@@ -4,6 +4,8 @@ const eleventyNavigationPlugin = require('@11ty/eleventy-navigation');
 const syntaxHighlight = require('@11ty/eleventy-plugin-syntaxhighlight');
 const path = require('path');
 const highlighter = require('./src/_plugins/syntax-highlighter');
+path;
+highlighter;
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addGlobalData('site_name', 'example');

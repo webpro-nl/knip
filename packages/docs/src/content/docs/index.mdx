@@ -16,7 +16,7 @@ hero:
       icon: right-arrow
       variant: primary
     - text: View on GitHub
-      link: https://github.com/webpro/knip
+      link: https://github.com/webpro-nl/knip
       icon: external
       variant: minimal
 ---
@@ -29,7 +29,7 @@ import Contributors from '../../components/Contributors.astro';
 
 :::div{.sponsor}
 
-Using Knip in a commercial project? Please consider [sponsoring me][1]!
+Using Knip in a commercial project?<br />Please consider [sponsoring me][1]!
 
 :::
 
@@ -59,91 +59,92 @@ Using Knip in a commercial project? Please consider [sponsoring me][1]!
   </Card>
 </CardGrid>
 
+## 🧡 Projects Using Knip
+
+:::section{.columns.min300}
+
+- [ArkType][6]
+- [Backstage][7]
+- [Cody (SourceGraph)][8]
+- [Create TypeScript App][9]
+- [DefinitelyTyped-tools (Microsoft)][10]
+- [ESLint][11]
+- [freeCodeCamp][12]
+- [Fuels][13]
+- [Grafana][14]
+- [InvokeAI][15]
+- [Monkeytype][16]
+- [Nuxt][17]
+- [Release It!][18]
+- [Svelte][19]
+- [TanStack Query][20]
+- [TanStack Table][21]
+- [typescript-eslint][22]
+- [TypeStat][23]
+
+:::
+
 ## 🧡 Introduction Video
 
-[James Shopland][6] created this great introduction and overview of Knip:
+[James Shopland][24] created this great introduction and overview of Knip:
 
 <YouTube id="uhEkgWt-pUM" />
 
 ## 🧡 Sponsors
 
-Big shoutout to the awesome companies and people sponsoring this project! See
-[Sponsors][7] for the full list.
+Eternal gratitude to the companies and people that are already sponsoring me:
 
 <Sponsors direction="row" showAll={false} />
 
+Please see [Sponsors][1] for the full list, and how you can become a sponsor of
+Knip.
+
 ## 🧡 Contributors
 
-Special thanks to the wonderful people who have contributed to this project!
+Special thanks to the wonderful people who have contributed to this project:
 
 <Contributors />
 
 ## 🧡 Articles
 
 - Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports,
-  And Dependencies][8]
+  And Dependencies][25]
 - Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code
-  and types][9]
-- Maddy Miller: [Using Knip to find dead code in a high-traffic git repo][10]
-- Josh Goldberg: [Speeding Up Centered Part 4: Unused Code Bloat][11]
+  and types][26]
+- Maddy Miller: [Using Knip to find dead code in a high-traffic git repo][27]
+- Josh Goldberg: [Speeding Up Centered Part 4: Unused Code Bloat][28]
 
 ## 🧡 Testimonials
 
 <Tweets />
 
-## 🧡 Selected Projects Using Knip
-
-:::section{.columns.min300}
-
-- [Argos][12]
-- [ESLint][13]
-- [freeCodeCamp][14]
-- [gajus/slonik][15]
-- [JoshuaKGoldberg/create-typescript-app][16]
-- [microsoft/DefinitelyTyped-tools][17]
-- [Monkeytype][18]
-- [Release It!][19]
-- [sourcegraph/cody][20]
-- [Svelte][21]
-- [TanStack/query][22]
-- [TanStack/table][23]
-- [Tipi][24]
-- [Wagmi][25]
-
-:::
-
-Use [GitHub Search for `package.json` files containing "knip"][26] for more
-projects and examples using Knip.
-
-Have or know about a nice resource about or project using Knip? Feel free to
-propose a change and add it to this page!
-
-[1]: https://github.com/sponsors/webpro
+[1]: ./sponsors
 [2]: ./overview/getting-started.mdx
 [3]: ./explanations/why-use-knip.md
 [4]: ./guides/troubleshooting.md
 [5]: ./reference/plugins.md
-[6]: https://www.jamesshopland.com
-[7]: ./sponsors
-[8]:
+[6]: https://github.com/arktypeio/arktype
+[7]: https://github.com/backstage/backstage
+[8]: https://github.com/sourcegraph/cody
+[9]: https://github.com/JoshuaKGoldberg/create-typescript-app
+[10]: https://github.com/microsoft/DefinitelyTyped-tools
+[11]: https://github.com/eslint/eslint
+[12]: https://github.com/freeCodeCamp/freeCodeCamp
+[13]: https://github.com/FuelLabs/fuels-ts
+[14]: https://github.com/grafana/grafana
+[15]: https://github.com/invoke-ai/InvokeAI
+[16]: https://github.com/monkeytypegame/monkeytype
+[17]: https://github.com/nuxt/nuxt
+[18]: https://github.com/release-it/release-it
+[19]: https://github.com/sveltejs/svelte
+[20]: https://github.com/TanStack/query
+[21]: https://github.com/TanStack/table
+[22]: https://github.com/typescript-eslint/typescript-eslint
+[23]: https://github.com/JoshuaKGoldberg/TypeStat
+[24]: https://www.jamesshopland.com
+[25]:
   https://www.smashingmagazine.com/2023/08/knip-automated-tool-find-unused-files-exports-dependencies/
-[9]: https://effectivetypescript.com/2023/07/29/knip/
-[10]: https://madelinemiller.dev/blog/knip-dead-code/
-[11]:
+[26]: https://effectivetypescript.com/2023/07/29/knip/
+[27]: https://madelinemiller.dev/blog/knip-dead-code/
+[28]:
   https://www.joshuakgoldberg.com/blog/speeding-up-centered-part-4-unused-code-bloat/
-[12]: https://github.com/argos-ci/argos
-[13]: https://github.com/eslint/eslint
-[14]: https://github.com/freeCodeCamp/freeCodeCamp
-[15]: https://github.com/gajus/slonik
-[16]: https://github.com/JoshuaKGoldberg/create-typescript-app
-[17]: https://github.com/microsoft/DefinitelyTyped-tools
-[18]: https://github.com/monkeytypegame/monkeytype
-[19]: https://github.com/release-it/release-it
-[20]: https://github.com/sourcegraph/cody
-[21]: https://github.com/sveltejs/svelte
-[22]: https://github.com/TanStack/query
-[23]: https://github.com/TanStack/table
-[24]: https://github.com/runtipi/runtipi
-[25]: https://github.com/wevm/wagmi
-[26]:
-  https://github.com/search?q=path%3A%2F%28%5E%7C%5C%2F%29package%5C.json%24%2F+knip&type=code

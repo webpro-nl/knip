@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 import bun from './bun.js';
 import execa from './execa.js';
 import zx from './zx.js';

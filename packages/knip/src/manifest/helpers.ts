@@ -1,6 +1,6 @@
+import type { Scripts } from '../types/package-json.js';
 import { join } from '../util/path.js';
 import { _require } from '../util/require.js';
-import type { Scripts } from '../types/package-json.js';
 
 type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 
@@ -9,11 +9,11 @@ export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManife
   // managers (npm, Yarn, pnpm)
   try {
     return _require(join(dir, 'node_modules', packageName, 'package.json'));
-  } catch (error) {
+  } catch (_error) {
     if (dir !== cwd) {
       try {
         return _require(join(cwd, 'node_modules', packageName, 'package.json'));
-      } catch (error) {
+      } catch (_error) {
         // Explicitly suppressing errors here
       }
     }
@@ -33,7 +33,7 @@ export const getFilteredScripts = ({ isProduction, scripts }: GetFilteredScripts
   const scriptFilter = new Set(['start', 'postinstall']);
   const filteredScripts: Scripts = {};
 
-  for (let scriptName in scripts) {
+  for (const scriptName in scripts) {
     if (scriptFilter.has(scriptName)) filteredScripts[scriptName] = scripts[scriptName];
   }
 

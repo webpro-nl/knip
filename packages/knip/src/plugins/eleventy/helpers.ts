@@ -4,7 +4,6 @@ import type { EleventyConfig } from './types.js';
 
 /** @public */
 export class DummyEleventyConfig {
-  constructor() {}
   _getUniqueId() {}
   reset() {}
   versionCheck() {}
@@ -39,7 +38,7 @@ export class DummyEleventyConfig {
     if (typeof input === 'string') {
       this.passthroughCopies[input] = {};
     } else {
-      for (let [inputPath] of Object.entries(input)) {
+      for (const [inputPath] of Object.entries(input)) {
         this.passthroughCopies[inputPath] = {};
       }
     }

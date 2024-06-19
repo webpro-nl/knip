@@ -6,7 +6,8 @@ export const fencedCodeBlockMatcher = /```[\s\S]*?```/g;
 
 export const importsWithinScripts: SyncCompilerFn = (text: string) => {
   const scripts = [];
-  let scriptMatch;
+  let scriptMatch: RegExpExecArray | null;
+  // biome-ignore lint/suspicious/noAssignInExpressions: ignore
   while ((scriptMatch = scriptExtractor.exec(text))) {
     for (const importMatch of scriptMatch[1].matchAll(importMatcher)) {
       scripts.push(importMatch);

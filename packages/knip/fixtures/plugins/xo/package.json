@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/xo",
+  "scripts": {
+    "test": "xo"
+  },
+  "devDependencies": {
+    "xo": "^0.24.0"
+  },
+  "xo": {
+    "space": true,
+    "plugins": ["eslint-comments"]
+  }
+}

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-// eslint-disable-next-line import/order, n/no-restricted-import
+// biome-ignore lint/nursery/noRestrictedImports: ignore
 import { resolve } from 'node:path';
 
 // We can't import sharp normally because it's a CJS thing and those don't seems to work well with Astro, Vite, everyone
@@ -14,7 +14,7 @@ export function breakText(str: string, maxLines: number, maxLineLen: number) {
   const segmenterTitle = new Intl.Segmenter('en-US', { granularity: 'word' });
   const segments = segmenterTitle.segment(str);
 
-  let linesOut = [''];
+  const linesOut = [''];
   let lineNo = 0;
   let offsetInLine = 0;
   for (const word of Array.from(segments)) {
@@ -42,10 +42,15 @@ const getPages = async () => {
     const imagePath = filePath.replace(/^\/src\/content\//, '').replace(/(\/index)?\.(md|mdx)$/, '.webp');
     pages[imagePath] = page;
   }
+
+  pages['docs/sponsors.webp'] = {
+    frontmatter: { title: 'Become a sponsor!', description: 'Become a sponsor of Knip' },
+  };
+
   return pages;
 };
 
-const S = ({ title }: { title: string; description: string[] }) => {
+const renderSVG = ({ title }: { title: string; description: string[] }) => {
   const titleText = breakText(title, 2, 45)
     .map((text, i, texts) => {
       const m = (texts.length === 1 ? 0 : -75) / 2;
@@ -58,13 +63,13 @@ const S = ({ title }: { title: string; description: string[] }) => {
   return template.replace('<!-- titleText -->', titleText);
 };
 
-export const GET = async function ({ params }: { params: { route: string } }) {
+export const GET = async ({ params }: { params: { route: string } }) => {
   const pages = await getPages();
   const pageEntry = pages[params.route];
   if (!pageEntry) return new Response('Page not found', { status: 404 });
 
   const svgBuffer = Buffer.from(
-    S({
+    renderSVG({
       // @ts-expect-error TODO type properly
       title: pageEntry.frontmatter.hero?.tagline ?? pageEntry.frontmatter.title,
       // @ts-expect-error TODO type properly
@@ -81,7 +86,7 @@ export const GET = async function ({ params }: { params: { route: string } }) {
   });
 };
 
-export const getStaticPaths = async function () {
+export const getStaticPaths = async () => {
   const pages = await getPages();
   return Object.keys(pages).map(route => ({ params: { route } }));
 };

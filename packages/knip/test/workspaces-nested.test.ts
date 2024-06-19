@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -8,7 +8,6 @@ import baseCounters from './helpers/baseCounters.js';
 const cwd = resolve('fixtures/workspaces-nested');
 
 const expectedConfigurationHintsProduction = new Set([
-  { type: 'ignoreDependencies', identifier: 'ignored-dep-global', workspaceName: '.' },
   { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
 ]);
 
@@ -16,6 +15,7 @@ const expectedConfigurationHints = new Set([
   ...expectedConfigurationHintsProduction,
   { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-global', workspaceName: '.' },
   { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-L-2', workspaceName: 'L-1-1/L-1-2' },
+  { type: 'ignoreDependencies', identifier: 'ignored-dep-global', workspaceName: '.' },
   { type: 'ignoreDependencies', identifier: 'unused-ignored-dep-global', workspaceName: '.' },
   { type: 'ignoreDependencies', identifier: 'unused-ignored-dep-L-3', workspaceName: 'L-1-1/L-1-2/L-1-3' },
 ]);

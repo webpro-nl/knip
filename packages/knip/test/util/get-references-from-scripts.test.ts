@@ -1,6 +1,5 @@
-import '../../src/util/register.js'; // to resolve .ts files
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
 import { join, resolve } from '../../src/util/path.js';
 
@@ -94,19 +93,20 @@ test('getReferencesFromScripts (cross-env)', () => {
   t('cross-env NODE_ENV=production program', ['bin:cross-env', 'bin:program']);
   t('cross-env NODE_ENV=production program subcommand', ['bin:cross-env', 'bin:program']);
   t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', ['bin:cross-env', 'bin:program']);
-  t('cross-env NODE_ENV=production node -r pkg/config ./script.js', ['bin:cross-env', 'pkg', js]);
+  t('cross-env NODE_OPTIONS="--loader pkg" knex', ['bin:cross-env', 'bin:knex', 'pkg']);
   t('NODE_ENV=production cross-env -- program --cache', ['bin:cross-env', 'bin:program']);
+});
+
+test('getReferencesFromScripts (cross-env/node)', () => {
+  t('cross-env NODE_ENV=production node -r pkg/config ./script.js', ['bin:cross-env', js, 'pkg']);
+  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['bin:cross-env', js, 'dotenv']);
+  t('cross-env NODE_ENV=production node -r esm script.js', ['bin:cross-env', js, 'esm']);
 });
 
 test('getReferencesFromScripts (nx)', () => {
   t('nx run myapp:build:production', ['bin:nx']);
   t('nx run-many -t build', ['bin:nx']);
   t('nx exec -- esbuild main.ts --outdir=build', ['bin:nx', 'bin:esbuild', ts]);
-});
-
-test('getReferencesFromScripts (cross-env/node)', () => {
-  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['bin:cross-env', 'dotenv', js]);
-  t('cross-env NODE_ENV=production node -r esm script.js', ['bin:cross-env', 'esm', js]);
 });
 
 test('getReferencesFromScripts (npm)', () => {

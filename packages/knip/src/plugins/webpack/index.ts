@@ -1,12 +1,12 @@
+import type { RuleSetRule, RuleSetUseItem } from 'webpack';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { compact } from '#p/util/array.js';
-import { isInternal, join, relative } from '#p/util/path.js';
+import { isAbsolute, isInternal, join, relative } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern, toProductionEntryPattern } from '#p/util/protocols.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import type { WebpackConfig, Env, Argv } from './types.js';
 import type { BabelConfigObj } from '../babel/types.js';
-import type { RuleSetRule, RuleSetUseItem } from 'webpack';
+import type { Argv, Env, WebpackConfig } from './types.js';
 
 // https://webpack.js.org/configuration/
 
@@ -30,7 +30,7 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
 
 const info = { compiler: '', issuer: '', realResource: '', resource: '', resourceQuery: '' };
 
-const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | '') => {
+const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | ''): string[] => {
   if (!rule || typeof rule === 'string') return [];
   if (typeof rule.use === 'string') return [rule.use];
   let useItem = rule.use ?? rule.loader ?? rule;
@@ -38,11 +38,12 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
   if (typeof useItem === 'string' && hasBabelOptions(rule)) {
     return [useItem, ...getDependenciesFromConfig((rule as { options: BabelConfigObj }).options)];
   }
-  return [useItem].flat().flatMap((item: RuleSetUseItem | undefined | null | false | 0) => {
+  return [useItem].flat().flatMap((item: RuleSetRule | RuleSetUseItem | undefined | null | false | 0) => {
     if (!item) return [];
     if (hasBabelOptions(item)) {
       return [...resolveUseItem(item), ...getDependenciesFromConfig((item as { options: BabelConfigObj }).options)];
     }
+    if (typeof item !== 'string' && 'oneOf' in item) return item.oneOf?.flatMap(resolveRuleSetDependencies) ?? [];
     return resolveUseItem(item);
   });
 };
@@ -77,23 +78,24 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
       if (typeof options.entry === 'string') entries.push(options.entry);
       else if (Array.isArray(options.entry)) entries.push(...options.entry);
       else if (typeof options.entry === 'object') {
-        Object.values(options.entry).forEach(entry => {
+        for (const entry of Object.values(options.entry)) {
           if (typeof entry === 'string') entries.push(entry);
           else if (Array.isArray(entry)) entries.push(...entry);
           else if (typeof entry === 'function') entries.push((entry as () => string)());
           else if (entry && typeof entry === 'object' && 'filename' in entry) entries.push(entry['filename'] as string);
-        });
+        }
       }
 
-      entries.forEach(entry => {
+      for (const entry of entries) {
         if (!isInternal(entry)) {
           dependencies.add(entry);
         } else {
-          const item = relative(cwd, join(options.context ? options.context : cwd, entry));
+          const absoluteEntry = isAbsolute(entry) ? entry : join(options.context ? options.context : cwd, entry);
+          const item = relative(cwd, absoluteEntry);
           const value = options.mode === 'development' ? toEntryPattern(item) : toProductionEntryPattern(item);
           entryPatterns.add(value);
         }
-      });
+      }
     }
   }
 

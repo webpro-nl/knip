@@ -1,5 +1,13 @@
 import ts from 'typescript';
-import { isImportCall, findDescendants, findAncestor, isAccessExpression, stripQuotes } from '../../ast-helpers.js';
+import { ANONYMOUS } from '../../../constants.js';
+import {
+  findAncestor,
+  findDescendants,
+  isAccessExpression,
+  isImportCall,
+  isTopLevel,
+  stripQuotes,
+} from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -41,6 +49,19 @@ export default visit(
                 return { identifier: 'default', specifier, pos };
               }
 
+              const variableDeclaration = findAncestor<ts.AccessExpression>(accessExpression, _node => {
+                if (ts.isCallExpression(_node) || ts.isSourceFile(_node)) return 'STOP';
+                return ts.isVariableDeclaration(_node);
+              });
+
+              if (variableDeclaration) {
+                const isTLA = isTopLevel(variableDeclaration.parent);
+                // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'ElementAccessExpression'.
+                const alias = String(variableDeclaration.name.escapedText);
+                // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'PropertyAccessExpression'.
+                return { identifier, alias, symbol: isTLA ? variableDeclaration.symbol : undefined, specifier, pos };
+              }
+
               // Pattern: import('side-effects')
               return { identifier, specifier, pos };
             }
@@ -61,49 +82,68 @@ export default visit(
               ts.isVariableDeclaration(variableDeclaration) &&
               ts.isVariableDeclarationList(variableDeclaration.parent)
             ) {
+              const isTLA = isTopLevel(variableDeclaration.parent);
               if (ts.isIdentifier(variableDeclaration.name)) {
                 // Pattern: const identifier = await import('specifier');
-                return { identifier: 'default', specifier, pos: node.arguments[0].pos };
-              } else {
-                const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
-                if (bindings.length > 0) {
-                  // Pattern: const { identifier } = await import('specifier');
-                  return bindings.map(element => {
-                    const identifier = (element.propertyName ?? element.name).getText();
-                    return { identifier, specifier, pos: element.pos };
-                  });
-                } else {
-                  // Pattern: import('specifier')
-                  return { identifier: 'default', specifier, pos: node.arguments[0].pos };
-                }
+                return {
+                  identifier: 'default',
+                  alias: String(variableDeclaration.name.escapedText),
+                  // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'VariableDeclaration'.
+                  symbol: isTLA ? variableDeclaration.symbol : undefined,
+                  specifier,
+                  pos: node.arguments[0].pos,
+                };
               }
-            } else {
-              const arrayLiteralExpression = node.parent;
-              const variableDeclaration = node.parent.parent?.parent?.parent;
-              if (
-                ts.isArrayLiteralExpression(arrayLiteralExpression) &&
-                variableDeclaration &&
-                ts.isVariableDeclarationList(variableDeclaration.parent) &&
-                ts.isVariableDeclaration(variableDeclaration) &&
-                ts.isArrayBindingPattern(variableDeclaration.name)
-              ) {
-                const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
-                const element = variableDeclaration.name.elements[index];
-                if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
-                  // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
-                  return element.name.elements.map(element => {
-                    const identifier = (element.propertyName ?? element.name).getText();
-                    return { identifier, specifier, pos: element.pos };
-                  });
-                }
-
-                // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
-                return { identifier: 'default', specifier, pos: element.pos };
+              const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
+              if (bindings.length > 0) {
+                // Pattern: const { identifier } = await import('specifier');
+                return bindings.map(element => {
+                  const identifier = (element.propertyName ?? element.name).getText();
+                  const alias = element.propertyName ? element.name.getText() : undefined;
+                  // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
+                  return { identifier, alias, symbol: isTLA ? element.symbol : undefined, specifier, pos: element.pos };
+                });
               }
-
-              // Pattern: import('side-effects')
-              return { identifier: 'default', specifier, pos: node.arguments[0].pos };
+              // Pattern: import('specifier')
+              return { identifier: ANONYMOUS, specifier, pos: node.arguments[0].pos };
             }
+            const arrayLiteralExpression = node.parent;
+            const variableDeclarationParent = node.parent.parent?.parent?.parent;
+            if (
+              ts.isArrayLiteralExpression(arrayLiteralExpression) &&
+              variableDeclarationParent &&
+              ts.isVariableDeclarationList(variableDeclarationParent.parent) &&
+              ts.isVariableDeclaration(variableDeclarationParent) &&
+              ts.isArrayBindingPattern(variableDeclarationParent.name)
+            ) {
+              const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
+              const element = variableDeclarationParent.name.elements[index];
+              const isTLA = isTopLevel(variableDeclarationParent.parent);
+              if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
+                // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
+                return element.name.elements.map(element => {
+                  const identifier = (element.propertyName ?? element.name).getText();
+                  const alias = element.propertyName ? element.name.getText() : undefined;
+                  // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
+                  return { identifier, alias, symbol: isTLA ? element.symbol : undefined, specifier, pos: element.pos };
+                });
+              }
+
+              // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
+              // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'OmittedExpression'.
+              const alias = element.name.escapedText;
+              return {
+                identifier: 'default',
+                // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
+                symbol: isTLA ? element.symbol : undefined,
+                alias,
+                specifier,
+                pos: element.pos,
+              };
+            }
+
+            // Pattern: import('side-effects')
+            return { identifier: 'default', specifier, pos: node.arguments[0].pos };
           }
         }
 

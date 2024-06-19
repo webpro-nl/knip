@@ -7,53 +7,44 @@
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
-    "url": "github:webpro/knip",
+    "url": "github:webpro-nl/knip",
     "directory": "packages/docs"
   },
   "engines": {
     "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
   },
   "scripts": {
-    "prebuild": "tsx scripts/generate-plugin-docs.ts",
+    "prebuild": "npx -y tsx@4.7.1 ./scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
+    "postbuild": "biome format --write --no-errors-on-unmatched src/content/docs/reference/plugins.md src/content/docs/reference/plugins/*.md",
     "dev": "astro dev",
-    "lint": "eslint scripts src",
-    "format": "prettier scripts src --write",
     "preremark": ". remark/preremark.sh",
     "remark": "remark README.md 'src/content/docs/**/*.{md,mdx}' --verbose -o",
-    "postremark": ". remark/postremark.sh",
-    "qa": "npm run build && npm run lint && npm run remark"
+    "postremark": ". remark/postremark.sh"
   },
   "dependencies": {
-    "@astro-community/astro-embed-youtube": "0.5.1",
-    "@astrojs/starlight": "0.21.3",
-    "sharp": "0.33.3"
+    "@astro-community/astro-embed-youtube": "0.5.2",
+    "@astrojs/starlight": "0.24.2",
+    "sharp": "0.33.4"
   },
   "devDependencies": {
-    "@astrojs/check": "0.5.10",
-    "@knip/eslint-config": "0.0.0",
-    "@types/mdast": "4.0.3",
+    "@astrojs/check": "0.7.0",
+    "@types/mdast": "4.0.4",
     "@types/unist": "3.0.2",
-    "astro": "4.5.15",
-    "eslint": "8.57.0",
+    "astro": "4.10.2",
     "hastscript": "9.0.0",
-    "kleur": "4.1.5",
-    "prettier": "3.2.5",
-    "prettier-plugin-astro": "0.13.0",
-    "remark-cli": "12.0.0",
+    "picocolors": "^1.0.1",
+    "remark-cli": "12.0.1",
     "remark-directive": "3.0.0",
     "remark-frontmatter": "5.0.0",
     "remark-parse": "11.0.0",
     "remark-preset-webpro": "1.1.0",
     "remark-stringify": "11.0.0",
-    "tsx": "^4.7.1",
     "unified": "11.0.4",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.0.0"
   },
   "remarkConfig": {
-    "plugins": [
-      "preset-webpro"
-    ]
+    "plugins": ["preset-webpro"]
   }
 }

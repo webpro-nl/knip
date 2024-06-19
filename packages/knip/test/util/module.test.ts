@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { getDefinitelyTypedFor, getPackageFromDefinitelyTyped } from '../../src/util/modules.js';
 
 test('Should return definitely typed package for package name', () => {

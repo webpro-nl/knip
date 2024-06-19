@@ -1,13 +1,12 @@
 import { EOL } from 'node:os';
-// eslint-disable-next-line n/no-restricted-import
+// biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 import ts from 'typescript';
 import { getCompilerExtensions } from '../compilers/index.js';
-import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
-import { createCustomModuleResolver } from './resolveModuleNames.js';
+import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
+import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { SourceFileManager } from './SourceFileManager.js';
-import { createCustomSys } from './sys.js';
-import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
+import { createCustomModuleResolver } from './resolveModuleNames.js';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 
@@ -17,23 +16,37 @@ type CreateHostsOptions = {
   entryPaths: Set<string>;
   compilers: [SyncCompilers, AsyncCompilers];
   isSkipLibs: boolean;
+  toSourceFilePath: ToSourceFilePath;
+  useResolverCache: boolean;
 };
 
-export const createHosts = ({ cwd, compilerOptions, entryPaths, compilers, isSkipLibs }: CreateHostsOptions) => {
+export const createHosts = ({
+  cwd,
+  compilerOptions,
+  entryPaths,
+  compilers,
+  isSkipLibs,
+  toSourceFilePath,
+  useResolverCache,
+}: CreateHostsOptions) => {
   const fileManager = new SourceFileManager({ compilers, isSkipLibs });
   const compilerExtensions = getCompilerExtensions(compilers);
-  const sys = createCustomSys(cwd, [...compilerExtensions, ...FOREIGN_FILE_EXTENSIONS]);
-  const resolveModuleNames = createCustomModuleResolver(sys, compilerOptions, compilerExtensions);
+  const resolveModuleNames = createCustomModuleResolver(
+    compilerOptions,
+    compilerExtensions,
+    toSourceFilePath,
+    useResolverCache
+  );
 
   const languageServiceHost: ts.LanguageServiceHost = {
     getCompilationSettings: () => compilerOptions,
     getScriptFileNames: () => Array.from(entryPaths),
     getScriptVersion: () => '0',
     getScriptSnapshot: (fileName: string) => fileManager.getSnapshot(fileName),
-    getCurrentDirectory: sys.getCurrentDirectory,
+    getCurrentDirectory: () => cwd,
     getDefaultLibFileName: ts.getDefaultLibFilePath,
-    readFile: sys.readFile,
-    fileExists: sys.fileExists,
+    readFile: ts.sys.readFile,
+    fileExists: ts.sys.fileExists,
     resolveModuleNames,
   };
 

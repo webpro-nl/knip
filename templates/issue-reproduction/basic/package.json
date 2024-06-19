@@ -1,13 +1,15 @@
 {
-  "name": "knip-repro-basic",
+  "name": "@knip/templates-basic",
   "version": "1.0.0",
-  "description": "Knip case reproduction template",
+  "description": "Knip case reproduction template - basic",
+  "private": true,
   "scripts": {
     "knip": "knip"
   },
-  "bugs": "https://github.com/webpro/knip/issues",
+  "bugs": "https://github.com/webpro-nl/knip/issues",
   "homepage": "https://knip.dev",
   "devDependencies": {
+    "@types/node": "^20.12.7",
     "knip": "^5.4.0",
     "typescript": "^5.4.3"
   }

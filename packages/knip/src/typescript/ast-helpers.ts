@@ -56,7 +56,7 @@ export function stripQuotes(name: string) {
   return name;
 }
 
-const enum CharacterCodes {
+enum CharacterCodes {
   backtick = 0x60,
   doubleQuote = 0x22,
   singleQuote = 0x27,
@@ -79,7 +79,8 @@ export function findAncestor<T>(
     const result = callback(node);
     if (result === 'STOP') {
       return undefined;
-    } else if (result) {
+    }
+    if (result) {
       return node as T;
     }
     node = node.parent;
@@ -96,7 +97,8 @@ export function findDescendants<T>(node: ts.Node | undefined, callback: (element
     const result = callback(node);
     if (result === 'STOP') {
       return;
-    } else if (result) {
+    }
+    if (result) {
       results.push(node as T);
     }
     ts.forEachChild(node, visit);
@@ -111,7 +113,7 @@ export const isDeclarationFileExtension = (extension: string) =>
   extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
 
 export const getJSDocTags = (node: ts.Node) => {
-  const tags = new Array<string>();
+  const tags = new Set<string>();
   let tagNodes = ts.getJSDocTags(node);
   if (ts.isExportSpecifier(node) || ts.isBindingElement(node)) {
     tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent.parent)];
@@ -122,7 +124,7 @@ export const getJSDocTags = (node: ts.Node) => {
   }
   for (const tagNode of tagNodes) {
     const match = tagNode.getText()?.match(/@\S+/);
-    if (match) tags.push(match[0]);
+    if (match) tags.add(match[0]);
   }
   return tags;
 };
@@ -132,7 +134,7 @@ export const getLineAndCharacterOfPosition = (node: ts.Node, pos: number) => {
   return { line: line + 1, col: character + 1, pos };
 };
 
-export const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => {
+const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => {
   if (ts.isElementAccessExpression(node)) {
     if (ts.isStringLiteral(node.argumentExpression)) return [node.argumentExpression.text];
     const type = typeChecker.getTypeAtLocation(node.argumentExpression);
@@ -143,3 +145,48 @@ export const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.No
     return [node.name.escapedText as string];
   }
 };
+
+export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Identifier) => {
+  let members: string[] = [];
+  let current: ts.Node = node.parent;
+  while (current) {
+    const ms = getMemberStringLiterals(typeChecker, current);
+    if (!ms) break;
+    const joinIds = (id: string) => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`));
+    members = members.concat(ms.flatMap(joinIds));
+    current = current.parent;
+  }
+  return members;
+};
+
+export const isDestructuring = (node: ts.Node) =>
+  node.parent &&
+  ts.isVariableDeclaration(node.parent) &&
+  ts.isVariableDeclarationList(node.parent.parent) &&
+  ts.isObjectBindingPattern(node.parent.name);
+
+export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
+  name.elements.map(element => element.name.getText());
+
+export const isConsiderReferencedNS = (node: ts.Identifier) =>
+  ts.isShorthandPropertyAssignment(node.parent) ||
+  (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
+  ts.isSpreadAssignment(node.parent) ||
+  ts.isExportAssignment(node.parent) ||
+  (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
+  ts.isTypeQueryNode(node.parent);
+
+export const isTopLevel = (node: ts.Node) =>
+  ts.isSourceFile(node.parent) || (node.parent && ts.isSourceFile(node.parent.parent));
+
+export const getTypeName = (node: ts.Identifier) => {
+  if (!node.parent?.parent) return;
+  const typeRef = findAncestor<ts.TypeReferenceNode>(node, _node => ts.isTypeReferenceNode(_node));
+  if (typeRef && ts.isQualifiedName(typeRef.typeName)) return typeRef.typeName;
+};
+
+export const isImportSpecifier = (node: ts.Node) =>
+  ts.isImportSpecifier(node.parent) ||
+  ts.isImportEqualsDeclaration(node.parent) ||
+  ts.isImportClause(node.parent) ||
+  ts.isNamespaceImport(node.parent);

@@ -66,6 +66,21 @@ module.exports = () => {
             ],
           },
         }),
+        {
+          test: /\.css$/,
+          oneOf: [
+            {
+              resourceQuery: /inline/,
+              loader: 'url-loader'
+            }, 
+            {
+              resourceQuery: /external/,
+              use: [{
+                loader: 'file-loader',
+              }]
+            },
+          ],
+        },
       ],
     },
     plugins: [

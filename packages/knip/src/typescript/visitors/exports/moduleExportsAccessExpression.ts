@@ -1,9 +1,9 @@
 import ts from 'typescript';
+import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import { stripQuotes } from '../../ast-helpers.js';
 import { isJS } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
-import type { Fix } from '../../../types/exports.js';
 
 const isModuleExportsAccess = (node: ts.PropertyAccessExpression) =>
   ts.isIdentifier(node.expression) && node.expression.escapedText === 'module' && node.name.escapedText === 'exports';
@@ -27,7 +27,8 @@ export default visit(isJS, (node, { isFixExports }) => {
             pos,
             fix,
           };
-        } else if (isModuleExportsAccess(node.expression.left)) {
+        }
+        if (isModuleExportsAccess(node.expression.left)) {
           const expr = node.expression.right;
           if (ts.isObjectLiteralExpression(expr) && expr.properties.every(ts.isShorthandPropertyAssignment)) {
             // Pattern: module.exports = { identifier, identifier2 }
@@ -35,10 +36,9 @@ export default visit(isJS, (node, { isFixExports }) => {
               const fix: Fix = isFixExports ? [node.getStart(), node.getEnd()] : undefined;
               return { node, identifier: node.getText(), type: SymbolType.UNKNOWN, pos: node.getStart(), fix };
             });
-          } else {
-            // Pattern: module.exports = any
-            return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos: expr.pos + 1, fix: undefined };
           }
+          // Pattern: module.exports = any
+          return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos: expr.pos + 1, fix: undefined };
         }
       } else if (
         ts.isElementAccessExpression(node.expression.left) &&

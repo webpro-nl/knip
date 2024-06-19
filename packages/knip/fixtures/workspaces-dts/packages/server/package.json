@@ -1,0 +1,10 @@
+{
+  "name": "@workspaces-dts/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "typings": "server.d.ts",
+  "dependencies": {
+    "@workspaces-dts/shared": "*"
+  }
+}

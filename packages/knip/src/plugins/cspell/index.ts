@@ -1,5 +1,5 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
-import type { Plugin, ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 import type { CSpellConfig } from './types.js';
 
 // https://cspell.org/configuration/

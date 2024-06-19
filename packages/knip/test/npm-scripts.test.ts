@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { getDependencyMetaData } from '../src/manifest/index.js';
 import { join, resolve } from '../src/util/path.js';
@@ -70,7 +70,7 @@ test('Unused dependencies in npm scripts', async () => {
     dependencies: 1,
     devDependencies: 1,
     binaries: 2,
-    processed: 1,
+    processed: 2,
     total: 2,
   });
 
@@ -103,11 +103,5 @@ test('Unused dependencies in npm scripts (strict)', async () => {
     total: 2,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
-    ])
-  );
+  assert.deepEqual(configurationHints, new Set());
 });

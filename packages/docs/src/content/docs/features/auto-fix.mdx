@@ -8,81 +8,60 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-**WARNING**: This is an experimental feature. Make sure to run in a VCS/Git
-repository so you can review and undo changes if necessary.
+Run Knip as you normally would, and if the report looks good then run it again
+with the `--fix` flag to let Knip automatically apply fixes.
 
-Run Knip as you normally would, and then run it again with the `--fix` flag to
-let Knip automatically apply fixes. Currently includes:
+Knip currently can fix these [issue types][1]:
 
-- Remove `export` keyword for unused exports
-- Remove `export` keyword for unused types
+- Remove `export` keyword for unused exports and exported types
 - Remove unused `dependencies` and `devDependencies` from `package.json`
+- Remove unused files
 - Works across workspaces in a monorepo
+
+## Flags
+
+Add the `--fix` flag to remove unused exports and dependencies:
 
 ```sh
 knip --fix
 ```
 
-Use `--fix-type` to fix only specific issue types (`exports`, `types` and/or
-`dependencies`). Example:
+Add `--allow-remove-files` to allow Knip to remove unused files:
+
+```sh
+knip --fix --allow-remove-files
+```
+
+Use `--fix-type` to fix only specific issue types:
+
+- `files`
+- `exports`
+- `types`
+- `dependencies`
+
+Example:
 
 ```sh
 knip --fix-type exports,types
+knip --fix-type exports --fix-type types   # same as above
 ```
 
-## Example Result
-
-The `export` keyword for unused exports is removed:
-
-```diff title="file.js"
--export const unused = 1;
--export default class MyClass {}
-+const unused = 1
-+class MyClass {}
-```
-
-Also note that the `default` keyword was removed here.
-
-Knip cleans up the whole or part of re-exports:
-
-```diff title="file.js"
--export { Cat, Dog } from './pets';
--export { Lion, Elephant } from './jungle';
-+export { Elephant } from './jungle'
-```
-
-Sometimes lines can be removed completely:
-
-```diff title="file.js"
--module.exports.UNUSED = 1;
--module.exports['ACCESS'] = 1;
-+
-+
-```
-
-Unused dependencies are removed from `package.json`:
-
-```diff title="package.json"
- {
-   "name": "my-package",
-   "dependencies": {
--    "rimraf": "*",
--    "unused-dependency": "*"
-+    "rimraf": "*"
-   },
--  "devDependencies": {
--    "unreferenced-package": "5.3.3"
--  }
-+  "devDependencies": {}
- }
-```
+Use VCS/Git to review and undo changes if necessary.
 
 ## Post-fix
 
-- You may want to run tools like `eslint --fix` or `prettier --write` to fix the
-  remaining issues.
-- Verify changes in `package.json` and update dependencies using your package
-  manager:
+After Knip has fixed issues, there are two things to consider:
+
+### Unused variables
+
+Use tools like ESLint or Biome to find and remove unused variables inside files.
+This may result in more deleted code, and Knip may then find more unused code.
+Rinse and repeat!
+
+### Unused dependencies
+
+Verify changes in `package.json` and update dependencies using your package
+manager:
 
 <Tabs>
   <TabItem label="npm">
@@ -118,12 +97,58 @@ Unused dependencies are removed from `package.json`:
   </TabItem>
 </Tabs>
 
-## Notes
+## Example results
 
-Nothing is set in stone, but some ideas include:
+The `export` keyword for unused exports is removed:
+
+```diff title="file.js"
+-export const unused = 1;
+-export default class MyClass {}
++const unused = 1
++class MyClass {}
+```
+
+The `default` keyword was also removed here.
+
+Knip cleans up the whole or part of re-exports:
+
+```diff title="file.js"
+-export { Cat, Dog } from './pets';
+-export { Lion, Elephant } from './jungle';
++export { Elephant } from './jungle'
+```
+
+Sometimes lines can be removed completely:
+
+```diff title="file.js"
+-module.exports.UNUSED = 1;
+-module.exports['ACCESS'] = 1;
++
++
+```
+
+Unused dependencies are removed from `package.json`:
+
+```diff title="package.json"
+ {
+   "name": "my-package",
+   "dependencies": {
+-    "rimraf": "*",
+-    "unused-dependency": "*"
++    "rimraf": "*"
+   },
+-  "devDependencies": {
+-    "unreferenced-package": "5.3.3"
+-  }
++  "devDependencies": {}
+ }
+```
+
+## What's not included
+
+Operations that auto-fix does not yet perform include:
 
 - Add unlisted (dev) dependencies to `package.json`
-- Remove unused files
 - Remove unused class and enum members
 - Remove empty export declarations for less common cases, e.g.:
 
@@ -132,3 +157,5 @@ export const { ,  } = { a, b };
 
 export const [, ] = [c, d];
 ```
+
+[1]: ../reference/issue-types.md

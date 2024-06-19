@@ -1,12 +1,9 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
-import type { Plugin, ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
+import type { CommitLintConfig } from './types.js';
 
 // https://commitlint.js.org
 // https://github.com/conventional-changelog/commitlint#config
-
-type CommitLintConfig = {
-  extends: string[];
-};
 
 const title = 'commitlint';
 
@@ -21,8 +18,23 @@ const config = [
   'package.json',
 ];
 
-const resolveConfig: ResolveConfig<CommitLintConfig> = config => {
-  return config.extends ? [config.extends].flat() : [];
+const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
+  const extendsConfigs = config.extends
+    ? [config.extends]
+        .flat()
+        .map(id => (id.startsWith('@') || id.startsWith('commitlint-config-') ? id : `commitlint-config-${id}`))
+    : [];
+  const plugins = config.plugins ? [config.plugins].flat().filter(s => typeof s === 'string') : [];
+  const formatter = config.formatter ? [config.formatter] : [];
+  const parserPreset = await config.parserPreset;
+  const parserPresetPaths: string[] = parserPreset
+    ? typeof parserPreset === 'string'
+      ? [parserPreset]
+      : parserPreset.path
+        ? [parserPreset.path ?? parserPreset]
+        : []
+    : [];
+  return [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths];
 };
 
 export default {

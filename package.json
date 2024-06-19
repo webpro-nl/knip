@@ -6,29 +6,25 @@
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/webpro/knip"
+    "url": "https://github.com/webpro-nl/knip"
   },
-  "bugs": "https://github.com/webpro/knip/issues",
+  "bugs": "https://github.com/webpro-nl/knip/issues",
   "license": "ISC",
   "type": "module",
   "author": {
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "scripts": {
-    "knip": "knip",
-    "watch": "npm run watch --workspace packages/knip",
-    "docs": "npm run dev --workspace packages/docs",
-    "format": "npm run format --workspaces --if-present",
-    "test": "npm run qa --workspaces --if-present && installed-check --no-include-workspace-root --ignore-dev"
-  },
-  "peerDependencies": {
-    "knip": "file:packages/knip"
+    "watch": "bun run --cwd packages/knip watch",
+    "docs": "bun run --cwd packages/docs dev",
+    "format": "biome format .",
+    "lint": "biome lint .",
+    "ci": "biome ci . && installed-check --no-include-workspace-root --ignore-dev"
   },
   "devDependencies": {
-    "installed-check": "^9.1.0"
+    "@biomejs/biome": "1.7.3",
+    "installed-check": "^9.3.0"
   }
 }

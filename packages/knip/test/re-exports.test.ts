@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -27,7 +27,7 @@ test('Ignore re-exports from entry files (include entry + ignore @public)', asyn
     isIncludeEntryExports: true,
   });
 
-  assert(issues.exports['1-entry.ts']['somethingNotToIgnore']);
+  assert(issues.exports['4-my-module.ts']['somethingNotToIgnore']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

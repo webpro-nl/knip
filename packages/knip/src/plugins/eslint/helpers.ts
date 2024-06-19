@@ -1,11 +1,11 @@
 import { compact } from '#p/util/array.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '#p/util/modules.js';
-import { isInternal, toAbsolute, isAbsolute } from '#p/util/path.js';
+import { basename, dirname, isAbsolute, isInternal, toAbsolute } from '#p/util/path.js';
 import { load } from '#p/util/plugin.js';
 import { _resolve } from '#p/util/require.js';
+import type { PluginOptions } from '../../types/plugins.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
-import type { PluginOptions } from '../../types/plugins.js';
 
 const getDependencies = (config: ESLintConfig | OverrideConfig) => {
   const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendSpecifier) : [];
@@ -32,17 +32,19 @@ type GetDependenciesDeep = (
 
 export const getDependenciesDeep: GetDependenciesDeep = async (localConfig, options, dependencies = new Set()) => {
   const { configFileDir } = options;
-  const addAll = (deps: string[] | Set<string>) => deps.forEach(dependency => dependencies.add(dependency));
+  const addAll = (deps: string[] | Set<string>) => {
+    for (const dependency of deps) dependencies.add(dependency);
+  };
 
   if (localConfig) {
     if (localConfig.extends) {
       for (const extend of [localConfig.extends].flat()) {
         if (isInternal(extend)) {
-          const filePath = toAbsolute(extend, configFileDir);
-          const extendConfigFilePath = _resolve(filePath);
-          dependencies.add(extendConfigFilePath);
-          const localConfig: ESLintConfig = await load(extendConfigFilePath);
-          addAll(await getDependenciesDeep(localConfig, options, dependencies));
+          const filePath = _resolve(toAbsolute(extend, configFileDir));
+          dependencies.add(filePath);
+          const localConfig: ESLintConfig = await load(filePath);
+          const opts = { ...options, configFileDir: dirname(filePath), configFileName: basename(filePath) };
+          addAll(await getDependenciesDeep(localConfig, opts, dependencies));
         }
       }
     }

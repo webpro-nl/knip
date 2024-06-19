@@ -1,6 +1,6 @@
 import '@mdx-js/mdx';
 
-module.exports = {
+export default {
   compilers: {
     md: (text, path) => {
       if (!path) throw new Error('Path not passed to compiler');

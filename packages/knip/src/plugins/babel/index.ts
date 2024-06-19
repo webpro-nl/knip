@@ -1,7 +1,7 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { compact } from '#p/util/array.js';
 import { hasDependency } from '#p/util/plugin.js';
-import { resolveName, api } from './helpers.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
+import { api, resolveName } from './helpers.js';
 import type { BabelConfig, BabelConfigObj } from './types.js';
 
 // https://babeljs.io/docs/configuration
@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['babel.config.{json,js,cjs,mjs,cts}', '.babelrc.{json,js,cjs,mjs,cts}', '.babelrc', 'package.json'];
 
 const getName = (value: string | [string, unknown]) =>
-  typeof value === 'string' ? [value] : Array.isArray(value) ? [value[0]] : [];
+  [Array.isArray(value) ? value[0] : value].filter(name => typeof name === 'string');
 
 export const getDependenciesFromConfig = (config: BabelConfigObj): string[] => {
   const presets = config.presets?.flatMap(getName).map(name => resolveName(name, 'preset')) ?? [];

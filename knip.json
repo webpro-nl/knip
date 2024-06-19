@@ -1,0 +1,25 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "include": ["classMembers"],
+  "ignore": ["templates/**"],
+  "workspaces": {
+    ".": {
+      "ignoreBinaries": ["knip"]
+    },
+    "packages/knip": {
+      "project": ["src/**/*.ts!"],
+      "ignore": ["**/fixtures/**", "**/_template/**", "**/dist/**"],
+      "node-test-runner": {
+        "entry": ["test/**/*.test.ts"],
+        "project": ["test/**/*.ts"]
+      }
+    },
+    "packages/docs": {
+      "entry": [
+        "{remark,scripts}/*.ts",
+        "src/components/{Head,Header,Footer}.astro!"
+      ],
+      "ignore": "config.ts"
+    }
+  }
+}

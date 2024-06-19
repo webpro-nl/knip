@@ -1,57 +1,156 @@
-import { exportLookupLog } from './debug.js';
-import type { SerializableImportMap, SerializableImports } from '../types/imports.js';
+import { IMPORT_STAR } from '../constants.js';
+import type { DependencyGraph } from '../types/dependency-graph.js';
+import { type TraceNode, addNodes, createNode, isTrace } from './trace.js';
 
-export const getIsIdentifierReferencedHandler = (importedSymbols: SerializableImportMap) => {
+type Result = {
+  isReferenced: boolean;
+  reExportingEntryFile: undefined | string;
+  traceNode: TraceNode;
+};
+
+export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPaths: Set<string>) => {
   const isIdentifierReferenced = (
     filePath: string,
     id: string,
-    importsForExport?: SerializableImports,
-    depth: number = 0
-  ): boolean => {
-    if (depth === 0) exportLookupLog(-1, `Looking up export "${id}" from`, filePath);
+    isIncludeEntryExports = false,
+    traceNode = createNode(filePath),
+    seen = new Set<string>()
+  ): Result => {
+    let isReferenced = false;
+    let reExportingEntryFile = entryPaths.has(filePath) ? filePath : undefined;
 
-    if (!importsForExport) {
-      exportLookupLog(depth, `no imports found from`, filePath);
-      return false;
+    if (reExportingEntryFile) traceNode.isEntry = true;
+
+    if (!isIncludeEntryExports && reExportingEntryFile) return { isReferenced, reExportingEntryFile, traceNode };
+
+    seen.add(filePath);
+
+    const ids = id.split('.');
+    const [identifier, ...rest] = ids;
+
+    const file = graph.get(filePath)?.imported;
+
+    if (!file) return { isReferenced, reExportingEntryFile, traceNode };
+
+    if (
+      ((identifier !== id && file.refs.has(id)) || identifier === id) &&
+      (file.imported.has(identifier) || file.importedAs.has(identifier))
+    ) {
+      isReferenced = true;
+      if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+      addNodes(traceNode, id, graph, file.imported.get(identifier));
     }
 
-    if (importsForExport.identifiers.has(id)) {
-      exportLookupLog(depth, `imported from`, filePath);
-      return true;
-    }
-
-    for (const ns of importsForExport.importedNs) {
-      if (importsForExport.identifiers.has(`${ns}.${id}`)) {
-        exportLookupLog(depth, `imported on ${ns} from`, filePath);
-        return true;
-      }
-    }
-
-    if (importsForExport.isReExport) {
-      for (const filePath of importsForExport.isReExportedBy) {
-        if (isIdentifierReferenced(filePath, id, importedSymbols[filePath], depth + 1)) {
-          exportLookupLog(depth, `re-exported by`, filePath);
-          return true;
-        }
-      }
-
-      for (const [filePath, alias] of importsForExport.isReExportedAs) {
-        if (isIdentifierReferenced(filePath, alias, importedSymbols[filePath], depth + 1)) {
-          exportLookupLog(depth, `re-exported as ${alias} by`, filePath);
-          return true;
-        }
-      }
-
-      for (const [filePath, ns] of importsForExport.isReExportedNs) {
-        if (isIdentifierReferenced(filePath, `${ns}.${id}`, importedSymbols[filePath], depth + 1)) {
-          exportLookupLog(depth, `re-exported on ${ns} by`, filePath);
-          return true;
+    for (const [exportId, aliases] of file.importedAs.entries()) {
+      if (identifier === exportId) {
+        for (const alias of aliases.keys()) {
+          const aliasedRef = [alias, ...rest].join('.');
+          if (file.refs.has(aliasedRef)) {
+            isReferenced = true;
+            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+            addNodes(traceNode, aliasedRef, graph, aliases.get(alias));
+          }
         }
       }
     }
 
-    exportLookupLog(depth, `not imported from`, filePath);
-    return false;
+    for (const [namespace, byFilePaths] of file.importedNs) {
+      if (file.refs.has(`${namespace}.${id}`)) {
+        isReferenced = true;
+        if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+        addNodes(traceNode, `${namespace}.${id}`, graph, byFilePaths);
+      }
+
+      const reExportedAs = file.reExportedAs.get(namespace);
+
+      if (reExportedAs) {
+        for (const [alias, byFilePaths] of reExportedAs) {
+          for (const byFilePath of byFilePaths) {
+            if (!seen.has(byFilePath)) {
+              const child = createNode(byFilePath);
+              traceNode.children.add(child);
+              const result = isIdentifierReferenced(byFilePath, `${alias}.${id}`, isIncludeEntryExports, child, seen);
+              if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
+              if (result.isReferenced) {
+                isReferenced = true;
+                if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+              }
+            }
+          }
+        }
+      }
+
+      const reExportedNs = file.reExportedNs.get(namespace);
+
+      if (reExportedNs) {
+        for (const byFilePath of reExportedNs) {
+          if (!seen.has(byFilePath)) {
+            const child = createNode(byFilePath);
+            traceNode.children.add(child);
+            const result = isIdentifierReferenced(byFilePath, `${namespace}.${id}`, isIncludeEntryExports, child, seen);
+            if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
+            if (result.isReferenced) {
+              isReferenced = true;
+              if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+            }
+          }
+        }
+      }
+    }
+
+    const reExported = file.reExported.get(identifier) ?? file.reExported.get(IMPORT_STAR);
+
+    if (reExported) {
+      for (const byFilePath of reExported) {
+        if (!seen.has(byFilePath)) {
+          const child = createNode(byFilePath);
+          traceNode.children.add(child);
+          const result = isIdentifierReferenced(byFilePath, id, isIncludeEntryExports, child, seen);
+          if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
+          if (result.isReferenced) {
+            isReferenced = true;
+            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+          }
+        }
+      }
+    }
+
+    const reExportedAs = file.reExportedAs.get(identifier);
+
+    if (reExportedAs) {
+      for (const [alias, byFilePaths] of reExportedAs) {
+        for (const byFilePath of byFilePaths) {
+          if (!seen.has(byFilePath)) {
+            const child = createNode(byFilePath);
+            traceNode.children.add(child);
+            const ref = [alias, ...rest].join('.');
+            const result = isIdentifierReferenced(byFilePath, ref, isIncludeEntryExports, child, seen);
+            if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
+            if (result.isReferenced) {
+              isReferenced = true;
+              if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+            }
+          }
+        }
+      }
+    }
+
+    for (const [namespace, byFilePaths] of file.reExportedNs.entries()) {
+      for (const byFilePath of byFilePaths) {
+        if (!seen.has(byFilePath)) {
+          const child = createNode(byFilePath);
+          traceNode.children.add(child);
+          const result = isIdentifierReferenced(byFilePath, `${namespace}.${id}`, isIncludeEntryExports, child, seen);
+          if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
+          if (result.isReferenced) {
+            isReferenced = true;
+            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+          }
+        }
+      }
+    }
+
+    return { isReferenced, reExportingEntryFile, traceNode };
   };
 
   return isIdentifierReferenced;

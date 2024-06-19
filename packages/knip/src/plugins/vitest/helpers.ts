@@ -26,7 +26,20 @@ export const getEnvPackageName = (env: string) => {
   return `vitest-environment-${env}`;
 };
 
-const builtInReporters = ['default', 'verbose', 'dot', 'json', 'tap', 'tap-flat', 'junit', 'hanging-process'];
+// See full list here : https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/reporters/index.ts#L30
+const builtInReporters = [
+  'basic',
+  'default',
+  'dot',
+  'github-actions',
+  'hanging-process',
+  'html',
+  'json',
+  'junit',
+  'tap',
+  'tap-flat',
+  'verbose',
+];
 
 export const getExternalReporters = (reporters?: ViteConfig['test']['reporters']) =>
   reporters

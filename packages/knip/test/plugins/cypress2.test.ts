@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../../src/index.js';
 import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
@@ -15,7 +15,7 @@ test('Find dependencies with the Cypress plugin (2)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });

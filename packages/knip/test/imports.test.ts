@@ -1,13 +1,13 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Support various ways to import modules', async () => {
-  const cwd = resolve('fixtures/imports');
+const cwd = resolve('fixtures/imports');
 
+test('Support various ways to import modules', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -15,7 +15,7 @@ test('Support various ways to import modules', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 22,
-    total: 22,
+    processed: 23,
+    total: 23,
   });
 });

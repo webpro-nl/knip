@@ -1,7 +1,7 @@
 import picocolors from 'picocolors';
 import { ISSUE_TYPE_TITLE } from '../constants.js';
-import { toRelative, relative } from '../util/path.js';
 import type { Issue, IssueSeverity, IssueSymbol } from '../types/issues.js';
+import { relative, toRelative } from '../util/path.js';
 
 export const identity = (text: string) => text;
 
@@ -28,7 +28,7 @@ export const logIssueLine = ({ owner, filePath, symbols, parentSymbol, severity 
 };
 
 export const logIssueSet = (issues: string[]) => {
-  issues.sort().forEach(value => console.log(toRelative(value)));
+  for (const value of issues.sort()) console.log(toRelative(value));
 };
 
 export const convert = (issue: Issue | IssueSymbol) => ({

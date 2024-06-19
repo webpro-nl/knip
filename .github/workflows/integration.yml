@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - uses: oven-sh/setup-bun@v1
 
       - run: cd packages/knip && npm install && npm run build && npm link
 
@@ -29,21 +30,30 @@ jobs:
         with:
           repository: JoshuaKGoldberg/create-typescript-app
           path: create-typescript-app
-      - run: cd create-typescript-app && pnpm install && knip
+      - run: |
+          cd create-typescript-app
+          pnpm install
+          knip
 
       - name: Test Knip against slonik
         uses: actions/checkout@v4
         with:
           repository: gajus/slonik
           path: slonik
-      - run: cd slonik && npm ci && knip
+      - run: |
+          cd slonik
+          pnpm install
+          knip
 
       - name: Test Knip against 10ten-ja-reader
         uses: actions/checkout@v4
         with:
           repository: birchill/10ten-ja-reader
           path: 10ten-ja-reader
-      - run: cd 10ten-ja-reader && pnpm install && knip
+      - run: |
+          cd 10ten-ja-reader
+          pnpm install
+          knip
 
       - name: Test Knip against DefinitelyTyped-tools
         uses: actions/checkout@v4
@@ -60,14 +70,21 @@ jobs:
         with:
           repository: TanStack/query
           path: query
-      - run: cd query && pnpm install && knip
+      - run: |
+          cd query
+          pnpm install
+          knip --cache
+          knip --cache
 
       - name: Test Knip against argos-ci/argos
         uses: actions/checkout@v4
         with:
           repository: argos-ci/argos
           path: argos
-      - run: cd argos && npm install && knip
+      - run: |
+          cd argos
+          npm ci
+          knip --tags=-route
 
       - name: Test Knip against ESLint
         uses: actions/checkout@v4
@@ -78,7 +95,8 @@ jobs:
           cd eslint
           npm install --force
           cd docs && npm install && cd -
-          knip
+          knip --cache
+          knip --cache
 
       - name: Test Knip against TypeScript
         uses: actions/checkout@v4
@@ -86,4 +104,20 @@ jobs:
           repository: webpro/TypeScript
           path: TypeScript
           ref: remove-unused-exports
-      - run: cd TypeScript && npm install && knip --tags=-internal,-knipignore --exclude duplicates
+      - run: |
+          cd TypeScript
+          npm ci
+          knip --tags=+internal,-knipignore --exclude=duplicates,enumMembers
+
+      - name: Test Knip against InvokeAI
+        uses: actions/checkout@v4
+        with:
+          repository: invoke-ai/InvokeAI
+          path: InvokeAI
+          sparse-checkout: invokeai/frontend/web
+      - run: |
+          cd InvokeAI/invokeai/frontend/web
+          pnpm install
+          knip-bun
+          knip-bun --production --fix --no-exit-code --allow-remove-files
+          knip-bun --production

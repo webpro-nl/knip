@@ -1,4 +1,4 @@
-import { api } from './helpers.js';
+import type { api } from './helpers.js';
 
 type BabelConfigFn = (options: typeof api) => BabelConfigObj;
 

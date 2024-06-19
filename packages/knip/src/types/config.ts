@@ -1,8 +1,8 @@
-import { z } from 'zod';
-import { ConfigurationValidator, pluginSchema } from '../ConfigurationValidator.js';
-import * as Plugins from '../plugins/index.js';
-import type { Rules, IssueType } from './issues.js';
-import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
+import type { z } from 'zod';
+import type { ConfigurationValidator, pluginSchema } from '../ConfigurationValidator.js';
+import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
+import type * as Plugins from '../plugins/index.js';
+import type { IssueType, Rules } from './issues.js';
 
 export type RawConfiguration = z.infer<typeof ConfigurationValidator>;
 

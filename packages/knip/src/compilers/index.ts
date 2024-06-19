@@ -1,10 +1,10 @@
+import type { RawConfiguration } from '../types/config.js';
+import type { DependencySet } from '../types/workspace.js';
 import Astro from './astro.js';
 import MDX from './mdx.js';
 import Svelte from './svelte.js';
-import Vue from './vue.js';
 import type { AsyncCompilerFn, AsyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
-import type { RawConfiguration } from '../types/config.js';
-import type { DependencySet } from '../types/workspace.js';
+import Vue from './vue.js';
 
 // TODO This does not detect functions returning a promise (just the async keyword)
 const isAsync = (fn?: SyncCompilerFn | AsyncCompilerFn) => (fn ? fn.constructor.name === 'AsyncFunction' : false);

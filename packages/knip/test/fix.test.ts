@@ -1,7 +1,7 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { EOL } from 'node:os';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -10,7 +10,7 @@ const cwd = resolve('fixtures/fix');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-test('Remove exports', async () => {
+test('Remove exports and dependencies', async () => {
   const tests = [
     [
       'mod.ts',
@@ -29,6 +29,9 @@ export const { ,  } = { a: 1, b: 1 };
 export const [, ] = [1, 2];
 
 class MyClass {}
+
+/** @knipignore */
+export type U = number;
 `.replace(/\n/g, EOL),
     ],
     [
@@ -51,7 +54,11 @@ module.exports = { identifier,  };
     [
       'reexports.js',
       await readContents('reexports.js'),
-      `export { One } from './reexported';
+      `export { RangeSlider } from './reexported';
+export { Rating } from './reexported';
+export { One } from './reexported';
+export { Col, Col as KCol } from './reexported';
+export { Row as KRow, Row } from './reexported';
 `.replace(/\n/g, EOL),
     ],
     [
@@ -70,7 +77,8 @@ export const One = 1;
       `{
   "name": "@fixtures/fix",
   "dependencies": {
-    "lodash": "*"
+    "lodash": "*",
+    "ignored": "*"
   },
   "devDependencies": {}
 }
@@ -82,16 +90,30 @@ export const One = 1;
     ...baseArguments,
     cwd,
     isFix: true,
+    tags: [[], ['knipignore']],
   });
 
-  assert(issues.exports['access.js']['ACCESS']);
   assert(issues.exports['access.js']['UNUSED']);
+  assert(issues.exports['access.js']['ACCESS']);
   assert(issues.exports['exports.js']['identifier2']);
   assert(issues.exports['mod.ts']['a']);
   assert(issues.exports['mod.ts']['b']);
+  assert(issues.exports['mod.ts']['c']);
+  assert(issues.exports['mod.ts']['d']);
   assert(issues.exports['mod.ts']['default']);
   assert(issues.exports['mod.ts']['x']);
   assert(issues.exports['mod.ts']['y']);
+  assert(issues.exports['reexported.js']['Three']);
+  assert(issues.exports['reexported.js']['Two']);
+
+  // check ignore
+  assert(issues.exports['ignored.ts'] === undefined);
+
+  // check ignoreDependencies
+  assert(issues.dependencies['package.json']['ignored'] === undefined);
+
+  // check ignored by tags
+  assert(issues.types['mod.ts']['U'] === undefined);
 
   for (const [fileName, before, after] of tests) {
     const filePath = join(cwd, fileName);
@@ -120,6 +142,9 @@ export const { a, b } = { a: 1, b: 1 };
 export const [c, d] = [1, 2];
 
 export default class MyClass {}
+
+/** @knipignore */
+export type U = number;
 `.replace(/\n/g, EOL),
     ],
   ];
@@ -129,6 +154,7 @@ export default class MyClass {}
     cwd,
     isFix: true,
     fixTypes: ['types'],
+    tags: [[], ['knipignore']],
   });
 
   assert(issues.exports['access.js']['ACCESS']);
@@ -139,6 +165,15 @@ export default class MyClass {}
   assert(issues.exports['mod.ts']['default']);
   assert(issues.exports['mod.ts']['x']);
   assert(issues.exports['mod.ts']['y']);
+
+  // check ignore
+  assert(issues.exports['ignored.ts'] === undefined);
+
+  // check ignoreDependencies
+  assert(issues.dependencies['package.json']['ignored'] === undefined);
+
+  // check ignored by tags
+  assert(issues.types['mod.ts']['U'] === undefined);
 
   for (const [fileName, before, after] of tests) {
     const filePath = join(cwd, fileName);

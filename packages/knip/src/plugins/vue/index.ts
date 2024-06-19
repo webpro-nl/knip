@@ -1,6 +1,6 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
-import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import type { VueConfig, WebpackConfiguration } from './types.js';
 
 // https://cli.vuejs.org/config/
@@ -33,7 +33,7 @@ const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
       config: modifiedConfig ?? baseConfig,
       cwd,
     });
-    dependencies.forEach(dependency => deps.push(dependency));
+    for (const dependency of dependencies) deps.push(dependency);
   }
 
   if (

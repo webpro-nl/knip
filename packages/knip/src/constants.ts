@@ -2,6 +2,10 @@ import type { IssueType } from './types/issues.js';
 
 export const ROOT_WORKSPACE_NAME = '.';
 
+export const IMPORT_STAR = '*';
+
+export const ANONYMOUS = '__anonymous';
+
 export const KNIP_CONFIG_LOCATIONS = [
   'knip.json',
   'knip.jsonc',
@@ -22,12 +26,15 @@ export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 // In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
 // Package may exist in npm registry, but last publish is at least 6 years ago
 export const IGNORED_GLOBAL_BINARIES = new Set([
+  'aws',
   'bash',
   'bun',
+  'bundle',
   'bunx',
   'cat',
   'cd',
   'chmod',
+  'command',
   'corepack',
   'cp',
   'curl',
@@ -35,12 +42,16 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'dirname',
   'docker',
   'echo',
+  'env',
   'exec',
   'exit',
   'find',
+  'gem',
   'git',
   'grep',
   'gzip',
+  'kill',
+  'ln',
   'ls',
   'mkdir',
   'mv',
@@ -52,12 +63,15 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'rm',
   'set',
   'sh',
+  'ssh',
   'sudo',
   'test', // exception (node built-in module)
   'touch',
   'true',
   'yarn',
   'xargs',
+  'xcodebuild',
+  'xvfb-run',
 ]);
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
@@ -110,6 +124,7 @@ export const ISSUE_TYPES: IssueType[] = [
 
 export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   files: 'Unused files',
+  _files: 'Unused files',
   dependencies: 'Unused dependencies',
   devDependencies: 'Unused devDependencies',
   optionalPeerDependencies: 'Referenced optional peerDependencies',

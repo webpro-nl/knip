@@ -1,7 +1,8 @@
-import micromatch from 'micromatch';
-import { initIssues, initCounters } from './issues/initializers.js';
-import { relative } from './util/path.js';
+import picomatch from 'picomatch';
+import { initCounters, initIssues } from './issues/initializers.js';
 import type { ConfigurationHint, Issue, Rules } from './types/issues.js';
+import { timerify } from './util/Performance.js';
+import { relative } from './util/path.js';
 
 type Filters = Partial<{
   dir: string;
@@ -17,6 +18,8 @@ const hasHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>
   Array.from(hints).some(
     item => item.identifier === hint.identifier && item.type === hint.type && item.workspaceName === hint.workspaceName
   );
+
+const isMatch = timerify(picomatch.isMatch, 'isMatch');
 
 /**
  * - Collects issues and counts them
@@ -41,9 +44,9 @@ export class IssueCollector {
   }
 
   addIgnorePatterns(patterns: string[]) {
-    patterns.forEach(pattern => this.ignorePatterns.add(pattern));
+    for (const pattern of patterns) this.ignorePatterns.add(pattern);
     const p = [...this.ignorePatterns];
-    this.isMatch = (filePath: string) => micromatch.isMatch(filePath, p, { dot: true });
+    this.isMatch = (filePath: string) => isMatch(filePath, p, { dot: true });
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
@@ -52,18 +55,20 @@ export class IssueCollector {
   }
 
   addFilesIssues(filePaths: string[]) {
-    filePaths.forEach(filePath => {
-      if (this.filters.dir && !filePath.startsWith(this.filters.dir + '/')) return;
-      if (this.referencedFiles.has(filePath)) return;
-      if (this.isMatch(filePath)) return;
+    for (const filePath of filePaths) {
+      if (this.filters.dir && !filePath.startsWith(`${this.filters.dir}/`)) continue;
+      if (this.referencedFiles.has(filePath)) continue;
+      if (this.isMatch(filePath)) continue;
       this.issues.files.add(filePath);
+      // @ts-expect-error TODO Fix up in next major
+      this.issues._files.add({ type: 'files', filePath, symbol: relative(filePath) });
       this.counters.files++;
       this.counters.processed++;
-    });
+    }
   }
 
   addIssue(issue: Issue) {
-    if (this.filters.dir && !issue.filePath.startsWith(this.filters.dir + '/')) return;
+    if (this.filters.dir && !issue.filePath.startsWith(`${this.filters.dir}/`)) return;
     if (this.isMatch(issue.filePath)) return;
     const key = relative(this.cwd, issue.filePath);
     issue.severity = this.rules[issue.type];
@@ -72,12 +77,20 @@ export class IssueCollector {
       this.issues[issue.type][key][issue.symbol] = issue;
       this.counters[issue.type]++;
     }
+    return issue;
   }
 
   addConfigurationHint(issue: ConfigurationHint) {
     if (!hasHint(this.configurationHints, issue)) {
       this.configurationHints.add(issue);
     }
+  }
+
+  purge() {
+    const unusedFiles = this.issues.files;
+    this.issues = initIssues();
+    this.counters = initCounters();
+    return unusedFiles;
   }
 
   getIssues() {

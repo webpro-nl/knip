@@ -10,9 +10,8 @@ integrated monorepo style][1].
 
 Let's assume some of these projects are applications ("apps") which have their
 own ESLint configuration files and Cypress configuration and test files. This
-may result in a those files reported as unused, and consequently also the
-dependencies the ESLint and Cypress plugins would find (such as ESLint or
-Cypress plugins).
+may result in those files getting reported as unused, and consequently also the
+dependencies they import and refer to.
 
 In that case, we could configure the ESLint and Cypress plugins like this:
 
@@ -27,7 +26,7 @@ In that case, we could configure the ESLint and Cypress plugins like this:
 }
 ```
 
-Adapt the file patterns to your project and the relevant configuration and entry
+Adapt the file patterns to your project, and the relevant `config` and `entry`
 files and dependencies should no longer be reported as unused.
 
 [1]: https://nx.dev/getting-started/tutorials/integrated-repo-tutorial

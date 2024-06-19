@@ -7,10 +7,13 @@ Usage: knip [options]
 Options:
   -c, --config [file]      Configuration file path (default: [.]knip.json[c], knip.js, knip.ts or package.json#knip)
   -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
-  --production             Analyze only production source files (e.g. no tests, devDependencies, exported types)
+  --production             Analyze only production source files (e.g. no test files, devDependencies)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
   -W, --workspace [dir]    Analyze a single workspace (default: analyze all configured workspaces)
   --directory [dir]        Run process from a different directory (default: cwd)
+  --cache                  Enable caching
+  --cache-location         Change cache location (default: node_modules/.cache/knip)
+  --watch                  Watch mode
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
@@ -19,9 +22,10 @@ Options:
   --files                  Shortcut for --include files
   --fix                    Fix issues
   --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
+  --allow-remove-files     Allow Knip to remove files (with --fix)
   --include-libs           Include type definitions from dependencies (default: false; implied with classMembers)
   --include-entry-exports  Include entry files when reporting unused exports
-  --isolate-workspaces     Isolate workspaces into separate programs (default: false)
+  --isolate-workspaces     Isolate workspaces into separate programs
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
@@ -50,10 +54,13 @@ $ knip --tags=-knipignore
 
 Website: https://knip.dev`;
 
+// biome-ignore lint/suspicious/noImplicitAnyLet: TODO
 let parsedArgs;
 try {
   parsedArgs = parseArgs({
     options: {
+      cache: { type: 'boolean' },
+      'cache-location': { type: 'string' },
       config: { type: 'string', short: 'c' },
       debug: { type: 'boolean', short: 'd' },
       dependencies: { type: 'boolean' },
@@ -65,6 +72,7 @@ try {
       files: { type: 'boolean' },
       fix: { type: 'boolean' },
       'fix-type': { type: 'string', multiple: true },
+      'allow-remove-files': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
       'ignore-internal': { type: 'boolean' },
       include: { type: 'string', multiple: true },
@@ -84,15 +92,18 @@ try {
       'reporter-options': { type: 'string' },
       strict: { type: 'boolean' },
       trace: { type: 'boolean' },
+      'trace-export': { type: 'string' },
+      'trace-file': { type: 'string' },
       tsConfig: { type: 'string', short: 't' },
       version: { type: 'boolean', short: 'V' },
+      watch: { type: 'boolean' },
       workspace: { type: 'string', short: 'W' },
     },
   });
 } catch (error: unknown) {
   if (error instanceof Error) {
     console.error(error.message);
-    console.log('\n' + helpText);
+    console.log(`\n${helpText}`);
     process.exit(1);
   }
   throw error;

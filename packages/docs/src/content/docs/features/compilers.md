@@ -8,7 +8,7 @@ like `.mdx`, `.astro`, `.vue` and `.svelte` may also import other source files
 and external dependencies. So ideally, these files are included when linting the
 project. That's why Knip supports compilers.
 
-## Built-in Compilers
+## Built-in compilers
 
 Knip has built-in "compilers" for the following file extensions:
 
@@ -19,17 +19,18 @@ Knip has built-in "compilers" for the following file extensions:
 
 Note that "compilers" is quoted, as they are not real compilers, but regular
 expressions to collect `import` statements from files with those extensions.
-This allows Knip to build the dependency graph.
+This is fast, requires no dependencies, and enough for Knip to build the
+dependency graph.
 
 On the other hand, real compilers may expose their own challenges in the context
 of Knip. For instance, the Svelte compiler keeps `exports` intact, while they
 might represent component properties. This results in those exports being
 reported as unused by Knip.
 
-In short, the built-in functions seem to do a decent job, but you can override
-them however you like.
+The built-in functions seem to do a decent job, but you can override them
+however you like.
 
-## Custom Compilers
+## Custom compilers
 
 Additional custom compilers can be added, and built-in compilers can be
 overridden. Since compilers are functions, the Knip configuration file must be a
@@ -52,6 +53,27 @@ to Knip. This means you don't need to add something like `**/*.{ts,css}` to the
 `entry` or `project` file patterns manually.
 
 :::
+
+### Svelte
+
+In a project with Svelte, the compiler is automatically enabled, but you may
+have unresolved imports starting with `$app/`:
+
+```shell
+Unresolved imports (5)
+$app/stores       src/routes/Header.svelte:1:9
+$app/environment  src/routes/about/+page.ts:1:9
+```
+
+In this case, you can manually add the `$app` path alias:
+
+```json title="knip.json"
+{
+  "paths": {
+    "$app/*": ["node_modules/@sveltejs/kit/src/runtime/app/*"]
+  }
+}
+```
 
 ### CSS
 

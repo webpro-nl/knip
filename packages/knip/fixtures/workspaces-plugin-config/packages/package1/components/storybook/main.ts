@@ -9,4 +9,7 @@ module.exports = {
       directory: '../epic',
     },
   ],
+  core: {
+    builder: '@storybook/builder-vite',
+  },
 };

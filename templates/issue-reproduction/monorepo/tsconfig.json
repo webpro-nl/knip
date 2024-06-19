@@ -1,0 +1,20 @@
+{
+  "files": [],
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "references": [
+    { "path": "packages/client" },
+    { "path": "packages/server" },
+    { "path": "packages/shared" }
+  ]
+}

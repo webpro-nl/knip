@@ -10,11 +10,12 @@ export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleS
       const resolvedFilePath = _tryResolve(filePath, cwd);
       if (resolvedFilePath) {
         return resolvedFilePath;
-      } else if (acceptModuleSpecifier) {
+      }
+      if (acceptModuleSpecifier) {
         return getPackageNameFromModuleSpecifier(specifier);
       }
     } else if (specifier.includes('node_modules/.bin')) {
-      return toBinary(stripBinaryPath(specifier));
+      return toBinary(trimBinary(specifier));
     } else {
       return getPackageNameFromFilePath(specifier);
     }
@@ -28,7 +29,7 @@ export const stripVersionFromSpecifier = (specifier: string) => specifier.replac
 
 const stripNodeModulesFromPath = (command: string) => command.replace(/^(\.\/)?node_modules\//, '');
 
-export const stripBinaryPath = (command: string) =>
+export const trimBinary = (command: string) =>
   stripVersionFromSpecifier(
     stripNodeModulesFromPath(command)
       .replace(/^(\.bin\/)/, '')

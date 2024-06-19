@@ -1,12 +1,15 @@
 import parseArgs from 'minimist';
 import { compact } from '../../util/array.js';
-import { tryResolveFilePath, tryResolveSpecifiers } from '../util.js';
 import type { Resolver } from '../types.js';
+import { tryResolveFilePath, tryResolveSpecifiers } from '../util.js';
 
-export const resolve: Resolver = (binary, args, { cwd }) => {
-  const parsed = parseArgs(args, {
+export const parseNodeArgs = (args: string[]) =>
+  parseArgs(args, {
     string: ['r'],
     alias: { require: ['r', 'loader', 'experimental-loader', 'test-reporter', 'watch', 'import'] },
   });
+
+export const resolve: Resolver = (_binary, args, { cwd }) => {
+  const parsed = parseNodeArgs(args);
   return compact([tryResolveFilePath(cwd, parsed._[0]), ...tryResolveSpecifiers(cwd, [parsed.require].flat())]);
 };

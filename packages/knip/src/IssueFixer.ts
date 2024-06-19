@@ -1,12 +1,20 @@
-import { readFile, writeFile } from 'fs/promises';
-import NPMCliPackageJson, { type PackageJson } from '@npmcli/package-json';
-import { dirname, join } from './util/path.js';
+import { readFile, rm, writeFile } from 'node:fs/promises';
 import type { Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
+import { load, save } from './util/package-json.js';
+import { join, relative } from './util/path.js';
+
+interface Fixer {
+  isEnabled: boolean;
+  cwd: string;
+  fixTypes: string[];
+  isRemoveFiles: boolean;
+}
 
 export class IssueFixer {
   isEnabled = false;
   cwd: string = process.cwd();
+  isFixFiles = true;
   isFixDependencies = true;
   isFixUnusedTypes = true;
   isFixUnusedExports = true;
@@ -14,9 +22,10 @@ export class IssueFixer {
   unusedTypeNodes: Map<string, Set<[number, number]>> = new Map();
   unusedExportNodes: Map<string, Set<[number, number]>> = new Map();
 
-  constructor({ isEnabled, cwd, fixTypes = [] }: { isEnabled: boolean; cwd: string; fixTypes: string[] }) {
+  constructor({ isEnabled, cwd, fixTypes = [], isRemoveFiles }: Fixer) {
     this.isEnabled = isEnabled;
     this.cwd = cwd;
+    this.isFixFiles = isRemoveFiles && (fixTypes.length === 0 || fixTypes.includes('files'));
     this.isFixDependencies = fixTypes.length === 0 || fixTypes.includes('dependencies');
     this.isFixUnusedTypes = fixTypes.length === 0 || fixTypes.includes('types');
     this.isFixUnusedExports = fixTypes.length === 0 || fixTypes.includes('exports');
@@ -24,22 +33,47 @@ export class IssueFixer {
 
   public addUnusedTypeNode(filePath: string, fixes: Fixes | undefined) {
     if (!fixes || fixes.length === 0) return;
-    if (this.unusedTypeNodes.has(filePath)) fixes.forEach(fix => this.unusedTypeNodes.get(filePath)!.add(fix));
+    if (this.unusedTypeNodes.has(filePath)) for (const fix of fixes) this.unusedTypeNodes.get(filePath)?.add(fix);
     else this.unusedTypeNodes.set(filePath, new Set(fixes));
   }
 
   public addUnusedExportNode(filePath: string, fixes: Fixes | undefined) {
     if (!fixes || fixes.length === 0) return;
-    if (this.unusedExportNodes.has(filePath)) fixes.forEach(fix => this.unusedExportNodes.get(filePath)!.add(fix));
+    if (this.unusedExportNodes.has(filePath)) for (const fix of fixes) this.unusedExportNodes.get(filePath)?.add(fix);
     else this.unusedExportNodes.set(filePath, new Set(fixes));
   }
 
   public async fixIssues(issues: Issues) {
-    await this.removeUnusedExportKeywords();
+    await this.removeUnusedFiles(issues);
+    await this.removeUnusedExportKeywords(issues);
     await this.removeUnusedDependencies(issues);
   }
 
-  private async removeUnusedExportKeywords() {
+  private markExportFixed(issues: Issues, filePath: string) {
+    const relPath = relative(filePath);
+
+    const types = [
+      ...(this.isFixUnusedTypes ? (['types', 'nsTypes'] as const) : []),
+      ...(this.isFixUnusedExports ? (['exports', 'nsExports'] as const) : []),
+    ];
+
+    for (const type of types) {
+      for (const id in issues[type][relPath]) {
+        issues[type][relPath][id].isFixed = true;
+      }
+    }
+  }
+
+  private async removeUnusedFiles(issues: Issues) {
+    if (!this.isFixFiles) return;
+
+    for (const issue of issues._files) {
+      await rm(issue.filePath);
+      issue.isFixed = true;
+    }
+  }
+
+  private async removeUnusedExportKeywords(issues: Issues) {
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
       const exportPositions: Fixes = [
@@ -52,10 +86,14 @@ export class IssueFixer {
           (text, [start, end]) => text.substring(0, start) + text.substring(end),
           await readFile(filePath, 'utf-8')
         );
+
         const withoutEmptyReExports = sourceFileText
           .replaceAll(/export \{[ ,]+\} from ('|")[^'"]+('|");?\r?\n?/g, '')
           .replaceAll(/export \{[ ,]+\};?\r?\n?/g, '');
+
         await writeFile(filePath, withoutEmptyReExports);
+
+        this.markExportFixed(issues, filePath);
       }
     }
   }
@@ -66,22 +104,28 @@ export class IssueFixer {
     const filePaths = new Set([...Object.keys(issues.dependencies), ...Object.keys(issues.devDependencies)]);
 
     for (const filePath of filePaths) {
-      const manifest = await NPMCliPackageJson.load(dirname(join(this.cwd, filePath)));
-      const pkg: PackageJson = manifest.content;
+      const absFilePath = join(this.cwd, filePath);
+      const pkg = await load(absFilePath);
 
       if (filePath in issues.dependencies) {
-        Object.keys(issues.dependencies[filePath]).forEach(dependency => {
-          if (pkg.dependencies) delete pkg.dependencies[dependency];
-        });
+        for (const dependency of Object.keys(issues.dependencies[filePath])) {
+          if (pkg.dependencies) {
+            delete pkg.dependencies[dependency];
+            issues.dependencies[filePath][dependency].isFixed = true;
+          }
+        }
       }
 
       if (filePath in issues.devDependencies) {
-        Object.keys(issues.devDependencies[filePath]).forEach(dependency => {
-          if (pkg.devDependencies) delete pkg.devDependencies[dependency];
-        });
+        for (const dependency of Object.keys(issues.devDependencies[filePath])) {
+          if (pkg.devDependencies) {
+            delete pkg.devDependencies[dependency];
+            issues.devDependencies[filePath][dependency].isFixed = true;
+          }
+        }
       }
 
-      await manifest.save();
+      await save(absFilePath, pkg);
     }
   }
 }

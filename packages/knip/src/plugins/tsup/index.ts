@@ -1,6 +1,6 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '#p/util/protocols.js';
-import type { ResolveConfig, IsPluginEnabled, Plugin } from '#p/types/plugins.js';
+import { toProductionEntryPattern } from '#p/util/protocols.js';
 import type { TsupConfig } from './types.js';
 
 // https://paka.dev/npm/tsup/api
@@ -23,8 +23,7 @@ const resolveConfig: ResolveConfig<TsupConfig> = async config => {
       if (Array.isArray(config.entry)) return config.entry;
       return Object.values(config.entry);
     })
-    .filter(entry => !entry.startsWith('!'))
-    .map(toEntryPattern);
+    .map(toProductionEntryPattern);
 
   return entryPatterns;
 };

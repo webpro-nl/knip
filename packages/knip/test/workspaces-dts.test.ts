@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -13,12 +13,12 @@ test('Find unused un-built exports across workspaces', async () => {
     cwd,
   });
 
-  assert(issues.exports['packages/shared/src/index.js']['unusedFunction']);
+  assert(issues.exports['packages/shared/src/unused-function.js']['unusedFunction']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 1,
-    processed: 7,
-    total: 7,
+    processed: 8,
+    total: 8,
   });
 });

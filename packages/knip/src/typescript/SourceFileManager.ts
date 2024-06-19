@@ -1,9 +1,9 @@
 import ts from 'typescript';
+import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import { debugLog } from '../util/debug.js';
 import { extname, isInNodeModules, isInternal } from '../util/path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
-import type { SyncCompilers, AsyncCompilers } from '../compilers/types.js';
 
 interface SourceFileManagerOptions {
   isSkipLibs: boolean;
@@ -34,7 +34,7 @@ export class SourceFileManager {
     if (this.sourceFileCache.has(filePath)) return this.sourceFileCache.get(filePath);
     const ext = extname(filePath);
     const compiler = this.syncCompilers.get(ext);
-    if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) return undefined;
+    if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) return this.createSourceFile(filePath, '');
     if (this.isSkipLibs && isInNodeModules(filePath)) {
       if (isDeclarationFileExtension(ext)) return undefined;
       return this.createSourceFile(filePath, '');

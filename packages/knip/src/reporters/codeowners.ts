@@ -1,9 +1,9 @@
 import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import picocolors from 'picocolors';
-import { toRelative, relative, resolve } from '../util/path.js';
-import { getTitle, logTitle, logIssueLine } from './util.js';
-import type { Issue, ReporterOptions, IssueSet, IssueRecords } from '../types/issues.js';
 import type { Entries } from 'type-fest';
+import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.js';
+import { relative, resolve, toRelative } from '../util/path.js';
+import { getTitle, logIssueLine, logTitle } from './util.js';
 
 type OwnedIssue = Issue & { owner: string };
 
@@ -12,16 +12,16 @@ type ExtraReporterOptions = {
 };
 
 const logIssueSet = (issues: { symbol: string; owner: string }[]) => {
-  issues
-    .sort((a, b) => (a.owner < b.owner ? -1 : 1))
-    .forEach(issue => console.log(picocolors.cyan(issue.owner), toRelative(issue.symbol)));
+  for (const issue of issues.sort((a, b) => (a.owner < b.owner ? -1 : 1))) {
+    console.log(picocolors.cyan(issue.owner), toRelative(issue.symbol));
+  }
 };
 
 const logIssueRecord = (issues: OwnedIssue[]) => {
   const sortedByFilePath = issues.sort((a, b) => (a.owner < b.owner ? -1 : 1));
-  sortedByFilePath.forEach(({ filePath, symbols, owner, parentSymbol }) =>
-    logIssueLine({ owner, filePath, symbols, parentSymbol })
-  );
+  for (const { filePath, symbols, owner, parentSymbol } of sortedByFilePath) {
+    logIssueLine({ owner, filePath, symbols, parentSymbol });
+  }
 };
 
 export default ({ report, issues, isShowProgress, options }: ReporterOptions) => {
@@ -54,7 +54,7 @@ export default ({ report, issues, isShowProgress, options }: ReporterOptions) =>
               .map(toIssue)
               .map(addOwner)
           : reportType === 'duplicates'
-            ? Object.values(issues[reportType]).map(Object.values).flat().map(addOwner)
+            ? Object.values(issues[reportType]).flatMap(Object.values).map(addOwner)
             : Object.values(issues[reportType] as IssueRecords).map(issues => {
                 const symbols = Object.values(issues);
                 return addOwner({ ...symbols[0], symbols });

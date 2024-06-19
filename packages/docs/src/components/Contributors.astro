@@ -12,10 +12,7 @@ interface Contributor {
   login: string;
 }
 
-const url = new URL(
-  `/repos/webpro/knip/contributors`,
-  'https://api.github.com'
-);
+const url = new URL('/repos/webpro-nl/knip/contributors', 'https://api.github.com');
 url.searchParams.set('per_page', '100');
 
 const contributors: Contributor[] = isFetch

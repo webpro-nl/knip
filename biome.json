@@ -1,0 +1,111 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.7.1/schema.json",
+  "files": {
+    "ignore": [
+      "**/dist",
+      "**/tmp",
+      "**/fixtures",
+      "packages/knip/package.json",
+      "packages/docs/.astro"
+    ]
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "node:path": "Please use src/util/path.js instead.",
+              "path": "Please use src/util/path.js instead."
+            }
+          }
+        }
+      },
+      "style": {
+        "noParameterAssign": "off",
+        "useNodeAssertStrict": "error"
+      },
+      "suspicious": {
+        "noConsoleLog": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "lineWidth": 120,
+    "indentStyle": "space",
+    "formatWithErrors": true
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "arrowParentheses": "asNeeded",
+      "trailingComma": "es5"
+    }
+  },
+  "json": {
+    "formatter": {
+      "lineWidth": 80
+    }
+  },
+  "overrides": [
+    {
+      "include": ["*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": [
+        "packages/docs",
+        "packages/knip/scripts",
+        "packages/knip/src/cli.ts",
+        "packages/knip/src/reporters",
+        "packages/knip/src/util/cli-arguments.ts",
+        "packages/knip/src/util/debug.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["packages/knip/fixtures"],
+      "organizeImports": {
+        "enabled": false
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          },
+          "style": {
+            "useImportType": "off"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,4 +1,10 @@
 import index from '@lib';
 import fn from '@lib/fn';
+import customExt from '@lib/data.ext';
 import js from 'xyz/main.js';
 import anything from '~/my-module';
+customExt;
+index;
+fn;
+js;
+anything;

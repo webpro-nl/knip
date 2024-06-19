@@ -1,4 +1,4 @@
-import { performance, PerformanceObserver, PerformanceEntry } from 'node:perf_hooks';
+import { type PerformanceEntry, PerformanceObserver, performance } from 'node:perf_hooks';
 import { constants } from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
 import EasyTable from 'easy-table';
@@ -9,13 +9,13 @@ import { debugLog } from './debug.js';
 
 const { performance: isEnabled = false } = parsedArgValues;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: ignore
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
   if (!isEnabled) return fn;
   return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));
 };
 
-export class Performance {
+class Performance {
   isEnabled: boolean;
   startTime = 0;
   endTime = 0;
@@ -24,7 +24,6 @@ export class Performance {
   fnObserver?: PerformanceObserver;
   gcObserver?: PerformanceObserver;
   memoryUsageStart?: ReturnType<typeof memoryUsage>;
-  memoryUsageEnd?: ReturnType<typeof memoryUsage>;
 
   constructor(isEnabled: boolean) {
     if (isEnabled) {
@@ -33,9 +32,9 @@ export class Performance {
 
       // timerified functions
       this.fnObserver = new PerformanceObserver(items => {
-        items.getEntries().forEach(entry => {
+        for (const entry of items.getEntries()) {
           this.entries.push(entry);
-        });
+        }
       });
       this.fnObserver.observe({ entryTypes: ['function'] });
 
@@ -88,7 +87,7 @@ export class Performance {
   getTable() {
     const entriesByName = this.getEntriesByName();
     const table = new EasyTable();
-    Object.entries(entriesByName).forEach(([name, values]) => {
+    for (const [name, values] of Object.entries(entriesByName)) {
       const stats = new Summary(values);
       table.cell('Name', name);
       table.cell('size', stats.size(), EasyTable.number(0));
@@ -97,23 +96,25 @@ export class Performance {
       table.cell('median', stats.median(), EasyTable.number(2));
       table.cell('sum', stats.sum(), EasyTable.number(2));
       table.newRow();
-    });
+    }
     table.sort(['sum|des']);
     return table.toString().trim();
   }
 
-  getTotalTime() {
-    return this.endTime - this.startTime;
+  getCurrentDurationInMs(startTime?: number) {
+    return performance.now() - (startTime ?? this.startTime);
   }
 
   getMemHeapUsage() {
-    return (this.memoryUsageEnd?.heapUsed ?? 0) - (this.memoryUsageStart?.heapUsed ?? 0);
+    return (memoryUsage().heapUsed ?? 0) - (this.memoryUsageStart?.heapUsed ?? 0);
+  }
+
+  getCurrentMemUsageInMb() {
+    return Math.round((this.getMemHeapUsage() / 1024 / 1024) * 100) / 100;
   }
 
   public async finalize() {
     if (!this.isEnabled) return;
-    this.endTime = performance.now();
-    this.memoryUsageEnd = memoryUsage();
     // Workaround to get all entries
     await this.flush();
   }
@@ -123,3 +124,5 @@ export class Performance {
     this.fnObserver?.disconnect();
   }
 }
+
+export const perfObserver = new Performance(isEnabled);

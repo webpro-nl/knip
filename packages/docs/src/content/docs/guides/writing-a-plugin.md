@@ -2,8 +2,6 @@
 title: Writing A Plugin
 ---
 
-## Introduction
-
 Plugins provide Knip with entry files and dependencies it would be unable to
 find otherwise. Plugins always do at least one of the following:
 
@@ -89,9 +87,9 @@ configuration object.
 Here's the full source code of the `nyc` plugin:
 
 ```ts
-import { hasDependency } from '~/util/plugin.js';
+import { hasDependency } from '#p/util/plugin.js';
 import type { NycConfig } from './types.js';
-import type { ResolveConfig, IsPluginEnabled } from '~/types/plugins.js';
+import type { ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
 
 const title = 'nyc';
 
@@ -167,7 +165,6 @@ Here's an example from the Ava test runner plugin:
 
 ```ts
 const resolveEntryPaths: ResolveEntryPaths<AvaConfig> = localConfig => {
-  if (typeof localConfig === 'function') localConfig = localConfig();
   return localConfig?.files ?? [];
 };
 ```
@@ -190,7 +187,7 @@ The easiest way to create a new plugin is to use the `create-plugin` script:
 
 ```sh
 cd packages/knip
-npm run create-plugin -- --name tool
+bun create-plugin --name tool
 ```
 
 This adds source and test files and fixtures to get you started. It also adds
@@ -199,7 +196,7 @@ the plugin to the JSON Schema and TypeScript types.
 Run the test for your new plugin:
 
 ```sh
-npx tsx test/plugins/tool.test.ts
+bun test test/plugins/tool.test.ts
 ```
 
 You're ready to implement and submit a new Knip plugin! 🆕 🎉

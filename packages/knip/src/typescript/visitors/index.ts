@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 import type { ExportNode } from '../../types/exports.js';
 import type { ImportNode } from '../../types/imports.js';
 import type { GetImportsAndExportsOptions } from '../getImportsAndExports.js';

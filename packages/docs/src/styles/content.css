@@ -2,6 +2,10 @@
   border: unset;
 }
 
+.sl-container .sl-markdown-content ul li p {
+  margin: 0;
+}
+
 .sl-markdown-content table {
   overflow: unset;
 }
@@ -21,7 +25,7 @@
   border-bottom: 1px solid var(--sl-color-gray-1);
 }
 
-h2 em {
+.sl-markdown-content em {
   font-weight: bold;
 }
 
@@ -34,6 +38,11 @@ h2 em {
 
 p code {
   white-space: nowrap;
+}
+
+.sl-markdown-content a code {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 blockquote {
@@ -74,7 +83,7 @@ section.plugins li {
 }
 
 .sponsor {
-  font-size: 1.3rem;
+  font-size: 2rem;
   text-align: center;
   margin-bottom: 5rem;
 }
@@ -84,4 +93,8 @@ section.plugins li {
   --sl-color-bg-badge: transparent;
   --sl-color-border-badge: var(--sl-color-orange);
   color: var(--sl-color-white);
+}
+
+.sl-markdown-content .mw500 {
+  max-width: 500px;
 }

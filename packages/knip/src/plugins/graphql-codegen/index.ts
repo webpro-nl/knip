@@ -1,30 +1,50 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
+import { get } from '#p/util/object.js';
 import { isInternal } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
-import { isConfigurationOutput } from './types.js';
-import type { Plugin, ResolveConfig, IsPluginEnabled } from '#p/types/plugins.js';
-import type { ConfiguredPlugin, GraphqlCodegenTypes, PresetNames } from './types.js';
+import { isConfigurationOutput, isGraphqlConfigTypes, isGraphqlProjectsConfigTypes } from './types.js';
+import type {
+  ConfiguredPlugin,
+  GraphqlCodegenTypes,
+  GraphqlConfigTypes,
+  GraphqlProjectsConfigTypes,
+  PresetNames,
+} from './types.js';
 
 // https://the-guild.dev/graphql/codegen/docs/config-reference/codegen-config
 // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/config.ts
 
 const title = 'GraphQL Codegen';
 
-const enablers = [/^@graphql-codegen\//];
+const enablers = [/^@graphql-codegen\//, 'graphql-config'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const packageJsonPath = 'codegen';
+const packageJsonPath: Plugin['packageJsonPath'] = manifest => get(manifest, 'codegen') ?? get(manifest, 'graphql');
 
 const config = [
+  'package.json',
+  // graphql-codegen config files
   'codegen.{json,yml,yaml,js,ts,mjs,cts}',
   '.codegenrc.{json,yml,yaml,js,ts}',
   'codegen.config.js',
-  'package.json',
+  // graphql-config config files
+  // https://the-guild.dev/graphql/config/docs/user/usage#config-search-places
+  '.graphqlrc',
+  '.graphqlrc.{json,yml,yaml,toml,js,ts}',
+  'graphql.config.{json,yml,yaml,toml,js,cjs,ts}',
 ];
 
-const resolveConfig: ResolveConfig<GraphqlCodegenTypes> = config => {
-  const generateSet = config.generates ? Object.values(config.generates) : [];
+const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes> = config => {
+  const codegenConfigs = isGraphqlProjectsConfigTypes(config)
+    ? Object.values(config.projects).flatMap(project => project.extensions?.codegen ?? [])
+    : isGraphqlConfigTypes(config)
+      ? [config.extensions?.codegen]
+      : [config];
+  const generateSet = codegenConfigs
+    .filter((config): config is GraphqlCodegenTypes => Boolean(config?.generates))
+    .flatMap(config => Object.values(config.generates));
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 

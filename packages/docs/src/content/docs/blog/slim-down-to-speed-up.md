@@ -266,4 +266,4 @@ Remember, Knip it before you ship it! Have a great day ☀️
 
 [1]: #the-story-of-findreferences
 [2]: https://github.com/remix-run/remix
-[3]: https://github.com/webpro/knip/issues
+[3]: https://github.com/webpro-nl/knip/issues

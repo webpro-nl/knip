@@ -1,14 +1,15 @@
-import * as fs from 'fs';
+import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
 import { walk as _walk } from '@nodelib/fs.walk';
-import { type Options as FastGlobOptions } from 'fast-glob';
-import fastGlob from 'fast-glob';
+import type { Entry } from '@nodelib/fs.walk';
+import type { Options as FastGlobOptions } from 'fast-glob';
+import fg from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
-import { debugLogObject } from './debug.js';
-import { dirname, join, relative, toPosix } from './path.js';
 import { timerify } from './Performance.js';
-import type { Entry } from '@nodelib/fs.walk';
+import { debugLogObject } from './debug.js';
+import { isFile } from './fs.js';
+import { dirname, join, relative, toPosix } from './path.js';
 
 const walk = promisify(_walk);
 
@@ -28,32 +29,32 @@ type Gitignores = { ignores: string[]; unignores: string[] };
 
 const cachedIgnores = new Map<string, Gitignores>();
 
-function convertGitignoreToMicromatch(pattern: string) {
-  let negated = pattern[0] === '!';
+function convertGitignoreToPicomatch(pattern: string) {
+  const negated = pattern[0] === '!';
   if (negated) {
     pattern = pattern.slice(1);
   }
 
-  let extPattern;
+  let extPattern: string;
 
   if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
 
   if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  else if (!pattern.startsWith('**/')) pattern = '**/' + pattern;
+  else if (!pattern.startsWith('**/')) pattern = `**/${pattern}`;
 
   if (pattern.endsWith('/*')) extPattern = pattern;
-  else if (pattern.endsWith('/')) extPattern = pattern + '**';
-  else extPattern = pattern + '/**';
+  else if (pattern.endsWith('/')) extPattern = `${pattern}**`;
+  else extPattern = `${pattern}/**`;
 
   return { negated, patterns: [pattern, extPattern] };
 }
 
 function parseGitignoreFile(filePath: string) {
-  const file = fs.readFileSync(filePath, 'utf8');
+  const file = readFileSync(filePath, 'utf8');
   return file
     .split(/\r?\n/)
-    .filter(line => line && !line.startsWith('#'))
-    .map(pattern => convertGitignoreToMicromatch(pattern.replace(/(?<!\\)#.*/, '').trim()));
+    .filter(line => line.trim() && !line.startsWith('#'))
+    .map(pattern => convertGitignoreToPicomatch(pattern.replace(/(?<!\\)#.*/, '').trim()));
 }
 
 async function parseFindGitignores(options: Options): Promise<Gitignores> {
@@ -73,66 +74,77 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
     return false;
   };
 
-  const entryFilter = (entry: Entry) => {
-    if (entry.dirent.isFile() && entry.name === '.gitignore') {
-      gitignoreFiles.push(entry.path);
+  const addFile = (filePath: string) => {
+    gitignoreFiles.push(filePath);
 
-      const dir = dirname(toPosix(entry.path));
-      const base = relative(options.cwd, dir);
-      const dirIgnores = base === '' ? ['.git', ...GLOBAL_IGNORE_PATTERNS] : [];
-      const dirUnignores = [];
+    const dir = dirname(toPosix(filePath));
+    const base = relative(options.cwd, dir);
+    const dirIgnores = base === '' ? ['.git', ...GLOBAL_IGNORE_PATTERNS] : [];
+    const dirUnignores = [];
 
-      for (const rule of parseGitignoreFile(entry.path)) {
-        const [p, ext] = rule.patterns;
-        if (rule.negated) {
-          if (base === '') {
-            if (!unignores.includes(ext)) dirUnignores.push(...rule.patterns);
-          } else {
-            if (!unignores.includes(ext.startsWith('**/') ? ext : '**/' + ext)) {
-              dirUnignores.push(join(base, p), join(base, ext));
-            }
-          }
+    for (const rule of parseGitignoreFile(filePath)) {
+      const [p, ext] = rule.patterns;
+      if (rule.negated) {
+        if (base === '') {
+          if (!unignores.includes(ext)) dirUnignores.push(...rule.patterns);
         } else {
-          if (base === '') {
-            if (!ignores.includes(ext)) dirIgnores.push(...rule.patterns);
-          } else {
-            if (!ignores.includes(ext.startsWith('**/') ? ext : '**/' + ext)) {
-              dirIgnores.push(join(base, p), join(base, ext));
-            }
+          if (!unignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
+            dirUnignores.push(join(base, p), join(base, ext));
+          }
+        }
+      } else {
+        if (base === '') {
+          if (!ignores.includes(ext)) dirIgnores.push(...rule.patterns);
+        } else {
+          if (!ignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
+            dirIgnores.push(join(base, p), join(base, ext));
           }
         }
       }
+    }
 
-      ignores.push(...dirIgnores);
-      unignores.push(...dirUnignores);
-      cachedIgnores.set(dir, { ignores: dirIgnores, unignores: dirUnignores });
-      matchers.push(...dirIgnores.map(ignore => _picomatch(ignore, pmOptions)));
+    ignores.push(...dirIgnores);
+    unignores.push(...dirUnignores);
+    cachedIgnores.set(dir, { ignores: dirIgnores, unignores: dirUnignores });
+    matchers.push(...dirIgnores.map(ignore => _picomatch(ignore, pmOptions)));
+  };
 
+  if (isFile('.git/info/exclude')) addFile('.git/info/exclude');
+
+  const entryFilter = (entry: Entry) => {
+    if (entry.dirent.isFile() && entry.name === '.gitignore') {
+      addFile(entry.path);
       return true;
     }
     return false;
   };
+
   const deepFilter = (entry: Entry) => !matcher(relative(options.cwd, entry.path));
+
   await walk(options.cwd, {
     entryFilter: timerify(entryFilter),
     deepFilter: timerify(deepFilter),
   });
+
   debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles, ignores, unignores });
+
   return { ignores, unignores };
 }
 
 const _parseFindGitignores = timerify(parseFindGitignores);
 
-/** simpler and faster replacement for the globby npm library */
 export async function globby(patterns: string | string[], options: GlobOptions): Promise<string[]> {
+  if (Array.isArray(patterns) && patterns.length === 0) return [];
+
   const ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
+
   if (options.gitignore) {
     let dir = options.dir;
     while (dir !== options.cwd) {
       const i = cachedIgnores.get(dir);
       if (i) {
         ignore.push(...i.ignores);
-        ignore.push(...i.unignores.map(e => '!' + e));
+        ignore.push(...i.unignores.map(e => `!${e}`));
       }
       dir = dirname(dir);
     }
@@ -142,21 +154,20 @@ export async function globby(patterns: string | string[], options: GlobOptions):
 
   const { dir, ...fastGlobOptions } = { ...options, ignore };
 
-  debugLogObject(relative(options.cwd, dir) || ROOT_WORKSPACE_NAME, `Glob options`, { patterns, ...options });
+  debugLogObject(relative(options.cwd, dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...options });
 
-  return fastGlob(patterns, fastGlobOptions);
+  return fg.glob(patterns, fastGlobOptions);
 }
 
-/** create a function that should be equivalent to `git check-ignored` */
 export async function getGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
   cachedIgnores.clear();
+
   if (options.gitignore === false) return () => false;
+
   const gitignore = await _parseFindGitignores(options);
   const matcher = _picomatch(gitignore.ignores, { ignore: gitignore.unignores });
-  const isGitIgnored = (filePath: string) => {
-    const ret = matcher(relative(options.cwd, filePath));
-    // debugLogObject(filePath, 'isGitIgnored', { path: relative(options.cwd, filePath), gitignore });
-    return ret;
-  };
+
+  const isGitIgnored = (filePath: string) => matcher(relative(options.cwd, filePath));
+
   return timerify(isGitIgnored);
 }

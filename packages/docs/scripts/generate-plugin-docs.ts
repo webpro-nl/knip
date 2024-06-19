@@ -1,18 +1,16 @@
 import fs from 'node:fs/promises';
-// eslint-disable-next-line n/no-restricted-import
+// biome-ignore lint/nursery/noRestrictedImports: script
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import prettier from 'prettier';
+import type { Root } from 'mdast';
 import remarkDirective from 'remark-directive';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
-import { u } from 'unist-builder';
-import { base } from '../config.js';
-import type { Plugin } from '../../knip/src/types/plugins.js';
-import type { Root } from 'mdast';
 import type { Node } from 'unist';
+import { u } from 'unist-builder';
+import type { Plugin } from '../../knip/src/types/plugins.js';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const referenceDocsDir = path.join(rootDir, 'src/content/docs/reference');
@@ -20,9 +18,6 @@ const knipDir = path.join(rootDir, '../../packages/knip');
 const pluginsDir = path.join(knipDir, 'src/plugins');
 const directories = await fs.opendir(pluginsDir);
 const plugins = [];
-
-const prettierConfigPath = path.join(rootDir, '.prettierrc.json');
-const prettierOptions = await prettier.resolveConfig(prettierConfigPath);
 
 const parseFragment = (text: string) => {
   const tree = unified().use(remarkParse).parse(text);
@@ -40,8 +35,7 @@ const writeTree = async (tree: Node, filePath: string) => {
       })
       .stringify(file as Root);
 
-    const formattedMarkdown = await prettier.format(markdown, { ...prettierOptions, parser: 'markdown' });
-    await fs.writeFile(filePath, formattedMarkdown);
+    await fs.writeFile(filePath, markdown);
   } catch (err) {
     console.error(err);
   }
@@ -92,6 +86,7 @@ for await (const dir of directories) {
         value: JSON.stringify({ [pluginName]: defaults }, null, 2),
       }),
       ...parseFragment('Custom `config` or `entry` configuration overrides the defaults, they are not merged.'),
+      ...parseFragment('See [Plugins](../../explanations/plugins) for more details.'),
     ]);
 
     console.log(`Writing ${pluginName} docs to plugins/${pluginName}.md`);
@@ -101,7 +96,7 @@ for await (const dir of directories) {
 
 plugins.sort((a, b) => (a[1] < b[1] ? -1 : 1));
 
-const frontmatter = u('yaml', `title: Plugins\ntableOfContents: false`);
+const frontmatter = u('yaml', 'title: Plugins\ntableOfContents: false');
 
 const tree = u('root', [
   frontmatter,
@@ -110,16 +105,12 @@ const tree = u('root', [
       'list',
       { spread: false, ordered: false },
       plugins.map(plugin =>
-        u('listItem', [
-          u('link', { title: plugin[0], url: (base === '/' ? '' : base) + `/reference/plugins/${plugin[1]}` }, [
-            u('text', plugin[0]),
-          ]),
-        ])
+        u('listItem', [u('link', { title: plugin[0], url: `/reference/plugins/${plugin[1]}` }, [u('text', plugin[0])])])
       )
     ),
     u('paragraph'),
   ]),
 ]);
 
-console.log(`Writing plugin list to plugins.md`);
+console.log('Writing plugin list to plugins.md');
 await writeTree(tree, path.join(referenceDocsDir, 'plugins.md'));
