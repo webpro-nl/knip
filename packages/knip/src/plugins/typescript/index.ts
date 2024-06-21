@@ -31,7 +31,11 @@ const getExtends = async (configFilePath: string, internalExtends = new Set<stri
     }
   }
 
-  for (const extend of extends_) internalExtends.add(extend);
+  for (const extend of extends_) {
+    if (isInternal(extend)) internalExtends.add(toAbsolute(extend, dirname(configFilePath)));
+    else internalExtends.add(extend);
+  }
+
   return internalExtends;
 };
 
