@@ -29,7 +29,7 @@ test('Support CommonJS-style imports and exports', async () => {
     ...baseCounters,
     exports: 2,
     unlisted: 8,
-    processed: 7,
-    total: 7,
+    processed: 8,
+    total: 8,
   });
 });
