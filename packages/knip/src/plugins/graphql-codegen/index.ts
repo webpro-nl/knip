@@ -61,6 +61,10 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
   const nestedPlugins = configurationOutput
     .flatMap(configOutput => (configOutput.plugins ? configOutput.plugins : []))
     .flatMap(plugin => {
+      if (typeof plugin === 'object') return Object.keys(plugin);
+      return [plugin];
+    })
+    .flatMap(plugin => {
       if (typeof plugin !== 'string') return [];
       if (isInternal(plugin)) return [toEntryPattern(plugin)];
       return [`@graphql-codegen/${plugin}`];
