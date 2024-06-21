@@ -91,7 +91,7 @@
     "@wdio/types": "^8.38.2",
     "glob": "^10.3.12",
     "playwright": "^1.44.1",
-    "release-it": "^17.3.0",
+    "release-it": "^17.4.0",
     "type-fest": "^4.20.0",
     "typescript": "^5.5.2"
   },
