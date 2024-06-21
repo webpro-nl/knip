@@ -9,7 +9,9 @@ const fn = (_: any) => {};
 const topLevel = await import('./top-level-await-import');
 const { top } = await import('./top-level-await-import');
 
-const dynamic = () => import('./dir/import-b').then(m => m.dynamic);
+const dynamicB = () => import('./dir/import-b').then(m => m.dynamic);
+
+const dynamicF = () => import('./dir/import-f').then(({ dynamic, named: renamed }) => [dynamic, renamed]);
 
 import('./top-level-side-effects-call');
 

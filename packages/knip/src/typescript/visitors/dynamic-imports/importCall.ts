@@ -44,6 +44,18 @@ export default visit(
                         return { identifier, specifier, pos };
                       });
                     }
+                  } else if (ts.isObjectBindingPattern(arg.name)) {
+                    // Pattern: import('specifier').then({ identifier } => identifier);
+                    return arg.name.elements.map(element => {
+                      const identifier = (element.propertyName ?? element.name).getText();
+                      const alias = element.propertyName ? element.name.getText() : undefined;
+                      return {
+                        identifier,
+                        alias,
+                        specifier,
+                        pos: element.pos,
+                      };
+                    });
                   }
                 }
                 return { identifier: 'default', specifier, pos };
