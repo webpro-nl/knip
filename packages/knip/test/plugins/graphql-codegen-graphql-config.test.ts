@@ -21,11 +21,13 @@ test('Find dependencies with the graphql-codegen plugin (graphql-config)', async
   assert(issues.unlisted['graphql.config.ts']['@graphql-codegen/typescript-urql']);
   assert(issues.unlisted['graphql.config.ts']['@graphql-codegen/typescript-msw']);
 
+  assert(issues.unlisted['.graphqlrc']['@graphql-codegen/add']);
   assert(issues.unlisted['.graphqlrc']['@graphql-codegen/typescript']);
   assert(issues.unlisted['.graphqlrc']['@graphql-codegen/typescript-operations']);
   assert(issues.unlisted['.graphqlrc']['@graphql-codegen/typed-document-node']);
   assert(issues.unlisted['.graphqlrc']['@graphql-codegen/typescript-resolvers']);
 
+  assert(issues.unlisted['graphql.config.toml']['@graphql-codegen/add']);
   assert(issues.unlisted['graphql.config.toml']['@graphql-codegen/typescript']);
   assert(issues.unlisted['graphql.config.toml']['@graphql-codegen/typescript-operations']);
   assert(issues.unlisted['graphql.config.toml']['@graphql-codegen/typed-document-node']);
@@ -35,7 +37,7 @@ test('Find dependencies with the graphql-codegen plugin (graphql-config)', async
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 16,
+    unlisted: 18,
     processed: 1,
     total: 1,
   });
