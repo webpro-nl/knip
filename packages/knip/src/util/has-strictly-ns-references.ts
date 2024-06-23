@@ -3,13 +3,10 @@ import type { DependencyGraph, ImportDetails } from '../types/dependency-graph.j
 
 export const getHasStrictlyNsReferences = (
   graph: DependencyGraph,
-  importsForExport: ImportDetails | undefined
+  importsForExport: ImportDetails | undefined,
+  id: string
 ): [boolean, string?] => {
   if (!importsForExport) return [false];
-
-  if (importsForExport.importedNs.size === 0 && !importsForExport.reExported.has(IMPORT_STAR)) {
-    return [false];
-  }
 
   let namespace: string | undefined;
 
@@ -23,7 +20,7 @@ export const getHasStrictlyNsReferences = (
       for (const filePath of byFilePaths) {
         const file = graph.get(filePath);
         if (file?.imported) {
-          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported);
+          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, id);
           if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
         }
       }
@@ -35,7 +32,7 @@ export const getHasStrictlyNsReferences = (
         for (const filePath of byFilePaths) {
           const file = graph.get(filePath);
           if (file?.imported) {
-            const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported);
+            const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, id);
             if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
           }
         }
@@ -45,18 +42,48 @@ export const getHasStrictlyNsReferences = (
     namespace = ns;
   }
 
-  const byFilePaths = importsForExport.reExported.get(IMPORT_STAR);
+  const byFilePaths = importsForExport.reExported.get(id);
   if (byFilePaths) {
     for (const filePath of byFilePaths) {
       const file = graph.get(filePath);
       if (file?.imported) {
-        const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported);
+        const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, id);
         if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+        namespace = hasStrictlyNsReferences[1];
       }
     }
   }
 
-  return [true, namespace];
+  {
+    const byFilePaths = importsForExport.reExported.get(IMPORT_STAR);
+    if (byFilePaths) {
+      for (const filePath of byFilePaths) {
+        const file = graph.get(filePath);
+        if (file?.imported) {
+          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, id);
+          if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+          namespace = hasStrictlyNsReferences[1];
+        }
+      }
+    }
+  }
+
+  const reExportedAs = importsForExport.reExportedAs.get(id);
+  if (reExportedAs) {
+    for (const [alias, filePaths] of reExportedAs.entries()) {
+      for (const filePath of filePaths) {
+        const file = graph.get(filePath);
+        if (file?.imported) {
+          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, alias);
+          if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+          namespace = hasStrictlyNsReferences[1];
+        }
+      }
+    }
+  }
+
+  if (namespace) return [true, namespace];
+  return [false];
 };
 
 export const getType = (hasOnlyNsReference: boolean, isType: boolean) =>

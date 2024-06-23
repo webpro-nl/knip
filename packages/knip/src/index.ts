@@ -27,6 +27,7 @@ import { isFile } from './util/fs.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredFn } from './util/globby.js';
 import { getHandler } from './util/handle-dependency.js';
+import { getHasStrictlyNsReferences, getType } from './util/has-strictly-ns-references.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join, toPosix } from './util/path.js';
@@ -35,7 +36,6 @@ import { getShouldIgnoreHandler } from './util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
 import { createAndPrintTrace, printTrace } from './util/trace.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
-import { getHasStrictlyNsReferences, getType } from './util/type.js';
 
 export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
@@ -481,16 +481,16 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               }
             }
 
-            const [hasStrictlyNsReferences, namespace] = getHasStrictlyNsReferences(graph, importsForExport);
+            const [hasStrictlyNsRefs, namespace] = getHasStrictlyNsReferences(graph, importsForExport, identifier);
 
             const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
-            if (hasStrictlyNsReferences && ((!report.nsTypes && isType) || !(report.nsExports || isType))) continue;
+            if (hasStrictlyNsRefs && ((!report.nsTypes && isType) || !(report.nsExports || isType))) continue;
 
             if (!isExportedItemReferenced(exportedItem)) {
               if (!isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
 
-              const type = getType(hasStrictlyNsReferences, isType);
+              const type = getType(hasStrictlyNsRefs, isType);
               const isIssueAdded = collector.addIssue({
                 type,
                 filePath,
