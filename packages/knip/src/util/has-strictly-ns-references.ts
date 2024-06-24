@@ -68,16 +68,28 @@ export const getHasStrictlyNsReferences = (
     }
   }
 
-  const reExportedAs = importsForExport.reExportedAs.get(id);
+  const [identifier, ...rest] = id.split('.');
+  const reExportedAs = importsForExport.reExportedAs.get(identifier);
   if (reExportedAs) {
     for (const [alias, filePaths] of reExportedAs.entries()) {
       for (const filePath of filePaths) {
         const file = graph.get(filePath);
         if (file?.imported) {
-          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, alias);
+          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, [alias, ...rest].join('.'));
           if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
           namespace = hasStrictlyNsReferences[1];
         }
+      }
+    }
+  }
+
+  for (const [ns, filePaths] of importsForExport.reExportedNs.entries()) {
+    for (const filePath of filePaths) {
+      const file = graph.get(filePath);
+      if (file?.imported) {
+        const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, `${ns}.${id}`);
+        if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+        namespace = hasStrictlyNsReferences[1];
       }
     }
   }
