@@ -9,16 +9,17 @@ We can distinguish two types of issues:
 - [Issues reported by Knip][1]
 - [Exceptions thrown by Knip][2]
 
+Both of which could be either an issue on your end or with Knip.
+
+You can use [--debug][4] and [--trace][5] to help troubleshoot issues.
+
 ## Issues reported by Knip
 
 This indicates a successful run, but there are unused items. Continue with
 [handling issues][3] to deal with unused items reported by Knip.
 
-:::tip
-
-Use [--debug][4] and [--trace][5] to troubleshoot issues.
-
-:::
+If you think it's a false positive and you want to open an issue, please see
+[issue reproduction][7].
 
 ## Exceptions thrown by Knip
 
@@ -61,6 +62,9 @@ screenshot:
 
 <img src="/screenshots/trace.png" alt="trace" class="mw500" />
 
+It's like a reversed dependency graph. Instead of traversing imports it goes in
+the opposite direction and shows where exports are imported.
+
 #### Legend
 
 |     | Description                                 |
@@ -68,44 +72,22 @@ screenshot:
 | `✓` | Contains import and reference to the export |
 | `◯` | Entry file                                  |
 
-## Minimal reproduction
+## Opening an issue
 
-If you encounter an issue or false positives when running Knip, you can [open an
-issue on GitHub][7]. Depending on the type of issue, you might be asked to
-create a minimal reproduction: only the code and configuration required to
-demonstrate the issue.
-
-A convenient way to do so is by starting with one of these templates in
-CodeSandbox or StackBlitz:
-
-| Template |                   |                  |
-| :------- | ----------------- | ---------------- |
-| Basic    | [CodeSandbox][8]  | [StackBlitz][9]  |
-| Monorepo | [CodeSandbox][10] | [StackBlitz][11] |
-
-Other solutions may work well too. For instance, many people choose to create a
-small repository on GitHub. The goal is to have an easy and common understanding
-and reproduction.
-
-:::tip
-
-The optimal way is to add fixtures and/or failing tests to the Knip repository,
-and open a pull request to discuss the issue!
-
-:::
+If you want to open an issue, please see [issue reproduction][7].
 
 ## Understanding Knip
 
-Looking to better understand how Knip works? The [entry files][12] and
-[plugins][13] explanations cover two core concepts. After this you might want to
-check out features like [production mode][14] and [monorepos & workspaces][15].
+Looking to better understand how Knip works? The [entry files][8] and
+[plugins][9] explanations cover two core concepts. After this you might want to
+check out features like [production mode][10] and [monorepos & workspaces][11].
 
-In a more general sense, [Why use Knip?][16] explains what Knip can do for you.
+In a more general sense, [Why use Knip?][12] explains what Knip can do for you.
 
 ## Asking for help
 
 If you can't find your answer in any of the aforementioned resources, feel free
-to [open an issue on GitHub][7] or discuss it in [the Discord channel][17].
+to [open an issue on GitHub][13] or discuss it in [the Discord channel][14].
 
 [1]: #issues-reported-by-knip
 [2]: #exceptions-thrown-by-knip
@@ -113,18 +95,11 @@ to [open an issue on GitHub][7] or discuss it in [the Discord channel][17].
 [4]: #debug
 [5]: #trace
 [6]: ../reference/known-issues.md
-[7]: https://github.com/webpro-nl/knip/issues
-[8]:
-  https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/basic
-[9]:
-  https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/basic
-[10]:
-  https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/monorepo
-[11]:
-  https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/monorepo
-[12]: ../explanations/entry-files.md
-[13]: ../explanations/plugins.md
-[14]: ../features/production-mode.md
-[15]: ../features/monorepos-and-workspaces.md
-[16]: ../explanations/why-use-knip.md
-[17]: https://discord.gg/r5uXTtbTpc
+[7]: ./issue-reproduction.md
+[8]: ../explanations/entry-files.md
+[9]: ../explanations/plugins.md
+[10]: ../features/production-mode.md
+[11]: ../features/monorepos-and-workspaces.md
+[12]: ../explanations/why-use-knip.md
+[13]: https://github.com/webpro-nl/knip/issues
+[14]: https://discord.gg/r5uXTtbTpc
