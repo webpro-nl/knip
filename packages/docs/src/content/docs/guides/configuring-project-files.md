@@ -89,11 +89,13 @@ we don't want the unused exports of such files to be reported:
 }
 ```
 
+Also see the [ignoreExportsUsedInFile][2] configuration option.
+
 ## Production Mode
 
 In default mode, Knip includes all test files and other non-production files in
 the analysis. To find out what files, dependencies and exports are unused in
-production source files, use [production mode][2].
+production source files, use [production mode][3].
 
 How to exclude test and other non-production files from the analysis? For a
 better understanding of how Knip works, here's a list of options that DON'T
@@ -196,9 +198,10 @@ To reiterate, the default `entry` and `project` files for each workspace:
 
 Next to this, there are other places where [Knip looks for entry files][1].
 
-Additionally, [plugins have plenty of entry files configured][3] that are
+Additionally, [plugins have plenty of entry files configured][4] that are
 automatically added as well.
 
 [1]: ../explanations/entry-files.md
-[2]: ../features/production-mode.md
-[3]: ../explanations/plugins.md#entry-files
+[2]: ../reference/configuration#ignoreexportsusedinfile
+[3]: ../features/production-mode.md
+[4]: ../explanations/plugins.md#entry-files

@@ -158,10 +158,12 @@ Array of glob patterns to ignore issues from matching files. Example:
 }
 ```
 
-Use `ignore` patterns to exclude issues in matching files from being reported.
+:::tip
 
-To prevent matching files from being added to the analysis, use negated patterns
-in `entry` and `project` glob patterns.
+Please read [project files configuration][8] before using the `ignore` option,
+because in many cases you'll want to **exclude project files** instead.
+
+:::
 
 ### `ignoreBinaries`
 
@@ -279,3 +281,4 @@ configurations individually.
 [5]: ../explanations/plugins.md#entry-files
 [6]: ../explanations/plugins.md
 [7]: ../features/rules-and-filters.md#filters
+[8]: ../guides/configuring-project-files.md
