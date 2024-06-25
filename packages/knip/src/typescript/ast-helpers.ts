@@ -190,3 +190,18 @@ export const isImportSpecifier = (node: ts.Node) =>
   ts.isImportEqualsDeclaration(node.parent) ||
   ts.isImportClause(node.parent) ||
   ts.isNamespaceImport(node.parent);
+
+const isExported = (node: ts.Node): boolean => {
+  // @ts-expect-error TODO Property 'modifiers' does not exist on type 'Node'.
+  if ((node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.ExportKeyword)) return true;
+  return node.parent ? isExported(node.parent) : false;
+};
+
+export const isReferencedInExportedType = (node: ts.Node, symbol: ts.Symbol) =>
+  // @ts-expect-error
+  symbol.exportSymbol &&
+  // @ts-expect-error
+  !(node.transformFlags & ts.TransformFlags.ContainsTypeScript) &&
+  // @ts-expect-error
+  Boolean(node.parent.transformFlags & ts.TransformFlags.ContainsTypeScript) &&
+  isExported(node.parent);

@@ -36,7 +36,7 @@ export interface Export {
   type: SymbolType;
   members: ExportMember[];
   jsDocTags: Tags;
-  refs: number;
+  refs: [number, boolean];
   fixes: Fixes;
   symbol?: ts.Symbol;
   isReExport: boolean;
@@ -48,7 +48,7 @@ export type ExportMember = {
   line: number;
   col: number;
   type: SymbolType;
-  refs: number;
+  refs: [number, boolean];
   fix: Fix;
   symbol?: ts.Symbol;
   jsDocTags: Tags;

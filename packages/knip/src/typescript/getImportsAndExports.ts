@@ -23,6 +23,7 @@ import {
   isConsiderReferencedNS,
   isDestructuring,
   isImportSpecifier,
+  isReferencedInExportedType,
 } from './ast-helpers.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
@@ -48,10 +49,13 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Exp
     line: line + 1,
     col: character + 1,
     fix: member.fix,
-    refs: 0,
+    refs: [0, false],
     jsDocTags: getJSDocTags(member.node),
   };
 };
+
+const isType = (item: Export | ExportMember) =>
+  item.type === 'type' || item.type === 'interface' || item.type === 'member';
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
@@ -76,7 +80,7 @@ const getImportsAndExports = (
   typeChecker: ts.TypeChecker,
   options: GetImportsAndExportsOptions
 ) => {
-  const { skipTypeOnly, tags } = options;
+  const { skipTypeOnly, tags, ignoreExportsUsedInFile } = options;
   const internalImports: ImportMap = new Map();
   const externalImports = new Set<string>();
   const unresolvedImports = new Set<UnresolvedImport>();
@@ -88,6 +92,8 @@ const getImportsAndExports = (
   const traceRefs = new Set<string>();
 
   const importedInternalSymbols = new Map<ts.Symbol, string>();
+
+  const referencedSymbolsInExportedTypes = new Set<ts.Symbol>();
 
   const visitors = getVisitors(sourceFile);
 
@@ -254,7 +260,7 @@ const getImportsAndExports = (
         line: line + 1,
         col: character + 1,
         fixes: fix ? [fix] : [],
-        refs: 0,
+        refs: [0, false],
         isReExport,
       });
     }
@@ -359,6 +365,11 @@ const getImportsAndExports = (
             }
           }
         }
+
+        if (ignoreExportsUsedInFile && !isTopLevel && isReferencedInExportedType(node, symbol)) {
+          // @ts-expect-error
+          referencedSymbolsInExportedTypes.add(symbol.exportSymbol);
+        }
       }
     }
 
@@ -396,20 +407,21 @@ const getImportsAndExports = (
           // @ts-expect-error ts.getTokenAtPosition is internal fn
           const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
           if (symbol) {
+            const isInExportedType = referencedSymbolsInExportedTypes.has(symbol);
             if (item.symbol === symbol) {
-              item.refs = 1;
-              break;
+              item.refs = [1, isInExportedType];
+              if (isInExportedType || isType(item)) break;
             }
             // @ts-expect-error Keep it cheap
             const declaration = symbol.declarations?.[0];
             if (declaration) {
               if (item.symbol === declaration.name?.flowNode?.node?.symbol) {
-                item.refs = 1;
+                item.refs = [1, isInExportedType];
                 break;
               }
               if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
                 // re-exported symbol is referenced
-                item.refs = 1;
+                item.refs = [1, isInExportedType];
                 break;
               }
             }
@@ -422,7 +434,7 @@ const getImportsAndExports = (
   };
 
   for (const item of exports.values()) {
-    if (options.ignoreExportsUsedInFile) setRefs(item);
+    if (ignoreExportsUsedInFile) setRefs(item);
     for (const member of item.members) {
       setRefs(member);
       member.symbol = undefined;

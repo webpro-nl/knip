@@ -375,11 +375,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
 
+  const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
   const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
-    exportedItem.refs > 0 &&
-    (typeof chief.config.ignoreExportsUsedInFile === 'object'
-      ? exportedItem.type !== 'unknown' && !!chief.config.ignoreExportsUsedInFile[exportedItem.type]
-      : chief.config.ignoreExportsUsedInFile);
+    exportedItem.refs[1] ||
+    (exportedItem.refs[0] > 0 &&
+      (typeof ignoreExportsUsedInFile === 'object'
+        ? exportedItem.type !== 'unknown' && !!ignoreExportsUsedInFile[exportedItem.type]
+        : ignoreExportsUsedInFile));
 
   const findUnusedExports = async () => {
     if (isReportValues || isReportTypes) {
@@ -438,7 +440,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
                     if (shouldIgnore(member.jsDocTags)) continue;
 
-                    if (member.refs === 0) {
+                    if (member.refs[0] === 0) {
                       const id = `${identifier}.${member.identifier}`;
                       const { isReferenced } = isIdentifierReferenced(filePath, id);
 

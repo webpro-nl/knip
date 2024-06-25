@@ -2,7 +2,7 @@ export interface MyInterface {
   _class: MyClass;
   _type: MyType;
   _fn: typeof fn;
-  _const: typeof c;
+  _const: typeof myNumber;
 }
 
 export type MyType = {
@@ -11,6 +11,21 @@ export type MyType = {
 
 export class MyClass {}
 
+export class NotInExportedType {}
+
 export function fn() {}
 
-export const c = 1;
+export const myNumber = 1;
+
+const instance = new MyClass();
+
+const inst = new NotInExportedType();
+
+const total = myNumber + myNumber;
+total;
+
+interface MyInterface2 {
+  _class2: NotInExportedType;
+}
+
+const x: MyInterface2 = { _class2: 1 };
