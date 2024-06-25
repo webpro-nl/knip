@@ -390,30 +390,31 @@ const getImportsAndExports = (
     const id = item.identifier;
     // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
     while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
-      if (id !== ' ' && (isIdChar(text.charAt(index - 1)) || isIdChar(text.charAt(index + id.length)))) break;
-      const isDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
-      if (!isDeclaration) {
-        // @ts-expect-error ts.getTokenAtPosition is internal fn
-        const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
-        if (symbol) {
-          if (item.symbol === symbol) {
-            item.refs = 1;
-            break;
-          }
-          // @ts-expect-error Keep it cheap
-          const declaration = symbol.declarations?.[0];
-          if (declaration) {
-            if (item.symbol === declaration.name?.flowNode?.node?.symbol) {
+      if (!isIdChar(text.charAt(index - 1)) && !isIdChar(text.charAt(index + id.length))) {
+        const isDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
+        if (!isDeclaration) {
+          // @ts-expect-error ts.getTokenAtPosition is internal fn
+          const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
+          if (symbol) {
+            if (item.symbol === symbol) {
               item.refs = 1;
               break;
             }
-            if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
-              // re-exported symbol is referenced
-              item.refs = 1;
-              break;
+            // @ts-expect-error Keep it cheap
+            const declaration = symbol.declarations?.[0];
+            if (declaration) {
+              if (item.symbol === declaration.name?.flowNode?.node?.symbol) {
+                item.refs = 1;
+                break;
+              }
+              if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
+                // re-exported symbol is referenced
+                item.refs = 1;
+                break;
+              }
             }
+            symbols.add(symbol);
           }
-          symbols.add(symbol);
         }
       }
       index += id.length;
