@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/exports-in-file-shorthand');
+const cwd = resolve('fixtures/ignore-exports-used-in-file-shorthand');
 
 test('Find unused exports respecting an ignoreExportsUsedInFile (shorthand)', async () => {
   const { counters } = await main({
