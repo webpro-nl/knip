@@ -11,20 +11,20 @@ We can distinguish two types of issues:
 
 Both of which could be either an issue on your end or with Knip.
 
-You can use [--debug][4] and [--trace][5] to help troubleshoot issues.
+You can use [--debug][3] and [--trace][4] to help troubleshoot issues.
 
 ## Issues reported by Knip
 
 This indicates a successful run, but there are unused items. Continue with
-[handling issues][3] to deal with unused items reported by Knip.
+[handling issues][5] to deal with unused items reported by Knip.
 
 If you think it's a false positive and you want to open an issue, please see
-[issue reproduction][7].
+[issue reproduction][6].
 
 ## Exceptions thrown by Knip
 
 Knip (or one of its plugins loading a configuration file) may throw an error,
-resulting in an unsuccessful run. You might be encountering a [known issue][6].
+resulting in an unsuccessful run. You might be encountering a [known issue][7].
 
 Add `--debug` to the command for more error details to better locate the cause
 of the error.
@@ -74,7 +74,7 @@ the opposite direction and shows where exports are imported.
 
 ## Opening an issue
 
-If you want to open an issue, please see [issue reproduction][7].
+If you want to open an issue, please see [issue reproduction][6].
 
 ## Understanding Knip
 
@@ -91,11 +91,11 @@ to [open an issue on GitHub][13] or discuss it in [the Discord channel][14].
 
 [1]: #issues-reported-by-knip
 [2]: #exceptions-thrown-by-knip
-[3]: ../guides/handling-issues.md
-[4]: #debug
-[5]: #trace
-[6]: ../reference/known-issues.md
-[7]: ./issue-reproduction.md
+[3]: #debug
+[4]: #trace
+[5]: ../guides/handling-issues.md
+[6]: ./issue-reproduction.md
+[7]: ../reference/known-issues.md
 [8]: ../explanations/entry-files.md
 [9]: ../explanations/plugins.md
 [10]: ../features/production-mode.md
