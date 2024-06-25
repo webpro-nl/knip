@@ -25,7 +25,7 @@ const logIssueRecord = (issues: Issue[]) => {
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
 };
 
-export default ({ report, issues, configurationHints, noConfigHints, isShowProgress }: ReporterOptions) => {
+export default ({ report, issues, tagHints, configurationHints, noConfigHints, isShowProgress }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
@@ -57,13 +57,24 @@ export default ({ report, issues, configurationHints, noConfigHints, isShowProgr
     }
   }
 
-  if (!noConfigHints && configurationHints.size > 0) {
-    logTitle('Configuration issues', configurationHints.size);
-    for (const hint of configurationHints) {
-      const { type, workspaceName, identifier } = hint;
-      const message = `Unused item in ${type}`;
-      const workspace = workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : '';
-      console.warn(picocolors.gray(`${message}${workspace}:`), identifier);
+  if (!noConfigHints) {
+    if (configurationHints.size > 0) {
+      logTitle('Configuration issues', configurationHints.size);
+      for (const hint of configurationHints) {
+        const { type, workspaceName, identifier } = hint;
+        const message = `Unused item in ${type}`;
+        const workspace =
+          workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : '';
+        console.warn(picocolors.gray(`${message}${workspace}:`), identifier);
+      }
+    }
+    if (tagHints.size > 0) {
+      logTitle('Tag issues', tagHints.size);
+      for (const hint of tagHints) {
+        const { filePath, identifier, tagName } = hint;
+        const message = `Unused tag in ${toRelative(filePath)}:`;
+        console.warn(picocolors.gray(message), `${identifier} → ${tagName}`);
+      }
     }
   }
 

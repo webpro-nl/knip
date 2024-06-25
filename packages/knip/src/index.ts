@@ -32,7 +32,7 @@ import { getIsIdentifierReferencedHandler } from './util/is-identifier-reference
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join, toPosix } from './util/path.js';
 import { findMatch } from './util/regex.js';
-import { getShouldIgnoreHandler } from './util/tag.js';
+import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from './util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
 import { createAndPrintTrace, printTrace } from './util/trace.js';
 import { loadTSConfig } from './util/tsconfig-loader.js';
@@ -371,7 +371,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   if (isIsolateWorkspaces) for (const principal of principals) factory.deletePrincipal(principal);
 
-  const shouldIgnore = getShouldIgnoreHandler(tags, isProduction);
+  const shouldIgnore = getShouldIgnoreHandler(isProduction);
+  const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
 
   const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
 
@@ -415,7 +416,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             // Skip tagged exports
             if (shouldIgnore(exportedItem.jsDocTags)) continue;
 
-            if (importsForExport) {
+            const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags);
+
+            if (!isIgnored && importsForExport) {
               const { isReferenced, reExportingEntryFile, traceNode } = isIdentifierReferenced(
                 filePath,
                 identifier,
@@ -443,8 +446,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                     if (member.refs[0] === 0) {
                       const id = `${identifier}.${member.identifier}`;
                       const { isReferenced } = isIdentifierReferenced(filePath, id);
+                      const isIgnored = shouldIgnoreTags(member.jsDocTags);
 
                       if (!isReferenced) {
+                        if (isIgnored) continue;
+
                         collector.addIssue({
                           type: 'enumMembers',
                           filePath,
@@ -455,6 +461,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                           line: member.line,
                           col: member.col,
                         });
+                      } else if (isIgnored) {
+                        for (const tagName of exportedItem.jsDocTags) {
+                          if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                            collector.addTagHint({ type: 'tag', filePath, identifier: id, tagName });
+                          }
+                        }
                       }
                     }
                   }
@@ -465,6 +477,16 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                     member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
                   );
                   for (const member of principal.findUnusedMembers(filePath, members)) {
+                    if (shouldIgnoreTags(member.jsDocTags)) {
+                      const identifier = `${exportedItem.identifier}.${member.identifier}`;
+                      for (const tagName of exportedItem.jsDocTags) {
+                        if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                          collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
+                        }
+                      }
+                      continue;
+                    }
+
                     collector.addIssue({
                       type: 'classMembers',
                       filePath,
@@ -490,6 +512,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
             if (hasStrictlyNsRefs && ((!report.nsTypes && isType) || !(report.nsExports || isType))) continue;
 
             if (!isExportedItemReferenced(exportedItem)) {
+              if (isIgnored) continue;
               if (!isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
 
               const type = getType(hasStrictlyNsRefs, isType);
@@ -507,6 +530,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (isIssueAdded) {
                 if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
                 else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
+              }
+            } else if (isIgnored) {
+              for (const tagName of exportedItem.jsDocTags) {
+                if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                  collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
+                }
               }
             }
           }
@@ -656,7 +685,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   await findUnusedExports();
 
-  const { issues, counters, configurationHints } = collector.getIssues();
+  const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
   if (isFix) {
     await fixer.fixIssues(issues);
@@ -665,5 +694,5 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   if (isWatch) watchReporter({ report, issues, streamer, size: analyzedFiles.size, isDebug });
   else streamer.clear();
 
-  return { report, issues, counters, rules, configurationHints };
+  return { report, issues, counters, rules, tagHints, configurationHints };
 };

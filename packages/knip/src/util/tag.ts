@@ -21,9 +21,10 @@ export const shouldIgnore = (jsDocTags: Set<string>, tags: Tags) => {
   return false;
 };
 
-export const getShouldIgnoreHandler = (tags: Tags, isProduction: boolean) => (jsDocTags: Set<string>) =>
+export const getShouldIgnoreHandler = (isProduction: boolean) => (jsDocTags: Set<string>) =>
   jsDocTags.has('@public') ||
   jsDocTags.has('@beta') ||
   jsDocTags.has('@alias') ||
-  shouldIgnore(jsDocTags, tags) ||
   (isProduction && jsDocTags.has('@internal'));
+
+export const getShouldIgnoreTagHandler = (tags: Tags) => (jsDocTags: Set<string>) => shouldIgnore(jsDocTags, tags);

@@ -50,7 +50,7 @@ const isShowProgress = isNoProgress === false && process.stdout.isTTY && typeof 
 
 const run = async () => {
   try {
-    const { report, issues, counters, rules, configurationHints } = await main({
+    const { report, issues, counters, rules, tagHints, configurationHints } = await main({
       cwd,
       tsConfigFile: tsConfig,
       gitignore: !isNoGitIgnore,
@@ -74,6 +74,7 @@ const run = async () => {
       report,
       issues,
       counters,
+      tagHints,
       configurationHints,
       noConfigHints,
       cwd,
