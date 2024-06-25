@@ -10,6 +10,7 @@ import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/dependency-graph.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { extname, isInNodeModules } from '../util/path.js';
+import { isIdChar } from '../util/regex.js';
 import { shouldIgnore } from '../util/tag.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import {
@@ -385,8 +386,11 @@ const getImportsAndExports = (
     if (!item.symbol) return;
     const symbols = new Set<ts.Symbol>();
     let index = 0;
+    const text = sourceFile.text;
+    const id = item.identifier;
     // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-    while (index < sourceFile.text.length && (index = sourceFile.text.indexOf(item.identifier, index)) !== -1) {
+    while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
+      if (id !== ' ' && (isIdChar(text.charAt(index - 1)) || isIdChar(text.charAt(index + id.length)))) break;
       const isDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
       if (!isDeclaration) {
         // @ts-expect-error ts.getTokenAtPosition is internal fn
@@ -412,7 +416,7 @@ const getImportsAndExports = (
           symbols.add(symbol);
         }
       }
-      index += item.identifier.length;
+      index += id.length;
     }
   };
 
