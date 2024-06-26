@@ -192,8 +192,7 @@ export const isImportSpecifier = (node: ts.Node) =>
   ts.isNamespaceImport(node.parent);
 
 const isExported = (node: ts.Node): boolean => {
-  // @ts-expect-error TODO Property 'modifiers' does not exist on type 'Node'.
-  if ((node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.ExportKeyword)) return true;
+  if (getExportKeywordNode(node)) return true;
   return node.parent ? isExported(node.parent) : false;
 };
 
@@ -211,3 +210,11 @@ export const isReferencedInExportedType = (node: ts.Node) => {
   const typeNode = getAncestorTypeDeclaration(node);
   return Boolean(typeNode && isExported(typeNode));
 };
+
+export const getExportKeywordNode = (node: ts.Node) =>
+  // @ts-expect-error Property 'modifiers' does not exist on type 'Node'.
+  (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.ExportKeyword);
+
+export const getDefaultKeywordNode = (node: ts.Node) =>
+  // @ts-expect-error Property 'modifiers' does not exist on type 'Node'.
+  (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);

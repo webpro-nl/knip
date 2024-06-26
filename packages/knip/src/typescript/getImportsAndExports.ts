@@ -98,7 +98,7 @@ const getImportsAndExports = (
   const visitors = getVisitors(sourceFile);
 
   const addInternalImport = (options: AddInternalImportOptions) => {
-    const { identifier, symbol, filePath, namespace, specifier, isReExport } = options;
+    const { identifier, symbol, filePath, namespace, alias, specifier, isReExport } = options;
 
     const isStar = identifier === IMPORT_STAR;
 
@@ -110,7 +110,7 @@ const getImportsAndExports = (
 
     if (!file) internalImports.set(filePath, imports);
 
-    const nsOrAlias = symbol ? String(symbol.escapedName) : options.alias;
+    const nsOrAlias = symbol ? String(symbol.escapedName) : alias;
 
     if (isReExport) {
       if (isStar && namespace) {

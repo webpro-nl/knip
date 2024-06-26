@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/re-exports-default-renamed-deep');
 
-test('Find exports through re-exported aliased exports', async () => {
+test('Find exports through re-exported aliased exports (deep)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
