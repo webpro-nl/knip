@@ -1,6 +1,9 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import { hasDependency, toLilconfig } from '#p/util/plugin.js';
 import type { PostCSSConfig } from './types.js';
+
+// https://github.com/postcss/postcss-load-config/blob/main/src/index.js#L110
+// Additionally postcss.config.json is loaded by nextjs
 
 const title = 'PostCSS';
 
@@ -8,7 +11,11 @@ const enablers = ['postcss', 'postcss-cli', 'next'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['postcss.config.{cjs,js}', 'postcss.config.json', 'package.json'];
+const config = [
+  'package.json',
+  'postcss.config.json',
+  ...toLilconfig('postcss', { configDir: false, additionalExtensions: ['ts', 'mts', 'cts', 'yaml', 'yml'] }),
+];
 
 const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
   return config.plugins

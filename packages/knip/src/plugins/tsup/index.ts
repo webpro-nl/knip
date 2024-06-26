@@ -4,6 +4,7 @@ import { toProductionEntryPattern } from '#p/util/protocols.js';
 import type { TsupConfig } from './types.js';
 
 // https://paka.dev/npm/tsup/api
+// https://github.com/egoist/tsup/blob/dev/src/load.ts
 
 const title = 'tsup';
 
@@ -11,7 +12,7 @@ const enablers = ['tsup'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['tsup.config.{js,ts,cjs,json}', 'package.json'];
+const config = ['tsup.config.{js,ts,cjs,mjs,json}', 'package.json'];
 
 const resolveConfig: ResolveConfig<TsupConfig> = async config => {
   if (typeof config === 'function') config = await config({});

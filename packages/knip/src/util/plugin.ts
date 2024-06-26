@@ -1,7 +1,7 @@
-export { _load as load } from './loader.js';
-export { _loadJSON as loadJSON } from './fs.js';
-export { _tryResolve as tryResolve } from './require.js';
 export { _getDependenciesFromScripts as getDependenciesFromScripts } from '../binaries/index.js';
+export { _loadJSON as loadJSON } from './fs.js';
+export { _load as load } from './loader.js';
+export { _tryResolve as tryResolve } from './require.js';
 import type { RawPluginConfiguration } from '../types/config.js';
 import type { Plugin, PluginOptions } from '../types/plugins.js';
 import { arrayify } from './array.js';
@@ -81,3 +81,56 @@ export const getFinalEntryPaths = (plugin: Plugin, options: PluginOptions, confi
       ? configEntryPaths
       : [...(plugin.entry ?? []).map(toEntryPattern), ...(plugin.production ?? []).map(toProductionEntryPattern)];
 };
+
+const toConfigMap =
+  (
+    defaultExtensions: string[],
+    builderConfig: {
+      rcPrefix?: string;
+      rcSuffix?: string;
+      configDir?: boolean;
+      configFiles?: boolean;
+      configFilesAllExtensions?: boolean;
+      additionalExtensions?: string[];
+    }
+  ) =>
+  (moduleName: string, options?: typeof builderConfig) => {
+    const config = {
+      rcPrefix: '.',
+      rcSuffix: 'rc',
+      // Generate .config/<file>
+      configDir: true,
+      // Generate <file>.config.<ext>
+      configFiles: true,
+      // Allow for .json, .yaml, .yml, .toml etc
+      configFilesAllExtensions: false,
+      additionalExtensions: [],
+      ...builderConfig,
+      ...options,
+    };
+    const { rcPrefix, rcSuffix } = config;
+    const jsTypeExtensions = ['js', 'ts', 'cjs', 'mjs', 'cts', 'mts'];
+    const extensions = [...defaultExtensions, ...config.additionalExtensions];
+
+    const rcFiles = [
+      `${rcPrefix}${moduleName}${rcSuffix}`,
+      ...extensions.map(ext => `${rcPrefix}${moduleName}${rcSuffix}.${ext}`),
+    ];
+    const configFiles = config.configFiles
+      ? extensions.filter(ext => config.configFilesAllExtensions || jsTypeExtensions.includes(ext)).map(ext => `${moduleName}.config.${ext}`)
+      : [];
+    const configDirFiles = config.configDir
+      ? [`.config/${moduleName}${rcSuffix}`, ...extensions.map(ext => `.config/${moduleName}${rcSuffix}.${ext}`)]
+      : [];
+
+    return [...rcFiles, ...configFiles, ...configDirFiles];
+  };
+
+export const toCosmiconfig = toConfigMap(['json', 'yaml', 'yml', 'js', 'ts', 'cjs', 'mjs'], { configDir: true });
+export const toLilconfig = toConfigMap(['json', 'js', 'cjs', 'mjs'], { configDir: true });
+export const toUnconfig = toConfigMap(['json', 'ts', 'mts', 'cts', 'js', 'mjs', 'cjs'], {
+  configDir: false,
+  rcPrefix: '',
+  rcSuffix: '',
+  configFiles: false,
+});

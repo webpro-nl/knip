@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import { getDependenciesFromScripts, hasDependency, toLilconfig } from '#p/util/plugin.js';
 import type { LintStagedConfig } from './types.js';
 
 // https://github.com/okonet/lint-staged
@@ -13,12 +13,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const packageJsonPath = 'lint-staged';
 
 const config = [
-  '.lintstagedrc',
-  '.lintstagedrc.json',
-  '.lintstagedrc.{yml,yaml}',
-  '.lintstagedrc.{js,mjs,cjs}',
-  'lint-staged.config.{js,mjs,cjs}',
   'package.json',
+  'package.yaml',
+  'package.yml',
+  ...toLilconfig('lint-staged'),
+  ...toLilconfig('lintstaged'),
 ];
 
 const resolveConfig: ResolveConfig<LintStagedConfig> = async (config, options) => {

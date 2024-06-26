@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { isInternal } from '#p/util/path.js';
-import { hasDependency } from '#p/util/plugin.js';
+import { hasDependency, toCosmiconfig } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
 import type { PluginConfig } from './types.js';
 
@@ -14,14 +14,7 @@ const enablers = ['@linthtml/linthtml'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = [
-  '.linthtmlrc',
-  '.linthtmlrc.json',
-  '.linthtmlrc.yml',
-  '.linthtmlrc.{js,cjs}',
-  'linthtml.config.js',
-  'package.json',
-];
+const config = ['package.json', ...toCosmiconfig('linthtml')];
 
 const resolveConfig: ResolveConfig<PluginConfig> = config => {
   const extensions = [config.extends ?? []]
