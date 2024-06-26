@@ -366,7 +366,7 @@ const getImportsAndExports = (
           }
         }
 
-        if (ignoreExportsUsedInFile && !isTopLevel && isReferencedInExportedType(node, symbol)) {
+        if (ignoreExportsUsedInFile && !isTopLevel && isReferencedInExportedType(node)) {
           // @ts-expect-error
           referencedSymbolsInExportedTypes.add(symbol.exportSymbol);
         }

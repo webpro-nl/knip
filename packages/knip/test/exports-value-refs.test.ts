@@ -14,10 +14,12 @@ test('Find unused exports in exported types', async () => {
   });
 
   assert(issues.exports['refs.ts']['NotInExportedType']);
+  assert(issues.exports['refs.ts']['myValue']);
+  assert(issues.exports['refs.ts']['myResult']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 1,
+    exports: 3,
     processed: 2,
     total: 2,
   });

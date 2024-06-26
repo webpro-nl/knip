@@ -13,7 +13,7 @@ export class MyClass {}
 
 export class NotInExportedType {}
 
-export function fn() {}
+export function fn(n: unknown) {}
 
 export const myNumber = 1;
 
@@ -29,3 +29,6 @@ interface MyInterface2 {
 }
 
 const x: MyInterface2 = { _class2: 1 };
+
+export const myValue: unknown = {};
+export const myResult: unknown = fn(myValue);

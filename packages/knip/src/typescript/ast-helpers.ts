@@ -197,11 +197,17 @@ const isExported = (node: ts.Node): boolean => {
   return node.parent ? isExported(node.parent) : false;
 };
 
-export const isReferencedInExportedType = (node: ts.Node, symbol: ts.Symbol) =>
-  // @ts-expect-error
-  symbol.exportSymbol &&
-  // @ts-expect-error
-  !(node.transformFlags & ts.TransformFlags.ContainsTypeScript) &&
-  // @ts-expect-error
-  Boolean(node.parent.transformFlags & ts.TransformFlags.ContainsTypeScript) &&
-  isExported(node.parent);
+const isTypeDeclaration = (node: ts.Node) =>
+  ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node);
+
+const getAncestorTypeDeclaration = (node: ts.Node) => {
+  while (node) {
+    if (isTypeDeclaration(node)) return node;
+    node = node.parent;
+  }
+};
+
+export const isReferencedInExportedType = (node: ts.Node) => {
+  const typeNode = getAncestorTypeDeclaration(node);
+  return Boolean(typeNode && isExported(typeNode));
+};
