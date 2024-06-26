@@ -13,6 +13,8 @@ test('Include or exclude tagged exports (default)', async () => {
     cwd,
   });
 
+  assert(issues.exports['unimported.ts']['unimported']);
+  assert(issues.exports['unimported.ts']['unimportedUntagged']);
   assert(issues.exports['tags.ts']['UnusedUntagged']);
   assert(issues.exports['tags.ts']['UnusedCustom']);
   assert(issues.exports['tags.ts']['UnusedInternal']);
@@ -30,12 +32,12 @@ test('Include or exclude tagged exports (default)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 5,
+    exports: 7,
     types: 1,
     classMembers: 4,
     enumMembers: 4,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
 
@@ -46,6 +48,7 @@ test('Include or exclude tagged exports (include)', async () => {
     tags: [['custom'], []],
   });
 
+  assert(issues.exports['unimported.ts']['unimported']);
   assert(issues.exports['tags.ts']['UnusedCustom']);
   assert(issues.exports['tags.ts']['UnusedCustomAndInternal']);
   assert(issues.exports['tags.ts']['MyCustomClass']);
@@ -53,10 +56,10 @@ test('Include or exclude tagged exports (include)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 3,
+    exports: 4,
     types: 1,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
 
@@ -67,6 +70,7 @@ test('Include or exclude tagged exports (exclude)', async () => {
     tags: [[], ['custom']],
   });
 
+  assert(issues.exports['unimported.ts']['unimportedUntagged']);
   assert(issues.exports['tags.ts']['UnusedUntagged']);
   assert(issues.exports['tags.ts']['UnusedInternal']);
   assert(issues.classMembers['tags.ts']['UnusedUntagged']);
@@ -76,10 +80,10 @@ test('Include or exclude tagged exports (exclude)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
+    exports: 3,
     classMembers: 2,
     enumMembers: 2,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

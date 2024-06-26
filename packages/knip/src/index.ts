@@ -418,12 +418,22 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
             const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags);
 
-            if (!isIgnored && importsForExport) {
+            if (importsForExport) {
               const { isReferenced, reExportingEntryFile, traceNode } = isIdentifierReferenced(
                 filePath,
                 identifier,
                 isIncludeEntryExports
               );
+
+              if ((isReferenced || exportedItem.refs[1]) && isIgnored) {
+                for (const tagName of exportedItem.jsDocTags) {
+                  if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                    collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
+                  }
+                }
+              }
+
+              if (isIgnored) continue;
 
               if (reExportingEntryFile) {
                 if (!isIncludeEntryExports) {
@@ -531,12 +541,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               if (isFix && isIssueAdded) {
                 if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
                 else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
-              }
-            } else if (isIgnored) {
-              for (const tagName of exportedItem.jsDocTags) {
-                if (tags[1].includes(tagName.replace(/^\@/, ''))) {
-                  collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
-                }
               }
             }
           }
