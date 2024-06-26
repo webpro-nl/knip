@@ -455,7 +455,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
                     if (member.refs[0] === 0) {
                       const id = `${identifier}.${member.identifier}`;
-                      const { isReferenced } = isIdentifierReferenced(filePath, id);
+                      const { isReferenced } = isIdentifierReferenced(filePath, id, true);
                       const isIgnored = shouldIgnoreTags(member.jsDocTags);
 
                       if (!isReferenced) {
