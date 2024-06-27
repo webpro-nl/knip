@@ -1,7 +1,7 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
+import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
@@ -64,7 +64,7 @@ test('Include or exclude tagged exports (include)', async () => {
 });
 
 test('Include or exclude tagged exports (exclude)', async () => {
-  const { issues, counters } = await main({
+  const { issues, counters, tagHints } = await main({
     ...baseArguments,
     cwd,
     tags: [[], ['custom']],
@@ -77,6 +77,18 @@ test('Include or exclude tagged exports (exclude)', async () => {
   assert(issues.classMembers['tags.ts']['UnusedInternal']);
   assert(issues.enumMembers['tags.ts']['UnusedUntagged']);
   assert(issues.enumMembers['tags.ts']['UnusedInternal']);
+
+  assert.deepEqual(
+    tagHints,
+    new Set([
+      {
+        type: 'tag',
+        filePath: join(cwd, 'unimported.ts'),
+        identifier: 'ignored',
+        tagName: '@custom',
+      },
+    ])
+  );
 
   assert.deepEqual(counters, {
     ...baseCounters,
