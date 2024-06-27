@@ -395,6 +395,12 @@ const getImportsAndExports = (
 
   const setRefs = (item: Export | ExportMember) => {
     if (!item.symbol) return;
+
+    if (item.symbol.flags & ts.SymbolFlags.AliasExcludes) {
+      item.refs = [1, false];
+      return;
+    }
+
     const symbols = new Set<ts.Symbol>();
     let index = 0;
     const text = sourceFile.text;
