@@ -300,7 +300,11 @@ const getImportsAndExports = (
     }
 
     // Skip some work by handling only top-level import/export assignments
-    const isTopLevel = node.parent === sourceFile || node.parent?.parent === sourceFile;
+    const isTopLevel =
+      node.parent &&
+      ('commonJsModuleIndicator' in sourceFile
+        ? node.parent.parent === sourceFile || node.parent === sourceFile
+        : node.parent === sourceFile);
 
     if (isTopLevel) {
       for (const visitor of visitors.import) {
@@ -408,8 +412,8 @@ const getImportsAndExports = (
     // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
     while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
       if (!isIdChar(text.charAt(index - 1)) && !isIdChar(text.charAt(index + id.length))) {
-        const isDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
-        if (!isDeclaration) {
+        const isExportDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
+        if (!isExportDeclaration) {
           // @ts-expect-error ts.getTokenAtPosition is internal fn
           const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
           if (symbol) {
@@ -439,8 +443,11 @@ const getImportsAndExports = (
     }
   };
 
+  const isSetRefs = ignoreExportsUsedInFile;
   for (const item of exports.values()) {
-    if (ignoreExportsUsedInFile) setRefs(item);
+    if (isSetRefs === true || (typeof isSetRefs === 'object' && item.type !== 'unknown' && !!isSetRefs[item.type])) {
+      setRefs(item);
+    }
     for (const member of item.members) {
       setRefs(member);
       member.symbol = undefined;
