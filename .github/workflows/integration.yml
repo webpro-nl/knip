@@ -101,9 +101,8 @@ jobs:
       - name: Test Knip against TypeScript
         uses: actions/checkout@v4
         with:
-          repository: webpro/TypeScript
+          repository: microsoft/TypeScript
           path: TypeScript
-          ref: remove-unused-exports
       - run: |
           cd TypeScript
           npm ci
