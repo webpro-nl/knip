@@ -112,18 +112,19 @@ const toConfigMap =
     const jsTypeExtensions = ['js', 'ts', 'cjs', 'mjs', 'cts', 'mts'];
     const extensions = [...defaultExtensions, ...config.additionalExtensions];
 
-    const rcFiles = [
+    const baseFiles = [
       `${rcPrefix}${moduleName}${rcSuffix}`,
-      ...extensions.map(ext => `${rcPrefix}${moduleName}${rcSuffix}.${ext}`),
+      ...(config.configDir ? [`.config/${moduleName}${rcSuffix}`] : []),
     ];
-    const configFiles = config.configFiles
-      ? extensions.filter(ext => config.configFilesAllExtensions || jsTypeExtensions.includes(ext)).map(ext => `${moduleName}.config.${ext}`)
-      : [];
-    const configDirFiles = config.configDir
-      ? [`.config/${moduleName}${rcSuffix}`, ...extensions.map(ext => `.config/${moduleName}${rcSuffix}.${ext}`)]
-      : [];
 
-    return [...rcFiles, ...configFiles, ...configDirFiles];
+    const rcFiles = `${rcPrefix}${moduleName}${rcSuffix}.{${extensions.join(',')}}`;
+    const configExtensions = extensions.filter(
+      ext => config.configFilesAllExtensions || jsTypeExtensions.includes(ext)
+    );
+    const configFiles = !!config.configFiles && `${moduleName}.config.{${configExtensions.join(',')}}`;
+    const configDirFiles = !!config.configDir && `.config/${moduleName}${rcSuffix}.{${extensions.join(',')}}`;
+
+    return [...baseFiles, rcFiles, configFiles, configDirFiles].filter(item => item !== false);
   };
 
 export const toCosmiconfig = toConfigMap(['json', 'yaml', 'yml', 'js', 'ts', 'cjs', 'mjs'], { configDir: true });
