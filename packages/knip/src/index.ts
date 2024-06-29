@@ -418,12 +418,22 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
             const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags);
 
-            if (!isIgnored && importsForExport) {
+            if (importsForExport) {
               const { isReferenced, reExportingEntryFile, traceNode } = isIdentifierReferenced(
                 filePath,
                 identifier,
                 isIncludeEntryExports
               );
+
+              if ((isReferenced || exportedItem.refs[1]) && isIgnored) {
+                for (const tagName of exportedItem.jsDocTags) {
+                  if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                    collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
+                  }
+                }
+              }
+
+              if (isIgnored) continue;
 
               if (reExportingEntryFile) {
                 if (!isIncludeEntryExports) {
@@ -445,7 +455,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
                     if (member.refs[0] === 0) {
                       const id = `${identifier}.${member.identifier}`;
-                      const { isReferenced } = isIdentifierReferenced(filePath, id);
+                      const { isReferenced } = isIdentifierReferenced(filePath, id, true);
                       const isIgnored = shouldIgnoreTags(member.jsDocTags);
 
                       if (!isReferenced) {
@@ -527,15 +537,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                 line: exportedItem.line,
                 col: exportedItem.col,
               });
-              if (isIssueAdded) {
+
+              if (isFix && isIssueAdded) {
                 if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
                 else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
-              }
-            } else if (isIgnored) {
-              for (const tagName of exportedItem.jsDocTags) {
-                if (tags[1].includes(tagName.replace(/^\@/, ''))) {
-                  collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
-                }
               }
             }
           }

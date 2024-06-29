@@ -98,7 +98,7 @@ const getImportsAndExports = (
   const visitors = getVisitors(sourceFile);
 
   const addInternalImport = (options: AddInternalImportOptions) => {
-    const { identifier, symbol, filePath, namespace, specifier, isReExport } = options;
+    const { identifier, symbol, filePath, namespace, alias, specifier, isReExport } = options;
 
     const isStar = identifier === IMPORT_STAR;
 
@@ -110,7 +110,7 @@ const getImportsAndExports = (
 
     if (!file) internalImports.set(filePath, imports);
 
-    const nsOrAlias = symbol ? String(symbol.escapedName) : options.alias;
+    const nsOrAlias = symbol ? String(symbol.escapedName) : alias;
 
     if (isReExport) {
       if (isStar && namespace) {
@@ -300,7 +300,11 @@ const getImportsAndExports = (
     }
 
     // Skip some work by handling only top-level import/export assignments
-    const isTopLevel = node.parent === sourceFile || node.parent?.parent === sourceFile;
+    const isTopLevel =
+      node.parent &&
+      ('commonJsModuleIndicator' in sourceFile
+        ? node.parent.parent === sourceFile || node.parent === sourceFile
+        : node.parent === sourceFile);
 
     if (isTopLevel) {
       for (const visitor of visitors.import) {
@@ -366,7 +370,7 @@ const getImportsAndExports = (
           }
         }
 
-        if (ignoreExportsUsedInFile && !isTopLevel && isReferencedInExportedType(node, symbol)) {
+        if (ignoreExportsUsedInFile && !isTopLevel && isReferencedInExportedType(node)) {
           // @ts-expect-error
           referencedSymbolsInExportedTypes.add(symbol.exportSymbol);
         }
@@ -395,6 +399,12 @@ const getImportsAndExports = (
 
   const setRefs = (item: Export | ExportMember) => {
     if (!item.symbol) return;
+
+    if (item.symbol.flags & ts.SymbolFlags.AliasExcludes) {
+      item.refs = [1, false];
+      return;
+    }
+
     const symbols = new Set<ts.Symbol>();
     let index = 0;
     const text = sourceFile.text;
@@ -402,8 +412,8 @@ const getImportsAndExports = (
     // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
     while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
       if (!isIdChar(text.charAt(index - 1)) && !isIdChar(text.charAt(index + id.length))) {
-        const isDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
-        if (!isDeclaration) {
+        const isExportDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
+        if (!isExportDeclaration) {
           // @ts-expect-error ts.getTokenAtPosition is internal fn
           const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
           if (symbol) {
@@ -433,8 +443,11 @@ const getImportsAndExports = (
     }
   };
 
+  const isSetRefs = ignoreExportsUsedInFile;
   for (const item of exports.values()) {
-    if (ignoreExportsUsedInFile) setRefs(item);
+    if (isSetRefs === true || (typeof isSetRefs === 'object' && item.type !== 'unknown' && !!isSetRefs[item.type])) {
+      setRefs(item);
+    }
     for (const member of item.members) {
       setRefs(member);
       member.symbol = undefined;

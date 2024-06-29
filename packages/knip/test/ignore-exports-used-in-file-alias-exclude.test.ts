@@ -5,22 +5,17 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/exports-value-refs');
+const cwd = resolve('fixtures/ignore-exports-used-in-file-alias-exclude');
 
-test('Find unused exports in exported types', async () => {
-  const { issues, counters } = await main({
+test('Find unused exports respecting an ignoreExportsUsedInFile (alias)', async () => {
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(issues.exports['refs.ts']['NotInExportedType']);
-  assert(issues.exports['refs.ts']['myValue']);
-  assert(issues.exports['refs.ts']['myResult']);
-
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 3,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
