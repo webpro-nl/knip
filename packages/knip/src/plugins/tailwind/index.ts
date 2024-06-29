@@ -2,6 +2,7 @@ import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
 
 // https://tailwindcss.com/docs/configuration
+// Tailwinds lilconfig dependency is only used for postcss
 
 const title = 'Tailwind';
 

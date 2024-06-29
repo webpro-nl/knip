@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { isInternal } from '#p/util/path.js';
-import { hasDependency } from '#p/util/plugin.js';
+import { hasDependency, toCosmiconfig } from '#p/util/plugin.js';
 import type { BaseStyleLintConfig, StyleLintConfig } from './types.js';
 
 // https://stylelint.io/user-guide/configure/
@@ -11,7 +11,7 @@ const enablers = ['stylelint'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.stylelintrc', '.stylelintrc.{cjs,js,json,yaml,yml}', 'stylelint.config.{cjs,mjs,js}'];
+const config = ['package.json', ...toCosmiconfig('stylelint')];
 
 const resolve = (config: StyleLintConfig | BaseStyleLintConfig): string[] => {
   const extend = config.extends ? [config.extends].flat().filter(id => !isInternal(id)) : [];

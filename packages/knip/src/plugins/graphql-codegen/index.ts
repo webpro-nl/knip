@@ -3,7 +3,6 @@ import { get } from '#p/util/object.js';
 import { isInternal } from '#p/util/path.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
-import { isConfigurationOutput, isGraphqlConfigTypes, isGraphqlProjectsConfigTypes } from './types.js';
 import type {
   ConfiguredPlugin,
   GraphqlCodegenTypes,
@@ -11,9 +10,14 @@ import type {
   GraphqlProjectsConfigTypes,
   PresetNames,
 } from './types.js';
+import { isConfigurationOutput, isGraphqlConfigTypes, isGraphqlProjectsConfigTypes } from './types.js';
 
+// Both use Cosmiconfig with custom searchPlaces - not using helper as a result
+// Codegen:
 // https://the-guild.dev/graphql/codegen/docs/config-reference/codegen-config
 // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/config.ts
+// Config:
+// https://the-guild.dev/graphql/config/docs/user/usage#config-search-places
 
 const title = 'GraphQL Codegen';
 
@@ -26,11 +30,10 @@ const packageJsonPath: Plugin['packageJsonPath'] = manifest => get(manifest, 'co
 const config = [
   'package.json',
   // graphql-codegen config files
-  'codegen.{json,yml,yaml,js,ts,mjs,cts}',
+  'codegen.{json,yml,yaml,js,ts}',
   '.codegenrc.{json,yml,yaml,js,ts}',
   'codegen.config.js',
   // graphql-config config files
-  // https://the-guild.dev/graphql/config/docs/user/usage#config-search-places
   '.graphqlrc',
   '.graphqlrc.{json,yml,yaml,toml,js,ts}',
   'graphql.config.{json,yml,yaml,toml,js,cjs,ts}',

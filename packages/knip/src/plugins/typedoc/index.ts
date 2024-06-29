@@ -3,6 +3,7 @@ import { hasDependency } from '#p/util/plugin.js';
 import type { TypeDocConfig } from './types.js';
 
 // https://typedoc.org/guides/overview/
+// https://github.com/TypeStrong/typedoc/blob/9f0fb048399c7a1273dc452d01cca92b34f4675b/src/lib/utils/options/readers/typedoc.ts#L168
 
 const title = 'TypeDoc';
 
@@ -13,10 +14,10 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const packageJsonPath = 'typedocOptions';
 
 const config = [
-  'typedoc.{js,cjs,json,jsonc}',
-  'typedoc.config.{js,cjs}',
-  '.config/typedoc.{js,cjs,json,jsonc}',
-  '.config/typedoc.config.{js,cjs}',
+  'typedoc.{js,cjs,mjs,json,jsonc}',
+  'typedoc.config.{js,cjs,mjs}',
+  '.config/typedoc.{js,cjs,mjs,json,jsonc}',
+  '.config/typedoc.config.{js,cjs,mjs}',
   'package.json',
   'tsconfig.json',
 ];
