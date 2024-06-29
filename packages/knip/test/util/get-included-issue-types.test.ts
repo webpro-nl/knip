@@ -92,10 +92,7 @@ test('Resolve included issue types (--exports)', async () => {
   assert.deepEqual(config, {
     ...none,
     exports: true,
-    nsExports: true,
-    classMembers: true,
     types: true,
-    nsTypes: true,
     enumMembers: true,
     duplicates: true,
   });

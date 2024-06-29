@@ -46,7 +46,7 @@ export const getIncludedIssueTypes = (
     incl = [...incl, 'dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
   }
   if (cliArgs.exports) {
-    incl = [...incl, 'exports', 'nsExports', 'classMembers', 'types', 'nsTypes', 'enumMembers', 'duplicates'];
+    incl = [...incl, 'exports', 'types', 'enumMembers', 'duplicates'];
   }
   if (cliArgs.files) {
     incl = [...incl, 'files'];
