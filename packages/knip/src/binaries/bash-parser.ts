@@ -1,5 +1,4 @@
-import parse from '@ericcornelissen/bash-parser';
-import type { Assignment, ExpansionNode, Node, Prefix } from '@ericcornelissen/bash-parser';
+import parse, { type Assignment, type ExpansionNode, type Node, type Prefix } from '../../vendor/bash-parser/index.js';
 import { debugLogObject } from '../util/debug.js';
 import { toBinary } from '../util/protocols.js';
 import * as FallbackResolver from './resolvers/fallback.js';
