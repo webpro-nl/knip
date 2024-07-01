@@ -6,6 +6,7 @@
       "**/tmp",
       "**/fixtures",
       "packages/knip/package.json",
+      "packages/knip/vendor/bash-parser/index.js",
       "packages/docs/.astro"
     ]
   },
