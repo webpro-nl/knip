@@ -111,7 +111,7 @@ export default visit(
       }
 
       if (ts.isInterfaceDeclaration(node)) {
-        const identifier = node.name.getText();
+        const identifier = defaultKeyword ? 'default' : node.name.getText();
         const pos = node.name.getStart();
         const fix = getTypeFix(exportKeyword);
         return { node, identifier, type: SymbolType.INTERFACE, pos, fix };
