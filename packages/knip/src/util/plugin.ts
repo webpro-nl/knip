@@ -9,7 +9,6 @@ import { _load as load } from './loader.js';
 import { get } from './object.js';
 import { basename } from './path.js';
 import { toEntryPattern, toProductionEntryPattern } from './protocols.js';
-import { _loadESLintConfig as loadESLintConfig } from './require.js';
 
 export const toCamelCase = (name: string) =>
   name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
@@ -58,10 +57,7 @@ export const loadConfigForPlugin = async (
       ? typeof packageJsonPath === 'function'
         ? packageJsonPath(manifest)
         : get(manifest, packageJsonPath ?? pluginName)
-      : // TODO Leftover from plugin API streamline refactor
-        plugin.title === 'ESLint' && !/(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
-        ? await loadESLintConfig(configFilePath)
-        : await load(configFilePath);
+      : await load(configFilePath);
 
   return localConfig;
 };
