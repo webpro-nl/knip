@@ -60,7 +60,7 @@
     "schema-jsonc.json"
   ],
   "dependencies": {
-    "@nodelib/fs.walk": "2.0.0",
+    "@nodelib/fs.walk": "1.2.8",
     "@snyk/github-codeowners": "1.1.0",
     "easy-table": "1.2.0",
     "fast-glob": "^3.3.2",
