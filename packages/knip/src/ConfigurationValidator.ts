@@ -15,6 +15,7 @@ const issueTypeSchema = z.union([
   z.literal('files'),
   z.literal('dependencies'),
   z.literal('devDependencies'),
+  z.literal('optionalPeerDependencies'),
   z.literal('unlisted'),
   z.literal('binaries'),
   z.literal('unresolved'),

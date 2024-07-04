@@ -60,9 +60,11 @@ export class IssueCollector {
       if (this.filters.dir && !filePath.startsWith(`${this.filters.dir}/`)) continue;
       if (this.referencedFiles.has(filePath)) continue;
       if (this.isMatch(filePath)) continue;
+
       this.issues.files.add(filePath);
       // @ts-expect-error TODO Fix up in next major
-      this.issues._files.add({ type: 'files', filePath, symbol: relative(filePath) });
+      this.issues._files.add({ type: 'files', filePath, symbol: relative(filePath), severity: this.rules.files });
+
       this.counters.files++;
       this.counters.processed++;
     }

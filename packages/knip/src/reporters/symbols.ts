@@ -42,6 +42,7 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
           for (const issue of issuesForType) {
             const relPath = toRelative(issue.filePath);
             if (issue.isFixed) console.log(picocolors.gray(`${relPath} (deleted)`));
+            else if (issue.severity === 'warn') console.log(picocolors.gray(relPath));
             else console.log(relPath);
           }
           totalIssues = totalIssues + issuesForType.length;
