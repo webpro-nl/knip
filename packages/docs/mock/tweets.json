@@ -4,6 +4,42 @@
       "entities": {
         "urls": []
       },
+      "id": "1808672067900092505",
+      "author_id": "3",
+      "created_at": "2024-07-04T03:19:00.000Z",
+      "attachments": {},
+      "text": "knip is great.\n\nA great example of stuff just working. It detects your environment so well and its defaults are almost too good because I didn’t realise it was doing everything automatically.",
+      "public_metrics": {
+        "retweet_count": 1,
+        "reply_count": 1,
+        "like_count": 4,
+        "quote_count": 1,
+        "bookmark_count": 1,
+        "impression_count": 987
+      }
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "id": "1808808208229707835",
+      "author_id": "3",
+      "created_at": "2024-07-04T12:20:00.000Z",
+      "attachments": {},
+      "text": "Then was like “this is how tooling should be, this has taken me an hour not a day and it’s faster and more accurate and more future proof”\n\nFive stars ⭐️⭐️⭐️⭐️⭐️",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 1,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 121
+      }
+    },
+    {
+      "entities": {
+        "urls": []
+      },
       "id": "1803013555907698921",
       "author_id": "2",
       "created_at": "2024-06-18T12:35:00.000Z",
@@ -782,6 +818,12 @@
         "username": "jokull",
         "profile_image_url": "https://pbs.twimg.com/profile_images/1758441525300613120/JzStjli1_400x400.jpg",
         "name": "Jökull Solberg"
+      },
+      {
+        "id": "3",
+        "username": "Hicksyfern",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1559181703352094720/NFL2PBbK_400x400.jpg",
+        "name": "Tom Hicks"
       },
       {
         "id": "22918124",
