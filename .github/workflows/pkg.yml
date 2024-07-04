@@ -1,0 +1,13 @@
+name: Publish commit
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install --ignore-scripts --frozen-lockfile
+      - run: bun run build
+        working-directory: packages/knip
+      - run: bunx pkg-pr-new publish --compact ./packages/knip
