@@ -36,8 +36,10 @@
   /* margin-bottom: 0; */
 }
 
-p code {
+.sl-markdown-content p code,
+.sl-markdown-content ul code {
   white-space: nowrap;
+  padding: 0 1px;
 }
 
 .sl-markdown-content a code {
