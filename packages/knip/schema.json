@@ -115,10 +115,19 @@
     "rules": {
       "type": "object",
       "properties": {
+        "binaries": {
+          "$ref": "#/definitions/ruleValue"
+        },
         "classMembers": {
           "$ref": "#/definitions/ruleValue"
         },
         "dependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "devDependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "optionalPeerDependencies": {
           "$ref": "#/definitions/ruleValue"
         },
         "duplicates": {
