@@ -59,7 +59,7 @@ export const getBinariesFromScript = (script: string, options: GetDependenciesFr
               .flatMap(node => node.text.split('=')[1])
               .map(arg => parseNodeArgs(arg.split(' ')))
               .filter(args => args.require)
-              .map(arg => arg.require) ?? [];
+              .flatMap(arg => arg.require) ?? [];
 
           if (binary in KnownResolvers) {
             const resolver = KnownResolvers[binary as KnownResolver];
