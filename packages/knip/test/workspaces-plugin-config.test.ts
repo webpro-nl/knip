@@ -15,8 +15,8 @@ test('Use root plugin config in workspaces', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    total: 25,
-    processed: 25,
+    total: 26,
+    processed: 26,
   });
 });
 
@@ -33,13 +33,14 @@ test('Use root plugin config in workspaces (strict production)', async () => {
     new Set([
       join(cwd, 'packages/frontend/components/component.js'),
       join(cwd, 'packages/package1/components/component.js'),
+      join(cwd, 'packages/package1/jest-setup.ts'),
     ])
   );
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
-    total: 6,
-    processed: 6,
+    files: 3,
+    total: 7,
+    processed: 7,
   });
 });

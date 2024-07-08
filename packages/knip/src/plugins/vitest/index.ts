@@ -1,7 +1,7 @@
 import type { PackageJson } from '#p/types/package-json.js';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
-import { isAbsolute, join, relative } from '#p/util/path.js';
-import { hasDependency, tryResolve } from '#p/util/plugin.js';
+import { join } from '#p/util/path.js';
+import { hasDependency, resolveEntry } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
@@ -17,15 +17,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['vitest*.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{ts,js,json}'];
 
 const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)'];
-
-const resolveEntry = (options: PluginOptions, rootDir: string, specifier: string) => {
-  const { configFileDir, configFileName } = options;
-  const resolvedPath = isAbsolute(specifier)
-    ? specifier
-    : tryResolve(join(configFileDir, rootDir, specifier), join(configFileDir, rootDir, configFileName));
-  if (resolvedPath) return toEntryPattern(relative(configFileDir, resolvedPath));
-  return specifier;
-};
 
 const isVitestCoverageCommand = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
 
@@ -51,8 +42,9 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
   const rootDir = testConfig.root ?? '.';
-  const setupFiles = [testConfig.setupFiles ?? []].flat().map(v => resolveEntry(options, rootDir, v));
-  const globalSetup = [testConfig.globalSetup ?? []].flat().map(v => resolveEntry(options, rootDir, v));
+  const setupFiles = [testConfig.setupFiles ?? []].flat().map(specifier => resolveEntry(options, specifier, rootDir));
+  const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => resolveEntry(options, specifier, rootDir));
+
   return [...environments, ...reporters, ...coverage, ...setupFiles, ...globalSetup];
 };
 
@@ -101,7 +93,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     const entry = cfg.build?.lib?.entry ?? [];
     const rootDir = cfg.test?.root ?? '.';
     const deps = (typeof entry === 'string' ? [entry] : Object.values(entry)).map(specifier =>
-      resolveEntry(options, rootDir, specifier)
+      resolveEntry(options, specifier, rootDir)
     );
     for (const dependency of deps) dependencies.add(dependency);
   }

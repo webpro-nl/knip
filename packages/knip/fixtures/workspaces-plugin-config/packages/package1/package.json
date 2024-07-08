@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-plugin-config/package-using-ava",
+  "name": "@workspaces-plugin-config/shared",
   "scripts": {
     "test": "ava"
   },

@@ -1,14 +1,14 @@
 export { _getDependenciesFromScripts as getDependenciesFromScripts } from '../binaries/index.js';
 export { _loadJSON as loadJSON } from './fs.js';
 export { _load as load } from './loader.js';
-export { _tryResolve as tryResolve } from './require.js';
 import type { RawPluginConfiguration } from '../types/config.js';
 import type { Plugin, PluginOptions } from '../types/plugins.js';
 import { arrayify } from './array.js';
 import { _load as load } from './loader.js';
 import { get } from './object.js';
-import { basename } from './path.js';
+import { basename, isAbsolute, join, relative } from './path.js';
 import { toEntryPattern, toProductionEntryPattern } from './protocols.js';
+import { _tryResolve as tryResolve } from './require.js';
 
 export const toCamelCase = (name: string) =>
   name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
@@ -131,3 +131,12 @@ export const toUnconfig = toConfigMap(['json', 'ts', 'mts', 'cts', 'js', 'mjs', 
   rcSuffix: '',
   configFiles: false,
 });
+
+export const resolveEntry = (options: PluginOptions, specifier: string, rootDir = '.') => {
+  const { configFileDir, configFileName } = options;
+  const resolvedPath = isAbsolute(specifier)
+    ? specifier
+    : tryResolve(join(configFileDir, rootDir, specifier), join(configFileDir, rootDir, configFileName));
+  if (resolvedPath) return toEntryPattern(relative(configFileDir, resolvedPath));
+  return specifier;
+};
