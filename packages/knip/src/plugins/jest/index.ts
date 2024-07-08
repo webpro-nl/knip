@@ -62,8 +62,8 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     : [];
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
-  const setupFiles = config.setupFiles ?? [];
-  const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
+  const setupFiles = (config.setupFiles ?? []).map(toEntryPattern);
+  const setupFilesAfterEnv = (config.setupFilesAfterEnv ?? []).map(toEntryPattern);
   const transform = config.transform
     ? Object.values(config.transform).map(transform => (typeof transform === 'string' ? transform : transform[0]))
     : [];
@@ -75,8 +75,8 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
   const testSequencer = config.testSequencer ? [config.testSequencer] : [];
-  const globalSetup = config.globalSetup ? [config.globalSetup] : [];
-  const globalTeardown = config.globalTeardown ? [config.globalTeardown] : [];
+  const globalSetup = (config.globalSetup ? [config.globalSetup] : []).map(toEntryPattern);
+  const globalTeardown = (config.globalTeardown ? [config.globalTeardown] : []).map(toEntryPattern);
 
   return [
     ...presets,
