@@ -44,7 +44,7 @@ export default visit(
                         return { identifier, specifier, pos };
                       });
                     }
-                  } else if (ts.isObjectBindingPattern(arg.name)) {
+                  } else if (arg && ts.isObjectBindingPattern(arg.name)) {
                     // Pattern: import('specifier').then({ identifier } => identifier);
                     return arg.name.elements.map(element => {
                       const identifier = (element.propertyName ?? element.name).getText();
