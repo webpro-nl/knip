@@ -56,11 +56,7 @@ Also see [configuring project files][1].
 
 Knip shares files from separate workspaces if the configuration in
 `tsconfig.json` allows this. This reduces memory consumption and run duration.
-The relevant compiler options are `baseUrl` and `paths`, and a workspace is
-shared if the following is true:
-
-- The `compilerOptions.baseUrl` is not set explicitly
-- There are no conflicting keys in `compilerOptions.paths`
+Relevant compiler options include `baseUrl`, `paths` and `moduleResolution`.
 
 With the `--debug` flag you can see how many programs Knip uses. Look for
 messages like this:
@@ -80,6 +76,9 @@ messages like this:
 The first number in `P1/1` is the number of the program, the second number
 indicates additional entry files were found in the previous round so it does
 another round of analysis on those files.
+
+Use [--isolate-workspaces](../reference/cli.md#--isolate-workspaces) to disable
+this behavior.
 
 ## findReferences
 
