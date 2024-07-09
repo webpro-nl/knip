@@ -1,4 +1,5 @@
 import { isBuiltin } from 'node:module';
+import { DT_SCOPE } from '../constants.js';
 import type { PackageJson } from '../types/package-json.js';
 import { _glob } from './glob.js';
 import { getStringValues } from './object.js';
@@ -10,26 +11,28 @@ export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   return moduleSpecifier.startsWith('@') ? parts.join('/') : parts[0];
 };
 
+const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
 export const getPackageNameFromFilePath = (value: string) => {
-  const match = toPosix(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g);
+  const match = toPosix(value).match(lastPackageNameMatch);
   if (match) return match[match.length - 1];
   return value;
 };
 
+const packageNameMatch = /.*\/node_modules\/(.+)/;
 export const normalizeSpecifierFromFilePath = (value: string) => {
-  const match = toPosix(value).match(/.*\/node_modules\/(.+)/);
+  const match = toPosix(value).match(packageNameMatch);
   if (match) return match[match.length - 1];
   return value;
 };
 
 export const isStartsLikePackageName = (specifier: string) => /^@?[a-z0-9]/.test(specifier);
 
-export const isDefinitelyTyped = (packageName: string) => packageName.startsWith('@types/');
+export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);
 
 export const getDefinitelyTypedFor = (packageName: string) => {
   if (isDefinitelyTyped(packageName)) return packageName;
-  if (packageName.startsWith('@')) return `@types/${packageName.slice(1).replace('/', '__')}`;
-  return `@types/${packageName}`;
+  if (packageName.startsWith('@')) return [DT_SCOPE, packageName.slice(1).replace('/', '__')].join('/');
+  return [DT_SCOPE, packageName].join('/');
 };
 
 export const getPackageFromDefinitelyTyped = (typedDependency: string) => {

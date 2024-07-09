@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
+import { ALIAS_TAG, ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
 import type { Tags } from '../types/cli.js';
 import type { Export, ExportMap, ExportMember, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
@@ -265,7 +265,7 @@ const getImportsAndExports = (
       });
     }
 
-    if (!jsDocTags.has('@alias')) {
+    if (!jsDocTags.has(ALIAS_TAG)) {
       if (ts.isExportAssignment(node)) maybeAddAliasedExport(node.expression, 'default');
       if (ts.isVariableDeclaration(node)) maybeAddAliasedExport(node.initializer, identifier);
     }

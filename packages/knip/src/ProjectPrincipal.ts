@@ -4,7 +4,7 @@ import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { ReferencedDependencies } from './WorkspaceWorker.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
 import type { DependencyGraph, Export, ExportMember, FileNode, UnresolvedImport } from './types/dependency-graph.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
@@ -269,6 +269,9 @@ export class ProjectPrincipal {
       // Ignore Deno style http import specifiers
       if (specifier.startsWith('http')) continue;
 
+      // All bets are off after failing to resolve module:
+      // - either add to external dependencies if it quacks like that so it'll end up as unused or unlisted dependency
+      // - or maintain unresolved status if not ignored and not foreign
       const sanitizedSpecifier = sanitizeSpecifier(specifier);
       if (isStartsLikePackageName(sanitizedSpecifier)) {
         external.add(sanitizedSpecifier);
@@ -308,7 +311,7 @@ export class ProjectPrincipal {
     }
 
     return members.filter(member => {
-      if (member.jsDocTags.has('@public')) return false;
+      if (member.jsDocTags.has(PUBLIC_TAG)) return false;
       const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
       const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
       return refs.length === 0;
@@ -316,7 +319,7 @@ export class ProjectPrincipal {
   }
 
   public hasExternalReferences(filePath: string, exportedItem: Export) {
-    if (exportedItem.jsDocTags.has('@public')) return false;
+    if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
 
     if (!this.findReferences) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());

@@ -1,6 +1,7 @@
 import { isBuiltin } from 'node:module';
 import type { Workspace } from './ConfigurationChief.js';
 import {
+  DT_SCOPE,
   IGNORED_DEPENDENCIES,
   IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
@@ -256,7 +257,7 @@ export class DependencyDeputy {
         if (isPeerDep && peerDepRecs[dependency]) return false;
 
         const [scope, typedDependency] = dependency.split('/');
-        if (scope === '@types') {
+        if (scope === DT_SCOPE) {
           // The `pkg` dependency already has types included, i.e. this `@types/pkg` is obsolete
           if (hasTypesIncluded?.has(typedDependency)) return false;
 

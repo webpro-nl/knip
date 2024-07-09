@@ -1,9 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
-import { walk as _walk } from '@nodelib/fs.walk';
-import type { Entry } from '@nodelib/fs.walk';
-import type { Options as FastGlobOptions } from 'fast-glob';
-import fg from 'fast-glob';
+import { type Entry, walk as _walk } from '@nodelib/fs.walk';
+import fg, { type Options as FastGlobOptions } from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
@@ -159,7 +157,7 @@ export async function globby(patterns: string | string[], options: GlobOptions):
   return fg.glob(patterns, fastGlobOptions);
 }
 
-export async function getGitIgnoredFn(options: Options): Promise<(path: string) => boolean> {
+export async function getGitIgnoredHandler(options: Options): Promise<(path: string) => boolean> {
   cachedIgnores.clear();
 
   if (options.gitignore === false) return () => false;

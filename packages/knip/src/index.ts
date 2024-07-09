@@ -25,7 +25,7 @@ import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { addNsValues, addValues, createFileNode } from './util/dependency-graph.js';
 import { isFile } from './util/fs.js';
 import { _glob, negate } from './util/glob.js';
-import { getGitIgnoredFn } from './util/globby.js';
+import { getGitIgnoredHandler } from './util/globby.js';
 import { getHandler } from './util/handle-dependency.js';
 import { getHasStrictlyNsReferences, getType } from './util/has-strictly-ns-references.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
@@ -66,7 +66,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
-  const isGitIgnored = await getGitIgnoredFn({ cwd, gitignore });
+  const isGitIgnored = await getGitIgnoredHandler({ cwd, gitignore });
   const toSourceFilePath = getToSourcePathHandler(chief);
 
   streamer.cast('Reading workspace configuration(s)...');
@@ -156,12 +156,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
-    // Add dependencies from package.json
+    // Add dependencies from package.json#scripts
     const options = { manifestScriptNames, cwd: dir, dependencies };
     const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
     principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
 
-    // Add entry paths from package.json
+    // Add entry paths from package.json#main, #bin, #exports
     const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
     debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
     principal.addEntryPaths(entryPathsFromManifest);

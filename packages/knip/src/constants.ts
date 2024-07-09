@@ -22,6 +22,13 @@ export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
 
 export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 
+export const PUBLIC_TAG = '@public';
+export const INTERNAL_TAG = '@internal';
+export const BETA_TAG = '@beta';
+export const ALIAS_TAG = '@alias';
+
+export const DT_SCOPE = '@types';
+
 // Binaries that are expected to be globally installed
 // In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
 // Package may exist in npm registry, but last publish is at least 6 years ago
