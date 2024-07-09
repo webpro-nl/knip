@@ -1,4 +1,4 @@
-import type ts from 'typescript';
+import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { debugLog } from './util/debug.js';
@@ -64,6 +64,7 @@ export class PrincipalFactory {
     const workspacePaths = compilerOptions?.paths ? Object.keys(compilerOptions.paths) : [];
     const principal = Array.from(this.principals).find(principal => {
       if (compilerOptions.pathsBasePath && principal.principal.compilerOptions.pathsBasePath) return false;
+      if (compilerOptions.moduleResolution !== principal.principal.compilerOptions.moduleResolution) return false;
       if (compilerOptions.baseUrl === principal.principal.compilerOptions.baseUrl) {
         return workspacePaths.every(p => !principal.pathKeys.has(p));
       }
@@ -81,6 +82,7 @@ export class PrincipalFactory {
   ) {
     const { pathsBasePath, paths } = compilerOptions;
     if (pathsBasePath) principal.principal.compilerOptions.pathsBasePath = pathsBasePath;
+    principal.principal.compilerOptions.moduleResolution ??= ts.ModuleResolutionKind.Bundler;
     for (const p of Object.keys(paths ?? {})) principal.pathKeys.add(p);
     principal.principal.addPaths(paths);
     principal.principal.addCompilers(compilers);
