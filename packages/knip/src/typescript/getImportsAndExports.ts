@@ -2,7 +2,7 @@ import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { ALIAS_TAG, ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
 import type { Tags } from '../types/cli.js';
-import type { Export, ExportMap, ExportMember, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
+import type { ExportMap, ExportMember, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
@@ -10,7 +10,6 @@ import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/dependency-graph.js';
 import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { extname, isInNodeModules } from '../util/path.js';
-import { isIdChar } from '../util/regex.js';
 import { shouldIgnore } from '../util/tag.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import {
@@ -25,6 +24,7 @@ import {
   isImportSpecifier,
   isReferencedInExportedType,
 } from './ast-helpers.js';
+import { findInternalReferences } from './find-internal-references.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getImportsFromPragmas } from './visitors/helpers.js';
@@ -53,9 +53,6 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Exp
     jsDocTags: getJSDocTags(member.node),
   };
 };
-
-const isType = (item: Export | ExportMember) =>
-  item.type === 'type' || item.type === 'interface' || item.type === 'member';
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
@@ -397,59 +394,13 @@ const getImportsAndExports = (
   const pragmaImports = getImportsFromPragmas(sourceFile);
   if (pragmaImports) for (const node of pragmaImports) addImport(node, sourceFile);
 
-  const setRefs = (item: Export | ExportMember) => {
-    if (!item.symbol) return;
-
-    if (item.symbol.flags & ts.SymbolFlags.AliasExcludes) {
-      item.refs = [1, false];
-      return;
-    }
-
-    const symbols = new Set<ts.Symbol>();
-    let index = 0;
-    const text = sourceFile.text;
-    const id = item.identifier;
-    // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-    while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
-      if (!isIdChar(text.charAt(index - 1)) && !isIdChar(text.charAt(index + id.length))) {
-        const isExportDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
-        if (!isExportDeclaration) {
-          // @ts-expect-error ts.getTokenAtPosition is internal fn
-          const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
-          if (symbol) {
-            const isInExportedType = referencedSymbolsInExportedTypes.has(symbol);
-            if (item.symbol === symbol) {
-              item.refs = [1, isInExportedType];
-              if (isInExportedType || isType(item)) break;
-            }
-            // @ts-expect-error Keep it cheap
-            const declaration = symbol.declarations?.[0];
-            if (declaration) {
-              if (item.symbol === declaration.name?.flowNode?.node?.symbol) {
-                item.refs = [1, isInExportedType];
-                break;
-              }
-              if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
-                // re-exported symbol is referenced
-                item.refs = [1, isInExportedType];
-                break;
-              }
-            }
-            symbols.add(symbol);
-          }
-        }
-      }
-      index += id.length;
-    }
-  };
-
   const isSetRefs = ignoreExportsUsedInFile;
   for (const item of exports.values()) {
     if (isSetRefs === true || (typeof isSetRefs === 'object' && item.type !== 'unknown' && !!isSetRefs[item.type])) {
-      setRefs(item);
+      item.refs = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExportedTypes);
     }
     for (const member of item.members) {
-      setRefs(member);
+      member.refs = findInternalReferences(member, sourceFile, typeChecker, referencedSymbolsInExportedTypes);
       member.symbol = undefined;
     }
     item.symbol = undefined;
