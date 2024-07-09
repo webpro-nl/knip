@@ -123,6 +123,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const principal = factory.getPrincipal({
       cwd: dir,
       paths: config.paths,
+      isFile,
       compilerOptions,
       compilers,
       pkgName,

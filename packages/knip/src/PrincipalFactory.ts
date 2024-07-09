@@ -11,6 +11,7 @@ type Principals = Set<Principal>;
 
 export type PrincipalOptions = {
   cwd: string;
+  isFile: boolean;
   compilerOptions: ts.CompilerOptions;
   paths: Paths;
   compilers: [SyncCompilers, AsyncCompilers];
@@ -47,8 +48,9 @@ export class PrincipalFactory {
   principals: Principals = new Set();
 
   public getPrincipal(options: PrincipalOptions) {
-    const { cwd, compilerOptions, paths, pkgName, isIsolateWorkspaces, compilers } = options;
+    const { cwd, compilerOptions, isFile, paths, pkgName, isIsolateWorkspaces, compilers } = options;
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
+    if (isFile) compilerOptions.moduleResolution ??= ts.ModuleResolutionKind.Bundler;
     const principal = this.findReusablePrincipal(compilerOptions);
     if (!isIsolateWorkspaces && principal) {
       this.linkPrincipal(principal, cwd, compilerOptions, pkgName, compilers);
@@ -64,7 +66,6 @@ export class PrincipalFactory {
     const workspacePaths = compilerOptions?.paths ? Object.keys(compilerOptions.paths) : [];
     const principal = Array.from(this.principals).find(principal => {
       if (compilerOptions.pathsBasePath && principal.principal.compilerOptions.pathsBasePath) return false;
-      if (compilerOptions.moduleResolution !== principal.principal.compilerOptions.moduleResolution) return false;
       if (compilerOptions.baseUrl === principal.principal.compilerOptions.baseUrl) {
         return workspacePaths.every(p => !principal.pathKeys.has(p));
       }
@@ -82,7 +83,7 @@ export class PrincipalFactory {
   ) {
     const { pathsBasePath, paths } = compilerOptions;
     if (pathsBasePath) principal.principal.compilerOptions.pathsBasePath = pathsBasePath;
-    principal.principal.compilerOptions.moduleResolution ??= ts.ModuleResolutionKind.Bundler;
+    principal.principal.compilerOptions.moduleResolution ??= compilerOptions.moduleResolution;
     for (const p of Object.keys(paths ?? {})) principal.pathKeys.add(p);
     principal.principal.addPaths(paths);
     principal.principal.addCompilers(compilers);
