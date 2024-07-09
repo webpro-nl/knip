@@ -70,9 +70,10 @@ export const getEntryPathFromManifest = (
 };
 
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
+const matchDirectives = /^([?!|-]+)?([^!?:]+).*/;
 export const sanitizeSpecifier = (specifier: string) => {
   if (isBuiltin(specifier)) return specifier;
   if (isAbsolute(specifier)) return specifier;
   if (specifier.startsWith('virtual:')) return specifier;
-  return specifier.replace(/^([?!|-]+)?([^!?:]+).*/, '$2');
+  return specifier.replace(matchDirectives, '$2');
 };

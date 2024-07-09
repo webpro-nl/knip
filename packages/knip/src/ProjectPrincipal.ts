@@ -18,7 +18,7 @@ import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
 // These compiler options override local options
-const baseCompilerOptions = {
+const baseCompilerOptions: ts.CompilerOptions = {
   allowJs: true,
   allowSyntheticDefaultImports: true,
   declaration: false,
@@ -29,11 +29,11 @@ const baseCompilerOptions = {
   jsx: ts.JsxEmit.Preserve,
   jsxImportSource: undefined,
   lib: [],
-  types: ['node'],
   noEmit: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   sourceMap: false,
+  types: ['node'],
 };
 
 const tsCreateProgram = timerify(ts.createProgram);
@@ -87,7 +87,7 @@ export class ProjectPrincipal {
     this.compilerOptions = {
       ...compilerOptions,
       ...baseCompilerOptions,
-      types: compact([...(compilerOptions.types ?? []), ...baseCompilerOptions.types]),
+      types: compact([...(compilerOptions.types ?? []), ...(baseCompilerOptions.types ?? [])]),
       allowNonTsExtensions: true,
     };
 

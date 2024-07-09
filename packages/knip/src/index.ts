@@ -355,9 +355,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const files = resolvedFiles.filter(filePath => !analyzedFiles.has(filePath));
 
       debugLogArray('*', `Analyzing used resolved files [P${principals.indexOf(principal) + 1}/${++round}]`, files);
-      for (const filePath of files) {
-        analyzeSourceFile(filePath, principal);
-      }
+      for (const filePath of files) analyzeSourceFile(filePath, principal);
     } while (size !== principal.entryPaths.size);
 
     for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
