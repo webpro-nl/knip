@@ -81,7 +81,7 @@ for await (const dir of directories) {
       u('heading', { depth: 2 }, [u('text', 'Enabled')]),
       ...en,
       u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
-      u('text', 'This configuration is added automatically if the plugin is enabled:'),
+      ...parseFragment('This configuration is added automatically if the plugin is enabled:'),
       u('code', {
         lang: 'json title="knip.json"', // TODO How to set attributes/properties/props properly?
         value: JSON.stringify({ [pluginName]: defaults }, null, 2),
