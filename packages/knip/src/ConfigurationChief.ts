@@ -229,12 +229,14 @@ export class ConfigurationChief {
   private async setWorkspaces() {
     this.ignoredWorkspacePatterns = this.getIgnoredWorkspacePatterns();
 
-    const [byName, byPkgName] = await mapWorkspaces(this.cwd, this.getListedWorkspaces());
+    this.additionalWorkspaceNames = await this.getAdditionalWorkspaceNames();
+    const workspaceNames = compact([...this.getListedWorkspaces(), ...this.additionalWorkspaceNames]);
+    const [byName, byPkgName] = await mapWorkspaces(this.cwd, workspaceNames);
+
     this.workspacePackages = byName;
     this.workspacePackagesByName = byPkgName;
     this.addRootPackage();
 
-    this.additionalWorkspaceNames = await this.getAdditionalWorkspaceNames();
     this.availableWorkspaceNames = this.getAvailableWorkspaceNames(byName.keys());
     this.availableWorkspacePkgNames = this.getAvailableWorkspacePkgNames(byPkgName.keys());
     this.availableWorkspaceDirs = this.availableWorkspaceNames
