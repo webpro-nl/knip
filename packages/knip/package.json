@@ -75,7 +75,6 @@
     "smol-toml": "^1.1.4",
     "strip-json-comments": "5.0.1",
     "summary": "2.1.0",
-    "tsconfig-paths": "^4.2.0",
     "zod": "^3.22.4",
     "zod-validation-error": "^3.0.3"
   },

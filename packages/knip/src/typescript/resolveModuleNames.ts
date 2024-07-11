@@ -1,11 +1,10 @@
 import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
-import { createMatchPath } from 'tsconfig-paths';
 import ts from 'typescript';
 import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { timerify } from '../util/Performance.js';
 import { sanitizeSpecifier } from '../util/modules.js';
-import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.js';
+import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.js';
 import { resolveSync } from '../util/resolve.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
@@ -35,6 +34,32 @@ export function createCustomModuleResolver(
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
 
+  const virtualDeclarationFiles = new Map<string, { path: string; ext: string }>();
+
+  const tsSys: ts.System = {
+    ...ts.sys,
+    // We trick TypeScript into resolving paths with arbitrary extensions. When
+    // a module "./module.ext" is imported TypeScript only tries to resolve it to
+    // "./module.d.ext.ts". TypeScript never checks whether "./module.ext" itself exists.
+    // So, if TypeScript checks whether "./module.d.ext.ts" exists and the file
+    // does not exist we can assume the compiler wants to resolve `./module.ext`.
+    // If the latter exists we return true and record this fact in
+    // `virtualDeclarationFiles`.
+    fileExists(path: string) {
+      if (ts.sys.fileExists(path)) {
+        return true;
+      }
+
+      const original = originalFromDeclarationPath(path);
+      if (original && ts.sys.fileExists(original.path)) {
+        virtualDeclarationFiles.set(path, original);
+        return true;
+      }
+
+      return false;
+    },
+  };
+
   function resolveModuleNames(moduleNames: string[], containingFile: string): Array<ts.ResolvedModuleFull | undefined> {
     return moduleNames.map(moduleName => {
       if (!useCache) return resolveModuleName(moduleName, containingFile);
@@ -53,13 +78,6 @@ export function createCustomModuleResolver(
       return resolvedModule;
     });
   }
-
-  const tsMatchPath = createMatchPath(
-    // If `baseUrl` is undefined we have already modified `paths` so that all
-    // entries are absolute. See `mergePaths` in `src/PrincipalFactory.ts`.
-    compilerOptions.baseUrl ?? '/',
-    compilerOptions.paths || {}
-  );
 
   /**
    * - Virtual files have built-in or custom compiler, return as JS
@@ -97,29 +115,11 @@ export function createCustomModuleResolver(
       };
     }
 
-    const pathMappedFileName = tsMatchPath(
-      sanitizedSpecifier,
-      undefined,
-      undefined,
-      // Leave extensions empty and let `ts.resolveModuleName()` handle that.
-      // `tsMatchPath` will strip extensions from the returned specifier which
-      // means we don’t get the actual file path.
-      []
-    );
-    if (pathMappedFileName) {
-      const ext = extname(pathMappedFileName);
-      return {
-        resolvedFileName: toPosix(pathMappedFileName),
-        extension: customCompilerExtensionsSet.has(ext) ? ts.Extension.Js : ext,
-        isExternalLibraryImport: false,
-      };
-    }
-
     const tsResolvedModule = ts.resolveModuleName(
       sanitizedSpecifier,
       containingFile,
       compilerOptions,
-      ts.sys
+      tsSys
     ).resolvedModule;
 
     if (tsResolvedModule) {
@@ -135,6 +135,14 @@ export function createCustomModuleResolver(
           };
         }
       }
+      const original = virtualDeclarationFiles.get(tsResolvedModule.resolvedFileName);
+      if (original) {
+        return {
+          ...tsResolvedModule,
+          resolvedFileName: original.path,
+          extension: customCompilerExtensionsSet.has(original.ext) ? ts.Extension.Js : original.ext,
+        };
+      }
 
       return tsResolvedModule;
     }
@@ -146,4 +154,20 @@ export function createCustomModuleResolver(
   }
 
   return timerify(resolveModuleNames);
+}
+
+const declarationPathRe = /^(.*)\.d(\.[^.]+)\.ts$/;
+
+/**
+ * For paths that look like `.../module.d.yyy.ts` returns path `.../module.yyy` and
+ * ext `yyy`.
+ */
+function originalFromDeclarationPath(path: string): { path: string; ext: string } | undefined {
+  const match = declarationPathRe.exec(path);
+  if (match) {
+    return {
+      path: match[1] + match[2],
+      ext: match[2],
+    };
+  }
 }
