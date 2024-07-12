@@ -1,0 +1,40 @@
+name: 🐛 Regression
+description: Something that worked properly before, but no longer does
+labels: ['regression']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please make sure you have read the docs and are using the latest version of Knip. Use common sense and provide the necessary information that helps me or others to help you.
+
+        A minimal reproduction is required: only the code and configuration required to demonstrate the issue.
+
+        Please make sure you've read https://knip.dev/guides/issue-reproduction.
+  - type: input
+    id: reproduction
+    attributes:
+      label: Reproduction url
+      description: Please link to the location of the issue reproduction
+    validations:
+      required: true
+  - type: input
+    id: latest-version
+    attributes:
+      label: Reproduction url
+      description: What's the latest version it worked as expected?
+    validations:
+      required: true
+  - type: input
+    id: first-version
+    attributes:
+      label: Reproduction url
+      description: What's the first version it no longer works as expected?
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the regression
+      description: What happened before, what happens now?
+    validations:
+      required: true

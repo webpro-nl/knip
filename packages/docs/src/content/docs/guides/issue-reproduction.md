@@ -6,9 +6,19 @@ If you encounter an issue or false positives when using Knip, you can [open an
 issue on GitHub][1]. This will help you in your project, and will also improve
 Knip for everyone else!
 
-Since many factors may influence the issue at hand, in most cases you'll be
-asked to provide a minimal reproduction. This contains only the source code and
-configuration required to demonstrate the issue. Providing this with a clear
+There are many factors that may influence the issue at hand, such as:
+
+- Code syntax, import and export structure in source files
+- Dependencies, scripts and entry files in `package.json`
+- TypeScript configuration in `tsconfig.json`
+- Enabled plugins and configuration files for that tooling
+- Dependent or depending workspaces in a monorepo
+- Knip configuration in `knip.json`
+
+Think of Knip like a kitchen sink, it handles a large amount of projects and
+configurations, and your project is different from all others. That's why it's
+required to provide a minimal reproduction. This contains only the source code
+and configuration required to demonstrate the issue. Providing this with a clear
 issue description will help us help you, and greatly improves the chances your
 issue will be looked into efficiently and in a timely manner.
 
@@ -20,9 +30,9 @@ source code and configuration is complete and actionable.
 
 Before opening an issue, please make sure you..
 
-- have searched [open issues][1] for the same.
-- have checked the list of [known issues][2].
-- are using the latest version.
+- have searched [open issues][1] for the same,
+- have checked the list of [known issues][2],
+- are using the latest version,
 - have read the documentation.
 
 Please file only a single issue at a time, so each of them can be labeled and
