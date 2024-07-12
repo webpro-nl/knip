@@ -1,1 +1,4 @@
-export interface CypressConfig {reporter: string; reporterOptions?: {configFile?: string}};
+export interface CypressConfig {
+  reporter: string;
+  reporterOptions?: { configFile?: string };
+}

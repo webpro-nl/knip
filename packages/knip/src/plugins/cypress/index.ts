@@ -34,7 +34,7 @@ const resolveEntryPaths: ResolveEntryPaths = async localConfig => {
 };
 
 const resolveConfig: ResolveConfig<CypressConfig> = (config, options) => {
-  return resolveDependencies(config, options)
+  return resolveDependencies(config, options);
 };
 
 export default {
@@ -44,5 +44,5 @@ export default {
   config,
   entry,
   resolveEntryPaths,
-  resolveConfig
+  resolveConfig,
 } satisfies Plugin;
