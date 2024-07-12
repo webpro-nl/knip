@@ -3,6 +3,10 @@ import { isInternal, toAbsolute } from '#p/util/path.ts';
 import { load, resolveEntry } from '#p/util/plugin.ts';
 import type { CypressConfig } from './types.js';
 
+interface ReporterConfig {
+    reporterEnabled: string;
+}
+
 export const resolveDependencies = async (config: CypressConfig, options: PluginOptions) => {
   const { reporter } = config;
   const { configFileDir } = options;
@@ -17,12 +21,14 @@ export const resolveDependencies = async (config: CypressConfig, options: Plugin
     const { configFile } = config.reporterOptions;
     const configFilePath = toAbsolute(configFile, configFileDir);
     if (isInternal(configFilePath)) {
-      const reporterConfig = await load(configFilePath);
+      const reporterConfig: ReporterConfig = await load(configFilePath);
       if (typeof reporterConfig === 'object' && reporterConfig.reporterEnabled) {
         const { reporterEnabled: reporterConcatenatedNames } = reporterConfig;
-        const reporterNames = reporterConcatenatedNames.split(', ');
+        // Pulled from the reporter source code, https://github.com/YOU54F/cypress-plugins/blob/master/cypress-multi-reporters/lib/MultiReporters.js#L50-L58
+        // Not sure why they allow for extra whitespace characters, but let's handle it the same as them.
+        const reporterNames = reporterConcatenatedNames.split(',');
         for (const reporterName of reporterNames) {
-          reporters.push(resolve(reporterName));
+          reporters.push(resolve(reporterName.trim()));
         }
       }
     }
