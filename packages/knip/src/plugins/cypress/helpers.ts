@@ -4,7 +4,7 @@ import { load, resolveEntry } from '#p/util/plugin.ts';
 import type { CypressConfig } from './types.js';
 
 interface ReporterConfig {
-    reporterEnabled: string;
+  reporterEnabled: string;
 }
 
 export const resolveDependencies = async (config: CypressConfig, options: PluginOptions) => {
