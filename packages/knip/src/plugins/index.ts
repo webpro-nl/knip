@@ -17,6 +17,7 @@ export { default as githubActions } from './github-actions/index.js';
 export { default as graphqlCodegen } from './graphql-codegen/index.js';
 export { default as husky } from './husky/index.js';
 export { default as jest } from './jest/index.js';
+export { default as ladle } from './ladle/index.js';
 export { default as lefthook } from './lefthook/index.js';
 export { default as linthtml } from './linthtml/index.js';
 export { default as lintStaged } from './lint-staged/index.js';
