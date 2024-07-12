@@ -1,0 +1,4 @@
+{
+    "reporterEnabled": "mochawesome, mocha-junit-reporter"
+  }
+  
