@@ -54,12 +54,20 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
   const presets = configurationOutput
     .map(configOutput => (configOutput.preset ? configOutput.preset : undefined))
     .filter((preset): preset is PresetNames => typeof preset === 'string')
-    .map(presetName => `@graphql-codegen/${presetName}${presetName.endsWith('-preset') ? '' : '-preset'}`);
+    .map(presetName =>
+      // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/presets.ts#L8-L11
+      presetName.startsWith('@graphql-codegen/')
+        ? presetName
+        : `@graphql-codegen/${presetName}${presetName.endsWith('-preset') ? '' : '-preset'}`
+    );
 
   const flatPlugins = generateSet
     .filter((config): config is ConfiguredPlugin => !isConfigurationOutput(config))
     .flatMap(item => Object.keys(item))
-    .map(plugin => `@graphql-codegen/${plugin}`);
+    .map(plugin =>
+      // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/plugins.ts#L8-L18
+      plugin.includes('codegen-') ? plugin : `@graphql-codegen/${plugin}`
+    );
 
   const nestedPlugins = configurationOutput
     .flatMap(configOutput => (configOutput.plugins ? configOutput.plugins : []))
@@ -70,7 +78,7 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     .flatMap(plugin => {
       if (typeof plugin !== 'string') return [];
       if (isInternal(plugin)) return [toEntryPattern(plugin)];
-      return [`@graphql-codegen/${plugin}`];
+      return [plugin.includes('codegen-') ? plugin : `@graphql-codegen/${plugin}`];
     });
 
   return [...presets, ...flatPlugins, ...nestedPlugins];

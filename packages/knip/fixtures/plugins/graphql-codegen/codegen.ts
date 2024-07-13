@@ -3,13 +3,14 @@ module.exports = {
   overwrite: true,
   generates: {
     './graphql.schema.json': {
-      plugins: ['introspection'],
+      plugins: ['introspection', 'graphql-codegen-typescript-validation-schema'],
     },
     './graphql.schema.graphql': {
       'schema-ast': {},
     },
     './src/generated/graphql.ts': {
       documents: ['./src/**/*.tsx'],
+      preset: '@graphql-codegen/graphql-modules-preset',
       plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
     },
     './lib/': {
