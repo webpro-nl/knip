@@ -26,7 +26,7 @@ import { addNsValues, addValues, createFileNode } from './util/dependency-graph.
 import { isFile } from './util/fs.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredHandler } from './util/globby.js';
-import { getHandler } from './util/handle-dependency.js';
+import { getReferencedDependencyHandler } from './util/handle-dependency.js';
 import { getHasStrictlyNsReferences, getType } from './util/has-strictly-ns-references.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
@@ -66,9 +66,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
-  const isGitIgnored = await getGitIgnoredHandler({ cwd, gitignore });
-  const toSourceFilePath = getToSourcePathHandler(chief);
-
   streamer.cast('Reading workspace configuration(s)...');
 
   await chief.init();
@@ -94,6 +91,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
   debugLogObject('*', 'Included workspace configs', o);
+
+  const isGitIgnored = await getGitIgnoredHandler({ cwd, gitignore });
+  const toSourceFilePath = getToSourcePathHandler(chief);
+  const handleReferencedDependency = getReferencedDependencyHandler(collector, deputy, chief);
+  const shouldIgnore = getShouldIgnoreHandler(isProduction);
+  const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
 
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName, manifestPath } = workspace;
@@ -251,8 +254,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const entryPaths = new Set<string>();
 
   const getFileNode = (filePath: string) => graph.get(filePath) ?? createFileNode();
-
-  const handleReferencedDependency = getHandler(collector, deputy, chief);
+  const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
 
   const updateImportDetails = (importedModule: ImportDetails, importItems: ImportDetails) => {
     for (const id of importItems.refs) importedModule.refs.add(id);
@@ -370,11 +372,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   }
 
   if (isIsolateWorkspaces) for (const principal of principals) factory.deletePrincipal(principal);
-
-  const shouldIgnore = getShouldIgnoreHandler(isProduction);
-  const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
-
-  const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
 
   const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
   const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
@@ -589,6 +586,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       for (const issue of dependencyIssues) collector.addIssue(issue);
       if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
       for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
+
       const configurationHints = deputy.getConfigurationHints(collector.getIssues());
       for (const hint of configurationHints) collector.addConfigurationHint(hint);
     }

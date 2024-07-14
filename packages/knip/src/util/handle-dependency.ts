@@ -11,7 +11,7 @@ import { fromBinary, isBinary } from './protocols.js';
 import { _resolveSpecifier } from './require.js';
 import { resolveSync } from './resolve.js';
 
-export const getHandler =
+export const getReferencedDependencyHandler =
   (collector: IssueCollector, deputy: DependencyDeputy, chief: ConfigurationChief) =>
   (specifier: string, containingFilePath: string, workspace: Workspace) => {
     if (isBinary(specifier)) {
