@@ -8,9 +8,9 @@ import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } fr
 import type { DependencyGraph, Export, ExportMember, FileNode, UnresolvedImport } from './types/dependency-graph.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
-import { createHosts } from './typescript/createHosts.js';
+import { createHosts } from './typescript/create-hosts.js';
 import { type GetImportsAndExportsOptions, _getImportsAndExports } from './typescript/get-imports-and-exports.js';
-import type { ResolveModuleNames } from './typescript/resolveModuleNames.js';
+import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
