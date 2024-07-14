@@ -6,20 +6,20 @@ interface Package {
   dir: string;
 }
 
-export type Graph = Record<string, Set<string>>;
+export type WorkspaceGraph = Record<string, Set<string>>;
 
 const types = ['peerDependencies', 'devDependencies', 'optionalDependencies', 'dependencies'] as const;
 
-export function createPkgGraph(
+export function createWorkspaceGraph(
   cwd: string,
   wsNames: string[],
   wsPkgNames: Set<string>,
   byPkgName: Map<string, Package>,
   byName: Map<string, Package>
 ) {
-  const graph: Graph = {};
+  const graph: WorkspaceGraph = {};
 
-  const getPkgDirs = (pkg: Package) => {
+  const getWorkspaceDirs = (pkg: Package) => {
     const dirs = new Set<string>();
     for (const type of types) {
       if (pkg.manifest[type]) {
@@ -36,7 +36,7 @@ export function createPkgGraph(
 
   for (const name of wsNames) {
     const pkg = byName.get(name);
-    if (pkg) graph[join(cwd, name)] = getPkgDirs(pkg);
+    if (pkg) graph[join(cwd, name)] = getWorkspaceDirs(pkg);
   }
 
   return graph;
