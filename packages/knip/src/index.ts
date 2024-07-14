@@ -130,6 +130,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       isIsolateWorkspaces,
       isSkipLibs,
       isWatch,
+      toSourceFilePath,
     });
 
     const worker = new WorkspaceWorker({
@@ -331,7 +332,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   };
 
   for (const principal of principals) {
-    principal.init(toSourceFilePath);
+    principal.init();
 
     for (const [containingFilePath, specifier, workspaceName] of principal.referencedDependencies) {
       const workspace = chief.findWorkspaceByName(workspaceName);

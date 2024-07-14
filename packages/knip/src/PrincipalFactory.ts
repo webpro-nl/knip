@@ -3,6 +3,7 @@ import { ProjectPrincipal } from './ProjectPrincipal.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { debugLog } from './util/debug.js';
 import { toAbsolute, toRelative } from './util/path.js';
+import type { ToSourceFilePath } from './util/to-source-path.js';
 
 type Paths = ts.CompilerOptions['paths'];
 
@@ -19,6 +20,7 @@ export type PrincipalOptions = {
   isIsolateWorkspaces: boolean;
   isSkipLibs: boolean;
   isWatch: boolean;
+  toSourceFilePath: ToSourceFilePath;
 };
 
 const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>
