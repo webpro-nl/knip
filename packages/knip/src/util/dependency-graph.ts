@@ -1,6 +1,40 @@
-import type { FileNode, IdToFileMap, IdToNsToFileMap, ImportDetails } from '../types/dependency-graph.js';
+import type {
+  DependencyGraph,
+  FileNode,
+  IdToFileMap,
+  IdToNsToFileMap,
+  ImportDetails,
+  ImportMap,
+} from '../types/dependency-graph.js';
 
-export const createFileNode = (): FileNode => ({
+export const getOrCreateFileNode = (graph: DependencyGraph, filePath: string) =>
+  graph.get(filePath) ?? createFileNode();
+
+const updateImportDetails = (importedModule: ImportDetails, importItems: ImportDetails) => {
+  for (const id of importItems.refs) importedModule.refs.add(id);
+  for (const [id, v] of importItems.imported.entries()) addValues(importedModule.imported, id, v);
+  for (const [id, v] of importItems.importedAs.entries()) addNsValues(importedModule.importedAs, id, v);
+  for (const [id, v] of importItems.importedNs.entries()) addValues(importedModule.importedNs, id, v);
+  for (const [id, v] of importItems.reExported.entries()) addValues(importedModule.reExported, id, v);
+  for (const [id, v] of importItems.reExportedAs.entries()) addNsValues(importedModule.reExportedAs, id, v);
+  for (const [id, v] of importItems.reExportedNs.entries()) addValues(importedModule.reExportedNs, id, v);
+};
+
+export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: DependencyGraph) => {
+  for (const [importedFilePath, importDetails] of importMap.entries()) {
+    const importedFileImports = file.imports.internal.get(importedFilePath);
+    if (!importedFileImports) file.imports.internal.set(importedFilePath, importDetails);
+    else updateImportDetails(importedFileImports, importDetails);
+
+    const importedFile = getOrCreateFileNode(graph, importedFilePath);
+    if (!importedFile.imported) importedFile.imported = importDetails;
+    else updateImportDetails(importedFile.imported, importDetails);
+
+    graph.set(importedFilePath, importedFile);
+  }
+};
+
+const createFileNode = (): FileNode => ({
   imports: {
     internal: new Map(),
     external: new Set(),
@@ -38,12 +72,12 @@ export const addNsValue = (map: IdToNsToFileMap, id: string, ns: string, value: 
   }
 };
 
-export const addValues = (map: IdToFileMap, id: string, values: Set<string>) => {
+const addValues = (map: IdToFileMap, id: string, values: Set<string>) => {
   if (map.has(id)) for (const v of values) map.get(id)?.add(v);
   else map.set(id, values);
 };
 
-export const addNsValues = (map: IdToNsToFileMap, id: string, value: IdToFileMap) => {
+const addNsValues = (map: IdToNsToFileMap, id: string, value: IdToFileMap) => {
   // @ts-expect-error come on
   if (map.has(id)) for (const [ns, v] of value) addValues(map.get(id), ns, v);
   else map.set(id, value);

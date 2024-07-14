@@ -13,16 +13,9 @@ import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.j
 import { getFilteredScripts } from './manifest/helpers.js';
 import watchReporter from './reporters/watch.js';
 import type { CommandLineOptions } from './types/cli.js';
-import type {
-  DependencyGraph,
-  Export,
-  ExportMember,
-  FileNode,
-  ImportDetails,
-  ImportMap,
-} from './types/dependency-graph.js';
+import type { DependencyGraph, Export, ExportMember } from './types/dependency-graph.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
-import { addNsValues, addValues, createFileNode } from './util/dependency-graph.js';
+import { getOrCreateFileNode, updateImportMap } from './util/dependency-graph.js';
 import { isFile } from './util/fs.js';
 import { _glob, negate } from './util/glob.js';
 import { getGitIgnoredHandler } from './util/globby.js';
@@ -253,31 +246,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
 
-  const getFileNode = (filePath: string) => graph.get(filePath) ?? createFileNode();
   const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
-
-  const updateImportDetails = (importedModule: ImportDetails, importItems: ImportDetails) => {
-    for (const id of importItems.refs) importedModule.refs.add(id);
-    for (const [id, v] of importItems.imported.entries()) addValues(importedModule.imported, id, v);
-    for (const [id, v] of importItems.importedAs.entries()) addNsValues(importedModule.importedAs, id, v);
-    for (const [id, v] of importItems.importedNs.entries()) addValues(importedModule.importedNs, id, v);
-    for (const [id, v] of importItems.reExported.entries()) addValues(importedModule.reExported, id, v);
-    for (const [id, v] of importItems.reExportedAs.entries()) addNsValues(importedModule.reExportedAs, id, v);
-    for (const [id, v] of importItems.reExportedNs.entries()) addValues(importedModule.reExportedNs, id, v);
-  };
-
-  const updateImportMap = (file: FileNode, importMap: ImportMap) => {
-    for (const [importedFilePath, importDetails] of importMap.entries()) {
-      const importedFileImports = file.imports.internal.get(importedFilePath);
-      if (!importedFileImports) file.imports.internal.set(importedFilePath, importDetails);
-      else updateImportDetails(importedFileImports, importDetails);
-
-      const importedFile = getFileNode(importedFilePath);
-      if (!importedFile.imported) importedFile.imported = importDetails;
-      else updateImportDetails(importedFile.imported, importDetails);
-      graph.set(importedFilePath, importedFile);
-    }
-  };
 
   const isPackageNameInternalWorkspace = (packageName: string) => chief.availableWorkspacePkgNames.has(packageName);
 
@@ -307,14 +276,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         getPrincipalByFilePath
       );
 
-      const file = getFileNode(filePath);
+      const file = getOrCreateFileNode(graph, filePath);
 
       file.imports = imports;
       file.exports = exports;
       file.scripts = scripts;
       file.traceRefs = traceRefs;
 
-      updateImportMap(file, imports.internal);
+      updateImportMap(file, imports.internal, graph);
       file.internalImportCache = imports.internal;
 
       graph.set(filePath, file);
@@ -667,7 +636,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               // Rebuild dep graph
               for (const filePath of filePaths) {
                 const file = graph.get(filePath);
-                if (file?.internalImportCache) updateImportMap(file, file.internalImportCache);
+                if (file?.internalImportCache) updateImportMap(file, file.internalImportCache, graph);
               }
             }
 
