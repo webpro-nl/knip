@@ -22,12 +22,13 @@ const project = ['.ladle/**/*.{js,jsx,ts,tsx}'];
 
 const resolveEntryPaths: ResolveEntryPaths<LadleConfig> = async localConfig => {
   const localStories = typeof localConfig.stories === 'string' ? [localConfig.stories] : localConfig.stories;
-  const localViteConfig = localConfig.viteConfig ? [localConfig.viteConfig] : [];
-
-  const patterns = [...restEntry, ...(localStories ?? stories), ...localViteConfig];
+  const patterns = [...restEntry, ...(localStories ?? stories)];
 
   return patterns.map(toEntryPattern);
 };
+
+const resolveConfig: ResolveEntryPaths<LadleConfig> = async localConfig =>
+  localConfig.viteConfig ? [localConfig.viteConfig] : [];
 
 export default {
   title,
@@ -37,4 +38,5 @@ export default {
   entry,
   project,
   resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;
