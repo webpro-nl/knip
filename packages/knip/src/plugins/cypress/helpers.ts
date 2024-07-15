@@ -1,6 +1,6 @@
-import type { PluginOptions } from '#p/types/plugins.ts';
-import { isInternal, toAbsolute } from '#p/util/path.ts';
-import { load, resolveEntry } from '#p/util/plugin.ts';
+import type { PluginOptions } from '#p/types/plugins.js';
+import { isInternal, toAbsolute } from '#p/util/path.js';
+import { load, resolveEntry } from '#p/util/plugin.js';
 import type { CypressConfig } from './types.js';
 
 interface ReporterConfig {
