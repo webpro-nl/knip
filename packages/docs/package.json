@@ -24,11 +24,11 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.2",
-    "@astrojs/starlight": "0.25.0",
+    "@astrojs/starlight": "0.25.1",
     "sharp": "0.33.4"
   },
   "devDependencies": {
-    "@astrojs/check": "0.8.0",
+    "@astrojs/check": "0.8.1",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.2",
     "astro": "4.11.5",
