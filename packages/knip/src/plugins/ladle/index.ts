@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['.ladle/config.{mjs,js,ts}'];
 
-const stories: string[] = ['**/*.@(stories.@(mdx|js|jsx|mjs|ts|tsx))'];
+const stories: string[] = ['src/**/*.stories.{js,jsx,ts,tsx,mdx}'];
 const restEntry: string[] = ['.ladle/components.{js,jsx,ts,tsx}'];
 const entry: string[] = [...restEntry, ...stories];
 
