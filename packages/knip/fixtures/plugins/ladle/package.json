@@ -1,5 +1,6 @@
 {
   "name": "@fixtures/ladle",
+  "type": "module",
   "scripts": {
     "dev": "ladle serve --port 4123",
     "build": "ladle build"
