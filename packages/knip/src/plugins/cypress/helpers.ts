@@ -14,7 +14,7 @@ export const resolveDependencies = async (config: CypressConfig, options: Plugin
   const resolve = (specifier: string) => resolveEntry(options, specifier);
 
   // Initialize the array of reporters with the initial reporter if present.
-  const reporters = reporter ? new Set(reporter) : new Set();
+  const reporters = reporter ? new Set([reporter]) : new Set();
   // https://github.com/YOU54F/cypress-plugins/tree/master/cypress-multi-reporters#configuring-reporters
   if (reporter === 'cypress-multi-reporters' && config.reporterOptions?.configFile) {
     // Try to resolve the config file if present and attach the reporters listed in it.
