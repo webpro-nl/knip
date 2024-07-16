@@ -13,19 +13,18 @@ test('Find dependencies with the ladle plugin', async () => {
     cwd,
   });
 
-  assert(issues.dependencies['package.json']['@ladle/react']);
-  assert(issues.dependencies['package.json']['react']);
   assert(issues.dependencies['package.json']['react-dom']);
-  assert(issues.devDependencies['package.json']['@types/react']);
   assert(issues.devDependencies['package.json']['@types/react-dom']);
   assert(issues.binaries['package.json']['ladle']);
+  assert(issues.unlisted['.ladle/vite.config.ts']['vite']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
-    dependencies: 3,
-    devDependencies: 2,
-    processed: 0,
-    total: 0,
+    dependencies: 1,
+    devDependencies: 1,
+    processed: 5,
+    unlisted: 1,
+    total: 5,
   });
 });

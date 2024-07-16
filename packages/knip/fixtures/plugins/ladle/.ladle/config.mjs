@@ -2,5 +2,5 @@
 /** @type {import('@ladle/react').UserConfig} */
 export default {
   stories: "app/**/*.stories.{tsx,mdx}",
-  viteConfig: process.cwd() + "./ladle/vite.config.ts",
+  viteConfig: "./.ladle/vite.config.ts",
 };
