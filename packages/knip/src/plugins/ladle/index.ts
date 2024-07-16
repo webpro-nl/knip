@@ -4,6 +4,7 @@ import { hasDependency, load } from '#p/util/plugin.js';
 import type { LadleConfig } from './types.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { resolveConfig as resolveVitestConfig } from '../vitest/index.js';
+import { isAbsolute, join } from '#p/util/path.js';
 
 // https://ladle.dev/docs/config
 
@@ -21,15 +22,25 @@ const entry: string[] = [...restEntry, ...stories];
 
 const project = ['.ladle/**/*.{js,jsx,ts,tsx}'];
 
-const resolveEntryPaths: ResolveEntryPaths<LadleConfig> = async localConfig => {
+const resolveEntryPaths: ResolveEntryPaths<LadleConfig> = async (localConfig, options) => {
   const localStories = typeof localConfig.stories === 'string' ? [localConfig.stories] : localConfig.stories;
-  const patterns = [...restEntry, ...(localStories ?? stories)];
+  const viteConfig = localConfig.viteConfig
+    ? [isAbsolute(localConfig.viteConfig) ? localConfig.viteConfig : join(options.cwd, localConfig.viteConfig)]
+    : [];
 
+  const patterns = [...restEntry, ...(localStories ?? stories), ...viteConfig];
   return patterns.map(toEntryPattern);
 };
 
 const resolveConfig: ResolveConfig<LadleConfig> = async (localConfig, options) =>
-  localConfig.viteConfig ? resolveVitestConfig(await load(localConfig.viteConfig), options) : [];
+  localConfig.viteConfig
+    ? resolveVitestConfig(
+        await load(
+          isAbsolute(localConfig.viteConfig) ? localConfig.viteConfig : join(options.cwd, localConfig.viteConfig)
+        ),
+        options
+      )
+    : [];
 
 export default {
   title,
