@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/cypress",
+  "devDependencies": {
+    "cypress": "*",
+    "cypress-multi-reporters": "*",
+    "mocha-junit-reporter": "*",
+    "mochawesome": "*"
+  }
+}
