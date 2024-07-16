@@ -12,6 +12,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 export const config = ['vite*.config.{js,mjs,ts,cjs,mts,cts}'];
 
+const entry = ['src/vite-env.d.ts'];
+
 const production: string[] = [];
 
 export default {
@@ -19,6 +21,7 @@ export default {
   enablers,
   isEnabled,
   config,
+  entry,
   production,
   resolveEntryPaths,
   resolveConfig,
