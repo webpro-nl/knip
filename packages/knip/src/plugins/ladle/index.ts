@@ -1,10 +1,10 @@
 import type { EnablerPatterns } from '#p/types/config.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
+import { isAbsolute, join } from '#p/util/path.js';
 import { hasDependency, load } from '#p/util/plugin.js';
-import type { LadleConfig } from './types.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { resolveConfig as resolveVitestConfig } from '../vitest/index.js';
-import { isAbsolute, join } from '#p/util/path.js';
+import type { LadleConfig } from './types.js';
 
 // https://ladle.dev/docs/config
 
