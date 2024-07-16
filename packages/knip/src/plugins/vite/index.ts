@@ -1,6 +1,8 @@
-import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
+import { toEntryPattern } from '#p/util/protocols.ts';
 import { resolveConfig, resolveEntryPaths } from '../vitest/index.js';
+import type { ViteConfigOrFn, VitestWorkspaceConfig } from '../vitest/types.js';
 
 // https://vitejs.dev/config/
 
@@ -10,9 +12,18 @@ const enablers = ['vite', 'vitest'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const config = ['vite*.config.{js,mjs,ts,cjs,mts,cts}', 'src/vite-env.d.ts'];
+export const config = ['vite*.config.{js,mjs,ts,cjs,mts,cts}'];
 
 const production: string[] = [];
+
+const viteResolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspaceConfig> = async (
+  localConfig,
+  options
+) => {
+  const vitestEntryPaths = await resolveEntryPaths(localConfig, options);
+
+  return [...vitestEntryPaths, toEntryPattern('src/vite-env.d.ts')];
+};
 
 export default {
   title,
@@ -20,6 +31,6 @@ export default {
   isEnabled,
   config,
   production,
-  resolveEntryPaths,
+  resolveEntryPaths: viteResolveEntryPaths,
   resolveConfig,
 } satisfies Plugin;
