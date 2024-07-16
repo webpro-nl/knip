@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '#p/util/protocols.ts';
+import { toEntryPattern } from '#p/util/protocols.js';
 import { resolveConfig, resolveEntryPaths } from '../vitest/index.js';
 import type { ViteConfigOrFn, VitestWorkspaceConfig } from '../vitest/types.js';
 
