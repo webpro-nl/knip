@@ -71,7 +71,7 @@ export const resolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspa
   localConfig,
   options
 ) => {
-  const dependencies = new Set<string>();
+  const dependencies = new Set<string>(['src/vite-env.d.ts']);
   const configs = await getConfigs(localConfig);
   for (const cfg of configs) {
     const rootDir = cfg.test?.root ?? '.';
