@@ -1,6 +1,6 @@
 import type { EnablerPatterns } from '#p/types/config.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
-import { isAbsolute, join } from '#p/util/path.js';
+import { toAbsolute } from '#p/util/path.js';
 import { hasDependency, load } from '#p/util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
 import { resolveConfig as resolveVitestConfig } from '../vitest/index.js';
@@ -22,25 +22,21 @@ const entry: string[] = [...restEntry, ...stories];
 
 const project = ['.ladle/**/*.{js,jsx,ts,tsx}'];
 
-const resolveEntryPaths: ResolveEntryPaths<LadleConfig> = async (localConfig, options) => {
+const resolveEntryPaths: ResolveEntryPaths<LadleConfig> = (localConfig, options) => {
   const localStories = typeof localConfig.stories === 'string' ? [localConfig.stories] : localConfig.stories;
-  const viteConfig = localConfig.viteConfig
-    ? [isAbsolute(localConfig.viteConfig) ? localConfig.viteConfig : join(options.cwd, localConfig.viteConfig)]
-    : [];
-
+  const viteConfig = localConfig.viteConfig ? [toAbsolute(localConfig.viteConfig, options.cwd)] : [];
   const patterns = [...restEntry, ...(localStories ?? stories), ...viteConfig];
   return patterns.map(toEntryPattern);
 };
 
-const resolveConfig: ResolveConfig<LadleConfig> = async (localConfig, options) =>
-  localConfig.viteConfig
-    ? resolveVitestConfig(
-        await load(
-          isAbsolute(localConfig.viteConfig) ? localConfig.viteConfig : join(options.cwd, localConfig.viteConfig)
-        ),
-        options
-      )
-    : [];
+const resolveConfig: ResolveConfig<LadleConfig> = async (localConfig, options) => {
+  if (localConfig.viteConfig) {
+    const viteConfigPath = toAbsolute(localConfig.viteConfig, options.cwd);
+    const viteConfig = await load(viteConfigPath);
+    return resolveVitestConfig(viteConfig, options);
+  }
+  return [];
+};
 
 export default {
   title,
