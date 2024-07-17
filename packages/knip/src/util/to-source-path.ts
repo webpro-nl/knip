@@ -6,8 +6,6 @@ import { debugLog } from './debug.js';
 import { isDirectory } from './fs.js';
 import { isInternal, join, toRelative } from './path.js';
 
-export type ToSourceFilePath = (filePath: string) => undefined | string;
-
 const defaultExtensions = `.{${DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',')}}`;
 const hasJSExt = /\.(m|c)js$/;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
@@ -22,7 +20,7 @@ export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOpti
 export const getToSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string>();
 
-  const toSourcePath: ToSourceFilePath = (filePath: string) => {
+  const toSourcePath = (filePath: string) => {
     if (!isInternal(filePath) || hasJSExt.test(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -43,3 +41,5 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
 
   return toSourcePath;
 };
+
+export type ToSourceFilePath = ReturnType<typeof getToSourcePathHandler>;

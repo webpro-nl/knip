@@ -16,6 +16,7 @@ import type {
 import type { PackageJson } from './types/package-json.js';
 import { arrayify, compact } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
+import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
 import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
@@ -24,7 +25,6 @@ import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
 import { join, relative, resolve, toPosix } from './util/path.js';
-import { type Graph, createPkgGraph } from './util/pkgs-graph.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { unwrapFunction } from './util/unwrap-function.js';
@@ -114,7 +114,7 @@ export class ConfigurationChief {
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
   availableWorkspaceDirs: string[] = [];
-  packageGraph: Graph | undefined;
+  workspaceGraph: WorkspaceGraph | undefined;
   includedWorkspaces: Workspace[] = [];
 
   resolvedConfigFilePath?: string;
@@ -182,7 +182,7 @@ export class ConfigurationChief {
   }
 
   public getFilters() {
-    if (this.packageGraph && workspaceArg) return { dir: join(this.cwd, workspaceArg) };
+    if (this.workspaceGraph && workspaceArg) return { dir: join(this.cwd, workspaceArg) };
     return {};
   }
 
@@ -244,7 +244,7 @@ export class ConfigurationChief {
       .reverse()
       .map(dir => join(this.cwd, dir));
 
-    this.packageGraph = createPkgGraph(
+    this.workspaceGraph = createWorkspaceGraph(
       this.cwd,
       this.availableWorkspaceNames,
       this.availableWorkspacePkgNames,
@@ -345,7 +345,7 @@ export class ConfigurationChief {
     if (workspaceArg && this.isStrict) {
       ws.add(workspaceArg);
     } else if (workspaceArg) {
-      const graph = this.packageGraph;
+      const graph = this.workspaceGraph;
       if (graph) {
         const seen = new Set<string>();
         const initialWorkspaces = workspaceNames.map(name => join(this.cwd, name));

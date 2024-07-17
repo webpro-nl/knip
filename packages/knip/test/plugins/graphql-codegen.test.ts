@@ -20,6 +20,8 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/typescript-operations']);
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/typescript-urql']);
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/typescript-msw']);
+  assert(issues.unlisted['codegen.ts']['@graphql-codegen/graphql-modules-preset']);
+  assert(issues.unlisted['codegen.ts']['graphql-codegen-typescript-validation-schema']);
 
   assert(issues.unlisted['codegen.yaml']['@graphql-codegen/add']);
   assert(issues.unlisted['codegen.yaml']['@graphql-codegen/typescript']);
@@ -31,7 +33,7 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 13,
+    unlisted: 15,
     processed: 1,
     total: 1,
   });

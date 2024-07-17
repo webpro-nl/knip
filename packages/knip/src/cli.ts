@@ -68,6 +68,7 @@ const run = async () => {
       isRemoveFiles,
     });
 
+    // These modes have their own reporting mechanism
     if (isWatch || isTrace) return;
 
     const initialData: ReporterOptions = {

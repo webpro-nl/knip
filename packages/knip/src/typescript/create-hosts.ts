@@ -6,7 +6,7 @@ import { getCompilerExtensions } from '../compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { SourceFileManager } from './SourceFileManager.js';
-import { createCustomModuleResolver } from './resolveModuleNames.js';
+import { createCustomModuleResolver } from './resolve-module-names.js';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 

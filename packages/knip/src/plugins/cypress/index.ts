@@ -1,6 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import { hasDependency } from '#p/util/plugin.js';
 import { toEntryPattern } from '../../util/protocols.js';
+import { resolveDependencies } from './helpers.js';
+import type { CypressConfig } from './types.js';
 
 // https://docs.cypress.io/guides/references/configuration
 
@@ -31,6 +33,10 @@ const resolveEntryPaths: ResolveEntryPaths = async localConfig => {
   ].map(toEntryPattern);
 };
 
+const resolveConfig: ResolveConfig<CypressConfig> = (config, options) => {
+  return resolveDependencies(config, options);
+};
+
 export default {
   title,
   enablers,
@@ -38,4 +44,5 @@ export default {
   config,
   entry,
   resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;

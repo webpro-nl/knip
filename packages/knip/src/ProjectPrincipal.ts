@@ -8,9 +8,9 @@ import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } fr
 import type { DependencyGraph, Export, ExportMember, FileNode, UnresolvedImport } from './types/dependency-graph.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
-import { createHosts } from './typescript/createHosts.js';
-import { type GetImportsAndExportsOptions, _getImportsAndExports } from './typescript/getImportsAndExports.js';
-import type { ResolveModuleNames } from './typescript/resolveModuleNames.js';
+import { createHosts } from './typescript/create-hosts.js';
+import { type GetImportsAndExportsOptions, _getImportsAndExports } from './typescript/get-imports-and-exports.js';
+import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
@@ -69,6 +69,8 @@ export class ProjectPrincipal {
 
   cache: CacheConsultant<FileNode>;
 
+  toSourceFilePath: ToSourceFilePath;
+
   // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
   backend: {
     fileManager: SourceFileManager;
@@ -81,7 +83,7 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isSkipLibs, isWatch, pkgName }: PrincipalOptions) {
+  constructor({ compilerOptions, cwd, compilers, isSkipLibs, isWatch, pkgName, toSourceFilePath }: PrincipalOptions) {
     this.cwd = cwd;
 
     this.compilerOptions = {
@@ -98,16 +100,17 @@ export class ProjectPrincipal {
     this.isSkipLibs = isSkipLibs;
     this.isWatch = isWatch;
     this.cache = new CacheConsultant(pkgName || ANONYMOUS);
+    this.toSourceFilePath = toSourceFilePath;
   }
 
-  init(toSourceFilePath: ToSourceFilePath) {
+  init() {
     const { fileManager, compilerHost, resolveModuleNames, languageServiceHost } = createHosts({
       cwd: this.cwd,
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
       compilers: [this.syncCompilers, this.asyncCompilers],
       isSkipLibs: this.isSkipLibs,
-      toSourceFilePath,
+      toSourceFilePath: this.toSourceFilePath,
       useResolverCache: !this.isWatch,
     });
 
