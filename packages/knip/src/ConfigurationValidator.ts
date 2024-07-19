@@ -120,6 +120,7 @@ const pluginsSchema = z.object({
   remark: pluginSchema,
   remix: pluginSchema,
   rollup: pluginSchema,
+  rspack: pluginSchema,
   'semantic-release': pluginSchema,
   sentry: pluginSchema,
   'simple-git-hooks': pluginSchema,

@@ -41,6 +41,7 @@ export { default as releaseIt } from './release-it/index.js';
 export { default as remark } from './remark/index.js';
 export { default as remix } from './remix/index.js';
 export { default as rollup } from './rollup/index.js';
+export { default as rspack } from './rspack/index.js';
 export { default as semanticRelease } from './semantic-release/index.js';
 export { default as sentry } from './sentry/index.js';
 export { default as simpleGitHooks } from './simple-git-hooks/index.js';

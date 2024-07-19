@@ -452,6 +452,10 @@
           "title": "Rollup plugin configuration (https://knip.dev/reference/plugins/rollup)",
           "$ref": "#/definitions/plugin"
         },
+        "rspack": {
+          "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
+          "$ref": "#/definitions/plugin"
+        },
         "semantic-release": {
           "title": "semantic-release plugin configuration (https://knip.dev/reference/plugins/semantic-release)",
           "$ref": "#/definitions/plugin"
