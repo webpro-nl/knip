@@ -14,10 +14,18 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const gitHookPaths = getGitHookPaths('.husky', false);
 
 // Add patterns for both v8 and v9 because we can't know which version is installed at this point
-const config = [...gitHookPaths];
+const config = [...gitHookPaths, 'package.json'];
 
-const resolveConfig: ResolveConfig<string> = async (script, options) => {
+const resolveConfig: ResolveConfig = (script, options) => {
   if (!script) return [];
+
+  if (options.configFileName === 'package.json') {
+    const hooks = script.hooks;
+    if (hooks) {
+      const scripts: string[] = Object.values(hooks);
+      return ['husky', ...getDependenciesFromScripts(scripts, { ...options })];
+    }
+  }
 
   return getDependenciesFromScripts(String(script), { ...options, knownGlobalsOnly: true });
 };
