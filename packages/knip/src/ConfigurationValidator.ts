@@ -116,6 +116,7 @@ const pluginsSchema = z.object({
   'playwright-ct': pluginSchema,
   postcss: pluginSchema,
   prettier: pluginSchema,
+  'react-cosmos': pluginSchema,
   'release-it': pluginSchema,
   remark: pluginSchema,
   remix: pluginSchema,

@@ -436,6 +436,10 @@
           "title": "Prettier plugin configuration (https://knip.dev/reference/plugins/prettier)",
           "$ref": "#/definitions/plugin"
         },
+        "react-cosmos": {
+          "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
+          "$ref": "#/definitions/plugin"
+        },
         "release-it": {
           "title": "Release It plugin configuration (https://knip.dev/reference/plugins/release-it)",
           "$ref": "#/definitions/plugin"
