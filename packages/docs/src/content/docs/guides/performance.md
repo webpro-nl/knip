@@ -74,8 +74,8 @@ messages like this:
 ```
 
 The first number in `P1/1` is the number of the program, the second number
-indicates additional entry files were found in the previous round so it does
-another round of analysis on those files.
+indicates additional entry files were found so it does another round of analysis
+on those files.
 
 Use [--isolate-workspaces][2] to disable this behavior.
 
