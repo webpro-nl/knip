@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/rsbuild",
+  "version": "*",
+  "scripts": {
+    "dev": "rsbuild dev --open",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "1.0.1-beta.3",
+    "@rsbuild/plugin-react": "1.0.1-beta.3"
+  }
+}

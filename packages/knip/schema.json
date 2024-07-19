@@ -452,6 +452,10 @@
           "title": "Rollup plugin configuration (https://knip.dev/reference/plugins/rollup)",
           "$ref": "#/definitions/plugin"
         },
+        "rsbuild": {
+          "title": "rsbuild plugin configuration (https://knip.dev/reference/plugins/rsbuild)",
+          "$ref": "#/definitions/plugin"
+        },
         "rspack": {
           "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
           "$ref": "#/definitions/plugin"
