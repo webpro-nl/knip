@@ -7,7 +7,7 @@ import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
 import { debugLogObject } from './debug.js';
 import { isFile } from './fs.js';
-import { dirname, join, relative, toPosix } from './path.js';
+import { dirname, join, relative, toPosix, toRelative } from './path.js';
 
 const walk = promisify(_walk);
 
@@ -73,7 +73,7 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
   };
 
   const addFile = (filePath: string) => {
-    gitignoreFiles.push(filePath);
+    gitignoreFiles.push(toRelative(filePath));
 
     const dir = dirname(toPosix(filePath));
     const base = relative(options.cwd, dir);
