@@ -307,7 +307,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const workspace = chief.findWorkspaceByName(workspaceName);
       if (workspace) {
         const specifierFilePath = handleReferencedDependency(specifier, containingFilePath, workspace);
-        if (specifierFilePath) principal.addEntryPath(specifierFilePath);
+        if (specifierFilePath && !isGitIgnored(specifierFilePath)) principal.addEntryPath(specifierFilePath);
       }
     }
 
