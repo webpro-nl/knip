@@ -279,10 +279,11 @@ export class ConfigurationChief {
   }
 
   private getIgnoredWorkspacePatterns() {
-    const ignoredWorkspaces = this.getListedWorkspaces()
+    const ignoredWorkspacesManifest = this.getListedWorkspaces()
       .filter(name => name.startsWith('!'))
       .map(name => name.replace(/^!/, ''));
-    return [...ignoredWorkspaces, ...this.config.ignoreWorkspaces];
+    const ignoredWorkspacesConfig = this.config.ignoreWorkspaces.map(name => name.replace(/\/\*$/, ''));
+    return [...ignoredWorkspacesManifest, ...ignoredWorkspacesConfig];
   }
 
   private getConfiguredWorkspaceKeys() {
