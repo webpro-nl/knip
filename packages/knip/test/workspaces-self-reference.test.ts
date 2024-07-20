@@ -17,7 +17,7 @@ skipIf('Find unused files, dependencies and exports in workspaces with cross sel
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 8,
-    total: 8,
+    processed: 7,
+    total: 7,
   });
 });

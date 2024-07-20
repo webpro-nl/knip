@@ -18,8 +18,8 @@ skipIf('Allows self-references from plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    processed: 2,
-    total: 2,
+    processed: 1,
+    total: 1,
   });
 });
 
