@@ -130,28 +130,26 @@ export default visit(
             ) {
               const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
               const element = variableDeclarationParent.name.elements[index];
-              const isTLA = isTopLevel(variableDeclarationParent.parent);
-              if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
-                // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
-                return element.name.elements.map(element => {
-                  const identifier = (element.propertyName ?? element.name).getText();
-                  const alias = element.propertyName ? element.name.getText() : undefined;
-                  // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
-                  return { identifier, alias, symbol: isTLA ? element.symbol : undefined, specifier, pos: element.pos };
-                });
-              }
+              if (element) {
+                const isTLA = isTopLevel(variableDeclarationParent.parent);
+                if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
+                  // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
+                  return element.name.elements.map(element => {
+                    const identifier = (element.propertyName ?? element.name).getText();
+                    const alias = element.propertyName ? element.name.getText() : undefined;
+                    // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
+                    const symbol = isTLA ? element.symbol : undefined;
+                    return { identifier, alias, symbol, specifier, pos: element.pos };
+                  });
+                }
 
-              // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
-              // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'OmittedExpression'.
-              const alias = element.name.escapedText;
-              return {
-                identifier: 'default',
+                // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
+                // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'OmittedExpression'.
+                const alias = element.name.escapedText;
                 // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
-                symbol: isTLA ? element.symbol : undefined,
-                alias,
-                specifier,
-                pos: element.pos,
-              };
+                const symbol = isTLA ? element.symbol : undefined;
+                return { identifier: 'default', symbol, alias, specifier, pos: element.pos };
+              }
             }
 
             // Pattern: import('side-effects')
