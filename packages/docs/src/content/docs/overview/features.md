@@ -23,7 +23,7 @@ Overview of features supported by Knip (A-Z):
 | [Script parser][15]                       | Scripts contain dependencies and entry paths               |
 | [Trace][16]                               | Trace exports to find where they are used                  |
 | [Watch mode][17]                          | Use `--watch` to update the reporter on file changes       |
-| [Workspace][18]                           | Lint only a single workspace in a monorepo                 |
+| [Workspace][18]                           | Use `--workspace` to lint a single workspace in a monorepo |
 
 [1]: ../features/auto-fix.mdx
 [2]: ../reference/cli.md#--cache

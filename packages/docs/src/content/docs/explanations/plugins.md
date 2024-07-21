@@ -21,9 +21,9 @@ in `package.json`. For instance, if `astro` is listed in `dependencies` or
 Knip uses [entry files][2] as starting points to scan your source code and
 resolve other internal files and external dependencies. The dependency graph can
 be statically resolved through the `require` and `import` statements in those
-source files. However, configuration files often reference external dependencies
-in different ways. Knip uses plugins to parse configuration files to find those
-dependencies.
+source files. However, configuration files reference external dependencies in
+various ways. Knip uses a plugin for each tool to parse configuration files and
+find those dependencies.
 
 In this example we look at [Knip's ESLint plugin][3]. The default `config` file
 patterns include `.eslintrc.json`. Here's a minimal example:
