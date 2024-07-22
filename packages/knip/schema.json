@@ -356,6 +356,10 @@
           "title": "Jest plugin configuration (https://knip.dev/reference/plugins/jest)",
           "$ref": "#/definitions/plugin"
         },
+        "ladle": {
+          "title": "ladle plugin configuration (https://knip.dev/reference/plugins/ladle)",
+          "$ref": "#/definitions/plugin"
+        },
         "lefthook": {
           "title": "lefthook plugin configuration (https://knip.dev/reference/plugins/lefthook)",
           "$ref": "#/definitions/plugin"

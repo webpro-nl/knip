@@ -96,6 +96,7 @@ const pluginsSchema = z.object({
   'graphql-codegen': pluginSchema,
   husky: pluginSchema,
   jest: pluginSchema,
+  ladle: pluginSchema,
   lefthook: pluginSchema,
   'lint-staged': pluginSchema,
   linthtml: pluginSchema,
