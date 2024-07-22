@@ -49,6 +49,7 @@ function promiseAll() {
       const [identifierA, { default: identifierB }] = await Promise.all([
         import('./import-a'),
         import('./dir/import-b'),
+        import('./dir/import-b'),
       ]);
 
       [identifierA, identifierB];
