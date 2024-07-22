@@ -8,17 +8,17 @@ import type { LadleConfig } from './types.js';
 
 // https://ladle.dev/docs/config
 
-const title = 'ladle';
+const title = 'Ladle';
 
-const enablers: EnablerPatterns = [/^@ladle\//];
+const enablers: EnablerPatterns = ['@ladle/react'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['.ladle/config.{mjs,js,ts}'];
 
-const stories: string[] = ['src/**/*.stories.{js,jsx,ts,tsx,mdx}'];
-const restEntry: string[] = ['.ladle/components.{js,jsx,ts,tsx}'];
-const entry: string[] = [...restEntry, ...stories];
+const stories = ['src/**/*.stories.{js,jsx,ts,tsx,mdx}'];
+const restEntry = ['.ladle/components.{js,jsx,ts,tsx}'];
+const entry = [...restEntry, ...stories];
 
 const project = ['.ladle/**/*.{js,jsx,ts,tsx}'];
 

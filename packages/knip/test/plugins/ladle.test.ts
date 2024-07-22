@@ -23,8 +23,8 @@ test('Find dependencies with the ladle plugin', async () => {
     binaries: 1,
     dependencies: 1,
     devDependencies: 1,
-    processed: 5,
     unlisted: 1,
+    processed: 5,
     total: 5,
   });
 });
