@@ -16,7 +16,7 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-          # - windows-latest # temp disabled because https://github.com/oven-sh/bun/issues/9932
+          - windows-latest
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}
     steps:
