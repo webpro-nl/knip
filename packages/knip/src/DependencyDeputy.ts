@@ -378,17 +378,16 @@ export class DependencyDeputy {
     }
   }
 
-  public getConfigurationHints({ issues, counters }: { issues: Issues; counters: Counters }) {
-    const configurationHints: ConfigurationHints = new Set();
-
+  public removeIgnoredIssues({ issues, counters }: { issues: Issues; counters: Counters }) {
     this.handleIgnoredDependencies(issues, counters, 'dependencies');
     this.handleIgnoredDependencies(issues, counters, 'devDependencies');
     this.handleIgnoredDependencies(issues, counters, 'optionalPeerDependencies');
     this.handleIgnoredDependencies(issues, counters, 'unlisted');
     this.handleIgnoredBinaries(issues, counters, 'binaries');
+  }
 
-    // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in production/strict mode
-    if (this.isProduction) return configurationHints;
+  public getConfigurationHints() {
+    const configurationHints: ConfigurationHints = new Set();
 
     for (const [workspaceName, manifest] of this._manifests.entries()) {
       for (const identifier of manifest.ignoreDependencies) {

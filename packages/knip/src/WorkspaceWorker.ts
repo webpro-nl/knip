@@ -30,6 +30,8 @@ type WorkspaceManagerOptions = {
   enabledPluginsInAncestors: string[];
   isProduction: boolean;
   isStrict: boolean;
+  isCache: boolean;
+  cacheLocation: string;
 };
 
 export type ReferencedDependencies = Set<[string, string]>;
@@ -81,6 +83,8 @@ export class WorkspaceWorker {
     rootIgnore,
     negatedWorkspacePatterns,
     enabledPluginsInAncestors,
+    isCache,
+    cacheLocation,
   }: WorkspaceManagerOptions) {
     this.name = name;
     this.dir = dir;
@@ -95,7 +99,7 @@ export class WorkspaceWorker {
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
 
-    this.cache = new CacheConsultant(`plugins-${name}`);
+    this.cache = new CacheConsultant({ name: `plugins-${name}`, isEnabled: isCache, cacheLocation });
   }
 
   public async init() {

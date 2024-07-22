@@ -11,58 +11,66 @@ const defaults = Object.fromEntries([
   ...ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.includes(type)).map(included),
   ...defaultExcludedIssueTypes.map(excluded),
 ]);
-const shorthands = { dependencies: false, exports: false, files: false };
+const shorthands = { isDependenciesShorthand: false, isExportsShorthand: false, isFilesShorthand: false };
 
 test('Resolve included issue types (default)', async () => {
-  const cliArgs = { include: [], exclude: [], ...shorthands };
+  const cliArgs = { includedIssueTypes: [], excludedIssueTypes: [], ...shorthands };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, { ...defaults });
 });
 
 test('Resolve included issue types (all)', async () => {
-  const cliArgs = { include: ['classMembers', 'nsExports', 'nsTypes'], exclude: [], ...shorthands };
+  const cliArgs = {
+    includedIssueTypes: ['classMembers', 'nsExports', 'nsTypes'],
+    excludedIssueTypes: [],
+    ...shorthands,
+  };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, { ...all });
 });
 
 test('Resolve included issue types (include single)', async () => {
-  const cliArgs = { include: ['duplicates'], exclude: [], ...shorthands };
+  const cliArgs = { includedIssueTypes: ['duplicates'], excludedIssueTypes: [], ...shorthands };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, { ...none, duplicates: true });
 });
 
 test('Resolve included issue types (exclude some)', async () => {
   const cliArgs = {
-    include: [],
-    exclude: ['duplicates', 'nsTypes'],
-    dependencies: false,
-    exports: false,
-    files: false,
+    includedIssueTypes: [],
+    excludedIssueTypes: ['duplicates', 'nsTypes'],
+    isDependenciesShorthand: false,
+    isExportsShorthand: false,
+    isFilesShorthand: false,
   };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, { ...defaults, duplicates: false, nsTypes: false });
 });
 
 test('Resolve included issue types (overlap)', async () => {
-  const cliArgs = { include: ['exports', 'files', 'nsTypes'], exclude: ['files', 'duplicates'], ...shorthands };
+  const cliArgs = {
+    includedIssueTypes: ['exports', 'files', 'nsTypes'],
+    excludedIssueTypes: ['files', 'duplicates'],
+    ...shorthands,
+  };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, { ...none, exports: true, nsTypes: true });
 });
 
 test('Resolve included issue types (include devDependencies)', async () => {
-  const cliArgs = { include: ['dependencies'], exclude: [], ...shorthands };
+  const cliArgs = { includedIssueTypes: ['dependencies'], excludedIssueTypes: [], ...shorthands };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, { ...none, dependencies: true, devDependencies: true, optionalPeerDependencies: true });
 });
 
 test('Resolve included issue types (include dependencies)', async () => {
-  const cliArgs = { include: ['dependencies'], exclude: [], ...shorthands };
+  const cliArgs = { includedIssueTypes: ['dependencies'], excludedIssueTypes: [], ...shorthands };
   const config = getIncludedIssueTypes(cliArgs, { isProduction: true });
   assert.deepEqual(config, { ...none, dependencies: true });
 });
 
 test('Resolve included issue types (exclude dependencies)', async () => {
-  const cliArgs = { include: [], exclude: ['dependencies'], ...shorthands };
+  const cliArgs = { includedIssueTypes: [], excludedIssueTypes: ['dependencies'], ...shorthands };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, {
     ...defaults,
@@ -73,7 +81,13 @@ test('Resolve included issue types (exclude dependencies)', async () => {
 });
 
 test('Resolve included issue types (--dependencies)', async () => {
-  const cliArgs = { include: [], exclude: [], dependencies: true, exports: false, files: false };
+  const cliArgs = {
+    includedIssueTypes: [],
+    excludedIssueTypes: [],
+    isDependenciesShorthand: true,
+    isExportsShorthand: false,
+    isFilesShorthand: false,
+  };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, {
     ...none,
@@ -87,30 +101,36 @@ test('Resolve included issue types (--dependencies)', async () => {
 });
 
 test('Resolve included issue types (--exports)', async () => {
-  const cliArgs = { include: [], exclude: [], dependencies: false, exports: true, files: false };
+  const cliArgs = {
+    includedIssueTypes: [],
+    excludedIssueTypes: [],
+    isDependenciesShorthand: false,
+    isExportsShorthand: true,
+    isFilesShorthand: false,
+  };
   const config = getIncludedIssueTypes(cliArgs);
-  assert.deepEqual(config, {
-    ...none,
-    exports: true,
-    types: true,
-    enumMembers: true,
-    duplicates: true,
-  });
+  assert.deepEqual(config, { ...none, exports: true, types: true, enumMembers: true, duplicates: true });
 });
 
 test('Resolve included issue types (--files)', async () => {
-  const cliArgs = { include: [], exclude: [], dependencies: false, exports: false, files: true };
+  const cliArgs = {
+    includedIssueTypes: [],
+    excludedIssueTypes: [],
+    isDependenciesShorthand: false,
+    isExportsShorthand: false,
+    isFilesShorthand: true,
+  };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, { ...none, files: true });
 });
 
 test('Resolve included issue types (all)', async () => {
   const cliArgs = {
-    include: ['classMembers', 'nsExports', 'nsTypes'],
-    exclude: [],
-    dependencies: true,
-    exports: true,
-    files: true,
+    includedIssueTypes: ['classMembers', 'nsExports', 'nsTypes'],
+    excludedIssueTypes: [],
+    isDependenciesShorthand: true,
+    isExportsShorthand: true,
+    isFilesShorthand: true,
   };
   const config = getIncludedIssueTypes(cliArgs);
   assert.deepEqual(config, all);

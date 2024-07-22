@@ -33,26 +33,35 @@ export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js'
 
 export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const {
+    cacheLocation,
     cwd,
-    tsConfigFile,
+    excludedIssueTypes,
+    fixTypes,
     gitignore,
-    isStrict,
-    isProduction,
-    isShowProgress,
+    includedIssueTypes,
+    isCache,
+    isDebug,
+    isDependenciesShorthand,
+    isExportsShorthand,
+    isFilesShorthand,
+    isFix,
+    isHideConfigHints,
     isIncludeEntryExports,
     isIncludeLibs,
     isIsolateWorkspaces,
-    isDebug,
+    isProduction,
+    isRemoveFiles,
+    isShowProgress,
+    isStrict,
     isWatch,
     tags,
-    isFix,
-    fixTypes,
-    isRemoveFiles,
+    tsConfigFile,
+    workspace,
   } = unresolvedConfiguration;
 
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
-  const chief = new ConfigurationChief({ cwd, isProduction, isStrict, isIncludeEntryExports });
+  const chief = new ConfigurationChief({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace });
   const deputy = new DependencyDeputy({ isProduction, isStrict });
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
@@ -62,7 +71,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   await chief.init();
 
   const workspaces = chief.getIncludedWorkspaces();
-  const report = chief.getIncludedIssueTypes();
+  const report = chief.getIncludedIssueTypes({
+    includedIssueTypes,
+    excludedIssueTypes,
+    isDependenciesShorthand,
+    isExportsShorthand,
+    isFilesShorthand,
+  });
   const rules = chief.getRules();
   const filters = chief.getFilters();
   const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes, isRemoveFiles });
@@ -125,6 +140,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       isSkipLibs,
       isWatch,
       toSourceFilePath,
+      isCache,
+      cacheLocation,
     });
 
     const worker = new WorkspaceWorker({
@@ -139,6 +156,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       rootIgnore: chief.config.ignore,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
+      isCache,
+      cacheLocation,
     });
 
     await worker.init();
@@ -554,8 +573,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
       for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
 
-      const configurationHints = deputy.getConfigurationHints(collector.getIssues());
-      for (const hint of configurationHints) collector.addConfigurationHint(hint);
+      deputy.removeIgnoredIssues(collector.getIssues());
+
+      // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in production/strict mode
+      if (!workspace && !isProduction && !isHideConfigHints) {
+        const configurationHints = deputy.getConfigurationHints();
+        for (const hint of configurationHints) collector.addConfigurationHint(hint);
+      }
     }
 
     const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
@@ -569,6 +593,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
   if (isWatch) {
+    const isIgnored = (filePath: string) =>
+      filePath.startsWith(cacheLocation) || filePath.includes('/.git/') || isGitIgnored(filePath);
+
     const watchHandler = await getWatchHandler({
       analyzedFiles,
       analyzeSourceFile,
@@ -579,7 +606,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       factory,
       graph,
       isDebug,
-      isGitIgnored,
+      isIgnored,
       report,
       streamer,
       unreferencedFiles,

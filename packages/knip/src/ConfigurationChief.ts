@@ -19,28 +19,18 @@ import parsedArgValues from './util/cli-arguments.js';
 import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
-import { getIncludedIssueTypes } from './util/get-included-issue-types.js';
+import { type CLIArguments, getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
 import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
-import { join, relative, resolve, toPosix } from './util/path.js';
+import { join, relative, resolve } from './util/path.js';
 import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
 
-const {
-  config: rawConfigArg,
-  workspace: rawWorkspaceArg,
-  include = [],
-  exclude = [],
-  dependencies = false,
-  exports = false,
-  files = false,
-} = parsedArgValues;
-
-const workspaceArg = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, '').replace(/\/$/, '') : undefined;
+const { config: rawConfigArg } = parsedArgValues;
 
 const getDefaultWorkspaceConfig = (extensions?: string[]) => {
   const exts = [...DEFAULT_EXTENSIONS, ...(extensions ?? [])].map(ext => ext.slice(1)).join(',');
@@ -73,6 +63,7 @@ type ConfigurationManagerOptions = {
   isProduction: boolean;
   isStrict: boolean;
   isIncludeEntryExports: boolean;
+  workspace: string | undefined;
 };
 
 export type Package = { dir: string; name: string; pkgName: string | undefined; manifest: PackageJson };
@@ -103,6 +94,7 @@ export class ConfigurationChief {
   isStrict = false;
   isIncludeEntryExports = false;
   config: Configuration;
+  workspace: string | undefined;
 
   manifestPath?: string;
   manifest?: PackageJson;
@@ -122,12 +114,13 @@ export class ConfigurationChief {
   // biome-ignore lint/suspicious/noExplicitAny: raw incoming user data
   rawConfig?: any;
 
-  constructor({ cwd, isProduction, isStrict, isIncludeEntryExports }: ConfigurationManagerOptions) {
+  constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace }: ConfigurationManagerOptions) {
     this.cwd = cwd;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
     this.isIncludeEntryExports = isIncludeEntryExports;
     this.config = defaultConfig;
+    this.workspace = workspace;
   }
 
   public async init() {
@@ -182,7 +175,7 @@ export class ConfigurationChief {
   }
 
   public getFilters() {
-    if (this.workspaceGraph && workspaceArg) return { dir: join(this.cwd, workspaceArg) };
+    if (this.workspaceGraph && this.workspace) return { dir: join(this.cwd, this.workspace) };
     return {};
   }
 
@@ -325,8 +318,8 @@ export class ConfigurationChief {
   }
 
   private determineIncludedWorkspaces() {
-    if (workspaceArg) {
-      const dir = resolve(workspaceArg);
+    if (this.workspace) {
+      const dir = resolve(this.workspace);
       if (!isDirectory(dir)) throw new ConfigurationError('Workspace is not a directory');
       if (!isFile(join(dir, 'package.json'))) throw new ConfigurationError('Unable to find package.json in workspace');
     }
@@ -337,15 +330,15 @@ export class ConfigurationChief {
       return ancestors;
     };
 
-    const workspaceNames = workspaceArg
-      ? [...this.availableWorkspaceNames.reduce(getAncestors(workspaceArg), []), workspaceArg]
+    const workspaceNames = this.workspace
+      ? [...this.availableWorkspaceNames.reduce(getAncestors(this.workspace), []), this.workspace]
       : this.availableWorkspaceNames;
 
     const ws = new Set<string>();
 
-    if (workspaceArg && this.isStrict) {
-      ws.add(workspaceArg);
-    } else if (workspaceArg) {
+    if (this.workspace && this.isStrict) {
+      ws.add(this.workspace);
+    } else if (this.workspace) {
       const graph = this.workspaceGraph;
       if (graph) {
         const seen = new Set<string>();
@@ -473,8 +466,7 @@ export class ConfigurationChief {
     return { entry, project, paths, ignore, isIncludeEntryExports, ...plugins };
   }
 
-  public getIncludedIssueTypes() {
-    const cliArgs = { include, exclude, dependencies, exports, files };
+  public getIncludedIssueTypes(cliArgs: CLIArguments) {
     const excludesFromRules = getKeysByValue(this.config.rules, 'off');
     const config = {
       include: this.config.include ?? [],

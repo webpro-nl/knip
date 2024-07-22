@@ -83,7 +83,17 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isSkipLibs, isWatch, pkgName, toSourceFilePath }: PrincipalOptions) {
+  constructor({
+    compilerOptions,
+    cwd,
+    compilers,
+    isSkipLibs,
+    isWatch,
+    pkgName,
+    toSourceFilePath,
+    isCache,
+    cacheLocation,
+  }: PrincipalOptions) {
     this.cwd = cwd;
 
     this.compilerOptions = {
@@ -99,7 +109,7 @@ export class ProjectPrincipal {
     this.asyncCompilers = asyncCompilers;
     this.isSkipLibs = isSkipLibs;
     this.isWatch = isWatch;
-    this.cache = new CacheConsultant(pkgName || ANONYMOUS);
+    this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation });
     this.toSourceFilePath = toSourceFilePath;
   }
 

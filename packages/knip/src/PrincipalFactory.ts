@@ -21,6 +21,8 @@ export type PrincipalOptions = {
   isSkipLibs: boolean;
   isWatch: boolean;
   toSourceFilePath: ToSourceFilePath;
+  isCache: boolean;
+  cacheLocation: string;
 };
 
 const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>

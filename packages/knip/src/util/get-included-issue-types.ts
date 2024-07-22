@@ -2,12 +2,12 @@ import { ISSUE_TYPES } from '../constants.js';
 import type { Report } from '../types/issues.js';
 import { ConfigurationError } from './errors.js';
 
-type CLIArguments = {
-  include: string[];
-  exclude: string[];
-  dependencies: boolean;
-  exports: boolean;
-  files: boolean;
+export type CLIArguments = {
+  includedIssueTypes: string[];
+  excludedIssueTypes: string[];
+  isDependenciesShorthand: boolean;
+  isExportsShorthand: boolean;
+  isFilesShorthand: boolean;
 };
 
 type Options = {
@@ -29,8 +29,8 @@ export const getIncludedIssueTypes = (
   { include = [], exclude = [], isProduction = false }: Options = {}
 ) => {
   // Allow space-separated argument values (--include files,dependencies)
-  let incl = normalize(cliArgs.include);
-  const excl = normalize(cliArgs.exclude);
+  let incl = normalize(cliArgs.includedIssueTypes);
+  const excl = normalize(cliArgs.excludedIssueTypes);
 
   // Naming is hard...
   for (const type of [...incl, ...excl, ...include, ...exclude]) {
@@ -42,13 +42,13 @@ export const getIncludedIssueTypes = (
   const excludes = exclude.filter(exclude => !incl.includes(exclude));
   const includes = include.filter(include => !excl.includes(include));
 
-  if (cliArgs.dependencies) {
+  if (cliArgs.isDependenciesShorthand) {
     incl = [...incl, 'dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
   }
-  if (cliArgs.exports) {
+  if (cliArgs.isExportsShorthand) {
     incl = [...incl, 'exports', 'types', 'enumMembers', 'duplicates'];
   }
-  if (cliArgs.files) {
+  if (cliArgs.isFilesShorthand) {
     incl = [...incl, 'files'];
   }
 

@@ -1,5 +1,4 @@
 import type { WatchListener } from 'node:fs';
-import { CacheConsultant } from '../CacheConsultant.js';
 import type { ConfigurationChief } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { IssueCollector } from '../IssueCollector.js';
@@ -23,7 +22,7 @@ type Watch = {
   factory: PrincipalFactory;
   graph: DependencyGraph;
   isDebug: boolean;
-  isGitIgnored: (path: string) => boolean;
+  isIgnored: (path: string) => boolean;
   report: Report;
   streamer: ConsoleStreamer;
   unreferencedFiles: Set<string>;
@@ -39,13 +38,11 @@ export const getWatchHandler = async ({
   factory,
   graph,
   isDebug,
-  isGitIgnored,
+  isIgnored,
   report,
   streamer,
   unreferencedFiles,
 }: Watch) => {
-  const cacheLocation = CacheConsultant.getCacheLocation();
-
   const reportIssues = async (startTime?: number) => {
     const { issues } = collector.getIssues();
     watchReporter({ report, issues, streamer, startTime, size: analyzedFiles.size, isDebug });
@@ -58,7 +55,7 @@ export const getWatchHandler = async ({
       const startTime = performance.now();
       const filePath = join(cwd, toPosix(filename));
 
-      if (filename.startsWith(cacheLocation) || filename.startsWith('.git/') || isGitIgnored(filePath)) {
+      if (isIgnored(filePath)) {
         debugLog('*', `ignoring ${eventType} ${filename}`);
         return;
       }
