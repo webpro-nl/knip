@@ -1,7 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
-import { EOL } from 'node:os';
 import { main } from '../src/index.js';
 import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -32,7 +31,7 @@ class MyClass {}
 
 /** @knipignore */
 export type U = number;
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'access.js',
@@ -40,7 +39,7 @@ export type U = number;
       `module.exports.USED = 1;
 
 
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'exports.js',
@@ -49,7 +48,7 @@ export type U = number;
 const identifier2 = 2;
 
 module.exports = { identifier,  };
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'reexports.js',
@@ -59,7 +58,7 @@ export { Rating } from './reexported';
 export { One } from './reexported';
 export { Col, Col as KCol } from './reexported';
 export { Row as KRow, Row } from './reexported';
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'reexported.js',
@@ -69,7 +68,7 @@ const Three = 2;
 
 
 export const One = 1;
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'package.json',
@@ -82,7 +81,7 @@ export const One = 1;
   },
   "devDependencies": {}
 }
-`.replace(/\n/g, EOL),
+`,
     ],
   ];
 
@@ -145,7 +144,7 @@ export default class MyClass {}
 
 /** @knipignore */
 export type U = number;
-`.replace(/\n/g, EOL),
+`,
     ],
   ];
 

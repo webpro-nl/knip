@@ -1,7 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
-import { EOL } from 'node:os';
 import { main } from '../src/index.js';
 import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -22,7 +21,7 @@ type T = number;
 
 /** @knipignore */
 export type U = number;
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'package.json',
@@ -36,7 +35,7 @@ export type U = number;
     "packages/*"
   ]
 }
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'packages/lib/exports.ts',
@@ -48,7 +47,7 @@ type T = number;
 
 /** @knipignore */
 export type U = number;
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'packages/lib/package.json',
@@ -59,7 +58,7 @@ export type U = number;
     "ignored": "*"
   }
 }
-`.replace(/\n/g, EOL),
+`,
     ],
   ];
 
@@ -114,7 +113,7 @@ type T = number;
 
 /** @knipignore */
 export type U = number;
-`.replace(/\n/g, EOL),
+`,
     ],
     [
       'packages/lib/exports.ts',
@@ -126,7 +125,7 @@ type T = number;
 
 /** @knipignore */
 export type U = number;
-`.replace(/\n/g, EOL),
+`,
     ],
   ];
 
