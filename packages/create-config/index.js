@@ -21,7 +21,11 @@ const main = () => {
   }
 
   const pm = getPackageManager();
-  const cmd = [pm, 'add', '-D', 'knip', 'typescript', '@types/node'].join(' ');
+  // check if pnpm workspace
+  const isPnpmWorkspace = fileExists('pnpm-workspace.yaml');
+  const cmd = [pm, 'add', isPnpmWorkspace ? '-w' : undefined, '-D', 'knip', 'typescript', '@types/node']
+    .filter(Boolean)
+    .join(' ');
 
   execSync(cmd);
   console.info('✓ Install Knip');
