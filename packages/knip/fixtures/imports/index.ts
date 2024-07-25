@@ -57,6 +57,20 @@ function promiseAll() {
   };
 }
 
+function promiseTail() {
+  return {
+    async fn() {
+      const [, , identifierB] = await Promise.all([
+        import('./dir/import-b'),
+        import('./dir/import-b'),
+        import('./dir/import-b'),
+      ]);
+
+      [identifierB];
+    },
+  };
+}
+
 (await import('./prop-access')).propAccess;
 
 const {

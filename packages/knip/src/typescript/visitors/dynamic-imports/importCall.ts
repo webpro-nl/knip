@@ -143,12 +143,16 @@ export default visit(
                   });
                 }
 
-                // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
-                // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'OmittedExpression'.
-                const alias = element.name.escapedText;
-                // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
-                const symbol = isTLA ? element.symbol : undefined;
-                return { identifier: 'default', symbol, alias, specifier, pos: element.pos };
+                if (!ts.isOmittedExpression(element) && ts.isIdentifier(element.name)) {
+                  // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
+                  // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'OmittedExpression'.
+                  const alias = element.name.escapedText;
+                  // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
+                  const symbol = isTLA ? element.symbol : undefined;
+                  return { identifier: 'default', symbol, alias, specifier, pos: element.pos };
+                }
+
+                return { identifier: 'default', specifier, pos: element.pos };
               }
             }
 
