@@ -152,8 +152,7 @@ Also see [external libs][8].
 
 ### `--isolate-workspaces`
 
-By default, Knip optimizes performance using
-[workspace sharing](../guides/performance.md#workspace-sharing) to existing
+By default, Knip optimizes performance using [workspace sharing][9] to existing
 TypeScript programs, based on the compatibility of their `compilerOptions`. Use
 this flag to disable this behavior and create one program per workspace.
 
@@ -383,7 +382,7 @@ Maximum number of issues before non-zero exit code. Default: `0`
 [6]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [7]: ./configuration.md#includeentryexports
 [8]: ../guides/handling-issues.mdx#external-libraries
-[9]: #--debug
+[9]: ../guides/performance.md#workspace-sharing
 [10]: ../features/production-mode.md
 [11]: #--production
 [12]: ../features/auto-fix.mdx

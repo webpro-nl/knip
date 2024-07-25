@@ -77,8 +77,7 @@ The first number in `P1/1` is the number of the program, the second number
 indicates additional entry files were found in the previous round so it does
 another round of analysis on those files.
 
-Use [--isolate-workspaces](../reference/cli.md#--isolate-workspaces) to disable
-this behavior.
+Use [--isolate-workspaces][2] to disable this behavior.
 
 ## findReferences
 
@@ -97,7 +96,8 @@ up symbols and caching.
 ## A last resort
 
 In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][2].
+individual workspaces][3].
 
 [1]: ./configuring-project-files.md
-[2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[2]: ../reference/cli.md#--isolate-workspaces
+[3]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
