@@ -1,8 +1,7 @@
 import { compact } from '#p/util/array.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '#p/util/modules.js';
 import { basename, dirname, isAbsolute, isInternal, toAbsolute } from '#p/util/path.js';
-import { load } from '#p/util/plugin.js';
-import { _resolve } from '#p/util/require.js';
+import { load, resolve } from '#p/util/plugin.js';
 import type { PluginOptions } from '../../types/plugins.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
@@ -40,11 +39,13 @@ export const getDependenciesDeep: GetDependenciesDeep = async (localConfig, opti
     if (localConfig.extends) {
       for (const extend of [localConfig.extends].flat()) {
         if (isInternal(extend)) {
-          const filePath = _resolve(toAbsolute(extend, configFileDir));
-          dependencies.add(filePath);
-          const localConfig: ESLintConfig = await load(filePath);
-          const opts = { ...options, configFileDir: dirname(filePath), configFileName: basename(filePath) };
-          addAll(await getDependenciesDeep(localConfig, opts, dependencies));
+          const filePath = resolve(toAbsolute(extend, configFileDir), configFileDir);
+          if (filePath) {
+            dependencies.add(filePath);
+            const localConfig: ESLintConfig = await load(filePath);
+            const opts = { ...options, configFileDir: dirname(filePath), configFileName: basename(filePath) };
+            addAll(await getDependenciesDeep(localConfig, opts, dependencies));
+          }
         }
       }
     }

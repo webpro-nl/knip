@@ -6,10 +6,18 @@ import {
   getPackageNameFromModuleSpecifier,
   normalizeSpecifierFromFilePath,
 } from './modules.js';
-import { isInNodeModules, isInternal } from './path.js';
+import { dirname, isInNodeModules, isInternal, join } from './path.js';
 import { fromBinary, isBinary } from './protocols.js';
-import { _resolveSpecifier } from './require.js';
-import { resolveSync } from './resolve.js';
+import { _resolveSync } from './resolve.js';
+
+const resolveFromInternalWorkspace = (specifier: string, baseDir: string) => {
+  const moduleSpecifier = normalizeSpecifierFromFilePath(specifier);
+  const packageName = getPackageNameFromModuleSpecifier(moduleSpecifier);
+  if (packageName) {
+    const relativeSpecifier = moduleSpecifier.replace(packageName, '.');
+    return _resolveSync(join(baseDir, relativeSpecifier), baseDir);
+  }
+};
 
 export const getReferencedDependencyHandler =
   (collector: IssueCollector, deputy: DependencyDeputy, chief: ConfigurationChief) =>
@@ -26,7 +34,7 @@ export const getReferencedDependencyHandler =
         });
     } else {
       if (isInternal(specifier)) {
-        const resolvedFilePath = resolveSync(specifier, containingFilePath);
+        const resolvedFilePath = _resolveSync(specifier, dirname(containingFilePath));
         if (resolvedFilePath) return resolvedFilePath;
         collector.addIssue({
           type: 'unresolved',
@@ -51,7 +59,7 @@ export const getReferencedDependencyHandler =
         if (packageName && specifier !== packageName) {
           const otherWorkspace = chief.workspacePackagesByName.get(packageName);
           if (otherWorkspace) {
-            const filePath = _resolveSpecifier(otherWorkspace.dir, normalizeSpecifierFromFilePath(specifier));
+            const filePath = resolveFromInternalWorkspace(specifier, otherWorkspace.dir);
             if (filePath) return filePath;
             collector.addIssue({
               type: 'unresolved',

@@ -5,7 +5,7 @@ import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { timerify } from '../util/Performance.js';
 import { sanitizeSpecifier } from '../util/modules.js';
 import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.js';
-import { resolveSync } from '../util/resolve.js';
+import { _resolveSync } from '../util/resolve.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 
@@ -90,7 +90,7 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins or externals, bail out
     if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
 
-    const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile, extensions);
+    const resolvedFileName = _resolveSync(sanitizedSpecifier, dirname(containingFile), extensions);
 
     if (resolvedFileName) {
       const ext = extname(resolvedFileName);

@@ -3,8 +3,8 @@ import { timerify } from './Performance.js';
 import { LoaderError } from './errors.js';
 import { loadFile, loadJSON, loadTOML, loadYAML, parseJSON, parseYAML } from './fs.js';
 import { isTypeModule } from './fs.js';
+import { jitiCJS, jitiESM } from './jiti.js';
 import { extname, isInternal } from './path.js';
-import { jitiCJS, jitiESM } from './register.js';
 
 const load = async (filePath: string) => {
   try {

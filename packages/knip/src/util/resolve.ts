@@ -1,14 +1,17 @@
 import resolve from 'resolve';
 import { DEFAULT_EXTENSIONS } from '../constants.js';
-import { dirname, toPosix } from './path.js';
+import { timerify } from './Performance.js';
+import { toPosix } from './path.js';
 
-export const resolveSync = (specifier: string, containingFile: string, extensions = DEFAULT_EXTENSIONS) => {
+const resolveSync = (specifier: string, baseDir: string, extensions = DEFAULT_EXTENSIONS) => {
   try {
     const resolved = resolve.sync(specifier, {
-      basedir: dirname(containingFile),
+      basedir: baseDir,
       extensions,
       preserveSymlinks: false,
     });
     return toPosix(resolved);
   } catch (_error) {}
 };
+
+export const _resolveSync = timerify(resolveSync);
