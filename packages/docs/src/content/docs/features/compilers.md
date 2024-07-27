@@ -90,3 +90,44 @@ export default {
 You may wonder why the CSS compiler is not included by default. It's currently
 not clear if it should be included. And if so, what would be the best way to
 determine it should be enabled, and what syntax(es) it should support.
+
+### Vue
+
+In a project with Vue, the compiler is automatically enabled. Override and use
+Vue's parser for better results if the built-in "compiler" is not enough:
+
+```ts
+import type { KnipConfig } from 'knip';
+import {
+  parse,
+  type SFCScriptBlock,
+  type SFCStyleBlock,
+} from 'vue/compiler-sfc';
+
+function getScriptBlockContent(block: SFCScriptBlock | null): string[] {
+  if (!block) return [];
+  if (block.src) return [`import '${block.src}'`];
+  return [block.content];
+}
+
+function getStyleBlockContent(block: SFCStyleBlock | null): string[] {
+  if (!block) return [];
+  if (block.src) return [`@import '${block.src}';`];
+  return [block.content];
+}
+
+const config = {
+  compilers: {
+    vue: (text: string, filename: string) => {
+      const { descriptor } = parse(text, { filename, sourceMap: false });
+      return [
+        ...getScriptBlockContent(descriptor.script),
+        ...getScriptBlockContent(descriptor.scriptSetup),
+        ...descriptor.styles.flatMap(getStyleBlockContent).map(getStyleImports),
+      ].join('\n');
+    },
+  },
+} satisfies KnipConfig;
+
+export default config;
+```
