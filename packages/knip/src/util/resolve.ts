@@ -4,6 +4,7 @@ import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { timerify } from './Performance.js';
 import { toPosix } from './path.js';
 
+// @ts-ignore error TS2345 (not in latest): Argument of type 'typeof import("node:fs")' is not assignable to parameter of type 'BaseFileSystem'.
 const fileSystem = new ER.CachedInputFileSystem(fs, 9999);
 
 export const createSyncResolver = (extensions: string[]) => {

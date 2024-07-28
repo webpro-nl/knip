@@ -118,10 +118,10 @@ const toConfigMap =
     const configExtensions = extensions.filter(
       ext => config.configFilesAllExtensions || jsTypeExtensions.includes(ext)
     );
-    const configFiles = !!config.configFiles && `${moduleName}.config.{${configExtensions.join(',')}}`;
-    const configDirFiles = !!config.configDir && `.config/${moduleName}${rcSuffix}.{${extensions.join(',')}}`;
+    const configFiles = config.configFiles ? [`${moduleName}.config.{${configExtensions.join(',')}}`] : [];
+    const configDirFiles = config.configDir ? [`.config/${moduleName}${rcSuffix}.{${extensions.join(',')}}`] : [];
 
-    return [...baseFiles, rcFiles, configFiles, configDirFiles].filter(item => item !== false);
+    return [...baseFiles, rcFiles, ...configFiles, ...configDirFiles];
   };
 
 export const toCosmiconfig = toConfigMap(['json', 'yaml', 'yml', 'js', 'ts', 'cjs', 'mjs'], { configDir: true });
