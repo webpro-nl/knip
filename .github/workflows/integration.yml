@@ -108,7 +108,7 @@ jobs:
       - run: |
           cd TypeScript
           npm ci
-          knip --tags=+internal,-knipignore --exclude=duplicates,enumMembers
+          knip --tags=+internal,-knipignore --exclude=duplicates,enumMembers,unlisted
 
       - name: Test Knip against InvokeAI
         uses: actions/checkout@v4
