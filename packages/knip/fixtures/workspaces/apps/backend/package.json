@@ -6,5 +6,8 @@
     "@workspaces/tools": "1.0.0",
     "picomatch": "*",
     "next": "*"
+  },
+  "devDependencies": {
+    "@workspaces/tsconfig": "1.0.0"
   }
 }

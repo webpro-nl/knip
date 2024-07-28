@@ -1,23 +1,10 @@
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
-import {
-  getPackageNameFromFilePath,
-  getPackageNameFromModuleSpecifier,
-  normalizeSpecifierFromFilePath,
-} from './modules.js';
-import { dirname, isInNodeModules, isInternal, join } from './path.js';
+import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './modules.js';
+import { dirname, isInNodeModules, isInternal } from './path.js';
 import { fromBinary, isBinary } from './protocols.js';
 import { _resolveSync } from './resolve.js';
-
-const resolveFromInternalWorkspace = (specifier: string, baseDir: string) => {
-  const moduleSpecifier = normalizeSpecifierFromFilePath(specifier);
-  const packageName = getPackageNameFromModuleSpecifier(moduleSpecifier);
-  if (packageName) {
-    const relativeSpecifier = moduleSpecifier.replace(packageName, '.');
-    return _resolveSync(join(baseDir, relativeSpecifier), baseDir);
-  }
-};
 
 export const getReferencedDependencyHandler =
   (collector: IssueCollector, deputy: DependencyDeputy, chief: ConfigurationChief) =>
@@ -57,9 +44,8 @@ export const getReferencedDependencyHandler =
 
         // Patterns: @local/package/file, self-reference/file, ./node_modules/@scope/pkg/tsconfig.json
         if (packageName && specifier !== packageName) {
-          const otherWorkspace = chief.workspacePackagesByName.get(packageName);
-          if (otherWorkspace) {
-            const filePath = resolveFromInternalWorkspace(specifier, otherWorkspace.dir);
+          if (chief.workspacePackagesByName.get(packageName)) {
+            const filePath = _resolveSync(specifier, dirname(containingFilePath));
             if (filePath) return filePath;
             collector.addIssue({
               type: 'unresolved',

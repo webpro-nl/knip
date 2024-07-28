@@ -5,7 +5,7 @@ import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { timerify } from '../util/Performance.js';
 import { sanitizeSpecifier } from '../util/modules.js';
 import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.js';
-import { _resolveSync } from '../util/resolve.js';
+import { _resolveSync, createSyncResolver } from '../util/resolve.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 
@@ -33,6 +33,7 @@ export function createCustomModuleResolver(
 ) {
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
+  const resolveSync = customCompilerExtensionsSet.size === 0 ? _resolveSync : createSyncResolver(extensions);
 
   const virtualDeclarationFiles = new Map<string, { path: string; ext: string }>();
 
@@ -90,7 +91,7 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins or externals, bail out
     if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
 
-    const resolvedFileName = _resolveSync(sanitizedSpecifier, dirname(containingFile), extensions);
+    const resolvedFileName = resolveSync(sanitizedSpecifier, dirname(containingFile));
 
     if (resolvedFileName) {
       const ext = extname(resolvedFileName);

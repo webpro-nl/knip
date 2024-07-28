@@ -1,4 +1,4 @@
 {
   "entry": ["entry.ts!"],
-  "project": ["*.ts!"]
+  "project": ["*.{js,ts}!"]
 }

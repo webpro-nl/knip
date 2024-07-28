@@ -18,13 +18,6 @@ export const getPackageNameFromFilePath = (value: string) => {
   return value;
 };
 
-const packageNameMatch = /.*\/node_modules\/(.+)/;
-export const normalizeSpecifierFromFilePath = (value: string) => {
-  const match = toPosix(value).match(packageNameMatch);
-  if (match) return match[match.length - 1];
-  return value;
-};
-
 export const isStartsLikePackageName = (specifier: string) => /^@?[a-z0-9]/.test(specifier);
 
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);

@@ -3,15 +3,15 @@
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     },
     "./build": {
       "require": "./dist/build.cjs",
       "import": "./dist/build.mjs"
     },
     "./local": {
-      "require": "./lib/module.js",
-      "import": "./lib/module.js"
+      "require": "./lib/module.js"
     }
   },
   "dependencies": {
