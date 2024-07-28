@@ -93,7 +93,6 @@
     "@types/webpack": "^5.28.5",
     "@wdio/types": "^8.39.0",
     "glob": "^10.4.2",
-    "playwright": "^1.44.1",
     "release-it": "^17.4.1",
     "type-fest": "^4.20.0",
     "typescript": "^5.5.2"
