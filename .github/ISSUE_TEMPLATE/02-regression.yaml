@@ -21,16 +21,16 @@ body:
     validations:
       required: true
   - type: input
-    id: latest-version
+    id: good-version
     attributes:
-      label: Reproduction url
+      label: Good version
       description: What's the latest version it worked as expected?
     validations:
       required: true
   - type: input
-    id: first-version
+    id: bad-version
     attributes:
-      label: Reproduction url
+      label: Bad version
       description: What's the first version it no longer works as expected?
     validations:
       required: true
