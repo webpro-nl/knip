@@ -54,7 +54,8 @@ export class PrincipalFactory {
   public getPrincipal(options: PrincipalOptions) {
     const { cwd, compilerOptions, isFile, paths, pkgName, isIsolateWorkspaces, compilers } = options;
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
-    if (isFile) compilerOptions.moduleResolution ??= ts.ModuleResolutionKind.Bundler;
+    if (isFile && compilerOptions.module !== ts.ModuleKind.CommonJS)
+      compilerOptions.moduleResolution ??= ts.ModuleResolutionKind.Bundler;
     const principal = this.findReusablePrincipal(compilerOptions);
     if (!isIsolateWorkspaces && principal) {
       this.linkPrincipal(principal, cwd, compilerOptions, pkgName, compilers);
