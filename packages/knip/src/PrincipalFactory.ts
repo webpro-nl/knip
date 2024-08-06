@@ -35,9 +35,10 @@ const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>
   );
 
 const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Paths = {}) => {
+  const basePath = typeof compilerOptions.pathsBasePath === 'string' ? compilerOptions.pathsBasePath : cwd;
   const compilerPaths =
     !compilerOptions.baseUrl && compilerOptions.paths
-      ? mapToAbsolutePaths(compilerOptions.paths, cwd)
+      ? mapToAbsolutePaths(compilerOptions.paths, basePath)
       : compilerOptions.paths;
   const extraPaths = mapToAbsolutePaths(paths, cwd);
   compilerOptions.paths = { ...compilerPaths, ...extraPaths };
