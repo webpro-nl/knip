@@ -191,7 +191,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       {
         const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
-        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false });
         debugLogArray(name, 'Entry paths', workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
       }
@@ -212,7 +212,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     } else {
       {
         const patterns = worker.getEntryFilePatterns();
-        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
+        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false });
         debugLogArray(name, 'Entry paths', workspaceEntryPaths);
         principal.addEntryPaths(workspaceEntryPaths);
       }
