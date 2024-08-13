@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { statSync } from 'node:fs';
+import { statSync, readFileSync } from 'node:fs';
 // biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 
@@ -19,6 +19,20 @@ const getPackageManager = () => {
   return 'npm';
 };
 
+const getWorkspaceFlag = (pm) => {
+  if(pm === 'pnpm') {
+    return fileExists('pnpm-workspace.yaml') ? '-w' : undefined;
+  } else if(pm === 'yarn') {
+    const packageJsonPath = path.join(process.cwd(), 'package.json');
+    if (fileExists(packageJsonPath)) {
+      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+      return (packageJson.workspaces && packageJson.workspaces.length > 0) ? '-W' : undefined;
+    }
+  }
+  
+  return undefined
+};
+
 const main = () => {
   if (!fileExists('package.json')) {
     console.error('Please run this command from the root of a repository with a package.json.');
@@ -26,9 +40,8 @@ const main = () => {
   }
 
   const pm = getPackageManager();
-  // check if pnpm workspace
-  const isPnpmWorkspace = fileExists('pnpm-workspace.yaml');
-  const cmd = [pm, 'add', isPnpmWorkspace ? '-w' : undefined, '-D', 'knip', 'typescript', '@types/node']
+
+  const cmd = [pm, 'add', getWorkspaceFlag(pm), '-D', 'knip', 'typescript', '@types/node']
     .filter(Boolean)
     .join(' ');
 
