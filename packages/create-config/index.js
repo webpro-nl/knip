@@ -24,10 +24,8 @@ const getWorkspaceFlag = (pm) => {
     return fileExists('pnpm-workspace.yaml') ? '-w' : undefined;
   } else if(pm === 'yarn') {
     const packageJsonPath = path.join(process.cwd(), 'package.json');
-    if (fileExists(packageJsonPath)) {
-      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-      return (packageJson.workspaces && packageJson.workspaces.length > 0) ? '-W' : undefined;
-    }
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    return (packageJson.workspaces && packageJson.workspaces.length > 0) ? '-W' : undefined;
   }
   
   return undefined
