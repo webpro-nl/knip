@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { statSync, readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 // biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 
@@ -19,16 +19,16 @@ const getPackageManager = () => {
   return 'npm';
 };
 
-const getWorkspaceFlag = (pm) => {
-  if(pm === 'pnpm') {
+const getWorkspaceFlag = pm => {
+  if (pm === 'pnpm') {
     return fileExists('pnpm-workspace.yaml') ? '-w' : undefined;
-  } else if(pm === 'yarn') {
+  }
+
+  if (pm === 'yarn') {
     const packageJsonPath = path.join(process.cwd(), 'package.json');
     const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-    return (packageJson.workspaces && packageJson.workspaces.length > 0) ? '-W' : undefined;
+    return packageJson.workspaces && packageJson.workspaces.length > 0 ? '-W' : undefined;
   }
-  
-  return undefined
 };
 
 const main = () => {
@@ -39,9 +39,7 @@ const main = () => {
 
   const pm = getPackageManager();
 
-  const cmd = [pm, 'add', getWorkspaceFlag(pm), '-D', 'knip', 'typescript', '@types/node']
-    .filter(Boolean)
-    .join(' ');
+  const cmd = [pm, 'add', getWorkspaceFlag(pm), '-D', 'knip', 'typescript', '@types/node'].filter(Boolean).join(' ');
 
   execSync(cmd);
   console.info('✓ Install Knip');
