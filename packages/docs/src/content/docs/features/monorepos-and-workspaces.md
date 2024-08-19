@@ -47,7 +47,8 @@ above).
 :::caution
 
 In a project with workspaces, the `entry` and `project` options at the root
-level are ignored. Use the workspace named `"."` for those.
+level are ignored. Use the workspace named `"."` for those (like in the example
+above).
 
 :::
 

@@ -1,11 +1,8 @@
 ---
-title: Configuration File
+title: Configuration
 ---
 
-This page lists all configuration options.
-
-Also see [dynamic configurations][1] in case you need more flexibility to
-configure Knip.
+This page lists all configuration file options.
 
 ## File Types
 
@@ -150,6 +147,13 @@ See [Rules & Filters][7].
 
 ### `ignore`
 
+:::tip
+
+Please read [project files configuration][8] before using the `ignore` option,
+because in many cases you'll want to **exclude project files** instead.
+
+:::
+
 Array of glob patterns to ignore issues from matching files. Example:
 
 ```json title="knip.json"
@@ -157,13 +161,6 @@ Array of glob patterns to ignore issues from matching files. Example:
   "ignore": ["src/generated.ts", "fixtures/**"]
 }
 ```
-
-:::tip
-
-Please read [project files configuration][8] before using the `ignore` option,
-because in many cases you'll want to **exclude project files** instead.
-
-:::
 
 ### `ignoreBinaries`
 

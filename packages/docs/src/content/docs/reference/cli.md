@@ -35,6 +35,8 @@ Run Knip using the Bun runtime (instead of Node.js + jiti).
 knip-bun
 ```
 
+This is equal to `bunx --bun knip`
+
 Requires [Bun][1] to be installed. Also see [known issues][2] for the type of
 issues this might help with.
 

@@ -53,13 +53,14 @@ unimported
 knip --production --dependencies --include files
 ```
 
+**Project status**: The project is archived and recommends Knip.
+
 ### ts-prune
 
 > Find unused exports in a typescript project. 🛀
 
 [ts-prune][5] aims to find potentially unused exports in your TypeScript project
-with zero configuration. The project is in maintenance mode, while it recommends
-Knip.
+with zero configuration.
 
 The following commands are similar:
 
@@ -69,6 +70,8 @@ knip --include exports,types,nsExports,nsTypes
 ```
 
 Use `knip --exports` to also include class and enum members.
+
+**Project status**: The project is archived and recommends Knip.
 
 ### ts-unused-exports
 

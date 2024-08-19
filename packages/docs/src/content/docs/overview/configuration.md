@@ -5,8 +5,8 @@ description: config
 
 ## Defaults
 
-Knip has good defaults and aims for "zero config". But sometimes Knip will need
-some help to not report incorrect things.
+Knip has good defaults and aims for "zero config". For best results, Knip might
+need some configuration.
 
 Here's a simplified version of the default configuration:
 
@@ -23,9 +23,8 @@ set of `project` files to determine which files are unused.
 
 :::tip
 
-Run Knip without any configuration to see if a configuration file with custom
-`entry` and `project` file patterns is necessary. You might need to [configure
-project files][1].
+Run Knip without configuration. If it reports false positives, you need a
+configuration file. Please also read [configure project files][1].
 
 :::
 
@@ -43,13 +42,17 @@ This is where Knip looks for a configuration file:
 - `knip.config.js`
 - `"knip"` property in `package.json`
 
-Use `--config path/to/knip.json` for a different file path.
+To use a different file path:
+
+```sh
+knip --config path/to/knip.json
+```
 
 ## Customize
 
-Maybe your project structure does not match the default `entry` and `project`
-files. Here's an example custom configuration to include `.js` files in the
-`scripts` folder:
+Your project structure may not match the default `entry` and `project` files.
+Here's an example custom configuration to include `.js` files in the `scripts`
+folder:
 
 ```json title="knip.json"
 {
@@ -61,7 +64,8 @@ files. Here's an example custom configuration to include `.js` files in the
 
 If you override the `entry` file patterns, you may also want to override
 `project` file patterns. The set of project files is used to determine what
-files are unused.
+files are unused. The `project` patterns can also be negated to exclude files
+from the analysis. Also see [configuring project files][1].
 
 The values you set override the default values, they are not merged.
 
@@ -86,21 +90,17 @@ in the "Understanding Knip" sections, starting with [entry files][2].
 Want to learn more about some of the main features?
 
 - Working with [monorepos & workspaces][3].
-- Using a framework like Astro, Svelte or Nuxt? See [compilers][4] to include
-  `.astro` or `.vue` files.
-- Learn more about [production mode][5].
+- Learn more about [production mode][4].
 
 Having troubles configuring Knip?
 
 - [Configuring project files][1]
-- [Handling issues][6]
+- [Handling issues][5]
 
-This website can be searched using the search bar at the top (`Ctrl+/` or
-`Ctrl+K`)
+Search this website using the bar at the top (`Ctrl+K` or `⌘+K`).
 
 [1]: ../guides/configuring-project-files.md
 [2]: ../explanations/entry-files.md
 [3]: ../features/monorepos-and-workspaces.md
-[4]: ../features/compilers.md
-[5]: ../features/production-mode.md
-[6]: ../guides/handling-issues.md
+[4]: ../features/production-mode.md
+[5]: ../guides/handling-issues.md
