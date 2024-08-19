@@ -28,12 +28,12 @@ source code and configuration is complete and actionable.
 
 ### Before opening an issue
 
-Before opening an issue, please make sure you..
+Before opening an issue, please make sure you:
 
-- have searched [open issues][1] for the same,
-- have checked the list of [known issues][2],
-- are using the latest version,
-- have read the documentation.
+- are using the latest version
+- have read the relevant documentation
+- have searched [existing issues][1]
+- have checked the list of [known issues][2]
 
 Please file only a single issue at a time, so each of them can be labeled and
 tracked separately.
@@ -52,7 +52,8 @@ Other solutions may work well too. For instance, many people choose to create a
 small repository on GitHub. The goal is to have an easy and common understanding
 and reproduction.
 
-Providing a link to your repository will likely not be considered "minimal".
+Providing a link to your existing project repository will likely not be
+considered "minimal".
 
 ### Pull Request
 
@@ -60,7 +61,7 @@ The optimal way is to add fixtures and/or failing tests to the Knip repository,
 and open a pull request to discuss the issue! Also see [instructions for
 development][7].
 
-[1]: https://github.com/webpro-nl/knip/issues
+[1]: https://github.com/webpro-nl/knip/issues?q=is%3Aissue
 [2]: https://knip.dev/reference/known-issues
 [3]:
   https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/basic

@@ -1,5 +1,6 @@
-name: 🐛 Regression
-description: Something that worked properly before, but no longer does
+name: 🔄 Regression
+description: Something that worked a certain way before, but no longer does
+title: '🔄 <TITLE>'
 labels: ['regression']
 body:
   - type: markdown

@@ -1,0 +1,12 @@
+name: 💡 Feature Request
+description: Suggest an idea for this project
+title: '💡 <TITLE>'
+labels: ['feature request']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        <!--
+          Use common sense and provide the necessary information to explain why
+          the feature is useful to you and to others. Thanks!
+        -->
