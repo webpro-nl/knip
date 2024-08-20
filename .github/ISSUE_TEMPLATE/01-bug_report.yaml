@@ -1,18 +1,14 @@
 name: 🐛 Bug report
 description: Create a report to help us improve
-title: '🐛 <TITLE>'
+title: '🐛 '
 labels: ['bug']
 body:
   - type: markdown
     attributes:
       value: |
-        Use common sense and provide the necessary information that helps us to
-        help you.
+        Use common sense and provide the necessary information that helps us to help you.
 
-        A minimal reproduction is required: only the code and configuration
-        required to demonstrate the issue.
-
-        Please make sure you've read https://knip.dev/guides/issue-reproduction.
+        A minimal reproduction is mandatory: only the code and configuration required to demonstrate the issue.
   - type: checkboxes
     attributes:
       label: Prerequisites
@@ -27,10 +23,12 @@ body:
             issues](https://github.com/webpro-nl/knip/issues?q=is%3Aissue)
           required: true
         - label:
-            I've checked the list of [known
+            I've checked the [list of known
             issues](https://knip.dev/reference/known-issues)
           required: true
-        - label: I've read https://knip.dev/guides/issue-reproduction
+        - label:
+            I've read the [issue reproduction
+            guide](https://knip.dev/guides/issue-reproduction)
           required: true
   - type: input
     id: reproduction
@@ -39,6 +37,13 @@ body:
       description: Please link to the location of the issue reproduction
     validations:
       required: true
+  - type: checkboxes
+    attributes:
+      label: Reproduction access
+      description: For instance, a CodeSandbox seems private by default
+      options:
+        - label: I've made sure the reproduction is publicly accessible
+          required: true
   - type: textarea
     id: description
     attributes:
