@@ -1,12 +1,16 @@
 name: 🧩 Everything Else
 description: Discuss anything related to Knip
-title: '🧩 <TITLE>'
+title: '🧩 '
 labels: ['discussion']
 body:
   - type: markdown
     attributes:
       value: |
-        <!--
-          Feel free to discuss anything related to Knip.
-          Just saying, there's also a Discord channel: https://discord.gg/r5uXTtbTpc
-        -->
+        Feel free to discuss anything related to Knip.
+        By the way, there's also a [Discord channel](https://discord.gg/r5uXTtbTpc).
+  - type: textarea
+    id: description
+    attributes:
+      label: Discuss anything related to Knip
+    validations:
+      required: true

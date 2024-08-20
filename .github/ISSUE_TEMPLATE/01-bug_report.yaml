@@ -1,6 +1,6 @@
 name: 🐛 Bug report
 description: Create a report to help us improve
-title: '🐛 <TITLE>'
+title: '🐛 '
 labels: ['bug']
 body:
   - type: markdown
