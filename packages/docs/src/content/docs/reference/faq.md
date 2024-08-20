@@ -142,7 +142,7 @@ set per workspace.
 ## How does Knip handle non-standard import syntax?
 
 Knip tries to be resilient against import syntax like what's used by e.g.
-Webpack loaders or Vite asset imports. Knip strips off the prefixes and suffixes
+webpack loaders or Vite asset imports. Knip strips off the prefixes and suffixes
 in import specifiers like this:
 
 ```ts title="component.ts"
@@ -151,7 +151,7 @@ import Styles from '-!style-loader!css-loader?modules!./styles.css';
 ```
 
 In this example, the `style-loader` and `css-loader` dependencies should be
-dependencies found in Webpack configuration, handled by Knip's Webpack plugin.
+dependencies found in webpack configuration, handled by Knip's webpack plugin.
 
 ## What does Knip look for in source files?
 
@@ -231,7 +231,7 @@ The rippling effect of plugins and recursively adding entry files and
 dependencies to build up this graph - as answered with the previous question -
 is also exactly what's meant by ["comprehensive" here][7].
 
-## Does Knip handle Vue or Astro files?
+## Does Knip handle Svelte or Astro files?
 
 To further increase the coverage of the module graph, non-standard files other
 than JavaScript and TypeScript modules should be included as well. For instance,
@@ -244,11 +244,11 @@ incompatibility with the existing compiler, and dependency size. Knip allows to
 override them with the compiler(s) in your project, and add additional ones for
 other file types.
 
-## Why are the exports of my `.svelte` files not used?
+## Why are the exports of my `.vue` files not used?
 
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
-statements. Override the built-in Svelte "compilers" with the real one in your
+statements. Override the built-in Vue "compiler" with the real one in your
 project. Also see the answer to the previous question and [Compilers][8].
 
 ## Why isn't production mode the default?
