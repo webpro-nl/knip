@@ -73,6 +73,13 @@ A workspace must have a `package.json` file.
 For projects with only a root `package.json`, please see [integrated
 monorepos][2].
 
+## Additional workspaces
+
+If a workspaces is not configured as such in `package.json#workspaces` (or
+`pnpm-workspace.yaml`) it can be added to the Knip configuration manually. Add
+their path to the `workspaces` configuration object the same way as
+`"packages/cli": {}` in the example above.
+
 ## Source mapping
 
 Let's say we have this module in a monorepo that imports `helper` from another
