@@ -16,7 +16,7 @@ more ways to configure those. Files and dependencies can be referenced in many
 ways, not just through import statements. This FAQ is an attempt to provide some
 perspective on why certain things work the way they do.
 
-## Why isn't Knip a ESLint plugin?
+## Why isn't Knip an ESLint plugin?
 
 Linters like ESLint analyze files separately, while Knip lints projects as a
 whole.
@@ -115,7 +115,7 @@ There's a difference between `--tsConfig [file]` as a CLI argument and the
 The `--tsConfig [file]` option is used to provide an alternative location for
 the default root `tsconfig.json` file. Relevant `compilerOptions` include
 `paths` and `moduleResolution`. It's currently only possible to set this
-location ar the root level (i.e. not in other monorepo workspaces).
+location at the root level (i.e. not in other monorepo workspaces).
 
 On the other hand, the `typescript.config` option is a TypeScript plugin option,
 and can be set per-workspace. The plugin extracts referenced external
