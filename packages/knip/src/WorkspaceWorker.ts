@@ -289,10 +289,6 @@ export class WorkspaceWorker {
 
         for (const configFilePath of configFilePaths) {
           const opts = { ...options, configFileDir: dirname(configFilePath), configFileName: basename(configFilePath) };
-
-          // biome-ignore lint/suspicious/noExplicitAny: raw incoming user data
-          let config: any;
-
           if (hasResolveEntryPaths || shouldRunConfigResolver) {
             const isManifest = basename(configFilePath) === 'package.json';
             const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
@@ -303,7 +299,7 @@ export class WorkspaceWorker {
               if (fd.meta.data.resolveConfig)
                 for (const id of fd.meta.data.resolveConfig) addDependency(id, configFilePath);
             } else {
-              config = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
+              const config = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
               const data: CacheItem = {};
               if (config) {
                 if (hasResolveEntryPaths) {
@@ -320,15 +316,15 @@ export class WorkspaceWorker {
               }
             }
           }
-
-          if (hasResolve) {
-            const dependencies = (await plugin.resolve?.(config, options)) ?? [];
-            for (const id of dependencies) addDependency(id, join(cwd, 'package.json'));
-          }
         }
 
         const finalEntryPaths = getFinalEntryPaths(plugin, options, configEntryPaths);
         for (const id of finalEntryPaths) addDependency(id);
+
+        if (hasResolve) {
+          const dependencies = (await plugin.resolve?.(options)) ?? [];
+          for (const id of dependencies) addDependency(id, join(cwd, 'package.json'));
+        }
 
         debugLogArray([name, plugin.title], 'dependencies', pluginDependencies);
       }

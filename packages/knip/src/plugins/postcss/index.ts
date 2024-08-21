@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency, toLilconfig } from '#p/util/plugin.js';
 import type { PostCSSConfig } from './types.js';
 
@@ -18,21 +18,21 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
-  return config.plugins
+  const plugins = config.plugins
     ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).flatMap(plugin => {
         if (typeof plugin === 'string') return plugin;
         if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
         return [];
       })
     : [];
-};
 
-const resolve: Resolve<PostCSSConfig> = async (options, config) => {
-  for (const plugin of await resolveConfig(options, config)) {
+  for (const plugin of plugins) {
     // Because postcss is not included in peerDependencies of tailwindcss
-    if (plugin === 'tailwindcss') return ['postcss'];
+    if (plugin === 'tailwindcss') {
+      return [...plugins, 'postcss'];
+    }
   }
-  return [];
+  return plugins;
 };
 
 export default {
@@ -41,5 +41,4 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-  resolve,
 } satisfies Plugin;
