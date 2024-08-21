@@ -18,13 +18,16 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
-  return config.plugins
+  const plugins = config.plugins
     ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).flatMap(plugin => {
         if (typeof plugin === 'string') return plugin;
         if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
         return [];
       })
     : [];
+
+  // Because postcss is not included in peerDependencies of tailwindcss
+  return plugins.includes('tailwindcss') ? [...plugins, 'postcss'] : plugins;
 };
 
 export default {
