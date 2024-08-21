@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '#p/types/plugins.js';
 import { hasDependency, toLilconfig } from '#p/util/plugin.js';
 import type { PostCSSConfig } from './types.js';
 
@@ -27,10 +27,19 @@ const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
     : [];
 };
 
+const resolve: Resolve<PostCSSConfig> = async (options, config) => {
+  for (const plugin of await resolveConfig(options, config)) {
+    // Because postcss is not included in peerDependencies of tailwindcss
+    if (plugin === 'tailwindcss') return ['postcss'];
+  }
+  return [];
+};
+
 export default {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  resolve,
 } satisfies Plugin;

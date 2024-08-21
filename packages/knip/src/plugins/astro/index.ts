@@ -13,7 +13,7 @@ const entry = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts'];
 
 const production = ['src/pages/**/*.{astro,mdx,js,ts}', 'src/content/**/*.mdx'];
 
-const resolve: Resolve = options => {
+const resolve: Resolve = (_, options) => {
   const { isProduction, manifest } = options;
   const dependencies = [];
 
