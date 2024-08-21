@@ -26,13 +26,8 @@ const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
       })
     : [];
 
-  for (const plugin of plugins) {
-    // Because postcss is not included in peerDependencies of tailwindcss
-    if (plugin === 'tailwindcss') {
-      return [...plugins, 'postcss'];
-    }
-  }
-  return plugins;
+  // Because postcss is not included in peerDependencies of tailwindcss
+  return plugins.includes('tailwindcss') ? [...plugins, 'postcss'] : plugins;
 };
 
 export default {
