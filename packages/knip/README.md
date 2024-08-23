@@ -26,13 +26,15 @@ less maintenance and easier refactorings.
 - [Contributing Guide][5]
 - [Sponsor Knip!][6]
 
-/'knɪp/ means "(to) cut" and is [pronounced with a hard "K"][7] 🇳🇱
-
 ## Contributors
 
 Special thanks to the wonderful people who have contributed to this project:
 
 [![Contributors][9]][8]
+
+## Knip
+
+/'knɪp/ means "(to) cut" and is [pronounced with a hard "K"][7] 🇳🇱
 
 [1]: https://www.npmjs.com/package/knip
 [2]: https://github.com/webpro-nl/knip

@@ -23,7 +23,7 @@ Options:
   --fix                    Fix issues
   --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
   --allow-remove-files     Allow Knip to remove files (with --fix)
-  --include-libs           Include type definitions from dependencies (default: false; implied with classMembers)
+  --include-libs           Include type definitions from external dependencies (default: false)
   --include-entry-exports  Include entry files when reporting unused exports
   --isolate-workspaces     Isolate workspaces into separate programs
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)

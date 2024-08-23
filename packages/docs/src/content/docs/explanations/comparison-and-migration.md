@@ -87,9 +87,18 @@ knip --include exports,types,nsExports,nsTypes
 
 Use `knip --exports` to also include class and enum members.
 
+### More alternative/related projects
+
+- [dependency-check][7]
+- [deadfile][8]
+- [npm-check][9] (used depcheck)
+
 [1]: ../features/monorepos-and-workspaces.md
 [2]: ../overview/getting-started.mdx
 [3]: https://github.com/depcheck/depcheck
 [4]: https://github.com/smeijer/unimported
 [5]: https://github.com/nadeesha/ts-prune
 [6]: https://github.com/pzavolinsky/ts-unused-exports
+[7]: https://github.com/dependency-check-team/dependency-check
+[8]: https://github.com/M-Izadmehr/deadfile
+[9]: https://github.com/dylang/npm-check

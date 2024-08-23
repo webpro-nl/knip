@@ -79,7 +79,7 @@ Potential workarounds:
 
 ## False positives with external libs
 
-Knip can report false positives when exports are consumed by external libraries.
+Knip may report false positives when exports are consumed by external libraries.
 
 Please see [external libs][8].
 

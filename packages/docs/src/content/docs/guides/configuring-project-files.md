@@ -40,8 +40,8 @@ more about fine-tuning the sets of entry and project files.
 ## Negated patterns
 
 Let's take a look at using negated patterns for `entry` and `project` files. If
-you think there are too many files in the analysis, this could be the first step
-in selecting the right files for the analysis.
+you think there are too many files in the analysis, this is the first step in
+selecting the right files for the analysis.
 
 For example, we need to explicitly add route files as entry files, except those
 starting with an underscore. Then we can use a negated pattern like so:
@@ -62,6 +62,35 @@ reported as unused files, we can use negated `project` patterns:
 }
 ```
 
+### Example
+
+❌   Don't do this:
+
+```json title="knip.json"
+{
+  "entry": ["src/index.ts", "scripts/*.ts"],
+  "ignore": ["build/**", "dist/**", "src/generated.ts"]
+}
+```
+
+Don't exclude files like build artifacts using `ignore`, but include the source
+and script files in `project` patterns instead:
+
+✅   Do this:
+
+```json title="knip.json"
+{
+  "entry": ["src/index.ts", "scripts/*.ts"],
+  "project": ["src/**", "scripts/**"],
+  "ignore": ["src/generated.ts"]
+}
+```
+
+This way, the `project` files cover all source files, and other files don't even
+need to be ignored anymore. Only files that are actually imported from source
+code might be candidates to `ignore`. This may also have significant impact on
+performance.
+
 It's not recommended to add all files as entry files for two reasons:
 
 1. Knip does not report unused exports in entry files.
@@ -70,7 +99,7 @@ It's not recommended to add all files as entry files for two reasons:
 
 :::tip
 
-Do not add too many `entry` files, you'll miss out on both unused exports and
+Do not add too many `entry` files. You'll miss out on both unused exports and
 unused files.
 
 :::

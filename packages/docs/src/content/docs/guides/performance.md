@@ -13,44 +13,11 @@ Use the `--debug` and `--performance` flags to find potential bottlenecks.
 ## Ignoring files
 
 Files matching the `ignore` patterns are not excluded from the analysis. They're
-just not printed in the report. Use negated `entry` patterns to exclude files
-from the analysis whenever possible.
+just not printed in the report. Use negated `entry` and `project` patterns to
+exclude files from the analysis.
 
-Here's a little guide:
-
-1. Set `entry` files if necessary.
-2. Override the default `project` setting to cover all source files (default:
-   `**/*.{js,ts}`)
-3. If needed, use additional negated `entry` patterns to exclude files from the
-   analysis.
-4. If needed, use additional negated `project` files to narrow down the set of
-   all files to find unused files.
-5. Then use `ignore` patterns for the remaining issues in the reports.
-
-❌ Don't do this:
-
-```json title="knip.json"
-{
-  "entry": ["src/index.ts", "scripts/*.ts"],
-  "ignore": ["build/**", "dist/**", "src/generated.ts"]
-}
-```
-
-✅ Do this:
-
-```json title="knip.json"
-{
-  "entry": ["src/index.ts", "scripts/*.ts"],
-  "project": ["src/**", "scripts/**"],
-  "ignore": ["src/generated.ts"]
-}
-```
-
-This way, the `project` files cover all source files, and most other files don't
-even need to be ignored anymore. This may have a significant impact on
-performance.
-
-Also see [configuring project files][1].
+Read [project file configuration][1] for more details and examples. Improving
+configuration may have a significant impact on performance.
 
 ## Workspace sharing
 
@@ -79,25 +46,43 @@ on those files.
 
 Use [--isolate-workspaces][2] to disable this behavior.
 
-## findReferences
+## Language Service
 
-The `findReferences` function (from the TypeScript Language Service) is invoked
-for exported class members. If finding unused class members is enabled, use the
-`--performance` flag to see how many times this function is invoked and how much
-time is spent there:
+Knip does not install the TypeScript Language Service (LS) by default. This is
+expensive, as TypeScript needs to set up symbols and caching for the rather slow
+`findReferences` function.
+
+There are two cases that enforce Knip to install the LS.
+
+### 1. Class members
+
+The `findReferences` function is used to find unused members of imported classes
+(i.e. when the issue type `classMembers` is included).
+
+### 2. Include external type definitions
+
+When [`--include-libs`][3] is enabled, Knip enables loading type definitions of
+external dependencies. This will also install the LS to access its
+`findReferences` function. It acts as an extra line of defense: only exports
+that weren't referenced to during default procedure go through this.
+
+## Metrics
+
+Use [the `--performance` flag][4] to see how many times potentially expensive
+functions (e.g. `findReferences`) are invoked and how much time is spent in
+those functions. Example usage:
 
 ```sh
 knip --include classMembers --performance
 ```
 
-The first invocation (per program) is especially expensive, as TypeScript sets
-up symbols and caching.
-
 ## A last resort
 
-In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][3].
+In case Knip is unbearably slow (or even crashes), you could resort to [lint
+individual workspaces][5].
 
 [1]: ./configuring-project-files.md
 [2]: ../reference/cli.md#--isolate-workspaces
-[3]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[3]: ../guides/handling-issues.mdx#external-libraries
+[4]: ../reference/cli.md#--performance
+[5]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace

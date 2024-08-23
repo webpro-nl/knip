@@ -13,7 +13,8 @@ The JavaScript ecosystem has a vast amount of frameworks and tools, and even
 more ways to configure those. Files and dependencies can be referenced in many
 ways, not just through import statements. This FAQ is an attempt to provide some
 perspective on a few design decisions and why certain things work the way they
-do.
+do. Here and there it's intentionally a bit more in-depth than the rest of the
+docs.
 
 ## Synergy
 
