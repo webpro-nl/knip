@@ -18,7 +18,12 @@ import type {
   InstalledBinaries,
   WorkspaceManifests,
 } from './types/workspace.js';
-import { getDefinitelyTypedFor, getPackageFromDefinitelyTyped, isDefinitelyTyped } from './util/modules.js';
+import {
+  getDefinitelyTypedFor,
+  getPackageFromDefinitelyTyped,
+  getPackageNameFromModuleSpecifier,
+  isDefinitelyTyped,
+} from './util/modules.js';
 import { findMatch, toRegexOrString } from './util/regex.js';
 
 type Options = {
@@ -317,13 +322,15 @@ export class DependencyDeputy {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {
         const issue = issueSet[issueKey];
-        if (IGNORED_DEPENDENCIES.has(issue.symbol)) {
+        const packageName = getPackageNameFromModuleSpecifier(issue.symbol);
+        if (!packageName) continue;
+        if (IGNORED_DEPENDENCIES.has(packageName)) {
           delete issueSet[issueKey];
           counters[type]--;
         } else {
           const manifest = this.getWorkspaceManifest(issue.workspace);
           if (manifest) {
-            const ignoreItem = findMatch(manifest.ignoreDependencies, issue.symbol);
+            const ignoreItem = findMatch(manifest.ignoreDependencies, packageName);
             if (ignoreItem) {
               delete issueSet[issueKey];
               counters[type]--;
@@ -331,7 +338,7 @@ export class DependencyDeputy {
             } else if (issue.workspace !== ROOT_WORKSPACE_NAME) {
               const manifest = this.getWorkspaceManifest(ROOT_WORKSPACE_NAME);
               if (manifest) {
-                const ignoreItem = findMatch(manifest.ignoreDependencies, issue.symbol);
+                const ignoreItem = findMatch(manifest.ignoreDependencies, packageName);
                 if (ignoreItem) {
                   delete issueSet[issueKey];
                   counters[type]--;
