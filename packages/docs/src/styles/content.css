@@ -47,7 +47,7 @@
   padding-right: 0;
 }
 
-blockquote {
+.sl-markdown-content blockquote {
   border-inline-start-color: var(--sl-color-gray-1);
 }
 
