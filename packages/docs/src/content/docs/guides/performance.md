@@ -40,11 +40,15 @@ messages like this:
 ...
 ```
 
-The first number in `P1/1` is the number of the program, the second number
+The first number in `P1/1` is the number of the programs, the second number
 indicates additional entry files were found so it does another round of analysis
 on those files.
 
-Use [--isolate-workspaces][2] to disable this behavior.
+Use [--isolate-workspaces][2] to disable this behavior. This is rarely
+necessary, but more of an escape hatch in cases with memory usage issues or
+incompatible `compilerOptions` across workspaces. Workspaces are analyzed
+sequentially which is slower and uses more memory overall, but memory usage
+should be spread out more evenly, which may prevent crashes on large monorepos.
 
 ## Language Service
 

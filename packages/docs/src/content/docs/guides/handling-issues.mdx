@@ -7,9 +7,8 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 A long list of unused items can be frustrating. The list may contain false
-positives, but also things that can actually be removed from the codebase. You
-can get a lot of value out of Knip, but sometimes it requires some initial
-configuration.
+positives, but also things that can actually be removed from the codebase. To
+get the most value out of Knip, it may require some initial configuration.
 
 This page guides you in dealing with false positives. It makes sense to go over
 the issue types one by one. For instance, reducing the number of unused files
@@ -46,32 +45,32 @@ knip --include files
 
 :::
 
-This works and might help with any other issue type as well. For instance, use
-`--dependencies` to focus only on dependencies and omit issues related to unused
-files and exports.
+This might help with other issue types as well. For instance, use
+`--dependencies` to focus only on dependencies and exclude issues related to
+unused files and exports.
 
 ### Implicit imports
 
 Some files are imported by other tooling, such as fixtures, mocks or templates.
-And some frameworks import files such as routes or models, and Knip doesn't have
-a plugin for that framework yet.
+And some frameworks import files such as routes or models, while Knip doesn't
+have a plugin for that framework yet.
 
-If such files are in the set of project files, but not imported by your code,
-they might be reported as unused files. Exclude them from the `project` files
-using negated `project` patterns:
-
-```json
-{
-  "project": ["src/**/*.ts", "!src/**/__mocks__/**"]
-}
-```
-
-On the other hand, if such files should be included (because [no plugin exists
-for those files yet][6]), the `entry` file patterns can be extended:
+If those files are in the set of project files, but not imported by your code,
+they might be reported as unused files. If they should be included, extend the
+`entry` file patterns:
 
 ```json
 {
   "entry": ["src/index.ts", "src/models/*.ts"]
+}
+```
+
+On the other hand, to exclude them from the `project` files using negated
+`project` patterns:
+
+```json
+{
+  "project": ["src/**/*.ts", "!src/**/__unimported__/**"]
 }
 ```
 
@@ -154,24 +153,21 @@ you don't feel like a plugin could solve it, a last resort is to ignore it:
 Depending on the situation, you may want to use `ignoreBinaries` instead. See
 [unlisted binaries][15].
 
-### ESLint & Jest
+### TypeScript, Jest & ESLint
 
-Within monorepos, tools like ESLint and Jest are a story of their own. Sharing
-and extending configurations is convenient, but for a project linter like Knip
-it can be a challenge to assign dependencies to the right workspace. Jest has
-comparable characteristics.
+Within monorepos, tools like TypeScript, ESLint and Jest are a story of their
+own. Sharing and extending configurations is convenient, but for a project
+linter like Knip it can be a challenge to assign dependencies to the right
+workspace.
 
-ESLint is still in the process of moving to a modern configuration system, which
-results in the recommendation going forward: migrate to the new [ESLint flat
-config system][16].
+The new [ESLint flat config system][16] does not have this issue, so it's
+recommended to migrate if you haven't already.
 
-Unfortunately there's currently no clean way to assign (unused or unlisted)
-dependencies to another workspace.
-
-There is a workaround, though. For example, workspaces that use the
+We can't "assign" dependencies to other workspaces. But workspaces that use the
 `@internal/eslint-config` package can force-enable the ESLint plugin (without
 having `eslint` listed) and ignore related dependencies (adjust to your
-situation):
+situation). So if you can't migrate to the ESLint flat config yet, here's a
+workaround:
 
 ```json
 {
@@ -179,6 +175,9 @@ situation):
   "ignoreDependencies": ["^eslint-.*"]
 }
 ```
+
+The same idea applies for false positives caused by tools like TypeScript and
+Jest that share and extend configurations across the monorepo.
 
 ## Unlisted dependencies
 
@@ -396,7 +395,7 @@ Also see [troubleshooting][26] if you haven't already.
 [13]: ../features/integrated-monorepos.md
 [14]: #unused-files
 [15]: #unlisted-binaries
-[16]: https://eslint.org/docs/latest/use/configure/configuration-files-new
+[16]: https://eslint.org/docs/latest/use/configure/configuration
 [17]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [18]: ../reference/configuration.md#ignoreexportsusedinfile
 [19]: ../reference/jsdoc-tsdoc-tags.md

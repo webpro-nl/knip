@@ -97,7 +97,7 @@ for await (const dir of directories) {
 
 plugins.sort((a, b) => (a[1] < b[1] ? -1 : 1));
 
-const frontmatter = u('yaml', 'title: Plugins\ntableOfContents: false');
+const frontmatter = u('yaml', `title: Plugins (${plugins.length})\ntableOfContents: false`);
 
 const tree = u('root', [
   frontmatter,

@@ -1,5 +1,5 @@
 ---
-title: Plugins
+title: Plugins (72)
 tableOfContents: false
 ---
 
@@ -24,54 +24,59 @@ tableOfContents: false
 - [GraphQL Codegen][17]
 - [husky][18]
 - [Jest][19]
-- [Lefthook][20]
-- [lint-staged][21]
-- [LintHTML][22]
-- [lockfile-lint][23]
-- [Lost Pixel][24]
-- [markdownlint][25]
-- [Mocha][26]
-- [moonrepo][27]
-- [Mock Service Worker][28]
-- [Netlify][29]
-- [Next.js][30]
-- [Node.js Test Runner][31]
-- [npm-package-json-lint][32]
-- [Nx][33]
-- [nyc][34]
-- [oclif][35]
-- [Playwright][36]
-- [Playwright for components][37]
-- [PostCSS][38]
-- [Prettier][39]
-- [Release It][40]
-- [Remark][41]
-- [Remix][42]
-- [Rollup][43]
-- [Semantic Release][44]
-- [Sentry][45]
-- [simple-git-hooks][46]
-- [size-limit][47]
-- [Storybook][48]
-- [Stryker][49]
-- [Stylelint][50]
-- [Svelte][51]
-- [Syncpack][52]
-- [Tailwind][53]
-- [tsup][54]
-- [TypeDoc][55]
-- [TypeScript][56]
-- [unbuild][57]
-- [UnoCSS][58]
-- [Vercel OG][59]
-- [Vite][60]
-- [Vitest][61]
-- [Vue][62]
-- [Webpack][63]
-- [Wireit][64]
-- [Wrangler][65]
-- [xo][66]
-- [yorkie][67]
+- [Ladle][20]
+- [Lefthook][21]
+- [lint-staged][22]
+- [LintHTML][23]
+- [lockfile-lint][24]
+- [Lost Pixel][25]
+- [markdownlint][26]
+- [Mocha][27]
+- [moonrepo][28]
+- [Mock Service Worker][29]
+- [Netlify][30]
+- [Next.js][31]
+- [Node.js Test Runner][32]
+- [npm-package-json-lint][33]
+- [Nx][34]
+- [nyc][35]
+- [oclif][36]
+- [Playwright][37]
+- [Playwright for components][38]
+- [PostCSS][39]
+- [Prettier][40]
+- [React Cosmos][41]
+- [Release It][42]
+- [Remark][43]
+- [Remix][44]
+- [Rollup][45]
+- [Rsbuild][46]
+- [Rspack][47]
+- [Semantic Release][48]
+- [Sentry][49]
+- [simple-git-hooks][50]
+- [size-limit][51]
+- [Storybook][52]
+- [Stryker][53]
+- [Stylelint][54]
+- [Svelte][55]
+- [Syncpack][56]
+- [Tailwind][57]
+- [tsup][58]
+- [TypeDoc][59]
+- [TypeScript][60]
+- [unbuild][61]
+- [UnoCSS][62]
+- [Vercel OG][63]
+- [Vite][64]
+- [Vitest][65]
+- [Vue][66]
+- [WebdriverIO][67]
+- [Webpack][68]
+- [Wireit][69]
+- [Wrangler][70]
+- [xo][71]
+- [yorkie][72]
 
 :::
 
@@ -94,51 +99,56 @@ tableOfContents: false
 [17]: /reference/plugins/graphql-codegen 'GraphQL Codegen'
 [18]: /reference/plugins/husky 'husky'
 [19]: /reference/plugins/jest 'Jest'
-[20]: /reference/plugins/lefthook 'Lefthook'
-[21]: /reference/plugins/lint-staged 'lint-staged'
-[22]: /reference/plugins/linthtml 'LintHTML'
-[23]: /reference/plugins/lockfile-lint 'lockfile-lint'
-[24]: /reference/plugins/lost-pixel 'Lost Pixel'
-[25]: /reference/plugins/markdownlint 'markdownlint'
-[26]: /reference/plugins/mocha 'Mocha'
-[27]: /reference/plugins/moonrepo 'moonrepo'
-[28]: /reference/plugins/msw 'Mock Service Worker'
-[29]: /reference/plugins/netlify 'Netlify'
-[30]: /reference/plugins/next 'Next.js'
-[31]: /reference/plugins/node-test-runner 'Node.js Test Runner'
-[32]: /reference/plugins/npm-package-json-lint 'npm-package-json-lint'
-[33]: /reference/plugins/nx 'Nx'
-[34]: /reference/plugins/nyc 'nyc'
-[35]: /reference/plugins/oclif 'oclif'
-[36]: /reference/plugins/playwright 'Playwright'
-[37]: /reference/plugins/playwright-ct 'Playwright for components'
-[38]: /reference/plugins/postcss 'PostCSS'
-[39]: /reference/plugins/prettier 'Prettier'
-[40]: /reference/plugins/release-it 'Release It'
-[41]: /reference/plugins/remark 'Remark'
-[42]: /reference/plugins/remix 'Remix'
-[43]: /reference/plugins/rollup 'Rollup'
-[44]: /reference/plugins/semantic-release 'Semantic Release'
-[45]: /reference/plugins/sentry 'Sentry'
-[46]: /reference/plugins/simple-git-hooks 'simple-git-hooks'
-[47]: /reference/plugins/size-limit 'size-limit'
-[48]: /reference/plugins/storybook 'Storybook'
-[49]: /reference/plugins/stryker 'Stryker'
-[50]: /reference/plugins/stylelint 'Stylelint'
-[51]: /reference/plugins/svelte 'Svelte'
-[52]: /reference/plugins/syncpack 'Syncpack'
-[53]: /reference/plugins/tailwind 'Tailwind'
-[54]: /reference/plugins/tsup 'tsup'
-[55]: /reference/plugins/typedoc 'TypeDoc'
-[56]: /reference/plugins/typescript 'TypeScript'
-[57]: /reference/plugins/unbuild 'unbuild'
-[58]: /reference/plugins/unocss 'UnoCSS'
-[59]: /reference/plugins/vercel-og 'Vercel OG'
-[60]: /reference/plugins/vite 'Vite'
-[61]: /reference/plugins/vitest 'Vitest'
-[62]: /reference/plugins/vue 'Vue'
-[63]: /reference/plugins/webpack 'Webpack'
-[64]: /reference/plugins/wireit 'Wireit'
-[65]: /reference/plugins/wrangler 'Wrangler'
-[66]: /reference/plugins/xo 'xo'
-[67]: /reference/plugins/yorkie 'yorkie'
+[20]: /reference/plugins/ladle 'Ladle'
+[21]: /reference/plugins/lefthook 'Lefthook'
+[22]: /reference/plugins/lint-staged 'lint-staged'
+[23]: /reference/plugins/linthtml 'LintHTML'
+[24]: /reference/plugins/lockfile-lint 'lockfile-lint'
+[25]: /reference/plugins/lost-pixel 'Lost Pixel'
+[26]: /reference/plugins/markdownlint 'markdownlint'
+[27]: /reference/plugins/mocha 'Mocha'
+[28]: /reference/plugins/moonrepo 'moonrepo'
+[29]: /reference/plugins/msw 'Mock Service Worker'
+[30]: /reference/plugins/netlify 'Netlify'
+[31]: /reference/plugins/next 'Next.js'
+[32]: /reference/plugins/node-test-runner 'Node.js Test Runner'
+[33]: /reference/plugins/npm-package-json-lint 'npm-package-json-lint'
+[34]: /reference/plugins/nx 'Nx'
+[35]: /reference/plugins/nyc 'nyc'
+[36]: /reference/plugins/oclif 'oclif'
+[37]: /reference/plugins/playwright 'Playwright'
+[38]: /reference/plugins/playwright-ct 'Playwright for components'
+[39]: /reference/plugins/postcss 'PostCSS'
+[40]: /reference/plugins/prettier 'Prettier'
+[41]: /reference/plugins/react-cosmos 'React Cosmos'
+[42]: /reference/plugins/release-it 'Release It'
+[43]: /reference/plugins/remark 'Remark'
+[44]: /reference/plugins/remix 'Remix'
+[45]: /reference/plugins/rollup 'Rollup'
+[46]: /reference/plugins/rsbuild 'Rsbuild'
+[47]: /reference/plugins/rspack 'Rspack'
+[48]: /reference/plugins/semantic-release 'Semantic Release'
+[49]: /reference/plugins/sentry 'Sentry'
+[50]: /reference/plugins/simple-git-hooks 'simple-git-hooks'
+[51]: /reference/plugins/size-limit 'size-limit'
+[52]: /reference/plugins/storybook 'Storybook'
+[53]: /reference/plugins/stryker 'Stryker'
+[54]: /reference/plugins/stylelint 'Stylelint'
+[55]: /reference/plugins/svelte 'Svelte'
+[56]: /reference/plugins/syncpack 'Syncpack'
+[57]: /reference/plugins/tailwind 'Tailwind'
+[58]: /reference/plugins/tsup 'tsup'
+[59]: /reference/plugins/typedoc 'TypeDoc'
+[60]: /reference/plugins/typescript 'TypeScript'
+[61]: /reference/plugins/unbuild 'unbuild'
+[62]: /reference/plugins/unocss 'UnoCSS'
+[63]: /reference/plugins/vercel-og 'Vercel OG'
+[64]: /reference/plugins/vite 'Vite'
+[65]: /reference/plugins/vitest 'Vitest'
+[66]: /reference/plugins/vue 'Vue'
+[67]: /reference/plugins/webdriver-io 'WebdriverIO'
+[68]: /reference/plugins/webpack 'Webpack'
+[69]: /reference/plugins/wireit 'Wireit'
+[70]: /reference/plugins/wrangler 'Wrangler'
+[71]: /reference/plugins/xo 'xo'
+[72]: /reference/plugins/yorkie 'yorkie'

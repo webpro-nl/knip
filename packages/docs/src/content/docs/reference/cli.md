@@ -155,12 +155,9 @@ Also see [external libs][8].
 ### `--isolate-workspaces`
 
 By default, Knip optimizes performance using [workspace sharing][9] to existing
-TypeScript programs, based on the compatibility of their `compilerOptions`. Use
-this flag to disable this behavior and create one program per workspace.
-
-Usually this setting isn't necessary, but more of an escape hatch in rare cases
-with memory usage issues or incompatible `compilerOptions` across workspaces.
-Also useful during troubleshooting.
+TypeScript programs, based on the compatibility of their `compilerOptions`. This
+flag disables this behavior and creates one program per workspace, which is
+slower but memory is spread more evenly over time.
 
 ## Modes
 

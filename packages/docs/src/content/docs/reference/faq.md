@@ -205,17 +205,12 @@ have it handled as a separate workspace.
 
 Knip creates TypeScript programs to create a module graph and traverse file
 ASTs. In a monorepo, it would make a lot of sense to create one program per
-workspace. However, memory usage (and duration) goes through the roof quickly
-when one program per workspace is created, sometimes even crashing Node.js.
-That's why Knip shares the files of multiple workspaces in a single program if
-their configuration allows it. This optimization is enabled by default, while it
-also allows the module resolver (one per program) to do some more caching.
+workspace. However, this slows down the whole process considerably. That's why
+Knip shares the files of multiple workspaces in a single program if their
+configuration allows it. This optimization is enabled by default, while it also
+allows the module resolver (one per program) to do some more caching.
 
-This can be disabled using the `--isolate-workspaces` flag (rarely necessary in
-practice).
-
-Also see [workspace sharing][5] (and [Slim down to speed up][6] for full
-history).
+Also see [workspace sharing][5].
 
 ### Why doesn't Knip just use `ts.findReferences`?
 
@@ -294,7 +289,7 @@ other file types.
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
 statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][7].
+project. Also see the answer to the previous question and [Compilers][6].
 
 ## Miscellaneous
 
@@ -324,7 +319,7 @@ Which mode should've been the default? They both have their merits:
   tooling, including most issues found in production mode. This mode has the
   most impact on DX, for the same reason.
 
-Also see [production mode][8].
+Also see [production mode][7].
 
 ### Why doesn't Knip have...?
 
@@ -338,17 +333,17 @@ extend Knip include:
   - Unused interface/type members
   - Unused object members (and e.g. React component props)
   - Unused object props in function return values
+- Analyze workspaces in parallel
 
 These are all interesting ideas, but do increase the API surface area. This
 would mean more development efforts and maintenance. Time is limited and
-[sponsorships][9] currently don't cover - this can change though!
+[sponsorships][8] currently don't cover - this can change though!
 
 [1]: ../guides/handling-issues.mdx#external-libraries
 [2]: ../explanations/why-use-knip.md#comprehensive
 [3]: https://www.npmjs.com/package/enhanced-resolve
 [4]: #parser
 [5]: ../guides/performance.md#workspace-sharing
-[6]: ../blog/slim-down-to-speed-up.md
-[7]: ../features/compilers.md
-[8]: ../features/production-mode.md
-[9]: /sponsors
+[6]: ../features/compilers.md
+[7]: ../features/production-mode.md
+[8]: /sponsors

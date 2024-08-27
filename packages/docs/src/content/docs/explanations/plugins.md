@@ -88,11 +88,11 @@ const config: PlaywrightTestConfig = {
 export default config;
 ```
 
-The plugin will read this configuration file and return those entry patterns
-(`integration/**/*-test.ts`). Knip will then not use the default entry patterns.
+The Playwright plugin will read this configuration file and return those entry
+patterns (`integration/**/*-test.ts`). Knip will then not use the default entry
+patterns.
 
-If that's not correct or in some way doesn't work, you can override this
-behavior in your Knip configuration:
+You can still override this behavior in your Knip configuration:
 
 ```json title="knip.json"
 {
