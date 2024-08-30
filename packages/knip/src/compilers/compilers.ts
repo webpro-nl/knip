@@ -1,8 +1,9 @@
 import type { SyncCompilerFn } from './types.js';
 
 const scriptExtractor = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
-export const importMatcher = /import[^'"]+['"].+['"]/g;
+export const importMatcher = /import\s+(?:[^'"]+\s+from\s+)?['"][^'"]+['"]/g;
 export const fencedCodeBlockMatcher = /```[\s\S]*?```/g;
+export const frontmatterMatcher = /^---\n([\s\S]*?)\n---/;
 
 export const importsWithinScripts: SyncCompilerFn = (text: string) => {
   const scripts = [];
