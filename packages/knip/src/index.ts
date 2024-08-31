@@ -19,7 +19,7 @@ import { getGitIgnoredHandler } from './util/globby.js';
 import { getReferencedDependencyHandler } from './util/handle-dependency.js';
 import { getHasStrictlyNsReferences, getType } from './util/has-strictly-ns-references.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
-import { getEntryPathFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
+import { getEntryPathsFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { dirname, join } from './util/path.js';
 import { findMatch } from './util/regex.js';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from './util/tag.js';
@@ -176,7 +176,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
 
     // Add entry paths from package.json#main, #bin, #exports
-    const entryPathsFromManifest = await getEntryPathFromManifest(manifest, { ...sharedGlobOptions, ignore });
+    const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { ...sharedGlobOptions, ignore });
     debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
     principal.addEntryPaths(entryPathsFromManifest);
 
