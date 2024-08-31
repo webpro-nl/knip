@@ -110,6 +110,7 @@ const pluginsSchema = z.object({
   next: pluginSchema,
   'node-test-runner': pluginSchema,
   'npm-package-json-lint': pluginSchema,
+  nuxt: pluginSchema,
   nx: pluginSchema,
   nyc: pluginSchema,
   oclif: pluginSchema,

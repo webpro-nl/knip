@@ -412,6 +412,10 @@
           "title": "npm-package-json-lint plugin configuration (https://knip.dev/reference/plugins/npm-package-json-lint)",
           "$ref": "#/definitions/plugin"
         },
+        "nuxt": {
+          "title": "Nuxt plugin configuration (https://knip.dev/reference/plugins/nuxt)",
+          "$ref": "#/definitions/plugin"
+        },
         "nx": {
           "title": "Nx plugin configuration (https://knip.dev/reference/plugins/nx)",
           "$ref": "#/definitions/plugin"

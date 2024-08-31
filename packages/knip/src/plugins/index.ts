@@ -31,6 +31,7 @@ export { default as netlify } from './netlify/index.js';
 export { default as next } from './next/index.js';
 export { default as nodeTestRunner } from './node-test-runner/index.js';
 export { default as npmPackageJsonLint } from './npm-package-json-lint/index.js';
+export { default as nuxt } from './nuxt/index.js';
 export { default as nx } from './nx/index.js';
 export { default as nyc } from './nyc/index.js';
 export { default as oclif } from './oclif/index.js';
