@@ -47,7 +47,7 @@ for await (const dir of directories) {
     const pluginDir = path.join(pluginsDir, pluginName);
     const plugin: Plugin = (await import(path.join(pluginDir, 'index.ts'))).default;
 
-    const { title, enablers, config, entry, production, project } = plugin;
+    const { title, enablers, note, config, entry, production, project } = plugin;
 
     plugins.push([title, pluginName]);
 
@@ -76,10 +76,13 @@ for await (const dir of directories) {
           ? parseFragment(enablers)
           : [u('paragraph', [u('text', 'N/A')])];
 
+    const n = note ? [u('heading', { depth: 2 }, [u('text', 'Note')]), ...parseFragment(note)] : [];
+
     const tree = u('root', [
       frontmatter,
       u('heading', { depth: 2 }, [u('text', 'Enabled')]),
       ...en,
+      ...n,
       u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
       ...parseFragment('This configuration is added automatically if the plugin is enabled:'),
       u('code', {
