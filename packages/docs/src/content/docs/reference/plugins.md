@@ -49,7 +49,7 @@ tableOfContents: false
 - [Preconstruct][42]
 - [Prettier][43]
 - [React Cosmos][44]
-- [Release It][45]
+- [Release It!][45]
 - [Remark][46]
 - [Remix][47]
 - [Rollup][48]
@@ -128,7 +128,7 @@ tableOfContents: false
 [42]: /reference/plugins/preconstruct 'Preconstruct'
 [43]: /reference/plugins/prettier 'Prettier'
 [44]: /reference/plugins/react-cosmos 'React Cosmos'
-[45]: /reference/plugins/release-it 'Release It'
+[45]: /reference/plugins/release-it 'Release It!'
 [46]: /reference/plugins/remark 'Remark'
 [47]: /reference/plugins/remix 'Remix'
 [48]: /reference/plugins/rollup 'Rollup'

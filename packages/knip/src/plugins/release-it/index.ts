@@ -6,7 +6,7 @@ import type { ReleaseItConfig } from './types.js';
 // Uses CosmiConfig but with custom searchPlaces
 // https://github.com/release-it/release-it/blob/main/lib/config.js
 
-const title = 'Release It';
+const title = 'Release It!';
 
 const enablers = ['release-it'];
 
