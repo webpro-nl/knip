@@ -396,6 +396,10 @@
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/msw)",
           "$ref": "#/definitions/plugin"
         },
+        "nest": {
+          "title": "nest plugin configuration (https://knip.dev/reference/plugins/nest)",
+          "$ref": "#/definitions/plugin"
+        },
         "netlify": {
           "title": "Netlify plugin configuration (https://knip.dev/reference/plugins/netlify)",
           "$ref": "#/definitions/plugin"

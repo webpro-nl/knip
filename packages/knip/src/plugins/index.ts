@@ -27,6 +27,7 @@ export { default as markdownlint } from './markdownlint/index.js';
 export { default as mocha } from './mocha/index.js';
 export { default as moonrepo } from './moonrepo/index.js';
 export { default as msw } from './msw/index.js';
+export { default as nest } from './nest/index.js';
 export { default as netlify } from './netlify/index.js';
 export { default as next } from './next/index.js';
 export { default as nodeTestRunner } from './node-test-runner/index.js';

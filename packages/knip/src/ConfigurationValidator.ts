@@ -106,6 +106,7 @@ const pluginsSchema = z.object({
   mocha: pluginSchema,
   moonrepo: pluginSchema,
   msw: pluginSchema,
+  nest: pluginSchema,
   netlify: pluginSchema,
   next: pluginSchema,
   'node-test-runner': pluginSchema,
