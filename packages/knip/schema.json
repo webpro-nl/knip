@@ -444,6 +444,10 @@
           "title": "PostCSS plugin configuration (https://knip.dev/reference/plugins/postcss)",
           "$ref": "#/definitions/plugin"
         },
+        "preconstruct": {
+          "title": "preconstruct plugin configuration (https://knip.dev/reference/plugins/preconstruct)",
+          "$ref": "#/definitions/plugin"
+        },
         "prettier": {
           "title": "Prettier plugin configuration (https://knip.dev/reference/plugins/prettier)",
           "$ref": "#/definitions/plugin"

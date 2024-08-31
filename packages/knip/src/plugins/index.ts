@@ -39,6 +39,7 @@ export { default as oclif } from './oclif/index.js';
 export { default as playwright } from './playwright/index.js';
 export { default as playwrightCt } from './playwright-ct/index.js';
 export { default as postcss } from './postcss/index.js';
+export { default as preconstruct } from './preconstruct/index.js';
 export { default as prettier } from './prettier/index.js';
 export { default as reactCosmos } from './react-cosmos/index.js';
 export { default as releaseIt } from './release-it/index.js';
