@@ -532,6 +532,10 @@
           "title": "vercel-og plugin configuration (https://knip.dev/reference/plugins/vercel-og)",
           "$ref": "#/definitions/plugin"
         },
+        "vike": {
+          "title": "vike plugin configuration (https://knip.dev/reference/plugins/vike)",
+          "$ref": "#/definitions/plugin"
+        },
         "vite": {
           "title": "vite plugin configuration (https://knip.dev/reference/plugins/vite)",
           "$ref": "#/definitions/plugin"

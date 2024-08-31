@@ -141,6 +141,7 @@ const pluginsSchema = z.object({
   unocss: pluginSchema,
   'vercel-og': pluginSchema,
   vue: pluginSchema,
+  vike: pluginSchema,
   vite: pluginSchema,
   vitest: pluginSchema,
   'webdriver-io': pluginSchema,

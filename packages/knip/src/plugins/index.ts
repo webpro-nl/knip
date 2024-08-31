@@ -61,6 +61,7 @@ export { default as typescript } from './typescript/index.js';
 export { default as unbuild } from './unbuild/index.js';
 export { default as unocss } from './unocss/index.js';
 export { default as vercelOg } from './vercel-og/index.js';
+export { default as vike } from './vike/index.js';
 export { default as vite } from './vite/index.js';
 export { default as vitest } from './vitest/index.js';
 export { default as vue } from './vue/index.js';
