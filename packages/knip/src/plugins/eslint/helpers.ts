@@ -18,9 +18,10 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
     ? getDependenciesFromConfig(config.parserOptions.babelOptions)
     : [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
+  const rules = getDependenciesFromRules(config.rules);
   const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependencies) : [];
 
-  return compact([...extendsSpecifiers, ...plugins, parser, ...babelDependencies, ...settings, ...overrides]);
+  return compact([...extendsSpecifiers, ...plugins, parser, ...babelDependencies, ...settings, ...rules, ...overrides]);
 };
 
 type GetDependenciesDeep = (
@@ -85,7 +86,11 @@ const resolveExtendSpecifier = (specifier: string) => {
   return resolveSpecifier(namespace, specifier);
 };
 
-// Super custom: find dependencies of specific ESLint plugins through settings
+const getDependenciesFromRules = (rules: ESLintConfig['rules'] = {}) =>
+  Object.keys(rules).flatMap(ruleKey =>
+    ruleKey.includes('/') ? [resolveSpecifier('eslint-plugin', ruleKey.split('/').slice(0, -1).join('/'))] : []
+  );
+
 const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) => {
   return Object.entries(settings).flatMap(([settingKey, settings]) => {
     if (settingKey === 'import/resolver') {
