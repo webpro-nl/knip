@@ -18,7 +18,8 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
     ? getDependenciesFromConfig(config.parserOptions.babelOptions)
     : [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-  const rules = getDependenciesFromRules(config.rules);
+  // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
+  const rules = getDependenciesFromRules({});
   const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependencies) : [];
 
   return compact([...extendsSpecifiers, ...plugins, parser, ...babelDependencies, ...settings, ...rules, ...overrides]);
