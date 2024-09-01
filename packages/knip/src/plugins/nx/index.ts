@@ -24,14 +24,16 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
   const plugins =
     localConfig.plugins && Array.isArray(localConfig.plugins)
       ? localConfig.plugins
-          .map(item => (typeof item === 'string' ? item : item.plugin))
-          .map(it => getPackageNameFromModuleSpecifier(it))
+          .map(value => (typeof value === 'string' ? value : value.plugin))
+          .map(value => getPackageNameFromModuleSpecifier(value))
           .filter(value => value !== undefined)
       : [];
+
   const generators = localConfig.generators
     ? Object.keys(localConfig.generators)
-        .map(it => getPackageNameFromModuleSpecifier(it))
+        .map(value => getPackageNameFromModuleSpecifier(value))
         .filter(value => value !== undefined)
+        .map(value => value.split(':')[0])
     : [];
 
   return compact([...targetsDefault, ...plugins, ...generators]);
@@ -52,9 +54,11 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .map(target => target?.executor)
     .filter(executor => executor && !executor.startsWith('.'))
     .map(executor => executor?.split(':')[0]);
+
   const scripts = targets
     .filter(target => target.executor === 'nx:run-commands')
     .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []));
+
   const dependencies = getDependenciesFromScripts(scripts, options);
 
   return compact([...executors, ...dependencies]);
