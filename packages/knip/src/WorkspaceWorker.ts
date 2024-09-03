@@ -145,7 +145,7 @@ export class WorkspaceWorker {
     return [excludeProductionNegations, this.negatedWorkspacePatterns].flat();
   }
 
-  getProjectFilePatterns(testFilePatterns: string[]) {
+  getProjectFilePatterns(projectFilePatterns: string[]) {
     const { project } = this.config;
     if (project.length === 0) return [];
 
@@ -157,7 +157,7 @@ export class WorkspaceWorker {
       excludeProductionNegations,
       negatedPluginConfigPatterns,
       negatedPluginProjectFilePatterns,
-      testFilePatterns,
+      projectFilePatterns,
       this.negatedWorkspacePatterns,
     ].flat();
   }
