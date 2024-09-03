@@ -16,7 +16,7 @@ export default visit(
           // Pattern: export * as namespace from 'specifier';
           return {
             identifier: IMPORT_STAR,
-            namespace: String(node.exportClause.name.escapedText),
+            namespace: String(node.exportClause.name.text),
             specifier: node.moduleSpecifier.text,
             isReExport: true,
             pos: node.exportClause.name.pos,
@@ -27,8 +27,8 @@ export default visit(
           if (element.propertyName && element.name) {
             // Pattern: export { identifier as otherIdentifier } from 'specifier';
             return {
-              identifier: String(element.propertyName.escapedText),
-              alias: String(element.name.escapedText),
+              identifier: String(element.propertyName.text),
+              alias: String(element.name.text),
               specifier: specifier.text,
               isReExport: true,
               pos: element.pos,
