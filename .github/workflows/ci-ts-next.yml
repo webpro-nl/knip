@@ -1,4 +1,4 @@
-name: Tests (against typescript@next in Node.js v22)
+name: Tests (against typescript@beta/rc in Node.js v22)
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ jobs:
         run: npm install --ignore-scripts
       - name: Install latest peer dependencies
         run: |
-          npm install -w packages/knip typescript@latest @types/node@latest
+          npm install -w packages/knip typescript@rc @types/node@latest
       - name: Build knip
         run: npm run build
         working-directory: packages/knip
