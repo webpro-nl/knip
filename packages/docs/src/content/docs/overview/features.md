@@ -2,8 +2,8 @@
 title: Features
 ---
 
-Overview of capabilities in support of the core feature: find [unused and
-unlisted stuff][1].
+Overview of capabilities in support of the core feature: find [issues][1]
+(clutter).
 
 There are also [things Knip does **not** do][2].
 

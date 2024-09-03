@@ -43,7 +43,7 @@ knip --dependencies
 
 [unimported][4] is fast and works well. It works in what Knip calls "production
 mode" exclusively. If you're fine with a little bit of configuration and don't
-want or need to deal with non-production stuff (such as `devDependencies` and
+want or need to deal with non-production items (such as `devDependencies` and
 test files), then this might work well for you.
 
 The following commands are similar:

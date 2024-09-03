@@ -15,11 +15,11 @@ You can use [--debug][3] and [--trace][4] to help troubleshoot issues.
 
 ## Issues reported by Knip
 
-This indicates a successful run, but there are unused items. Continue with
-[handling issues][5] to deal with unused items reported by Knip.
+This indicates a successful run, but clutter was found. Continue to [handle
+issues][5] and deal with the reported clutter.
 
-If you think it's a false positive and you want to open an issue, please see
-[issue reproduction][6].
+If Knip reports false positives and you want to open an issue, please see [issue
+reproduction][6].
 
 ## Exceptions thrown by Knip
 
@@ -28,6 +28,8 @@ resulting in an unsuccessful run. You might be encountering a [known issue][7].
 
 Add `--debug` to the command for more error details to better locate the cause
 of the error.
+
+Feel free to report bugs, please see [issue reproduction][6].
 
 ## Debug
 

@@ -298,10 +298,9 @@ project. Also see the answer to the previous question and [Compilers][6].
 Linters like ESLint analyze files separately, while Knip lints projects as a
 whole.
 
-Knip requires a full module and dependency graph to find things that are not
-referenced across the project. Creating this comprehensive graph is not a
-trivial task and it seems no such tool exists today, even more so when it comes
-to monorepos.
+Knip requires a full module and dependency graph to find clutter across the
+project. Creating this comprehensive graph is not a trivial task and it seems no
+such tool exists today, even more so when it comes to monorepos.
 
 ### Why isn't production mode the default?
 

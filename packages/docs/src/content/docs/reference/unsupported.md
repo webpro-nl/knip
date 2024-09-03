@@ -11,6 +11,14 @@ and types that are imported and/or exported.
 
 Use [ESLint][1], [Biome][2] or [oxc][3].
 
+## Unused properties
+
+Knip does not yet support finding unused members of types, interfaces and
+objects. This includes returned objects from exported functions and objects
+passed as React component props.
+
+Knip does support finding unused members of enums and classes.
+
 ## Circular dependencies
 
 Knip has no issues with circular dependencies, and does not report them. Tools

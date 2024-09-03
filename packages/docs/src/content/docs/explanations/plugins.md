@@ -49,7 +49,7 @@ of the relevant plugins contain `package.json` in the list of `config` files.
 :::tip[Summary]
 
 `config` files are parsed by plugins to find external dependencies. Knip uses
-this to determine the unused and unlisted dependencies.
+this to determine unused and unlisted dependencies.
 
 :::
 

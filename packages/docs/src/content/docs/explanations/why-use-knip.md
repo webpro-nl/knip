@@ -4,15 +4,14 @@ sidebar:
   order: 3
 ---
 
-The value of removing obsolete things from your code is undeniable. However,
-finding them is a manual and tedious job. This is where Knip comes in. As
-codebases grow in complexity and size, automated and comprehensive tooling
-becomes critical.
+The value of removing clutter from your code is undeniable. However, finding
+them is a manual and tedious job. This is where Knip comes in. As codebases grow
+in complexity and size, automated and comprehensive tooling becomes critical.
 
 ## Less is more
 
-There are plenty of reasons to delete unused files, unused dependencies and
-"dead code":
+There are plenty of reasons to delete unused files, dependencies and "dead
+code":
 
 - Easier maintenance: things are easier to manage when there's less of it.
 - Improved performance: startup time, build time and/or bundle size can be
@@ -32,17 +31,17 @@ There are plenty of reasons to delete unused files, unused dependencies and
 ## Automation
 
 Code and dependency management is often not the most fulfilling task. It is
-Knip's mission to automate the part where it comes to finding unused things.
-Because finding them manually is such a tedious job, and where do you even
-start? Knip contains a lot of standards and heuristics to search for things that
-can be deleted. Knip is not without flaws. But even a list of results with a few
-false positives is many times better and faster than trying to do it manually.
+Knip's mission to automate the part where it comes to finding clutter. Because
+finding them manually is such a tedious job, and where do you even start? Knip
+contains a lot of standards and heuristics to search for clutter. Knip is not
+without flaws. But even a list of results with a few false positives is many
+times better and faster than trying to do it manually.
 
 :::tip
 
-Knip not only finds unused things, it can also [fix issues][2]! Use Knip next to
-a linter like ESLint or Biome: after removing unused variables inside files,
-Knip might find even more unused code. Rinse and repeat!
+Knip not only finds clutter, it can also [clean it][2]! Use Knip next to a
+linter like ESLint or Biome: after removing unused variables inside files, Knip
+might find even more unused code. Rinse and repeat!
 
 :::
 
