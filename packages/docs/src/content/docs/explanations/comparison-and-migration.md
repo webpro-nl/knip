@@ -50,7 +50,7 @@ The following commands are similar:
 
 ```sh
 unimported
-knip --production --dependencies --include files
+knip --production --dependencies --files
 ```
 
 **Project status**: The project is archived and recommends Knip.

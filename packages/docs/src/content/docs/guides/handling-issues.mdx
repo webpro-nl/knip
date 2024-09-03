@@ -35,19 +35,15 @@ unused files = project files - (entry files + resolved files)
 In this section we'll look into common patterns that cause unused files and how
 to handle them.
 
-:::tip
-
-Use `--include files` to [filter the report][5] by unused files:
+Use `--files` to [filter the report][5] and focus on unused files:
 
 ```sh
-knip --include files
+knip --files
 ```
 
-:::
-
-This might help with other issue types as well. For instance, use
-`--dependencies` to focus only on dependencies and exclude issues related to
-unused files and exports.
+This works with other issue types as well. For instance, use `--dependencies` to
+focus only on dependencies and exclude issues related to unused files and
+exports.
 
 ### Implicit imports
 
@@ -119,15 +115,19 @@ Dependencies imported in unused files are reported as unused dependencies.
 That's why it's strongly recommended to try and remedy [unused files][13] first.
 This solves many cases of reported unused dependencies.
 
-:::tip
+:::caution[Monorepo]
+
+In a monorepo, a dependency is unused in the root workspace's `package.json` if
+it's also listed in an descendent workspace, and referenced only in the
+descendent workspace.
+
+:::
 
 Use the `--dependencies` flag to [filter][5] dependency related issues:
 
 ```sh
 knip --dependencies
 ```
-
-:::
 
 ### Plugins
 
@@ -262,16 +262,12 @@ are a few options:
   - Re-export the unused export(s) from an entry file
   - Add the file to the `exports` field of `package.json`
 
-:::tip
-
 Use the `--exports` flag to [filter][5] and focus only on issues related to
 exports:
 
 ```sh
 knip --exports
 ```
-
-:::
 
 ### External libraries
 
