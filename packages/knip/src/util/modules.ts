@@ -38,7 +38,7 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
 
 export const getEntryPathsFromManifest = (
   manifest: PackageJson,
-  sharedGlobOptions: { cwd: string; workingDir: string; gitignore: boolean; ignore: string[] }
+  sharedGlobOptions: { cwd: string; dir: string; gitignore: boolean; ignore: string[] }
 ) => {
   const { main, bin, exports, types, typings } = manifest;
 

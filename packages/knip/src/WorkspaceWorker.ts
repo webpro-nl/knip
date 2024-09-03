@@ -5,7 +5,7 @@ import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceCo
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
-import { _pureGlob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
+import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
 import { get, getKeysByValue } from './util/object.js';
 import { basename, dirname, join, toPosix } from './util/path.js';
 import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
@@ -261,7 +261,7 @@ export class WorkspaceWorker {
         if (!pluginConfig) continue;
 
         const patterns = this.getConfigurationFilePatterns(pluginName);
-        const allConfigFilePaths = await _pureGlob({ patterns, cwd, gitignore: false });
+        const allConfigFilePaths = await _glob({ patterns, cwd: baseOptions.rootCwd, dir: cwd, gitignore: false });
 
         const { packageJsonPath } = plugin;
         const configFilePaths = allConfigFilePaths.filter(

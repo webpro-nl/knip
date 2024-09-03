@@ -152,7 +152,7 @@ export async function globby(patterns: string | string[], options: GlobOptions):
 
   const { dir, ...fastGlobOptions } = { ...options, ignore };
 
-  debugLogObject(relative(options.cwd, dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...options });
+  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...options });
 
   return fg.glob(patterns, fastGlobOptions);
 }

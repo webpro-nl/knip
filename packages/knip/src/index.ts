@@ -166,7 +166,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     debugLogArray(name, 'Definition paths', definitionPaths);
 
     const ignore = worker.getIgnorePatterns();
-    const sharedGlobOptions = { cwd, workingDir: dir, gitignore };
+    const sharedGlobOptions = { cwd, dir, gitignore };
 
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
