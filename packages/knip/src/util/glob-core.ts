@@ -7,7 +7,7 @@ import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
 import { debugLogObject } from './debug.js';
 import { isFile } from './fs.js';
-import { dirname, join, relative, toPosix, toRelative } from './path.js';
+import { dirname, join, relative, toPosix } from './path.js';
 
 const walk = promisify(_walk);
 
@@ -27,35 +27,62 @@ type Gitignores = { ignores: string[]; unignores: string[] };
 
 const cachedIgnores = new Map<string, Gitignores>();
 
-function convertGitignoreToPicomatch(pattern: string) {
+/** @internal */
+export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
   const negated = pattern[0] === '!';
-  if (negated) {
-    pattern = pattern.slice(1);
-  }
+  const root = pattern[negated ? 1 : 0] === '/';
+
+  if (negated) pattern = pattern.slice(1);
 
   let extPattern: string;
 
+  if (pattern.endsWith('/')) pattern = pattern.slice(0, -1);
   if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
 
   if (pattern.startsWith('/')) pattern = pattern.slice(1);
   else if (!pattern.startsWith('**/')) pattern = `**/${pattern}`;
 
   if (pattern.endsWith('/*')) extPattern = pattern;
-  else if (pattern.endsWith('/')) extPattern = `${pattern}**`;
   else extPattern = `${pattern}/**`;
 
-  return { negated, patterns: [pattern, extPattern] };
-}
+  return { negated, root, patterns: [pattern, extPattern] };
+};
 
-function parseGitignoreFile(filePath: string) {
+function parseGitignoreFile(filePath: string, from?: string) {
   const file = readFileSync(filePath, 'utf8');
+  const matchFrom = from ? new RegExp(`^(!?/?)(${from})`) : undefined;
   return file
     .split(/\r?\n/)
     .filter(line => line.trim() && !line.startsWith('#'))
-    .map(pattern => convertGitignoreToPicomatch(pattern.replace(/(?<!\\)#.*/, '').trim()));
+    .map(pattern => pattern.replace(/(?<!\\)#.*/, '').trim())
+    .flatMap(pattern => {
+      if (from && matchFrom) {
+        if (pattern.match(matchFrom)) return [pattern.replace(matchFrom, '$1')];
+        if (pattern.startsWith('/**/')) return [pattern.slice(1)];
+        if (pattern.startsWith('!/**/')) return [`!${pattern.slice(2)}`];
+        if (pattern.startsWith('/') || pattern.startsWith('!/')) return [];
+      }
+      return [pattern];
+    })
+    .map(pattern => convertGitignoreToPicomatchIgnorePatterns(pattern));
 }
 
-async function parseFindGitignores(options: Options): Promise<Gitignores> {
+const findAncestorGitignoreFiles = (cwd: string): string[] => {
+  const gitignorePaths: string[] = [];
+  let dir = dirname(cwd);
+  let prev: string;
+  while (dir) {
+    const filePath = join(dir, '.gitignore');
+    if (isFile(filePath)) gitignorePaths.push(filePath);
+    // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+    dir = dirname((prev = dir));
+    if (prev === dir) break;
+  }
+  return gitignorePaths;
+};
+
+/** @internal */
+export const findAndParseGitignores = async (cwd: string) => {
   const ignores: string[] = ['.git', ...GLOBAL_IGNORE_PATTERNS];
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
@@ -73,17 +100,18 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
   };
 
   const addFile = (filePath: string) => {
-    gitignoreFiles.push(toRelative(filePath));
+    gitignoreFiles.push(relative(cwd, filePath));
 
     const dir = dirname(toPosix(filePath));
-    const base = relative(options.cwd, dir);
+    const base = relative(cwd, dir);
+    const from = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
     const dirIgnores = base === '' ? ['.git', ...GLOBAL_IGNORE_PATTERNS] : [];
     const dirUnignores = [];
 
-    for (const rule of parseGitignoreFile(filePath)) {
+    for (const rule of parseGitignoreFile(filePath, from)) {
       const [p, ext] = rule.patterns;
       if (rule.negated) {
-        if (base === '') {
+        if (base === '' || base.startsWith('..')) {
           if (!unignores.includes(ext)) dirUnignores.push(...rule.patterns);
         } else {
           if (!unignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
@@ -91,7 +119,7 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
           }
         }
       } else {
-        if (base === '') {
+        if (base === '' || base.startsWith('..')) {
           if (!ignores.includes(ext)) dirIgnores.push(...rule.patterns);
         } else {
           if (!ignores.includes(ext.startsWith('**/') ? ext : `**/${ext}`)) {
@@ -107,6 +135,8 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
     matchers.push(...dirIgnores.map(ignore => _picomatch(ignore, pmOptions)));
   };
 
+  findAncestorGitignoreFiles(cwd).forEach(addFile);
+
   if (isFile('.git/info/exclude')) addFile('.git/info/exclude');
 
   const entryFilter = (entry: Entry) => {
@@ -117,19 +147,19 @@ async function parseFindGitignores(options: Options): Promise<Gitignores> {
     return false;
   };
 
-  const deepFilter = (entry: Entry) => !matcher(relative(options.cwd, entry.path));
+  const deepFilter = (entry: Entry) => !matcher(relative(cwd, entry.path));
 
-  await walk(options.cwd, {
+  await walk(cwd, {
     entryFilter: timerify(entryFilter),
     deepFilter: timerify(deepFilter),
   });
 
   debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles, ignores, unignores });
 
-  return { ignores, unignores };
-}
+  return { gitignoreFiles, ignores, unignores };
+};
 
-const _parseFindGitignores = timerify(parseFindGitignores);
+const _parseFindGitignores = timerify(findAndParseGitignores);
 
 export async function globby(patterns: string | string[], options: GlobOptions): Promise<string[]> {
   if (Array.isArray(patterns) && patterns.length === 0) return [];
@@ -162,7 +192,7 @@ export async function getGitIgnoredHandler(options: Options): Promise<(path: str
 
   if (options.gitignore === false) return () => false;
 
-  const gitignore = await _parseFindGitignores(options);
+  const gitignore = await _parseFindGitignores(options.cwd);
   const matcher = _picomatch(gitignore.ignores, { ignore: gitignore.unignores });
 
   const isGitIgnored = (filePath: string) => matcher(relative(options.cwd, filePath));
