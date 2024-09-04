@@ -22,7 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: bun upgrade --canary
       - name: Install dependencies
         run: bun install --ignore-scripts --frozen-lockfile
       - name: Run formatter, linter, import sorter
