@@ -6,10 +6,10 @@ This page is an overview of related features Knip does not support.
 
 ## Unused variables
 
-Knip doesn't look for unused variables within a file. It only looks for values
-and types that are imported and/or exported.
+Knip doesn't look for unused variables within a file. It looks for exported and
+imported values and types.
 
-Use [ESLint][1], [Biome][2] or [oxc][3].
+Use [ESLint][1], [Biome][2] or [oxc][3] to find unused variables within files.
 
 ## Unused properties
 

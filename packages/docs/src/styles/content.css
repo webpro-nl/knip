@@ -100,3 +100,9 @@ section.plugins li {
 .sl-markdown-content .mw500 {
   max-width: 500px;
 }
+
+.logo-border {
+  width: 200px;
+  border: 2px solid var(--sl-color-white);
+  border-radius: 40px;
+}

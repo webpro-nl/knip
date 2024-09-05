@@ -27,6 +27,8 @@ code":
 - Keeping dead code around has a negative value on readability, as it can be
   misleading and distracting. Even if it serves no purpose it will need to be
   maintained (source: [Safe dead code removal → YAGNI][1]).
+- Also see
+  [Why are unused dependencies a problem?](../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem)
 
 ## Automation
 

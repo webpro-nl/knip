@@ -92,6 +92,7 @@ Use `knip --exports` to also include class and enum members.
 - [dependency-check][7]
 - [deadfile][8]
 - [npm-check][9] (used depcheck)
+- [find-unused-exports][10]
 
 [1]: ../features/monorepos-and-workspaces.md
 [2]: ../overview/getting-started.mdx
@@ -102,3 +103,4 @@ Use `knip --exports` to also include class and enum members.
 [7]: https://github.com/dependency-check-team/dependency-check
 [8]: https://github.com/M-Izadmehr/deadfile
 [9]: https://github.com/dylang/npm-check
+[10]: https://github.com/jaydenseric/find-unused-exports
