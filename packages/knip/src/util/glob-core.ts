@@ -30,7 +30,6 @@ const cachedIgnores = new Map<string, Gitignores>();
 /** @internal */
 export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
   const negated = pattern[0] === '!';
-  const root = pattern[negated ? 1 : 0] === '/';
 
   if (negated) pattern = pattern.slice(1);
 
@@ -45,18 +44,18 @@ export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
   if (pattern.endsWith('/*')) extPattern = pattern;
   else extPattern = `${pattern}/**`;
 
-  return { negated, root, patterns: [pattern, extPattern] };
+  return { negated, patterns: [pattern, extPattern] };
 };
 
-function parseGitignoreFile(filePath: string, from?: string) {
-  const file = readFileSync(filePath, 'utf8');
-  const matchFrom = from ? new RegExp(`^(!?/?)(${from})`) : undefined;
-  return file
+/** @internal */
+export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: string) => {
+  const matchFrom = ancestor ? new RegExp(`^(!?/?)(${ancestor})`) : undefined;
+  return patterns
     .split(/\r?\n/)
     .filter(line => line.trim() && !line.startsWith('#'))
-    .map(pattern => pattern.replace(/(?<!\\)#.*/, '').trim())
-    .flatMap(pattern => {
-      if (from && matchFrom) {
+    .flatMap(line => {
+      const pattern = line.replace(/(?<!\\)#.*/, '').trim();
+      if (ancestor && matchFrom) {
         if (pattern.match(matchFrom)) return [pattern.replace(matchFrom, '$1')];
         if (pattern.startsWith('/**/')) return [pattern.slice(1)];
         if (pattern.startsWith('!/**/')) return [`!${pattern.slice(2)}`];
@@ -65,7 +64,7 @@ function parseGitignoreFile(filePath: string, from?: string) {
       return [pattern];
     })
     .map(pattern => convertGitignoreToPicomatchIgnorePatterns(pattern));
-}
+};
 
 const findAncestorGitignoreFiles = (cwd: string): string[] => {
   const gitignorePaths: string[] = [];
@@ -105,11 +104,13 @@ export const findAndParseGitignores = async (cwd: string) => {
 
     const dir = dirname(toPosix(filePath));
     const base = relative(cwd, dir);
-    const from = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
+    const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
     const dirIgnores = new Set(base === '' ? init : []);
     const dirUnignores = new Set<string>();
 
-    for (const rule of parseGitignoreFile(filePath, from)) {
+    const patterns = readFileSync(filePath, 'utf8');
+
+    for (const rule of parseAndConvertGitignorePatterns(patterns, ancestor)) {
       const [pattern, extraPattern] = rule.patterns;
       if (rule.negated) {
         if (base === '' || base.startsWith('..')) {
@@ -148,10 +149,10 @@ export const findAndParseGitignores = async (cwd: string) => {
       }
     }
 
-    const cacheDir = from ? cwd : dir;
+    const cacheDir = ancestor ? cwd : dir;
     const cacheForDir = cachedIgnores.get(cwd);
 
-    if (from && cacheForDir) {
+    if (ancestor && cacheForDir) {
       for (const pattern of dirIgnores) cacheForDir?.ignores.add(pattern);
       cacheForDir.unignores = Array.from(new Set([...cacheForDir.unignores, ...dirUnignores]));
     } else {
