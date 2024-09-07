@@ -111,18 +111,18 @@ export const findAndParseGitignores = async (cwd: string) => {
     const patterns = readFileSync(filePath, 'utf8');
 
     for (const rule of parseAndConvertGitignorePatterns(patterns, ancestor)) {
-      const [pattern, extraPattern] = rule.patterns;
+      const [pattern1, pattern2] = rule.patterns;
       if (rule.negated) {
         if (base === '' || base.startsWith('..')) {
-          if (!unignores.includes(extraPattern)) {
+          if (!unignores.includes(pattern2)) {
             unignores.push(...rule.patterns);
-            dirUnignores.add(pattern);
-            dirUnignores.add(extraPattern);
+            dirUnignores.add(pattern1);
+            dirUnignores.add(pattern2);
           }
         } else {
-          if (!unignores.includes(extraPattern.startsWith('**/') ? extraPattern : `**/${extraPattern}`)) {
-            const unignore = join(base, pattern);
-            const extraUnignore = join(base, extraPattern);
+          if (!unignores.includes(pattern2.startsWith('**/') ? pattern2 : `**/${pattern2}`)) {
+            const unignore = join(base, pattern1);
+            const extraUnignore = join(base, pattern2);
             unignores.push(unignore, extraUnignore);
             dirUnignores.add(unignore);
             dirUnignores.add(extraUnignore);
@@ -130,21 +130,17 @@ export const findAndParseGitignores = async (cwd: string) => {
         }
       } else {
         if (base === '' || base.startsWith('..')) {
-          if (!ignores.has(extraPattern)) {
-            ignores.add(pattern);
-            ignores.add(extraPattern);
-            dirIgnores.add(pattern);
-            dirIgnores.add(extraPattern);
-          }
+          ignores.add(pattern1);
+          ignores.add(pattern2);
+          dirIgnores.add(pattern1);
+          dirIgnores.add(pattern2);
         } else {
-          if (!ignores.has(extraPattern.startsWith('**/') ? extraPattern : `**/${extraPattern}`)) {
-            const ignore = join(base, pattern);
-            const extraIgnore = join(base, extraPattern);
-            ignores.add(ignore);
-            ignores.add(extraIgnore);
-            dirIgnores.add(ignore);
-            dirIgnores.add(extraIgnore);
-          }
+          const ignore = join(base, pattern1);
+          const extraIgnore = join(base, pattern2);
+          ignores.add(ignore);
+          ignores.add(extraIgnore);
+          dirIgnores.add(ignore);
+          dirIgnores.add(extraIgnore);
         }
       }
     }
@@ -199,18 +195,22 @@ export async function globby(patterns: string | string[], options: GlobOptions):
     while (dir) {
       const cacheForDir = cachedIgnores.get(dir);
       if (cacheForDir) {
+        // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
         ignore.push(...cacheForDir.ignores);
-        ignore.push(...cacheForDir.unignores.map(pattern => `!${pattern}`));
       }
       // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
       dir = dirname((prev = dir));
       if (prev === dir || dir === '.') break;
     }
+  } else {
+    ignore.push(...GLOBAL_IGNORE_PATTERNS);
   }
 
-  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...options });
+  const fgOptions = Object.assign(options, { ignore });
 
-  return fg.glob(patterns, Object.assign(options, { ignore }));
+  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...fgOptions });
+
+  return fg.glob(patterns, fgOptions);
 }
 
 export async function getGitIgnoredHandler(options: Options): Promise<(path: string) => boolean> {

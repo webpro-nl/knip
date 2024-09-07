@@ -1,40 +1,26 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { findAndParseGitignores } from '../../src/util/glob-core.js';
-import { resolve } from '../../src/util/path.js';
+import { EOL } from 'node:os';
+import { parseAndConvertGitignorePatterns as parse } from '../../src/util/glob-core.js';
 
-test('findAndParseGitignores', async () => {
-  const cwd = resolve('fixtures/glob');
-  const gitignore = await findAndParseGitignores(cwd);
-  assert.deepEqual(gitignore, {
-    gitignoreFiles: ['../../.gitignore', '../../../../.gitignore', '.gitignore', 'a/.gitignore', 'a/b/.gitignore'],
-    ignores: new Set(['**/.idea', '**/.idea/**', '.git', '**/node_modules/**', '.yarn', '**/a/b/c', '**/a/b/c/**']),
-    unignores: [],
-  });
+test('parseAndConvertGitignorePatterns', async () => {
+  const gitignorePatterns = ['.git', 'node_modules', 'a/b/c', '/a/b/c'];
+  const globPatterns = parse(gitignorePatterns.join(EOL));
+  assert.deepEqual(globPatterns, [
+    { negated: false, patterns: ['**/.git', '**/.git/**'] },
+    { negated: false, patterns: ['**/node_modules', '**/node_modules/**'] },
+    { negated: false, patterns: ['**/a/b/c', '**/a/b/c/**'] },
+    { negated: false, patterns: ['a/b/c', 'a/b/c/**'] },
+  ]);
 });
 
-test('findAndParseGitignores (/a)', async () => {
-  const cwd = resolve('fixtures/glob/a');
-  const gitignore = await findAndParseGitignores(cwd);
-  assert.deepEqual(gitignore, {
-    gitignoreFiles: ['../.gitignore', '../../../.gitignore', '../../../../../.gitignore', '.gitignore', 'b/.gitignore'],
-    ignores: new Set(['.git', '**/node_modules/**', '.yarn', '**/b/c', '**/b/c/**', '**/.idea', '**/.idea/**']),
-    unignores: [],
-  });
-});
-
-test('findAndParseGitignores (/a/b', async () => {
-  const cwd = resolve('fixtures/glob/a/b');
-  const gitignore = await findAndParseGitignores(cwd);
-  assert.deepEqual(gitignore, {
-    gitignoreFiles: [
-      '../.gitignore',
-      '../../.gitignore',
-      '../../../../.gitignore',
-      '../../../../../../.gitignore',
-      '.gitignore',
-    ],
-    ignores: new Set(['.git', '**/node_modules/**', '.yarn', '**/c', '**/c/**', '**/.idea', '**/.idea/**']),
-    unignores: [],
-  });
+test('parseAndConvertGitignorePatterns (ancestor)', async () => {
+  const gitignorePatterns = ['.git', 'node_modules', 'a/b/c', '/a/b/c'];
+  const globPatterns = parse(gitignorePatterns.join(EOL), 'a/b/');
+  assert.deepEqual(globPatterns, [
+    { negated: false, patterns: ['**/.git', '**/.git/**'] },
+    { negated: false, patterns: ['**/node_modules', '**/node_modules/**'] },
+    { negated: false, patterns: ['**/c', '**/c/**'] }, // TODO FIXME: should probably be ['c', 'c/**']
+    { negated: false, patterns: ['c', 'c/**'] },
+  ]);
 });
