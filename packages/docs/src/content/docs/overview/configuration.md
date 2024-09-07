@@ -42,7 +42,7 @@ By default, Knip will look for a configuration file with the following names:
 - `knip.config.js`
 - `package.json` (in the `"knip"` property)
 
-If you want to use a custom file name or path, you can use the `--config` flag:
+If you want to use a custom file name or path, use the `--config` flag:
 
 ```sh
 knip --config path/to/knip.json
