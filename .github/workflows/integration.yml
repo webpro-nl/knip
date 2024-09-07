@@ -22,8 +22,6 @@ jobs:
         with:
           node-version: 20
       - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: '.bun-version'
 
       - run: cd packages/knip && npm install && npm run build && npm link
 
