@@ -206,6 +206,8 @@ export async function globby(patterns: string | string[], options: GlobOptions):
       dir = dirname((prev = dir));
       if (prev === dir || dir === '.') break;
     }
+  } else {
+    ignore.push(...GLOBAL_IGNORE_PATTERNS);
   }
 
   const fgOptions = Object.assign(options, { ignore });
