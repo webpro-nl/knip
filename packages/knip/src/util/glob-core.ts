@@ -208,9 +208,11 @@ export async function globby(patterns: string | string[], options: GlobOptions):
     }
   }
 
-  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...options });
+  const fgOptions = Object.assign(options, { ignore });
 
-  return fg.glob(patterns, Object.assign(options, { ignore }));
+  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...fgOptions });
+
+  return fg.glob(patterns, fgOptions);
 }
 
 export async function getGitIgnoredHandler(options: Options): Promise<(path: string) => boolean> {
