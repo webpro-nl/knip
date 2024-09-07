@@ -36,9 +36,7 @@ export default ({ report, issues }: ReporterOptions) => {
           console.log(`| :${'-'.repeat(longestSymbol - 1)} | :${'-'.repeat(longestFilePath - 1)} | :------- |`);
           for (const issue of sortedByFilePath) {
             console.log(
-              `| ${issue.symbol.padEnd(longestSymbol)} | ${getFilePath(issue).padEnd(longestFilePath)} | ${(
-                issue.severity ?? ''
-              ).padEnd(8)} |`
+              `| ${issue.symbol.padEnd(longestSymbol)} | ${getFilePath(issue).padEnd(longestFilePath)} | ${(issue.severity ?? '').padEnd(8)} |`
             );
           }
         }

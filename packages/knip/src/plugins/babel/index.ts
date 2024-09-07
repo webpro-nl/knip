@@ -22,7 +22,8 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): string[] => {
   const presets = config.presets?.flatMap(getName).map(name => resolveName(name, 'preset')) ?? [];
   const plugins = config.plugins?.flatMap(getName).map(name => resolveName(name, 'plugin')) ?? [];
   const nested = config.env ? Object.values(config.env).flatMap(getDependenciesFromConfig) : [];
-  return compact([...presets, ...plugins, ...nested]);
+  const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependenciesFromConfig) : [];
+  return compact([...presets, ...plugins, ...nested, ...overrides]);
 };
 
 const resolveConfig: ResolveConfig<BabelConfig> = async config => {

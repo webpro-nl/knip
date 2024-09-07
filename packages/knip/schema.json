@@ -115,10 +115,19 @@
     "rules": {
       "type": "object",
       "properties": {
+        "binaries": {
+          "$ref": "#/definitions/ruleValue"
+        },
         "classMembers": {
           "$ref": "#/definitions/ruleValue"
         },
         "dependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "devDependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "optionalPeerDependencies": {
           "$ref": "#/definitions/ruleValue"
         },
         "duplicates": {
@@ -347,6 +356,10 @@
           "title": "Jest plugin configuration (https://knip.dev/reference/plugins/jest)",
           "$ref": "#/definitions/plugin"
         },
+        "ladle": {
+          "title": "ladle plugin configuration (https://knip.dev/reference/plugins/ladle)",
+          "$ref": "#/definitions/plugin"
+        },
         "lefthook": {
           "title": "lefthook plugin configuration (https://knip.dev/reference/plugins/lefthook)",
           "$ref": "#/definitions/plugin"
@@ -383,6 +396,10 @@
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/msw)",
           "$ref": "#/definitions/plugin"
         },
+        "nest": {
+          "title": "nest plugin configuration (https://knip.dev/reference/plugins/nest)",
+          "$ref": "#/definitions/plugin"
+        },
         "netlify": {
           "title": "Netlify plugin configuration (https://knip.dev/reference/plugins/netlify)",
           "$ref": "#/definitions/plugin"
@@ -397,6 +414,10 @@
         },
         "npm-package-json-lint": {
           "title": "npm-package-json-lint plugin configuration (https://knip.dev/reference/plugins/npm-package-json-lint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "nuxt": {
+          "title": "Nuxt plugin configuration (https://knip.dev/reference/plugins/nuxt)",
           "$ref": "#/definitions/plugin"
         },
         "nx": {
@@ -423,8 +444,16 @@
           "title": "PostCSS plugin configuration (https://knip.dev/reference/plugins/postcss)",
           "$ref": "#/definitions/plugin"
         },
+        "preconstruct": {
+          "title": "preconstruct plugin configuration (https://knip.dev/reference/plugins/preconstruct)",
+          "$ref": "#/definitions/plugin"
+        },
         "prettier": {
           "title": "Prettier plugin configuration (https://knip.dev/reference/plugins/prettier)",
+          "$ref": "#/definitions/plugin"
+        },
+        "react-cosmos": {
+          "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
           "$ref": "#/definitions/plugin"
         },
         "release-it": {
@@ -441,6 +470,14 @@
         },
         "rollup": {
           "title": "Rollup plugin configuration (https://knip.dev/reference/plugins/rollup)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rsbuild": {
+          "title": "rsbuild plugin configuration (https://knip.dev/reference/plugins/rsbuild)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rspack": {
+          "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
           "$ref": "#/definitions/plugin"
         },
         "semantic-release": {
@@ -505,6 +542,10 @@
         },
         "vercel-og": {
           "title": "vercel-og plugin configuration (https://knip.dev/reference/plugins/vercel-og)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vike": {
+          "title": "vike plugin configuration (https://knip.dev/reference/plugins/vike)",
           "$ref": "#/definitions/plugin"
         },
         "vite": {

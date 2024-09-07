@@ -1,15 +1,15 @@
-export { _load as load } from './loader.js';
-export { _loadJSON as loadJSON } from './fs.js';
-export { _tryResolve as tryResolve } from './require.js';
 export { _getDependenciesFromScripts as getDependenciesFromScripts } from '../binaries/index.js';
+export { _loadJSON as loadJSON } from './fs.js';
+export { _load as load } from './loader.js';
+export { _resolveSync as resolve } from './resolve.js';
 import type { RawPluginConfiguration } from '../types/config.js';
 import type { Plugin, PluginOptions } from '../types/plugins.js';
 import { arrayify } from './array.js';
 import { _load as load } from './loader.js';
 import { get } from './object.js';
-import { basename } from './path.js';
+import { basename, isAbsolute, join, relative } from './path.js';
 import { toEntryPattern, toProductionEntryPattern } from './protocols.js';
-import { _loadESLintConfig as loadESLintConfig } from './require.js';
+import { _resolveSync } from './resolve.js';
 
 export const toCamelCase = (name: string) =>
   name.toLowerCase().replace(/(-[a-z])/g, group => group.toUpperCase().replace('-', ''));
@@ -58,10 +58,7 @@ export const loadConfigForPlugin = async (
       ? typeof packageJsonPath === 'function'
         ? packageJsonPath(manifest)
         : get(manifest, packageJsonPath ?? pluginName)
-      : // TODO Leftover from plugin API streamline refactor
-        plugin.title === 'ESLint' && !/(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
-        ? await loadESLintConfig(configFilePath)
-        : await load(configFilePath);
+      : await load(configFilePath);
 
   return localConfig;
 };
@@ -80,4 +77,69 @@ export const getFinalEntryPaths = (plugin: Plugin, options: PluginOptions, confi
     : configEntryPaths.length > 0
       ? configEntryPaths
       : [...(plugin.entry ?? []).map(toEntryPattern), ...(plugin.production ?? []).map(toProductionEntryPattern)];
+};
+
+const toConfigMap =
+  (
+    defaultExtensions: string[],
+    builderConfig: {
+      rcPrefix?: string;
+      rcSuffix?: string;
+      configDir?: boolean;
+      configFiles?: boolean;
+      configFilesAllExtensions?: boolean;
+      additionalExtensions?: string[];
+    }
+  ) =>
+  (moduleName: string, options?: typeof builderConfig) => {
+    const config = {
+      rcPrefix: '.',
+      rcSuffix: 'rc',
+      // Generate .config/<file>
+      configDir: true,
+      // Generate <file>.config.<ext>
+      configFiles: true,
+      // Allow for .json, .yaml, .yml, .toml etc
+      configFilesAllExtensions: false,
+      additionalExtensions: [],
+      ...builderConfig,
+      ...options,
+    };
+    const { rcPrefix, rcSuffix } = config;
+    const jsTypeExtensions = ['js', 'ts', 'cjs', 'mjs', 'cts', 'mts'];
+    const extensions = [...defaultExtensions, ...config.additionalExtensions];
+
+    const baseFiles = [
+      `${rcPrefix}${moduleName}${rcSuffix}`,
+      ...(config.configDir ? [`.config/${moduleName}${rcSuffix}`] : []),
+    ];
+
+    const rcFiles = `${rcPrefix}${moduleName}${rcSuffix}.{${extensions.join(',')}}`;
+    const configExtensions = extensions.filter(
+      ext => config.configFilesAllExtensions || jsTypeExtensions.includes(ext)
+    );
+    const configFiles = config.configFiles ? [`${moduleName}.config.{${configExtensions.join(',')}}`] : [];
+    const configDirFiles = config.configDir ? [`.config/${moduleName}${rcSuffix}.{${extensions.join(',')}}`] : [];
+
+    return [...baseFiles, rcFiles, ...configFiles, ...configDirFiles];
+  };
+
+export const toCosmiconfig = toConfigMap(['json', 'yaml', 'yml', 'js', 'ts', 'cjs', 'mjs'], { configDir: true });
+export const toLilconfig = toConfigMap(['json', 'js', 'cjs', 'mjs'], { configDir: true });
+export const toUnconfig = toConfigMap(['json', 'ts', 'mts', 'cts', 'js', 'mjs', 'cjs'], {
+  configDir: false,
+  rcPrefix: '',
+  rcSuffix: '',
+  configFiles: false,
+});
+
+export const resolveEntry = (options: PluginOptions, specifier: string, rootDir = '.') => {
+  const { configFileDir } = options;
+  const resolvedPath = isAbsolute(specifier)
+    ? specifier
+    : _resolveSync(join(configFileDir, rootDir, specifier), join(configFileDir, rootDir));
+
+  if (resolvedPath) return toEntryPattern(relative(configFileDir, resolvedPath));
+
+  return specifier;
 };

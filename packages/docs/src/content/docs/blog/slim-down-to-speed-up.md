@@ -158,7 +158,7 @@ The main takeaways here:
 - In v4, `getImportsAndExports` is more comprehensive to compensate for the
   absence of `findReferences` - more on that below
 
-Remember, unused class members are no longer reported in v4.
+Remember, unused class members are no longer reported by default in v4.
 
 ## The story of `findReferences`
 

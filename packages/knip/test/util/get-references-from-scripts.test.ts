@@ -88,13 +88,14 @@ test('getReferencesFromScripts (dotenv)', () => {
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', ['bin:dotenv', 'bin:mvn']);
 });
 
-test('getReferencesFromScripts (cross-env)', () => {
+test('getReferencesFromScripts (cross-env/env vars)', () => {
   t('cross-env program', ['bin:cross-env', 'bin:program']);
   t('cross-env NODE_ENV=production program', ['bin:cross-env', 'bin:program']);
   t('cross-env NODE_ENV=production program subcommand', ['bin:cross-env', 'bin:program']);
   t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', ['bin:cross-env', 'bin:program']);
   t('cross-env NODE_OPTIONS="--loader pkg" knex', ['bin:cross-env', 'bin:knex', 'pkg']);
   t('NODE_ENV=production cross-env -- program --cache', ['bin:cross-env', 'bin:program']);
+  t("NODE_OPTIONS='--require pkg-a --require pkg-b' program", ['bin:program', 'pkg-a', 'pkg-b']);
 });
 
 test('getReferencesFromScripts (cross-env/node)', () => {

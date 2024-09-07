@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
 import { dirname, isInternal, join, toAbsolute } from '#p/util/path.js';
-import { hasDependency, load } from '#p/util/plugin.js';
+import { hasDependency, load, resolveEntry } from '#p/util/plugin.js';
 import { toEntryPattern } from '#p/util/protocols.js';
 import type { JestConfig, JestInitialOptions } from './types.js';
 
@@ -32,6 +32,7 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
 
 const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<string[]> => {
   const { configFileDir } = options;
+
   if (config?.preset) {
     const { preset } = config;
     if (isInternal(preset)) {
@@ -40,9 +41,11 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
       Object.assign(config, presetConfig);
     }
   }
+
   const presets = (config.preset ? [config.preset] : []).map(preset =>
     isInternal(preset) ? preset : join(preset, 'jest-preset')
   );
+
   const projects = [];
   for (const project of config.projects ?? []) {
     if (typeof project === 'string') {
@@ -52,6 +55,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
       for (const dependency of dependencies) projects.push(dependency);
     }
   }
+
   const runner = config.runner ? [config.runner] : [];
   const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
   const resolvers = config.resolver ? [config.resolver] : [];
@@ -62,8 +66,6 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     : [];
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
-  const setupFiles = config.setupFiles ?? [];
-  const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
   const transform = config.transform
     ? Object.values(config.transform).map(transform => (typeof transform === 'string' ? transform : transform[0]))
     : [];
@@ -72,11 +74,16 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
       ? Object.values(config.moduleNameMapper).map(mapper => (typeof mapper === 'string' ? mapper : mapper[0]))
       : []
   ).filter(value => !/\$[0-9]/.test(value));
+
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
   const testSequencer = config.testSequencer ? [config.testSequencer] : [];
-  const globalSetup = config.globalSetup ? [config.globalSetup] : [];
-  const globalTeardown = config.globalTeardown ? [config.globalTeardown] : [];
+
+  const resolve = (specifier: string) => resolveEntry(options, specifier);
+  const setupFiles = (config.setupFiles ?? []).map(resolve);
+  const setupFilesAfterEnv = (config.setupFilesAfterEnv ?? []).map(resolve);
+  const globalSetup = (config.globalSetup ? [config.globalSetup] : []).map(resolve);
+  const globalTeardown = (config.globalTeardown ? [config.globalTeardown] : []).map(resolve);
 
   return [
     ...presets,

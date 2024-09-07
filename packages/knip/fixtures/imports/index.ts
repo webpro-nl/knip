@@ -9,7 +9,9 @@ const fn = (_: any) => {};
 const topLevel = await import('./top-level-await-import');
 const { top } = await import('./top-level-await-import');
 
-const dynamic = () => import('./dir/import-b').then(m => m.dynamic);
+const dynamicB = () => import('./dir/import-b').then(m => m.dynamic);
+
+const dynamicF = () => import('./dir/import-f').then(({ dynamic, named: renamed }) => [dynamic, renamed]);
 
 import('./top-level-side-effects-call');
 
@@ -47,9 +49,24 @@ function promiseAll() {
       const [identifierA, { default: identifierB }] = await Promise.all([
         import('./import-a'),
         import('./dir/import-b'),
+        import('./dir/import-b'),
       ]);
 
       [identifierA, identifierB];
+    },
+  };
+}
+
+function promiseTail() {
+  return {
+    async fn() {
+      const [, , identifierB] = await Promise.all([
+        import('./dir/import-b'),
+        import('./dir/import-b'),
+        import('./dir/import-b'),
+      ]);
+
+      [identifierB];
     },
   };
 }

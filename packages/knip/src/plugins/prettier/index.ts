@@ -3,6 +3,7 @@ import { hasDependency } from '#p/util/plugin.js';
 import type { PrettierConfig } from './types.js';
 
 // https://prettier.io/docs/en/configuration.html
+// https://github.com/prettier/prettier/blob/main/src/config/prettier-config/config-searcher.js
 
 const title = 'Prettier';
 
@@ -13,9 +14,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies, config }) =>
 
 const config = [
   '.prettierrc',
-  '.prettierrc.{json,js,cjs,mjs,yml,yaml}',
+  '.prettierrc.{json,js,cjs,mjs,yml,yaml,toml,json5}',
   'prettier.config.{js,cjs,mjs}',
-  'package.json',
+  'package.{json,yaml}',
 ];
 
 const resolveConfig: ResolveConfig<PrettierConfig> = config => {

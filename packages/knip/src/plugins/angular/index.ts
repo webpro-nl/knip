@@ -33,6 +33,14 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         if ('main' in opts && typeof opts.main === 'string') {
           dependencies.add(toProductionEntryPattern(join(cwd, opts.main)));
         }
+        if ('browser' in opts && typeof opts.browser === 'string') {
+          dependencies.add(toProductionEntryPattern(join(cwd, opts.browser)));
+        }
+        if ('ssr' in opts && opts.ssr && typeof opts.ssr === 'object') {
+          if ('entry' in opts.ssr && typeof opts.ssr.entry === 'string') {
+            dependencies.add(toProductionEntryPattern(join(cwd, opts.ssr.entry)));
+          }
+        }
       }
     }
   }

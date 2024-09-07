@@ -40,8 +40,8 @@ more about fine-tuning the sets of entry and project files.
 ## Negated patterns
 
 Let's take a look at using negated patterns for `entry` and `project` files. If
-you think there are too many files in the analysis, this could be the first step
-in selecting the right files for the analysis.
+you think there are too many files in the analysis, this is the first step in
+selecting the right files for the analysis.
 
 For example, we need to explicitly add route files as entry files, except those
 starting with an underscore. Then we can use a negated pattern like so:
@@ -62,6 +62,35 @@ reported as unused files, we can use negated `project` patterns:
 }
 ```
 
+### Example
+
+❌   Don't do this:
+
+```json title="knip.json"
+{
+  "entry": ["src/index.ts", "scripts/*.ts"],
+  "ignore": ["build/**", "dist/**", "src/generated.ts"]
+}
+```
+
+Don't exclude files like build artifacts using `ignore`, but include the source
+and script files in `project` patterns instead:
+
+✅   Do this:
+
+```json title="knip.json"
+{
+  "entry": ["src/index.ts", "scripts/*.ts"],
+  "project": ["src/**", "scripts/**"],
+  "ignore": ["src/generated.ts"]
+}
+```
+
+This way, the `project` files cover all source files, and other files don't even
+need to be ignored anymore. Only files that are actually imported from source
+code might be candidates to `ignore`. This may also have significant impact on
+performance.
+
 It's not recommended to add all files as entry files for two reasons:
 
 1. Knip does not report unused exports in entry files.
@@ -70,7 +99,7 @@ It's not recommended to add all files as entry files for two reasons:
 
 :::tip
 
-Do not add too many `entry` files, you'll miss out on both unused exports and
+Do not add too many `entry` files. You'll miss out on both unused exports and
 unused files.
 
 :::
@@ -89,11 +118,13 @@ we don't want the unused exports of such files to be reported:
 }
 ```
 
+Also see the [ignoreExportsUsedInFile][2] configuration option.
+
 ## Production Mode
 
 In default mode, Knip includes all test files and other non-production files in
 the analysis. To find out what files, dependencies and exports are unused in
-production source files, use [production mode][2].
+production source files, use [production mode][3].
 
 How to exclude test and other non-production files from the analysis? For a
 better understanding of how Knip works, here's a list of options that DON'T
@@ -196,9 +227,10 @@ To reiterate, the default `entry` and `project` files for each workspace:
 
 Next to this, there are other places where [Knip looks for entry files][1].
 
-Additionally, [plugins have plenty of entry files configured][3] that are
+Additionally, [plugins have plenty of entry files configured][4] that are
 automatically added as well.
 
 [1]: ../explanations/entry-files.md
-[2]: ../features/production-mode.md
-[3]: ../explanations/plugins.md#entry-files
+[2]: ../reference/configuration#ignoreexportsusedinfile
+[3]: ../features/production-mode.md
+[4]: ../explanations/plugins.md#entry-files

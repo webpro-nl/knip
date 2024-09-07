@@ -200,10 +200,13 @@ function of the `main` script (default: `index.js`) will be invoked with the
 
 ## Preprocessors
 
-A preprocessor is a function that receives the results and should return data in
-the same shape/structure (unless you pass it to only your own reporter). Just
-like reporters, use e.g. `--preprocessor ./my-preprocessor` from the command
-line (can be repeated).
+A preprocessor is a function that runs after the analysis is finished. It
+receives the results from the analysis and should return data in the same
+shape/structure (unless you pass it to only your own reporter).
+
+The data goes through the preprocessor(s) before the final data is passed to the
+reporter(s). There are no built-in preprocessors. Just like reporters, use e.g.
+`--preprocessor ./my-preprocessor` from the command line (can be repeated).
 
 The default export of the preprocessor should be a function with this interface:
 

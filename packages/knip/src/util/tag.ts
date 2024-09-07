@@ -1,3 +1,4 @@
+import { ALIAS_TAG, BETA_TAG, INTERNAL_TAG, PUBLIC_TAG } from '../constants.js';
 import type { Tags } from '../types/cli.js';
 
 export const splitTags = (rawTags: string[]) => {
@@ -21,9 +22,10 @@ export const shouldIgnore = (jsDocTags: Set<string>, tags: Tags) => {
   return false;
 };
 
-export const getShouldIgnoreHandler = (tags: Tags, isProduction: boolean) => (jsDocTags: Set<string>) =>
-  jsDocTags.has('@public') ||
-  jsDocTags.has('@beta') ||
-  jsDocTags.has('@alias') ||
-  shouldIgnore(jsDocTags, tags) ||
-  (isProduction && jsDocTags.has('@internal'));
+export const getShouldIgnoreHandler = (isProduction: boolean) => (jsDocTags: Set<string>) =>
+  jsDocTags.has(PUBLIC_TAG) ||
+  jsDocTags.has(BETA_TAG) ||
+  jsDocTags.has(ALIAS_TAG) ||
+  (isProduction && jsDocTags.has(INTERNAL_TAG));
+
+export const getShouldIgnoreTagHandler = (tags: Tags) => (jsDocTags: Set<string>) => shouldIgnore(jsDocTags, tags);

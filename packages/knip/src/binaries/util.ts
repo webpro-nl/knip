@@ -1,13 +1,13 @@
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { isAbsolute, isInNodeModules, join } from '../util/path.js';
 import { toBinary } from '../util/protocols.js';
-import { _tryResolve } from '../util/require.js';
+import { _resolveSync } from '../util/resolve.js';
 
 export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleSpecifier?: boolean) => {
   if (specifier) {
     const filePath = isAbsolute(specifier) ? specifier : join(cwd, specifier);
     if (!isInNodeModules(filePath)) {
-      const resolvedFilePath = _tryResolve(filePath, cwd);
+      const resolvedFilePath = _resolveSync(filePath, cwd);
       if (resolvedFilePath) {
         return resolvedFilePath;
       }

@@ -13,9 +13,12 @@ const setForeground = (theme: ExpressiveCodeTheme, scope: string, value: string)
 export default defineConfig({
   site: 'https://knip.dev',
   base: '/',
-  // @ts-expect-error TODO
+  // @ts-expect-error
   sitemap: false,
   trailingSlash: 'never',
+  redirects: {
+    '/guides/commonjs': '/guides/working-with-commonjs',
+  },
   markdown: {
     remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
   },
@@ -64,6 +67,11 @@ export default defineConfig({
         {
           label: 'Blog',
           autogenerate: { directory: 'blog' },
+        },
+        {
+          label: 'Read more',
+          collapsed: true,
+          autogenerate: { directory: 'typescript' },
         },
       ],
       expressiveCode: {

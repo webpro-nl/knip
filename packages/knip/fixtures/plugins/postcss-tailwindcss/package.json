@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/postcss-tailwindcss",
+  "devDependencies": {
+    "postcss": "*"
+  }
+}

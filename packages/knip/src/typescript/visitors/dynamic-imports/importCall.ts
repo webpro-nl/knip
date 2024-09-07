@@ -10,6 +10,9 @@ import {
 } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
+// @ts-expect-error Property 'symbol' does not exist on type 'BindingElement', etc.
+const getSymbol = (node: ts.Node, isTopLevel: boolean) => (isTopLevel ? node.symbol : undefined);
+
 export default visit(
   () => true,
   node => {
@@ -44,6 +47,13 @@ export default visit(
                         return { identifier, specifier, pos };
                       });
                     }
+                  } else if (arg && ts.isObjectBindingPattern(arg.name)) {
+                    // Pattern: import('specifier').then({ identifier } => identifier);
+                    return arg.name.elements.map(element => {
+                      const identifier = (element.propertyName ?? element.name).getText();
+                      const alias = element.propertyName ? element.name.getText() : undefined;
+                      return { identifier, alias, specifier, pos: element.pos };
+                    });
                   }
                 }
                 return { identifier: 'default', specifier, pos };
@@ -55,11 +65,10 @@ export default visit(
               });
 
               if (variableDeclaration) {
-                const isTLA = isTopLevel(variableDeclaration.parent);
                 // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'ElementAccessExpression'.
                 const alias = String(variableDeclaration.name.escapedText);
-                // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'PropertyAccessExpression'.
-                return { identifier, alias, symbol: isTLA ? variableDeclaration.symbol : undefined, specifier, pos };
+                const symbol = getSymbol(variableDeclaration, isTopLevel(variableDeclaration.parent));
+                return { identifier, alias, symbol, specifier, pos };
               }
 
               // Pattern: import('side-effects')
@@ -85,14 +94,9 @@ export default visit(
               const isTLA = isTopLevel(variableDeclaration.parent);
               if (ts.isIdentifier(variableDeclaration.name)) {
                 // Pattern: const identifier = await import('specifier');
-                return {
-                  identifier: 'default',
-                  alias: String(variableDeclaration.name.escapedText),
-                  // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'VariableDeclaration'.
-                  symbol: isTLA ? variableDeclaration.symbol : undefined,
-                  specifier,
-                  pos: node.arguments[0].pos,
-                };
+                const alias = String(variableDeclaration.name.escapedText);
+                const symbol = getSymbol(variableDeclaration, isTLA);
+                return { identifier: 'default', alias, symbol, specifier, pos: node.arguments[0].pos };
               }
               const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
               if (bindings.length > 0) {
@@ -100,8 +104,8 @@ export default visit(
                 return bindings.map(element => {
                   const identifier = (element.propertyName ?? element.name).getText();
                   const alias = element.propertyName ? element.name.getText() : undefined;
-                  // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
-                  return { identifier, alias, symbol: isTLA ? element.symbol : undefined, specifier, pos: element.pos };
+                  const symbol = getSymbol(element, isTLA);
+                  return { identifier, alias, symbol, specifier, pos: element.pos };
                 });
               }
               // Pattern: import('specifier')
@@ -118,28 +122,27 @@ export default visit(
             ) {
               const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
               const element = variableDeclarationParent.name.elements[index];
-              const isTLA = isTopLevel(variableDeclarationParent.parent);
-              if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
-                // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
-                return element.name.elements.map(element => {
-                  const identifier = (element.propertyName ?? element.name).getText();
-                  const alias = element.propertyName ? element.name.getText() : undefined;
-                  // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
-                  return { identifier, alias, symbol: isTLA ? element.symbol : undefined, specifier, pos: element.pos };
-                });
-              }
+              if (element) {
+                const isTL = isTopLevel(variableDeclarationParent.parent);
+                if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
+                  // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
+                  return element.name.elements.map(element => {
+                    const identifier = (element.propertyName ?? element.name).getText();
+                    const alias = element.propertyName ? element.name.getText() : undefined;
+                    const symbol = getSymbol(element, isTL);
+                    return { identifier, alias, symbol, specifier, pos: element.pos };
+                  });
+                }
 
-              // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
-              // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'OmittedExpression'.
-              const alias = element.name.escapedText;
-              return {
-                identifier: 'default',
-                // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
-                symbol: isTLA ? element.symbol : undefined,
-                alias,
-                specifier,
-                pos: element.pos,
-              };
+                if (!ts.isOmittedExpression(element) && ts.isIdentifier(element.name)) {
+                  // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
+                  const alias = String(element.name.escapedText);
+                  const symbol = getSymbol(element, isTL);
+                  return { identifier: 'default', symbol, alias, specifier, pos: element.pos };
+                }
+
+                return { identifier: 'default', specifier, pos: element.pos };
+              }
             }
 
             // Pattern: import('side-effects')

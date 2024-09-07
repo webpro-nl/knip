@@ -1,8 +1,7 @@
 import { compact } from '#p/util/array.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '#p/util/modules.js';
 import { basename, dirname, isAbsolute, isInternal, toAbsolute } from '#p/util/path.js';
-import { load } from '#p/util/plugin.js';
-import { _resolve } from '#p/util/require.js';
+import { load, resolve } from '#p/util/plugin.js';
 import type { PluginOptions } from '../../types/plugins.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
@@ -19,9 +18,11 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
     ? getDependenciesFromConfig(config.parserOptions.babelOptions)
     : [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
+  // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
+  const rules = getDependenciesFromRules({});
   const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependencies) : [];
 
-  return compact([...extendsSpecifiers, ...plugins, parser, ...babelDependencies, ...settings, ...overrides]);
+  return compact([...extendsSpecifiers, ...plugins, parser, ...babelDependencies, ...settings, ...rules, ...overrides]);
 };
 
 type GetDependenciesDeep = (
@@ -40,11 +41,13 @@ export const getDependenciesDeep: GetDependenciesDeep = async (localConfig, opti
     if (localConfig.extends) {
       for (const extend of [localConfig.extends].flat()) {
         if (isInternal(extend)) {
-          const filePath = _resolve(toAbsolute(extend, configFileDir));
-          dependencies.add(filePath);
-          const localConfig: ESLintConfig = await load(filePath);
-          const opts = { ...options, configFileDir: dirname(filePath), configFileName: basename(filePath) };
-          addAll(await getDependenciesDeep(localConfig, opts, dependencies));
+          const filePath = resolve(toAbsolute(extend, configFileDir), configFileDir);
+          if (filePath) {
+            dependencies.add(filePath);
+            const localConfig: ESLintConfig = await load(filePath);
+            const opts = { ...options, configFileDir: dirname(filePath), configFileName: basename(filePath) };
+            addAll(await getDependenciesDeep(localConfig, opts, dependencies));
+          }
         }
       }
     }
@@ -84,7 +87,11 @@ const resolveExtendSpecifier = (specifier: string) => {
   return resolveSpecifier(namespace, specifier);
 };
 
-// Super custom: find dependencies of specific ESLint plugins through settings
+const getDependenciesFromRules = (rules: ESLintConfig['rules'] = {}) =>
+  Object.keys(rules).flatMap(ruleKey =>
+    ruleKey.includes('/') ? [resolveSpecifier('eslint-plugin', ruleKey.split('/').slice(0, -1).join('/'))] : []
+  );
+
 const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) => {
   return Object.entries(settings).flatMap(([settingKey, settings]) => {
     if (settingKey === 'import/resolver') {

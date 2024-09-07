@@ -39,12 +39,23 @@ Also see the [list of issue types][2].
 
 ### Shorthands
 
-Use the `--dependencies` or `--exports` flag to combine groups of related types:
+Knip has shortcuts to include only specific issue types.
 
-- The `--dependencies` includes (dev) `dependencies`, `unlisted`, `binaries` and
-  `unresolved`
-- The `--exports` flag has`exports`, `nsExports`, `classMembers`, `types`,
-  `nsTypes`, `enumMembers` and `duplicates`
+1. The `--dependencies` flag includes:
+
+   - `dependencies` (and `devDependencies` + `optionalPeerDependencies`)
+   - `unlisted`
+   - `binaries`
+   - `unresolved`
+
+2. The `--exports` flag includes:
+
+   - `exports`
+   - `types`
+   - `enumMembers`
+   - `duplicates`
+
+3. The `--files` flag is a shortcut for `--include files`
 
 ## Rules
 
@@ -70,6 +81,9 @@ Example:
 ```
 
 Also see the [issue types overview][2].
+
+NOTE: If the `dependencies` issue type is included, the `devDependencies` and
+`optionalPeerDependencies` types can still be set to `"warn"` separately.
 
 The rules are modeled after the ESLint `rules` configuration, and could be
 extended in the future.

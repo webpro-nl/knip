@@ -190,3 +190,31 @@ export const isImportSpecifier = (node: ts.Node) =>
   ts.isImportEqualsDeclaration(node.parent) ||
   ts.isImportClause(node.parent) ||
   ts.isNamespaceImport(node.parent);
+
+const isExported = (node: ts.Node): boolean => {
+  if (getExportKeywordNode(node)) return true;
+  return node.parent ? isExported(node.parent) : false;
+};
+
+const isTypeDeclaration = (node: ts.Node) =>
+  ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node);
+
+const getAncestorTypeDeclaration = (node: ts.Node) => {
+  while (node) {
+    if (isTypeDeclaration(node)) return node;
+    node = node.parent;
+  }
+};
+
+export const isReferencedInExportedType = (node: ts.Node) => {
+  const typeNode = getAncestorTypeDeclaration(node);
+  return Boolean(typeNode && isExported(typeNode));
+};
+
+export const getExportKeywordNode = (node: ts.Node) =>
+  // @ts-expect-error Property 'modifiers' does not exist on type 'Node'.
+  (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.ExportKeyword);
+
+export const getDefaultKeywordNode = (node: ts.Node) =>
+  // @ts-expect-error Property 'modifiers' does not exist on type 'Node'.
+  (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);

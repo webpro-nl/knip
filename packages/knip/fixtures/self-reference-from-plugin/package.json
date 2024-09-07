@@ -1,11 +1,15 @@
 {
-  "name": "@fixtures/eslint-config-self-reference",
+  "name": "@fixtures/eslint-config-self-reference-from-plugin",
+  "type": "commonjs",
   "exports": {
     ".": {
-      "default": "./data.json"
+      "require": "./dist/build.js"
+    },
+    "./data": {
+      "node": "./data.json"
     },
     "./local": {
-      "require": "./dist/build.js"
+      "default": "./lokal.js"
     }
   },
   "devDependencies": {

@@ -47,7 +47,7 @@ for await (const dir of directories) {
     const pluginDir = path.join(pluginsDir, pluginName);
     const plugin: Plugin = (await import(path.join(pluginDir, 'index.ts'))).default;
 
-    const { title, enablers, config, entry, production, project } = plugin;
+    const { title, enablers, note, config, entry, production, project } = plugin;
 
     plugins.push([title, pluginName]);
 
@@ -76,16 +76,20 @@ for await (const dir of directories) {
           ? parseFragment(enablers)
           : [u('paragraph', [u('text', 'N/A')])];
 
+    const n = note ? [u('heading', { depth: 2 }, [u('text', 'Note')]), ...parseFragment(note)] : [];
+
     const tree = u('root', [
       frontmatter,
       u('heading', { depth: 2 }, [u('text', 'Enabled')]),
       ...en,
+      ...n,
       u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
+      ...parseFragment('This configuration is added automatically if the plugin is enabled:'),
       u('code', {
         lang: 'json title="knip.json"', // TODO How to set attributes/properties/props properly?
         value: JSON.stringify({ [pluginName]: defaults }, null, 2),
       }),
-      ...parseFragment('Custom `config` or `entry` configuration overrides the defaults, they are not merged.'),
+      ...parseFragment('Your custom `config` or `entry` options override default values, they are not merged.'),
       ...parseFragment('See [Plugins](../../explanations/plugins) for more details.'),
     ]);
 
@@ -96,7 +100,7 @@ for await (const dir of directories) {
 
 plugins.sort((a, b) => (a[1] < b[1] ? -1 : 1));
 
-const frontmatter = u('yaml', 'title: Plugins\ntableOfContents: false');
+const frontmatter = u('yaml', `title: Plugins (${plugins.length})\ntableOfContents: false`);
 
 const tree = u('root', [
   frontmatter,

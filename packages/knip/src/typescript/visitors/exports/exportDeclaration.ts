@@ -16,8 +16,8 @@ export default visit(
         const sourceFile: BoundSourceFile = node.getSourceFile();
         const declarations = sourceFile.getNamedDeclarations?.();
         return node.exportClause.elements.map(element => {
-          const identifier = String(element.name.escapedText);
-          const propName = element.propertyName?.escapedText;
+          const identifier = String(element.name.text);
+          const propName = element.propertyName?.text;
           // @ts-expect-error TODO Fix (convenience in addExport)
           // const symbol = element.symbol ?? declarations?.get(identifier)?.find((d: ts.Node) => d !== element)?.symbol;
           const symbol = declarations?.get(propName ?? identifier)?.[0]?.symbol;

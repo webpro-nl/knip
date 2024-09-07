@@ -3,8 +3,10 @@ import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
 import type { ReleaseItConfig } from './types.js';
 
 // https://github.com/release-it/release-it/blob/master/docs/plugins.md#using-a-plugin
+// Uses CosmiConfig but with custom searchPlaces
+// https://github.com/release-it/release-it/blob/main/lib/config.js
 
-const title = 'Release It';
+const title = 'Release It!';
 
 const enablers = ['release-it'];
 
@@ -12,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const packageJsonPath = 'release-it';
 
-const config = ['.release-it.json', '.release-it.{js,cjs}', '.release-it.{yml,yaml}', 'package.json'];
+const config = ['.release-it.{json,js,cjs,ts,yml,yaml,toml}', 'package.json'];
 
 const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
   const plugins = config.plugins ? Object.keys(config.plugins) : [];

@@ -33,6 +33,8 @@ test('Find dependencies with the ESLint plugin', async () => {
   assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-comments']);
   assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-plugin']);
   assert(issues.unlisted['.eslintrc.js']['eslint-plugin-import']);
+  assert(issues.unlisted['.eslintrc.js']['@org/eslint-plugin-name/typescript']);
+  // assert(issues.unlisted['.eslintrc.js']['@other-org/eslint-plugin']);
 
   assert(issues.unlisted['.eslintrc.json']['@babel/plugin-syntax-import-assertions']);
   assert(issues.unlisted['.eslintrc.json']['eslint-config-airbnb']);
@@ -43,7 +45,7 @@ test('Find dependencies with the ESLint plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 24,
+    unlisted: 25,
     processed: 4,
     total: 4,
   });

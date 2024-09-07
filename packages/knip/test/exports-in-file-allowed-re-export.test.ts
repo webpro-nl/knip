@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/exports-in-file-allowed-re-export');
+const cwd = resolve('fixtures/ignore-exports-used-in-file-re-export');
 
 test('Find unused exports respecting an ignoreExportsUsedInFile (re-export)', async () => {
   const { counters } = await main({

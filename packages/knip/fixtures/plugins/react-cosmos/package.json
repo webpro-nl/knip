@@ -1,0 +1,16 @@
+{
+  "name": "@fixtures/react-cosmos",
+  "version": "*",
+  "scripts": {
+    "cosmos": "cosmos",
+    "cosmos-export": "cosmos-export",
+    "cosmos-native": "cosmos-native"
+  },
+  "devDependencies": {
+    "react-cosmos": "*",
+    "react-cosmos-native": "*",
+    "react-cosmos-plugin-boolean-input": "*",
+    "react-cosmos-plugin-open-fixture": "*",
+    "react-cosmos-plugin-webpack": "*"
+  }
+}

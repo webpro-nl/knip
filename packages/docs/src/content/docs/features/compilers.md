@@ -17,10 +17,9 @@ Knip has built-in "compilers" for the following file extensions:
 - `.svelte`
 - `.vue`
 
-Note that "compilers" is quoted, as they are not real compilers, but regular
-expressions to collect `import` statements from files with those extensions.
-This is fast, requires no dependencies, and enough for Knip to build the
-dependency graph.
+Knip does not include real compilers for those files, but regular expressions to
+collect `import` statements. This is fast, requires no dependencies, and enough
+for Knip to build the dependency graph.
 
 On the other hand, real compilers may expose their own challenges in the context
 of Knip. For instance, the Svelte compiler keeps `exports` intact, while they
@@ -32,9 +31,9 @@ however you like.
 
 ## Custom compilers
 
-Additional custom compilers can be added, and built-in compilers can be
-overridden. Since compilers are functions, the Knip configuration file must be a
-dynamic `.js` or `.ts` file.
+Built-in compilers can be overridden, and additional compilers can be added.
+Since compilers are functions, the Knip configuration file must be a dynamic
+`.js` or `.ts` file.
 
 ### Interface
 
@@ -49,7 +48,7 @@ This may also be an `async` function.
 :::tip[Note]
 
 Compilers will automatically have their extension added as a default extension
-to Knip. This means you don't need to add something like `**/*.{ts,css}` to the
+to Knip. This means you don't need to add something like `**/*.{ts,vue}` to the
 `entry` or `project` file patterns manually.
 
 :::
@@ -90,3 +89,44 @@ export default {
 You may wonder why the CSS compiler is not included by default. It's currently
 not clear if it should be included. And if so, what would be the best way to
 determine it should be enabled, and what syntax(es) it should support.
+
+### Vue
+
+In a project with Vue, the compiler is automatically enabled. Override and use
+Vue's parser for better results if the built-in "compiler" is not enough:
+
+```ts
+import type { KnipConfig } from 'knip';
+import {
+  parse,
+  type SFCScriptBlock,
+  type SFCStyleBlock,
+} from 'vue/compiler-sfc';
+
+function getScriptBlockContent(block: SFCScriptBlock | null): string[] {
+  if (!block) return [];
+  if (block.src) return [`import '${block.src}'`];
+  return [block.content];
+}
+
+function getStyleBlockContent(block: SFCStyleBlock | null): string[] {
+  if (!block) return [];
+  if (block.src) return [`@import '${block.src}';`];
+  return [block.content];
+}
+
+const config = {
+  compilers: {
+    vue: (text: string, filename: string) => {
+      const { descriptor } = parse(text, { filename, sourceMap: false });
+      return [
+        ...getScriptBlockContent(descriptor.script),
+        ...getScriptBlockContent(descriptor.scriptSetup),
+        ...descriptor.styles.flatMap(getStyleBlockContent).map(getStyleImports),
+      ].join('\n');
+    },
+  },
+} satisfies KnipConfig;
+
+export default config;
+```

@@ -13,54 +13,17 @@ Use the `--debug` and `--performance` flags to find potential bottlenecks.
 ## Ignoring files
 
 Files matching the `ignore` patterns are not excluded from the analysis. They're
-just not printed in the report. Use negated `entry` patterns to exclude files
-from the analysis whenever possible.
+just not printed in the report. Use negated `entry` and `project` patterns to
+exclude files from the analysis.
 
-Here's a little guide:
-
-1. Set `entry` files if necessary.
-2. Override the default `project` setting to cover all source files (default:
-   `**/*.{js,ts}`)
-3. If needed, use additional negated `entry` patterns to exclude files from the
-   analysis.
-4. If needed, use additional negated `project` files to narrow down the set of
-   all files to find unused files.
-5. Then use `ignore` patterns for the remaining issues in the reports.
-
-❌ Don't do this:
-
-```json title="knip.json"
-{
-  "entry": ["src/index.ts", "scripts/*.ts"],
-  "ignore": ["build/**", "dist/**", "src/generated.ts"]
-}
-```
-
-✅ Do this:
-
-```json title="knip.json"
-{
-  "entry": ["src/index.ts", "scripts/*.ts"],
-  "project": ["src/**", "scripts/**"],
-  "ignore": ["src/generated.ts"]
-}
-```
-
-This way, the `project` files cover all source files, and most other files don't
-even need to be ignored anymore. This may have a significant impact on
-performance.
-
-Also see [configuring project files][1].
+Read [project file configuration][1] for more details and examples. Improving
+configuration may have a significant impact on performance.
 
 ## Workspace sharing
 
 Knip shares files from separate workspaces if the configuration in
 `tsconfig.json` allows this. This reduces memory consumption and run duration.
-The relevant compiler options are `baseUrl` and `paths`, and a workspace is
-shared if the following is true:
-
-- The `compilerOptions.baseUrl` is not set explicitly
-- There are no conflicting keys in `compilerOptions.paths`
+Relevant compiler options include `baseUrl`, `paths` and `moduleResolution`.
 
 With the `--debug` flag you can see how many programs Knip uses. Look for
 messages like this:
@@ -77,28 +40,53 @@ messages like this:
 ...
 ```
 
-The first number in `P1/1` is the number of the program, the second number
-indicates additional entry files were found in the previous round so it does
-another round of analysis on those files.
+The first number in `P1/1` is the number of the programs, the second number
+indicates additional entry files were found so it does another round of analysis
+on those files.
 
-## findReferences
+Use [--isolate-workspaces][2] to disable this behavior. This is rarely
+necessary, but more of an escape hatch in cases with memory usage issues or
+incompatible `compilerOptions` across workspaces. Workspaces are analyzed
+sequentially which is slower and uses more memory overall, but memory usage
+should be spread out more evenly, which may prevent crashes on large monorepos.
 
-The `findReferences` function (from the TypeScript Language Service) is invoked
-for exported class members. If finding unused class members is enabled, use the
-`--performance` flag to see how many times this function is invoked and how much
-time is spent there:
+## Language Service
+
+Knip does not install the TypeScript Language Service (LS) by default. This is
+expensive, as TypeScript needs to set up symbols and caching for the rather slow
+`findReferences` function.
+
+There are two cases that enforce Knip to install the LS.
+
+### 1. Class members
+
+The `findReferences` function is used to find unused members of imported classes
+(i.e. when the issue type `classMembers` is included).
+
+### 2. Include external type definitions
+
+When [`--include-libs`][3] is enabled, Knip enables loading type definitions of
+external dependencies. This will also install the LS to access its
+`findReferences` function. It acts as an extra line of defense: only exports
+that weren't referenced to during default procedure go through this.
+
+## Metrics
+
+Use [the `--performance` flag][4] to see how many times potentially expensive
+functions (e.g. `findReferences`) are invoked and how much time is spent in
+those functions. Example usage:
 
 ```sh
 knip --include classMembers --performance
 ```
 
-The first invocation (per program) is especially expensive, as TypeScript sets
-up symbols and caching.
-
 ## A last resort
 
-In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][2].
+In case Knip is unbearably slow (or even crashes), you could resort to [lint
+individual workspaces][5].
 
 [1]: ./configuring-project-files.md
-[2]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[2]: ../reference/cli.md#--isolate-workspaces
+[3]: ../guides/handling-issues.mdx#external-libraries
+[4]: ../reference/cli.md#--performance
+[5]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace

@@ -1,17 +1,12 @@
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
-import {
-  getPackageNameFromFilePath,
-  getPackageNameFromModuleSpecifier,
-  normalizeSpecifierFromFilePath,
-} from './modules.js';
-import { isInNodeModules, isInternal } from './path.js';
+import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './modules.js';
+import { dirname, isInNodeModules, isInternal } from './path.js';
 import { fromBinary, isBinary } from './protocols.js';
-import { _resolveSpecifier } from './require.js';
-import { resolveSync } from './resolve.js';
+import { _resolveSync } from './resolve.js';
 
-export const getHandler =
+export const getReferencedDependencyHandler =
   (collector: IssueCollector, deputy: DependencyDeputy, chief: ConfigurationChief) =>
   (specifier: string, containingFilePath: string, workspace: Workspace) => {
     if (isBinary(specifier)) {
@@ -26,7 +21,7 @@ export const getHandler =
         });
     } else {
       if (isInternal(specifier)) {
-        const resolvedFilePath = resolveSync(specifier, containingFilePath);
+        const resolvedFilePath = _resolveSync(specifier, dirname(containingFilePath));
         if (resolvedFilePath) return resolvedFilePath;
         collector.addIssue({
           type: 'unresolved',
@@ -49,9 +44,8 @@ export const getHandler =
 
         // Patterns: @local/package/file, self-reference/file, ./node_modules/@scope/pkg/tsconfig.json
         if (packageName && specifier !== packageName) {
-          const otherWorkspace = chief.workspacePackagesByName.get(packageName);
-          if (otherWorkspace) {
-            const filePath = _resolveSpecifier(otherWorkspace.dir, normalizeSpecifierFromFilePath(specifier));
+          if (chief.workspacePackagesByName.get(packageName)) {
+            const filePath = _resolveSync(specifier, dirname(containingFilePath));
             if (filePath) return filePath;
             collector.addIssue({
               type: 'unresolved',

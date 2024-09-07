@@ -4,5 +4,8 @@
   "dependencies": {
     "@workspaces/shared": "1.0.0",
     "@workspaces/tools": "1.0.0"
+  },
+  "devDependencies": {
+    "@workspaces/tsconfig": "1.0.0"
   }
 }

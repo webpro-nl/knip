@@ -15,10 +15,8 @@ const entry = ['svelte.config.js', ...viteConfig];
 const production = [
   'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',
   'src/hooks.{server,client}.{js,ts}',
-  'src/params/*{js,ts}',
+  'src/params/*.{js,ts}',
 ];
-
-const project = ['src/**/*.{js,ts,svelte}'];
 
 export default {
   title,
@@ -26,5 +24,4 @@ export default {
   isEnabled,
   entry,
   production,
-  project,
 } satisfies Plugin;

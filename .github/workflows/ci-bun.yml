@@ -16,12 +16,12 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-          # - windows-latest # temp disabled because https://github.com/oven-sh/bun/issues/9932
+          - windows-latest
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install --ignore-scripts --frozen-lockfile
       - name: Run formatter, linter, import sorter

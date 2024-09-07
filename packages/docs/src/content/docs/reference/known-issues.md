@@ -79,7 +79,7 @@ Potential workarounds:
 
 ## False positives with external libs
 
-Knip can report false positives when exports are consumed by external libraries.
+Knip may report false positives when exports are consumed by external libraries.
 
 Please see [external libs][8].
 
@@ -92,12 +92,12 @@ exceptions for such DT packages (`@types/*`) listed in `dependencies`.
 ## Extensionless imports
 
 Knip does not support extensionless imports for non-standard extensions, such as
-for `.vue` or `.svg` files. Bundlers like Webpack may support this, but Knip
-does not. Examples:
+for `.svg` files. Bundlers like Webpack may support this, but Knip does not.
+Examples:
 
 ```ts title="App.vue"
-import Component from './Component'; // → Does not resolve to ./Component.vue
-import ArrowIcon from '../icons/Arrow'; // → Does not resolve to ../icons/Arrow.svg
+import Component from './Component'; // → Should resolve to ./Component.vue
+import ArrowIcon from '../icons/Arrow'; // → Does NOT resolve to ../icons/Arrow.svg
 ```
 
 The recommendation is to add the extension when importing such files, similar to

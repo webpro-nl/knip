@@ -2,6 +2,78 @@
   "data": [
     {
       "entities": {
+        "urls": []
+      },
+      "id": "1808672067900092505",
+      "author_id": "3",
+      "created_at": "2024-07-04T03:19:00.000Z",
+      "attachments": {},
+      "text": "knip is great.\n\nA great example of stuff just working. It detects your environment so well and its defaults are almost too good because I didn’t realise it was doing everything automatically.",
+      "public_metrics": {
+        "retweet_count": 1,
+        "reply_count": 1,
+        "like_count": 12,
+        "quote_count": 1,
+        "bookmark_count": 7,
+        "impression_count": 2753
+      }
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "id": "1808808208229707835",
+      "author_id": "3",
+      "created_at": "2024-07-04T12:20:00.000Z",
+      "attachments": {},
+      "text": "Then was like “this is how tooling should be, this has taken me an hour not a day and it’s faster and more accurate and more future proof”\n\nFive stars ⭐️⭐️⭐️⭐️⭐️",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 1,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 121
+      }
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "id": "1803013555907698921",
+      "author_id": "2",
+      "created_at": "2024-06-18T12:35:00.000Z",
+      "attachments": {},
+      "text": "Crazy useful tool. Thought it would be a nightmare to setup in my Next.js+Workers repo but it has crazy good automatic detection for code dependencies. In short, Knip creates a graph of code use and highlights dead code for you to snip (knip).",
+      "public_metrics": {
+        "retweet_count": 1,
+        "reply_count": 1,
+        "like_count": 5,
+        "quote_count": 1,
+        "bookmark_count": 0,
+        "impression_count": 823
+      }
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "id": "1793913676896031033",
+      "author_id": "44217212",
+      "created_at": "2024-05-24T09:55:00.000Z",
+      "attachments": {},
+      "text": "Lars is singlehandedly building the best tool to keep your code clean and your dependencies minimal. And he's so engaging and helpful. Can't imagine going back to not using knip 👏",
+      "public_metrics": {
+        "retweet_count": 3,
+        "reply_count": 4,
+        "like_count": 69,
+        "quote_count": 1,
+        "bookmark_count": 11,
+        "impression_count": 10600
+      }
+    },
+    {
+      "entities": {
         "urls": [
           {
             "start": 4,
@@ -742,6 +814,18 @@
         "name": "Quinn Slack"
       },
       {
+        "id": "2",
+        "username": "jokull",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1758441525300613120/JzStjli1_400x400.jpg",
+        "name": "Jökull Solberg"
+      },
+      {
+        "id": "3",
+        "username": "Hicksyfern",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1559181703352094720/NFL2PBbK_400x400.jpg",
+        "name": "Tom Hicks"
+      },
+      {
         "id": "22918124",
         "username": "gregberge_",
         "profile_image_url": "https://pbs.twimg.com/profile_images/1722358890807861248/75S7CB3G_normal.jpg",
@@ -780,13 +864,13 @@
       {
         "id": "44217212",
         "username": "TkDodo",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1538855291604942848/STbt4nxl_normal.jpg",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1803004614372937728/OSIQ4AGx_400x400.jpg",
         "name": "Dominik 🔮"
       },
       {
         "id": "481186762",
         "username": "Mokkapps",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1556918231159504898/8cXgvuyP_normal.jpg",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1825498937911889920/FtBqvqgK_400x400.jpg",
         "name": "Michael Hoffmann"
       },
       {

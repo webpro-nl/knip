@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
+// biome-ignore lint/nursery/noRestrictedImports: ignore
+import path from 'node:path';
 
 const fileExists = filePath => {
   const stat = statSync(filePath, { throwIfNoEntry: false });
@@ -8,10 +10,25 @@ const fileExists = filePath => {
 };
 
 const getPackageManager = () => {
-  if (fileExists('bun.lockb')) return 'bun';
-  if (fileExists('yarn.lock')) return 'yarn';
-  if (fileExists('pnpm-lock.yaml')) return 'pnpm';
+  // get the root of the repository
+  const repositoryRoot = execSync('git rev-parse --show-toplevel').toString().trim();
+
+  if (fileExists(path.join(repositoryRoot, 'bun.lockb'))) return 'bun';
+  if (fileExists(path.join(repositoryRoot, 'yarn.lock'))) return 'yarn';
+  if (fileExists(path.join(repositoryRoot, 'pnpm-lock.yaml'))) return 'pnpm';
   return 'npm';
+};
+
+const getWorkspaceFlag = pm => {
+  if (pm === 'pnpm') {
+    return fileExists('pnpm-workspace.yaml') ? '-w' : undefined;
+  }
+
+  if (pm === 'yarn') {
+    const packageJsonPath = path.join(process.cwd(), 'package.json');
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    return packageJson.workspaces && packageJson.workspaces.length > 0 ? '-W' : undefined;
+  }
 };
 
 const main = () => {
@@ -21,7 +38,8 @@ const main = () => {
   }
 
   const pm = getPackageManager();
-  const cmd = [pm, 'add', '-D', 'knip', 'typescript', '@types/node'].join(' ');
+
+  const cmd = [pm, 'add', getWorkspaceFlag(pm), '-D', 'knip', 'typescript', '@types/node'].filter(Boolean).join(' ');
 
   execSync(cmd);
   console.info('✓ Install Knip');

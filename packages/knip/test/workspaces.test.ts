@@ -23,12 +23,10 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
   assert(issues.dependencies['apps/backend/package.json']['next']);
   assert(issues.dependencies['apps/backend/package.json']['picomatch']);
 
-  assert.equal(Object.keys(issues.unlisted).length, 5);
+  assert.equal(Object.keys(issues.unlisted).length, 3);
   assert(issues.unlisted['apps/frontend/index.ts']['vanilla-js']);
   assert(issues.unlisted['apps/backend/index.ts']['globby']);
   assert(issues.unlisted['apps/backend/index.ts']['js-yaml']);
-  assert(issues.unlisted['apps/backend/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
-  assert(issues.unlisted['apps/frontend/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
   assert(issues.unlisted['packages/tools/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
 
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
@@ -39,7 +37,7 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
     exports: 1,
     types: 1,
     dependencies: 4,
-    unlisted: 6,
+    unlisted: 4,
     processed: 7,
     total: 7,
   });

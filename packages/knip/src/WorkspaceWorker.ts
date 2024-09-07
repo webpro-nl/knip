@@ -5,7 +5,7 @@ import type { Configuration, EnsuredPluginConfiguration, PluginName, WorkspaceCo
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
-import { _pureGlob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
+import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
 import { get, getKeysByValue } from './util/object.js';
 import { basename, dirname, join, toPosix } from './util/path.js';
 import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
@@ -30,6 +30,8 @@ type WorkspaceManagerOptions = {
   enabledPluginsInAncestors: string[];
   isProduction: boolean;
   isStrict: boolean;
+  isCache: boolean;
+  cacheLocation: string;
 };
 
 export type ReferencedDependencies = Set<[string, string]>;
@@ -81,6 +83,8 @@ export class WorkspaceWorker {
     rootIgnore,
     negatedWorkspacePatterns,
     enabledPluginsInAncestors,
+    isCache,
+    cacheLocation,
   }: WorkspaceManagerOptions) {
     this.name = name;
     this.dir = dir;
@@ -95,7 +99,7 @@ export class WorkspaceWorker {
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
 
-    this.cache = new CacheConsultant(`plugins-${name}`);
+    this.cache = new CacheConsultant({ name: `plugins-${name}`, isEnabled: isCache, cacheLocation });
   }
 
   public async init() {
@@ -141,7 +145,7 @@ export class WorkspaceWorker {
     return [excludeProductionNegations, this.negatedWorkspacePatterns].flat();
   }
 
-  getProjectFilePatterns(testFilePatterns: string[]) {
+  getProjectFilePatterns(projectFilePatterns: string[]) {
     const { project } = this.config;
     if (project.length === 0) return [];
 
@@ -153,9 +157,13 @@ export class WorkspaceWorker {
       excludeProductionNegations,
       negatedPluginConfigPatterns,
       negatedPluginProjectFilePatterns,
-      testFilePatterns,
+      projectFilePatterns,
       this.negatedWorkspacePatterns,
     ].flat();
+  }
+
+  getPluginEntryFilePatterns(patterns: string[]) {
+    return [patterns, this.negatedWorkspacePatterns].flat();
   }
 
   getPluginProjectFilePatterns() {
@@ -253,7 +261,7 @@ export class WorkspaceWorker {
         if (!pluginConfig) continue;
 
         const patterns = this.getConfigurationFilePatterns(pluginName);
-        const allConfigFilePaths = await _pureGlob({ patterns, cwd, gitignore: false });
+        const allConfigFilePaths = await _glob({ patterns, cwd: baseOptions.rootCwd, dir: cwd, gitignore: false });
 
         const { packageJsonPath } = plugin;
         const configFilePaths = allConfigFilePaths.filter(

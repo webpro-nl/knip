@@ -1,0 +1,19 @@
+{
+  "name": "@fixtures/ladle",
+  "type": "module",
+  "scripts": {
+    "dev": "ladle serve --port 4123",
+    "build": "ladle build"
+  },
+  "dependencies": {
+    "@ladle/react": "*",
+    "react": "*",
+    "react-dom": "*"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "typescript": "*"
+  }
+}

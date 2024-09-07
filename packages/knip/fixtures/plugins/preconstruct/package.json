@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/preconstruct",
+  "version": "*",
+  "scripts": {
+    "build": "preconstruct build"
+  },
+  "devDependencies": {
+    "@preconstruct/cli": "*"
+  },
+  "preconstruct": {
+    "entrypoints": ["index.js", "other.js"]
+  }
+}

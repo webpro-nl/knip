@@ -1,5 +1,6 @@
 import ts from 'typescript';
 import { findAncestor, findDescendants, isRequireCall, isTopLevel } from '../../ast-helpers.js';
+import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -15,10 +16,12 @@ export default visit(
             return ts.isPropertyAccessExpression(_node);
           });
 
+          const resolve = isNotJS(node.getSourceFile());
+
           if (propertyAccessExpression) {
             // Pattern: require('side-effects').identifier
             const identifier = String(propertyAccessExpression.name.escapedText);
-            return { identifier, specifier, pos: propertyAccessExpression.name.pos };
+            return { identifier, specifier, pos: propertyAccessExpression.name.pos, resolve };
           }
           const variableDeclaration = node.parent;
           if (
@@ -36,6 +39,7 @@ export default visit(
                 symbol: isTLA ? variableDeclaration.symbol : undefined,
                 specifier,
                 pos: node.arguments[0].pos,
+                resolve,
               };
             }
             const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
@@ -45,14 +49,15 @@ export default visit(
                 const identifier = (element.propertyName ?? element.name).getText();
                 const alias = element.propertyName ? element.name.getText() : undefined;
                 // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
-                return { identifier, specifier, alias, symbol: isTLA ? element.symbol : undefined, pos: element.pos };
+                const symbol = isTLA ? element.symbol : undefined;
+                return { identifier, specifier, alias, symbol, pos: element.pos, resolve };
               });
             }
             // Pattern: require('specifier')
-            return { identifier: 'default', specifier, pos: node.arguments[0].pos };
+            return { identifier: 'default', specifier, pos: node.arguments[0].pos, resolve };
           }
           // Pattern: require('side-effects')
-          return { identifier: 'default', specifier, pos: node.arguments[0].pos };
+          return { identifier: 'default', specifier, pos: node.arguments[0].pos, resolve };
         }
       }
     }

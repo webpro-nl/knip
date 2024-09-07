@@ -1,8 +1,9 @@
-import type ts from 'typescript';
+import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { debugLog } from './util/debug.js';
 import { toAbsolute, toRelative } from './util/path.js';
+import type { ToSourceFilePath } from './util/to-source-path.js';
 
 type Paths = ts.CompilerOptions['paths'];
 
@@ -11,6 +12,7 @@ type Principals = Set<Principal>;
 
 export type PrincipalOptions = {
   cwd: string;
+  isFile: boolean;
   compilerOptions: ts.CompilerOptions;
   paths: Paths;
   compilers: [SyncCompilers, AsyncCompilers];
@@ -18,6 +20,9 @@ export type PrincipalOptions = {
   isIsolateWorkspaces: boolean;
   isSkipLibs: boolean;
   isWatch: boolean;
+  toSourceFilePath: ToSourceFilePath;
+  isCache: boolean;
+  cacheLocation: string;
 };
 
 const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>
@@ -30,9 +35,10 @@ const mapToAbsolutePaths = (paths: NonNullable<Paths>, cwd: string): Paths =>
   );
 
 const mergePaths = (cwd: string, compilerOptions: ts.CompilerOptions, paths: Paths = {}) => {
+  const basePath = typeof compilerOptions.pathsBasePath === 'string' ? compilerOptions.pathsBasePath : cwd;
   const compilerPaths =
     !compilerOptions.baseUrl && compilerOptions.paths
-      ? mapToAbsolutePaths(compilerOptions.paths, cwd)
+      ? mapToAbsolutePaths(compilerOptions.paths, basePath)
       : compilerOptions.paths;
   const extraPaths = mapToAbsolutePaths(paths, cwd);
   compilerOptions.paths = { ...compilerPaths, ...extraPaths };
@@ -47,8 +53,10 @@ export class PrincipalFactory {
   principals: Principals = new Set();
 
   public getPrincipal(options: PrincipalOptions) {
-    const { cwd, compilerOptions, paths, pkgName, isIsolateWorkspaces, compilers } = options;
+    const { cwd, compilerOptions, isFile, paths, pkgName, isIsolateWorkspaces, compilers } = options;
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
+    if (isFile && compilerOptions.module !== ts.ModuleKind.CommonJS)
+      compilerOptions.moduleResolution ??= ts.ModuleResolutionKind.Bundler;
     const principal = this.findReusablePrincipal(compilerOptions);
     if (!isIsolateWorkspaces && principal) {
       this.linkPrincipal(principal, cwd, compilerOptions, pkgName, compilers);
@@ -81,6 +89,7 @@ export class PrincipalFactory {
   ) {
     const { pathsBasePath, paths } = compilerOptions;
     if (pathsBasePath) principal.principal.compilerOptions.pathsBasePath = pathsBasePath;
+    principal.principal.compilerOptions.moduleResolution ??= compilerOptions.moduleResolution;
     for (const p of Object.keys(paths ?? {})) principal.pathKeys.add(p);
     principal.principal.addPaths(paths);
     principal.principal.addCompilers(compilers);

@@ -61,6 +61,7 @@ export type ReporterOptions = {
   report: Report;
   issues: Issues;
   counters: Counters;
+  tagHints: TagHints;
   configurationHints: ConfigurationHints;
   noConfigHints: boolean;
   cwd: string;
@@ -84,4 +85,13 @@ export type ConfigurationHint = {
   type: 'ignoreBinaries' | 'ignoreDependencies' | 'ignoreWorkspaces';
   identifier: string | RegExp;
   workspaceName?: string;
+};
+
+type TagHints = Set<TagHint>;
+
+export type TagHint = {
+  type: 'tag';
+  filePath: string;
+  identifier: string;
+  tagName: string;
 };

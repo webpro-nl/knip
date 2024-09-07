@@ -1,4 +1,5 @@
 import { isBuiltin } from 'node:module';
+import { DT_SCOPE } from '../constants.js';
 import type { PackageJson } from '../types/package-json.js';
 import { _glob } from './glob.js';
 import { getStringValues } from './object.js';
@@ -10,26 +11,21 @@ export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   return moduleSpecifier.startsWith('@') ? parts.join('/') : parts[0];
 };
 
+const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
 export const getPackageNameFromFilePath = (value: string) => {
-  const match = toPosix(value).match(/(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g);
-  if (match) return match[match.length - 1];
-  return value;
-};
-
-export const normalizeSpecifierFromFilePath = (value: string) => {
-  const match = toPosix(value).match(/.*\/node_modules\/(.+)/);
+  const match = toPosix(value).match(lastPackageNameMatch);
   if (match) return match[match.length - 1];
   return value;
 };
 
 export const isStartsLikePackageName = (specifier: string) => /^@?[a-z0-9]/.test(specifier);
 
-export const isDefinitelyTyped = (packageName: string) => packageName.startsWith('@types/');
+export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);
 
 export const getDefinitelyTypedFor = (packageName: string) => {
   if (isDefinitelyTyped(packageName)) return packageName;
-  if (packageName.startsWith('@')) return `@types/${packageName.slice(1).replace('/', '__')}`;
-  return `@types/${packageName}`;
+  if (packageName.startsWith('@')) return [DT_SCOPE, packageName.slice(1).replace('/', '__')].join('/');
+  return [DT_SCOPE, packageName].join('/');
 };
 
 export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
@@ -40,9 +36,9 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
   return typedDependency;
 };
 
-export const getEntryPathFromManifest = (
+export const getEntryPathsFromManifest = (
   manifest: PackageJson,
-  sharedGlobOptions: { cwd: string; workingDir: string; gitignore: boolean; ignore: string[] }
+  sharedGlobOptions: { cwd: string; dir: string; gitignore: boolean; ignore: string[] }
 ) => {
   const { main, bin, exports, types, typings } = manifest;
 
@@ -70,9 +66,10 @@ export const getEntryPathFromManifest = (
 };
 
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
+const matchDirectives = /^([?!|-]+)?([^!?:]+).*/;
 export const sanitizeSpecifier = (specifier: string) => {
   if (isBuiltin(specifier)) return specifier;
   if (isAbsolute(specifier)) return specifier;
   if (specifier.startsWith('virtual:')) return specifier;
-  return specifier.replace(/^([?!|-]+)?([^!?:]+).*/, '$2');
+  return specifier.replace(matchDirectives, '$2');
 };

@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/angular2",
+  "scripts": {
+    "ng": "ng"
+  },
+  "devDependencies": {
+    "@angular/cli": "*",
+    "@angular/ssr": "*",
+    "@angular-builders/custom-esbuild": "*",
+    "@angular-devkit/build-angular": "*"
+  }
+}

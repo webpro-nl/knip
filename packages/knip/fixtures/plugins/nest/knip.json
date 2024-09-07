@@ -1,0 +1,6 @@
+{
+  "jest": {
+    "config": "./test/jest-e2e.json",
+    "entry": ["src/**/*.spec.ts", "test/**/*.e2e-spec.ts"]
+  }
+}

@@ -35,6 +35,8 @@ Run Knip using the Bun runtime (instead of Node.js + jiti).
 knip-bun
 ```
 
+This is equal to `bunx --bun knip`
+
 Requires [Bun][1] to be installed. Also see [known issues][2] for the type of
 issues this might help with.
 
@@ -152,18 +154,10 @@ Also see [external libs][8].
 
 ### `--isolate-workspaces`
 
-By default, Knip optimizes performance by adding eligible workspaces to existing
-TypeScript programs, based on the compatibility of their `compilerOptions`. Use
-this flag to disable this behavior and create one program per workspace.
-
-You can see the behavior in action in [debug mode][9]. Look for messages like
-this:
-
-```sh
-[*] Installed 4 programs for 18 workspaces
-...
-[*] Analyzing used resolved files [P1/1] (78)
-```
+By default, Knip optimizes performance using [workspace sharing][9] to existing
+TypeScript programs, based on the compatibility of their `compilerOptions`. This
+flag disables this behavior and creates one program per workspace, which is
+slower but memory is spread more evenly over time.
 
 ## Modes
 
@@ -387,7 +381,7 @@ Maximum number of issues before non-zero exit code. Default: `0`
 [6]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [7]: ./configuration.md#includeentryexports
 [8]: ../guides/handling-issues.mdx#external-libraries
-[9]: #--debug
+[9]: ../guides/performance.md#workspace-sharing
 [10]: ../features/production-mode.md
 [11]: #--production
 [12]: ../features/auto-fix.mdx

@@ -1,0 +1,41 @@
+{
+  "name": "@fixtures/rules",
+  "dependencies": {
+    "used": "*",
+    "unused": "*"
+  },
+  "devDependencies": {
+    "@dev/used": "*",
+    "@dev/unused": "*"
+  },
+  "peerDependencies": {
+    "optional-peer-dep": "*"
+  },
+  "peerDependenciesMeta": {
+    "optional-peer-dep": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "unlisted-binary": "unlisted"
+  },
+  "knip": {
+    "include": ["classMembers", "nsExports", "nsTypes"],
+    "rules": {
+      "files": "warn",
+      "dependencies": "warn",
+      "devDependencies": "warn",
+      "optionalPeerDependencies": "warn",
+      "unlisted": "warn",
+      "binaries": "warn",
+      "unresolved": "warn",
+      "exports": "warn",
+      "types": "warn",
+      "nsExports": "warn",
+      "nsTypes": "warn",
+      "duplicates": "warn",
+      "enumMembers": "warn",
+      "classMembers": "warn"
+    }
+  }
+}

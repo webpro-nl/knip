@@ -1,7 +1,7 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import type { DependencyGraph, ImportDetails } from '../../src/types/dependency-graph.js';
-import { getHasStrictlyNsReferences } from '../../src/util/type.js';
+import { getHasStrictlyNsReferences } from '../../src/util/has-strictly-ns-references.js';
 
 const map: DependencyGraph = new Map();
 
@@ -15,64 +15,86 @@ const base: ImportDetails = {
   reExportedNs: new Map(),
 };
 
+const id = 'id';
+
 test('Strictly namespace refs (no namespaces)', () => {
-  assert.deepStrictEqual(getHasStrictlyNsReferences(map, base), [false]);
+  assert.deepStrictEqual(getHasStrictlyNsReferences(map, base, id), [false]);
 });
 
 test('Strictly namespace refs (single ns)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences(map, {
-      ...base,
-      importedNs: new Map([['ns', new Set()]]),
-      refs: new Set(['ns']),
-    }),
+    getHasStrictlyNsReferences(
+      map,
+      {
+        ...base,
+        importedNs: new Map([['ns', new Set()]]),
+        refs: new Set(['ns']),
+      },
+      id
+    ),
     [true, 'ns']
   );
 });
 
 test('Strictly namespace refs (no id)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences(map, {
-      ...base,
-      importedNs: new Map([['ns', new Set()]]),
-      refs: new Set([]),
-    }),
+    getHasStrictlyNsReferences(
+      map,
+      {
+        ...base,
+        importedNs: new Map([['ns', new Set()]]),
+        refs: new Set([]),
+      },
+      id
+    ),
     [false, 'ns']
   );
 });
 
 test('Strictly namespace refs (single ns, no id)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences(map, {
-      ...base,
-      importedNs: new Map([]),
-      refs: new Set(['ns']),
-    }),
+    getHasStrictlyNsReferences(
+      map,
+      {
+        ...base,
+        importedNs: new Map([]),
+        refs: new Set(['ns']),
+      },
+      id
+    ),
     [false]
   );
 });
 
 test('Strictly namespace refs (multiple ns, no id)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences(map, {
-      ...base,
-      importedNs: new Map([
-        ['ns', new Set()],
-        ['ns2', new Set()],
-      ]),
-      refs: new Set(['ns']),
-    }),
+    getHasStrictlyNsReferences(
+      map,
+      {
+        ...base,
+        importedNs: new Map([
+          ['ns', new Set()],
+          ['ns2', new Set()],
+        ]),
+        refs: new Set(['ns']),
+      },
+      id
+    ),
     [false, 'ns2']
   );
 });
 
 test('Strictly namespace refs (member access)', () => {
   assert.deepStrictEqual(
-    getHasStrictlyNsReferences(map, {
-      ...base,
-      importedNs: new Map([['ns', new Set()]]),
-      refs: new Set(['ns', 'ns.prop']),
-    }),
+    getHasStrictlyNsReferences(
+      map,
+      {
+        ...base,
+        importedNs: new Map([['ns', new Set()]]),
+        refs: new Set(['ns', 'ns.prop']),
+      },
+      id
+    ),
     [false, 'ns']
   );
 });

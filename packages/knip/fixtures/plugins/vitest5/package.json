@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/vitest5",
+  "devDependencies": {
+    "vitest": "*",
+    "@vitest/coverage-istanbul": "*"
+  }
+}

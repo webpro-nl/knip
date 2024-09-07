@@ -1,0 +1,16 @@
+{
+  "name": "@fixtures/husky-lint-staged",
+  "devDependencies": {
+    "husky": "*",
+    "lint-staged": "*",
+    "prettier": "*"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.*": ["prettier --write", "git add"]
+  }
+}

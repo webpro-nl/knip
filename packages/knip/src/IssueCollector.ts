@@ -1,6 +1,6 @@
 import picomatch from 'picomatch';
 import { initCounters, initIssues } from './issues/initializers.js';
-import type { ConfigurationHint, Issue, Rules } from './types/issues.js';
+import type { ConfigurationHint, Issue, Rules, TagHint } from './types/issues.js';
 import { timerify } from './util/Performance.js';
 import { relative } from './util/path.js';
 
@@ -14,7 +14,7 @@ type IssueCollectorOptions = {
   filters: Filters;
 };
 
-const hasHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>
+const hasConfigurationHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>
   Array.from(hints).some(
     item => item.identifier === hint.identifier && item.type === hint.type && item.workspaceName === hint.workspaceName
   );
@@ -33,6 +33,7 @@ export class IssueCollector {
   private counters = initCounters();
   private referencedFiles = new Set<string>();
   private configurationHints = new Set<ConfigurationHint>();
+  private tagHints = new Set<TagHint>();
   private ignorePatterns = new Set<string>();
   private isMatch: (filePath: string) => boolean;
 
@@ -59,9 +60,11 @@ export class IssueCollector {
       if (this.filters.dir && !filePath.startsWith(`${this.filters.dir}/`)) continue;
       if (this.referencedFiles.has(filePath)) continue;
       if (this.isMatch(filePath)) continue;
+
       this.issues.files.add(filePath);
       // @ts-expect-error TODO Fix up in next major
-      this.issues._files.add({ type: 'files', filePath, symbol: relative(filePath) });
+      this.issues._files.add({ type: 'files', filePath, symbol: relative(filePath), severity: this.rules.files });
+
       this.counters.files++;
       this.counters.processed++;
     }
@@ -81,9 +84,13 @@ export class IssueCollector {
   }
 
   addConfigurationHint(issue: ConfigurationHint) {
-    if (!hasHint(this.configurationHints, issue)) {
+    if (!hasConfigurationHint(this.configurationHints, issue)) {
       this.configurationHints.add(issue);
     }
+  }
+
+  addTagHint(issue: TagHint) {
+    this.tagHints.add(issue);
   }
 
   purge() {
@@ -97,6 +104,7 @@ export class IssueCollector {
     return {
       issues: this.issues,
       counters: this.counters,
+      tagHints: this.tagHints,
       configurationHints: this.configurationHints,
     };
   }

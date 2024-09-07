@@ -7,8 +7,7 @@
       "ignoreBinaries": ["knip"]
     },
     "packages/knip": {
-      "project": ["src/**/*.ts!"],
-      "ignore": ["**/fixtures/**", "**/_template/**", "**/dist/**"],
+      "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template/**"],
       "node-test-runner": {
         "entry": ["test/**/*.test.ts"],
         "project": ["test/**/*.ts"]

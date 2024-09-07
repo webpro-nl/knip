@@ -6,7 +6,7 @@ import { resolveConfig, resolveEntryPaths } from '../vitest/index.js';
 
 const title = 'Vite';
 
-const enablers = ['vite'];
+const enablers = ['vite', 'vitest'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

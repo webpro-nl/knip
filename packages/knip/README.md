@@ -19,7 +19,6 @@ Knip finds **unused files, dependencies and exports** in your JavaScript and
 TypeScript projects. Less code and dependencies lead to improved performance,
 less maintenance and easier refactorings.
 
-
 - Website: [knip.dev][3]
 - GitHub repo: [webpro-nl/knip][2]
 - npm package: [knip][1]
@@ -31,7 +30,11 @@ less maintenance and easier refactorings.
 
 Special thanks to the wonderful people who have contributed to this project:
 
-[![Contributors][8]][7]
+[![Contributors][9]][8]
+
+## Knip
+
+/'knɪp/ means "(to) cut" and is [pronounced with a hard "K"][7] 🇳🇱
 
 [1]: https://www.npmjs.com/package/knip
 [2]: https://github.com/webpro-nl/knip
@@ -39,5 +42,6 @@ Special thanks to the wonderful people who have contributed to this project:
 [4]: https://discord.gg/r5uXTtbTpc
 [5]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
 [6]: https://knip.dev/sponsors
-[7]: https://github.com/webpro-nl/knip/graphs/contributors
-[8]: https://contrib.rocks/image?repo=webpro-nl/knip
+[7]: https://en.wiktionary.org/wiki/knip#Dutch
+[8]: https://github.com/webpro-nl/knip/graphs/contributors
+[9]: https://contrib.rocks/image?repo=webpro-nl/knip

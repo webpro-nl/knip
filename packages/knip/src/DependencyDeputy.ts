@@ -1,6 +1,7 @@
 import { isBuiltin } from 'node:module';
 import type { Workspace } from './ConfigurationChief.js';
 import {
+  DT_SCOPE,
   IGNORED_DEPENDENCIES,
   IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
@@ -17,7 +18,12 @@ import type {
   InstalledBinaries,
   WorkspaceManifests,
 } from './types/workspace.js';
-import { getDefinitelyTypedFor, getPackageFromDefinitelyTyped, isDefinitelyTyped } from './util/modules.js';
+import {
+  getDefinitelyTypedFor,
+  getPackageFromDefinitelyTyped,
+  getPackageNameFromModuleSpecifier,
+  isDefinitelyTyped,
+} from './util/modules.js';
 import { findMatch, toRegexOrString } from './util/regex.js';
 
 type Options = {
@@ -256,7 +262,7 @@ export class DependencyDeputy {
         if (isPeerDep && peerDepRecs[dependency]) return false;
 
         const [scope, typedDependency] = dependency.split('/');
-        if (scope === '@types') {
+        if (scope === DT_SCOPE) {
           // The `pkg` dependency already has types included, i.e. this `@types/pkg` is obsolete
           if (hasTypesIncluded?.has(typedDependency)) return false;
 
@@ -316,13 +322,15 @@ export class DependencyDeputy {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {
         const issue = issueSet[issueKey];
-        if (IGNORED_DEPENDENCIES.has(issue.symbol)) {
+        const packageName = getPackageNameFromModuleSpecifier(issue.symbol);
+        if (!packageName) continue;
+        if (IGNORED_DEPENDENCIES.has(packageName)) {
           delete issueSet[issueKey];
           counters[type]--;
         } else {
           const manifest = this.getWorkspaceManifest(issue.workspace);
           if (manifest) {
-            const ignoreItem = findMatch(manifest.ignoreDependencies, issue.symbol);
+            const ignoreItem = findMatch(manifest.ignoreDependencies, packageName);
             if (ignoreItem) {
               delete issueSet[issueKey];
               counters[type]--;
@@ -330,7 +338,7 @@ export class DependencyDeputy {
             } else if (issue.workspace !== ROOT_WORKSPACE_NAME) {
               const manifest = this.getWorkspaceManifest(ROOT_WORKSPACE_NAME);
               if (manifest) {
-                const ignoreItem = findMatch(manifest.ignoreDependencies, issue.symbol);
+                const ignoreItem = findMatch(manifest.ignoreDependencies, packageName);
                 if (ignoreItem) {
                   delete issueSet[issueKey];
                   counters[type]--;
@@ -377,17 +385,16 @@ export class DependencyDeputy {
     }
   }
 
-  public getConfigurationHints({ issues, counters }: { issues: Issues; counters: Counters }) {
-    const configurationHints: ConfigurationHints = new Set();
-
+  public removeIgnoredIssues({ issues, counters }: { issues: Issues; counters: Counters }) {
     this.handleIgnoredDependencies(issues, counters, 'dependencies');
     this.handleIgnoredDependencies(issues, counters, 'devDependencies');
     this.handleIgnoredDependencies(issues, counters, 'optionalPeerDependencies');
     this.handleIgnoredDependencies(issues, counters, 'unlisted');
     this.handleIgnoredBinaries(issues, counters, 'binaries');
+  }
 
-    // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in production/strict mode
-    if (this.isProduction) return configurationHints;
+  public getConfigurationHints() {
+    const configurationHints: ConfigurationHints = new Set();
 
     for (const [workspaceName, manifest] of this._manifests.entries()) {
       for (const identifier of manifest.ignoreDependencies) {

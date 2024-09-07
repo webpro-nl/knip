@@ -4,13 +4,13 @@ import type { PrincipalOptions } from './PrincipalFactory.js';
 import type { ReferencedDependencies } from './WorkspaceWorker.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
 import type { DependencyGraph, Export, ExportMember, FileNode, UnresolvedImport } from './types/dependency-graph.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
-import { createHosts } from './typescript/createHosts.js';
-import { type GetImportsAndExportsOptions, _getImportsAndExports } from './typescript/getImportsAndExports.js';
-import type { ResolveModuleNames } from './typescript/resolveModuleNames.js';
+import { createHosts } from './typescript/create-hosts.js';
+import { type GetImportsAndExportsOptions, _getImportsAndExports } from './typescript/get-imports-and-exports.js';
+import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
@@ -18,7 +18,7 @@ import { dirname, extname, isInNodeModules, join } from './util/path.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
 // These compiler options override local options
-const baseCompilerOptions = {
+const baseCompilerOptions: ts.CompilerOptions = {
   allowJs: true,
   allowSyntheticDefaultImports: true,
   declaration: false,
@@ -29,11 +29,11 @@ const baseCompilerOptions = {
   jsx: ts.JsxEmit.Preserve,
   jsxImportSource: undefined,
   lib: [],
-  types: ['node'],
   noEmit: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   sourceMap: false,
+  types: ['node'],
 };
 
 const tsCreateProgram = timerify(ts.createProgram);
@@ -69,6 +69,8 @@ export class ProjectPrincipal {
 
   cache: CacheConsultant<FileNode>;
 
+  toSourceFilePath: ToSourceFilePath;
+
   // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
   backend: {
     fileManager: SourceFileManager;
@@ -81,13 +83,23 @@ export class ProjectPrincipal {
 
   findReferences?: ts.LanguageService['findReferences'];
 
-  constructor({ compilerOptions, cwd, compilers, isSkipLibs, isWatch, pkgName }: PrincipalOptions) {
+  constructor({
+    compilerOptions,
+    cwd,
+    compilers,
+    isSkipLibs,
+    isWatch,
+    pkgName,
+    toSourceFilePath,
+    isCache,
+    cacheLocation,
+  }: PrincipalOptions) {
     this.cwd = cwd;
 
     this.compilerOptions = {
       ...compilerOptions,
       ...baseCompilerOptions,
-      types: compact([...(compilerOptions.types ?? []), ...baseCompilerOptions.types]),
+      types: compact([...(compilerOptions.types ?? []), ...(baseCompilerOptions.types ?? [])]),
       allowNonTsExtensions: true,
     };
 
@@ -97,17 +109,18 @@ export class ProjectPrincipal {
     this.asyncCompilers = asyncCompilers;
     this.isSkipLibs = isSkipLibs;
     this.isWatch = isWatch;
-    this.cache = new CacheConsultant(pkgName || ANONYMOUS);
+    this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation });
+    this.toSourceFilePath = toSourceFilePath;
   }
 
-  init(toSourceFilePath: ToSourceFilePath) {
+  init() {
     const { fileManager, compilerHost, resolveModuleNames, languageServiceHost } = createHosts({
       cwd: this.cwd,
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
       compilers: [this.syncCompilers, this.asyncCompilers],
       isSkipLibs: this.isSkipLibs,
-      toSourceFilePath,
+      toSourceFilePath: this.toSourceFilePath,
       useResolverCache: !this.isWatch,
     });
 
@@ -269,6 +282,9 @@ export class ProjectPrincipal {
       // Ignore Deno style http import specifiers
       if (specifier.startsWith('http')) continue;
 
+      // All bets are off after failing to resolve module:
+      // - either add to external dependencies if it quacks like that so it'll end up as unused or unlisted dependency
+      // - or maintain unresolved status if not ignored and not foreign
       const sanitizedSpecifier = sanitizeSpecifier(specifier);
       if (isStartsLikePackageName(sanitizedSpecifier)) {
         external.add(sanitizedSpecifier);
@@ -308,7 +324,7 @@ export class ProjectPrincipal {
     }
 
     return members.filter(member => {
-      if (member.jsDocTags.has('@public')) return false;
+      if (member.jsDocTags.has(PUBLIC_TAG)) return false;
       const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
       const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
       return refs.length === 0;
@@ -316,7 +332,7 @@ export class ProjectPrincipal {
   }
 
   public hasExternalReferences(filePath: string, exportedItem: Export) {
-    if (exportedItem.jsDocTags.has('@public')) return false;
+    if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
 
     if (!this.findReferences) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
