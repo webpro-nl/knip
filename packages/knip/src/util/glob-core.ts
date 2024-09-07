@@ -199,8 +199,8 @@ export async function globby(patterns: string | string[], options: GlobOptions):
     while (dir) {
       const cacheForDir = cachedIgnores.get(dir);
       if (cacheForDir) {
+        // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
         ignore.push(...cacheForDir.ignores);
-        ignore.push(...cacheForDir.unignores.map(pattern => `!${pattern}`));
       }
       // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
       dir = dirname((prev = dir));
