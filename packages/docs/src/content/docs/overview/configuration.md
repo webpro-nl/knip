@@ -48,6 +48,8 @@ To use a different file path:
 knip --config path/to/knip.json
 ```
 
+If you want to use a TypeScript or a JavaScript configuration file instead of JSON, then see [the dynamic configuration page](../reference/dynamic-configuration.mdx).
+
 ## Customize
 
 Your project structure may not match the default `entry` and `project` files.
@@ -81,6 +83,10 @@ many more.
 
 Knip looks in many places for entry files. Learn more about this in the next
 page about [entry files][2].
+
+## Configuration Options
+
+See the [configuration reference documentation](../reference/configuration.md).
 
 ## What's next?
 
