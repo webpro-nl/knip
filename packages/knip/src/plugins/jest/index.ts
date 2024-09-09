@@ -77,6 +77,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
 
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
+  const snapshotSerializers = config.snapshotSerializers ?? [];
   const testSequencer = config.testSequencer ? [config.testSequencer] : [];
 
   const resolve = (specifier: string) => resolveEntry(options, specifier);
@@ -99,6 +100,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     ...moduleNameMapper,
     ...testResultsProcessor,
     ...snapshotResolver,
+    ...snapshotSerializers,
     ...testSequencer,
     ...globalSetup,
     ...globalTeardown,
