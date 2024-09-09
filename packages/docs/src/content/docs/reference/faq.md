@@ -93,7 +93,7 @@ all nodes of the generated AST to find:
 - Accessed properties on namespace imports and re-exports to track individual
   export usage
 - Calls to `require.resolve` and `import.meta.resolve`
-- Scripts in template strings
+- Scripts in template strings (passed to [script parser][3])
 
 ### What's in the graph?
 
@@ -142,12 +142,12 @@ seem to meet all requirements to be usable on its own by Knip:
   `module.js`
 
 A few strategies have been tried and tweaked, and Knip currently uses a
-combination of [enhanced-resolve][3], the TypeScript module resolver and a few
+combination of [enhanced-resolve][4], the TypeScript module resolver and a few
 customizations. This single custom module resolver function is hooked into the
 TypeScript compiler and language service hosts.
 
 Everything else outside the dependency graph is handled by `enhanced-resolve`
-when doing things like [script parsing][4] and resolving references to files in
+when doing things like [script parsing][3] and resolving references to files in
 other workspaces.
 
 ### How does Knip handle non-standard import syntax?
@@ -340,8 +340,8 @@ would mean more development efforts and maintenance. Time is limited and
 
 [1]: ../guides/handling-issues.mdx#external-libraries
 [2]: ../explanations/why-use-knip.md#comprehensive
-[3]: https://www.npmjs.com/package/enhanced-resolve
-[4]: #parser
+[3]: ../features/script-parser.md
+[4]: https://www.npmjs.com/package/enhanced-resolve
 [5]: ../guides/performance.md#workspace-sharing
 [6]: ../features/compilers.md
 [7]: ../features/production-mode.md

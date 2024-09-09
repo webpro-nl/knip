@@ -84,7 +84,7 @@ page about [entry files][2].
 
 ## Configuration Options
 
-See the [configuration reference documentation](../reference/configuration.md).
+See the [configuration reference documentation][3].
 
 ## What's next?
 
@@ -93,18 +93,19 @@ in the "Understanding Knip" sections, starting with [entry files][2].
 
 Want to learn more about some of the main features?
 
-- Working with [monorepos & workspaces][3].
-- Learn more about [production mode][4].
+- Working with [monorepos & workspaces][4].
+- Learn more about [production mode][5].
 
 Having troubles configuring Knip?
 
 - [Configuring project files][1]
-- [Handling issues][5]
+- [Handling issues][6]
 
 Search this website using the bar at the top (`Ctrl+K` or `⌘+K`).
 
 [1]: ../guides/configuring-project-files.md
 [2]: ../explanations/entry-files.md
-[3]: ../features/monorepos-and-workspaces.md
-[4]: ../features/production-mode.md
-[5]: ../guides/handling-issues.md
+[3]: ../reference/configuration.md
+[4]: ../features/monorepos-and-workspaces.md
+[5]: ../features/production-mode.md
+[6]: ../guides/handling-issues.md

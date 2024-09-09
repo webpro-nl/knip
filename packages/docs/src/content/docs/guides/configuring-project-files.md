@@ -93,7 +93,7 @@ performance.
 
 It's not recommended to add all files as entry files for two reasons:
 
-1. Knip does not report unused exports in entry files.
+1. Knip does not report [unused exports][2] in entry files.
 2. Configuring `entry` and `project` files properly allows Knip to find unused
    files.
 
@@ -118,13 +118,13 @@ we don't want the unused exports of such files to be reported:
 }
 ```
 
-Also see the [ignoreExportsUsedInFile][2] configuration option.
+Also see the [ignoreExportsUsedInFile][3] configuration option.
 
 ## Production Mode
 
 In default mode, Knip includes all test files and other non-production files in
 the analysis. To find out what files, dependencies and exports are unused in
-production source files, use [production mode][3].
+production source files, use [production mode][4].
 
 How to exclude test and other non-production files from the analysis? For a
 better understanding of how Knip works, here's a list of options that DON'T
@@ -227,10 +227,11 @@ To reiterate, the default `entry` and `project` files for each workspace:
 
 Next to this, there are other places where [Knip looks for entry files][1].
 
-Additionally, [plugins have plenty of entry files configured][4] that are
+Additionally, [plugins have plenty of entry files configured][5] that are
 automatically added as well.
 
 [1]: ../explanations/entry-files.md
-[2]: ../reference/configuration#ignoreexportsusedinfile
-[3]: ../features/production-mode.md
-[4]: ../explanations/plugins.md#entry-files
+[2]: ../typescript/unused-exports.md
+[3]: ../reference/configuration#ignoreexportsusedinfile
+[4]: ../features/production-mode.md
+[5]: ../explanations/plugins.md#entry-files

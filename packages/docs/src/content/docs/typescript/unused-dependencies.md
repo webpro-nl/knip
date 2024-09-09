@@ -32,25 +32,24 @@ Use Knip to find and remove unused dependencies. It also finds dependencies that
 are missing in `package.json` and has a lot more features to keep your
 JavaScript and TypeScript projects tidy.
 
-It's easy to [get started](../overview/getting-started.mdx) and make package
-management easier and more fun!
+It's easy to [get started][1] and make package management easier and more fun!
 
 <div style="display: flex; justify-content: center; margin: 4rem auto;">
-<img src="/logo.svg" alt="Logo of Knip, to find unused files, dependencies and exports" class="logo-border" />
+  <img src="/logo.svg" alt="Logo of Knip, to find unused files, dependencies and exports" class="logo-border" />
 </div>
 
 ## How does Knip identify unused dependencies?
 
 Knip works by analyzing `package.json` files, source code and configuration
 files for other tooling in the project to find unused and missing dependencies.
-Knip has many heuristics, [plugins](../reference/plugins.md) and
-[compilers](../features/compilers.md) to fully automate the process.
+Knip has many heuristics, [plugins][2] and [compilers][3] to fully automate the
+process.
 
 ## Can Knip remove unused dependencies?
 
-Yes, Knip can automatically remove unused dependencies for you. Add the `--fix`
-argument to [auto-fix](../features/auto-fix.mdx) and remove unused dependencies
-from `package.json`.
+Yes, Knip can automatically remove unused dependencies installed by a package
+manager like npm or pnpm for you. Add the `--fix` argument to [auto-fix][4] and
+remove unused dependencies from `package.json`.
 
 ## Can Knip detect missing dependencies?
 
@@ -61,8 +60,7 @@ breakage.
 
 ## Does Knip work with monorepos?
 
-Yes, Knip has first-class support for
-[monorepos and workspaces](../features/monorepos-and-workspaces.md). It analyzes
+Yes, Knip has first-class support for [monorepos and workspaces][5]. It analyzes
 all workspaces in the project and understands their relationship.
 
 For instance, if a dependency is listed in the root `package.json` it does not
@@ -71,13 +69,18 @@ need to be listed in other workspaces. Except if you enable `--strict` checking.
 ## Does Knip separate dependencies and devDependencies?
 
 Yes, Knip understands the difference between dependencies and devDependencies.
-It has a [production mode](../features/production-mode.md) to focus on
-production code only and find dead code and dependencies that would otherwise
-only be referenced by tests and other tooling. This allows you to remove both
-unused exported code and their tests.
+It has a [production mode][6] to focus on production code only and find dead
+code and dependencies that would otherwise only be referenced by tests and other
+tooling. This allows you to remove both unused exported code and their tests.
 
 ## Does Knip work with my package manager?
 
 Yes, Knip works with any package manager: npm, pnpm, Bun and Yarn are all
-supported. It's easy to [get started](../overview/getting-started.mdx) with any
-package manager.
+supported. It's easy to [get started][1] with any package manager.
+
+[1]: ../overview/getting-started.mdx
+[2]: ../reference/plugins.md
+[3]: ../features/compilers.md
+[4]: ../features/auto-fix.mdx
+[5]: ../features/monorepos-and-workspaces.md
+[6]: ../features/production-mode.md

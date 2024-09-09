@@ -93,6 +93,7 @@ Use `knip --exports` to also include class and enum members.
 - [deadfile][8]
 - [npm-check][9] (used depcheck)
 - [find-unused-exports][10]
+- [ts-remove-unused][11]
 
 [1]: ../features/monorepos-and-workspaces.md
 [2]: ../overview/getting-started.mdx
@@ -104,3 +105,4 @@ Use `knip --exports` to also include class and enum members.
 [8]: https://github.com/M-Izadmehr/deadfile
 [9]: https://github.com/dylang/npm-check
 [10]: https://github.com/jaydenseric/find-unused-exports
+[11]: https://github.com/line/ts-remove-unused

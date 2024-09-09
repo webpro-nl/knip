@@ -22,8 +22,9 @@ configuration may have a significant impact on performance.
 ## Workspace sharing
 
 Knip shares files from separate workspaces if the configuration in
-`tsconfig.json` allows this. This reduces memory consumption and run duration.
-Relevant compiler options include `baseUrl`, `paths` and `moduleResolution`.
+`tsconfig.json` allows this. This aims to reduce memory consumption and run
+duration. Relevant compiler options include `baseUrl`, `paths` and
+`moduleResolution`.
 
 With the `--debug` flag you can see how many programs Knip uses. Look for
 messages like this:
@@ -44,11 +45,11 @@ The first number in `P1/1` is the number of the programs, the second number
 indicates additional entry files were found so it does another round of analysis
 on those files.
 
-Use [--isolate-workspaces][2] to disable this behavior. This is rarely
+Use [--isolate-workspaces][2] to disable this behavior. This is usually not
 necessary, but more of an escape hatch in cases with memory usage issues or
 incompatible `compilerOptions` across workspaces. Workspaces are analyzed
-sequentially which is slower and uses more memory overall, but memory usage
-should be spread out more evenly, which may prevent crashes on large monorepos.
+sequentially to spread out memory usage more evenly, which may prevent crashes
+on large monorepos.
 
 ## Language Service
 

@@ -27,8 +27,8 @@ code":
 - Keeping dead code around has a negative value on readability, as it can be
   misleading and distracting. Even if it serves no purpose it will need to be
   maintained (source: [Safe dead code removal → YAGNI][1]).
-- Also see
-  [Why are unused dependencies a problem?](../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem)
+- Also see [Why are unused dependencies a problem?][2] and [Why are unused
+  exports a problem?][3].
 
 ## Automation
 
@@ -41,7 +41,7 @@ times better and faster than trying to do it manually.
 
 :::tip
 
-Knip not only finds clutter, it can also [clean it][2]! Use Knip next to a
+Knip not only finds clutter, it can also [clean it][4]! Use Knip next to a
 linter like ESLint or Biome: after removing unused variables inside files, Knip
 might find even more unused code. Rinse and repeat!
 
@@ -94,15 +94,17 @@ so you can easily get rid of false positives? A variety of reasons:
 
 1. A false positive may be a bug in Knip, and should be reported (not easily
    dismissed).
-2. Instead of proprietary comments, use [standardized annotations][3] serving as
+2. Instead of proprietary comments, use [standardized annotations][5] serving as
    documentation as well.
 3. In the event you want to remove Knip, you only need to uninstall the `knip`
    dependency and delete the file to configure it (and not countless useless
    comments scattered throughout the codebase).
 
-Knip v4 introduces [--tags][4], to filter the report to your needs.
+Knip v4 introduces [--tags][6], to filter the report to your needs.
 
 [1]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
-[2]: ../features/auto-fix.mdx
-[3]: ../reference/jsdoc-tsdoc-tags.md
-[4]: ../reference/cli.md#--tags
+[2]: ../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem
+[3]: ../typescript/unused-exports.md
+[4]: ../features/auto-fix.mdx
+[5]: ../reference/jsdoc-tsdoc-tags.md
+[6]: ../reference/cli.md#--tags
