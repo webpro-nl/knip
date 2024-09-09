@@ -14,7 +14,7 @@ export const resolve: Resolver = (_binary, args, options) => {
   const packageSpecifier = parsed._[0];
   const specifier = packageSpecifier ? stripVersionFromSpecifier(packageSpecifier) : '';
 
-  const packages = parsed.package ? [parsed.package].flat().map(stripVersionFromSpecifier) : [];
+  const packages = parsed.package && !parsed.yes ? [parsed.package].flat().map(stripVersionFromSpecifier) : [];
   const command = parsed.call ? fromArgs([parsed.call]) : [];
   const restArgs = argsFrom(args, packageSpecifier);
 
