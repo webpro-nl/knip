@@ -48,8 +48,6 @@ If you want to use a custom file name or path, use the `--config` flag:
 knip --config path/to/knip.json
 ```
 
-If you want to use a TypeScript or a JavaScript configuration file instead of JSON, then see [the dynamic configuration page](../reference/dynamic-configuration.mdx).
-
 ## Customize
 
 Your project structure may not match the default `entry` and `project` files.
