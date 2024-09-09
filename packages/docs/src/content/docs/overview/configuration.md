@@ -82,6 +82,10 @@ many more.
 Knip looks in many places for entry files. Learn more about this in the next
 page about [entry files][2].
 
+## Configuration Options
+
+See the [configuration reference documentation](../reference/configuration.md).
+
 ## What's next?
 
 The best way to understand Knip and what it can do for you is to read the pages
