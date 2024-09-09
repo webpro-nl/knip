@@ -30,7 +30,7 @@ configuration file. Please also read [configure project files][1].
 
 ## Location
 
-This is where Knip looks for a configuration file:
+By default, Knip will look for a configuration file with the following names:
 
 - `knip.json`
 - `knip.jsonc`
@@ -40,9 +40,9 @@ This is where Knip looks for a configuration file:
 - `knip.js`
 - `knip.config.ts`
 - `knip.config.js`
-- `"knip"` property in `package.json`
+- `package.json` (in the `"knip"` property)
 
-To use a different file path:
+If you want to use a custom file name or path, use the `--config` flag:
 
 ```sh
 knip --config path/to/knip.json
