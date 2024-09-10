@@ -1,9 +1,9 @@
 # Knip Playground (monorepo)
 
-Knip playground to show how Knip works. There are issues in this codebase on
-purpose.
+Welcome to this Knip playground. There are issues on purpose in this codebase
+below so Knip will report various types of issues.
 
-Feel free to fork this project and play around!
+Feel free to (fork this project and) play around!
 
 ## Usage
 
@@ -13,7 +13,8 @@ npm run knip
 
 ## Issues
 
-Running `knip` on this codebase will report the following issues:
+Run `npm run knip` on this codebase in the terminal below and Knip will report
+the following issues:
 
 ```
 ❯ knip

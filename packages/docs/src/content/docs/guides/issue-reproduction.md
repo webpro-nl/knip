@@ -48,6 +48,9 @@ these templates in CodeSandbox or StackBlitz:
 | Basic    | [CodeSandbox][3] | [StackBlitz][4] |
 | Monorepo | [CodeSandbox][5] | [StackBlitz][6] |
 
+Shoutout to [CodeSandbox][7] and [StackBlitz][8] for generously providing these
+free dev containers!
+
 Other solutions may work well too. For instance, many people choose to create a
 small repository on GitHub. The goal is to have an easy and common understanding
 and reproduction.
@@ -59,7 +62,7 @@ considered "minimal".
 
 The optimal way is to add fixtures and/or failing tests to the Knip repository,
 and open a pull request to discuss the issue! Also see [instructions for
-development][7].
+development][9].
 
 [1]: https://github.com/webpro-nl/knip/issues?q=is%3Aissue
 [2]: https://knip.dev/reference/known-issues
@@ -71,4 +74,6 @@ development][7].
   https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/monorepo
 [6]:
   https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/monorepo
-[7]: https://github.com/webpro-nl/knip/blob/main/.github/DEVELOPMENT.md
+[7]: https://codesandbox.io
+[8]: https://stackblitz.com
+[9]: https://github.com/webpro-nl/knip/blob/main/.github/DEVELOPMENT.md
