@@ -106,3 +106,9 @@ section.plugins li {
   border: 2px solid var(--sl-color-white);
   border-radius: 40px;
 }
+
+.playground iframe {
+  width: 100%;
+  height: 600px;
+  border: 1px solid var(--sl-color-orange);
+}

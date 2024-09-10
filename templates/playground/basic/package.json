@@ -1,8 +1,13 @@
 {
-  "name": "@knip/templates-monorepo",
+  "name": "@knip/playground-basic",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["packages/*"],
+  "scripts": {
+    "knip": "knip"
+  },
+  "dependencies": {
+    "tinyexec": "^0.3.0"
+  },
   "devDependencies": {
     "@types/node": "^20.14.8",
     "knip": "^5.30.1",
