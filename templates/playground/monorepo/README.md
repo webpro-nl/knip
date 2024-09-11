@@ -5,19 +5,11 @@ below so Knip will report various types of issues.
 
 Feel free to (fork this project and) play around!
 
-## Usage
-
-```
-npm run knip
-```
-
-## Issues
-
 Run `npm run knip` on this codebase in the terminal below and Knip will report
 the following issues:
 
 ```
-❯ knip
+$ npm run knip
 Unused dependencies (1)
 tinyglobby  package.json
 Unlisted dependencies (1)

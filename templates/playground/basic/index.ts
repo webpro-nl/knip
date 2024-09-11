@@ -1,3 +1,3 @@
-import { used } from './lib.js';
+import { used } from './util.js';
 
 used;

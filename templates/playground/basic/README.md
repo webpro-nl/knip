@@ -5,29 +5,21 @@ below so Knip will report various types of issues.
 
 Feel free to (fork this project and) play around!
 
-## Usage
-
-```
-npm run knip
-```
-
-## Issues
-
 Run `npm run knip` on this codebase in the terminal below and Knip will report
 the following issues:
 
 ```
-❯ knip
+$ npm run knip
 Unused files (1)
 clutter.ts
 Unlisted dependencies (1)
-unhead  lib.ts
+lodash  util.ts
 Unused exports (1)
-unusedFunction  unknown  lib.ts:6:14
+unusedFunction  unknown  util.ts:6:14
 ```
 
 - `clutter.ts` is an unused file, since it's not imported by any of the others
-- `unhead` is an unlisted dependency, because it's used in `imported.ts`, but
-  not listed in `package.json`
-- `unusedFunction` is exported from `imported.ts` but it's not imported
-  anywhere, so it's reported as an unused export.
+- `lodash` is an unlisted dependency, because it's used in `util.ts`, but not
+  listed in `package.json`
+- `unusedFunction` is exported from `util.ts` but it's not imported anywhere, so
+  it's reported as an unused export.
