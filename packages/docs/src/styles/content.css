@@ -2,6 +2,10 @@
   border: unset;
 }
 
+.sl-markdown-content h2 {
+  margin-bottom: 2rem;
+}
+
 .sl-container .sl-markdown-content ul li p {
   margin: 0;
 }
@@ -111,4 +115,9 @@ section.plugins li {
   width: 100%;
   height: 600px;
   border: 1px solid var(--sl-color-orange);
+}
+
+.sl-markdown-content p + lite-youtube {
+  border: 1px solid var(--sl-color-orange);
+  margin-top: 2rem;
 }

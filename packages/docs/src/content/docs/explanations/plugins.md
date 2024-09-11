@@ -165,7 +165,7 @@ jobs:
 From these scripts, the `scripts/build.js` and `scripts/deploy.ts` files will be
 added as entry files by the GitHub Actions plugin.
 
-You can read more about this in [Script Parser][6].
+Read more about this in [Script Parser][6].
 
 ### webpack
 

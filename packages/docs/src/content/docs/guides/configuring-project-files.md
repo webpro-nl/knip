@@ -186,8 +186,7 @@ This won't help either:
 knip --production
 ```
 
-This will exclude test files from the analysis, so you can focus on production
-code.
+This will exclude test files from the analysis to focus on production code.
 
 Now, Knip might still report certain files like test utilities as unused. That's
 because they're still part of the set of `project` files. Those files should

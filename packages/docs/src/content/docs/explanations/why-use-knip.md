@@ -96,15 +96,11 @@ so you can easily get rid of false positives? A variety of reasons:
    dismissed).
 2. Instead of proprietary comments, use [standardized annotations][5] serving as
    documentation as well.
-3. In the event you want to remove Knip, you only need to uninstall the `knip`
-   dependency and delete the file to configure it (and not countless useless
-   comments scattered throughout the codebase).
-
-Knip v4 introduces [--tags][6], to filter the report to your needs.
+3. In the event you want to remove Knip, just uninstall `knip`. And not
+   countless useless comments scattered throughout the codebase.
 
 [1]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
 [2]: ../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem
-[3]: ../typescript/unused-exports.md
+[3]: ../typescript/unused-exports.md#why-are-unused-exports-a-problem
 [4]: ../features/auto-fix.mdx
 [5]: ../reference/jsdoc-tsdoc-tags.md
-[6]: ../reference/cli.md#--tags

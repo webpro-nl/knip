@@ -24,7 +24,7 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: 'knip.dev',
+      title: 'Knip',
       logo: {
         light: './src/assets/title-light.svg',
         dark: './src/assets/title-dark.svg',

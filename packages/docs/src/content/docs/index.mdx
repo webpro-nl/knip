@@ -1,13 +1,12 @@
 ---
-title: Knip
+title: Knip the clutter!
 description:
-  Project linter to find unused files, dependencies and exports in JavaScript
-  and TypeScript projects
+  Project linter to find and remove unused files, dependencies and exports in
+  JavaScript and TypeScript projects
 template: splash
 hero:
-  tagline:
-    Find unused files, dependencies and exports in JavaScript and TypeScript
-    projects
+  title: Knip!
+  tagline: Cut the clutter from JavaScript & TypeScript projects
   image:
     file: ../../assets/logo.svg
   actions:
@@ -25,93 +24,63 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 import { YouTube } from '@astro-community/astro-embed-youtube';
 import Tweets from '../../components/Tweets.astro';
 import Sponsors from '../../components/Sponsors.astro';
+import Projects from '../../components/Projects.astro';
 import Contributors from '../../components/Contributors.astro';
 
 :::div{.sponsor}
 
-Using Knip in a commercial project?<br />Please consider [sponsoring me][1]!
+[Support Knip!][1]
 
 :::
 
 <CardGrid stagger>
-  <Card title="Getting Started" icon="rocket">
+  <Card title="Why use Knip?" icon="approve-check">
 
-    Read [getting started][2] to install and run Knip
+    [Find & remove unused files, dependencies and exports][3]
 
   </Card>
 
-  <Card title="Why Use Knip?" icon="approve-check">
+  <Card title="Playground" icon="rocket">
 
-    Understand [what Knip can do for you][3]
+    Try Knip on the [playground][2]
 
   </Card>
 
   <Card title="Troubleshooting" icon="warning">
 
-    Need help? [Start troubleshooting here][4]
-
-  </Card>
-
-  <Card title="Plugins" icon="list-format">
-
-    Check out the [list of plugins][5]
-
-  </Card>
-
-  <Card title="Works with checker.ts" icon="approve-check">
-
-    ^^ [New And More Valuable Checkbox™️][6]
+    Need help? [Start troubleshooting][4]
 
   </Card>
 
   <Card title="/'knɪp/" icon="translate">
 
-    Knip means "(to) cut" and is pronounced with a hard "K" 🇳🇱
+    Knip means "(to) cut" and is pronounced with a hard "K"  🇳🇱
 
   </Card>
 </CardGrid>
 
-## 🧡 Playground
-
-Head over to [the playground][7] to try out Knip in various settings.
-
-## 🧡 Projects Using Knip
+## 🧡 Projects using Knip
 
 :::section{.columns.min300}
 
-- [ArkType][8]
-- [Backstage (Spotify)][9]
-- [Cody (SourceGraph)][10]
-- [Create TypeScript App][11]
-- [ESLint][12]
-- [freeCodeCamp][13]
-- [Grafana][14]
-- [Nuxt][15]
-- [Mocha][16]
-- [Release It!][17]
-- [Svelte][18]
-- [Query][19], [Table][20] (TanStack)
-- [TypeScript (Microsoft)][21]
-- [typescript-eslint][22]
-- [TypeStat][23]
-- [XState (Stately)][24]
+<Projects />
 
 :::
 
-## 🧡 Introduction Video
+## 🧡 Introduction video
 
-[James Shopland][25] created this great introduction and overview of Knip:
+[James Shopland][5] has a great introduction and overview of Knip (thanks
+James!):
 
 <YouTube id="uhEkgWt-pUM" />
 
 ## 🧡 Sponsors
 
-Eternal gratitude to the companies and people that are already sponsoring me:
+Eternal gratitude to the companies and people that are already supporting Knip:
 
 <Sponsors direction="row" showAll={false} />
 
-Please see [Sponsors][1] for the full list, and how you can become a sponsor of
-Knip.
+Please see [Sponsors][1] for the full list. Consider supporting the project too!
 
 ## 🧡 Contributors
 
@@ -122,13 +91,13 @@ Special thanks to the wonderful people who have contributed to this project:
 ## 🧡 Articles
 
 - Smashing Magazine: [Knip: An Automated Tool For Finding Unused Files, Exports,
-  And Dependencies][26]
+  And Dependencies][6]
 - Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code
-  and types][27]
-- Maddy Miller: [Using Knip to find dead code in a high-traffic git repo][28]
-- Josh Goldberg: [Speeding Up Centered Part 4: Unused Code Bloat][29]
+  and types][7]
+- Maddy Miller: [Using Knip to find dead code in a high-traffic git repo][8]
+- Josh Goldberg: [Speeding Up Centered Part 4: Unused Code Bloat][9]
 - Taro: [Introducing Knip, a tool for removing unnecessary code from
-  TypeScript/JavaScript][30] (Japanese)
+  TypeScript/JavaScript][10] (Japanese)
 
 ## 🧡 Testimonials
 
@@ -136,40 +105,21 @@ Special thanks to the wonderful people who have contributed to this project:
 
 ## Read More
 
-- [Unused dependencies][31]
-- [Unused exports][32]
+- [Unused dependencies][11]
+- [Unused exports][12]
 
 [1]: ./sponsors
-[2]: ./overview/getting-started.mdx
+[2]: ./playground
 [3]: ./explanations/why-use-knip.md
 [4]: ./guides/troubleshooting.md
-[5]: ./reference/plugins.md
-[6]: https://x.com/robpalmer2/status/1805502964435505559
-[7]: /playground
-[8]: https://github.com/arktypeio/arktype
-[9]: https://github.com/backstage/backstage
-[10]: https://github.com/sourcegraph/cody
-[11]: https://github.com/JoshuaKGoldberg/create-typescript-app
-[12]: https://github.com/eslint/eslint
-[13]: https://github.com/freeCodeCamp/freeCodeCamp
-[14]: https://github.com/grafana/grafana
-[15]: https://github.com/nuxt/nuxt
-[16]: https://github.com/mochajs/mocha
-[17]: https://github.com/release-it/release-it
-[18]: https://github.com/sveltejs/svelte
-[19]: https://github.com/TanStack/query
-[20]: https://github.com/TanStack/table
-[21]: https://github.com/microsoft/TypeScript
-[22]: https://github.com/typescript-eslint/typescript-eslint
-[23]: https://github.com/JoshuaKGoldberg/TypeStat
-[24]: https://github.com/statelyai/xstate
-[25]: https://www.jamesshopland.com
-[26]:
+[5]: https://www.jamesshopland.com
+[6]:
   https://www.smashingmagazine.com/2023/08/knip-automated-tool-find-unused-files-exports-dependencies/
-[27]: https://effectivetypescript.com/2023/07/29/knip/
-[28]: https://madelinemiller.dev/blog/knip-dead-code/
-[29]:
+[7]: https://effectivetypescript.com/2023/07/29/knip/
+[8]: https://madelinemiller.dev/blog/knip-dead-code/
+[9]:
   https://www.joshuakgoldberg.com/blog/speeding-up-centered-part-4-unused-code-bloat/
-[30]: https://tech.basemachina.jp/entry/introduction-knip
-[31]: ./typescript/unused-dependencies.md
-[32]: ./typescript/unused-exports.md
+[10]: https://tech.basemachina.jp/entry/introduction-knip
+[11]: ./typescript/unused-dependencies.md
+[12]: ./typescript/unused-exports.md
+[13]: ./overview/getting-started.md

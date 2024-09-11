@@ -26,8 +26,8 @@ of Knip. For instance, the Svelte compiler keeps `exports` intact, while they
 might represent component properties. This results in those exports being
 reported as unused by Knip.
 
-The built-in functions seem to do a decent job, but you can override them
-however you like.
+The built-in functions seem to do a decent job, but override them however you
+like.
 
 ## Custom compilers
 

@@ -11,7 +11,7 @@ We can distinguish two types of issues:
 
 Both of which could be either an issue on your end or with Knip.
 
-You can use [--debug][3] and [--trace][4] to help troubleshoot issues.
+Use [--debug][3] and [--trace][4] to help troubleshoot issues.
 
 ## Issues reported by Knip
 
@@ -33,8 +33,8 @@ Feel free to report bugs, please see [issue reproduction][6].
 
 ## Debug
 
-To better understand why Knip reports what it does, you may want to run it in
-debug mode by adding `--debug` to the command:
+To better understand why Knip reports what it does, run it in debug mode by
+adding `--debug` to the command:
 
 ```sh
 knip --debug
