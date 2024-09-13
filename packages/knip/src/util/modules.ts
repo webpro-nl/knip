@@ -1,8 +1,5 @@
 import { isBuiltin } from 'node:module';
 import { DT_SCOPE } from '../constants.js';
-import type { PackageJson } from '../types/package-json.js';
-import { _glob } from './glob.js';
-import { getStringValues } from './object.js';
 import { isAbsolute, toPosix } from './path.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
@@ -34,35 +31,6 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
     return `@${scope}/${packageName}`;
   }
   return typedDependency;
-};
-
-export const getEntryPathsFromManifest = (
-  manifest: PackageJson,
-  sharedGlobOptions: { cwd: string; dir: string; gitignore: boolean; ignore: string[] }
-) => {
-  const { main, bin, exports, types, typings } = manifest;
-
-  const entryPaths = new Set<string>();
-
-  if (typeof main === 'string') entryPaths.add(main);
-
-  if (bin) {
-    if (typeof bin === 'string') entryPaths.add(bin);
-    if (typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
-  }
-
-  if (exports) {
-    for (const item of getStringValues(exports)) entryPaths.add(item);
-  }
-
-  if (typeof types === 'string') entryPaths.add(types);
-  if (typeof typings === 'string') entryPaths.add(typings);
-
-  // Use glob, as we only want source files that:
-  // - exist
-  // - are not (generated) files that are .gitignore'd
-  // - do not match configured `ignore` patterns
-  return _glob({ ...sharedGlobOptions, patterns: Array.from(entryPaths) });
 };
 
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
