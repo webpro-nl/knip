@@ -8,7 +8,7 @@ import type { ImportNode } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
 import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/dependency-graph.js';
-import { isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
+import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { extname, isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
 import type { BoundSourceFile } from './SourceFile.js';
@@ -160,7 +160,10 @@ const getImportsAndExports = (
         if (module.isExternalLibraryImport) {
           if (skipTypeOnly && isTypeOnly) return;
 
-          const sanitizedSpecifier = sanitizeSpecifier(specifier);
+          const sanitizedSpecifier = isInNodeModules(specifier)
+            ? getPackageNameFromFilePath(specifier)
+            : sanitizeSpecifier(specifier);
+
           if (!isStartsLikePackageName(sanitizedSpecifier)) {
             // Import maps and other exceptions, examples from tests: #dep, #internals/used, $app/stores
             return;

@@ -88,8 +88,8 @@ export function createCustomModuleResolver(
   function resolveModuleName(name: string, containingFile: string): ts.ResolvedModuleFull | undefined {
     const sanitizedSpecifier = sanitizeSpecifier(name);
 
-    // No need to try and resolve builtins or externals, bail out
-    if (isBuiltin(sanitizedSpecifier) || isInNodeModules(name)) return undefined;
+    // No need to try and resolve builtins, bail out
+    if (isBuiltin(sanitizedSpecifier)) return undefined;
 
     const resolvedFileName = resolveSync(sanitizedSpecifier, dirname(containingFile));
 
