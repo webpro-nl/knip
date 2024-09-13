@@ -44,9 +44,17 @@ export const getReferencedDependencyHandler =
 
         // Patterns: @local/package/file, self-reference/file, ./node_modules/@scope/pkg/tsconfig.json
         if (packageName && specifier !== packageName) {
-          if (chief.workspacePackagesByName.get(packageName)) {
-            const filePath = _resolveSync(specifier, dirname(containingFilePath));
-            if (filePath) return filePath;
+          const specifierWorkspace = chief.workspacePackagesByPkgName.get(packageName);
+          if (specifierWorkspace) {
+            if (specifier.startsWith(packageName)) {
+              const dir = specifier.replace(new RegExp(`^${packageName}`), `./${specifierWorkspace.name}`);
+              const resolvedFilePath = _resolveSync(dir, chief.cwd);
+              if (resolvedFilePath) return resolvedFilePath;
+            }
+
+            const resolvedFilePath = _resolveSync(specifier, dirname(containingFilePath));
+            if (resolvedFilePath) return resolvedFilePath;
+
             collector.addIssue({
               type: 'unresolved',
               filePath: containingFilePath,

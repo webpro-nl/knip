@@ -101,7 +101,7 @@ export class ConfigurationChief {
 
   ignoredWorkspacePatterns: string[] = [];
   workspacePackages = new Map<string, Package>();
-  workspacePackagesByName = new Map<string, Package>();
+  workspacePackagesByPkgName = new Map<string, Package>();
   additionalWorkspaceNames = new Set<string>();
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
@@ -227,7 +227,7 @@ export class ConfigurationChief {
     const [byName, byPkgName] = await mapWorkspaces(this.cwd, workspaceNames);
 
     this.workspacePackages = byName;
-    this.workspacePackagesByName = byPkgName;
+    this.workspacePackagesByPkgName = byPkgName;
     this.addRootPackage();
 
     this.availableWorkspaceNames = this.getAvailableWorkspaceNames(byName.keys());
@@ -258,7 +258,7 @@ export class ConfigurationChief {
         manifest: this.manifest,
       };
       this.workspacePackages.set('.', rootPackage);
-      this.workspacePackagesByName.set(pkgName, rootPackage);
+      this.workspacePackagesByPkgName.set(pkgName, rootPackage);
     }
   }
 
