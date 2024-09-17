@@ -121,3 +121,7 @@ section.plugins li {
   border: 1px solid var(--sl-color-orange);
   margin-top: 2rem;
 }
+
+.sl-markdown-content .starlight-aside {
+  margin-top: 2rem;
+}

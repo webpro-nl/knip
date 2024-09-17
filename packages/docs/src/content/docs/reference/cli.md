@@ -361,13 +361,13 @@ The default exit codes:
 
 | Code | Description                                                      |
 | :--: | :--------------------------------------------------------------- |
-| `0`  | Knip ran successfully, no lint errors                            |
-| `1`  | Knip ran successfully, but there is at least one lint error      |
+| `0`  | Knip ran successfully, no lint issues                            |
+| `1`  | Knip ran successfully, but there is at least one lint issues     |
 | `2`  | Knip did not run successfully due to bad input or internal error |
 
 ### `--no-exit-code`
 
-Always exit with code zero (`0`), even when there are lint errors.
+Always exit with code zero (`0`), even when there are lint issues.
 
 ### `--max-issues`
 

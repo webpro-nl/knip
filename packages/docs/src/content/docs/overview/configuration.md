@@ -5,10 +5,8 @@ description: config
 
 ## Defaults
 
-Knip has good defaults and aims for "zero config". For best results, Knip might
-need some configuration.
-
-Here's a simplified version of the default configuration:
+Knip has good defaults and aims for "zero config". Here's a simplified version
+of the default configuration:
 
 ```json
 {
@@ -18,8 +16,7 @@ Here's a simplified version of the default configuration:
 ```
 
 Entry files are the starting point for Knip to find more source files and
-external dependencies. The resulting set of used files is matched against the
-set of `project` files to determine which files are unused.
+external dependencies.
 
 :::tip
 
