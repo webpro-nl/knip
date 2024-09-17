@@ -10,10 +10,10 @@ A long report can be frustrating. The list may contain false positives, but also
 actual clutter. To get the most value out of Knip, it may require some initial
 configuration.
 
-This page guides you in dealing with false positives. It makes sense to go over
-the issue types one by one. For instance, reducing the number of unused files
-will also reduce the number of unused dependencies. Therefore it's recommended
-to work this page from top to bottom.
+This page guides you in dealing with false positives. Especially if you start
+out using Knip in a large project and have a long report, it makes sense to go
+over the issue types one by one. For instance, reducing the number of unused
+files will also reduce the number of unused dependencies.
 
 ## Unused files
 
@@ -36,9 +36,6 @@ Let's go over common causes for adding `entry` patterns manually:
 - [Integrated monorepos][6]
 - [Build artifacts and ignored files][7]
 - [Auto-mocking or auto-imports][8]
-
-The recommended solution is usually to add the file as shown in each example as
-an `entry` file.
 
 :::caution
 
@@ -66,6 +63,8 @@ Dynamic import specifiers aren't resolved, such as:
 const entry = await import(path.join(baseDir, 'entry.ts'));
 ```
 
+Solution: add `entry.ts` to `entry` patterns.
+
 ### Unsupported arguments in scripts
 
 Some tooling command arguments aren't recognized:
@@ -83,6 +82,8 @@ Some tooling command arguments aren't recognized:
 The same goes for other scripts such as those in GitHub Actions workflows or Git
 hooks. See [script parser][11] for what Knip does support.
 
+Solution: add `entry.ts` to `entry` patterns.
+
 ### Unsupported file formats
 
 Entry files referenced in HTML files (e.g. `<script src="entry.js">`).
@@ -94,6 +95,16 @@ Entry files referenced in HTML files (e.g. `<script src="entry.js">`).
   </body>
 </html>
 ```
+
+Knip has support for some popular framework formats through
+[compilers](../features/compilers.md), and additional compilers can be added for
+for any file type.
+
+The recommended solution is usually to add the file as shown in each example as
+an `entry` file.
+
+Solution: add `entry.js` to `entry` patterns. Or add an `.html` compiler to
+extract and resolve the value of `<script src>` elements.
 
 ### Missing plugin
 
@@ -108,22 +119,26 @@ example,
 - A framework imports all files matching `src/models/*.ts` and those might be
   reported as unused.
 
-[Create a new plugin][12] for tools or frameworks that are not [in the list][13]
-yet, or [request it][14].
+Solution: [create a new plugin][12] for the tool or framework that's not [in the
+list][13] yet, or [request it][14]. Or work around it and add `entry` patterns
+and maybe ignore a dependency or two.
 
 ### Incomplete plugin
 
 Files may be reported as unused if existing plugins do not include that entry
 file pattern yet. See the [plugins section of entry files][15] for more details.
-[Override plugin configuration][16] to customize default patterns for existing
-plugins.
+
+Solution: [override plugin configuration][16] to customize default patterns for
+existing plugins. Or even better: send a pull request to improve the plugin.
 
 ### Integrated monorepos
 
 Multiple instances of configuration files like `.eslintrc` and
 `jest.config.json` across the repository may be reported as unused when working
-in a (mono)repo with a single `package.json`. See [integrated monorepos][17] for
-more details and how to configure plugins to target those configuration files.
+in a (mono)repo with a single `package.json`.
+
+Solution: see [integrated monorepos][17] for more details and how to configure
+plugins to target those configuration files.
 
 ### Build artifacts and ignored files
 
@@ -136,8 +151,10 @@ manually for better or more consistent results.
 ### Auto-mocking or auto-imports
 
 Some frameworks have features like "auto-mocking" or "auto-imports" enabled,
-such as Jest and Nuxt. The solution is to include such entry files by extending
-the `entry` file patterns. This is recommended in most cases:
+such as Jest and Nuxt.
+
+Solution: include such entry files by extending the `entry` file patterns. This
+is recommended in most cases:
 
 ```json
 {
@@ -163,7 +180,7 @@ unused dependencies.
 
 The most common causes for unused and unlisted dependencies include:
 
-- \[Missing or incomplete plugin]\(#missing-or-incomplete-plugin)
+- [Missing or incomplete plugin](#missing-or-incomplete-plugin)
 - [Unreachable code][19]
 
 :::caution[Monorepo]
@@ -187,14 +204,16 @@ If a plugin exists and the dependency is referenced in the configuration file,
 but its custom dependency finder does not detect it, then that's a false
 positive. Please open a pull request or issue to fix it.
 
-Adding the configuration file as an `entry` file pattern may be a temporary
-stopgap that fixes your situation, but it's better to create a new plugin or fix
-an existing one.
+Solution: adding the configuration file as an `entry` file pattern may be a
+temporary stopgap that fixes your situation, but it's better to create a new
+plugin or fix an existing one.
 
 ### Unreachable code
 
-If the reference to a dependency is unrecognizable or unreachable to Knip, and
-you don't feel like a plugin could solve it, a last resort is to ignore it:
+Sometimes a reference to a dependency is unrecognizable or unreachable to Knip.
+
+Solution: add a new plugin or improve an existing one. If you don't feel like a
+plugin could solve it, a last resort is to ignore it:
 
 ```json
 {
@@ -228,8 +247,10 @@ dependency) and lives in `node_modules`, but it's not listed explicitly in
 `package.json`.
 
 You should not rely on transitive dependencies for various reasons, including
-control, security and stability. The solution is to install and list the
-dependency in `dependencies` or `devDependencies`.
+control, security and stability.
+
+Solution: install and list the dependency in `dependencies` or
+`devDependencies`.
 
 ## Unlisted binaries
 
@@ -253,7 +274,7 @@ this might have been caused by either the way your package manager installs
 dependencies and binaries, or by not running Knip from the root of the
 repository.
 
-Run Knip from the project root. From there you can [lint individual
+Solution: run Knip from the project root. From there you can [lint individual
 workspaces][23].
 
 ### Example

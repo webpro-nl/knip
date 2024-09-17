@@ -42,6 +42,6 @@ Special thanks to the wonderful people who have contributed to this project:
 [4]: https://discord.gg/r5uXTtbTpc
 [5]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
 [6]: https://knip.dev/sponsors
-[7]: https://en.wiktionary.org/wiki/knip#Dutch
+[7]: https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s
 [8]: https://github.com/webpro-nl/knip/graphs/contributors
 [9]: https://contrib.rocks/image?repo=webpro-nl/knip

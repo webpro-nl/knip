@@ -95,7 +95,7 @@ In a more general sense, [Why use Knip?][12] explains what Knip can do for you.
 If you can't find your answer in any of the aforementioned resources, feel free
 to [open an issue on GitHub][13] or discuss it in [the Discord channel][14].
 
-[1]: #issues-reported-by-knip
+[1]: #lint-issues-reported-by-knip
 [2]: #exceptions-thrown-by-knip
 [3]: #debug
 [4]: #trace
