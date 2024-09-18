@@ -77,8 +77,8 @@ export class IssueFixer {
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
       const exportPositions: Fixes = [
-        ...(this.isFixUnusedTypes ? this.unusedTypeNodes.get(filePath) ?? [] : []),
-        ...(this.isFixUnusedExports ? this.unusedExportNodes.get(filePath) ?? [] : []),
+        ...(this.isFixUnusedTypes ? (this.unusedTypeNodes.get(filePath) ?? []) : []),
+        ...(this.isFixUnusedExports ? (this.unusedExportNodes.get(filePath) ?? []) : []),
       ].sort((a, b) => b[0] - a[0]);
 
       if (exportPositions.length > 0) {

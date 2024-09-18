@@ -28,9 +28,7 @@
       border-bottom: none;
       opacity: 0;
       color: var(--sl-color-text);
-      transition:
-        color 0.3s,
-        opacity 0.3s;
+      transition: color 0.3s, opacity 0.3s;
     }
 
     &:hover a {

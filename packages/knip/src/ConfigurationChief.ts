@@ -266,7 +266,7 @@ export class ConfigurationChief {
     const workspaces = this.manifest?.workspaces
       ? Array.isArray(this.manifest.workspaces)
         ? this.manifest.workspaces
-        : this.manifest.workspaces.packages ?? []
+        : (this.manifest.workspaces.packages ?? [])
       : [];
     return workspaces.map(pattern => pattern.replace(/(?<=!?)\.\//, ''));
   }

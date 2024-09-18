@@ -62,6 +62,11 @@
       "lineWidth": 80
     }
   },
+  "css": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
   "overrides": [
     {
       "include": ["*.astro"],
