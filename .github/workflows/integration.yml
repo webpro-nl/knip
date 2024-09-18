@@ -120,3 +120,17 @@ jobs:
           knip-bun --tags=-knipignore
           knip-bun --tags=-knipignore --production --fix --no-exit-code --allow-remove-files
           knip-bun --tags=-knipignore --production
+
+      - name: Test Knip against Prettier
+        uses: actions/checkout@v4
+        with:
+          repository: prettier/prettier
+          path: prettier
+      - run: |
+          cd prettier
+          yarn
+          yarn --cwd scripts/release
+          yarn --cwd scripts/tools/bundle-test
+          yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules
+          yarn --cwd website
+          yarn knip
