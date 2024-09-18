@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 .content-panel + .content-panel {
   border: unset;
 }
@@ -37,7 +41,6 @@
 .sl-markdown-content h3 code {
   font-size: 0.9em;
   color: var(--sl-color-white);
-  /* margin-bottom: 0; */
 }
 
 .sl-markdown-content p code,
@@ -124,4 +127,10 @@ section.plugins li {
 
 .sl-markdown-content .starlight-aside {
   margin-top: 2rem;
+}
+
+:root[data-theme='light'] {
+  .logo-border {
+    border-color: var(--sl-color-black);
+  }
 }

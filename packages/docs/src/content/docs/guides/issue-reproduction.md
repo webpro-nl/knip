@@ -26,7 +26,7 @@ Issues containing just a screenshot, a snippet of output, or a snippet of source
 code don't tell the full picture. Only an actual reproduction of the issue with
 source code and configuration is complete and actionable.
 
-### Before opening an issue
+## Before opening an issue
 
 Before opening an issue, please make sure you:
 
@@ -38,7 +38,7 @@ Before opening an issue, please make sure you:
 Please file only a single issue at a time, so each of them can be labeled and
 tracked separately.
 
-### Templates
+## Templates
 
 A convenient way to create a minimal reproduction so is by starting with one of
 these templates in CodeSandbox or StackBlitz:
@@ -58,7 +58,7 @@ and reproduction.
 Providing a link to your existing project repository will likely not be
 considered "minimal".
 
-### Pull Request
+## Pull Request
 
 The optimal way is to add fixtures and/or failing tests to the Knip repository,
 and open a pull request to discuss the issue! Also see [instructions for
