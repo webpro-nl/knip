@@ -24,18 +24,18 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.3",
-    "@astrojs/markdown-remark": "^5.2.0",
     "@astrojs/starlight": "0.27.1",
-    "rehype-autolink-headings": "^7.1.0",
     "sharp": "0.33.5"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.3",
+    "@astrojs/markdown-remark": "^5.2.0",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
     "astro": "4.15.7",
     "hastscript": "9.0.0",
     "picocolors": "^1.1.0",
+    "rehype-autolink-headings": "^7.1.0",
     "remark-cli": "12.0.1",
     "remark-directive": "3.0.0",
     "remark-frontmatter": "5.0.0",
