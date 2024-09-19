@@ -58,6 +58,10 @@ html {
   border-inline-start-color: var(--sl-color-gray-1);
 }
 
+.sl-markdown-content section.columns.mt {
+  margin-top: 3rem;
+}
+
 section.columns ul {
   padding: 0;
   list-style: none;
@@ -127,6 +131,10 @@ section.plugins li {
 
 .sl-markdown-content .starlight-aside {
   margin-top: 2rem;
+}
+
+.sl-markdown-content p > img {
+  margin: 2rem 0;
 }
 
 :root[data-theme='light'] {

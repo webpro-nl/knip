@@ -24,6 +24,10 @@
   background-color: var(--sl-color-bright-orange);
 }
 
+.actions .sl-link-button.secondary:hover {
+  background-color: var(--sl-color-orange);
+}
+
 :root {
   .actions .sl-link-button.primary {
     color: var(--sl-color-white);

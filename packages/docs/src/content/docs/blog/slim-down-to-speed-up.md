@@ -2,7 +2,7 @@
 title: Slim down to speed up
 date: 2023-12-14
 sidebar:
-  order: 3
+  order: 4
 ---
 
 _Published: 2023-12-14_

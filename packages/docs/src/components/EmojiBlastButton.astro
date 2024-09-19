@@ -1,0 +1,36 @@
+<style>
+  div {
+    display: none;
+    justify-content: center;
+  }
+
+  button {
+    color: var(--sl-color-text-accent);
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: var(--sl-color-orange);
+    border: 2px solid var(--sl-color-text-accent);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.25rem;
+  }
+
+  button:hover {
+    background-color: var(--sl-color-bright-orange);
+  }
+</style>
+
+<div data-button-container>
+  <button>Hooray, release the clutter!</button>
+</div>
+
+<script type="module" id="emoji-blasts">
+  import { emojiBlast  } from 'https://unpkg.com/emoji-blast@0.10.1';
+  const container = document.querySelector('[data-button-container]');
+  const button = container.querySelector('button');
+  if(emojiBlast && button) {
+    const cb = () => emojiBlast({ emojis: ["✂️", "🚀", "❤️", "🎉", "🧡", "2️⃣"] });
+    container.style.display = 'flex';
+    button.addEventListener('click', cb);
+  };
+</script>
