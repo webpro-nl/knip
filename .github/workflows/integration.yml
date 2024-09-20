@@ -9,6 +9,10 @@ on:
     tags:
       - '!**'
 
+env:
+  PKG_URL: |
+    https://pkg.pr.new/knip@${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   prepare:
     name: Build and publish Knip
@@ -34,31 +38,31 @@ jobs:
             repo: JoshuaKGoldberg/create-typescript-app
             commands: |
               pnpm install
-              pnpm dlx https://pkg.pr.new/knip@${{ github.sha }}
+              pnpm dlx $PKG_URL
 
           - name: slonik
             repo: gajus/slonik
             commands: |
               pnpm install
-              pnpm dlx https://pkg.pr.new/knip@${{ github.sha }}
+              pnpm dlx $PKG_URL
 
           - name: 10ten-ja-reader
             repo: birchill/10ten-ja-reader
             commands: |
               pnpm install
-              pnpm dlx https://pkg.pr.new/knip@${{ github.sha }}
+              pnpm dlx $PKG_URL
 
           - name: DefinitelyTyped-tools
             repo: microsoft/DefinitelyTyped-tools
             commands: |
               pnpm install
-              pnpm dlx https://pkg.pr.new/knip@${{ github.sha }}
+              pnpm dlx $PKG_URL
 
           - name: query
             repo: TanStack/query
             commands: |
               pnpm install
-              pnpm add -D -w https://pkg.pr.new/knip@${{ github.sha }}
+              pnpm add -D -w $PKG_URL
               pnpm test:knip --cache
               pnpm test:knip --cache
 
@@ -66,7 +70,7 @@ jobs:
             repo: argos-ci/argos
             commands: |
               npm ci
-              npm add -D https://pkg.pr.new/knip@${{ github.sha }}
+              npm add -D $PKG_URL
               npm run knip
 
           - name: eslint
@@ -74,7 +78,7 @@ jobs:
             commands: |
               npm install --force
               npm install --prefix docs
-              npm install --force -D https://pkg.pr.new/knip@${{ github.sha }}
+              npm install --force -D $PKG_URL
               npm run lint:unused -- --cache
               npm run lint:unused -- --cache
 
@@ -82,14 +86,14 @@ jobs:
             repo: microsoft/TypeScript
             commands: |
               npm ci
-              npm install -D https://pkg.pr.new/knip@${{ github.sha }}
+              npm install -D $PKG_URL
               npm run knip
 
           - name: mocha
             repo: mochajs/mocha
             commands: |
               npm ci
-              npm install -D https://pkg.pr.new/knip@${{ github.sha }}
+              npm install -D $PKG_URL
               npm run lint:knip
 
           - name: InvokeAI
@@ -98,7 +102,7 @@ jobs:
             commands: |
               cd invokeai/frontend/web
               pnpm install
-              pnpm add -D https://pkg.pr.new/knip@${{ github.sha }}
+              pnpm add -D $PKG_URL
               bunx --bun knip --tags=-knipignore
               bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files
               bunx --bun knip --tags=-knipignore --production
@@ -111,7 +115,7 @@ jobs:
               yarn --cwd scripts/tools/bundle-test
               yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules
               yarn --cwd website
-              yarn add -D knip@https://pkg.pr.new/knip@${{ github.sha }}
+              yarn add -D knip@$PKG_URL
               yarn knip
 
     steps:
