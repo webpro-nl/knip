@@ -9,7 +9,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 Instead of a JSON file, you can use a JavaScript or TypeScript file for a
 dynamic configuration and type annotations:
 
-<Tabs>
+<Tabs syncKey="lang">
   <TabItem label="TypeScript">
 
     ```ts title="knip.ts"
@@ -45,7 +45,7 @@ dynamic configuration and type annotations:
 You can export a regular or async function that returns the configuration object
 as well:
 
-<Tabs>
+<Tabs syncKey="lang">
   <TabItem label="TypeScript">
 
     ```ts title="knip.ts"

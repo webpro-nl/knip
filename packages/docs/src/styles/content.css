@@ -91,10 +91,10 @@ section.plugins li {
   }
 }
 
-.sponsor {
+.sl-markdown-content .sponsor {
   font-size: 2rem;
   text-align: center;
-  margin-bottom: 5rem;
+  margin: 5rem 0;
 }
 
 .sl-badge.caution,

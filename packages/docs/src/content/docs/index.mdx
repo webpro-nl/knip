@@ -1,12 +1,12 @@
 ---
-title: Knip the clutter!
+title: Declutter your JavaScript & TypeScript projects
 description:
   Project linter to find and remove unused files, dependencies and exports in
   JavaScript and TypeScript projects
 template: splash
 hero:
   title: Knip!
-  tagline: Cut the clutter from JavaScript & TypeScript projects
+  tagline: Declutter your JavaScript & TypeScript projects
   image:
     file: ../../assets/logo.svg
   actions:
@@ -27,28 +27,48 @@ import Sponsors from '../../components/Sponsors.astro';
 import Projects from '../../components/Projects.astro';
 import Contributors from '../../components/Contributors.astro';
 
+<CardGrid>
+  <Card title="Why?" icon="approve-check">
+
+    Knip finds and fixes unused files, exports and dependencies. Use it for enhanced
+    code and dependency management.
+
+    Read the full explanation: [why should I use Knip?][1]
+
+  </Card>
+
+  <Card title="How?" icon="setting">
+
+    Deep analysis from fine-grained entry points based on the actual frameworks
+    and tooling in your (mono)repo with custom module resolution, configuration
+    file parsers, compilers, a shell script parser and additional heuristics to
+    maximize coverage for comprehensive and actionable results.
+
+  </Card>
+</CardGrid>
+
 :::div{.sponsor}
 
-[Support Knip!][1]
+[Support Knip!][2]
 
 :::
 
 <CardGrid stagger>
-  <Card title="Why use Knip?" icon="approve-check">
+  <Card title="Battle-tested" icon="approve-check">
 
-    [Find & remove unused files, dependencies and exports][2]
+    Thousands of projects are already using Knip!
 
   </Card>
 
   <Card title="Playground" icon="rocket">
 
-    Try Knip on the [playground][3]
+    Try Knip on the [playground][3].
 
   </Card>
 
   <Card title="Troubleshooting" icon="warning">
 
-    Need help? [Start troubleshooting][4]
+    Need help? [Start troubleshooting][4].
 
   </Card>
 
@@ -80,7 +100,7 @@ Eternal gratitude to the companies and people that are already supporting Knip:
 
 <Sponsors direction="row" showAll={false} />
 
-Please see [Sponsors][1] for the full list. Consider supporting the project too!
+Please see [Sponsors][2] for the full list. Consider supporting the project too!
 
 ## 🧡 Contributors
 
@@ -108,8 +128,8 @@ Special thanks to the wonderful people who have contributed to this project:
 - [Unused dependencies][11]
 - [Unused exports][12]
 
-[1]: ./sponsors
-[2]: ./explanations/why-use-knip.md
+[1]: ./explanations/why-use-knip.md
+[2]: ./sponsors
 [3]: ./playground
 [4]: ./guides/troubleshooting.md
 [5]: https://www.jamesshopland.com
