@@ -40,7 +40,7 @@
     "remark-directive": "3.0.0",
     "remark-frontmatter": "5.0.0",
     "remark-parse": "11.0.0",
-    "remark-preset-webpro": "1.1.0",
+    "remark-preset-webpro": "^1.1.1",
     "remark-stringify": "11.0.0",
     "unified": "11.0.5",
     "unist-builder": "4.0.0",
