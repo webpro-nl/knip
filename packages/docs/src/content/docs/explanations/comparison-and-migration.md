@@ -2,26 +2,26 @@
 title: Comparison & Migration
 ---
 
-First of all, Knip owes a lot to the projects on this page. Each and every one
-of them has been inspirational in their own way. The scope of Knip is larger
-than all of them combined, which is a vision you might not align with. So if any
-of those tools has the right scope for your requirements, then by all means, use
-what suits you best.
+First of all, Knip owes a lot to the projects on this page that exist longer and
+they've all been inspirational in their own way. For best results, Knip has [a
+vision embracing comprehensiveness][1] which is larger in scope than any of the
+alternatives. So if any of those tools has the right scope for your
+requirements, then by all means, use what suits you best.
 
 All tools have in common that they have less features and don't support the
-concept of [monorepos/workspaces][1]. Feel free to send in projects that Knip
+concept of [monorepos/workspaces][2]. Feel free to send in projects that Knip
 does not handle better, I'm up for the challenge!
 
 ## Migration
 
 A migration consists of deleting the dependency and its configuration file and
-[getting started with Knip][2]. You should end up with less configuration.
+[getting started with Knip][3]. You should end up with less configuration.
 
 ## Comparison
 
 ### depcheck
 
-> [Depcheck][3] is a tool for analyzing the dependencies in a project to see:
+> [Depcheck][4] is a tool for analyzing the dependencies in a project to see:
 > how each dependency is used, which dependencies are useless, and which
 > dependencies are missing from package.json.
 
@@ -41,7 +41,7 @@ knip --dependencies
 > Find and fix dangling files and unused dependencies in your JavaScript
 > projects.
 
-[unimported][4] is fast and works well. It works in what Knip calls "production
+[unimported][5] is fast and works well. It works in what Knip calls "production
 mode" exclusively. If you're fine with a little bit of configuration and don't
 want or need to deal with non-production items (such as `devDependencies` and
 test files), then this might work well for you.
@@ -59,7 +59,7 @@ knip --production --dependencies --files
 
 > Find unused exports in a typescript project. 🛀
 
-[ts-prune][5] aims to find potentially unused exports in your TypeScript project
+[ts-prune][6] aims to find potentially unused exports in your TypeScript project
 with zero configuration.
 
 The following commands are similar:
@@ -75,7 +75,7 @@ Use `knip --exports` to also include class and enum members.
 
 ### ts-unused-exports
 
-> [ts-unused-exports][6] finds unused exported symbols in your Typescript
+> [ts-unused-exports][7] finds unused exported symbols in your Typescript
 > project
 
 The following commands are similar:
@@ -87,26 +87,35 @@ knip --include exports,types,nsExports,nsTypes
 
 Use `knip --exports` to also include class and enum members.
 
+### ts-remove-unused
+
+> Remove unused code from your TypeScript Project
+
+[ts-remove-unused][8] removes unused exports, and works based on a single
+`tsconfig.json` file (`includes` and `excludes`) and requires no configuration.
+It removes the `export` keyword or the whole export declaration.
+
 ## Related projects
 
 Additional alternative and related projects include:
 
-- [deadfile][7]
-- [DepClean][8]
-- [dependency-check][9]
-- [find-unused-exports][10]
-- [npm-check][11]
-- [ts-remove-unused][12]
+- [deadfile][9]
+- [DepClean][10]
+- [dependency-check][11]
+- [find-unused-exports][12]
+- [npm-check][13]
+- [renoma][13]
 
-[1]: ../features/monorepos-and-workspaces.md
-[2]: ../overview/getting-started.mdx
-[3]: https://github.com/depcheck/depcheck
-[4]: https://github.com/smeijer/unimported
-[5]: https://github.com/nadeesha/ts-prune
-[6]: https://github.com/pzavolinsky/ts-unused-exports
-[7]: https://github.com/M-Izadmehr/deadfile
-[8]: https://github.com/mysteryven/depclean
-[9]: https://github.com/dependency-check-team/dependency-check
-[10]: https://github.com/jaydenseric/find-unused-exports
-[11]: https://github.com/dylang/npm-check
-[12]: https://github.com/line/ts-remove-unused
+[1]: ./why-use-knip.md#comprehensive
+[2]: ../features/monorepos-and-workspaces.md
+[3]: ../overview/getting-started.mdx
+[4]: https://github.com/depcheck/depcheck
+[5]: https://github.com/smeijer/unimported
+[6]: https://github.com/nadeesha/ts-prune
+[7]: https://github.com/pzavolinsky/ts-unused-exports
+[8]: https://github.com/line/ts-remove-unused
+[9]: https://github.com/M-Izadmehr/deadfile
+[10]: https://github.com/mysteryven/depclean
+[11]: https://github.com/dependency-check-team/dependency-check
+[12]: https://github.com/jaydenseric/find-unused-exports
+[13]: https://github.com/bluwy/renoma
