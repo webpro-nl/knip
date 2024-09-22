@@ -11,7 +11,7 @@ import type { ESLintConfig } from './types.js';
 
 const title = 'ESLint';
 
-const enablers = ['eslint'];
+const enablers = ['eslint', '@eslint/js'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies, manifest, config }) =>
   hasDependency(dependencies, enablers) ||
