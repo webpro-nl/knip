@@ -263,12 +263,12 @@ export class DependencyDeputy {
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === DT_SCOPE) {
-          // The `pkg` dependency already has types included, i.e. this `@types/pkg` is obsolete
-          if (hasTypesIncluded?.has(typedDependency)) return false;
-
           const typedPackageName = getPackageFromDefinitelyTyped(typedDependency);
           // Ignore `@types/*` packages that don't have a related dependency (e.g. `@types/node`)
-          if (IGNORE_DEFINITELY_TYPED.includes(typedPackageName)) return true;
+          if (IGNORE_DEFINITELY_TYPED.has(typedPackageName)) return true;
+
+          // The `pkg` dependency already has types included, i.e. this `@types/pkg` is obsolete
+          if (hasTypesIncluded?.has(typedDependency)) return false;
 
           // Ignore typed dependencies that have a host dependency that's referenced
           // Example: `next` (host) has `react-dom` and/or `@types/react-dom` (peer), peers can be ignored if host `next` is referenced

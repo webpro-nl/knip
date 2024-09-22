@@ -160,8 +160,13 @@ export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.yml',
 ]);
 
-// The `@types/node` dependency does not require the `node` dependency
-export const IGNORE_DEFINITELY_TYPED = ['node', 'bun'];
+export const IGNORE_DEFINITELY_TYPED = new Set([
+  // The `@types/node` dependency does not require the `node` dependency
+  'node',
+  'bun',
+  // Packages that confusingly include `package.json#types` but also recommend to install DT pkg
+  'jest',
+]);
 
 export const ISSUE_TYPES: IssueType[] = [
   'files',
