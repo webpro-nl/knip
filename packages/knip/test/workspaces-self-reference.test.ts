@@ -5,9 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const skipIf = typeof Bun !== 'undefined' ? test.skip : test;
-
-skipIf('Find unused files, dependencies and exports in workspaces with cross self-references', async () => {
+test('Find unused files, dependencies and exports in workspaces with cross self-references', async () => {
   const cwd = resolve('fixtures/workspaces-self-reference');
 
   const { counters } = await main({
