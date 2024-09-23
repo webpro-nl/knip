@@ -13,8 +13,8 @@ in complexity and size, automated and comprehensive tooling becomes critical.
 Knip finds and fixes unused files, exports and dependencies.
 
 Deep analysis from [fine-grained entry points][1] based on the actual frameworks
-and tooling in your [(mono)repo][2] with [custom module resolution][6],
-[configuration file parsers][3], [compilers][4], a [shell script parser][5] and
+and tooling in your [(mono)repo][2] with [custom module resolution][3],
+[configuration file parsers][4], [compilers][5], a [shell script parser][6] and
 additional heuristics to maximize coverage for comprehensive and actionable
 results.
 
@@ -114,10 +114,10 @@ so you can easily get rid of false positives? A variety of reasons:
 
 [1]: ./entry-files.md
 [2]: ../features/monorepos-and-workspaces.md
-[3]: ./plugins.md#configuration-files
-[4]: ../features/compilers.md
-[5]: ../features/script-parser.md
-[6]: ../reference/faq.md#why-doesnt-knip-use-an-existing-module-resolver
+[3]: ../reference/faq.md#why-doesnt-knip-use-an-existing-module-resolver
+[4]: ./plugins.md#configuration-files
+[5]: ../features/compilers.md
+[6]: ../features/script-parser.md
 [7]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
 [8]: ../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem
 [9]: ../typescript/unused-exports.md#why-are-unused-exports-a-problem
