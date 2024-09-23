@@ -218,3 +218,11 @@ export const getExportKeywordNode = (node: ts.Node) =>
 export const getDefaultKeywordNode = (node: ts.Node) =>
   // @ts-expect-error Property 'modifiers' does not exist on type 'Node'.
   (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);
+
+export const hasRequireCall = (node: ts.Node): boolean => {
+  if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'require') return true;
+  return node.getChildren().some(child => hasRequireCall(child));
+};
+
+export const isModuleExportsAccess = (node: ts.PropertyAccessExpression) =>
+  ts.isIdentifier(node.expression) && node.expression.escapedText === 'module' && node.name.escapedText === 'exports';

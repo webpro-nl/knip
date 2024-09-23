@@ -1,12 +1,9 @@
 import ts from 'typescript';
 import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
-import { stripQuotes } from '../../ast-helpers.js';
+import { hasRequireCall, isModuleExportsAccess, stripQuotes } from '../../ast-helpers.js';
 import { isJS } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
-
-const isModuleExportsAccess = (node: ts.PropertyAccessExpression) =>
-  ts.isIdentifier(node.expression) && node.expression.escapedText === 'module' && node.name.escapedText === 'exports';
 
 export default visit(isJS, (node, { isFixExports }) => {
   if (ts.isExpressionStatement(node)) {
@@ -37,6 +34,12 @@ export default visit(isJS, (node, { isFixExports }) => {
               return { node, identifier: node.getText(), type: SymbolType.UNKNOWN, pos: node.getStart(), fix };
             });
           }
+
+          if (ts.isCallExpression(node.expression.right) && hasRequireCall(node.expression.right)) {
+            // Pattern: module.exports = require('specifier');
+            return;
+          }
+
           // Pattern: module.exports = any
           return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos: expr.pos + 1, fix: undefined };
         }

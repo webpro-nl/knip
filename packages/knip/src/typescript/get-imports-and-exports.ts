@@ -120,6 +120,7 @@ const getImportsAndExports = (
         // Patterns:
         // export { id } from 'specifier';
         // export * from 'specifier';
+        // module.exports = require('specifier');
         addValue(imports.reExported, identifier, sourceFile.fileName);
       }
     } else {

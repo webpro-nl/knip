@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/re-exports-cjs",
+  "knip": {
+    "entry": ["1-entry.js"],
+    "project": ["*.js"]
+  }
+}
