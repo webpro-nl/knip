@@ -23,7 +23,7 @@ enum McEnum {}
 
 export const z = x + y;
 
-export const { ,  } = { a: 1, b: 1 };
+export const {  } = { a: 1, b: 1 };
 
 export const [, ] = [1, 2];
 
@@ -47,7 +47,7 @@ export type U = number;
       `const identifier = 1;
 const identifier2 = 2;
 
-module.exports = { identifier,  };
+module.exports = { identifier};
 `,
     ],
     [
@@ -82,6 +82,20 @@ export const One = 1;
   "devDependencies": {}
 }
 `,
+    ],
+    [
+      'commas.js',
+      await readContents('commas.js'),
+      `const a = 1
+const b = 2
+const usedC = 3
+const d = 4
+const e = 5
+const usedF = 6
+const g = 7
+const h= 8
+
+export { usedC, usedF}`,
     ],
   ];
 

@@ -88,8 +88,13 @@ export class IssueFixer {
         );
 
         const withoutEmptyReExports = sourceFileText
+          .replaceAll(/export \{[ ,]+\};?\r?\n?/g, '')
           .replaceAll(/export \{[ ,]+\} from ('|")[^'"]+('|");?\r?\n?/g, '')
-          .replaceAll(/export \{[ ,]+\};?\r?\n?/g, '');
+          .replaceAll(/\{(\s*,)+/g, '{')
+          .replaceAll(/(,\s*)+}/g, '}')
+          .replaceAll(/(\s*,\s*,\s*)+/g, ',')
+          // previous replacement leaves 2 commas for odd commas number
+          .replaceAll(/,,/g, ',');
 
         await writeFile(filePath, withoutEmptyReExports);
 

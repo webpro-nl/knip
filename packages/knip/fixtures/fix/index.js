@@ -4,6 +4,7 @@ import { USED } from './access';
 import { identifier } from './exports';
 import { a } from './ignored';
 import * as NS from './reexports';
+import {usedC, usedF} from "./commas";
 
 _;
 z;
@@ -11,3 +12,5 @@ USED;
 identifier;
 a;
 NS.One;
+usedC
+usedF
