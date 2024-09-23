@@ -161,9 +161,9 @@ const getImportsAndExports = (
         if (module.isExternalLibraryImport) {
           if (skipTypeOnly && isTypeOnly) return;
 
-          const sanitizedSpecifier = isInNodeModules(specifier)
-            ? getPackageNameFromFilePath(specifier)
-            : sanitizeSpecifier(specifier);
+          const sanitizedSpecifier = sanitizeSpecifier(
+            isInNodeModules(specifier) || isInNodeModules(filePath) ? getPackageNameFromFilePath(specifier) : specifier
+          );
 
           if (!isStartsLikePackageName(sanitizedSpecifier)) {
             // Import maps and other exceptions, examples from tests: #dep, #internals/used, $app/stores
