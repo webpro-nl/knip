@@ -15,7 +15,7 @@ export const getPackageNameFromFilePath = (value: string) => {
   return value;
 };
 
-export const isStartsLikePackageName = (specifier: string) => /^@?[a-z0-9]/.test(specifier);
+export const isStartsLikePackageName = (specifier: string) => /^@?[a-z0-9._]/.test(specifier);
 
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);
 
