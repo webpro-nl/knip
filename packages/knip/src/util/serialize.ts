@@ -8,6 +8,7 @@ if (typeof Bun !== 'undefined') {
 } else {
   const { serialize, deserialize } = await import('node:v8');
   s = serialize;
+  // @ts-ignore please bun
   d = deserialize;
 }
 
