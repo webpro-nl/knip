@@ -30,7 +30,23 @@ export const cleanExport = ({ text, start, end, isCleanable }: FixerOptions) => 
   }
 
   if (bracketCloseIndex === -1) {
-    return beforeStart + (commaIndex === -1 ? afterEnd : afterEnd.substring(commaIndex + 1));
+    let x = 0;
+    let j = beforeStart.length - 1;
+    while (j >= 0) {
+      const char = beforeStart[j];
+      if (!/\s/.test(char)) {
+        if (beforeStart.substring(j - 3, j + 1) === 'type') {
+          x = 5;
+        }
+        break;
+      }
+      j--;
+    }
+
+    return (
+      beforeStart.substring(0, beforeStart.length - x) +
+      (commaIndex === -1 ? afterEnd : afterEnd.substring(commaIndex + 1))
+    );
   }
 
   let j = beforeStart.length - 1;
@@ -40,25 +56,50 @@ export const cleanExport = ({ text, start, end, isCleanable }: FixerOptions) => 
       bracketOpenIndex = j;
       break;
     }
-    if (!/\s/.test(char)) break;
+    if (!/\s/.test(char)) {
+      if (beforeStart.substring(j - 3, j + 1) === 'type') {
+        j = j - 4;
+        continue;
+      }
+      break;
+    }
     j--;
   }
 
   if (bracketCloseIndex !== -1 && bracketOpenIndex !== -1) {
     const toBracket = beforeStart.substring(0, bracketOpenIndex).trim();
-    if (toBracket.endsWith('export')) {
+    const exportLength = toBracket.endsWith('export') ? 6 : toBracket.endsWith('export type') ? 12 : 0;
+    if (exportLength) {
       const fromBracket = afterEnd.substring(bracketCloseIndex + 1).trim();
       if (fromBracket.startsWith('from')) {
         const quoteMatch = afterEnd.match(/['"].*?['"]/);
         if (quoteMatch?.index) {
           const fromSpecifierLength = quoteMatch.index + quoteMatch[0].length;
-          return toBracket.substring(0, toBracket.length - 6) + afterEnd.substring(fromSpecifierLength);
+          return toBracket.substring(0, toBracket.length - exportLength) + afterEnd.substring(fromSpecifierLength);
         }
       }
 
-      return toBracket.substring(0, toBracket.length - 6) + afterEnd.substring(bracketCloseIndex + 1);
+      return toBracket.substring(0, toBracket.length - exportLength) + afterEnd.substring(bracketCloseIndex + 1);
     }
   }
 
-  return beforeStart + (commaIndex === -1 ? afterEnd : afterEnd.substring(commaIndex + 1));
+  {
+    let x = 0;
+    let j = beforeStart.length - 1;
+    while (j >= 0) {
+      const char = beforeStart[j];
+      if (!/\s/.test(char)) {
+        if (beforeStart.substring(j - 3, j + 1) === 'type') {
+          x = 5;
+        }
+        break;
+      }
+      j--;
+    }
+
+    return (
+      beforeStart.substring(0, beforeStart.length - x) +
+      (commaIndex === -1 ? afterEnd : afterEnd.substring(commaIndex + 1))
+    );
+  }
 };

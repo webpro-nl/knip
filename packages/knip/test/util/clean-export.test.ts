@@ -52,4 +52,29 @@ test('fixer', () => {
     const text = 'export   {   AB       }     from   "specifier"';
     assert.deepEqual(cleanExport(getOpts(text, 'AB')), '');
   }
+
+  {
+    const text = 'export type { AB }';
+    assert.deepEqual(cleanExport(getOpts(text, 'AB')), '');
+  }
+
+  {
+    const text = 'export { type AB }';
+    assert.deepEqual(cleanExport(getOpts(text, 'AB')), '');
+  }
+
+  {
+    const text = 'export { type AB, type CD, type EF }';
+    assert.deepEqual(cleanExport(getOpts(text, 'CD')), 'export { type AB,  type EF }');
+  }
+
+  {
+    const text = 'export { type AB, CD, type EF }';
+    assert.deepEqual(cleanExport(getOpts(text, 'AB')), 'export {  CD, type EF }');
+  }
+
+  {
+    const text = 'export { AB, CD, type EF }';
+    assert.deepEqual(cleanExport(getOpts(text, 'EF')), 'export { AB, CD,  }');
+  }
 });

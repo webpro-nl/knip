@@ -1,5 +1,5 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import type { Fixes } from './types/exports.js';
+import type { Fix, Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
 import { cleanExport } from './util/clean-export.js';
 import { load, save } from './util/package-json.js';
@@ -20,8 +20,8 @@ export class IssueFixer {
   isFixUnusedTypes = true;
   isFixUnusedExports = true;
 
-  unusedTypeNodes: Map<string, Set<[number, number, boolean]>> = new Map();
-  unusedExportNodes: Map<string, Set<[number, number, boolean]>> = new Map();
+  unusedTypeNodes: Map<string, Set<Fix>> = new Map();
+  unusedExportNodes: Map<string, Set<Fix>> = new Map();
 
   constructor({ isEnabled, cwd, fixTypes = [], isRemoveFiles }: Fixer) {
     this.isEnabled = isEnabled;
@@ -77,16 +77,13 @@ export class IssueFixer {
   private async removeUnusedExportKeywords(issues: Issues) {
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
-      const exportPositions: Fixes = [
-        ...(this.isFixUnusedTypes ? (this.unusedTypeNodes.get(filePath) ?? []) : []),
-        ...(this.isFixUnusedExports ? (this.unusedExportNodes.get(filePath) ?? []) : []),
-      ].sort((a, b) => b[0] - a[0]);
+      const types = (this.isFixUnusedTypes && this.unusedTypeNodes.get(filePath)) || [];
+      const exports = (this.isFixUnusedExports && this.unusedExportNodes.get(filePath)) || [];
+      const exportPositions = [...types, ...exports].filter(fix => fix !== undefined).sort((a, b) => b[0] - a[0]);
 
       if (exportPositions.length > 0) {
         const sourceFileText = exportPositions.reduce(
-          (text, [start, end, isCleanable]) => {
-            return cleanExport({ text, start, end, isCleanable: Boolean(isCleanable) });
-          },
+          (text, [start, end, isCleanable]) => cleanExport({ text, start, end, isCleanable: Boolean(isCleanable) }),
           await readFile(filePath, 'utf-8')
         );
 

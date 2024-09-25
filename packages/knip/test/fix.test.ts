@@ -59,7 +59,7 @@ module.exports = { identifier,  };
       await readContents('reexports.js'),
       `;
 ;
-export { One } from './reexported';
+export { One,    Nine,  } from './reexported';
 ;
 ;
 `,
@@ -75,6 +75,15 @@ const Five = 5;
 ;
 
 ;
+
+type Six = any;
+type Seven = unknown;
+const Eight = 8;
+const Nine = 9;
+type Ten = unknown[];
+;
+
+export {   Nine,  };
 
 export const One = 1;
 `,
