@@ -395,7 +395,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           const importsForExport = file.imported;
 
           for (const [identifier, exportedItem] of exportItems.entries()) {
-            if (exportedItem.isReExport) continue;
+            if (!isFix && exportedItem.isReExport) continue;
 
             // Skip tagged exports
             if (shouldIgnore(exportedItem.jsDocTags)) continue;

@@ -1,6 +1,7 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import type { Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
+import { cleanExport } from './util/clean-export.js';
 import { load, save } from './util/package-json.js';
 import { join, relative } from './util/path.js';
 
@@ -19,8 +20,8 @@ export class IssueFixer {
   isFixUnusedTypes = true;
   isFixUnusedExports = true;
 
-  unusedTypeNodes: Map<string, Set<[number, number]>> = new Map();
-  unusedExportNodes: Map<string, Set<[number, number]>> = new Map();
+  unusedTypeNodes: Map<string, Set<[number, number, boolean]>> = new Map();
+  unusedExportNodes: Map<string, Set<[number, number, boolean]>> = new Map();
 
   constructor({ isEnabled, cwd, fixTypes = [], isRemoveFiles }: Fixer) {
     this.isEnabled = isEnabled;
@@ -83,15 +84,13 @@ export class IssueFixer {
 
       if (exportPositions.length > 0) {
         const sourceFileText = exportPositions.reduce(
-          (text, [start, end]) => text.substring(0, start) + text.substring(end),
+          (text, [start, end, isCleanable]) => {
+            return cleanExport({ text, start, end, isCleanable: Boolean(isCleanable) });
+          },
           await readFile(filePath, 'utf-8')
         );
 
-        const withoutEmptyReExports = sourceFileText
-          .replaceAll(/export \{[ ,]+\} from ('|")[^'"]+('|");?\r?\n?/g, '')
-          .replaceAll(/export \{[ ,]+\};?\r?\n?/g, '');
-
-        await writeFile(filePath, withoutEmptyReExports);
+        await writeFile(filePath, sourceFileText);
 
         this.markExportFixed(issues, filePath);
       }

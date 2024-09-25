@@ -110,6 +110,18 @@ The `export` keyword for unused exports is removed:
 
 The `default` keyword was also removed here.
 
+Knip cleans up the whole or part of export declarations:
+
+```diff title="file.js"
+const Snake = 'snake';
+const Owl = 'owl';
+const Hawk = 'tuah';
+-export { Snake, Owl };
+-export { Hawk };
++;
++;
+```
+
 Knip cleans up the whole or part of re-exports:
 
 ```diff title="file.js"
@@ -118,7 +130,7 @@ Knip cleans up the whole or part of re-exports:
 +export { Elephant } from './jungle'
 ```
 
-Sometimes lines can be removed completely:
+Lines like the following are removed completely:
 
 ```diff title="file.js"
 -module.exports.UNUSED = 1;
@@ -144,18 +156,22 @@ Unused dependencies are removed from `package.json`:
  }
 ```
 
+Knip does not remove empty export declaration bindings, it only removes the
+individual exported items:
+
+```diff title="file.js"
+-export const { a, b  } = { a, b };
++export const { ,  } = { a, b };
+
+-export const [c, d] = [c, d];
++export const [, ] = [c, d];
+```
+
 ## What's not included
 
 Operations that auto-fix does not yet perform include:
 
 - Add unlisted (dev) dependencies to `package.json`
 - Remove unused class and enum members
-- Remove empty export declarations for less common cases, e.g.:
-
-```ts
-export const { ,  } = { a, b };
-
-export const [, ] = [c, d];
-```
 
 [1]: ../reference/issue-types.md

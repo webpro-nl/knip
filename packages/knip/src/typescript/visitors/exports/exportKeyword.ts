@@ -18,9 +18,10 @@ export default visit(
 
     if (exportKeyword) {
       const getFix = (node: ts.Node, defaultKeyword?: ts.Node): Fix =>
-        isFixExports ? [node.getStart(), (defaultKeyword ?? node).getEnd() + 1] : undefined;
-      const getElementFix = (node: ts.Node): Fix => (isFixExports ? [node.getStart(), node.getEnd()] : undefined);
-      const getTypeFix = (node: ts.Node): Fix => (isFixTypes ? [node.getStart(), node.getEnd() + 1] : undefined);
+        isFixExports ? [node.getStart(), (defaultKeyword ?? node).getEnd() + 1, false] : undefined;
+      const getElementFix = (node: ts.Node): Fix =>
+        isFixExports ? [node.getStart(), node.getEnd(), false] : undefined;
+      const getTypeFix = (node: ts.Node): Fix => (isFixTypes ? [node.getStart(), node.getEnd() + 1, false] : undefined);
 
       if (ts.isVariableStatement(node)) {
         // @ts-expect-error TODO Issue seems caused by mismatch between returned `node` types (but all ts.Node)

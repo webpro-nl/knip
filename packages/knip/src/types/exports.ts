@@ -3,7 +3,7 @@ import type { SymbolType } from './issues.js';
 
 type Identifier = string;
 
-type ExportPosTuple = [number, number];
+type ExportPosTuple = [number, number, boolean];
 export type Fix = ExportPosTuple | undefined;
 export type Fixes = Array<ExportPosTuple>;
 

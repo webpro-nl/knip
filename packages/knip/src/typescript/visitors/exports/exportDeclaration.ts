@@ -22,7 +22,7 @@ export default visit(
           // const symbol = element.symbol ?? declarations?.get(identifier)?.find((d: ts.Node) => d !== element)?.symbol;
           const symbol = declarations?.get(propName ?? identifier)?.[0]?.symbol;
           const pos = element.name.pos;
-          const fix: Fix = isFixExports || isFixTypes ? [element.getStart(), element.getEnd()] : undefined;
+          const fix: Fix = isFixExports || isFixTypes ? [element.getStart(), element.getEnd(), true] : undefined;
           return { node: element, symbol, identifier, type, pos, fix };
         });
       }

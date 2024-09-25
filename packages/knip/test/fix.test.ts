@@ -25,7 +25,11 @@ export const z = x + y;
 
 export const { ,  } = { a: 1, b: 1 };
 
-export const [, ] = [1, 2];
+export const [, ] = [3, 4];
+
+export const [, f] = [5, 6];
+
+export const [g, , i] = [7, 8, 9];
 
 class MyClass {}
 
@@ -53,19 +57,24 @@ module.exports = { identifier,  };
     [
       'reexports.js',
       await readContents('reexports.js'),
-      `export { RangeSlider } from './reexported';
-export { Rating } from './reexported';
+      `;
+;
 export { One } from './reexported';
-export { Col, Col as KCol } from './reexported';
-export { Row as KRow, Row } from './reexported';
+;
+;
 `,
     ],
     [
-      'reexported.js',
-      await readContents('reexported.js'),
+      'reexported.ts',
+      await readContents('reexported.ts'),
       `const Two = 2;
-const Three = 2;
+const Three = 3;
+const Four = 4;
+const Five = 5;
 
+;
+
+;
 
 export const One = 1;
 `,
@@ -102,8 +111,8 @@ export const One = 1;
   assert(issues.exports['mod.ts']['default']);
   assert(issues.exports['mod.ts']['x']);
   assert(issues.exports['mod.ts']['y']);
-  assert(issues.exports['reexported.js']['Three']);
-  assert(issues.exports['reexported.js']['Two']);
+  assert(issues.exports['reexported.ts']['Three']);
+  assert(issues.exports['reexported.ts']['Two']);
 
   // check ignore
   assert(issues.exports['ignored.ts'] === undefined);
@@ -138,7 +147,11 @@ export const z = x + y;
 
 export const { a, b } = { a: 1, b: 1 };
 
-export const [c, d] = [1, 2];
+export const [c, d] = [3, 4];
+
+export const [e, f] = [5, 6];
+
+export const [g, h, i] = [7, 8, 9];
 
 export default class MyClass {}
 
