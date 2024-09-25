@@ -11,7 +11,7 @@ export default visit(
       // export default 1;
       // export = identifier;
       const pos = node.getChildAt(1).getStart();
-      const fix: Fix = isFixExports ? [node.getStart(), node.getEnd() + 1] : undefined;
+      const fix: Fix = isFixExports ? { pos: [node.getStart(), node.getEnd() + 1] } : undefined;
       // @ts-expect-error We need the symbol in `addExport`
       const symbol = node.getSourceFile().locals?.get(node.expression.escapedText);
       return { node, symbol, identifier: 'default', type: SymbolType.UNKNOWN, pos, fix };

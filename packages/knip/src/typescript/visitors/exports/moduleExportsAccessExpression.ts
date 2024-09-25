@@ -16,7 +16,7 @@ export default visit(isJS, (node, { isFixExports }) => {
           // Pattern: module.exports.NAME
           const identifier = node.expression.left.name.getText();
           const pos = node.expression.left.name.pos;
-          const fix: Fix = isFixExports ? [node.getStart(), node.getEnd()] : undefined;
+          const fix: Fix = isFixExports ? { pos: [node.getStart(), node.getEnd()] } : undefined;
           return {
             node: node.expression.left.name,
             identifier,
@@ -30,7 +30,7 @@ export default visit(isJS, (node, { isFixExports }) => {
           if (ts.isObjectLiteralExpression(expr) && expr.properties.every(ts.isShorthandPropertyAssignment)) {
             // Pattern: module.exports = { identifier, identifier2 }
             return expr.properties.map(node => {
-              const fix: Fix = isFixExports ? [node.getStart(), node.getEnd()] : undefined;
+              const fix: Fix = isFixExports ? { pos: [node.getStart(), node.getEnd()] } : undefined;
               return { node, identifier: node.getText(), type: SymbolType.UNKNOWN, pos: node.getStart(), fix };
             });
           }
@@ -52,7 +52,7 @@ export default visit(isJS, (node, { isFixExports }) => {
         // Pattern: module.exports['NAME']
         const identifier = stripQuotes(node.expression.left.argumentExpression.getText());
         const pos = node.expression.left.argumentExpression.pos;
-        const fix: Fix = isFixExports ? [node.getStart(), node.getEnd()] : undefined;
+        const fix: Fix = isFixExports ? { pos: [node.getStart(), node.getEnd()] } : undefined;
         return {
           node: node.expression.left.argumentExpression,
           identifier,

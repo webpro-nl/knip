@@ -10,7 +10,7 @@ export default visit(isJS, (node, { isFixExports }) => {
       // Pattern: exports.NAME
       const identifier = node.left.name.getText();
       const pos = node.left.name.pos;
-      const fix: Fix = isFixExports ? [node.getStart(), node.getEnd()] : undefined;
+      const fix: Fix = isFixExports ? { pos: [node.getStart(), node.getEnd()] } : undefined;
       return {
         node: node.left.name,
         identifier,

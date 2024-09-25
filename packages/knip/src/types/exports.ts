@@ -3,9 +3,27 @@ import type { SymbolType } from './issues.js';
 
 type Identifier = string;
 
-type ExportPosTuple = [number, number];
-export type Fix = ExportPosTuple | undefined;
-export type Fixes = Array<ExportPosTuple>;
+export type ExportPosTuple = [number, number];
+
+export type ExportsWithElements = {
+  element: string;
+  // pos is a position of curve brackets "{ identifier, identifier2 }"
+  // in  "export { identifier, identifier2 };"
+  pos: ExportPosTuple;
+
+  allExportPos: ExportPosTuple;
+  allElements: string[];
+};
+
+export type CommonExport = {
+  pos: ExportPosTuple;
+};
+export type Fix = CommonExport | ExportsWithElements | undefined;
+export type Fixes = Array<Fix>;
+
+export const isFixForExportWithElements = (fix: Fix): fix is ExportsWithElements => {
+  return !!(fix as ExportsWithElements).element;
+};
 
 export type ExportNode = {
   node: ts.Node;

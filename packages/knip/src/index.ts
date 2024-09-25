@@ -375,6 +375,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       for (const [filePath, file] of graph.entries()) {
         const exportItems = file.exports?.exported;
 
+        // debugger
         if (!exportItems || exportItems.size === 0) continue;
 
         const workspace = chief.findWorkspaceByFilePath(filePath);

@@ -1,5 +1,5 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import type { Fixes } from './types/exports.js';
+import { type ExportsWithElements, type Fix, type Fixes, isFixForExportWithElements } from './types/exports.js';
 import type { Issues } from './types/issues.js';
 import { load, save } from './util/package-json.js';
 import { join, relative } from './util/path.js';
@@ -19,8 +19,8 @@ export class IssueFixer {
   isFixUnusedTypes = true;
   isFixUnusedExports = true;
 
-  unusedTypeNodes: Map<string, Set<[number, number]>> = new Map();
-  unusedExportNodes: Map<string, Set<[number, number]>> = new Map();
+  unusedTypeNodes: Map<string, Set<Fix>> = new Map();
+  unusedExportNodes: Map<string, Set<Fix>> = new Map();
 
   constructor({ isEnabled, cwd, fixTypes = [], isRemoveFiles }: Fixer) {
     this.isEnabled = isEnabled;
@@ -76,27 +76,36 @@ export class IssueFixer {
   private async removeUnusedExportKeywords(issues: Issues) {
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
-      const exportPositions: Fixes = [
+      const fixes: Fixes = [
         ...(this.isFixUnusedTypes ? (this.unusedTypeNodes.get(filePath) ?? []) : []),
         ...(this.isFixUnusedExports ? (this.unusedExportNodes.get(filePath) ?? []) : []),
-      ].sort((a, b) => b[0] - a[0]);
+      ].sort((a, b) => b!.pos[0] - a!.pos[0]); // TODO how to handle types?
 
+      // TODO add type guard
+      const exportPositions = fixes;
       if (exportPositions.length > 0) {
-        const sourceFileText = exportPositions.reduce(
-          (text, [start, end]) => text.substring(0, start) + text.substring(end),
-          await readFile(filePath, 'utf-8')
-        );
+        console.log(exportPositions);
+        const file = await readFile(filePath, 'utf-8');
+        const sourceFileText = exportPositions.reduce((text, fix) => {
+          if (isFixForExportWithElements(fix)) {
+            // TODO this could be called multiple times
+            const allElementFixesForExport = exportPositions
+              .filter(isFixForExportWithElements)
+              .filter(f => f.pos[0] === fix.pos[0] && f.pos[1] === fix.pos[1])
+              .map(f => f.element);
 
-        const withoutEmptyReExports = sourceFileText
-          .replaceAll(/export \{[ ,]+\};?\r?\n?/g, '')
-          .replaceAll(/export \{[ ,]+\} from ('|")[^'"]+('|");?\r?\n?/g, '')
-          .replaceAll(/\{(\s*,)+/g, '{')
-          .replaceAll(/(,\s*)+}/g, '}')
-          .replaceAll(/(\s*,\s*,\s*)+/g, ',')
-          // previous replacement leaves 2 commas for odd commas number
-          .replaceAll(/,,/g, ',');
+            const allElements = fix.allElements.filter(element => !allElementFixesForExport.includes(element));
+            debugger;
+            if (!allElements.length) {
+              return text.substring(0, fix!.allExportPos[0]) + text.substring(fix!.allExportPos[1]);
+            }
+            return text.substring(0, fix.pos[0]) + `{${allElements.join(', ')}}` + text.substring(fix.pos[1]);
+          } else {
+            return text.substring(0, fix!.pos[0]) + text.substring(fix!.pos[1]);
+          }
+        }, file);
 
-        await writeFile(filePath, withoutEmptyReExports);
+        await writeFile(filePath, sourceFileText);
 
         this.markExportFixed(issues, filePath);
       }
