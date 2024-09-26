@@ -10,9 +10,9 @@ export default visit(
     if (ts.isExportDeclaration(node)) {
       if (node.exportClause && ts.isNamedExports(node.exportClause)) {
         // Patterns:
-        // export { identifier, identifier2 };
+        // export { identifier, type identifier2 };
         // export type { Identifier, Identifier2 };
-        const type = node.isTypeOnly ? SymbolType.TYPE : SymbolType.UNKNOWN;
+        const nodeType = node.isTypeOnly ? SymbolType.TYPE : SymbolType.UNKNOWN;
         const sourceFile: BoundSourceFile = node.getSourceFile();
         const declarations = sourceFile.getNamedDeclarations?.();
         return node.exportClause.elements.map(element => {
@@ -22,7 +22,11 @@ export default visit(
           // const symbol = element.symbol ?? declarations?.get(identifier)?.find((d: ts.Node) => d !== element)?.symbol;
           const symbol = declarations?.get(propName ?? identifier)?.[0]?.symbol;
           const pos = element.name.pos;
-          const fix: Fix = isFixExports || isFixTypes ? [element.getStart(), element.getEnd(), true] : undefined;
+          const type = element.isTypeOnly ? SymbolType.TYPE : nodeType;
+          const fix: Fix =
+            (isFixExports && type !== SymbolType.TYPE) || (isFixTypes && type === SymbolType.TYPE)
+              ? [element.getStart(), element.getEnd(), true]
+              : undefined;
           return { node: element, symbol, identifier, type, pos, fix };
         });
       }
