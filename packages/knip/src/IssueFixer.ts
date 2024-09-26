@@ -54,7 +54,7 @@ export class IssueFixer {
     const relPath = relative(filePath);
 
     const types = [
-      ...(this.isFixUnusedTypes ? (['types', 'nsTypes'] as const) : []),
+      ...(this.isFixUnusedTypes ? (['types', 'nsTypes', 'classMembers', 'enumMembers'] as const) : []),
       ...(this.isFixUnusedExports ? (['exports', 'nsExports'] as const) : []),
     ];
 

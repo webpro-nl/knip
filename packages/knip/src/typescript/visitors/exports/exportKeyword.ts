@@ -100,7 +100,7 @@ export default visit(
                 // Naive, but [does.the.job()]
                 pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
                 type: SymbolType.MEMBER,
-                fix: undefined,
+                fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
               }))
           : [];
 
@@ -130,7 +130,7 @@ export default visit(
           identifier: stripQuotes(member.name.getText()),
           pos: member.name.getStart(),
           type: SymbolType.MEMBER,
-          fix: undefined,
+          fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING] as Fix) : undefined,
         }));
 
         return { node, identifier, type: SymbolType.ENUM, pos, members, fix };

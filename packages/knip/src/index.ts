@@ -445,7 +445,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                       if (!isReferenced) {
                         if (isIgnored) continue;
 
-                        collector.addIssue({
+                        const isIssueAdded = collector.addIssue({
                           type: 'enumMembers',
                           filePath,
                           workspace: workspace.name,
@@ -455,6 +455,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                           line: member.line,
                           col: member.col,
                         });
+
+                        if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                       } else if (isIgnored) {
                         for (const tagName of exportedItem.jsDocTags) {
                           if (tags[1].includes(tagName.replace(/^\@/, ''))) {
@@ -481,7 +483,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                       continue;
                     }
 
-                    collector.addIssue({
+                    const isIssueAdded = collector.addIssue({
                       type: 'classMembers',
                       filePath,
                       workspace: workspace.name,
@@ -491,6 +493,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                       line: member.line,
                       col: member.col,
                     });
+
+                    if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                   }
                 }
 

@@ -34,8 +34,8 @@ export const removeExport = ({ text, start, end, flags }: FixerOptions) => {
 
   if (flags % FIX_FLAGS.NONE) return beforeStart + afterEnd;
 
-  const exportKeyword = text.substring(start, end).trim();
-  if (exportKeyword === 'export' || exportKeyword === 'export default') return beforeStart + afterEnd;
+  const subject = text.substring(start, end).trim();
+  if (subject === 'export' || subject === 'export default') return beforeStart + afterEnd;
 
   let closingBracketOffset = -1;
   let commaOffset = -1;

@@ -47,6 +47,23 @@ test('Clean export (FIX_FLAGS.OBJECT_BINDING)', () => {
   }
 });
 
+test('Clean export (FIX_FLAGS.OBJECT_BINDING)', () => {
+  {
+    const text = 'export enum E { AB = 1, CD = 2 }';
+    assert.deepEqual(removeExport(getOpts(text, 'CD = 2', 1)), 'export enum E { AB = 1,  }');
+  }
+
+  {
+    const text = "export enum E { AB = 'AB', CD = 'CD', }";
+    assert.deepEqual(removeExport(getOpts(text, "AB = 'AB'", 1)), "export enum E {  CD = 'CD', }");
+  }
+
+  {
+    const text = 'export const { AB: A_B, CD: C_D } = fn();';
+    assert.deepEqual(removeExport(getOpts(text, 'AB: A_B', 1)), 'export const {  CD: C_D } = fn();');
+  }
+});
+
 test('Clean export (FIX_FLAGS.EMPTY_DECLARATION)', () => {
   {
     const text = 'export { AB }';
