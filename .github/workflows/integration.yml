@@ -69,9 +69,10 @@ jobs:
           - name: argos
             repo: argos-ci/argos
             commands: |
-              npm ci
-              npm add -D $PKG_URL
-              npm run knip
+              pnpm i -g pnpm
+              pnpm install
+              pnpm add -D -w $PKG_URL
+              pnpm run knip
 
           - name: eslint
             repo: eslint/eslint
