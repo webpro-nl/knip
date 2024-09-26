@@ -1,9 +1,9 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import type { Fix, Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
-import { cleanExport } from './util/clean-export.js';
 import { load, save } from './util/package-json.js';
 import { join, relative } from './util/path.js';
+import { removeExport } from './util/remove-export.js';
 
 interface Fixer {
   isEnabled: boolean;
@@ -46,7 +46,7 @@ export class IssueFixer {
 
   public async fixIssues(issues: Issues) {
     await this.removeUnusedFiles(issues);
-    await this.removeUnusedExportKeywords(issues);
+    await this.removeUnusedExports(issues);
     await this.removeUnusedDependencies(issues);
   }
 
@@ -74,7 +74,7 @@ export class IssueFixer {
     }
   }
 
-  private async removeUnusedExportKeywords(issues: Issues) {
+  private async removeUnusedExports(issues: Issues) {
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
       const types = (this.isFixUnusedTypes && this.unusedTypeNodes.get(filePath)) || [];
@@ -83,7 +83,7 @@ export class IssueFixer {
 
       if (exportPositions.length > 0) {
         const sourceFileText = exportPositions.reduce(
-          (text, [start, end, isCleanable]) => cleanExport({ text, start, end, isCleanable: Boolean(isCleanable) }),
+          (text, [start, end, flags]) => removeExport({ text, start, end, flags }),
           await readFile(filePath, 'utf-8')
         );
 

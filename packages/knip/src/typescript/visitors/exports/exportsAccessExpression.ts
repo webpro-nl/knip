@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { FIX_FLAGS } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import { isJS } from '../helpers.js';
@@ -10,7 +11,7 @@ export default visit(isJS, (node, { isFixExports }) => {
       // Pattern: exports.NAME
       const identifier = node.left.name.getText();
       const pos = node.left.name.pos;
-      const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), false] : undefined;
+      const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
       return {
         node: node.left.name,
         identifier,

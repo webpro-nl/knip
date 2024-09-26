@@ -23,7 +23,7 @@ enum McEnum {}
 
 export const z = x + y;
 
-export const { ,  } = { a: 1, b: 1 };
+export const {   } = { a: 1, b: 1 };
 
 export const [, ] = [3, 4];
 
@@ -46,6 +46,21 @@ export type U = number;
 `,
     ],
     [
+      'default-x.js',
+      await readContents('default-x.js'),
+      `const x = 1;
+
+
+export const dx = 1;
+`,
+    ],
+    [
+      'default.js',
+      await readContents('default.js'),
+      `export const d = 1;
+`,
+    ],
+    [
       'exports.js',
       await readContents('exports.js'),
       `const identifier = 1;
@@ -59,7 +74,7 @@ module.exports = { identifier,  };
       await readContents('reexports.js'),
       `;
 ;
-export { One,    Nine,  } from './reexported';
+export { One, Rectangle,    Nine,   setter } from './reexported';
 ;
 ;
 `,
@@ -76,6 +91,8 @@ const Five = 5;
 
 ;
 
+export { Four as Rectangle,  };
+
 type Six = any;
 type Seven = unknown;
 const Eight = 8;
@@ -86,6 +103,10 @@ type Ten = unknown[];
 export {   Nine,  };
 
 export const One = 1;
+
+const fn = () => ({ get: () => 1, set: () => 1 });
+
+export const {  set: setter } = fn();
 `,
     ],
     [
@@ -166,6 +187,36 @@ export default class MyClass {}
 
 /** @knipignore */
 export type U = number;
+`,
+    ],
+    [
+      'reexported.ts',
+      await readContents('reexported.ts'),
+      `const Two = 2;
+const Three = 3;
+const Four = 4;
+const Five = 5;
+
+export { Two, Three };
+
+export { Four as Fourth, Five as Fifth };
+
+export { Four as Rectangle, Five as Pentagon };
+
+type Six = any;
+type Seven = unknown;
+const Eight = 8;
+const Nine = 9;
+type Ten = unknown[];
+;
+
+export {  Eight, Nine,  };
+
+export const One = 1;
+
+const fn = () => ({ get: () => 1, set: () => 1 });
+
+export const { get: getter, set: setter } = fn();
 `,
     ],
   ];

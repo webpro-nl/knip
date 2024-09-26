@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { FIX_FLAGS } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import { compact } from '../../../util/array.js';
@@ -18,10 +19,10 @@ export default visit(
 
     if (exportKeyword) {
       const getFix = (node: ts.Node, defaultKeyword?: ts.Node): Fix =>
-        isFixExports ? [node.getStart(), (defaultKeyword ?? node).getEnd() + 1, false] : undefined;
-      const getElementFix = (node: ts.Node): Fix =>
-        isFixExports ? [node.getStart(), node.getEnd(), false] : undefined;
-      const getTypeFix = (node: ts.Node): Fix => (isFixTypes ? [node.getStart(), node.getEnd() + 1, false] : undefined);
+        isFixExports ? [node.getStart(), (defaultKeyword ?? node).getEnd() + 1, FIX_FLAGS.NONE] : undefined;
+
+      const getTypeFix = (node: ts.Node): Fix =>
+        isFixTypes ? [node.getStart(), node.getEnd() + 1, FIX_FLAGS.NONE] : undefined;
 
       if (ts.isVariableStatement(node)) {
         // @ts-expect-error TODO Issue seems caused by mismatch between returned `node` types (but all ts.Node)
@@ -31,7 +32,9 @@ export default visit(
             return compact(
               declaration.name.elements.map(element => {
                 if (ts.isIdentifier(element.name)) {
-                  const fix = getElementFix(element);
+                  const fix = isFixExports
+                    ? [element.getStart(), element.getEnd(), FIX_FLAGS.OBJECT_BINDING]
+                    : undefined;
                   return {
                     node: element,
                     identifier: element.name.escapedText.toString(),
@@ -48,7 +51,7 @@ export default visit(
             return compact(
               declaration.name.elements.map(element => {
                 if (ts.isBindingElement(element)) {
-                  const fix = getElementFix(element);
+                  const fix = isFixExports ? [element.getStart(), element.getEnd(), FIX_FLAGS.NONE] : undefined;
                   return {
                     node: element,
                     identifier: element.getText(),

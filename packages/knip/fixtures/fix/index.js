@@ -1,3 +1,5 @@
+import { d } from './default';
+import { dx } from './default-x';
 import _ from 'lodash';
 import { z, f, g, i } from './mod';
 import { USED } from './access';
@@ -5,6 +7,8 @@ import { identifier } from './exports';
 import { a } from './ignored';
 import * as NS from './reexports';
 
+d;
+dx;
 _;
 z;
 f;
@@ -14,4 +18,6 @@ USED;
 identifier;
 a;
 NS.One;
+NS.Rectangle;
 NS.Nine;
+NS.setter;

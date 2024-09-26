@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { FIX_FLAGS } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import { hasRequireCall, isModuleExportsAccess, stripQuotes } from '../../ast-helpers.js';
@@ -16,7 +17,7 @@ export default visit(isJS, (node, { isFixExports }) => {
           // Pattern: module.exports.NAME
           const identifier = node.expression.left.name.getText();
           const pos = node.expression.left.name.pos;
-          const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), false] : undefined;
+          const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
           return {
             node: node.expression.left.name,
             identifier,
@@ -30,7 +31,7 @@ export default visit(isJS, (node, { isFixExports }) => {
           if (ts.isObjectLiteralExpression(expr) && expr.properties.every(ts.isShorthandPropertyAssignment)) {
             // Pattern: module.exports = { identifier, identifier2 }
             return expr.properties.map(node => {
-              const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), true] : undefined;
+              const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
               return { node, identifier: node.getText(), type: SymbolType.UNKNOWN, pos: node.getStart(), fix };
             });
           }
@@ -52,7 +53,7 @@ export default visit(isJS, (node, { isFixExports }) => {
         // Pattern: module.exports['NAME']
         const identifier = stripQuotes(node.expression.left.argumentExpression.getText());
         const pos = node.expression.left.argumentExpression.pos;
-        const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), false] : undefined;
+        const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
         return {
           node: node.expression.left.argumentExpression,
           identifier,

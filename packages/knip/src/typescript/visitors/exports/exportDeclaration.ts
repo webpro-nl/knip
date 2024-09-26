@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { FIX_FLAGS } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import type { BoundSourceFile } from '../../SourceFile.js';
@@ -25,7 +26,7 @@ export default visit(
           const type = element.isTypeOnly ? SymbolType.TYPE : nodeType;
           const fix: Fix =
             (isFixExports && type !== SymbolType.TYPE) || (isFixTypes && type === SymbolType.TYPE)
-              ? [element.getStart(), element.getEnd(), true]
+              ? [element.getStart(), element.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.EMPTY_DECLARATION]
               : undefined;
           return { node: element, symbol, identifier, type, pos, fix };
         });
