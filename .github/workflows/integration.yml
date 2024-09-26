@@ -118,6 +118,16 @@ jobs:
               yarn add -D knip@$PKG_URL
               yarn knip
 
+          - name: freeCodeCamp
+            repo: freeCodeCamp/freeCodeCamp
+            commands: |
+              pnpm i -g pnpm
+              pnpm install
+              cp sample.env .env
+              pnpm run --dir client create:env
+              # No exit code, since freeCodeCamp project does not use Knip in CI
+              pnpm run knip:all --no-exit-code
+
     steps:
       - uses: actions/checkout@v4
 
