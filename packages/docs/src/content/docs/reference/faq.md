@@ -216,14 +216,17 @@ Also see [workspace sharing][5].
 
 TypeScript has a very good "Find references" feature, that you might be using in
 your IDE as well. Yet at scale this becomes too slow. That's why Knip builds up
-its own module graph to look up export usages. The added benefit is that this
-comprehensive graph is serializable (and thus cacheable) and potentially usable
-for other tools to build upon as well.
+its own module graph to look up export usages. Additional benefits for this
+comprehensive graph include:
 
-Knip does use `ts.findReferences` to find references to class members (i.e. when
-the issue type `classMembers` is included). In case analysis of exports requires
-type information of external dependencies, the [`--include-libs ` flag][1] will
-trigger the same.
+- serializable and cacheable
+- enables more features
+- usable for other tools to build upon as well
+
+Without sacrificing these benefits, Knip does use `ts.findReferences` to find
+references to class members (i.e. when the issue type `classMembers` is
+included). In case analysis of exports requires type information of external
+dependencies, the [`--include-libs ` flag][1] will trigger the same.
 
 ### Why can't I use path aliases to reference other workspaces?
 

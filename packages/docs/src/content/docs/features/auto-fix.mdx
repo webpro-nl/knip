@@ -1,22 +1,28 @@
 ---
 title: Auto-fix
-sidebar:
-  badge:
-    text: Experimental
-    variant: caution
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Badge } from '@astrojs/starlight/components';
 
 Run Knip as you normally would, and if the report looks good then run it again
-with the `--fix` flag to let Knip automatically apply fixes.
-
-Knip currently can fix these [issue types][1]:
+with the `--fix` flag to let Knip automatically apply fixes. It fixes the
+following [issue types][1]:
 
 - Remove `export` keyword for unused exports and exported types
+- Remove `export default` keywords for unused default exports
+- Remove exports, re-exports and exported types
+- Remove unused enum members
+- Remove unused class members (disabled by default)
 - Remove unused `dependencies` and `devDependencies` from `package.json`
 - Remove unused files
-- Works across workspaces in a monorepo
+
+:::caution
+
+Use a VCS (version control system) like Git to review and undo changes as
+necessary.
+
+:::
 
 ## Flags
 
@@ -46,22 +52,25 @@ knip --fix-type exports,types
 knip --fix-type exports --fix-type types   # same as above
 ```
 
-Use VCS/Git to review and undo changes if necessary.
-
 ## Post-fix
 
-After Knip has fixed issues, there are two things to consider:
+After Knip has fixed issues, there are four things to consider:
 
-### Unused variables
+### 1. Use a formatter
 
-Use tools like ESLint or Biome to find and remove unused variables inside files.
-This may result in more deleted code, and Knip may then find more unused code.
-Rinse and repeat!
+Use a tool like Prettier or Biome if the code needs formatting. Knip removes the
+minimum amount of code while leaving it in a working state.
 
-### Unused dependencies
+### 2. Unused variables
+
+Use a tool like ESLint or Biome to find and remove unused variables inside
+files. This may result in more deleted code, and Knip may then find more unused
+code. Rinse and repeat!
+
+### 3. Unused dependencies
 
 Verify changes in `package.json` and update dependencies using your package
-manager:
+manager.
 
 <Tabs syncKey="pm">
   <TabItem label="npm">
@@ -97,11 +106,51 @@ manager:
   </TabItem>
 </Tabs>
 
+### 4. Install unlisted dependencies
+
+If Knip reports unlisted dependencies or binaries, they should be installed.
+
+<Tabs syncKey="pm">
+  <TabItem label="npm">
+
+    ```shell
+    npm install unlisted-package
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm add unlisted-package
+    ```
+
+  </TabItem>
+
+  <TabItem label="bun">
+
+    ```shell
+    bun add unlisted-package
+    ```
+
+  </TabItem>
+
+  <TabItem label="yarn">
+
+    ```shell
+    yarn add unlisted-package
+    ```
+
+  </TabItem>
+</Tabs>
+
 ## Example results
+
+### Exports
 
 The `export` keyword for unused exports is removed:
 
-```diff title="file.js"
+```diff title="module.ts"
 -export const unused = 1;
 -export default class MyClass {}
 +const unused = 1
@@ -110,19 +159,21 @@ The `export` keyword for unused exports is removed:
 
 The `default` keyword was also removed here.
 
-Knip cleans up the whole or part of export declarations:
+Knip removes the whole or part of export declarations:
 
-```diff title="file.js"
-const Snake = 'snake';
-const Owl = 'owl';
-const Hawk = 'tuah';
--export { Snake, Owl };
--export { Hawk };
+```diff title="module.ts"
+type Snake = 'python' | 'anaconda';
+const Owl = 'Hedwig';
+const Hawk = 'Tony';
+-export type { Snake };
+-export { Owl, Hawk };
 +;
 +;
 ```
 
-Knip cleans up the whole or part of re-exports:
+### Re-exports
+
+Knip removes the whole or part of re-exports:
 
 ```diff title="file.js"
 -export { Cat, Dog } from './pets';
@@ -130,14 +181,87 @@ Knip cleans up the whole or part of re-exports:
 +export { Elephant } from './jungle'
 ```
 
-Lines like the following are removed completely:
+Also across any chain of re-exports:
+
+<Tabs>
+  <TabItem label="module.ts">
+
+    ```diff
+    export const Hawk = 'Tony';
+    -export const Owl = 'Hedwig';
+    +const Owl = 'Hedwig';
+    ```
+
+  </TabItem>
+
+  <TabItem label="barrel.ts">
+
+    ```diff
+    export * from './module.js';
+    ```
+
+  </TabItem>
+
+  <TabItem label="index.ts">
+
+    ```diff
+    -export { Hawk, Owl } from './barrel.js';
+    +export { Hawk } from './barrel.js'
+    ```
+
+  </TabItem>
+
+</Tabs>
+
+### Export assignments
+
+Knip removes individual exported items in "export assignments", but does not
+remove the entire export declaration if it's empty:
 
 ```diff title="file.js"
+-export const { a, b  } = fn();
++export const {   } = fn();
+
+-export const [c, d] = [c, d];
++export const [, ] = [c, d];
+```
+
+Reason: the right-hand side of the assignment might have side-effects. It's not
+safe to always remove the whole declaration. This could be improved in the
+future (feel free to open an issue/RFC).
+
+### Enum members
+
+Unused members of enums are removed:
+
+```diff title="file.ts"
+export enum Directions {
+  North = 1,
+  East = 2,
+-  South = 3,
++
+  West = 4,
+}
+```
+
+### CommonJS
+
+Knip supports CommonJS and removes unused exports:
+
+```diff title="common.js"
+-module.exports = { identifier, unused };
++module.exports = { identifier,  };
+
 -module.exports.UNUSED = 1;
 -module.exports['ACCESS'] = 1;
 +
 +
 ```
+
+Warning: the right-hand side of such an assignment might have side-effects. Knip
+currently removes the whole declaration (feel free to open an issue/RFC).
+
+### Dependencies
 
 Unused dependencies are removed from `package.json`:
 
@@ -156,22 +280,44 @@ Unused dependencies are removed from `package.json`:
  }
 ```
 
-Knip does not remove empty export declaration bindings, it only removes the
-individual exported items:
+### Class members   <Badge text="experimental" variant="caution" />
 
-```diff title="file.js"
--export const { a, b  } = { a, b };
-+export const { ,  } = { a, b };
+Unused members of classes can be removed:
 
--export const [c, d] = [c, d];
-+export const [, ] = [c, d];
+```diff title="file.ts"
+export class Rectangle {
+  constructor(public width: number, public height: number) {}
+
+-  static Key = 1;
++
+
+  area() {
+    return this.width * this.height;
+  }
+
+-  public get unusedGetter(): string {
+-    return 'unusedGetter';
+-  }
+}
 ```
+
+Currently Knip might be too eager removing class members when they're not
+referenced internally but meant to be called by an external library. For
+instance, Knip might think `componentDidMount` and `render` in React class
+component are unused and will remove those.
+
+Note that [`classMembers` aren't included by default][2].
 
 ## What's not included
 
-Operations that auto-fix does not yet perform include:
+Operations that auto-fix does not (yet) perform and why:
 
-- Add unlisted (dev) dependencies to `package.json`
-- Remove unused class and enum members
+- Add unlisted (dev) dependencies to `package.json` (should it go into
+  `dependencies` or `devDependencies`? For monorepos in current workspace or
+  root?)
+- Add unlisted binaries (which package and package version contains the used
+  binary?)
+- Fix duplicate exports (which one should removed?)
 
 [1]: ../reference/issue-types.md
+[2]: ../guides/handling-issues.mdx#class-members
