@@ -36,6 +36,9 @@ Options:
   --no-exit-code           Always exit with code zero (0)
   --max-issues             Maximum number of issues before non-zero exit code (default: 0)
   -d, --debug              Show debug output
+  --trace                  Show trace output
+  --trace-export [name]    Show trace output for named export(s)
+  --trace-file [file]      Show trace output for exports in file
   --performance            Measure count and running time of expensive functions and display stats table
   -h, --help               Print this help text
   -V, --version            Print version
