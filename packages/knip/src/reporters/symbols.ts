@@ -19,7 +19,7 @@ const logIssueRecord = (issues: Issue[]) => {
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
     const cell = `${relative(issue.filePath)}${pos}`;
     table.cell('filePath', print(cell));
-    issue.isFixed && table.cell('fixed', print('(fixed)'));
+    issue.isFixed && table.cell('fixed', print('(removed)'));
     table.newRow();
   }
   console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
@@ -41,7 +41,7 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
           title && logTitle(title, issuesForType.length);
           for (const issue of issuesForType) {
             const relPath = toRelative(issue.filePath);
-            if (issue.isFixed) console.log(picocolors.gray(`${relPath} (deleted)`));
+            if (issue.isFixed) console.log(picocolors.gray(`${relPath} (removed)`));
             else if (issue.severity === 'warn') console.log(picocolors.gray(relPath));
             else console.log(relPath);
           }
