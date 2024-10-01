@@ -19,57 +19,6 @@ environment variables set.
 If it isn't clear what's throwing the exception, try another run with `--debug`
 to locate the cause of the issue with more details.
 
-### The CJS build of Vite's Node API is deprecated
-
-```
-The CJS build of Vite's Node API is deprecated. See https://vitejs.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
-```
-
-Only a warning, but can be suppressed by setting the `VITE_CJS_IGNORE_WARNING`
-environment variable:
-
-```
-VITE_CJS_IGNORE_WARNING=1 knip
-```
-
-### Config files using ESM features
-
-Knip may fail when a plugin tries to load a TypeScript configuration file (e.g.
-`vite.config.ts`) with an error message like one of these:
-
-```
-SyntaxError: Cannot use 'import.meta' outside a module
-...
-SyntaxError: await is only valid in async functions and the top level bodies of modules
-...
-SyntaxError: missing ) after argument list
-...
-SyntaxError: Unexpected identifier 'Promise'
-...
-TypeError: Reflect.metadata is not a function
-...
-Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in [...]/node_modules/estree-walker/package.json
-```
-
-This is caused by Knip using [jiti][5] to load and execute TypeScript
-configuration files that contains ESM syntax (such as top-level await), which
-may incorrectly consider it as CommonJS (instead of not transforming ESM).
-
-Potential workarounds:
-
-- Turn the configuration file from TS into JS (e.g. `vitest.config.ts` →
-  `vitest.config.js`). Knip loads modules directly using native `import()`
-  calls.
-- Use Bun with [knip-bun][6].
-- [Disable the plugin][7] (not recommended, try the other options first).
-
-Use `knip --debug` in a monorepo to help locate where the error is coming from.
-
-Issues like [#72][8] and [#194][9] are hopefully fixed in [jiti v2][10]. By the
-way, nothing but love for jiti (it's awesome).
-
-[GitHub Issue #565][11]
-
 ### Path aliases in config files
 
 Loading the configuration file (e.g. `cypress.config.ts`) for one of Knip's
@@ -84,7 +33,9 @@ Require stack:
 ```
 
 Some tools (such as Cypress and Jest) support using TypeScript path aliases in
-the configuration file. Unfortunately jiti does not seem to support this.
+the configuration file. Jiti does support aliases, but in a different format
+compared to `tsconfig.json#compilerOptions.paths` and `knip.json#paths` (e.g.
+the target values are not arrays).
 
 Potential workarounds:
 
