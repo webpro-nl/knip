@@ -226,7 +226,7 @@ Available [issue types][13] when filtering output using `--include` or
 
 ### `--exclude`
 
-Exclude provided issue type(s) from report. Can be comma-separated or repeated.
+Exclude provided issue types from report. Can be comma-separated or repeated.
 
 Example:
 
@@ -237,7 +237,7 @@ knip --exclude classMembers --exclude enumMembers
 
 ### `--include`
 
-Report only provided issue type(s). Can be comma-separated or repeated.
+Report only provided issue types. Can be comma-separated or repeated.
 
 Example:
 
@@ -333,7 +333,7 @@ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the reporter(s).
+Preprocess the results before providing it to the reporters.
 
 Can be repeated. Examples:
 

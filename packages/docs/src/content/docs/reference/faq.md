@@ -281,7 +281,7 @@ dependencies.
 Knip includes basic "compilers" for a few common file types (Astro, MDX, Svelte,
 Vue). Knip does not include actual compilers for reasons of potential
 incompatibility with the existing compiler, and dependency size. Knip allows to
-override them with the compiler(s) in your project, and add additional ones for
+override them with the compilers in your project, and add additional ones for
 other file types.
 
 ### Why are the exports of my `.vue` files not used?

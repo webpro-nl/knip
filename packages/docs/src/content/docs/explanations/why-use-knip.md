@@ -103,9 +103,9 @@ consider comments like the following:
 ```
 
 Maybe you wonder why Knip does not have similar comments like `// knip-ignore`
-so you can easily get rid of false positives? A variety of reasons:
+so you can get rid of false positives? A variety of reasons:
 
-1. A false positive may be a bug in Knip, and should be reported (not easily
+1. A false positive may be a bug in Knip, and should be reported (not
    dismissed).
 2. Instead of proprietary comments, use [standardized annotations][11] serving
    as documentation as well.

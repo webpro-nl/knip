@@ -7,7 +7,7 @@ This page is an overview of related features Knip does not support.
 ## Unused variables
 
 Knip doesn't look for unused variables within a file. It looks for exported and
-imported values and types.
+imported values and types across files.
 
 Use [ESLint][1], [Biome][2] or [oxc][3] to find unused variables within files.
 
@@ -17,7 +17,8 @@ Knip does not yet support finding unused members of types, interfaces and
 objects. This includes returned objects from exported functions and objects
 passed as React component props.
 
-Knip does support finding unused members of enums and classes.
+Knip does support finding unused members of enums and classes, and exported
+values and types on imported namespaces.
 
 ## Circular dependencies
 

@@ -105,9 +105,9 @@ Markdown tables separated by issue types as headings, for example:
 
 ## Custom Reporters
 
-When the provided built-in reporters are not quite sufficient, a custom local
-reporter can be implemented or an external reporter can be used. Multiple
-reporters can be used at once by repeating the `--reporter` argument.
+When the provided built-in reporters are not sufficient, a custom local reporter
+can be implemented or an external reporter can be used. Multiple reporters can
+be used at once by repeating the `--reporter` argument.
 
 The results are passed to the function from its default export and can be used
 to write issues to `stdout`, a JSON or CSV file, or sent to a service. It
@@ -166,8 +166,8 @@ A preprocessor is a function that runs after the analysis is finished. It
 receives the results from the analysis and should return data in the same
 shape/structure (unless you pass it to only your own reporter).
 
-The data goes through the preprocessor(s) before the final data is passed to the
-reporter(s). There are no built-in preprocessors. Just like reporters, use e.g.
+The data goes through the preprocessors before the final data is passed to the
+reporters. There are no built-in preprocessors. Just like reporters, use e.g.
 `--preprocessor ./my-preprocessor` from the command line (can be repeated).
 
 The default export of the preprocessor should be a function with this interface:
