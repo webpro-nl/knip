@@ -5,7 +5,6 @@ import { join } from './path.js';
 const empty = join(fileURLToPath(import.meta.url), '../empty.js');
 
 const options = {
-  interopDefault: true,
   alias: {
     '@rushstack/eslint-config/patch/modern-module-resolution': empty,
     '@rushstack/eslint-patch/modern-module-resolution': empty,
