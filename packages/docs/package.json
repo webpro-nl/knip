@@ -32,7 +32,7 @@
     "@astrojs/markdown-remark": "^5.2.0",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "4.15.8",
+    "astro": "4.15.10",
     "hastscript": "9.0.0",
     "picocolors": "^1.1.0",
     "rehype-autolink-headings": "^7.1.0",
