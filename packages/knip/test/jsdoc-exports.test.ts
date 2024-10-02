@@ -14,10 +14,10 @@ test('Find exports from jsdoc @type tags', async () => {
     tags: [[], ['ignoreunresolved']],
   });
 
-  assert(issues.exports['module.js']['alphaFn']);
-  assert(issues.exports['module.js']['internalUnusedFn']);
-  assert(issues.exports['module.js']['invalidTaggedFn']);
-  assert(issues.exports['module.js']['unusedFn']);
+  assert(issues.exports['module.ts']['alphaFn']);
+  assert(issues.exports['module.ts']['internalUnusedFn']);
+  assert(issues.exports['module.ts']['invalidTaggedFn']);
+  assert(issues.exports['module.ts']['unusedFn']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -35,9 +35,9 @@ test('Find exports from jsdoc @type tags (production)', async () => {
     tags: [[], ['ignoreunresolved']],
   });
 
-  assert(issues.exports['module.js']['alphaFn']);
-  assert(issues.exports['module.js']['invalidTaggedFn']);
-  assert(issues.exports['module.js']['unusedFn']);
+  assert(issues.exports['module.ts']['alphaFn']);
+  assert(issues.exports['module.ts']['invalidTaggedFn']);
+  assert(issues.exports['module.ts']['unusedFn']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
