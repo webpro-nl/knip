@@ -24,3 +24,12 @@ test('parseAndConvertGitignorePatterns (ancestor)', async () => {
     { negated: false, patterns: ['c', 'c/**'] },
   ]);
 });
+
+test('parseAndConvertGitignorePatterns (hashes)', async () => {
+  const gitignorePatterns = ['#comment', 'ends-with-hash#', String.raw`\#starts-with-hash`];
+  const globPatterns = parse(gitignorePatterns.join(EOL));
+  assert.deepEqual(globPatterns, [
+    { negated: false, patterns: ['**/ends-with-hash#', '**/ends-with-hash#/**'] },
+    { negated: false, patterns: ['**/#starts-with-hash', '**/#starts-with-hash/**'] },
+  ]);
+});
