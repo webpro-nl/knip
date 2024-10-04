@@ -7,6 +7,10 @@ interface ReporterConfig {
   reporterEnabled: string;
 }
 
+// see https://docs.cypress.io/guides/tooling/reporters
+const BUILT_IN_REPORTERS: ReadonlyArray<string> = ['spec', 'junit', 'teamcity'] as const;
+const IS_NOT_BUILT_IN_REPORTER = (reporter: string) => !BUILT_IN_REPORTERS.includes(reporter);
+
 export const resolveDependencies = async (config: CypressConfig, options: PluginOptions) => {
   const { reporter } = config;
   const { configFileDir } = options;
@@ -33,5 +37,5 @@ export const resolveDependencies = async (config: CypressConfig, options: Plugin
       }
     }
   }
-  return [...reporters];
+  return [...reporters].filter(IS_NOT_BUILT_IN_REPORTER);
 };
