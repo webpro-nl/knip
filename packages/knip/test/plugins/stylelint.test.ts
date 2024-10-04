@@ -22,7 +22,7 @@ test('Find dependencies with the stylelint plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 3,
+    unlisted: 4,
     processed: 0,
     total: 0,
   });
