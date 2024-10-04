@@ -285,7 +285,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           skipTypeOnly: isStrict,
           isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
           isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
-          ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
+          ignoreExportsUsedInFile: chief.config.ignoreExportsUsedInFile,
           isReportClassMembers,
           tags,
         },

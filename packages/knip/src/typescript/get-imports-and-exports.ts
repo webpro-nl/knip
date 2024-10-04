@@ -2,6 +2,7 @@ import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { ALIAS_TAG, ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
 import type { Tags } from '../types/cli.js';
+import type { IgnoreExportsUsedInFile } from '../types/config.js';
 import type { ExportMap, ExportMember, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
@@ -23,9 +24,8 @@ import {
   isDestructuring,
   isImportSpecifier,
   isReferencedInExportedType,
-  isTypeDeclaration,
 } from './ast-helpers.js';
-import { findInternalReferences } from './find-internal-references.js';
+import { findInternalReferences, isType } from './find-internal-references.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getImportsFromPragmas } from './visitors/helpers.js';
@@ -61,7 +61,7 @@ export type GetImportsAndExportsOptions = {
   isFixExports: boolean;
   isFixTypes: boolean;
   isReportClassMembers: boolean;
-  ignoreExportsUsedInFile: boolean;
+  ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   tags: Tags;
 };
 
@@ -301,12 +301,8 @@ const getImportsAndExports = (
       result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
     }
 
-    // Skip some work by handling only top-level import/export assignments
-    const isTopLevel =
-      node.parent &&
-      ('commonJsModuleIndicator' in sourceFile
-        ? node.parent.parent === sourceFile || node.parent === sourceFile
-        : node.parent === sourceFile);
+    // @ts-expect-error Skip work by handling only top-level import/export assignments
+    const isTopLevel = node !== sourceFile && ts.isInTopLevelContext(node);
 
     if (isTopLevel) {
       for (const visitor of visitors.import) {
@@ -327,12 +323,14 @@ const getImportsAndExports = (
 
     if (ts.isIdentifier(node)) {
       const id = String(node.escapedText);
-      const symbol = sourceFile.locals?.get(id);
+      const local = sourceFile.locals?.get(id);
+      // @ts-expect-error
+      const symbol = node.symbol ?? node.parent.symbol ?? local;
+      const importedFilePath = importedInternalSymbols.get(symbol) ?? (local && importedInternalSymbols.get(local));
       if (symbol) {
-        const importedSymbolFilePath = importedInternalSymbols.get(symbol);
-        if (importedSymbolFilePath) {
+        if (importedFilePath) {
           if (!isImportSpecifier(node)) {
-            const imports = internalImports.get(importedSymbolFilePath);
+            const imports = internalImports.get(importedFilePath);
             if (imports) {
               traceRefs.add(id);
               if (isAccessExpression(node.parent)) {
@@ -373,11 +371,10 @@ const getImportsAndExports = (
         }
 
         if (
-          (ignoreExportsUsedInFile || isTypeDeclaration(node) || ts.isClassDeclaration(node)) &&
           !isTopLevel &&
-          isReferencedInExportedType(node)
+          symbol.exportSymbol &&
+          (ts.isTypeQueryNode(node.parent) || isReferencedInExportedType(node))
         ) {
-          // @ts-expect-error
           referencedSymbolsInExportedTypes.add(symbol.exportSymbol);
         }
       }
@@ -403,9 +400,15 @@ const getImportsAndExports = (
   const pragmaImports = getImportsFromPragmas(sourceFile);
   if (pragmaImports) for (const node of pragmaImports) addImport(node, sourceFile);
 
-  const isSetRefs = ignoreExportsUsedInFile;
   for (const item of exports.values()) {
-    if (isSetRefs === true || (typeof isSetRefs === 'object' && item.type !== 'unknown' && !!isSetRefs[item.type])) {
+    const isType_ = isType(item);
+    if (item.symbol && referencedSymbolsInExportedTypes.has(item.symbol)) {
+      item.refs = [1, true];
+    } else if (
+      ignoreExportsUsedInFile === true ||
+      (typeof ignoreExportsUsedInFile === 'object' && item.type !== 'unknown' && ignoreExportsUsedInFile[item.type]) ||
+      isType_
+    ) {
       item.refs = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExportedTypes);
     }
     for (const member of item.members) {

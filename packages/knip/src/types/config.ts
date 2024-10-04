@@ -40,6 +40,8 @@ export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Part
 
 type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
 
+export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+
 export interface Configuration {
   rules: Rules;
   include: IssueType[];
@@ -47,7 +49,7 @@ export interface Configuration {
   ignore: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
-  ignoreExportsUsedInFile: boolean | Partial<Record<IgnorableExport, boolean>>;
+  ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   ignoreMembers: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
