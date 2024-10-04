@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/cypress",
+  "name": "@fixtures/cypress-builtin-reporter",
   "devDependencies": {
     "cypress": "*",
     "cypress-multi-reporters": "*",
