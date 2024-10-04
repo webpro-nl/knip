@@ -325,8 +325,7 @@ Also see [production mode][7].
 
 ### Why doesn't Knip have...?
 
-Features that have been requested and could be implemented or opened up to
-extend Knip include:
+Examples of features that have been requested include:
 
 - Expose programmatic API
 - Add local/custom plugins
@@ -336,9 +335,16 @@ extend Knip include:
   - Unused object members (and e.g. React component props)
   - Unused object props in function return values
 - Analyze workspaces in parallel
+- Plugins for editors like VS Code and WebStorm (LSP-based?)
+- Support Deno
+- Improve internal code structures and accessibility to support contributions
+- One-shot dead code removal (more comprehensive removal of unused variables,
+  duplicate exports, dead code, etc).
+- Replace dependencies for better performance and correctness, such as for shell
+  script parsing, module resolution and globbing with "unignores".
 
-These are all interesting ideas, but do increase the API surface area. This
-would mean more development efforts and maintenance. Time is limited and
+These are all interesting ideas, but most increase the API surface area, and all
+require more development efforts and maintenance. Time is limited and
 [sponsorships][8] currently don't cover - this can change though!
 
 [1]: ../guides/handling-issues.mdx#external-libraries
