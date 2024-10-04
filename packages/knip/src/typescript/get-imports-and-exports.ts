@@ -23,6 +23,7 @@ import {
   isDestructuring,
   isImportSpecifier,
   isReferencedInExportedType,
+  isTypeDeclaration,
 } from './ast-helpers.js';
 import { findInternalReferences } from './find-internal-references.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -371,7 +372,11 @@ const getImportsAndExports = (
           }
         }
 
-        if (ignoreExportsUsedInFile && !isTopLevel && isReferencedInExportedType(node)) {
+        if (
+          (ignoreExportsUsedInFile || isTypeDeclaration(node) || ts.isClassDeclaration(node)) &&
+          !isTopLevel &&
+          isReferencedInExportedType(node)
+        ) {
           // @ts-expect-error
           referencedSymbolsInExportedTypes.add(symbol.exportSymbol);
         }
