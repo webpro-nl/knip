@@ -520,6 +520,10 @@
           "title": "tailwind plugin configuration (https://knip.dev/reference/plugins/tailwind)",
           "$ref": "#/definitions/plugin"
         },
+        "travis": {
+          "title": "travis plugin configuration (https://knip.dev/reference/plugins/travis)",
+          "$ref": "#/definitions/plugin"
+        },
         "tsup": {
           "title": "tsup plugin configuration (https://knip.dev/reference/plugins/tsup)",
           "$ref": "#/definitions/plugin"

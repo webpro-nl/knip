@@ -137,6 +137,7 @@ const pluginsSchema = z.object({
   svelte: pluginSchema,
   syncpack: pluginSchema,
   tailwind: pluginSchema,
+  travis: pluginSchema,
   tsup: pluginSchema,
   typedoc: pluginSchema,
   typescript: pluginSchema,

@@ -196,7 +196,7 @@ const isExported = (node: ts.Node): boolean => {
   return node.parent ? isExported(node.parent) : false;
 };
 
-const isTypeDeclaration = (node: ts.Node) =>
+export const isTypeDeclaration = (node: ts.Node) =>
   ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node);
 
 const getAncestorTypeDeclaration = (node: ts.Node) => {
