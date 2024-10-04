@@ -13,7 +13,7 @@ export const findInternalReferences = (
   typeChecker: ts.TypeChecker,
   referencedSymbolsInExportedTypes: Set<ts.Symbol>
 ): [number, boolean] => {
-  if (!item.symbol) return [0, false];
+  if (!item.symbol || item.identifier === '') return [0, false];
 
   if (item.symbol.flags & ts.SymbolFlags.AliasExcludes) return [1, false];
 
