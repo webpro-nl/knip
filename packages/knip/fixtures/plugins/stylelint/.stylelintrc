@@ -1,4 +1,5 @@
 {
+  "customsyntax": "postcss-less",
   "extends": ["stylelint-config-standard", "./myExtendableConfig"],
   "plugins": ["stylelint-order"],
   "rules": {
