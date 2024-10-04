@@ -29,7 +29,8 @@ export const getBinariesFromScript = (script: string, options: GetDependenciesFr
     nodes.flatMap(node => {
       switch (node.type) {
         case 'Command': {
-          const binary = node.name?.text ? trimBinary(node.name.text) : node.name?.text;
+          const text = node.name?.text;
+          const binary = text ? trimBinary(text) : text;
 
           const commandExpansions =
             node.prefix
@@ -71,7 +72,7 @@ export const getBinariesFromScript = (script: string, options: GetDependenciesFr
 
           // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
           // Actions, which are provisioned with lots of unknown global binaries.
-          if (options.knownGlobalsOnly) return [];
+          if (options.knownGlobalsOnly && !text?.startsWith('.')) return [];
 
           // We apply a kitchen sink fallback resolver for everything else
           return [...FallbackResolver.resolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
