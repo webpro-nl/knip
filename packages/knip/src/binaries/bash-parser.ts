@@ -44,7 +44,6 @@ export const getBinariesFromScript = (script: string, options: GetDependenciesFr
           // Bunch of early bail outs for things we can't or don't want to resolve
           if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
           if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
-          if (['deno'].includes(binary)) return [];
 
           const args = node.suffix?.map(arg => arg.text) ?? [];
 

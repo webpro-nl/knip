@@ -134,7 +134,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
 
-export const IGNORED_RUNTIME_DEPENDENCIES = new Set(['bun']);
+export const IGNORED_RUNTIME_DEPENDENCIES = new Set(['bun', 'deno']);
 
 export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.avif',
