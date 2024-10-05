@@ -169,6 +169,7 @@ export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
   name.elements.map(element => element.name.getText());
 
 export const isConsiderReferencedNS = (node: ts.Identifier) =>
+  ts.isPropertyAssignment(node.parent) ||
   ts.isShorthandPropertyAssignment(node.parent) ||
   (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
   ts.isSpreadAssignment(node.parent) ||
