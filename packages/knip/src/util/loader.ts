@@ -37,7 +37,7 @@ const load = async (filePath: string) => {
       return await loadTOML(filePath);
     }
 
-    return await jiti.import(filePath);
+    return await jiti.import(filePath, { default: true });
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
