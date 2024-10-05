@@ -176,6 +176,15 @@ export const isConsiderReferencedNS = (node: ts.Identifier) =>
   (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent);
 
+const objectEnumerationMethods = new Set(['keys', 'entries', 'values', 'getOwnPropertyNames']);
+export const isObjectEnumerationCallExpressionArgument = (node: ts.Identifier) =>
+  ts.isCallExpression(node.parent) &&
+  node.parent.arguments.includes(node) &&
+  ts.isPropertyAccessExpression(node.parent.expression) &&
+  ts.isIdentifier(node.parent.expression.expression) &&
+  node.parent.expression.expression.escapedText === 'Object' &&
+  objectEnumerationMethods.has(String(node.parent.expression.name.escapedText));
+
 export const isTopLevel = (node: ts.Node) =>
   ts.isSourceFile(node.parent) || (node.parent && ts.isSourceFile(node.parent.parent));
 

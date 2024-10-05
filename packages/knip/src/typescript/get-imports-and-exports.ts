@@ -23,6 +23,7 @@ import {
   isConsiderReferencedNS,
   isDestructuring,
   isImportSpecifier,
+  isObjectEnumerationCallExpressionArgument,
   isReferencedInExportedType,
 } from './ast-helpers.js';
 import { findInternalReferences, isType } from './find-internal-references.js';
@@ -362,7 +363,7 @@ const getImportsAndExports = (
                   maybeAddAccessExpressionAsNsImport(ns, members);
                 } else if (imports.importedNs.has(id) && isConsiderReferencedNS(node)) {
                   imports.refs.add(id);
-                } else {
+                } else if (isObjectEnumerationCallExpressionArgument(node)) {
                   imports.refs.add(id);
                 }
               }
