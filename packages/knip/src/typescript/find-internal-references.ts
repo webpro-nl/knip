@@ -6,7 +6,7 @@ export const isType = (item: Export | ExportMember) =>
   item.type === 'type' || item.type === 'interface' || item.type === 'enum';
 
 // Find internal references to export item
-// Also detect usage of non-types within types (e.g. class or typeof within interface), as those should be exported as well
+// Detect usage of non-types within types (e.g. class or typeof within interface/type) to keep those exported
 export const findInternalReferences = (
   item: Export | ExportMember,
   sourceFile: ts.SourceFile,
