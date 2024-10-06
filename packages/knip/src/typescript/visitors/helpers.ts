@@ -17,7 +17,8 @@ export function getImportsFromPragmas(sourceFile: BoundSourceFile) {
         ? jsxImportSourcePragmas[jsxImportSourcePragmas.length - 1]
         : jsxImportSourcePragmas;
       const { factory: specifier } = jsxImportSourcePragma?.arguments ?? {};
-      if (specifier) importNodes.push({ specifier, isTypeOnly: true, identifier: '__jsx', pos: 0 });
+      const pos = jsxImportSourcePragma.range?.pos ?? 0;
+      if (specifier) importNodes.push({ specifier, isTypeOnly: true, identifier: '__jsx', pos });
     }
 
     const referencePragma = sourceFile.pragmas.get('reference');

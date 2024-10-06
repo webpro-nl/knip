@@ -19,6 +19,12 @@ type PragmaMap = {
     path?: { value?: string; pos?: number };
     types?: { value?: string; pos?: number };
   };
+  range?: {
+    kind?: number;
+    pos?: number;
+    end?: number;
+    hasTrailingNewLine?: boolean;
+  };
 };
 
 export interface BoundSourceFile extends ts.SourceFile {
