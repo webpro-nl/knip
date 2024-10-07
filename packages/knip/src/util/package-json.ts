@@ -47,11 +47,15 @@ export const getEntryPathsFromManifest = (
   manifest: PackageJson,
   sharedGlobOptions: { cwd: string; dir: string; gitignore: boolean; ignore: string[] }
 ) => {
-  const { main, bin, exports, types, typings } = manifest;
+  const { main, module, browser, bin, exports, types, typings } = manifest;
 
   const entryPaths = new Set<string>();
 
   if (typeof main === 'string') entryPaths.add(main);
+
+  if (typeof module === 'string') entryPaths.add(module);
+
+  if (typeof browser === 'string') entryPaths.add(browser);
 
   if (bin) {
     if (typeof bin === 'string') entryPaths.add(bin);
