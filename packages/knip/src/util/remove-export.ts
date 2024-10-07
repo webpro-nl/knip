@@ -38,18 +38,24 @@ export const removeExport = ({ text, start, end, flags }: FixerOptions) => {
   if (subject === 'export' || subject === 'export default') return beforeStart + afterEnd;
 
   let closingBracketOffset = -1;
-  let commaOffset = -1;
+  let removeAfterLength = -1;
 
   if (flags & FIX_FLAGS.OBJECT_BINDING) {
     let i = 0;
     while (i <= afterEnd.length) {
       const char = afterEnd[i];
       if (char === ',') {
-        commaOffset = i + 1;
+        removeAfterLength = i + 1;
+      } else if (flags & FIX_FLAGS.WITH_NEWLINE && (char === '\n' || char === '\r' || char === '\r\n')) {
+        removeAfterLength = i + 1;
       } else if (char === '}') {
         closingBracketOffset = i + 1;
+        if (flags & FIX_FLAGS.WITH_NEWLINE) removeAfterLength = i;
         break;
-      } else if (!/\s/.test(char)) break;
+      } else if (!/\s/.test(char)) {
+        if (flags & FIX_FLAGS.WITH_NEWLINE) removeAfterLength = i;
+        break;
+      }
       i++;
     }
   }
@@ -74,5 +80,5 @@ export const removeExport = ({ text, start, end, flags }: FixerOptions) => {
     }
   }
 
-  return beforeStart + (commaOffset === -1 ? afterEnd : afterEnd.substring(commaOffset));
+  return beforeStart + (removeAfterLength === -1 ? afterEnd : afterEnd.substring(removeAfterLength));
 };

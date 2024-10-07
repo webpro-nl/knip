@@ -130,7 +130,9 @@ export default visit(
           identifier: stripQuotes(member.name.getText()),
           pos: member.name.getStart(),
           type: SymbolType.MEMBER,
-          fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING] as Fix) : undefined,
+          fix: isFixTypes
+            ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
+            : undefined,
         }));
 
         return { node, identifier, type: SymbolType.ENUM, pos, members, fix };

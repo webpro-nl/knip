@@ -35,7 +35,7 @@ test('Clean export (FIX_FLAGS.NONE)', () => {
   }
 });
 
-test('Clean export (FIX_FLAGS.OBJECT_BINDING)', () => {
+test('Clean export (FIX_FLAGS.OBJECT_BINDING) - destructuring', () => {
   {
     const text = 'export const { AB, CD } = {};';
     assert.deepEqual(removeExport(getOpts(text, 'AB', 1)), 'export const {  CD } = {};');
@@ -47,7 +47,7 @@ test('Clean export (FIX_FLAGS.OBJECT_BINDING)', () => {
   }
 });
 
-test('Clean export (FIX_FLAGS.OBJECT_BINDING)', () => {
+test('Clean export (FIX_FLAGS.OBJECT_BINDING) - enum', () => {
   {
     const text = 'export enum E { AB = 1, CD = 2 }';
     assert.deepEqual(removeExport(getOpts(text, 'CD = 2', 1)), 'export enum E { AB = 1,  }');
@@ -61,6 +61,41 @@ test('Clean export (FIX_FLAGS.OBJECT_BINDING)', () => {
   {
     const text = 'export const { AB: A_B, CD: C_D } = fn();';
     assert.deepEqual(removeExport(getOpts(text, 'AB: A_B', 1)), 'export const {  CD: C_D } = fn();');
+  }
+});
+
+test('Clean export (FIX_FLAGS.WITH_NEWLINE)', () => {
+  {
+    const text = 'export enum E { AB = 1,\nCD = 2 }';
+    assert.deepEqual(removeExport(getOpts(text, 'AB = 1', 5)), 'export enum E { CD = 2 }');
+  }
+  {
+    const text = 'export enum E { AB = 1,\n CD = 2 }';
+    assert.deepEqual(removeExport(getOpts(text, 'AB = 1', 5)), 'export enum E { CD = 2 }');
+  }
+  {
+    const text = 'export enum E { AB = 1,\n CD = 2,\n EF = 3 }';
+    assert.deepEqual(removeExport(getOpts(text, 'CD = 2', 5)), 'export enum E { AB = 1,\n EF = 3 }');
+  }
+  {
+    const text = 'export enum E { AB = 1,CD = 2,EF = 3 }';
+    assert.deepEqual(removeExport(getOpts(text, 'CD = 2', 5)), 'export enum E { AB = 1,EF = 3 }');
+  }
+  {
+    const text = 'export enum E {\tAB = 1,\tCD = 2,\tEF = 3 }';
+    assert.deepEqual(removeExport(getOpts(text, 'CD = 2', 5)), 'export enum E {\tAB = 1,\tEF = 3 }');
+  }
+  {
+    const text = 'export enum E {\tAB = 1,\n\tCD = 2,\n\tEF = 3 }';
+    assert.deepEqual(removeExport(getOpts(text, 'CD = 2', 5)), 'export enum E {\tAB = 1,\n\tEF = 3 }');
+  }
+  {
+    const text = 'export enum E {\tAB = 1,\n\tCD = 2,\n\tEF = 3,\n}';
+    assert.deepEqual(removeExport(getOpts(text, 'EF = 3', 5)), 'export enum E {\tAB = 1,\n\tCD = 2,\n\t}');
+  }
+  {
+    const text = 'export enum E {\tAB = 1,\r\n\tCD = 2,\r\n\tEF = 3,\r\n}';
+    assert.deepEqual(removeExport(getOpts(text, 'EF = 3', 5)), 'export enum E {\tAB = 1,\r\n\tCD = 2,\r\n\t}');
   }
 });
 

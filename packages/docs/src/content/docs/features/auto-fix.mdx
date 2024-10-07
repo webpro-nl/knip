@@ -153,7 +153,7 @@ The `export` keyword for unused exports is removed:
 ```diff title="module.ts"
 -export const unused = 1;
 -export default class MyClass {}
-+const unused = 1
++const unused = 1;
 +class MyClass {}
 ```
 
@@ -239,7 +239,6 @@ export enum Directions {
   North = 1,
   East = 2,
 -  South = 3,
-+
   West = 4,
 }
 ```

@@ -207,4 +207,5 @@ export const FIX_FLAGS = {
   NONE: 0,
   OBJECT_BINDING: 1 << 0, // remove next comma
   EMPTY_DECLARATION: 1 << 1, // remove declaration if empty
+  WITH_NEWLINE: 1 << 2, // remove with newline
 } as const;

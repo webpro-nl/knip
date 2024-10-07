@@ -38,21 +38,12 @@ test('Remove exports and dependencies', async () => {
       'enums.ts',
       await readContents('enums.ts'),
       `export enum Directions {
-` +
-        '  ' +
-        `
   East = 2,
-` +
-        '  \n  ' +
-        `
-}
+  }
 
 export enum Fruits {
   apple = 'apple',
-` +
-        '  ' +
-        `
-}
+  }
 `,
     ],
   ];
