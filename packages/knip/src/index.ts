@@ -226,7 +226,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
 
       {
-        const patterns = worker.getPluginEntryFilePatterns([...entryFilePatterns, ...productionEntryFilePatterns]);
+        const patterns = [...entryFilePatterns, ...productionEntryFilePatterns];
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(name, 'Plugin entry paths', pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });

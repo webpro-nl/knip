@@ -162,10 +162,6 @@ export class WorkspaceWorker {
     ].flat();
   }
 
-  getPluginEntryFilePatterns(patterns: string[]) {
-    return [patterns, this.negatedWorkspacePatterns].flat();
-  }
-
   getPluginProjectFilePatterns() {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of Object.entries(plugins) as PluginEntries) {
