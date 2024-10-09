@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "storybook": "storybook dev"
+  },
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "storybook": "*",
+    "@storybook/react": "*"
+  }
+}
