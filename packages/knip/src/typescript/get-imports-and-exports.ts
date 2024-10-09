@@ -24,7 +24,7 @@ import {
   isDestructuring,
   isImportSpecifier,
   isObjectEnumerationCallExpressionArgument,
-  isReferencedInExportedType,
+  isReferencedInExported,
 } from './ast-helpers.js';
 import { findInternalReferences, isType } from './find-internal-references.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -373,10 +373,8 @@ const getImportsAndExports = (
 
         // Store exports referenced in exported types, including `typeof` values
         // Simplifies and speeds up (*) below while we're still in the realm of bound AST
-        if (!isTopLevel && symbol.exportSymbol) {
-          if (ts.isTypeQueryNode(node.parent) || isReferencedInExportedType(node)) {
-            referencedSymbolsInExportedTypes.add(symbol.exportSymbol);
-          }
+        if (!isTopLevel && symbol.exportSymbol && isReferencedInExported(node)) {
+          referencedSymbolsInExportedTypes.add(symbol.exportSymbol);
         }
       }
     }

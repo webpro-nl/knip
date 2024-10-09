@@ -7,14 +7,17 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/exports-value-refs-default');
 
-test('Find unused exports in exported types', async () => {
-  const { counters } = await main({
+test('Find unused exports in exported types (default)', async () => {
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
+  assert(issues.exports['refs.ts']['logger']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
+    exports: 1,
     processed: 2,
     total: 2,
   });
