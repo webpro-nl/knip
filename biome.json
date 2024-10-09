@@ -40,7 +40,8 @@
         "useNodeAssertStrict": "error"
       },
       "suspicious": {
-        "noConsoleLog": "error"
+        "noConsoleLog": "error",
+        "noExplicitAny": "off"
       }
     }
   },

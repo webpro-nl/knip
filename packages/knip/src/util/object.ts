@@ -1,4 +1,3 @@
-// biome-ignore lint/suspicious/noExplicitAny: TODO
 export const getValuesByKeyDeep = (obj: any, key: string): unknown[] => {
   const objects = [];
   if (obj && typeof obj === 'object') {
@@ -14,7 +13,6 @@ export const getValuesByKeyDeep = (obj: any, key: string): unknown[] => {
   return objects;
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: TODO
 export const getStringValues = (obj: any): string[] => {
   if (typeof obj === 'string') return [obj];
   let values: string[] = [];
@@ -38,5 +36,4 @@ export const getKeysByValue = <T>(obj: T, value: unknown): (keyof T)[] => {
   return keys;
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: TODO
 export const get = <T>(obj: T, path: string) => path.split('.').reduce((o: any, p) => o?.[p], obj);

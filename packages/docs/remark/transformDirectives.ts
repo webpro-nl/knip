@@ -5,9 +5,7 @@ import { type Visitor, visit } from 'unist-util-visit';
 interface DirectiveNode extends Node {
   type: 'textDirective' | 'leafDirective' | 'containerDirective';
   name: string;
-  // biome-ignore lint/suspicious/noExplicitAny: ignore
   attributes: Record<string, any>;
-  // biome-ignore lint/suspicious/noExplicitAny: ignore
   data: Record<string, any>;
 }
 

@@ -9,7 +9,6 @@ import { debugLog } from './debug.js';
 
 const { performance: isEnabled = false } = parsedArgValues;
 
-// biome-ignore lint/suspicious/noExplicitAny: ignore
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
   if (!isEnabled) return fn;
   return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));

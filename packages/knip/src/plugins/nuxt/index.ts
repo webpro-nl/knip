@@ -15,7 +15,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => {
   const isEnabled = hasDependency(dependencies, enablers);
 
   // TODO Add generic way for plugins to init?
-  // biome-ignore lint/suspicious/noExplicitAny: deal with it
   if (isEnabled && !('defineNuxtConfig' in globalThis)) (globalThis as any).defineNuxtConfig = (c: any) => c;
 
   return isEnabled;

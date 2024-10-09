@@ -111,7 +111,6 @@ export class ConfigurationChief {
 
   resolvedConfigFilePath?: string;
 
-  // biome-ignore lint/suspicious/noExplicitAny: raw incoming user data
   rawConfig?: any;
 
   constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace }: ConfigurationManagerOptions) {

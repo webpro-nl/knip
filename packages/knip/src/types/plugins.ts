@@ -27,10 +27,8 @@ export interface PluginOptions extends BaseOptions {
   enabledPlugins: string[];
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: TODO
 export type ResolveEntryPaths<T = any> = (config: T, options: PluginOptions) => Promise<string[]> | string[];
 
-// biome-ignore lint/suspicious/noExplicitAny: TODO
 export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<string[]> | string[];
 
 export type Resolve = (options: PluginOptions) => Promise<string[]> | string[];

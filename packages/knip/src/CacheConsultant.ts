@@ -2,7 +2,6 @@ import { timerify } from './util/Performance.js';
 import { type FileDescriptor, FileEntryCache } from './util/file-entry-cache.js';
 import { version } from './version.js';
 
-// biome-ignore lint/suspicious/noExplicitAny: deal with it
 const dummyFileDescriptor: FileDescriptor<any> = { key: '', changed: true, notFound: true };
 
 type CacheOptions = {
