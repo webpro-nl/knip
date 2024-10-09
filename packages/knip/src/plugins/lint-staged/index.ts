@@ -1,5 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { getDependenciesFromScripts, hasDependency, toLilconfig } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toLilconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
+import type { Dependency } from '../../util/protocols.js';
 import type { LintStagedConfig } from './types.js';
 
 // https://github.com/okonet/lint-staged
@@ -25,11 +27,11 @@ const resolveConfig: ResolveConfig<LintStagedConfig> = async (config, options) =
 
   if (!config) return [];
 
-  const dependencies = new Set<string>();
+  const dependencies = new Set<Dependency>();
 
   for (const entry of Object.values(config).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
-    for (const id of getDependenciesFromScripts(scripts, options)) dependencies.add(id);
+    for (const id of options.getDependenciesFromScripts(scripts)) dependencies.add(id);
   }
 
   return Array.from(dependencies);

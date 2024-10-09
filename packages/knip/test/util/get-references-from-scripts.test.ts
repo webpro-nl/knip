@@ -1,150 +1,220 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
-import { join, resolve } from '../../src/util/path.js';
+import { resolve } from '../../src/util/path.js';
+import {
+  type Dependency,
+  toBinary,
+  toConfig,
+  toDeferResolve,
+  toDeferResolveEntry,
+  toDependency,
+  toEntry,
+} from '../../src/util/protocols.js';
 
 const cwd = resolve('fixtures/binaries');
-
-const js = join(cwd, 'script.js');
-const ts = join(cwd, 'main.ts');
-const req = join(cwd, 'require.js');
-const index = join(cwd, 'dir', 'index.js');
-
 const pkgScripts = { cwd, manifestScriptNames: new Set(['program']) };
 const knownOnly = { cwd, knownGlobalsOnly: true };
 
-type T = (script: string | string[], dependencies: string[], options?: { cwd: string }) => void;
+const js = toDeferResolveEntry('./script.js');
+const ts = toDeferResolveEntry('./main.ts');
+const req = toDeferResolve('./require.js');
+
+type T = (script: string | string[], dependencies: Dependency[], options?: { cwd: string }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
   assert.deepEqual(
-    _getDependenciesFromScripts(script, { manifestScriptNames: new Set(), dependencies: new Set(), ...options }),
+    _getDependenciesFromScripts(script, {
+      rootCwd: cwd,
+      manifestScriptNames: new Set(),
+      dependencies: new Set(),
+      ...options,
+    }),
     dependencies
   );
 
-test('getReferencesFromScripts', () => {
-  t('program', ['bin:program']);
-  t(['program', 'program'], ['bin:program']);
-  t('program -short --long args', ['bin:program']);
-  t('program && program2', ['bin:program', 'bin:program2']);
-  t('program -x && exec -y -- program2 -z', ['bin:program', 'bin:exec']);
-  t('program -x; exec -y -- program2', ['bin:program', 'bin:exec']);
-  t('program script.js -- program2', ['bin:program']);
-  t("program '*.js' -- program2", ['bin:program']);
-  t('program -s .', ['bin:program']);
-  t('program command', ['bin:program']);
+test('getReferencesFromScripts (unknown programs)', () => {
+  t('program', [toBinary('program')]);
+  t(['program', 'program'], [toBinary('program'), toBinary('program')]);
+  t('program -short --long args', [toBinary('program')]);
+  t('program && program2', [toBinary('program'), toBinary('program2')]);
+  t('program -x && exec -y -- program2 -z', [toBinary('program'), toBinary('exec')]);
+  t('program -x; exec -y -- program2', [toBinary('program'), toBinary('exec')]);
+  t('program script.js -- program2', [toBinary('program')]);
+  t("program '*.js' -- program2", [toBinary('program')]);
+  t('program -s .', [toBinary('program')]);
+  t('program command', [toBinary('program')]);
+  t('adb install -r android/app/app-dev-debug.apk', [toBinary('adb')]);
+});
+
+test('getReferencesFromScripts (unknown scripts)', () => {
+  t('./script.sh -r 10', [toEntry('./script.sh')]);
 });
 
 test('getReferencesFromScripts (node)', () => {
-  t('node script.js', [js]);
-  t('node -r script.js', [js]);
-  t('node -r package/script', ['package']);
-  t('node -r ./require.js script.js', [js, req]);
-  t('node --require=pkg1 --require pkg2 script', [js, 'pkg1', 'pkg2']);
-  t('node --import tsx ./main.ts', [ts, 'tsx']);
-  t('node --loader ts-node/esm node_modules/webpack-cli/bin/cli.js -c ./webpack.config.ts', ['webpack-cli', 'ts-node']);
-  t('node --experimental-loader ts-node/esm/transpile-only script.js', [js, 'ts-node']);
-  // TODO With jiti's `esmResolve: true` dirs are no longer resolved to their index.js (but extensionless is OK)
-  // But enabling that has a much bigger advantages and seems to fix the `*.config.ts` loading errors
-  // t('node -r @scope/package/register ./dir', [index, '@scope/package']);
-  t('node -r @scope/package/register ./dir/index', [index, '@scope/package']);
-  t('node --inspect-brk -r tsconfig-paths/register node_modules/.bin/jest --runInBand', ['bin:jest', 'tsconfig-paths']);
-  t('node dist/index.js', []);
-  t('./script.js', [js]);
-  t('node --watch ./script.js', [js]);
-  t('node script', [js]);
-  t('node ./script.js build', [js]);
+  t('node script.js', [toBinary('node'), toDeferResolveEntry('script.js')]);
+  t('node -r script.js', [toBinary('node'), toDeferResolve('script.js')]);
+  t('node -r package/script', [toBinary('node'), toDeferResolve('package/script')]);
+  t('node -r ./require.js script.js', [toBinary('node'), toDeferResolveEntry('script.js'), req]);
+  t('node --require=pkg1 --require pkg2 script', [
+    toBinary('node'),
+    toDeferResolveEntry('script'),
+    toDeferResolve('pkg1'),
+    toDeferResolve('pkg2'),
+  ]);
+  t('node --import tsx ./main.ts', [toBinary('node'), toDeferResolveEntry('./main.ts'), toDeferResolve('tsx')]);
+  t('node --loader ts-node/esm node_modules/pkg/bin/cli.js -c ./webpack.config.ts', [
+    toBinary('node'),
+    toDeferResolveEntry('node_modules/pkg/bin/cli.js'),
+    toDeferResolve('ts-node/esm'),
+  ]);
+  t('node --experimental-loader ts-node/esm/transpile-only script.js', [
+    toBinary('node'),
+    toDeferResolveEntry('script.js'),
+    toDeferResolve('ts-node/esm/transpile-only'),
+  ]);
+  t('node -r @scope/package/register ./dir', [
+    toBinary('node'),
+    toDeferResolveEntry('./dir'),
+    toDeferResolve('@scope/package/register'),
+  ]);
+  t('node -r @scope/package/register ./dir/index', [
+    toBinary('node'),
+    toDeferResolveEntry('./dir/index'),
+    toDeferResolve('@scope/package/register'),
+  ]);
+  t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [
+    toBinary('node'),
+    toDeferResolveEntry('node_modules/.bin/exec'),
+    toDeferResolve('pkg/register'),
+  ]);
+  t('node dist/index.js', [toBinary('node'), toDeferResolveEntry('dist/index.js')]);
+  t('./script.js', [toEntry('./script.js')]);
+  t('node --watch ./script.js', [toBinary('node'), js]);
+  t('node script', [toBinary('node'), toDeferResolveEntry('script')]);
+  t('node ./script.js build', [toBinary('node'), js]);
 });
 
 test('getReferencesFromScripts (ts-node)', () => {
-  t('ts-node --require pkg/register main.ts', ['bin:ts-node', ts, 'pkg']);
-  t('ts-node -T main.ts', ['bin:ts-node', ts]);
-  t('babel-node --inspect=0.0.0.0 ./main.ts', ['bin:babel-node', ts]);
+  t('ts-node --require pkg/register ./main.ts', [toBinary('ts-node'), ts, toDeferResolve('pkg/register')]);
+  t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
+  t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toDeferResolve('./main.ts')]);
 });
 
 test('getReferencesFromScripts (tsx)', () => {
-  t('tsx ./main.ts', ['bin:tsx', ts]);
-  t('tsx watch ./main.ts', ['bin:tsx', ts]);
-  t('node --loader tsx ./main.ts', [ts, 'tsx']);
-  t('tsx main', ['bin:tsx', ts]);
-  t('tsx ./main.ts build', ['bin:tsx', ts]);
+  t('tsx ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx watch ./main.ts', [toBinary('tsx'), ts]);
+  t('node --loader tsx ./main.ts', [toBinary('node'), ts, toDeferResolve('tsx')]);
+  t('tsx main', [toBinary('tsx'), toDeferResolveEntry('main')]);
+  t('tsx ./main.ts build', [toBinary('tsx'), ts]);
 });
 
 test('getReferencesFromScripts (--require)', () => {
-  t('program --loader tsx --test "test/*.spec.ts"', ['bin:program', 'tsx']);
-  t('program --loader ldr --loader tsx --test "test/*.spec.ts"', ['bin:program', 'ldr', 'tsx']);
+  t('program --loader tsx --test "test/*.spec.ts"', [toBinary('program')]);
+  t('program --loader ldr --loader tsx --test "test/*.spec.ts"', [toBinary('program')]);
 });
 
 test('getReferencesFromScripts (.bin)', () => {
-  t('./node_modules/.bin/tsc --noEmit', ['bin:tsc']);
-  t('node_modules/.bin/tsc --noEmit', ['bin:tsc']);
-  t('$(npm bin)/tsc --noEmit', ['bin:tsc']);
+  t('./node_modules/.bin/tsc --noEmit', [toBinary('tsc')]);
+  t('node_modules/.bin/tsc --noEmit', [toBinary('tsc')]);
+  t('$(npm bin)/tsc --noEmit', [toBinary('tsc')]);
   t('../../../scripts/node_modules/.bin/tsc --noEmit', []);
 });
 
 test('getReferencesFromScripts (dotenv)', () => {
-  t('dotenv program', ['bin:dotenv', 'bin:program']);
-  t('dotenv -- program', ['bin:dotenv', 'bin:program']);
-  t('dotenv -e .env3 -v VARIABLE=somevalue -- program', ['bin:dotenv', 'bin:program']);
-  t('dotenv -e .env3 -v VARIABLE=somevalue program -- exit', ['bin:dotenv', 'bin:program']);
-  t('dotenv -- mvn exec:java -Dexec.args="-g -f"', ['bin:dotenv', 'bin:mvn']);
+  t('dotenv program', [toBinary('dotenv'), toBinary('program')]);
+  t('dotenv -- program', [toBinary('dotenv'), toBinary('program')]);
+  t('dotenv -e .env3 -v VARIABLE=somevalue -- program', [toBinary('dotenv'), toBinary('program')]);
+  t('dotenv -e .env3 -v VARIABLE=somevalue program -- exit', [toBinary('dotenv'), toBinary('program')]);
+  t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [toBinary('dotenv'), toBinary('mvn')]);
 });
 
 test('getReferencesFromScripts (cross-env/env vars)', () => {
-  t('cross-env program', ['bin:cross-env', 'bin:program']);
-  t('cross-env NODE_ENV=production program', ['bin:cross-env', 'bin:program']);
-  t('cross-env NODE_ENV=production program subcommand', ['bin:cross-env', 'bin:program']);
-  t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', ['bin:cross-env', 'bin:program']);
-  t('cross-env NODE_OPTIONS="--loader pkg" knex', ['bin:cross-env', 'bin:knex', 'pkg']);
-  t('NODE_ENV=production cross-env -- program --cache', ['bin:cross-env', 'bin:program']);
-  t("NODE_OPTIONS='--require pkg-a --require pkg-b' program", ['bin:program', 'pkg-a', 'pkg-b']);
+  t('cross-env program', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env NODE_ENV=production program', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env NODE_ENV=production program subcommand', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env NODE_OPTIONS="--loader pkg" knex', [toBinary('cross-env'), toBinary('knex'), toDeferResolve('pkg')]);
+  t('NODE_ENV=production cross-env -- program --cache', [toBinary('cross-env'), toBinary('program')]);
+  t("NODE_OPTIONS='--require pkg-a --require pkg-b' program", [
+    toBinary('program'),
+    toDeferResolve('pkg-a'),
+    toDeferResolve('pkg-b'),
+  ]);
 });
 
 test('getReferencesFromScripts (cross-env/node)', () => {
-  t('cross-env NODE_ENV=production node -r pkg/config ./script.js', ['bin:cross-env', js, 'pkg']);
-  t('cross-env NODE_ENV=production node -r node_modules/dotenv/config ./script.js', ['bin:cross-env', js, 'dotenv']);
-  t('cross-env NODE_ENV=production node -r esm script.js', ['bin:cross-env', js, 'esm']);
+  t('cross-env NODE_ENV=production node -r pkg/config ./script.js', [
+    toBinary('cross-env'),
+    toBinary('node'),
+    js,
+    toDeferResolve('pkg/config'),
+  ]);
+  t('cross-env NODE_ENV=production node -r node_modules/pkg/cfg ./script.js', [
+    toBinary('cross-env'),
+    toBinary('node'),
+    js,
+    toDeferResolve('node_modules/pkg/cfg'),
+  ]);
+  t('cross-env NODE_ENV=production node -r esm ./script.js', [
+    toBinary('cross-env'),
+    toBinary('node'),
+    js,
+    toDeferResolve('esm'),
+  ]);
 });
 
 test('getReferencesFromScripts (nx)', () => {
-  t('nx run myapp:build:production', ['bin:nx']);
-  t('nx run-many -t build', ['bin:nx']);
-  t('nx exec -- esbuild main.ts --outdir=build', ['bin:nx', 'bin:esbuild', ts]);
+  t('nx run myapp:build:production', [toBinary('nx')]);
+  t('nx run-many -t build', [toBinary('nx')]);
+  t('nx exec -- esbuild ./main.ts --outdir=build', [toBinary('nx'), toBinary('esbuild'), toDeferResolve('./main.ts')]);
 });
 
 test('getReferencesFromScripts (npm)', () => {
-  t('npm run script', ['bin:npm']);
-  t('npm run publish:latest -- --npm-tag=debug --no-push', ['bin:npm']);
+  t('npm run script', [toBinary('npm')]);
+  t('npm run publish:latest -- --npm-tag=debug --no-push', [toBinary('npm')]);
 });
 
 test('getReferencesFromScripts (npx)', () => {
-  t('npx pkg', ['bin:pkg']);
-  t('npx prisma migrate reset --force', ['bin:prisma']);
-  t('npx @scope/pkg', ['@scope/pkg']);
-  t('npx tsx watch main', ['bin:tsx', ts]);
-  t('npx -y pkg', []);
-  t('npx --yes pkg', []);
-  t('npx --no pkg --edit ${1}', ['bin:pkg']);
-  t('npx --no -- pkg --edit ${1}', ['bin:pkg']);
-  t('npx pkg install --with-deps', ['bin:pkg']);
-  t('npx pkg migrate reset --force', ['bin:pkg']);
-  t('npx pkg@1.0.0 migrate reset --force', ['pkg']);
-  t('npx @scope/cli migrate reset --force', ['@scope/cli']);
-  t('npx -- pkg', ['bin:pkg']);
-  t('npx -- @scope/cli@1.0.0 migrate reset --force', ['@scope/cli']);
-  t('npx retry-cli@0.6.0 -- curl --output /dev/null ', ['retry-cli', 'bin:curl']);
-  t('npx --package pkg@0.6.0 -- curl --output /dev/null', ['bin:curl', 'pkg']);
-  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', ['bin:curl', '@scope/pkg', 'pkg']);
-  t("npx --package=foo -c 'curl --output /dev/null'", ['foo', 'bin:curl']);
-  t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', ['bin:swagger-typescript-api']);
-  t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', ['bin:swagger-typescript-api']);
-  t('npx tsx main', ['bin:tsx', ts]);
-  t('npx tsx ./main.ts build', ['bin:tsx', ts]);
-  t('npx tsx ./main.ts -- build', ['bin:tsx', ts]);
+  t('npx pkg', [toBinary('npx'), toBinary('pkg')]);
+  t('npx prisma migrate reset --force', [toBinary('npx'), toBinary('prisma')]);
+  t('npx @scope/pkg', [toBinary('npx'), toDependency('@scope/pkg')]);
+  t('npx tsx watch main', [toBinary('npx'), toBinary('tsx'), toDeferResolveEntry('main')]);
+  t('npx -y pkg', [toBinary('npx')]);
+  t('npx --yes pkg', [toBinary('npx')]);
+  t('npx --no pkg --edit ${1}', [toBinary('npx'), toBinary('pkg')]);
+  t('npx --no -- pkg --edit ${1}', [toBinary('npx'), toBinary('pkg')]);
+  t('npx pkg install --with-deps', [toBinary('npx'), toBinary('pkg')]);
+  t('npx pkg migrate reset --force', [toBinary('npx'), toBinary('pkg')]);
+  t('npx pkg@1.0.0 migrate reset --force', [toBinary('npx'), toDependency('pkg')]);
+  t('npx @scope/cli migrate reset --force', [toBinary('npx'), toDependency('@scope/cli')]);
+  t('npx -- pkg', [toBinary('npx'), toBinary('pkg')]);
+  t('npx -- @scope/cli@1.0.0 migrate reset --force', [toBinary('npx'), toDependency('@scope/cli')]);
+  t('npx retry-cli@0.6.0 -- curl --output /dev/null ', [toBinary('npx'), toDependency('retry-cli'), toBinary('curl')]);
+  t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('npx'), toBinary('curl'), toDependency('pkg')]);
+  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [
+    toBinary('npx'),
+    toBinary('curl'),
+    toDependency('@scope/pkg'),
+    toDependency('pkg'),
+  ]);
+  t("npx --package=foo -c 'curl --output /dev/null'", [toBinary('npx'), toDependency('foo'), toBinary('curl')]);
+  t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [
+    toBinary('npx'),
+    toBinary('swagger-typescript-api'),
+  ]);
+  t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', [
+    toBinary('npx'),
+    toBinary('swagger-typescript-api'),
+  ]);
+  t('npx tsx main', [toBinary('npx'), toBinary('tsx'), toDeferResolveEntry('main')]);
+  t('npx tsx ./main.ts build', [toBinary('npx'), toBinary('tsx'), ts]);
+  t('npx tsx ./main.ts -- build', [toBinary('npx'), toBinary('tsx'), ts]);
 });
 
 test('getReferencesFromScripts (pnpm)', () => {
-  t('pnpm exec program', ['bin:program']);
+  t('pnpm exec program', [toBinary('program')]);
   t('pnpm run program', []);
-  t('pnpm program', ['bin:program']);
+  t('pnpm program', [toBinary('program')]);
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', []);
@@ -156,66 +226,93 @@ test('getReferencesFromScripts (pnpm)', () => {
 });
 
 test('getReferencesFromScripts (yarn)', () => {
-  t('yarn exec program', ['bin:program']);
-  t('yarn run program', ['bin:program']);
-  t('yarn program', ['bin:program']);
+  t('yarn exec program', [toBinary('program')]);
+  t('yarn run program', [toBinary('program')]);
+  t('yarn program', [toBinary('program')]);
   t('yarn run program', [], pkgScripts);
   t('yarn program', [], pkgScripts);
   t('yarn dlx pkg', []);
   t('yarn --package=pkg-a -p pkg-b dlx pkg', []);
-  t('yarn node script.js', [js]);
+  t('yarn node script.js', [toBinary('node'), toDeferResolveEntry('script.js')]);
 });
 
 test('getReferencesFromScripts (rollup)', () => {
-  t('rollup --watch --watch.onEnd="node script.js"', ['bin:rollup', js]);
-  t('rollup -p ./require.js', ['bin:rollup', req]);
-  t('rollup --plugin @rollup/plugin-node-resolve', ['bin:rollup', '@rollup/plugin-node-resolve']);
-  t('rollup --configPlugin @rollup/plugin-typescript', ['bin:rollup', '@rollup/plugin-typescript']);
+  t('rollup --watch --watch.onEnd="node ./script.js"', [toBinary('rollup'), toBinary('node'), js]);
+  t('rollup -p ./require.js', [toBinary('rollup'), req]);
+  t('rollup --plugin @rollup/plugin-node-resolve', [toBinary('rollup'), toDeferResolve('@rollup/plugin-node-resolve')]);
+  t('rollup --configPlugin @rollup/plugin-typescript', [
+    toBinary('rollup'),
+    toDeferResolve('@rollup/plugin-typescript'),
+  ]);
 });
 
 test('getReferencesFromScripts (execa)', () => {
-  t('execa --quiet script.js', ['bin:execa', js]);
-  t('npx --yes execa --quiet script.js', [js]);
+  t('execa --quiet ./script.js', [toBinary('execa'), toDeferResolve('./script.js')]);
+  t('npx --yes execa --quiet ./script.js', [toBinary('npx'), toDeferResolve('./script.js')]);
 });
 
 test('getReferencesFromScripts (zx)', () => {
-  t('zx --quiet script.js', ['bin:zx', js]);
-  t('npx --yes zx --quiet script.js', [js]);
+  t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
+  t('npx --yes zx --quiet script.js', [toBinary('npx'), toDeferResolve('script.js')]);
 });
 
 test('getReferencesFromScripts (c8)', () => {
-  t('c8 node script.js', ['bin:c8', js]);
-  t('c8 npm test', ['bin:c8', 'bin:npm']);
-  t('c8 check-coverage --lines 95 --per-file npm test', ['bin:c8', 'bin:npm']);
-  t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", ['bin:c8', 'bin:mocha']);
-  t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/reporter', ['bin:c8', '@org/reporter']);
+  t('c8 node script.js', [toBinary('c8'), toBinary('node'), toDeferResolveEntry('script.js')]);
+  t('c8 npm test', [toBinary('c8'), toBinary('npm')]);
+  t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8'), toBinary('npm')]);
+  t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha')]);
+  t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/rep', [
+    toBinary('c8'),
+    toBinary('node'),
+    toDeferResolve('@org/rep'),
+  ]);
 });
 
 test('getReferencesFromScripts (nodemon)', () => {
-  t('nodemon --require dotenv/config ./script.js --watch ./script.js', ['bin:nodemon', js, 'dotenv']);
-  t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", ['bin:nodemon', ts, 'bin:ts-node', 'bin:pino-pretty']);
-  t('nodemon script.js', ['bin:nodemon', js]);
-});
-
-test('getReferencesFromScripts (fallback resolver)', () => {
-  t('adb install -r android/app/app-dev-debug.apk', ['bin:adb']);
+  t('nodemon --require dotenv/config ./script.js --watch ./script.js', [
+    toBinary('nodemon'),
+    js,
+    toDeferResolve('dotenv/config'),
+  ]);
+  t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", [
+    toBinary('nodemon'),
+    ts,
+    toBinary('ts-node'),
+    toBinary('pino-pretty'),
+  ]);
+  t('nodemon script.js', [toBinary('nodemon'), toDeferResolveEntry('script.js')]);
 });
 
 test('getReferencesFromScripts (bash expressions)', () => {
-  t('if test "$NODE_ENV" = "production" ; then make install ; fi ', ['bin:make']);
-  t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', ['bin:make']);
-  t('if ! npx pkg --verbose ; then exit 1 ; fi', ['bin:pkg', 'bin:exit']);
-  t('exec < /dev/tty && node_modules/.bin/cz --hook || true', ['bin:exec', 'bin:cz', 'bin:true']);
+  t('if test "$NODE_ENV" = "production" ; then make install ; fi ', [toBinary('make')]);
+  t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [
+    toBinary('node'),
+    toBinary('make'),
+  ]);
+  t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('npx'), toBinary('pkg'), toBinary('exit')]);
+  t('exec < /dev/tty && node_modules/.bin/cz --hook || true', [toBinary('exec'), toBinary('cz'), toBinary('true')]);
 });
 
 test('getReferencesFromScripts (bash expansion)', () => {
-  t('var=$(node ./script.js)', [js]);
-  t('var=`node ./script.js`;var=`node ./require.js`', [js, req]);
+  t('var=$(node ./script.js)', [toBinary('node'), js]);
+  t('var=`node ./script.js`;var=`node ./require.js`', [
+    toBinary('node'),
+    js,
+    toBinary('node'),
+    js,
+    toBinary('node'),
+    toDeferResolveEntry('./require.js'),
+  ]);
 });
 
 test('getReferencesFromScripts (multiline)', () => {
-  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', ['bin:lint-staged']);
-  t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, ['rc', '@scope/rc']);
+  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('npx'), toBinary('lint-staged')]);
+  t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [
+    toBinary('npx'),
+    toDependency('rc'),
+    toBinary('npx'),
+    toDependency('@scope/rc'),
+  ]);
 });
 
 test('getReferencesFromScripts (bail outs)', () => {
@@ -225,4 +322,9 @@ test('getReferencesFromScripts (bail outs)', () => {
 
 test('getReferencesFromScripts (ignore parse error)', () => {
   t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', []); // unclosed '
+});
+
+test('getReferencesFromScripts (config)', () => {
+  t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
+  t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
 });

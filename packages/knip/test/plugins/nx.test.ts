@@ -18,8 +18,10 @@ test('Find dependencies with the Nx plugin', async () => {
   assert(issues.devDependencies['package.json']['@nrwl/storybook']);
   assert(issues.devDependencies['package.json']['@nrwl/web']);
   assert(issues.devDependencies['package.json']['@nrwl/workspace']);
+
   assert(issues.unlisted['apps/b/project.json']['@js/cypress']);
   assert(issues.unlisted['libs/b/project.json']['nx']);
+
   assert(issues.binaries['package.json']['nx']);
   assert(issues.binaries['libs/b/project.json']['webpack']);
   assert(issues.binaries['libs/b/project.json']['compodoc']);

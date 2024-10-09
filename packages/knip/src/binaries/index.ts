@@ -1,31 +1,20 @@
-import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
+import type { GetDependenciesFromScripts } from '../types/config.js';
 import { timerify } from '../util/Performance.js';
-import { compact } from '../util/array.js';
-import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
-import { extname, isInternal } from '../util/path.js';
-import { fromBinary, isBinary } from '../util/protocols.js';
-import { getBinariesFromScript } from './bash-parser.js';
-import type { GetDependenciesFromScripts } from './types.js';
+import { type Dependency, fromBinary, isBinary } from '../util/protocols.js';
+import { getDependenciesFromScript } from './bash-parser.js';
 
 const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, options) => {
   const scripts = typeof npmScripts === 'string' ? [npmScripts] : [...npmScripts];
-  const results = scripts.flatMap(script => getBinariesFromScript(script, options));
+  const results = scripts.flatMap(script => getDependenciesFromScript(script, options));
+  const dependencies = new Set<Dependency>();
 
-  return compact(
-    results.map(identifier => {
-      if (identifier.startsWith('http')) return;
-      if (isBinary(identifier)) {
-        if (!/^\b/.test(fromBinary(identifier))) return;
-        return identifier;
-      }
-      if (isInternal(identifier)) {
-        const ext = extname(identifier);
-        if (ext && FOREIGN_FILE_EXTENSIONS.has(ext)) return;
-        return identifier;
-      }
-      return getPackageNameFromModuleSpecifier(identifier);
-    })
-  );
+  for (const dependency of results) {
+    if (!dependency.specifier || dependency.specifier.startsWith('http')) continue;
+    if (isBinary(dependency) && !/^\b/.test(fromBinary(dependency))) continue;
+    dependencies.add(dependency);
+  }
+
+  return Array.from(dependencies);
 };
 
 export const _getDependenciesFromScripts = timerify(getDependenciesFromScripts);

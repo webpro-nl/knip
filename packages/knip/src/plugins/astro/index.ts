@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, Resolve } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDependency } from '../../util/protocols.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -14,15 +15,14 @@ const entry = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts'];
 const production = ['src/pages/**/*.{astro,mdx,js,ts}', 'src/content/**/*.mdx'];
 
 const resolve: Resolve = options => {
-  const { isProduction, manifest } = options;
+  const { manifest } = options;
   const dependencies = [];
 
   if (
-    !isProduction &&
     manifest.scripts &&
     Object.values(manifest.scripts).some(script => /(?<=^|\s)astro(\s|\s.+\s)check(?=\s|$)/.test(script))
   ) {
-    dependencies.push('@astrojs/check');
+    dependencies.push(toDependency('@astrojs/check'));
   }
 
   return dependencies;

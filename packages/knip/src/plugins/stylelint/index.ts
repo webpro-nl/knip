@@ -1,6 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { isInternal } from '#p/util/path.js';
-import { hasDependency, toCosmiconfig } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { type Dependency, toDeferResolve } from '../../util/protocols.js';
 import type { BaseStyleLintConfig, StyleLintConfig } from './types.js';
 
 // https://stylelint.io/user-guide/configure/
@@ -13,12 +14,12 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['package.json', ...toCosmiconfig('stylelint')];
 
-const resolve = (config: StyleLintConfig | BaseStyleLintConfig): string[] => {
+const resolve = (config: StyleLintConfig | BaseStyleLintConfig): Dependency[] => {
   const extend = config.extends ? [config.extends].flat() : [];
   const plugins = config.plugins ? [config.plugins].flat() : [];
   const customSyntax = config.customSyntax ? [config.customSyntax] : [];
   const overrideConfigs = 'overrides' in config ? config.overrides.flatMap(resolve) : [];
-  return [...extend, ...plugins, ...overrideConfigs, ...customSyntax].filter(id => !isInternal(id));
+  return [...[...extend, ...plugins, ...customSyntax].map(toDeferResolve), ...overrideConfigs];
 };
 
 const resolveConfig: ResolveConfig<StyleLintConfig> = config => resolve(config);

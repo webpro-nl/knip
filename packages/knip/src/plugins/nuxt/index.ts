@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
-import { join } from '#p/util/path.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toProductionEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import { join } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toProductionEntry } from '../../util/protocols.js';
 import type { NuxtConfig } from './types.js';
 
 const title = 'Nuxt';
@@ -49,7 +49,7 @@ const resolveEntryPaths: ResolveEntryPaths<NuxtConfig> = async localConfig => {
     'server/plugins/**/*.ts',
   ];
 
-  return patterns.map(pattern => toProductionEntryPattern(join(srcDir, pattern)));
+  return patterns.map(pattern => toProductionEntry(join(srcDir, pattern)));
 };
 
 export default {

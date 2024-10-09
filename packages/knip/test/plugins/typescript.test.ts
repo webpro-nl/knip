@@ -25,6 +25,7 @@ test('Find dependencies with the TypeScript plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    binaries: 1, // TODO
     unlisted: 9,
     processed: 0,
     total: 0,

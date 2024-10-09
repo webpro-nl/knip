@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDeferResolve } from '../../util/protocols.js';
 import type { NycConfig } from './types.js';
 
 // https://www.npmjs.com/package/nyc
@@ -15,7 +16,7 @@ const config = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js', '
 const resolveConfig: ResolveConfig<NycConfig> = config => {
   const extend = config?.extends ? [config?.extends].flat() : [];
   const requires = config?.require ? [config?.require].flat() : [];
-  return [...extend, ...requires].flat();
+  return [...extend, ...requires].flat().map(toDeferResolve);
 };
 
 export default {

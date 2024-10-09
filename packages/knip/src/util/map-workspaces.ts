@@ -1,6 +1,5 @@
 import fg from 'fast-glob';
-import type { Package } from '../ConfigurationChief.js';
-import type { PackageJson } from '../types/package-json.js';
+import type { Package, PackageJson } from '../types/package-json.js';
 import { partition } from './array.js';
 import { debugLog } from './debug.js';
 import { ConfigurationError } from './errors.js';

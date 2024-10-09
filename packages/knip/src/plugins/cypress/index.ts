@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDeferResolve, toEntry } from '../../util/protocols.js';
 import { resolveDependencies } from './helpers.js';
 import type { CypressConfig } from './types.js';
 
@@ -30,11 +30,12 @@ const resolveEntryPaths: ResolveEntryPaths = async localConfig => {
   return [
     ...(specPatterns.length > 0 ? specPatterns : TEST_FILE_PATTERNS),
     ...(supportFiles.length > 0 ? supportFiles : SUPPORT_FILE_PATTERNS),
-  ].map(toEntryPattern);
+  ].map(toEntry);
 };
 
-const resolveConfig: ResolveConfig<CypressConfig> = (config, options) => {
-  return resolveDependencies(config, options);
+const resolveConfig: ResolveConfig<CypressConfig> = async (config, options) => {
+  const dependencies = await resolveDependencies(config, options);
+  return dependencies.map(toDeferResolve);
 };
 
 export default {

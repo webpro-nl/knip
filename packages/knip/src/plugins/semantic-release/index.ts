@@ -1,5 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency, toCosmiconfig } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDeferResolve } from '../../util/protocols.js';
 import type { SemanticReleaseConfig } from './types.js';
 
 // https://github.com/semantic-release/semantic-release/blob/master/docs/usage/configuration.md#configuration-file
@@ -16,7 +18,7 @@ const config = ['package.json', ...toCosmiconfig('release')];
 
 const resolveConfig: ResolveConfig<SemanticReleaseConfig> = config => {
   const plugins = (config?.plugins ?? []).map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));
-  return plugins;
+  return plugins.map(toDeferResolve);
 };
 
 export default {

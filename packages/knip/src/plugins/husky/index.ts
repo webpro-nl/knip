@@ -1,6 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { getGitHookPaths } from '../../util/git.js';
-import { getDependenciesFromScripts, hasDependency } from '../../util/plugin.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDependency } from '../../util/protocols.js';
 
 // https://typicode.github.io/husky
 
@@ -23,11 +24,11 @@ const resolveConfig: ResolveConfig = (script, options) => {
     const hooks = script.hooks;
     if (hooks) {
       const scripts: string[] = Object.values(hooks);
-      return ['husky', ...getDependenciesFromScripts(scripts, { ...options })];
+      return [toDependency('husky'), ...options.getDependenciesFromScripts(scripts, { ...options })];
     }
   }
 
-  return getDependenciesFromScripts(String(script), { ...options, knownGlobalsOnly: true });
+  return options.getDependenciesFromScripts(String(script), { knownGlobalsOnly: true });
 };
 
 export default {

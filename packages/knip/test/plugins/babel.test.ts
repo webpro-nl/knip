@@ -68,7 +68,7 @@ test('Find dependencies with the Babel plugin (1)', async () => {
     ...baseCounters,
     devDependencies: 2,
     unlisted: 39,
-    unresolved: 4,
+    unresolved: 16,
     processed: 3,
     total: 3,
   });

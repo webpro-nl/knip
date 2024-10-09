@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
-import { join } from '#p/util/path.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import { join } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toEntry } from '../../util/protocols.js';
 import type { MSWConfig } from './types.js';
 
 // https://mswjs.io/docs/integrations/browser
@@ -19,7 +19,7 @@ const entry = ['mockServiceWorker.js'];
 const resolveEntryPaths: ResolveEntryPaths<MSWConfig> = async localConfig => {
   const workerDirectory = localConfig?.workerDirectory;
   const dir = workerDirectory ? [workerDirectory].flat()[0] : '.';
-  return entry.map(pattern => toEntryPattern(join(dir, pattern)));
+  return entry.map(pattern => toEntry(join(dir, pattern)));
 };
 
 export default {

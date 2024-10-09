@@ -1,17 +1,78 @@
-export const toBinary = (specifier: string) => specifier.replace(/^(bin:)?/, 'bin:');
+import type { PluginName } from '../types/PluginNames.js';
 
-export const fromBinary = (specifier: string) => specifier.replace(/^(bin:)?/, '');
+type Type = 'binary' | 'entry' | 'config' | 'dependency' | 'deferResolve' | 'deferResolveEntry';
 
-export const isBinary = (specifier: string) => specifier.startsWith('bin:');
+export interface Dependency {
+  type: Type;
+  specifier: string;
+  production?: boolean;
+  dir?: string;
+  containingFilePath?: string;
+}
 
-export const toEntryPattern = (specifier: string) => specifier.replace(/^(entry:)?/, 'entry:');
+export interface ConfigDependency extends Dependency {
+  pluginName: PluginName;
+}
 
-export const fromEntryPattern = (specifier: string) => specifier.replace(/^(entry:)?/, '');
+type Options = {
+  production?: boolean;
+  dir?: string;
+  containingFilePath?: string;
+};
 
-export const isEntryPattern = (specifier: string) => specifier.startsWith('entry:');
+export const fromBinary = (dependency: Dependency) => dependency.specifier;
 
-export const toProductionEntryPattern = (specifier: string) => specifier.replace(/^(production:)?/, 'production:');
+export const toBinary = (specifier: string, options: Options = {}): Dependency => ({
+  type: 'binary',
+  specifier,
+  ...options,
+});
 
-export const fromProductionEntryPattern = (specifier: string) => specifier.replace(/^(production:)?/, '');
+export const isBinary = (dependency: Dependency) => dependency.type === 'binary';
 
-export const isProductionEntryPattern = (specifier: string) => specifier.startsWith('production:');
+export const toEntry = (specifier: string): Dependency => ({ type: 'entry', specifier });
+
+export const isEntry = (dependency: Dependency) => dependency.type === 'entry' && !dependency.production;
+
+export const toProductionEntry = (specifier: string, options: Options = {}): Dependency => ({
+  type: 'entry',
+  specifier,
+  production: true,
+  ...options,
+});
+
+export const isProductionEntry = (dependency: Dependency) =>
+  dependency.type === 'entry' && dependency.production === true;
+
+export const toConfig = (pluginName: PluginName, specifier: string): ConfigDependency => ({
+  type: 'config',
+  pluginName,
+  specifier,
+});
+
+export const isConfigPattern = (dependency: Dependency): dependency is ConfigDependency => dependency.type === 'config';
+
+export const toDependency = (specifier: string): Dependency => ({ type: 'dependency', specifier });
+
+export const isDependency = (dependency: Dependency) => dependency.type === 'dependency';
+
+export const toProductionDependency = (specifier: string): Dependency => ({
+  type: 'dependency',
+  specifier,
+  production: true,
+});
+
+export const isProductionDependency = (dependency: Dependency) =>
+  dependency.type === 'dependency' && dependency.production === true;
+
+export const toDevDependency = (specifier: string): Dependency => ({ type: 'dependency', specifier });
+
+export const toDeferResolve = (specifier: string): Dependency => ({ type: 'deferResolve', specifier });
+
+export const isDeferResolve = (dependency: Dependency) => dependency.type === 'deferResolve';
+
+export const toDeferResolveEntry = (specifier: string): Dependency => ({ type: 'deferResolveEntry', specifier });
+
+export const isDeferResolveEntry = (dependency: Dependency) => dependency.type === 'deferResolveEntry';
+
+export const toDebugString = (dependency: Dependency) => `${dependency.type}:${dependency.specifier}`;

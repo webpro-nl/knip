@@ -1,13 +1,12 @@
-import type { EnablerPatterns } from '#p/types/config.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { MoonConfiguration } from './types.js';
 
-// link to moonrepo docs: https://moonrepo.dev/docs
+// https://moonrepo.dev/docs
 
 const title = 'moonrepo';
 
-const enablers: EnablerPatterns = ['@moonrepo/cli'];
+const enablers = ['@moonrepo/cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -18,10 +17,9 @@ const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) 
   const dependencies = tasks
     .map(task => task.command)
     .filter(command => command)
-    // biome-ignore lint/style/noNonNullAssertion: TODO
-    .map(command => command.replace('$workspaceRoot', options.rootCwd!))
+    .map(command => command.replace('$workspaceRoot', options.rootCwd))
     .map(command => command.replace('$projectRoot', options.cwd))
-    .flatMap(command => getDependenciesFromScripts(command, options));
+    .flatMap(command => options.getDependenciesFromScripts(command));
   return [...dependencies];
 };
 

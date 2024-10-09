@@ -15,6 +15,7 @@ test('Find unused files, dependencies and exports in workspaces with eslint-conf
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unresolved: 4,
     processed: 7,
     total: 7,
   });

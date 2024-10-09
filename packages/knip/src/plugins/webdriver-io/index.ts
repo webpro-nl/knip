@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDependency } from '../../util/protocols.js';
 import type { WebdriverIOConfig } from './types.js';
 
 // https://webdriver.io/docs/configuration
@@ -33,7 +34,7 @@ const resolveConfig: ResolveConfig<WebdriverIOConfig> = async config => {
         .map(reporter => `@wdio/${reporter}-reporter`)
     : [];
 
-  return [...frameworks, ...runners, ...reporters];
+  return [...frameworks, ...runners, ...reporters].map(toDependency);
 };
 
 export default {

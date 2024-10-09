@@ -1,26 +1,34 @@
-import type { Entries } from 'type-fest';
-import * as originalPlugins from './plugins/index.js';
-import type { PluginName } from './types/config.js';
-import type { Plugin } from './types/plugins.js';
+import { Plugins } from './plugins/index.js';
+import type { PluginName } from './types/PluginNames.js';
+import type { Args } from './types/args.js';
+import type { Entries, PluginMap } from './types/config.js';
 import { timerify } from './util/Performance.js';
 import parsedArgValues from './util/cli-arguments.js';
 
+const PMap: PluginMap = Plugins;
+
 const { performance: isEnabled = false } = parsedArgValues;
 
-const plugins = (isEnabled ? {} : originalPlugins) as Record<PluginName, Plugin>;
+const timerifyMethods = ['resolve', 'resolveConfig', 'resolveEntryPaths'] as const;
 
-const methods = ['resolve', 'resolveConfig', 'resolveEntryPaths'] as const;
+const PluginEntries = Object.entries(PMap) as Entries;
 
 if (isEnabled) {
-  for (const [name, plugin] of Object.entries(originalPlugins) as Entries<typeof originalPlugins>) {
-    plugins[name] = plugin;
-    for (const method of methods) {
-      if (method in plugin) {
-        // @ts-expect-error It's fine, really.
-        plugins[name][method] = timerify(plugin[method], `${method} (${plugin.title})`);
-      }
+  for (const [, plugin] of PluginEntries) {
+    for (const method of timerifyMethods) {
+      // @ts-expect-error function signatures don't match but doesn't matter
+      if (method in plugin) plugin[method] = timerify(plugin[method], `${method} (${plugin.title})`);
     }
   }
 }
 
-export { plugins };
+const pluginArgsMap = new Map(
+  PluginEntries.flatMap(([pluginName, plugin]) => {
+    if (!plugin.args) return [];
+    const item: [PluginName, Args] = [pluginName, plugin.args];
+    if (Array.isArray(plugin.args?.binaries)) return plugin.args.binaries.map(bin => [bin, item]);
+    return [[pluginName, item]];
+  })
+);
+
+export { PMap as Plugins, PluginEntries, pluginArgsMap };

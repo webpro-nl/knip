@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDeferResolve, toDependency } from '../../util/protocols.js';
 import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.js';
 
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/gatsby-project-structure.md
@@ -26,7 +27,9 @@ const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConf
   const { configFileName } = options;
 
   if (/gatsby-config/.test(configFileName)) {
-    return (localConfig as GatsbyConfig).plugins.map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve));
+    return (localConfig as GatsbyConfig).plugins
+      .map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve))
+      .map(toDeferResolve);
   }
 
   if (/gatsby-node/.test(configFileName)) {
@@ -36,7 +39,7 @@ const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConf
     if (typeof _config.onCreateBabelConfig === 'function') {
       _config.onCreateBabelConfig({ actions });
     }
-    return Array.from(plugins);
+    return Array.from(plugins).map(toDependency);
   }
 
   return [];

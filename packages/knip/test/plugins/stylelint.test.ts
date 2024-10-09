@@ -23,6 +23,7 @@ test('Find dependencies with the stylelint plugin', async () => {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 4,
+    unresolved: 1,
     processed: 0,
     total: 0,
   });

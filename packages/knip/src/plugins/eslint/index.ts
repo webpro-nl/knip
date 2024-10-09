@@ -1,10 +1,10 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesDeep } from './helpers.js';
 import type { ESLintConfig } from './types.js';
 
-// Old: https://eslint.org/docs/latest/use/configure/configuration-files
-// New: https://eslint.org/docs/latest/use/configure/configuration-files-new
+// New: https://eslint.org/docs/latest/use/configure/configuration-files
+// Old: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated
 
 // Note: shareable configs should use `peerDependencies` for plugins
 // https://eslint.org/docs/latest/extend/shareable-configs#publishing-a-shareable-config

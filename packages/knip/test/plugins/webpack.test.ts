@@ -24,6 +24,7 @@ test('Find dependencies with Webpack plugin', async () => {
     files: 2,
     devDependencies: 1,
     unlisted: 3,
+    unresolved: 14,
     processed: 11,
     total: 11,
   });

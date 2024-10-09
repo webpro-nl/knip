@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDeferResolve } from '../../util/protocols.js';
 import type { TypeDocConfig } from './types.js';
 
 // https://typedoc.org/guides/overview/
@@ -24,7 +25,7 @@ const config = [
 
 const resolveConfig: ResolveConfig<TypeDocConfig | { typedocOptions: TypeDocConfig }> = config => {
   config = 'typedocOptions' in config ? config.typedocOptions : config; // exception for `tsconfig.json`
-  return config?.plugin ?? [];
+  return (config?.plugin ?? []).map(toDeferResolve);
 };
 
 export default {

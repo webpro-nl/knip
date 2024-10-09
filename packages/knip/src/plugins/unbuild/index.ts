@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toEntry } from '../../util/protocols.js';
 import type { UnbuildConfig } from './types.js';
 
 // https://github.com/unjs/unbuild#unbuild
@@ -18,7 +18,7 @@ const resolveConfig: ResolveConfig<UnbuildConfig> = config => {
     .flat()
     .map(obj => obj.entries)
     .flatMap(entries => entries?.map(entry => (typeof entry === 'string' ? entry : entry.input)) ?? [])
-    .map(toEntryPattern);
+    .map(toEntry);
 };
 
 export default {

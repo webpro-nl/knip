@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
-import { dirname, isInternal, join, toAbsolute } from '#p/util/path.js';
-import { hasDependency, load, resolveEntry } from '#p/util/plugin.js';
-import { toEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { dirname, isInternal, join, toAbsolute } from '../../util/path.js';
+import { hasDependency, load } from '../../util/plugin.js';
+import { type Dependency, toDeferResolve, toEntry } from '../../util/protocols.js';
 import type { JestConfig, JestInitialOptions } from './types.js';
 
 // https://jestjs.io/docs/configuration
@@ -30,7 +30,7 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   return config;
 };
 
-const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<string[]> => {
+const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Dependency[]> => {
   const { configFileDir } = options;
 
   if (config?.preset) {
@@ -80,11 +80,11 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   const snapshotSerializers = config.snapshotSerializers ?? [];
   const testSequencer = config.testSequencer ? [config.testSequencer] : [];
 
-  const resolve = (specifier: string) => resolveEntry(options, specifier);
-  const setupFiles = (config.setupFiles ?? []).map(resolve);
-  const setupFilesAfterEnv = (config.setupFilesAfterEnv ?? []).map(resolve);
-  const globalSetup = (config.globalSetup ? [config.globalSetup] : []).map(resolve);
-  const globalTeardown = (config.globalTeardown ? [config.globalTeardown] : []).map(resolve);
+  // const resolve = (specifier: string) => resolveEntry(options, specifier);
+  const setupFiles = config.setupFiles ?? [];
+  const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
+  const globalSetup = config.globalSetup ? [config.globalSetup] : [];
+  const globalTeardown = config.globalTeardown ? [config.globalTeardown] : [];
 
   return [
     ...presets,
@@ -104,29 +104,32 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     ...testSequencer,
     ...globalSetup,
     ...globalTeardown,
-  ];
+  ].map(id => (typeof id === 'string' ? toDeferResolve(id) : id));
 };
 
 const resolveEntryPaths: ResolveEntryPaths<JestConfig> = async (localConfig, options) => {
-  const { cwd, configFileDir } = options;
+  const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
   const rootDir = localConfig.rootDir ? join(configFileDir, localConfig.rootDir) : configFileDir;
-  const replaceRootDir = (name: string) => (name.includes('<rootDir>') ? name.replace(/<rootDir>/, rootDir) : name);
-  const matchCwd = new RegExp(`^${toEntryPattern(cwd)}/`);
-  return (localConfig.testMatch ?? [])
-    .map(replaceRootDir)
-    .map(dependency => dependency.replace(matchCwd, toEntryPattern('')))
-    .map(toEntryPattern);
+  const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
+  return (localConfig.testMatch ?? []).map(replaceRootDir).map(toEntry);
 };
 
 const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {
-  const { cwd, configFileDir } = options;
+  const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
   const rootDir = localConfig.rootDir ? join(configFileDir, localConfig.rootDir) : configFileDir;
-  const replaceRootDir = (name: string) => (name.includes('<rootDir>') ? name.replace(/<rootDir>/, rootDir) : name);
+
+  const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
+
   const dependencies = await resolveDependencies(localConfig, options);
-  const matchCwd = new RegExp(`^${toEntryPattern(cwd)}/`);
-  return dependencies.map(replaceRootDir).map(dependency => dependency.replace(matchCwd, toEntryPattern('')));
+
+  const result = dependencies.map(dependency => {
+    dependency.specifier = replaceRootDir(dependency.specifier);
+    return dependency;
+  });
+
+  return result;
 };
 
 export default {

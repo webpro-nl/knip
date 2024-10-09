@@ -1,5 +1,12 @@
 {
   "name": "@fixtures/typescript",
+  "scripts": {
+    "build-base": "tsc -p tsconfig.base.json",
+    "build-ext": "tsc -p tsconfig.ext.json",
+    "build-preact": "tsc -p tsconfig.jsx-import-source-preact.json",
+    "build-react": "tsc -p tsconfig.jsx-import-source-react.json",
+    "build-jsx": "tsc -p tsconfig.jsx-preserve.json"
+  },
   "devDependencies": {
     "typescript": "*"
   }

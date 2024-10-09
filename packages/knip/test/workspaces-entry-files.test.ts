@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/workspaces-entry-files');
 
-test('Use root plugin config in workspaces', async () => {
+test('Use root plugin entry config in workspaces', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

@@ -21,21 +21,22 @@ export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManife
   }
 };
 
-type GetFilteredScriptsOptions = {
-  isProduction: boolean;
-  scripts?: Scripts;
-};
+// type GetFilteredScriptsOptions = {
+//   isProduction: boolean;
+//   scripts?: Scripts;
+// };
 
-export const getFilteredScripts = ({ isProduction, scripts }: GetFilteredScriptsOptions) => {
-  if (!scripts) return {};
-  if (!isProduction) return scripts;
+export const getFilteredScripts = (scripts: Scripts) => {
+  if (!scripts) return [{}, {}];
 
   const scriptFilter = new Set(['start', 'postinstall']);
-  const filteredScripts: Scripts = {};
+  const productionScripts: Scripts = {};
+  const developmentScripts: Scripts = {};
 
   for (const scriptName in scripts) {
-    if (scriptFilter.has(scriptName)) filteredScripts[scriptName] = scripts[scriptName];
+    if (scriptFilter.has(scriptName)) productionScripts[scriptName] = scripts[scriptName];
+    else developmentScripts[scriptName] = scripts[scriptName];
   }
 
-  return filteredScripts;
+  return [productionScripts, developmentScripts];
 };

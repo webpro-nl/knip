@@ -46,6 +46,7 @@ test('Find dependencies with the ESLint plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 25,
+    unresolved: 3,
     processed: 4,
     total: 4,
   });

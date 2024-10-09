@@ -28,15 +28,19 @@ export const debugLog = IS_DEBUG_ENABLED
   : noop;
 
 export const debugLogObject = IS_DEBUG_ENABLED
-  ? (context: string, name: string, obj: unknown | (() => unknown)) => {
+  ? (context: string | [string, string], name: string, obj: unknown | (() => unknown)) => {
       console.log(`${ctx(context)} ${name}`);
       console.log(util.inspect(typeof obj === 'function' ? obj() : obj, inspectOptions));
     }
   : noop;
 
 export const debugLogArray = IS_DEBUG_ENABLED
-  ? (context: string | [string, string], message: string, elements: string[] | Set<string>) => {
-      const collection = Array.from(elements);
+  ? (
+      context: string | [string, string],
+      message: string,
+      elements: string[] | Set<string> | (() => string[] | Set<string>)
+    ) => {
+      const collection = Array.from(typeof elements === 'function' ? elements() : elements);
       console.debug(`${ctx(context)} ${message} (${collection.length})`);
       logArray(collection);
     }

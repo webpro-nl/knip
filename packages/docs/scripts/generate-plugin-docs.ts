@@ -10,7 +10,7 @@ import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 import type { Node } from 'unist';
 import { u } from 'unist-builder';
-import type { Plugin } from '../../knip/src/types/plugins.js';
+import type { Plugin } from '../../knip/src/types/config.js';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const referenceDocsDir = path.join(rootDir, 'src/content/docs/reference');
@@ -47,7 +47,7 @@ for await (const dir of directories) {
     const pluginDir = path.join(pluginsDir, pluginName);
     const plugin: Plugin = (await import(path.join(pluginDir, 'index.ts'))).default;
 
-    const { title, enablers, note, config, entry, production, project } = plugin;
+    const { title, enablers, note, args, config, entry, production, project } = plugin;
 
     plugins.push([title, pluginName]);
 
@@ -58,6 +58,8 @@ for await (const dir of directories) {
     if (entry && entry.length > 0) defaults.entry = entry;
     if (production && production.length > 0) defaults.entry = [...(defaults.entry ?? []), ...production];
     if (project && project.length > 0) defaults.project = project;
+
+    const hasDefaultConfig = Object.values(defaults).some(v => v.length > 0);
 
     const en =
       Array.isArray(enablers) && enablers.length > 0
@@ -78,19 +80,28 @@ for await (const dir of directories) {
 
     const n = note ? [u('heading', { depth: 2 }, [u('text', 'Note')]), ...parseFragment(note)] : [];
 
+    const def = hasDefaultConfig
+      ? [
+          u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
+          ...parseFragment('This configuration is added automatically if the plugin is enabled:'),
+          u('code', {
+            lang: 'json title="knip.json"', // TODO How to set attributes/properties/props properly?
+            value: JSON.stringify({ [pluginName]: defaults }, null, 2),
+          }),
+          ...parseFragment('Your custom `config` or `entry` options override default values, they are not merged.'),
+          ...parseFragment('See [Plugins](../../explanations/plugins) for more details.'),
+        ]
+      : [];
+
+    const argsText = args ? parseFragment('## Shell commands\n\nThis plugin enables argument parsing') : [];
+
     const tree = u('root', [
       frontmatter,
       u('heading', { depth: 2 }, [u('text', 'Enabled')]),
       ...en,
       ...n,
-      u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
-      ...parseFragment('This configuration is added automatically if the plugin is enabled:'),
-      u('code', {
-        lang: 'json title="knip.json"', // TODO How to set attributes/properties/props properly?
-        value: JSON.stringify({ [pluginName]: defaults }, null, 2),
-      }),
-      ...parseFragment('Your custom `config` or `entry` options override default values, they are not merged.'),
-      ...parseFragment('See [Plugins](../../explanations/plugins) for more details.'),
+      ...def,
+      ...argsText,
     ]);
 
     console.log(`Writing ${pluginName} docs to plugins/${pluginName}.md`);

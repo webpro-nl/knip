@@ -1,6 +1,6 @@
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { isAbsolute, isInNodeModules, join } from '../util/path.js';
-import { toBinary } from '../util/protocols.js';
+import { toBinary, toDependency, toEntry } from '../util/protocols.js';
 import { _resolveSync } from '../util/resolve.js';
 
 export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleSpecifier?: boolean) => {
@@ -9,21 +9,19 @@ export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleS
     if (!isInNodeModules(filePath)) {
       const resolvedFilePath = _resolveSync(filePath, cwd);
       if (resolvedFilePath) {
-        return resolvedFilePath;
+        return toEntry(resolvedFilePath);
       }
       if (acceptModuleSpecifier) {
-        return getPackageNameFromModuleSpecifier(specifier);
+        const p = getPackageNameFromModuleSpecifier(specifier);
+        if (p) return toDependency(p);
       }
     } else if (specifier.includes('node_modules/.bin')) {
       return toBinary(trimBinary(specifier));
     } else {
-      return getPackageNameFromFilePath(specifier);
+      return toDependency(getPackageNameFromFilePath(specifier));
     }
   }
 };
-
-export const tryResolveSpecifiers = (cwd: string, specifiers: string[]) =>
-  specifiers.map(specifier => tryResolveFilePath(cwd, specifier, true));
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
 

@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
 import { config as viteConfig } from '../vite/index.js';
 
 // https://kit.svelte.dev/docs

@@ -1,0 +1,33 @@
+name: CI
+
+on: push
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    name: work
+
+    steps:
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
+
+      - run: node scripts/no-working-dir
+
+  job2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@4
+        with:
+          path: some-dir
+
+      - run: node scripts/from-working-dir-with-path
+        working-directory: ./some-dir
+
+  job3:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@4
+
+      - run: node from-working-dir
+        working-directory: scripts

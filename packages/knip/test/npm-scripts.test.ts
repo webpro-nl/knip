@@ -42,6 +42,7 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
       ['eslint-v8', new Set(['eslint'])],
       ['@commitlint/cli', new Set(['commitlint'])],
       ['@org/runnable', new Set(['runnable'])],
+      ['tsup', new Set(['tsup'])],
       ['commitlint', new Set(['@commitlint/cli'])],
     ])
   );
@@ -70,6 +71,7 @@ test('Unused dependencies in npm scripts', async () => {
     dependencies: 1,
     devDependencies: 1,
     binaries: 2,
+    unresolved: 0,
     processed: 2,
     total: 2,
   });

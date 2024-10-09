@@ -34,7 +34,7 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
     ...baseCounters,
     binaries: 10,
     unlisted: 4,
-    processed: 7,
-    total: 7,
+    processed: 10,
+    total: 10,
   });
 });

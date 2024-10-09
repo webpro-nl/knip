@@ -1,12 +1,11 @@
-import type { EnablerPatterns } from '#p/types/config.js';
-import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://docs.lost-pixel.com/user-docs/api-reference/lost-pixel.config.js-or-ts
 
 const title = 'Lost Pixel';
 
-const enablers: EnablerPatterns = ['lost-pixel'];
+const enablers = ['lost-pixel'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

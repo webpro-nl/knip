@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { _firstGlob } from '#p/util/glob.js';
-import { getValuesByKeyDeep } from '#p/util/object.js';
-import { join } from '#p/util/path.js';
-import { getDependenciesFromScripts } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { _firstGlob } from '../../util/glob.js';
+import { findByKeyDeep } from '../../util/object.js';
+import { join, relative } from '../../util/path.js';
+import { type Dependency, toEntry } from '../../util/protocols.js';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
@@ -17,10 +17,43 @@ const config = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
-const resolveConfig: ResolveConfig = async (config, options) => {
-  const { configFileDir, configFileName } = options;
+type Step = {
+  run?: string;
+  uses?: string;
+  with?: {
+    path: string;
+  };
+  'working-directory'?: string;
+};
 
-  const scripts = getValuesByKeyDeep(config, 'run').filter(isString);
+type Steps = Step[];
+
+type Job = {
+  steps: Steps;
+};
+
+const resolveConfig: ResolveConfig = async (config, options) => {
+  const { configFileDir, configFileName, rootCwd, getDependenciesFromScripts } = options;
+
+  const dependencies = new Set<Dependency>();
+
+  const jobs = findByKeyDeep<Job>(config, 'steps');
+
+  for (const steps of jobs) {
+    const action = steps.steps.find(
+      step => step.uses?.startsWith('actions/checkout@') && typeof step.with?.path === 'string'
+    );
+    const path = action?.with?.path;
+    for (const step of steps.steps) {
+      const workingDir = step['working-directory'];
+      const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
+      if (step.run) {
+        for (const d of getDependenciesFromScripts([step.run], { knownGlobalsOnly: true })) {
+          dependencies.add({ ...d, dir });
+        }
+      }
+    }
+  }
 
   const getActionDependencies = () => {
     const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
@@ -29,7 +62,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
     return scripts.map(script => join(configFileDir, script));
   };
 
-  return [...getActionDependencies(), ...getDependenciesFromScripts(scripts, { ...options, knownGlobalsOnly: true })];
+  return [...getActionDependencies().map(toEntry), ...dependencies];
 };
 
 export default {

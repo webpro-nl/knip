@@ -15,6 +15,7 @@ test('Find dependencies with the cucumber plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unresolved: 1,
     processed: 2,
     total: 2,
   });

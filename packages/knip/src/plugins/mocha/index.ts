@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toEntry } from '../../util/protocols.js';
 import type { MochaConfig } from './types.js';
 
 // https://mochajs.org/#configuring-mocha-nodejs
@@ -17,12 +17,16 @@ const entry = ['**/test/*.{js,cjs,mjs}'];
 
 const resolveEntryPaths: ResolveEntryPaths<MochaConfig> = localConfig => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : [];
-  return [...entryPatterns].map(toEntryPattern);
+  return [...entryPatterns].map(toEntry);
 };
 
 const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
   const require = localConfig.require ? [localConfig.require].flat() : [];
-  return [...require].map(toEntryPattern);
+  return [...require].map(toEntry);
+};
+
+const args = {
+  nodeImportArgs: true,
 };
 
 export default {
@@ -33,4 +37,5 @@ export default {
   entry,
   resolveConfig,
   resolveEntryPaths,
+  args,
 } satisfies Plugin;

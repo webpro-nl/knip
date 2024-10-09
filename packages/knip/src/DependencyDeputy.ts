@@ -205,8 +205,8 @@ export class DependencyDeputy {
       typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName));
 
     if (closestWorkspaceName || closestWorkspaceNameForTypes) {
-      closestWorkspaceName && this.addReferencedDependency(closestWorkspaceName, packageName);
-      closestWorkspaceNameForTypes && this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+      if (closestWorkspaceName) this.addReferencedDependency(closestWorkspaceName, packageName);
+      if (closestWorkspaceNameForTypes) this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
       return true;
     }
     this.addReferencedDependency(workspace.name, packageName);

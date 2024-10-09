@@ -1,15 +1,17 @@
 import parse, { type Assignment, type ExpansionNode, type Node, type Prefix } from '../../vendor/bash-parser/index.js';
+import { pluginArgsMap } from '../plugins.js';
+import type { GetDependenciesFromScriptsOptions } from '../types/config.js';
 import { debugLogObject } from '../util/debug.js';
-import { toBinary } from '../util/protocols.js';
-import * as FallbackResolver from './resolvers/fallback.js';
-import KnownResolvers from './resolvers/index.js';
-import { parseNodeArgs } from './resolvers/node.js';
-import type { GetDependenciesFromScriptsOptions } from './types.js';
+import { type Dependency, toBinary, toDeferResolve } from '../util/protocols.js';
+import { resolve as fallbackResolve } from './fallback.js';
+import PackageManagerResolvers from './package-manager/index.js';
+import { parseNodeArgs } from './package-manager/node.js';
+import { resolve as resolverFromPlugins } from './plugins.js';
 import { trimBinary } from './util.js';
 
 // https://vorpaljs.github.io/bash-parser-playground/
 
-type KnownResolver = keyof typeof KnownResolvers;
+type KnownResolver = keyof typeof PackageManagerResolvers;
 
 // Binaries that spawn a child process for the binary at first positional arg (and don't have custom resolver already)
 const spawningBinaries = ['cross-env', 'retry-cli'];
@@ -18,14 +20,18 @@ const isExpansion = (node: Prefix): node is ExpansionNode => 'expansion' in node
 
 const isAssignment = (node: Prefix): node is Assignment => 'type' in node && node.type === 'AssignmentWord';
 
-export const getBinariesFromScript = (script: string, options: GetDependenciesFromScriptsOptions) => {
+export const getDependenciesFromScript = (script: string, options: GetDependenciesFromScriptsOptions): Dependency[] => {
   if (!script) return [];
 
   // Helper for recursive calls
-  const fromArgs = (args: string[]) =>
-    getBinariesFromScript(args.filter(arg => arg !== '--').join(' '), { ...options, knownGlobalsOnly: false });
+  const fromArgs = (args: string[]) => {
+    return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
+      ...options,
+      knownGlobalsOnly: false,
+    });
+  };
 
-  const getBinariesFromNodes = (nodes: Node[]): string[] =>
+  const getDependenciesFromNodes = (nodes: Node[]): Dependency[] =>
     nodes.flatMap(node => {
       switch (node.type) {
         case 'Command': {
@@ -39,7 +45,9 @@ export const getBinariesFromScript = (script: string, options: GetDependenciesFr
               .flatMap(expansion => expansion.filter(expansion => expansion.type === 'CommandExpansion') ?? []) ?? [];
 
           if (commandExpansions.length > 0) {
-            return commandExpansions.flatMap(expansion => getBinariesFromNodes(expansion.commandAST.commands)) ?? [];
+            return (
+              commandExpansions.flatMap(expansion => getDependenciesFromNodes(expansion.commandAST.commands)) ?? []
+            );
           }
 
           // Bunch of early bail outs for things we can't or don't want to resolve
@@ -58,37 +66,42 @@ export const getBinariesFromScript = (script: string, options: GetDependenciesFr
               .flatMap(node => node.text.split('=')[1])
               .map(arg => parseNodeArgs(arg.split(' ')))
               .filter(args => args.require)
-              .flatMap(arg => arg.require) ?? [];
+              .flatMap(arg => arg.require)
+              .map(toDeferResolve) ?? [];
 
-          if (binary in KnownResolvers) {
-            const resolver = KnownResolvers[binary as KnownResolver];
+          if (binary in PackageManagerResolvers) {
+            const resolver = PackageManagerResolvers[binary as KnownResolver];
             return resolver(binary, args, { ...options, fromArgs });
           }
 
+          if (pluginArgsMap.has(binary)) {
+            return [...resolverFromPlugins(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
+          }
+
           if (spawningBinaries.includes(binary)) {
-            const command = script.replace(new RegExp(`.*${node.name?.text ?? binary}(\\s--\\s)?`), '');
-            return [toBinary(binary), ...getBinariesFromScript(command, options)];
+            // Run again with everything behind `binary -- ` (bash-parser AST is lacking)
+            const command = script.replace(new RegExp(`.*${text ?? binary}(\\s--\\s)?`), '');
+            return [toBinary(binary), ...getDependenciesFromScript(command, options)];
           }
 
           // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
           // Actions, which are provisioned with lots of unknown global binaries.
           if (options.knownGlobalsOnly && !text?.startsWith('.')) return [];
 
-          // We apply a kitchen sink fallback resolver for everything else
-          return [...FallbackResolver.resolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
+          return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
         }
         case 'LogicalExpression':
-          return getBinariesFromNodes([node.left, node.right]);
+          return getDependenciesFromNodes([node.left, node.right]);
         case 'If':
-          return getBinariesFromNodes([node.clause, node.then, ...(node.else ? [node.else] : [])]);
+          return getDependenciesFromNodes([node.clause, node.then, ...(node.else ? [node.else] : [])]);
         case 'For':
-          return getBinariesFromNodes(node.do.commands);
+          return getDependenciesFromNodes(node.do.commands);
         case 'CompoundList':
-          return getBinariesFromNodes(node.commands);
+          return getDependenciesFromNodes(node.commands);
         case 'Pipeline':
-          return getBinariesFromNodes(node.commands);
+          return getDependenciesFromNodes(node.commands);
         case 'Function':
-          return getBinariesFromNodes(node.body.commands);
+          return getDependenciesFromNodes(node.body.commands);
         default:
           return [];
       }
@@ -96,7 +109,7 @@ export const getBinariesFromScript = (script: string, options: GetDependenciesFr
 
   try {
     const parsed = parse(script);
-    return parsed?.commands ? getBinariesFromNodes(parsed.commands) : [];
+    return parsed?.commands ? getDependenciesFromNodes(parsed.commands) : [];
   } catch (error) {
     debugLogObject('*', 'Bash parser error', error);
     return [];

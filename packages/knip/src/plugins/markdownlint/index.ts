@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDependency } from '../../util/protocols.js';
 import { getArgumentValues } from './helpers.js';
 import type { MarkdownlintConfig } from './types.js';
 
@@ -22,7 +23,7 @@ const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
   const uses = scripts
     .filter(script => script.includes('markdownlint '))
     .flatMap(script => getArgumentValues(script, / (--rules|-r)[ =]([^ ]+)/g));
-  return [...extend, ...uses];
+  return [...extend, ...uses].map(toDependency);
 };
 
 export default {

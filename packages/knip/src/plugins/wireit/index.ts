@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { WireitConfig } from './types.js';
 
 // https://github.com/google/wireit
@@ -17,7 +17,7 @@ const config = ['package.json'];
 const resolveConfig: ResolveConfig<WireitConfig> = (localConfig, options) => {
   const scripts = Object.values(localConfig).flatMap(({ command: script }) => (script ? [script] : []));
 
-  const scriptDependencies = getDependenciesFromScripts(scripts, options);
+  const scriptDependencies = options.getDependenciesFromScripts(scripts);
 
   return scriptDependencies;
 };

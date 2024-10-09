@@ -1,6 +1,5 @@
-import type { EnablerPatterns } from '#p/types/config.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesDeep } from '../eslint/helpers.js';
 import type { XOConfig } from './types.js';
 
@@ -10,7 +9,7 @@ import type { XOConfig } from './types.js';
 
 const title = 'xo';
 
-const enablers: EnablerPatterns = ['xo'];
+const enablers = ['xo'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies, config }) =>
   hasDependency(dependencies, enablers) || 'xo' in config;

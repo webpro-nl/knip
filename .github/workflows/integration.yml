@@ -150,6 +150,5 @@ jobs:
           sparse-checkout: ${{ matrix.project.sparse-checkout }}
 
       - name: Run Knip in ${{ matrix.project.repo }}
-        run: |
-          cd ${{ matrix.project.name }}
-          ${{ matrix.project.commands }}
+        working-directory: ${{ matrix.project.name }}
+        run: ${{ matrix.project.commands }}

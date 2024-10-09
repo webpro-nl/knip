@@ -1,4 +1,15 @@
 {
   "name": "@fixtures/tsup",
-  "version": "*"
+  "version": "*",
+  "devDependencies": {
+    "tsup": "*"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build-3": "tsup --config tsup.config-3.ts",
+    "build-4": "tsup -c tsup.config-4.ts"
+  },
+  "tsup": {
+    "entry": ["entry-5.ts"]
+  }
 }

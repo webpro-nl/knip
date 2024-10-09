@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
-import { join, relative } from '#p/util/path.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { join, relative } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDeferResolve, toDependency, toEntry } from '../../util/protocols.js';
 import type { StorybookConfig } from './types.js';
 
 // https://storybook.js.org/docs/react/configure/overview
@@ -30,7 +30,7 @@ const resolveEntryPaths: ResolveEntryPaths<StorybookConfig> = async (localConfig
     return relative(cwd, join(configFileDir, pattern.directory, pattern.files ?? stories[0]));
   });
   const patterns = [...restEntry, ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : stories)];
-  return patterns.map(toEntryPattern);
+  return patterns.map(toEntry);
 };
 
 const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {
@@ -44,7 +44,7 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {
       : [builder]
     : [];
   const frameworks = localConfig.framework?.name ? [localConfig.framework.name] : [];
-  return [...addons, ...builderPackages, ...frameworks];
+  return [...addons.map(toDeferResolve), ...builderPackages.map(toDependency), ...frameworks.map(toDependency)];
 };
 
 export default {

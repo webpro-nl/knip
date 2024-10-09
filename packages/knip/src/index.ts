@@ -9,19 +9,19 @@ import type { ProjectPrincipal } from './ProjectPrincipal.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import { _getDependenciesFromScripts } from './binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
-import { getFilteredScripts } from './manifest/helpers.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type { DependencyGraph, Export, ExportMember } from './types/dependency-graph.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { getOrCreateFileNode, updateImportMap } from './util/dependency-graph.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { _glob, negate } from './util/glob.js';
-import { getReferencedDependencyHandler } from './util/handle-dependency.js';
+import { getReferencedDependencyHandler } from './util/handle-referenced-dependency.js';
 import { getHasStrictlyNsReferences, getType } from './util/has-strictly-ns-references.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { getEntryPathsFromManifest } from './util/package-json.js';
-import { dirname, join } from './util/path.js';
+import { dirname, isAbsolute, join, relative } from './util/path.js';
+import { type Dependency, isEntry, isProductionEntry, toProductionEntry } from './util/protocols.js';
 import { findMatch } from './util/regex.js';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from './util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
@@ -101,36 +101,80 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const isGitIgnored = await getGitIgnoredHandler({ cwd, gitignore });
   const toSourceFilePath = getToSourcePathHandler(chief);
-  const handleReferencedDependency = getReferencedDependencyHandler(collector, deputy, chief);
+  const handleReferencedDependency = getReferencedDependencyHandler(collector, deputy, chief, isGitIgnored);
   const shouldIgnore = getShouldIgnoreHandler(isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
 
   for (const workspace of workspaces) {
-    const { name, dir, ancestors, pkgName, manifestPath } = workspace;
+    const { name, dir, manifestPath } = workspace;
+    const manifest = chief.getManifestForWorkspace(name);
+    if (!manifest) continue;
+    const { ignoreBinaries, ignoreDependencies } = chief.getIgnores(name);
+    deputy.addWorkspace({ name, cwd, dir, manifestPath, manifest, ignoreBinaries, ignoreDependencies });
+  }
+
+  for (const workspace of workspaces) {
+    const { name, dir, ancestors, pkgName } = workspace;
 
     streamer.cast(`Analyzing workspace ${name}...`);
 
     const manifest = chief.getManifestForWorkspace(name);
-    const { ignoreBinaries, ignoreDependencies } = chief.getIgnores(name);
 
     if (!manifest) continue;
 
-    deputy.addWorkspace({ name, cwd, dir, manifestPath, manifest, ignoreBinaries, ignoreDependencies });
     const dependencies = deputy.getDependencies(name);
 
     const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
     const extensions = getCompilerExtensions(compilers);
     const config = chief.getConfigForWorkspace(name, extensions);
 
-    const filteredScripts = getFilteredScripts({ isProduction, scripts: manifest.scripts });
-    const manifestScripts = Object.values(filteredScripts);
-    const manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
-
-    const { isFile, compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
+    const tsConfigFilePath = join(dir, tsConfigFile ?? 'tsconfig.json');
+    const { isFile, compilerOptions, definitionPaths } = await loadTSConfig(tsConfigFilePath);
 
     if (isFile) augmentWorkspace(workspace, dir, compilerOptions);
 
-    const principal = factory.getPrincipal({
+    const worker = new WorkspaceWorker({
+      name,
+      dir,
+      cwd,
+      config,
+      manifest,
+      dependencies,
+      isProduction,
+      isStrict,
+      rootIgnore: chief.config.ignore,
+      negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
+      ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
+      enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
+      isCache,
+      cacheLocation,
+    });
+
+    await worker.init();
+
+    const deps = new Set<Dependency>();
+
+    debugLogArray(name, 'Definition paths', definitionPaths);
+    for (const id of definitionPaths) deps.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
+
+    const ignore = worker.getIgnorePatterns();
+    const sharedGlobOptions = { cwd, dir, gitignore };
+
+    collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
+
+    // Add entry paths from package.json#main, #bin, #exports
+    const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { ...sharedGlobOptions, ignore });
+    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
+    for (const id of entryPathsFromManifest.map(id => toProductionEntry(id))) deps.add(id);
+
+    // Get dependencies from plugins
+    const dependenciesFromPlugins = await worker.findDependenciesByPlugins(dependencies);
+    for (const id of dependenciesFromPlugins) deps.add(id);
+
+    enabledPluginsStore.set(name, worker.enabledPlugins);
+
+    // workspace + worker → principal
+    const principal = factory.createPrincipal({
       cwd: dir,
       paths: config.paths,
       isFile,
@@ -145,47 +189,20 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       cacheLocation,
     });
 
-    const worker = new WorkspaceWorker({
-      name,
-      dir,
-      cwd,
-      config,
-      manifest,
-      dependencies,
-      isProduction,
-      isStrict,
-      rootIgnore: chief.config.ignore,
-      negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
-      enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
-      isCache,
-      cacheLocation,
-    });
+    const entryFilePatterns = new Set<string>();
+    const productionEntryFilePatterns = new Set<string>();
 
-    await worker.init();
-
-    principal.addEntryPaths(definitionPaths);
-    debugLogArray(name, 'Definition paths', definitionPaths);
-
-    const ignore = worker.getIgnorePatterns();
-    const sharedGlobOptions = { cwd, dir, gitignore };
-
-    collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
-
-    // Add dependencies from package.json#scripts
-    const options = { manifestScriptNames, cwd: dir, dependencies };
-    const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
-    principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
-
-    // Add entry paths from package.json#main, #bin, #exports
-    const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { ...sharedGlobOptions, ignore });
-    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
-    principal.addEntryPaths(entryPathsFromManifest);
-
-    // Run plugins
-    const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } =
-      await worker.findDependenciesByPlugins();
-    enabledPluginsStore.set(name, enabledPlugins);
-    principal.addReferencedDependencies(name, referencedDependencies);
+    for (const dependency of deps) {
+      const s = dependency.specifier;
+      if (isEntry(dependency)) {
+        entryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
+      } else if (isProductionEntry(dependency)) {
+        productionEntryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
+      } else {
+        const specifierFilePath = handleReferencedDependency(dependency, workspace);
+        if (specifierFilePath) principal.addEntryPath(specifierFilePath);
+      }
+    }
 
     if (isProduction) {
       const negatedEntryPatterns: string[] = Array.from(entryFilePatterns).map(negate);
@@ -226,7 +243,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       }
 
       {
-        const patterns = [...entryFilePatterns, ...productionEntryFilePatterns];
+        const patterns = worker.getPluginEntryFilePatterns([...entryFilePatterns, ...productionEntryFilePatterns]);
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
         debugLogArray(name, 'Plugin entry paths', pluginWorkspaceEntryPaths);
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
@@ -308,12 +325,18 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       // Handle scripts here since they might lead to more entry files
       if (scripts && scripts.size > 0) {
-        const cwd = dirname(filePath);
+        const dir = dirname(filePath);
         const dependencies = deputy.getDependencies(workspace.name);
         const manifestScriptNames = new Set<string>();
-        const specifiers = _getDependenciesFromScripts(scripts, { cwd, manifestScriptNames, dependencies });
+        const specifiers = _getDependenciesFromScripts(scripts, {
+          cwd: dir,
+          manifestScriptNames,
+          dependencies,
+          rootCwd: cwd,
+        });
         for (const specifier of specifiers) {
-          const specifierFilePath = handleReferencedDependency(specifier, filePath, workspace);
+          specifier.containingFilePath = filePath;
+          const specifierFilePath = handleReferencedDependency(specifier, workspace);
           if (specifierFilePath) analyzeSourceFile(specifierFilePath, principal);
         }
       }
@@ -322,14 +345,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   for (const principal of principals) {
     principal.init();
-
-    for (const [containingFilePath, specifier, workspaceName] of principal.referencedDependencies) {
-      const workspace = chief.findWorkspaceByName(workspaceName);
-      if (workspace) {
-        const specifierFilePath = handleReferencedDependency(specifier, containingFilePath, workspace);
-        if (specifierFilePath && !isGitIgnored(specifierFilePath)) principal.addEntryPath(specifierFilePath);
-      }
-    }
 
     streamer.cast('Running async compilers...');
 
@@ -594,6 +609,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
     }
   };
+
+  // inspect(graph);
 
   await collectUnusedExports();
 

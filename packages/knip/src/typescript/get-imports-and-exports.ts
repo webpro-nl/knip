@@ -1,8 +1,7 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { ALIAS_TAG, ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
-import type { Tags } from '../types/cli.js';
-import type { IgnoreExportsUsedInFile } from '../types/config.js';
+import type { GetImportsAndExportsOptions } from '../types/config.js';
 import type { ExportMap, ExportMember, ImportDetails, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
@@ -54,16 +53,6 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Exp
     refs: [0, false],
     jsDocTags: getJSDocTags(member.node),
   };
-};
-
-export type GetImportsAndExportsOptions = {
-  skipTypeOnly: boolean;
-  skipExports: boolean;
-  isFixExports: boolean;
-  isFixTypes: boolean;
-  isReportClassMembers: boolean;
-  ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
-  tags: Tags;
 };
 
 interface AddInternalImportOptions extends ImportNode {

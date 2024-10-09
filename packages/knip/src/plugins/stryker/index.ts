@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDeferResolve } from '../../util/protocols.js';
 import type { StrykerConfig } from './types.js';
 
 // https://stryker-mutator.io/docs/stryker-js/config-file/
@@ -19,7 +20,7 @@ const resolveConfig: ResolveConfig<StrykerConfig> = localConfig => {
     : [];
   const plugins = localConfig.plugins ?? [];
 
-  return [...runners, ...checkers, ...plugins];
+  return [...runners, ...checkers, ...plugins].map(toDeferResolve);
 };
 
 export default {

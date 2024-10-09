@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toProductionEntry } from '../../util/protocols.js';
 import type { WranglerConfig } from './types.js';
 
 // https://developers.cloudflare.com/workers/wrangler/configuration/
@@ -13,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['wrangler.{json,toml}'];
 
 const resolveEntryPaths: ResolveEntryPaths<WranglerConfig> = async config => {
-  return config.main ? [config.main] : [];
+  return (config.main ? [config.main] : []).map(id => toProductionEntry(id));
 };
 
 export default {

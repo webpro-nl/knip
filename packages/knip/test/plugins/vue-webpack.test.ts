@@ -15,6 +15,7 @@ test('Support compiler functions in config (vue + webpack)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unresolved: 3,
     processed: 6,
     total: 6,
   });

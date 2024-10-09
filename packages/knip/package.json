@@ -35,10 +35,6 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "imports": {
-    "#p/*.ts": "./src/*.ts",
-    "#p/*.js": "./dist/*.js"
-  },
   "scripts": {
     "knip": "node ./dist/cli.js --directory ../..",
     "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
@@ -52,7 +48,8 @@
     "qa": "bun lint && bun run build && bun knip && bun knip:production && bun run test",
     "release": "release-it",
     "create-plugin": "bun ./scripts/create-new-plugin.ts",
-    "postcreate-plugin": "biome format --write schema.json schema-jsonc.json src/ConfigurationValidator.ts"
+    "postcreate-plugin": "biome format --write schema.json schema-jsonc.json src/ConfigurationValidator.ts",
+    "generate-plugin-types": "bun ./scripts/generate-plugin-types.ts"
   },
   "files": [
     "dist",

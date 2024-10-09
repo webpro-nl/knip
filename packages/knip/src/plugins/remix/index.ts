@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://remix.run/docs/en/v1/api/conventions
 

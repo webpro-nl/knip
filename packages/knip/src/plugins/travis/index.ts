@@ -1,6 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { _glob } from '#p/util/glob.js';
-import { getDependenciesFromScripts } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { _glob } from '../../util/glob.js';
 
 // https://docs.travis-ci.com/user/customizing-the-build/
 
@@ -21,7 +20,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
 
   const scripts = [...beforeDeploy, ...beforeInstall, ...beforeScript];
 
-  return getDependenciesFromScripts(scripts, { ...options, knownGlobalsOnly: true });
+  return options.getDependenciesFromScripts(scripts, { knownGlobalsOnly: true });
 };
 
 export default {

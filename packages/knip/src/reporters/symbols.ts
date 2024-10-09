@@ -60,7 +60,7 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
 
   if (!noConfigHints) {
     if (configurationHints.size > 0) {
-      logTitle('Configuration issues', configurationHints.size);
+      logTitle('Configuration hints', configurationHints.size);
       for (const hint of configurationHints) {
         const { type, workspaceName, identifier } = hint;
         const message = `Unused item in ${type}`;

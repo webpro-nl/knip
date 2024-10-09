@@ -1,6 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { compact } from '#p/util/array.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { compact } from '../../util/array.js';
+import { hasDependency } from '../../util/plugin.js';
+import { type Dependency, toDeferResolve } from '../../util/protocols.js';
 import { api, resolveName } from './helpers.js';
 import type { BabelConfig, BabelConfigObj } from './types.js';
 
@@ -18,12 +19,12 @@ const config = ['babel.config.{json,js,cjs,mjs,cts}', '.babelrc.{json,js,cjs,mjs
 const getName = (value: string | [string, unknown]) =>
   [Array.isArray(value) ? value[0] : value].filter(name => typeof name === 'string');
 
-export const getDependenciesFromConfig = (config: BabelConfigObj): string[] => {
+export const getDependenciesFromConfig = (config: BabelConfigObj): Dependency[] => {
   const presets = config.presets?.flatMap(getName).map(name => resolveName(name, 'preset')) ?? [];
   const plugins = config.plugins?.flatMap(getName).map(name => resolveName(name, 'plugin')) ?? [];
   const nested = config.env ? Object.values(config.env).flatMap(getDependenciesFromConfig) : [];
-  const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependenciesFromConfig) : [];
-  return compact([...presets, ...plugins, ...nested, ...overrides]);
+  const overrides = config.overrides ? [config.overrides].flat().flatMap(getDependenciesFromConfig) : [];
+  return compact([...presets.map(toDeferResolve), ...plugins.map(toDeferResolve), ...nested, ...overrides]);
 };
 
 const resolveConfig: ResolveConfig<BabelConfig> = async config => {

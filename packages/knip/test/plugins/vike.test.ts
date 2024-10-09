@@ -15,6 +15,7 @@ test('Find dependencies with the vike plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unresolved: 1,
     processed: 22,
     total: 22,
   });

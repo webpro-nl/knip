@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { isInternal } from '#p/util/path.js';
-import { hasDependency, toCosmiconfig } from '#p/util/plugin.js';
-import { toEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDeferResolve } from '../../util/protocols.js';
 import type { PluginConfig } from './types.js';
 
 // https://linthtml.vercel.app/
@@ -14,15 +14,12 @@ const enablers = ['@linthtml/linthtml'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['package.json', ...toCosmiconfig('linthtml')];
+const config: string[] = ['package.json', ...toCosmiconfig('linthtml')];
 
 const resolveConfig: ResolveConfig<PluginConfig> = config => {
-  const extensions = [config.extends ?? []]
-    .flat()
-    .map(extension => (isInternal(extension) ? toEntryPattern(extension) : extension));
-  const plugins = [config.plugins ?? []].flat().map(plugin => (isInternal(plugin) ? toEntryPattern(plugin) : plugin));
-
-  return [...extensions, ...plugins];
+  const extensions = [config.extends ?? []].flat();
+  const plugins = [config.plugins ?? []].flat();
+  return [...extensions, ...plugins].map(toDeferResolve);
 };
 
 export default {

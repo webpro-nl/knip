@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toEntry } from '../../util/protocols.js';
 import type { PreconstructConfig } from './types.js';
 
 // https://preconstruct.tools/configuration
@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['package.json'];
 
 const resolveEntryPaths: ResolveConfig<PreconstructConfig> = async config => {
-  return (config.entrypoints ?? []).map(toEntryPattern);
+  return (config.entrypoints ?? []).map(toEntry);
 };
 
 export default {

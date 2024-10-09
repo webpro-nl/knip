@@ -1,5 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency, toCosmiconfig } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
+import { toDependency } from '../../util/protocols.js';
 import type { CommitLintConfig } from './types.js';
 
 // https://commitlint.js.org
@@ -30,7 +32,7 @@ const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
         ? [parserPreset.path ?? parserPreset]
         : []
     : [];
-  return [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths];
+  return [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths].map(toDependency);
 };
 
 export default {
