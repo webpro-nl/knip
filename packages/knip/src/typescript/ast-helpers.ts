@@ -216,7 +216,7 @@ const getAncestorTypeDeclaration = (node: ts.Node) => {
   }
 };
 
-export const isReferencedInExported = (node: ts.Node) => {
+export const isReferencedInExport = (node: ts.Node) => {
   if (ts.isTypeQueryNode(node.parent) && isExported(node.parent.parent)) return true;
   if (ts.isTypeReferenceNode(node.parent) && isExported(node.parent.parent)) return true;
   const typeNode = getAncestorTypeDeclaration(node);

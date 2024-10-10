@@ -11,7 +11,8 @@ export const findInternalReferences = (
   item: Export | ExportMember,
   sourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker,
-  referencedSymbolsInExportedTypes: Set<ts.Symbol>
+  referencedSymbolsInExport: Set<ts.Symbol>,
+  isBindingElement?: boolean
 ): [number, boolean] => {
   if (!item.symbol) return [0, false];
   if (item.identifier === '') return [1, false]; // not pretty, ideally we'd find ref(s) to empty-string enum key
@@ -23,7 +24,7 @@ export const findInternalReferences = (
   const symbols = new Set<ts.Symbol>();
 
   let refCount = 0;
-  let isSymbolInExportedType = false;
+  let isSymbolInExport = false;
   let index = 0;
 
   // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
@@ -34,13 +35,14 @@ export const findInternalReferences = (
         // @ts-expect-error ts.getTokenAtPosition is internal fn
         const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
         if (symbol) {
-          const isInExportedType = referencedSymbolsInExportedTypes.has(symbol);
+          const isInExport = referencedSymbolsInExport.has(symbol);
 
-          if (isInExportedType) isSymbolInExportedType = true;
+          if (isInExport) isSymbolInExport = true;
 
           if (item.symbol === symbol) {
             refCount++;
-            if (isInExportedType || isType(item)) return [refCount, isSymbolInExportedType];
+            if (isInExport || isType(item)) return [refCount, isSymbolInExport];
+            if (isBindingElement) return [refCount, true];
           }
 
           // @ts-expect-error Keep it cheap
@@ -48,12 +50,12 @@ export const findInternalReferences = (
           if (declaration) {
             // Pattern: export { identifier }
             if (item.symbol === declaration.name?.flowNode?.node?.symbol) {
-              return [++refCount, isSymbolInExportedType];
+              return [++refCount, isSymbolInExport];
             }
 
             if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
               // Consider re-exports referenced
-              return [++refCount, isSymbolInExportedType];
+              return [++refCount, isSymbolInExport];
             }
           }
 
@@ -64,5 +66,5 @@ export const findInternalReferences = (
     index += id.length;
   }
 
-  return [refCount, isSymbolInExportedType];
+  return [refCount, isSymbolInExport];
 };

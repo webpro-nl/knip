@@ -21,3 +21,16 @@ export function logger(s: string) {
 function setLogger(log: typeof logger): void {
   log;
 }
+
+const obj = {
+  destrRefObj: 1,
+};
+
+const arr = [1, 2, 3];
+
+export const { destrRefObj } = obj;
+
+export const [destrRefArr] = arr;
+
+destrRefObj;
+destrRefArr;

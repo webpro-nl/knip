@@ -37,6 +37,8 @@ export default visit(
                     : undefined;
                   return {
                     node: element,
+                    // @ts-expect-error We'll use the symbol in `findInternalReferences`
+                    symbol: element.symbol,
                     identifier: element.name.escapedText.toString(),
                     type: SymbolType.UNKNOWN,
                     pos: element.name.getStart(),
@@ -54,6 +56,8 @@ export default visit(
                   const fix = isFixExports ? [element.getStart(), element.getEnd(), FIX_FLAGS.NONE] : undefined;
                   return {
                     node: element,
+                    // @ts-expect-error We'll use the symbol in `findInternalReferences`
+                    symbol: element.symbol,
                     identifier: element.getText(),
                     type: SymbolType.UNKNOWN,
                     pos: element.getStart(),

@@ -24,7 +24,7 @@ import {
   isDestructuring,
   isImportSpecifier,
   isObjectEnumerationCallExpressionArgument,
-  isReferencedInExported,
+  isReferencedInExport,
 } from './ast-helpers.js';
 import { findInternalReferences, isType } from './find-internal-references.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -92,7 +92,7 @@ const getImportsAndExports = (
 
   const importedInternalSymbols = new Map<ts.Symbol, string>();
 
-  const referencedSymbolsInExportedTypes = new Set<ts.Symbol>();
+  const referencedSymbolsInExport = new Set<ts.Symbol>();
 
   const visitors = getVisitors(sourceFile);
 
@@ -373,8 +373,8 @@ const getImportsAndExports = (
 
         // Store exports referenced in exported types, including `typeof` values
         // Simplifies and speeds up (*) below while we're still in the realm of bound AST
-        if (!isTopLevel && symbol.exportSymbol && isReferencedInExported(node)) {
-          referencedSymbolsInExportedTypes.add(symbol.exportSymbol);
+        if (!isTopLevel && symbol.exportSymbol && isReferencedInExport(node)) {
+          referencedSymbolsInExport.add(symbol.exportSymbol);
         }
       }
     }
@@ -408,19 +408,24 @@ const getImportsAndExports = (
   // For each export, see if it's referenced in same file,
   // and whether it's referenced in an exported type and should be exported with it (*)
   for (const item of exports.values()) {
-    const isType_ = isType(item);
-    if (item.symbol && referencedSymbolsInExportedTypes.has(item.symbol)) {
+    if (item.symbol && referencedSymbolsInExport.has(item.symbol)) {
       item.refs = [1, true];
-    } else if (
-      ignoreExportsUsedInFile === true ||
-      (typeof ignoreExportsUsedInFile === 'object' && item.type !== 'unknown' && ignoreExportsUsedInFile[item.type]) ||
-      isType_
-    ) {
-      item.refs = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExportedTypes);
+    } else {
+      const isBindingElement = item.symbol?.valueDeclaration && ts.isBindingElement(item.symbol.valueDeclaration);
+      if (
+        ignoreExportsUsedInFile === true ||
+        (typeof ignoreExportsUsedInFile === 'object' &&
+          item.type !== 'unknown' &&
+          ignoreExportsUsedInFile[item.type]) ||
+        isType(item) ||
+        isBindingElement
+      ) {
+        item.refs = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExport, isBindingElement);
+      }
     }
 
     for (const member of item.members) {
-      member.refs = findInternalReferences(member, sourceFile, typeChecker, referencedSymbolsInExportedTypes);
+      member.refs = findInternalReferences(member, sourceFile, typeChecker, referencedSymbolsInExport);
       member.symbol = undefined;
     }
 
