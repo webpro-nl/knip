@@ -288,6 +288,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           ignoreExportsUsedInFile: chief.config.ignoreExportsUsedInFile,
           isReportClassMembers,
           tags,
+          workspacePkgNames: chief.availableWorkspacePkgNames,
         },
         isGitIgnored,
         isPackageNameInternalWorkspace,
