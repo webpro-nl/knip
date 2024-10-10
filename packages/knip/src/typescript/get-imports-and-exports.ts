@@ -10,7 +10,8 @@ import type { IssueSymbol } from '../types/issues.js';
 import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/dependency-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { extname, isInNodeModules } from '../util/path.js';
+import { dirname, extname, isInNodeModules } from '../util/path.js';
+import { _resolveSyncFollowSymlinks } from '../util/resolve.js';
 import { shouldIgnore } from '../util/tag.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import {
@@ -64,6 +65,7 @@ export type GetImportsAndExportsOptions = {
   isReportClassMembers: boolean;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   tags: Tags;
+  workspacePkgNames: Set<string>;
 };
 
 interface AddInternalImportOptions extends ImportNode {
@@ -79,7 +81,7 @@ const getImportsAndExports = (
   typeChecker: ts.TypeChecker,
   options: GetImportsAndExportsOptions
 ) => {
-  const { skipTypeOnly, tags, ignoreExportsUsedInFile } = options;
+  const { skipTypeOnly, tags, ignoreExportsUsedInFile, workspacePkgNames } = options;
   const internalImports: ImportMap = new Map();
   const externalImports = new Set<string>();
   const unresolvedImports = new Set<UnresolvedImport>();
@@ -188,6 +190,9 @@ const getImportsAndExports = (
 
         if (!module.isExternalLibraryImport || !isInNodeModules(filePath)) {
           addInternalImport({ ...options, identifier, filePath, isReExport });
+        } else if (workspacePkgNames.has(getPackageNameFromFilePath(filePath))) {
+          const fp = _resolveSyncFollowSymlinks(filePath, dirname(filePath));
+          if (fp) addInternalImport({ ...options, identifier, filePath: fp, isReExport });
         }
 
         if (module.isExternalLibraryImport) {

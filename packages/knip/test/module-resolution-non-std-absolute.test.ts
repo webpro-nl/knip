@@ -14,10 +14,12 @@ test('Resolve non-standard absolute specifiers', async () => {
   });
 
   assert(issues.unlisted['self/index.ts']['other']);
+  assert(issues.unlisted['self/index.ts']['other/absolute.css']);
+  assert(issues.unlisted['self/index.ts']['other/absolute.svg']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
+    unlisted: 3,
     processed: 1,
     total: 1,
   });
