@@ -304,7 +304,7 @@ export class WorkspaceWorker {
 
       const configFilePaths = await _glob({ patterns, cwd: baseOptions.rootCwd, dir: cwd, gitignore: false });
 
-      debugLogArray([name, plugin.title], 'config file paths', configFilePaths);
+      if (configFilePaths.length > 0) debugLogArray([name, plugin.title], 'config file paths', configFilePaths);
 
       const options = {
         ...baseOptions,
