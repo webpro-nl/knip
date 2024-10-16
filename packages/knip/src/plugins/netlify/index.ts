@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toDependency, toProductionEntry } from '../../util/dependencies.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDeferResolve, toProductionEntry } from '../../util/protocols.js';
 import { extractFunctionsConfigProperty } from './helpers.js';
 import type { NetlifyConfig } from './types.js';
 
@@ -32,9 +32,9 @@ const resolveEntryPaths: ResolveEntryPaths<NetlifyConfig> = localConfig => {
 
 const resolveConfig: ResolveConfig<NetlifyConfig> = async localConfig => {
   return [
-    ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []),
-    ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules'),
-  ].map(toDeferResolve);
+    ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []).map(toDependency),
+    ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules').map(toDependency),
+  ];
 };
 
 export default {

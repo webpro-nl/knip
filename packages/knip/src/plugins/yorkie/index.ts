@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Dependency, toDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { type Dependency, toDependency } from '../../util/protocols.js';
 import type { LintStagedConfig } from '../lint-staged/types.js';
 
 // https://github.com/yyx990803/yorkie

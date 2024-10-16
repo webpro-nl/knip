@@ -8,13 +8,16 @@ import baseCounters from './helpers/baseCounters.js';
 const cwd = resolve('fixtures/script-visitors/execa');
 
 test('Find dependencies with custom script visitors (execa)', async () => {
-  const { counters } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
+  assert(issues.unresolved['options.mjs']['hydrate.js']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
+    unresolved: 1,
     processed: 5,
     total: 5,
   });

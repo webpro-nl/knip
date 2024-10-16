@@ -67,14 +67,9 @@ export const toProductionDependency = (specifier: string): Dependency => ({
   production: true,
 });
 
-export const isProductionDependency = (dependency: Dependency) =>
-  dependency.type === 'dependency' && dependency.production === true;
-
 export const toDevDependency = (specifier: string): Dependency => ({ type: 'dependency', specifier });
 
 export const toDeferResolve = (specifier: string): Dependency => ({ type: 'deferResolve', specifier });
-
-export const isDeferResolve = (dependency: Dependency) => dependency.type === 'deferResolve';
 
 export const toDeferResolveEntry = (specifier: string): Dependency => ({ type: 'deferResolveEntry', specifier });
 

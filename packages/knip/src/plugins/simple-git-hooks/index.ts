@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { Dependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { Dependency } from '../../util/protocols.js';
 import type { PluginConfig } from './types.js';
 
 // https://github.com/toplenboren/simple-git-hooks

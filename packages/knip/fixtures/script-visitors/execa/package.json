@@ -16,8 +16,6 @@
     "execa": "*"
   },
   "knip": {
-    "ignoreBinaries": [
-      "sleep"
-    ]
+    "ignoreBinaries": ["sleep"]
   }
 }

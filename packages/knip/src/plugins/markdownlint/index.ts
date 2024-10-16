@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDependency } from '../../util/protocols.js';
 import { getArgumentValues } from './helpers.js';
 import type { MarkdownlintConfig } from './types.js';
 

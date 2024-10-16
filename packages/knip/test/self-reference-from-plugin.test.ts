@@ -16,8 +16,8 @@ test('Allows self-references from plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    processed: 3,
-    total: 3,
+    processed: 2,
+    total: 2,
   });
 });
 

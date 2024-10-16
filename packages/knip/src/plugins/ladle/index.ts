@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toEntry } from '../../util/dependencies.js';
 import { toAbsolute } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import { toEntry } from '../../util/protocols.js';
 import { resolveConfig as resolveVitestConfig } from '../vitest/index.js';
 import type { LadleConfig } from './types.js';
 

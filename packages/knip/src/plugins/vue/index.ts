@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Dependency, toDevDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { type Dependency, toDevDependency } from '../../util/protocols.js';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
 import type { VueConfig, WebpackConfiguration } from './types.js';
 

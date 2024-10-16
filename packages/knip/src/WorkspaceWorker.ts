@@ -13,21 +13,17 @@ import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
 import { compact } from './util/array.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
-import { isFile } from './util/fs.js';
-import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
-import { getPackageNameFromModuleSpecifier } from './util/modules.js';
-import { getKeysByValue } from './util/object.js';
-import { basename, dirname, isAbsolute, isInternal, join } from './util/path.js';
-import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
 import {
   type ConfigDependencyW,
   type Dependency,
   isConfigPattern,
   toDebugString,
-  toDependency,
   toEntry,
-} from './util/protocols.js';
-import { _resolveSync } from './util/resolve.js';
+} from './util/dependencies.js';
+import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
+import { getKeysByValue } from './util/object.js';
+import { basename, dirname, join } from './util/path.js';
+import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
 
 type WorkspaceManagerOptions = {
   name: string;
@@ -36,7 +32,7 @@ type WorkspaceManagerOptions = {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
-  workspacePkgNames: DependencySet;
+  getReferencedInternalFilePath: (v: Dependency) => string | undefined;
   rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
@@ -58,13 +54,6 @@ const initEnabledPluginsMap = () =>
     {} as Record<PluginName, boolean>
   );
 
-const resolveConfigFilePath = (dependency: ConfigDependencyW) => {
-  const dir = dirname(dependency.containingFilePath);
-  const filePath = join(dir, dependency.specifier);
-  const r = isAbsolute(filePath) && isFile(filePath) ? filePath : _resolveSync(dependency.specifier, dir);
-  return r;
-};
-
 /**
  * - Determines enabled plugins
  * - Hands out workspace and plugin glob patterns
@@ -78,7 +67,7 @@ export class WorkspaceWorker {
   manifest: PackageJson;
   manifestScriptNames: Set<string>;
   dependencies: DependencySet;
-  workspacePkgNames: DependencySet;
+  getReferencedInternalFilePath: (v: Dependency) => string | undefined;
   isProduction;
   isStrict;
   rootIgnore: Configuration['ignore'];
@@ -98,13 +87,13 @@ export class WorkspaceWorker {
     config,
     manifest,
     dependencies,
-    workspacePkgNames,
     isProduction,
     isStrict,
     rootIgnore,
     negatedWorkspacePatterns,
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors,
+    getReferencedInternalFilePath,
     isCache,
     cacheLocation,
   }: WorkspaceManagerOptions) {
@@ -115,13 +104,14 @@ export class WorkspaceWorker {
     this.manifest = manifest;
     this.manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
     this.dependencies = dependencies;
-    this.workspacePkgNames = workspacePkgNames;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
     this.rootIgnore = rootIgnore;
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
+
+    this.getReferencedInternalFilePath = getReferencedInternalFilePath;
 
     this.cache = new CacheConsultant({ name: `plugins-${name}`, isEnabled: isCache, cacheLocation });
   }
@@ -287,53 +277,27 @@ export class WorkspaceWorker {
       _getDependenciesFromScripts(scripts, { ...baseOptions, ...options });
 
     const remainingPlugins = new Set(this.enabledPlugins);
-    const configFiles = new Map<PluginName, Set<ConfigDependencyW>>();
+    const configFiles = new Map<PluginName, Set<string>>();
 
-    const addC = (pluginName: PluginName, dependency: ConfigDependencyW) => {
-      const packageName = getPackageNameFromModuleSpecifier(dependency.specifier);
-
-      if (packageName && this.workspacePkgNames.has(packageName)) {
+    const handleConfigDependency = (pluginName: PluginName, dependency: ConfigDependencyW) => {
+      const configFilePath = this.getReferencedInternalFilePath(dependency);
+      if (configFilePath) {
         if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
-        configFiles.get(pluginName)?.add(dependency);
+        configFiles.get(pluginName)?.add(configFilePath);
         add(toEntry(dependency.specifier), dependency.containingFilePath);
-        pluginDependencies.push({ ...dependency, ...toDependency(dependency.specifier) });
-        return;
       }
-
-      if (packageName && this.dependencies.has(packageName)) {
-        pluginDependencies.push({ ...dependency, ...toDependency(dependency.specifier) });
-        return;
-      }
-
-      const s = dependency.specifier;
-      if (isInternal(s)) {
-        if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
-        configFiles.get(pluginName)?.add(dependency);
-        add(toEntry(dependency.specifier), dependency.containingFilePath);
-        return;
-      }
-
-      const r = resolveConfigFilePath(dependency);
-      if (r && isInternal(r)) {
-        if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
-        configFiles.get(pluginName)?.add(dependency);
-        add(toEntry(dependency.specifier), dependency.containingFilePath);
-        return;
-      }
-
-      pluginDependencies.push({ ...dependency, ...toDependency(dependency.specifier) });
     };
 
     for (const dependency of [...dependenciesFromManifest, ...dependenciesFromManifest1]) {
       if (isConfigPattern(dependency)) {
-        addC(dependency.pluginName, { ...dependency, containingFilePath: manifestPath });
+        handleConfigDependency(dependency.pluginName, { ...dependency, containingFilePath: manifestPath });
       } else {
         if (!this.isProduction) add(dependency, manifestPath);
         else if (this.isProduction && (dependency.production || has(dependency))) add(dependency, manifestPath);
       }
     }
 
-    const fn = async (pluginName: PluginName, patterns: string[]) => {
+    const runPlugin = async (pluginName: PluginName, patterns: string[]) => {
       const plugin = Plugins[pluginName];
       const hasResolveEntryPaths = typeof plugin.resolveEntryPaths === 'function';
       const hasResolveConfig = typeof plugin.resolveConfig === 'function';
@@ -388,7 +352,8 @@ export class WorkspaceWorker {
               if (shouldRunConfigResolver) {
                 const dependencies = (await plugin.resolveConfig?.(config, opts)) ?? [];
                 for (const id of dependencies) {
-                  if (isConfigPattern(id)) addC(id.pluginName, { ...id, containingFilePath: configFilePath });
+                  if (isConfigPattern(id))
+                    handleConfigDependency(id.pluginName, { ...id, containingFilePath: configFilePath });
                   add(id, configFilePath);
                 }
                 data.resolveConfig = dependencies;
@@ -410,19 +375,17 @@ export class WorkspaceWorker {
 
     for (const [pluginName] of PluginEntries) {
       if (this.enabledPluginsMap[pluginName]) {
-        const p = Array.from(configFiles.get(pluginName) ?? []).map(resolveConfigFilePath);
-        const patterns = [...this.getConfigurationFilePatterns(pluginName), ...compact(p)];
+        const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles.get(pluginName) ?? [])];
         configFiles.delete(pluginName);
-        await fn(pluginName, patterns);
+        await runPlugin(pluginName, compact(patterns));
         remainingPlugins.delete(pluginName);
       }
     }
 
     do {
       for (const [pluginName, dependencies] of configFiles.entries()) {
-        const patterns = Array.from(dependencies).map(resolveConfigFilePath);
         configFiles.delete(pluginName);
-        await fn(pluginName, compact(patterns));
+        await runPlugin(pluginName, Array.from(dependencies));
       }
     } while (remainingPlugins.size > 0 && configFiles.size > 0);
 

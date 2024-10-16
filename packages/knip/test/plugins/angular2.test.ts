@@ -13,11 +13,11 @@ test('Find dependencies with the Angular plugin (2)', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['angular.json']['tsconfig.spec.json']);
+  assert(issues.unresolved['angular.json']['tsconfig.spec.json']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
+    unresolved: 1,
     processed: 2,
     total: 2,
   });

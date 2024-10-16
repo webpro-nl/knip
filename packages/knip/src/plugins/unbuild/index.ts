@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toEntry } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toEntry } from '../../util/protocols.js';
 import type { UnbuildConfig } from './types.js';
 
 // https://github.com/unjs/unbuild#unbuild

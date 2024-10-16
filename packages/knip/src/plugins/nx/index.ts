@@ -1,8 +1,8 @@
 import type { ParsedArgs } from 'minimist';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
+import { toDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDependency } from '../../util/protocols.js';
 import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
 
 const title = 'Nx';

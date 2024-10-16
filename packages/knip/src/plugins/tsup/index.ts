@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toProductionEntry } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toProductionEntry } from '../../util/protocols.js';
 import type { TsupConfig } from './types.js';
 
 // https://paka.dev/npm/tsup/api

@@ -1,8 +1,8 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Dependency, isDeferResolveEntry, toEntry } from '../../util/dependencies.js';
 import { _firstGlob } from '../../util/glob.js';
 import { findByKeyDeep } from '../../util/object.js';
 import { join, relative } from '../../util/path.js';
-import { type Dependency, toEntry } from '../../util/protocols.js';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
@@ -48,8 +48,10 @@ const resolveConfig: ResolveConfig = async (config, options) => {
       const workingDir = step['working-directory'];
       const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
       if (step.run) {
-        for (const d of getDependenciesFromScripts([step.run], { knownGlobalsOnly: true })) {
-          dependencies.add({ ...d, dir });
+        for (const dependency of getDependenciesFromScripts([step.run], { knownGlobalsOnly: true })) {
+          if (isDeferResolveEntry(dependency) && path && !workingDir)
+            dependency.specifier = relative(join(dir, path), join(rootCwd, dependency.specifier));
+          dependencies.add({ ...dependency, dir });
         }
       }
     }

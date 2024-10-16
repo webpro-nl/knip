@@ -113,6 +113,14 @@
           }
         }
       }
+    },
+    {
+      "include": [
+        "packages/knip/test/util/get-references-from-scripts.test.ts"
+      ],
+      "formatter": {
+        "lineWidth": 200
+      }
     }
   ]
 }

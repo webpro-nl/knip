@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toDeferResolve, toEntry } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDeferResolve, toEntry } from '../../util/protocols.js';
 import { resolveDependencies } from './helpers.js';
 import type { CypressConfig } from './types.js';
 

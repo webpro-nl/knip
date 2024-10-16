@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Dependency, toConfig, toDependency, toProductionEntry } from '../../util/dependencies.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { type Dependency, toConfig, toDependency, toProductionEntry } from '../../util/protocols.js';
 import type { AngularCLIWorkspaceConfiguration } from './types.js';
 
 // https://angular.io/guide/workspace-config

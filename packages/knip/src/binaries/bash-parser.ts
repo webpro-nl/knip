@@ -2,7 +2,7 @@ import parse, { type Assignment, type ExpansionNode, type Node, type Prefix } fr
 import { pluginArgsMap } from '../plugins.js';
 import type { GetDependenciesFromScriptsOptions } from '../types/config.js';
 import { debugLogObject } from '../util/debug.js';
-import { type Dependency, toBinary, toDeferResolve } from '../util/protocols.js';
+import { type Dependency, toBinary, toDeferResolve } from '../util/dependencies.js';
 import { resolve as fallbackResolve } from './fallback.js';
 import PackageManagerResolvers from './package-manager/index.js';
 import { parseNodeArgs } from './package-manager/node.js';

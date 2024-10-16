@@ -14,14 +14,14 @@ test('Find dependencies with the Remark plugin', async () => {
   });
 
   assert(issues.devDependencies['package.json']['remark-cli']);
-  assert(issues.unlisted['package.json']['remark-preset-webpro']);
+  assert(issues.unresolved['package.json']['remark-preset-webpro']);
   assert(issues.binaries['package.json']['remark']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
     devDependencies: 1,
-    unlisted: 1,
+    unresolved: 1,
     processed: 0,
     total: 0,
   });

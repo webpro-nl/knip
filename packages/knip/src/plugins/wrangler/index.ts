@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import { toProductionEntry } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toProductionEntry } from '../../util/protocols.js';
 import type { WranglerConfig } from './types.js';
 
 // https://developers.cloudflare.com/workers/wrangler/configuration/

@@ -98,7 +98,8 @@ export class ConfigurationChief {
 
   ignoredWorkspacePatterns: string[] = [];
   workspacePackages = new Map<string, Package>();
-  workspacePackagesByPkgName = new Map<string, Package>();
+  workspacesByPkgName = new Map<string, Workspace>();
+  workspacesByName = new Map<string, Workspace>();
   additionalWorkspaceNames = new Set<string>();
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
@@ -219,41 +220,24 @@ export class ConfigurationChief {
 
     this.additionalWorkspaceNames = await this.getAdditionalWorkspaceNames();
     const workspaceNames = compact([...this.getListedWorkspaces(), ...this.additionalWorkspaceNames]);
-    const [byName, byPkgName] = await mapWorkspaces(this.cwd, workspaceNames);
+    const [packages, wsPkgNames] = await mapWorkspaces(this.cwd, [...workspaceNames, '.']);
 
-    this.workspacePackages = byName;
-    this.workspacePackagesByPkgName = byPkgName;
-    this.addRootPackage();
+    this.workspacePackages = packages;
 
-    this.availableWorkspaceNames = this.getAvailableWorkspaceNames(byName.keys());
-    this.availableWorkspacePkgNames = this.getAvailableWorkspacePkgNames(byPkgName.keys());
+    this.availableWorkspaceNames = this.getAvailableWorkspaceNames(packages.keys());
+    this.availableWorkspacePkgNames = wsPkgNames;
     this.availableWorkspaceDirs = this.availableWorkspaceNames
       .sort(byPathDepth)
       .reverse()
       .map(dir => join(this.cwd, dir));
 
-    this.workspaceGraph = createWorkspaceGraph(
-      this.cwd,
-      this.availableWorkspaceNames,
-      this.availableWorkspacePkgNames,
-      byPkgName,
-      byName
-    );
+    this.workspaceGraph = createWorkspaceGraph(this.cwd, this.availableWorkspaceNames, wsPkgNames, packages);
 
     this.includedWorkspaces = this.setIncludedWorkspaces();
-  }
 
-  private addRootPackage() {
-    if (this.manifest) {
-      const pkgName = this.manifest.name ?? ROOT_WORKSPACE_NAME;
-      const rootPackage = {
-        pkgName,
-        name: ROOT_WORKSPACE_NAME,
-        dir: this.cwd,
-        manifest: this.manifest,
-      };
-      this.workspacePackages.set('.', rootPackage);
-      this.workspacePackagesByPkgName.set(pkgName, rootPackage);
+    for (const workspace of this.includedWorkspaces) {
+      this.workspacesByPkgName.set(workspace.pkgName, workspace);
+      this.workspacesByName.set(workspace.name, workspace);
     }
   }
 

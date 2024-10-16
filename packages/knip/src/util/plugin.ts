@@ -2,10 +2,10 @@ export { _loadJSON as loadJSON } from './fs.js';
 export { _load as load } from './loader.js';
 import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.js';
 import { arrayify } from './array.js';
+import { type Dependency, toEntry, toProductionEntry } from './dependencies.js';
 import { _load as load } from './loader.js';
 import { get } from './object.js';
 import { basename } from './path.js';
-import { type Dependency, toEntry, toProductionEntry } from './protocols.js';
 
 export const hasDependency = (dependencies: Set<string>, values: (string | RegExp)[]) =>
   values.some(value => {

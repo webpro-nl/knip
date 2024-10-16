@@ -13,11 +13,11 @@ test('Find dependencies with the PostCSS plugin (implicit w/ Next.js)', async ()
     cwd,
   });
 
-  assert(issues.unlisted['package.json']['autoprefixer']);
-  assert(issues.unlisted['postcss.config.json']['autoprefixer']);
+  assert(issues.unresolved['package.json']['autoprefixer']);
+  assert(issues.unresolved['postcss.config.json']['autoprefixer']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 2,
+    unresolved: 2,
   });
 });

@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDeferResolve } from '../../util/protocols.js';
 import type { PluginConfig } from './types.js';
 
 // link to __PLUGIN_NAME__ docs

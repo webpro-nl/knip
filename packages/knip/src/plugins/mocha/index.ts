@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toEntry } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toEntry } from '../../util/protocols.js';
 import type { MochaConfig } from './types.js';
 
 // https://mochajs.org/#configuring-mocha-nodejs

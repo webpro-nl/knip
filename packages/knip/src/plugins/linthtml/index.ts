@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/dependencies.js';
 import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDeferResolve } from '../../util/protocols.js';
 import type { PluginConfig } from './types.js';
 
 // https://linthtml.vercel.app/

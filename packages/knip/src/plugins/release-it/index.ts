@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDependency } from '../../util/protocols.js';
 import type { ReleaseItConfig } from './types.js';
 
 // https://github.com/release-it/release-it/blob/master/docs/plugins.md#using-a-plugin

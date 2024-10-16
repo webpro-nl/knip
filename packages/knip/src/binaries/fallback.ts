@@ -1,7 +1,7 @@
 import parseArgs from 'minimist';
 import type { Resolver } from '../types/config.js';
 import { compact } from '../util/array.js';
-import { toBinary, toDeferResolve, toEntry } from '../util/protocols.js';
+import { toBinary, toDeferResolve, toEntry } from '../util/dependencies.js';
 
 // Binaries that spawn a child process for the binary at first positional arg (and don't have custom resolver already)
 const spawningBinaries = ['cross-env', 'retry-cli'];

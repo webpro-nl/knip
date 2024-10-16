@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDependency } from '../../util/protocols.js';
 import type { OclifConfig } from './types.js';
 
 // https://oclif.io/docs/configuring_your_cli

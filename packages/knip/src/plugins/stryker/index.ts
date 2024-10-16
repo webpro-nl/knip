@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDeferResolve } from '../../util/protocols.js';
 import type { StrykerConfig } from './types.js';
 
 // https://stryker-mutator.io/docs/stryker-js/config-file/

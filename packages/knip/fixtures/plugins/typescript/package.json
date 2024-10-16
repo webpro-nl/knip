@@ -8,6 +8,8 @@
     "build-jsx": "tsc -p tsconfig.jsx-preserve.json"
   },
   "devDependencies": {
+    "@tsconfig/node16": "*",
+    "@tsconfig/node20": "*",
     "typescript": "*"
   }
 }

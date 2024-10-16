@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
+import { toDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDependency } from '../../util/protocols.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 

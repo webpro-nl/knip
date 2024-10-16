@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toDeferResolve, toEntry } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDeferResolve, toEntry } from '../../util/protocols.js';
 import type { CucumberConfig } from './types.js';
 
 // https://github.com/cucumber/cucumber-js/blob/main/docs/configuration.md

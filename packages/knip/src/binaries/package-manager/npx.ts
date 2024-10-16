@@ -1,7 +1,7 @@
 import parseArgs from 'minimist';
 import type { Resolver } from '../../types/config.js';
+import { toBinary, toDependency } from '../../util/dependencies.js';
 import { isInternal } from '../../util/path.js';
-import { toBinary, toDependency } from '../../util/protocols.js';
 import { argsFrom, stripVersionFromSpecifier } from '../util.js';
 
 export const resolve: Resolver = (_binary, args, options) => {

@@ -13,10 +13,12 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['.github/actions/composite/action.yml']['esbuild-register']);
   assert(issues.unlisted['.github/workflows/test.yml']['@scope/retry-cli']);
-  assert(issues.unlisted['.github/workflows/test.yml']['esbuild-register']);
   assert(issues.unlisted['.github/workflows/test.yml']['retry-cli']);
+
+  assert(issues.unresolved['.github/workflows/test.yml']['esbuild-register']);
+  assert(issues.unresolved['.github/workflows/test.yml']['./script.js']);
+  assert(issues.unresolved['.github/actions/composite/action.yml']['esbuild-register']);
 
   assert(issues.binaries['.github/actions/composite/action.yml']['eslint']);
   assert(issues.binaries['.github/actions/composite/action.yml']['playwright']);
@@ -33,7 +35,8 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 10,
-    unlisted: 4,
+    unlisted: 2,
+    unresolved: 3,
     processed: 10,
     total: 10,
   });

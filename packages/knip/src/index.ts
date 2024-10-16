@@ -12,6 +12,13 @@ import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.j
 import type { CommandLineOptions } from './types/cli.js';
 import type { DependencyGraph, Export, ExportMember } from './types/dependency-graph.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
+import {
+  type Dependency,
+  isConfigPattern,
+  isEntry,
+  isProductionEntry,
+  toProductionEntry,
+} from './util/dependencies.js';
 import { getOrCreateFileNode, updateImportMap } from './util/dependency-graph.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { _glob, negate } from './util/glob.js';
@@ -21,7 +28,6 @@ import { getIsIdentifierReferencedHandler } from './util/is-identifier-reference
 import { getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { getEntryPathsFromManifest } from './util/package-json.js';
 import { dirname, isAbsolute, join, relative } from './util/path.js';
-import { type Dependency, isEntry, isProductionEntry, toProductionEntry } from './util/protocols.js';
 import { findMatch } from './util/regex.js';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from './util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
@@ -101,7 +107,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const isGitIgnored = await getGitIgnoredHandler({ cwd, gitignore });
   const toSourceFilePath = getToSourcePathHandler(chief);
-  const handleReferencedDependency = getReferencedDependencyHandler(collector, deputy, chief, isGitIgnored);
+  const getReferencedInternalFilePath = getReferencedDependencyHandler(collector, deputy, chief, isGitIgnored);
   const shouldIgnore = getShouldIgnoreHandler(isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
 
@@ -120,7 +126,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const manifest = chief.getManifestForWorkspace(name);
 
-    if (!manifest) continue;
+    if (!manifest) {
+      continue;
+    }
 
     const dependencies = deputy.getDependencies(name);
 
@@ -140,7 +148,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       config,
       manifest,
       dependencies,
-      workspacePkgNames: chief.availableWorkspacePkgNames,
+      getReferencedInternalFilePath: (v: Dependency) => getReferencedInternalFilePath(v, workspace),
       isProduction,
       isStrict,
       rootIgnore: chief.config.ignore,
@@ -199,10 +207,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         entryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
       } else if (isProductionEntry(dependency)) {
         productionEntryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
-      } else {
+      } else if (!isConfigPattern(dependency)) {
         const ws =
           (dependency.containingFilePath && chief.findWorkspaceByFilePath(dependency.containingFilePath)) || workspace;
-        const specifierFilePath = handleReferencedDependency(dependency, ws);
+        const specifierFilePath = getReferencedInternalFilePath(dependency, ws);
         if (specifierFilePath) principal.addEntryPath(specifierFilePath);
       }
     }
@@ -328,18 +336,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       // Handle scripts here since they might lead to more entry files
       if (scripts && scripts.size > 0) {
-        const dir = dirname(filePath);
         const dependencies = deputy.getDependencies(workspace.name);
-        const manifestScriptNames = new Set<string>();
-        const specifiers = _getDependenciesFromScripts(scripts, {
-          cwd: dir,
-          manifestScriptNames,
-          dependencies,
-          rootCwd: cwd,
-        });
+        const options = { cwd: dirname(filePath), manifestScriptNames: new Set<string>(), dependencies, rootCwd: cwd };
+        const specifiers = _getDependenciesFromScripts(scripts, options);
         for (const specifier of specifiers) {
           specifier.containingFilePath = filePath;
-          const specifierFilePath = handleReferencedDependency(specifier, workspace);
+          specifier.dir = cwd;
+          const specifierFilePath = getReferencedInternalFilePath(specifier, workspace);
           if (specifierFilePath) analyzeSourceFile(specifierFilePath, principal);
         }
       }

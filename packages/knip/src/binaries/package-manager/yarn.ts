@@ -1,7 +1,7 @@
 import parseArgs from 'minimist';
 import type { Resolver } from '../../types/config.js';
+import { toBinary } from '../../util/dependencies.js';
 import { join } from '../../util/path.js';
-import { toBinary } from '../../util/protocols.js';
 
 // https://yarnpkg.com/cli
 

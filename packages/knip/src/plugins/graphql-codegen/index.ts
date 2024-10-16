@@ -1,8 +1,8 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency, toEntry } from '../../util/dependencies.js';
 import { get } from '../../util/object.js';
 import { isInternal } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDependency, toEntry } from '../../util/protocols.js';
 import type {
   ConfiguredPlugin,
   GraphqlCodegenTypes,

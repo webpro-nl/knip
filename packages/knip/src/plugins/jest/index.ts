@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { type Dependency, toDeferResolve, toEntry } from '../../util/dependencies.js';
 import { dirname, isInternal, join, toAbsolute } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import { type Dependency, toDeferResolve, toEntry } from '../../util/protocols.js';
 import type { JestConfig, JestInitialOptions } from './types.js';
 
 // https://jestjs.io/docs/configuration

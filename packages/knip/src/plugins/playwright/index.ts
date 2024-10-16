@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toDeferResolve, toEntry } from '../../util/dependencies.js';
 import { join, relative } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDeferResolve, toEntry } from '../../util/protocols.js';
 import type { PlaywrightTestConfig } from './types.js';
 
 // https://playwright.dev/docs/test-configuration
@@ -12,7 +12,7 @@ const enablers = ['@playwright/test'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['playwright.config.{js,ts}'];
+const config = ['playwright.config.{js,ts,mjs}'];
 
 export const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 

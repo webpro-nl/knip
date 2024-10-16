@@ -1,6 +1,6 @@
 import type { GetDependenciesFromScripts } from '../types/config.js';
 import { timerify } from '../util/Performance.js';
-import { type Dependency, fromBinary, isBinary } from '../util/protocols.js';
+import { type Dependency, fromBinary, isBinary } from '../util/dependencies.js';
 import { getDependenciesFromScript } from './bash-parser.js';
 
 const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, options) => {

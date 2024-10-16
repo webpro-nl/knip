@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import { toProductionEntry } from '../../util/dependencies.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toProductionEntry } from '../../util/protocols.js';
 import type { NuxtConfig } from './types.js';
 
 const title = 'Nuxt';

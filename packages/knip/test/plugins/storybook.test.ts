@@ -14,18 +14,19 @@ test('Find dependencies with Storybook plugin', async () => {
   });
 
   assert(issues.devDependencies['package.json']['storybook-addon-performance']);
-  assert(issues.unlisted['main.js']['@storybook/addon-knobs/preset']);
   assert(issues.unlisted['main.js']['@storybook/builder-webpack5']);
   assert(issues.unlisted['main.js']['@storybook/manager-webpack5']);
   assert(issues.unlisted['main.js']['@storybook/react-webpack5']);
-  assert(issues.unlisted['main.js']['storybook-addon-export-to-codesandbox']);
   assert(issues.unlisted['preview.js']['cypress-storybook/react']);
+  assert(issues.unresolved['main.js']['@storybook/addon-knobs/preset']);
+  assert(issues.unresolved['main.js']['storybook-addon-export-to-codesandbox']);
   assert(issues.binaries['package.json']['storybook']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 6,
+    unlisted: 4,
+    unresolved: 2,
     binaries: 1,
     processed: 3,
     total: 3,

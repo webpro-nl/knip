@@ -1,8 +1,8 @@
 import type { PluginOptions } from '../../types/config.js';
 import { compact } from '../../util/array.js';
+import { type ConfigDependency, type Dependency, toConfig, toDeferResolve } from '../../util/dependencies.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { isAbsolute, isInternal } from '../../util/path.js';
-import { type ConfigDependency, type Dependency, toConfig, toDeferResolve } from '../../util/protocols.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
 

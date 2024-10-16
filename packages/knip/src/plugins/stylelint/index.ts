@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Dependency, toDeferResolve } from '../../util/dependencies.js';
 import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
-import { type Dependency, toDeferResolve } from '../../util/protocols.js';
 import type { BaseStyleLintConfig, StyleLintConfig } from './types.js';
 
 // https://stylelint.io/user-guide/configure/

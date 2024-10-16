@@ -14,12 +14,12 @@ test('Find dependencies with the nyc plugin', async () => {
   });
 
   assert(issues.devDependencies['package.json']['nyc']);
-  assert(issues.unlisted['.nycrc.json']['@istanbuljs/nyc-config-typescript']);
+  assert(issues.unresolved['.nycrc.json']['@istanbuljs/nyc-config-typescript']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 1,
+    unresolved: 1,
     processed: 0,
     total: 0,
   });

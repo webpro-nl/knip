@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve, toDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toDeferResolve, toDependency } from '../../util/protocols.js';
 import type { PrettierConfig } from './types.js';
 
 // https://prettier.io/docs/en/configuration.html

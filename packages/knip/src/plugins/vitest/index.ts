@@ -1,8 +1,8 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
+import { type Dependency, toDeferResolve, toDependency, toEntry } from '../../util/dependencies.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { type Dependency, toDeferResolve, toDependency, toEntry } from '../../util/protocols.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
 

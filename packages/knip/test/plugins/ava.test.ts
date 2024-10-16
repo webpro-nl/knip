@@ -13,12 +13,12 @@ test('Find dependencies with the Ava plugin', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['package.json']['ts-node/esm/transpile-only']);
-  assert(issues.unlisted['ava.config.mjs']['tsconfig-paths/register']);
+  assert(issues.unresolved['package.json']['ts-node/esm/transpile-only']);
+  assert(issues.unresolved['ava.config.mjs']['tsconfig-paths/register']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 2,
+    unresolved: 2,
     processed: 1,
     total: 1,
   });

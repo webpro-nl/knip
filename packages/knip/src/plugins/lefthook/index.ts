@@ -1,9 +1,9 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { fromBinary, toDependency } from '../../util/dependencies.js';
 import { getGitHookPaths } from '../../util/git.js';
 import { findByKeyDeep } from '../../util/object.js';
 import { extname } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { fromBinary, toDependency } from '../../util/protocols.js';
 
 // https://github.com/evilmartians/lefthook
 

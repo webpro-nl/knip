@@ -2,7 +2,7 @@ import parseArgs from 'minimist';
 import { pluginArgsMap } from '../plugins.js';
 import type { Resolver } from '../types/config.js';
 import { compact } from '../util/array.js';
-import { toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/protocols.js';
+import { toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/dependencies.js';
 import { resolve as fallbackResolve } from './fallback.js';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;

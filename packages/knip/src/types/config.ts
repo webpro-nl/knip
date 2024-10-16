@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import type { ConfigurationValidator, pluginSchema } from '../ConfigurationValidator.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import type { Dependency } from '../util/protocols.js';
+import type { Dependency } from '../util/dependencies.js';
 import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';
 import type { Tags } from './cli.js';

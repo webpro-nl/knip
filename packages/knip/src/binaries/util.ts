@@ -1,6 +1,6 @@
+import { toBinary, toDependency, toEntry } from '../util/dependencies.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { isAbsolute, isInNodeModules, join } from '../util/path.js';
-import { toBinary, toDependency, toEntry } from '../util/protocols.js';
 import { _resolveSync } from '../util/resolve.js';
 
 export const tryResolveFilePath = (cwd: string, specifier: string, acceptModuleSpecifier?: boolean) => {

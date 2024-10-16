@@ -1,8 +1,8 @@
 import type { TsConfigJson } from 'type-fest';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
+import { toConfig, toDeferResolve, toProductionDependency } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toConfig, toDeferResolve, toProductionDependency } from '../../util/protocols.js';
 
 // https://www.typescriptlang.org/tsconfig
 

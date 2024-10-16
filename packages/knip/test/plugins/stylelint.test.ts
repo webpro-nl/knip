@@ -14,16 +14,16 @@ test('Find dependencies with the stylelint plugin', async () => {
   });
 
   assert(issues.devDependencies['package.json']['stylelint']);
-  assert(issues.unlisted['.stylelintrc']['postcss-less']);
-  assert(issues.unlisted['.stylelintrc']['stylelint-config-standard']);
-  assert(issues.unlisted['.stylelintrc']['stylelint-order']);
-  assert(issues.unlisted['.stylelintrc']['stylelint-config-html/html']);
+  assert(issues.unresolved['.stylelintrc']['postcss-less']);
+  assert(issues.unresolved['.stylelintrc']['stylelint-config-standard']);
+  assert(issues.unresolved['.stylelintrc']['stylelint-order']);
+  assert(issues.unresolved['.stylelintrc']['stylelint-config-html/html']);
+  assert(issues.unresolved['.stylelintrc']['./myExtendableConfig']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 4,
-    unresolved: 1,
+    unresolved: 5,
     processed: 0,
     total: 0,
   });

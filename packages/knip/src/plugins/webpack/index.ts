@@ -1,8 +1,6 @@
 import type { RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
-import { isAbsolute, isInternal, join, relative } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
 import {
   type Dependency,
   toDeferResolve,
@@ -10,7 +8,9 @@ import {
   toDevDependency,
   toEntry,
   toProductionEntry,
-} from '../../util/protocols.js';
+} from '../../util/dependencies.js';
+import { isAbsolute, isInternal, join, relative } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { BabelConfigObj } from '../babel/types.js';
 import type { Argv, Env, WebpackConfig } from './types.js';

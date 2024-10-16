@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
+import { type Dependency, toDeferResolve } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { type Dependency, toDeferResolve } from '../../util/protocols.js';
 import { api, resolveName } from './helpers.js';
 import type { BabelConfig, BabelConfigObj } from './types.js';
 

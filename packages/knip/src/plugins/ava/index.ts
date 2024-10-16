@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toEntry } from '../../util/dependencies.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toEntry } from '../../util/protocols.js';
 import type { AvaConfig } from './types.js';
 
 // https://github.com/avajs/ava/blob/main/docs/06-configuration.md
