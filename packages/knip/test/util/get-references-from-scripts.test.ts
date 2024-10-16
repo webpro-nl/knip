@@ -44,6 +44,7 @@ test('getReferencesFromScripts (unknown programs)', () => {
   t('program -s .', [toBinary('program')]);
   t('program command', [toBinary('program')]);
   t('adb install -r android/app/app-dev-debug.apk', [toBinary('adb')]);
+  t('./wait-for-postgres.sh -h localhost -p 5433 -U dev -r 10', [toEntry('./wait-for-postgres.sh')]);
 });
 
 test('getReferencesFromScripts (unknown scripts)', () => {
