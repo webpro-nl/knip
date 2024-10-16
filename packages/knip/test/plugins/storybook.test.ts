@@ -27,7 +27,6 @@ test('Find dependencies with Storybook plugin', async () => {
     devDependencies: 1,
     unlisted: 6,
     binaries: 1,
-    unresolved: 2,
     processed: 3,
     total: 3,
   });

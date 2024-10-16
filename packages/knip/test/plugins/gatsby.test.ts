@@ -30,7 +30,6 @@ test('Find dependencies with the Gatsby plugin', async () => {
     binaries: 1,
     devDependencies: 4,
     unlisted: 5,
-    unresolved: 7,
     processed: 2,
     total: 2,
   });

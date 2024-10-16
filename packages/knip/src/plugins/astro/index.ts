@@ -15,10 +15,11 @@ const entry = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts'];
 const production = ['src/pages/**/*.{astro,mdx,js,ts}', 'src/content/**/*.mdx'];
 
 const resolve: Resolve = options => {
-  const { manifest } = options;
+  const { manifest, isProduction } = options;
   const dependencies = [];
 
   if (
+    !isProduction &&
     manifest.scripts &&
     Object.values(manifest.scripts).some(script => /(?<=^|\s)astro(\s|\s.+\s)check(?=\s|$)/.test(script))
   ) {

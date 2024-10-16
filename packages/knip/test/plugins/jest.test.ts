@@ -30,7 +30,7 @@ test('Find dependencies with the Jest plugin', async () => {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 10,
-    unresolved: 2,
+    unresolved: 1,
     processed: 6,
     total: 6,
   });

@@ -110,6 +110,7 @@ export interface PluginOptions extends BaseOptions {
   config: EnsuredPluginConfiguration;
   configFileDir: string;
   configFileName: string;
+  configFilePath: string;
   isProduction: boolean;
   enabledPlugins: string[];
   getDependenciesFromScripts: GetDependenciesFromScriptsP;

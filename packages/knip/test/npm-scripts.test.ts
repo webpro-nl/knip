@@ -72,6 +72,7 @@ test('Unused dependencies in npm scripts', async () => {
     devDependencies: 1,
     binaries: 2,
     unresolved: 0,
+    unlisted: 1,
     processed: 2,
     total: 2,
   });

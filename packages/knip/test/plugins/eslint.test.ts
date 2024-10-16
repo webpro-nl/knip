@@ -32,21 +32,17 @@ test('Find dependencies with the ESLint plugin', async () => {
   assert(issues.unlisted['.eslintrc.js']['eslint-plugin-cypress']);
   assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-comments']);
   assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-plugin']);
-  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-import']);
   assert(issues.unlisted['.eslintrc.js']['@org/eslint-plugin-name/typescript']);
-  // assert(issues.unlisted['.eslintrc.js']['@other-org/eslint-plugin']);
 
   assert(issues.unlisted['.eslintrc.json']['@babel/plugin-syntax-import-assertions']);
   assert(issues.unlisted['.eslintrc.json']['eslint-config-airbnb']);
-  assert(issues.unlisted['.eslintrc.json']['eslint-plugin-import']);
 
   assert(issues.unlisted['.eslintrc.yml']['@sinonjs/eslint-config']);
   assert(issues.unlisted['.eslintrc.yml']['@sinonjs/eslint-plugin-no-prototype-methods']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 25,
-    unresolved: 3,
+    unlisted: 23,
     processed: 4,
     total: 4,
   });

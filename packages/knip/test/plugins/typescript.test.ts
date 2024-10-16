@@ -13,11 +13,9 @@ test('Find dependencies with the TypeScript plugin', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['tsconfig.json']['@tsconfig/node16/tsconfig.json']);
   assert(issues.unlisted['tsconfig.json']['typescript-eslint-language-service']);
   assert(issues.unlisted['tsconfig.json']['ts-graphql-plugin']);
   assert(issues.unlisted['tsconfig.json']['tslib']);
-  assert(issues.unlisted['tsconfig.base.json']['@tsconfig/node20/tsconfig.json']);
   assert(issues.unlisted['tsconfig.ext.json']['@tsconfig/node20/tsconfig.json']);
   assert(issues.unlisted['tsconfig.jsx-import-source-preact.json']['preact']);
   assert(issues.unlisted['tsconfig.jsx-import-source-react.json']['vitest/globals']);
@@ -25,8 +23,8 @@ test('Find dependencies with the TypeScript plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1, // TODO
-    unlisted: 9,
+    binaries: 1,
+    unlisted: 8,
     processed: 0,
     total: 0,
   });

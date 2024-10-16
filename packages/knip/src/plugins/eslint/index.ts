@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getDependenciesDeep } from './helpers.js';
+import { getDependencies } from './helpers.js';
 import type { ESLintConfig } from './types.js';
 
 // New: https://eslint.org/docs/latest/use/configure/configuration-files
@@ -24,8 +24,8 @@ const entry = ['eslint.config.{js,cjs,mjs}'];
 
 const config = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
 
-const resolveConfig: ResolveConfig<ESLintConfig> = async (localConfig, options) => {
-  const dependencies = await getDependenciesDeep(localConfig, options);
+const resolveConfig: ResolveConfig<ESLintConfig> = (localConfig, options) => {
+  const dependencies = getDependencies(localConfig, options);
   return Array.from(dependencies);
 };
 

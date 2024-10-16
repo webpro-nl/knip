@@ -15,7 +15,6 @@ test('Find dependencies with the nest plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unresolved: 1,
     processed: 6,
     total: 6,
   });

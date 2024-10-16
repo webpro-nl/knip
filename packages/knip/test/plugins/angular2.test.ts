@@ -8,13 +8,16 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/angular2');
 
 test('Find dependencies with the Angular plugin (2)', async () => {
-  const { counters } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
+  assert(issues.unlisted['angular.json']['tsconfig.spec.json']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
+    unlisted: 1,
     processed: 2,
     total: 2,
   });

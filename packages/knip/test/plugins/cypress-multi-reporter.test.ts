@@ -22,7 +22,6 @@ test('Find dependencies with the cypress-multi-reporter plugin', async () => {
     ...baseCounters,
     devDependencies: 0,
     unlisted: 4,
-    unresolved: 3,
     processed: 3,
     total: 3,
   });

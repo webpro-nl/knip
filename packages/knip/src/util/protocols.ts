@@ -1,4 +1,5 @@
 import type { PluginName } from '../types/PluginNames.js';
+import { toRelative } from './path.js';
 
 type Type = 'binary' | 'entry' | 'config' | 'dependency' | 'deferResolve' | 'deferResolveEntry';
 
@@ -12,6 +13,10 @@ export interface Dependency {
 
 export interface ConfigDependency extends Dependency {
   pluginName: PluginName;
+}
+
+export interface ConfigDependencyW extends ConfigDependency {
+  containingFilePath: string;
 }
 
 type Options = {
@@ -75,4 +80,5 @@ export const toDeferResolveEntry = (specifier: string): Dependency => ({ type: '
 
 export const isDeferResolveEntry = (dependency: Dependency) => dependency.type === 'deferResolveEntry';
 
-export const toDebugString = (dependency: Dependency) => `${dependency.type}:${dependency.specifier}`;
+export const toDebugString = (dependency: Dependency) =>
+  `${dependency.type}:${dependency.specifier} ${dependency.containingFilePath ? `(${toRelative(dependency.containingFilePath)})` : ''}`;

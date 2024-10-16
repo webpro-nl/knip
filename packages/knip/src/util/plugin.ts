@@ -1,6 +1,5 @@
 export { _loadJSON as loadJSON } from './fs.js';
 export { _load as load } from './loader.js';
-export { _resolveSync as resolve } from './resolve.js';
 import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.js';
 import { arrayify } from './array.js';
 import { _load as load } from './loader.js';

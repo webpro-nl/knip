@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getDependenciesDeep } from '../eslint/helpers.js';
+import { getDependencies } from '../eslint/helpers.js';
 import type { XOConfig } from './types.js';
 
 // link to xo docs: https://github.com/xojs/xo#config
@@ -20,7 +20,7 @@ const config = ['package.json', '.xo-config', '.xo-config.{js,cjs,json}', 'xo.co
 const entry: string[] = ['.xo-config.{js,cjs}', 'xo.config.{js,cjs}'];
 
 const resolveConfig: ResolveConfig<XOConfig> = async (config, options) => {
-  const dependencies = await getDependenciesDeep(config, options);
+  const dependencies = getDependencies(config, options);
   return [...dependencies];
 };
 

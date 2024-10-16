@@ -140,6 +140,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       config,
       manifest,
       dependencies,
+      workspacePkgNames: chief.availableWorkspacePkgNames,
       isProduction,
       isStrict,
       rootIgnore: chief.config.ignore,
@@ -199,7 +200,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       } else if (isProductionEntry(dependency)) {
         productionEntryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
       } else {
-        const specifierFilePath = handleReferencedDependency(dependency, workspace);
+        const ws =
+          (dependency.containingFilePath && chief.findWorkspaceByFilePath(dependency.containingFilePath)) || workspace;
+        const specifierFilePath = handleReferencedDependency(dependency, ws);
         if (specifierFilePath) principal.addEntryPath(specifierFilePath);
       }
     }

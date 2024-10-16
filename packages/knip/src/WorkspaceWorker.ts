@@ -7,18 +7,27 @@ import type {
   Configuration,
   EnsuredPluginConfiguration,
   GetDependenciesFromScriptsP,
-  Plugin,
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
 import { compact } from './util/array.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
+import { isFile } from './util/fs.js';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
+import { getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { getKeysByValue } from './util/object.js';
-import { basename, dirname, join } from './util/path.js';
+import { basename, dirname, isAbsolute, isInternal, join } from './util/path.js';
 import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
-import { type Dependency, isConfigPattern, toDebugString, toEntry } from './util/protocols.js';
+import {
+  type ConfigDependencyW,
+  type Dependency,
+  isConfigPattern,
+  toDebugString,
+  toDependency,
+  toEntry,
+} from './util/protocols.js';
+import { _resolveSync } from './util/resolve.js';
 
 type WorkspaceManagerOptions = {
   name: string;
@@ -27,6 +36,7 @@ type WorkspaceManagerOptions = {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
+  workspacePkgNames: DependencySet;
   rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
@@ -48,6 +58,13 @@ const initEnabledPluginsMap = () =>
     {} as Record<PluginName, boolean>
   );
 
+const resolveConfigFilePath = (dependency: ConfigDependencyW) => {
+  const dir = dirname(dependency.containingFilePath);
+  const filePath = join(dir, dependency.specifier);
+  const r = isAbsolute(filePath) && isFile(filePath) ? filePath : _resolveSync(dependency.specifier, dir);
+  return r;
+};
+
 /**
  * - Determines enabled plugins
  * - Hands out workspace and plugin glob patterns
@@ -61,6 +78,7 @@ export class WorkspaceWorker {
   manifest: PackageJson;
   manifestScriptNames: Set<string>;
   dependencies: DependencySet;
+  workspacePkgNames: DependencySet;
   isProduction;
   isStrict;
   rootIgnore: Configuration['ignore'];
@@ -80,6 +98,7 @@ export class WorkspaceWorker {
     config,
     manifest,
     dependencies,
+    workspacePkgNames,
     isProduction,
     isStrict,
     rootIgnore,
@@ -96,6 +115,7 @@ export class WorkspaceWorker {
     this.manifest = manifest;
     this.manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
     this.dependencies = dependencies;
+    this.workspacePkgNames = workspacePkgNames;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
     this.rootIgnore = rootIgnore;
@@ -241,7 +261,7 @@ export class WorkspaceWorker {
     const pluginDependencies: Dependency[] = [];
 
     const add = (id: Dependency, containingFilePath: string) => {
-      pluginDependencies.push({ ...id, containingFilePath });
+      pluginDependencies.push({ ...id, containingFilePath: containingFilePath ?? id.containingFilePath });
     };
 
     // Get dependencies from package.json#scripts
@@ -266,31 +286,55 @@ export class WorkspaceWorker {
     const getDependenciesFromScripts: GetDependenciesFromScriptsP = (scripts, options) =>
       _getDependenciesFromScripts(scripts, { ...baseOptions, ...options });
 
-    const configFiles = new Map<PluginName, Set<string>>();
-    const configFiles2 = new Map<PluginName, Set<string>>();
+    const remainingPlugins = new Set(this.enabledPlugins);
+    const configFiles = new Map<PluginName, Set<ConfigDependencyW>>();
 
-    const addC = (pluginName: PluginName, dependency: Dependency) => {
-      if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
-      configFiles.get(pluginName)?.add(dependency.specifier);
-    };
+    const addC = (pluginName: PluginName, dependency: ConfigDependencyW) => {
+      const packageName = getPackageNameFromModuleSpecifier(dependency.specifier);
 
-    const addC2 = (pluginName: PluginName, dependency: Dependency) => {
-      if (!configFiles2.has(pluginName)) configFiles2.set(pluginName, new Set());
-      configFiles2.get(pluginName)?.add(dependency.specifier);
+      if (packageName && this.workspacePkgNames.has(packageName)) {
+        if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
+        configFiles.get(pluginName)?.add(dependency);
+        add(toEntry(dependency.specifier), dependency.containingFilePath);
+        pluginDependencies.push({ ...dependency, ...toDependency(dependency.specifier) });
+        return;
+      }
+
+      if (packageName && this.dependencies.has(packageName)) {
+        pluginDependencies.push({ ...dependency, ...toDependency(dependency.specifier) });
+        return;
+      }
+
+      const s = dependency.specifier;
+      if (isInternal(s)) {
+        if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
+        configFiles.get(pluginName)?.add(dependency);
+        add(toEntry(dependency.specifier), dependency.containingFilePath);
+        return;
+      }
+
+      const r = resolveConfigFilePath(dependency);
+      if (r && isInternal(r)) {
+        if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
+        configFiles.get(pluginName)?.add(dependency);
+        add(toEntry(dependency.specifier), dependency.containingFilePath);
+        return;
+      }
+
+      pluginDependencies.push({ ...dependency, ...toDependency(dependency.specifier) });
     };
 
     for (const dependency of [...dependenciesFromManifest, ...dependenciesFromManifest1]) {
       if (isConfigPattern(dependency)) {
-        const pluginName = dependency.pluginName as PluginName;
-        addC(pluginName, dependency);
-        add(toEntry(dependency.specifier), manifestPath);
+        addC(dependency.pluginName, { ...dependency, containingFilePath: manifestPath });
       } else {
         if (!this.isProduction) add(dependency, manifestPath);
         else if (this.isProduction && (dependency.production || has(dependency))) add(dependency, manifestPath);
       }
     }
 
-    const fn = async (pluginName: PluginName, plugin: Plugin, patterns: string[]) => {
+    const fn = async (pluginName: PluginName, patterns: string[]) => {
+      const plugin = Plugins[pluginName];
       const hasResolveEntryPaths = typeof plugin.resolveEntryPaths === 'function';
       const hasResolveConfig = typeof plugin.resolveConfig === 'function';
       const shouldRunConfigResolver =
@@ -309,6 +353,7 @@ export class WorkspaceWorker {
       const options = {
         ...baseOptions,
         config: pluginConfig,
+        configFilePath: manifestPath,
         configFileDir: cwd,
         configFileName: '',
         getDependenciesFromScripts,
@@ -317,7 +362,12 @@ export class WorkspaceWorker {
       const configEntryPaths: Dependency[] = [];
 
       for (const configFilePath of configFilePaths) {
-        const opts = { ...options, configFileDir: dirname(configFilePath), configFileName: basename(configFilePath) };
+        const opts = {
+          ...options,
+          configFilePath,
+          configFileDir: dirname(configFilePath),
+          configFileName: basename(configFilePath),
+        };
         if (hasResolveEntryPaths || shouldRunConfigResolver) {
           const isManifest = basename(configFilePath) === 'package.json';
           const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
@@ -338,7 +388,7 @@ export class WorkspaceWorker {
               if (shouldRunConfigResolver) {
                 const dependencies = (await plugin.resolveConfig?.(config, opts)) ?? [];
                 for (const id of dependencies) {
-                  if (isConfigPattern(id)) addC2(id.pluginName, id);
+                  if (isConfigPattern(id)) addC(id.pluginName, { ...id, containingFilePath: configFilePath });
                   add(id, configFilePath);
                 }
                 data.resolveConfig = dependencies;
@@ -358,16 +408,23 @@ export class WorkspaceWorker {
       }
     };
 
-    for (const [pluginName, plugin] of PluginEntries) {
+    for (const [pluginName] of PluginEntries) {
       if (this.enabledPluginsMap[pluginName]) {
-        const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles.get(pluginName) ?? [])];
-        await fn(pluginName, plugin, patterns);
+        const p = Array.from(configFiles.get(pluginName) ?? []).map(resolveConfigFilePath);
+        const patterns = [...this.getConfigurationFilePatterns(pluginName), ...compact(p)];
+        configFiles.delete(pluginName);
+        await fn(pluginName, patterns);
+        remainingPlugins.delete(pluginName);
       }
     }
 
-    for (const [pluginName, configFilePaths] of configFiles2.entries()) {
-      await fn(pluginName, Plugins[pluginName], [...configFilePaths]);
-    }
+    do {
+      for (const [pluginName, dependencies] of configFiles.entries()) {
+        const patterns = Array.from(dependencies).map(resolveConfigFilePath);
+        configFiles.delete(pluginName);
+        await fn(pluginName, compact(patterns));
+      }
+    } while (remainingPlugins.size > 0 && configFiles.size > 0);
 
     debugLogArray(name, 'Plugin dependencies', () => compact(pluginDependencies.map(toDebugString)));
 

@@ -15,7 +15,6 @@ test('Find dependencies with the LintHTML plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unresolved: 1,
     processed: 1,
     total: 1,
   });
