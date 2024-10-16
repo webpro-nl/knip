@@ -18,13 +18,13 @@ const config = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
 
 const resolveExtensibleConfig = async (configFilePath: string) => {
-  const config = await load(configFilePath);
+  let config = await load(configFilePath);
   if (config?.preset) {
     const { preset } = config;
     if (isInternal(preset)) {
       const presetConfigPath = toAbsolute(preset, dirname(configFilePath));
       const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-      Object.assign(config, presetConfig);
+      config = Object.assign({}, presetConfig, config);
     }
   }
   return config;
@@ -38,7 +38,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     if (isInternal(preset)) {
       const presetConfigPath = toAbsolute(preset, configFileDir);
       const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-      Object.assign(config, presetConfig);
+      config = Object.assign({}, presetConfig, config);
     }
   }
 
