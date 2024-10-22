@@ -390,6 +390,7 @@ export class DependencyDeputy {
     this.handleIgnoredDependencies(issues, counters, 'devDependencies');
     this.handleIgnoredDependencies(issues, counters, 'optionalPeerDependencies');
     this.handleIgnoredDependencies(issues, counters, 'unlisted');
+    this.handleIgnoredDependencies(issues, counters, 'unresolved');
     this.handleIgnoredBinaries(issues, counters, 'binaries');
   }
 
