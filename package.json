@@ -26,7 +26,7 @@
     "waitDB": "./wait-for-postgres.sh -h localhost -p 5433 -U dev -r 10"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.3",
+    "@biomejs/biome": "1.9.4",
     "installed-check": "^9.3.0"
   }
 }
