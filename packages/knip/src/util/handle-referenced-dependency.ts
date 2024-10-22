@@ -93,7 +93,7 @@ export const getReferencedDependencyHandler =
         workspace: workspace.name,
         symbol: packageName ?? specifier,
       });
-    } else if (!isGitIgnored(filePath)) {
+    } else if (!isConfigPattern(dependency) && !isGitIgnored(filePath)) {
       collector.addIssue({
         type: 'unresolved',
         filePath: containingFilePath,
