@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toDeferResolve, toEntry } from '../../util/dependencies.js';
+import { toDeferResolve, toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { ReactCosmosConfig } from './types.js';

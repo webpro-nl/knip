@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry } from '../../util/dependencies.js';
+import { toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PreconstructConfig } from './types.js';
 

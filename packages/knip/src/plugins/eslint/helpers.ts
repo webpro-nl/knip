@@ -1,6 +1,6 @@
 import type { PluginOptions } from '../../types/config.js';
 import { compact } from '../../util/array.js';
-import { type ConfigDependency, type Dependency, toConfig, toDeferResolve } from '../../util/dependencies.js';
+import { type ConfigInput, type Input, toConfig, toDeferResolve } from '../../util/input.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { isAbsolute, isInternal } from '../../util/path.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
@@ -9,12 +9,12 @@ import type { ESLintConfig, OverrideConfig } from './types.js';
 export const getDependencies = (
   config: ESLintConfig | OverrideConfig,
   options: PluginOptions
-): (Dependency | ConfigDependency)[] => {
+): (Input | ConfigInput)[] => {
   const extendsSpecifiers = config.extends ? compact([config.extends].flat().map(resolveExtendSpecifier)) : [];
   // https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
   if (extendsSpecifiers.some(specifier => specifier?.startsWith('eslint-plugin-prettier')))
     extendsSpecifiers.push('eslint-config-prettier');
-  const extendConfigs = extendsSpecifiers.map(specifier => toConfig('eslint', specifier));
+  const extendConfigs = extendsSpecifiers.map(specifier => toConfig('eslint', specifier, options.configFilePath));
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
   const parser = config.parser ?? config.parserOptions?.parser;
   const babelDependencies = config.parserOptions?.babelOptions

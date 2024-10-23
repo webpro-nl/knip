@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency } from '../../util/dependencies.js';
 import { isFile } from '../../util/fs.js';
+import { toDependency } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { CapacitorConfig } from './types.js';

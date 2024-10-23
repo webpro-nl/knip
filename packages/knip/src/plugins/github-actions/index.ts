@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Dependency, isDeferResolveEntry, toEntry } from '../../util/dependencies.js';
 import { _firstGlob } from '../../util/glob.js';
+import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.js';
 import { findByKeyDeep } from '../../util/object.js';
 import { join, relative } from '../../util/path.js';
 
@@ -35,7 +35,7 @@ type Job = {
 const resolveConfig: ResolveConfig = async (config, options) => {
   const { configFileDir, configFileName, rootCwd, getDependenciesFromScripts } = options;
 
-  const dependencies = new Set<Dependency>();
+  const inputs = new Set<Input>();
 
   const jobs = findByKeyDeep<Job>(config, 'steps');
 
@@ -48,10 +48,10 @@ const resolveConfig: ResolveConfig = async (config, options) => {
       const workingDir = step['working-directory'];
       const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
       if (step.run) {
-        for (const dependency of getDependenciesFromScripts([step.run], { knownGlobalsOnly: true })) {
+        for (const dependency of getDependenciesFromScripts([step.run], { knownBinsOnly: true })) {
           if (isDeferResolveEntry(dependency) && path && !workingDir)
             dependency.specifier = relative(join(dir, path), join(rootCwd, dependency.specifier));
-          dependencies.add({ ...dependency, dir });
+          inputs.add({ ...dependency, dir });
         }
       }
     }
@@ -64,7 +64,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
     return scripts.map(script => join(configFileDir, script));
   };
 
-  return [...getActionDependencies().map(toEntry), ...dependencies];
+  return [...getActionDependencies().map(toEntry), ...inputs];
 };
 
 export default {

@@ -12,18 +12,12 @@ import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.j
 import type { CommandLineOptions } from './types/cli.js';
 import type { DependencyGraph, Export, ExportMember } from './types/dependency-graph.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
-import {
-  type Dependency,
-  isConfigPattern,
-  isEntry,
-  isProductionEntry,
-  toProductionEntry,
-} from './util/dependencies.js';
 import { getOrCreateFileNode, updateImportMap } from './util/dependency-graph.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { _glob, negate } from './util/glob.js';
 import { getReferencedDependencyHandler } from './util/handle-referenced-dependency.js';
 import { getHasStrictlyNsReferences, getType } from './util/has-strictly-ns-references.js';
+import { type Input, isConfigPattern, isEntry, isProductionEntry, toProductionEntry } from './util/input.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getPackageNameFromModuleSpecifier } from './util/modules.js';
 import { getEntryPathsFromManifest } from './util/package-json.js';
@@ -148,7 +142,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       config,
       manifest,
       dependencies,
-      getReferencedInternalFilePath: (v: Dependency) => getReferencedInternalFilePath(v, workspace),
+      getReferencedInternalFilePath: (input: Input) => getReferencedInternalFilePath(input, workspace),
       isProduction,
       isStrict,
       rootIgnore: chief.config.ignore,
@@ -161,7 +155,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     await worker.init();
 
-    const deps = new Set<Dependency>();
+    const deps = new Set<Input>();
 
     debugLogArray(name, 'Definition paths', definitionPaths);
     for (const id of definitionPaths) deps.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
@@ -177,7 +171,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     for (const id of entryPathsFromManifest.map(id => toProductionEntry(id))) deps.add(id);
 
     // Get dependencies from plugins
-    const dependenciesFromPlugins = await worker.findDependenciesByPlugins(dependencies);
+    const dependenciesFromPlugins = await worker.findDependenciesByPlugins();
     for (const id of dependenciesFromPlugins) deps.add(id);
 
     enabledPluginsStore.set(name, worker.enabledPlugins);
@@ -337,7 +331,15 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       // Handle scripts here since they might lead to more entry files
       if (scripts && scripts.size > 0) {
         const dependencies = deputy.getDependencies(workspace.name);
-        const options = { cwd: dirname(filePath), manifestScriptNames: new Set<string>(), dependencies, rootCwd: cwd };
+        const manifestScriptNames = new Set<string>();
+        const rootCwd = cwd;
+        const options = {
+          cwd: dirname(filePath),
+          rootCwd,
+          containingFilePath: filePath,
+          dependencies,
+          manifestScriptNames,
+        };
         const specifiers = _getDependenciesFromScripts(scripts, options);
         for (const specifier of specifiers) {
           specifier.containingFilePath = filePath;

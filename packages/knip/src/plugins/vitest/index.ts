@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
-import { type Dependency, toDeferResolve, toDependency, toEntry } from '../../util/dependencies.js';
+import { type Input, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
@@ -75,33 +75,33 @@ export const resolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspa
   localConfig,
   options
 ) => {
-  const dependencies = new Set<Dependency>();
-  dependencies.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
+  const inputs = new Set<Input>();
+  inputs.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
   const configs = await getConfigs(localConfig);
   for (const cfg of configs) {
     const dir = join(options.configFileDir, cfg.test?.root ?? '.');
     if (cfg.test?.include) {
-      for (const dependency of cfg.test.include) dependencies.add(toEntry(join(dir, dependency)));
+      for (const dependency of cfg.test.include) inputs.add(toEntry(join(dir, dependency)));
     } else {
-      for (const dependency of options.config.entry ?? entry) dependencies.add(toEntry(join(dir, dependency)));
+      for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
     }
   }
-  return Array.from(dependencies);
+  return Array.from(inputs);
 };
 
 export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig> = async (localConfig, options) => {
-  const dependencies = new Set<Dependency>();
+  const inputs = new Set<Input>();
   const configs = await getConfigs(localConfig);
   for (const cfg of configs) {
-    for (const dependency of findConfigDependencies(cfg, options)) dependencies.add(dependency);
+    for (const dependency of findConfigDependencies(cfg, options)) inputs.add(dependency);
     const entry = cfg.build?.lib?.entry ?? [];
     const dir = join(options.configFileDir, cfg.test?.root ?? '.');
     const deps = (typeof entry === 'string' ? [entry] : Object.values(entry))
       .map(specifier => join(dir, specifier))
       .map(toEntry);
-    for (const dependency of deps) dependencies.add(dependency);
+    for (const dependency of deps) inputs.add(dependency);
   }
-  return Array.from(dependencies);
+  return Array.from(inputs);
 };
 
 const args = {

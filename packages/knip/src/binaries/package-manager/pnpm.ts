@@ -1,6 +1,6 @@
 import parseArgs from 'minimist';
-import type { Resolver } from '../../types/config.js';
-import { toBinary } from '../../util/dependencies.js';
+import type { BinaryResolver } from '../../types/config.js';
+import { toBinary } from '../../util/input.js';
 
 // https://pnpm.io/cli/add
 
@@ -56,7 +56,7 @@ const commands = [
   'why',
 ];
 
-export const resolve: Resolver = (_binary, args, { manifestScriptNames, fromArgs }) => {
+export const resolve: BinaryResolver = (_binary, args, { manifestScriptNames, fromArgs }) => {
   const parsed = parseArgs(args, {
     boolean: ['recursive', 'silent', 'shell-mode'],
     alias: { recursive: 'r', silent: 's', 'shell-mode': 'c' },

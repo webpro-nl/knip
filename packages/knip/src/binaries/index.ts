@@ -1,20 +1,20 @@
-import type { GetDependenciesFromScripts } from '../types/config.js';
+import type { GetInputsFromScripts } from '../types/config.js';
 import { timerify } from '../util/Performance.js';
-import { type Dependency, fromBinary, isBinary } from '../util/dependencies.js';
+import { type Input, fromBinary, isBinary } from '../util/input.js';
 import { getDependenciesFromScript } from './bash-parser.js';
 
-const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, options) => {
-  const scripts = typeof npmScripts === 'string' ? [npmScripts] : [...npmScripts];
+const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {
+  const scripts = typeof npmScripts === 'string' ? [npmScripts] : Array.from(npmScripts);
   const results = scripts.flatMap(script => getDependenciesFromScript(script, options));
-  const dependencies = new Set<Dependency>();
+  const inputs = new Set<Input>();
 
-  for (const dependency of results) {
-    if (!dependency.specifier || dependency.specifier.startsWith('http')) continue;
-    if (isBinary(dependency) && !/^\b/.test(fromBinary(dependency))) continue;
-    dependencies.add(dependency);
+  for (const input of results) {
+    if (!input.specifier || input.specifier.startsWith('http')) continue;
+    if (isBinary(input) && !/^\b/.test(fromBinary(input))) continue;
+    inputs.add(input);
   }
 
-  return Array.from(dependencies);
+  return Array.from(inputs);
 };
 
-export const _getDependenciesFromScripts = timerify(getDependenciesFromScripts);
+export const _getDependenciesFromScripts = timerify(getInputsFromScripts);

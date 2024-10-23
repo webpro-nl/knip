@@ -1,7 +1,7 @@
 import type { ParsedArgs } from 'minimist';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
-import { toDependency } from '../../util/dependencies.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
 
@@ -58,9 +58,9 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .filter(target => target.executor === 'nx:run-commands')
     .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []));
 
-  const dependencies = options.getDependenciesFromScripts(scripts);
+  const inputs = options.getDependenciesFromScripts(scripts);
 
-  return compact([...executors, ...dependencies]).map(id => (typeof id === 'string' ? toDependency(id) : id));
+  return compact([...executors, ...inputs]).map(id => (typeof id === 'string' ? toDependency(id) : id));
 };
 
 const args = {

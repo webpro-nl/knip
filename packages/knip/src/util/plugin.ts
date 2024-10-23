@@ -2,7 +2,7 @@ export { _loadJSON as loadJSON } from './fs.js';
 export { _load as load } from './loader.js';
 import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.js';
 import { arrayify } from './array.js';
-import { type Dependency, toEntry, toProductionEntry } from './dependencies.js';
+import { type Input, toEntry, toProductionEntry } from './input.js';
 import { _load as load } from './loader.js';
 import { get } from './object.js';
 import { basename } from './path.js';
@@ -56,7 +56,7 @@ export const loadConfigForPlugin = async (
   return localConfig;
 };
 
-export const getFinalEntryPaths = (plugin: Plugin, options: PluginOptions, configEntryPaths: Dependency[]) => {
+export const getFinalEntryPaths = (plugin: Plugin, options: PluginOptions, configEntryPaths: Input[]) => {
   const { config, isProduction } = options;
 
   // TODO Leftover from plugin API streamline refactor

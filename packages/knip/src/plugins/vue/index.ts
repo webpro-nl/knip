@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Dependency, toDevDependency } from '../../util/dependencies.js';
+import { type Input, toDevDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
 import type { VueConfig, WebpackConfiguration } from './types.js';
@@ -18,7 +18,7 @@ const config = ['vue.config.{js,ts}'];
 const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
   const { cwd, manifest } = options;
 
-  const deps: Dependency[] = [];
+  const inputs: Input[] = [];
 
   if (config.configureWebpack) {
     const baseConfig = {
@@ -30,21 +30,21 @@ const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
     } satisfies WebpackConfiguration;
     const modifiedConfig =
       typeof config.configureWebpack === 'function' ? config.configureWebpack(baseConfig) : config.configureWebpack;
-    const dependencies = await findWebpackDependenciesFromConfig({
+    const inputsFromConfig = await findWebpackDependenciesFromConfig({
       config: modifiedConfig ?? baseConfig,
       cwd,
     });
-    for (const dependency of dependencies) deps.push(dependency);
+    for (const input of inputsFromConfig) inputs.push(input);
   }
 
   if (
     manifest.scripts &&
     Object.values(manifest.scripts).some(script => /(?<=^|\s)vue-cli-service(\s|\s.+\s)lint(?=\s|$)/.test(script))
   ) {
-    deps.push(toDevDependency('@vue/cli-plugin-eslint'));
+    inputs.push(toDevDependency('@vue/cli-plugin-eslint'));
   }
 
-  return deps;
+  return inputs;
 };
 
 export default {

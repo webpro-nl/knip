@@ -20,8 +20,8 @@ const config = ['package.json', '.xo-config', '.xo-config.{js,cjs,json}', 'xo.co
 const entry: string[] = ['.xo-config.{js,cjs}', 'xo.config.{js,cjs}'];
 
 const resolveConfig: ResolveConfig<XOConfig> = async (config, options) => {
-  const dependencies = getDependencies(config, options);
-  return [...dependencies];
+  const inputs = getDependencies(config, options);
+  return [...inputs];
 };
 
 export default {

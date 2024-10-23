@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency } from '../../util/dependencies.js';
 import { getGitHookPaths } from '../../util/git.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 
 // https://typicode.github.io/husky
@@ -28,7 +28,7 @@ const resolveConfig: ResolveConfig = (script, options) => {
     }
   }
 
-  return options.getDependenciesFromScripts(String(script), { knownGlobalsOnly: true });
+  return options.getDependenciesFromScripts(String(script), { knownBinsOnly: true });
 };
 
 export default {

@@ -1,11 +1,11 @@
 import parseArgs from 'minimist';
-import type { Resolver } from '../../types/config.js';
-import { toBinary, toDependency } from '../../util/dependencies.js';
+import type { BinaryResolver } from '../../types/config.js';
+import { toBinary, toDependency } from '../../util/input.js';
 import { isInternal } from '../../util/path.js';
 import { argsFrom, stripVersionFromSpecifier } from '../util.js';
 
-export const resolve: Resolver = (_binary, args, options) => {
-  const { fromArgs, dependencies } = options;
+export const resolve: BinaryResolver = (_binary, args, options) => {
+  const { fromArgs } = options;
   const parsed = parseArgs(args, {
     boolean: ['yes', 'no', 'quiet'],
     alias: { yes: 'y', no: 'no-install', package: 'p', call: 'c' },
@@ -18,8 +18,7 @@ export const resolve: Resolver = (_binary, args, options) => {
   const command = parsed.call ? fromArgs([parsed.call]) : [];
   const restArgs = argsFrom(args, packageSpecifier);
 
-  const isBinary =
-    specifier && !packageSpecifier.includes('@') && !isInternal(specifier) && !dependencies.has(specifier);
+  const isBinary = specifier && !packageSpecifier.includes('@') && !isInternal(specifier);
   const dependency = isBinary ? toBinary(specifier) : toDependency(specifier);
   const specifiers = dependency && !parsed.yes ? [dependency] : [];
 

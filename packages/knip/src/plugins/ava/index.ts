@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toEntry } from '../../util/dependencies.js';
+import { toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { AvaConfig } from './types.js';
 
@@ -38,9 +38,7 @@ const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => 
   const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
   const fakeCommand = `node ${nodeArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  const dependencies = options.getDependenciesFromScripts(fakeCommand, { knownGlobalsOnly: true });
-
-  return [...dependencies];
+  return options.getDependenciesFromScripts(fakeCommand, { knownBinsOnly: true });
 };
 
 export default {

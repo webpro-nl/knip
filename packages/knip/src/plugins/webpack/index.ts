@@ -2,13 +2,13 @@ import type { RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
 import {
-  type Dependency,
+  type Input,
   toDeferResolve,
   toDependency,
   toDevDependency,
   toEntry,
   toProductionEntry,
-} from '../../util/dependencies.js';
+} from '../../util/input.js';
 import { isAbsolute, isInternal, join, relative } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
@@ -69,7 +69,7 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
   // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
   const passes = typeof config === 'function' ? [false, true] : [false];
 
-  const dependencies = new Set<Dependency>();
+  const inputs = new Set<Input>();
 
   for (const isProduction of passes) {
     const env: Env = { production: isProduction };
@@ -80,7 +80,7 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
       const entries = [];
 
       for (const loader of options.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
-        dependencies.add(toDeferResolve(loader.replace(/\?.*/, '')));
+        inputs.add(toDeferResolve(loader.replace(/\?.*/, '')));
       }
 
       if (typeof options.entry === 'string') entries.push(options.entry);
@@ -96,30 +96,30 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
 
       for (const entry of entries) {
         if (!isInternal(entry)) {
-          dependencies.add(toDependency(entry));
+          inputs.add(toDependency(entry));
         } else {
           const absoluteEntry = isAbsolute(entry) ? entry : join(options.context ? options.context : cwd, entry);
           const item = relative(cwd, absoluteEntry);
           const value = options.mode === 'development' ? toEntry(item) : toProductionEntry(item);
-          dependencies.add(value);
+          inputs.add(value);
         }
       }
     }
   }
 
-  return dependencies;
+  return inputs;
 };
 
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
   const { cwd, manifest } = options;
 
-  const dependencies = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
+  const inputs = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
 
   const scripts = Object.values(manifest.scripts ?? {});
   const webpackCLI = scripts.some(script => script && /(?<=^|\s)webpack(?=\s|$)/.test(script)) ? ['webpack-cli'] : [];
   const webpackDevServer = scripts.some(script => script?.includes('webpack serve')) ? ['webpack-dev-server'] : [];
 
-  return compact([...dependencies, [...webpackCLI, ...webpackDevServer].map(toDevDependency)].flat());
+  return compact([...inputs, [...webpackCLI, ...webpackDevServer].map(toDevDependency)].flat());
 };
 
 export default {

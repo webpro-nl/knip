@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/dependencies.js';
+import { toDeferResolve } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 
@@ -18,8 +18,8 @@ const entry: string[] = [];
 const production: string[] = [];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async config => {
-  const dependencies = config?.plugins ?? [];
-  return [...dependencies].map(toDeferResolve);
+  const inputs = config?.plugins ?? [];
+  return [...inputs].map(toDeferResolve);
 };
 
 export default {

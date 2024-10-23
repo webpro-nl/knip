@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency } from '../../util/dependencies.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { NestConfig } from './types.js';
 
@@ -14,8 +14,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config: string[] = ['nest-cli.json', '.nestcli.json', '.nest-cli.json', 'nest.json'];
 
 const resolveConfig: ResolveConfig<NestConfig> = async config => {
-  const dependencies = config?.collection ? [config.collection] : [];
-  return [...dependencies].map(toDependency);
+  const inputs = config?.collection ? [config.collection] : [];
+  return [...inputs].map(toDependency);
 };
 
 export default {

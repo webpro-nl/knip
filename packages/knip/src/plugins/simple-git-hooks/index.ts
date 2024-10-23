@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import type { Dependency } from '../../util/dependencies.js';
+import type { Input } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 
@@ -26,13 +26,13 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
 
   if (!config) return [];
 
-  const dependencies = new Set<Dependency>();
+  const inputs = new Set<Input>();
 
   for (const hook of Object.values(config)) {
-    for (const id of options.getDependenciesFromScripts(hook)) dependencies.add(id);
+    for (const id of options.getDependenciesFromScripts(hook)) inputs.add(id);
   }
 
-  return Array.from(dependencies);
+  return Array.from(inputs);
 };
 
 export default {

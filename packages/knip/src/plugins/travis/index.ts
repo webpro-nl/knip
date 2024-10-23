@@ -20,7 +20,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
 
   const scripts = [...beforeDeploy, ...beforeInstall, ...beforeScript];
 
-  return options.getDependenciesFromScripts(scripts, { knownGlobalsOnly: true });
+  return options.getDependenciesFromScripts(scripts, { knownBinsOnly: true });
 };
 
 export default {

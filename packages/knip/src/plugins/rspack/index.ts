@@ -16,9 +16,9 @@ const config = ['rspack.config*.{js,ts,mjs,cjs}'];
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
   const { cwd } = options;
 
-  const dependencies = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
+  const inputs = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
 
-  return Array.from(dependencies).filter(dependency => !dependency.specifier.startsWith('builtin:'));
+  return Array.from(inputs).filter(input => !input.specifier.startsWith('builtin:'));
 };
 
 export default {

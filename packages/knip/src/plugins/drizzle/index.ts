@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toProductionEntry } from '../../util/dependencies.js';
+import { toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { DrizzleConfig } from './types.js';
 

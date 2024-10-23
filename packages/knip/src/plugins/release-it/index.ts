@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency } from '../../util/dependencies.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { ReleaseItConfig } from './types.js';
 
@@ -26,9 +26,9 @@ const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
   if (typeof config.gitlab?.releaseNotes === 'string') {
     scripts.push(config.gitlab.releaseNotes);
   }
-  const dependencies = options.getDependenciesFromScripts(scripts);
+  const inputs = options.getDependenciesFromScripts(scripts);
 
-  return [...plugins.map(toDependency), ...dependencies];
+  return [...plugins.map(toDependency), ...inputs];
 };
 
 export default {

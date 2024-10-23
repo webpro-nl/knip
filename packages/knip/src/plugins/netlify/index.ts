@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toDependency, toProductionEntry } from '../../util/dependencies.js';
+import { toDependency, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { extractFunctionsConfigProperty } from './helpers.js';

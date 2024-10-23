@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/dependencies.js';
+import { toDeferResolve } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { NycConfig } from './types.js';
 

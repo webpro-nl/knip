@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { type Dependency, toDeferResolve, toEntry } from '../../util/dependencies.js';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
 import { dirname, isInternal, join, toAbsolute } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { JestConfig, JestInitialOptions } from './types.js';
@@ -30,7 +30,7 @@ const resolveExtensibleConfig = async (configFilePath: string) => {
   return config;
 };
 
-const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Dependency[]> => {
+const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
   const { configFileDir } = options;
 
   if (config?.preset) {
@@ -122,9 +122,9 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
 
   const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
 
-  const dependencies = await resolveDependencies(localConfig, options);
+  const inputs = await resolveDependencies(localConfig, options);
 
-  const result = dependencies.map(dependency => {
+  const result = inputs.map(dependency => {
     dependency.specifier = replaceRootDir(dependency.specifier);
     return dependency;
   });

@@ -1,8 +1,8 @@
 import parse, { type Assignment, type ExpansionNode, type Node, type Prefix } from '../../vendor/bash-parser/index.js';
 import { pluginArgsMap } from '../plugins.js';
-import type { GetDependenciesFromScriptsOptions } from '../types/config.js';
+import type { GetInputsFromScriptsOptions } from '../types/config.js';
 import { debugLogObject } from '../util/debug.js';
-import { type Dependency, toBinary, toDeferResolve } from '../util/dependencies.js';
+import { type Input, toBinary, toDeferResolve } from '../util/input.js';
 import { resolve as fallbackResolve } from './fallback.js';
 import PackageManagerResolvers from './package-manager/index.js';
 import { parseNodeArgs } from './package-manager/node.js';
@@ -20,18 +20,18 @@ const isExpansion = (node: Prefix): node is ExpansionNode => 'expansion' in node
 
 const isAssignment = (node: Prefix): node is Assignment => 'type' in node && node.type === 'AssignmentWord';
 
-export const getDependenciesFromScript = (script: string, options: GetDependenciesFromScriptsOptions): Dependency[] => {
+export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
 
   // Helper for recursive calls
   const fromArgs = (args: string[]) => {
     return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
       ...options,
-      knownGlobalsOnly: false,
+      knownBinsOnly: false,
     });
   };
 
-  const getDependenciesFromNodes = (nodes: Node[]): Dependency[] =>
+  const getDependenciesFromNodes = (nodes: Node[]): Input[] =>
     nodes.flatMap(node => {
       switch (node.type) {
         case 'Command': {
@@ -86,7 +86,7 @@ export const getDependenciesFromScript = (script: string, options: GetDependenci
 
           // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
           // Actions, which are provisioned with lots of unknown global binaries.
-          if (options.knownGlobalsOnly && !text?.startsWith('.')) return [];
+          if (options.knownBinsOnly && !text?.startsWith('.')) return [];
 
           return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
         }

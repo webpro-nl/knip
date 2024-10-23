@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { fromBinary, toDependency } from '../../util/dependencies.js';
 import { getGitHookPaths } from '../../util/git.js';
+import { fromBinary, toDependency } from '../../util/input.js';
 import { findByKeyDeep } from '../../util/object.js';
 import { extname } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -25,17 +25,17 @@ type Command = {
 const resolveConfig: ResolveConfig = async (localConfig, options) => {
   const { manifest, configFileName, cwd, getDependenciesFromScripts } = options;
 
-  const dependencies = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(toDependency) : [];
+  const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(toDependency) : [];
 
   if (extname(configFileName) === '.yml') {
     const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
-      const deps = getDependenciesFromScripts([command.run], { ...options, knownGlobalsOnly: true });
+      const deps = getDependenciesFromScripts([command.run], { ...options, knownBinsOnly: true });
       const dir = command.root ?? cwd;
       return deps.flatMap(dependency => ({ ...dependency, dir }));
     });
 
     const lefthook = process.env.CI
-      ? enablers.filter(dependency => dependencies.some(d => d.specifier === dependency)).map(toDependency)
+      ? enablers.filter(dependency => inputs.some(d => d.specifier === dependency)).map(toDependency)
       : [];
 
     return [...scripts, ...lefthook];
@@ -45,8 +45,8 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
 
   if (!script) return [];
 
-  const scriptDependencies = getDependenciesFromScripts(script);
-  const matches = scriptDependencies.find(dep => dependencies.some(d => d.specifier === fromBinary(dep)));
+  const scriptInputs = getDependenciesFromScripts(script);
+  const matches = scriptInputs.find(dep => inputs.some(d => d.specifier === fromBinary(dep)));
   return matches ? [matches] : [];
 };
 

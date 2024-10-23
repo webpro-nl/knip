@@ -1,18 +1,18 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
-import { type Dependency, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/dependencies.js';
+import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
 import { resolve } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/binaries');
 const pkgScripts = { cwd, manifestScriptNames: new Set(['program']) };
-const knownOnly = { cwd, knownGlobalsOnly: true };
+const knownOnly = { cwd, knownBinsOnly: true };
 
 const js = toDeferResolveEntry('./script.js');
 const ts = toDeferResolveEntry('./main.ts');
 const req = toDeferResolve('./require.js');
 
-type T = (script: string | string[], dependencies: Dependency[], options?: { cwd: string }) => void;
+type T = (script: string | string[], dependencies: Input[], options?: { cwd: string }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
   assert.deepEqual(
     _getDependenciesFromScripts(script, {

@@ -6,21 +6,15 @@ import type { PluginName } from './types/PluginNames.js';
 import type {
   Configuration,
   EnsuredPluginConfiguration,
-  GetDependenciesFromScriptsP,
+  GetInputsFromScriptsPartial,
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
 import { compact } from './util/array.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
-import {
-  type ConfigDependencyW,
-  type Dependency,
-  isConfigPattern,
-  toDebugString,
-  toEntry,
-} from './util/dependencies.js';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
+import { type ConfigInput, type Input, isConfigPattern, toDebugString, toEntry } from './util/input.js';
 import { getKeysByValue } from './util/object.js';
 import { basename, dirname, join } from './util/path.js';
 import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
@@ -32,7 +26,7 @@ type WorkspaceManagerOptions = {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
-  getReferencedInternalFilePath: (v: Dependency) => string | undefined;
+  getReferencedInternalFilePath: (input: Input) => string | undefined;
   rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
@@ -43,7 +37,7 @@ type WorkspaceManagerOptions = {
   cacheLocation: string;
 };
 
-type CacheItem = { resolveEntryPaths?: Dependency[]; resolveConfig?: Dependency[] };
+type CacheItem = { resolveEntryPaths?: Input[]; resolveConfig?: Input[] };
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
@@ -65,9 +59,8 @@ export class WorkspaceWorker {
   cwd: string;
   config: WorkspaceConfiguration;
   manifest: PackageJson;
-  manifestScriptNames: Set<string>;
   dependencies: DependencySet;
-  getReferencedInternalFilePath: (v: Dependency) => string | undefined;
+  getReferencedInternalFilePath: (input: Input) => string | undefined;
   isProduction;
   isStrict;
   rootIgnore: Configuration['ignore'];
@@ -102,7 +95,6 @@ export class WorkspaceWorker {
     this.cwd = cwd;
     this.config = config;
     this.manifest = manifest;
-    this.manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
     this.dependencies = dependencies;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
@@ -242,58 +234,52 @@ export class WorkspaceWorker {
     return [...this.rootIgnore, ...this.config.ignore.map(pattern => prependDirToPattern(this.name, pattern))];
   }
 
-  public async findDependenciesByPlugins(dependencies: DependencySet) {
+  public async findDependenciesByPlugins() {
     const name = this.name;
     const cwd = this.dir;
+    const rootCwd = this.cwd;
     const manifest = this.manifest;
-    const manifestPath = join(cwd, 'package.json');
+    const containingFilePath = join(cwd, 'package.json');
+    const isProduction = this.isProduction;
+    const knownBinsOnly = false;
 
-    const pluginDependencies: Dependency[] = [];
-
-    const add = (id: Dependency, containingFilePath: string) => {
-      pluginDependencies.push({ ...id, containingFilePath: containingFilePath ?? id.containingFilePath });
-    };
+    const manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
+    const baseOptions = { manifestScriptNames, cwd, rootCwd, containingFilePath, knownBinsOnly };
 
     // Get dependencies from package.json#scripts
-    const manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
-    const _options = { manifestScriptNames, cwd, dependencies, rootCwd: this.cwd };
+    const baseScriptOptions = { ...baseOptions, manifest, isProduction, enabledPlugins: this.enabledPlugins };
     const [productionScripts, developmentScripts] = getFilteredScripts(manifest.scripts ?? {});
-    const dependenciesFromManifest = _getDependenciesFromScripts(Object.values(developmentScripts), _options);
-    const dependenciesFromManifest1 = _getDependenciesFromScripts(Object.values(productionScripts), _options);
-    const has = (id: Dependency) =>
-      dependenciesFromManifest1.find(d => d.specifier === id.specifier && d.type === id.type);
+    const inputsFromManifest = _getDependenciesFromScripts(Object.values(developmentScripts), baseOptions);
+    const productionInputsFromManifest = _getDependenciesFromScripts(Object.values(productionScripts), baseOptions);
 
-    const baseOptions = {
-      rootCwd: this.cwd,
-      cwd,
-      manifest,
-      manifestScriptNames,
-      dependencies: this.dependencies,
-      isProduction: this.isProduction,
-      enabledPlugins: this.enabledPlugins,
-    };
+    const hasProductionInput = (input: Input) =>
+      productionInputsFromManifest.find(d => d.specifier === input.specifier && d.type === input.type);
 
-    const getDependenciesFromScripts: GetDependenciesFromScriptsP = (scripts, options) =>
-      _getDependenciesFromScripts(scripts, { ...baseOptions, ...options });
+    const getDependenciesFromScripts: GetInputsFromScriptsPartial = (scripts, options) =>
+      _getDependenciesFromScripts(scripts, { ...baseScriptOptions, ...options });
 
-    const remainingPlugins = new Set(this.enabledPlugins);
+    const inputs: Input[] = [];
     const configFiles = new Map<PluginName, Set<string>>();
+    const remainingPlugins = new Set(this.enabledPlugins);
 
-    const handleConfigDependency = (pluginName: PluginName, dependency: ConfigDependencyW) => {
+    const addInput = (input: Input, containingFilePath = input.containingFilePath) =>
+      inputs.push({ ...input, containingFilePath });
+
+    const handleConfigInput = (pluginName: PluginName, dependency: ConfigInput) => {
       const configFilePath = this.getReferencedInternalFilePath(dependency);
       if (configFilePath) {
         if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
         configFiles.get(pluginName)?.add(configFilePath);
-        add(toEntry(dependency.specifier), dependency.containingFilePath);
+        addInput(toEntry(dependency.specifier), dependency.containingFilePath);
       }
     };
 
-    for (const dependency of [...dependenciesFromManifest, ...dependenciesFromManifest1]) {
-      if (isConfigPattern(dependency)) {
-        handleConfigDependency(dependency.pluginName, { ...dependency, containingFilePath: manifestPath });
+    for (const input of [...inputsFromManifest, ...productionInputsFromManifest]) {
+      if (isConfigPattern(input)) {
+        handleConfigInput(input.pluginName, { ...input, containingFilePath });
       } else {
-        if (!this.isProduction) add(dependency, manifestPath);
-        else if (this.isProduction && (dependency.production || has(dependency))) add(dependency, manifestPath);
+        if (!isProduction) addInput(input, containingFilePath);
+        else if (isProduction && (input.production || hasProductionInput(input))) addInput(input, containingFilePath);
       }
     }
 
@@ -301,29 +287,26 @@ export class WorkspaceWorker {
       const plugin = Plugins[pluginName];
       const hasResolveEntryPaths = typeof plugin.resolveEntryPaths === 'function';
       const hasResolveConfig = typeof plugin.resolveConfig === 'function';
-      const shouldRunConfigResolver =
-        hasResolveConfig && (!this.isProduction || (this.isProduction && 'production' in plugin));
+      const shouldRunConfigResolver = hasResolveConfig && (!isProduction || (isProduction && 'production' in plugin));
       const hasResolve = typeof plugin.resolve === 'function';
-      const pluginConfig = this.getConfigForPlugin(pluginName);
+      const config = this.getConfigForPlugin(pluginName);
 
-      if (!pluginConfig) {
-        return;
-      }
+      if (!config) return;
 
-      const configFilePaths = await _glob({ patterns, cwd: baseOptions.rootCwd, dir: cwd, gitignore: false });
+      const configFilePaths = await _glob({ patterns, cwd: baseScriptOptions.rootCwd, dir: cwd, gitignore: false });
 
       if (configFilePaths.length > 0) debugLogArray([name, plugin.title], 'config file paths', configFilePaths);
 
       const options = {
-        ...baseOptions,
-        config: pluginConfig,
-        configFilePath: manifestPath,
+        ...baseScriptOptions,
+        config,
+        configFilePath: containingFilePath,
         configFileDir: cwd,
         configFileName: '',
         getDependenciesFromScripts,
       };
 
-      const configEntryPaths: Dependency[] = [];
+      const configEntryPaths: Input[] = [];
 
       for (const configFilePath of configFilePaths) {
         const opts = {
@@ -339,7 +322,7 @@ export class WorkspaceWorker {
           if (fd?.meta?.data && !fd.changed) {
             if (fd.meta.data.resolveEntryPaths)
               for (const id of fd.meta.data.resolveEntryPaths) configEntryPaths.push(id);
-            if (fd.meta.data.resolveConfig) for (const id of fd.meta.data.resolveConfig) add(id, configFilePath);
+            if (fd.meta.data.resolveConfig) for (const id of fd.meta.data.resolveConfig) addInput(id, configFilePath);
           } else {
             const config = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
             const data: CacheItem = {};
@@ -353,8 +336,8 @@ export class WorkspaceWorker {
                 const dependencies = (await plugin.resolveConfig?.(config, opts)) ?? [];
                 for (const id of dependencies) {
                   if (isConfigPattern(id))
-                    handleConfigDependency(id.pluginName, { ...id, containingFilePath: configFilePath });
-                  add(id, configFilePath);
+                    handleConfigInput(id.pluginName, { ...id, containingFilePath: configFilePath });
+                  addInput(id, configFilePath);
                 }
                 data.resolveConfig = dependencies;
               }
@@ -365,11 +348,11 @@ export class WorkspaceWorker {
       }
 
       const finalEntryPaths = getFinalEntryPaths(plugin, options, configEntryPaths);
-      for (const id of finalEntryPaths) add(id, id.containingFilePath ?? manifestPath);
+      for (const id of finalEntryPaths) addInput(id, id.containingFilePath ?? containingFilePath);
 
       if (hasResolve) {
         const dependencies = (await plugin.resolve?.(options)) ?? [];
-        for (const id of dependencies) add(id, manifestPath);
+        for (const id of dependencies) addInput(id, containingFilePath);
       }
     };
 
@@ -389,9 +372,9 @@ export class WorkspaceWorker {
       }
     } while (remainingPlugins.size > 0 && configFiles.size > 0);
 
-    debugLogArray(name, 'Plugin dependencies', () => compact(pluginDependencies.map(toDebugString)));
+    debugLogArray(name, 'Plugin dependencies', () => compact(inputs.map(toDebugString)));
 
-    return pluginDependencies;
+    return inputs;
   }
 
   public onDispose() {

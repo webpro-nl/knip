@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Dependency, toDeferResolve } from '../../util/dependencies.js';
+import { type Input, toDeferResolve } from '../../util/input.js';
 import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { BaseStyleLintConfig, StyleLintConfig } from './types.js';
@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['package.json', ...toCosmiconfig('stylelint')];
 
-const resolve = (config: StyleLintConfig | BaseStyleLintConfig): Dependency[] => {
+const resolve = (config: StyleLintConfig | BaseStyleLintConfig): Input[] => {
   const extend = config.extends ? [config.extends].flat() : [];
   const plugins = config.plugins ? [config.plugins].flat() : [];
   const customSyntax = config.customSyntax ? [config.customSyntax] : [];

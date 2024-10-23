@@ -1,35 +1,35 @@
 import type { z } from 'zod';
 import type { ConfigurationValidator, pluginSchema } from '../ConfigurationValidator.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import type { Dependency } from '../util/dependencies.js';
+import type { Input } from '../util/input.js';
 import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';
 import type { Tags } from './cli.js';
 import type { IssueType, Rules } from './issues.js';
 import type { PackageJson } from './package-json.js';
-import type { DependencySet } from './workspace.js';
 
-export interface GetDependenciesFromScriptsOptions extends BaseOptions {
-  knownGlobalsOnly?: boolean;
+export interface GetInputsFromScriptsOptions extends BaseOptions {
+  knownBinsOnly?: boolean;
+  containingFilePath: string;
 }
 
-export type GetDependenciesFromScripts = (
+export type GetInputsFromScripts<T = GetInputsFromScriptsOptions> = (
   npmScripts: string | string[] | Set<string>,
-  options: GetDependenciesFromScriptsOptions
-) => Dependency[];
+  options: T
+) => Input[];
 
-export type GetDependenciesFromScriptsP = (
+export type GetInputsFromScriptsPartial = (
   npmScripts: string | string[] | Set<string>,
-  options?: Partial<GetDependenciesFromScriptsOptions>
-) => Dependency[];
+  options?: Partial<GetInputsFromScriptsOptions>
+) => Input[];
 
-type FromArgs = (args: string[]) => Dependency[];
+type FromArgs = (args: string[]) => Input[];
 
-interface BinaryResolverOptions extends GetDependenciesFromScriptsOptions {
+interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
   fromArgs: FromArgs;
 }
 
-export type Resolver = (binary: string, args: string[], options: BinaryResolverOptions) => Dependency[];
+export type BinaryResolver = (binary: string, args: string[], options: BinaryResolverOptions) => Input[];
 
 export type RawConfiguration = z.infer<typeof ConfigurationValidator>;
 
@@ -93,7 +93,6 @@ interface BaseOptions {
   rootCwd: string;
   cwd: string;
   manifestScriptNames: Set<string>;
-  dependencies: DependencySet;
 }
 
 type IsPluginEnabledOptions = {
@@ -113,14 +112,14 @@ export interface PluginOptions extends BaseOptions {
   configFilePath: string;
   isProduction: boolean;
   enabledPlugins: string[];
-  getDependenciesFromScripts: GetDependenciesFromScriptsP;
+  getDependenciesFromScripts: GetInputsFromScriptsPartial;
 }
 
-export type ResolveEntryPaths<T = any> = (config: T, options: PluginOptions) => Promise<Dependency[]> | Dependency[];
+export type ResolveEntryPaths<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
 
-export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<Dependency[]> | Dependency[];
+export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
 
-export type Resolve = (options: PluginOptions) => Promise<Dependency[]> | Dependency[];
+export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
 export interface Plugin {
   title: string;

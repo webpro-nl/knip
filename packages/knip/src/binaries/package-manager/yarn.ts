@@ -1,6 +1,6 @@
 import parseArgs from 'minimist';
-import type { Resolver } from '../../types/config.js';
-import { toBinary } from '../../util/dependencies.js';
+import type { BinaryResolver } from '../../types/config.js';
+import { toBinary } from '../../util/input.js';
 import { join } from '../../util/path.js';
 
 // https://yarnpkg.com/cli
@@ -38,7 +38,7 @@ const commands = [
   'workspaces',
 ];
 
-export const resolve: Resolver = (_binary, args, { manifestScriptNames, fromArgs, cwd, rootCwd }) => {
+export const resolve: BinaryResolver = (_binary, args, { manifestScriptNames, fromArgs, cwd, rootCwd }) => {
   const parsed = parseArgs(args, { boolean: ['top-level'], string: ['cwd'] });
   const [command, binary] = parsed._;
   const dir = parsed['top-level'] ? rootCwd : parsed.cwd ? join(cwd, parsed.cwd) : undefined;

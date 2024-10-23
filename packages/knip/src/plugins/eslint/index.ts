@@ -24,10 +24,7 @@ const entry = ['eslint.config.{js,cjs,mjs}'];
 
 const config = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
 
-const resolveConfig: ResolveConfig<ESLintConfig> = (localConfig, options) => {
-  const dependencies = getDependencies(localConfig, options);
-  return Array.from(dependencies);
-};
+const resolveConfig: ResolveConfig<ESLintConfig> = (localConfig, options) => getDependencies(localConfig, options);
 
 export default {
   title,

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
-import { toEntry } from '../../util/dependencies.js';
+import { toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { MSWConfig } from './types.js';

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency, toEntry } from '../../util/dependencies.js';
+import { toDependency, toEntry } from '../../util/input.js';
 import { get } from '../../util/object.js';
 import { isInternal } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';

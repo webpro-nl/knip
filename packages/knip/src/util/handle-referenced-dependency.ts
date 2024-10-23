@@ -2,7 +2,7 @@ import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
-import { type Dependency, fromBinary, isBinary, isConfigPattern, isDependency } from './dependencies.js';
+import { type Input, fromBinary, isBinary, isConfigPattern, isDependency } from './input.js';
 import { getPackageNameFromSpecifier } from './modules.js';
 import { dirname, isAbsolute, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
@@ -20,7 +20,7 @@ export const getReferencedDependencyHandler =
     chief: ConfigurationChief,
     isGitIgnored: (s: string) => boolean
   ) =>
-  (dependency: Dependency, workspace: Workspace) => {
+  (dependency: Input, workspace: Workspace) => {
     const { specifier, containingFilePath } = dependency;
     if (!containingFilePath || IGNORED_RUNTIME_DEPENDENCIES.has(specifier)) return;
 

@@ -1,7 +1,7 @@
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toDeferResolve, toProductionEntry } from '../../util/dependencies.js';
 import { isDirectory } from '../../util/fs.js';
+import { toDeferResolve, toProductionEntry } from '../../util/input.js';
 import { isInNodeModules, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
