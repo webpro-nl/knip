@@ -10,7 +10,7 @@ const enablers = ['vite', 'vitest'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const config = ['vite*.config.{js,mjs,ts,cjs,mts,cts}'];
+export const config = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
 const production: string[] = [];
 

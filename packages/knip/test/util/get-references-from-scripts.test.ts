@@ -124,6 +124,7 @@ test('getReferencesFromScripts (nx)', () => {
 test('getReferencesFromScripts (npm)', () => {
   t('npm run script', [toBinary('npm')]);
   t('npm run publish:latest -- --npm-tag=debug --no-push', [toBinary('npm')]);
+  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('npm'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
 });
 
 test('getReferencesFromScripts (npx)', () => {

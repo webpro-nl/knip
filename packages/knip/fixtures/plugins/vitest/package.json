@@ -1,5 +1,8 @@
 {
   "name": "@fixtures/vitest",
+  "scripts": {
+    "test": "vitest --config vitest-default-coverage.config.ts"
+  },
   "devDependencies": {
     "vitest": "*"
   }

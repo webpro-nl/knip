@@ -363,6 +363,7 @@ export class WorkspaceWorker {
         for (const id of dependencies) addInput(id, containingFilePath);
       }
     };
+
     for (const [pluginName] of PluginEntries) {
       if (this.enabledPluginsMap[pluginName]) {
         const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles.get(pluginName) ?? [])];

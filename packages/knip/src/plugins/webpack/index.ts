@@ -23,7 +23,7 @@ const enablers = ['webpack', 'webpack-cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['webpack.config*.{js,ts,mjs,cjs,mts,cts}'];
+const config = ['webpack.config.{js,ts,mjs,cjs,mts,cts}'];
 
 const production: string[] = [];
 
