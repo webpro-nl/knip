@@ -29,6 +29,8 @@ export const ALIAS_TAG = '@alias';
 
 export const DT_SCOPE = '@types';
 
+export const PROTOCOL_VIRTUAL = 'virtual:';
+
 // Binaries that are expected to be globally installed
 // In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
 // Package may exist in npm registry, but last publish is at least 6 years ago

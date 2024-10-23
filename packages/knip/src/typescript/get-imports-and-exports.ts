@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ALIAS_TAG, ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR } from '../constants.js';
+import { ALIAS_TAG, ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR, PROTOCOL_VIRTUAL } from '../constants.js';
 import type { GetImportsAndExportsOptions } from '../types/config.js';
 import type { ExportMap, ExportMember, ImportDetails, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
@@ -199,6 +199,7 @@ const getImportsAndExports = (
     } else {
       if (skipTypeOnly && isTypeOnly) return;
       if (shouldIgnore(getJSDocTags(node), tags)) return;
+      if (specifier.startsWith(PROTOCOL_VIRTUAL)) return;
 
       if (typeof pos === 'number') {
         const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);

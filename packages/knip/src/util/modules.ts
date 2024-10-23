@@ -1,5 +1,5 @@
 import { isBuiltin } from 'node:module';
-import { DT_SCOPE } from '../constants.js';
+import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.js';
 import { isAbsolute, isInNodeModules, toPosix } from './path.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
@@ -41,6 +41,6 @@ const matchDirectives = /^([?!|-]+)?([^!?:]+).*/;
 export const sanitizeSpecifier = (specifier: string) => {
   if (isBuiltin(specifier)) return specifier;
   if (isAbsolute(specifier)) return specifier;
-  if (specifier.startsWith('virtual:')) return specifier;
+  if (specifier.startsWith(PROTOCOL_VIRTUAL)) return specifier;
   return specifier.replace(matchDirectives, '$2');
 };
