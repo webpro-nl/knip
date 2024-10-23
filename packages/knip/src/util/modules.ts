@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import { DT_SCOPE } from '../constants.js';
-import { isAbsolute, toPosix } from './path.js';
+import { isAbsolute, isInNodeModules, toPosix } from './path.js';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   if (!isStartsLikePackageName(moduleSpecifier)) return;
@@ -14,6 +14,9 @@ export const getPackageNameFromFilePath = (value: string) => {
   if (match) return match[match.length - 1];
   return value;
 };
+
+export const getPackageNameFromSpecifier = (specifier: string) =>
+  isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
 
 export const isStartsLikePackageName = (specifier: string) => /^(@[a-z0-9._]|[a-z0-9])/.test(specifier);
 

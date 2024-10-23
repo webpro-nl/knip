@@ -3,12 +3,9 @@ import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import { type Dependency, fromBinary, isBinary, isConfigPattern, isDependency } from './dependencies.js';
-import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from './modules.js';
-import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.js';
+import { getPackageNameFromSpecifier } from './modules.js';
+import { dirname, isAbsolute, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
-
-const getPackageName = (specifier: string) =>
-  isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
 
 /**
  * Resolve internal file paths + collect issues
@@ -41,7 +38,7 @@ export const getReferencedDependencyHandler =
       return;
     }
 
-    const packageName = getPackageName(specifier);
+    const packageName = getPackageNameFromSpecifier(specifier);
 
     if (packageName) {
       // Attempt fast path first for external dependencies and internal workspaces
