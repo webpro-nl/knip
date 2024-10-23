@@ -93,6 +93,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const collector = new IssueCollector({ cwd, rules, filters });
 
+  // Handle config files only once across workspaces workers
+  const allConfigFilePaths = new Set<string>();
+
   const enabledPluginsStore = new Map<string, string[]>();
 
   const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
@@ -151,6 +154,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
       isCache,
       cacheLocation,
+      allConfigFilePaths,
     });
 
     await worker.init();

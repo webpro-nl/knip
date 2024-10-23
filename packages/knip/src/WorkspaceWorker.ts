@@ -35,6 +35,7 @@ type WorkspaceManagerOptions = {
   isStrict: boolean;
   isCache: boolean;
   cacheLocation: string;
+  allConfigFilePaths: Set<string>;
 };
 
 type CacheItem = { resolveEntryPaths?: Input[]; resolveConfig?: Input[] };
@@ -73,6 +74,8 @@ export class WorkspaceWorker {
 
   cache: CacheConsultant<CacheItem>;
 
+  allConfigFilePaths: Set<string>;
+
   constructor({
     name,
     dir,
@@ -89,6 +92,7 @@ export class WorkspaceWorker {
     getReferencedInternalFilePath,
     isCache,
     cacheLocation,
+    allConfigFilePaths,
   }: WorkspaceManagerOptions) {
     this.name = name;
     this.dir = dir;
@@ -102,6 +106,7 @@ export class WorkspaceWorker {
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
+    this.allConfigFilePaths = allConfigFilePaths;
 
     this.getReferencedInternalFilePath = getReferencedInternalFilePath;
 
@@ -295,6 +300,9 @@ export class WorkspaceWorker {
 
       const configFilePaths = await _glob({ patterns, cwd: baseScriptOptions.rootCwd, dir: cwd, gitignore: false });
 
+      const remainingConfigFilePaths = configFilePaths.filter(filePath => !this.allConfigFilePaths.has(filePath));
+      for (const f of remainingConfigFilePaths) if (basename(f) !== 'package.json') this.allConfigFilePaths.add(f);
+
       if (configFilePaths.length > 0) debugLogArray([name, plugin.title], 'config file paths', configFilePaths);
 
       const options = {
@@ -308,7 +316,7 @@ export class WorkspaceWorker {
 
       const configEntryPaths: Input[] = [];
 
-      for (const configFilePath of configFilePaths) {
+      for (const configFilePath of remainingConfigFilePaths) {
         const opts = {
           ...options,
           configFilePath,
@@ -355,7 +363,6 @@ export class WorkspaceWorker {
         for (const id of dependencies) addInput(id, containingFilePath);
       }
     };
-
     for (const [pluginName] of PluginEntries) {
       if (this.enabledPluginsMap[pluginName]) {
         const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles.get(pluginName) ?? [])];
