@@ -1,7 +1,9 @@
 import type { TsConfigJson } from 'type-fest';
+import type { ConfigArg } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
 import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.js';
+import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 
 // https://www.typescriptlang.org/tsconfig
@@ -40,7 +42,7 @@ const args = {
   binaries: ['tsc'],
   string: ['project'],
   alias: { project: ['p'] },
-  config: ['project'],
+  config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,
 };
 
 export default {

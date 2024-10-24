@@ -1,5 +1,7 @@
 import type { ParsedArgs } from 'minimist';
 
+export type ConfigArg = boolean | (string | [string, (id: string) => string])[];
+
 export type Args = {
   /**
    * Default executables for the dependency (e.g. typescript has `["tsc"]`)
@@ -64,7 +66,7 @@ export type Args = {
    *
    * @default undefined
    */
-  config?: boolean | string[];
+  config?: ConfigArg;
 
   /**
    * Modify or filter arguments before parsing.

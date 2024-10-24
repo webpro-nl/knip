@@ -54,8 +54,12 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
         : [];
 
   const config = opts.config === true ? ['config'] : opts.config || [];
-  const mapToConfigPattern = (id: string) =>
-    parsed[id] && pluginName ? [toConfig(pluginName, parsed[id], containingFilePath)] : [];
+  const mapToConfigPattern = (value: string | [string, (value: string) => string]) => {
+    if (typeof value === 'string')
+      return parsed[value] && pluginName ? [toConfig(pluginName, parsed[value], containingFilePath)] : [];
+    const [id, fn] = value;
+    return parsed[id] && pluginName ? [toConfig(pluginName, fn(parsed[id]), containingFilePath)] : [];
+  };
   const configFilePaths = config.flatMap(mapToConfigPattern);
 
   return [
