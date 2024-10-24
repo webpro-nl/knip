@@ -17,7 +17,9 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
   assert(issues.unlisted['.github/workflows/test.yml']['retry-cli']);
 
   assert(issues.unresolved['.github/workflows/test.yml']['esbuild-register']);
-  assert(issues.unresolved['.github/workflows/test.yml']['./script.js']);
+
+  // Let's start out conservatively
+  // assert(issues.unresolved['.github/workflows/test.yml']['./script.js']);
   assert(issues.unresolved['.github/actions/composite/action.yml']['esbuild-register']);
 
   assert(issues.binaries['.github/actions/composite/action.yml']['eslint']);
@@ -36,7 +38,7 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
     ...baseCounters,
     binaries: 10,
     unlisted: 2,
-    unresolved: 3,
+    unresolved: 2,
     processed: 10,
     total: 10,
   });

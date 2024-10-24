@@ -2,7 +2,9 @@ import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
-import { type Input, fromBinary, isBinary, isConfigPattern, isDependency } from './input.js';
+import { debugLog } from './debug.js';
+import { toDebugString } from './input.js';
+import { type Input, fromBinary, isBinary, isConfigPattern, isDeferResolveEntry, isDependency } from './input.js';
 import { getPackageNameFromSpecifier } from './modules.js';
 import { dirname, isAbsolute, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
@@ -91,12 +93,17 @@ export const getReferencedDependencyHandler =
         workspace: workspace.name,
         symbol: packageName ?? specifier,
       });
-    } else if (!isConfigPattern(dependency) && !isGitIgnored(filePath)) {
-      collector.addIssue({
-        type: 'unresolved',
-        filePath: containingFilePath,
-        workspace: workspace.name,
-        symbol: specifier,
-      });
+    } else if (!isGitIgnored(filePath)) {
+      // Let's start out conservatively
+      if (!isDeferResolveEntry(input) && !isConfigPattern(input)) {
+        collector.addIssue({
+          type: 'unresolved',
+          filePath: containingFilePath,
+          workspace: workspace.name,
+          symbol: specifier,
+        });
+      } else {
+        debugLog(workspace.name, `Unable to resolve ${toDebugString(input)}`);
+      }
     }
   };
