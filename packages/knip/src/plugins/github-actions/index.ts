@@ -21,6 +21,7 @@ type Step = {
   run?: string;
   uses?: string;
   with?: {
+    repository: string;
     path: string;
   };
   'working-directory'?: string;
@@ -41,7 +42,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
 
   for (const steps of jobs) {
     const action = steps.steps.find(
-      step => step.uses?.startsWith('actions/checkout@') && typeof step.with?.path === 'string'
+      step => step.uses?.startsWith('actions/checkout@') && typeof step.with?.path === 'string' && !step.with.repository
     );
     const path = action?.with?.path;
     for (const step of steps.steps) {
