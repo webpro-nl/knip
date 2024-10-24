@@ -128,9 +128,9 @@ export class WorkspaceWorker {
       }
       const isEnabledInAncestor = this.enabledPluginsInAncestors.includes(pluginName);
       if (
-        !plugin.isEnabled ||
         isEnabledInAncestor ||
-        (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies: this.dependencies, config: this.config }))
+        (typeof plugin.isEnabled === 'function' &&
+          (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies: this.dependencies, config: this.config })))
       ) {
         this.enabledPluginsMap[pluginName] = true;
       }
@@ -364,13 +364,11 @@ export class WorkspaceWorker {
       }
     };
 
-    for (const [pluginName] of PluginEntries) {
-      if (this.enabledPluginsMap[pluginName]) {
-        const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles.get(pluginName) ?? [])];
-        configFiles.delete(pluginName);
-        await runPlugin(pluginName, compact(patterns));
-        remainingPlugins.delete(pluginName);
-      }
+    for (const pluginName of this.enabledPlugins) {
+      const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles.get(pluginName) ?? [])];
+      configFiles.delete(pluginName);
+      await runPlugin(pluginName, compact(patterns));
+      remainingPlugins.delete(pluginName);
     }
 
     do {
