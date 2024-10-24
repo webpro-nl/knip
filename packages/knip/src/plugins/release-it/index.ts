@@ -26,7 +26,7 @@ const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
   if (typeof config.gitlab?.releaseNotes === 'string') {
     scripts.push(config.gitlab.releaseNotes);
   }
-  const inputs = options.getDependenciesFromScripts(scripts);
+  const inputs = options.getInputsFromScripts(scripts);
 
   return [...plugins.map(toDependency), ...inputs];
 };

@@ -20,7 +20,7 @@ const resolveConfig: ResolveConfig<LintStagedConfig> = (config, options) => {
 
   for (const script of Object.values(config).flat()) {
     const scripts = [script].flat();
-    for (const identifier of options.getDependenciesFromScripts(scripts)) inputs.add(identifier);
+    for (const identifier of options.getInputsFromScripts(scripts)) inputs.add(identifier);
   }
 
   // Looks like the idea is to have lint-staged installed too, so there are no refs to yorkie

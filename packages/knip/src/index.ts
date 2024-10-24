@@ -7,7 +7,7 @@ import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import type { ProjectPrincipal } from './ProjectPrincipal.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
-import { _getDependenciesFromScripts } from './binaries/index.js';
+import { _getInputsFromScripts } from './binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type { DependencyGraph, Export, ExportMember } from './types/dependency-graph.js';
@@ -344,7 +344,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           dependencies,
           manifestScriptNames,
         };
-        const specifiers = _getDependenciesFromScripts(scripts, options);
+        const specifiers = _getInputsFromScripts(scripts, options);
         for (const specifier of specifiers) {
           specifier.containingFilePath = filePath;
           specifier.dir = cwd;

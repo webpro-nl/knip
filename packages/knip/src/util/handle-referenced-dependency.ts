@@ -20,13 +20,14 @@ export const getReferencedDependencyHandler =
     chief: ConfigurationChief,
     isGitIgnored: (s: string) => boolean
   ) =>
-  (dependency: Input, workspace: Workspace) => {
-    const { specifier, containingFilePath } = dependency;
+  (input: Input, workspace: Workspace) => {
+    const { specifier, containingFilePath } = input;
+
     if (!containingFilePath || IGNORED_RUNTIME_DEPENDENCIES.has(specifier)) return;
 
-    if (isBinary(dependency)) {
-      const binaryName = fromBinary(dependency);
-      const ws = (dependency.dir && chief.findWorkspaceByFilePath(`${dependency.dir}/`)) || workspace;
+    if (isBinary(input)) {
+      const binaryName = fromBinary(input);
+      const ws = (input.dir && chief.findWorkspaceByFilePath(`${input.dir}/`)) || workspace;
       const isHandled = deputy.maybeAddReferencedBinary(ws, binaryName);
       if (isHandled) return;
       collector.addIssue({
@@ -48,9 +49,9 @@ export const getReferencedDependencyHandler =
       if (specifierWorkspace) {
         const isHandled = deputy.maybeAddReferencedExternalDependency(specifierWorkspace, packageName);
 
-        if (isWorkspace || isDependency(dependency)) {
+        if (isWorkspace || isDependency(input)) {
           if (!isHandled) {
-            if ((deputy.isProduction && dependency.production) || !deputy.isProduction) {
+            if ((deputy.isProduction && input.production) || !deputy.isProduction) {
               // Unlisted dependency
               collector.addIssue({
                 type: 'unlisted',
@@ -71,11 +72,11 @@ export const getReferencedDependencyHandler =
       }
     }
 
-    if (!isConfigPattern(dependency) && deputy.isProduction && !dependency.production) {
+    if (!isConfigPattern(input) && deputy.isProduction && !input.production) {
       return;
     }
 
-    const baseDir = dependency.dir ?? dirname(containingFilePath);
+    const baseDir = input.dir ?? dirname(containingFilePath);
     const filePath = isAbsolute(specifier) ? specifier : join(baseDir, specifier);
     const resolvedFilePath = _resolveSync(filePath, baseDir);
 

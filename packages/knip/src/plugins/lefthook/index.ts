@@ -23,13 +23,13 @@ type Command = {
 };
 
 const resolveConfig: ResolveConfig = async (localConfig, options) => {
-  const { manifest, configFileName, cwd, getDependenciesFromScripts } = options;
+  const { manifest, configFileName, cwd, getInputsFromScripts } = options;
 
   const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(toDependency) : [];
 
   if (extname(configFileName) === '.yml') {
     const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
-      const deps = getDependenciesFromScripts([command.run], { ...options, knownBinsOnly: true });
+      const deps = getInputsFromScripts([command.run], { ...options, knownBinsOnly: true });
       const dir = command.root ?? cwd;
       return deps.flatMap(dependency => ({ ...dependency, dir }));
     });
@@ -45,7 +45,7 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
 
   if (!script) return [];
 
-  const scriptInputs = getDependenciesFromScripts(script);
+  const scriptInputs = getInputsFromScripts(script);
   const matches = scriptInputs.find(dep => inputs.some(d => d.specifier === fromBinary(dep)));
   return matches ? [matches] : [];
 };

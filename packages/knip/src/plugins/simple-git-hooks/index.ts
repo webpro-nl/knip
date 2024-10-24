@@ -29,7 +29,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
   const inputs = new Set<Input>();
 
   for (const hook of Object.values(config)) {
-    for (const id of options.getDependenciesFromScripts(hook)) inputs.add(id);
+    for (const id of options.getInputsFromScripts(hook)) inputs.add(id);
   }
 
   return Array.from(inputs);

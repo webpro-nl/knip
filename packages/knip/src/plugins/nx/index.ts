@@ -58,7 +58,7 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .filter(target => target.executor === 'nx:run-commands')
     .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []));
 
-  const inputs = options.getDependenciesFromScripts(scripts);
+  const inputs = options.getInputsFromScripts(scripts);
 
   return compact([...executors, ...inputs]).map(id => (typeof id === 'string' ? toDependency(id) : id));
 };

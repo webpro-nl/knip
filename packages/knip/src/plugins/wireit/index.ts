@@ -17,7 +17,7 @@ const config = ['package.json'];
 const resolveConfig: ResolveConfig<WireitConfig> = (localConfig, options) => {
   const scripts = Object.values(localConfig).flatMap(({ command: script }) => (script ? [script] : []));
 
-  const scriptDependencies = options.getDependenciesFromScripts(scripts);
+  const scriptDependencies = options.getInputsFromScripts(scripts);
 
   return scriptDependencies;
 };

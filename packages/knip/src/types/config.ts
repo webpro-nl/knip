@@ -112,7 +112,7 @@ export interface PluginOptions extends BaseOptions {
   configFilePath: string;
   isProduction: boolean;
   enabledPlugins: string[];
-  getDependenciesFromScripts: GetInputsFromScriptsPartial;
+  getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 
 export type ResolveEntryPaths<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];

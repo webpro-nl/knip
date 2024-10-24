@@ -19,7 +19,7 @@ const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) 
     .filter(command => command)
     .map(command => command.replace('$workspaceRoot', options.rootCwd))
     .map(command => command.replace('$projectRoot', options.cwd))
-    .flatMap(command => options.getDependenciesFromScripts(command));
+    .flatMap(command => options.getInputsFromScripts(command));
   return [...inputs];
 };
 

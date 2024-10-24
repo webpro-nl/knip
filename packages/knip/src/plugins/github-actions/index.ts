@@ -33,7 +33,7 @@ type Job = {
 };
 
 const resolveConfig: ResolveConfig = async (config, options) => {
-  const { configFileDir, configFileName, rootCwd, getDependenciesFromScripts } = options;
+  const { configFileDir, configFileName, rootCwd, getInputsFromScripts } = options;
 
   const inputs = new Set<Input>();
 
@@ -48,10 +48,10 @@ const resolveConfig: ResolveConfig = async (config, options) => {
       const workingDir = step['working-directory'];
       const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
       if (step.run) {
-        for (const dependency of getDependenciesFromScripts([step.run], { knownBinsOnly: true })) {
-          if (isDeferResolveEntry(dependency) && path && !workingDir)
-            dependency.specifier = relative(join(dir, path), join(rootCwd, dependency.specifier));
-          inputs.add({ ...dependency, dir });
+        for (const input of getInputsFromScripts([step.run], { knownBinsOnly: true })) {
+          if (isDeferResolveEntry(input) && path && !workingDir)
+            input.specifier = relative(join(dir, path), join(rootCwd, input.specifier));
+          inputs.add({ ...input, dir });
         }
       }
     }

@@ -1,6 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { _getDependenciesFromScripts } from '../../src/binaries/index.js';
+import { _getInputsFromScripts } from '../../src/binaries/index.js';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
 import { resolve } from '../../src/util/path.js';
 
@@ -15,7 +15,7 @@ const req = toDeferResolve('./require.js');
 type T = (script: string | string[], dependencies: Input[], options?: { cwd: string }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
   assert.deepEqual(
-    _getDependenciesFromScripts(script, {
+    _getInputsFromScripts(script, {
       rootCwd: cwd,
       manifestScriptNames: new Set(),
       dependencies: new Set(),

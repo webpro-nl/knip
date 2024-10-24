@@ -31,7 +31,7 @@ const resolveConfig: ResolveConfig<LintStagedConfig> = async (config, options) =
 
   for (const entry of Object.values(config).flat()) {
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
-    for (const id of options.getDependenciesFromScripts(scripts)) inputs.add(id);
+    for (const id of options.getInputsFromScripts(scripts)) inputs.add(id);
   }
 
   return Array.from(inputs);

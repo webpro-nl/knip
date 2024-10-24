@@ -24,11 +24,11 @@ const resolveConfig: ResolveConfig = (script, options) => {
     const hooks = script.hooks;
     if (hooks) {
       const scripts: string[] = Object.values(hooks);
-      return [toDependency('husky'), ...options.getDependenciesFromScripts(scripts, { ...options })];
+      return [toDependency('husky'), ...options.getInputsFromScripts(scripts, { ...options })];
     }
   }
 
-  return options.getDependenciesFromScripts(String(script), { knownBinsOnly: true });
+  return options.getInputsFromScripts(String(script), { knownBinsOnly: true });
 };
 
 export default {

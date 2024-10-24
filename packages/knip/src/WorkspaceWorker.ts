@@ -1,5 +1,5 @@
 import { CacheConsultant } from './CacheConsultant.js';
-import { _getDependenciesFromScripts } from './binaries/index.js';
+import { _getInputsFromScripts } from './binaries/index.js';
 import { getFilteredScripts } from './manifest/helpers.js';
 import { PluginEntries, Plugins } from './plugins.js';
 import type { PluginName } from './types/PluginNames.js';
@@ -254,14 +254,14 @@ export class WorkspaceWorker {
     // Get dependencies from package.json#scripts
     const baseScriptOptions = { ...baseOptions, manifest, isProduction, enabledPlugins: this.enabledPlugins };
     const [productionScripts, developmentScripts] = getFilteredScripts(manifest.scripts ?? {});
-    const inputsFromManifest = _getDependenciesFromScripts(Object.values(developmentScripts), baseOptions);
-    const productionInputsFromManifest = _getDependenciesFromScripts(Object.values(productionScripts), baseOptions);
+    const inputsFromManifest = _getInputsFromScripts(Object.values(developmentScripts), baseOptions);
+    const productionInputsFromManifest = _getInputsFromScripts(Object.values(productionScripts), baseOptions);
 
     const hasProductionInput = (input: Input) =>
       productionInputsFromManifest.find(d => d.specifier === input.specifier && d.type === input.type);
 
-    const getDependenciesFromScripts: GetInputsFromScriptsPartial = (scripts, options) =>
-      _getDependenciesFromScripts(scripts, { ...baseScriptOptions, ...options });
+    const getInputsFromScripts: GetInputsFromScriptsPartial = (scripts, options) =>
+      _getInputsFromScripts(scripts, { ...baseScriptOptions, ...options });
 
     const inputs: Input[] = [];
     const configFiles = new Map<PluginName, Set<string>>();
@@ -311,7 +311,7 @@ export class WorkspaceWorker {
         configFilePath: containingFilePath,
         configFileDir: cwd,
         configFileName: '',
-        getDependenciesFromScripts,
+        getInputsFromScripts,
       };
 
       const configEntryPaths: Input[] = [];
@@ -336,18 +336,18 @@ export class WorkspaceWorker {
             const data: CacheItem = {};
             if (config) {
               if (hasResolveEntryPaths) {
-                const dependencies = (await plugin.resolveEntryPaths?.(config, opts)) ?? [];
-                for (const id of dependencies) configEntryPaths.push(id);
-                data.resolveEntryPaths = dependencies;
+                const entryPaths = (await plugin.resolveEntryPaths?.(config, opts)) ?? [];
+                for (const entryPath of entryPaths) configEntryPaths.push(entryPath);
+                data.resolveEntryPaths = entryPaths;
               }
               if (shouldRunConfigResolver) {
-                const dependencies = (await plugin.resolveConfig?.(config, opts)) ?? [];
-                for (const id of dependencies) {
-                  if (isConfigPattern(id))
-                    handleConfigInput(id.pluginName, { ...id, containingFilePath: configFilePath });
-                  addInput(id, configFilePath);
+                const inputs = (await plugin.resolveConfig?.(config, opts)) ?? [];
+                for (const input of inputs) {
+                  if (isConfigPattern(input))
+                    handleConfigInput(input.pluginName, { ...input, containingFilePath: configFilePath });
+                  addInput(input, configFilePath);
                 }
-                data.resolveConfig = dependencies;
+                data.resolveConfig = inputs;
               }
               if (!isManifest && fd?.changed && fd.meta) fd.meta.data = data;
             }

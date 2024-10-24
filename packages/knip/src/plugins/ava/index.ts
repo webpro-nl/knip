@@ -38,7 +38,7 @@ const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => 
   const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
   const fakeCommand = `node ${nodeArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  return options.getDependenciesFromScripts(fakeCommand, { knownBinsOnly: true });
+  return options.getInputsFromScripts(fakeCommand, { knownBinsOnly: true });
 };
 
 export default {

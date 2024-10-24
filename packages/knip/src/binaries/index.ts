@@ -17,4 +17,4 @@ const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {
   return Array.from(inputs);
 };
 
-export const _getDependenciesFromScripts = timerify(getInputsFromScripts);
+export const _getInputsFromScripts = timerify(getInputsFromScripts);
