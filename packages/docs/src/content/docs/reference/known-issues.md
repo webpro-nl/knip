@@ -70,6 +70,28 @@ import ArrowIcon from '../icons/Arrow'; // → Does NOT resolve to ../icons/Arro
 The recommendation is to always add the extension when importing such files,
 similar to how standard ES Modules work.
 
+## `unplugin-icons` imports
+
+[unplugin-icons](https://github.com/antfu/unplugin-icons) uses virtual imports
+to import icons from icon sets as components. Knip cannot resolve these imports
+and will report them as unused.
+
+To fix this, you can use the [`paths` configuration option][13] to tell Knip
+where to find the icon types.
+
+For example:
+
+```json title="knip.json"
+{
+  "paths": {
+    "~icons/*": ["node_modules/unplugin-icons/types/[framework].d.ts"]
+  }
+}
+```
+
+where `[framework]` is the name of the framework you're using (see [this
+list][14] for available types).
+
 [1]: #exceptions-from-config-files
 [2]: #false-positives-with-external-libs
 [3]: #definitely-typed-packages-in-dependencies
@@ -82,3 +104,5 @@ similar to how standard ES Modules work.
 [10]: https://github.com/unjs/jiti/issues/174
 [11]: https://github.com/webpro-nl/knip/issues/565
 [12]: ../guides/handling-issues.mdx#external-libraries
+[13]: ./configuration.md#paths
+[14]: https://github.com/unplugin/unplugin-icons/tree/main/types
