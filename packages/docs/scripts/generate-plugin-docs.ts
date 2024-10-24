@@ -93,7 +93,21 @@ for await (const dir of directories) {
         ]
       : [];
 
-    const argsText = args ? parseFragment('## Shell commands\n\nThis plugin enables argument parsing') : [];
+    const argsText = args
+      ? [
+          ...parseFragment(
+            `## Shell commands\n\nThis plugin adds argument parsing for the <code>${args.binaries ? args.binaries.join(' and ') : pluginName}</code> binary. Configuration:`
+          ),
+          ...parseFragment(
+            `\`\`\`\n${Object.entries(args)
+              .filter(([key]) => key !== 'binaries')
+              .map(
+                ([key, value]) => `${key}: ${typeof value === 'function' ? value.toString() : JSON.stringify(value)}`
+              )
+              .join('\n')}\n\`\`\``
+          ),
+        ]
+      : [];
 
     const tree = u('root', [
       frontmatter,

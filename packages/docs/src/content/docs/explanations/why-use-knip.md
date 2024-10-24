@@ -13,10 +13,14 @@ in complexity and size, automated and comprehensive tooling becomes critical.
 Knip finds and fixes unused files, exports and dependencies.
 
 Deep analysis from [fine-grained entry points][1] based on the actual frameworks
-and tooling in your [(mono)repo][2] with [custom module resolution][3],
-[configuration file parsers][4], [compilers][5], a [shell script parser][6] and
-additional heuristics to maximize coverage for comprehensive and actionable
-results.
+and tooling in your [(mono)repo][2] for accurate and actionable results.
+Advanced features for maximum coverage:
+
+- [Custom module resolution][3]
+- [Configuration file parsers][4]
+- [Advanced shell script parser][5]
+- [Built-in and custom compilers][6]
+- [Auto-fix many issues][7]
 
 :::
 
@@ -38,9 +42,9 @@ code":
   the same for files, dependencies and exports that you forgot to delete.
 - Keeping dead code around has a negative value on readability, as it can be
   misleading and distracting. Even if it serves no purpose it will need to be
-  maintained (source: [Safe dead code removal → YAGNI][7]).
-- Also see [Why are unused dependencies a problem?][8] and [Why are unused
-  exports a problem?][9].
+  maintained (source: [Safe dead code removal → YAGNI][8]).
+- Also see [Why are unused dependencies a problem?][9] and [Why are unused
+  exports a problem?][10].
 
 ## Automation
 
@@ -53,7 +57,7 @@ times better and faster than trying to do it manually.
 
 :::tip
 
-Knip not only finds clutter, it can also [clean it][10]!
+Knip not only finds clutter, it can also [clean it][7]!
 
 Use Knip next to a linter like ESLint or Biome: after removing unused variables
 inside files, Knip might find even more unused code. Rinse and repeat!
@@ -116,10 +120,10 @@ so you can get rid of false positives? A variety of reasons:
 [2]: ../features/monorepos-and-workspaces.md
 [3]: ../reference/faq.md#why-doesnt-knip-use-an-existing-module-resolver
 [4]: ./plugins.md#configuration-files
-[5]: ../features/compilers.md
-[6]: ../features/script-parser.md
-[7]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
-[8]: ../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem
-[9]: ../typescript/unused-exports.md#why-are-unused-exports-a-problem
-[10]: ../features/auto-fix.mdx
+[5]: ../features/script-parser.md
+[6]: ../features/compilers.md
+[7]: ../features/auto-fix.mdx
+[8]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
+[9]: ../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem
+[10]: ../typescript/unused-exports.md#why-are-unused-exports-a-problem
 [11]: ../reference/jsdoc-tsdoc-tags.md

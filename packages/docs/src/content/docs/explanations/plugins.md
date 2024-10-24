@@ -7,27 +7,32 @@ sidebar:
 This page describes why Knip uses plugins and the difference between `config`
 and `entry` files.
 
-Knip has an extensive and growing [list of built-in plugins][1]. Currently it's
-not possible to add custom plugins, but feel free to [request a plugin][2] or
-even [write a plugin][3] so others can benefit too.
+Knip has an extensive and growing [list of built-in plugins][1]. Feel free to
+[request a plugin][2] or even [write a plugin][3] so others can benefit too!
 
-## Enabled
+## What does a plugin do?
 
 Plugins are enabled if the related package is listed in the list of dependencies
 in `package.json`. For instance, if `astro` is listed in `dependencies` or
-`devDependencies`, then the Astro plugin is enabled.
+`devDependencies`, then the Astro plugin is enabled. And this means that this
+plugin will:
+
+- Handle [configuration files][4] like `astro.config.mjs`
+- Add [entry files][5] such as `src/pages/**/*.astro`
 
 ## Configuration files
 
-Knip uses [entry files][4] as starting points to scan your source code and
+Knip uses [entry files][6] as starting points to scan your source code and
 resolve other internal files and external dependencies. The dependency graph can
 be statically resolved through the `require` and `import` statements in those
 source files. However, configuration files reference external dependencies in
 various ways. Knip uses a plugin for each tool to parse configuration files and
 find those dependencies.
 
-In this example we look at [Knip's ESLint plugin][5]. The default `config` file
-patterns include `.eslintrc.json`. Here's a minimal example:
+### Example: ESLint
+
+In the first example we look at [the ESLint plugin][7]. The default `config`
+file patterns include `.eslintrc.json`. Here's a minimal example:
 
 ```json title=".eslintrc.json"
 {
@@ -39,12 +44,44 @@ patterns include `.eslintrc.json`. Here's a minimal example:
 Configuration files like this don't `import` or `require` anything, but they do
 require the referenced dependencies to be installed.
 
-In this case, the plugin will return the `eslint-config-airbnb`,
-`eslint-config-prettier` and `@typescript-eslint/eslint-plugin` dependencies, so
-Knip knows they should be listed in `package.json`.
+In this case, the plugin will return three dependencies:
+
+- `eslint-config-airbnb`
+- `eslint-config-prettier`
+- `@typescript-eslint/eslint-plugin`
+
+Knip will then look for missing dependencies in `package.json` and report those
+as unlisted. And vice versa, if there are any ESLint plugins listed in
+`package.json`, but unused, those will be reported as well.
+
+### Example: Vitest
+
+The second example uses [the Vitest plugin][7]. Here's a minimal example of a
+Vitest configuration file:
+
+```ts title="vitest.config.ts"
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    coverage: {
+      provider: 'istanbul',
+    },
+    environment: 'happy-dom',
+  },
+});
+```
+
+The Vitest plugin reads this configuration and return two dependencies:
+
+- `@vitest/coverage-istanbul`
+- `vitest-environment-happy-dom`
+
+Knip will look for missing and unused dependencies in `package.json` and report
+accordingly.
 
 Some tools allow configuration to be stored in `package.json`, that's why some
-of the relevant plugins contain `package.json` in the list of `config` files.
+plugins contain `package.json` in the list of `config` files.
 
 :::tip[Summary]
 
@@ -135,7 +172,8 @@ The Angular plugin parses the Angular configuration file. Here's a fragment:
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/knip-angular-example",
-            "main": "src/main.ts"
+            "main": "src/main.ts",
+            "tsConfig": "tsconfig.app.json"
           }
         }
       }
@@ -146,6 +184,9 @@ The Angular plugin parses the Angular configuration file. Here's a fragment:
 
 This will result in `src/main.ts` being added as an entry file (and
 `@angular-devkit/build-angular` as a referenced dependency).
+
+Additionally, the Angular plugin returns `tsconfig.app.json` as a configuration
+file for the TypeScript plugin.
 
 ### GitHub Actions
 
@@ -160,12 +201,17 @@ jobs:
       - run: npm install
       - run: node scripts/build.js
       - run: node --loader tsx scripts/deploy.ts
+      - run: playwright test -c playwright.web.config.ts
+        working-dir: e2e
 ```
 
 From these scripts, the `scripts/build.js` and `scripts/deploy.ts` files will be
 added as entry files by the GitHub Actions plugin.
 
-Read more about this in [Script Parser][6].
+Additionally, the file `e2e/playwright.web.config.ts` is detected and will be
+handed over as a Playwright configuration file.
+
+Read more about this in [Script Parser][8].
 
 ### webpack
 
@@ -251,6 +297,8 @@ Plugins are configured with two distinct types of files:
 [1]: ../reference/plugins.md
 [2]: https://github.com/webpro-nl/knip/issues/483
 [3]: ../guides/writing-a-plugin.md
-[4]: ./entry-files.md
-[5]: ../reference/plugins/eslint.md
-[6]: ../features/script-parser.md
+[4]: #configuration-files
+[5]: #entry-files
+[6]: ./entry-files.md
+[7]: ../reference/plugins/eslint.md
+[8]: ../features/script-parser.md

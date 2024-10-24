@@ -2,14 +2,14 @@
 title: Script Parser
 ---
 
-Knip parses shell commands and scripts to find additional dependencies and entry
-files in various places:
+Knip parses shell commands and scripts to find additional dependencies, entry
+files and configuration files in various places:
 
 - In [`package.json`][1]
 - In specific [`config` files][2]
 - In [source code][3]
 
-Shell scripts can be read and statically analyzed, but not executed.
+Shell scripts can be read and statically analyzed, but they're not executed.
 
 ## package.json
 
@@ -56,20 +56,28 @@ or parsed by Knip.
 
 ### Scripts parsing
 
-When parsing the `scripts` entries of `package.json`, `knip` also detect
-dependencies of `-r`, `--require`, `--loader` or `--import` arguments. Example:
+When parsing the `scripts` entries of `package.json`, Knip detects dependencies
+of `-r`, `--require`, `--loader` or `--import` arguments. It also recognizes
+configuration files. Example:
 
 ```json
 {
   "name": "my-lib",
   "scripts": {
-    "start": "node --import tsx/esm run.ts"
+    "start": "node --import tsx/esm run.ts",
+    "bundle": "tsup -c tsup.lib.config.ts",
+    "type-check": "tsc -p tsconfig.app.json"
   }
 }
 ```
 
 This will have `tsx` marked as a referenced dependency, and adds `run.ts` as an
 entry file.
+
+The following files are also detected as configuration files:
+
+- `tsup.lib.config.ts` - to be handled by the tsup plugin
+- `tsconfig.app.json` - to be handled by the TypeScript plugin
 
 ## Plugins
 

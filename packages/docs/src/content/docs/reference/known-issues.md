@@ -40,14 +40,14 @@ the target values are not arrays).
 Potential workarounds:
 
 - Rewrite the import in the configuration file to a relative import.
-- Use Bun with [knip-bun][6].
-- [Disable the plugin][7] (not recommended, try the other options first).
+- Use Bun with [knip-bun][5].
+- [Disable the plugin][6] (not recommended, try the other options first).
 
 ## False positives with external libs
 
 Knip may report false positives when exports are consumed by external libraries.
 
-Please see [external libs][12].
+Please see [external libs][7].
 
 ## Definitely Typed packages in `dependencies`
 
@@ -72,14 +72,10 @@ similar to how standard ES Modules work.
 
 ## `unplugin-icons` imports
 
-[unplugin-icons](https://github.com/antfu/unplugin-icons) uses virtual imports
-to import icons from icon sets as components. Knip cannot resolve these imports
-and will report them as unused.
-
-To fix this, you can use the [`paths` configuration option][13] to tell Knip
-where to find the icon types.
-
-For example:
+[unplugin-icons][8] uses aliased imports to import icons from icon sets as
+components. Knip cannot resolve these imports and will report them as unused.
+Use the [`paths` configuration option][9] to tell Knip where to find the icon
+types. For example:
 
 ```json title="knip.json"
 {
@@ -89,20 +85,16 @@ For example:
 }
 ```
 
-where `[framework]` is the name of the framework you're using (see [this
-list][14] for available types).
+Where `[framework]` is the name of the framework you're using (see [available
+types][10]).
 
 [1]: #exceptions-from-config-files
 [2]: #false-positives-with-external-libs
 [3]: #definitely-typed-packages-in-dependencies
 [4]: #extensionless-imports
-[5]: https://github.com/unjs/jiti
-[6]: ./cli.md#knip-bun
-[7]: ./configuration.md#plugins
-[8]: https://github.com/unjs/jiti/issues/72
-[9]: https://github.com/unjs/jiti/issues/194
-[10]: https://github.com/unjs/jiti/issues/174
-[11]: https://github.com/webpro-nl/knip/issues/565
-[12]: ../guides/handling-issues.mdx#external-libraries
-[13]: ./configuration.md#paths
-[14]: https://github.com/unplugin/unplugin-icons/tree/main/types
+[5]: ./cli.md#knip-bun
+[6]: ./configuration.md#plugins
+[7]: ../guides/handling-issues.mdx#external-libraries
+[8]: https://github.com/antfu/unplugin-icons
+[9]: ./configuration.md#paths
+[10]: https://github.com/unplugin/unplugin-icons/tree/main/types
