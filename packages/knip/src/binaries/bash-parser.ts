@@ -3,10 +3,11 @@ import { pluginArgsMap } from '../plugins.js';
 import type { GetInputsFromScriptsOptions } from '../types/config.js';
 import { debugLogObject } from '../util/debug.js';
 import { type Input, toBinary, toDeferResolve } from '../util/input.js';
+import { extractBinary } from '../util/modules.js';
 import { resolve as fallbackResolve } from './fallback.js';
 import PackageManagerResolvers from './package-manager/index.js';
 import { resolve as resolverFromPlugins } from './plugins.js';
-import { parseNodeArgs, trimBinary } from './util.js';
+import { parseNodeArgs } from './util.js';
 
 // https://vorpaljs.github.io/bash-parser-playground/
 
@@ -35,7 +36,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
       switch (node.type) {
         case 'Command': {
           const text = node.name?.text;
-          const binary = text ? trimBinary(text) : text;
+          const binary = text ? extractBinary(text) : text;
 
           const commandExpansions =
             node.prefix

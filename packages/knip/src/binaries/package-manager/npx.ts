@@ -1,8 +1,9 @@
 import parseArgs from 'minimist';
 import type { BinaryResolver } from '../../types/config.js';
 import { toBinary, toDependency } from '../../util/input.js';
+import { stripVersionFromSpecifier } from '../../util/modules.js';
 import { isInternal } from '../../util/path.js';
-import { argsFrom, stripVersionFromSpecifier } from '../util.js';
+import { argsFrom } from '../util.js';
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
   const { fromArgs } = options;

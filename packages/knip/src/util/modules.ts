@@ -10,6 +10,7 @@ export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
 
 const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
 export const getPackageNameFromFilePath = (value: string) => {
+  if (value.includes('node_modules/.bin/')) return extractBinary(value);
   const match = toPosix(value).match(lastPackageNameMatch);
   if (match) return match[match.length - 1];
   return value;
@@ -19,6 +20,17 @@ export const getPackageNameFromSpecifier = (specifier: string) =>
   isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
 
 export const isStartsLikePackageName = (specifier: string) => /^(@[a-z0-9._]|[a-z0-9])/.test(specifier);
+
+export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
+
+const stripNodeModulesFromPath = (command: string) => command.replace(/^(\.\/)?node_modules\//, '');
+
+export const extractBinary = (command: string) =>
+  stripVersionFromSpecifier(
+    stripNodeModulesFromPath(command)
+      .replace(/^(\.bin\/)/, '')
+      .replace(/\$\(npm bin\)\/(\w+)/, '$1') // Removed in npm v9
+  );
 
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);
 
