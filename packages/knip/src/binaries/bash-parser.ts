@@ -5,9 +5,8 @@ import { debugLogObject } from '../util/debug.js';
 import { type Input, toBinary, toDeferResolve } from '../util/input.js';
 import { resolve as fallbackResolve } from './fallback.js';
 import PackageManagerResolvers from './package-manager/index.js';
-import { parseNodeArgs } from './package-manager/node.js';
 import { resolve as resolverFromPlugins } from './plugins.js';
-import { trimBinary } from './util.js';
+import { parseNodeArgs, trimBinary } from './util.js';
 
 // https://vorpaljs.github.io/bash-parser-playground/
 
