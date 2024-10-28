@@ -15,7 +15,7 @@ import { _resolveSync } from './resolve.js';
  * Try not to use module resolver. This is slow. Use known workspaces and dependencies.
  * Eventually we might be able to work mostly from lockfile alone.
  */
-export const getReferencedDependencyHandler =
+export const getReferencedInputsHandler =
   (
     collector: IssueCollector,
     deputy: DependencyDeputy,

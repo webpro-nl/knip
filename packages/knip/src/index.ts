@@ -15,7 +15,7 @@ import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { getOrCreateFileNode, updateImportMap } from './util/dependency-graph.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { _glob, negate } from './util/glob.js';
-import { getReferencedDependencyHandler } from './util/handle-referenced-dependency.js';
+import { getReferencedInputsHandler } from './util/handle-referenced-inputs.js';
 import { getHasStrictlyNsReferences, getType } from './util/has-strictly-ns-references.js';
 import { type Input, isConfigPattern, isEntry, isProductionEntry, toProductionEntry } from './util/input.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
@@ -104,7 +104,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const isGitIgnored = await getGitIgnoredHandler({ cwd, gitignore });
   const toSourceFilePath = getToSourcePathHandler(chief);
-  const getReferencedInternalFilePath = getReferencedDependencyHandler(collector, deputy, chief, isGitIgnored);
+  const getReferencedInternalFilePath = getReferencedInputsHandler(collector, deputy, chief, isGitIgnored);
   const shouldIgnore = getShouldIgnoreHandler(isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
 
