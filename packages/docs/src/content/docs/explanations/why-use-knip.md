@@ -71,8 +71,9 @@ strategy that addresses all of files, dependencies and exports is in their
 synergy:
 
 - Utilizing plugins to find their dependencies includes the capacity to find
-  additional entry files. This results in more resolved and used files. Better
-  coverage gives better insights into unused files and exports.
+  additional entry and configuration files. This results in more resolved and
+  used files. Better coverage gives better insights into unused files and
+  exports.
 - Analyzing more files reveals more unused exports and dependency usage,
   refining the list of both unused and unlisted dependencies.
 - This approach is amplified in a monorepo setting. In fact, files and internal

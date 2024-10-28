@@ -19,10 +19,11 @@ plugin will:
 
 - Handle [configuration files][4] like `astro.config.mjs`
 - Add [entry files][5] such as `src/pages/**/*.astro`
+- Define [command-line arguments][6]
 
 ## Configuration files
 
-Knip uses [entry files][6] as starting points to scan your source code and
+Knip uses [entry files][7] as starting points to scan your source code and
 resolve other internal files and external dependencies. The dependency graph can
 be statically resolved through the `require` and `import` statements in those
 source files. However, configuration files reference external dependencies in
@@ -31,7 +32,7 @@ find those dependencies.
 
 ### Example: ESLint
 
-In the first example we look at [the ESLint plugin][7]. The default `config`
+In the first example we look at [the ESLint plugin][8]. The default `config`
 file patterns include `.eslintrc.json`. Here's a minimal example:
 
 ```json title=".eslintrc.json"
@@ -56,7 +57,7 @@ as unlisted. And vice versa, if there are any ESLint plugins listed in
 
 ### Example: Vitest
 
-The second example uses [the Vitest plugin][7]. Here's a minimal example of a
+The second example uses [the Vitest plugin][8]. Here's a minimal example of a
 Vitest configuration file:
 
 ```ts title="vitest.config.ts"
@@ -85,8 +86,8 @@ plugins contain `package.json` in the list of `config` files.
 
 :::tip[Summary]
 
-`config` files are parsed by plugins to find external dependencies. Knip uses
-this to determine unused and unlisted dependencies.
+Plugins parse `config` files to find external dependencies. Knip uses this to
+determine unused and unlisted dependencies.
 
 :::
 
@@ -107,9 +108,8 @@ configured.
 
 :::tip[Plugins result in less configuration]
 
-Plugins even consult the configuration files of these tools, in case alternative
-entry files should be used. So you don't need to repeat this in your Knip
-configuration.
+Plugins uses entry file patterns as defined in the configuration files of these
+tools. So you don't need to repeat this in your Knip configuration.
 
 :::
 
@@ -211,7 +211,7 @@ added as entry files by the GitHub Actions plugin.
 Additionally, the file `e2e/playwright.web.config.ts` is detected and will be
 handed over as a Playwright configuration file.
 
-Read more about this in [Script Parser][8].
+Read more about this in [command-line arguments][6].
 
 ### webpack
 
@@ -283,14 +283,28 @@ automatically added as `entry` files for Knip to **statically** resolve the
 
 Additionally, `./setup-tests.ts` will be added as an `entry` file.
 
+## Command-Line Arguments
+
+Plugins may define the arguments where Knip should look for entry files,
+configuration files and dependencies. We've already seen some examples above:
+
+```sh
+node --loader tsx scripts/deploy.ts
+playwright test -c playwright.web.config.ts
+```
+
+Please see [script parser][9] for more details.
+
+## Summary
+
 :::tip[Summary]
 
 Plugins are configured with two distinct types of files:
 
 - `config` files are dynamically loaded and parsed by the plugin
-- `entry` files are statically analyzed by Knip to create a comprehensive
-  dependency graph
-- Both can result in additional entry files and dependencies
+- `entry` files are added to the module dependency graph
+- Both can recursively lead to additional entry files, config files and
+  dependencies
 
 :::
 
@@ -299,6 +313,7 @@ Plugins are configured with two distinct types of files:
 [3]: ../guides/writing-a-plugin.md
 [4]: #configuration-files
 [5]: #entry-files
-[6]: ./entry-files.md
-[7]: ../reference/plugins/eslint.md
-[8]: ../features/script-parser.md
+[6]: #command-line-arguments
+[7]: ./entry-files.md
+[8]: ../reference/plugins/eslint.md
+[9]: ../features/script-parser.md

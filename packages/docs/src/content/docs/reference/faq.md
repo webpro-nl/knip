@@ -23,7 +23,7 @@ docs.
 Plugins are an essential part of Knip. They prevent you from a lot of
 configuration out of the box, by adding entry files as accurately as possible
 and only for the tools actually installed. Yet the real magic is in their custom
-parsers for configuration files.
+parsers for configuration files and command-line argument definitions.
 
 For instance, Vitest has the `environment` configuration option. The Vitest
 plugin knows `"node"` is the default value for `environment` which does not
@@ -48,7 +48,8 @@ resolution and not only static but also dynamic analysis (i.e. actually load and
 execute modules), such as for parsers of plugins to receive the exported value
 of dynamic tooling configuration files. Additionally, [exports consumed by
 external libraries][1] require type information, as supported by the TypeScript
-backend.
+backend. Last but not least, shell script parsing is required to find the right
+entry files, configuration files and dependencies accurately.
 
 The rippling effect of plugins and recursively adding entry files and
 dependencies to build up the graph is also exactly what's meant by

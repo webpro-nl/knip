@@ -54,11 +54,14 @@ Knip does not add scripts without a standard extension. For instance, the
 `bin/tool` file might be a valid executable for Node.js, but wouldn't be added
 or parsed by Knip.
 
-### Scripts parsing
+### package.json
 
-When parsing the `scripts` entries of `package.json`, Knip detects dependencies
-of `-r`, `--require`, `--loader` or `--import` arguments. It also recognizes
-configuration files. Example:
+When parsing the `scripts` entries of `package.json`, Knip detects various types
+of inputs. Some examples:
+
+- The first positional argument is usually an entry file
+- Configuration files are often in the `-c` or `--config` argument
+- The `--require`, `--loader` or `--import` arguments are often dependencies
 
 ```json
 {
@@ -74,10 +77,12 @@ configuration files. Example:
 This will have `tsx` marked as a referenced dependency, and adds `run.ts` as an
 entry file.
 
-The following files are also detected as configuration files:
+The following files are detected as configuration files:
 
 - `tsup.lib.config.ts` - to be handled by the tsup plugin
 - `tsconfig.app.json` - to be handled by the TypeScript plugin
+
+The arguments are defined in plugins separately for fine-grained results.
 
 ## Plugins
 
@@ -92,6 +97,12 @@ from commands. A few examples:
 - Nx: task executors and `nx:run-commands` executors in `project.json` contains
   scripts
 - Release It: `hooks` contain commands
+
+Plugins can also return configuration files. Some examples:
+
+- The Angular detects `options.tsConfig` as a TypeScript config file
+- The GitHub Actions plugin parses `run` commands which may contain
+  configuration file paths
 
 ## Source Code
 
