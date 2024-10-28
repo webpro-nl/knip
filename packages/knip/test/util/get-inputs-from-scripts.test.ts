@@ -64,6 +64,7 @@ test('getInputsFromScripts (node -r)', () => {
   t('node -r @scope/package/register ./dir', [toBinary('node'), toDeferResolveEntry('./dir'), toDeferResolve('@scope/package/register')]);
   t('node -r @scope/package/register ./dir/index', [toBinary('node'), toDeferResolveEntry('./dir/index'), toDeferResolve('@scope/package/register')]);
   t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toDeferResolveEntry('node_modules/.bin/exec'), toDeferResolve('pkg/register')]);
+  t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toDeferResolveEntry('node_modules/.bin/jest'), toDeferResolve('ts-node/register')]);
 });
 
 test('getInputsFromScripts (ts-node)', () => {
