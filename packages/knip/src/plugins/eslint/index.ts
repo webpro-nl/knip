@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getDependencies } from './helpers.js';
-import type { ESLintConfig } from './types.js';
+import { getInputs } from './helpers.js';
+import type { ESLintConfigDeprecated } from './types.js';
 
 // New: https://eslint.org/docs/latest/use/configure/configuration-files
 // Old: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated
@@ -20,18 +20,21 @@ const isEnabled: IsPluginEnabled = ({ dependencies, manifest, config }) =>
 
 const packageJsonPath = 'eslintConfig';
 
-const entry = ['eslint.config.{js,cjs,mjs}'];
+const config = [
+  'eslint.config.{js,cjs,mjs,ts,mts,cts}',
+  '.eslintrc',
+  '.eslintrc.{js,json,cjs}',
+  '.eslintrc.{yml,yaml}',
+  'package.json',
+];
 
-const config = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
-
-const resolveConfig: ResolveConfig<ESLintConfig> = (localConfig, options) => getDependencies(localConfig, options);
+const resolveConfig: ResolveConfig<ESLintConfigDeprecated> = (localConfig, options) => getInputs(localConfig, options);
 
 export default {
   title,
   enablers,
   isEnabled,
   packageJsonPath,
-  entry,
   config,
   resolveConfig,
 } satisfies Plugin;

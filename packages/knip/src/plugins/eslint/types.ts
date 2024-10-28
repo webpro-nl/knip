@@ -21,9 +21,11 @@ type BaseConfig = {
   rules?: Rules;
 };
 
-export type OverrideConfig = BaseConfig & { files: string[]; overrides: OverrideConfig };
+export type ESLintConfig = BaseConfig[];
 
-export type ESLintConfig = BaseConfig & {
+export type OverrideConfigDeprecated = BaseConfig & { files: string[]; overrides: OverrideConfigDeprecated };
+
+export type ESLintConfigDeprecated = BaseConfig & {
   env?: Record<string, boolean>;
-  overrides?: OverrideConfig[];
+  overrides?: OverrideConfigDeprecated[];
 };

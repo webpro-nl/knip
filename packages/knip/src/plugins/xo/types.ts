@@ -1,6 +1,6 @@
-import type { ESLintConfig } from '../eslint/types.js';
+import type { ESLintConfigDeprecated } from '../eslint/types.js';
 
-export type XOConfig = ESLintConfig & {
+export type XOConfig = ESLintConfigDeprecated & {
   envs?: string[] | undefined;
   globals?: string[] | undefined;
   ignores?: string[] | undefined;
