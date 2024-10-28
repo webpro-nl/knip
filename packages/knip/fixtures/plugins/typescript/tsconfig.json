@@ -16,5 +16,10 @@
         "tag": "gql"
       },
     ]
-  }
+  },
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+  ]
 }
