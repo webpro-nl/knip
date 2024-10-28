@@ -15,7 +15,7 @@ test('Find dependencies with the Nx plugin', async () => {
 
   assert(issues.devDependencies['package.json']['@nx/cypress']);
   assert(issues.devDependencies['package.json']['@nrwl/workspace']);
-  assert(issues.unlisted['nx.json']['@nx/nuxt/plugin']);
+  assert(issues.unlisted['nx.json']['@nx/nuxt']);
   assert(issues.binaries['package.json']['nx']);
 
   assert.deepEqual(counters, {

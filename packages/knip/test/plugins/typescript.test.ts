@@ -19,7 +19,7 @@ test('Find dependencies with the TypeScript plugin', async () => {
   assert(issues.unlisted['tsconfig.jsx-import-source-preact.json']['preact']);
   assert(issues.unresolved['tsconfig.jsx-import-source-preact.json']['preact']);
   assert(issues.unresolved['tsconfig.jsx-import-source-react.json']['vitest/globals']);
-  assert(issues.unlisted['tsconfig.jsx-import-source-react.json']['hastscript/svg']);
+  assert(issues.unlisted['tsconfig.jsx-import-source-react.json']['hastscript']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -39,7 +39,7 @@ test('Find dependencies with the TypeScript plugin (production)', async () => {
   });
 
   assert(issues.unlisted['tsconfig.jsx-import-source-preact.json']['preact']);
-  assert(issues.unlisted['tsconfig.jsx-import-source-react.json']['hastscript/svg']);
+  assert(issues.unlisted['tsconfig.jsx-import-source-react.json']['hastscript']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

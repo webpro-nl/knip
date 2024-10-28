@@ -6,14 +6,26 @@ import type { Issue, ReporterOptions } from '../types/issues.js';
 import { relative, toRelative } from '../util/path.js';
 import { getTitle, identity, logTitle } from './util.js';
 
+const dim = picocolors.gray;
+const bright = picocolors.whiteBright;
+
 const TRUNCATE_WIDTH = 40;
 const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? `${text.slice(0, TRUNCATE_WIDTH - 3)}...` : text);
+
+const hl = (issue: Issue) => {
+  if (issue.specifier && issue.specifier !== issue.symbol && issue.specifier.includes(issue.symbol)) {
+    const parts = issue.specifier.split(issue.symbol);
+    const rest = parts.slice(1).join('');
+    return [dim(parts[0]), bright(issue.symbol), dim(rest)].join('');
+  }
+  return issue.symbol;
+};
 
 const logIssueRecord = (issues: Issue[]) => {
   const table = new EasyTable();
   for (const issue of issues) {
-    const print = issue.isFixed || issue.severity === 'warn' ? picocolors.gray : identity;
-    table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.map(s => s.symbol).join(', ')) : issue.symbol));
+    const print = issue.isFixed || issue.severity === 'warn' ? dim : identity;
+    table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.map(s => s.symbol).join(', ')) : hl(issue)));
     issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
     issue.symbolType && table.cell('symbolType', print(issue.symbolType));
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
@@ -41,8 +53,8 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
           title && logTitle(title, issuesForType.length);
           for (const issue of issuesForType) {
             const relPath = toRelative(issue.filePath);
-            if (issue.isFixed) console.log(picocolors.gray(`${relPath} (removed)`));
-            else if (issue.severity === 'warn') console.log(picocolors.gray(relPath));
+            if (issue.isFixed) console.log(dim(`${relPath} (removed)`));
+            else if (issue.severity === 'warn') console.log(dim(relPath));
             else console.log(relPath);
           }
           totalIssues = totalIssues + issuesForType.length;
@@ -66,7 +78,7 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
         const message = `Unused item in ${type}`;
         const workspace =
           workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : '';
-        console.warn(picocolors.gray(`${message}${workspace}:`), identifier);
+        console.warn(dim(`${message}${workspace}:`), identifier);
       }
     }
     if (tagHints.size > 0) {
@@ -74,7 +86,7 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
       for (const hint of tagHints) {
         const { filePath, identifier, tagName } = hint;
         const message = `Unused tag in ${toRelative(filePath)}:`;
-        console.warn(picocolors.gray(message), `${identifier} → ${tagName}`);
+        console.warn(dim(message), `${identifier} → ${tagName}`);
       }
     }
   }

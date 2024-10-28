@@ -37,6 +37,7 @@ export const getReferencedInputsHandler =
         filePath: containingFilePath,
         workspace: workspace.name,
         symbol: binaryName,
+        specifier,
       });
       return;
     }
@@ -59,7 +60,8 @@ export const getReferencedInputsHandler =
                 type: 'unlisted',
                 filePath: containingFilePath,
                 workspace: specifierWorkspace.name,
-                symbol: specifier,
+                symbol: packageName ?? specifier,
+                specifier,
               });
             }
             return;
@@ -92,6 +94,7 @@ export const getReferencedInputsHandler =
         filePath: containingFilePath,
         workspace: workspace.name,
         symbol: packageName ?? specifier,
+        specifier,
       });
     } else if (!isGitIgnored(filePath)) {
       // Let's start out conservatively

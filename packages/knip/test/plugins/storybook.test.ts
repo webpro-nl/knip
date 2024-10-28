@@ -17,7 +17,7 @@ test('Find dependencies with Storybook plugin', async () => {
   assert(issues.unlisted['main.js']['@storybook/builder-webpack5']);
   assert(issues.unlisted['main.js']['@storybook/manager-webpack5']);
   assert(issues.unlisted['main.js']['@storybook/react-webpack5']);
-  assert(issues.unlisted['preview.js']['cypress-storybook/react']);
+  assert(issues.unlisted['preview.js']['cypress-storybook']);
   assert(issues.unresolved['main.js']['@storybook/addon-knobs/preset']);
   assert(issues.unresolved['main.js']['storybook-addon-export-to-codesandbox']);
   assert(issues.binaries['package.json']['storybook']);

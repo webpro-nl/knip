@@ -582,7 +582,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           for (const specifier of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(specifier);
             const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(ws, packageName);
-            if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, workspace: ws.name, symbol: specifier });
+            if (!isHandled)
+              collector.addIssue({
+                type: 'unlisted',
+                filePath,
+                workspace: ws.name,
+                symbol: packageName ?? specifier,
+                specifier,
+              });
           }
         }
 
