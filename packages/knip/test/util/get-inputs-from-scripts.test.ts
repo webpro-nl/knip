@@ -2,9 +2,10 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { _getInputsFromScripts } from '../../src/binaries/index.js';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
-import { resolve } from '../../src/util/path.js';
+import { join, resolve } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/binaries');
+const containingFilePath = join(cwd, 'package.json');
 const pkgScripts = { cwd, manifestScriptNames: new Set(['program']) };
 const knownOnly = { cwd, knownBinsOnly: true };
 
@@ -18,13 +19,13 @@ const t: T = (script, dependencies = [], options = { cwd }) =>
     _getInputsFromScripts(script, {
       rootCwd: cwd,
       manifestScriptNames: new Set(),
-      dependencies: new Set(),
+      containingFilePath,
       ...options,
     }),
     dependencies
   );
 
-test('getReferencesFromScripts (unknown programs)', () => {
+test('getInputsFromScripts (unknown programs)', () => {
   t('program', [toBinary('program')]);
   t(['program', 'program'], [toBinary('program'), toBinary('program')]);
   t('program -short --long args', [toBinary('program')]);
@@ -39,11 +40,11 @@ test('getReferencesFromScripts (unknown programs)', () => {
   t('./wait-for-postgres.sh -h localhost -p 5433 -U dev -r 10', [toEntry('./wait-for-postgres.sh')]);
 });
 
-test('getReferencesFromScripts (unknown scripts)', () => {
+test('getInputsFromScripts (unknown scripts)', () => {
   t('./script.sh -r 10', [toEntry('./script.sh')]);
 });
 
-test('getReferencesFromScripts (node)', () => {
+test('getInputsFromScripts (node)', () => {
   t('node script.js', [toBinary('node'), toDeferResolveEntry('script.js')]);
   t('node dist/index.js', [toBinary('node'), toDeferResolveEntry('dist/index.js')]);
   t('./script.js', [toEntry('./script.js')]);
@@ -52,7 +53,7 @@ test('getReferencesFromScripts (node)', () => {
   t('node ./script.js build', [toBinary('node'), js]);
 });
 
-test('getReferencesFromScripts (node -r)', () => {
+test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toDeferResolve('script.js')]);
   t('node -r package/script', [toBinary('node'), toDeferResolve('package/script')]);
   t('node -r ./require.js script.js', [toBinary('node'), toDeferResolveEntry('script.js'), req]);
@@ -65,13 +66,13 @@ test('getReferencesFromScripts (node -r)', () => {
   t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toDeferResolveEntry('node_modules/.bin/exec'), toDeferResolve('pkg/register')]);
 });
 
-test('getReferencesFromScripts (ts-node)', () => {
+test('getInputsFromScripts (ts-node)', () => {
   t('ts-node --require pkg/register ./main.ts', [toBinary('ts-node'), ts, toDeferResolve('pkg/register')]);
   t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toDeferResolve('./main.ts')]);
 });
 
-test('getReferencesFromScripts (tsx)', () => {
+test('getInputsFromScripts (tsx)', () => {
   t('tsx ./main.ts', [toBinary('tsx'), ts]);
   t('tsx watch ./main.ts', [toBinary('tsx'), ts]);
   t('node --loader tsx ./main.ts', [toBinary('node'), ts, toDeferResolve('tsx')]);
@@ -79,19 +80,19 @@ test('getReferencesFromScripts (tsx)', () => {
   t('tsx ./main.ts build', [toBinary('tsx'), ts]);
 });
 
-test('getReferencesFromScripts (--require)', () => {
+test('getInputsFromScripts (--require)', () => {
   t('program --loader tsx --test "test/*.spec.ts"', [toBinary('program')]);
   t('program --loader ldr --loader tsx --test "test/*.spec.ts"', [toBinary('program')]);
 });
 
-test('getReferencesFromScripts (.bin)', () => {
+test('getInputsFromScripts (.bin)', () => {
   t('./node_modules/.bin/tsc --noEmit', [toBinary('tsc')]);
   t('node_modules/.bin/tsc --noEmit', [toBinary('tsc')]);
   t('$(npm bin)/tsc --noEmit', [toBinary('tsc')]);
   t('../../../scripts/node_modules/.bin/tsc --noEmit', []);
 });
 
-test('getReferencesFromScripts (dotenv)', () => {
+test('getInputsFromScripts (dotenv)', () => {
   t('dotenv program', [toBinary('dotenv'), toBinary('program')]);
   t('dotenv -- program', [toBinary('dotenv'), toBinary('program')]);
   t('dotenv -e .env3 -v VARIABLE=somevalue -- program', [toBinary('dotenv'), toBinary('program')]);
@@ -99,7 +100,7 @@ test('getReferencesFromScripts (dotenv)', () => {
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [toBinary('dotenv'), toBinary('mvn')]);
 });
 
-test('getReferencesFromScripts (cross-env/env vars)', () => {
+test('getInputsFromScripts (cross-env/env vars)', () => {
   t('cross-env program', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_ENV=production program', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_ENV=production program subcommand', [toBinary('cross-env'), toBinary('program')]);
@@ -109,25 +110,25 @@ test('getReferencesFromScripts (cross-env/env vars)', () => {
   t("NODE_OPTIONS='--require pkg-a --require pkg-b' program", [toBinary('program'), toDeferResolve('pkg-a'), toDeferResolve('pkg-b')]);
 });
 
-test('getReferencesFromScripts (cross-env/node)', () => {
+test('getInputsFromScripts (cross-env/node)', () => {
   t('cross-env NODE_ENV=production node -r pkg/config ./script.js', [toBinary('cross-env'), toBinary('node'), js, toDeferResolve('pkg/config')]);
   t('cross-env NODE_ENV=production node -r node_modules/pkg/cfg ./script.js', [toBinary('cross-env'), toBinary('node'), js, toDeferResolve('node_modules/pkg/cfg')]);
   t('cross-env NODE_ENV=production node -r esm ./script.js', [toBinary('cross-env'), toBinary('node'), js, toDeferResolve('esm')]);
 });
 
-test('getReferencesFromScripts (nx)', () => {
+test('getInputsFromScripts (nx)', () => {
   t('nx run myapp:build:production', [toBinary('nx')]);
   t('nx run-many -t build', [toBinary('nx')]);
   t('nx exec -- esbuild ./main.ts --outdir=build', [toBinary('nx'), toBinary('esbuild'), toDeferResolve('./main.ts')]);
 });
 
-test('getReferencesFromScripts (npm)', () => {
+test('getInputsFromScripts (npm)', () => {
   t('npm run script', [toBinary('npm')]);
   t('npm run publish:latest -- --npm-tag=debug --no-push', [toBinary('npm')]);
-  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('npm'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
+  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('npm'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts', containingFilePath)]);
 });
 
-test('getReferencesFromScripts (npx)', () => {
+test('getInputsFromScripts (npx)', () => {
   t('npx pkg', [toBinary('npx'), toBinary('pkg')]);
   t('npx prisma migrate reset --force', [toBinary('npx'), toBinary('prisma')]);
   t('npx @scope/pkg', [toBinary('npx'), toDependency('@scope/pkg')]);
@@ -153,7 +154,7 @@ test('getReferencesFromScripts (npx)', () => {
   t('npx tsx ./main.ts -- build', [toBinary('npx'), toBinary('tsx'), ts]);
 });
 
-test('getReferencesFromScripts (pnpm)', () => {
+test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
   t('pnpm run program', []);
   t('pnpm program', [toBinary('program')]);
@@ -167,7 +168,7 @@ test('getReferencesFromScripts (pnpm)', () => {
   t('pnpm --silent run program script.js', [], pkgScripts);
 });
 
-test('getReferencesFromScripts (yarn)', () => {
+test('getInputsFromScripts (yarn)', () => {
   t('yarn exec program', [toBinary('program')]);
   t('yarn run program', [toBinary('program')]);
   t('yarn program', [toBinary('program')]);
@@ -178,24 +179,24 @@ test('getReferencesFromScripts (yarn)', () => {
   t('yarn node script.js', [toBinary('node'), toDeferResolveEntry('script.js')]);
 });
 
-test('getReferencesFromScripts (rollup)', () => {
+test('getInputsFromScripts (rollup)', () => {
   t('rollup --watch --watch.onEnd="node ./script.js"', [toBinary('rollup'), toBinary('node'), js]);
   t('rollup -p ./require.js', [toBinary('rollup'), req]);
   t('rollup --plugin @rollup/plugin-node-resolve', [toBinary('rollup'), toDeferResolve('@rollup/plugin-node-resolve')]);
   t('rollup --configPlugin @rollup/plugin-typescript', [toBinary('rollup'), toDeferResolve('@rollup/plugin-typescript')]);
 });
 
-test('getReferencesFromScripts (execa)', () => {
+test('getInputsFromScripts (execa)', () => {
   t('execa --quiet ./script.js', [toBinary('execa'), toDeferResolve('./script.js')]);
   t('npx --yes execa --quiet ./script.js', [toBinary('npx'), toDeferResolve('./script.js')]);
 });
 
-test('getReferencesFromScripts (zx)', () => {
+test('getInputsFromScripts (zx)', () => {
   t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('npx'), toDeferResolve('script.js')]);
 });
 
-test('getReferencesFromScripts (c8)', () => {
+test('getInputsFromScripts (c8)', () => {
   t('c8 node script.js', [toBinary('c8'), toBinary('node'), toDeferResolveEntry('script.js')]);
   t('c8 npm test', [toBinary('c8'), toBinary('npm')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8'), toBinary('npm')]);
@@ -203,39 +204,39 @@ test('getReferencesFromScripts (c8)', () => {
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/rep', [toBinary('c8'), toBinary('node'), toDeferResolve('@org/rep')]);
 });
 
-test('getReferencesFromScripts (nodemon)', () => {
+test('getInputsFromScripts (nodemon)', () => {
   t('nodemon --require dotenv/config ./script.js --watch ./script.js', [toBinary('nodemon'), js, toDeferResolve('dotenv/config')]);
   t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", [toBinary('nodemon'), ts, toBinary('ts-node'), toBinary('pino-pretty')]);
   t('nodemon script.js', [toBinary('nodemon'), toDeferResolveEntry('script.js')]);
 });
 
-test('getReferencesFromScripts (bash expressions)', () => {
+test('getInputsFromScripts (bash expressions)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', [toBinary('make')]);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [toBinary('node'), toBinary('make')]);
   t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('npx'), toBinary('pkg'), toBinary('exit')]);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', [toBinary('exec'), toBinary('cz'), toBinary('true')]);
 });
 
-test('getReferencesFromScripts (bash expansion)', () => {
+test('getInputsFromScripts (bash expansion)', () => {
   t('var=$(node ./script.js)', [toBinary('node'), js]);
   t('var=`node ./script.js`;var=`node ./require.js`', [toBinary('node'), js, toBinary('node'), js, toBinary('node'), toDeferResolveEntry('./require.js')]);
 });
 
-test('getReferencesFromScripts (multiline)', () => {
+test('getInputsFromScripts (multiline)', () => {
   t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('npx'), toBinary('lint-staged')]);
   t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [toBinary('npx'), toDependency('rc'), toBinary('npx'), toDependency('@scope/rc')]);
 });
 
-test('getReferencesFromScripts (bail outs)', () => {
+test('getInputsFromScripts (bail outs)', () => {
   t('curl', [], knownOnly);
   t('program -- mvn exec:java -Dexec.args="-g -f"', [], knownOnly);
 });
 
-test('getReferencesFromScripts (ignore parse error)', () => {
+test('getInputsFromScripts (ignore parse error)', () => {
   t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', []); // unclosed '
 });
 
-test('getReferencesFromScripts (config)', () => {
-  t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
-  t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
+test('getInputsFromScripts (config)', () => {
+  t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json', containingFilePath)]);
+  t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json', containingFilePath)]);
 });
