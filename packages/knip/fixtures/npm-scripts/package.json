@@ -14,7 +14,8 @@
     "go": "runnable",
     "go-live": "deploy -r repo_name",
     "tsup": "tsup -c tsup.cool.json",
-    "tsuppy": "tsup --config tsup.cool.json"
+    "tsuppy": "tsup --config tsup.cool.json",
+    "serve": "http-server"
   },
   "dependencies": {
     "express": "*",

@@ -1,6 +1,6 @@
 import type { GetInputsFromScripts } from '../types/config.js';
 import { timerify } from '../util/Performance.js';
-import { type Input, fromBinary, isBinary } from '../util/input.js';
+import { type Input, fromBinary, isBinary, isDependency } from '../util/input.js';
 import { getDependenciesFromScript } from './bash-parser.js';
 
 const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {
@@ -9,7 +9,8 @@ const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {
   const inputs = new Set<Input>();
 
   for (const input of results) {
-    if (!input.specifier || input.specifier.startsWith('http')) continue;
+    if (!input.specifier) continue;
+    if (isDependency(input) && input.specifier.startsWith('http')) continue;
     if (isBinary(input) && !/^\b/.test(fromBinary(input))) continue;
     inputs.add(input);
   }
