@@ -143,8 +143,8 @@ Also see [includeEntryExports][7].
 
 ### `--ignore-exports-used-in-file`
 
-When a repository is self-contained or private, you may want to include entry
-files when reporting unused exports:
+In files with multiple exports, you may not want to include those that are
+used only internally but never imported when reporting unused exports:
 
 ```sh
 knip --ignore-exports-used-in-file
