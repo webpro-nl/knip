@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { RemarkConfig } from './types.js';
 
 // https://github.com/remarkjs/remark/blob/main/packages/remark-cli/readme.md
@@ -23,7 +24,7 @@ const resolveConfig: ResolveConfig<RemarkConfig> = config => {
         return [];
       })
       .map(plugin => (plugin.startsWith('remark-') ? plugin : `remark-${plugin}`)) ?? [];
-  return plugins;
+  return plugins.map(toDeferResolve);
 };
 
 export default {

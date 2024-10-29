@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/vitest6",
+  "scripts": {
+    "test": "vitest -c config/fiep.ts"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

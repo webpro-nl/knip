@@ -13,7 +13,7 @@ test('Find unused files, dependencies and exports in workspaces (w/ paths)', asy
   });
 
   assert.equal(Object.keys(issues.unlisted).length, 1);
-  assert(issues.unlisted['packages/lib-e/src/index.ts']['not/found']);
+  assert(issues.unlisted['packages/lib-e/src/index.ts']['not']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

@@ -1,6 +1,6 @@
-import type { EnablerPatterns } from '#p/types/config.js';
-import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
-import { hasDependency, toLilconfig } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import { toLilconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://github.com/ai/size-limit
 // Uses lilconfig but with custom searchPlaces
@@ -8,7 +8,7 @@ import { hasDependency, toLilconfig } from '#p/util/plugin.js';
 
 const title = 'size-limit';
 
-const enablers: EnablerPatterns = ['size-limit'];
+const enablers = ['size-limit'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

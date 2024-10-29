@@ -1,5 +1,13 @@
+html {
+  scroll-behavior: smooth;
+}
+
 .content-panel + .content-panel {
   border: unset;
+}
+
+.sl-markdown-content h2 {
+  margin-bottom: 2rem;
 }
 
 .sl-container .sl-markdown-content ul li p {
@@ -33,7 +41,6 @@
 .sl-markdown-content h3 code {
   font-size: 0.9em;
   color: var(--sl-color-white);
-  /* margin-bottom: 0; */
 }
 
 .sl-markdown-content p code,
@@ -49,6 +56,10 @@
 
 .sl-markdown-content blockquote {
   border-inline-start-color: var(--sl-color-gray-1);
+}
+
+.sl-markdown-content section.columns.mt {
+  margin-top: 3rem;
 }
 
 section.columns ul {
@@ -84,10 +95,10 @@ section.plugins li {
   }
 }
 
-.sponsor {
+.sl-markdown-content .sponsor {
   font-size: 2rem;
   text-align: center;
-  margin-bottom: 5rem;
+  margin: 5rem 0;
 }
 
 .sl-badge.caution,
@@ -105,4 +116,29 @@ section.plugins li {
   width: 200px;
   border: 2px solid var(--sl-color-white);
   border-radius: 40px;
+}
+
+.playground iframe {
+  width: 100%;
+  height: 600px;
+  border: 1px solid var(--sl-color-orange);
+}
+
+.sl-markdown-content p + lite-youtube {
+  border: 1px solid var(--sl-color-orange);
+  margin-top: 2rem;
+}
+
+.sl-markdown-content .starlight-aside {
+  margin-top: 2rem;
+}
+
+.sl-markdown-content p > img {
+  margin: 2rem 0;
+}
+
+:root[data-theme='light'] {
+  .logo-border {
+    border-color: var(--sl-color-black);
+  }
 }

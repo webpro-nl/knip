@@ -1,17 +1,20 @@
-import { compact } from '#p/util/array.js';
-import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '#p/util/modules.js';
-import { basename, dirname, isAbsolute, isInternal, toAbsolute } from '#p/util/path.js';
-import { load, resolve } from '#p/util/plugin.js';
-import type { PluginOptions } from '../../types/plugins.js';
+import type { PluginOptions } from '../../types/config.js';
+import { compact } from '../../util/array.js';
+import { type ConfigInput, type Input, toConfig, toDeferResolve } from '../../util/input.js';
+import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.js';
+import { isAbsolute, isInternal } from '../../util/path.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { ESLintConfig, OverrideConfig } from './types.js';
 
-const getDependencies = (config: ESLintConfig | OverrideConfig) => {
-  const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendSpecifier) : [];
+export const getDependencies = (
+  config: ESLintConfig | OverrideConfig,
+  options: PluginOptions
+): (Input | ConfigInput)[] => {
+  const extendsSpecifiers = config.extends ? compact([config.extends].flat().map(resolveExtendSpecifier)) : [];
   // https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
   if (extendsSpecifiers.some(specifier => specifier?.startsWith('eslint-plugin-prettier')))
     extendsSpecifiers.push('eslint-config-prettier');
-
+  const extendConfigs = extendsSpecifiers.map(specifier => toConfig('eslint', specifier, options.configFilePath));
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
   const parser = config.parser ?? config.parserOptions?.parser;
   const babelDependencies = config.parserOptions?.babelOptions
@@ -20,42 +23,9 @@ const getDependencies = (config: ESLintConfig | OverrideConfig) => {
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
   // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
   const rules = getDependenciesFromRules({});
-  const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependencies) : [];
-
-  return compact([...extendsSpecifiers, ...plugins, parser, ...babelDependencies, ...settings, ...rules, ...overrides]);
-};
-
-type GetDependenciesDeep = (
-  localConfig: ESLintConfig,
-  options: PluginOptions,
-  dependencies?: Set<string>
-) => Promise<Set<string>>;
-
-export const getDependenciesDeep: GetDependenciesDeep = async (localConfig, options, dependencies = new Set()) => {
-  const { configFileDir } = options;
-  const addAll = (deps: string[] | Set<string>) => {
-    for (const dependency of deps) dependencies.add(dependency);
-  };
-
-  if (localConfig) {
-    if (localConfig.extends) {
-      for (const extend of [localConfig.extends].flat()) {
-        if (isInternal(extend)) {
-          const filePath = resolve(toAbsolute(extend, configFileDir), configFileDir);
-          if (filePath) {
-            dependencies.add(filePath);
-            const localConfig: ESLintConfig = await load(filePath);
-            const opts = { ...options, configFileDir: dirname(filePath), configFileName: basename(filePath) };
-            addAll(await getDependenciesDeep(localConfig, opts, dependencies));
-          }
-        }
-      }
-    }
-
-    addAll(getDependencies(localConfig));
-  }
-
-  return dependencies;
+  const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getDependencies(d, options)) : [];
+  const x = compact([...extendsSpecifiers, ...plugins, parser, ...settings, ...rules]).map(toDeferResolve);
+  return [...extendConfigs, ...x, ...babelDependencies, ...overrides];
 };
 
 const isQualifiedSpecifier = (specifier: string) =>

@@ -1,0 +1,9 @@
+sudo: false
+
+language: node_js
+
+node_js:
+  - 12
+
+before_deploy:
+  - ./node_modules/.bin/patch-version

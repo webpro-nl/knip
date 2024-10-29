@@ -1,0 +1,16 @@
+{
+  "name": "@knip/playground-basic",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "knip": "knip"
+  },
+  "dependencies": {
+    "picocolors": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.8",
+    "knip": "^5.30.1",
+    "typescript": "^5.5.4"
+  }
+}

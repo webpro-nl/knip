@@ -13,9 +13,9 @@ test('Find dependencies with the Cypress plugin', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['cypress.config.ts']['@nrwl/cypress/plugins/cypress-preset']);
+  assert(issues.unlisted['cypress.config.ts']['@nrwl/cypress']);
   assert(issues.unlisted['cypress/support/commands.ts']['@faker-js/faker']);
-  assert(issues.unlisted['cypress/support/e2e.ts']['@testing-library/cypress/add-commands']);
+  assert(issues.unlisted['cypress/support/e2e.ts']['@testing-library/cypress']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

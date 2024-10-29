@@ -1,5 +1,6 @@
 import ts from 'typescript';
-import { findAncestor, findDescendants, isRequireCall, isTopLevel } from '../../ast-helpers.js';
+import { IMPORT_STAR } from '../../../constants.js';
+import { findAncestor, findDescendants, isModuleExportsAccess, isRequireCall, isTopLevel } from '../../ast-helpers.js';
 import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -56,6 +57,16 @@ export default visit(
             // Pattern: require('specifier')
             return { identifier: 'default', specifier, pos: node.arguments[0].pos, resolve };
           }
+
+          if (
+            ts.isBinaryExpression(node.parent) &&
+            ts.isPropertyAccessExpression(node.parent.left) &&
+            isModuleExportsAccess(node.parent.left)
+          ) {
+            // Pattern: module.exports = require('specifier')
+            return { identifier: IMPORT_STAR, specifier, isReExport: true, pos: node.arguments[0].pos };
+          }
+
           // Pattern: require('side-effects')
           return { identifier: 'default', specifier, pos: node.arguments[0].pos, resolve };
         }

@@ -1,7 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { compact } from '#p/util/array.js';
-import { getPackageNameFromModuleSpecifier } from '#p/util/modules.js';
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { ParsedArgs } from 'minimist';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { compact } from '../../util/array.js';
+import { toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
 
 const title = 'Nx';
@@ -25,18 +26,16 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
     localConfig.plugins && Array.isArray(localConfig.plugins)
       ? localConfig.plugins
           .map(value => (typeof value === 'string' ? value : value.plugin))
-          .map(value => getPackageNameFromModuleSpecifier(value))
           .filter(value => value !== undefined)
       : [];
 
   const generators = localConfig.generators
     ? Object.keys(localConfig.generators)
-        .map(value => getPackageNameFromModuleSpecifier(value))
         .filter(value => value !== undefined)
         .map(value => value.split(':')[0])
     : [];
 
-  return compact([...targetsDefault, ...plugins, ...generators]);
+  return compact([...targetsDefault, ...plugins, ...generators]).map(toDependency);
 };
 
 const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = async (localConfig, options) => {
@@ -59,9 +58,13 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .filter(target => target.executor === 'nx:run-commands')
     .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []));
 
-  const dependencies = getDependenciesFromScripts(scripts, options);
+  const inputs = options.getInputsFromScripts(scripts);
 
-  return compact([...executors, ...dependencies]);
+  return compact([...executors, ...inputs]).map(id => (typeof id === 'string' ? toDependency(id) : id));
+};
+
+const args = {
+  fromArgs: (parsed: ParsedArgs) => (parsed._[0] === 'exec' ? parsed._.slice(1) : []),
 };
 
 export default {
@@ -70,4 +73,5 @@ export default {
   isEnabled,
   config,
   resolveConfig,
+  args,
 } satisfies Plugin;

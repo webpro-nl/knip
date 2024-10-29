@@ -27,7 +27,6 @@ type ReporterDescription = Readonly<
     ]
   | ['null']
   | [string]
-  // biome-ignore lint/suspicious/noExplicitAny: deal with it
   | [string, any]
 >;
 

@@ -3,17 +3,16 @@ import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { partitionCompilers } from './compilers/index.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
 import { defaultRules } from './issues/initializers.js';
-import * as plugins from './plugins/index.js';
+import { type PluginName, pluginNames } from './types/PluginNames.js';
 import type {
   Configuration,
   IgnorePatterns,
-  PluginName,
   PluginsConfiguration,
   RawConfiguration,
   RawPluginConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { PackageJson } from './types/package-json.js';
+import type { Package, PackageJson } from './types/package-json.js';
 import { arrayify, compact } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
@@ -25,7 +24,7 @@ import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
 import { join, relative, resolve } from './util/path.js';
-import { normalizePluginConfig, toCamelCase } from './util/plugin.js';
+import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
@@ -39,6 +38,8 @@ const getDefaultWorkspaceConfig = (extensions?: string[]) => {
     project: [`**/*.{${exts}}!`],
   };
 };
+
+const isPluginName = (name: string): name is PluginName => pluginNames.includes(name as PluginName);
 
 const defaultConfig: Configuration = {
   rules: defaultRules,
@@ -56,8 +57,6 @@ const defaultConfig: Configuration = {
   rootPluginConfigs: {},
 };
 
-const PLUGIN_NAMES = Object.keys(plugins);
-
 type ConfigurationManagerOptions = {
   cwd: string;
   isProduction: boolean;
@@ -65,8 +64,6 @@ type ConfigurationManagerOptions = {
   isIncludeEntryExports: boolean;
   workspace: string | undefined;
 };
-
-export type Package = { dir: string; name: string; pkgName: string | undefined; manifest: PackageJson };
 
 export type Workspace = {
   name: string;
@@ -101,7 +98,8 @@ export class ConfigurationChief {
 
   ignoredWorkspacePatterns: string[] = [];
   workspacePackages = new Map<string, Package>();
-  workspacePackagesByName = new Map<string, Package>();
+  workspacesByPkgName = new Map<string, Workspace>();
+  workspacesByName = new Map<string, Workspace>();
   additionalWorkspaceNames = new Set<string>();
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
@@ -111,7 +109,6 @@ export class ConfigurationChief {
 
   resolvedConfigFilePath?: string;
 
-  // biome-ignore lint/suspicious/noExplicitAny: raw incoming user data
   rawConfig?: any;
 
   constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace }: ConfigurationManagerOptions) {
@@ -195,9 +192,8 @@ export class ConfigurationChief {
 
     const rootPluginConfigs: Partial<PluginsConfiguration> = {};
 
-    for (const [name, pluginConfig] of Object.entries(rawConfig)) {
-      const pluginName = toCamelCase(name) as PluginName;
-      if (PLUGIN_NAMES.includes(pluginName)) {
+    for (const [pluginName, pluginConfig] of Object.entries(rawConfig)) {
+      if (isPluginName(pluginName)) {
         rootPluginConfigs[pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
       }
     }
@@ -224,41 +220,24 @@ export class ConfigurationChief {
 
     this.additionalWorkspaceNames = await this.getAdditionalWorkspaceNames();
     const workspaceNames = compact([...this.getListedWorkspaces(), ...this.additionalWorkspaceNames]);
-    const [byName, byPkgName] = await mapWorkspaces(this.cwd, workspaceNames);
+    const [packages, wsPkgNames] = await mapWorkspaces(this.cwd, [...workspaceNames, '.']);
 
-    this.workspacePackages = byName;
-    this.workspacePackagesByName = byPkgName;
-    this.addRootPackage();
+    this.workspacePackages = packages;
 
-    this.availableWorkspaceNames = this.getAvailableWorkspaceNames(byName.keys());
-    this.availableWorkspacePkgNames = this.getAvailableWorkspacePkgNames(byPkgName.keys());
+    this.availableWorkspaceNames = this.getAvailableWorkspaceNames(packages.keys());
+    this.availableWorkspacePkgNames = wsPkgNames;
     this.availableWorkspaceDirs = this.availableWorkspaceNames
       .sort(byPathDepth)
       .reverse()
       .map(dir => join(this.cwd, dir));
 
-    this.workspaceGraph = createWorkspaceGraph(
-      this.cwd,
-      this.availableWorkspaceNames,
-      this.availableWorkspacePkgNames,
-      byPkgName,
-      byName
-    );
+    this.workspaceGraph = createWorkspaceGraph(this.cwd, this.availableWorkspaceNames, wsPkgNames, packages);
 
-    this.includedWorkspaces = this.determineIncludedWorkspaces();
-  }
+    this.includedWorkspaces = this.setIncludedWorkspaces();
 
-  private addRootPackage() {
-    if (this.manifest) {
-      const pkgName = this.manifest.name ?? ROOT_WORKSPACE_NAME;
-      const rootPackage = {
-        pkgName,
-        name: ROOT_WORKSPACE_NAME,
-        dir: this.cwd,
-        manifest: this.manifest,
-      };
-      this.workspacePackages.set('.', rootPackage);
-      this.workspacePackagesByName.set(pkgName, rootPackage);
+    for (const workspace of this.includedWorkspaces) {
+      this.workspacesByPkgName.set(workspace.pkgName, workspace);
+      this.workspacesByName.set(workspace.name, workspace);
     }
   }
 
@@ -266,7 +245,7 @@ export class ConfigurationChief {
     const workspaces = this.manifest?.workspaces
       ? Array.isArray(this.manifest.workspaces)
         ? this.manifest.workspaces
-        : this.manifest.workspaces.packages ?? []
+        : (this.manifest.workspaces.packages ?? [])
       : [];
     return workspaces.map(pattern => pattern.replace(/(?<=!?)\.\//, ''));
   }
@@ -317,7 +296,7 @@ export class ConfigurationChief {
     return names;
   }
 
-  private determineIncludedWorkspaces() {
+  private setIncludedWorkspaces() {
     if (this.workspace) {
       const dir = resolve(this.workspace);
       if (!isDirectory(dir)) throw new ConfigurationError('Workspace is not a directory');
@@ -391,7 +370,7 @@ export class ConfigurationChief {
       .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(`${name}/`));
   }
 
-  private getIgnoredWorkspacesFor(name: string) {
+  public getIgnoredWorkspacesFor(name: string) {
     return this.ignoredWorkspacePatterns
       .filter(workspaceName => workspaceName !== name)
       .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name));
@@ -451,14 +430,12 @@ export class ConfigurationChief {
 
     const plugins: Partial<PluginsConfiguration> = {};
 
-    for (const [name, pluginConfig] of Object.entries(this.config.rootPluginConfigs)) {
-      const pluginName = toCamelCase(name) as PluginName;
-      if (typeof pluginConfig !== 'undefined') plugins[pluginName] = pluginConfig;
+    for (const [pluginName, pluginConfig] of Object.entries(this.config.rootPluginConfigs)) {
+      if (typeof pluginConfig !== 'undefined') plugins[pluginName as PluginName] = pluginConfig;
     }
 
-    for (const [name, pluginConfig] of Object.entries(workspaceConfig)) {
-      const pluginName = toCamelCase(name) as PluginName;
-      if (PLUGIN_NAMES.includes(pluginName)) {
+    for (const [pluginName, pluginConfig] of Object.entries(workspaceConfig)) {
+      if (isPluginName(pluginName)) {
         plugins[pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
       }
     }
@@ -479,10 +456,6 @@ export class ConfigurationChief {
   public findWorkspaceByFilePath(filePath: string) {
     const workspaceDir = this.availableWorkspaceDirs.find(workspaceDir => filePath.startsWith(`${workspaceDir}/`));
     return this.includedWorkspaces.find(workspace => workspace.dir === workspaceDir);
-  }
-
-  public findWorkspaceByName(name: string) {
-    return this.includedWorkspaces.find(workspace => workspace.name === name);
   }
 
   public getUnusedIgnoredWorkspaces() {

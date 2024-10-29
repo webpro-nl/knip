@@ -27,7 +27,7 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
   assert(issues.unlisted['apps/frontend/index.ts']['vanilla-js']);
   assert(issues.unlisted['apps/backend/index.ts']['globby']);
   assert(issues.unlisted['apps/backend/index.ts']['js-yaml']);
-  assert(issues.unlisted['packages/tools/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
+  assert(issues.unlisted['packages/tools/tsconfig.json']['@workspaces/tsconfig']);
 
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
 

@@ -1,5 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency, toCosmiconfig } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { NpmPkgJsonLintConfig } from './types.js';
 
 // https://npmpackagejsonlint.org/docs/
@@ -15,7 +17,7 @@ const packageJsonPath = 'npmpackagejsonlint';
 const config = ['package.json', ...toCosmiconfig('npmpackagejsonlint')];
 
 const resolveConfig: ResolveConfig<NpmPkgJsonLintConfig> = localConfig => {
-  return localConfig?.extends ? [localConfig.extends] : [];
+  return localConfig?.extends ? [localConfig.extends].map(toDependency) : [];
 };
 
 export default {

@@ -13,6 +13,9 @@ test('Find dependencies with custom script visitors (execa)', async () => {
     cwd,
   });
 
+  // Let's start out conservatively
+  // assert(issues.unresolved['options.mjs']['hydrate.js']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 5,

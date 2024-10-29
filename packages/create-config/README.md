@@ -17,9 +17,9 @@ Example result:
     "knip": "knip"
   },
   "devDependencies": {
-    "@types/node": "^20.12.8",
-    "knip": "^5.12.2",
-    "typescript": "^5.4.5"
+    "@types/node": "^20.14.8",
+    "knip": "^5.30.1",
+    "typescript": "^5.5.4"
   }
 }
 ```

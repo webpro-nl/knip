@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toEntry } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { AvaConfig } from './types.js';
 
 // https://github.com/avajs/ava/blob/main/docs/06-configuration.md
@@ -28,7 +28,7 @@ const entry = [
 
 const resolveEntryPaths: ResolveEntryPaths<AvaConfig> = localConfig => {
   if (typeof localConfig === 'function') localConfig = localConfig();
-  return (localConfig?.files ?? []).map(toEntryPattern);
+  return (localConfig?.files ?? []).map(toEntry);
 };
 
 const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => {
@@ -38,9 +38,7 @@ const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => 
   const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
   const fakeCommand = `node ${nodeArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  const dependencies = getDependenciesFromScripts([fakeCommand], { ...options, knownGlobalsOnly: true });
-
-  return [...dependencies];
+  return options.getInputsFromScripts(fakeCommand, { knownBinsOnly: true });
 };
 
 export default {

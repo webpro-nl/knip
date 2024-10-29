@@ -29,10 +29,13 @@ export const ALIAS_TAG = '@alias';
 
 export const DT_SCOPE = '@types';
 
+export const PROTOCOL_VIRTUAL = 'virtual:';
+
 // Binaries that are expected to be globally installed
 // In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
 // Package may exist in npm registry, but last publish is at least 6 years ago
 export const IGNORED_GLOBAL_BINARIES = new Set([
+  'amplify',
   'aws',
   'base64',
   'basename',
@@ -134,7 +137,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
 
-export const IGNORED_RUNTIME_DEPENDENCIES = new Set(['bun']);
+export const IGNORED_RUNTIME_DEPENDENCIES = new Set(['node', 'bun', 'deno']);
 
 export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.avif',
@@ -160,8 +163,13 @@ export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.yml',
 ]);
 
-// The `@types/node` dependency does not require the `node` dependency
-export const IGNORE_DEFINITELY_TYPED = ['node', 'bun'];
+export const IGNORE_DEFINITELY_TYPED = new Set([
+  // The `@types/node` dependency does not require the `node` dependency
+  'node',
+  'bun',
+  // Packages that confusingly include `package.json#types` but also recommend to install DT pkg
+  'jest',
+]);
 
 export const ISSUE_TYPES: IssueType[] = [
   'files',
@@ -197,3 +205,10 @@ export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   classMembers: 'Unused exported class members',
   duplicates: 'Duplicate exports',
 };
+
+export const FIX_FLAGS = {
+  NONE: 0,
+  OBJECT_BINDING: 1 << 0, // remove next comma
+  EMPTY_DECLARATION: 1 << 1, // remove declaration if empty
+  WITH_NEWLINE: 1 << 2, // remove with newline
+} as const;

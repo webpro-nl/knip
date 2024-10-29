@@ -10,32 +10,42 @@ A long report can be frustrating. The list may contain false positives, but also
 actual clutter. To get the most value out of Knip, it may require some initial
 configuration.
 
-This page guides you in dealing with false positives. It makes sense to go over
-the issue types one by one. For instance, reducing the number of unused files
-will also reduce the number of unused dependencies. Therefore it's recommended
-to work this page from top to bottom.
-
-If you haven't already, make sure to make yourself familiar with the following
-topics:
-
-- [Configuration][1]
-- [Entry files][2]
-- [Configuring project files][3]
-- [Using monorepos & workspaces?][4]
+This page guides you in dealing with false positives. Especially if you start
+out using Knip in a large project and have a long report, it makes sense to go
+over the issue types one by one. For instance, reducing the number of unused
+files will also reduce the number of unused dependencies.
 
 ## Unused files
 
-Files are reported as unused if they are in the set of project files, but not in
-the set of files resolved from the entry files:
+The first thing we're looking at is unused files, since the positive effect of
+getting those right trickles down into the other issue types as well. Files are
+reported as unused if they are in the set of `project` files, but not in the set
+of files resolved from the `entry` files:
 
 ```
 unused files = project files - (entry files + resolved files)
 ```
 
-In this section we'll look into common patterns that cause unused files and how
-to handle them.
+Let's go over common causes for adding `entry` patterns manually:
 
-Use `--files` to [filter the report][5] and focus on unused files:
+- [Dynamic import specifiers][1]
+- [Unsupported arguments in scripts][2]
+- [Unsupported file formats][3]
+- [Missing plugin][4]
+- [Incomplete plugin][5]
+- [Integrated monorepos][6]
+- [Build artifacts and ignored files][7]
+- [Auto-mocking or auto-imports][8]
+
+:::caution
+
+Please don't add unused files to the `ignore` option before reading [configuring
+project files][9]. Learn why and when to use `entry`, `project` and `ignore`
+patterns for better results and performance.
+
+:::
+
+Use `--files` to [filter the report][10] and focus on unused files:
 
 ```sh
 knip --files
@@ -45,15 +55,105 @@ This works with other issue types as well. For instance, use `--dependencies` to
 focus only on dependencies and exclude issues related to unused files and
 exports.
 
-### Implicit imports
+### Dynamic import specifiers
 
-Some files are imported by other tooling, such as fixtures, mocks or templates.
-And some frameworks import files such as routes or models, while Knip doesn't
-have a plugin for that framework yet.
+Dynamic import specifiers aren't resolved, such as:
 
-If those files are in the set of project files, but not imported by your code,
-they might be reported as unused files. If they should be included, extend the
-`entry` file patterns:
+```ts
+const entry = await import(path.join(baseDir, 'entry.ts'));
+```
+
+Solution: add `entry.ts` to `entry` patterns.
+
+### Unsupported arguments in scripts
+
+Some tooling command arguments aren't recognized:
+
+```json
+{
+  "name": "my-lib",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "unknown-build-cli --entryPath entry.ts"
+  }
+}
+```
+
+The same goes for other scripts such as those in GitHub Actions workflows or Git
+hooks. See [script parser][11] for what Knip does support.
+
+Solution: add `entry.ts` to `entry` patterns.
+
+### Unsupported file formats
+
+Entry files referenced in HTML files (e.g. `<script src="entry.js">`).
+
+```html
+<html>
+  <body>
+    <script type="module" src="entry.js"></script>
+  </body>
+</html>
+```
+
+Knip has support for some popular framework formats through [compilers][12], and
+additional compilers can be added for for any file type.
+
+The recommended solution is usually to add the file as shown in each example as
+an `entry` file.
+
+Solution: add `entry.js` to `entry` patterns. Or add an `.html` compiler to
+extract and resolve the value of `<script src>` elements.
+
+### Missing plugin
+
+You might be using a tool or framework for which Knip doesn't have a plugin
+(yet). Configuration and entry files (and related dependencies) may be reported
+as unused because there is no plugin yet that would include those files. For
+example,
+
+- Config file `tool.config.js` contains a reference to the package
+  `"@tool/plugin"` and both the file and the dependency may be reported as an
+  unused.
+- A framework imports all files matching `src/models/*.ts` and those might be
+  reported as unused.
+
+Solution: [create a new plugin][13] for the tool or framework that's not [in the
+list][14] yet, or [request it][15]. Or work around it and add `entry` patterns
+and maybe ignore a dependency or two.
+
+### Incomplete plugin
+
+Files may be reported as unused if existing plugins do not include that entry
+file pattern yet. See the [plugins section of entry files][16] for more details.
+
+Solution: [override plugin configuration][17] to customize default patterns for
+existing plugins. Or even better: send a pull request to improve the plugin.
+
+### Integrated monorepos
+
+Multiple instances of configuration files like `.eslintrc` and
+`jest.config.json` across the repository may be reported as unused when working
+in a (mono)repo with a single `package.json`.
+
+Solution: see [integrated monorepos][18] for more details and how to configure
+plugins to target those configuration files.
+
+### Build artifacts and ignored files
+
+In rare cases, build artifacts and `.gitignore` files may have a surprising
+effects on files reported as unused. Results may be different in separate runs,
+depending on the presence of build artifacts. Knip tries to do the right thing,
+but in some cases you may need to add a file to the `entry` file patterns
+manually for better or more consistent results.
+
+### Auto-mocking or auto-imports
+
+Some frameworks have features like "auto-mocking" or "auto-imports" enabled,
+such as Jest and Nuxt.
+
+Solution: include such entry files by extending the `entry` file patterns. This
+is recommended in most cases:
 
 ```json
 {
@@ -61,59 +161,26 @@ they might be reported as unused files. If they should be included, extend the
 }
 ```
 
-On the other hand, to exclude them from the `project` files using negated
-`project` patterns:
+Alternatively, exceptions and outliers can be excluded from the analysis using
+negated `project` patterns:
 
 ```json
 {
-  "project": ["src/**/*.ts", "!src/**/__unimported__/**"]
+  "project": ["src/**/*.ts", "!src/**/__mocks__/**"]
 }
 ```
 
-Also see [configuring project files][6] to learn more about `entry` and
-`project` files, and when to use `ignore` patterns.
-
-### Plugins
-
-#### Missing plugins
-
-You might be using a tool or framework that's not in the list of available
-plugins. Configuration and entry files (and related dependencies) may be
-reported as unused because there is no plugin yet that includes those files. For
-example, if `tool.config.js` contains a reference to `@tool/package` then both
-the file and the dependency may be reported as an unused.
-
-[Create a new plugin][7] for tools or frameworks that are not [in the list][8]
-yet, or [request it][9].
-
-#### Existing plugins
-
-Files may be reported as unused if existing plugins do not include that entry
-file pattern yet.
-
-See the [plugins section of entry files][10] for more details. [Override plugin
-configuration][11] to customize default patterns for existing plugins.
-
-### Integrated monorepos
-
-Multiple instances of configuration files like `.eslintrc` and
-`jest.config.json` across the repository may be reported as unused when working
-in a (mono)repo with a single `package.json`. See [integrated monorepos][12] for
-more details and how to configure plugins to target those configuration files.
-
-### Build artifacts and ignored files
-
-Sometimes build artifacts and `.gitignore` files may have a surprising effects
-on files reported as unused. Results may be different in separate runs,
-depending on the presence of build artifacts. Knip tries to do the right thing,
-but in some cases you may need to add a file to the `entry` file patterns
-manually for better or more consistent results.
-
 ## Unused dependencies
 
-Dependencies imported in unused files are reported as unused dependencies.
-That's why it's strongly recommended to try and remedy [unused files][13] first.
-This solves many cases of reported unused dependencies.
+First off: dependencies imported in unused files are reported as unused
+dependencies. That's why it's strongly recommended to try and remedy [unused
+files][19] first. Better `entry` and `project` file coverage will solve many
+cases of reported unused dependencies.
+
+The most common causes for unused and unlisted dependencies include:
+
+- [Missing or incomplete plugin][20]
+- [Unreachable code][21]
 
 :::caution[Monorepo]
 
@@ -123,26 +190,29 @@ descendent workspace.
 
 :::
 
-Use the `--dependencies` flag to [filter][5] dependency related issues:
+Use `--dependencies` to [filter the report][10] and focus on dependency related
+issues:
 
 ```sh
 knip --dependencies
 ```
 
-### Plugins
+### Missing or incomplete plugin
 
 If a plugin exists and the dependency is referenced in the configuration file,
 but its custom dependency finder does not detect it, then that's a false
 positive. Please open a pull request or issue to fix it.
 
-Adding the configuration file as an `entry` file pattern may be a temporary
-stopgap that fixes your situation, but it's better to create a new plugin or fix
-an existing one.
+Solution: adding the configuration file as an `entry` file pattern may be a
+temporary stopgap that fixes your situation, but it's better to create a new
+plugin or fix an existing one.
 
 ### Unreachable code
 
-If the reference to a dependency is unrecognizable or unreachable to Knip, and
-you don't feel like a plugin could solve it, a last resort is to ignore it:
+Sometimes a reference to a dependency is unrecognizable or unreachable to Knip.
+
+Solution: add a new plugin or improve an existing one. If you don't feel like a
+plugin could solve it, a last resort is to ignore it:
 
 ```json
 {
@@ -150,34 +220,34 @@ you don't feel like a plugin could solve it, a last resort is to ignore it:
 }
 ```
 
-Depending on the situation, you may want to use `ignoreBinaries` instead. See
-[unlisted binaries][14].
+If a binary (or "executable") is referenced you'll want to use `ignoreBinaries`
+instead. See [unlisted binaries][22].
 
-### TypeScript, Jest & ESLint
+### Types packages
 
-Within monorepos, tools like TypeScript, ESLint and Jest are a story of their
-own. Sharing and extending configurations is convenient, but for a project
-linter like Knip it can be a challenge to assign dependencies to the right
-workspace.
+For packages that have types integrated in the same package, the separate types
+package is reported as unused.
 
-The new [ESLint flat config system][15] does not have this issue, so it's
+This is also useful for future regressions: if a package had a DT package for
+its types before and later on integrates those types into its own package, Knip
+will start reporting the types dependency as unused. Examples include Webpack v5
+and React Router v6 rendering the `@types/webpack` and `@types/react-router`
+dependencies obsolete since those versions.
+
+Solution: remove the types dependency (usually `@types` scoped DT package).
+
+### TypeScript, Jest & legacy ESLint
+
+In monorepos, sharing and extending configurations is convenient, but for a
+project linter like Knip certain scenarios can be a challenge to assign
+dependencies to the right workspace. Specifically, the root cause is usually a
+combination of JSON-based configuration files that extend from each other across
+workspaces in a monorepo. This is an issue since we can't "assign" dependencies
+to other workspaces and incorrectly end up having "unlisted dependencies".
+
+Most notably, tools like TypeScript, Jest and legacy ESLint suffer from this.
+The new [ESLint flat config system][23] does not have this issue, so it's
 recommended to migrate if you haven't already.
-
-We can't "assign" dependencies to other workspaces. But workspaces that use the
-`@internal/eslint-config` package can force-enable the ESLint plugin (without
-having `eslint` listed) and ignore related dependencies (adjust to your
-situation). So if you can't migrate to the ESLint flat config yet, here's a
-workaround:
-
-```json
-{
-  "eslint": true,
-  "ignoreDependencies": ["^eslint-.*"]
-}
-```
-
-The same idea applies for false positives caused by tools like TypeScript and
-Jest that share and extend configurations across the monorepo.
 
 ## Unlisted dependencies
 
@@ -189,8 +259,10 @@ dependency) and lives in `node_modules`, but it's not listed explicitly in
 `package.json`.
 
 You should not rely on transitive dependencies for various reasons, including
-control, security and stability. The solution is to install and list the
-dependency in `dependencies` or `devDependencies`.
+control, security and stability.
+
+Solution: install and list the dependency in `dependencies` or
+`devDependencies`.
 
 ## Unlisted binaries
 
@@ -198,20 +270,24 @@ Binaries are executable Node.js scripts. Many npm packages, when installed, add
 an executable file to use from scripts in `package.json`. Examples include
 TypeScript with the `tsc` binary, Next.js with the `next` binary, and so on.
 
-Knip detects such binaries in scripts and checks whether there's package
-installed that includes the binary. It looks up the `bin` field in the
+Knip detects such binaries in scripts and checks whether there's a package
+installed that includes that binary. It looks up the `bin` field in the
 `package.json` file of installed packages. If it doesn't find it, it will be
 reported as an unlisted binary as there is no package listed that contains it.
-Except for those listed as `IGNORED_GLOBAL_BINARIES` in `constants.ts`.
+
+Except for binaries that are most likely meant to be installed on the OS already
+and not installed from npm (details: [list in source][24]).
 
 ### Missing binaries
 
 In case unused (dev) dependencies look like a match against unlisted binaries,
 then this might be caused by `node_modules` not containing the packages. And
 this might have been caused by either the way your package manager installs
-dependencies, or by not running Knip from the root of the repository.
+dependencies and binaries, or by not running Knip from the root of the
+repository.
 
-Knip should run from the root. But you can [lint individual workspaces][16].
+Solution: run Knip from the project root. From there you can [lint individual
+workspaces][25].
 
 ### Example
 
@@ -239,42 +315,70 @@ This technically works as `commitlint` is a transitive dependency of
 
 ## npx
 
-For `npx` scripts, Knip assumes that `--yes` (as in `npx --yes package`) means
-that the package is not listed. Knip expects the dependency to be listed with
-`--no` or no flag at all.
+For usages of the `npx` command, Knip assumes `npx --yes my-package` means that
+`my-package` is not listed. Knip expects the dependency to be listed with `--no`
+or no flag at all. The recommendation here is to be explicit:
 
-The recommendation here is to be explicit: use `--yes` if the dependency is not
-supposed to be listed in `package.json`. Or use `--no` if the dependency is
-listed.
+- Use `npx --yes` if the dependency is not supposed to be listed in
+  `package.json`.
+- Use `npx --no` if the dependency is listed in `package.json`.
 
 ## Unused exports
 
 By default, Knip does not report unused exports of `entry` files.
 
-When unused exports are reported, and you want to keep exporting those, there
-are a few options:
+The most common causes for unused exports include:
 
-- [Ignore exports used in file][17] for exports used internally.
-- Individual exports can be [tagged using JSDoc syntax][18].
-- Have the export in or re-exported by an [entry file][2]:
-  - Add the file to the `entry` file patterns array in the configuration
-  - Move the export(s) to an entry file
-  - Re-export the unused export(s) from an entry file
-  - Add the file to the `exports` field of `package.json`
+- [Enumerations][26]
+- [External libraries][27]
 
-Use the `--exports` flag to [filter][5] and focus only on issues related to
-exports:
+Use the `--exports` flag to [filter][10] and focus on issues related to exports:
 
 ```sh
 knip --exports
 ```
 
+### Enumerations
+
+Currently Knip does not consider all exports or enum members referenced when
+implicitly referenced in an enumeration like the following example:
+
+<Tabs>
+  <TabItem label="index.js">
+
+    ```ts
+    import * as Fruits from './fruits.js';
+    import { FruitsEnum } from './fruits.js';
+
+    for (const fruit of Object.values(Fruits)); // Exports are not referenced explicitly
+
+    Object.entries(FruitsEnum); // Members are not referenced explicitly
+    ```
+
+  </TabItem>
+
+  <TabItem label="fruits.js">
+
+    ```ts
+    export const apple = 'apple';
+    export const orange = 'orange';
+
+    export enum FruitsEnum {
+      apple = 'apple',
+      orange = 'orange',
+    }
+    ```
+
+  </TabItem>
+</Tabs>
+
+See [namepace imports][28] to see what patterns Knip does consider to be used
+exports.
+
 ### External libraries
 
 Are the exports consumed or imported by an external library, resulting in a
-non-standard consumption of your exports? Try the `--include-libs` flag.
-
-Here's an example:
+non-standard consumption of your exports? Here's an example:
 
 <Tabs>
   <TabItem label="index.js">
@@ -309,27 +413,37 @@ Knip does not include external type definitions by default so it won't see the
 export being referenced.
 
 To include the type definitions of external libraries, use the
-[--include-libs][19] flag:
+[--include-libs][29] flag:
 
 ```shell
 knip --include-libs
 ```
 
 This comes at a performance and memory penalty, but should give better results
-if you need it. This flag is implied when [classMembers][20] are included (that
+if you need it. This flag is implied when [classMembers][30] are included (that
 feature comes with roughly the same performance penalty).
 
-### Non-standard files
+### Exclude exports from the report
+
+To exclude unused exports from the report, there are a few options:
+
+- [Ignore exports used in file][31] for exports used internally.
+- Individual exports can be [tagged using JSDoc syntax][32].
+- Have the export in an entry file:
+  - Add the file to the `entry` file patterns array in the configuration.
+  - Move the export(s) to an entry file.
+  - Add the file to the `exports` field of `package.json`
+- Re-export the unused export(s) from an entry file.
+
+## Missing exports?
+
+Did you expect certain exports in the report, but are they missing? They might
+be exported from an entry file. In that case, use [--include-entry-exports][33]
+to make Knip also report unused exports in entry files.
 
 The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
-`.svelte` are not available by default. See [compilers][21] for more details on
+`.svelte` are not available by default. See [compilers][12] for more details on
 how to include them.
-
-### Missing exports?
-
-Do you expect certain exports in the report, but are they missing? They might be
-exported from an entry file. Use [--include-entry-exports][22] to make Knip also
-report unused exports in entry files.
 
 ## Class members
 
@@ -340,13 +454,12 @@ knip --include classMembers
 ```
 
 This option is also available in the Knip configuration file. Note that this
-feature comes at a cost: linting will take more time and more memory (in rare
-cases it may even run out of memory in large repositories).
+feature comes at a cost: linting will take more time and more memory.
 
-Individual class members can be [tagged using JSDoc syntax][18].
+Individual class members can be [tagged using JSDoc syntax][32].
 
 Classes exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][22] to make Knip also report members of unused exports
+[--include-entry-exports][33] to make Knip also report members of unused exports
 in entry files.
 
 ## Enum members
@@ -358,46 +471,52 @@ members can also be disabled altogether, for example:
 knip --exclude enumMembers
 ```
 
-Individual enum members can be [tagged using JSDoc syntax][18].
+Individual enum members can be [tagged using JSDoc syntax][32].
 
 Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][22] to make Knip also report members of unused exports
+[--include-entry-exports][33] to make Knip also report members of unused exports
 in entry files.
 
-## False positives
+## Feedback or false positives?
 
-If you believe Knip incorrectly reports something as unused (i.e. a false
-positive), this could be caused by one of multiple reasons:
+If you believe Knip incorrectly reports something as unused (i.e. there's a
+false positive), feel free to create a [minimal reproduction][34] and open an
+issue on GitHub. It'll make Knip better for everyone! Join the [Discord
+channel][35] to discuss any feedback or questions you may have.
 
-- Knip requires additional configuration, for instance additional [entry
-  files][2] or [paths][23] should be added.
-- Knip has a bug. You can help your own project and Knip by creating a [minimal
-  reproduction][24] and open an issue on GitHub.
-
-Also see [troubleshooting][25] if you haven't already.
-
-[1]: ../overview/configuration.md
-[2]: ../explanations/entry-files.md
-[3]: ../guides/configuring-project-files.md
-[4]: ../features/monorepos-and-workspaces.md
-[5]: ../features/rules-and-filters.md#filters
-[6]: ./configuring-project-files.md
-[7]: ./writing-a-plugin.md
-[8]: ../reference/plugins.md
-[9]: https://github.com/webpro-nl/knip/issues/483
-[10]: ../explanations/plugins.md#entry-files
-[11]: ../explanations/entry-files.md#plugins
-[12]: ../features/integrated-monorepos.md
-[13]: #unused-files
-[14]: #unlisted-binaries
-[15]: https://eslint.org/docs/latest/use/configure/configuration
-[16]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[17]: ../reference/configuration.md#ignoreexportsusedinfile
-[18]: ../reference/jsdoc-tsdoc-tags.md
-[19]: ../reference/cli#--include-libs
-[20]: #class-members
-[21]: ../features/compilers.md
-[22]: ../reference/configuration.md#includeentryexports
-[23]: ../reference/configuration.md#paths
-[24]: ../guides/troubleshooting.md#minimal-reproduction
-[25]: ./troubleshooting.md
+[1]: #dynamic-import-specifiers
+[2]: #unsupported-arguments-in-scripts
+[3]: #unsupported-file-formats
+[4]: #missing-plugin
+[5]: #incomplete-plugin
+[6]: #integrated-monorepos
+[7]: #build-artifacts-and-ignored-files
+[8]: #auto-mocking-or-auto-imports
+[9]: ./configuring-project-files.md
+[10]: ../features/rules-and-filters.md#filters
+[11]: ../features/script-parser.md
+[12]: ../features/compilers.md
+[13]: ./writing-a-plugin.md
+[14]: ../reference/plugins.md
+[15]: https://github.com/webpro-nl/knip/issues/483
+[16]: ../explanations/plugins.md#entry-files
+[17]: ../explanations/entry-files.md#plugins
+[18]: ../features/integrated-monorepos.md
+[19]: #unused-files
+[20]: #missing-or-incomplete-plugin
+[21]: #unreachable-code
+[22]: #unlisted-binaries
+[23]: https://eslint.org/docs/latest/use/configure/configuration
+[24]:
+  https://github.com/webpro-nl/knip/blob/6f561ff09b4f1bf36585b64210ee34ea27ae04ea/packages/knip/src/constants.ts#L32-L133
+[25]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[26]: #enumerations
+[27]: #external-libraries
+[28]: ../guides/namespace-imports.md
+[29]: ../reference/cli#--include-libs
+[30]: #class-members
+[31]: ../reference/configuration.md#ignoreexportsusedinfile
+[32]: ../reference/jsdoc-tsdoc-tags.md
+[33]: ../reference/configuration.md#includeentryexports
+[34]: ../guides/issue-reproduction
+[35]: https://discord.gg/r5uXTtbTpc

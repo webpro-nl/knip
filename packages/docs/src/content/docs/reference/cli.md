@@ -226,7 +226,7 @@ Available [issue types][13] when filtering output using `--include` or
 
 ### `--exclude`
 
-Exclude provided issue type(s) from report. Can be comma-separated or repeated.
+Exclude provided issue types from report. Can be comma-separated or repeated.
 
 Example:
 
@@ -237,7 +237,7 @@ knip --exclude classMembers --exclude enumMembers
 
 ### `--include`
 
-Report only provided issue type(s). Can be comma-separated or repeated.
+Report only provided issue types. Can be comma-separated or repeated.
 
 Example:
 
@@ -333,7 +333,7 @@ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the reporter(s).
+Preprocess the results before providing it to the reporters.
 
 Can be repeated. Examples:
 
@@ -361,13 +361,13 @@ The default exit codes:
 
 | Code | Description                                                      |
 | :--: | :--------------------------------------------------------------- |
-| `0`  | Knip ran successfully, no lint errors                            |
-| `1`  | Knip ran successfully, but there is at least one lint error      |
+| `0`  | Knip ran successfully, no lint issues                            |
+| `1`  | Knip ran successfully, but there is at least one lint issues     |
 | `2`  | Knip did not run successfully due to bad input or internal error |
 
 ### `--no-exit-code`
 
-Always exit with code zero (`0`), even when there are lint errors.
+Always exit with code zero (`0`), even when there are lint issues.
 
 ### `--max-issues`
 

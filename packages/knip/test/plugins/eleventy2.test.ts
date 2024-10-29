@@ -13,7 +13,7 @@ test('Find dependencies with the Eleventy plugin (2)', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['eleventy.config.cjs']['./node_modules/prismjs/themes/prism-okaidia.css']);
+  assert(issues.unlisted['eleventy.config.cjs']['prismjs']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toProductionEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toProductionEntry } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { DrizzleConfig } from './types.js';
 
 // https://orm.drizzle.team/kit-docs/overview
@@ -15,7 +15,7 @@ const config = ['drizzle.config.{ts,js,json}'];
 
 const resolveConfig: ResolveConfig<DrizzleConfig> = config => {
   if (!config.schema) return [];
-  return [config.schema].flat().map(toProductionEntryPattern);
+  return [config.schema].flat().map(id => toProductionEntry(id));
 };
 
 export default {

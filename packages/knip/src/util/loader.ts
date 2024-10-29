@@ -1,9 +1,7 @@
-import { pathToFileURL } from 'node:url';
 import { timerify } from './Performance.js';
 import { LoaderError } from './errors.js';
 import { loadFile, loadJSON, loadTOML, loadYAML, parseJSON, parseYAML } from './fs.js';
-import { isTypeModule } from './fs.js';
-import { jitiCJS, jitiESM } from './jiti.js';
+import { jiti } from './jiti.js';
 import { extname, isInternal } from './path.js';
 
 const load = async (filePath: string) => {
@@ -39,17 +37,7 @@ const load = async (filePath: string) => {
       return await loadTOML(filePath);
     }
 
-    if (ext === '.mjs' || (ext === '.js' && isTypeModule(filePath))) {
-      const fileUrl = pathToFileURL(filePath);
-      const imported = await import(fileUrl.href);
-      return imported.default ?? imported;
-    }
-
-    if (ext === '.mts' || ((ext === '.ts' || ext === '.tsx') && isTypeModule(filePath))) {
-      return await jitiESM(filePath);
-    }
-
-    return await jitiCJS(filePath);
+    return await jiti.import(filePath, { default: true });
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }

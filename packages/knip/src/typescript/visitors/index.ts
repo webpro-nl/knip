@@ -1,7 +1,7 @@
 import type ts from 'typescript';
+import type { GetImportsAndExportsOptions } from '../../types/config.js';
 import type { ExportNode } from '../../types/exports.js';
 import type { ImportNode } from '../../types/imports.js';
-import type { GetImportsAndExportsOptions } from '../get-imports-and-exports.js';
 
 type FileCondition = (sourceFile: ts.SourceFile) => boolean;
 type VisitorFactory<T> = (fileCondition: FileCondition, fn: Visitor<T>) => VisitorCondition<T>;

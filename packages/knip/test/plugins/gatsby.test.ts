@@ -18,9 +18,9 @@ test('Find dependencies with the Gatsby plugin', async () => {
   assert(issues.devDependencies['package.json']['gatsby-plugin-advanced-sitemap']);
   assert(issues.devDependencies['package.json']['gatsby-remark-prismjs']);
 
-  assert(issues.unlisted['gatsby-config.js']['@sentry/gatsby']);
-  assert(issues.unlisted['gatsby-config.js']['gatsby-plugin-webpack-bundle-analyser-v2']);
-  assert(issues.unlisted['gatsby-config.js']['gatsby-remark-node-identity']);
+  assert(issues.unresolved['gatsby-config.js']['@sentry/gatsby']);
+  assert(issues.unresolved['gatsby-config.js']['gatsby-plugin-webpack-bundle-analyser-v2']);
+  assert(issues.unresolved['gatsby-config.js']['gatsby-remark-node-identity']);
 
   assert(issues.unlisted['gatsby-node.js']['@babel/plugin-proposal-function-bind']);
   assert(issues.unlisted['gatsby-node.js']['babel-plugin-transform-imports']);
@@ -29,7 +29,8 @@ test('Find dependencies with the Gatsby plugin', async () => {
     ...baseCounters,
     binaries: 1,
     devDependencies: 4,
-    unlisted: 5,
+    unlisted: 2,
+    unresolved: 3,
     processed: 2,
     total: 2,
   });

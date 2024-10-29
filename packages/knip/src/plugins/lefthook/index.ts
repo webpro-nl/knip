@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { getGitHookPaths } from '#p/util/git.js';
-import { getValuesByKeyDeep } from '#p/util/object.js';
-import { extname } from '#p/util/path.js';
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
-import { fromBinary } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { getGitHookPaths } from '../../util/git.js';
+import { fromBinary, toDependency } from '../../util/input.js';
+import { findByKeyDeep } from '../../util/object.js';
+import { extname } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://github.com/evilmartians/lefthook
 
@@ -17,25 +17,36 @@ const gitHookPaths = getGitHookPaths();
 
 const config = ['lefthook.yml', ...gitHookPaths];
 
+type Command = {
+  run: string;
+  root: string;
+};
+
 const resolveConfig: ResolveConfig = async (localConfig, options) => {
-  const { manifest, isProduction, configFileName } = options;
+  const { manifest, configFileName, cwd, getInputsFromScripts } = options;
 
-  if (isProduction) return [];
-
-  const dependencies = manifest.devDependencies ? Object.keys(manifest.devDependencies) : [];
+  const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(toDependency) : [];
 
   if (extname(configFileName) === '.yml') {
-    const scripts = getValuesByKeyDeep(localConfig, 'run').filter((run): run is string => typeof run === 'string');
-    const lefthook = process.env.CI ? enablers.filter(dependency => dependencies.includes(dependency)) : [];
-    return [...lefthook, ...getDependenciesFromScripts(scripts, { ...options, knownGlobalsOnly: true })];
+    const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
+      const deps = getInputsFromScripts([command.run], { ...options, knownBinsOnly: true });
+      const dir = command.root ?? cwd;
+      return deps.flatMap(dependency => ({ ...dependency, dir }));
+    });
+
+    const lefthook = process.env.CI
+      ? enablers.filter(dependency => inputs.some(d => d.specifier === dependency)).map(toDependency)
+      : [];
+
+    return [...scripts, ...lefthook];
   }
 
   const script = localConfig;
 
   if (!script) return [];
 
-  const scriptDependencies = getDependenciesFromScripts(script, options);
-  const matches = scriptDependencies.find(dep => dependencies.includes(fromBinary(dep)));
+  const scriptInputs = getInputsFromScripts(script);
+  const matches = scriptInputs.find(dep => inputs.some(d => d.specifier === fromBinary(dep)));
   return matches ? [matches] : [];
 };
 

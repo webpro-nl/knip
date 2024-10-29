@@ -6,6 +6,37 @@
   transition: border-color 300ms;
 }
 
+.sl-markdown-content {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    position: relative;
+
+    a::before {
+      content: '#';
+    }
+
+    a {
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin-left: -1.5rem;
+      text-decoration: none;
+      border-bottom: none;
+      opacity: 0;
+      color: var(--sl-color-text);
+      transition: color 0.3s, opacity 0.3s;
+    }
+
+    &:hover a {
+      opacity: 1;
+    }
+  }
+}
+
 .right-sidebar a:hover,
 .sidebar-content a:hover,
 .sidebar-content a:hover {

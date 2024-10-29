@@ -75,9 +75,10 @@ export class IssueCollector {
     if (this.isMatch(issue.filePath)) return;
     const key = relative(this.cwd, issue.filePath);
     issue.severity = this.rules[issue.type];
-    this.issues[issue.type][key] = this.issues[issue.type][key] ?? {};
-    if (!this.issues[issue.type][key][issue.symbol]) {
-      this.issues[issue.type][key][issue.symbol] = issue;
+    const issues = this.issues[issue.type];
+    issues[key] = issues[key] ?? {};
+    if (!issues[key][issue.symbol]) {
+      issues[key][issue.symbol] = issue;
       this.counters[issue.type]++;
     }
     return issue;

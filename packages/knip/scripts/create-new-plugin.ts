@@ -16,7 +16,7 @@ if (!name) {
   process.exit(1);
 }
 
-if (/[^a-z_-]/.test(name)) {
+if (!/[a-z][a-z0-9_-]+/.test(name)) {
   console.error('Name must contain only lowercased letters, dashes and underscores (you can adjust the title later)');
   process.exit(1);
 }

@@ -54,7 +54,7 @@ export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: st
     .split(/\r?\n/)
     .filter(line => line.trim() && !line.startsWith('#'))
     .flatMap(line => {
-      const pattern = line.replace(/(?<!\\)#.*/, '').trim();
+      const pattern = line.replace(/^\\(?=#)/, '').trim();
       if (ancestor && matchFrom) {
         if (pattern.match(matchFrom)) return [pattern.replace(matchFrom, '$1')];
         if (pattern.startsWith('/**/')) return [pattern.slice(1)];

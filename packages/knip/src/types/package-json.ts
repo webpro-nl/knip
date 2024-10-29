@@ -37,4 +37,10 @@ export type PackageJson = {
   peerDependencies?: Dependencies;
   optionalDependencies?: Dependencies;
   peerDependenciesMeta?: Record<string, { optional: true }>;
+  module?: string;
+  browser?: string;
+  types?: string;
+  typings?: string;
 } & Plugins;
+
+export type Package = { dir: string; name: string; pkgName: string | undefined; manifest: PackageJson };

@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Input, toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { LintStagedConfig } from '../lint-staged/types.js';
 
 // https://github.com/yyx990803/yorkie
@@ -15,15 +16,15 @@ const packageJsonPath = 'gitHooks';
 const config = ['package.json'];
 
 const resolveConfig: ResolveConfig<LintStagedConfig> = (config, options) => {
-  const dependencies = new Set<string>();
+  const inputs = new Set<Input>();
 
   for (const script of Object.values(config).flat()) {
     const scripts = [script].flat();
-    for (const identifier of getDependenciesFromScripts(scripts, options)) dependencies.add(identifier);
+    for (const identifier of options.getInputsFromScripts(scripts)) inputs.add(identifier);
   }
 
   // Looks like the idea is to have lint-staged installed too, so there are no refs to yorkie
-  return ['yorkie', ...dependencies];
+  return [toDependency('yorkie'), ...inputs];
 };
 
 export default {

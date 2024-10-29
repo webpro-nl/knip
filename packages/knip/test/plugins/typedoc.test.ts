@@ -14,17 +14,16 @@ test('Find dependencies with the typedoc plugin', async () => {
   });
 
   assert(issues.devDependencies['package.json']['typedoc']);
-  assert(issues.unlisted['typedoc.json']['@appium/typedoc-plugin-appium']);
-  assert(issues.unlisted['typedoc.json']['typedoc-plugin-expand-object-like-types']);
-  assert(issues.unlisted['package.json']['typedoc-plugin-umami']);
-  assert(issues.unlisted['tsconfig.json']['typedoc-plugin-zod']);
+  assert(issues.unresolved['typedoc.json']['@appium/typedoc-plugin-appium']);
+  assert(issues.unresolved['typedoc.json']['typedoc-plugin-expand-object-like-types']);
+  assert(issues.unresolved['package.json']['typedoc-plugin-umami']);
+  assert(issues.unresolved['tsconfig.json']['typedoc-plugin-zod']);
   assert(issues.unresolved['typedoc.json']['./dist/index.cjs']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 4,
-    unresolved: 1,
+    unresolved: 5,
     processed: 0,
     total: 0,
   });

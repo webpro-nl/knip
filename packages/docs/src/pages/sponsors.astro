@@ -1,29 +1,37 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Projects from '../components/Projects.astro';
 import SponsorsComponent from '../components/Sponsors.astro';
+import Tweets from '../components/Tweets.astro';
 ---
 
 <StarlightPage frontmatter={{ title: 'Become a sponsor!', template: 'splash' }}>
   <article class="sponsors-body">
     <div class="column">
       <p>
-        This project has been a labor of love and dedication. While Knip
-        wouldn't be nearly as good as it is today without the contributions of
-        many awesome developers, I remain the solo creator and driving force
-        behind its development.
+        Knip is a powerful tool that helps thousands of developers keep their
+        JavaScript and TypeScript projects lean and maintainable. By identifying
+        unused files, dependencies and exports, Knip saves teams valuable time.
       </p>
 
       <p>
-        Currently, sponsorships total around $200 per month. While I love to
-        give something back to the open source community, this isn't enough for
-        sustainable development. Your support is invaluable and helps me
-        continue to improve Knip, ensuring it remains a reliable and powerful
-        tool for the JavaScript and TypeScript community.
+        As the creator and primary maintainer, I (<a href="https://github.com/webpro">Lars Kappert</a>) am dedicated to the continued
+        development and support of Knip. With my deep expertise in JavaScript
+        and TypeScript, its ecosystem, frameworks and tooling, I ensure Knip
+        remains best-in-class.
       </p>
 
       <p>
-        If you think Knip is useful in your company, please consider supporting
-        the project! The following channels are available to support Knip:
+        Your sponsorship directly funds the development of new features, bug
+        fixes, and performance improvements in Knip. It allows me to spend more
+        time enhancing this valuable open-source tool
+        <a href="#projects-using-knip">relied upon by many</a> in the JavaScript
+        community.
+      </p>
+
+      <p>
+        Please consider supporting the project! The following platforms are
+        available to support Knip:
       </p>
 
       <ul>
@@ -35,7 +43,7 @@ import SponsorsComponent from '../components/Sponsors.astro';
       <p>
         You or your company logo will be added to this page if you decide to
         support the project on an ongoing basis. Eternal gratitude to the
-        companies and people that are already sponsoring me:
+        companies and people that are already supporting me:
       </p>
 
     </div>
@@ -46,5 +54,19 @@ import SponsorsComponent from '../components/Sponsors.astro';
 
     </div>
 
-  </div>
+  </article>
+
+  <h2 id="projects-using-knip">🧡 Projects using Knip</h2>
+
+  <section class="columns min300">
+
+    <Projects />
+
+  </section>
+
+  <h2>🧡 Testimonials</h2>
+
+  <Tweets />
+
+
 </StarlightPage>

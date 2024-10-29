@@ -20,11 +20,12 @@ test('Find dependencies with Vitest plugin', async () => {
   assert(issues.unlisted['vitest-default-coverage.config.ts']['@vitest/coverage-v8']);
   assert(issues.unlisted['vitest.config.ts']['happy-dom']);
   assert(issues.unlisted['vitest.config.ts']['@vitest/coverage-istanbul']);
-  assert(issues.unlisted['vitest.config.ts']['setup.js']);
+  assert(issues.unresolved['vitest.config.ts']['setup.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 8,
+    unlisted: 7,
+    unresolved: 1,
     processed: 8,
     total: 8,
   });

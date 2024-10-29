@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '#p/types/plugins.js';
-import { isDirectory } from '#p/util/fs.js';
-import { isInNodeModules, join } from '#p/util/path.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toProductionEntryPattern } from '#p/util/protocols.js';
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { isDirectory } from '../../util/fs.js';
+import { toDeferResolve, toProductionEntry } from '../../util/input.js';
+import { isInNodeModules, join } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
 import type { EleventyConfig } from './types.js';
 
@@ -48,7 +48,7 @@ const resolveEntryPaths: ResolveEntryPaths<T> = async (localConfig, options) => 
     join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
     join(inputDir, '**/*.11tydata.js'),
     ...copiedEntries,
-  ].map(toProductionEntryPattern);
+  ].map(id => toProductionEntry(id));
 };
 
 const resolveConfig: ResolveConfig<T> = async localConfig => {
@@ -61,7 +61,7 @@ const resolveConfig: ResolveConfig<T> = async localConfig => {
     if (isInNodeModules(path)) copiedPackages.add(path);
   }
 
-  return [...copiedPackages];
+  return [...copiedPackages].map(id => toDeferResolve(id));
 };
 
 export default {

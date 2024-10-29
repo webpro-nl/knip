@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { NycConfig } from './types.js';
 
 // https://www.npmjs.com/package/nyc
@@ -10,10 +11,12 @@ const enablers = ['nyc'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
+const config = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js', 'package.json'];
 
 const resolveConfig: ResolveConfig<NycConfig> = config => {
-  return config?.extends ? [config.extends].flat() : [];
+  const extend = config?.extends ? [config?.extends].flat() : [];
+  const requires = config?.require ? [config?.require].flat() : [];
+  return [...extend, ...requires].flat().map(toDeferResolve);
 };
 
 export default {

@@ -1,31 +1,21 @@
-import { FOREIGN_FILE_EXTENSIONS } from '../constants.js';
+import type { GetInputsFromScripts } from '../types/config.js';
 import { timerify } from '../util/Performance.js';
-import { compact } from '../util/array.js';
-import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
-import { extname, isInternal } from '../util/path.js';
-import { fromBinary, isBinary } from '../util/protocols.js';
-import { getBinariesFromScript } from './bash-parser.js';
-import type { GetDependenciesFromScripts } from './types.js';
+import { type Input, fromBinary, isBinary, isDependency } from '../util/input.js';
+import { getDependenciesFromScript } from './bash-parser.js';
 
-const getDependenciesFromScripts: GetDependenciesFromScripts = (npmScripts, options) => {
-  const scripts = typeof npmScripts === 'string' ? [npmScripts] : [...npmScripts];
-  const results = scripts.flatMap(script => getBinariesFromScript(script, options));
+const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {
+  const scripts = typeof npmScripts === 'string' ? [npmScripts] : Array.from(npmScripts);
+  const results = scripts.flatMap(script => getDependenciesFromScript(script, options));
+  const inputs = new Set<Input>();
 
-  return compact(
-    results.map(identifier => {
-      if (identifier.startsWith('http')) return;
-      if (isBinary(identifier)) {
-        if (!/^\b/.test(fromBinary(identifier))) return;
-        return identifier;
-      }
-      if (isInternal(identifier)) {
-        const ext = extname(identifier);
-        if (ext && FOREIGN_FILE_EXTENSIONS.has(ext)) return;
-        return identifier;
-      }
-      return getPackageNameFromModuleSpecifier(identifier);
-    })
-  );
+  for (const input of results) {
+    if (!input.specifier) continue;
+    if (isDependency(input) && input.specifier.startsWith('http')) continue;
+    if (isBinary(input) && !/^\b/.test(fromBinary(input))) continue;
+    inputs.add(input);
+  }
+
+  return Array.from(inputs);
 };
 
-export const _getDependenciesFromScripts = timerify(getDependenciesFromScripts);
+export const _getInputsFromScripts = timerify(getInputsFromScripts);

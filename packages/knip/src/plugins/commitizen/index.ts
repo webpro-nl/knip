@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { CommitizenConfig } from './types.js';
 
 // https://github.com/commitizen/cz-cli
@@ -15,7 +16,7 @@ const packageJsonPath = 'config.commitizen';
 const config = ['.czrc', '.cz.json', 'package.json'];
 
 const resolveConfig: ResolveConfig<CommitizenConfig> = config => {
-  return config.path ? [config.path] : [];
+  return config.path ? [toDependency(config.path)] : [];
 };
 
 export default {

@@ -10,14 +10,13 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Knip v5 requires Node.js v18.6 or higher. Or Bun.
 
-Looking for docs of previous versions? Go to [v3.knip.dev][1] or
-[v4.knip.dev][2].
+Want to try Knip without installation? Visit [the playground][1].
 
 ## Installation
 
 This is the easiest and recommended way to install Knip:
 
-<Tabs>
+<Tabs syncKey="pm">
   <TabItem label="npm">
 
     ```shell
@@ -53,7 +52,7 @@ This is the easiest and recommended way to install Knip:
 
 Now you can run Knip to lint your project:
 
-<Tabs>
+<Tabs syncKey="pm">
   <TabItem label="npm">
 
     ```shell
@@ -89,13 +88,13 @@ Now you can run Knip to lint your project:
 
 Knip will lint your project and report unused files, dependencies and exports.
 
-You can skip the rest of this page and go to [configuration][3].
+You can skip the rest of this page and go to [configuration][2].
 
 ## Manual
 
-Alternatively, you can manually install Knip using your package manager:
+Alternatively, manually install Knip using your package manager:
 
-<Tabs>
+<Tabs syncKey="pm">
   <TabItem label="npm">
 
     ```shell
@@ -148,7 +147,7 @@ Then add a `knip` script to your `package.json`:
 
 To run Knip without adding it to your project:
 
-<Tabs>
+<Tabs syncKey="pm">
   <TabItem label="npm">
 
     ```shell
@@ -177,6 +176,5 @@ To run Knip without adding it to your project:
 In this scenario `typescript` and `@types/node` are expected to be installed
 already.
 
-[1]: https://v3.knip.dev/overview/getting-started
-[2]: https://v4.knip.dev/overview/getting-started
-[3]: ./configuration.md
+[1]: /playground
+[2]: ./configuration.md

@@ -16,7 +16,7 @@ test('Resolve modules properly using tsconfig paths and globs', async () => {
   assert.equal(issues.dependencies['package.json']['internal'].symbol, 'internal');
 
   assert.equal(issues.unlisted['index.ts']['@unknown'].symbol, '@unknown');
-  assert.equal(issues.unlisted['index.ts']['unresolved/dir'].symbol, 'unresolved/dir');
+  assert.equal(issues.unlisted['index.ts']['unresolved'].symbol, 'unresolved');
 
   assert.equal(issues.exports['internal-package/index.ts']['unused'].symbol, 'unused');
   assert.equal(issues.exports['unprefixed/module.ts']['unused'].symbol, 'unused');

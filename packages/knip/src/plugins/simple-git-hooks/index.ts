@@ -1,13 +1,13 @@
-import type { EnablerPatterns } from '#p/types/config.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { getDependenciesFromScripts, hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { Input } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 
 // https://github.com/toplenboren/simple-git-hooks
 
 const title = 'simple-git-hooks';
 
-const enablers: EnablerPatterns = ['simple-git-hooks'];
+const enablers = ['simple-git-hooks'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -26,13 +26,13 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
 
   if (!config) return [];
 
-  const dependencies = new Set<string>();
+  const inputs = new Set<Input>();
 
   for (const hook of Object.values(config)) {
-    for (const id of getDependenciesFromScripts(hook, options)) dependencies.add(id);
+    for (const id of options.getInputsFromScripts(hook)) inputs.add(id);
   }
 
-  return Array.from(dependencies);
+  return Array.from(inputs);
 };
 
 export default {

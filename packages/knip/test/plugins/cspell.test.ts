@@ -13,13 +13,13 @@ test('Find dependencies with the Cspell plugin', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['.cspell.json']['@cspell/dict-cryptocurrencies/cspell-ext.json']);
+  assert(issues.unresolved['.cspell.json']['@cspell/dict-cryptocurrencies/cspell-ext.json']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
     // TODO fast-glob returns two files cspell.json and .cSpell.json while there's only one file on disk
-    unlisted: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
+    unresolved: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
     processed: 0,
     total: 0,
   });

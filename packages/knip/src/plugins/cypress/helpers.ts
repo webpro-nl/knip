@@ -1,6 +1,6 @@
-import type { PluginOptions } from '#p/types/plugins.js';
-import { isInternal, toAbsolute } from '#p/util/path.js';
-import { load, resolveEntry } from '#p/util/plugin.js';
+import type { PluginOptions } from '../../types/config.js';
+import { isInternal, toAbsolute } from '../../util/path.js';
+import { load } from '../../util/plugin.js';
 import type { CypressConfig } from './types.js';
 
 interface ReporterConfig {
@@ -11,10 +11,9 @@ export const resolveDependencies = async (config: CypressConfig, options: Plugin
   const { reporter } = config;
   const { configFileDir } = options;
 
-  const resolve = (specifier: string) => resolveEntry(options, specifier);
-
   // Initialize the array of reporters with the initial reporter if present.
   const reporters: Set<string> = reporter ? new Set([reporter]) : new Set();
+
   // https://github.com/YOU54F/cypress-plugins/tree/master/cypress-multi-reporters#configuring-reporters
   if (reporter === 'cypress-multi-reporters' && config.reporterOptions?.configFile) {
     // Try to resolve the config file if present and attach the reporters listed in it.
@@ -28,7 +27,7 @@ export const resolveDependencies = async (config: CypressConfig, options: Plugin
         // Not sure why they allow for extra whitespace characters, but let's handle it the same as them.
         const reporterNames = reporterConcatenatedNames.split(',');
         for (const reporterName of reporterNames) {
-          reporters.add(resolve(reporterName.trim()));
+          reporters.add(reporterName.trim());
         }
       }
     }

@@ -1,8 +1,9 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import type { Fixes } from './types/exports.js';
+import type { Fix, Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
 import { load, save } from './util/package-json.js';
 import { join, relative } from './util/path.js';
+import { removeExport } from './util/remove-export.js';
 
 interface Fixer {
   isEnabled: boolean;
@@ -19,8 +20,8 @@ export class IssueFixer {
   isFixUnusedTypes = true;
   isFixUnusedExports = true;
 
-  unusedTypeNodes: Map<string, Set<[number, number]>> = new Map();
-  unusedExportNodes: Map<string, Set<[number, number]>> = new Map();
+  unusedTypeNodes: Map<string, Set<Fix>> = new Map();
+  unusedExportNodes: Map<string, Set<Fix>> = new Map();
 
   constructor({ isEnabled, cwd, fixTypes = [], isRemoveFiles }: Fixer) {
     this.isEnabled = isEnabled;
@@ -45,7 +46,7 @@ export class IssueFixer {
 
   public async fixIssues(issues: Issues) {
     await this.removeUnusedFiles(issues);
-    await this.removeUnusedExportKeywords(issues);
+    await this.removeUnusedExports(issues);
     await this.removeUnusedDependencies(issues);
   }
 
@@ -53,7 +54,7 @@ export class IssueFixer {
     const relPath = relative(filePath);
 
     const types = [
-      ...(this.isFixUnusedTypes ? (['types', 'nsTypes'] as const) : []),
+      ...(this.isFixUnusedTypes ? (['types', 'nsTypes', 'classMembers', 'enumMembers'] as const) : []),
       ...(this.isFixUnusedExports ? (['exports', 'nsExports'] as const) : []),
     ];
 
@@ -73,25 +74,20 @@ export class IssueFixer {
     }
   }
 
-  private async removeUnusedExportKeywords(issues: Issues) {
+  private async removeUnusedExports(issues: Issues) {
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
-      const exportPositions: Fixes = [
-        ...(this.isFixUnusedTypes ? this.unusedTypeNodes.get(filePath) ?? [] : []),
-        ...(this.isFixUnusedExports ? this.unusedExportNodes.get(filePath) ?? [] : []),
-      ].sort((a, b) => b[0] - a[0]);
+      const types = (this.isFixUnusedTypes && this.unusedTypeNodes.get(filePath)) || [];
+      const exports = (this.isFixUnusedExports && this.unusedExportNodes.get(filePath)) || [];
+      const exportPositions = [...types, ...exports].filter(fix => fix !== undefined).sort((a, b) => b[0] - a[0]);
 
       if (exportPositions.length > 0) {
         const sourceFileText = exportPositions.reduce(
-          (text, [start, end]) => text.substring(0, start) + text.substring(end),
+          (text, [start, end, flags]) => removeExport({ text, start, end, flags }),
           await readFile(filePath, 'utf-8')
         );
 
-        const withoutEmptyReExports = sourceFileText
-          .replaceAll(/export \{[ ,]+\} from ('|")[^'"]+('|");?\r?\n?/g, '')
-          .replaceAll(/export \{[ ,]+\};?\r?\n?/g, '');
-
-        await writeFile(filePath, withoutEmptyReExports);
+        await writeFile(filePath, sourceFileText);
 
         this.markExportFixed(issues, filePath);
       }

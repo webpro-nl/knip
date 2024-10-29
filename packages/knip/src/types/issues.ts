@@ -18,6 +18,7 @@ export type Issue = {
   symbols?: IssueSymbol[];
   symbolType?: SymbolType;
   parentSymbol?: string;
+  specifier?: string;
   severity?: IssueSeverity;
   pos?: number;
   line?: number;

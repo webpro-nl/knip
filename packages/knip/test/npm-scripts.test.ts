@@ -42,6 +42,7 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
       ['eslint-v8', new Set(['eslint'])],
       ['@commitlint/cli', new Set(['commitlint'])],
       ['@org/runnable', new Set(['runnable'])],
+      ['tsup', new Set(['tsup'])],
       ['commitlint', new Set(['@commitlint/cli'])],
     ])
   );
@@ -62,6 +63,7 @@ test('Unused dependencies in npm scripts', async () => {
 
   assert(issues.binaries['package.json']['nodemon']);
   assert(issues.binaries['package.json']['dotenv']);
+  assert(issues.binaries['package.json']['http-server']);
   assert(!issues.binaries['package.json']['rm']);
   assert(!issues.binaries['package.json']['bash']);
 
@@ -69,7 +71,7 @@ test('Unused dependencies in npm scripts', async () => {
     ...baseCounters,
     dependencies: 1,
     devDependencies: 1,
-    binaries: 2,
+    binaries: 3,
     processed: 2,
     total: 2,
   });

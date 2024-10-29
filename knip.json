@@ -17,8 +17,7 @@
       "entry": [
         "{remark,scripts}/*.ts",
         "src/components/{Head,Header,Footer}.astro!"
-      ],
-      "ignore": "config.ts"
+      ]
     }
   }
 }

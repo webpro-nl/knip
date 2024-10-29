@@ -1,0 +1,36 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+---
+
+<StarlightPage frontmatter={{ title: 'Playground', template: 'splash' }}>
+  <p>Welcome to the Knip playground. There are issues on purpose in the codebases below so Knip will report various types of issues.</p>
+
+  <p>Feel free to play around!</p>
+
+  <ul>
+    <li><a href="#basic">Basic</a></li>
+    <li><a href="#monorepo">Monorepo</a></li>
+  </ul>
+
+  <p>Shoutout to <a href="https://stackblitz.com">StackBlitz</a> for generously providing these free dev containers.</p>
+
+  <h2 id="basic">Basic</h2>
+
+  <p>
+    Visit this <a href="https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/playground/basic?file=README.md&amp;view=editor">Knip playground on StackBlitz</a>
+    to try out Knip:</p>
+
+  <div class="playground">
+    <iframe src="https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/playground/basic?file=README.md&amp;view=editor" />
+  </div>
+
+  <h2 id="monorepo">Monorepo</h2>
+
+  <p>
+    Visit this <a href="https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/playground/monorepo?file=README.md&amp;view=editor">Knip playground on StackBlitz</a>
+    to try out Knip in a monorepo setting:</p>
+
+  <div class="playground">
+    <iframe src="https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/playground/monorepo?file=README.md&amp;view=editor" />
+  </div>
+</StarlightPage>

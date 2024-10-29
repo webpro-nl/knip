@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { get } from '#p/util/object.js';
-import { isInternal } from '#p/util/path.js';
-import { hasDependency } from '#p/util/plugin.js';
-import { toEntryPattern } from '#p/util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency, toEntry } from '../../util/input.js';
+import { get } from '../../util/object.js';
+import { isInternal } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
 import type {
   ConfiguredPlugin,
   GraphqlCodegenTypes,
@@ -77,11 +77,11 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     })
     .flatMap(plugin => {
       if (typeof plugin !== 'string') return [];
-      if (isInternal(plugin)) return [toEntryPattern(plugin)];
-      return [plugin.includes('codegen-') ? plugin : `@graphql-codegen/${plugin}`];
+      if (isInternal(plugin)) return [toEntry(plugin)];
+      return [plugin.includes('codegen-') ? plugin : `@graphql-codegen/${plugin}`].map(toDependency);
     });
 
-  return [...presets, ...flatPlugins, ...nestedPlugins];
+  return [...presets, ...flatPlugins, ...nestedPlugins].map(id => (typeof id === 'string' ? toDependency(id) : id));
 };
 
 export default {

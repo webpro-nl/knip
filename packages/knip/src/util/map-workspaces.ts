@@ -1,6 +1,5 @@
 import fg from 'fast-glob';
-import type { Package } from '../ConfigurationChief.js';
-import type { PackageJson } from '../types/package-json.js';
+import type { Package, PackageJson } from '../types/package-json.js';
 import { partition } from './array.js';
 import { debugLog } from './debug.js';
 import { ConfigurationError } from './errors.js';
@@ -8,12 +7,15 @@ import { getPackageName } from './package-name.js';
 import { join } from './path.js';
 import { _require } from './require.js';
 
-export default async function mapWorkspaces(cwd: string, workspaces: string[]) {
-  const [negatedPatterns, patterns] = partition(workspaces, p => p.match(/^!/));
-  const byPkgDir = new Map<string, Package>();
-  const byPkgName = new Map<string, Package>();
+type Packages = Map<string, Package>;
+type WorkspacePkgNames = Set<string>;
 
-  if (patterns.length === 0 && negatedPatterns.length === 0) return [byPkgDir, byPkgName];
+export default async function mapWorkspaces(cwd: string, workspaces: string[]): Promise<[Packages, WorkspacePkgNames]> {
+  const [negatedPatterns, patterns] = partition(workspaces, p => p.match(/^!/));
+  const packages: Packages = new Map();
+  const wsPkgNames: WorkspacePkgNames = new Set();
+
+  if (patterns.length === 0 && negatedPatterns.length === 0) return [packages, wsPkgNames];
 
   const matches = await fg.glob(patterns, {
     cwd,
@@ -28,8 +30,8 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]) {
       const manifest: PackageJson = _require(filePath);
       const pkgName = getPackageName(manifest, dir);
       const pkg: Package = { dir, name, pkgName, manifest };
-      byPkgDir.set(name, pkg);
-      if (pkgName) byPkgName.set(pkgName, pkg);
+      packages.set(name, pkg);
+      if (pkgName) wsPkgNames.add(pkgName);
       else throw new ConfigurationError(`Missing package name in ${filePath}`);
     } catch (error) {
       // @ts-expect-error
@@ -38,5 +40,5 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]) {
     }
   }
 
-  return [byPkgDir, byPkgName];
+  return [packages, wsPkgNames];
 }

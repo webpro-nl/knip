@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/workspaces-complex-module-resolution');
+const cwd = resolve('fixtures/workspaces-module-resolution');
 
 test('Resolve modules properly across multiple workspaces', async () => {
   const { counters } = await main({

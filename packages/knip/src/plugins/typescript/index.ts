@@ -1,9 +1,10 @@
 import type { TsConfigJson } from 'type-fest';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { compact } from '#p/util/array.js';
-import { dirname, isInternal, join, toAbsolute } from '#p/util/path.js';
-import { hasDependency, loadJSON } from '#p/util/plugin.js';
-import { loadTSConfig } from '#p/util/tsconfig-loader.js';
+import type { ConfigArg } from '../../types/args.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { compact } from '../../util/array.js';
+import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.js';
+import { join } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://www.typescriptlang.org/tsconfig
 
@@ -13,45 +14,25 @@ const enablers = ['typescript'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['tsconfig.json', 'tsconfig.*.json'];
+const config = ['tsconfig.json'];
 
 const production: string[] = [];
 
-const getExtends = async (configFilePath: string, internalExtends = new Set<string>()) => {
-  const filePath = configFilePath.replace(/(\.json)?$/, '.json');
-  const localConfig: TsConfigJson | undefined = await loadJSON(filePath);
+const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) => {
+  const { compilerOptions } = localConfig;
 
-  if (!localConfig) return internalExtends;
+  const extend = localConfig.extends
+    ? [localConfig.extends].flat().map(specifier => toConfig('typescript', specifier, options.configFilePath))
+    : [];
 
-  const extends_ = localConfig.extends ? [localConfig.extends].flat() : [];
-  for (const extend of extends_) {
-    if (isInternal(extend)) {
-      const presetConfigPath = toAbsolute(extend, dirname(configFilePath));
-      await getExtends(presetConfigPath, internalExtends);
-    }
-  }
+  const references =
+    localConfig.references
+      ?.filter(reference => reference.path.endsWith('.json'))
+      .map(reference => toConfig('typescript', reference.path, options.configFilePath)) ?? [];
 
-  for (const extend of extends_) {
-    if (isInternal(extend)) internalExtends.add(toAbsolute(extend, dirname(configFilePath)));
-    else internalExtends.add(extend);
-  }
+  if (!(compilerOptions && localConfig)) return compact([...extend, ...references]);
 
-  return internalExtends;
-};
-
-const resolveConfig: ResolveConfig = async (localConfig, options) => {
-  const { isProduction, configFileDir, configFileName } = options;
-
-  const configFilePath = join(configFileDir, configFileName);
-  const { compilerOptions } = await loadTSConfig(configFilePath);
-
-  const extend = await getExtends(configFilePath);
-
-  if (!(compilerOptions && localConfig)) return [];
-
-  const jsx = compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : [];
-
-  if (isProduction) return [...jsx];
+  const jsx = (compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : []).map(toProductionDependency);
 
   const types = compilerOptions.types ?? [];
   const plugins = Array.isArray(compilerOptions?.plugins)
@@ -59,7 +40,14 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
     : [];
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
 
-  return compact([...extend, ...types, ...plugins, ...importHelpers, ...jsx]);
+  return compact([...extend, ...references, ...[...types, ...plugins, ...importHelpers].map(toDeferResolve), ...jsx]);
+};
+
+const args = {
+  binaries: ['tsc'],
+  string: ['project'],
+  alias: { project: ['p'] },
+  config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,
 };
 
 export default {
@@ -69,4 +57,5 @@ export default {
   config,
   production,
   resolveConfig,
+  args,
 } satisfies Plugin;

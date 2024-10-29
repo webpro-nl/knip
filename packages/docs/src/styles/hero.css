@@ -16,16 +16,20 @@
   font-size: var(--sl-text-3xl);
 }
 
-.action.primary {
+.actions .sl-link-button.primary {
   background-color: var(--sl-color-orange);
 }
 
-.action.primary:hover {
+.actions .sl-link-button.primary:hover {
   background-color: var(--sl-color-bright-orange);
 }
 
+.actions .sl-link-button.secondary:hover {
+  background-color: var(--sl-color-orange);
+}
+
 :root {
-  .action.primary {
+  .actions .sl-link-button.primary {
     color: var(--sl-color-white);
     border: 1px solid var(--sl-color-white);
   }
@@ -36,12 +40,12 @@
     border-color: var(--sl-color-black);
   }
 
-  .action.primary {
+  .actions .sl-link-button.primary {
     color: var(--sl-color-black);
     border: 2px solid var(--sl-color-black);
   }
 
-  .action.primary svg {
+  .actions .sl-link-button.primary svg {
     color: var(--sl-color-black);
   }
 }

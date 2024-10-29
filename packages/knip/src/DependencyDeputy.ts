@@ -205,8 +205,8 @@ export class DependencyDeputy {
       typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName));
 
     if (closestWorkspaceName || closestWorkspaceNameForTypes) {
-      closestWorkspaceName && this.addReferencedDependency(closestWorkspaceName, packageName);
-      closestWorkspaceNameForTypes && this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+      if (closestWorkspaceName) this.addReferencedDependency(closestWorkspaceName, packageName);
+      if (closestWorkspaceNameForTypes) this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
       return true;
     }
     this.addReferencedDependency(workspace.name, packageName);
@@ -263,12 +263,12 @@ export class DependencyDeputy {
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === DT_SCOPE) {
-          // The `pkg` dependency already has types included, i.e. this `@types/pkg` is obsolete
-          if (hasTypesIncluded?.has(typedDependency)) return false;
-
           const typedPackageName = getPackageFromDefinitelyTyped(typedDependency);
           // Ignore `@types/*` packages that don't have a related dependency (e.g. `@types/node`)
-          if (IGNORE_DEFINITELY_TYPED.includes(typedPackageName)) return true;
+          if (IGNORE_DEFINITELY_TYPED.has(typedPackageName)) return true;
+
+          // The `pkg` dependency already has types included, i.e. this `@types/pkg` is obsolete
+          if (hasTypesIncluded?.has(typedDependency)) return false;
 
           // Ignore typed dependencies that have a host dependency that's referenced
           // Example: `next` (host) has `react-dom` and/or `@types/react-dom` (peer), peers can be ignored if host `next` is referenced
@@ -390,6 +390,7 @@ export class DependencyDeputy {
     this.handleIgnoredDependencies(issues, counters, 'devDependencies');
     this.handleIgnoredDependencies(issues, counters, 'optionalPeerDependencies');
     this.handleIgnoredDependencies(issues, counters, 'unlisted');
+    this.handleIgnoredDependencies(issues, counters, 'unresolved');
     this.handleIgnoredBinaries(issues, counters, 'binaries');
   }
 

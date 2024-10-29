@@ -21,9 +21,6 @@
     flex-direction: row;
     align-items: unset;
   }
-
-  .sponsors-body > .column:first-of-type {
-  }
 }
 
 .sponsors {

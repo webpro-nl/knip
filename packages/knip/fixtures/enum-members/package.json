@@ -1,12 +1,3 @@
 {
-  "name": "@fixtures/enum-members",
-  "dependencies": {},
-  "knip": {
-    "entry": [
-      "index.ts"
-    ],
-    "project": [
-      "*.ts"
-    ]
-  }
+  "name": "@fixtures/enum-members"
 }

@@ -40,7 +40,8 @@
         "useNodeAssertStrict": "error"
       },
       "suspicious": {
-        "noConsoleLog": "error"
+        "noConsoleLog": "error",
+        "noExplicitAny": "off"
       }
     }
   },
@@ -60,6 +61,11 @@
   "json": {
     "formatter": {
       "lineWidth": 80
+    }
+  },
+  "css": {
+    "formatter": {
+      "quoteStyle": "single"
     }
   },
   "overrides": [
@@ -106,6 +112,12 @@
             "useImportType": "off"
           }
         }
+      }
+    },
+    {
+      "include": ["packages/knip/test/util/get-inputs-from-scripts.test.ts"],
+      "formatter": {
+        "lineWidth": 200
       }
     }
   ]

@@ -169,12 +169,22 @@ export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
   name.elements.map(element => element.name.getText());
 
 export const isConsiderReferencedNS = (node: ts.Identifier) =>
+  ts.isPropertyAssignment(node.parent) ||
   ts.isShorthandPropertyAssignment(node.parent) ||
   (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
   ts.isSpreadAssignment(node.parent) ||
   ts.isExportAssignment(node.parent) ||
   (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent);
+
+const objectEnumerationMethods = new Set(['keys', 'entries', 'values', 'getOwnPropertyNames']);
+export const isObjectEnumerationCallExpressionArgument = (node: ts.Identifier) =>
+  ts.isCallExpression(node.parent) &&
+  node.parent.arguments.includes(node) &&
+  ts.isPropertyAccessExpression(node.parent.expression) &&
+  ts.isIdentifier(node.parent.expression.expression) &&
+  node.parent.expression.expression.escapedText === 'Object' &&
+  objectEnumerationMethods.has(String(node.parent.expression.name.escapedText));
 
 export const isTopLevel = (node: ts.Node) =>
   ts.isSourceFile(node.parent) || (node.parent && ts.isSourceFile(node.parent.parent));
@@ -206,7 +216,9 @@ const getAncestorTypeDeclaration = (node: ts.Node) => {
   }
 };
 
-export const isReferencedInExportedType = (node: ts.Node) => {
+export const isReferencedInExport = (node: ts.Node) => {
+  if (ts.isTypeQueryNode(node.parent) && isExported(node.parent.parent)) return true;
+  if (ts.isTypeReferenceNode(node.parent) && isExported(node.parent.parent)) return true;
   const typeNode = getAncestorTypeDeclaration(node);
   return Boolean(typeNode && isExported(typeNode));
 };
@@ -218,3 +230,11 @@ export const getExportKeywordNode = (node: ts.Node) =>
 export const getDefaultKeywordNode = (node: ts.Node) =>
   // @ts-expect-error Property 'modifiers' does not exist on type 'Node'.
   (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);
+
+export const hasRequireCall = (node: ts.Node): boolean => {
+  if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'require') return true;
+  return node.getChildren().some(child => hasRequireCall(child));
+};
+
+export const isModuleExportsAccess = (node: ts.PropertyAccessExpression) =>
+  ts.isIdentifier(node.expression) && node.expression.escapedText === 'module' && node.name.escapedText === 'exports';

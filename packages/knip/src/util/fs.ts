@@ -1,11 +1,11 @@
-import { readFileSync, statSync } from 'node:fs';
+import { statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
 import { timerify } from './Performance.js';
 import { LoaderError } from './errors.js';
-import { dirname, join } from './path.js';
+import { join } from './path.js';
 
 export const isDirectory = (filePath: string) => {
   try {
@@ -63,19 +63,5 @@ export const parseJSON = async (filePath: string, contents: string) => {
 export const parseYAML = (contents: string) => {
   return yaml.load(contents);
 };
-
-export function isTypeModule(path: string) {
-  while (path && path !== '.' && path !== '/') {
-    path = dirname(path);
-    try {
-      const pkg = readFileSync(join(path, 'package.json'), 'utf-8');
-      try {
-        return JSON.parse(pkg).type === 'module';
-      } catch {}
-      break;
-    } catch {}
-  }
-  return false;
-}
 
 export const _loadJSON = timerify(loadJSON);

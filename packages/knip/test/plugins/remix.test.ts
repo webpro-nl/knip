@@ -26,11 +26,11 @@ test('Find dependencies with the Remix plugin', async () => {
 
   assert(issues.unlisted['app/entry.client.tsx']['@remix-run/react']);
   assert(issues.unlisted['app/entry.client.tsx']['react']);
-  assert(issues.unlisted['app/entry.client.tsx']['react-dom/client']);
+  assert(issues.unlisted['app/entry.client.tsx']['react-dom']);
 
   assert(issues.unlisted['app/entry.server.tsx']['@remix-run/node']);
   assert(issues.unlisted['app/entry.server.tsx']['@remix-run/react']);
-  assert(issues.unlisted['app/entry.server.tsx']['react-dom/server']);
+  assert(issues.unlisted['app/entry.server.tsx']['react-dom']);
 
   assert(issues.unlisted['app/root.tsx']['@remix-run/node']);
   assert(issues.unlisted['app/root.tsx']['@remix-run/react']);

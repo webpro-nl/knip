@@ -1,12 +1,12 @@
-import type { EnablerPatterns } from '#p/types/config.js';
-import type { IsPluginEnabled, Plugin } from '#p/types/plugins.js';
-import { hasDependency, toCosmiconfig } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://github.com/lirantal/lockfile-lint/blob/main/packages/lockfile-lint/README.md
 
 const title = 'lockfile-lint';
 
-const enablers: EnablerPatterns = ['lockfile-lint'];
+const enablers = ['lockfile-lint'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

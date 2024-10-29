@@ -12,7 +12,7 @@ A `$schema` field is a URL that you put at the top of your JSON file. This
 allows you to get red squiggly lines inside of your IDE when you make a typo or
 provide an otherwise invalid configuration option.
 
-In JSON, you can use the provided JSON schema:
+In JSON, use the provided JSON schema:
 
 ```json title="knip.json"
 {
@@ -22,7 +22,7 @@ In JSON, you can use the provided JSON schema:
 
 ### JSONC
 
-In JSONC, you can use the provided JSONC schema:
+In JSONC, use the provided JSONC schema:
 
 ```json title="knip.jsonc"
 {
@@ -238,7 +238,7 @@ used internally, it will be reported as unused.
 }
 ```
 
-In a more fine-grained manner, you can also ignore only specific issue types:
+In a more fine-grained manner, to ignore only specific issue types:
 
 ```json title="knip.json"
 {

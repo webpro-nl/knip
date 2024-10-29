@@ -1,15 +1,15 @@
 import ts from 'typescript';
 import { CacheConsultant } from './CacheConsultant.js';
-import type { PrincipalOptions } from './PrincipalFactory.js';
-import type { ReferencedDependencies } from './WorkspaceWorker.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
+import type { GetImportsAndExportsOptions } from './types/config.js';
 import type { DependencyGraph, Export, ExportMember, FileNode, UnresolvedImport } from './types/dependency-graph.js';
+import type { PrincipalOptions } from './types/project.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/create-hosts.js';
-import { type GetImportsAndExportsOptions, _getImportsAndExports } from './typescript/get-imports-and-exports.js';
+import { _getImportsAndExports } from './typescript/get-imports-and-exports.js';
 import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
@@ -53,8 +53,6 @@ export class ProjectPrincipal {
   entryPaths = new Set<string>();
   projectPaths = new Set<string>();
   nonEntryPaths = new Set<string>();
-
-  referencedDependencies: Set<[string, string, string]> = new Set();
 
   // We don't want to report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
@@ -194,11 +192,6 @@ export class ProjectPrincipal {
     this.projectPaths.delete(filePath);
     this.invalidateFile(filePath);
     this.deletedFiles.add(filePath);
-  }
-
-  public addReferencedDependencies(workspaceName: string, referencedDependencies: ReferencedDependencies) {
-    for (const referencedDependency of referencedDependencies)
-      this.referencedDependencies.add([...referencedDependency, workspaceName]);
   }
 
   /**

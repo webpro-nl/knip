@@ -47,6 +47,10 @@ const getPages = async () => {
     frontmatter: { title: 'Become a sponsor!', description: 'Become a sponsor of Knip' },
   };
 
+  pages['docs/playground.webp'] = {
+    frontmatter: { title: 'Playground', description: 'Try Knip in your browser' },
+  };
+
   return pages;
 };
 

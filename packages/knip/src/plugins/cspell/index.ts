@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { CSpellConfig } from './types.js';
 
 // https://cspell.org/configuration/
@@ -18,7 +19,7 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<CSpellConfig> = config => {
-  return config.import ?? [];
+  return (config.import ?? []).map(toDeferResolve);
 };
 
 export default {

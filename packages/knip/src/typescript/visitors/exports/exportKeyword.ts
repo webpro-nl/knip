@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { FIX_FLAGS } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import { compact } from '../../../util/array.js';
@@ -18,9 +19,10 @@ export default visit(
 
     if (exportKeyword) {
       const getFix = (node: ts.Node, defaultKeyword?: ts.Node): Fix =>
-        isFixExports ? [node.getStart(), (defaultKeyword ?? node).getEnd() + 1] : undefined;
-      const getElementFix = (node: ts.Node): Fix => (isFixExports ? [node.getStart(), node.getEnd()] : undefined);
-      const getTypeFix = (node: ts.Node): Fix => (isFixTypes ? [node.getStart(), node.getEnd() + 1] : undefined);
+        isFixExports ? [node.getStart(), (defaultKeyword ?? node).getEnd() + 1, FIX_FLAGS.NONE] : undefined;
+
+      const getTypeFix = (node: ts.Node): Fix =>
+        isFixTypes ? [node.getStart(), node.getEnd() + 1, FIX_FLAGS.NONE] : undefined;
 
       if (ts.isVariableStatement(node)) {
         // @ts-expect-error TODO Issue seems caused by mismatch between returned `node` types (but all ts.Node)
@@ -30,9 +32,13 @@ export default visit(
             return compact(
               declaration.name.elements.map(element => {
                 if (ts.isIdentifier(element.name)) {
-                  const fix = getElementFix(element);
+                  const fix = isFixExports
+                    ? [element.getStart(), element.getEnd(), FIX_FLAGS.OBJECT_BINDING]
+                    : undefined;
                   return {
                     node: element,
+                    // @ts-expect-error We'll use the symbol in `findInternalReferences`
+                    symbol: element.symbol,
                     identifier: element.name.escapedText.toString(),
                     type: SymbolType.UNKNOWN,
                     pos: element.name.getStart(),
@@ -47,9 +53,11 @@ export default visit(
             return compact(
               declaration.name.elements.map(element => {
                 if (ts.isBindingElement(element)) {
-                  const fix = getElementFix(element);
+                  const fix = isFixExports ? [element.getStart(), element.getEnd(), FIX_FLAGS.NONE] : undefined;
                   return {
                     node: element,
+                    // @ts-expect-error We'll use the symbol in `findInternalReferences`
+                    symbol: element.symbol,
                     identifier: element.getText(),
                     type: SymbolType.UNKNOWN,
                     pos: element.getStart(),
@@ -96,7 +104,7 @@ export default visit(
                 // Naive, but [does.the.job()]
                 pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
                 type: SymbolType.MEMBER,
-                fix: undefined,
+                fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
               }))
           : [];
 
@@ -126,7 +134,9 @@ export default visit(
           identifier: stripQuotes(member.name.getText()),
           pos: member.name.getStart(),
           type: SymbolType.MEMBER,
-          fix: undefined,
+          fix: isFixTypes
+            ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
+            : undefined,
         }));
 
         return { node, identifier, type: SymbolType.ENUM, pos, members, fix };

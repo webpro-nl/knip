@@ -3,7 +3,7 @@ import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { timerify } from './Performance.js';
 import { compact } from './array.js';
 import { globby } from './glob-core.js';
-import { join, relative } from './path.js';
+import { isAbsolute, join, relative } from './path.js';
 
 interface GlobOptions {
   cwd: string;
@@ -15,7 +15,8 @@ interface GlobOptions {
 // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
 const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) => {
   const relativePath = relative(cwd, dir);
-  const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
+  const prepend = (pattern: string) =>
+    isAbsolute(pattern.replace(/^!/, '')) ? pattern : prependDirToPattern(relativePath, pattern);
   return compact([patterns].flat().map(prepend).map(removeProductionSuffix)).sort(negatedLast);
 };
 

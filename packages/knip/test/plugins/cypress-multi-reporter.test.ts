@@ -13,15 +13,16 @@ test('Find dependencies with the cypress-multi-reporter plugin', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['cypress.config.ts']['@nrwl/cypress/plugins/cypress-preset']);
+  assert(issues.unlisted['cypress.config.ts']['@nrwl/cypress']);
   assert(issues.unlisted['cypress/support/commands.ts']['@faker-js/faker']);
-  assert(issues.unlisted['cypress/support/e2e.ts']['@testing-library/cypress/add-commands']);
-  assert(issues.unlisted['cypress.config.ts']['@testing-library/my-fake-reporter']);
+  assert(issues.unlisted['cypress/support/e2e.ts']['@testing-library/cypress']);
+  assert(issues.unresolved['cypress.config.ts']['@testing-library/my-fake-reporter']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 0,
-    unlisted: 4,
+    unlisted: 3,
+    unresolved: 1,
     processed: 3,
     total: 3,
   });

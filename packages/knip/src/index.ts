@@ -7,20 +7,21 @@ import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import type { ProjectPrincipal } from './ProjectPrincipal.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
-import { _getDependenciesFromScripts } from './binaries/index.js';
+import { _getInputsFromScripts } from './binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
-import { getFilteredScripts } from './manifest/helpers.js';
 import type { CommandLineOptions } from './types/cli.js';
 import type { DependencyGraph, Export, ExportMember } from './types/dependency-graph.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { getOrCreateFileNode, updateImportMap } from './util/dependency-graph.js';
+import { getReferencedInputsHandler } from './util/get-referenced-inputs.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { _glob, negate } from './util/glob.js';
-import { getReferencedDependencyHandler } from './util/handle-dependency.js';
 import { getHasStrictlyNsReferences, getType } from './util/has-strictly-ns-references.js';
+import { type Input, isConfigPattern, isEntry, isProductionEntry, toProductionEntry } from './util/input.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
-import { getEntryPathsFromManifest, getPackageNameFromModuleSpecifier } from './util/modules.js';
-import { dirname, join } from './util/path.js';
+import { getPackageNameFromModuleSpecifier } from './util/modules.js';
+import { getEntryPathsFromManifest } from './util/package-json.js';
+import { dirname, isAbsolute, join, relative } from './util/path.js';
 import { findMatch } from './util/regex.js';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from './util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler } from './util/to-source-path.js';
@@ -92,6 +93,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const collector = new IssueCollector({ cwd, rules, filters });
 
+  // Handle config files only once across workspaces workers
+  const allConfigFilePaths = new Set<string>();
+
   const enabledPluginsStore = new Map<string, string[]>();
 
   const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
@@ -100,36 +104,84 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const isGitIgnored = await getGitIgnoredHandler({ cwd, gitignore });
   const toSourceFilePath = getToSourcePathHandler(chief);
-  const handleReferencedDependency = getReferencedDependencyHandler(collector, deputy, chief);
+  const getReferencedInternalFilePath = getReferencedInputsHandler(collector, deputy, chief, isGitIgnored);
   const shouldIgnore = getShouldIgnoreHandler(isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
 
   for (const workspace of workspaces) {
-    const { name, dir, ancestors, pkgName, manifestPath } = workspace;
+    const { name, dir, manifestPath } = workspace;
+    const manifest = chief.getManifestForWorkspace(name);
+    if (!manifest) continue;
+    const { ignoreBinaries, ignoreDependencies } = chief.getIgnores(name);
+    deputy.addWorkspace({ name, cwd, dir, manifestPath, manifest, ignoreBinaries, ignoreDependencies });
+  }
+
+  for (const workspace of workspaces) {
+    const { name, dir, ancestors, pkgName } = workspace;
 
     streamer.cast(`Analyzing workspace ${name}...`);
 
     const manifest = chief.getManifestForWorkspace(name);
-    const { ignoreBinaries, ignoreDependencies } = chief.getIgnores(name);
 
-    if (!manifest) continue;
+    if (!manifest) {
+      continue;
+    }
 
-    deputy.addWorkspace({ name, cwd, dir, manifestPath, manifest, ignoreBinaries, ignoreDependencies });
     const dependencies = deputy.getDependencies(name);
 
     const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
     const extensions = getCompilerExtensions(compilers);
     const config = chief.getConfigForWorkspace(name, extensions);
 
-    const filteredScripts = getFilteredScripts({ isProduction, scripts: manifest.scripts });
-    const manifestScripts = Object.values(filteredScripts);
-    const manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
-
-    const { isFile, compilerOptions, definitionPaths } = await loadTSConfig(join(dir, tsConfigFile ?? 'tsconfig.json'));
+    const tsConfigFilePath = join(dir, tsConfigFile ?? 'tsconfig.json');
+    const { isFile, compilerOptions, definitionPaths } = await loadTSConfig(tsConfigFilePath);
 
     if (isFile) augmentWorkspace(workspace, dir, compilerOptions);
 
-    const principal = factory.getPrincipal({
+    const worker = new WorkspaceWorker({
+      name,
+      dir,
+      cwd,
+      config,
+      manifest,
+      dependencies,
+      getReferencedInternalFilePath: (input: Input) => getReferencedInternalFilePath(input, workspace),
+      isProduction,
+      isStrict,
+      rootIgnore: chief.config.ignore,
+      negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
+      ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
+      enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
+      isCache,
+      cacheLocation,
+      allConfigFilePaths,
+    });
+
+    await worker.init();
+
+    const deps = new Set<Input>();
+
+    debugLogArray(name, 'Definition paths', definitionPaths);
+    for (const id of definitionPaths) deps.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
+
+    const ignore = worker.getIgnorePatterns();
+    const sharedGlobOptions = { cwd, dir, gitignore };
+
+    collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
+
+    // Add entry paths from package.json#main, #bin, #exports
+    const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { ...sharedGlobOptions, ignore });
+    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
+    for (const id of entryPathsFromManifest.map(id => toProductionEntry(id))) deps.add(id);
+
+    // Get dependencies from plugins
+    const dependenciesFromPlugins = await worker.findDependenciesByPlugins();
+    for (const id of dependenciesFromPlugins) deps.add(id);
+
+    enabledPluginsStore.set(name, worker.enabledPlugins);
+
+    // workspace + worker → principal
+    const principal = factory.createPrincipal({
       cwd: dir,
       paths: config.paths,
       isFile,
@@ -144,47 +196,22 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       cacheLocation,
     });
 
-    const worker = new WorkspaceWorker({
-      name,
-      dir,
-      cwd,
-      config,
-      manifest,
-      dependencies,
-      isProduction,
-      isStrict,
-      rootIgnore: chief.config.ignore,
-      negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
-      enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
-      isCache,
-      cacheLocation,
-    });
+    const entryFilePatterns = new Set<string>();
+    const productionEntryFilePatterns = new Set<string>();
 
-    await worker.init();
-
-    principal.addEntryPaths(definitionPaths);
-    debugLogArray(name, 'Definition paths', definitionPaths);
-
-    const ignore = worker.getIgnorePatterns();
-    const sharedGlobOptions = { cwd, dir, gitignore };
-
-    collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
-
-    // Add dependencies from package.json#scripts
-    const options = { manifestScriptNames, cwd: dir, dependencies };
-    const dependenciesFromManifest = _getDependenciesFromScripts(manifestScripts, options);
-    principal.addReferencedDependencies(name, new Set(dependenciesFromManifest.map(id => [manifestPath, id])));
-
-    // Add entry paths from package.json#main, #bin, #exports
-    const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { ...sharedGlobOptions, ignore });
-    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
-    principal.addEntryPaths(entryPathsFromManifest);
-
-    // Run plugins
-    const { referencedDependencies, enabledPlugins, entryFilePatterns, productionEntryFilePatterns } =
-      await worker.findDependenciesByPlugins();
-    enabledPluginsStore.set(name, enabledPlugins);
-    principal.addReferencedDependencies(name, referencedDependencies);
+    for (const dependency of deps) {
+      const s = dependency.specifier;
+      if (isEntry(dependency)) {
+        entryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
+      } else if (isProductionEntry(dependency)) {
+        productionEntryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
+      } else if (!isConfigPattern(dependency)) {
+        const ws =
+          (dependency.containingFilePath && chief.findWorkspaceByFilePath(dependency.containingFilePath)) || workspace;
+        const specifierFilePath = getReferencedInternalFilePath(dependency, ws);
+        if (specifierFilePath) principal.addEntryPath(specifierFilePath);
+      }
+    }
 
     if (isProduction) {
       const negatedEntryPatterns: string[] = Array.from(entryFilePatterns).map(negate);
@@ -284,7 +311,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           skipTypeOnly: isStrict,
           isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
           isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
-          ignoreExportsUsedInFile: Boolean(chief.config.ignoreExportsUsedInFile),
+          ignoreExportsUsedInFile: chief.config.ignoreExportsUsedInFile,
           isReportClassMembers,
           tags,
         },
@@ -307,12 +334,21 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       // Handle scripts here since they might lead to more entry files
       if (scripts && scripts.size > 0) {
-        const cwd = dirname(filePath);
         const dependencies = deputy.getDependencies(workspace.name);
         const manifestScriptNames = new Set<string>();
-        const specifiers = _getDependenciesFromScripts(scripts, { cwd, manifestScriptNames, dependencies });
+        const rootCwd = cwd;
+        const options = {
+          cwd: dirname(filePath),
+          rootCwd,
+          containingFilePath: filePath,
+          dependencies,
+          manifestScriptNames,
+        };
+        const specifiers = _getInputsFromScripts(scripts, options);
         for (const specifier of specifiers) {
-          const specifierFilePath = handleReferencedDependency(specifier, filePath, workspace);
+          specifier.containingFilePath = filePath;
+          specifier.dir = cwd;
+          const specifierFilePath = getReferencedInternalFilePath(specifier, workspace);
           if (specifierFilePath) analyzeSourceFile(specifierFilePath, principal);
         }
       }
@@ -321,14 +357,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   for (const principal of principals) {
     principal.init();
-
-    for (const [containingFilePath, specifier, workspaceName] of principal.referencedDependencies) {
-      const workspace = chief.findWorkspaceByName(workspaceName);
-      if (workspace) {
-        const specifierFilePath = handleReferencedDependency(specifier, containingFilePath, workspace);
-        if (specifierFilePath && !isGitIgnored(specifierFilePath)) principal.addEntryPath(specifierFilePath);
-      }
-    }
 
     streamer.cast('Running async compilers...');
 
@@ -394,7 +422,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           const importsForExport = file.imported;
 
           for (const [identifier, exportedItem] of exportItems.entries()) {
-            if (exportedItem.isReExport) continue;
+            if (!isFix && exportedItem.isReExport) continue;
 
             // Skip tagged exports
             if (shouldIgnore(exportedItem.jsDocTags)) continue;
@@ -432,6 +460,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
               if (isReferenced) {
                 if (report.enumMembers && exportedItem.type === 'enum') {
+                  if (importsForExport.refs.has(identifier)) continue; // consider members referenced (isObjectEnumerationCallExpressionArgument)
+
                   for (const member of exportedItem.members) {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
                     if (shouldIgnore(member.jsDocTags)) continue;
@@ -444,7 +474,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                       if (!isReferenced) {
                         if (isIgnored) continue;
 
-                        collector.addIssue({
+                        const isIssueAdded = collector.addIssue({
                           type: 'enumMembers',
                           filePath,
                           workspace: workspace.name,
@@ -454,6 +484,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                           line: member.line,
                           col: member.col,
                         });
+
+                        if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                       } else if (isIgnored) {
                         for (const tagName of exportedItem.jsDocTags) {
                           if (tags[1].includes(tagName.replace(/^\@/, ''))) {
@@ -480,7 +512,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                       continue;
                     }
 
-                    collector.addIssue({
+                    const isIssueAdded = collector.addIssue({
                       type: 'classMembers',
                       filePath,
                       workspace: workspace.name,
@@ -490,6 +522,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                       line: member.line,
                       col: member.col,
                     });
+
+                    if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                   }
                 }
 
@@ -548,7 +582,14 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           for (const specifier of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(specifier);
             const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(ws, packageName);
-            if (!isHandled) collector.addIssue({ type: 'unlisted', filePath, workspace: ws.name, symbol: specifier });
+            if (!isHandled)
+              collector.addIssue({
+                type: 'unlisted',
+                filePath,
+                workspace: ws.name,
+                symbol: packageName ?? specifier,
+                specifier,
+              });
           }
         }
 
@@ -587,6 +628,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
     }
   };
+
+  // inspect(graph);
 
   await collectUnusedExports();
 

@@ -1,7 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { isFile } from '#p/util/fs.js';
-import { join } from '#p/util/path.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { isFile } from '../../util/fs.js';
+import { toDependency } from '../../util/input.js';
+import { join } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { CapacitorConfig } from './types.js';
 
 // https://capacitorjs.com/docs/config
@@ -21,7 +22,7 @@ const resolveConfig: ResolveConfig<CapacitorConfig> = async (config, { configFil
   const android = (await exists('android/capacitor.settings.gradle')) ? ['@capacitor/android'] : [];
   const ios = (await exists('ios/App/Podfile')) ? ['@capacitor/ios'] : [];
 
-  return [...plugins, ...android, ...ios];
+  return [...plugins, ...android, ...ios].map(toDependency);
 };
 
 export default {

@@ -9,6 +9,8 @@ test('findAndParseGitignores', async () => {
   assert.deepEqual(gitignore, {
     gitignoreFiles: ['../../.gitignore', '../../../../.gitignore', '.gitignore', 'a/.gitignore', 'a/b/.gitignore'],
     ignores: new Set([
+      '**/.cache',
+      '**/.cache/**',
       '**/.idea',
       '**/.idea/**',
       '.git',
@@ -34,6 +36,8 @@ test('findAndParseGitignores (/a)', async () => {
       '.yarn',
       '**/b/c',
       '**/b/c/**',
+      '**/.cache',
+      '**/.cache/**',
       '**/.idea',
       '**/.idea/**',
     ]),
@@ -59,6 +63,8 @@ test('findAndParseGitignores (/a/b', async () => {
       '.yarn',
       '**/c',
       '**/c/**',
+      '**/.cache',
+      '**/.cache/**',
       '**/.idea',
       '**/.idea/**',
     ]),

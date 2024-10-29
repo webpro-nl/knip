@@ -6,35 +6,41 @@ sidebar:
 
 We can distinguish two types of issues:
 
-- [Issues reported by Knip][1]
+- [Lint issues reported by Knip][1]
 - [Exceptions thrown by Knip][2]
 
-Both of which could be either an issue on your end or with Knip.
+Also see the [debug][3] and [trace][4] options below that can help to
+troubleshoot issues.
 
-You can use [--debug][3] and [--trace][4] to help troubleshoot issues.
+## Lint issues reported by Knip
 
-## Issues reported by Knip
+Knip reports lint issues in your codebase. See [handling issues][5] to deal with
+the reported issues.
 
-This indicates a successful run, but clutter was found. Continue to [handle
-issues][5] and deal with the reported clutter.
+If Knip reports false positives and you're considering filing a GitHub issue,
+please do! It'll make Knip better for everyone. Please read [issue
+reproduction][6] first.
 
-If Knip reports false positives and you want to open an issue, please see [issue
-reproduction][6].
+Exit code 1 indicates a successful run, but lint issues were found.
 
 ## Exceptions thrown by Knip
 
-Knip (or one of its plugins loading a configuration file) may throw an error,
-resulting in an unsuccessful run. You might be encountering a [known issue][7].
+Knip may throw an exception, resulting in an unsuccessful run.
 
-Add `--debug` to the command for more error details to better locate the cause
-of the error.
+See [known issues][7] as it may be listed there and a workaround may be
+available. If it isn't clear what's throwing the exception, try another run with
+`--debug` to locate the cause of the issue with more details.
 
-Feel free to report bugs, please see [issue reproduction][6].
+If Knip throws an exception and you're considering filing a GitHub issue, please
+do! It'll make Knip better for everyone. Please read [issue reproduction][6]
+first.
+
+Exit code 2 indicates an exception was thrown by Knip.
 
 ## Debug
 
-To better understand why Knip reports what it does, you may want to run it in
-debug mode by adding `--debug` to the command:
+To better understand why Knip reports what it does, run it in debug mode by
+adding `--debug` to the command:
 
 ```sh
 knip --debug
@@ -51,13 +57,11 @@ This will give a lengthy output, including:
 
 ## Trace
 
-Use `--trace` to see where exports are used.
+Use `--trace` to see where all exports are used. Or be more specific:
 
 - Use `--trace-file [path]` to output this only for the given file.
 - Use `--trace-export [name]` to output this only for the given export name.
-
-Use both to be more specific, this is useful e.g. for tracing only the `default`
-export of a certain file.
+- Use both to trace a specific named or default export of a certain file.
 
 This works across re-exports, barrel files and workspaces. Here's an example
 screenshot:
@@ -91,7 +95,7 @@ In a more general sense, [Why use Knip?][12] explains what Knip can do for you.
 If you can't find your answer in any of the aforementioned resources, feel free
 to [open an issue on GitHub][13] or discuss it in [the Discord channel][14].
 
-[1]: #issues-reported-by-knip
+[1]: #lint-issues-reported-by-knip
 [2]: #exceptions-thrown-by-knip
 [3]: #debug
 [4]: #trace

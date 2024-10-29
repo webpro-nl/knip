@@ -8,6 +8,22 @@ The value of removing clutter from your code is undeniable. However, finding
 them is a manual and tedious job. This is where Knip comes in. As codebases grow
 in complexity and size, automated and comprehensive tooling becomes critical.
 
+:::tip[TL;DR]
+
+Knip finds and fixes unused files, exports and dependencies.
+
+Deep analysis from [fine-grained entry points][1] based on the actual frameworks
+and tooling in your [(mono)repo][2] for accurate and actionable results.
+Advanced features for maximum coverage:
+
+- [Custom module resolution][3]
+- [Configuration file parsers][4]
+- [Advanced shell script parser][5]
+- [Built-in and custom compilers][6]
+- [Auto-fix many issues][7]
+
+:::
+
 ## Less is more
 
 There are plenty of reasons to delete unused files, dependencies and "dead
@@ -26,9 +42,9 @@ code":
   the same for files, dependencies and exports that you forgot to delete.
 - Keeping dead code around has a negative value on readability, as it can be
   misleading and distracting. Even if it serves no purpose it will need to be
-  maintained (source: [Safe dead code removal → YAGNI][1]).
-- Also see
-  [Why are unused dependencies a problem?](../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem)
+  maintained (source: [Safe dead code removal → YAGNI][8]).
+- Also see [Why are unused dependencies a problem?][9] and [Why are unused
+  exports a problem?][10].
 
 ## Automation
 
@@ -41,9 +57,10 @@ times better and faster than trying to do it manually.
 
 :::tip
 
-Knip not only finds clutter, it can also [clean it][2]! Use Knip next to a
-linter like ESLint or Biome: after removing unused variables inside files, Knip
-might find even more unused code. Rinse and repeat!
+Knip not only finds clutter, it can also [clean it][7]!
+
+Use Knip next to a linter like ESLint or Biome: after removing unused variables
+inside files, Knip might find even more unused code. Rinse and repeat!
 
 :::
 
@@ -54,10 +71,11 @@ strategy that addresses all of files, dependencies and exports is in their
 synergy:
 
 - Utilizing plugins to find their dependencies includes the capacity to find
-  additional entry files. This results in more resolved and used files. Better
-  coverage gives greater insights into unused files and exports.
-- Analyzing more files reveals more dependency usage, refining the list of both
-  unused and unlisted dependencies.
+  additional entry and configuration files. This results in more resolved and
+  used files. Better coverage gives better insights into unused files and
+  exports.
+- Analyzing more files reveals more unused exports and dependency usage,
+  refining the list of both unused and unlisted dependencies.
 - This approach is amplified in a monorepo setting. In fact, files and internal
   dependencies can recursively reference each other (across workspaces).
 
@@ -90,19 +108,23 @@ consider comments like the following:
 ```
 
 Maybe you wonder why Knip does not have similar comments like `// knip-ignore`
-so you can easily get rid of false positives? A variety of reasons:
+so you can get rid of false positives? A variety of reasons:
 
-1. A false positive may be a bug in Knip, and should be reported (not easily
+1. A false positive may be a bug in Knip, and should be reported (not
    dismissed).
-2. Instead of proprietary comments, use [standardized annotations][3] serving as
-   documentation as well.
-3. In the event you want to remove Knip, you only need to uninstall the `knip`
-   dependency and delete the file to configure it (and not countless useless
-   comments scattered throughout the codebase).
+2. Instead of proprietary comments, use [standardized annotations][11] serving
+   as documentation as well.
+3. In the event you want to remove Knip, just uninstall `knip`. And not
+   countless useless comments scattered throughout the codebase.
 
-Knip v4 introduces [--tags][4], to filter the report to your needs.
-
-[1]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
-[2]: ../features/auto-fix.mdx
-[3]: ../reference/jsdoc-tsdoc-tags.md
-[4]: ../reference/cli.md#--tags
+[1]: ./entry-files.md
+[2]: ../features/monorepos-and-workspaces.md
+[3]: ../reference/faq.md#why-doesnt-knip-use-an-existing-module-resolver
+[4]: ./plugins.md#configuration-files
+[5]: ../features/script-parser.md
+[6]: ../features/compilers.md
+[7]: ../features/auto-fix.mdx
+[8]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
+[9]: ../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem
+[10]: ../typescript/unused-exports.md#why-are-unused-exports-a-problem
+[11]: ../reference/jsdoc-tsdoc-tags.md

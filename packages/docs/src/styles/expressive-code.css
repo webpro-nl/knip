@@ -1,3 +1,7 @@
+.expressive-code figure.frame {
+  box-shadow: none;
+}
+
 .expressive-code .frame pre,
 .expressive-code .frame div {
   margin-top: unset;

@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '#p/types/plugins.js';
-import { hasDependency } from '#p/util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve, toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { PrettierConfig } from './types.js';
 
 // https://prettier.io/docs/en/configuration.html
@@ -20,12 +21,10 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<PrettierConfig> = config => {
-  if (typeof config === 'string') {
-    return [config];
-  }
+  if (typeof config === 'string') return [toDeferResolve(config)];
 
   return Array.isArray(config.plugins)
-    ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string')
+    ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string').map(toDependency)
     : [];
 };
 
