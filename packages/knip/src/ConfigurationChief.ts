@@ -113,7 +113,14 @@ export class ConfigurationChief {
 
   rawConfig?: any;
 
-  constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, isIgnoreExportsUsedInFile, workspace }: ConfigurationManagerOptions) {
+  constructor({
+    cwd,
+    isProduction,
+    isStrict,
+    isIncludeEntryExports,
+    isIgnoreExportsUsedInFile,
+    workspace,
+  }: ConfigurationManagerOptions) {
     this.cwd = cwd;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
