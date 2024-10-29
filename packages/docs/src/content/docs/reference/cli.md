@@ -141,6 +141,17 @@ knip --include-entry-exports
 
 Also see [includeEntryExports][7].
 
+### `--ignore-exports-used-in-file`
+
+When a repository is self-contained or private, you may want to include entry
+files when reporting unused exports:
+
+```sh
+knip --ignore-exports-used-in-file
+```
+
+Also see [ignoreExportsUsedInFile][8].
+
 ### `--include-libs`
 
 Getting false positives for exports consumed by external libraries? Try the
@@ -150,11 +161,11 @@ Getting false positives for exports consumed by external libraries? Try the
 knip --include-libs
 ```
 
-Also see [external libs][8].
+Also see [external libs][9].
 
 ### `--isolate-workspaces`
 
-By default, Knip optimizes performance using [workspace sharing][9] to existing
+By default, Knip optimizes performance using [workspace sharing][10] to existing
 TypeScript programs, based on the compatibility of their `compilerOptions`. This
 flag disables this behavior and creates one program per workspace, which is
 slower but memory is spread more evenly over time.
@@ -171,18 +182,18 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][10].
+Read more at [Production Mode][11].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][11].
+mode][12].
 
-Read more at [Production Mode][10].
+Read more at [Production Mode][11].
 
 ### `--fix`
 
-Read more at [auto-fix][12].
+Read more at [auto-fix][13].
 
 ### `--cache`
 
@@ -208,7 +219,7 @@ changes in `package.json` and/or `node_modules` are not supported.
 
 ## Filters
 
-Available [issue types][13] when filtering output using `--include` or
+Available [issue types][14] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -264,7 +275,7 @@ Shortcut to include all types of export issues:
 
 ### `--experimental-tags`
 
-Deprecated. Use [--tags][14] instead.
+Deprecated. Use [--tags][15] instead.
 
 ### `--tags`
 
@@ -318,7 +329,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][15].
+Also see [Reporters & Preprocessors][16].
 
 ### `--reporter-options [json]`
 
@@ -353,7 +364,7 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
-Also see [Reporters & Preprocessors][15].
+Also see [Reporters & Preprocessors][16].
 
 ## Exit code
 
@@ -380,11 +391,12 @@ Maximum number of issues before non-zero exit code. Default: `0`
 [5]: #--trace
 [6]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [7]: ./configuration.md#includeentryexports
-[8]: ../guides/handling-issues.mdx#external-libraries
-[9]: ../guides/performance.md#workspace-sharing
-[10]: ../features/production-mode.md
-[11]: #--production
-[12]: ../features/auto-fix.mdx
-[13]: ./issue-types.md
-[14]: #--tags
-[15]: ../features/reporters.md
+[8]: ./configuration.md#ignoreexportsusedinfile
+[9]: ../guides/handling-issues.mdx#external-libraries
+[10]: ../guides/performance.md#workspace-sharing
+[11]: ../features/production-mode.md
+[12]: #--production
+[13]: ../features/auto-fix.mdx
+[14]: ./issue-types.md
+[15]: #--tags
+[16]: ../features/reporters.md
