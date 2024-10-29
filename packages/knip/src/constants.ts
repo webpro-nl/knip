@@ -35,6 +35,7 @@ export const PROTOCOL_VIRTUAL = 'virtual:';
 // In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
 // Package may exist in npm registry, but last publish is at least 6 years ago
 export const IGNORED_GLOBAL_BINARIES = new Set([
+  'amplify',
   'aws',
   'base64',
   'basename',
