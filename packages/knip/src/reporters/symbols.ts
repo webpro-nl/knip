@@ -51,7 +51,8 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
         const issuesForType = Array.from(issues._files);
         if (issuesForType.length > 0) {
           title && logTitle(title, issuesForType.length);
-          for (const issue of issuesForType) {
+          const sortedIssues = issuesForType.sort((a, b) => a.filePath.localeCompare(b.filePath));
+          for (const issue of sortedIssues) {
             const relPath = toRelative(issue.filePath);
             if (issue.isFixed) console.log(dim(`${relPath} (removed)`));
             else if (issue.severity === 'warn') console.log(dim(relPath));
