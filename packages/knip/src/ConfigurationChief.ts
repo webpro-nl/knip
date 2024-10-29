@@ -62,6 +62,7 @@ type ConfigurationManagerOptions = {
   isProduction: boolean;
   isStrict: boolean;
   isIncludeEntryExports: boolean;
+  isIgnoreExportsUsedInFile: boolean;
   workspace: string | undefined;
 };
 
@@ -90,6 +91,7 @@ export class ConfigurationChief {
   isProduction = false;
   isStrict = false;
   isIncludeEntryExports = false;
+  isIgnoreExportsUsedInFile = false;
   config: Configuration;
   workspace: string | undefined;
 
@@ -111,11 +113,12 @@ export class ConfigurationChief {
 
   rawConfig?: any;
 
-  constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace }: ConfigurationManagerOptions) {
+  constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, isIgnoreExportsUsedInFile, workspace }: ConfigurationManagerOptions) {
     this.cwd = cwd;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
     this.isIncludeEntryExports = isIncludeEntryExports;
+    this.isIgnoreExportsUsedInFile = isIgnoreExportsUsedInFile;
     this.config = defaultConfig;
     this.workspace = workspace;
   }
@@ -184,7 +187,7 @@ export class ConfigurationChief {
     const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
     const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
-    const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
+    const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? this.isIgnoreExportsUsedInFile;
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
 
