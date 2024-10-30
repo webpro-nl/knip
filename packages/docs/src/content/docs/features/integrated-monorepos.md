@@ -8,6 +8,12 @@ Some repositories have a single `package.json`, but consist of multiple projects
 with configuration files across the repository. A good example is the [Nx
 integrated monorepo style][1].
 
+:::tip
+
+An integrated monorepo is a single workspace.
+
+:::
+
 Let's assume some of these projects are applications ("apps") which have their
 own ESLint configuration files and Cypress configuration and test files. This
 may result in those files getting reported as unused, and consequently also the
