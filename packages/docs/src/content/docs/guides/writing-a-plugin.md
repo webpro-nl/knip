@@ -101,7 +101,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) =>
 const config = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
 
 const resolveConfig: ResolveConfig<NycConfig> = config => {
-  return config?.extends ? [config.extends].flat() : [];
+  const extend = config?.extends ?? [];
+  const requires = config?.require ?? [];
+  return [extend, requires].flat().map(toDeferResolve);
 };
 
 export default {
@@ -141,10 +143,10 @@ without an extension are provided as plain text strings.
 
 :::tip[Should I implement resolveConfig?]
 
-You should implement `resolveConfig` if:
+You should implement `resolveConfig` if any of these are true:
 
-- The tool supports a `config` file in JSON or YAML format, and/or
-- The `config` file reference dependencies as strings
+- The tool supports a `config` file in JSON or YAML format
+- The `config` file references dependencies as strings
 
 :::
 
@@ -165,7 +167,7 @@ Here's an example from the Ava test runner plugin:
 
 ```ts
 const resolveEntryPaths: ResolveEntryPaths<AvaConfig> = localConfig => {
-  return localConfig?.files ?? [];
+  return (localConfig?.files ?? []).map(toEntry);
 };
 ```
 

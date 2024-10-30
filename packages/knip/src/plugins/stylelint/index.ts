@@ -15,11 +15,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['package.json', ...toCosmiconfig('stylelint')];
 
 const resolve = (config: StyleLintConfig | BaseStyleLintConfig): Input[] => {
-  const extend = config.extends ? [config.extends].flat() : [];
-  const plugins = config.plugins ? [config.plugins].flat() : [];
+  const extend = config.extends ?? [];
+  const plugins = config.plugins ?? [];
   const customSyntax = config.customSyntax ? [config.customSyntax] : [];
   const overrideConfigs = 'overrides' in config ? config.overrides.flatMap(resolve) : [];
-  return [...[...extend, ...plugins, ...customSyntax].map(toDeferResolve), ...overrideConfigs];
+  return [...[extend, plugins, customSyntax].flat().map(toDeferResolve), ...overrideConfigs];
 };
 
 const resolveConfig: ResolveConfig<StyleLintConfig> = config => resolve(config);

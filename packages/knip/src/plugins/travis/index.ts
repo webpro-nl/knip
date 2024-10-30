@@ -14,11 +14,11 @@ const config = ['.travis.yml'];
 const resolveConfig: ResolveConfig = async (config, options) => {
   if (!config) return [];
 
-  const beforeDeploy = [config.before_deploy ?? []].flat();
-  const beforeInstall = [config.before_install ?? []].flat();
-  const beforeScript = [config.before_script ?? []].flat();
+  const beforeDeploy = config.before_deploy ?? [];
+  const beforeInstall = config.before_install ?? [];
+  const beforeScript = config.before_script ?? [];
 
-  const scripts = [...beforeDeploy, ...beforeInstall, ...beforeScript];
+  const scripts = [beforeDeploy, beforeInstall, beforeScript].flat();
 
   return options.getInputsFromScripts(scripts, { knownBinsOnly: true });
 };
