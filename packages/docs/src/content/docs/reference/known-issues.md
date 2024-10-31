@@ -19,7 +19,7 @@ environment variables set.
 If it isn't clear what's throwing the exception, try another run with `--debug`
 to locate the cause of the issue with more details.
 
-### Path aliases in config files
+## Path aliases in config files
 
 Loading the configuration file (e.g. `cypress.config.ts`) for one of Knip's
 plugins may give an error:
@@ -42,6 +42,21 @@ Potential workarounds:
 - Rewrite the import in the configuration file to a relative import.
 - Use Bun with [knip-bun][5].
 - [Disable the plugin][6] (not recommended, try the other options first).
+
+## Nx Daemon
+
+In Nx projects you might encounter this error:
+
+```sh
+NX   Daemon process terminated and closed the connection
+```
+
+The solution is to
+[turn off the Nx Daemon](https://nx.dev/concepts/nx-daemon#turning-it-off):
+
+```sh
+NX_DAEMON=false knip
+```
 
 ## False positives with external libs
 
