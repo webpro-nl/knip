@@ -629,8 +629,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
   };
 
-  // inspect(graph);
-
   await collectUnusedExports();
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();

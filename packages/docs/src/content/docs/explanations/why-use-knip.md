@@ -20,7 +20,7 @@ Advanced features for maximum coverage:
 - [Configuration file parsers][4]
 - [Advanced shell script parser][5]
 - [Built-in and custom compilers][6]
-- [Auto-fix many issues][7]
+- [Auto-fix most issues][7]
 
 :::
 
