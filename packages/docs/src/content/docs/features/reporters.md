@@ -8,8 +8,9 @@ Knip provides the following built-in reporters:
 
 - `codeowners`
 - `compact`
-- `json`
-- `markdown`
+- [`disclosure`](#disclosure)
+- [`json`](#json)
+- [`markdown`](#markdown)
 - `symbol` (default)
 
 Example usage:
@@ -102,6 +103,54 @@ Markdown tables separated by issue types as headings, for example:
 | :----------- | :----------------- | :------- |
 | ./unresolved | src/index.ts:10:12 | error    |
 ```
+
+### Disclosure
+
+This reporter is useful for sharing large reports. Groups of issues are rendered
+in a closed state initially. The reporter renders this:
+
+````text
+$ knip --reporter disclosure
+
+<details><summary>Unused files (2)</summary>
+
+```
+unused.ts
+dangling.js
+```
+
+</details>
+
+<details><summary>Unused dependencies (2)</summary>
+
+```
+unused-dep     package.json
+my-package     package.json
+```
+
+</details>
+````
+
+The above can be copy-pasted where HTML and Markdown is supported, such as a
+GitHub issue or pull request, and renders like so:
+
+<details><summary>Unused files (2)</summary>
+
+```
+unused.ts
+dangling.js
+```
+
+</details>
+
+<details><summary>Unused dependencies (2)</summary>
+
+```
+unused-dep     package.json
+my-package     package.json
+```
+
+</details>
 
 ## Custom Reporters
 
