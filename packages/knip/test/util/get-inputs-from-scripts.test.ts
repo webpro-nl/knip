@@ -211,6 +211,10 @@ test('getInputsFromScripts (nodemon)', () => {
   t('nodemon script.js', [toBinary('nodemon'), toDeferResolveEntry('script.js')]);
 });
 
+test('getInputsFromScripts (double-dash)', () => {
+  t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toDeferResolveEntry('src/index.ts')]);
+});
+
 test('getInputsFromScripts (bash expressions)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', [toBinary('make')]);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [toBinary('node'), toBinary('make')]);
