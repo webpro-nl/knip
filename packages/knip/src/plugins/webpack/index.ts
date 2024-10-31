@@ -72,8 +72,9 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
   const inputs = new Set<Input>();
 
   for (const isProduction of passes) {
-    const env: Env = { production: isProduction };
-    const argv: Argv = { mode: isProduction ? 'production' : 'development' };
+    const mode = isProduction ? 'production' : 'development';
+    const env: Env = { production: isProduction, mode };
+    const argv: Argv = { mode };
     const resolvedConfig = typeof config === 'function' ? await config(env, argv) : config;
 
     for (const options of [resolvedConfig].flat()) {
