@@ -63,7 +63,7 @@
     "easy-table": "1.2.0",
     "enhanced-resolve": "^5.17.1",
     "fast-glob": "^3.3.2",
-    "jiti": "^2.3.3",
+    "jiti": "^2.4.0",
     "js-yaml": "^4.1.0",
     "minimist": "^1.2.8",
     "picocolors": "^1.1.0",
