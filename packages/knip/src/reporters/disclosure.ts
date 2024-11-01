@@ -5,7 +5,7 @@ import { relative, toRelative } from '../util/path.js';
 import { getTitle } from './util.js';
 
 const printHeader = (size: number, title?: string) =>
-  console.log(`<details>${title ? `<summary>${title} (${size})</summary>` : ''}\n\n\`\`\``);
+  console.log(`<details>\n${title ? `<summary>${title} (${size})</summary>\n` : ''}\n\`\`\``);
 
 const printFooter = () => console.log('```\n\n</details>\n');
 

@@ -112,7 +112,8 @@ in a closed state initially. The reporter renders this:
 ````text
 $ knip --reporter disclosure
 
-<details><summary>Unused files (2)</summary>
+<details>
+<summary>Unused files (2)</summary>
 
 ```
 unused.ts
@@ -121,7 +122,8 @@ dangling.js
 
 </details>
 
-<details><summary>Unused dependencies (2)</summary>
+<details>
+<summary>Unused dependencies (2)</summary>
 
 ```
 unused-dep     package.json
@@ -134,7 +136,8 @@ my-package     package.json
 The above can be copy-pasted where HTML and Markdown is supported, such as a
 GitHub issue or pull request, and renders like so:
 
-<details><summary>Unused files (2)</summary>
+<details>
+<summary>Unused files (2)</summary>
 
 ```
 unused.ts
@@ -143,7 +146,8 @@ dangling.js
 
 </details>
 
-<details><summary>Unused dependencies (2)</summary>
+<details>
+<summary>Unused dependencies (2)</summary>
 
 ```
 unused-dep     package.json
