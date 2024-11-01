@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Table from 'easy-table';
-import type { Plugin } from '../src/types/plugins.js';
+import type { Plugin } from '../src/types/config.js';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const knipDir = path.join(rootDir, '../../packages/knip');
