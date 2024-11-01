@@ -4,6 +4,24 @@
       "entities": {
         "urls": []
       },
+      "id": "3k3obqi65oy2p",
+      "author_id": "4",
+      "created_at": "2023-07-29T17:33:00.000Z",
+      "attachments": {},
+      "text": "`knip` is the best code maintenance tool I've used in my 20 years of development, just an absolute work of art",
+      "public_metrics": {
+        "retweet_count": 1,
+        "reply_count": 1,
+        "like_count": 2,
+        "quote_count": 1,
+        "bookmark_count": 0,
+        "impression_count": 111
+      }
+    },
+    {
+      "entities": {
+        "urls": []
+      },
       "id": "1808672067900092505",
       "author_id": "3",
       "created_at": "2024-07-04T03:19:00.000Z",
@@ -826,6 +844,12 @@
         "name": "Tom Hicks"
       },
       {
+        "id": "4",
+        "username": "daviduzumeri.bsky.social",
+        "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:6ykajndqngy2kxozo37mpsgc/bafkreif2xu6bini3tpv2hfauw53ng43zbefgqol36yt4baehcbdfxahihu@jpeg",
+        "name": "Old Man Uzi"
+      },
+      {
         "id": "22918124",
         "username": "gregberge_",
         "profile_image_url": "https://pbs.twimg.com/profile_images/1722358890807861248/75S7CB3G_normal.jpg",
@@ -834,7 +858,7 @@
       {
         "id": "19268321",
         "username": "housecor",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1525874017630035970/veQQouGw_normal.jpg",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1845812720899076099/oANCzCiQ_400x400.jpg",
         "name": "Cory House"
       },
       {

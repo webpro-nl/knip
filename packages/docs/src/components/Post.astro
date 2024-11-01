@@ -1,8 +1,8 @@
 ---
 import sprites from '../assets/sprites.svg';
-import { type TweetWithUser, formatTimestamp, replaceShortenedUrls } from '../util/tweet.js';
+import { type PostWithUser, formatTimestamp, replaceShortenedUrls } from '../util/post.js';
 
-const tweet: TweetWithUser = replaceShortenedUrls(Astro.props.data);
+const post: PostWithUser = replaceShortenedUrls(Astro.props.data);
 ---
 
 <style>
@@ -49,20 +49,20 @@ const tweet: TweetWithUser = replaceShortenedUrls(Astro.props.data);
 </style>
 
 {
-  tweet && (
+  post && (
     <>
       <header class="n">
-        <img class="profile" src={tweet.user.profile_image_url} />
+        <img class="profile" src={post.user.profile_image_url} />
         <div class="name">
-          <span class="real">{tweet.user.name}</span>
-          <span class="screen">@{tweet.user.username}</span>
+          <span class="real">{post.user.name}</span>
+          <span class="screen">@{post.user.username}</span>
         </div>
       </header>
-      <p class="text" set:html={tweet.text.trim().replace(/\n/g, '<br />')} />
+      <p class="text" set:html={post.text.trim().replace(/\n/g, '<br />')} />
       <p class="timestamp">
         <a
-          href={`https://twitter.com/${tweet.user.username}/status/${tweet.id}`}>
-          {formatTimestamp(tweet.created_at)}
+          href={`${post.id.length > 17 ? `https://twitter.com/${post.user.username}/status/${post.id}` : `https://bsky.app/profile/${post.user.username}/post/${post.id}`}`}>
+          {formatTimestamp(post.created_at)}
         </a>
       </p>
       <footer class="engagement">
@@ -71,16 +71,16 @@ const tweet: TweetWithUser = replaceShortenedUrls(Astro.props.data);
             <title>replies</title>
             <use href={`${sprites.src}#replies`} />
           </svg>
-          <span>{tweet.public_metrics.reply_count}</span>
+          <span>{post.public_metrics.reply_count}</span>
         </div>
         <div>
           <svg width="24" height="24">
-            <title>retweets</title>
-            <use href={`${sprites.src}#retweets`} />
+            <title>reposts</title>
+            <use href={`${sprites.src}#reposts`} />
           </svg>
           <span>
-            {tweet.public_metrics.retweet_count +
-              tweet.public_metrics.quote_count}
+            {post.public_metrics.retweet_count +
+              post.public_metrics.quote_count}
           </span>
         </div>
         <div>
@@ -88,14 +88,14 @@ const tweet: TweetWithUser = replaceShortenedUrls(Astro.props.data);
             <title>likes</title>
             <use href={`${sprites.src}#likes`} />
           </svg>
-          <span>{tweet.public_metrics.like_count}</span>
+          <span>{post.public_metrics.like_count}</span>
         </div>
         <div>
           <svg width="24" height="24">
             <title>bookmarks</title>
             <use href={`${sprites.src}#bookmarks`} />
           </svg>
-          <span>{tweet.public_metrics.bookmark_count}</span>
+          <span>{post.public_metrics.bookmark_count}</span>
         </div>
       </footer>
     </>

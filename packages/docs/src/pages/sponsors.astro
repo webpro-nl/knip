@@ -1,8 +1,8 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Posts from '../components/Posts.astro';
 import Projects from '../components/Projects.astro';
 import SponsorsComponent from '../components/Sponsors.astro';
-import Tweets from '../components/Tweets.astro';
 ---
 
 <StarlightPage frontmatter={{ title: 'Become a sponsor!', template: 'splash' }}>
@@ -66,7 +66,7 @@ import Tweets from '../components/Tweets.astro';
 
   <h2>🧡 Testimonials</h2>
 
-  <Tweets />
+  <Posts />
 
 
 </StarlightPage>
