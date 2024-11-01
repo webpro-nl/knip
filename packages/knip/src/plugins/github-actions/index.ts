@@ -41,6 +41,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
   const jobs = findByKeyDeep<Job>(config, 'steps');
 
   for (const steps of jobs) {
+    if (!Array.isArray(steps.steps)) continue;
     const action = steps.steps.find(
       step => step.uses?.startsWith('actions/checkout@') && typeof step.with?.path === 'string' && !step.with.repository
     );
