@@ -124,6 +124,16 @@ This graph allows to report more interesting details, such as:
 - List of all binaries used
 - List of all used (OS) binaries not installed in `node_modules`
 
+### Why doesn't Knip just read the lockfile?
+
+Knip reads the `package.json` file of each dependency. Most of the information
+required is in the lockfile as well, which would be more efficient. However,
+there are a few issues with this approach:
+
+- It requires lockfile parsing for each lockfile format and version of each
+  package manager.
+- The lockfile doesn't contain whether the package [has types included][4].
+
 ## Module Resolution
 
 ### Why doesn't Knip use an existing module resolver?
@@ -143,7 +153,7 @@ seem to meet all requirements to be usable on its own by Knip:
   `module.js`
 
 A few strategies have been tried and tweaked, and Knip currently uses a
-combination of [enhanced-resolve][4], the TypeScript module resolver and a few
+combination of [enhanced-resolve][5], the TypeScript module resolver and a few
 customizations. This single custom module resolver function is hooked into the
 TypeScript compiler and language service hosts.
 
@@ -179,7 +189,7 @@ file. They're not a concept in Knip.
 
 A TypeScript program has a 1-to-1 relationship with workspaces if they're
 analyzed in isolation. However, by default Knip optimizes for performance and
-utilizes [workspace sharing][5]. That's why debug output contains messages like
+utilizes [workspace sharing][6]. That's why debug output contains messages like
 "Installed 2 programs for 29 workspaces".
 
 ### Why doesn't Knip match my TypeScript project structure?
@@ -211,7 +221,7 @@ Knip shares the files of multiple workspaces in a single program if their
 configuration allows it. This optimization is enabled by default, while it also
 allows the module resolver (one per program) to do some more caching.
 
-Also see [workspace sharing][5].
+Also see [workspace sharing][6].
 
 ### Why doesn't Knip just use `ts.findReferences`?
 
@@ -293,7 +303,7 @@ other file types.
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
 statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][6].
+project. Also see the answer to the previous question and [Compilers][7].
 
 ## Miscellaneous
 
@@ -322,7 +332,7 @@ Which mode should've been the default? They both have their merits:
   tooling, including most issues found in production mode. This mode has the
   most impact on DX, for the same reason.
 
-Also see [production mode][7].
+Also see [production mode][8].
 
 ### Why doesn't Knip have...?
 
@@ -346,13 +356,14 @@ Examples of features that have been requested include:
 
 These are all interesting ideas, but most increase the API surface area, and all
 require more development efforts and maintenance. Time is limited and
-[sponsorships][8] currently don't cover - this can change though!
+[sponsorships][9] currently don't cover - this can change though!
 
 [1]: ../guides/handling-issues.mdx#external-libraries
 [2]: ../explanations/why-use-knip.md#comprehensive
 [3]: ../features/script-parser.md
-[4]: https://www.npmjs.com/package/enhanced-resolve
-[5]: ../guides/performance.md#workspace-sharing
-[6]: ../features/compilers.md
-[7]: ../features/production-mode.md
-[8]: /sponsors
+[4]: ../guides/handling-issues.mdx#types-packages
+[5]: https://www.npmjs.com/package/enhanced-resolve
+[6]: ../guides/performance.md#workspace-sharing
+[7]: ../features/compilers.md
+[8]: ../features/production-mode.md
+[9]: /sponsors

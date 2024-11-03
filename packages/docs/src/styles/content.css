@@ -142,3 +142,30 @@ section.plugins li {
     border-color: var(--sl-color-black);
   }
 }
+
+#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within,
+#starlight__search .pagefind-ui__result-nested:focus-within {
+  .pagefind-ui__result-link,
+  .pagefind-ui__result-excerpt,
+  .pagefind-ui__result-excerpt mark {
+    color: var(--sl-color-text-accent);
+  }
+}
+
+:root[data-theme='light'] {
+  #starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within,
+  #starlight__search .pagefind-ui__result-nested:focus-within {
+    .pagefind-ui__result-link,
+    .pagefind-ui__result-excerpt,
+    .pagefind-ui__result-excerpt mark {
+      color: var(--sl-color-black);
+    }
+  }
+}
+
+.social-icons a:hover {
+  opacity: 1;
+  svg {
+    color: var(--sl-color-bright-orange);
+  }
+}

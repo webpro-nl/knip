@@ -21,11 +21,6 @@ export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManife
   }
 };
 
-// type GetFilteredScriptsOptions = {
-//   isProduction: boolean;
-//   scripts?: Scripts;
-// };
-
 export const getFilteredScripts = (scripts: Scripts) => {
   if (!scripts) return [{}, {}];
 

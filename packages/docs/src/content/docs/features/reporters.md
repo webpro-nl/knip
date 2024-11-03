@@ -8,9 +8,9 @@ Knip provides the following built-in reporters:
 
 - `codeowners`
 - `compact`
-- [`disclosure`](#disclosure)
-- [`json`](#json)
-- [`markdown`](#markdown)
+- [`disclosure`][1]
+- [`json`][2]
+- [`markdown`][3]
 - `symbol` (default)
 
 Example usage:
@@ -71,7 +71,7 @@ object per file structured like this:
 }
 ```
 
-The keys match the [reported issue types][1]. Example usage:
+The keys match the [reported issue types][4]. Example usage:
 
 ```sh
 knip --reporter json
@@ -137,7 +137,7 @@ The above can be copy-pasted where HTML and Markdown is supported, such as a
 GitHub issue or pull request, and renders like so:
 
 <details>
-<summary>Unused files (2)</summary>
+  <summary>Unused files (2)</summary>
 
 ```
 unused.ts
@@ -147,7 +147,7 @@ dangling.js
 </details>
 
 <details>
-<summary>Unused dependencies (2)</summary>
+  <summary>Unused dependencies (2)</summary>
 
 ```
 unused-dep     package.json
@@ -251,4 +251,7 @@ Example usage:
 knip --preprocessor ./preprocess.ts
 ```
 
-[1]: ../reference/issue-types.md
+[1]: #disclosure
+[2]: #json
+[3]: #markdown
+[4]: ../reference/issue-types.md
