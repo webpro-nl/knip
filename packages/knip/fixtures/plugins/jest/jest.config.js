@@ -2,6 +2,7 @@
 module.exports = {
   ...require('./jest.config.shared'),
   displayName: 'dev',
+  runtime: '@side/jest-runtime',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   setupFiles: [],
   moduleNameMapper: {
