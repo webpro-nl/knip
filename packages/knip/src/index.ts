@@ -90,6 +90,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;
   const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
+  const isShowConfigHints = !workspace && !isProduction && !isHideConfigHints;
 
   const collector = new IssueCollector({ cwd, rules, filters });
 
@@ -617,15 +618,17 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       deputy.removeIgnoredIssues(collector.getIssues());
 
       // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in production/strict mode
-      if (!workspace && !isProduction && !isHideConfigHints) {
+      if (isShowConfigHints) {
         const configurationHints = deputy.getConfigurationHints();
         for (const hint of configurationHints) collector.addConfigurationHint(hint);
       }
     }
 
-    const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
-    for (const identifier of unusedIgnoredWorkspaces) {
-      collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
+    if (isShowConfigHints) {
+      const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
+      for (const identifier of unusedIgnoredWorkspaces) {
+        collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
+      }
     }
   };
 

@@ -7,12 +7,8 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/workspaces-nested');
 
-const expectedConfigurationHintsProduction = new Set([
-  { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
-]);
-
 const expectedConfigurationHints = new Set([
-  ...expectedConfigurationHintsProduction,
+  { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
   { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-global', workspaceName: '.' },
   { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-L-2', workspaceName: 'L-1-1/L-1-2' },
   { type: 'ignoreDependencies', identifier: 'ignored-dep-global', workspaceName: '.' },
@@ -68,7 +64,7 @@ test('Find unused dependencies in nested workspaces with default config in produ
     total: 3,
   });
 
-  assert.deepEqual(configurationHints, expectedConfigurationHintsProduction);
+  assert.deepEqual(configurationHints, new Set());
 });
 
 test('Find unused dependencies in nested workspaces with default config in production mode (strict)', async () => {
@@ -93,5 +89,5 @@ test('Find unused dependencies in nested workspaces with default config in produ
     total: 3,
   });
 
-  assert.deepEqual(configurationHints, expectedConfigurationHintsProduction);
+  assert.deepEqual(configurationHints, new Set());
 });
