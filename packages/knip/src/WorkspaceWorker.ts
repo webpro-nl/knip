@@ -16,7 +16,7 @@ import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
 import { type ConfigInput, type Input, isConfigPattern, toDebugString, toEntry } from './util/input.js';
 import { getKeysByValue } from './util/object.js';
-import { basename, dirname, join } from './util/path.js';
+import { basename, dirname, extname, join } from './util/path.js';
 import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
 
 type WorkspaceManagerOptions = {
@@ -275,7 +275,8 @@ export class WorkspaceWorker {
       if (configFilePath) {
         if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
         configFiles.get(pluginName)?.add(configFilePath);
-        addInput(toEntry(dependency.specifier), dependency.containingFilePath);
+        if (extname(dependency.specifier) !== '.json')
+          addInput(toEntry(dependency.specifier), dependency.containingFilePath);
       }
     };
 
