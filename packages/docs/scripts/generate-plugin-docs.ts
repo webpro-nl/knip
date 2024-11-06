@@ -18,6 +18,7 @@ const knipDir = path.join(rootDir, '../../packages/knip');
 const pluginsDir = path.join(knipDir, 'src/plugins');
 const directories = await fs.opendir(pluginsDir);
 const plugins = [];
+const srcBaseUrl = new URL('webpro-nl/knip/blob/main/packages/knip/src/plugins', 'https://github.com');
 
 const parseFragment = (text: string) => {
   const tree = unified().use(remarkParse).parse(text);
@@ -61,7 +62,7 @@ for await (const dir of directories) {
 
     const hasDefaultConfig = Object.values(defaults).some(v => v.length > 0);
 
-    const en =
+    const enabledText =
       Array.isArray(enablers) && enablers.length > 0
         ? [
             ...parseFragment(
@@ -78,9 +79,9 @@ for await (const dir of directories) {
           ? parseFragment(enablers)
           : [u('paragraph', [u('text', 'N/A')])];
 
-    const n = note ? [u('heading', { depth: 2 }, [u('text', 'Note')]), ...parseFragment(note)] : [];
+    const notes = note ? [u('heading', { depth: 2 }, [u('text', 'Note')]), ...parseFragment(note)] : [];
 
-    const def = hasDefaultConfig
+    const defaultConfig = hasDefaultConfig
       ? [
           u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
           ...parseFragment('This configuration is added automatically if the plugin is enabled:'),
@@ -89,7 +90,9 @@ for await (const dir of directories) {
             value: JSON.stringify({ [pluginName]: defaults }, null, 2),
           }),
           ...parseFragment('Your custom `config` or `entry` options override default values, they are not merged.'),
-          ...parseFragment('See [Plugins](../../explanations/plugins) for more details.'),
+          ...parseFragment(
+            'See [Plugins](../../explanations/plugins) for more details about plugins and their `entry` and `config` options.'
+          ),
         ]
       : [];
 
@@ -109,13 +112,18 @@ for await (const dir of directories) {
         ]
       : [];
 
+    const generated = parseFragment(
+      `## Generated from source\n\nThis page was generated from the [${pluginName} plugin source code](${srcBaseUrl}/${dir.name}/index.ts).`
+    );
+
     const tree = u('root', [
       frontmatter,
       u('heading', { depth: 2 }, [u('text', 'Enabled')]),
-      ...en,
-      ...n,
-      ...def,
+      ...enabledText,
+      ...notes,
+      ...defaultConfig,
       ...argsText,
+      ...generated,
     ]);
 
     console.log(`Writing ${pluginName} docs to plugins/${pluginName}.md`);
