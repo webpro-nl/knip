@@ -9,6 +9,11 @@ import { getPackageNameFromSpecifier } from './modules.js';
 import { dirname, isAbsolute, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
 
+const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Workspace) =>
+  (input.dir && chief.findWorkspaceByFilePath(`${input.dir}/`)) ||
+  (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) ||
+  workspace;
+
 /**
  * Resolve internal file paths + collect issues
  *
@@ -29,8 +34,8 @@ export const getReferencedInputsHandler =
 
     if (isBinary(input)) {
       const binaryName = fromBinary(input);
-      const ws = (input.dir && chief.findWorkspaceByFilePath(`${input.dir}/`)) || workspace;
-      const isHandled = deputy.maybeAddReferencedBinary(ws, binaryName);
+      const inputWorkspace = getWorkspaceFor(input, chief, workspace);
+      const isHandled = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
       if (isHandled) return;
       collector.addIssue({
         type: 'binaries',
@@ -47,10 +52,10 @@ export const getReferencedInputsHandler =
     if (packageName) {
       // Attempt fast path first for external dependencies and internal workspaces
       const isWorkspace = chief.workspacesByPkgName.has(packageName);
-      const specifierWorkspace = chief.findWorkspaceByFilePath(containingFilePath) ?? workspace;
+      const inputWorkspace = getWorkspaceFor(input, chief, workspace);
 
-      if (specifierWorkspace) {
-        const isHandled = deputy.maybeAddReferencedExternalDependency(specifierWorkspace, packageName);
+      if (inputWorkspace) {
+        const isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName);
 
         if (isWorkspace || isDependency(input)) {
           if (!isHandled) {
@@ -59,7 +64,7 @@ export const getReferencedInputsHandler =
               collector.addIssue({
                 type: 'unlisted',
                 filePath: containingFilePath,
-                workspace: specifierWorkspace.name,
+                workspace: inputWorkspace.name,
                 symbol: packageName ?? specifier,
                 specifier,
               });
