@@ -17,6 +17,7 @@ import { default as eleventy } from './eleventy/index.js';
 import { default as eslint } from './eslint/index.js';
 import { default as gatsby } from './gatsby/index.js';
 import { default as githubActions } from './github-actions/index.js';
+import { default as glob } from './glob/index.js';
 import { default as graphqlCodegen } from './graphql-codegen/index.js';
 import { default as husky } from './husky/index.js';
 import { default as jest } from './jest/index.js';
@@ -103,6 +104,7 @@ export const Plugins = {
   eslint,
   gatsby,
   'github-actions': githubActions,
+  glob,
   'graphql-codegen': graphqlCodegen,
   husky,
   jest,
