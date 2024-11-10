@@ -11,6 +11,8 @@ const enablers = ['husky'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
+const isRootOnly = true;
+
 // husky v9 registers hooks in .husky/_/, so need to set "false" here to get same lookup as in v8
 const gitHookPaths = getGitHookPaths('.husky', false);
 
@@ -35,6 +37,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   config,
   resolveConfig,
 } satisfies Plugin;

@@ -128,6 +128,7 @@ export interface Plugin {
   packageJsonPath?: string | ((manifest: PackageJson) => string);
   enablers?: IgnorePatterns | string;
   isEnabled?: IsPluginEnabled;
+  isRootOnly?: boolean;
   config?: string[];
   entry?: string[];
   production?: string[];

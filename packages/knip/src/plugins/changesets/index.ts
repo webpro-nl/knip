@@ -11,6 +11,8 @@ const enablers = ['@changesets/cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
+const isRootOnly = true;
+
 const config = ['.changeset/config.json'];
 
 const resolveConfig: ResolveConfig<ChangesetsConfig> = config => {
@@ -27,6 +29,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   config,
   resolveConfig,
 } satisfies Plugin;

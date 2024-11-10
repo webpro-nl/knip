@@ -122,6 +122,7 @@ export class WorkspaceWorker {
 
     for (const [pluginName, plugin] of PluginEntries) {
       if (this.config[pluginName] === false) continue;
+      if (this.cwd !== this.dir && plugin.isRootOnly) continue;
       if (this.config[pluginName]) {
         this.enabledPluginsMap[pluginName] = true;
         continue;

@@ -9,6 +9,8 @@ const enablers = 'This plugin is enabled when a `.travis.yml` file is found in t
 
 const isEnabled: IsPluginEnabled = async ({ cwd }) => (await _glob({ cwd, patterns: ['.travis.yml'] })).length > 0;
 
+const isRootOnly = true;
+
 const config = ['.travis.yml'];
 
 const resolveConfig: ResolveConfig = async (config, options) => {
@@ -27,6 +29,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   config,
   resolveConfig,
 } satisfies Plugin;
