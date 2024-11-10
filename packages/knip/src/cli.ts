@@ -126,8 +126,7 @@ const run = async () => {
     }
 
     if (experimentalTags.length > 0) {
-      const prefix = `${picocolors.yellow('DEPRECATION WARNING:')}`;
-      console.warn(`\n${prefix} --experimental-tags is deprecated, please start using --tags instead`);
+      logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
     }
 
     if (!noExitCode && totalErrorCount > Number(maxIssues)) {
@@ -137,8 +136,7 @@ const run = async () => {
     process.exitCode = 2;
     if (!isDebug && error instanceof Error && isKnownError(error)) {
       const knownError = getKnownError(error);
-      const prefix = `${picocolors.red('ERROR:')}`;
-      console.error(`${prefix} ${knownError.message}`);
+      logError('ERROR', knownError.message);
       if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
       if (isConfigurationError(knownError)) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
