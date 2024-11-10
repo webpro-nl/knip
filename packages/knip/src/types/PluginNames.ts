@@ -1,3 +1,4 @@
+// This file is generated (no need to edit)
 export type PluginName =
   | 'angular'
   | 'astro'

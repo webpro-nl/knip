@@ -3,6 +3,7 @@ import { EOL } from 'node:os';
 // biome-ignore lint/nursery/noRestrictedImports: script
 import path from 'node:path';
 
+const HEADER = '// This file is generated (no need to edit)';
 const cc = str => str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_m, char) => char.toUpperCase());
 
 const pluginsDir = path.resolve('src/plugins');
@@ -19,11 +20,11 @@ const typeDefinition = `export type PluginName = ${pluginNames.map(name => `'${n
 
 const values = `export const pluginNames = [${pluginNames.map(name => `'${name}'`).join(',')}] as const;`;
 
-fs.writeFileSync(outputFileTypes, typeDefinition + EOL + EOL + values);
+fs.writeFileSync(outputFileTypes, HEADER + EOL + typeDefinition + EOL + EOL + values);
 
 const imports = pluginNames.map(name => `import { default as ${cc(name)} } from './${name}/index.js';`).join(EOL);
 const pluginsObj = `export const Plugins = {${pluginNames
   .map(name => (name === cc(name) ? `${name},` : `'${name}': ${cc(name)},`))
   .join(EOL)} };`;
 
-fs.writeFileSync(outputFilePlugins, imports + EOL + EOL + pluginsObj);
+fs.writeFileSync(outputFilePlugins, HEADER + EOL + imports + EOL + EOL + pluginsObj);

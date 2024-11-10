@@ -1,3 +1,4 @@
+// This file is generated (no need to edit)
 import { default as angular } from './angular/index.js';
 import { default as astro } from './astro/index.js';
 import { default as ava } from './ava/index.js';
