@@ -11,10 +11,7 @@
       }
     },
     "packages/docs": {
-      "entry": [
-        "{remark,scripts}/*.ts",
-        "src/components/{Head,Header,Footer}.astro!"
-      ]
+      "entry": ["{remark,scripts}/*.ts", "src/components/{Head,Footer}.astro!"]
     }
   }
 }
