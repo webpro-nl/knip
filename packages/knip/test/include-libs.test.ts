@@ -11,6 +11,7 @@ test('Find used exports through external lib definitions', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
+    isIncludeLibs: true,
   });
 
   assert.deepEqual(counters, {
