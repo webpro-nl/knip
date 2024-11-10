@@ -11,7 +11,7 @@ export type Args = {
   binaries?: string[];
 
   /**
-   * Add first positional argument as entry point
+   * Add first positional argument as entry point(s)
    *
    * @default undefined
    */
