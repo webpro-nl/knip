@@ -73,5 +73,5 @@ export const getEntryPathsFromManifest = (
   // - exist
   // - are not (generated) files that are .gitignore'd
   // - do not match configured `ignore` patterns
-  return _glob({ ...sharedGlobOptions, patterns: Array.from(entryPaths) });
+  return _glob({ ...sharedGlobOptions, patterns: Array.from(entryPaths), label: 'package.json entry' });
 };

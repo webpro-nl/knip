@@ -5,6 +5,7 @@ import fg, { type Options as FastGlobOptions } from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
+import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
 import { isFile } from './fs.js';
 import { dirname, join, relative, toPosix } from './path.js';
@@ -19,13 +20,15 @@ type GlobOptions = {
   readonly gitignore: boolean;
   readonly cwd: string;
   readonly dir: string;
+  label?: string;
 } & FastGlobOptionsWithoutCwd;
 
 type FastGlobOptionsWithoutCwd = Pick<FastGlobOptions, 'onlyDirectories' | 'ignore' | 'absolute' | 'dot'>;
 
 type Gitignores = { ignores: Set<string>; unignores: string[] };
 
-const cachedIgnores = new Map<string, Gitignores>();
+const cachedGitIgnores = new Map<string, Gitignores>();
+const cachedGlobIgnores = new Map<string, string[]>();
 
 /** @internal */
 export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
@@ -146,13 +149,13 @@ export const findAndParseGitignores = async (cwd: string) => {
     }
 
     const cacheDir = ancestor ? cwd : dir;
-    const cacheForDir = cachedIgnores.get(cwd);
+    const cacheForDir = cachedGitIgnores.get(cwd);
 
     if (ancestor && cacheForDir) {
       for (const pattern of dirIgnores) cacheForDir?.ignores.add(pattern);
       cacheForDir.unignores = Array.from(new Set([...cacheForDir.unignores, ...dirUnignores]));
     } else {
-      cachedIgnores.set(cacheDir, { ignores: dirIgnores, unignores: Array.from(dirUnignores) });
+      cachedGitIgnores.set(cacheDir, { ignores: dirIgnores, unignores: Array.from(dirUnignores) });
     }
 
     for (const pattern of dirIgnores) matchers.add(_picomatch(pattern, pmOptions));
@@ -177,44 +180,60 @@ export const findAndParseGitignores = async (cwd: string) => {
     deepFilter: timerify(deepFilter),
   });
 
-  debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles, ignores, unignores });
+  debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles });
 
   return { gitignoreFiles, ignores, unignores };
 };
 
 const _parseFindGitignores = timerify(findAndParseGitignores);
 
-export async function globby(patterns: string | string[], options: GlobOptions): Promise<string[]> {
+export async function glob(patterns: string | string[], options: GlobOptions): Promise<string[]> {
   if (Array.isArray(patterns) && patterns.length === 0) return [];
 
-  const ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
+  const canCache = options.label && options.gitignore;
+  const willCache = canCache && !cachedGlobIgnores.has(options.dir);
+  const cachedIgnores = canCache && cachedGlobIgnores.get(options.dir);
+
+  const _ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
 
   if (options.gitignore) {
-    let dir = options.dir;
-    let prev: string;
-    while (dir) {
-      const cacheForDir = cachedIgnores.get(dir);
-      if (cacheForDir) {
-        // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
-        ignore.push(...cacheForDir.ignores);
+    if (willCache) {
+      let dir = options.dir;
+      let prev: string;
+      while (dir) {
+        const cacheForDir = cachedGitIgnores.get(dir);
+        if (cacheForDir) {
+          // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
+          _ignore.push(...cacheForDir.ignores);
+        }
+        // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+        dir = dirname((prev = dir));
+        if (prev === dir || dir === '.') break;
       }
-      // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
-      dir = dirname((prev = dir));
-      if (prev === dir || dir === '.') break;
     }
   } else {
-    ignore.push(...GLOBAL_IGNORE_PATTERNS);
+    _ignore.push(...GLOBAL_IGNORE_PATTERNS);
   }
 
-  const fgOptions = Object.assign(options, { ignore });
+  const ignore = cachedIgnores || compact(_ignore);
 
-  debugLogObject(relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME, 'Glob options', { patterns, ...fgOptions });
+  const { dir, label, ...fgOptions } = { ...options, ignore };
 
-  return fg.glob(patterns, fgOptions);
+  const paths = await fg.glob(patterns, fgOptions);
+
+  debugLogObject(
+    relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME,
+    label ? `Finding ${label} paths` : 'Finding paths',
+    () => ({ patterns, ...fgOptions, ignore: cachedIgnores ? `identical to ${dir} ↑` : ignore, paths })
+  );
+
+  if (willCache) cachedGlobIgnores.set(options.dir, ignore);
+
+  return paths;
 }
 
 export async function getGitIgnoredHandler(options: Options): Promise<(path: string) => boolean> {
-  cachedIgnores.clear();
+  cachedGitIgnores.clear();
 
   if (options.gitignore === false) return () => false;
 
