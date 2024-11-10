@@ -1,5 +1,5 @@
 import parse, { type Assignment, type ExpansionNode, type Node, type Prefix } from '../../vendor/bash-parser/index.js';
-import { pluginArgsMap } from '../plugins.js';
+import { Plugins, pluginArgsMap } from '../plugins.js';
 import type { GetInputsFromScriptsOptions } from '../types/config.js';
 import { debugLogObject } from '../util/debug.js';
 import { type Input, toBinary, toDeferResolve } from '../util/input.js';
@@ -82,6 +82,10 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
             // Run again with everything behind `binary -- ` (bash-parser AST is lacking)
             const command = script.replace(new RegExp(`.*${text ?? binary}(\\s--\\s)?`), '');
             return [toBinary(binary), ...getDependenciesFromScript(command, options)];
+          }
+
+          if (binary in Plugins) {
+            return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
           }
 
           // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
