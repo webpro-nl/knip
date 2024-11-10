@@ -3,7 +3,6 @@ import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
-import { timerify } from './Performance.js';
 import { LoaderError } from './errors.js';
 import { join } from './path.js';
 
@@ -63,5 +62,3 @@ export const parseJSON = async (filePath: string, contents: string) => {
 export const parseYAML = (contents: string) => {
   return yaml.load(contents);
 };
-
-export const _loadJSON = timerify(loadJSON);
