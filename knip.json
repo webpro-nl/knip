@@ -1,14 +1,12 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "include": ["classMembers"],
-  "ignore": ["templates/**"],
   "workspaces": {
+    ".": {
+      "project": ["!templates/**"]
+    },
     "packages/knip": {
-      "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template/**"],
-      "node-test-runner": {
-        "entry": ["test/**/*.test.ts"],
-        "project": ["test/**/*.ts"]
-      }
+      "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template/**"]
     },
     "packages/docs": {
       "entry": ["{remark,scripts}/*.ts", "src/components/{Head,Footer}.astro!"]
