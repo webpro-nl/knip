@@ -3,9 +3,6 @@
   "include": ["classMembers"],
   "ignore": ["templates/**"],
   "workspaces": {
-    ".": {
-      "ignoreBinaries": ["knip"]
-    },
     "packages/knip": {
       "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template/**"],
       "node-test-runner": {
