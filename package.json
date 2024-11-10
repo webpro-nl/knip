@@ -22,8 +22,7 @@
     "test": "bun run --cwd packages/knip test",
     "format": "biome format .",
     "lint": "biome lint .",
-    "ci": "biome ci . && installed-check --no-include-workspace-root --ignore-dev",
-    "waitDB": "./wait-for-postgres.sh -h localhost -p 5433 -U dev -r 10"
+    "ci": "biome ci . && installed-check --no-include-workspace-root --ignore-dev"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
