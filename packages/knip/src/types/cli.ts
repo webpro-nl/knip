@@ -13,6 +13,7 @@ export interface CommandLineOptions {
   isFix: boolean;
   isHideConfigHints: boolean;
   isIncludeEntryExports: boolean;
+  isIgnoreExportsUsedInFile: boolean;
   isIncludeLibs: boolean;
   isIsolateWorkspaces: boolean;
   isProduction: boolean;
