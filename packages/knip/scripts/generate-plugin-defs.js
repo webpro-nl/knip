@@ -9,6 +9,7 @@ const cc = str => str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_m, char) => c
 const pluginsDir = path.resolve('src/plugins');
 const outputFileTypes = path.resolve('src/types/PluginNames.ts');
 const outputFilePlugins = path.resolve('src/plugins/index.ts');
+const outputFileSchema = path.resolve('src/schema/plugins.ts');
 
 const pluginNames = fs
   .readdirSync(pluginsDir, { withFileTypes: true })
@@ -28,3 +29,21 @@ const pluginsObj = `export const Plugins = {${pluginNames
   .join(EOL)} };`;
 
 fs.writeFileSync(outputFilePlugins, HEADER + EOL + imports + EOL + EOL + pluginsObj);
+
+const pluginSchemas = pluginNames.map(name => `'${name}': pluginSchema`).join(`,${EOL}`);
+const pluginSchema = `import { z } from 'zod';
+export const globSchema = z.union([z.string(), z.array(z.string())]);
+
+export const pluginSchema = z.union([
+  z.boolean(),
+  globSchema,
+  z.object({
+    config: globSchema.optional(),
+    entry: globSchema.optional(),
+    project: globSchema.optional(),
+  }),
+]);
+
+export const pluginsSchema = z.object({${pluginSchemas}});`;
+
+fs.writeFileSync(outputFileSchema, HEADER + EOL + pluginSchema);

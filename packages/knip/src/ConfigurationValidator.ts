@@ -1,7 +1,5 @@
 import { z } from 'zod';
-import { pluginsSchema } from './schema/plugins.js';
-
-const globSchema = z.union([z.string(), z.array(z.string())]);
+import { globSchema, pluginsSchema } from './schema/plugins.js';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
@@ -67,16 +65,6 @@ const reportConfigSchema = z.object({
   include: z.array(issueTypeSchema).optional(),
   exclude: z.array(issueTypeSchema).optional(),
 });
-
-export const pluginSchema = z.union([
-  z.boolean(),
-  globSchema,
-  z.object({
-    config: globSchema.optional(),
-    entry: globSchema.optional(),
-    project: globSchema.optional(),
-  }),
-]);
 
 const baseWorkspaceConfigurationSchema = z.object({
   entry: globSchema.optional(),

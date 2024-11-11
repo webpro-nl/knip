@@ -1,6 +1,7 @@
 import type { z } from 'zod';
-import type { ConfigurationValidator, pluginSchema } from '../ConfigurationValidator.js';
+import type { ConfigurationValidator } from '../ConfigurationValidator.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
+import type { pluginSchema } from '../schema/plugins.js';
 import type { Input } from '../util/input.js';
 import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';

@@ -1,9 +1,20 @@
+// This file is generated (no need to edit)
 import { z } from 'zod';
-import { pluginSchema } from '../ConfigurationValidator.js';
+export const globSchema = z.union([z.string(), z.array(z.string())]);
+
+export const pluginSchema = z.union([
+  z.boolean(),
+  globSchema,
+  z.object({
+    config: globSchema.optional(),
+    entry: globSchema.optional(),
+    project: globSchema.optional(),
+  }),
+]);
 
 export const pluginsSchema = z.object({
-  astro: pluginSchema,
   angular: pluginSchema,
+  astro: pluginSchema,
   ava: pluginSchema,
   babel: pluginSchema,
   c8: pluginSchema,
@@ -15,10 +26,12 @@ export const pluginsSchema = z.object({
   cucumber: pluginSchema,
   cypress: pluginSchema,
   dotenv: pluginSchema,
+  drizzle: pluginSchema,
   eleventy: pluginSchema,
   eslint: pluginSchema,
   gatsby: pluginSchema,
   'github-actions': pluginSchema,
+  glob: pluginSchema,
   'graphql-codegen': pluginSchema,
   husky: pluginSchema,
   jest: pluginSchema,
@@ -36,8 +49,8 @@ export const pluginsSchema = z.object({
   netlify: pluginSchema,
   next: pluginSchema,
   node: pluginSchema,
-  nodemon: pluginSchema,
   'node-test-runner': pluginSchema,
+  nodemon: pluginSchema,
   'npm-package-json-lint': pluginSchema,
   nuxt: pluginSchema,
   nx: pluginSchema,
@@ -75,10 +88,10 @@ export const pluginsSchema = z.object({
   unbuild: pluginSchema,
   unocss: pluginSchema,
   'vercel-og': pluginSchema,
-  vue: pluginSchema,
   vike: pluginSchema,
   vite: pluginSchema,
   vitest: pluginSchema,
+  vue: pluginSchema,
   'webdriver-io': pluginSchema,
   webpack: pluginSchema,
   wireit: pluginSchema,
