@@ -399,7 +399,7 @@ const getImportsAndExports = (
   // and whether it's referenced in an exported type and should be exported with it (*)
   for (const item of exports.values()) {
     // TODO Reconsider this messy logic in AST visitors + `isReferencedInExport` + `findInternalReferences`
-    if (item.symbol && referencedSymbolsInExport.has(item.symbol)) {
+    if (!isType(item) && item.symbol && referencedSymbolsInExport.has(item.symbol)) {
       item.refs = [1, true];
     } else {
       const isBindingElement = item.symbol?.valueDeclaration && ts.isBindingElement(item.symbol.valueDeclaration);
@@ -408,7 +408,6 @@ const getImportsAndExports = (
         (typeof ignoreExportsUsedInFile === 'object' &&
           item.type !== 'unknown' &&
           ignoreExportsUsedInFile[item.type]) ||
-        isType(item) ||
         isBindingElement
       ) {
         item.refs = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExport, isBindingElement);

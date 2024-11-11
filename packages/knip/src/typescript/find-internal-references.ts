@@ -41,7 +41,6 @@ export const findInternalReferences = (
 
           if (item.symbol === symbol) {
             refCount++;
-            if (isInExport || isType(item)) return [refCount, isSymbolInExport];
             if (isBindingElement) return [refCount, true];
           }
 

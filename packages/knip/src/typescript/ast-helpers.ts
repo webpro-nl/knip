@@ -201,26 +201,15 @@ export const isImportSpecifier = (node: ts.Node) =>
   ts.isImportClause(node.parent) ||
   ts.isNamespaceImport(node.parent);
 
-const isExported = (node: ts.Node): boolean => {
+const isInExportedNode = (node: ts.Node): boolean => {
   if (getExportKeywordNode(node)) return true;
-  return node.parent ? isExported(node.parent) : false;
-};
-
-const isTypeDeclaration = (node: ts.Node) =>
-  ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node);
-
-const getAncestorTypeDeclaration = (node: ts.Node) => {
-  while (node) {
-    if (isTypeDeclaration(node)) return node;
-    node = node.parent;
-  }
+  return node.parent ? isInExportedNode(node.parent) : false;
 };
 
 export const isReferencedInExport = (node: ts.Node) => {
-  if (ts.isTypeQueryNode(node.parent) && isExported(node.parent.parent)) return true;
-  if (ts.isTypeReferenceNode(node.parent) && isExported(node.parent.parent)) return true;
-  const typeNode = getAncestorTypeDeclaration(node);
-  return Boolean(typeNode && isExported(typeNode));
+  if (ts.isTypeQueryNode(node.parent) && isInExportedNode(node.parent.parent)) return true;
+  if (ts.isTypeReferenceNode(node.parent) && isInExportedNode(node.parent.parent)) return true;
+  return false;
 };
 
 export const getExportKeywordNode = (node: ts.Node) =>

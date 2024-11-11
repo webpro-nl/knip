@@ -40,7 +40,7 @@ export type IgnorePatterns = (string | RegExp)[];
 
 type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
 
-export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
@@ -68,7 +68,7 @@ export interface Configuration {
   rootPluginConfigs: Partial<PluginsConfiguration>;
 }
 
-export type NormalizedGlob = string[];
+type NormalizedGlob = string[];
 
 export type EnsuredPluginConfiguration = {
   config: NormalizedGlob | null;
