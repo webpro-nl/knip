@@ -2,6 +2,36 @@
   "data": [
     {
       "entities": {
+        "urls": [
+          {
+            "start": 4,
+            "end": 27,
+            "url": "https://t.co/kA81p5gkmP",
+            "expanded_url": "https://www.npmjs.com/package/knip",
+            "display_url": "npmjs.com/package/knip",
+            "status": 200,
+            "title": "Knip",
+            "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects.",
+            "unwound_url": "https://www.npmjs.com/package/knip"
+          }
+        ]
+      },
+      "id": "1850975288362221628",
+      "author_id": "5",
+      "created_at": "2024-10-28T19:57:00.000Z",
+      "attachments": {},
+      "text": "Knip may be the greatest tool ever conceived.\nhttps://t.co/kA81p5gkmP",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 1,
+        "like_count": 3,
+        "quote_count": 0,
+        "bookmark_count": 1,
+        "impression_count": 338
+      }
+    },
+    {
+      "entities": {
         "urls": []
       },
       "id": "3k3obqi65oy2p",
@@ -848,6 +878,12 @@
         "username": "daviduzumeri.bsky.social",
         "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:6ykajndqngy2kxozo37mpsgc/bafkreif2xu6bini3tpv2hfauw53ng43zbefgqol36yt4baehcbdfxahihu@jpeg",
         "name": "Old Man Uzi"
+      },
+      {
+        "id": "5",
+        "username": "gary__tyr",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1748013320039440384/aJvwN534_400x400.jpg",
+        "name": "Gary Tyr"
       },
       {
         "id": "22918124",
