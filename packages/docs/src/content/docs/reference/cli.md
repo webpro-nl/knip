@@ -40,6 +40,14 @@ This is equal to `bunx --bun knip`
 Requires [Bun][1] to be installed. Also see [known issues][2] for the type of
 issues this might help with.
 
+### NO_COLOR
+
+The default reporters use the [NO_COLOR][3] friendly [picocolors][4]:
+
+```sh
+NO_COLOR=1 knip
+```
+
 ## Troubleshooting
 
 ### `--debug`
@@ -75,21 +83,21 @@ Total running time: 5s (mem: 631.27MB)
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][3]).
+`performance.timerify` ([GitHub issue][5]).
 
 ### `--trace`
 
 Trace exports to see where they are imported.
 
-Also see [Trace][4].
+Also see [Trace][6].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][5].
+Trace export name to see where it's imported. Implies [--trace][7].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][5].
+Trace file to see where its exports are imported. Implies [--trace][7].
 
 ## Configuration
 
@@ -115,7 +123,7 @@ Default location: `tsconfig.json`
 
 ### `--workspace [dir]`
 
-[Lint a single workspace][6] including its ancestor and dependent workspaces.
+[Lint a single workspace][8] including its ancestor and dependent workspaces.
 The default behavior is to lint all configured workspaces.
 
 Shortcut: `-W`
@@ -139,7 +147,7 @@ files when reporting unused exports:
 knip --include-entry-exports
 ```
 
-Also see [includeEntryExports][7].
+Also see [includeEntryExports][9].
 
 ### `--include-libs`
 
@@ -150,11 +158,11 @@ Getting false positives for exports consumed by external libraries? Try the
 knip --include-libs
 ```
 
-Also see [external libs][8].
+Also see [external libs][10].
 
 ### `--isolate-workspaces`
 
-By default, Knip optimizes performance using [workspace sharing][9] to existing
+By default, Knip optimizes performance using [workspace sharing][11] to existing
 TypeScript programs, based on the compatibility of their `compilerOptions`. This
 flag disables this behavior and creates one program per workspace, which is
 slower but memory is spread more evenly over time.
@@ -171,18 +179,18 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][10].
+Read more at [Production Mode][12].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][11].
+mode][13].
 
-Read more at [Production Mode][10].
+Read more at [Production Mode][12].
 
 ### `--fix`
 
-Read more at [auto-fix][12].
+Read more at [auto-fix][14].
 
 ### `--cache`
 
@@ -208,7 +216,7 @@ changes in `package.json` and/or `node_modules` are not supported.
 
 ## Filters
 
-Available [issue types][13] when filtering output using `--include` or
+Available [issue types][15] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -264,7 +272,7 @@ Shortcut to include all types of export issues:
 
 ### `--experimental-tags`
 
-Deprecated. Use [--tags][14] instead.
+Deprecated. Use [--tags][16] instead.
 
 ### `--tags`
 
@@ -318,7 +326,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][15].
+Also see [Reporters & Preprocessors][17].
 
 ### `--reporter-options [json]`
 
@@ -353,7 +361,7 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
-Also see [Reporters & Preprocessors][15].
+Also see [Reporters & Preprocessors][17].
 
 ## Exit code
 
@@ -375,16 +383,18 @@ Maximum number of issues before non-zero exit code. Default: `0`
 
 [1]: https://bun.sh
 [2]: ../reference/known-issues.md
-[3]: https://github.com/oven-sh/bun/issues/9271
-[4]: ../guides/troubleshooting.md#trace
-[5]: #--trace
-[6]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[7]: ./configuration.md#includeentryexports
-[8]: ../guides/handling-issues.mdx#external-libraries
-[9]: ../guides/performance.md#workspace-sharing
-[10]: ../features/production-mode.md
-[11]: #--production
-[12]: ../features/auto-fix.mdx
-[13]: ./issue-types.md
-[14]: #--tags
-[15]: ../features/reporters.md
+[3]: https://no-color.org/
+[4]: https://www.npmjs.com/package/picocolors
+[5]: https://github.com/oven-sh/bun/issues/9271
+[6]: ../guides/troubleshooting.md#trace
+[7]: #--trace
+[8]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[9]: ./configuration.md#includeentryexports
+[10]: ../guides/handling-issues.mdx#external-libraries
+[11]: ../guides/performance.md#workspace-sharing
+[12]: ../features/production-mode.md
+[13]: #--production
+[14]: ../features/auto-fix.mdx
+[15]: ./issue-types.md
+[16]: #--tags
+[17]: ../features/reporters.md
