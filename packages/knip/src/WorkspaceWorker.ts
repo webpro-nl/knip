@@ -16,7 +16,7 @@ import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
 import { type ConfigInput, type Input, isConfigPattern, toDebugString, toEntry } from './util/input.js';
 import { getKeysByValue } from './util/object.js';
-import { basename, dirname, join } from './util/path.js';
+import { basename, dirname, extname, join } from './util/path.js';
 import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
 
 type WorkspaceManagerOptions = {
@@ -122,6 +122,7 @@ export class WorkspaceWorker {
 
     for (const [pluginName, plugin] of PluginEntries) {
       if (this.config[pluginName] === false) continue;
+      if (this.cwd !== this.dir && plugin.isRootOnly) continue;
       if (this.config[pluginName]) {
         this.enabledPluginsMap[pluginName] = true;
         continue;
@@ -136,12 +137,7 @@ export class WorkspaceWorker {
       }
     }
 
-    const enabledPlugins = getKeysByValue(this.enabledPluginsMap, true);
-
-    const enabledPluginTitles = enabledPlugins.map(name => Plugins[name].title);
-    debugLogObject(this.name, 'Enabled plugins', enabledPluginTitles);
-
-    return enabledPlugins;
+    return getKeysByValue(this.enabledPluginsMap, true);
   }
 
   private getConfigForPlugin(pluginName: PluginName): EnsuredPluginConfiguration {
@@ -275,7 +271,8 @@ export class WorkspaceWorker {
       if (configFilePath) {
         if (!configFiles.has(pluginName)) configFiles.set(pluginName, new Set());
         configFiles.get(pluginName)?.add(configFilePath);
-        addInput(toEntry(dependency.specifier), dependency.containingFilePath);
+        if (extname(dependency.specifier) !== '.json')
+          addInput(toEntry(dependency.specifier), dependency.containingFilePath);
       }
     };
 
@@ -298,12 +295,11 @@ export class WorkspaceWorker {
 
       if (!config) return;
 
-      const configFilePaths = await _glob({ patterns, cwd: baseScriptOptions.rootCwd, dir: cwd, gitignore: false });
+      const label = 'config file';
+      const configFilePaths = await _glob({ patterns, cwd: rootCwd, dir: cwd, gitignore: false, label });
 
       const remainingConfigFilePaths = configFilePaths.filter(filePath => !this.allConfigFilePaths.has(filePath));
       for (const f of remainingConfigFilePaths) if (basename(f) !== 'package.json') this.allConfigFilePaths.add(f);
-
-      if (configFilePaths.length > 0) debugLogArray([name, plugin.title], 'config file paths', configFilePaths);
 
       const options = {
         ...baseScriptOptions,
@@ -363,6 +359,9 @@ export class WorkspaceWorker {
         for (const id of dependencies) addInput(id, containingFilePath);
       }
     };
+
+    const enabledPluginTitles = this.enabledPlugins.map(name => Plugins[name].title);
+    debugLogObject(this.name, 'Enabled plugins', enabledPluginTitles);
 
     for (const pluginName of this.enabledPlugins) {
       const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles.get(pluginName) ?? [])];

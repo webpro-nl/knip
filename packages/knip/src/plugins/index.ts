@@ -1,3 +1,4 @@
+// This file is generated (no need to edit)
 import { default as angular } from './angular/index.js';
 import { default as astro } from './astro/index.js';
 import { default as ava } from './ava/index.js';
@@ -16,6 +17,7 @@ import { default as eleventy } from './eleventy/index.js';
 import { default as eslint } from './eslint/index.js';
 import { default as gatsby } from './gatsby/index.js';
 import { default as githubActions } from './github-actions/index.js';
+import { default as glob } from './glob/index.js';
 import { default as graphqlCodegen } from './graphql-codegen/index.js';
 import { default as husky } from './husky/index.js';
 import { default as jest } from './jest/index.js';
@@ -102,13 +104,14 @@ export const Plugins = {
   eslint,
   gatsby,
   'github-actions': githubActions,
+  glob,
   'graphql-codegen': graphqlCodegen,
   husky,
   jest,
   ladle,
   lefthook,
-  linthtml,
   'lint-staged': lintStaged,
+  linthtml,
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
   markdownlint,
@@ -119,8 +122,8 @@ export const Plugins = {
   netlify,
   next,
   node,
-  nodemon,
   'node-test-runner': nodeTestRunner,
+  nodemon,
   'npm-package-json-lint': npmPackageJsonLint,
   nuxt,
   nx,

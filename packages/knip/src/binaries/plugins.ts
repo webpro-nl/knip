@@ -35,7 +35,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
   });
 
   const positionals = [];
-  if (opts.positional) {
+  if (opts.positional && parsed._[0]) {
     const id = parsed._[0]; // let's start out safe, but sometimes we'll want more
     if (isGlobLike(id)) positionals.push(toEntry(id));
     else positionals.push(toDeferResolveEntry(id));

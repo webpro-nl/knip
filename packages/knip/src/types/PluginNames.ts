@@ -1,3 +1,4 @@
+// This file is generated (no need to edit)
 export type PluginName =
   | 'angular'
   | 'astro'
@@ -17,6 +18,7 @@ export type PluginName =
   | 'eslint'
   | 'gatsby'
   | 'github-actions'
+  | 'glob'
   | 'graphql-codegen'
   | 'husky'
   | 'jest'
@@ -103,6 +105,7 @@ export const pluginNames = [
   'eslint',
   'gatsby',
   'github-actions',
+  'glob',
   'graphql-codegen',
   'husky',
   'jest',

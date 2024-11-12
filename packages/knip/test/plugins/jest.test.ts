@@ -16,6 +16,7 @@ test('Find dependencies with the Jest plugin', async () => {
   assert(issues.unlisted['jest.config.shared.js']['@jest/types']);
   assert(issues.unlisted['jest.setup.js']['@testing-library/jest-dom']);
   assert(issues.unlisted['jest.config.js']['@jest/types']);
+  assert(issues.unresolved['jest.config.js']['@side/jest-runtime']);
   assert(issues.unresolved['jest.config.js']['@nrwl/react/plugins/jest']);
   assert(issues.unresolved['jest.config.js']['babel-jest']);
   assert(issues.unresolved['jest.config.js']['identity-obj-proxy']);
@@ -29,7 +30,7 @@ test('Find dependencies with the Jest plugin', async () => {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 3,
-    unresolved: 8,
+    unresolved: 9,
     processed: 6,
     total: 6,
   });

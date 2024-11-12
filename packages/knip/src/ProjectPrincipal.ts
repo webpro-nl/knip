@@ -338,7 +338,16 @@ export class ProjectPrincipal {
 
     const externalRefs = referencedSymbols
       .flatMap(refs => refs.references)
-      .filter(ref => !ref.isDefinition && ref.fileName !== filePath);
+      .filter(ref => !ref.isDefinition && ref.fileName !== filePath)
+      .filter(ref => {
+        // Filter out are re-exports
+        const sourceFile = this.backend.program?.getSourceFile(ref.fileName);
+        if (!sourceFile) return true;
+        // @ts-expect-error ts.getTokenAtPosition is internal fn
+        const node = ts.getTokenAtPosition(sourceFile, ref.textSpan.start);
+        if (!node?.parent?.parent?.parent) return true;
+        return !(ts.isExportSpecifier(node.parent) && node.parent.parent.parent.moduleSpecifier);
+      });
 
     return externalRefs.length > 0;
   }

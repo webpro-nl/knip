@@ -72,7 +72,7 @@ jobs:
               pnpm i -g pnpm
               pnpm install
               pnpm add -D -w $PKG_URL
-              bunx --bun knip --tags=-route
+              pnpm run knip --fix --no-exit-code
 
           - name: eslint
             repo: eslint/eslint

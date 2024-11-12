@@ -90,6 +90,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;
   const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
+  const isShowConfigHints = !workspace && !isProduction && !isHideConfigHints;
 
   const collector = new IssueCollector({ cwd, rules, filters });
 
@@ -161,8 +162,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const deps = new Set<Input>();
 
-    debugLogArray(name, 'Definition paths', definitionPaths);
-    for (const id of definitionPaths) deps.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
+    if (definitionPaths.length > 0) {
+      debugLogArray(name, 'Definition paths', definitionPaths);
+      for (const id of definitionPaths) deps.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
+    }
 
     const ignore = worker.getIgnorePatterns();
     const sharedGlobOptions = { cwd, dir, gitignore };
@@ -171,7 +174,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     // Add entry paths from package.json#main, #bin, #exports
     const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { ...sharedGlobOptions, ignore });
-    debugLogArray(name, 'Entry paths in package.json', entryPathsFromManifest);
     for (const id of entryPathsFromManifest.map(id => toProductionEntry(id))) deps.add(id);
 
     // Get dependencies from plugins
@@ -217,58 +219,58 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const negatedEntryPatterns: string[] = Array.from(entryFilePatterns).map(negate);
 
       {
+        const label = 'entry';
         const patterns = worker.getProductionEntryFilePatterns(negatedEntryPatterns);
-        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false });
-        debugLogArray(name, 'Entry paths', workspaceEntryPaths);
+        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false, label });
         principal.addEntryPaths(workspaceEntryPaths);
       }
 
       {
+        const label = 'production plugin entry';
         const patterns = Array.from(productionEntryFilePatterns);
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, 'Production plugin entry paths', pluginWorkspaceEntryPaths);
+        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
+        const label = 'project';
         const patterns = worker.getProductionProjectFilePatterns(negatedEntryPatterns);
-        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, 'Project paths', workspaceProjectPaths);
+        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         for (const projectPath of workspaceProjectPaths) principal.addProjectPath(projectPath);
       }
     } else {
       {
+        const label = 'entry';
         const patterns = worker.getEntryFilePatterns();
-        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false });
-        debugLogArray(name, 'Entry paths', workspaceEntryPaths);
+        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false, label });
         principal.addEntryPaths(workspaceEntryPaths);
       }
 
       {
+        const label = 'project';
         const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns]);
-        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, 'Project paths', workspaceProjectPaths);
+        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         for (const projectPath of workspaceProjectPaths) principal.addProjectPath(projectPath);
       }
 
       {
+        const label = 'plugin entry';
         const patterns = worker.getPluginEntryFilePatterns([...entryFilePatterns, ...productionEntryFilePatterns]);
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, 'Plugin entry paths', pluginWorkspaceEntryPaths);
+        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
 
       {
+        const label = 'plugin project';
         const patterns = worker.getPluginProjectFilePatterns();
-        const pluginWorkspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, 'Plugin project paths', pluginWorkspaceProjectPaths);
+        const pluginWorkspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         for (const projectPath of pluginWorkspaceProjectPaths) principal.addProjectPath(projectPath);
       }
 
       {
+        const label = 'plugin configuration';
         const patterns = worker.getPluginConfigPatterns();
-        const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns });
-        debugLogArray(name, 'Plugin configuration paths', configurationEntryPaths);
+        const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
       }
     }
@@ -617,19 +619,19 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       deputy.removeIgnoredIssues(collector.getIssues());
 
       // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in production/strict mode
-      if (!workspace && !isProduction && !isHideConfigHints) {
+      if (isShowConfigHints) {
         const configurationHints = deputy.getConfigurationHints();
         for (const hint of configurationHints) collector.addConfigurationHint(hint);
       }
     }
 
-    const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
-    for (const identifier of unusedIgnoredWorkspaces) {
-      collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
+    if (isShowConfigHints) {
+      const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
+      for (const identifier of unusedIgnoredWorkspaces) {
+        collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
+      }
     }
   };
-
-  // inspect(graph);
 
   await collectUnusedExports();
 

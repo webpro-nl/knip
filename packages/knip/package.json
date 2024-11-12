@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "5.34.3",
+  "version": "5.36.7",
   "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
   "repository": {
@@ -43,13 +43,13 @@
     "test": "bun test test/*.test.ts test/**/*.test.ts",
     "test:node": "glob -c \"npx -y tsx --test --import ./transform-test.js\" \"test/**/*.test.ts\"",
     "watch": "npm link && tsc --watch",
-    "prebuild": "node rmdir.js dist",
+    "prebuild": "npm run generate-plugin-defs && node rmdir.js dist",
     "build": "tsc",
     "qa": "bun lint && bun run build && bun knip && bun knip:production && bun run test",
     "release": "release-it",
     "create-plugin": "bun ./scripts/create-new-plugin.ts",
     "postcreate-plugin": "biome format --write schema.json schema-jsonc.json src/ConfigurationValidator.ts",
-    "generate-plugin-types": "bun ./scripts/generate-plugin-types.ts"
+    "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && biome check --write src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts"
   },
   "files": [
     "dist",
@@ -63,7 +63,7 @@
     "easy-table": "1.2.0",
     "enhanced-resolve": "^5.17.1",
     "fast-glob": "^3.3.2",
-    "jiti": "^2.3.3",
+    "jiti": "^2.4.0",
     "js-yaml": "^4.1.0",
     "minimist": "^1.2.8",
     "picocolors": "^1.1.0",

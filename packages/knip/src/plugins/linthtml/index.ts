@@ -17,9 +17,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config: string[] = ['package.json', ...toCosmiconfig('linthtml')];
 
 const resolveConfig: ResolveConfig<PluginConfig> = config => {
-  const extensions = [config.extends ?? []].flat();
-  const plugins = [config.plugins ?? []].flat();
-  return [...extensions, ...plugins].map(toDeferResolve);
+  const extensions = config.extends ?? [];
+  const plugins = config.plugins ?? [];
+  return [extensions, plugins].flat().map(toDeferResolve);
 };
 
 export default {

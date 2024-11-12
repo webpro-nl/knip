@@ -13,6 +13,8 @@ const enablers = 'This plugin is enabled when a `.yml` or `.yaml` file is found 
 const isEnabled: IsPluginEnabled = async ({ cwd }) =>
   Boolean(await _firstGlob({ cwd, patterns: ['.github/workflows/*.{yml,yaml}'] }));
 
+const isRootOnly = true;
+
 const config = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'];
 
 const isString = (value: unknown): value is string => typeof value === 'string';
@@ -41,6 +43,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
   const jobs = findByKeyDeep<Job>(config, 'steps');
 
   for (const steps of jobs) {
+    if (!Array.isArray(steps.steps)) continue;
     const action = steps.steps.find(
       step => step.uses?.startsWith('actions/checkout@') && typeof step.with?.path === 'string' && !step.with.repository
     );
@@ -72,6 +75,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   config,
   resolveConfig,
 } satisfies Plugin;

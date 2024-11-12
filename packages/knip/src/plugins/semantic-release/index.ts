@@ -12,6 +12,8 @@ const enablers = ['semantic-release'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
+const isRootOnly = true;
+
 const packageJsonPath = 'release';
 
 const config = ['package.json', ...toCosmiconfig('release')];
@@ -25,6 +27,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   packageJsonPath,
   config,
   resolveConfig,

@@ -1,10 +1,10 @@
-import picocolors from 'picocolors';
 import prettyMilliseconds from 'pretty-ms';
 import { main } from './index.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
 import { perfObserver } from './util/Performance.js';
 import parsedArgValues, { helpText } from './util/cli-arguments.js';
 import { getKnownError, hasCause, isConfigurationError, isKnownError } from './util/errors.js';
+import { logError, logWarning } from './util/log.js';
 import { cwd, join, toPosix } from './util/path.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { splitTags } from './util/tag.js';
@@ -126,8 +126,11 @@ const run = async () => {
     }
 
     if (experimentalTags.length > 0) {
-      const prefix = `${picocolors.yellow('DEPRECATION WARNING:')}`;
-      console.warn(`\n${prefix} --experimental-tags is deprecated, please start using --tags instead`);
+      logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
+    }
+
+    if (isIsolateWorkspaces && report.classMembers) {
+      logWarning('WARNING', 'Class members are not tracked when using the --isolate-workspaces flag');
     }
 
     if (!noExitCode && totalErrorCount > Number(maxIssues)) {
@@ -137,8 +140,7 @@ const run = async () => {
     process.exitCode = 2;
     if (!isDebug && error instanceof Error && isKnownError(error)) {
       const knownError = getKnownError(error);
-      const prefix = `${picocolors.red('ERROR:')}`;
-      console.error(`${prefix} ${knownError.message}`);
+      logError('ERROR', knownError.message);
       if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
       if (isConfigurationError(knownError)) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);

@@ -19,7 +19,7 @@ environment variables set.
 If it isn't clear what's throwing the exception, try another run with `--debug`
 to locate the cause of the issue with more details.
 
-### Path aliases in config files
+## Path aliases in config files
 
 Loading the configuration file (e.g. `cypress.config.ts`) for one of Knip's
 plugins may give an error:
@@ -43,11 +43,25 @@ Potential workarounds:
 - Use Bun with [knip-bun][5].
 - [Disable the plugin][6] (not recommended, try the other options first).
 
+## Nx Daemon
+
+In Nx projects you might encounter this error:
+
+```sh
+NX   Daemon process terminated and closed the connection
+```
+
+The solution is to [turn off the Nx Daemon][7]:
+
+```sh
+NX_DAEMON=false knip
+```
+
 ## False positives with external libs
 
 Knip may report false positives when exports are consumed by external libraries.
 
-Please see [external libs][7].
+Please see [external libs][8].
 
 ## Definitely Typed packages in `dependencies`
 
@@ -72,9 +86,9 @@ similar to how standard ES Modules work.
 
 ## `unplugin-icons` imports
 
-[unplugin-icons][8] uses aliased imports to import icons from icon sets as
+[unplugin-icons][9] uses aliased imports to import icons from icon sets as
 components. Knip cannot resolve these imports and will report them as unused.
-Use the [`paths` configuration option][9] to tell Knip where to find the icon
+Use the [`paths` configuration option][10] to tell Knip where to find the icon
 types. For example:
 
 ```json title="knip.json"
@@ -86,7 +100,7 @@ types. For example:
 ```
 
 Where `[framework]` is the name of the framework you're using (see [available
-types][10]).
+types][11]).
 
 [1]: #exceptions-from-config-files
 [2]: #false-positives-with-external-libs
@@ -94,7 +108,8 @@ types][10]).
 [4]: #extensionless-imports
 [5]: ./cli.md#knip-bun
 [6]: ./configuration.md#plugins
-[7]: ../guides/handling-issues.mdx#external-libraries
-[8]: https://github.com/antfu/unplugin-icons
-[9]: ./configuration.md#paths
-[10]: https://github.com/unplugin/unplugin-icons/tree/main/types
+[7]: https://nx.dev/concepts/nx-daemon#turning-it-off
+[8]: ../guides/handling-issues.mdx#external-libraries
+[9]: https://github.com/antfu/unplugin-icons
+[10]: ./configuration.md#paths
+[11]: https://github.com/unplugin/unplugin-icons/tree/main/types

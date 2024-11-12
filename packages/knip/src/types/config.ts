@@ -1,6 +1,7 @@
 import type { z } from 'zod';
-import type { ConfigurationValidator, pluginSchema } from '../ConfigurationValidator.js';
+import type { ConfigurationValidator } from '../ConfigurationValidator.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
+import type { pluginSchema } from '../schema/plugins.js';
 import type { Input } from '../util/input.js';
 import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';
@@ -39,7 +40,7 @@ export type IgnorePatterns = (string | RegExp)[];
 
 type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
 
-export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
@@ -67,7 +68,7 @@ export interface Configuration {
   rootPluginConfigs: Partial<PluginsConfiguration>;
 }
 
-export type NormalizedGlob = string[];
+type NormalizedGlob = string[];
 
 export type EnsuredPluginConfiguration = {
   config: NormalizedGlob | null;
@@ -128,6 +129,7 @@ export interface Plugin {
   packageJsonPath?: string | ((manifest: PackageJson) => string);
   enablers?: IgnorePatterns | string;
   isEnabled?: IsPluginEnabled;
+  isRootOnly?: boolean;
   config?: string[];
   entry?: string[];
   production?: string[];

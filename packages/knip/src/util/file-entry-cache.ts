@@ -1,3 +1,8 @@
+/**
+ * Credits for this idea go to file-entry-cache, this is a modified and simplified version.
+ * - https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/README.md
+ * - https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
+ */
 import fs from 'node:fs';
 import { timerify } from './Performance.js';
 import { debugLog } from './debug.js';

@@ -9,16 +9,18 @@ const enablers = 'This plugin is enabled when a `.travis.yml` file is found in t
 
 const isEnabled: IsPluginEnabled = async ({ cwd }) => (await _glob({ cwd, patterns: ['.travis.yml'] })).length > 0;
 
+const isRootOnly = true;
+
 const config = ['.travis.yml'];
 
 const resolveConfig: ResolveConfig = async (config, options) => {
   if (!config) return [];
 
-  const beforeDeploy = [config.before_deploy ?? []].flat();
-  const beforeInstall = [config.before_install ?? []].flat();
-  const beforeScript = [config.before_script ?? []].flat();
+  const beforeDeploy = config.before_deploy ?? [];
+  const beforeInstall = config.before_install ?? [];
+  const beforeScript = config.before_script ?? [];
 
-  const scripts = [...beforeDeploy, ...beforeInstall, ...beforeScript];
+  const scripts = [beforeDeploy, beforeInstall, beforeScript].flat();
 
   return options.getInputsFromScripts(scripts, { knownBinsOnly: true });
 };
@@ -27,6 +29,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   config,
   resolveConfig,
 } satisfies Plugin;

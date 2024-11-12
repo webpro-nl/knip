@@ -37,6 +37,7 @@ export default defineConfig({
         github: 'https://github.com/webpro-nl/knip',
         discord: 'https://discord.gg/r5uXTtbTpc',
         'x.com': 'https://x.com/webprolific',
+        blueSky: 'https://bsky.app/profile/webpro.nl',
       },
       components: {
         Head: './src/components/Head.astro',

@@ -287,15 +287,6 @@ export class ConfigurationChief {
     );
   }
 
-  private getAvailableWorkspacePkgNames(pkgNames: Iterable<string>) {
-    const names = new Set<string>();
-    for (const pkgName of pkgNames) {
-      if (names.has(pkgName)) throw new ConfigurationError(`Duplicate package name: ${pkgName}`);
-      if (!picomatch.isMatch(pkgName, this.ignoredWorkspacePatterns)) names.add(pkgName);
-    }
-    return names;
-  }
-
   private setIncludedWorkspaces() {
     if (this.workspace) {
       const dir = resolve(this.workspace);

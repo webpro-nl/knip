@@ -11,6 +11,8 @@ const enablers = ['commitizen'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
+const isRootOnly = true;
+
 const packageJsonPath = 'config.commitizen';
 
 const config = ['.czrc', '.cz.json', 'package.json'];
@@ -23,6 +25,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   packageJsonPath,
   config,
   resolveConfig,

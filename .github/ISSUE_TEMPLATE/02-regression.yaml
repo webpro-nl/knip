@@ -6,7 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please make sure you have read the docs and are using the latest version of Knip. Use common sense and provide the necessary information that helps me or others to help you.
+        Please make sure you have read the docs and are using the latest version of Knip.
+        Use common sense and provide the necessary information that helps me or others to help you.
 
         A minimal reproduction is mandatory: only the code and configuration required to demonstrate the issue.
   - type: checkboxes

@@ -19,7 +19,7 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<CSpellConfig> = config => {
-  return (config.import ?? []).map(toDeferResolve);
+  return [config?.import ?? []].flat().map(toDeferResolve);
 };
 
 export default {

@@ -1,10 +1,10 @@
-export const replaceShortenedUrls = (tweet: TweetWithUser) => {
-  let text = (tweet.note_tweet?.text ?? tweet.text).replace(/^(@[^ ]+ )*/, '');
-  if (!tweet.entities.urls) return { ...tweet, text };
-  tweet.entities.urls.sort((a, b) => b.start - a.start);
-  for (const urlEntity of tweet.entities.urls) {
+export const replaceShortenedUrls = (post: PostWithUser) => {
+  let text = (post.note_tweet?.text ?? post.text).replace(/^(@[^ ]+ )*/, '');
+  if (!post.entities.urls) return { ...post, text };
+  post.entities.urls.sort((a, b) => b.start - a.start);
+  for (const urlEntity of post.entities.urls) {
     if (urlEntity.media_key) {
-      const media = (tweet.media ?? []).find(media => media.media_key === urlEntity.media_key);
+      const media = (post.media ?? []).find(media => media.media_key === urlEntity.media_key);
       if (media && media.type === 'photo') {
         text = text.replace(urlEntity.url, `<img src="${media.url}" alt="${media.alt_text}" />`);
       }
@@ -14,11 +14,11 @@ export const replaceShortenedUrls = (tweet: TweetWithUser) => {
       text = text.replace(urlEntity.url, `<a href="${urlEntity.expanded_url}">${urlEntity.expanded_url}</a>`);
     }
   }
-  if (tweet.media && tweet.note_tweet?.text) {
-    text = text + tweet.media.map(media => `<img src="${media.url}" alt="${media.alt_text}" />`).join('');
+  if (post.media && post.note_tweet?.text) {
+    text = text + post.media.map(media => `<img src="${media.url}" alt="${media.alt_text}" />`).join('');
   }
-  tweet.text = text;
-  return tweet;
+  post.text = text;
+  return post;
 };
 
 const timeFormatter = new Intl.DateTimeFormat('en-US', {
@@ -41,7 +41,7 @@ export const formatTimestamp = (date: string) => {
   return `${timeFormatter.format(d)} · ${dateFormatter.format(d)}`;
 };
 
-interface Tweet {
+interface Post {
   public_metrics: {
     retweet_count: number;
     reply_count: number;
@@ -114,13 +114,13 @@ interface Media {
   media_key: string;
 }
 
-export interface TweetWithUser extends Tweet {
+export interface PostWithUser extends Post {
   media?: Media[];
   user: User;
 }
 
-export interface TweetsResponse {
-  data: Tweet[];
+export interface PostResponse {
+  data: Post[];
   includes: {
     users: User[];
     media: Media[];

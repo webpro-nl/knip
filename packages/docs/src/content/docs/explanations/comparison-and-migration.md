@@ -104,7 +104,7 @@ Additional alternative and related projects include:
 - [dependency-check][11]
 - [find-unused-exports][12]
 - [npm-check][13]
-- [renoma][13]
+- [renoma][14]
 
 [1]: ./why-use-knip.md#comprehensive
 [2]: ../features/monorepos-and-workspaces.md
@@ -118,4 +118,5 @@ Additional alternative and related projects include:
 [10]: https://github.com/mysteryven/depclean
 [11]: https://github.com/dependency-check-team/dependency-check
 [12]: https://github.com/jaydenseric/find-unused-exports
-[13]: https://github.com/bluwy/renoma
+[13]: https://github.com/dylang/npm-check
+[14]: https://github.com/bluwy/renoma
