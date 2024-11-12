@@ -112,7 +112,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
 const resolveEntryPaths: ResolveEntryPaths<JestConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
-  const rootDir = localConfig.rootDir ? join(configFileDir, localConfig.rootDir) : configFileDir;
+  const rootDir = localConfig.rootDir ?? configFileDir;
   const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
   return (localConfig.testMatch ?? []).map(replaceRootDir).map(toEntry);
 };
@@ -120,8 +120,7 @@ const resolveEntryPaths: ResolveEntryPaths<JestConfig> = async (localConfig, opt
 const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
-  const rootDir = localConfig.rootDir ? join(configFileDir, localConfig.rootDir) : configFileDir;
-
+  const rootDir = localConfig.rootDir ??  configFileDir;
   const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
 
   const inputs = await resolveDependencies(localConfig, options);
