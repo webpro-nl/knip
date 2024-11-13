@@ -58,14 +58,12 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
 
   const runner = config.runner ? [config.runner] : [];
   const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
-
-  let environments: Array<string> = [];
-  if (config.testEnvironment === 'jsdom') {
-    environments = ['jest-environment-jsdom'];
-  } else if (config.testEnvironment) {
-    environments = [config.testEnvironment];
-  }
-
+  const environments =
+    config.testEnvironment === 'jsdom'
+      ? ['jest-environment-jsdom']
+      : config.testEnvironment
+        ? [config.testEnvironment]
+        : [];
   const resolvers = config.resolver ? [config.resolver] : [];
   const reporters = config.reporters
     ? config.reporters
