@@ -19,13 +19,16 @@ test('Find dependencies with the Jest plugin', async () => {
   // <rootDir> to reference the root directory.
   assert(!issues.files.has(join(cwd, 'project1/setupFiles/setup.js')));
 
+  // Correctly identifies a local `testEnvironment` file.
+  assert(!issues.files.has(join(cwd, 'jest.environment.js')));
+
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 0,
     devDependencies: 1,
     unlisted: 0,
     unresolved: 0,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
