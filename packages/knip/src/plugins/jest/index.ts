@@ -65,11 +65,40 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
         ? [config.testEnvironment]
         : [];
   const resolvers = config.resolver ? [config.resolver] : [];
-  const reporters = config.reporters
+
+  // Resolve dependencies for jest-junit reporter config
+  const jUnitReporterDeps: Array<string> = [];
+  for (const reporter of config.reporters ?? []) {
+    if (typeof reporter !== 'string' && reporter[0] === 'jest-junit') {
+      const {
+        testCasePropertiesFile,
+        testCasePropertiesDirectory,
+        testSuitePropertiesFile,
+        testSuitePropertiesDirectory,
+      } = reporter[1];
+      const testCaseFileName =
+        typeof testCasePropertiesFile === 'string' ? testCasePropertiesFile : 'junitProperties.js';
+      const testCaseDirectory =
+        typeof testCasePropertiesDirectory === 'string' ? testCasePropertiesDirectory : options.rootCwd;
+      const testSuiteFileName =
+        typeof testSuitePropertiesFile === 'string' ? testSuitePropertiesFile : 'junitTestCaseProperties.js';
+      const testSuiteDirectory =
+        typeof testSuitePropertiesDirectory === 'string' ? testSuitePropertiesDirectory : options.rootCwd;
+      const testCaseFilePath = join(testCaseDirectory, testCaseFileName);
+      const testSuiteFilePath = join(testSuiteDirectory, testSuiteFileName);
+      jUnitReporterDeps.push(testCaseFilePath);
+      jUnitReporterDeps.push(testSuiteFilePath);
+    }
+  }
+
+  let reporters = config.reporters
     ? config.reporters
         .map(reporter => (typeof reporter === 'string' ? reporter : reporter[0]))
         .filter(reporter => !['default', 'github-actions', 'summary'].includes(reporter))
     : [];
+
+  reporters = [...reporters, ...jUnitReporterDeps];
+
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
   const transform = config.transform
