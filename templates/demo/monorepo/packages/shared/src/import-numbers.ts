@@ -1,4 +1,4 @@
-import { ONE, NUMBERS } from './numbers.js';
+import { NUMBERS, ONE } from './numbers.js';
 
 ONE;
 

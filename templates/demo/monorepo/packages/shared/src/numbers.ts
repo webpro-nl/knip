@@ -7,5 +7,5 @@ export const THREE = ONE + TWO;
 
 export enum NUMBERS {
   FOUR = 4,
-  FIVE = 5
+  FIVE = 5,
 }
