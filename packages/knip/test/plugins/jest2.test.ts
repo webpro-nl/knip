@@ -28,7 +28,7 @@ test('Find dependencies with the Jest plugin', async () => {
     devDependencies: 1,
     unlisted: 0,
     unresolved: 0,
-    processed: 5,
-    total: 5,
+    processed: 7,
+    total: 7,
   });
 });

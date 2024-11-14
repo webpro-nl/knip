@@ -3,6 +3,7 @@
   "scripts": {},
   "devDependencies": {
     "jest": "*",
-    "@testing-library/jest-dom": "*"
+    "@testing-library/jest-dom": "*",
+    "jest-junit": "*"
   }
 }
