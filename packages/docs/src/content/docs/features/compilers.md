@@ -115,6 +115,10 @@ function getStyleBlockContent(block: SFCStyleBlock | null): string[] {
   return [block.content];
 }
 
+function getStyleImports(content: string): string {
+  return [...content.matchAll(/(?<=@)import[^;]+/g)].join('\n');
+}
+
 const config = {
   compilers: {
     vue: (text: string, filename: string) => {
