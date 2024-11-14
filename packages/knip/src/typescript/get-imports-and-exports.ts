@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ALIAS_TAG, ANONYMOUS, DEFAULT_EXTENSIONS, IMPORT_STAR, PROTOCOL_VIRTUAL } from '../constants.js';
+import { ALIAS_TAG, ANONYMOUS, IMPORT_STAR, PROTOCOL_VIRTUAL } from '../constants.js';
 import type { GetImportsAndExportsOptions } from '../types/config.js';
 import type { ExportMap, ExportMember, ImportDetails, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
@@ -9,7 +9,7 @@ import type { IssueSymbol } from '../types/issues.js';
 import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/dependency-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { extname, isInNodeModules } from '../util/path.js';
+import { isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import {
@@ -155,9 +155,7 @@ const getImportsAndExports = (
         addValue(imports.imported, identifier, sourceFile.fileName);
       }
 
-      if (symbol && DEFAULT_EXTENSIONS.includes(extname(sourceFile.fileName))) {
-        importedInternalSymbols.set(symbol, filePath);
-      }
+      if (symbol) importedInternalSymbols.set(symbol, filePath);
     }
   };
 
