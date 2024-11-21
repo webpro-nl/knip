@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/jest3",
+  "scripts": {},
+  "devDependencies": {
+    "jest": "*",
+    "jest-junit": "*"
+  }
+}

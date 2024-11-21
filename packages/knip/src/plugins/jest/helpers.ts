@@ -32,16 +32,17 @@ export const getReportersDependencies = (config: JestInitialOptions, options: Pl
         testSuitePropertiesDirectory,
       } = reporter[1];
 
-      const testCaseFileName = getStringPropOrFallback(testCasePropertiesFile, 'junitProperties.js');
-      const testCaseDirectory = getStringPropOrFallback(testCasePropertiesDirectory, options.rootCwd);
-      const testCaseFilePath = join(testCaseDirectory, testCaseFileName);
+      if (testCasePropertiesFile) {
+        const fileName = getStringPropOrFallback(testCasePropertiesFile, 'junitProperties.js');
+        const dir = getStringPropOrFallback(testCasePropertiesDirectory, options.rootCwd);
+        jUnitReporterDeps.push(join(dir, fileName));
+      }
 
-      const testSuiteFileName = getStringPropOrFallback(testSuitePropertiesFile, 'junitTestCaseProperties.js');
-      const testSuiteDirectory = getStringPropOrFallback(testSuitePropertiesDirectory, options.rootCwd);
-      const testSuiteFilePath = join(testSuiteDirectory, testSuiteFileName);
-
-      jUnitReporterDeps.push(testCaseFilePath);
-      jUnitReporterDeps.push(testSuiteFilePath);
+      if (testSuitePropertiesFile) {
+        const fileName = getStringPropOrFallback(testSuitePropertiesFile, 'junitTestCaseProperties.js');
+        const dir = getStringPropOrFallback(testSuitePropertiesDirectory, options.rootCwd);
+        jUnitReporterDeps.push(join(dir, fileName));
+      }
     }
   }
 

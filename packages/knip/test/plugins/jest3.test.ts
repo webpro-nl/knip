@@ -5,22 +5,17 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/plugins/jest2');
+const cwd = resolve('fixtures/plugins/jest3');
 
-test('Find dependencies with the Jest plugin (2)', async () => {
-  const { issues, counters } = await main({
+test('Find dependencies with the Jest plugin (3)', async () => {
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(issues.devDependencies['package.json']['jest']);
-
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
-    unlisted: 0,
-    unresolved: 0,
-    processed: 6,
-    total: 6,
+    processed: 2,
+    total: 2,
   });
 });
