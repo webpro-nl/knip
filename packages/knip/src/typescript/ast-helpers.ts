@@ -173,6 +173,7 @@ export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isShorthandPropertyAssignment(node.parent) ||
   (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
   ts.isSpreadAssignment(node.parent) ||
+  ts.isArrayLiteralExpression(node.parent) ||
   ts.isExportAssignment(node.parent) ||
   (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent);

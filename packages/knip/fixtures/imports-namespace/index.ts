@@ -5,6 +5,8 @@ import * as NS3 from './namespace3';
 import * as NS4 from './namespace4';
 import * as NS5 from './namespace5';
 import * as NS6 from './namespace6';
+import * as NS7 from './namespace7';
+import * as NS8 from './namespace8';
 import fn from 'external';
 
 NS.identifier15;
@@ -24,3 +26,7 @@ fn(NS4);
 const spread = { ...NS5 };
 
 const assign = NS6;
+
+fn([NS7]);
+
+fn({ NS8 });

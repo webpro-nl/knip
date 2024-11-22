@@ -79,6 +79,8 @@ const shorthand = { NS };
 
 const assignment = NS;
 
+const item = [NS];
+
 type TypeOf = typeof NS;
 
 export { NS };
