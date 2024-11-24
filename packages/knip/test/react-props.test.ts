@@ -31,6 +31,6 @@ test('Find unused component props', async () => {
     processed: 3,
     total: 3,
     types: 1,
-    reactComponentProps: totalErrors,
+    componentProps: totalErrors,
   });
 });

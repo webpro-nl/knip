@@ -52,23 +52,18 @@ export const createHosts = ({
         // Try to resolve @types for any non-relative, non-absolute import
         if (!moduleName.startsWith('.') && !moduleName.startsWith('/') && !moduleName.startsWith('node:')) {
           // Get the base package name (handle scoped packages and subpaths)
-          const basePackage = moduleName.startsWith('@') 
+          const basePackage = moduleName.startsWith('@')
             ? moduleName.split('/').slice(0, 2).join('/')
             : moduleName.split('/')[0];
-          
-          const typeResult = ts.resolveTypeReferenceDirective(
-            basePackage,
-            containingFile,
-            options,
-            {
-              fileExists: ts.sys.fileExists,
-              readFile: ts.sys.readFile,
-              directoryExists: ts.sys.directoryExists,
-              getCurrentDirectory: () => cwd,
-              getDirectories: ts.sys.getDirectories,
-            }
-          );
-          
+
+          const typeResult = ts.resolveTypeReferenceDirective(basePackage, containingFile, options, {
+            fileExists: ts.sys.fileExists,
+            readFile: ts.sys.readFile,
+            directoryExists: ts.sys.directoryExists,
+            getCurrentDirectory: () => cwd,
+            getDirectories: ts.sys.getDirectories,
+          });
+
           if (typeResult.resolvedTypeReferenceDirective?.resolvedFileName) {
             return {
               resolvedFileName: typeResult.resolvedTypeReferenceDirective.resolvedFileName,
@@ -77,7 +72,7 @@ export const createHosts = ({
             };
           }
         }
-        
+
         // Fall back to normal module resolution
         return resolveModuleNames([moduleName], containingFile)[0];
       });

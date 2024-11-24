@@ -253,10 +253,15 @@ export class ProjectPrincipal {
 
     const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
-    const { imports, exports, scripts, traceRefs, jsxComponents } = _getImportsAndExports(sourceFile, resolve, typeChecker, {
-      ...options,
-      skipExports,
-    });
+    const { imports, exports, scripts, traceRefs, jsxComponents } = _getImportsAndExports(
+      sourceFile,
+      resolve,
+      typeChecker,
+      {
+        ...options,
+        skipExports,
+      }
+    );
 
     const { internal, resolved, specifiers, unresolved, external } = imports;
 
