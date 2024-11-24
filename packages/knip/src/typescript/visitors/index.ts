@@ -1,3 +1,4 @@
+import type { JSXComponentNode } from 'src/types/jsx-component.js';
 import type ts from 'typescript';
 import type { GetImportsAndExportsOptions } from '../../types/config.js';
 import type { ExportNode } from '../../types/exports.js';
@@ -19,6 +20,13 @@ export const importVisitor: VisitorFactory<ImportNode> = (fileCondition, visitor
 };
 
 export const exportVisitor: VisitorFactory<ExportNode> = (fileCondition, visitorFn) => sourceFile => {
+  if (fileCondition(sourceFile)) {
+    return (node, options) => visitorFn(node, options);
+  }
+  return noop;
+};
+
+export const jsxComponentVisitor: VisitorFactory<JSXComponentNode> = (fileCondition, visitorFn) => sourceFile => {
   if (fileCondition(sourceFile)) {
     return (node, options) => visitorFn(node, options);
   }

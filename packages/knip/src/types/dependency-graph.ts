@@ -56,6 +56,14 @@ export type ExportMember = {
 
 export type ExportMap = Map<Identifier, Export>;
 
+export interface JSXComponent {
+  symbol?: ts.Symbol;
+  identifier: Identifier;
+  propsPos: number;
+  jsDocTags: Set<string>;
+  fix: Fix | undefined;
+}
+
 export type FileNode = {
   imports: {
     internal: ImportMap;
@@ -66,6 +74,7 @@ export type FileNode = {
     exported: ExportMap;
     duplicate: Iterable<Array<IssueSymbol>>;
   };
+  jsxComponents: Set<JSXComponent>;
   scripts: Set<string>;
   imported?: ImportDetails;
   internalImportCache?: ImportMap;

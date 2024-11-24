@@ -1,8 +1,16 @@
 import { isBuiltin } from 'node:module';
+import type { JSXComponentNode } from 'src/types/jsx-component.js';
 import ts from 'typescript';
 import { ALIAS_TAG, ANONYMOUS, IMPORT_STAR, PROTOCOL_VIRTUAL } from '../constants.js';
 import type { GetImportsAndExportsOptions } from '../types/config.js';
-import type { ExportMap, ExportMember, ImportDetails, ImportMap, UnresolvedImport } from '../types/dependency-graph.js';
+import type {
+  ExportMap,
+  ExportMember,
+  ImportDetails,
+  ImportMap,
+  JSXComponent,
+  UnresolvedImport,
+} from '../types/dependency-graph.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
@@ -30,6 +38,7 @@ import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getImportsFromPragmas } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
+import getReactComponentVisitors from './visitors/jsx-component/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 
 const getVisitors = (sourceFile: ts.SourceFile) => ({
@@ -37,9 +46,10 @@ const getVisitors = (sourceFile: ts.SourceFile) => ({
   import: getImportVisitors(sourceFile),
   dynamicImport: getDynamicImportVisitors(sourceFile),
   script: getScriptVisitors(sourceFile),
+  jsxComponent: getReactComponentVisitors(sourceFile),
 });
 
-const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): ExportMember => {
+export const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): ExportMember => {
   const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
   return {
     // @ts-expect-error ref will be unset later
@@ -77,6 +87,7 @@ const getImportsAndExports = (
   const exports: ExportMap = new Map();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
+  const jsxComponents = new Set<JSXComponent>();
   const traceRefs = new Set<string>();
 
   const importedInternalSymbols = new Map<ts.Symbol, string>();
@@ -271,6 +282,12 @@ const getImportsAndExports = (
     }
   };
 
+  const addJSXComponent = ({ node, identifier, propsPos, fix }: JSXComponentNode) => {
+    if (options.skipExports) return;
+    const jsDocTags = getJSDocTags(node);
+    jsxComponents.add({ identifier, propsPos, jsDocTags, fix });
+  };
+
   const addScript = (script: string) => scripts.add(script);
 
   const getImport = (id: string, node: ts.Identifier | ts.ImportEqualsDeclaration) => {
@@ -307,6 +324,13 @@ const getImportsAndExports = (
     for (const visitor of visitors.script) {
       const result = visitor(node, options);
       result && (Array.isArray(result) ? result.forEach(addScript) : addScript(result));
+    }
+
+    if (options.isReportComponentProps) {
+      for (const visitor of visitors.jsxComponent) {
+        const result = visitor(node, options);
+        result && (Array.isArray(result) ? result.forEach(addJSXComponent) : addJSXComponent(result));
+      }
     }
 
     // Find and populate `refs` to internal import symbols
@@ -432,6 +456,7 @@ const getImportsAndExports = (
       exported: exports,
       duplicate: [...aliasedExports.values()],
     },
+    jsxComponents,
     scripts,
     traceRefs,
   };

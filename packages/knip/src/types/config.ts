@@ -38,7 +38,7 @@ export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
 export type IgnorePatterns = (string | RegExp)[];
 
-type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
+type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type' | 'component';
 
 type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
 
@@ -47,7 +47,9 @@ export type GetImportsAndExportsOptions = {
   skipExports: boolean;
   isFixExports: boolean;
   isFixTypes: boolean;
+  isFixComponentProps: boolean;
   isReportClassMembers: boolean;
+  isReportComponentProps: boolean;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   tags: Tags;
 };
