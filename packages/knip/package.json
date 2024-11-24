@@ -86,6 +86,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/picomatch": "3.0.1",
+    "@types/react": "^18.3.12",
     "@types/webpack": "^5.28.5",
     "@wdio/types": "^9.2.2",
     "glob": "^10.4.2",
