@@ -47,7 +47,41 @@ export const createHosts = ({
     getDefaultLibFileName: ts.getDefaultLibFilePath,
     readFile: ts.sys.readFile,
     fileExists: ts.sys.fileExists,
-    resolveModuleNames,
+    resolveModuleNames: (moduleNames, containingFile, _, __, options) => {
+      return moduleNames.map(moduleName => {
+        // Try to resolve @types for any non-relative, non-absolute import
+        if (!moduleName.startsWith('.') && !moduleName.startsWith('/') && !moduleName.startsWith('node:')) {
+          // Get the base package name (handle scoped packages and subpaths)
+          const basePackage = moduleName.startsWith('@') 
+            ? moduleName.split('/').slice(0, 2).join('/')
+            : moduleName.split('/')[0];
+          
+          const typeResult = ts.resolveTypeReferenceDirective(
+            basePackage,
+            containingFile,
+            options,
+            {
+              fileExists: ts.sys.fileExists,
+              readFile: ts.sys.readFile,
+              directoryExists: ts.sys.directoryExists,
+              getCurrentDirectory: () => cwd,
+              getDirectories: ts.sys.getDirectories,
+            }
+          );
+          
+          if (typeResult.resolvedTypeReferenceDirective?.resolvedFileName) {
+            return {
+              resolvedFileName: typeResult.resolvedTypeReferenceDirective.resolvedFileName,
+              isExternalLibraryImport: true,
+              extension: '.d.ts',
+            };
+          }
+        }
+        
+        // Fall back to normal module resolution
+        return resolveModuleNames([moduleName], containingFile)[0];
+      });
+    },
   };
 
   const compilerHost: ts.CompilerHost = {
