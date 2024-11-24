@@ -26,7 +26,6 @@ const isMatch = timerify(picomatch.isMatch, 'isMatch');
  * - Hands them out, to be consumed by reporters
  */
 export class IssueCollector {
-  private cwd: string;
   private rules: Rules;
   private filters: Filters;
   private issues = initIssues();
@@ -36,6 +35,7 @@ export class IssueCollector {
   private tagHints = new Set<TagHint>();
   private ignorePatterns = new Set<string>();
   private isMatch: (filePath: string) => boolean;
+  public cwd: string;
 
   constructor({ cwd, rules, filters }: IssueCollectorOptions) {
     this.cwd = cwd;

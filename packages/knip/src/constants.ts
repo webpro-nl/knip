@@ -186,6 +186,7 @@ export const ISSUE_TYPES: IssueType[] = [
   'enumMembers',
   'classMembers',
   'duplicates',
+  'componentProps',
 ];
 
 export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
@@ -204,6 +205,7 @@ export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   enumMembers: 'Unused exported enum members',
   classMembers: 'Unused exported class members',
   duplicates: 'Duplicate exports',
+  componentProps: 'Unused JSX component props',
 };
 
 export const FIX_FLAGS = {

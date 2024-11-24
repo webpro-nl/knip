@@ -79,7 +79,14 @@ export class ProjectPrincipal {
     languageServiceHost: ts.LanguageServiceHost;
   };
 
-  findReferences?: ts.LanguageService['findReferences'];
+  _findReferences?: ts.LanguageService['findReferences'];
+  get findReferences() {
+    if (!this._findReferences) {
+      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
+      this._findReferences = timerify(languageService.findReferences);
+    }
+    return this._findReferences;
+  }
 
   constructor({
     compilerOptions,
@@ -246,7 +253,7 @@ export class ProjectPrincipal {
 
     const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
-    const { imports, exports, scripts, traceRefs } = _getImportsAndExports(sourceFile, resolve, typeChecker, {
+    const { imports, exports, scripts, traceRefs, jsxComponents } = _getImportsAndExports(sourceFile, resolve, typeChecker, {
       ...options,
       skipExports,
     });
@@ -299,6 +306,7 @@ export class ProjectPrincipal {
         unresolved: unresolvedImports,
         external,
       },
+      jsxComponents,
       exports,
       scripts,
       traceRefs,
@@ -310,27 +318,19 @@ export class ProjectPrincipal {
     this.backend.fileManager.sourceFileCache.delete(filePath);
   }
 
-  public findUnusedMembers(filePath: string, members: ExportMember[]) {
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
-
-    return members.filter(member => {
-      if (member.jsDocTags.has(PUBLIC_TAG)) return false;
-      const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+  public findRefsForMembers(filePath: string, members: ExportMember[]) {
+    const refsForMembers = [];
+    for (const member of members) {
+      if (member.jsDocTags.has(PUBLIC_TAG)) continue;
+      const referencedSymbols = this.findReferences(filePath, member.pos) ?? [];
       const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
-      return refs.length === 0;
-    });
+      refsForMembers.push({ member, refs });
+    }
+    return refsForMembers;
   }
 
   public hasExternalReferences(filePath: string, exportedItem: Export) {
     if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
-
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
 
     const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
 

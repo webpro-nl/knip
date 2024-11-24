@@ -1,4 +1,5 @@
 import { watch } from 'node:fs';
+import * as ts from 'typescript';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
@@ -9,8 +10,12 @@ import type { ProjectPrincipal } from './ProjectPrincipal.js';
 import { WorkspaceWorker } from './WorkspaceWorker.js';
 import { _getInputsFromScripts } from './binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from './compilers/index.js';
+import { FIX_FLAGS } from './constants.js';
 import type { CommandLineOptions } from './types/cli.js';
-import type { DependencyGraph, Export, ExportMember } from './types/dependency-graph.js';
+import type { DependencyGraph, Export, ExportMember, JSXComponent } from './types/dependency-graph.js';
+import type { Fix } from './types/exports.js';
+import { type Issue, SymbolType } from './types/issues.js';
+import { createMember } from './typescript/get-imports-and-exports.js';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.js';
 import { getOrCreateFileNode, updateImportMap } from './util/dependency-graph.js';
 import { getReferencedInputsHandler } from './util/get-referenced-inputs.js';
@@ -307,14 +312,16 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
     if (workspace) {
-      const { imports, exports, scripts, traceRefs } = principal.analyzeSourceFile(
+      const { imports, exports, scripts, traceRefs, jsxComponents } = principal.analyzeSourceFile(
         filePath,
         {
           skipTypeOnly: isStrict,
           isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
           isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
+          isFixComponentProps: fixer.isEnabled && fixer.isFixUnusedComponentProps,
           ignoreExportsUsedInFile: chief.config.ignoreExportsUsedInFile,
           isReportClassMembers,
+          isReportComponentProps: report.componentProps,
           tags,
         },
         isGitIgnored,
@@ -328,6 +335,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       file.exports = exports;
       file.scripts = scripts;
       file.traceRefs = traceRefs;
+      file.jsxComponents = jsxComponents;
 
       updateImportMap(file, imports.internal, graph);
       file.internalImportCache = imports.internal;
@@ -503,7 +511,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                   const members = exportedItem.members.filter(
                     member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
                   );
-                  for (const member of principal.findUnusedMembers(filePath, members)) {
+                  for (const { member, refs } of principal.findRefsForMembers(filePath, members)) {
+                    if (refs.length) continue;
                     if (shouldIgnoreTags(member.jsDocTags)) {
                       const identifier = `${exportedItem.identifier}.${member.identifier}`;
                       for (const tagName of exportedItem.jsDocTags) {
@@ -633,7 +642,171 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
   };
 
+  const collectUnusedComponentProps = async () => {
+    const unusedComponentProps: Record<
+      string,
+      {
+        issue: Issue;
+        fix: Fix;
+        components: JSXComponent[];
+      }
+    > = {};
+
+    if (report.componentProps) {
+      streamer.cast('Finding unused component props...');
+
+      for (const [filePath, file] of graph.entries()) {
+        const components = file.jsxComponents;
+        if (!components || components.size === 0) continue;
+
+        const workspace = chief.findWorkspaceByFilePath(filePath);
+        if (!workspace) continue;
+
+        const { isIncludeEntryExports } = workspace.config;
+
+        const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+
+        const isEntry = entryPaths.has(filePath);
+
+        // Bail out when in entry file (unless `isIncludeEntryExports`)
+        if (!isIncludeEntryExports && isEntry) {
+          createAndPrintTrace(filePath, { isEntry });
+          continue;
+        }
+
+        for (const component of components.values()) {
+          // Skip tagged exports
+          if (shouldIgnore(component.jsDocTags) || shouldIgnoreTags(component.jsDocTags)) continue;
+
+          if (principal && report.componentProps) {
+            const references = principal.findReferences(filePath, component.propsPos);
+            if (!references?.length) continue;
+            const definition = references.find(
+              ref => ref.definition.kind === 'interface' || ref.definition.kind === 'type'
+            );
+            if (!definition) continue;
+
+            // Find the matching export
+            const definitionSourceFile = principal.backend.fileManager.getSourceFile(definition.definition.fileName);
+            if (!definitionSourceFile) continue;
+
+            // Find the node again from file+pos
+            const findNodeVisitor = (
+              node: ts.Node,
+              pos: { start: number; end: number },
+              parent: ts.Node = node
+            ): { node: ts.Node; parent: ts.Node } | undefined => {
+              if (node.getStart() === pos.start && node.getEnd() === pos.end) {
+                return { node, parent };
+              }
+              return ts.forEachChild(node, child => findNodeVisitor(child, pos, node));
+            };
+
+            const declarationNodeAtPosition = findNodeVisitor(definitionSourceFile, {
+              start: definition.definition.textSpan.start,
+              end: definition.definition.textSpan.start + definition.definition.textSpan.length,
+            })?.parent;
+            if (!declarationNodeAtPosition) continue;
+
+            const members = (() => {
+              if (ts.isInterfaceDeclaration(declarationNodeAtPosition)) {
+                return declarationNodeAtPosition.members;
+              }
+              if (
+                ts.isTypeAliasDeclaration(declarationNodeAtPosition) &&
+                ts.isTypeLiteralNode(declarationNodeAtPosition.type)
+              ) {
+                return declarationNodeAtPosition.type.members;
+              }
+              return null;
+            })();
+            if (!members?.length) continue;
+
+            const exportMembers = [];
+            for (const member of members) {
+              if (!ts.isPropertySignature(member)) continue;
+              exportMembers.push(
+                createMember(
+                  declarationNodeAtPosition,
+                  {
+                    fix: [member.getStart(), member.getEnd() + 1, FIX_FLAGS.NONE],
+                    identifier: member.name.getText(),
+                    node: member,
+                    pos: member.getStart(),
+                    type: SymbolType.MEMBER,
+                  },
+                  member.getStart()
+                )
+              );
+            }
+            for (const { member, refs } of principal.findRefsForMembers(
+              definition.definition.fileName,
+              exportMembers
+            )) {
+              if (shouldIgnoreTags(member.jsDocTags)) {
+                const identifier = `${component.identifier}.${member.identifier}`;
+                for (const tagName of component.jsDocTags) {
+                  if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                    collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
+                  }
+                }
+                continue;
+              }
+
+              const filteredRefs = refs.filter(ref => {
+                if (!ref.fileName.endsWith('.tsx') && !ref.fileName.endsWith('.jsx')) return false;
+
+                const definitionSourceFile = principal.backend.fileManager.getSourceFile(ref.fileName);
+                if (!definitionSourceFile) return false;
+
+                // Validate whether it's JSX usage
+                const node = findNodeVisitor(definitionSourceFile, {
+                  start: ref.textSpan.start,
+                  end: ref.textSpan.start + ref.textSpan.length,
+                })?.parent;
+                return node && node.kind === ts.SyntaxKind.JsxAttribute;
+              });
+
+              // Bail if there are any remaining JSX usages
+              if (filteredRefs.length) continue;
+
+              const symbol = `${component.identifier}.${member.identifier}`;
+              const key = `${relative(collector.cwd, definition.definition.fileName)}.${symbol}`;
+
+              unusedComponentProps[key] ??= {
+                issue: {
+                  type: 'componentProps',
+                  filePath,
+                  workspace: workspace.name,
+                  symbol: `${component.identifier}.${member.identifier}`,
+                  parentSymbol: component.identifier,
+                  pos: member.pos,
+                  line: member.line,
+                  col: member.col,
+                },
+                fix: member.fix,
+                components: [],
+              };
+              unusedComponentProps[key].components.push(component);
+            }
+          }
+        }
+      }
+    }
+
+    for (const unusedProps of Object.values(unusedComponentProps)) {
+      const { issue, fix, components } = unusedProps;
+      const isIssueAdded = collector.addIssue({
+        ...issue,
+        parentSymbol: components.map(c => c.identifier).join(','),
+      });
+
+      if (isFix && isIssueAdded && fix) fixer.addUnusedTypeNode(issue.filePath, [fix]);
+    }
+  };
+
   await collectUnusedExports();
+  await collectUnusedComponentProps();
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
@@ -646,7 +819,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       analyzeSourceFile,
       chief,
       collector,
-      collectUnusedExports,
+      collectUnusedExports: collectUnusedExports,
       cwd,
       factory,
       graph,

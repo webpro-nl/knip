@@ -19,6 +19,7 @@ export class IssueFixer {
   isFixDependencies = true;
   isFixUnusedTypes = true;
   isFixUnusedExports = true;
+  isFixUnusedComponentProps = true;
 
   unusedTypeNodes: Map<string, Set<Fix>> = new Map();
   unusedExportNodes: Map<string, Set<Fix>> = new Map();
@@ -30,6 +31,7 @@ export class IssueFixer {
     this.isFixDependencies = fixTypes.length === 0 || fixTypes.includes('dependencies');
     this.isFixUnusedTypes = fixTypes.length === 0 || fixTypes.includes('types');
     this.isFixUnusedExports = fixTypes.length === 0 || fixTypes.includes('exports');
+    this.isFixUnusedComponentProps = fixTypes.length === 0 || fixTypes.includes('react-component');
   }
 
   public addUnusedTypeNode(filePath: string, fixes: Fixes | undefined) {
