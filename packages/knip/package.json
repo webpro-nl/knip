@@ -51,12 +51,7 @@
     "postcreate-plugin": "biome format --write schema.json schema-jsonc.json src/ConfigurationValidator.ts",
     "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && biome check --write src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts"
   },
-  "files": [
-    "dist",
-    "vendor",
-    "schema.json",
-    "schema-jsonc.json"
-  ],
+  "files": ["dist", "vendor", "schema.json", "schema-jsonc.json"],
   "dependencies": {
     "@nodelib/fs.walk": "1.2.8",
     "@snyk/github-codeowners": "1.1.0",
@@ -86,7 +81,6 @@
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/picomatch": "3.0.1",
-    "@types/react": "^18.3.12",
     "@types/webpack": "^5.28.5",
     "@wdio/types": "^9.2.2",
     "glob": "^10.4.2",
