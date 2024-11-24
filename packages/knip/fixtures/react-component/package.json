@@ -1,0 +1,21 @@
+{
+  "name": "@fixtures/class-members",
+  "dependencies": {
+    "react": "^18.3.1"
+  },
+  "knip": {
+    "entry": [
+      "index.tsx"
+    ],
+    "project": [
+      "*.ts",
+      "*.tsx"
+    ],
+    "include": [
+      "classMembers"
+    ]
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12"
+  }
+}
