@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-ignored/deep-h2",
+  "scripts": {
+    "start": "ignored"
+  }
+}
