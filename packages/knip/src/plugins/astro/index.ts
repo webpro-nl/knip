@@ -12,7 +12,12 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts'];
 
-const production = ['src/pages/**/*.{astro,mdx,js,ts}', 'src/content/**/*.mdx'];
+const production = [
+  'src/pages/**/*.{astro,mdx,js,ts}',
+  'src/content/**/*.mdx',
+  'src/middleware.{js,ts}',
+  'src/actions/index.{js,ts}',
+];
 
 const resolve: Resolve = options => {
   const { manifest, isProduction } = options;
