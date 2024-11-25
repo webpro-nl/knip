@@ -9,7 +9,7 @@ const enablers = ['plop'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['plopfile.{cjs,mjs,js,ts}']
+const config = ['plopfile.{cjs,mjs,js,ts}'];
 
 export default {
   title,

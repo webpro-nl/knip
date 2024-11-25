@@ -8,14 +8,14 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/plop');
 
 test('Find dependencies with the plop plugin', async () => {
-    const { counters } = await main({
-        ...baseArguments,
-        cwd,
-    });
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-    assert.deepEqual(counters, {
-        ...baseCounters,
-        processed: 1,
-        total: 1,
-    });
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
 });
