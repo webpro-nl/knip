@@ -12,6 +12,23 @@ We can distinguish two types of issues:
 Also see the [debug][3] and [trace][4] options below that can help to
 troubleshoot issues.
 
+:::note
+
+The JavaScript/TypeScript ecosystem has a vast amount of frameworks and tools,
+and even more ways to configure those. Files and dependencies can be referenced
+in many ways, not just through static import statements. In short: "it's
+complicated". Knip and documentation are always a work in progress.
+
+If it doesn't come your way at the first try, please understand this also shows
+the dynamic and innovative nature of the ecosystem. Often only small changes go
+a long way towards success. Consider
+[opening an issue](https://github.com/webpro-nl/knip/issues/new/choose) and/or
+[ask away on Discord](https://discord.gg/r5uXTtbTpc). With the help of the
+community (that's you!) we can improve Knip for everyone and make project
+maintenance easier and more fun!
+
+:::
+
 ## Lint issues reported by Knip
 
 Knip reports lint issues in your codebase. See [handling issues][5] to deal with
