@@ -46,6 +46,7 @@ export type Issues = {
   duplicates: IssueRecords;
   enumMembers: IssueRecords;
   classMembers: IssueRecords;
+  componentProps: IssueRecords;
 };
 
 export type IssueType = keyof Issues;

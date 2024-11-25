@@ -27,6 +27,7 @@ type Row = {
   duplicates?: Array<Item[]>;
   enumMembers?: Record<string, Array<Item>>;
   classMembers?: Record<string, Array<Item>>;
+  componentProps?: Record<string, Array<Item>>;
 };
 
 export default async ({ report, issues, options }: ReporterOptions) => {
@@ -75,7 +76,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
           json[filePath] = json[filePath] ?? initRow(filePath);
           if (type === 'duplicates') {
             symbols && json[filePath][type]?.push(symbols.map(convert));
-          } else if (type === 'enumMembers' || type === 'classMembers') {
+          } else if (type === 'enumMembers' || type === 'classMembers' || type === 'componentProps') {
             const item = json[filePath][type];
             if (parentSymbol && item) {
               item[parentSymbol] = item[parentSymbol] ?? [];

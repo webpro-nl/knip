@@ -44,6 +44,7 @@ const createFileNode = (): FileNode => ({
     exported: new Map(),
     duplicate: new Set(),
   },
+  jsxComponents: new Set(),
   scripts: new Set(),
   traceRefs: new Set(),
 });
