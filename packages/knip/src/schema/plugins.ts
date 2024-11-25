@@ -59,6 +59,7 @@ export const pluginsSchema = z.object({
   playwright: pluginSchema,
   'playwright-ct': pluginSchema,
   'playwright-test': pluginSchema,
+  plop: pluginSchema,
   postcss: pluginSchema,
   preconstruct: pluginSchema,
   prettier: pluginSchema,
