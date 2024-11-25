@@ -79,6 +79,7 @@ export const pluginsSchema = z.object({
   svelte: pluginSchema,
   syncpack: pluginSchema,
   tailwind: pluginSchema,
+  'tanstack-router': pluginSchema,
   travis: pluginSchema,
   'ts-node': pluginSchema,
   tsup: pluginSchema,
