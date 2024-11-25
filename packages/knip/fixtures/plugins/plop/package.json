@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/plop",
+  "version": "*",
+  "type": "module",
+  "scripts": {
+    "plop": "plop"
+  },
+  "dependencies": {
+    "plop": "*"
+  }
+}
