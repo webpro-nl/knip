@@ -9,6 +9,12 @@
   }
 }
 
+:root[data-theme='dark'] {
+  .card {
+    border: none;
+  }
+}
+
 :root[data-theme='light'] {
   .card .title .icon {
     color: var(--sl-color-black);

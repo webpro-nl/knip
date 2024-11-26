@@ -16,7 +16,14 @@ test('Ignore workspaces', async () => {
   assert.equal(Object.keys(issues.binaries).length, 1);
   assert(issues.binaries['packages/e/package.json']['not-ignored']);
 
-  assert.deepEqual(configurationHints, new Set([{ type: 'ignoreWorkspaces', identifier: 'packages/f' }]));
+  assert.deepEqual(
+    configurationHints,
+    new Set([
+      { type: 'ignoreWorkspaces', identifier: 'packages/f' },
+      { type: 'ignoreWorkspaces', identifier: 'packages/wut/*' },
+      { type: 'ignoreWorkspaces', identifier: 'packages/un/**/used' },
+    ])
+  );
 
   assert.deepEqual(counters, {
     ...baseCounters,

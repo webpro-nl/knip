@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-ignored/flat-i1",
+  "scripts": {
+    "start": "ignored"
+  }
+}

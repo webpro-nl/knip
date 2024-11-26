@@ -9,12 +9,53 @@ Knip finds and removes unused files, dependencies and exports. As a "kitchen
 sink" in the npm ecosystem, it creates a comprehensive module and dependency
 graph of your project.
 
-The JavaScript ecosystem has a vast amount of frameworks and tools, and even
-more ways to configure those. Files and dependencies can be referenced in many
-ways, not just through import statements. This FAQ is an attempt to provide some
-perspective on a few design decisions and why certain things work the way they
-do. Here and there it's intentionally a bit more in-depth than the rest of the
-docs.
+:::note
+
+The JavaScript/TypeScript ecosystem has a vast amount of frameworks and tools,
+and even more ways to configure those. Files and dependencies can be referenced
+in many ways, not just through static import statements. In short: "it's
+complicated". Knip and documentation are always a work in progress.
+
+:::
+
+This FAQ is an attempt to provide some perspective on a few design decisions and
+why certain things work the way they do. Here and there it's intentionally a bit
+more in-depth than the rest of the docs.
+
+## Comparison
+
+### Why isn't Knip an ESLint plugin?
+
+Linters like ESLint analyze files separately, while Knip lints projects as a
+whole.
+
+Knip requires a full module and dependency graph to find clutter across the
+project. Creating this comprehensive graph is not a trivial task and it seems no
+such tool exists today, even more so when it comes to monorepos.
+
+File-oriented linters like ESLint and Knip are complementary tools.
+
+### Isn't tree-shaking enough?
+
+In short: no. They share an important goal: improve UX by removing unused code.
+The main takeaway here is that tree-shaking and Knip are different and
+complementary tools.
+
+Tree-shaking is a build or compile-time activity to reduce production bundle
+size. It typically operates on bundled production code, which might include
+external/third-party code. An optimization in the build process, "out of your
+hands".
+
+On the other hand, Knip is a project linter that should be part of QA. It lints,
+reports and fixes only your own source code. A linter reporting issues hands
+control back to you (unless you [auto-fix](../features/auto-fix.mdx)
+everything).
+
+Besides those differences, Knip has a broader scope:
+
+- Improve DX (see [less is more](../explanations/why-use-knip.md#less-is-more)).
+- Include non-production code and dependencies in the process by default.
+- Report more [issue types](./issue-types.md) (such as unlisted dependencies).
 
 ## Synergy
 
@@ -306,15 +347,6 @@ statements. Override the built-in Vue "compiler" with the real one in your
 project. Also see the answer to the previous question and [Compilers][7].
 
 ## Miscellaneous
-
-### Why isn't Knip an ESLint plugin?
-
-Linters like ESLint analyze files separately, while Knip lints projects as a
-whole.
-
-Knip requires a full module and dependency graph to find clutter across the
-project. Creating this comprehensive graph is not a trivial task and it seems no
-such tool exists today, even more so when it comes to monorepos.
 
 ### Why isn't production mode the default?
 

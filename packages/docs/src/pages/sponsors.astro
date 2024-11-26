@@ -3,6 +3,7 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import Posts from '../components/Posts.astro';
 import Projects from '../components/Projects.astro';
 import SponsorsComponent from '../components/Sponsors.astro';
+import SponsorsPast from '../components/SponsorsPast.astro';
 ---
 
 <StarlightPage frontmatter={{ title: 'Become a sponsor!', template: 'splash' }}>
@@ -55,6 +56,14 @@ import SponsorsComponent from '../components/Sponsors.astro';
     </div>
 
   </article>
+
+  <h2 id="projects-using-knip">🧡 Past Sponsors</h2>
+
+  <div class="sponsors">
+
+    <SponsorsPast />
+
+  </div>
 
   <h2 id="projects-using-knip">🧡 Projects using Knip</h2>
 
