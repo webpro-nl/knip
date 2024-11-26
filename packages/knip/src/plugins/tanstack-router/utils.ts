@@ -72,7 +72,7 @@ function parseValue(node: Expression, sourceFile: SourceFile): any {
   return node.getText(sourceFile);
 }
 
-export function getPluginConfigFromBundlerConfig(
+function getPluginConfigFromBundlerConfig(
   filePath: string,
   fileName: string,
   moduleSpecifier: string,
