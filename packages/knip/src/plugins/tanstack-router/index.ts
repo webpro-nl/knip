@@ -9,7 +9,7 @@ import { getRsbuildPluginConfig, getRspackPluginConfig, getVitePluginConfig, get
 
 const title = 'Tanstack Router';
 
-const enablers = ['@tanstack/react-router', '@tanstack/router-plugin'];
+const enablers = ['@tanstack/react-router', '@tanstack/router-plugin', '@tanstack/router-cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
