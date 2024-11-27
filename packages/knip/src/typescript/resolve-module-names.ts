@@ -29,7 +29,8 @@ export function createCustomModuleResolver(
   compilerOptions: ts.CompilerOptions,
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
-  useCache = true
+  useCache = true,
+  isSkipLibs = true
 ) {
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
@@ -91,7 +92,7 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins, bail out
     if (isBuiltin(sanitizedSpecifier)) return undefined;
 
-    const resolvedFileName = resolveSync(sanitizedSpecifier, dirname(containingFile));
+    const resolvedFileName = isSkipLibs && resolveSync(sanitizedSpecifier, dirname(containingFile));
 
     if (resolvedFileName) {
       const ext = extname(resolvedFileName);
