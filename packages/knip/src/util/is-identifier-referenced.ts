@@ -38,7 +38,11 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
     ) {
       isReferenced = true;
       if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
-      addNodes(traceNode, id, graph, file.imported.get(identifier));
+      if (file.importedAs.has(identifier)) {
+        for (const aliases of file.importedAs.values()) {
+          for (const alias of aliases.keys()) addNodes(traceNode, alias, graph, aliases.get(alias));
+        }
+      } else addNodes(traceNode, id, graph, file.imported.get(identifier));
     }
 
     for (const [exportId, aliases] of file.importedAs.entries()) {
@@ -47,7 +51,9 @@ export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPa
           const aliasedRef = [alias, ...rest].join('.');
           if (file.refs.has(aliasedRef)) {
             isReferenced = true;
-            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
+            if (!isTrace) {
+              return { isReferenced, reExportingEntryFile, traceNode };
+            }
             addNodes(traceNode, aliasedRef, graph, aliases.get(alias));
           }
         }
