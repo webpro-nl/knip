@@ -1,5 +1,5 @@
-import { _glob } from '../../util/glob.js';
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import { _glob } from '../../util/glob.js';
 
 // https://yarnpkg.com/features/constraints
 
