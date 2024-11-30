@@ -612,6 +612,10 @@
           "title": "xo plugin configuration (https://knip.dev/reference/plugins/xo)",
           "$ref": "#/definitions/plugin"
         },
+        "yarn": {
+          "title": "yarn plugin configuration (https://knip.dev/reference/plugins/yarn)",
+          "$ref": "#/definitions/plugin"
+        },
         "yorkie": {
           "title": "yorkie plugin configuration (https://knip.dev/reference/plugins/yorkie)",
           "$ref": "#/definitions/plugin"

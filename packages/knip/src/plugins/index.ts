@@ -85,6 +85,7 @@ import { default as wireit } from './wireit/index.js';
 import { default as wrangler } from './wrangler/index.js';
 import { default as xo } from './xo/index.js';
 import { default as yorkie } from './yorkie/index.js';
+import { default as yarn } from './yarn/index.js';
 
 export const Plugins = {
   angular,
@@ -173,4 +174,5 @@ export const Plugins = {
   wrangler,
   xo,
   yorkie,
+  yarn,
 };
