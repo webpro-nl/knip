@@ -98,5 +98,6 @@ export const pluginsSchema = z.object({
   wireit: pluginSchema,
   wrangler: pluginSchema,
   xo: pluginSchema,
+  yarn: pluginSchema,
   yorkie: pluginSchema,
 });
