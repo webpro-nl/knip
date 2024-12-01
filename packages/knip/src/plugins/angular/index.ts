@@ -44,6 +44,9 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
           inputs.add(toConfig('typescript', opts.tsConfig, configFilePath));
         }
+        if ('server' in opts && opts.server && typeof opts.server === 'string') {
+          inputs.add(toProductionEntry(join(cwd, opts.server)));
+        }
       }
     }
   }
