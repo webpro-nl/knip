@@ -8,12 +8,12 @@
 /**
  * File format version
  */
-export type FileVersion = number;
+type FileVersion = number;
 /**
  * This interface was referenced by `undefined`'s JSON-Schema definition
  * via the `patternProperty` "^(?:@[a-zA-Z0-9._-]+/)?[a-zA-Z0-9._-]+$".
  */
-export type Project = Project1 & {
+type Project = Project1 & {
   cli?: {
     [k: string]: unknown;
   };
@@ -441,10 +441,10 @@ export type Project = Project1 & {
    */
   [k: string]: unknown;
 };
-export type Project1 = {
+type Project1 = {
   [k: string]: unknown;
 };
-export type PrerenderTarget = {
+type PrerenderTarget = {
   [k: string]: unknown;
 };
 
@@ -461,7 +461,7 @@ export interface AngularCLIWorkspaceConfiguration {
     [k: string]: Project;
   };
 }
-export interface CliOptions {
+interface CliOptions {
   /**
    * The list of schematic collections to use.
    */
@@ -501,7 +501,7 @@ export interface CliOptions {
     path?: string;
   };
 }
-export interface SchematicOptions {
+interface SchematicOptions {
   "@schematics/angular:application"?: AngularApplicationOptionsSchema;
   "@schematics/angular:class"?: AngularClassOptionsSchema;
   "@schematics/angular:component"?: AngularComponentOptionsSchema;
@@ -521,7 +521,7 @@ export interface SchematicOptions {
 /**
  * Generates a new basic application definition in the "projects" subfolder of the workspace.
  */
-export interface AngularApplicationOptionsSchema {
+interface AngularApplicationOptionsSchema {
   /**
    * The root directory of the new application.
    */
@@ -594,7 +594,7 @@ export interface AngularApplicationOptionsSchema {
 /**
  * Creates a new, generic class definition in the given project.
  */
-export interface AngularClassOptionsSchema {
+interface AngularClassOptionsSchema {
   /**
    * The name of the new class.
    */
@@ -619,7 +619,7 @@ export interface AngularClassOptionsSchema {
 /**
  * Creates a new, generic component definition in the given project.
  */
-export interface AngularComponentOptionsSchema {
+interface AngularComponentOptionsSchema {
   /**
    * The path at which to create the component file, relative to the current workspace. Default is a folder with the same name as the component in the project root.
    */
@@ -706,7 +706,7 @@ export interface AngularComponentOptionsSchema {
 /**
  * Creates a new, generic directive definition in the given project.
  */
-export interface AngularDirectiveOptionsSchema {
+interface AngularDirectiveOptionsSchema {
   /**
    * The name of the new directive.
    */
@@ -757,7 +757,7 @@ export interface AngularDirectiveOptionsSchema {
 /**
  * Generates a new, generic enum definition in the given project.
  */
-export interface AngularEnumOptionsSchema {
+interface AngularEnumOptionsSchema {
   /**
    * The name of the enum.
    */
@@ -778,7 +778,7 @@ export interface AngularEnumOptionsSchema {
 /**
  * Generates a new, generic route guard definition in the given project.
  */
-export interface AngularGuardOptionsSchema {
+interface AngularGuardOptionsSchema {
   /**
    * The name of the new route guard.
    */
@@ -816,7 +816,7 @@ export interface AngularGuardOptionsSchema {
 /**
  * Creates a new, generic interceptor definition in the given project.
  */
-export interface AngularInterceptorOptionsSchema {
+interface AngularInterceptorOptionsSchema {
   /**
    * The name of the interceptor.
    */
@@ -845,7 +845,7 @@ export interface AngularInterceptorOptionsSchema {
 /**
  * Creates a new, generic interface definition in the given project.
  */
-export interface AngularInterfaceOptionsSchema {
+interface AngularInterfaceOptionsSchema {
   /**
    * The name of the interface.
    */
@@ -870,7 +870,7 @@ export interface AngularInterfaceOptionsSchema {
 /**
  * Creates a new, generic library project in the current workspace.
  */
-export interface LibraryOptionsSchema {
+interface LibraryOptionsSchema {
   /**
    * The name of the library.
    */
@@ -907,7 +907,7 @@ export interface LibraryOptionsSchema {
 /**
  * Creates a new, generic pipe definition in the given project.
  */
-export interface AngularPipeOptionsSchema {
+interface AngularPipeOptionsSchema {
   /**
    * The name of the pipe.
    */
@@ -948,7 +948,7 @@ export interface AngularPipeOptionsSchema {
 /**
  * Creates a new project by combining the workspace and application schematics.
  */
-export interface AngularNgNewOptionsSchema {
+interface AngularNgNewOptionsSchema {
   /**
    * The directory name to create the workspace in.
    */
@@ -1048,7 +1048,7 @@ export interface AngularNgNewOptionsSchema {
 /**
  * Generates a new, generic resolver definition in the given project.
  */
-export interface AngularResolverOptionsSchema {
+interface AngularResolverOptionsSchema {
   /**
    * The name of the new resolver.
    */
@@ -1077,7 +1077,7 @@ export interface AngularResolverOptionsSchema {
 /**
  * Creates a new, generic service definition in the given project.
  */
-export interface AngularServiceOptionsSchema {
+interface AngularServiceOptionsSchema {
   /**
    * The name of the service.
    */
@@ -1102,7 +1102,7 @@ export interface AngularServiceOptionsSchema {
 /**
  * Creates a new, generic web worker definition in the given project.
  */
-export interface AngularWebWorkerOptionsSchema {
+interface AngularWebWorkerOptionsSchema {
   /**
    * The path at which to create the worker file, relative to the current workspace.
    */
@@ -1123,7 +1123,7 @@ export interface AngularWebWorkerOptionsSchema {
 /**
  * Project i18n options
  */
-export interface I18N {
+interface I18N {
   sourceLocale?:
     | string
     | {
@@ -1156,7 +1156,7 @@ export interface I18N {
 /**
  * Application builder target options
  */
-export interface ApplicationSchemaForBuildFacade {
+interface ApplicationSchemaForBuildFacade {
   /**
    * List of static application assets.
    */
@@ -1555,11 +1555,11 @@ export interface ApplicationSchemaForBuildFacade {
    */
   outputMode?: "static" | "server";
 }
-export interface FileReplacement {
+interface FileReplacement {
   replace: string;
   with: string;
 }
-export interface Budget {
+interface Budget {
   /**
    * The type of budget.
    */
@@ -1600,7 +1600,7 @@ export interface Budget {
 /**
  * App Shell target options for Build Facade.
  */
-export interface AppShellTarget {
+interface AppShellTarget {
   /**
    * A browser builder target use for rendering the application shell in the format of `project:target[:configuration]`. You can also pass in more than one configuration name as a comma-separated list. Example: `project:target:production,staging`.
    */
@@ -1629,7 +1629,7 @@ export interface AppShellTarget {
 /**
  * Browser target options
  */
-export interface WebpackBrowserSchemaForBuildFacade {
+interface WebpackBrowserSchemaForBuildFacade {
   /**
    * List of static application assets.
    */
@@ -1925,7 +1925,7 @@ export interface WebpackBrowserSchemaForBuildFacade {
    */
   allowedCommonJsDependencies?: string[];
 }
-export interface Budget1 {
+interface Budget1 {
   /**
    * The type of budget.
    */
@@ -1966,7 +1966,7 @@ export interface Budget1 {
 /**
  * Browser target options
  */
-export interface EsbuildBrowserSchemaForBuildFacade {
+interface EsbuildBrowserSchemaForBuildFacade {
   /**
    * List of static application assets.
    */
@@ -2258,11 +2258,11 @@ export interface EsbuildBrowserSchemaForBuildFacade {
    */
   allowedCommonJsDependencies?: string[];
 }
-export interface FileReplacement1 {
+interface FileReplacement1 {
   replace: string;
   with: string;
 }
-export interface Budget2 {
+interface Budget2 {
   /**
    * The type of budget.
    */
@@ -2303,7 +2303,7 @@ export interface Budget2 {
 /**
  * Dev Server target options for Build Facade.
  */
-export interface DevServerTarget {
+interface DevServerTarget {
   /**
    * A build builder target to serve in the format of `project:target[:configuration]`. You can also pass in more than one configuration name as a comma-separated list. Example: `project:target:production,staging`.
    */
@@ -2385,7 +2385,7 @@ export interface DevServerTarget {
 /**
  * Dev Server target options for Build Facade.
  */
-export interface DevServerTarget1 {
+interface DevServerTarget1 {
   /**
    * A build builder target to serve in the format of `project:target[:configuration]`. You can also pass in more than one configuration name as a comma-separated list. Example: `project:target:production,staging`.
    */
@@ -2483,7 +2483,7 @@ export interface DevServerTarget1 {
 /**
  * Extract i18n target options for Build Facade.
  */
-export interface ExtractI18NTarget {
+interface ExtractI18NTarget {
   /**
    * A builder target to extract i18n messages in the format of `project:target[:configuration]`. You can also pass in more than one configuration name as a comma-separated list. Example: `project:target:production,staging`.
    */
@@ -2508,7 +2508,7 @@ export interface ExtractI18NTarget {
 /**
  * Extract i18n target options for Build Facade.
  */
-export interface ExtractI18NTarget1 {
+interface ExtractI18NTarget1 {
   /**
    * A builder target to extract i18n messages in the format of `project:target[:configuration]`. You can also pass in more than one configuration name as a comma-separated list. Example: `project:target:production,staging`.
    */
@@ -2533,7 +2533,7 @@ export interface ExtractI18NTarget1 {
 /**
  * Karma target options for Build Facade.
  */
-export interface KarmaTarget {
+interface KarmaTarget {
   /**
    * The name of the main entry-point file.
    */
@@ -2714,7 +2714,7 @@ export interface KarmaTarget {
 /**
  * Jest target options
  */
-export interface JestBrowserSchemaForBuildFacade {
+interface JestBrowserSchemaForBuildFacade {
   /**
    * Globs of files to include, relative to project root.
    */
@@ -2735,7 +2735,7 @@ export interface JestBrowserSchemaForBuildFacade {
 /**
  * Web Test Runner target options for Build Facade.
  */
-export interface WebTestRunnerTarget {
+interface WebTestRunnerTarget {
   /**
    * The name of the main entry-point file.
    */
@@ -2904,7 +2904,7 @@ export interface WebTestRunnerTarget {
 /**
  * SSR Dev Server target options for Build Facade.
  */
-export interface SSRDevServerTarget {
+interface SSRDevServerTarget {
   /**
    * Browser target to build.
    */
@@ -2962,7 +2962,7 @@ export interface SSRDevServerTarget {
    */
   verbose?: boolean;
 }
-export interface UniversalTarget {
+interface UniversalTarget {
   /**
    * List of static application assets.
    */
@@ -3143,7 +3143,7 @@ export interface UniversalTarget {
 /**
  * ng-packagr target options for Build Architect. Use to build library projects.
  */
-export interface NgPackagrTarget {
+interface NgPackagrTarget {
   /**
    * The file path for the ng-packagr configuration file, relative to the current workspace.
    */
