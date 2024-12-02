@@ -1629,7 +1629,7 @@ interface AppShellTarget {
 /**
  * Browser target options
  */
-interface WebpackBrowserSchemaForBuildFacade {
+export interface WebpackBrowserSchemaForBuildFacade {
   /**
    * List of static application assets.
    */
