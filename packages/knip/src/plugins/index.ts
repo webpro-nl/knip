@@ -84,6 +84,7 @@ import { default as webpack } from './webpack/index.js';
 import { default as wireit } from './wireit/index.js';
 import { default as wrangler } from './wrangler/index.js';
 import { default as xo } from './xo/index.js';
+import { default as yarn } from './yarn/index.js';
 import { default as yorkie } from './yorkie/index.js';
 
 export const Plugins = {
@@ -172,5 +173,6 @@ export const Plugins = {
   wireit,
   wrangler,
   xo,
+  yarn,
   yorkie,
 };

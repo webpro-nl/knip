@@ -85,6 +85,7 @@ export type PluginName =
   | 'wireit'
   | 'wrangler'
   | 'xo'
+  | 'yarn'
   | 'yorkie';
 
 export const pluginNames = [
@@ -173,5 +174,6 @@ export const pluginNames = [
   'wireit',
   'wrangler',
   'xo',
+  'yarn',
   'yorkie',
 ] as const;
