@@ -34,7 +34,7 @@ type Project = Project1 & {
   /**
    * Project type.
    */
-  projectType: "application" | "library";
+  projectType: 'application' | 'library';
   architect?: {
     [k: string]:
       | {
@@ -59,7 +59,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular/build:application";
+          builder?: '@angular/build:application';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -70,7 +70,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:application";
+          builder?: '@angular-devkit/build-angular:application';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -81,7 +81,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:app-shell";
+          builder?: '@angular-devkit/build-angular:app-shell';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -92,7 +92,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:browser";
+          builder?: '@angular-devkit/build-angular:browser';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -103,7 +103,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:browser-esbuild";
+          builder?: '@angular-devkit/build-angular:browser-esbuild';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -114,7 +114,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular/build:dev-server";
+          builder?: '@angular/build:dev-server';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -125,7 +125,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:dev-server";
+          builder?: '@angular-devkit/build-angular:dev-server';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -136,7 +136,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular/build:extract-i18n";
+          builder?: '@angular/build:extract-i18n';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -147,7 +147,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:extract-i18n";
+          builder?: '@angular-devkit/build-angular:extract-i18n';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -158,7 +158,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:karma";
+          builder?: '@angular-devkit/build-angular:karma';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -169,7 +169,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:jest";
+          builder?: '@angular-devkit/build-angular:jest';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -180,7 +180,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:web-test-runner";
+          builder?: '@angular-devkit/build-angular:web-test-runner';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -191,7 +191,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:prerender";
+          builder?: '@angular-devkit/build-angular:prerender';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -202,7 +202,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:ssr-dev-server";
+          builder?: '@angular-devkit/build-angular:ssr-dev-server';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -213,7 +213,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:server";
+          builder?: '@angular-devkit/build-angular:server';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -224,7 +224,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:ng-packagr";
+          builder?: '@angular-devkit/build-angular:ng-packagr';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -259,7 +259,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular/build:application";
+          builder?: '@angular/build:application';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -270,7 +270,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:application";
+          builder?: '@angular-devkit/build-angular:application';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -281,7 +281,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:app-shell";
+          builder?: '@angular-devkit/build-angular:app-shell';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -292,7 +292,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:browser";
+          builder?: '@angular-devkit/build-angular:browser';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -303,7 +303,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:browser-esbuild";
+          builder?: '@angular-devkit/build-angular:browser-esbuild';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -314,7 +314,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular/build:dev-server";
+          builder?: '@angular/build:dev-server';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -325,7 +325,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:dev-server";
+          builder?: '@angular-devkit/build-angular:dev-server';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -336,7 +336,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular/build:extract-i18n";
+          builder?: '@angular/build:extract-i18n';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -347,7 +347,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:extract-i18n";
+          builder?: '@angular-devkit/build-angular:extract-i18n';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -358,7 +358,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:karma";
+          builder?: '@angular-devkit/build-angular:karma';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -369,7 +369,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:jest";
+          builder?: '@angular-devkit/build-angular:jest';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -380,7 +380,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:web-test-runner";
+          builder?: '@angular-devkit/build-angular:web-test-runner';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -391,7 +391,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:prerender";
+          builder?: '@angular-devkit/build-angular:prerender';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -402,7 +402,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:ssr-dev-server";
+          builder?: '@angular-devkit/build-angular:ssr-dev-server';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -413,7 +413,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:server";
+          builder?: '@angular-devkit/build-angular:server';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -424,7 +424,7 @@ type Project = Project1 & {
           };
         }
       | {
-          builder?: "@angular-devkit/build-angular:ng-packagr";
+          builder?: '@angular-devkit/build-angular:ng-packagr';
           /**
            * A default named configuration to use when a target configuration is not provided.
            */
@@ -469,7 +469,7 @@ interface CliOptions {
   /**
    * Specify which package manager tool to use.
    */
-  packageManager?: "npm" | "cnpm" | "yarn" | "pnpm" | "bun";
+  packageManager?: 'npm' | 'cnpm' | 'yarn' | 'pnpm' | 'bun';
   /**
    * Control CLI specific console warnings
    */
@@ -490,7 +490,7 @@ interface CliOptions {
     /**
      * Configure in which environment disk cache is enabled.
      */
-    environment?: "local" | "ci" | "all";
+    environment?: 'local' | 'ci' | 'all';
     /**
      * Configure whether disk caching is enabled.
      */
@@ -502,20 +502,20 @@ interface CliOptions {
   };
 }
 interface SchematicOptions {
-  "@schematics/angular:application"?: AngularApplicationOptionsSchema;
-  "@schematics/angular:class"?: AngularClassOptionsSchema;
-  "@schematics/angular:component"?: AngularComponentOptionsSchema;
-  "@schematics/angular:directive"?: AngularDirectiveOptionsSchema;
-  "@schematics/angular:enum"?: AngularEnumOptionsSchema;
-  "@schematics/angular:guard"?: AngularGuardOptionsSchema;
-  "@schematics/angular:interceptor"?: AngularInterceptorOptionsSchema;
-  "@schematics/angular:interface"?: AngularInterfaceOptionsSchema;
-  "@schematics/angular:library"?: LibraryOptionsSchema;
-  "@schematics/angular:pipe"?: AngularPipeOptionsSchema;
-  "@schematics/angular:ng-new"?: AngularNgNewOptionsSchema;
-  "@schematics/angular:resolver"?: AngularResolverOptionsSchema;
-  "@schematics/angular:service"?: AngularServiceOptionsSchema;
-  "@schematics/angular:web-worker"?: AngularWebWorkerOptionsSchema;
+  '@schematics/angular:application'?: AngularApplicationOptionsSchema;
+  '@schematics/angular:class'?: AngularClassOptionsSchema;
+  '@schematics/angular:component'?: AngularComponentOptionsSchema;
+  '@schematics/angular:directive'?: AngularDirectiveOptionsSchema;
+  '@schematics/angular:enum'?: AngularEnumOptionsSchema;
+  '@schematics/angular:guard'?: AngularGuardOptionsSchema;
+  '@schematics/angular:interceptor'?: AngularInterceptorOptionsSchema;
+  '@schematics/angular:interface'?: AngularInterfaceOptionsSchema;
+  '@schematics/angular:library'?: LibraryOptionsSchema;
+  '@schematics/angular:pipe'?: AngularPipeOptionsSchema;
+  '@schematics/angular:ng-new'?: AngularNgNewOptionsSchema;
+  '@schematics/angular:resolver'?: AngularResolverOptionsSchema;
+  '@schematics/angular:service'?: AngularServiceOptionsSchema;
+  '@schematics/angular:web-worker'?: AngularWebWorkerOptionsSchema;
   [k: string]: unknown;
 }
 /**
@@ -541,7 +541,7 @@ interface AngularApplicationOptionsSchema {
   /**
    * The view encapsulation strategy to use in the new application.
    */
-  viewEncapsulation?: "Emulated" | "None" | "ShadowDom";
+  viewEncapsulation?: 'Emulated' | 'None' | 'ShadowDom';
   /**
    * Creates an application with routing enabled.
    */
@@ -553,7 +553,7 @@ interface AngularApplicationOptionsSchema {
   /**
    * The file extension or preprocessor to use for style files.
    */
-  style?: "css" | "scss" | "sass" | "less";
+  style?: 'css' | 'scss' | 'sass' | 'less';
   /**
    * Do not create "spec.ts" test files for the application.
    */
@@ -651,11 +651,11 @@ interface AngularComponentOptionsSchema {
   /**
    * The view encapsulation strategy to use in the new component.
    */
-  viewEncapsulation?: "Emulated" | "None" | "ShadowDom";
+  viewEncapsulation?: 'Emulated' | 'None' | 'ShadowDom';
   /**
    * The change detection strategy to use in the new component.
    */
-  changeDetection?: "Default" | "OnPush";
+  changeDetection?: 'Default' | 'OnPush';
   /**
    * The prefix to apply to the generated component selector.
    */
@@ -665,7 +665,7 @@ interface AngularComponentOptionsSchema {
   /**
    * The file extension or preprocessor to use for style files, or 'none' to skip generating the style file.
    */
-  style?: "css" | "scss" | "sass" | "less" | "none";
+  style?: 'css' | 'scss' | 'sass' | 'less' | 'none';
   /**
    * Adds a developer-defined type to the filename, in the format "name.type.ts".
    */
@@ -809,8 +809,8 @@ interface AngularGuardOptionsSchema {
    * @minItems 1
    */
   implements?: [
-    "CanActivate" | "CanActivateChild" | "CanDeactivate" | "CanMatch",
-    ...("CanActivate" | "CanActivateChild" | "CanDeactivate" | "CanMatch")[]
+    'CanActivate' | 'CanActivateChild' | 'CanDeactivate' | 'CanMatch',
+    ...('CanActivate' | 'CanActivateChild' | 'CanDeactivate' | 'CanMatch')[],
   ];
 }
 /**
@@ -991,7 +991,7 @@ interface AngularNgNewOptionsSchema {
   /**
    * The view encapsulation strategy to use in the initial project.
    */
-  viewEncapsulation?: "Emulated" | "None" | "ShadowDom";
+  viewEncapsulation?: 'Emulated' | 'None' | 'ShadowDom';
   /**
    * The version of the Angular CLI to use.
    */
@@ -1007,7 +1007,7 @@ interface AngularNgNewOptionsSchema {
   /**
    * The file extension or preprocessor to use for style files.
    */
-  style?: "css" | "scss" | "sass" | "less";
+  style?: 'css' | 'scss' | 'sass' | 'less';
   /**
    * Do not generate "spec.ts" test files for the new project.
    */
@@ -1027,7 +1027,7 @@ interface AngularNgNewOptionsSchema {
   /**
    * The package manager used to install dependencies.
    */
-  packageManager?: "npm" | "yarn" | "pnpm" | "cnpm" | "bun";
+  packageManager?: 'npm' | 'yarn' | 'pnpm' | 'cnpm' | 'bun';
   /**
    * Creates an application based upon the standalone API, without NgModules.
    */
@@ -1264,7 +1264,7 @@ interface ApplicationSchemaForBuildFacade {
   /**
    * The stylesheet language to use for the application's inline component styles.
    */
-  inlineStyleLanguage?: "css" | "less" | "sass" | "scss";
+  inlineStyleLanguage?: 'css' | 'less' | 'sass' | 'scss';
   /**
    * Options to pass to style preprocessors.
    */
@@ -1348,7 +1348,7 @@ interface ApplicationSchemaForBuildFacade {
      * This interface was referenced by `undefined`'s JSON-Schema definition
      * via the `patternProperty` "^\.\S+$".
      */
-    [k: string]: "text" | "binary" | "file" | "empty";
+    [k: string]: 'text' | 'binary' | 'file' | 'empty';
   };
   /**
    * Defines global identifiers that will be replaced with a specified constant value when found in any JavaScript or TypeScript code including libraries. The value will be used directly. String values must be put in quotes. Identifiers within Angular metadata such as Component Decorators will not be replaced.
@@ -1425,11 +1425,11 @@ interface ApplicationSchemaForBuildFacade {
   /**
    * How to handle missing translations for i18n.
    */
-  i18nMissingTranslation?: "warning" | "error" | "ignore";
+  i18nMissingTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * How to handle duplicate translations for i18n.
    */
-  i18nDuplicateTranslation?: "warning" | "error" | "ignore";
+  i18nDuplicateTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * Translate the bundles in one or more locales.
    */
@@ -1441,7 +1441,7 @@ interface ApplicationSchemaForBuildFacade {
   /**
    * Define the output filename cache-busting hashing mode.
    */
-  outputHashing?: "none" | "all" | "media" | "bundles";
+  outputHashing?: 'none' | 'all' | 'media' | 'bundles';
   /**
    * Enable and define the file watching poll time period in milliseconds.
    */
@@ -1506,7 +1506,7 @@ interface ApplicationSchemaForBuildFacade {
   /**
    * Define the crossorigin attribute setting of elements that provide CORS support.
    */
-  crossOrigin?: "none" | "anonymous" | "use-credentials";
+  crossOrigin?: 'none' | 'anonymous' | 'use-credentials';
   /**
    * A list of CommonJS or AMD packages that are allowed to be used without a build time warning. Use `'*'` to allow all.
    */
@@ -1544,7 +1544,7 @@ interface ApplicationSchemaForBuildFacade {
          *
          * Please note that this feature does not provide polyfills for Node.js modules. Additionally, it is experimental, and the schematics may undergo changes in future versions.
          */
-        experimentalPlatform?: "node" | "neutral";
+        experimentalPlatform?: 'node' | 'neutral';
       };
   /**
    * Generates an application shell during build time.
@@ -1553,7 +1553,7 @@ interface ApplicationSchemaForBuildFacade {
   /**
    * Defines the build output target. 'static': Generates a static site for deployment on any static hosting service. 'server': Produces an application designed for deployment on a server that supports server-side rendering (SSR).
    */
-  outputMode?: "static" | "server";
+  outputMode?: 'static' | 'server';
 }
 interface FileReplacement {
   replace: string;
@@ -1563,7 +1563,7 @@ interface Budget {
   /**
    * The type of budget.
    */
-  type: "all" | "allScript" | "any" | "anyScript" | "anyComponentStyle" | "bundle" | "initial";
+  type: 'all' | 'allScript' | 'any' | 'anyScript' | 'anyComponentStyle' | 'bundle' | 'initial';
   /**
    * The name of the bundle.
    */
@@ -1713,7 +1713,7 @@ interface WebpackBrowserSchemaForBuildFacade {
   /**
    * The stylesheet language to use for the application's inline component styles.
    */
-  inlineStyleLanguage?: "css" | "less" | "sass" | "scss";
+  inlineStyleLanguage?: 'css' | 'less' | 'sass' | 'scss';
   /**
    * Options to pass to style preprocessors.
    */
@@ -1835,11 +1835,11 @@ interface WebpackBrowserSchemaForBuildFacade {
   /**
    * How to handle missing translations for i18n.
    */
-  i18nMissingTranslation?: "warning" | "error" | "ignore";
+  i18nMissingTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * How to handle duplicate translations for i18n.
    */
-  i18nDuplicateTranslation?: "warning" | "error" | "ignore";
+  i18nDuplicateTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * Translate the bundles in one or more locales.
    */
@@ -1851,7 +1851,7 @@ interface WebpackBrowserSchemaForBuildFacade {
   /**
    * Define the output filename cache-busting hashing mode.
    */
-  outputHashing?: "none" | "all" | "media" | "bundles";
+  outputHashing?: 'none' | 'all' | 'media' | 'bundles';
   /**
    * Enable and define the file watching poll time period in milliseconds.
    */
@@ -1919,7 +1919,7 @@ interface WebpackBrowserSchemaForBuildFacade {
   /**
    * Define the crossorigin attribute setting of elements that provide CORS support.
    */
-  crossOrigin?: "none" | "anonymous" | "use-credentials";
+  crossOrigin?: 'none' | 'anonymous' | 'use-credentials';
   /**
    * A list of CommonJS or AMD packages that are allowed to be used without a build time warning. Use `'*'` to allow all.
    */
@@ -1929,7 +1929,7 @@ interface Budget1 {
   /**
    * The type of budget.
    */
-  type: "all" | "allScript" | "any" | "anyScript" | "anyComponentStyle" | "bundle" | "initial";
+  type: 'all' | 'allScript' | 'any' | 'anyScript' | 'anyComponentStyle' | 'bundle' | 'initial';
   /**
    * The name of the bundle.
    */
@@ -2050,7 +2050,7 @@ interface EsbuildBrowserSchemaForBuildFacade {
   /**
    * The stylesheet language to use for the application's inline component styles.
    */
-  inlineStyleLanguage?: "css" | "less" | "sass" | "scss";
+  inlineStyleLanguage?: 'css' | 'less' | 'sass' | 'scss';
   /**
    * Options to pass to style preprocessors.
    */
@@ -2167,11 +2167,11 @@ interface EsbuildBrowserSchemaForBuildFacade {
   /**
    * How to handle missing translations for i18n.
    */
-  i18nMissingTranslation?: "warning" | "error" | "ignore";
+  i18nMissingTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * How to handle duplicate translations for i18n.
    */
-  i18nDuplicateTranslation?: "warning" | "error" | "ignore";
+  i18nDuplicateTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * Translate the bundles in one or more locales.
    */
@@ -2183,7 +2183,7 @@ interface EsbuildBrowserSchemaForBuildFacade {
   /**
    * Define the output filename cache-busting hashing mode.
    */
-  outputHashing?: "none" | "all" | "media" | "bundles";
+  outputHashing?: 'none' | 'all' | 'media' | 'bundles';
   /**
    * Enable and define the file watching poll time period in milliseconds.
    */
@@ -2252,7 +2252,7 @@ interface EsbuildBrowserSchemaForBuildFacade {
   /**
    * Define the crossorigin attribute setting of elements that provide CORS support.
    */
-  crossOrigin?: "none" | "anonymous" | "use-credentials";
+  crossOrigin?: 'none' | 'anonymous' | 'use-credentials';
   /**
    * A list of CommonJS or AMD packages that are allowed to be used without a build time warning. Use `'*'` to allow all.
    */
@@ -2266,7 +2266,7 @@ interface Budget2 {
   /**
    * The type of budget.
    */
-  type: "all" | "allScript" | "any" | "anyScript" | "anyComponentStyle" | "bundle" | "initial";
+  type: 'all' | 'allScript' | 'any' | 'anyScript' | 'anyComponentStyle' | 'bundle' | 'initial';
   /**
    * The name of the bundle.
    */
@@ -2491,7 +2491,7 @@ interface ExtractI18NTarget {
   /**
    * Output format for the generated file.
    */
-  format?: "xmb" | "xlf" | "xlif" | "xliff" | "xlf2" | "xliff2" | "json" | "arb" | "legacy-migrate";
+  format?: 'xmb' | 'xlf' | 'xlif' | 'xliff' | 'xlf2' | 'xliff2' | 'json' | 'arb' | 'legacy-migrate';
   /**
    * Log progress to the console.
    */
@@ -2516,7 +2516,7 @@ interface ExtractI18NTarget1 {
   /**
    * Output format for the generated file.
    */
-  format?: "xmb" | "xlf" | "xlif" | "xliff" | "xlf2" | "xliff2" | "json" | "arb" | "legacy-migrate";
+  format?: 'xmb' | 'xlf' | 'xlif' | 'xliff' | 'xlf2' | 'xliff2' | 'json' | 'arb' | 'legacy-migrate';
   /**
    * Log progress to the console.
    */
@@ -2617,7 +2617,7 @@ interface KarmaTarget {
   /**
    * The stylesheet language to use for the application's inline component styles.
    */
-  inlineStyleLanguage?: "css" | "less" | "sass" | "scss";
+  inlineStyleLanguage?: 'css' | 'less' | 'sass' | 'scss';
   /**
    * Options to pass to style preprocessors
    */
@@ -2705,7 +2705,7 @@ interface KarmaTarget {
   /**
    * Determines how to build the code under test. If set to 'detect', attempts to follow the development builder.
    */
-  builderMode?: "detect" | "browser" | "application";
+  builderMode?: 'detect' | 'browser' | 'application';
   /**
    * TypeScript configuration for Web Worker modules.
    */
@@ -2815,7 +2815,7 @@ interface WebTestRunnerTarget {
   /**
    * The stylesheet language to use for the application's inline component styles.
    */
-  inlineStyleLanguage?: "css" | "less" | "sass" | "scss";
+  inlineStyleLanguage?: 'css' | 'less' | 'sass' | 'scss';
   /**
    * Options to pass to style preprocessors
    */
@@ -3002,7 +3002,7 @@ interface UniversalTarget {
   /**
    * The stylesheet language to use for the application's inline component styles.
    */
-  inlineStyleLanguage?: "css" | "less" | "sass" | "scss";
+  inlineStyleLanguage?: 'css' | 'less' | 'sass' | 'scss';
   /**
    * Options to pass to style preprocessors
    */
@@ -3090,11 +3090,11 @@ interface UniversalTarget {
   /**
    * How to handle missing translations for i18n.
    */
-  i18nMissingTranslation?: "warning" | "error" | "ignore";
+  i18nMissingTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * How to handle duplicate translations for i18n.
    */
-  i18nDuplicateTranslation?: "warning" | "error" | "ignore";
+  i18nDuplicateTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * Translate the bundles in one or more locales.
    */
@@ -3102,7 +3102,7 @@ interface UniversalTarget {
   /**
    * Define the output filename cache-busting hashing mode.
    */
-  outputHashing?: "none" | "all" | "media" | "bundles";
+  outputHashing?: 'none' | 'all' | 'media' | 'bundles';
   /**
    * Delete the output path before building.
    */
