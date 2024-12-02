@@ -3,7 +3,7 @@ import { _glob } from '../../util/glob.js';
 
 // https://yarnpkg.com/features/constraints
 
-const title = 'yarn';
+const title = 'Yarn';
 
 const enablers = 'This plugin is enabled when a `yarn.lock` file is found in the root folder.';
 
