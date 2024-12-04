@@ -10,7 +10,9 @@ const enablers = ['@moonrepo/cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['moon.yml', '.moon/tasks.yml', '.moon/tasks/*.yml'];
+const isRootOnly = true;
+
+const config = ['moon.yml', '.moon/tasks.yml', '.moon/tasks/*.yml'];
 
 const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) => {
   const tasks = config.tasks ? Object.values(config.tasks) : [];
@@ -27,6 +29,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   config,
   resolveConfig,
 } satisfies Plugin;

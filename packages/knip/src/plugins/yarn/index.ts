@@ -9,11 +9,14 @@ const enablers = 'This plugin is enabled when a `yarn.lock` file is found in the
 
 const isEnabled: IsPluginEnabled = async ({ cwd }) => Boolean(await _firstGlob({ cwd, patterns: ['yarn.lock'] }));
 
-const entry: string[] = ['yarn.config.cjs'];
+const isRootOnly = true;
+
+const entry = ['yarn.config.cjs'];
 
 export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   entry,
 } satisfies Plugin;
