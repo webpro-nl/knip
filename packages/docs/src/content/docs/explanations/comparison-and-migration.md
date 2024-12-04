@@ -10,7 +10,7 @@ requirements, then by all means, use what suits you best.
 
 All tools have in common that they have less features and don't support the
 concept of [monorepos/workspaces][2]. Feel free to send in projects that Knip
-does not handle better, I'm up for the challenge!
+does not handle better, Knip loves to be challenged!
 
 ## Migration
 
@@ -25,9 +25,8 @@ A migration consists of deleting the dependency and its configuration file and
 > how each dependency is used, which dependencies are useless, and which
 > dependencies are missing from package.json.
 
-The project has plugins (specials), yet not as many as Knip has and I'd argue
-they're not as advanced. It also supports compilers (parsers) for non-standard
-files.
+The project has plugins (specials), yet not as many as Knip has and they're not
+as advanced. It also supports compilers (parsers) for non-standard files.
 
 The following commands are similar:
 

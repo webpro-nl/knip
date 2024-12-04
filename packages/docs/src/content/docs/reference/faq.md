@@ -81,8 +81,8 @@ imports of internal modules or external dependencies, and so on.
 
 ### Why is Knip so heavily engineered?
 
-Even though I love the Unix philosophy, at this point I believe for Knip it
-makes sense to have the pieces in a single tool.
+Even though a modular approach has its merits, for Knip it makes sense to have
+all the pieces in a single tool.
 
 Building up the module and dependency graph requires non-standard module
 resolution and not only static but also dynamic analysis (i.e. actually load and
@@ -117,13 +117,28 @@ dependencies to build up the graph is also exactly what's meant by
   {
     "name": "my-lib",
     "scripts": {
-      "start": "node --import tsx/esm run.ts"
+      "start": "node --import tsx/esm run.ts",
+      "start": "vitest -c config/vitest.config.ts"
     }
   }
   ```
+- Through plugins handling CI workflow files like `.github/workflows/ci.yml`:
+  ```yaml
+  jobs:
+    test:
+      steps:
+        run: playwright test e2e/**/*.spec.ts --config playwright.e2e.config.ts
+        run: node --import tsx/esm run.ts
+  ```
 
-Entry files are added to the module graph and they might lead to additional
-entry files recursively until no more entry files are found.
+Scripts like the ones shown here may also contain references to configuration
+files (`config/vitest.config.ts` and `playwright.e2e.config.ts` in the examples
+above). They're recognized as configuration files and passed to their respective
+plugins, and may contain additional entry files.
+
+Entry files are added to the module graph.
+[Module resolution](#module-resolution) might result in additional entry files
+recursively until no more entry files are found.
 
 ### What does Knip look for in source files?
 
