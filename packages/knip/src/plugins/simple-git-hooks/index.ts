@@ -13,7 +13,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const packageJsonPath = 'simple-git-hooks';
 
-const config: string[] = [
+const config = [
   '.simple-git-hooks.{js,cjs}',
   'simple-git-hooks.{js,cjs}',
   '.simple-git-hooks.json',

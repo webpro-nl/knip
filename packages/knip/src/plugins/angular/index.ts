@@ -14,8 +14,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['angular.json'];
 
-const production: string[] = [];
-
 const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (config, options) => {
   const { cwd, configFilePath } = options;
 
@@ -82,6 +80,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  production,
   resolveConfig,
 } satisfies Plugin;

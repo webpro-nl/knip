@@ -14,12 +14,12 @@ const enablers = [/^@netlify\/plugin-/, 'netlify-cli', '@netlify/functions'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['netlify.toml'];
+const config = ['netlify.toml'];
 
 const NETLIFY_FUNCTIONS_DIR = 'netlify/functions';
 const NETLIFY_FUNCTIONS_EXTS = 'js,mjs,cjs,ts,mts,cts';
 
-const production: string[] = [`${NETLIFY_FUNCTIONS_DIR}/**/*.{${NETLIFY_FUNCTIONS_EXTS}}`];
+const production = [`${NETLIFY_FUNCTIONS_DIR}/**/*.{${NETLIFY_FUNCTIONS_EXTS}}`];
 
 const resolveEntryPaths: ResolveEntryPaths<NetlifyConfig> = localConfig => {
   return [

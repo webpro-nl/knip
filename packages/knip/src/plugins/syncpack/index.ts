@@ -2,7 +2,7 @@ import type { IsPluginEnabled, Plugin } from '../../types/config.js';
 import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
 
-// link to syncpack docs https://jamiemason.github.io/syncpack/config/syncpackrc/
+// https://jamiemason.github.io/syncpack/config/syncpackrc/
 
 const title = 'Syncpack';
 

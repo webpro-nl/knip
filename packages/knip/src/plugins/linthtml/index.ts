@@ -14,7 +14,7 @@ const enablers = ['@linthtml/linthtml'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['package.json', ...toCosmiconfig('linthtml')];
+const config = ['package.json', ...toCosmiconfig('linthtml')];
 
 const resolveConfig: ResolveConfig<PluginConfig> = config => {
   const extensions = config.extends ?? [];

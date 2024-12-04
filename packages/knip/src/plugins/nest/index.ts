@@ -11,7 +11,7 @@ const enablers = [/^@nestjs\/.*/];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['nest-cli.json', '.nestcli.json', '.nest-cli.json', 'nest.json'];
+const config = ['nest-cli.json', '.nestcli.json', '.nest-cli.json', 'nest.json'];
 
 const resolveConfig: ResolveConfig<NestConfig> = async config => {
   const inputs = config?.collection ? [config.collection] : [];
