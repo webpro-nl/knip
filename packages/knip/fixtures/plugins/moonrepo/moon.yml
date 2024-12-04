@@ -1,0 +1,6 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+tasks:
+  lint.readme:
+    command: 'vite-node $workspaceRoot/tools/linters/lint-readme.ts -- $projectRoot'
+  start.prod:
+    command: 'vitest ./server/server.ts'
