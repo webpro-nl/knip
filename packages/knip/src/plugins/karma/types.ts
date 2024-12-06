@@ -43,18 +43,18 @@ export interface ConfigOptions {
   plugins?: Array<PluginName | InlinePluginDef> | undefined;
 }
 
-export type PluginName = string;
-export type InlinePluginDef = Record<PluginName, InlinePluginType>;
-export type InlinePluginType = FactoryFnType | ConstructorFnType | ValueType;
-export type FactoryFnType = ['factory', FactoryFn];
-export type FactoryFn = (...params: any[]) => any;
-export type ConstructorFnType = ['type', ConstructorFn];
+type PluginName = string;
+type InlinePluginDef = Record<PluginName, InlinePluginType>;
+type InlinePluginType = FactoryFnType | ConstructorFnType | ValueType;
+type FactoryFnType = ['factory', FactoryFn];
+type FactoryFn = (...params: any[]) => any;
+type ConstructorFnType = ['type', ConstructorFn];
 // biome-ignore lint/complexity/noBannedTypes: copy/pasted
-export type ConstructorFn = Function | (new (...params: any[]) => any);
-export type ValueType = ['value', any];
+type ConstructorFn = Function | (new (...params: any[]) => any);
+type ValueType = ['value', any];
 
 //👇 Partial extraction of relevant options for Knip
-export interface FilePattern {
+interface FilePattern {
   /**
    * The pattern to use for matching.
    */
