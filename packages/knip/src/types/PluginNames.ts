@@ -22,6 +22,7 @@ export type PluginName =
   | 'graphql-codegen'
   | 'husky'
   | 'jest'
+  | 'karma'
   | 'ladle'
   | 'lefthook'
   | 'lint-staged'
@@ -111,6 +112,7 @@ export const pluginNames = [
   'graphql-codegen',
   'husky',
   'jest',
+  'karma',
   'ladle',
   'lefthook',
   'lint-staged',
