@@ -134,3 +134,38 @@ const config = {
 
 export default config;
 ```
+
+### MDX
+
+In a project with MDX, the compiler is automatically enabled when `@mdx-js/*` or
+`astro` are found in the list of dependencies
+([source code](https://github.com/webpro-nl/knip/blob/main/packages/knip/src/compilers/mdx.ts))
+. Override the MDX compiler if
+
+- The built-in "compiler" is not automatically enabled because your code doesn't
+  use the dependencies in the built-in list.
+
+  ```typescript
+  // knip.config.ts
+  import mdx from 'knip/dist/compilers/mdx';
+
+  const config: KnipConfig = {
+    // Manually enable built-in MDX compiler
+    compilers: {
+      mdx: mdx.compiler,
+    },
+  };
+  ```
+
+- The built-in "compiler" is not enough
+
+  ```typescript
+  // knip.config.ts
+  import { compile } from 'lib-that-has-the-mdx-compiler';
+
+  const config: KnipConfig = {
+    compilers: {
+      mdx: (text: string, filePath: string) => compile(text),
+    },
+  };
+  ```
