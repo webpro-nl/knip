@@ -74,4 +74,4 @@ export const toDeferResolveEntry = (specifier: string): Input => ({ type: 'defer
 export const isDeferResolveEntry = (input: Input) => input.type === 'deferResolveEntry';
 
 export const toDebugString = (input: Input) =>
-  `${input.type}:${input.specifier} ${input.containingFilePath ? `(${toRelative(input.containingFilePath)})` : ''}`;
+  `${input.type}:${input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath)})` : ''}`;

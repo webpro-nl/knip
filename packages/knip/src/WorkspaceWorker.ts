@@ -352,7 +352,7 @@ export class WorkspaceWorker {
       }
 
       const finalEntryPaths = getFinalEntryPaths(plugin, options, configEntryPaths);
-      for (const id of finalEntryPaths) addInput(id, id.containingFilePath ?? containingFilePath);
+      for (const id of finalEntryPaths) addInput(id, id.containingFilePath);
 
       if (hasResolve) {
         const dependencies = (await plugin.resolve?.(options)) ?? [];
