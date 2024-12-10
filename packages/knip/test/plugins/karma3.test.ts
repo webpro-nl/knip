@@ -5,22 +5,22 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/plugins/karma');
+const cwd = resolve('fixtures/plugins/karma3');
 
-test('Find dependencies with the Karma plugin (initial config)', async () => {
+test('Find dependencies with the Karma plugin (plugin dependencies)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(issues.unlisted['karma.conf.js']['jasmine-core']);
+  assert.ok(issues.unlisted['karma.conf.js']['karma-jasmine']);
+  assert.ok(issues.unlisted['karma.conf.js']['karma-coverage']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    //👇 Not 2, as `karma-coverage` should be loaded as plugin by default
     devDependencies: 1,
-    unlisted: 1,
-    processed: 1,
-    total: 1,
+    unlisted: 2,
+    processed: 2,
+    total: 2,
   });
 });

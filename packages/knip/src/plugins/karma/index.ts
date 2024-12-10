@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
 import { type Input, toDevDependency, toEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
+import { extname, isInternal, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { Config, ConfigOptions } from './types.js';
 
@@ -19,7 +19,7 @@ const entry: string[] = [];
 
 type ConfigFile = (config: Config) => void;
 
-const resolveConfig: ResolveConfig<ConfigFile> = async configFile => {
+const resolveConfig: ResolveConfig<ConfigFile> = async (configFile, options) => {
   const inputs = new Set<Input>();
 
   const config = loadConfigFromFile(configFile);
@@ -27,6 +27,23 @@ const resolveConfig: ResolveConfig<ConfigFile> = async configFile => {
   if (config.frameworks) {
     for (const framework of config.frameworks) {
       inputs.add(toDevDependency(devDepForFramework(framework)));
+    }
+  }
+  if (config.plugins) {
+    for (const plugin of config.plugins) {
+      if (typeof plugin !== 'string') continue;
+      if (isInternal(plugin)) {
+        inputs.add(toEntry(extname(plugin).length === 0 ? `${plugin}.js` : plugin));
+      } else {
+        inputs.add(toDevDependency(plugin));
+      }
+    }
+  } else {
+    const karmaPluginDevDeps = Object.keys(options.manifest.devDependencies ?? {}).filter(name =>
+      name.startsWith('karma-')
+    );
+    for (const karmaPluginDevDep of karmaPluginDevDeps) {
+      inputs.add(toDevDependency(karmaPluginDevDep));
     }
   }
 

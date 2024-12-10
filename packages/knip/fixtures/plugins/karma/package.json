@@ -2,6 +2,7 @@
   "name": "@fixtures/karma",
   "scripts": {},
   "devDependencies": {
-    "karma": "*"
+    "karma": "*",
+    "karma-coverage": "*"
   }
 }
