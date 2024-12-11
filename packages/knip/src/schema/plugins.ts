@@ -35,6 +35,7 @@ export const pluginsSchema = z.object({
   'graphql-codegen': pluginSchema,
   husky: pluginSchema,
   jest: pluginSchema,
+  karma: pluginSchema,
   ladle: pluginSchema,
   lefthook: pluginSchema,
   'lint-staged': pluginSchema,
