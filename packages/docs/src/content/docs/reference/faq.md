@@ -48,14 +48,13 @@ hands".
 
 On the other hand, Knip is a project linter that should be part of QA. It lints,
 reports and fixes only your own source code. A linter reporting issues hands
-control back to you (unless you [auto-fix](../features/auto-fix.mdx)
-everything).
+control back to you (unless you [auto-fix][1] everything).
 
 Besides those differences, Knip has a broader scope:
 
-- Improve DX (see [less is more](../explanations/why-use-knip.md#less-is-more)).
+- Improve DX (see [less is more][2]).
 - Include non-production code and dependencies in the process by default.
-- Report more [issue types](./issue-types.md) (such as unlisted dependencies).
+- Report more [issue types][3] (such as unlisted dependencies).
 
 ## Synergy
 
@@ -88,13 +87,13 @@ Building up the module and dependency graph requires non-standard module
 resolution and not only static but also dynamic analysis (i.e. actually load and
 execute modules), such as for parsers of plugins to receive the exported value
 of dynamic tooling configuration files. Additionally, [exports consumed by
-external libraries][1] require type information, as supported by the TypeScript
+external libraries][4] require type information, as supported by the TypeScript
 backend. Last but not least, shell script parsing is required to find the right
 entry files, configuration files and dependencies accurately.
 
 The rippling effect of plugins and recursively adding entry files and
 dependencies to build up the graph is also exactly what's meant by
-["comprehensive" here][2].
+["comprehensive" here][5].
 
 ## Building the graph
 
@@ -136,9 +135,8 @@ files (`config/vitest.config.ts` and `playwright.e2e.config.ts` in the examples
 above). They're recognized as configuration files and passed to their respective
 plugins, and may contain additional entry files.
 
-Entry files are added to the module graph.
-[Module resolution](#module-resolution) might result in additional entry files
-recursively until no more entry files are found.
+Entry files are added to the module graph. [Module resolution][6] might result
+in additional entry files recursively until no more entry files are found.
 
 ### What does Knip look for in source files?
 
@@ -150,7 +148,7 @@ all nodes of the generated AST to find:
 - Accessed properties on namespace imports and re-exports to track individual
   export usage
 - Calls to `require.resolve` and `import.meta.resolve`
-- Scripts in template strings (passed to [script parser][3])
+- Scripts in template strings (passed to [script parser][7])
 
 ### What's in the graph?
 
@@ -188,7 +186,7 @@ there are a few issues with this approach:
 
 - It requires lockfile parsing for each lockfile format and version of each
   package manager.
-- The lockfile doesn't contain whether the package [has types included][4].
+- The lockfile doesn't contain whether the package [has types included][8].
 
 ## Module Resolution
 
@@ -209,12 +207,12 @@ seem to meet all requirements to be usable on its own by Knip:
   `module.js`
 
 A few strategies have been tried and tweaked, and Knip currently uses a
-combination of [enhanced-resolve][5], the TypeScript module resolver and a few
+combination of [enhanced-resolve][9], the TypeScript module resolver and a few
 customizations. This single custom module resolver function is hooked into the
 TypeScript compiler and language service hosts.
 
 Everything else outside the dependency graph is handled by `enhanced-resolve`
-when doing things like [script parsing][3] and resolving references to files in
+when doing things like [script parsing][7] and resolving references to files in
 other workspaces.
 
 ### How does Knip handle non-standard import syntax?
@@ -245,7 +243,7 @@ file. They're not a concept in Knip.
 
 A TypeScript program has a 1-to-1 relationship with workspaces if they're
 analyzed in isolation. However, by default Knip optimizes for performance and
-utilizes [workspace sharing][6]. That's why debug output contains messages like
+utilizes [workspace sharing][10]. That's why debug output contains messages like
 "Installed 2 programs for 29 workspaces".
 
 ### Why doesn't Knip match my TypeScript project structure?
@@ -277,7 +275,7 @@ Knip shares the files of multiple workspaces in a single program if their
 configuration allows it. This optimization is enabled by default, while it also
 allows the module resolver (one per program) to do some more caching.
 
-Also see [workspace sharing][6].
+Also see [workspace sharing][10].
 
 ### Why doesn't Knip just use `ts.findReferences`?
 
@@ -293,7 +291,7 @@ comprehensive graph include:
 Without sacrificing these benefits, Knip does use `ts.findReferences` to find
 references to class members (i.e. when the issue type `classMembers` is
 included). In case analysis of exports requires type information of external
-dependencies, the [`--include-libs ` flag][1] will trigger the same.
+dependencies, the [`--include-libs ` flag][4] will trigger the same.
 
 ### Why can't I use path aliases to reference other workspaces?
 
@@ -359,7 +357,7 @@ other file types.
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
 statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][7].
+project. Also see the answer to the previous question and [Compilers][11].
 
 ## Miscellaneous
 
@@ -379,7 +377,7 @@ Which mode should've been the default? They both have their merits:
   tooling, including most issues found in production mode. This mode has the
   most impact on DX, for the same reason.
 
-Also see [production mode][8].
+Also see [production mode][12].
 
 ### Why doesn't Knip have...?
 
@@ -403,14 +401,18 @@ Examples of features that have been requested include:
 
 These are all interesting ideas, but most increase the API surface area, and all
 require more development efforts and maintenance. Time is limited and
-[sponsorships][9] currently don't cover - this can change though!
+[sponsorships][13] currently don't cover - this can change though!
 
-[1]: ../guides/handling-issues.mdx#external-libraries
-[2]: ../explanations/why-use-knip.md#comprehensive
-[3]: ../features/script-parser.md
-[4]: ../guides/handling-issues.mdx#types-packages
-[5]: https://www.npmjs.com/package/enhanced-resolve
-[6]: ../guides/performance.md#workspace-sharing
-[7]: ../features/compilers.md
-[8]: ../features/production-mode.md
-[9]: /sponsors
+[1]: ../features/auto-fix.mdx
+[2]: ../explanations/why-use-knip.md#less-is-more
+[3]: ./issue-types.md
+[4]: ../guides/handling-issues.mdx#external-libraries
+[5]: ../explanations/why-use-knip.md#comprehensive
+[6]: #module-resolution
+[7]: ../features/script-parser.md
+[8]: ../guides/handling-issues.mdx#types-packages
+[9]: https://www.npmjs.com/package/enhanced-resolve
+[10]: ../guides/performance.md#workspace-sharing
+[11]: ../features/compilers.md
+[12]: ../features/production-mode.md
+[13]: /sponsors
