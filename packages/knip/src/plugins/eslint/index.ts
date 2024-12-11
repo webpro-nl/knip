@@ -20,7 +20,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies, manifest, config }) =>
 
 const packageJsonPath = 'eslintConfig';
 
-const entry = ['eslint.config.{js,cjs,mjs}'];
+const entry = ['eslint.config.{js,cjs,cts,mjs,mts,ts}'];
 
 const config = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
 
