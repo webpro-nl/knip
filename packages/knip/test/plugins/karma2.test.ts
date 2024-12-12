@@ -14,12 +14,13 @@ test('Find dependencies with the Karma plugin (test files)', async () => {
   });
 
   assert.ok(issues.files.has(join(cwd, 'out-of-base-path', 'example.spec.js')));
+  assert.ok(issues.files.has(join(cwd, 'src', 'excluded.spec.js')));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    files: 1,
-    processed: 4,
-    total: 4,
+    files: 2,
+    processed: 5,
+    total: 5,
   });
 });

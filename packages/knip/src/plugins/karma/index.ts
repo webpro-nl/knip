@@ -64,6 +64,11 @@ const resolveEntryPaths: ResolveEntryPaths<ConfigFile> = (configFile, options) =
       inputs.add(toEntry(join(options.configFileDir, basePath, fileOrPattern)));
     }
   }
+  if (config.exclude) {
+    for (const fileOrPattern of config.exclude) {
+      inputs.add(toEntry(`!${join(options.configFileDir, basePath, fileOrPattern)}`));
+    }
+  }
 
   return Array.from(inputs);
 };
