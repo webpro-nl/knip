@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { type Input, toDevDependency, toEntry } from '../../util/input.js';
-import { extname, isInternal, join } from '../../util/path.js';
+import { type Input, toDeferResolveEntry, toDevDependency, toEntry } from '../../util/input.js';
+import { isInternal, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { Config, ConfigOptions } from './types.js';
 
@@ -33,7 +33,7 @@ const resolveConfig: ResolveConfig<ConfigFile> = async (configFile, options) => 
     for (const plugin of config.plugins) {
       if (typeof plugin !== 'string') continue;
       if (isInternal(plugin)) {
-        inputs.add(toEntry(extname(plugin).length === 0 ? `${plugin}.js` : plugin));
+        inputs.add(toDeferResolveEntry(plugin));
       } else {
         inputs.add(toDevDependency(plugin));
       }
