@@ -19,10 +19,10 @@ const entry: string[] = [];
 
 type ConfigFile = (config: Config) => void;
 
-const resolveConfig: ResolveConfig<ConfigFile> = async (configFile, options) => {
+const resolveConfig: ResolveConfig<ConfigFile> = async (localConfig, options) => {
   const inputs = new Set<Input>();
 
-  const config = loadConfigFromFile(configFile);
+  const config = loadConfig(localConfig);
 
   if (config.frameworks) {
     for (const framework of config.frameworks) {
@@ -52,10 +52,10 @@ const resolveConfig: ResolveConfig<ConfigFile> = async (configFile, options) => 
 
 const devDepForFramework = (framework: string): string => (framework === 'jasmine' ? 'jasmine-core' : framework);
 
-const resolveEntryPaths: ResolveEntryPaths<ConfigFile> = (configFile, options) => {
+const resolveEntryPaths: ResolveEntryPaths<ConfigFile> = (localConfig, options) => {
   const inputs = new Set<Input>();
 
-  const config = loadConfigFromFile(configFile);
+  const config = loadConfig(localConfig);
 
   const basePath = config.basePath ?? '';
   if (config.files) {
@@ -73,7 +73,7 @@ const resolveEntryPaths: ResolveEntryPaths<ConfigFile> = (configFile, options) =
   return Array.from(inputs);
 };
 
-const loadConfigFromFile = (configFile: ConfigFile): ConfigOptions => {
+const loadConfig = (configFile: ConfigFile): ConfigOptions => {
   const inMemoryConfig = new InMemoryConfig();
   configFile(inMemoryConfig);
   return inMemoryConfig.config ?? {};
