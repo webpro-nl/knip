@@ -42,14 +42,13 @@ export class FileEntryCache<T> {
   constructor(cacheId: string, _path: string) {
     // leverage node:path 
     const isWindows = process.platform === 'win32';
-    const { directory } = parsedArgValues;
-    const localDirectory = directory || process.cwd();
-    const currentCwd = isWindows ? path.win32.resolve(localDirectory): path.posix.resolve(localDirectory);
-    
-    const pathResolver = process.platform === 'win32' ? path.win32.join : resolve;
-    this.filePath = isAbsolute(_path) ? resolve(_path, cacheId) : resolve(cwd, _path, cacheId);
+    const { directory: directoryFromCliArg } = parsedArgValues;
+    const currentCwd = directoryFromCliArg || cwd;
+    const currentPath = isWindows ? path.win32.resolve(currentCwd): path.posix.resolve(currentCwd);
+    const pathResolver =  isWindows ? path.win32.join : resolve;
 
-    this.filePath = isAbsolute(_path) ? pathResolver(_path, cacheId) : pathResolver(cwd, _path, cacheId);
+    this.filePath = isAbsolute(currentPath) ? pathResolver(currentPath, cacheId) : pathResolver(currentPath, _path, cacheId);
+    
     if (isFile(this.filePath)) this.cache = create(this.filePath);
     this.removeNotFoundFiles();
   }
