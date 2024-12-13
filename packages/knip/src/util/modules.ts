@@ -19,7 +19,7 @@ export const getPackageNameFromFilePath = (value: string) => {
 export const getPackageNameFromSpecifier = (specifier: string) =>
   isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
 
-export const isStartsLikePackageName = (specifier: string) => /^(@[a-z0-9._]|[a-z0-9])/.test(specifier);
+export const isStartsLikePackageName = (specifier: string) => /^(@[a-z0-9._]|[a-z0-9])/i.test(specifier);
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
 

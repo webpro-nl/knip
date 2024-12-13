@@ -27,7 +27,7 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   gap: 5rem;
   margin-bottom: 3rem;
@@ -44,6 +44,10 @@
 
 .sponsors .w500 {
   width: 500px;
+}
+
+.sponsors .smaller {
+  margin: 0 2em;
 }
 
 .sponsors .w400 {

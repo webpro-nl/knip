@@ -106,6 +106,10 @@ end
 
 local function init(done)
   hs.execute("code ", true)
+  hs.eventtap.keyStroke({ "cmd", "shift" }, "0")
+  hs.eventtap.keyStroke({ "cmd" }, "=")
+  hs.eventtap.keyStroke({ "cmd" }, "=")
+  hs.eventtap.keyStroke({ "cmd" }, "=")
   enterStage(done, "✂️ demo\n\nknip --watch\nknip --fix", function(cb)
     openVSCodeWithFile(demo .. "/packages/shared/src/exports.ts", cb);
   end)

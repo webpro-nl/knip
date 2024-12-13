@@ -35,6 +35,7 @@ export const pluginsSchema = z.object({
   'graphql-codegen': pluginSchema,
   husky: pluginSchema,
   jest: pluginSchema,
+  karma: pluginSchema,
   ladle: pluginSchema,
   lefthook: pluginSchema,
   'lint-staged': pluginSchema,
@@ -59,6 +60,7 @@ export const pluginsSchema = z.object({
   playwright: pluginSchema,
   'playwright-ct': pluginSchema,
   'playwright-test': pluginSchema,
+  plop: pluginSchema,
   postcss: pluginSchema,
   preconstruct: pluginSchema,
   prettier: pluginSchema,
@@ -97,5 +99,6 @@ export const pluginsSchema = z.object({
   wireit: pluginSchema,
   wrangler: pluginSchema,
   xo: pluginSchema,
+  yarn: pluginSchema,
   yorkie: pluginSchema,
 });

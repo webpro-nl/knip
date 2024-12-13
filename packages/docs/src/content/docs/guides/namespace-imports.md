@@ -35,13 +35,14 @@ export { NS };
 
 If this all usage of the `NS` namespace object, we also don't know whether
 individual exports like `version` or `getRocket` will be used. However, if at
-least one reference to a property such as `NS.end` is found, then the individual
-exports are considered separately again and `start` will be marked as unused:
+least one reference to a property such as `NS.version` is found, then the
+individual exports are considered separately again and `getRocket` will be
+marked as unused:
 
 ```ts title="index.ts"
 import { NS } from './my-module.js';
 
-const finish = NS.end;
+const version = NS.version;
 ```
 
 ## The default heuristic
@@ -78,6 +79,8 @@ const spread = { ...NS };
 const shorthand = { NS };
 
 const assignment = NS;
+
+const item = [NS];
 
 type TypeOf = typeof NS;
 

@@ -6,9 +6,11 @@ const { debug } = parsedArgValues;
 
 const IS_DEBUG_ENABLED = debug ?? false;
 
+const IS_COLORS = !process.env.NO_COLOR;
+
 const noop = () => {};
 
-const inspectOptions = { maxArrayLength: null, depth: null, colors: true };
+const inspectOptions = { maxArrayLength: null, depth: null, colors: IS_COLORS };
 
 /** @public */
 export const inspect = (obj: unknown) => console.log(util.inspect(obj, inspectOptions));

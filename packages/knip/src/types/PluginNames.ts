@@ -22,6 +22,7 @@ export type PluginName =
   | 'graphql-codegen'
   | 'husky'
   | 'jest'
+  | 'karma'
   | 'ladle'
   | 'lefthook'
   | 'lint-staged'
@@ -46,6 +47,7 @@ export type PluginName =
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
+  | 'plop'
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
@@ -84,6 +86,7 @@ export type PluginName =
   | 'wireit'
   | 'wrangler'
   | 'xo'
+  | 'yarn'
   | 'yorkie';
 
 export const pluginNames = [
@@ -109,6 +112,7 @@ export const pluginNames = [
   'graphql-codegen',
   'husky',
   'jest',
+  'karma',
   'ladle',
   'lefthook',
   'lint-staged',
@@ -133,6 +137,7 @@ export const pluginNames = [
   'playwright',
   'playwright-ct',
   'playwright-test',
+  'plop',
   'postcss',
   'preconstruct',
   'prettier',
@@ -171,5 +176,6 @@ export const pluginNames = [
   'wireit',
   'wrangler',
   'xo',
+  'yarn',
   'yorkie',
 ] as const;

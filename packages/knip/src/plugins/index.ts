@@ -21,6 +21,7 @@ import { default as glob } from './glob/index.js';
 import { default as graphqlCodegen } from './graphql-codegen/index.js';
 import { default as husky } from './husky/index.js';
 import { default as jest } from './jest/index.js';
+import { default as karma } from './karma/index.js';
 import { default as ladle } from './ladle/index.js';
 import { default as lefthook } from './lefthook/index.js';
 import { default as lintStaged } from './lint-staged/index.js';
@@ -45,6 +46,7 @@ import { default as oclif } from './oclif/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
 import { default as playwright } from './playwright/index.js';
+import { default as plop } from './plop/index.js';
 import { default as postcss } from './postcss/index.js';
 import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
@@ -83,6 +85,7 @@ import { default as webpack } from './webpack/index.js';
 import { default as wireit } from './wireit/index.js';
 import { default as wrangler } from './wrangler/index.js';
 import { default as xo } from './xo/index.js';
+import { default as yarn } from './yarn/index.js';
 import { default as yorkie } from './yorkie/index.js';
 
 export const Plugins = {
@@ -108,6 +111,7 @@ export const Plugins = {
   'graphql-codegen': graphqlCodegen,
   husky,
   jest,
+  karma,
   ladle,
   lefthook,
   'lint-staged': lintStaged,
@@ -132,6 +136,7 @@ export const Plugins = {
   playwright,
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,
+  plop,
   postcss,
   preconstruct,
   prettier,
@@ -170,5 +175,6 @@ export const Plugins = {
   wireit,
   wrangler,
   xo,
+  yarn,
   yorkie,
 };

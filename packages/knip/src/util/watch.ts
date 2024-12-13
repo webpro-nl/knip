@@ -103,7 +103,7 @@ export const getWatchHandler = async ({
                 // Remove files no longer referenced
                 graph.delete(filePath);
                 analyzedFiles.delete(filePath);
-                cachedUnusedFiles.add(filePath);
+                if (filePath.startsWith(cwd)) cachedUnusedFiles.add(filePath);
               }
             }
 

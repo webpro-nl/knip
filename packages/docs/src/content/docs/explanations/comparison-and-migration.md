@@ -10,7 +10,7 @@ requirements, then by all means, use what suits you best.
 
 All tools have in common that they have less features and don't support the
 concept of [monorepos/workspaces][2]. Feel free to send in projects that Knip
-does not handle better, I'm up for the challenge!
+does not handle better, Knip loves to be challenged!
 
 ## Migration
 
@@ -25,9 +25,8 @@ A migration consists of deleting the dependency and its configuration file and
 > how each dependency is used, which dependencies are useless, and which
 > dependencies are missing from package.json.
 
-The project has plugins (specials), yet not as many as Knip has and I'd argue
-they're not as advanced. It also supports compilers (parsers) for non-standard
-files.
+The project has plugins (specials), yet not as many as Knip has and they're not
+as advanced. It also supports compilers (parsers) for non-standard files.
 
 The following commands are similar:
 
@@ -87,13 +86,13 @@ knip --include exports,types,nsExports,nsTypes
 
 Use `knip --exports` to also include class and enum members.
 
-### ts-remove-unused
+### tsr
 
 > Remove unused code from your TypeScript Project
 
-[ts-remove-unused][8] removes unused exports, and works based on a single
-`tsconfig.json` file (`includes` and `excludes`) and requires no configuration.
-It removes the `export` keyword or the whole export declaration.
+[tsr][8] (previously `ts-remove-unused`) removes unused exports, and works based
+on a single `tsconfig.json` file (`includes` and `excludes`) and requires no
+configuration. It removes the `export` keyword or the whole export declaration.
 
 ## Related projects
 
@@ -103,8 +102,9 @@ Additional alternative and related projects include:
 - [DepClean][10]
 - [dependency-check][11]
 - [find-unused-exports][12]
-- [npm-check][13]
-- [renoma][14]
+- [next-unused][13]
+- [npm-check][14]
+- [renoma][15]
 
 [1]: ./why-use-knip.md#comprehensive
 [2]: ../features/monorepos-and-workspaces.md
@@ -113,10 +113,11 @@ Additional alternative and related projects include:
 [5]: https://github.com/smeijer/unimported
 [6]: https://github.com/nadeesha/ts-prune
 [7]: https://github.com/pzavolinsky/ts-unused-exports
-[8]: https://github.com/line/ts-remove-unused
+[8]: https://github.com/line/tsr
 [9]: https://github.com/M-Izadmehr/deadfile
 [10]: https://github.com/mysteryven/depclean
 [11]: https://github.com/dependency-check-team/dependency-check
 [12]: https://github.com/jaydenseric/find-unused-exports
-[13]: https://github.com/dylang/npm-check
-[14]: https://github.com/bluwy/renoma
+[13]: https://github.com/pacocoursey/next-unused
+[14]: https://github.com/dylang/npm-check
+[15]: https://github.com/bluwy/renoma

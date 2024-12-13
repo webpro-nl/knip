@@ -1,7 +1,8 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
 import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
-import { dirname, isInternal, join, toAbsolute } from '../../util/path.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { isInternal, join, toAbsolute } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
+import { getReportersDependencies, resolveExtensibleConfig } from './helpers.js';
 import type { JestConfig, JestInitialOptions } from './types.js';
 
 // https://jestjs.io/docs/configuration
@@ -16,19 +17,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
 const config = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
 const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
-
-const resolveExtensibleConfig = async (configFilePath: string) => {
-  let config = await load(configFilePath);
-  if (config?.preset) {
-    const { preset } = config;
-    if (isInternal(preset)) {
-      const presetConfigPath = toAbsolute(preset, dirname(configFilePath));
-      const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-      config = Object.assign({}, presetConfig, config);
-    }
-  }
-  return config;
-};
 
 const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
   const { configFileDir } = options;
@@ -58,13 +46,14 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
 
   const runner = config.runner ? [config.runner] : [];
   const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
-  const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
+  const environments =
+    config.testEnvironment === 'jsdom'
+      ? ['jest-environment-jsdom']
+      : config.testEnvironment
+        ? [config.testEnvironment]
+        : [];
   const resolvers = config.resolver ? [config.resolver] : [];
-  const reporters = config.reporters
-    ? config.reporters
-        .map(reporter => (typeof reporter === 'string' ? reporter : reporter[0]))
-        .filter(reporter => !['default', 'github-actions', 'summary'].includes(reporter))
-    : [];
+  const reporters = getReportersDependencies(config, options);
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
   const transform = config.transform
@@ -112,7 +101,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
 const resolveEntryPaths: ResolveEntryPaths<JestConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
-  const rootDir = localConfig.rootDir ? join(configFileDir, localConfig.rootDir) : configFileDir;
+  const rootDir = localConfig.rootDir ?? configFileDir;
   const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
   return (localConfig.testMatch ?? []).map(replaceRootDir).map(toEntry);
 };
@@ -120,8 +109,7 @@ const resolveEntryPaths: ResolveEntryPaths<JestConfig> = async (localConfig, opt
 const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
-  const rootDir = localConfig.rootDir ? join(configFileDir, localConfig.rootDir) : configFileDir;
-
+  const rootDir = localConfig.rootDir ?? configFileDir;
   const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
 
   const inputs = await resolveDependencies(localConfig, options);

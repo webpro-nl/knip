@@ -68,5 +68,5 @@ const B = { option: true };
 module.exports = { __esModule: true, A, B };
 ```
 
-The `__esModule` key could be named differently (but I think makes sense given
-it's an informal "CJS/ESM interop" standard amongst compilers and bundlers).
+The `__esModule` key could be named differently (but makes sense given it's an
+informal "CJS/ESM interop" standard amongst compilers and bundlers).

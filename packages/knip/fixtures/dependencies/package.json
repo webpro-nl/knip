@@ -9,7 +9,8 @@
     "@sindresorhus/is": "*",
     "fs-extra": "*",
     "has": "*",
-    "stream": "*"
+    "stream": "*",
+    "JSONStream": "*"
   },
   "peerDependencies": {
     "ansi-regex": "*",

@@ -15,7 +15,7 @@ test('Find dependencies with the Angular plugin (2)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 5,
+    total: 5,
   });
 });

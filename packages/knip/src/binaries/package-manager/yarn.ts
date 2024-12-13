@@ -14,6 +14,7 @@ const commands = [
   'dedupe',
   'dlx',
   'explain',
+  'global',
   'info',
   'init',
   'install',

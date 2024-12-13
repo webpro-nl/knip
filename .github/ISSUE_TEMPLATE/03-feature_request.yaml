@@ -1,5 +1,5 @@
 name: 💡 Feature Request (RFC)
-description: Suggest an idea for this project
+description: Suggest an idea for Knip
 title: '💡 '
 labels: ['feature request']
 body:
@@ -11,6 +11,6 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: Suggest an idea for this project
+      label: Suggest an idea for Knip
     validations:
       required: true

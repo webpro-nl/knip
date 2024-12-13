@@ -364,6 +364,10 @@
           "title": "Jest plugin configuration (https://knip.dev/reference/plugins/jest)",
           "$ref": "#/definitions/plugin"
         },
+        "karma": {
+          "title": "karma plugin configuration (https://knip.dev/reference/plugins/karma)",
+          "$ref": "#/definitions/plugin"
+        },
         "ladle": {
           "title": "ladle plugin configuration (https://knip.dev/reference/plugins/ladle)",
           "$ref": "#/definitions/plugin"
@@ -610,6 +614,10 @@
         },
         "xo": {
           "title": "xo plugin configuration (https://knip.dev/reference/plugins/xo)",
+          "$ref": "#/definitions/plugin"
+        },
+        "yarn": {
+          "title": "yarn plugin configuration (https://knip.dev/reference/plugins/yarn)",
           "$ref": "#/definitions/plugin"
         },
         "yorkie": {

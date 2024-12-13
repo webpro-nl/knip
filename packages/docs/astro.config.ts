@@ -81,9 +81,15 @@ export default defineConfig({
       expressiveCode: {
         emitExternalStylesheet: true,
         styleOverrides: {
-          // @ts-expect-error TODO
+          // @ts-expect-error deal with it
           'frm-tooltipSuccessBg': 'var(--sl-color-orange)',
           'frm-tooltipSuccessFg': 'var(--sl-color-white)',
+          'frm-edBg': 'var(--sl-color-black)',
+          'frm-edActTabBg': 'var(--sl-color-black)',
+          'frm-edActTabBrdCol': 'var(--sl-color-black)',
+          'frm-edTabBarBg': 'none',
+          'frm-edTabBarBrdBtmCol': 'none',
+          'frm-frameBoxShdCssVal': 'none',
         },
         frames: {
           showCopyToClipboardButton: true,

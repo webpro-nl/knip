@@ -35,7 +35,8 @@ export const createHosts = ({
     compilerOptions,
     compilerExtensions,
     toSourceFilePath,
-    useResolverCache
+    useResolverCache,
+    isSkipLibs
   );
 
   const languageServiceHost: ts.LanguageServiceHost = {

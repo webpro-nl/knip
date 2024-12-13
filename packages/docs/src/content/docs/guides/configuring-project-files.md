@@ -217,10 +217,10 @@ To reiterate, the default `entry` and `project` files for each workspace:
 ```json
 {
   "entry": [
-    "{index,main,cli}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
-    "src/{index,main,cli}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"
+    "{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
+    "src/{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"
   ],
-  "project": ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"]
+  "project": ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}!"]
 }
 ```
 

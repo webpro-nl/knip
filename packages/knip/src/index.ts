@@ -211,7 +211,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
         const ws =
           (dependency.containingFilePath && chief.findWorkspaceByFilePath(dependency.containingFilePath)) || workspace;
         const specifierFilePath = getReferencedInternalFilePath(dependency, ws);
-        if (specifierFilePath) principal.addEntryPath(specifierFilePath);
+        if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
       }
     }
 

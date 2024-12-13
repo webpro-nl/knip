@@ -13,8 +13,8 @@ in complexity and size, automated and comprehensive tooling becomes critical.
 Knip finds and fixes unused files, exports and dependencies.
 
 Deep analysis from [fine-grained entry points][1] based on the actual frameworks
-and tooling in your [(mono)repo][2] for accurate and actionable results.
-Advanced features for maximum coverage:
+and tooling in [(mono)repos][2] for accurate and actionable results. Advanced
+features for maximum coverage:
 
 - [Custom module resolution][3]
 - [Configuration file parsers][4]

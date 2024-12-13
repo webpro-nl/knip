@@ -17,7 +17,7 @@ import type { Argv, Env, WebpackConfig } from './types.js';
 
 // https://webpack.js.org/configuration/
 
-const title = 'Webpack';
+const title = 'webpack';
 
 const enablers = ['webpack', 'webpack-cli'];
 

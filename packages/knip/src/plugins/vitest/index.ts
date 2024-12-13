@@ -77,7 +77,7 @@ export const resolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspa
   for (const cfg of configs) {
     const dir = join(options.configFileDir, cfg.test?.root ?? '.');
     if (cfg.test?.include) {
-      for (const dependency of cfg.test.include) inputs.add(toEntry(join(dir, dependency)));
+      for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
     } else {
       for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
     }
