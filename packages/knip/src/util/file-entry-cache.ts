@@ -43,7 +43,7 @@ export class FileEntryCache<T> {
     /**
      * analyzes process for posix vs. win32 environment distinction
      * applies correct path transformation based on the current environment
-     * and applies it to the cache location
+     * and applies it to the cache location passed in from the cli args
      */
     const isWindows = process.platform === 'win32';
     const { directory: directoryFromCliArg } = parsedArgValues;
