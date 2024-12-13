@@ -4,8 +4,6 @@ import parsedArgValues from './cli-arguments.js';
 
 const { directory } = parsedArgValues;
 
-const isWindows = () => process.platform === 'win32';
-
 export const isAbsolute = path.isAbsolute;
 
 export const dirname = path.posix.dirname;
@@ -20,10 +18,8 @@ export const toPosix = (value: string) => value.split(path.sep).join(path.posix.
 
 export const cwd = directory ? path.posix.resolve(directory) : toPosix(process.cwd());
 
-export const resolve = (...paths: string[]) => {
-  const pathResolver = isWindows() ? path.win32 : path.posix;
-  return paths.length === 1 ? pathResolver.join(cwd, paths[0]) : pathResolver.resolve(...paths);
-}
+export const resolve = (...paths: string[]) =>
+  paths.length === 1 ? path.posix.join(cwd, paths[0]) : path.posix.resolve(...paths);
 
 export const relative = (from: string, to?: string) => toPosix(path.relative(to ? from : cwd, to ?? from));
 

@@ -4,11 +4,13 @@
  * - https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
  */
 import fs from 'node:fs';
+import path from 'node:path';
 import { timerify } from './Performance.js';
 import { debugLog } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
 import { dirname, isAbsolute, resolve } from './path.js';
 import { deserialize, serialize } from './serialize.js';
+import parsedArgValues from './cli-arguments.js'
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
 
@@ -38,7 +40,16 @@ export class FileEntryCache<T> {
   normalizedEntries = new Map<string, FileDescriptor<T>>();
 
   constructor(cacheId: string, _path: string) {
+    // leverage node:path 
+    const isWindows = process.platform === 'win32';
+    const { directory } = parsedArgValues;
+    const localDirectory = directory || process.cwd();
+    const currentCwd = isWindows ? path.win32.resolve(localDirectory): path.posix.resolve(localDirectory);
+    
+    const pathResolver = process.platform === 'win32' ? path.win32.join : resolve;
     this.filePath = isAbsolute(_path) ? resolve(_path, cacheId) : resolve(cwd, _path, cacheId);
+
+    this.filePath = isAbsolute(_path) ? pathResolver(_path, cacheId) : pathResolver(cwd, _path, cacheId);
     if (isFile(this.filePath)) this.cache = create(this.filePath);
     this.removeNotFoundFiles();
   }
