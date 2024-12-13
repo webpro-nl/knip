@@ -40,7 +40,11 @@ export class FileEntryCache<T> {
   normalizedEntries = new Map<string, FileDescriptor<T>>();
 
   constructor(cacheId: string, _path: string) {
-    // leverage node:path 
+    /**
+     * analyzes process for posix vs. win32 environment distinction
+     * applies correct path transformation based on the current environment
+     * and applies it to the cache location
+     */
     const isWindows = process.platform === 'win32';
     const { directory: directoryFromCliArg } = parsedArgValues;
     const currentCwd = directoryFromCliArg || cwd;
