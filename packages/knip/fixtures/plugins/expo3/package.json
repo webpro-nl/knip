@@ -1,0 +1,15 @@
+{
+  "name": "@fixtures/expo3",
+  "version": "*",
+  "main": "expo-router/entry",
+  "dependencies": {
+    "@expo/metro-runtime": "*",
+    "expo": "*",
+    "expo-system-ui": "*",
+    "expo-updates": "*",
+    "react": "*",
+    "react-dom": "*",
+    "react-native": "*",
+    "react-native-web": "*"
+  }
+}

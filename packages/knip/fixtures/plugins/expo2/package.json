@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/expo2",
+  "version": "*",
+  "main": "expo-router/entry",
+  "dependencies": {
+    "expo": "*",
+    "expo-dev-client": "*",
+    "expo-insights": "*",
+    "expo-navigation-bar": "*",
+    "expo-router": "*",
+    "react-native": "*"
+  }
+}
