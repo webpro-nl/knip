@@ -11,7 +11,7 @@ const enablers = ['nx', /^@nrwl\//, /^@nx\//];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['nx.json', 'project.json', '{apps,libs}/**/project.json'];
+const config = ['nx.json', 'project.json', '{apps,libs}/**/project.json', 'package.json'];
 
 const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfig => {
   const targetsDefault = localConfig.targetDefaults
