@@ -12,7 +12,7 @@ test('Find dependencies with the Nx plugin', async () => {
     ...baseArguments,
     cwd,
   });
-  
+
   assert(issues.devDependencies['package.json']['@nx/cypress']);
   assert(issues.devDependencies['package.json']['@nrwl/devkit']);
   assert(issues.devDependencies['package.json']['@nrwl/storybook']);
