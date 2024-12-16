@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Knip",
+    "slug": "knip",
+    "platforms": ["ios", "web"],
+    "updates": {
+      "enabled": false
+    },
+    "plugins": ["react-native-ble-plx"]
+  }
+}

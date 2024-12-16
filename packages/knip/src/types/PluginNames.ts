@@ -16,6 +16,7 @@ export type PluginName =
   | 'drizzle'
   | 'eleventy'
   | 'eslint'
+  | 'expo'
   | 'gatsby'
   | 'github-actions'
   | 'glob'
@@ -106,6 +107,7 @@ export const pluginNames = [
   'drizzle',
   'eleventy',
   'eslint',
+  'expo',
   'gatsby',
   'github-actions',
   'glob',
