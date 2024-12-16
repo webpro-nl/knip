@@ -18,7 +18,7 @@ const config: string[] = ['app.json', 'app.config.{ts,js}'];
 const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (expoConfig, { manifest }) => {
   const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;
 
-  let production: string[] = ['index.{js,jsx,ts,tsx}'];
+  let production: string[] = [];
 
   // https://docs.expo.dev/router/installation/#setup-entry-point
   if (manifest.main === 'expo-router/entry') {

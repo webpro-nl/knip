@@ -2,12 +2,16 @@
   "name": "@fixtures/expo2",
   "version": "*",
   "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start"
+  },
   "dependencies": {
     "expo": "*",
     "expo-dev-client": "*",
     "expo-insights": "*",
     "expo-navigation-bar": "*",
     "expo-router": "*",
+    "react": "*",
     "react-native": "*"
   }
 }

@@ -2,6 +2,9 @@
   "name": "@fixtures/expo3",
   "version": "*",
   "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start"
+  },
   "dependencies": {
     "@expo/metro-runtime": "*",
     "expo": "*",

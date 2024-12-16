@@ -1,6 +1,9 @@
 {
   "name": "@fixtures/expo",
   "version": "*",
+  "scripts": {
+    "start": "expo start"
+  },
   "dependencies": {
     "@config-plugins/detox": "*",
     "@sentry/react-native": "*",

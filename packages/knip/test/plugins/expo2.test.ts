@@ -16,12 +16,11 @@ test('Find dependencies with the Expo plugin (2)', async () => {
   assert(issues.unlisted['app.config.js']['expo-camera']);
   assert(issues.unlisted['app.config.js']['expo-system-ui']);
   assert(issues.unlisted['app.config.js']['expo-updates']);
-  assert(issues.unlisted['app.config.js']['react']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 2,
     total: 2,
-    unlisted: 4,
+    unlisted: 3,
   });
 });
