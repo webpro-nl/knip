@@ -40,19 +40,10 @@ export class FileEntryCache<T> {
   normalizedEntries = new Map<string, FileDescriptor<T>>();
 
   constructor(cacheId: string, _path: string) {
-    /**
-     * analyzes process for posix vs. win32 environment distinction
-     * applies correct path transformation based on the current environment
-     * and applies it to the cache location passed in from the cli args
-     */
-    const isWindows = process.platform === 'win32';
-    const { directory: directoryFromCliArg } = parsedArgValues;
-    const currentCwd = directoryFromCliArg || cwd;
-    const currentPath = isWindows ? path.win32.resolve(currentCwd): path.posix.resolve(currentCwd);
-    const pathResolver =  isWindows ? path.win32.join : resolve;
+    const { "cache-location": cacheLocation } = parsedArgValues;
+    const currentPath = cacheLocation ? path.resolve(cacheLocation) : path.resolve(cwd);
+    this.filePath = isAbsolute(currentPath) ? path.join(currentPath, cacheId) : path.join(currentPath, _path, cacheId);
 
-    this.filePath = isAbsolute(currentPath) ? pathResolver(currentPath, cacheId) : pathResolver(currentPath, _path, cacheId);
-    
     if (isFile(this.filePath)) this.cache = create(this.filePath);
     this.removeNotFoundFiles();
   }
