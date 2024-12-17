@@ -15,6 +15,17 @@
     "@nrwl/storybook": "*",
     "@nrwl/web": "*",
     "@nrwl/workspace": "*",
-    "@tsconfig/node20": "*"
+    "@tsconfig/node20": "*",
+    "rimraf": "*"
+  },
+  "nx": {
+    "targets": {
+        "clean": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "rimraf dist"
+            }
+        }
+    }
   }
 }

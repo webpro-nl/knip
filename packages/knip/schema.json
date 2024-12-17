@@ -344,6 +344,10 @@
           "title": "ESLint plugin configuration (https://knip.dev/reference/plugins/eslint)",
           "$ref": "#/definitions/plugin"
         },
+        "expo": {
+          "title": "Expo plugin configuration (https://knip.dev/reference/plugins/expo)",
+          "$ref": "#/definitions/plugin"
+        },
         "gatsby": {
           "title": "Gatsby plugin configuration (https://knip.dev/reference/plugins/gatsby)",
           "$ref": "#/definitions/plugin"

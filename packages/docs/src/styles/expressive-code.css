@@ -2,6 +2,10 @@
   box-shadow: none;
 }
 
+.expressive-code .frame.has-title:not(.is-terminal) .header .title::after {
+  border-bottom: none;
+}
+
 :root[data-theme='light'] {
   .expressive-code .frame pre,
   .expressive-code .frame.has-title:not(.is-terminal) .header .title {

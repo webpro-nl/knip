@@ -16,7 +16,7 @@
   "scripts": {
     "prebuild": "npx -y tsx@4.7.1 ./scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
-    "postbuild": "biome format --write --no-errors-on-unmatched src/content/docs/reference/plugins.md src/content/docs/reference/plugins/*.md",
+    "postbuild": "[ \"$CF_PAGES\" = \"1\" ] && find dist -mindepth 2 -type f -name 'index.html' -exec bash -c 'f=\"$1\"; d=$(dirname \"$f\"); bn=$(basename \"$d\"); mv -v \"$f\" \"$d/../$bn.html\"' _ {} \\; && find dist -mindepth 1 -type d -empty -print -delete || true",
     "dev": "astro dev",
     "preremark": ". remark/preremark.sh",
     "remark": "remark README.md 'src/content/docs/**/*.{md,mdx}' --verbose -o",
