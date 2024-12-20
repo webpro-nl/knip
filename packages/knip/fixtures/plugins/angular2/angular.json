@@ -98,7 +98,8 @@
               }
             ],
             "styles": ["src/styles.css"],
-            "scripts": []
+            "scripts": [],
+            "karmaConfig": "another-karma.conf.js"
           }
         }
       }
