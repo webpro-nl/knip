@@ -134,6 +134,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'xvfb-run',
   'yarn',
   'yes',
+  'zip',
 ]);
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
