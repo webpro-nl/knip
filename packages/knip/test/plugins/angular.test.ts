@@ -15,12 +15,14 @@ test('Find dependencies with the Angular plugin', async () => {
 
   assert(issues.unlisted['angular.json']['@angular-devkit/build-angular']);
   assert(issues.unresolved['tsconfig.spec.json']['jasmine']);
+  assert(issues.devDependencies['package.json']['karma']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    devDependencies: 1,
     unlisted: 1,
     unresolved: 1,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });

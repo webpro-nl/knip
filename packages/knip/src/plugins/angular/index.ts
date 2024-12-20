@@ -2,7 +2,8 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { type Input, toConfig, toDependency, toEntry, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { AngularCLIWorkspaceConfiguration, WebpackBrowserSchemaForBuildFacade } from './types.js';
+import * as karma from '../karma/helpers.js';
+import type { AngularCLIWorkspaceConfiguration, KarmaTarget, WebpackBrowserSchemaForBuildFacade } from './types.js';
 
 // https://angular.io/guide/workspace-config
 
@@ -59,6 +60,34 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
               inputs.add(isProductionConfig ? toProductionEntry(fileReplacedBy) : toEntry(fileReplacedBy));
             }
           }
+        }
+      }
+      if (target.builder === '@angular-devkit/build-angular:karma' && opts) {
+        const karmaBuilderOptions = opts as KarmaTarget;
+        // https://github.com/angular/angular-cli/blob/19.0.6/packages/angular_devkit/build_angular/src/builders/karma/schema.json#L143
+        const testFilePatterns = karmaBuilderOptions.include ?? ['**/*.spec.ts'];
+        for (const testFilePattern of testFilePatterns) {
+          inputs.add(toEntry(testFilePattern));
+        }
+        // https://github.com/angular/angular-cli/blob/19.0.6/packages/angular_devkit/build_angular/src/builders/karma/schema.json#L146
+        const excludedTestFilePatterns = karmaBuilderOptions.exclude ?? [];
+        for (const excludedTestFilePattern of excludedTestFilePatterns) {
+          inputs.add(toEntry(`!${excludedTestFilePattern}`));
+        }
+        const karmaConfig = karmaBuilderOptions.karmaConfig;
+        if (!karmaConfig) {
+          // Hardcoded default Karma config from Angular builder
+          // https://github.com/angular/angular-cli/blob/19.0.6/packages/angular_devkit/build_angular/src/builders/karma/index.ts#L115
+          karma
+            .inputsFromPlugins(
+              ['karma-jasmine', 'karma-chrome-launcher', 'karma-jasmine-html-reporter', 'karma-coverage'],
+              options.manifest.devDependencies
+            )
+            .forEach(inputs.add, inputs);
+          karma.inputsFromFrameworks(['jasmine']).forEach(inputs.add, inputs);
+        }
+        if (karmaConfig && !karma.configFiles.includes(karmaConfig)) {
+          inputs.add(toConfig('karma', karmaConfig, options.configFilePath));
         }
       }
     }

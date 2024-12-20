@@ -2533,7 +2533,7 @@ interface ExtractI18NTarget1 {
 /**
  * Karma target options for Build Facade.
  */
-interface KarmaTarget {
+export interface KarmaTarget {
   /**
    * The name of the main entry-point file.
    */

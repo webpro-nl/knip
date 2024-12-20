@@ -8,14 +8,17 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/angular2');
 
 test('Find dependencies with the Angular plugin (2)', async () => {
-  const { counters } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
+  assert(issues.devDependencies['package.json']['karma']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    devDependencies: 1,
+    processed: 7,
+    total: 7,
   });
 });

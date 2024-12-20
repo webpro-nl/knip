@@ -10,6 +10,12 @@
   },
   "devDependencies": {
     "@angular/cli": "*",
+    "karma": "*",
+    "karma-chrome-launcher": "*",
+    "karma-coverage": "*",
+    "karma-jasmine": "*",
+    "karma-jasmine-html-reporter": "*",
+    "jasmine-core": "*",
     "typescript": "*"
   }
 }
