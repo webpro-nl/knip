@@ -23,31 +23,33 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
 
   for (const project of Object.values(config.projects)) {
     if (!project.architect) return [];
-    for (const target of Object.values(project.architect)) {
+    for (const [targetName, target] of Object.entries(project.architect)) {
+      const isProductionTarget = targetName === 'build';
+      const asEntry = isProductionTarget ? toProductionEntry : toEntry;
       const { options: opts, configurations: configs } = target;
       const [packageName] = typeof target.builder === 'string' ? target.builder.split(':') : [];
       if (typeof packageName === 'string') inputs.add(toDependency(packageName));
       if (opts) {
         if ('main' in opts && typeof opts.main === 'string') {
-          inputs.add(toProductionEntry(join(cwd, opts.main)));
+          inputs.add(asEntry(join(cwd, opts.main)));
         }
         if ('browser' in opts && typeof opts.browser === 'string') {
-          inputs.add(toProductionEntry(join(cwd, opts.browser)));
+          inputs.add(asEntry(join(cwd, opts.browser)));
         }
         if ('ssr' in opts && opts.ssr && typeof opts.ssr === 'object') {
           if ('entry' in opts.ssr && typeof opts.ssr.entry === 'string') {
-            inputs.add(toProductionEntry(join(cwd, opts.ssr.entry)));
+            inputs.add(asEntry(join(cwd, opts.ssr.entry)));
           }
         }
         if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
           inputs.add(toConfig('typescript', opts.tsConfig, configFilePath));
         }
         if ('server' in opts && opts.server && typeof opts.server === 'string') {
-          inputs.add(toProductionEntry(join(cwd, opts.server)));
+          inputs.add(asEntry(join(cwd, opts.server)));
         }
         if ('fileReplacements' in opts && opts.fileReplacements && Array.isArray(opts.fileReplacements)) {
           for (const fileReplacedBy of filesReplacedBy(opts.fileReplacements)) {
-            inputs.add(toEntry(fileReplacedBy));
+            inputs.add(asEntry(fileReplacedBy));
           }
         }
       }
@@ -80,5 +82,7 @@ export default {
   enablers,
   isEnabled,
   config,
+  // TODO: Remove after https://github.com/webpro-nl/knip/pull/884
+  production: [],
   resolveConfig,
 } satisfies Plugin;

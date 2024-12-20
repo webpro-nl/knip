@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "knip-angular-example": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "main": "src/main.ts"
+          }
+        },
+        "a-non-prod-target": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "browser": "src/main-for-non-prod-target.ts",
+            "ssr": {
+              "entry": "src/server-for-non-prod-target.ts"
+            },
+            "server": "src/main.server-for-non-prod-target.ts"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/main-for-testing.ts"
+          }
+        }
+      }
+    }
+  }
+}
