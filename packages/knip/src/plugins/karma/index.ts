@@ -1,8 +1,8 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { type Input, toDeferResolveEntry, toDevDependency, toEntry } from '../../util/input.js';
-import { isInternal, join } from '../../util/path.js';
+import { type Input, toEntry } from '../../util/input.js';
+import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { Config, ConfigOptions } from './types.js';
+import { type ConfigFile, configFiles, inputsFromFrameworks, inputsFromPlugins, loadConfig } from './helpers.js';
 
 // https://karma-runner.github.io/latest/config/configuration-file.html
 
@@ -12,50 +12,29 @@ const enablers = ['karma'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-//👇 All but CoffeeScript ones. Low usage nowadays compared to the effort to implement support for those files
-const config = ['karma.conf.js', 'karma.conf.ts', '.config/karma.conf.js', '.config/karma.conf.ts'];
+const config = configFiles;
 
 const entry: string[] = [];
-
-type ConfigFile = (config: Config) => void;
 
 const resolveConfig: ResolveConfig<ConfigFile> = async (localConfig, options) => {
   const inputs = new Set<Input>();
 
   const config = loadConfig(localConfig);
+  if (!config) return [];
 
   if (config.frameworks) {
-    for (const framework of config.frameworks) {
-      inputs.add(toDevDependency(devDepForFramework(framework)));
-    }
+    inputsFromFrameworks(config.frameworks).forEach(inputs.add, inputs);
   }
-  if (config.plugins) {
-    for (const plugin of config.plugins) {
-      if (typeof plugin !== 'string') continue;
-      if (isInternal(plugin)) {
-        inputs.add(toDeferResolveEntry(plugin));
-      } else {
-        inputs.add(toDevDependency(plugin));
-      }
-    }
-  } else {
-    const karmaPluginDevDeps = Object.keys(options.manifest.devDependencies ?? {}).filter(name =>
-      name.startsWith('karma-')
-    );
-    for (const karmaPluginDevDep of karmaPluginDevDeps) {
-      inputs.add(toDevDependency(karmaPluginDevDep));
-    }
-  }
+  inputsFromPlugins(config.plugins, options.manifest.devDependencies).forEach(inputs.add, inputs);
 
   return Array.from(inputs);
 };
-
-const devDepForFramework = (framework: string): string => (framework === 'jasmine' ? 'jasmine-core' : framework);
 
 const resolveEntryPaths: ResolveEntryPaths<ConfigFile> = (localConfig, options) => {
   const inputs = new Set<Input>();
 
   const config = loadConfig(localConfig);
+  if (!config) return [];
 
   const basePath = config.basePath ?? '';
   if (config.files) {
@@ -72,28 +51,6 @@ const resolveEntryPaths: ResolveEntryPaths<ConfigFile> = (localConfig, options) 
 
   return Array.from(inputs);
 };
-
-const loadConfig = (configFile: ConfigFile): ConfigOptions => {
-  const inMemoryConfig = new InMemoryConfig();
-  configFile(inMemoryConfig);
-  return inMemoryConfig.config ?? {};
-};
-
-/**
- * Dummy configuration class with no default config options
- * Relevant config options' defaults are empty, so that's good enough
- * Real class: https://github.com/karma-runner/karma/blob/v6.4.4/lib/config.js#L275
- */
-class InMemoryConfig implements Config {
-  config?: ConfigOptions;
-  /**
-   * Real method merges configurations with Lodash's `mergeWith`
-   * https://github.com/karma-runner/karma/blob/v6.4.4/lib/config.js#L343
-   */
-  set(config: ConfigOptions) {
-    this.config = config;
-  }
-}
 
 export default {
   title,
