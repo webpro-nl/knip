@@ -25,8 +25,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['webpack.config.{js,ts,mjs,cjs,mts,cts}'];
 
-const production: string[] = [];
-
 const hasBabelOptions = (use: RuleSetUseItem) =>
   Boolean(use) &&
   typeof use !== 'string' &&
@@ -128,6 +126,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  production,
   resolveConfig,
 } satisfies Plugin;

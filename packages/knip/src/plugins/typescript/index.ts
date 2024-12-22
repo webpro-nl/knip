@@ -16,8 +16,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['tsconfig.json'];
 
-const production: string[] = [];
-
 const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) => {
   const { compilerOptions } = localConfig;
 
@@ -55,7 +53,6 @@ export default {
   enablers,
   isEnabled,
   config,
-  production,
   resolveConfig,
   args,
 } satisfies Plugin;

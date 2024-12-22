@@ -12,14 +12,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 export const config = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
-const production: string[] = [];
-
 export default {
   title,
   enablers,
   isEnabled,
   config,
-  production,
   resolveEntryPaths,
   resolveConfig,
 } satisfies Plugin;
