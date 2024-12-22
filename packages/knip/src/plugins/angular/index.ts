@@ -51,6 +51,12 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
             inputs.add(toEntry(fileReplacedBy));
           }
         }
+        if ('scripts' in opts && opts.scripts && Array.isArray(opts.scripts)) {
+          for (const scriptStringOrObject of opts.scripts as AngularScriptsBuildOption) {
+            const script = typeof scriptStringOrObject === 'string' ? scriptStringOrObject : scriptStringOrObject.input;
+            inputs.add(toProductionEntry(script));
+          }
+        }
       }
       if (configs) {
         for (const [configName, config] of Object.entries(configs)) {
@@ -95,6 +101,8 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
 
   return Array.from(inputs);
 };
+
+type AngularScriptsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['scripts'], undefined>;
 
 const filesReplacedBy = (
   //👇 Using Webpack-based browser schema to support old `replaceWith` file replacements
