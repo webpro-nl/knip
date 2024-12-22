@@ -22,7 +22,7 @@ test('Find dependencies with the Angular plugin', async () => {
     devDependencies: 1,
     unlisted: 1,
     unresolved: 1,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
