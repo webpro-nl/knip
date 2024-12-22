@@ -99,6 +99,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'pwd',
   'rm',
   'rmdir',
+  'rsync',
   'scp',
   'seq',
   'set',
