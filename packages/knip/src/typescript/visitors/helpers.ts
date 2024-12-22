@@ -7,6 +7,8 @@ export const isNotJS = (sourceFile: BoundSourceFile) => !isJS(sourceFile);
 export const isJS = (sourceFile: BoundSourceFile) =>
   sourceFile.scriptKind === ts.ScriptKind.JS || sourceFile.scriptKind === ts.ScriptKind.JSX;
 
+export const isModule = (sourceFile: BoundSourceFile) => ts.isExternalModule(sourceFile);
+
 export function getImportsFromPragmas(sourceFile: BoundSourceFile) {
   const importNodes: ImportNode[] = [];
 

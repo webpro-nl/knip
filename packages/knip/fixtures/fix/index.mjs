@@ -1,11 +1,11 @@
-import { d } from './default';
-import { dx } from './default-x';
+import { d } from './default.mjs';
+import { dx } from './default-x.mjs';
 import _ from 'lodash';
 import { z, f, g, i } from './mod';
 import { USED } from './access';
 import { identifier } from './exports';
 import { a } from './ignored';
-import * as NS from './reexports';
+import * as NS from './reexports.mjs';
 
 d;
 dx;

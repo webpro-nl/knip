@@ -46,8 +46,8 @@ export type U = number;
 `,
     ],
     [
-      'default-x.js',
-      await readContents('default-x.js'),
+      'default-x.mjs',
+      await readContents('default-x.mjs'),
       `const x = 1;
 
 
@@ -55,8 +55,8 @@ export const dx = 1;
 `,
     ],
     [
-      'default.js',
-      await readContents('default.js'),
+      'default.mjs',
+      await readContents('default.mjs'),
       `export const d = 1;
 `,
     ],
@@ -70,8 +70,8 @@ module.exports = { identifier,  };
 `,
     ],
     [
-      'reexports.js',
-      await readContents('reexports.js'),
+      'reexports.mjs',
+      await readContents('reexports.mjs'),
       `;
 ;
 export { One, Rectangle,    Nine,   setter } from './reexported';
