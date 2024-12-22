@@ -289,7 +289,6 @@ export class WorkspaceWorker {
       const plugin = Plugins[pluginName];
       const hasResolveEntryPaths = typeof plugin.resolveEntryPaths === 'function';
       const hasResolveConfig = typeof plugin.resolveConfig === 'function';
-      const shouldRunConfigResolver = hasResolveConfig && (!isProduction || (isProduction && 'production' in plugin));
       const hasResolve = typeof plugin.resolve === 'function';
       const config = this.getConfigForPlugin(pluginName);
 
@@ -319,7 +318,7 @@ export class WorkspaceWorker {
           configFileDir: dirname(configFilePath),
           configFileName: basename(configFilePath),
         };
-        if (hasResolveEntryPaths || shouldRunConfigResolver) {
+        if (hasResolveEntryPaths || hasResolveConfig) {
           const isManifest = basename(configFilePath) === 'package.json';
           const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
 
@@ -336,7 +335,7 @@ export class WorkspaceWorker {
                 for (const entryPath of entryPaths) configEntryPaths.push(entryPath);
                 data.resolveEntryPaths = entryPaths;
               }
-              if (shouldRunConfigResolver) {
+              if (hasResolveConfig) {
                 const inputs = (await plugin.resolveConfig?.(config, opts)) ?? [];
                 for (const input of inputs) {
                   if (isConfigPattern(input))
