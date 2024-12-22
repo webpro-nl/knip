@@ -69,9 +69,9 @@ const getImportsAndExports = (
   options: GetImportsAndExportsOptions
 ) => {
   const { skipTypeOnly, tags, ignoreExportsUsedInFile } = options;
-  const internalImports: ImportMap = new Map();
-  const externalImports = new Set<string>();
-  const unresolvedImports = new Set<UnresolvedImport>();
+  const internal: ImportMap = new Map();
+  const external = new Set<string>();
+  const unresolved = new Set<UnresolvedImport>();
   const resolved = new Set<string>();
   const specifiers = new Set<[string, string]>();
   const exports: ExportMap = new Map();
@@ -122,11 +122,11 @@ const getImportsAndExports = (
 
     specifiers.add([specifier, filePath]);
 
-    const file = internalImports.get(filePath);
+    const file = internal.get(filePath);
 
     const imports = file ?? createImports();
 
-    if (!file) internalImports.set(filePath, imports);
+    if (!file) internal.set(filePath, imports);
 
     const nsOrAlias = symbol ? String(symbol.escapedName) : alias;
 
@@ -191,7 +191,7 @@ const getImportsAndExports = (
 
           // Module resolver may return DTS references or unaliased npm package names,
           // but in the rest of the program we want the package name based on the original specifier.
-          externalImports.add(sanitizedSpecifier);
+          external.add(sanitizedSpecifier);
         }
       }
     } else {
@@ -201,9 +201,9 @@ const getImportsAndExports = (
 
       if (typeof pos === 'number') {
         const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
-        unresolvedImports.add({ specifier, pos, line: line + 1, col: character + 1 });
+        unresolved.add({ specifier, pos, line: line + 1, col: character + 1 });
       } else {
-        unresolvedImports.add({ specifier });
+        unresolved.add({ specifier });
       }
     }
   };
@@ -215,7 +215,7 @@ const getImportsAndExports = (
       const importedSymbolFilePath = importedInternalSymbols.get(symbol);
       if (importedSymbolFilePath) {
         const importId = String(symbol.escapedName);
-        const internalImport = internalImports.get(importedSymbolFilePath);
+        const internalImport = internal.get(importedSymbolFilePath);
         if (internalImport) {
           if (importId !== identifier) {
             // Pattern: import { id as alias } from 'specifier'; export = id; export default id;
@@ -316,7 +316,7 @@ const getImportsAndExports = (
       if (symbol) {
         if (filePath) {
           if (!isImportSpecifier(node)) {
-            const imports = internalImports.get(filePath);
+            const imports = internal.get(filePath);
             if (imports) {
               traceRefs.add(id);
               if (isAccessExpression(node.parent)) {
@@ -378,7 +378,7 @@ const getImportsAndExports = (
       const namespace = left.text;
       const { filePath } = getImport(namespace, node);
       if (filePath) {
-        const internalImport = internalImports.get(filePath);
+        const internalImport = internal.get(filePath);
         if (internalImport) addNsMemberRefs(internalImport, namespace, right.text);
       }
     }
@@ -421,17 +421,9 @@ const getImportsAndExports = (
   }
 
   return {
-    imports: {
-      internal: internalImports,
-      external: externalImports,
-      resolved,
-      specifiers,
-      unresolved: unresolvedImports,
-    },
-    exports: {
-      exported: exports,
-      duplicate: [...aliasedExports.values()],
-    },
+    imports: { internal, external, resolved, specifiers, unresolved },
+    exports,
+    duplicates: [...aliasedExports.values()],
     scripts,
     traceRefs,
   };

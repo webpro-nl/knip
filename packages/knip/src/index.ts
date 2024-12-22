@@ -307,7 +307,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
     if (workspace) {
-      const { imports, exports, scripts, traceRefs } = principal.analyzeSourceFile(
+      const { imports, exports, duplicates, scripts, traceRefs } = principal.analyzeSourceFile(
         filePath,
         {
           skipTypeOnly: isStrict,
@@ -326,6 +326,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
       file.imports = imports;
       file.exports = exports;
+      file.duplicates = duplicates;
       file.scripts = scripts;
       file.traceRefs = traceRefs;
 
@@ -402,7 +403,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       streamer.cast('Connecting the dots...');
 
       for (const [filePath, file] of graph.entries()) {
-        const exportItems = file.exports?.exported;
+        const exportItems = file.exports;
 
         if (!exportItems || exportItems.size === 0) continue;
 
@@ -454,7 +455,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
                   continue;
                 }
                 // Skip exports if re-exported from entry file and tagged
-                const reExportedItem = graph.get(reExportingEntryFile)?.exports.exported.get(identifier);
+                const reExportedItem = graph.get(reExportingEntryFile)?.exports.get(identifier);
                 if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
               }
 
@@ -571,8 +572,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const ws = chief.findWorkspaceByFilePath(filePath);
 
       if (ws) {
-        if (file.exports?.duplicate) {
-          for (const symbols of file.exports.duplicate) {
+        if (file.duplicates) {
+          for (const symbols of file.duplicates) {
             if (symbols.length > 1) {
               const symbol = symbols.map(s => s.symbol).join('|');
               collector.addIssue({ type: 'duplicates', filePath, workspace: ws.name, symbol, symbols });

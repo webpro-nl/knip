@@ -246,10 +246,7 @@ export class ProjectPrincipal {
 
     const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
-    const { imports, exports, scripts, traceRefs } = _getImportsAndExports(sourceFile, resolve, typeChecker, {
-      ...options,
-      skipExports,
-    });
+    const { imports, ...rest } = _getImportsAndExports(sourceFile, resolve, typeChecker, { ...options, skipExports });
 
     const { internal, resolved, specifiers, unresolved, external } = imports;
 
@@ -293,16 +290,7 @@ export class ProjectPrincipal {
       }
     }
 
-    return {
-      imports: {
-        internal,
-        unresolved: unresolvedImports,
-        external,
-      },
-      exports,
-      scripts,
-      traceRefs,
-    };
+    return { imports: { internal, unresolved: unresolvedImports, external }, ...rest };
   }
 
   invalidateFile(filePath: string) {

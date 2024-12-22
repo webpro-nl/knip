@@ -40,10 +40,8 @@ const createFileNode = (): FileNode => ({
     external: new Set(),
     unresolved: new Set(),
   },
-  exports: {
-    exported: new Map(),
-    duplicate: new Set(),
-  },
+  exports: new Map(),
+  duplicates: new Set(),
   scripts: new Set(),
   traceRefs: new Set(),
 });
