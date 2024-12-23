@@ -13,7 +13,7 @@ type FileVersion = number;
  * This interface was referenced by `undefined`'s JSON-Schema definition
  * via the `patternProperty` "^(?:@[a-zA-Z0-9._-]+/)?[a-zA-Z0-9._-]+$".
  */
-type Project = Project1 & {
+export type Project = Project1 & {
   cli?: {
     [k: string]: unknown;
   };

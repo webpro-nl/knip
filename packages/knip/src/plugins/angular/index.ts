@@ -3,7 +3,12 @@ import { type Input, toConfig, toDependency, toEntry, toProductionEntry } from '
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import * as karma from '../karma/helpers.js';
-import type { AngularCLIWorkspaceConfiguration, KarmaTarget, WebpackBrowserSchemaForBuildFacade } from './types.js';
+import type {
+  AngularCLIWorkspaceConfiguration,
+  KarmaTarget,
+  Project,
+  WebpackBrowserSchemaForBuildFacade,
+} from './types.js';
 
 // https://angular.io/guide/workspace-config
 
@@ -24,48 +29,40 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
 
   for (const project of Object.values(config.projects)) {
     if (!project.architect) return [];
-    for (const target of Object.values(project.architect)) {
+    for (const [targetName, target] of Object.entries(project.architect)) {
       const { options: opts, configurations: configs } = target;
       const [packageName] = typeof target.builder === 'string' ? target.builder.split(':') : [];
       if (typeof packageName === 'string') inputs.add(toDependency(packageName));
       if (opts) {
-        if ('main' in opts && typeof opts.main === 'string') {
-          inputs.add(toProductionEntry(join(cwd, opts.main)));
-        }
-        if ('browser' in opts && typeof opts.browser === 'string') {
-          inputs.add(toProductionEntry(join(cwd, opts.browser)));
-        }
-        if ('ssr' in opts && opts.ssr && typeof opts.ssr === 'object') {
-          if ('entry' in opts.ssr && typeof opts.ssr.entry === 'string') {
-            inputs.add(toProductionEntry(join(cwd, opts.ssr.entry)));
-          }
-        }
         if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
           inputs.add(toConfig('typescript', opts.tsConfig, configFilePath));
         }
-        if ('server' in opts && opts.server && typeof opts.server === 'string') {
-          inputs.add(toProductionEntry(join(cwd, opts.server)));
-        }
-        if ('fileReplacements' in opts && opts.fileReplacements && Array.isArray(opts.fileReplacements)) {
-          for (const fileReplacedBy of filesReplacedBy(opts.fileReplacements)) {
-            inputs.add(toEntry(fileReplacedBy));
-          }
-        }
-        if ('scripts' in opts && opts.scripts && Array.isArray(opts.scripts)) {
-          for (const scriptStringOrObject of opts.scripts as AngularScriptsBuildOption) {
-            const script = typeof scriptStringOrObject === 'string' ? scriptStringOrObject : scriptStringOrObject.input;
-            inputs.add(toProductionEntry(script));
+      }
+      const defaultEntriesByOption: EntriesByOption = opts ? entriesByOption(opts) : new Map();
+      const entriesByOptionByConfig: Map<string, EntriesByOption> = new Map(
+        configs ? Object.entries(configs).map(([name, opts]) => [name, entriesByOption(opts)]) : []
+      );
+      const productionEntriesByOption: EntriesByOption =
+        entriesByOptionByConfig.get(PRODUCTION_CONFIG_NAME) ?? new Map();
+      const normalizePath = (path: string) => join(cwd, path);
+      for (const [configName, entriesByOption] of entriesByOptionByConfig.entries()) {
+        for (const entries of entriesByOption.values()) {
+          for (const entry of entries) {
+            inputs.add(
+              targetName === BUILD_TARGET_NAME && configName === PRODUCTION_CONFIG_NAME
+                ? toProductionEntry(normalizePath(entry))
+                : toEntry(normalizePath(entry))
+            );
           }
         }
       }
-      if (configs) {
-        for (const [configName, config] of Object.entries(configs)) {
-          const isProductionConfig = configName === 'production';
-          if ('fileReplacements' in config && config.fileReplacements && Array.isArray(config.fileReplacements)) {
-            for (const fileReplacedBy of filesReplacedBy(config.fileReplacements)) {
-              inputs.add(isProductionConfig ? toProductionEntry(fileReplacedBy) : toEntry(fileReplacedBy));
-            }
-          }
+      for (const [option, entries] of defaultEntriesByOption.entries()) {
+        for (const entry of entries) {
+          inputs.add(
+            targetName === BUILD_TARGET_NAME && !productionEntriesByOption.get(option)?.length
+              ? toProductionEntry(normalizePath(entry))
+              : toEntry(normalizePath(entry))
+          );
         }
       }
       if (target.builder === '@angular-devkit/build-angular:karma' && opts) {
@@ -102,15 +99,47 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
   return Array.from(inputs);
 };
 
-type AngularScriptsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['scripts'], undefined>;
-
-const filesReplacedBy = (
-  //👇 Using Webpack-based browser schema to support old `replaceWith` file replacements
-  fileReplacements: Exclude<WebpackBrowserSchemaForBuildFacade['fileReplacements'], undefined>
-): readonly string[] =>
-  fileReplacements.map(fileReplacement =>
-    'with' in fileReplacement ? fileReplacement.with : fileReplacement.replaceWith
+const entriesByOption = (opts: TargetOptions): EntriesByOption =>
+  new Map(
+    Object.entries({
+      main: 'main' in opts && opts.main && typeof opts.main === 'string' ? [opts.main] : [],
+      scripts:
+        'scripts' in opts && opts.scripts && Array.isArray(opts.scripts)
+          ? (opts.scripts as ScriptsBuildOption).map(scriptStringOrObject =>
+              typeof scriptStringOrObject === 'string' ? scriptStringOrObject : scriptStringOrObject.input
+            )
+          : [],
+      fileReplacements:
+        'fileReplacements' in opts && opts.fileReplacements && Array.isArray(opts.fileReplacements)
+          ? (opts.fileReplacements as FileReplacementsBuildOption).map(fileReplacement =>
+              'with' in fileReplacement ? fileReplacement.with : fileReplacement.replaceWith
+            )
+          : [],
+      browser: 'browser' in opts && opts.browser && typeof opts.browser === 'string' ? [opts.browser] : [],
+      server: 'server' in opts && opts.server && typeof opts.server === 'string' ? [opts.server] : [],
+      ssrEntry:
+        'ssr' in opts &&
+        opts.ssr &&
+        typeof opts.ssr === 'object' &&
+        'entry' in opts.ssr &&
+        typeof opts.ssr.entry === 'string'
+          ? [opts.ssr.entry]
+          : [],
+    })
   );
+
+type TargetOptions = Exclude<Target['options'], undefined>;
+type Target = Architect[string];
+type Architect = Exclude<Project['architect'], undefined>;
+
+type EntriesByOption = Map<string, readonly string[]>;
+
+//👇 Using Webpack-based browser schema to support old `replaceWith` file replacements
+type FileReplacementsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['fileReplacements'], undefined>;
+type ScriptsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['scripts'], undefined>;
+
+const PRODUCTION_CONFIG_NAME = 'production';
+const BUILD_TARGET_NAME = 'build';
 
 export default {
   title,
