@@ -25,6 +25,9 @@
     },
     "tsc": {
       "executor": "./tools/executors/tsc:tsc"
+    },
+    "lint": {
+      "command": "biome lint ."
     }
   }
 }

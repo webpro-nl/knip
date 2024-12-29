@@ -1,6 +1,7 @@
 export interface NxProjectConfiguration {
   targets?: {
     [targetName: string]: {
+      command?: string;
       executor?: string;
       options?: {
         command?: string;
