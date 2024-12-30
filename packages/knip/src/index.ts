@@ -463,7 +463,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
               if (isReferenced) {
                 if (report.enumMembers && exportedItem.type === 'enum') {
-                  if (importsForExport.refs.has(identifier)) continue; // consider members referenced (isObjectEnumerationCallExpressionArgument)
+                  if (importsForExport.refs.has(identifier)) {
+                    // consider members referenced (isObjectEnumerationCallExpressionArgument, isIteratingObject)
+                    continue;
+                  }
 
                   for (const member of exportedItem.members) {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;

@@ -1,11 +1,11 @@
 export enum SymbolType {
-  TYPE = "type",
-  INTERFACE = "interface",
-  ENUM = "enum",
-  FUNCTION = "function",
-  CLASS = "class",
-  MEMBER = "member",
-  UNKNOWN = "unknown",
+  TYPE = 'type',
+  INTERFACE = 'interface',
+  ENUM = 'enum',
+  FUNCTION = 'function',
+  CLASS = 'class',
+  MEMBER = 'member',
+  UNKNOWN = 'unknown',
 }
 
 export type IssueSymbol = {
@@ -36,19 +36,19 @@ export type IssueSet = Set<string>;
 export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export enum SymbolIssueNames {
-  dependencies = "dependencies",
-  devDependencies = "devDependencies",
-  optionalPeerDependencies = "optionalPeerDependencies",
-  unlisted = "unlisted",
-  binaries = "binaries",
-  unresolved = "unresolved",
-  exports = "exports",
-  types = "types",
-  nsExports = "nsExports",
-  nsTypes = "nsTypes",
-  duplicates = "duplicates",
-  enumMembers = "enumMembers",
-  classMembers = "classMembers",
+  dependencies = 'dependencies',
+  devDependencies = 'devDependencies',
+  optionalPeerDependencies = 'optionalPeerDependencies',
+  unlisted = 'unlisted',
+  binaries = 'binaries',
+  unresolved = 'unresolved',
+  exports = 'exports',
+  types = 'types',
+  nsExports = 'nsExports',
+  nsTypes = 'nsTypes',
+  duplicates = 'duplicates',
+  enumMembers = 'enumMembers',
+  classMembers = 'classMembers',
 }
 
 export type SymbolIssues = Record<keyof typeof SymbolIssueNames, IssueRecords>;
@@ -59,13 +59,13 @@ export type Issues = {
 
 export type IssueType = keyof Issues;
 
-export type SymbolIssueType = Exclude<IssueType, "files" | "_files">;
+export type SymbolIssueType = Exclude<IssueType, 'files' | '_files'>;
 
 export type Report = {
   [key in keyof Issues]: boolean;
 };
 
-export type Counters = Record<IssueType | "processed" | "total", number>;
+export type Counters = Record<IssueType | 'processed' | 'total', number>;
 
 export type ReporterOptions = {
   report: Report;
