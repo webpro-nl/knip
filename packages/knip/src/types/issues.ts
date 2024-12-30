@@ -8,12 +8,7 @@ export enum SymbolType {
   UNKNOWN = 'unknown',
 }
 
-export type IssueSymbol = {
-  symbol: string;
-  pos?: number;
-  line?: number;
-  col?: number;
-};
+export type IssueSymbol = { symbol: string; pos?: number; line?: number; col?: number };
 
 export type Issue = {
   type: SymbolIssueType;

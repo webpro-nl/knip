@@ -168,8 +168,7 @@ export const isDestructuring = (node: ts.Node) =>
 // Pattern: for (const x in NS) { }
 // Pattern: for (const x of NS) { }
 export const isIteratingObject = (node: ts.Node) =>
-  node.parent &&
-  (ts.isForInStatement(node.parent) || ts.isForOfStatement(node.parent));
+  node.parent && (ts.isForInStatement(node.parent) || ts.isForOfStatement(node.parent));
 
 export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
   name.elements.map(element => element.name.getText());
