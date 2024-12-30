@@ -8,10 +8,16 @@
       "program": "${file}",
       "args": ["test"],
       "cwd": "${workspaceFolder}/packages/knip",
-      "runtime": "bun",
+      "runtime": "/Users/ianstewart/.bun/bin/bun",
       "runtimeArgs": ["test"]
     },
     {
+      "type": "bun",
+      "request": "attach",
+      "name": "Attach to Bun",
+      "url": "ws://localhost:6499/knip"
+    },
+        {
       "type": "bun",
       "request": "attach",
       "name": "Attach to Bun",

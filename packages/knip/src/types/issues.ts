@@ -1,14 +1,19 @@
 export enum SymbolType {
-  TYPE = 'type',
-  INTERFACE = 'interface',
-  ENUM = 'enum',
-  FUNCTION = 'function',
-  CLASS = 'class',
-  MEMBER = 'member',
-  UNKNOWN = 'unknown',
+  TYPE = "type",
+  INTERFACE = "interface",
+  ENUM = "enum",
+  FUNCTION = "function",
+  CLASS = "class",
+  MEMBER = "member",
+  UNKNOWN = "unknown",
 }
 
-export type IssueSymbol = { symbol: string; pos?: number; line?: number; col?: number };
+export type IssueSymbol = {
+  symbol: string;
+  pos?: number;
+  line?: number;
+  col?: number;
+};
 
 export type Issue = {
   type: SymbolIssueType;
@@ -30,33 +35,37 @@ export type IssueSet = Set<string>;
 
 export type IssueRecords = Record<string, Record<string, Issue>>;
 
+export enum SymbolIssueNames {
+  dependencies = "dependencies",
+  devDependencies = "devDependencies",
+  optionalPeerDependencies = "optionalPeerDependencies",
+  unlisted = "unlisted",
+  binaries = "binaries",
+  unresolved = "unresolved",
+  exports = "exports",
+  types = "types",
+  nsExports = "nsExports",
+  nsTypes = "nsTypes",
+  duplicates = "duplicates",
+  enumMembers = "enumMembers",
+  classMembers = "classMembers",
+}
+
+export type SymbolIssues = Record<keyof typeof SymbolIssueNames, IssueRecords>;
 export type Issues = {
   files: IssueSet;
   _files: Set<Issue>;
-  dependencies: IssueRecords;
-  devDependencies: IssueRecords;
-  optionalPeerDependencies: IssueRecords;
-  unlisted: IssueRecords;
-  binaries: IssueRecords;
-  unresolved: IssueRecords;
-  exports: IssueRecords;
-  types: IssueRecords;
-  nsExports: IssueRecords;
-  nsTypes: IssueRecords;
-  duplicates: IssueRecords;
-  enumMembers: IssueRecords;
-  classMembers: IssueRecords;
-};
+} & SymbolIssues;
 
 export type IssueType = keyof Issues;
 
-export type SymbolIssueType = Exclude<IssueType, 'files' | '_files'>;
+export type SymbolIssueType = Exclude<IssueType, "files" | "_files">;
 
 export type Report = {
   [key in keyof Issues]: boolean;
 };
 
-export type Counters = Record<IssueType | 'processed' | 'total', number>;
+export type Counters = Record<IssueType | "processed" | "total", number>;
 
 export type ReporterOptions = {
   report: Report;
