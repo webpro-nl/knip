@@ -283,8 +283,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     worker.onDispose();
   }
 
-  const principals = factory.getPrincipals();
-
+  let principals: Array<ProjectPrincipal | undefined> | undefined = factory.getPrincipals();
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
   const graph: DependencyGraph = new Map();
@@ -358,7 +357,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
   };
 
-  for (const principal of principals) {
+  for (let i = 0; i < principals.length; ++i) {
+    const principal = principals[i];
+    if (!principal) continue;
+
     principal.init();
 
     streamer.cast('Running async compilers...');
@@ -375,7 +377,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       const resolvedFiles = principal.getUsedResolvedFiles();
       const files = resolvedFiles.filter(filePath => !analyzedFiles.has(filePath));
 
-      debugLogArray('*', `Analyzing used resolved files [P${principals.indexOf(principal) + 1}/${++round}]`, files);
+      debugLogArray('*', `Analyzing used resolved files [P${i + 1}/${++round}]`, files);
       for (const filePath of files) analyzeSourceFile(filePath, principal);
     } while (size !== principal.entryPaths.size);
 
@@ -385,10 +387,18 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     principal.reconcileCache(graph);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (!isIsolateWorkspaces && isSkipLibs && !isWatch) factory.deletePrincipal(principal);
+    if (!isIsolateWorkspaces && isSkipLibs && !isWatch) {
+      factory.deletePrincipal(principal);
+      principals[i] = undefined;
+    }
   }
 
-  if (isIsolateWorkspaces) for (const principal of principals) factory.deletePrincipal(principal);
+  if (isIsolateWorkspaces) {
+    for (const principal of principals) {
+      if (principal) factory.deletePrincipal(principal);
+    }
+  }
+  principals = undefined;
 
   const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
   const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
