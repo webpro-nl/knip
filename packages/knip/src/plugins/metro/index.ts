@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = options => hasDependency(options.dependencies
 
 const packageJsonPath = 'metro';
 
-const config: string[] = ['metro.config.{js,cjs,mjs,json}', 'package.json'];
+const config: string[] = ['metro.config.{js,cjs,json}', 'package.json'];
 
 const resolveEntryPaths: ResolveEntryPaths<PluginConfig> = async config => {
   if (!config.projectRoot) return [];
