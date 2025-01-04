@@ -55,8 +55,13 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .map(executor => executor?.split(':')[0]);
 
   const scripts = targets
-    .filter(target => target.executor === 'nx:run-commands')
-    .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []));
+    .filter(target => target.executor === 'nx:run-commands' || target.command)
+    .flatMap(target => {
+      if (target.command) return [target.command];
+      if (target.options?.command) return [target.options.command];
+      if (target.options?.commands) return target.options.commands;
+      return [];
+    });
 
   const inputs = options.getInputsFromScripts(scripts);
 
