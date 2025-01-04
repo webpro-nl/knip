@@ -349,9 +349,6 @@ export class DependencyDeputy {
           }
         }
       }
-      if (Object.keys(issueSet).length === 0) {
-        delete issues[type][key];
-      }
     }
   }
 
@@ -384,9 +381,6 @@ export class DependencyDeputy {
             }
           }
         }
-      }
-      if (Object.keys(issueSet).length === 0) {
-        delete issues[type][key];
       }
     }
   }

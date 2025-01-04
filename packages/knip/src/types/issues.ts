@@ -30,27 +30,23 @@ export type IssueSet = Set<string>;
 
 export type IssueRecords = Record<string, Record<string, Issue>>;
 
-export enum SymbolIssueNames {
-  dependencies = 'dependencies',
-  devDependencies = 'devDependencies',
-  optionalPeerDependencies = 'optionalPeerDependencies',
-  unlisted = 'unlisted',
-  binaries = 'binaries',
-  unresolved = 'unresolved',
-  exports = 'exports',
-  types = 'types',
-  nsExports = 'nsExports',
-  nsTypes = 'nsTypes',
-  duplicates = 'duplicates',
-  enumMembers = 'enumMembers',
-  classMembers = 'classMembers',
-}
-
-export type SymbolIssues = Record<keyof typeof SymbolIssueNames, IssueRecords>;
 export type Issues = {
   files: IssueSet;
   _files: Set<Issue>;
-} & SymbolIssues;
+  dependencies: IssueRecords;
+  devDependencies: IssueRecords;
+  optionalPeerDependencies: IssueRecords;
+  unlisted: IssueRecords;
+  binaries: IssueRecords;
+  unresolved: IssueRecords;
+  exports: IssueRecords;
+  types: IssueRecords;
+  nsExports: IssueRecords;
+  nsTypes: IssueRecords;
+  duplicates: IssueRecords;
+  enumMembers: IssueRecords;
+  classMembers: IssueRecords;
+};
 
 export type IssueType = keyof Issues;
 
