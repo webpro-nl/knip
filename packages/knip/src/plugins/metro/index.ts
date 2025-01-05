@@ -1,6 +1,6 @@
-import { join } from '../../util/path.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
 import { toDeferResolve, toProductionEntry } from '../../util/input.js';
+import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 
