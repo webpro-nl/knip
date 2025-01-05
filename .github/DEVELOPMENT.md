@@ -24,6 +24,8 @@ gh repo fork webpro-nl/knip --clone
 cd knip
 bun install
 cd packages/knip
+npm run build
+npm run test
 ```
 
 Depending on the goals and the way you like to work, below are a few things that
