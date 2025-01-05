@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/metro",
+  "version": "*",
+  "dependencies": {
+    "expo-asset": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-svg-transformer": "*"
+  },
+  "metro": {
+    "transformerPath": "./custom-metro-transformer.js"
+  }
+}

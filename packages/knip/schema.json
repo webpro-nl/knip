@@ -400,6 +400,10 @@
           "title": "markdownlint plugin configuration (https://knip.dev/reference/plugins/markdownlint)",
           "$ref": "#/definitions/plugin"
         },
+        "metro": {
+          "title": "metro plugin configuration (https://knip.dev/reference/plugins/metro)",
+          "$ref": "#/definitions/plugin"
+        },
         "mocha": {
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/mocha)",
           "$ref": "#/definitions/plugin"
