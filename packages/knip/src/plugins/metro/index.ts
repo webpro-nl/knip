@@ -8,7 +8,7 @@ import type { PluginConfig } from './types.js';
 
 const title = 'Metro';
 
-const enablers = [/^metro(-.*)?$/, 'react-native'];
+const enablers = ['metro', 'react-native'];
 
 const isEnabled: IsPluginEnabled = options => hasDependency(options.dependencies, enablers);
 
