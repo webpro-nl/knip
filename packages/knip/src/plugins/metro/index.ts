@@ -1,12 +1,16 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { compact } from '../../util/array.js';
 import { toDeferResolve, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
+import type { MetroConfig } from './types.js';
 
 // https://metrobundler.dev/docs/configuration
 
 const title = 'Metro';
+
+const note = `False positives for platform-specific unused files?
+Override the entry patterns as shown below to match platforms and extensions.`;
 
 const enablers = ['metro', 'react-native'];
 
@@ -16,15 +20,27 @@ const packageJsonPath = 'metro';
 
 const config: string[] = ['metro.config.{js,cjs,json}', 'package.json'];
 
-const resolveEntryPaths: ResolveEntryPaths<PluginConfig> = async config => {
-  if (!config.projectRoot) return [];
+const DEFAULT_PLATFORMS = ['ios', 'android', 'windows', 'web'];
+const PLATFORMS = [...DEFAULT_PLATFORMS, 'native', 'default'];
+const DEFAULT_EXTENSIONS = ['js', 'jsx', 'json', 'ts', 'tsx'];
+
+const production = [`src/**/*.{${PLATFORMS.join(',')}}.{${DEFAULT_EXTENSIONS.join(',')}}`];
+
+const resolveEntryPaths: ResolveEntryPaths<MetroConfig> = async config => {
+  const platformEntryPatterns = compact(PLATFORMS.concat(config.resolver?.platforms ?? []));
+  const sourceExts = config.resolver?.sourceExts ?? DEFAULT_EXTENSIONS;
+  const pattern = `src/**/*.{${platformEntryPatterns.join(',')}}.{${sourceExts.join(',')}}`;
+
+  if (!config.projectRoot) return [toProductionEntry(pattern)];
 
   const entryFilePattern = 'index.{js,jsx,ts,tsx}';
   const entryFilePath = join(config.projectRoot, entryFilePattern);
-  return [toProductionEntry(entryFilePath)];
+  const entryFilePaths = join(config.projectRoot, pattern);
+
+  return [toProductionEntry(entryFilePath), toProductionEntry(entryFilePaths)];
 };
 
-const resolveConfig: ResolveConfig<PluginConfig> = async config => {
+const resolveConfig: ResolveConfig<MetroConfig> = async config => {
   const { transformerPath, transformer } = config;
   const inputs: string[] = [];
 
@@ -38,10 +54,12 @@ const resolveConfig: ResolveConfig<PluginConfig> = async config => {
 
 export default {
   title,
+  note,
   enablers,
   isEnabled,
   packageJsonPath,
   config,
+  production,
   resolveEntryPaths,
   resolveConfig,
 } satisfies Plugin;
