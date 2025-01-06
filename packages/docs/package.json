@@ -24,15 +24,15 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.6",
-    "@astrojs/starlight": "0.29.2",
+    "@astrojs/starlight": "0.30.3",
     "sharp": "0.33.5"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.4",
-    "@astrojs/markdown-remark": "^5.3.0",
+    "@astrojs/markdown-remark": "^6.0.1",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "4.16.14",
+    "astro": "5.1.2",
     "hastscript": "9.0.0",
     "picocolors": "^1.1.1",
     "rehype-autolink-headings": "^7.1.0",
