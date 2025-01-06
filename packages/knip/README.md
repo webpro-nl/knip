@@ -28,7 +28,7 @@ less maintenance and easier refactorings.
 
 ## Contributors
 
-Special thanks to [the wonderful people who have contributed Knip][8]!
+Special thanks to [the wonderful people who have contributed to Knip][8]!
 
 ## Knip
 
