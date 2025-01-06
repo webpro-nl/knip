@@ -1,17 +1,3 @@
 {
-  "name": "@fixtures/import-star-iteration",
-  "devDependencies": {
-    "ts-node": "^10.8.2"
-  },
-  "scripts": {
-    "execute-test-code": "ts-node index.ts"
-  },
-  "knip": {
-    "ignoreBinaries": [
-      "ts-node"
-    ],
-    "ignoreDependencies": [
-      "ts-node"
-    ]
-  }
+  "name": "@fixtures/import-star-iteration"
 }

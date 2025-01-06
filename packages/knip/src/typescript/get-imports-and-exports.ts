@@ -22,7 +22,7 @@ import {
   isConsiderReferencedNS,
   isDestructuring,
   isImportSpecifier,
-  isIteratingObject,
+  isInForIteration,
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
 } from './ast-helpers.js';
@@ -354,7 +354,7 @@ const getImportsAndExports = (
                 } else if (isObjectEnumerationCallExpressionArgument(node)) {
                   // Pattern: Object.keys(NS)
                   imports.refs.add(id);
-                } else if (isIteratingObject(node)) {
+                } else if (isInForIteration(node)) {
                   // Pattern: for (const x in NS) { }
                   // Pattern: for (const x of NS) { }
                   imports.refs.add(id);

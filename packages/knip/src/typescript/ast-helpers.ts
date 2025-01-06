@@ -165,11 +165,6 @@ export const isDestructuring = (node: ts.Node) =>
   ts.isVariableDeclarationList(node.parent.parent) &&
   ts.isObjectBindingPattern(node.parent.name);
 
-// Pattern: for (const x in NS) { }
-// Pattern: for (const x of NS) { }
-export const isIteratingObject = (node: ts.Node) =>
-  node.parent && (ts.isForInStatement(node.parent) || ts.isForOfStatement(node.parent));
-
 export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
   name.elements.map(element => element.name.getText());
 
@@ -191,6 +186,9 @@ export const isObjectEnumerationCallExpressionArgument = (node: ts.Identifier) =
   ts.isIdentifier(node.parent.expression.expression) &&
   node.parent.expression.expression.escapedText === 'Object' &&
   objectEnumerationMethods.has(String(node.parent.expression.name.escapedText));
+
+export const isInForIteration = (node: ts.Node) =>
+  node.parent && (ts.isForInStatement(node.parent) || ts.isForOfStatement(node.parent));
 
 export const isTopLevel = (node: ts.Node) =>
   ts.isSourceFile(node.parent) || (node.parent && ts.isSourceFile(node.parent.parent));
