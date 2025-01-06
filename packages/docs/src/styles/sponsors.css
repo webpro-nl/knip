@@ -30,7 +30,11 @@
   justify-content: center;
   align-items: center;
   gap: 5rem;
-  margin-bottom: 3rem;
+}
+
+.sl-markdown-content .sponsors:not(.column) {
+  margin: 3rem 0;
+  gap: 3rem;
 }
 
 .sponsors a {
