@@ -5,7 +5,7 @@ import type { PluginConfig } from './types.js';
 
 // link to __PLUGIN_NAME__ docs
 
-const title = '_template';
+const title = '__PLUGIN_NAME__';
 
 const enablers = ['__PLUGIN_NAME__'];
 

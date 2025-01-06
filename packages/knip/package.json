@@ -48,7 +48,7 @@
     "qa": "bun lint && bun run build && bun knip && bun knip:production && bun run test",
     "release": "release-it",
     "create-plugin": "bun ./scripts/create-new-plugin.ts",
-    "postcreate-plugin": "biome format --write schema.json schema-jsonc.json src/ConfigurationValidator.ts",
+    "postcreate-plugin": "bun run build && biome format --write schema.json schema-jsonc.json src/ConfigurationValidator.ts",
     "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && biome check --write src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts"
   },
   "files": [
