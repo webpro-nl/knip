@@ -7,10 +7,9 @@ import fs from 'node:fs';
 // biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 import { timerify } from './Performance.js';
-import parsedArgValues from './cli-arguments.js';
 import { debugLog } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
-import { dirname, isAbsolute, resolve } from './path.js';
+import { cwd, dirname, isAbsolute, resolve } from './path.js';
 import { deserialize, serialize } from './serialize.js';
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
@@ -22,8 +21,6 @@ export type FileDescriptor<T> = {
   err?: unknown;
   meta?: MetaData<T>;
 };
-
-const cwd = process.cwd();
 
 const createCache = (filePath: string) => {
   try {
@@ -41,10 +38,7 @@ export class FileEntryCache<T> {
   normalizedEntries = new Map<string, FileDescriptor<T>>();
 
   constructor(cacheId: string, _path: string) {
-    const { 'cache-location': cacheLocation } = parsedArgValues;
-    const currentPath = cacheLocation ? path.resolve(cacheLocation) : path.resolve(cwd);
-    this.filePath = isAbsolute(currentPath) ? path.join(currentPath, cacheId) : path.join(currentPath, _path, cacheId);
-
+    this.filePath = isAbsolute(_path) ? path.resolve(_path, cacheId) : path.resolve(cwd, _path, cacheId);
     if (isFile(this.filePath)) this.cache = create(this.filePath);
     this.removeNotFoundFiles();
   }
