@@ -8,7 +8,7 @@ This page describes why Knip uses plugins and the difference between `config`
 and `entry` files.
 
 Knip has an extensive and growing [list of built-in plugins][1]. Feel free to
-[request a plugin][2] or even [write a plugin][3] so others can benefit too!
+[write a plugin][2] so others can benefit too!
 
 ## What does a plugin do?
 
@@ -17,13 +17,13 @@ in `package.json`. For instance, if `astro` is listed in `dependencies` or
 `devDependencies`, then the Astro plugin is enabled. And this means that this
 plugin will:
 
-- Handle [configuration files][4] like `astro.config.mjs`
-- Add [entry files][5] such as `src/pages/**/*.astro`
-- Define [command-line arguments][6]
+- Handle [configuration files][3] like `astro.config.mjs`
+- Add [entry files][4] such as `src/pages/**/*.astro`
+- Define [command-line arguments][5]
 
 ## Configuration files
 
-Knip uses [entry files][7] as starting points to scan your source code and
+Knip uses [entry files][6] as starting points to scan your source code and
 resolve other internal files and external dependencies. The dependency graph can
 be statically resolved through the `require` and `import` statements in those
 source files. However, configuration files reference external dependencies in
@@ -32,7 +32,7 @@ find those dependencies.
 
 ### Example: ESLint
 
-In the first example we look at [the ESLint plugin][8]. The default `config`
+In the first example we look at [the ESLint plugin][7]. The default `config`
 file patterns include `.eslintrc.json`. Here's a minimal example:
 
 ```json title=".eslintrc.json"
@@ -57,7 +57,7 @@ as unlisted. And vice versa, if there are any ESLint plugins listed in
 
 ### Example: Vitest
 
-The second example uses [the Vitest plugin][8]. Here's a minimal example of a
+The second example uses [the Vitest plugin][7]. Here's a minimal example of a
 Vitest configuration file:
 
 ```ts title="vitest.config.ts"
@@ -211,7 +211,7 @@ added as entry files by the GitHub Actions plugin.
 Additionally, the file `e2e/playwright.web.config.ts` is detected and will be
 handed over as a Playwright configuration file.
 
-Read more about this in [command-line arguments][6].
+Read more about this in [command-line arguments][5].
 
 ### webpack
 
@@ -293,7 +293,7 @@ node --loader tsx scripts/deploy.ts
 playwright test -c playwright.web.config.ts
 ```
 
-Please see [script parser][9] for more details.
+Please see [script parser][8] for more details.
 
 ## Summary
 
@@ -309,11 +309,10 @@ Plugins are configured with two distinct types of files:
 :::
 
 [1]: ../reference/plugins.md
-[2]: https://github.com/webpro-nl/knip/issues/483
-[3]: ../guides/writing-a-plugin.md
-[4]: #configuration-files
-[5]: #entry-files
-[6]: #command-line-arguments
-[7]: ./entry-files.md
-[8]: ../reference/plugins/eslint.md
-[9]: ../features/script-parser.md
+[2]: ../guides/writing-a-plugin.md
+[3]: #configuration-files
+[4]: #entry-files
+[5]: #command-line-arguments
+[6]: ./entry-files.md
+[7]: ../reference/plugins/eslint.md
+[8]: ../features/script-parser.md
