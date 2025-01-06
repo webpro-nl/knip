@@ -122,6 +122,10 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
   return result;
 };
 
+const args = {
+  config: true,
+};
+
 export default {
   title,
   enablers,
@@ -130,4 +134,5 @@ export default {
   entry,
   resolveEntryPaths,
   resolveConfig,
+  args,
 } satisfies Plugin;
