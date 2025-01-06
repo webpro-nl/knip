@@ -121,10 +121,16 @@ const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options)
   return compact([...inputs, [...webpackCLI, ...webpackDevServer].map(toDevDependency)].flat());
 };
 
+const args = {
+  binaries: ['webpack', 'webpack-dev-server'],
+  config: true,
+};
+
 export default {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  args,
 } satisfies Plugin;
