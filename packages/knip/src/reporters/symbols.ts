@@ -11,12 +11,16 @@ const bright = picocolors.whiteBright;
 
 const TRUNCATE_WIDTH = 40;
 const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? `${text.slice(0, TRUNCATE_WIDTH - 3)}...` : text);
+const truncateStart = (text: string, width: number) => (text.length > width ? `...${text.slice(-(width - 3))}` : text);
 
 const hl = (issue: Issue) => {
   if (issue.specifier && issue.specifier !== issue.symbol && issue.specifier.includes(issue.symbol)) {
     const parts = issue.specifier.split(issue.symbol);
-    const rest = parts.slice(1).join('');
-    return [dim(parts[0]), bright(issue.symbol), dim(rest)].join('');
+    const right = parts.slice(1).join('');
+    const max = TRUNCATE_WIDTH - issue.symbol.length - right.length;
+    const part = parts[0];
+    const left = part.length > 3 ? (max <= 3 ? `...${part.slice(-3)}` : truncateStart(part, max)) : part;
+    return [dim(left), bright(issue.symbol), dim(right)].join('');
   }
   return issue.symbol;
 };
