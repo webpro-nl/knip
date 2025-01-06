@@ -284,6 +284,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   }
 
   const principals: Array<ProjectPrincipal | undefined> = factory.getPrincipals();
+
   debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
 
   const graph: DependencyGraph = new Map();
@@ -397,10 +398,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     for (const principal of principals) {
       if (principal) factory.deletePrincipal(principal);
     }
+    principals.length = 0;
   }
-
-  // Release the memory / empty the array that may be be filled with undefined's now.
-  principals.length = 0;
 
   const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
   const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
