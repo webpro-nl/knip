@@ -7,28 +7,30 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/angular3');
 
-test('Find dependencies with the Angular plugin (production vs non-production)', async () => {
-  const { issues: nonProdIssues, counters: nonProdCounters } = await main({
+test('Find dependencies with the Angular plugin (non-production)', async () => {
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(nonProdIssues.devDependencies['package.json']['@angular/cli']);
+  assert(issues.devDependencies['package.json']['@angular/cli']);
 
-  assert.deepEqual(nonProdCounters, {
+  assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
     processed: 8,
     total: 8,
   });
+});
 
-  const { counters: prodCounters } = await main({
+test('Find dependencies with the Angular plugin (production)', async () => {
+  const { counters } = await main({
     ...baseArguments,
     isProduction: true,
     cwd,
   });
 
-  assert.deepEqual(prodCounters, {
+  assert.deepEqual(counters, {
     ...baseCounters,
     processed: 4,
     total: 4,
