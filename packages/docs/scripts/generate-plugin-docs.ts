@@ -66,7 +66,7 @@ for await (const dir of directories) {
       Array.isArray(enablers) && enablers.length > 0
         ? [
             ...parseFragment(
-              "This plugin is enabled when there's a match in `dependencies` or `devDependencies` in `package.json`:"
+              "This plugin is enabled automatically when there's a match in `dependencies` or `devDependencies` in `package.json`:"
             ),
             u(
               'list',
@@ -77,19 +77,19 @@ for await (const dir of directories) {
           ]
         : typeof enablers === 'string'
           ? parseFragment(enablers)
-          : [u('paragraph', [u('text', 'N/A')])];
+          : [u('paragraph', [u('text', 'This plugin is always enabled.')])];
 
     const notes = note ? [u('heading', { depth: 2 }, [u('text', 'Note')]), ...parseFragment(note)] : [];
 
     const defaultConfig = hasDefaultConfig
       ? [
           u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
-          ...parseFragment('This configuration is added automatically if the plugin is enabled:'),
+          ...parseFragment('If enabled, this configuration is added automatically:'),
           u('code', {
-            lang: 'json title="knip.json"', // TODO How to set attributes/properties/props properly?
+            lang: 'json', // TODO How to set attributes/properties/props properly?
             value: JSON.stringify({ [pluginName]: defaults }, null, 2),
           }),
-          ...parseFragment('Your custom `config` or `entry` options override default values, they are not merged.'),
+          ...parseFragment('Custom `config` or `entry` options override default values, they are not merged.'),
           ...parseFragment(
             'See [Plugins](../../explanations/plugins) for more details about plugins and their `entry` and `config` options.'
           ),
@@ -99,15 +99,20 @@ for await (const dir of directories) {
     const argsText = args
       ? [
           ...parseFragment(
-            `## Shell commands\n\nThis plugin adds argument parsing for the <code>${args.binaries ? args.binaries.join(' and ') : pluginName}</code> binary. Configuration:`
+            `## Shell commands\n\nThis plugin adds argument parsing for the <code>${args.binaries ? args.binaries.join(' and ') : pluginName}</code>
+            ${args.binaries && args.binaries.length > 1 ? 'binaries' : 'binary'}. Configuration:`
           ),
           ...parseFragment(
             `\`\`\`\n${Object.entries(args)
               .filter(([key]) => key !== 'binaries')
               .map(
-                ([key, value]) => `${key}: ${typeof value === 'function' ? value.toString() : JSON.stringify(value)}`
+                ([key, value]) =>
+                  `${key}: ${typeof value === 'function' ? value.toString() : JSON.stringify(value).replace(/([,:])/g, '$1 ')}`
               )
               .join('\n')}\n\`\`\``
+          ),
+          ...parseFragment(
+            'The configuration was generated from source code. Also see [Script Parser](../../features/script-parser).'
           ),
         ]
       : [];
