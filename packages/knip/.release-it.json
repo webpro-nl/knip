@@ -11,6 +11,10 @@
   },
   "github": {
     "release": true,
+    "releaseNotes": {
+      "commit": "* ${commit.message} (${sha}){ - thanks @${author.login}!}",
+      "excludeMatches": ["webpro"]
+    },
     "comments": {
       "submit": true,
       "issue": ":rocket: _This issue has been resolved in v${version}. See [${releaseName}](${releaseUrl}) for release notes._\n\n_Using Knip in a commercial project? Please consider [becoming a sponsor](https://knip.dev/sponsors)._",
