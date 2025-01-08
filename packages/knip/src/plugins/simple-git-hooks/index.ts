@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import type { Input } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
+import type { SimpleGitHooksConfig } from './types.js';
 
 // https://github.com/toplenboren/simple-git-hooks
 
@@ -11,17 +11,9 @@ const enablers = ['simple-git-hooks'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const packageJsonPath = 'simple-git-hooks';
+const config = ['.simple-git-hooks.{js,cjs,json}', 'simple-git-hooks.{js,cjs,json}', 'package.json'];
 
-const config = [
-  '.simple-git-hooks.{js,cjs}',
-  'simple-git-hooks.{js,cjs}',
-  '.simple-git-hooks.json',
-  'simple-git-hooks.json',
-  'package.json',
-];
-
-const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
+const resolveConfig: ResolveConfig<SimpleGitHooksConfig> = async (config, options) => {
   if (typeof config === 'function') config = config();
 
   if (!config) return [];
@@ -39,7 +31,6 @@ export default {
   title,
   enablers,
   isEnabled,
-  packageJsonPath,
   config,
   resolveConfig,
 } satisfies Plugin;

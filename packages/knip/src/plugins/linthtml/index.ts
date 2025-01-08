@@ -2,7 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { toDeferResolve } from '../../util/input.js';
 import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
+import type { LintHTMLConfig } from './types.js';
 
 // https://linthtml.vercel.app/
 
@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['package.json', ...toCosmiconfig('linthtml')];
 
-const resolveConfig: ResolveConfig<PluginConfig> = config => {
+const resolveConfig: ResolveConfig<LintHTMLConfig> = config => {
   const extensions = config.extends ?? [];
   const plugins = config.plugins ?? [];
   return [extensions, plugins].flat().map(toDeferResolve);

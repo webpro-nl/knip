@@ -5,4 +5,4 @@
 // }
 type Config = Record<string, string>;
 
-export type PluginConfig = Config | (() => Config);
+export type SimpleGitHooksConfig = Config | (() => Config);

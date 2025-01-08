@@ -13,7 +13,7 @@ const enablers = ['expo'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['app.json', 'app.config.{ts,js}'];
+const config = ['app.json', 'app.config.{ts,js}'];
 
 const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (expoConfig, { manifest }) => {
   const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;

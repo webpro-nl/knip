@@ -16,9 +16,7 @@ const enablers = ['metro', 'react-native'];
 
 const isEnabled: IsPluginEnabled = options => hasDependency(options.dependencies, enablers);
 
-const packageJsonPath = 'metro';
-
-const config: string[] = ['metro.config.{js,cjs,json}', 'package.json'];
+const config = ['metro.config.{js,cjs,json}', 'package.json'];
 
 const DEFAULT_PLATFORMS = ['ios', 'android', 'windows', 'web'];
 const PLATFORMS = [...DEFAULT_PLATFORMS, 'native', 'default'];
@@ -57,7 +55,6 @@ export default {
   note,
   enablers,
   isEnabled,
-  packageJsonPath,
   config,
   production,
   resolveEntryPaths,

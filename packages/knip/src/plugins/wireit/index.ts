@@ -10,8 +10,6 @@ const enablers = ['wireit'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const packageJsonPath = 'wireit';
-
 const config = ['package.json'];
 
 const resolveConfig: ResolveConfig<WireitConfig> = (localConfig, options) => {
@@ -26,7 +24,6 @@ export default {
   title,
   enablers,
   isEnabled,
-  packageJsonPath,
   config,
   resolveConfig,
 } satisfies Plugin;

@@ -1,4 +1,4 @@
-export type PluginConfig = {
+export type LintHTMLConfig = {
   extends?: string | string[];
   plugins?: string[];
 };

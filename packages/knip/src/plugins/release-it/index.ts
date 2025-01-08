@@ -13,8 +13,6 @@ const enablers = ['release-it'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const packageJsonPath = 'release-it';
-
 const config = ['.release-it.{json,js,cjs,ts,yml,yaml,toml}', 'package.json'];
 
 const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
@@ -35,7 +33,6 @@ export default {
   title,
   enablers,
   isEnabled,
-  packageJsonPath,
   config,
   resolveConfig,
 } satisfies Plugin;
