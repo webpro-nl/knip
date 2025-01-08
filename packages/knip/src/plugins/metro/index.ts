@@ -24,6 +24,9 @@ const DEFAULT_EXTENSIONS = ['js', 'jsx', 'json', 'ts', 'tsx'];
 
 const production = [`src/**/*.{${PLATFORMS.join(',')}}.{${DEFAULT_EXTENSIONS.join(',')}}`];
 
+/** @public */
+export const docs = { production };
+
 const resolveEntryPaths: ResolveEntryPaths<MetroConfig> = async config => {
   const platformEntryPatterns = compact(PLATFORMS.concat(config.resolver?.platforms ?? []));
   const sourceExts = config.resolver?.sourceExts ?? DEFAULT_EXTENSIONS;
@@ -56,7 +59,6 @@ export default {
   enablers,
   isEnabled,
   config,
-  production,
   resolveEntryPaths,
   resolveConfig,
 } satisfies Plugin;

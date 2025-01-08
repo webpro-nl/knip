@@ -15,14 +15,19 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['app.json', 'app.config.{ts,js}'];
 
+const production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
+
+/** @public */
+export const docs = { production };
+
 const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (expoConfig, { manifest }) => {
   const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;
 
-  let production: string[] = [];
+  let patterns: string[] = [];
 
   // https://docs.expo.dev/router/installation/#setup-entry-point
   if (manifest.main === 'expo-router/entry') {
-    production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
+    patterns = [...production];
 
     const normalizedPlugins =
       config.plugins?.map(plugin => (Array.isArray(plugin) ? plugin : ([plugin] as const))) ?? [];
@@ -32,12 +37,12 @@ const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (expoConfig, { ma
       const [, options] = expoRouterPlugin;
 
       if (typeof options?.root === 'string') {
-        production = [join(options.root, '**/*.{js,jsx,ts,tsx}')];
+        patterns = [join(options.root, '**/*.{js,jsx,ts,tsx}')];
       }
     }
   }
 
-  return production.map(entry => toProductionEntry(entry));
+  return patterns.map(entry => toProductionEntry(entry));
 };
 
 const resolveConfig: ResolveConfig<ExpoConfig> = async (expoConfig, options) => getDependencies(expoConfig, options);

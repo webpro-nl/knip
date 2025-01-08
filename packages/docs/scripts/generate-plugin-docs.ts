@@ -46,7 +46,9 @@ for await (const dir of directories) {
   if (dir.isDirectory() && dir.name !== '_template') {
     const pluginName = dir.name;
     const pluginDir = path.join(pluginsDir, pluginName);
-    const plugin: Plugin = (await import(path.join(pluginDir, 'index.ts'))).default;
+    const mod = await import(path.join(pluginDir, 'index.ts'));
+    const plugin: Plugin = mod.default;
+    const docs: undefined | { entry?: string[]; production?: string[] } = mod.docs;
 
     const { title, enablers, note, args, config, entry, production, project } = plugin;
 
@@ -57,7 +59,10 @@ for await (const dir of directories) {
     const defaults: Record<string, string[]> = {};
     if (config && config.length > 0) defaults.config = config;
     if (entry && entry.length > 0) defaults.entry = entry;
+    if (docs?.entry && docs.entry.length > 0) defaults.entry = [...(defaults.entry ?? []), ...docs.entry];
     if (production && production.length > 0) defaults.entry = [...(defaults.entry ?? []), ...production];
+    if (docs?.production && docs.production.length > 0)
+      defaults.entry = [...(defaults.entry ?? []), ...docs.production];
     if (project && project.length > 0) defaults.project = project;
 
     const hasDefaultConfig = Object.values(defaults).some(v => v.length > 0);
@@ -84,11 +89,12 @@ for await (const dir of directories) {
     const defaultConfig = hasDefaultConfig
       ? [
           u('heading', { depth: 2 }, [u('text', 'Default configuration')]),
-          ...parseFragment('If enabled, this configuration is added automatically:'),
+          ...parseFragment('If this plugin is enabled, the following configuration is added automatically:'),
           u('code', {
             lang: 'json', // TODO How to set attributes/properties/props properly?
             value: JSON.stringify({ [pluginName]: defaults }, null, 2),
           }),
+          ...parseFragment('Depending on local configuration, plugins may modify the defaults as shown.'),
           ...parseFragment('Custom `config` or `entry` options override default values, they are not merged.'),
           ...parseFragment(
             'See [Plugins](../../explanations/plugins) for more details about plugins and their `entry` and `config` options.'
