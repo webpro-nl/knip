@@ -27,7 +27,7 @@ const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
       })
     : false;
 
-const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
+export const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
   const { manifest, configFileDir } = options;
   const testConfig = localConfig.test;
 
@@ -48,7 +48,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
   return [...[...environments, ...reporters, ...coverage].map(toDependency), ...setupFiles, ...globalSetup];
 };
 
-const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) => {
+export const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) => {
   const configs: ViteConfig[] = [];
   for (const config of [localConfig].flat()) {
     if (config && typeof config !== 'string') {

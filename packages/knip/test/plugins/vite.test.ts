@@ -15,6 +15,7 @@ test('Find dependencies with the Vite plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    devDependencies: 1,
     processed: 2,
     total: 2,
   });

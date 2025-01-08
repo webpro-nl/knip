@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "*",
+    "@emotion/babel-plugin": "*",
     "vite": "*"
   }
 }
