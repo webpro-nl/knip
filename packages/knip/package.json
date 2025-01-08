@@ -81,15 +81,15 @@
   },
   "devDependencies": {
     "@jest/types": "^29.6.3",
-    "@release-it/bumper": "^6.0.1",
-    "@types/bun": "^1.1.14",
+    "@release-it/bumper": "^7.0.0",
+    "@types/bun": "^1.1.15",
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/picomatch": "3.0.1",
     "@types/webpack": "^5.28.5",
     "@wdio/types": "^9.5.0",
     "glob": "^10.4.2",
-    "release-it": "https://pkg.pr.new/release-it@14e578f",
+    "release-it": "https://pkg.pr.new/release-it@29fb513",
     "type-fest": "^4.31.0",
     "typescript": "^5.5.2"
   },
