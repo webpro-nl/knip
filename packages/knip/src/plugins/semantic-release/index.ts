@@ -18,9 +18,16 @@ const packageJsonPath = 'release';
 
 const config = ['package.json', ...toCosmiconfig('release')];
 
+const excludePackages = [
+  '@semantic-release/commit-analyzer',
+  '@semantic-release/github',
+  '@semantic-release/npm',
+  '@semantic-release/release-notes-generator',
+];
+
 const resolveConfig: ResolveConfig<SemanticReleaseConfig> = config => {
   const plugins = (config?.plugins ?? []).map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));
-  return plugins.map(toDeferResolve);
+  return plugins.filter(plugin => !excludePackages.includes(plugin)).map(toDeferResolve);
 };
 
 export default {
