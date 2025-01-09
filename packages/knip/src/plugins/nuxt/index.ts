@@ -6,9 +6,6 @@ import type { NuxtConfig } from './types.js';
 
 const title = 'Nuxt';
 
-const note = `Knip works best with [explicit imports](https://nuxt.com/docs/guide/concepts/auto-imports#explicit-imports).
-Nuxt allows to [disable auto-imports](https://nuxt.com/docs/guide/concepts/auto-imports#disabling-auto-imports).`;
-
 const enablers = ['nuxt'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => {
@@ -52,9 +49,14 @@ const resolveEntryPaths: ResolveEntryPaths<NuxtConfig> = async localConfig => {
   return patterns.map(pattern => toProductionEntry(join(srcDir, pattern)));
 };
 
+const note = `Knip works best with [explicit imports](https://nuxt.com/docs/guide/concepts/auto-imports#explicit-imports).
+Nuxt allows to [disable auto-imports](https://nuxt.com/docs/guide/concepts/auto-imports#disabling-auto-imports).`;
+
+/** @public */
+export const docs = { note };
+
 export default {
   title,
-  note,
   enablers,
   isEnabled,
   entry,

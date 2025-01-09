@@ -48,6 +48,12 @@ const args = {
   config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,
 };
 
+const note =
+  '[What’s up with that configurable tsconfig.json location?](/reference/faq#whats-up-with-that-configurable-tsconfigjson-location)';
+
+/** @public */
+export const docs = { note };
+
 export default {
   title,
   enablers,

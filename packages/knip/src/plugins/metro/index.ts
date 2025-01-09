@@ -9,9 +9,6 @@ import type { MetroConfig } from './types.js';
 
 const title = 'Metro';
 
-const note = `False positives for platform-specific unused files?
-Override the entry patterns as shown below to match platforms and extensions.`;
-
 const enablers = ['metro', 'react-native'];
 
 const isEnabled: IsPluginEnabled = options => hasDependency(options.dependencies, enablers);
@@ -23,9 +20,6 @@ const PLATFORMS = [...DEFAULT_PLATFORMS, 'native', 'default'];
 const DEFAULT_EXTENSIONS = ['js', 'jsx', 'json', 'ts', 'tsx'];
 
 const production = [`src/**/*.{${PLATFORMS.join(',')}}.{${DEFAULT_EXTENSIONS.join(',')}}`];
-
-/** @public */
-export const docs = { production };
 
 const resolveEntryPaths: ResolveEntryPaths<MetroConfig> = async config => {
   const platformEntryPatterns = compact(PLATFORMS.concat(config.resolver?.platforms ?? []));
@@ -53,9 +47,14 @@ const resolveConfig: ResolveConfig<MetroConfig> = async config => {
   return [...inputs].map(toDeferResolve);
 };
 
+const note = `False positives for platform-specific unused files?
+Override the entry patterns as shown below to match platforms and extensions.`;
+
+/** @public */
+export const docs = { note, production };
+
 export default {
   title,
-  note,
   enablers,
   isEnabled,
   config,

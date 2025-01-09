@@ -312,8 +312,8 @@ There's a difference between `--tsConfig [file]` as a CLI argument and the
 
 The `--tsConfig [file]` option is used to provide an alternative location for
 the default root `tsconfig.json` file. Relevant `compilerOptions` include
-`paths` and `moduleResolution`. It's currently only possible to set this
-location at the root level (i.e. not in other monorepo workspaces).
+`paths` and `moduleResolution`. This setting is only available at the root
+level.
 
 On the other hand, the `typescript.config` option is a TypeScript plugin option,
 and can be set per-workspace. The plugin extracts referenced external
@@ -332,10 +332,16 @@ settings:
 From this example, Knip can determine whether the `@tsconfig/node20` and
 `hastscript` dependencies are properly listed in `package.json`.
 
-Note that the TypeScript plugin doesn't add support for TypeScript to Knip. Like
-other plugins, it extracts dependencies from configuration files. With the
-`typescript.config` option an alternative location for `tsconfig.json` can be
-set per workspace.
+#### Notes
+
+- The TypeScript plugin doesn't add support for TypeScript to Knip (that's
+  already built-in). Like other plugins, it extracts dependencies from
+  `tsconfig.json`. With the `typescript.config` option an alternative location
+  for `tsconfig.json` can be set per workspace.
+- In case path aliases from `compilerOptions.paths` aren't picked up by Knip,
+  either use `--tsConfig [file]` to target a different `tsconfig.json`, or
+  manually add [paths][11] to the Knip configuration. The latter can be done per
+  workspace.
 
 ## Compilers
 
@@ -357,7 +363,7 @@ other file types.
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
 statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][11].
+project. Also see the answer to the previous question and [Compilers][12].
 
 ## Miscellaneous
 
@@ -377,7 +383,7 @@ Which mode should've been the default? They both have their merits:
   tooling, including most issues found in production mode. This mode has the
   most impact on DX, for the same reason.
 
-Also see [production mode][12].
+Also see [production mode][13].
 
 ### Why doesn't Knip have...?
 
@@ -401,7 +407,7 @@ Examples of features that have been requested include:
 
 These are all interesting ideas, but most increase the API surface area, and all
 require more development efforts and maintenance. Time is limited and
-[sponsorships][13] currently don't cover - this can change though!
+[sponsorships][14] currently don't cover - this can change though!
 
 [1]: ../features/auto-fix.mdx
 [2]: ../explanations/why-use-knip.md#less-is-more
@@ -413,6 +419,7 @@ require more development efforts and maintenance. Time is limited and
 [8]: ../guides/handling-issues.mdx#types-packages
 [9]: https://www.npmjs.com/package/enhanced-resolve
 [10]: ../guides/performance.md#workspace-sharing
-[11]: ../features/compilers.md
-[12]: ../features/production-mode.md
-[13]: /sponsors
+[11]: ../reference/configuration.md#paths
+[12]: ../features/compilers.md
+[13]: ../features/production-mode.md
+[14]: /sponsors

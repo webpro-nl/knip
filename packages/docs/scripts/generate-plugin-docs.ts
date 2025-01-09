@@ -48,9 +48,9 @@ for await (const dir of directories) {
     const pluginDir = path.join(pluginsDir, pluginName);
     const mod = await import(path.join(pluginDir, 'index.ts'));
     const plugin: Plugin = mod.default;
-    const docs: undefined | { entry?: string[]; production?: string[] } = mod.docs;
+    const docs: undefined | { note: string; entry?: string[]; production?: string[] } = mod.docs;
 
-    const { title, enablers, note, args, config, entry, production, project } = plugin;
+    const { title, enablers, args, config, entry, production, project } = plugin;
 
     plugins.push([title, pluginName]);
 
@@ -69,22 +69,24 @@ for await (const dir of directories) {
 
     const enabledText =
       Array.isArray(enablers) && enablers.length > 0
-        ? [
-            ...parseFragment(
-              "This plugin is enabled automatically when there's a match in `dependencies` or `devDependencies` in `package.json`:"
-            ),
-            u(
-              'list',
-              enablers.map((enabler: string | RegExp) =>
-                u('listItem', [u('inlineCode', typeof enabler === 'string' ? enabler : enabler.source)])
-              )
-            ),
-          ]
+        ? enablers.length === 1 && typeof enablers[0] === 'string'
+          ? parseFragment(
+              `This plugin is enabled if \`"${enablers[0]}"\` is listed in \`"dependencies"\` or \`"devDependencies"\` in \`package.json\`.`
+            )
+          : [
+              ...parseFragment(
+                `This plugin is enabled if there's a match in \`"dependencies"\` or \`"devDependencies"\` in \`package.json\`:`
+              ),
+              u(
+                'list',
+                enablers.map((enabler: string | RegExp) =>
+                  u('listItem', [u('inlineCode', typeof enabler === 'string' ? enabler : enabler.source)])
+                )
+              ),
+            ]
         : typeof enablers === 'string'
           ? parseFragment(enablers)
           : [u('paragraph', [u('text', 'This plugin is always enabled.')])];
-
-    const notes = note ? [u('heading', { depth: 2 }, [u('text', 'Note')]), ...parseFragment(note)] : [];
 
     const defaultConfig = hasDefaultConfig
       ? [
@@ -102,6 +104,15 @@ for await (const dir of directories) {
         ]
       : [];
 
+    const notes = docs?.note ? [u('heading', { depth: 2 }, [u('text', 'Note')]), ...parseFragment(docs.note)] : [];
+
+    const printCode = (value: unknown): string =>
+      Array.isArray(value)
+        ? `[${value.map(printCode).join(', ')}]`
+        : typeof value === 'function'
+          ? value.toString()
+          : JSON.stringify(value).replace(/([,:])/g, '$1 ');
+
     const argsText = args
       ? [
           ...parseFragment(
@@ -111,10 +122,7 @@ for await (const dir of directories) {
           ...parseFragment(
             `\`\`\`\n${Object.entries(args)
               .filter(([key]) => key !== 'binaries')
-              .map(
-                ([key, value]) =>
-                  `${key}: ${typeof value === 'function' ? value.toString() : JSON.stringify(value).replace(/([,:])/g, '$1 ')}`
-              )
+              .map(([key, value]) => `${key}: ${printCode(value)}`)
               .join('\n')}\n\`\`\``
           ),
           ...parseFragment(
@@ -131,8 +139,8 @@ for await (const dir of directories) {
       frontmatter,
       u('heading', { depth: 2 }, [u('text', 'Enabled')]),
       ...enabledText,
-      ...notes,
       ...defaultConfig,
+      ...notes,
       ...argsText,
       ...generated,
     ]);
