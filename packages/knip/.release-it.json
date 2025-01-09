@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/release-it@17/schema/release-it.json",
+  "$schema": "https://unpkg.com/release-it@18/schema/release-it.json",
   "hooks": {
     "before:init": [
       "bun run lint",
