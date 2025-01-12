@@ -14,8 +14,8 @@ test('Find unused enum members', async () => {
   });
 
   assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
-  assert(issues.enumMembers['members.ts']['B_Unused']);
-  assert(issues.enumMembers['members.ts']['D_Key']);
+  assert(issues.enumMembers['members.ts']['MyEnum.B_Unused']);
+  assert(issues.enumMembers['members.ts']['MyEnum.D_Key']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -33,9 +33,9 @@ test('Find unused enum members (isIncludeEntryExports)', async () => {
   });
 
   assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
-  assert(issues.enumMembers['members.ts']['B_Unused']);
-  assert(issues.enumMembers['members.ts']['D_Key']);
-  assert(issues.enumMembers['index.ts']['UnusedMemberInEntryEnum']);
+  assert(issues.enumMembers['members.ts']['MyEnum.B_Unused']);
+  assert(issues.enumMembers['members.ts']['MyEnum.D_Key']);
+  assert(issues.enumMembers['index.ts']['EntryEnum.UnusedMemberInEntryEnum']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

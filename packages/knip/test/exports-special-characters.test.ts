@@ -20,31 +20,31 @@ test('Handle special characters in named exports and members', async () => {
 
   assert(issues.types['exports.ts']['$DollarType']);
 
-  assert(issues.classMembers['exports.ts']['$member']);
-  assert(issues.classMembers['exports.ts']['member$']);
-  assert(issues.classMembers['exports.ts']['$method']);
-  assert(issues.classMembers['exports.ts']['method$']);
+  assert(issues.classMembers['exports.ts']['DollarMembers.$member']);
+  assert(issues.classMembers['exports.ts']['DollarMembers.member$']);
+  assert(issues.classMembers['exports.ts']['DollarMembers.$method']);
+  assert(issues.classMembers['exports.ts']['DollarMembers.method$']);
 
-  assert(issues.enumMembers['exports.ts']['-']);
-  assert(issues.enumMembers['exports.ts'][',']);
-  assert(issues.enumMembers['exports.ts'][':']);
-  assert(issues.enumMembers['exports.ts']['?']);
-  assert(issues.enumMembers['exports.ts']['.']);
-  assert(issues.enumMembers['exports.ts']['(']);
-  assert(issues.enumMembers['exports.ts'][')']);
-  assert(issues.enumMembers['exports.ts']['[']);
-  assert(issues.enumMembers['exports.ts'][']']);
-  assert(issues.enumMembers['exports.ts']['{']);
-  assert(issues.enumMembers['exports.ts']['}']);
-  assert(issues.enumMembers['exports.ts']['@']);
-  assert(issues.enumMembers['exports.ts']['*']);
-  assert(issues.enumMembers['exports.ts']['/']);
-  assert(issues.enumMembers['exports.ts']['\\\\']);
-  assert(issues.enumMembers['exports.ts']['+']);
-  assert(issues.enumMembers['exports.ts']['|']);
-  assert(issues.enumMembers['exports.ts']['$']);
-  assert(issues.enumMembers['exports.ts']['Slash']);
-  assert(issues.enumMembers['exports.ts']['Space']);
+  assert(issues.enumMembers['exports.ts']['Characters.-']);
+  assert(issues.enumMembers['exports.ts']['Characters.,']);
+  assert(issues.enumMembers['exports.ts']['Characters.:']);
+  assert(issues.enumMembers['exports.ts']['Characters.?']);
+  assert(issues.enumMembers['exports.ts']['Characters..']);
+  assert(issues.enumMembers['exports.ts']['Characters.(']);
+  assert(issues.enumMembers['exports.ts']['Characters.)']);
+  assert(issues.enumMembers['exports.ts']['Characters.[']);
+  assert(issues.enumMembers['exports.ts']['Characters.]']);
+  assert(issues.enumMembers['exports.ts']['Characters.{']);
+  assert(issues.enumMembers['exports.ts']['Characters.}']);
+  assert(issues.enumMembers['exports.ts']['Characters.@']);
+  assert(issues.enumMembers['exports.ts']['Characters.*']);
+  assert(issues.enumMembers['exports.ts']['Characters./']);
+  assert(issues.enumMembers['exports.ts']['Characters.\\\\']);
+  assert(issues.enumMembers['exports.ts']['Characters.+']);
+  assert(issues.enumMembers['exports.ts']['Characters.|']);
+  assert(issues.enumMembers['exports.ts']['Characters.$']);
+  assert(issues.enumMembers['exports.ts']['Characters.Slash']);
+  assert(issues.enumMembers['exports.ts']['Characters.Space']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

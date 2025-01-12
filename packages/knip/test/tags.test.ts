@@ -20,14 +20,14 @@ test('Include or exclude tagged exports (default)', async () => {
   assert(issues.exports['tags.ts']['UnusedInternal']);
   assert(issues.exports['tags.ts']['UnusedCustomAndInternal']);
   assert(issues.exports['tags.ts']['MyCustomClass']);
-  assert(issues.classMembers['tags.ts']['UnusedUntagged']);
-  assert(issues.classMembers['tags.ts']['UnusedCustom']);
-  assert(issues.classMembers['tags.ts']['UnusedInternal']);
-  assert(issues.classMembers['tags.ts']['UnusedCustomAndInternal']);
-  assert(issues.enumMembers['tags.ts']['UnusedUntagged']);
-  assert(issues.enumMembers['tags.ts']['UnusedCustom']);
-  assert(issues.enumMembers['tags.ts']['UnusedInternal']);
-  assert(issues.enumMembers['tags.ts']['UnusedCustomAndInternal']);
+  assert(issues.classMembers['tags.ts']['MyClass.UnusedUntagged']);
+  assert(issues.classMembers['tags.ts']['MyClass.UnusedCustom']);
+  assert(issues.classMembers['tags.ts']['MyClass.UnusedInternal']);
+  assert(issues.classMembers['tags.ts']['MyClass.UnusedCustomAndInternal']);
+  assert(issues.enumMembers['tags.ts']['MyEnum.UnusedUntagged']);
+  assert(issues.enumMembers['tags.ts']['MyEnum.UnusedCustom']);
+  assert(issues.enumMembers['tags.ts']['MyEnum.UnusedInternal']);
+  assert(issues.enumMembers['tags.ts']['MyEnum.UnusedCustomAndInternal']);
   assert(issues.types['tags.ts']['MyCustomEnum']);
 
   assert.deepEqual(counters, {
@@ -73,10 +73,10 @@ test('Include or exclude tagged exports (exclude)', async () => {
   assert(issues.exports['unimported.ts']['unimportedUntagged']);
   assert(issues.exports['tags.ts']['UnusedUntagged']);
   assert(issues.exports['tags.ts']['UnusedInternal']);
-  assert(issues.classMembers['tags.ts']['UnusedUntagged']);
-  assert(issues.classMembers['tags.ts']['UnusedInternal']);
-  assert(issues.enumMembers['tags.ts']['UnusedUntagged']);
-  assert(issues.enumMembers['tags.ts']['UnusedInternal']);
+  assert(issues.classMembers['tags.ts']['MyClass.UnusedUntagged']);
+  assert(issues.classMembers['tags.ts']['MyClass.UnusedInternal']);
+  assert(issues.enumMembers['tags.ts']['MyEnum.UnusedUntagged']);
+  assert(issues.enumMembers['tags.ts']['MyEnum.UnusedInternal']);
 
   assert.deepEqual(
     tagHints,

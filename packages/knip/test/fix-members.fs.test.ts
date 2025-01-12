@@ -55,12 +55,12 @@ export enum Fruits {
     isFix: true,
   });
 
-  assert(issues.enumMembers['enums.ts']['orange']);
-  assert(issues.enumMembers['enums.ts']['North']);
-  assert(issues.enumMembers['enums.ts']['South']);
-  assert(issues.enumMembers['enums.ts']['West']);
-  assert(issues.classMembers['class.ts']['Key']);
-  assert(issues.classMembers['class.ts']['unusedGetter']);
+  assert(issues.enumMembers['enums.ts']['Fruits.orange']);
+  assert(issues.enumMembers['enums.ts']['Directions.North']);
+  assert(issues.enumMembers['enums.ts']['Directions.South']);
+  assert(issues.enumMembers['enums.ts']['Directions.West']);
+  assert(issues.classMembers['class.ts']['Rectangle.Key']);
+  assert(issues.classMembers['class.ts']['Rectangle.unusedGetter']);
 
   for (const [fileName, before, after] of tests) {
     const filePath = join(cwd, fileName);

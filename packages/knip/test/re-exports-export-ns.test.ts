@@ -14,7 +14,7 @@ test('Find re-exports through namespaces (2)', async () => {
   });
 
   assert(issues.exports['4-leaf-C.ts']['fnC']);
-  assert(issues.enumMembers['4-leaf-A.ts']['UnusedProp']);
+  assert(issues.enumMembers['4-leaf-A.ts']['EnumA.UnusedProp']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -35,7 +35,7 @@ test('Find re-exports through namespaces (2) including entry files', async () =>
   assert(issues.exports['index.ts']['default']);
   assert(issues.exports['4-leaf-C.ts']['fnC']);
   // assert(issues.nsExports['1-root.ts']['exportedFnOnNs']); // only when `nsExports` is included
-  assert(issues.enumMembers['4-leaf-A.ts']['UnusedProp']);
+  assert(issues.enumMembers['4-leaf-A.ts']['EnumA.UnusedProp']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

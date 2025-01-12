@@ -13,8 +13,8 @@ test('Respect ignored members, including string-to-regex, show config hints', as
     cwd,
   });
 
-  assert(issues.classMembers['MyClass.ts']['implemented']);
-  assert(issues.enumMembers['enums.ts']['Down']);
+  assert(issues.classMembers['MyClass.ts']['MyClass.implemented']);
+  assert(issues.enumMembers['enums.ts']['Direction.Down']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

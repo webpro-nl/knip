@@ -74,11 +74,14 @@ export class IssueCollector {
     if (this.filters.dir && !issue.filePath.startsWith(`${this.filters.dir}/`)) return;
     if (this.isMatch(issue.filePath)) return;
     const key = relative(this.cwd, issue.filePath);
-    issue.severity = this.rules[issue.type];
-    const issues = this.issues[issue.type];
+    const { type } = issue;
+    issue.severity = this.rules[type];
+    const issues = this.issues[type];
     issues[key] = issues[key] ?? {};
-    if (!issues[key][issue.symbol]) {
-      issues[key][issue.symbol] = issue;
+    const symbol =
+      type.endsWith('Members') && issue.parentSymbol ? `${issue.parentSymbol}.${issue.symbol}` : issue.symbol;
+    if (!issues[key][symbol]) {
+      issues[key][symbol] = issue;
       this.counters[issue.type]++;
     }
     return issue;
