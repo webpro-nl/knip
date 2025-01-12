@@ -23,7 +23,7 @@ export const isStartsLikePackageName = (specifier: string) => /^(@[a-z0-9._]|[a-
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
 
-const stripNodeModulesFromPath = (command: string) => command.replace(/^(\.\/)?node_modules\//, '');
+const stripNodeModulesFromPath = (command: string) => command.replace(/(?:\.{0,2}\/)*node_modules\//, '');
 
 export const extractBinary = (command: string) =>
   stripVersionFromSpecifier(

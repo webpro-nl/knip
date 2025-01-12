@@ -3,6 +3,7 @@ import { pluginArgsMap } from '../plugins.js';
 import type { BinaryResolver } from '../types/config.js';
 import { compact } from '../util/array.js';
 import { toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.js';
+import { extractBinary } from '../util/modules.js';
 import { resolve as fallbackResolve } from './fallback.js';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
@@ -38,7 +39,10 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
   if (opts.positional && parsed._[0]) {
     const id = parsed._[0]; // let's start out safe, but sometimes we'll want more
     if (isGlobLike(id)) positionals.push(toEntry(id));
-    else positionals.push(toDeferResolveEntry(id));
+    else {
+      if (id.includes('node_modules/.bin/')) positionals.push(toBinary(extractBinary(id)));
+      else positionals.push(toDeferResolveEntry(id));
+    }
   }
 
   const mapToParsedKey = (id: string) => parsed[id];

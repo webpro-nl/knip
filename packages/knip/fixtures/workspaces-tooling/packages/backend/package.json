@@ -1,10 +1,13 @@
 {
   "name": "@workspaces-tooling/backend",
   "scripts": {
-    "lint": "eslint"
+    "lint": "eslint",
+    "typeorm": "node --require @swc/register ../../node_modules/.bin/typeorm"
   },
   "devDependencies": {
     "eslint": "*",
-    "eslint-config-custom": "*"
+    "eslint-config-custom": "*",
+    "typeorm": "*",
+    "@swc/register": "*"
   }
 }

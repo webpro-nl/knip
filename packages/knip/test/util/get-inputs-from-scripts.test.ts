@@ -63,8 +63,8 @@ test('getInputsFromScripts (node -r)', () => {
   t('node --experimental-loader ts-node/esm/transpile-only script.js', [toBinary('node'), toDeferResolveEntry('script.js'), toDeferResolve('ts-node/esm/transpile-only')]);
   t('node -r @scope/package/register ./dir', [toBinary('node'), toDeferResolveEntry('./dir'), toDeferResolve('@scope/package/register')]);
   t('node -r @scope/package/register ./dir/index', [toBinary('node'), toDeferResolveEntry('./dir/index'), toDeferResolve('@scope/package/register')]);
-  t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toDeferResolveEntry('node_modules/.bin/exec'), toDeferResolve('pkg/register')]);
-  t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toDeferResolveEntry('node_modules/.bin/jest'), toDeferResolve('ts-node/register')]);
+  t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toBinary('exec'), toDeferResolve('pkg/register')]);
+  t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toDeferResolve('ts-node/register')]);
 });
 
 test('getInputsFromScripts (ts-node)', () => {
