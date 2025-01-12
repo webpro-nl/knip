@@ -404,6 +404,10 @@
           "title": "metro plugin configuration (https://knip.dev/reference/plugins/metro)",
           "$ref": "#/definitions/plugin"
         },
+        "miniprogram": {
+          "title": "miniprogram plugin configuration (https://knip.dev/reference/plugins/miniprogram)",
+          "$ref": "#/definitions/plugin"
+        },
         "mocha": {
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/mocha)",
           "$ref": "#/definitions/plugin"

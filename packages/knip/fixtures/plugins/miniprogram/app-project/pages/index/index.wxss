@@ -1,0 +1,6 @@
+@import "/styles/missing-theme.wxss";
+@import "/styles/used-theme.wxss";
+
+.container {
+  padding: 20px;
+} 

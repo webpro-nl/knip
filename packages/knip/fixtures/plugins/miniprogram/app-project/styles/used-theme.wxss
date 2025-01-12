@@ -1,0 +1,4 @@
+.unused-theme {
+  color: #333;
+  background: #fff;
+} 

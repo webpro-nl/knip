@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@2/schema.json",
+  "paths": {
+    "@components/*": ["components/*"],
+    "@utils/*": ["utils/*"],
+    "@styles/*": ["styles/*"],
+    "~/*": ["*"]
+  }
+} 

@@ -1,0 +1,7 @@
+var common = require('./missing-common.wxs');
+var usedDate = require('./used-date.wxs');
+
+module.exports = {
+  format: common.format,
+  usedDate: usedDate.format
+}; 

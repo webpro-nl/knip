@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "missing-button": "@components/missing-button",
+    "missing-helper": "~/utils/missing-helper",
+    "missing-footer": "./missing-footer",
+    "used-counter": "../used-counter"
+  }
+} 

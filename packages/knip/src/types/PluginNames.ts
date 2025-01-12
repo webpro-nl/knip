@@ -32,6 +32,7 @@ export type PluginName =
   | 'lost-pixel'
   | 'markdownlint'
   | 'metro'
+  | 'miniprogram'
   | 'mocha'
   | 'moonrepo'
   | 'msw'
@@ -124,6 +125,7 @@ export const pluginNames = [
   'lost-pixel',
   'markdownlint',
   'metro',
+  'miniprogram',
   'mocha',
   'moonrepo',
   'msw',
