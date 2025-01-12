@@ -29,3 +29,10 @@ internalInterfaceUsage;
 export interface OnlyTypedUsage {
   id: string;
 }
+
+export interface NeverImported {
+  used: boolean;
+  unused: boolean;
+}
+
+const neverImported: NeverImported = { used: true };

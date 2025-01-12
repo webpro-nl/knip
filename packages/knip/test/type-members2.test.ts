@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/type-members2');
 
-test('Find unused type and interface members', async () => {
+test('Find unused type and interface members (2)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

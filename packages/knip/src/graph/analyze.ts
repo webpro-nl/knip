@@ -7,7 +7,7 @@ import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
 import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
-import { getType, hasStrictlyEnumReferences, hasStrictlyNsReferences } from '../util/has-strictly-ns-references.js';
+import { getType, hasStrictlyNsReferences } from '../util/has-strictly-ns-references.js';
 import { getIsIdentifierReferencedHandler } from '../util/is-identifier-referenced.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { findMatch } from '../util/regex.js';
@@ -76,6 +76,8 @@ export const analyze = async (options: AnalyzeOptions) => {
         ? exportedItem.type !== 'unknown' && !!ignoreExportsUsedInFile[exportedItem.type]
         : ignoreExportsUsedInFile));
 
+  const isUnignoreMembers = typeof ignoreExportsUsedInFile === 'object' && !ignoreExportsUsedInFile.member;
+
   const analyzeGraph = async () => {
     if (isReportValues || isReportTypes) {
       streamer.cast('Connecting the dots...');
@@ -139,10 +141,9 @@ export const analyze = async (options: AnalyzeOptions) => {
 
               if (traceNode) printTrace(traceNode, filePath, identifier);
 
-              if (isReferenced) {
+              if (isReferenced || isExportedItemReferenced(exportedItem)) {
                 if (report.enumMembers && exportedItem.type === 'enum') {
-                  if (!report.nsTypes && importsForExport.refs.has(identifier)) continue;
-                  if (hasStrictlyEnumReferences(importsForExport, identifier)) continue;
+                  if (importsForExport.refs.has(identifier)) continue; // consider members referenced (isObjectEnumerationCallExpressionArgument)
 
                   for (const member of exportedItem.members) {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
@@ -184,27 +185,19 @@ export const analyze = async (options: AnalyzeOptions) => {
                   isReportTypeMembers &&
                   (exportedItem.type === 'interface' || exportedItem.type === 'type')
                 ) {
-                  if (!principal.shouldAnalyzeTypeMembers(filePath, exportedItem)) continue;
-
                   const members = exportedItem.members.filter(
                     member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
                   );
+
+                  if (members.length === 0 || !principal.shouldAnalyzeTypeMembers(filePath, exportedItem)) continue;
+
                   for (const member of principal.findUnusedMembers(filePath, members)) {
                     const id = `${identifier}.${member.identifier}`;
-                    const { isReferenced } = isIdentifierReferenced(filePath, id, true);
+                    const { isReferenced: isMemberReferenced } = isIdentifierReferenced(filePath, id, true);
                     const isIgnored = shouldIgnoreTags(member.jsDocTags);
 
-                    if (!isReferenced) {
-                      if (isIgnored) {
-                        const identifier = `${exportedItem.identifier}.${member.identifier}`;
-                        for (const tagName of exportedItem.jsDocTags) {
-                          if (tags[1].includes(tagName.replace(/^\@/, ''))) {
-                            collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
-                          }
-                        }
-                        continue;
-                      }
-
+                    if (!isMemberReferenced && !(!isReferenced && !isUnignoreMembers)) {
+                      if (isIgnored) continue;
                       const isIssueAdded = collector.addIssue({
                         type: 'typeMembers',
                         filePath,
@@ -217,6 +210,13 @@ export const analyze = async (options: AnalyzeOptions) => {
                       });
 
                       if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
+                    } else if (isIgnored) {
+                      const identifier = `${exportedItem.identifier}.${member.identifier}`;
+                      for (const tagName of exportedItem.jsDocTags) {
+                        if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                          collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
+                        }
+                      }
                     }
                   }
                 }

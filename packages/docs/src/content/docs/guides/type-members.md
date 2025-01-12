@@ -36,7 +36,7 @@ fixture folders ([1][1] & [2][2]) for slightly more involved examples.
 In the next example, `Dog.wings` is reported as unused:
 
 ```ts
-interface Dog {
+export interface Dog {
   legs: number;
   wings: boolean;
 }
@@ -51,12 +51,12 @@ const charlie: Dog = {
 In the next example, `Pet.fins` and `Cat.horn` are reported as unused:
 
 ```ts
-type Pet = {
+export type Pet = {
   legs: number;
   fins: boolean;
 };
 
-type Cat = {
+export type Cat = {
   legs: Pet['legs'];
   horn: boolean;
 };
@@ -136,6 +136,20 @@ const App = () => <Component />;
 - Knip tries to consider only **relevant** interfaces and types.
 - Don't start exporting or reusing interfaces and types for the sake of Knip
   detecting unused properties.
+
+Having said that, `ignoreExportsUsedInFile` can be enabled for types and
+interfaces, and then unused members can be "un-ignored" (i.e. reported) like so:
+
+```json
+{
+  "include": ["typeMembers"],
+  "ignoreExportsUsedInFile": {
+    "type": true,
+    "interface": true,
+    "member": false
+  }
+}
+```
 
 [1]:
   https://github.com/webpro-nl/knip/tree/feat/unused-exported-type-members/packages/knip/fixtures/type-members

@@ -11,11 +11,13 @@ test('Find unused type and interface members', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
+    tags: [[], ['flarp']],
   });
 
   assert(issues.typeMembers['interfaces.ts']['MyInterface.unusedInterfaceMember']);
   assert(issues.typeMembers['interfaces.ts']['MyInterface.unused-interface-quoted']);
   assert(issues.typeMembers['interfaces.ts']['ExtendedInterface.boolA']);
+  assert(issues.typeMembers['interfaces.ts']['NeverImported.unused']);
 
   assert(issues.typeMembers['types.ts']['MyType.unusedTypeMember']);
   assert(issues.typeMembers['types.ts']['MyType.unused-type-quoted']);
@@ -30,7 +32,7 @@ test('Find unused type and interface members', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    typeMembers: 12,
+    typeMembers: 13,
     processed: 4,
     total: 4,
   });

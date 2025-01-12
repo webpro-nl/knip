@@ -1,6 +1,11 @@
 {
   "name": "@fixtures/type-members",
   "knip": {
+    "ignoreExportsUsedInFile": {
+      "interface": true,
+      "member": false
+    },
+    "ignoreMembers": ["ignoredByString", ".*ByRegEx.+"],
     "include": ["typeMembers"]
   }
 }

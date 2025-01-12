@@ -8,6 +8,15 @@ export type MyType = {
 
   unusedTypeMember?: boolean;
   'unused-type-quoted'?: boolean;
+
+  ignoredByString: boolean;
+  ignoredByRegExp: boolean;
+
+  /** @public */
+  ignoredByKnownTag: boolean;
+
+  /** @flarp */
+  ignoredByCustomTag: boolean;
 };
 
 export type WithIntersection = { boolB?: boolean } & Omit<MyType, 'usedInExtends' | 'usedInExtendsInternal'>;
