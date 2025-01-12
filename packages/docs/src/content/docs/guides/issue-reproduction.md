@@ -1,5 +1,7 @@
 ---
 title: Issue Reproduction
+sidebar:
+  order: 4
 ---
 
 If you encounter an issue or false positives when using Knip, you can [open an

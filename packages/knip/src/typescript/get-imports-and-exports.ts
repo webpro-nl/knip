@@ -363,6 +363,15 @@ const getImportsAndExports = (
                   // Pattern: for (const x in NS) { }
                   // Pattern: for (const x of NS) { }
                   imports.refs.add(id);
+                } else if (ts.isTypeReferenceNode(node.parent)) {
+                  // Pattern: Interface['Member']
+                  if (ts.isIndexedAccessTypeNode(node.parent.parent)) {
+                    const indexType = node.parent.parent.indexType;
+                    if (ts.isLiteralTypeNode(indexType) && ts.isStringLiteral(indexType.literal)) {
+                      const members = [indexType.literal.text];
+                      addNsMemberRefs(imports, id, members);
+                    }
+                  }
                 }
               }
             }

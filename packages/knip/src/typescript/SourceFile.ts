@@ -13,6 +13,17 @@ interface SymbolWithExportSymbol extends ts.Symbol {
   exportSymbol?: ts.Symbol;
 }
 
+export interface SymbolWithLinks extends ts.Symbol {
+  links?: {
+    mapper?: {
+      target: {
+        aliasSymbol?: ts.Symbol;
+        symbol: ts.Symbol;
+      };
+    };
+  };
+}
+
 type PragmaMap = {
   arguments: {
     factory?: string;

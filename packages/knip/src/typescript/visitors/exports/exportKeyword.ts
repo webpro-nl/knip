@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { FIX_FLAGS } from '../../../constants.js';
-import type { Fix } from '../../../types/exports.js';
+import type { ExportNodeMember, Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import { compact } from '../../../util/array.js';
 import {
@@ -13,7 +13,7 @@ import {
 import { isModule } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
 
-export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassMembers }) => {
+export default visit(isModule, (node, { isFixExports, isFixTypes, isReportTypeMembers, isReportClassMembers }) => {
   const exportKeyword = getExportKeywordNode(node);
 
   if (exportKeyword) {
@@ -45,6 +45,7 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
             })
           );
         }
+
         if (ts.isArrayBindingPattern(declaration.name)) {
           // Pattern: export const [name1, name2] = [];
           return compact(
@@ -108,18 +109,55 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
       return { node, identifier, type: SymbolType.CLASS, pos, members, fix };
     }
 
+    const getMember = (member: ts.TypeElement, parentPath = ''): ExportNodeMember[] => {
+      if (!member.name) return [];
+
+      const memberName = stripQuotes(member.name.getText());
+      const identifier = parentPath ? `${parentPath}.${memberName}` : memberName;
+
+      const memberEntry = {
+        node: member,
+        identifier,
+        pos: member.name.getStart(),
+        type: SymbolType.MEMBER,
+        fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
+      };
+
+      if (ts.isPropertySignature(member) && member.type && ts.isTypeLiteralNode(member.type)) {
+        const nestedMembers = member.type.members.flatMap(child => getMember(child, identifier));
+        return [memberEntry, ...nestedMembers];
+      }
+
+      return [memberEntry];
+    };
+    const getMembersFromTypeNode = (typeNode: ts.TypeNode) => {
+      if (ts.isTypeLiteralNode(typeNode)) {
+        return typeNode.members.flatMap(member => getMember(member));
+      }
+
+      if (ts.isUnionTypeNode(typeNode) || ts.isIntersectionTypeNode(typeNode)) {
+        return typeNode.types.flatMap(type =>
+          ts.isTypeLiteralNode(type) ? type.members.flatMap(member => getMember(member)) : []
+        );
+      }
+
+      return [];
+    };
+
     if (ts.isTypeAliasDeclaration(node)) {
       const identifier = node.name.getText();
       const pos = node.name.getStart();
       const fix = getTypeFix(exportKeyword);
-      return { node, identifier, type: SymbolType.TYPE, pos, fix };
+      const members = isReportTypeMembers ? getMembersFromTypeNode(node.type) : [];
+      return { node, identifier, type: SymbolType.TYPE, pos, members, fix };
     }
 
     if (ts.isInterfaceDeclaration(node)) {
       const identifier = defaultKeyword ? 'default' : node.name.getText();
       const pos = node.name.getStart();
       const fix = getTypeFix(exportKeyword);
-      return { node, identifier, type: SymbolType.INTERFACE, pos, fix };
+      const members = isReportTypeMembers ? node.members.flatMap(m => getMember(m)) : [];
+      return { node, identifier, type: SymbolType.INTERFACE, pos, members, fix };
     }
 
     if (ts.isEnumDeclaration(node)) {

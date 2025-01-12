@@ -80,8 +80,9 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLogObject('*', 'Included issue types', report);
 
+  const isReportTypeMembers = report.typeMembers;
   const isReportClassMembers = report.classMembers;
-  const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
+  const isSkipLibs = !(isIncludeLibs || isReportTypeMembers || isReportClassMembers);
 
   const collector = new IssueCollector({ cwd, rules, filters });
 

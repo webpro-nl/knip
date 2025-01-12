@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/type-members2",
+  "knip": {
+    "include": ["typeMembers"]
+  }
+}
