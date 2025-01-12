@@ -57,4 +57,4 @@ export interface MiniprogramAnalysisResult {
   }>;
   workers?: MiniprogramDependency[];
   tabBarIcons?: MiniprogramDependency[];
-} 
+}

@@ -26,7 +26,7 @@ test('parseWxml should parse dependencies correctly', () => {
     "import './item.wxml'",
     "import '/templates/header'",
     "import '/utils/format.wxs'",
-    "import './helper.wxs'"
+    "import './helper.wxs'",
   ].join('\n');
 
   assert.equal(result, expected);
@@ -54,7 +54,7 @@ test('parseWxss should parse dependencies correctly', () => {
     "@import '/styles/theme.wxss'",
     "@import './local.wxss'",
     "@import '@styles/alias.wxss'",
-    "@import '~/styles/root.wxss'"
+    "@import '~/styles/root.wxss'",
   ].join('\n');
 
   assert.equal(result, expected);
@@ -82,7 +82,7 @@ test('parseWxs should parse dependencies correctly', () => {
     "import '/utils/common.wxs'",
     "import './helper.wxs'",
     "import '@utils/format.wxs'",
-    "import '~/utils/util.wxs'"
+    "import '~/utils/util.wxs'",
   ].join('\n');
 
   assert.equal(result, expected);
@@ -91,4 +91,4 @@ test('parseWxs should parse dependencies correctly', () => {
 test('parseWxs should handle empty or invalid input', () => {
   assert.equal(parseWxs('', 'test.wxs'), '');
   assert.equal(parseWxs('invalid javascript', 'test.wxs'), '');
-}); 
+});

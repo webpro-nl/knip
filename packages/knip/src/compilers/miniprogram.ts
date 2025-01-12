@@ -3,7 +3,7 @@ import type { HasDependency } from './types.js';
 
 // Enable compilers when miniprogram-api-typings is present (indicating a Mini Program project)
 const isMiniprogramProject = (hasDependency: HasDependency) => {
-    return hasDependency('miniprogram-api-typings');
+  return hasDependency('miniprogram-api-typings');
 };
 
 // We don't parse JSON files in the compiler because:
@@ -13,7 +13,7 @@ const isMiniprogramProject = (hasDependency: HasDependency) => {
 // 2. The only purpose of this JSON compiler is to make getCompilerExtensions include
 //    JSON files as project files, so they can be analyzed for usage
 const parseJson = (text: string) => {
-    return text;
+  return text;
 };
 
 const wxml = { condition: isMiniprogramProject, compiler: parseWxml };

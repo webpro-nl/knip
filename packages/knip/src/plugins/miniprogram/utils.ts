@@ -31,7 +31,7 @@ export const isMiniprogramProject = (cwd: string, hasDependency: HasDependency):
  * 1. Absolute paths (starting with '/') - resolved relative to project root
  * 2. Alias paths (matching configured aliases) - resolved using the first target path
  * 3. Relative paths - resolved relative to project root
- * 
+ *
  * @param path - The path to resolve (can be absolute, aliased, or relative)
  * @param cwd - The project root directory
  * @param paths - Optional path alias configuration mapping aliases to target paths
@@ -76,7 +76,7 @@ interface MiniprogramAnalysisOptions {
 /**
  * Analyze a Mini Program project starting from app.json
  * Returns all pages, components, and other assets used in the project
- * 
+ *
  * File structure:
  * - Components:
  *   Required:
@@ -85,7 +85,7 @@ interface MiniprogramAnalysisOptions {
  *   - .wxml (component template)
  *   Optional:
  *   - .wxss (component styles)
- * 
+ *
  * - Pages:
  *   Required:
  *   - .json (page config)
@@ -94,20 +94,23 @@ interface MiniprogramAnalysisOptions {
  *   Optional:
  *   - .wxss (page styles)
  */
-export const analyzeMiniprogramProject = (cwd: string, options: MiniprogramAnalysisOptions = {}): MiniprogramAnalysisResult => {
+export const analyzeMiniprogramProject = (
+  cwd: string,
+  options: MiniprogramAnalysisOptions = {}
+): MiniprogramAnalysisResult => {
   const result: MiniprogramAnalysisResult = {
     pages: [],
     components: [],
     subPackagePages: [],
     workers: [],
-    tabBarIcons: []
+    tabBarIcons: [],
   };
 
   // Read and parse app.json
   try {
     const appJsonPath = join(cwd, 'app.json');
     const appConfig = parseConfig<AppConfig>(appJsonPath);
-    
+
     if (!appConfig || typeof appConfig !== 'object') {
       console.error('Invalid app.json config', appJsonPath);
       return result;
@@ -115,20 +118,24 @@ export const analyzeMiniprogramProject = (cwd: string, options: MiniprogramAnaly
 
     // Add main pages
     if (Array.isArray(appConfig.pages)) {
-      result.pages.push(...appConfig.pages.map(page => ({
-        specifier: page,
-        resolvedPath: resolveMiniprogramPath(page, cwd, options.paths),
-        containingFile: appJsonPath
-      })));
+      result.pages.push(
+        ...appConfig.pages.map(page => ({
+          specifier: page,
+          resolvedPath: resolveMiniprogramPath(page, cwd, options.paths),
+          containingFile: appJsonPath,
+        }))
+      );
     }
 
     // Add global components
     if (appConfig.usingComponents) {
-      result.components.push(...Object.values(appConfig.usingComponents).map(component => ({
-        specifier: component,
-        resolvedPath: resolveMiniprogramPath(component, cwd, options.paths),
-        containingFile: appJsonPath
-      })));
+      result.components.push(
+        ...Object.values(appConfig.usingComponents).map(component => ({
+          specifier: component,
+          resolvedPath: resolveMiniprogramPath(component, cwd, options.paths),
+          containingFile: appJsonPath,
+        }))
+      );
     }
 
     // Add worker
@@ -136,7 +143,7 @@ export const analyzeMiniprogramProject = (cwd: string, options: MiniprogramAnaly
       result.workers?.push({
         specifier: appConfig.workers,
         resolvedPath: resolveMiniprogramPath(appConfig.workers, cwd, options.paths),
-        containingFile: appJsonPath
+        containingFile: appJsonPath,
       });
     }
 
@@ -147,14 +154,14 @@ export const analyzeMiniprogramProject = (cwd: string, options: MiniprogramAnaly
           result.tabBarIcons?.push({
             specifier: tab.iconPath,
             resolvedPath: resolveMiniprogramPath(tab.iconPath, cwd, options.paths),
-            containingFile: appJsonPath
+            containingFile: appJsonPath,
           });
         }
         if (tab.selectedIconPath) {
           result.tabBarIcons?.push({
             specifier: tab.selectedIconPath,
             resolvedPath: resolveMiniprogramPath(tab.selectedIconPath, cwd, options.paths),
-            containingFile: appJsonPath
+            containingFile: appJsonPath,
           });
         }
       }
@@ -172,15 +179,17 @@ export const analyzeMiniprogramProject = (cwd: string, options: MiniprogramAnaly
         // If filePath is already absolute, use it directly
         const configPath = filePath.startsWith('/') ? `${filePath}.json` : join(cwd, `${filePath}.json`);
         const config = parseConfig<ComponentConfig>(configPath);
-        
+
         if (config?.usingComponents) {
           const components = Object.values(config.usingComponents);
-          result.components.push(...components.map(component => ({
-            specifier: component,
-            resolvedPath: resolveMiniprogramPath(component, cwd, options.paths),
-            containingFile: configPath
-          })));
-          
+          result.components.push(
+            ...components.map(component => ({
+              specifier: component,
+              resolvedPath: resolveMiniprogramPath(component, cwd, options.paths),
+              containingFile: configPath,
+            }))
+          );
+
           // Recursively process components
           for (const component of components) {
             const resolvedPath = resolveMiniprogramPath(component, cwd, options.paths);
@@ -196,8 +205,6 @@ export const analyzeMiniprogramProject = (cwd: string, options: MiniprogramAnaly
     for (const page of result.pages) {
       findComponents(page.resolvedPath, page.containingFile);
     }
-
-
   } catch (error) {
     console.error('Error analyzing Mini Program project:', error);
   }

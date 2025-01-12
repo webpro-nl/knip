@@ -16,7 +16,7 @@ test('should analyze miniprogram project', () => {
 
   // Check components
   assert.equal(result.components.length, 5);
-  
+
   // Check global components from app.json
   const missingHeader = result.components.find(c => c.specifier === '/components/missing-header/index');
   assert.ok(missingHeader);
@@ -68,13 +68,13 @@ test('should handle path aliases', () => {
     paths: {
       '@components': ['components'],
       '@utils': ['utils'],
-      '~': ['.']
-    }
+      '~': ['.'],
+    },
   });
 
   // Check aliased components
   assert.equal(result.components.length, 5);
-  
+
   // Check global components from app.json
   const missingHeader = result.components.find(c => c.specifier === '/components/missing-header/index');
   assert.ok(missingHeader);
@@ -101,4 +101,4 @@ test('should handle path aliases', () => {
   assert.ok(pageFooter);
   assert.equal(pageFooter.resolvedPath, join(fixturesDir, 'missing-footer'));
   assert.equal(pageFooter.containingFile, join(fixturesDir, 'pages/index/index.json'));
-}); 
+});
