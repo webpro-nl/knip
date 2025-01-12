@@ -41,6 +41,7 @@
     "lint": "biome lint ../..",
     "format": "biome format --write .",
     "test": "bun test test/*.test.ts test/**/*.test.ts",
+    "test:watch": "bun test test/*.test.ts test/**/*.test.ts --reporter=junit --reporter-outfile=junit.xml || bun test --watch $(grep -o 'name=\"[^\"]*\".*failures=\"[^0]' junit.xml | grep -v 'name=\"bun test\"' | grep -o 'name=\"[^\"]*\"' | cut -d'\"' -f2)",
     "test:node": "glob -c \"npx -y tsx --test --import ./transform-test.js\" \"test/**/*.test.ts\"",
     "watch": "npm link && tsc --watch",
     "prebuild": "npm run generate-plugin-defs && node rmdir.js dist",
