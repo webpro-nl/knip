@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/dependency-cruiser",
+  "version": "*",
+  "devDependencies": {
+    "dependency-cruiser": "*"
+  },
+  "scripts": {
+    "test": "depcruise",
+    "test:custom": "depcruise --config custom-depcruise-config.js"
+  }
+} 

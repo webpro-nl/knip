@@ -11,6 +11,7 @@ import { default as commitlint } from './commitlint/index.js';
 import { default as cspell } from './cspell/index.js';
 import { default as cucumber } from './cucumber/index.js';
 import { default as cypress } from './cypress/index.js';
+import { default as dependencyCruiser } from './dependency-cruiser/index.js';
 import { default as dotenv } from './dotenv/index.js';
 import { default as drizzle } from './drizzle/index.js';
 import { default as eleventy } from './eleventy/index.js';
@@ -103,6 +104,7 @@ export const Plugins = {
   cspell,
   cucumber,
   cypress,
+  'dependency-cruiser': dependencyCruiser,
   dotenv,
   drizzle,
   eleventy,
