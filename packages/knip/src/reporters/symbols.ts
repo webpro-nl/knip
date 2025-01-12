@@ -13,6 +13,12 @@ const TRUNCATE_WIDTH = 40;
 const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? `${text.slice(0, TRUNCATE_WIDTH - 3)}...` : text);
 const truncateStart = (text: string, width: number) => (text.length > width ? `...${text.slice(-(width - 3))}` : text);
 
+const sortByPos = (a: Issue, b: Issue) => {
+  const [f, r, c] = a.filePath.split(':');
+  const [f2, r2, c2] = b.filePath.split(':');
+  return f === f2 ? (Number(r) === Number(r2) ? Number(c) - Number(c2) : Number(r) - Number(r2)) : f.localeCompare(f2);
+};
+
 const hl = (issue: Issue) => {
   if (issue.specifier && issue.specifier !== issue.symbol && issue.specifier.includes(issue.symbol)) {
     const parts = issue.specifier.split(issue.symbol);
@@ -38,7 +44,7 @@ const logIssueRecord = (issues: Issue[]) => {
     issue.isFixed && table.cell('fixed', print('(removed)'));
     table.newRow();
   }
-  console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
+  console.log(table.sort(sortByPos).print().trim());
 };
 
 export default ({ report, issues, tagHints, configurationHints, noConfigHints, isShowProgress }: ReporterOptions) => {
