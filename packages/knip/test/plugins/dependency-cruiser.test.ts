@@ -17,7 +17,6 @@ test('Find dependencies with the dependency-cruiser plugin', async () => {
   assert(issues.devDependencies['package.json']['dependency-cruiser']);
   assert(issues.binaries['package.json']['depcruise']);
 
-  console.log(issues)
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
