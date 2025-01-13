@@ -241,8 +241,8 @@ export default {
 
 ### `ignoreMembers`
 
-Array of class and enum members to exclude from the report. Regular expressions
-allowed. Example:
+Array of class, enum and type members to exclude from the report. Regular
+expressions allowed. Example:
 
 ```json title="knip.json"
 {
