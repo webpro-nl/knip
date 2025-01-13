@@ -109,6 +109,12 @@ const entriesByOption = (opts: TargetOptions): EntriesByOption =>
               typeof scriptStringOrObject === 'string' ? scriptStringOrObject : scriptStringOrObject.input
             )
           : [],
+      polyfills:
+        'polyfills' in opts && opts.polyfills
+          ? Array.isArray(opts.polyfills)
+            ? opts.polyfills
+            : [opts.polyfills]
+          : [],
       fileReplacements:
         'fileReplacements' in opts && opts.fileReplacements && Array.isArray(opts.fileReplacements)
           ? (opts.fileReplacements as FileReplacementsBuildOption).map(fileReplacement =>
