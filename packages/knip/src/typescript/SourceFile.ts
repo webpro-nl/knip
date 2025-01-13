@@ -13,13 +13,15 @@ interface SymbolWithExportSymbol extends ts.Symbol {
   exportSymbol?: ts.Symbol;
 }
 
+type Target = {
+  aliasSymbol?: ts.Symbol;
+  symbol: ts.Symbol;
+};
+
 export interface SymbolWithLinks extends ts.Symbol {
   links?: {
     mapper?: {
-      target: {
-        aliasSymbol?: ts.Symbol;
-        symbol: ts.Symbol;
-      };
+      target?: Target | { types: Target[] };
     };
   };
 }

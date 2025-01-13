@@ -343,7 +343,10 @@ export class ProjectPrincipal {
               const params: SymbolWithLinks[] = callSignatures[0].getParameters();
               for (const param of params) {
                 const target = param.links?.mapper?.target;
-                if (target && name === (target.aliasSymbol ?? target.symbol).name) return true;
+                if (target) {
+                  for (const type of 'types' in target ? target.types : [target])
+                    if ((type.aliasSymbol ?? type.symbol).name === name) return true;
+                }
               }
             }
           }
