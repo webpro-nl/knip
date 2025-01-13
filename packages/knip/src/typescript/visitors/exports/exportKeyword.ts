@@ -120,7 +120,9 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportTypeMe
         identifier,
         pos: member.name.getStart(),
         type: SymbolType.MEMBER,
-        fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
+        fix: isFixTypes
+          ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
+          : undefined,
       };
 
       if (ts.isPropertySignature(member) && member.type && ts.isTypeLiteralNode(member.type)) {

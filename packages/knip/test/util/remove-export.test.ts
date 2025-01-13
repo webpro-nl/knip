@@ -200,3 +200,18 @@ test('Clean export (FIX_FLAGS.EMPTY_DECLARATION)', () => {
     assert.deepEqual(removeExport(getOpts(text, 'type    EF')), ';');
   }
 });
+
+test('Clean export (FIX_FLAGS.TYPE_MEMBER)', () => {
+  {
+    const text = 'export type T = { usedMember: string; unusedMember: string }';
+    assert.deepEqual(removeExport(getOpts(text, 'unusedMember: string')), 'export type T = { usedMember: string;  }');
+  }
+
+  {
+    const text = 'export interface I { usedMember: string; unusedMember: string }';
+    assert.deepEqual(
+      removeExport(getOpts(text, 'unusedMember: string')),
+      'export interface I { usedMember: string;  }'
+    );
+  }
+});
