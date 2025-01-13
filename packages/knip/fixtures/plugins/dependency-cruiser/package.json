@@ -5,7 +5,9 @@
     "dependency-cruiser": "*"
   },
   "scripts": {
-    "test": "depcruise",
-    "test:custom": "depcruise --config custom-depcruise-config.js"
+    "test": "dependency-cruiser",
+    "test:custom": "depcruise --config custom-depcruise-config.js",
+    "test:baseline": "depcruise-baseline -c baseline.config.js",
+    "test:dependency-cruise": "dependency-cruise -c dependency-cruise.config.js"
   }
 } 
