@@ -13,8 +13,6 @@ test('Find dependencies with the dependency-cruiser plugin', async () => {
     cwd,
   });
 
-  console.log(issues);
-
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 4,
