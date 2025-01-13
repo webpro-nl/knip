@@ -116,6 +116,7 @@ interface Media {
 
 export interface PostWithUser extends Post {
   media?: Media[];
+  user: User;
 }
 
 export interface PostResponse {
