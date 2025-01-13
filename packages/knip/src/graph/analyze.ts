@@ -191,7 +191,12 @@ export const analyze = async (options: AnalyzeOptions) => {
 
                   if (members.length === 0 || !principal.shouldAnalyzeTypeMembers(filePath, exportedItem)) continue;
 
+                  const unused: string[] = [];
+                  const isParentUnused = (id: string) => id.includes('.') && unused.some(p => id.startsWith(`${p}.`));
+
                   for (const member of principal.findUnusedMembers(filePath, members)) {
+                    if (isParentUnused(member.identifier)) continue;
+
                     const id = `${identifier}.${member.identifier}`;
                     const { isReferenced: isMemberReferenced } = isIdentifierReferenced(filePath, id, true);
                     const isIgnored = shouldIgnoreTags(member.jsDocTags);
@@ -209,6 +214,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                         col: member.col,
                       });
 
+                      unused.push(member.identifier);
                       if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                     } else if (isIgnored) {
                       const identifier = `${exportedItem.identifier}.${member.identifier}`;
