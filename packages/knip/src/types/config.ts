@@ -114,7 +114,6 @@ export interface PluginOptions extends BaseOptions {
   configFileName: string;
   configFilePath: string;
   isProduction: boolean;
-  enabledPlugins: string[];
   getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 

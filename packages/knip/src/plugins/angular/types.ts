@@ -14,228 +14,19 @@ type FileVersion = number;
  * via the `patternProperty` "^(?:@[a-zA-Z0-9._-]+/)?[a-zA-Z0-9._-]+$".
  */
 export type Project = Project1 & {
-  cli?: {
-    [k: string]: unknown;
-  };
-  schematics?: SchematicOptions;
   /**
    * The prefix to apply to generated selectors.
    */
-  prefix?: string;
   /**
    * Root of the project files.
    */
-  root: string;
-  i18n?: I18N;
   /**
    * The root of the source files, assets and index.html file structure.
    */
-  sourceRoot?: string;
   /**
    * Project type.
    */
-  projectType: 'application' | 'library';
   architect?: {
-    [k: string]:
-      | {
-          /**
-           * The builder used for this package.
-           */
-          builder: string;
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: {
-            [k: string]: unknown;
-          };
-          /**
-           * A map of alternative target options.
-           */
-          configurations?: {
-            [k: string]: {
-              [k: string]: unknown;
-            };
-          };
-        }
-      | {
-          builder?: '@angular/build:application';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: ApplicationSchemaForBuildFacade;
-          configurations?: {
-            [k: string]: ApplicationSchemaForBuildFacade;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:application';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: ApplicationSchemaForBuildFacade;
-          configurations?: {
-            [k: string]: ApplicationSchemaForBuildFacade;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:app-shell';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: AppShellTarget;
-          configurations?: {
-            [k: string]: AppShellTarget;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:browser';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: WebpackBrowserSchemaForBuildFacade;
-          configurations?: {
-            [k: string]: WebpackBrowserSchemaForBuildFacade;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:browser-esbuild';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: EsbuildBrowserSchemaForBuildFacade;
-          configurations?: {
-            [k: string]: EsbuildBrowserSchemaForBuildFacade;
-          };
-        }
-      | {
-          builder?: '@angular/build:dev-server';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: DevServerTarget;
-          configurations?: {
-            [k: string]: DevServerTarget;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:dev-server';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: DevServerTarget1;
-          configurations?: {
-            [k: string]: DevServerTarget1;
-          };
-        }
-      | {
-          builder?: '@angular/build:extract-i18n';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: ExtractI18NTarget;
-          configurations?: {
-            [k: string]: ExtractI18NTarget;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:extract-i18n';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: ExtractI18NTarget1;
-          configurations?: {
-            [k: string]: ExtractI18NTarget1;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:karma';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: KarmaTarget;
-          configurations?: {
-            [k: string]: KarmaTarget;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:jest';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: JestBrowserSchemaForBuildFacade;
-          configurations?: {
-            [k: string]: JestBrowserSchemaForBuildFacade;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:web-test-runner';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: WebTestRunnerTarget;
-          configurations?: {
-            [k: string]: WebTestRunnerTarget;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:prerender';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: PrerenderTarget;
-          configurations?: {
-            [k: string]: PrerenderTarget;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:ssr-dev-server';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: SSRDevServerTarget;
-          configurations?: {
-            [k: string]: SSRDevServerTarget;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:server';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: UniversalTarget;
-          configurations?: {
-            [k: string]: UniversalTarget;
-          };
-        }
-      | {
-          builder?: '@angular-devkit/build-angular:ng-packagr';
-          /**
-           * A default named configuration to use when a target configuration is not provided.
-           */
-          defaultConfiguration?: string;
-          options?: NgPackagrTarget;
-          configurations?: {
-            [k: string]: NgPackagrTarget;
-          };
-        };
-  };
-  targets?: {
     [k: string]:
       | {
           /**
@@ -449,14 +240,9 @@ type PrerenderTarget = {
 };
 
 export interface AngularCLIWorkspaceConfiguration {
-  $schema?: string;
-  version: FileVersion;
-  cli?: CliOptions;
-  schematics?: SchematicOptions;
   /**
    * Path where new projects will be created.
    */
-  newProjectRoot?: string;
   projects?: {
     [k: string]: Project;
   };
@@ -1633,31 +1419,6 @@ export interface WebpackBrowserSchemaForBuildFacade {
   /**
    * List of static application assets.
    */
-  assets?: (
-    | {
-        /**
-         * Allow glob patterns to follow symlink directories. This allows subdirectories of the symlink to be searched.
-         */
-        followSymlinks?: boolean;
-        /**
-         * The pattern to match.
-         */
-        glob: string;
-        /**
-         * The input directory path in which to apply 'glob'. Defaults to the project root.
-         */
-        input: string;
-        /**
-         * An array of globs to ignore.
-         */
-        ignore?: string[];
-        /**
-         * Absolute path within the output.
-         */
-        output?: string;
-      }
-    | string
-  )[];
   /**
    * The full path for the main entry point to the app, relative to the current workspace.
    */
@@ -1665,7 +1426,6 @@ export interface WebpackBrowserSchemaForBuildFacade {
   /**
    * Polyfills to be included in the build.
    */
-  polyfills?: string[] | string;
   /**
    * The full path for the TypeScript configuration file, relative to the current workspace.
    */
@@ -1693,73 +1453,15 @@ export interface WebpackBrowserSchemaForBuildFacade {
   /**
    * Global styles to be included in the build.
    */
-  styles?: (
-    | {
-        /**
-         * The file to include.
-         */
-        input: string;
-        /**
-         * The bundle name for this extra entry point.
-         */
-        bundleName?: string;
-        /**
-         * If the bundle will be referenced in the HTML file.
-         */
-        inject?: boolean;
-      }
-    | string
-  )[];
   /**
    * The stylesheet language to use for the application's inline component styles.
    */
-  inlineStyleLanguage?: 'css' | 'less' | 'sass' | 'scss';
   /**
    * Options to pass to style preprocessors.
    */
-  stylePreprocessorOptions?: {
-    /**
-     * Paths to include. Paths will be resolved to workspace root.
-     */
-    includePaths?: string[];
-  };
   /**
    * Enables optimization of the build output. Including minification of scripts and styles, tree-shaking, dead-code elimination, inlining of critical CSS and fonts inlining. For more information, see https://angular.dev/reference/configs/workspace-config#optimization-configuration.
    */
-  optimization?:
-    | {
-        /**
-         * Enables optimization of the scripts output.
-         */
-        scripts?: boolean;
-        /**
-         * Enables optimization of the styles output.
-         */
-        styles?:
-          | {
-              /**
-               * Minify CSS definitions by removing extraneous whitespace and comments, merging identifiers and minimizing values.
-               */
-              minify?: boolean;
-              /**
-               * Extract and inline critical CSS definitions to improve first paint time.
-               */
-              inlineCritical?: boolean;
-            }
-          | boolean;
-        /**
-         * Enables optimization for fonts. This option requires internet access. `HTTPS_PROXY` environment variable can be used to specify a proxy server.
-         */
-        fonts?:
-          | {
-              /**
-               * Reduce render blocking requests by inlining external Google Fonts and Adobe Fonts CSS definitions in the application's HTML index file. This option requires internet access. `HTTPS_PROXY` environment variable can be used to specify a proxy server.
-               */
-              inline?: boolean;
-            }
-          | boolean;
-      }
-    | boolean;
   /**
    * Replace compilation source files with other compilation source files in the build.
    */
@@ -1776,155 +1478,94 @@ export interface WebpackBrowserSchemaForBuildFacade {
   /**
    * The full path for the new output directory, relative to the current workspace.
    */
-  outputPath: string;
   /**
    * The path where style resources will be placed, relative to outputPath.
    */
-  resourcesOutputPath?: string;
   /**
    * Build using Ahead of Time compilation.
    */
-  aot?: boolean;
   /**
    * Output source maps for scripts and styles. For more information, see https://angular.dev/reference/configs/workspace-config#source-map-configuration.
    */
-  sourceMap?:
-    | {
-        /**
-         * Output source maps for all scripts.
-         */
-        scripts?: boolean;
-        /**
-         * Output source maps for all styles.
-         */
-        styles?: boolean;
-        /**
-         * Output source maps used for error reporting tools.
-         */
-        hidden?: boolean;
-        /**
-         * Resolve vendor packages source maps.
-         */
-        vendor?: boolean;
-      }
-    | boolean;
   /**
    * Generate a seperate bundle containing only vendor libraries. This option should only be used for development to reduce the incremental compilation time.
    */
-  vendorChunk?: boolean;
   /**
    * Generate a seperate bundle containing code used across multiple bundles.
    */
-  commonChunk?: boolean;
   /**
    * Base url for the application being built.
    */
-  baseHref?: string;
   /**
    * Customize the base path for the URLs of resources in 'index.html' and component stylesheets. This option is only necessary for specific deployment scenarios, such as with Angular Elements or when utilizing different CDN locations.
    */
-  deployUrl?: string;
   /**
    * Adds more details to output logging.
    */
-  verbose?: boolean;
   /**
    * Log progress to the console while building.
    */
-  progress?: boolean;
   /**
    * How to handle missing translations for i18n.
    */
-  i18nMissingTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * How to handle duplicate translations for i18n.
    */
-  i18nDuplicateTranslation?: 'warning' | 'error' | 'ignore';
   /**
    * Translate the bundles in one or more locales.
    */
-  localize?: boolean | [string, ...string[]];
   /**
    * Run build when files change.
    */
-  watch?: boolean;
   /**
    * Define the output filename cache-busting hashing mode.
    */
-  outputHashing?: 'none' | 'all' | 'media' | 'bundles';
   /**
    * Enable and define the file watching poll time period in milliseconds.
    */
-  poll?: number;
   /**
    * Delete the output path before building.
    */
-  deleteOutputPath?: boolean;
   /**
    * Do not use the real path when resolving modules. If unset then will default to `true` if NodeJS option --preserve-symlinks is set.
    */
-  preserveSymlinks?: boolean;
   /**
    * Extract all licenses in a separate file.
    */
-  extractLicenses?: boolean;
   /**
    * Enables advanced build optimizations when using the 'aot' option.
    */
-  buildOptimizer?: boolean;
   /**
    * Use file name for lazy loaded chunks.
    */
-  namedChunks?: boolean;
   /**
    * Enables the use of subresource integrity validation.
    */
-  subresourceIntegrity?: boolean;
   /**
    * Generates a service worker config for production builds.
    */
-  serviceWorker?: boolean;
   /**
    * Path to ngsw-config.json.
    */
-  ngswConfigPath?: string;
   /**
    * Configures the generation of the application's HTML index.
    */
-  index:
-    | string
-    | {
-        /**
-         * The path of a file to use for the application's generated HTML index.
-         */
-        input: string;
-        /**
-         * The output path of the application's generated HTML index file. The full provided path will be used and will be considered relative to the application's configured output path.
-         */
-        output?: string;
-        [k: string]: unknown;
-      };
   /**
    * Generates a 'stats.json' file which can be analyzed using tools such as 'webpack-bundle-analyzer'.
    */
-  statsJson?: boolean;
   /**
    * Budget thresholds to ensure parts of your application stay within boundaries which you set.
    */
-  budgets?: Budget1[];
   /**
    * TypeScript configuration for Web Worker modules.
    */
-  webWorkerTsConfig?: string;
   /**
    * Define the crossorigin attribute setting of elements that provide CORS support.
    */
-  crossOrigin?: 'none' | 'anonymous' | 'use-credentials';
   /**
    * A list of CommonJS or AMD packages that are allowed to be used without a build time warning. Use `'*'` to allow all.
    */
-  allowedCommonJsDependencies?: string[];
-}
+  }
 interface Budget1 {
   /**
    * The type of budget.
