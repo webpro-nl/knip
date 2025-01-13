@@ -7,4 +7,6 @@ export type NetlifyConfig = {
 
 export type FunctionsConfig = {
   directory?: string;
-  };
+  external_node_modules?: string[];
+  included_files?: string[];
+};
