@@ -12,9 +12,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['.dependency-cruiser.{js,cjs,mjs,json}'];
 
 const args = {
-  binaries: ['depcruise'],
-  alias: { config: ['c'] },
-  string: ['config'],
+  binaries: ['depcruise', 'dependency-cruise', 'dependency-cruiser', 'depcruise-baseline'],
   config: true,
 };
 
