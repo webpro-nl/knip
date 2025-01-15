@@ -9,7 +9,8 @@
       "args": ["test"],
       "cwd": "${workspaceFolder}/packages/knip",
       "runtime": "bun",
-      "runtimeArgs": ["test"]
+      "runtimeArgs": ["test"],
+      "internalConsoleOptions": "openOnSessionStart"
     },
     {
       "type": "bun",
