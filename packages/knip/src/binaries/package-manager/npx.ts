@@ -24,7 +24,6 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const specifiers = dependency && !parsed.yes ? [dependency] : [];
 
   return [
-    toBinary(_binary),
     ...specifiers,
     ...packages.map(id => toDependency(id, { optional: true })),
     ...command,

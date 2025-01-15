@@ -45,7 +45,8 @@ export const resolve: BinaryResolver = (_binary, args, { manifestScriptNames, fr
   const dir = parsed['top-level'] ? rootCwd : parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   if ((!dir && manifestScriptNames.has(command)) || commands.includes(command)) return [];
   if (!dir && command === 'run' && manifestScriptNames.has(binary)) return [];
-  if (command === 'run' || command === 'exec') return dir ? [{ ...toBinary(binary), dir }] : [toBinary(binary)];
   if (command === 'node') return fromArgs(parsed._);
-  return command ? (dir ? [{ ...toBinary(command), dir }] : [toBinary(command)]) : [];
+  const bin = command === 'run' || command === 'exec' ? toBinary(binary) : toBinary(command);
+  if (dir) Object.assign(bin, { dir });
+  return [bin];
 };

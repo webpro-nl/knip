@@ -57,24 +57,23 @@ const commands = [
   'why',
 ];
 
-export const resolve: BinaryResolver = (binary, args, options) => {
-  const bin = toBinary(binary);
+export const resolve: BinaryResolver = (_binary, args, options) => {
   const parsed = parseArgs(args, {
     boolean: ['recursive', 'silent', 'shell-mode'],
     alias: { recursive: 'r', silent: 's', 'shell-mode': 'c' },
   });
-  const [command, __binary] = parsed._;
+  const [command, binary] = parsed._;
 
   if (command === 'dlx') {
     const argsForDlx = args.filter(arg => arg !== 'dlx');
-    return [toBinary(binary), ...resolveDlx(argsForDlx, options)];
+    return resolveDlx(argsForDlx, options);
   }
 
   const { manifestScriptNames, fromArgs } = options;
-  if (manifestScriptNames.has(command) || commands.includes(command)) return [bin];
+  if (manifestScriptNames.has(command) || commands.includes(command)) return [];
   if (command === 'exec') {
-    if (parsed._.length > 2) return [bin, toBinary(__binary), ...fromArgs(parsed._.slice(1))];
-    return [bin, toBinary(__binary)];
+    if (parsed._.length > 2) return [toBinary(binary), ...fromArgs(parsed._.slice(1))];
+    return [toBinary(binary)];
   }
-  return command ? [bin, toBinary(command)] : [bin];
+  return command ? [toBinary(command)] : [];
 };
