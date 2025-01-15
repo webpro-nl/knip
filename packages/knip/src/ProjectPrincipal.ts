@@ -364,7 +364,6 @@ export class ProjectPrincipal {
     }
 
     return members.filter(member => {
-      if (member.jsDocTags.has(PUBLIC_TAG)) return false;
       const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
       const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
       return refs.length === 0;
@@ -372,8 +371,6 @@ export class ProjectPrincipal {
   }
 
   public hasExternalReferences(filePath: string, exportedItem: Export) {
-    if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
-
     if (!this.findReferences) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
       this.findReferences = timerify(languageService.findReferences);
