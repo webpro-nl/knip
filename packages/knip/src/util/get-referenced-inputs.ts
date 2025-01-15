@@ -74,7 +74,7 @@ export const getReferencedInputsHandler =
 
           // Return resolved path for refs to internal workspaces
           const ref = _resolveSync(specifier, dirname(containingFilePath));
-          if (ref && !isGitIgnored(ref)) return ref;
+          if (ref && isInternal(ref) && !isGitIgnored(ref)) return ref;
         }
 
         if (isHandled) return;
