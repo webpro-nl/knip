@@ -2,7 +2,7 @@ import ts from 'typescript';
 import { CacheConsultant } from './CacheConsultant.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
 import type { GetImportsAndExportsOptions } from './types/config.js';
 import type { Export, ExportMember, FileNode, ModuleGraph, UnresolvedImport } from './types/module-graph.js';
 import type { PrincipalOptions } from './types/project.js';
@@ -355,6 +355,17 @@ export class ProjectPrincipal {
       }
       return false;
     });
+  }
+
+  public findUnusedMember(filePath: string, member: ExportMember) {
+    if (!this.findReferences) {
+      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
+      this.findReferences = timerify(languageService.findReferences);
+    }
+
+    const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+    const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
+    return refs.length === 0;
   }
 
   public findUnusedMembers(filePath: string, members: ExportMember[]) {
