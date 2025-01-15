@@ -338,7 +338,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       // Handle scripts here since they might lead to more entry files
       if (scripts && scripts.size > 0) {
         const dependencies = deputy.getDependencies(workspace.name);
-        const manifestScriptNames = new Set<string>();
+        const manifestScriptNames = new Set(Object.keys(chief.getManifestForWorkspace(workspace.name)?.scripts ?? {}));
         const rootCwd = cwd;
         const options = {
           cwd: dirname(filePath),
