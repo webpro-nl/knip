@@ -44,7 +44,11 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {
       : [builder]
     : [];
   const frameworks = localConfig.framework?.name ? [localConfig.framework.name] : [];
-  return [...addons.map(toDeferResolve), ...builderPackages.map(toDependency), ...frameworks.map(toDependency)];
+  return [
+    ...addons.map(toDeferResolve),
+    ...builderPackages.map(id => toDependency(id)),
+    ...frameworks.map(id => toDependency(id)),
+  ];
 };
 
 export default {

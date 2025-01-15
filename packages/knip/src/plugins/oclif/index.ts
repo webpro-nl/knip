@@ -16,7 +16,7 @@ const config = ['package.json'];
 const resolveConfig: ResolveConfig<OclifConfig> = async config => {
   const plugins = config?.plugins ?? [];
   const devPlugins = config?.devPlugins ?? [];
-  return [...plugins, ...devPlugins].map(toDependency);
+  return [...plugins, ...devPlugins].map(id => toDependency(id));
 };
 
 export default {

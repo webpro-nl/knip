@@ -78,7 +78,7 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     .flatMap(plugin => {
       if (typeof plugin !== 'string') return [];
       if (isInternal(plugin)) return [toEntry(plugin)];
-      return [plugin.includes('codegen-') ? plugin : `@graphql-codegen/${plugin}`].map(toDependency);
+      return [plugin.includes('codegen-') ? plugin : `@graphql-codegen/${plugin}`].map(id => toDependency(id));
     });
 
   return [...presets, ...flatPlugins, ...nestedPlugins].map(id => (typeof id === 'string' ? toDependency(id) : id));

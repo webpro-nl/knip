@@ -24,7 +24,7 @@ const resolveConfig: ResolveConfig<PrettierConfig> = config => {
   if (typeof config === 'string') return [toDeferResolve(config)];
 
   return Array.isArray(config.plugins)
-    ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string').map(toDependency)
+    ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string').map(id => toDependency(id))
     : [];
 };
 

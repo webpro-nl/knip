@@ -34,7 +34,7 @@ const resolveConfig: ResolveConfig<WebdriverIOConfig> = async config => {
         .map(reporter => `@wdio/${reporter}-reporter`)
     : [];
 
-  return [...frameworks, ...runners, ...reporters].map(toDependency);
+  return [...frameworks, ...runners, ...reporters].map(id => toDependency(id));
 };
 
 export default {

@@ -25,7 +25,7 @@ type Command = {
 const resolveConfig: ResolveConfig = async (localConfig, options) => {
   const { manifest, configFileName, cwd, getInputsFromScripts } = options;
 
-  const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(toDependency) : [];
+  const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(id => toDependency(id)) : [];
 
   if (extname(configFileName) === '.yml') {
     const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
@@ -35,7 +35,7 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
     });
 
     const lefthook = process.env.CI
-      ? enablers.filter(dependency => inputs.some(d => d.specifier === dependency)).map(toDependency)
+      ? enablers.filter(dependency => inputs.some(d => d.specifier === dependency)).map(id => toDependency(id))
       : [];
 
     return [...scripts, ...lefthook];

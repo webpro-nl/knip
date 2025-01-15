@@ -26,7 +26,7 @@ const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
   }
   const inputs = options.getInputsFromScripts(scripts);
 
-  return [...plugins.map(toDependency), ...inputs];
+  return [...plugins.map(id => toDependency(id)), ...inputs];
 };
 
 export default {

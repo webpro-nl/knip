@@ -23,7 +23,7 @@ const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
   const uses = scripts
     .filter(script => script.includes('markdownlint '))
     .flatMap(script => getArgumentValues(script, / (--rules|-r)[ =]([^ ]+)/g));
-  return [...extend, ...uses].map(toDependency);
+  return [...extend, ...uses].map(id => toDependency(id));
 };
 
 export default {

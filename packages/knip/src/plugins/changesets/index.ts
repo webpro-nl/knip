@@ -22,7 +22,7 @@ const resolveConfig: ResolveConfig<ChangesetsConfig> = config => {
       : typeof config.changelog === 'string'
         ? [config.changelog]
         : []
-  ).map(toDependency);
+  ).map(id => toDependency(id));
 };
 
 export default {

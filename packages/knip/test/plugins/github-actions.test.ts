@@ -13,9 +13,6 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['.github/workflows/test.yml']['@scope/retry-cli']);
-  assert(issues.unlisted['.github/workflows/test.yml']['retry-cli']);
-
   assert(issues.unresolved['.github/workflows/test.yml']['esbuild-register']);
 
   // Let's start out conservatively
@@ -37,7 +34,6 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 10,
-    unlisted: 2,
     unresolved: 2,
     processed: 10,
     total: 10,

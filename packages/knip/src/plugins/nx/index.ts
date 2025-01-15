@@ -35,7 +35,7 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
         .map(value => value.split(':')[0])
     : [];
 
-  return compact([...targetsDefault, ...plugins, ...generators]).map(toDependency);
+  return compact([...targetsDefault, ...plugins, ...generators]).map(id => toDependency(id));
 };
 
 const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = async (localConfig, options) => {

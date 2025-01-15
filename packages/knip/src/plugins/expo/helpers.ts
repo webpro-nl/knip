@@ -18,7 +18,7 @@ export const getDependencies = async (expoConfig: ExpoConfig, { manifest }: Plug
       })
       .filter(Boolean) as string[]) ?? [];
 
-  const inputs = new Set<Input>(pluginPackages.map(toDependency));
+  const inputs = new Set<Input>(pluginPackages.map(id => toDependency(id)));
 
   const allowedPackages = ['expo-atlas', 'expo-dev-client'];
   const allowedProductionPackages = ['expo-insights'];

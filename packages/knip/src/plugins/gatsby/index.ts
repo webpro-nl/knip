@@ -39,7 +39,7 @@ const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConf
     if (typeof _config.onCreateBabelConfig === 'function') {
       _config.onCreateBabelConfig({ actions });
     }
-    return Array.from(plugins).map(toDependency);
+    return Array.from(plugins).map(id => toDependency(id));
   }
 
   return [];

@@ -20,8 +20,14 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const restArgs = argsFrom(args, packageSpecifier);
 
   const isBinary = specifier && !packageSpecifier.includes('@') && !isInternal(specifier);
-  const dependency = isBinary ? toBinary(specifier) : toDependency(specifier);
+  const dependency = isBinary ? toBinary(specifier) : toDependency(specifier, { optional: !parsed.no });
   const specifiers = dependency && !parsed.yes ? [dependency] : [];
 
-  return [toBinary(_binary), ...specifiers, ...packages.map(toDependency), ...command, ...fromArgs(restArgs).slice(1)];
+  return [
+    toBinary(_binary),
+    ...specifiers,
+    ...packages.map(id => toDependency(id, { optional: true })),
+    ...command,
+    ...fromArgs(restArgs).slice(1),
+  ];
 };

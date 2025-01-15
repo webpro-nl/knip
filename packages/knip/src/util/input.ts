@@ -7,6 +7,7 @@ export interface Input {
   type: InputType;
   specifier: string;
   production?: boolean;
+  optional?: boolean;
   dir?: string;
   containingFilePath?: string;
 }
@@ -19,6 +20,7 @@ export interface ConfigInput extends Input {
 
 type Options = {
   production?: boolean;
+  optional?: boolean;
   dir?: string;
   containingFilePath?: string;
 };
@@ -55,7 +57,11 @@ export const toConfig = (pluginName: PluginName, specifier: string, containingFi
 
 export const isConfigPattern = (input: Input): input is ConfigInput => input.type === 'config';
 
-export const toDependency = (specifier: string): Input => ({ type: 'dependency', specifier });
+export const toDependency = (specifier: string, options: Options = {}): Input => ({
+  type: 'dependency',
+  specifier,
+  ...options,
+});
 
 export const isDependency = (input: Input) => input.type === 'dependency';
 

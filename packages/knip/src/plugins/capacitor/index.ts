@@ -22,7 +22,7 @@ const resolveConfig: ResolveConfig<CapacitorConfig> = async (config, { configFil
   const android = (await exists('android/capacitor.settings.gradle')) ? ['@capacitor/android'] : [];
   const ios = (await exists('ios/App/Podfile')) ? ['@capacitor/ios'] : [];
 
-  return [...plugins, ...android, ...ios].map(toDependency);
+  return [...plugins, ...android, ...ios].map(id => toDependency(id));
 };
 
 export default {

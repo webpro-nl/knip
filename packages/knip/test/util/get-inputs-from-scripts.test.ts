@@ -8,6 +8,7 @@ const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
 const pkgScripts = { cwd, manifestScriptNames: new Set(['program']) };
 const knownOnly = { cwd, knownBinsOnly: true };
+const optional = { optional: true };
 
 const js = toDeferResolveEntry('./script.js');
 const ts = toDeferResolveEntry('./main.ts');
@@ -132,7 +133,7 @@ test('getInputsFromScripts (npm)', () => {
 test('getInputsFromScripts (npx)', () => {
   t('npx pkg', [toBinary('npx'), toBinary('pkg')]);
   t('npx prisma migrate reset --force', [toBinary('npx'), toBinary('prisma')]);
-  t('npx @scope/pkg', [toBinary('npx'), toDependency('@scope/pkg')]);
+  t('npx @scope/pkg', [toBinary('npx'), toDependency('@scope/pkg', optional)]);
   t('npx tsx watch main', [toBinary('npx'), toBinary('tsx'), toDeferResolveEntry('main')]);
   t('npx -y pkg', [toBinary('npx')]);
   t('npx --yes pkg', [toBinary('npx')]);
@@ -140,14 +141,14 @@ test('getInputsFromScripts (npx)', () => {
   t('npx --no -- pkg --edit ${1}', [toBinary('npx'), toBinary('pkg')]);
   t('npx pkg install --with-deps', [toBinary('npx'), toBinary('pkg')]);
   t('npx pkg migrate reset --force', [toBinary('npx'), toBinary('pkg')]);
-  t('npx pkg@1.0.0 migrate reset --force', [toBinary('npx'), toDependency('pkg')]);
-  t('npx @scope/cli migrate reset --force', [toBinary('npx'), toDependency('@scope/cli')]);
+  t('npx pkg@1.0.0 migrate reset --force', [toBinary('npx'), toDependency('pkg', optional)]);
+  t('npx @scope/cli migrate reset --force', [toBinary('npx'), toDependency('@scope/cli', optional)]);
   t('npx -- pkg', [toBinary('npx'), toBinary('pkg')]);
-  t('npx -- @scope/cli@1.0.0 migrate reset --force', [toBinary('npx'), toDependency('@scope/cli')]);
-  t('npx retry-cli@0.6.0 -- curl --output /dev/null ', [toBinary('npx'), toDependency('retry-cli'), toBinary('curl')]);
-  t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('npx'), toBinary('curl'), toDependency('pkg')]);
-  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('npx'), toBinary('curl'), toDependency('@scope/pkg'), toDependency('pkg')]);
-  t("npx --package=foo -c 'curl --output /dev/null'", [toBinary('npx'), toDependency('foo'), toBinary('curl')]);
+  t('npx -- @scope/cli@1.0.0 migrate reset --force', [toBinary('npx'), toDependency('@scope/cli', optional)]);
+  t('npx retry-cli@0.6.0 -- curl --output /dev/null ', [toBinary('npx'), toDependency('retry-cli', optional), toBinary('curl')]);
+  t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('npx'), toBinary('curl'), toDependency('pkg', optional)]);
+  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('npx'), toBinary('curl'), toDependency('@scope/pkg', optional), toDependency('pkg', optional)]);
+  t("npx --package=foo -c 'curl --output /dev/null'", [toBinary('npx'), toDependency('foo', optional), toBinary('curl')]);
   t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [toBinary('npx'), toBinary('swagger-typescript-api')]);
   t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', [toBinary('npx'), toBinary('swagger-typescript-api')]);
   t('npx tsx main', [toBinary('npx'), toBinary('tsx'), toDeferResolveEntry('main')]);
@@ -155,18 +156,32 @@ test('getInputsFromScripts (npx)', () => {
   t('npx tsx ./main.ts -- build', [toBinary('npx'), toBinary('tsx'), ts]);
 });
 
+test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
+  t('pnpx pkg', [toBinary('pnpx'), toDependency('pkg', optional)]);
+  const s = [toDependency('cowsay', optional), toDependency('lolcatjs', optional), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
+  t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', [toBinary('pnpx'), ...s]);
+  t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', [toBinary('pnpm'), ...s]);
+});
+
+test('getInputsFromScripts (bunx/bun x)', () => {
+  t('bunx pkg', [toBinary('bunx'), toDependency('pkg', optional)]);
+  t('bunx cowsay "Hello world!"', [toBinary('bunx'), toDependency('cowsay', optional)]);
+  t('bunx my-cli --foo bar', [toBinary('bunx'), toDependency('my-cli', optional)]);
+  t('bun x pkg', [toBinary('bun'), toDependency('pkg', optional)]);
+});
+
 test('getInputsFromScripts (pnpm)', () => {
-  t('pnpm exec program', [toBinary('program')]);
-  t('pnpm run program', []);
-  t('pnpm program', [toBinary('program')]);
-  t('pnpm run program', [], pkgScripts);
-  t('pnpm program', [], pkgScripts);
-  t('pnpm dlx pkg', []);
-  t('pnpm --package=pkg-a dlx pkg', []);
-  t('pnpm --recursive --parallel test -- --sequence.seed=1700316221712', []);
-  t('pnpm program script.js', [], pkgScripts);
-  t('pnpm --silent program script.js', [], pkgScripts);
-  t('pnpm --silent run program script.js', [], pkgScripts);
+  t('pnpm exec program', [toBinary('pnpm'), toBinary('program')]);
+  t('pnpm run program', [toBinary('pnpm')]);
+  t('pnpm program', [toBinary('pnpm'), toBinary('program')]);
+  t('pnpm run program', [toBinary('pnpm')], pkgScripts);
+  t('pnpm program', [toBinary('pnpm')], pkgScripts);
+  t('pnpm dlx pkg', [toBinary('pnpm'), toDependency('pkg', optional)]);
+  t('pnpm --package=pkg-a dlx pkg', [toBinary('pnpm'), toDependency('pkg', optional), toDependency('pkg-a', optional)]);
+  t('pnpm --recursive --parallel test -- --sequence.seed=1700316221712', [toBinary('pnpm')]);
+  t('pnpm program script.js', [toBinary('pnpm')], pkgScripts);
+  t('pnpm --silent program script.js', [toBinary('pnpm')], pkgScripts);
+  t('pnpm --silent run program script.js', [toBinary('pnpm')], pkgScripts);
 });
 
 test('getInputsFromScripts (yarn)', () => {
@@ -229,7 +244,7 @@ test('getInputsFromScripts (bash expansion)', () => {
 
 test('getInputsFromScripts (multiline)', () => {
   t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('npx'), toBinary('lint-staged')]);
-  t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [toBinary('npx'), toDependency('rc'), toBinary('npx'), toDependency('@scope/rc')]);
+  t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [toBinary('npx'), toDependency('rc', optional), toBinary('npx'), toDependency('@scope/rc', optional)]);
 });
 
 test('getInputsFromScripts (bail outs)', () => {

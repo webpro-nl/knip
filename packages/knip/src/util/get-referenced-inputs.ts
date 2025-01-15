@@ -59,7 +59,7 @@ export const getReferencedInputsHandler =
 
         if (isWorkspace || isDependency(input)) {
           if (!isHandled) {
-            if ((deputy.isProduction && input.production) || !deputy.isProduction) {
+            if (!input.optional && ((deputy.isProduction && input.production) || !deputy.isProduction)) {
               // Unlisted dependency
               collector.addIssue({
                 type: 'unlisted',
@@ -92,6 +92,8 @@ export const getReferencedInputsHandler =
     if (resolvedFilePath && isInternal(resolvedFilePath)) {
       return isGitIgnored(resolvedFilePath) ? undefined : resolvedFilePath;
     }
+
+    if (input.optional) return;
 
     if (!isInternal(filePath)) {
       collector.addIssue({

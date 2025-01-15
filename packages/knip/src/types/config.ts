@@ -26,7 +26,7 @@ export type GetInputsFromScriptsPartial = (
 
 type FromArgs = (args: string[]) => Input[];
 
-interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
+export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
   fromArgs: FromArgs;
 }
 

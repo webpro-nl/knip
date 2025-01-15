@@ -32,8 +32,8 @@ const resolveEntryPaths: ResolveEntryPaths<NetlifyConfig> = localConfig => {
 
 const resolveConfig: ResolveConfig<NetlifyConfig> = async localConfig => {
   return [
-    ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []).map(toDependency),
-    ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules').map(toDependency),
+    ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []).map(id => toDependency(id)),
+    ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules').map(id => toDependency(id)),
   ];
 };
 
