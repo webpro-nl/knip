@@ -8,7 +8,7 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/dependency-cruiser');
 
 test('Find dependencies with the dependency-cruiser plugin', async () => {
-  const { issues,counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
