@@ -156,6 +156,14 @@ export class ProjectPrincipal {
     this.backend.typeChecker = typeChecker();
   }
 
+  private getFindReferences() {
+    if (!this.findReferences) {
+      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
+      this.findReferences = timerify(languageService.findReferences);
+    }
+    return this.findReferences;
+  }
+
   private hasAcceptedExtension(filePath: string) {
     return this.extensions.has(extname(filePath));
   }
@@ -300,15 +308,12 @@ export class ProjectPrincipal {
 
   public shouldAnalyzeTypeMembers(filePath: string, exportedItem: Export): boolean {
     // Analyze members only when the type/interface is used in any of the specific patterns at least once (see comments below)
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
+    const findReferences = this.getFindReferences();
 
     const typeChecker = this.backend.typeChecker;
     if (!typeChecker) return false;
 
-    const referencedSymbols = this.findReferences?.(filePath, exportedItem.pos) ?? [];
+    const referencedSymbols = findReferences(filePath, exportedItem.pos) ?? [];
     const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
 
     if (refs.length === 0) return false;
@@ -358,36 +363,27 @@ export class ProjectPrincipal {
   }
 
   public findUnusedMember(filePath: string, member: ExportMember) {
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
+    const findReferences = this.getFindReferences();
 
-    const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+    const referencedSymbols = findReferences(filePath, member.pos) ?? [];
     const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
     return refs.length === 0;
   }
 
   public findUnusedMembers(filePath: string, members: ExportMember[]) {
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
+    const findReferences = this.getFindReferences();
 
     return members.filter(member => {
-      const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+      const referencedSymbols = findReferences(filePath, member.pos) ?? [];
       const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
       return refs.length === 0;
     });
   }
 
   public hasExternalReferences(filePath: string, exportedItem: Export) {
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
+    const findReferences = this.getFindReferences();
 
-    const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
+    const referencedSymbols = findReferences(filePath, exportedItem.pos);
 
     if (!referencedSymbols?.length) return false;
 
