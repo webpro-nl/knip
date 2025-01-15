@@ -34,5 +34,6 @@
     "tsup",
     "unimported",
     "webp"
-  ]
+  ],
+  "editor.formatOnSave": true
 }
