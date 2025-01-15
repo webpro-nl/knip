@@ -313,16 +313,6 @@ This technically works as `commitlint` is a transitive dependency of
 `@commitlint/cli`, but to avoid confusion it's recommended to use
 `npx @commitlint/cli`.
 
-## npx
-
-For usages of the `npx` command, Knip assumes `npx --yes my-package` means that
-`my-package` is not listed. Knip expects the dependency to be listed with `--no`
-or no flag at all. The recommendation here is to be explicit:
-
-- Use `npx --yes` if the dependency is not supposed to be listed in
-  `package.json`.
-- Use `npx --no` if the dependency is listed in `package.json`.
-
 ## Unused exports
 
 By default, Knip does not report unused exports of `entry` files.
