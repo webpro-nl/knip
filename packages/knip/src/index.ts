@@ -347,11 +347,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
           dependencies,
           manifestScriptNames,
         };
-        const specifiers = _getInputsFromScripts(scripts, options);
-        for (const specifier of specifiers) {
-          specifier.containingFilePath = filePath;
-          specifier.dir = cwd;
-          const specifierFilePath = getReferencedInternalFilePath(specifier, workspace);
+        const inputs = _getInputsFromScripts(scripts, options);
+        for (const input of inputs) {
+          input.containingFilePath = filePath;
+          input.dir = cwd;
+          const specifierFilePath = getReferencedInternalFilePath(input, workspace);
           if (specifierFilePath) analyzeSourceFile(specifierFilePath, principal);
         }
       }
