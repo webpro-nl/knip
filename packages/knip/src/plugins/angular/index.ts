@@ -1,6 +1,7 @@
+import { existsSync } from 'node:fs';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toConfig, toDependency, toEntry, toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.js';
+import { isInternal, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import * as karma from '../karma/helpers.js';
 import type {
@@ -44,14 +45,26 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
       );
       const productionEntriesByOption: EntriesByOption =
         entriesByOptionByConfig.get(PRODUCTION_CONFIG_NAME) ?? new Map();
-      const normalizePath = (path: string) => join(cwd, path);
+      const isBuildTarget = targetName === BUILD_TARGET_NAME;
+      const maybeExternal = (option: string) => option === 'polyfills';
+      const toInput = (specifier: string, opts: { isProduction: boolean; maybeExternal: boolean }): Input => {
+        const normalizedPath = join(cwd, specifier);
+        // 👇 `isInternal` will report `false` for specifiers not starting with `.`
+        //    However, relative imports are usually specified in `angular.json` without `.` prefix
+        //    Hence checking also that file doesn't exist before considering it external
+        if (opts.maybeExternal && !isInternal(specifier) && !existsSync(normalizedPath)) {
+          return toDeferResolve(specifier);
+        }
+        return opts.isProduction ? toEntry(normalizedPath) : toProductionEntry(normalizedPath);
+      };
       for (const [configName, entriesByOption] of entriesByOptionByConfig.entries()) {
-        for (const entries of entriesByOption.values()) {
+        for (const [option, entries] of entriesByOption.entries()) {
           for (const entry of entries) {
             inputs.add(
-              targetName === BUILD_TARGET_NAME && configName === PRODUCTION_CONFIG_NAME
-                ? toProductionEntry(normalizePath(entry))
-                : toEntry(normalizePath(entry))
+              toInput(entry, {
+                isProduction: isBuildTarget && configName === PRODUCTION_CONFIG_NAME,
+                maybeExternal: maybeExternal(option),
+              })
             );
           }
         }
@@ -59,9 +72,10 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
       for (const [option, entries] of defaultEntriesByOption.entries()) {
         for (const entry of entries) {
           inputs.add(
-            targetName === BUILD_TARGET_NAME && !productionEntriesByOption.get(option)?.length
-              ? toProductionEntry(normalizePath(entry))
-              : toEntry(normalizePath(entry))
+            toInput(entry, {
+              isProduction: isBuildTarget && !productionEntriesByOption.get(option)?.length,
+              maybeExternal: maybeExternal(option),
+            })
           );
         }
       }

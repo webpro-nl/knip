@@ -8,6 +8,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
+  "dependencies": {
+    "zone.js": "*"
+  },
   "devDependencies": {
     "@angular/cli": "*",
     "karma": "*",
