@@ -92,6 +92,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'nproc',
   'npx',
   'paste',
+  'pm2-runtime',
   'pnpm',
   'pnpx',
   'pr',
