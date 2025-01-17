@@ -55,7 +55,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         if (opts.maybeExternal && !isInternal(specifier) && !existsSync(normalizedPath)) {
           return toDeferResolve(specifier);
         }
-        return opts.isProduction ? toEntry(normalizedPath) : toProductionEntry(normalizedPath);
+        return opts.isProduction ? toProductionEntry(normalizedPath) : toEntry(normalizedPath);
       };
       for (const [configName, entriesByOption] of entriesByOptionByConfig.entries()) {
         for (const [option, entries] of entriesByOption.entries()) {
