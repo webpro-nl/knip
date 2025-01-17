@@ -36,7 +36,7 @@ export const getReferencedInputsHandler =
       const binaryName = fromBinary(input);
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
       const isHandled = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
-      if (isHandled) return;
+      if (isHandled || input.optional) return;
       collector.addIssue({
         type: 'binaries',
         filePath: containingFilePath,

@@ -36,7 +36,7 @@ type Job = {
 };
 
 const resolveConfig: ResolveConfig = async (config, options) => {
-  const { configFileDir, configFileName, rootCwd, getInputsFromScripts } = options;
+  const { rootCwd, getInputsFromScripts, isProduction } = options;
 
   const inputs = new Set<Input>();
 
@@ -55,6 +55,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
         for (const input of getInputsFromScripts([step.run], { knownBinsOnly: true })) {
           if (isDeferResolveEntry(input) && path && !workingDir)
             input.specifier = relative(join(dir, path), join(rootCwd, input.specifier));
+          if (isProduction) Object.assign(input, { optional: true });
           inputs.add({ ...input, dir });
         }
       }
