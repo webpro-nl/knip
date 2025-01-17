@@ -18,4 +18,5 @@ type AppConfig = {
   plugins?: (string | [string, Record<string, unknown>])[];
 };
 
-export type ExpoConfig = AppConfig | { expo: AppConfig };
+type Config = AppConfig | { expo: AppConfig };
+export type ExpoConfig = Config | (() => Config);

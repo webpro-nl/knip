@@ -5,7 +5,8 @@ import type { ExpoConfig } from './types.js';
 
 // https://docs.expo.dev/versions/latest/config/app
 
-export const getDependencies = async (expoConfig: ExpoConfig, { manifest }: PluginOptions) => {
+export const getDependencies = async (localConfig: ExpoConfig, { manifest }: PluginOptions) => {
+  const expoConfig = typeof localConfig === 'function' ? localConfig() : localConfig;
   const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;
 
   const platforms = config.platforms ?? ['ios', 'android'];

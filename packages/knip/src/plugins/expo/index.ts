@@ -20,7 +20,8 @@ const production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
 /** @public */
 export const docs = { production };
 
-const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (expoConfig, { manifest }) => {
+const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (localConfig, { manifest }) => {
+  const expoConfig = typeof localConfig === 'function' ? localConfig() : localConfig;
   const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;
 
   let patterns: string[] = [];
