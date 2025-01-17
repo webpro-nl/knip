@@ -338,8 +338,9 @@ export class WorkspaceWorker {
               if (hasResolveConfig) {
                 const inputs = (await plugin.resolveConfig?.(config, opts)) ?? [];
                 for (const input of inputs) {
-                  if (isConfigPattern(input))
+                  if (isConfigPattern(input)) {
                     handleConfigInput(input.pluginName, { ...input, containingFilePath: configFilePath });
+                  }
                   addInput(input, configFilePath);
                 }
                 data.resolveConfig = inputs;

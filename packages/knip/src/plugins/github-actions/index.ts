@@ -1,8 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import { _firstGlob } from '../../util/glob.js';
 import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.js';
 import { findByKeyDeep } from '../../util/object.js';
 import { join, relative } from '../../util/path.js';
+import type { Job, Runs } from './types.js';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
@@ -19,20 +20,13 @@ const config = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
-type Step = {
-  run?: string;
-  uses?: string;
-  with?: {
-    repository: string;
-    path: string;
-  };
-  'working-directory'?: string;
-};
-
-type Steps = Step[];
-
-type Job = {
-  steps: Steps;
+const getActionDependencies = (config: any, options: PluginOptions) => {
+  const { configFileDir, configFileName } = options;
+  const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
+  if (!(isActionManifest && config?.runs?.using?.startsWith('node'))) return [];
+  const runs: Runs = config.runs;
+  const scripts = [runs.pre, runs.main, runs.post].filter(isString);
+  return scripts.map(script => join(configFileDir, script));
 };
 
 const resolveConfig: ResolveConfig = async (config, options) => {
@@ -53,8 +47,9 @@ const resolveConfig: ResolveConfig = async (config, options) => {
       const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
       if (step.run) {
         for (const input of getInputsFromScripts([step.run], { knownBinsOnly: true })) {
-          if (isDeferResolveEntry(input) && path && !workingDir)
+          if (isDeferResolveEntry(input) && path && !workingDir) {
             input.specifier = relative(join(dir, path), join(rootCwd, input.specifier));
+          }
           if (isProduction) Object.assign(input, { optional: true });
           inputs.add({ ...input, dir });
         }
@@ -62,14 +57,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
     }
   }
 
-  const getActionDependencies = () => {
-    const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
-    if (!(isActionManifest && config?.runs?.using?.startsWith('node'))) return [];
-    const scripts = [config.runs.pre, config.runs.main, config.runs.post].filter(isString);
-    return scripts.map(script => join(configFileDir, script));
-  };
-
-  return [...getActionDependencies().map(toEntry), ...inputs];
+  return [...inputs, ...getActionDependencies(config, options).map(toEntry)];
 };
 
 export default {
