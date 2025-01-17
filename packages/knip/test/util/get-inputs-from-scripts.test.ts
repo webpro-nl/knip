@@ -156,13 +156,6 @@ test('getInputsFromScripts (npx)', () => {
   t('npx tsx ./main.ts -- build', [toBinary('tsx'), ts]);
 });
 
-test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
-  t('pnpx pkg', [toDependency('pkg', optional)]);
-  const inputs = [toDependency('cowsay', optional), toDependency('lolcatjs', optional), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
-  t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
-  t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
-});
-
 test('getInputsFromScripts (bunx/bun x)', () => {
   t('bunx pkg', [toDependency('pkg', optional)]);
   t('bunx cowsay "Hello world!"', [toDependency('cowsay', optional)]);
@@ -184,15 +177,27 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --silent run program script.js', [], pkgScripts);
 });
 
+test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
+  t('pnpx pkg', [toDependency('pkg', optional)]);
+  const inputs = [toDependency('cowsay', optional), toDependency('lolcatjs', optional), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
+  t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
+  t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
+});
+
 test('getInputsFromScripts (yarn)', () => {
   t('yarn exec program', [toBinary('program')]);
-  t('yarn run program', [toBinary('program')]);
+  t('yarn run program', [toBinary('program', optional)]);
   t('yarn program', [toBinary('program')]);
   t('yarn run program', [], pkgScripts);
   t('yarn program', [], pkgScripts);
-  t('yarn dlx pkg', []);
-  t('yarn --package=pkg-a -p pkg-b dlx pkg', []);
   t('yarn node script.js', [toBinary('node'), toDeferResolveEntry('script.js')]);
+});
+
+test('getInputsFromScripts (yarn dlx)', () => {
+  t('yarn dlx pkg', [toBinary('pkg', optional)]);
+  t('yarn dlx -p typescript -p ts-node ts-node -T -e "console.log(\'hello!\')"', [toDependency('typescript', optional), toDependency('ts-node', optional), toBinary('ts-node', optional)]);
+  t('yarn dlx -p ts-node ts-node ./main.ts', [toDependency('ts-node', optional), toBinary('ts-node', optional), ts]);
+  t('yarn --package=pkg-a -p pkg-b dlx pkg', [toDependency('pkg-a', optional), toDependency('pkg-b', optional), toBinary('pkg', optional)]);
 });
 
 test('getInputsFromScripts (rollup)', () => {

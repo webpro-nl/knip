@@ -70,10 +70,13 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   }
 
   const { manifestScriptNames, fromArgs } = options;
+
   if (manifestScriptNames.has(command) || commands.includes(command)) return [];
+
   if (command === 'exec') {
     if (parsed._.length > 2) return [toBinary(binary), ...fromArgs(parsed._.slice(1))];
     return [toBinary(binary)];
   }
+
   return command ? [toBinary(command)] : [];
 };
