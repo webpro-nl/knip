@@ -16,7 +16,10 @@
             "ssr": {
               "entry": "src/server.ts"
             },
-            "server": "src/main.server-for-non-prod.ts"
+            "server": "src/main.server-for-non-prod.ts",
+            "polyfills": [
+              "src/polyfill.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -24,7 +27,8 @@
               "scripts": ["src/script.js"]
             },
             "development": {
-              "scripts": ["src/script-for-non-prod.js"]
+              "scripts": ["src/script-for-non-prod.js"],
+              "polyfills": ["src/polyfill-for-non-prod.js"]
             }
           }
         },

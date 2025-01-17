@@ -18,8 +18,8 @@ test('Find dependencies with the Angular plugin (non-production)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    processed: 8,
-    total: 8,
+    processed: 10,
+    total: 10,
   });
 });
 
@@ -32,7 +32,7 @@ test('Find dependencies with the Angular plugin (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });

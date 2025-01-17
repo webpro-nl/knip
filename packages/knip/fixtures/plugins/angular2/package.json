@@ -3,6 +3,9 @@
   "scripts": {
     "ng": "ng"
   },
+  "dependencies": {
+    "zone.js": "*"
+  },
   "devDependencies": {
     "@angular/cli": "*",
     "@angular/ssr": "*",
