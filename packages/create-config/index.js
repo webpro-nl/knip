@@ -13,7 +13,7 @@ const getPackageManager = () => {
   // get the root of the repository
   let repositoryRoot = "";
   try {
-    repositoryRoot = execSync('git rev-parse --show-toplevel').toString().trim();
+    repositoryRoot = execSync('git rev-parse --show-toplevel', { stdio: [null, null, 'ignore'] }).toString().trim();
   } catch {}
 
   if (fileExists(path.join(repositoryRoot, 'bun.lockb'))) return 'bun';
