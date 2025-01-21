@@ -45,5 +45,6 @@ export const getExternalReporters = (reporters?: ViteConfig['test']['reporters']
   reporters
     ? [reporters]
         .flat()
+        .flat()
         .filter((reporter): reporter is string => typeof reporter === 'string' && !builtInReporters.includes(reporter))
     : [];
