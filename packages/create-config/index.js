@@ -11,7 +11,12 @@ const fileExists = filePath => {
 
 const getPackageManager = () => {
   // get the root of the repository
-  const repositoryRoot = execSync('git rev-parse --show-toplevel').toString().trim();
+  let repositoryRoot = '';
+  try {
+    repositoryRoot = execSync('git rev-parse --show-toplevel', { stdio: [null, null, 'ignore'] })
+      .toString()
+      .trim();
+  } catch {}
 
   if (fileExists(path.join(repositoryRoot, 'bun.lockb'))) return 'bun';
   if (fileExists(path.join(repositoryRoot, 'yarn.lock'))) return 'yarn';
