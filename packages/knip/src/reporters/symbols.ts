@@ -4,13 +4,13 @@ import type { Entries } from 'type-fest';
 import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import type { Issue, ReporterOptions } from '../types/issues.js';
 import { relative, toRelative } from '../util/path.js';
+import { truncate } from '../util/string.js';
 import { getTitle, identity, logTitle } from './util.js';
 
 const dim = picocolors.gray;
 const bright = picocolors.whiteBright;
 
 const TRUNCATE_WIDTH = 40;
-const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? `${text.slice(0, TRUNCATE_WIDTH - 3)}...` : text);
 const truncateStart = (text: string, width: number) => (text.length > width ? `...${text.slice(-(width - 3))}` : text);
 
 const sortByPos = (a: Issue, b: Issue) => {
@@ -35,7 +35,8 @@ const logIssueRecord = (issues: Issue[]) => {
   const table = new EasyTable();
   for (const issue of issues) {
     const print = issue.isFixed || issue.severity === 'warn' ? dim : identity;
-    table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.map(s => s.symbol).join(', ')) : hl(issue)));
+    const symbols = issue.symbols;
+    table.cell('symbol', print(symbols ? truncate(symbols.map(s => s.symbol).join(', '), TRUNCATE_WIDTH) : hl(issue)));
     issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
     issue.symbolType && table.cell('symbolType', print(issue.symbolType));
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;

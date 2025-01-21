@@ -256,8 +256,10 @@ export class WorkspaceWorker {
     const hasProductionInput = (input: Input) =>
       productionInputsFromManifest.find(d => d.specifier === input.specifier && d.type === input.type);
 
-    const getInputsFromScripts: GetInputsFromScriptsPartial = (scripts, options) =>
-      _getInputsFromScripts(scripts, { ...baseScriptOptions, ...options });
+    const createGetInputsFromScripts =
+      (containingFilePath: string): GetInputsFromScriptsPartial =>
+      (scripts, options) =>
+        _getInputsFromScripts(scripts, { ...baseOptions, ...options, containingFilePath });
 
     const inputs: Input[] = [];
     const configFiles = new Map<PluginName, Set<string>>();
@@ -306,7 +308,7 @@ export class WorkspaceWorker {
         configFilePath: containingFilePath,
         configFileDir: cwd,
         configFileName: '',
-        getInputsFromScripts,
+        getInputsFromScripts: createGetInputsFromScripts(containingFilePath),
       };
 
       const configEntryPaths: Input[] = [];
@@ -314,6 +316,7 @@ export class WorkspaceWorker {
       for (const configFilePath of remainingConfigFilePaths) {
         const opts = {
           ...options,
+          getInputsFromScripts: createGetInputsFromScripts(configFilePath),
           configFilePath,
           configFileDir: dirname(configFilePath),
           configFileName: basename(configFilePath),

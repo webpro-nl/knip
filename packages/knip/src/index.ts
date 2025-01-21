@@ -339,18 +339,18 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
       if (scripts && scripts.size > 0) {
         const dependencies = deputy.getDependencies(workspace.name);
         const manifestScriptNames = new Set(Object.keys(chief.getManifestForWorkspace(workspace.name)?.scripts ?? {}));
-        const rootCwd = cwd;
+        const dir = dirname(filePath);
         const options = {
-          cwd: dirname(filePath),
-          rootCwd,
+          cwd: dir,
+          rootCwd: cwd,
           containingFilePath: filePath,
           dependencies,
           manifestScriptNames,
         };
         const inputs = _getInputsFromScripts(scripts, options);
         for (const input of inputs) {
-          input.containingFilePath = filePath;
-          input.dir = cwd;
+          input.containingFilePath ??= filePath;
+          input.dir ??= dir;
           const specifierFilePath = getReferencedInternalFilePath(input, workspace);
           if (specifierFilePath) analyzeSourceFile(specifierFilePath, principal);
         }

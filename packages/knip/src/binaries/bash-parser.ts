@@ -4,6 +4,8 @@ import type { GetInputsFromScriptsOptions } from '../types/config.js';
 import { debugLogObject } from '../util/debug.js';
 import { type Input, toBinary, toDeferResolve } from '../util/input.js';
 import { extractBinary } from '../util/modules.js';
+import { relative } from '../util/path.js';
+import { truncate } from '../util/string.js';
 import { resolve as fallbackResolve } from './fallback.js';
 import PackageManagerResolvers from './package-manager/index.js';
 import { resolve as resolverFromPlugins } from './plugins.js';
@@ -115,7 +117,8 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     const parsed = parse(script);
     return parsed?.commands ? getDependenciesFromNodes(parsed.commands) : [];
   } catch (error) {
-    debugLogObject('*', 'Bash parser error', error);
+    const msg = `Warning: failed to parse and ignoring script in ${relative(options.containingFilePath)} (${truncate(script, 30)})`;
+    debugLogObject('*', msg, error);
     return [];
   }
 };
