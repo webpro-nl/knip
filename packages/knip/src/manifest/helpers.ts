@@ -1,7 +1,7 @@
 import type { Scripts } from '../types/package-json.js';
-import { join, dirname } from '../util/path.js';
-import { _require } from '../util/require.js';
 import { isFile } from '../util/fs.js';
+import { dirname, join } from '../util/path.js';
+import { _require } from '../util/require.js';
 
 let isPnPEnabled: boolean | 'NOT_DETERMINED_YET' = 'NOT_DETERMINED_YET';
 
@@ -29,36 +29,36 @@ const tryLoadManifestWithYarnPnp = (cwd: string, packageName: string) => {
   if (isPnPEnabled === false) {
     return null;
   }
-  
+
   try {
     if (isPnPEnabled === 'NOT_DETERMINED_YET') {
       const pnpPath = findNearestPnPFile(cwd);
-      
+
       if (pnpPath != null) {
         const pnp = _require(pnpPath);
-        pnp.setup()
+        pnp.setup();
         isPnPEnabled = true;
       } else {
         isPnPEnabled = false;
       }
     }
-    
+
     if (isPnPEnabled) {
-      const pnpApi = _require('pnpapi')
+      const pnpApi = _require('pnpapi');
 
       if (pnpApi != null) {
         const resolvedPath = pnpApi.resolveRequest(packageName, cwd);
-        
+
         if (resolvedPath) {
-          const packageLocation = pnpApi.findPackageLocator(resolvedPath)
-          const packageInformation = pnpApi.getPackageInformation(packageLocation)
+          const packageLocation = pnpApi.findPackageLocator(resolvedPath);
+          const packageInformation = pnpApi.getPackageInformation(packageLocation);
           const packageJsonPath = join(packageInformation.packageLocation, 'package.json');
-          
+
           // We need to require fs dynamically here because pnp patches it.
-          const _readFileSync = _require('fs').readFileSync
-          const manifest = JSON.parse(_readFileSync(packageJsonPath, 'utf8'))
-          
-          return manifest
+          const _readFileSync = _require('fs').readFileSync;
+          const manifest = JSON.parse(_readFileSync(packageJsonPath, 'utf8'));
+
+          return manifest;
         }
       }
     }
@@ -74,8 +74,8 @@ export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManife
   const pnpManifest = tryLoadManifestWithYarnPnp(cwd, packageName);
   if (pnpManifest != null) {
     return pnpManifest;
-  };
-  
+  }
+
   // 2. Fallback to traditional node_modules resolution
   try {
     return _require(join(dir, 'node_modules', packageName, 'package.json'));
@@ -89,7 +89,7 @@ export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManife
     }
     // Explicitly suppressing errors here
   }
-}
+};
 
 export const getFilteredScripts = (scripts: Scripts) => {
   if (!scripts) return [{}, {}];
