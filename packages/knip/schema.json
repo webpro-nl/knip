@@ -36,6 +36,11 @@
       "examples": ["render", "on.*"],
       "$ref": "#/definitions/list"
     },
+    "ignoreUnresolved": {
+      "title": "Unresolved imports to ignore (regex allowed)",
+      "examples": ["#/virtual"],
+      "$ref": "#/definitions/list"
+    },
     "ignoreWorkspaces": {
       "title": "Workspaces to ignore",
       "examples": ["packages/ignore-me"],
@@ -239,6 +244,11 @@
         "ignoreDependencies": {
           "title": "Dependencies from package.json to ignore (regex allowed)",
           "examples": ["husky", "lint-staged"],
+          "$ref": "#/definitions/list"
+        },
+        "ignoreUnresolved": {
+          "title": "Unresolved imports to ignore (regex allowed)",
+          "examples": ["#/virtual"],
           "$ref": "#/definitions/list"
         },
         "includeEntryExports": {
