@@ -3,7 +3,10 @@ import { isFile } from '../util/fs.js';
 import { dirname, join } from '../util/path.js';
 import { _require } from '../util/require.js';
 
-let isPnPEnabled: boolean | 'NOT_DETERMINED_YET' = 'NOT_DETERMINED_YET';
+const pnpStatus = {
+  cwd: '',
+  enabled: false,
+}
 
 type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 
@@ -26,24 +29,26 @@ const findNearestPnPFile = (startDir: string): string | null => {
 };
 
 const tryLoadManifestWithYarnPnp = (cwd: string, packageName: string) => {
-  if (isPnPEnabled === false) {
+  if (pnpStatus.cwd === cwd && pnpStatus.enabled === false) {
     return null;
   }
 
   try {
-    if (isPnPEnabled === 'NOT_DETERMINED_YET') {
+    if (pnpStatus.cwd !== cwd) {
       const pnpPath = findNearestPnPFile(cwd);
 
       if (pnpPath != null) {
         const pnp = _require(pnpPath);
         pnp.setup();
-        isPnPEnabled = true;
+        pnpStatus.cwd = cwd;
+        pnpStatus.enabled = true;
       } else {
-        isPnPEnabled = false;
+        pnpStatus.cwd = cwd;
+        pnpStatus.enabled = false;
       }
     }
 
-    if (isPnPEnabled) {
+    if (pnpStatus.enabled) {
       const pnpApi = _require('pnpapi');
 
       if (pnpApi != null) {
@@ -71,9 +76,10 @@ const tryLoadManifestWithYarnPnp = (cwd: string, packageName: string) => {
 
 export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManifestOptions) => {
   // 1. Try Yarn PnP first
-  const pnpManifest = tryLoadManifestWithYarnPnp(cwd, packageName);
-  if (pnpManifest != null) {
-    return pnpManifest;
+  const manifest = tryLoadManifestWithYarnPnp(cwd, packageName);
+
+  if (manifest != null) {
+    return manifest;
   }
 
   // 2. Fallback to traditional node_modules resolution
