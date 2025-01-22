@@ -8,19 +8,15 @@ import baseCounters from './helpers/baseCounters.js';
 const cwd = resolve('fixtures/yarn-pnp');
 
 test('Find unused dependencies', async () => {
-  const { issues, counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
+    isStrict: true,
   });
-  
-  console.log(issues, counters)
-
-  assert(issues.dependencies['package.json']['unused']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 0,
     processed: 1,
-    total: 1,
+    total: 4,
   });
 });
