@@ -6,7 +6,7 @@ import { _require } from '../util/require.js';
 const pnpStatus = {
   cwd: '',
   enabled: false,
-}
+};
 
 type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 

@@ -1,4 +1,4 @@
-import { test, describe, beforeAll } from 'bun:test';
+import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
