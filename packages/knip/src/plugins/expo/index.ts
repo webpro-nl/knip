@@ -24,11 +24,9 @@ const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (localConfig, { m
   const expoConfig = typeof localConfig === 'function' ? localConfig() : localConfig;
   const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;
 
-  let patterns: string[] = [];
-
   // https://docs.expo.dev/router/installation/#setup-entry-point
   if (manifest.main === 'expo-router/entry') {
-    patterns = [...production];
+    let patterns = [...production];
 
     const normalizedPlugins =
       config.plugins?.map(plugin => (Array.isArray(plugin) ? plugin : ([plugin] as const))) ?? [];
@@ -41,9 +39,11 @@ const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (localConfig, { m
         patterns = [join(options.root, '**/*.{js,jsx,ts,tsx}')];
       }
     }
+
+    return patterns.map(entry => toProductionEntry(entry));
   }
 
-  return patterns.map(entry => toProductionEntry(entry));
+  return production.map(entry => toProductionEntry(entry));
 };
 
 const resolveConfig: ResolveConfig<ExpoConfig> = async (expoConfig, options) => getDependencies(expoConfig, options);
