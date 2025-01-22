@@ -313,14 +313,26 @@ This technically works as `commitlint` is a transitive dependency of
 `@commitlint/cli`, but to avoid confusion it's recommended to use
 `npx @commitlint/cli`.
 
+## Unresolved imports
+
+Knip may be unable to resolve an import specifier or dependency reference. First
+look for solutions such as [paths][25], otherwise they can be ignored as a last
+resort:
+
+```json
+{
+  "ignoreUnresolved": ["#virtual/.+"]
+}
+```
+
 ## Unused exports
 
 By default, Knip does not report unused exports of `entry` files.
 
 The most common causes for unused exports include:
 
-- [Enumerations][25]
-- [External libraries][26]
+- [Enumerations][26]
+- [External libraries][27]
 
 Use the `--exports` flag to [filter][10] and focus on issues related to exports:
 
@@ -362,7 +374,7 @@ implicitly referenced in an enumeration like the following example:
   </TabItem>
 </Tabs>
 
-See [namepace imports][27] to see what patterns Knip does consider to be used
+See [namepace imports][28] to see what patterns Knip does consider to be used
 exports.
 
 ### External libraries
@@ -403,22 +415,22 @@ Knip does not include external type definitions by default so it won't see the
 export being referenced.
 
 To include the type definitions of external libraries, use the
-[--include-libs][28] flag:
+[--include-libs][29] flag:
 
 ```shell
 knip --include-libs
 ```
 
 This comes at a performance and memory penalty, but should give better results
-if you need it. This flag is implied when [classMembers][29] are included (that
+if you need it. This flag is implied when [classMembers][30] are included (that
 feature comes with roughly the same performance penalty).
 
 ### Exclude exports from the report
 
 To exclude unused exports from the report, there are a few options:
 
-- [Ignore exports used in file][30] for exports used internally.
-- Individual exports can be [tagged using JSDoc syntax][31].
+- [Ignore exports used in file][31] for exports used internally.
+- Individual exports can be [tagged using JSDoc syntax][32].
 - Have the export in an entry file:
   - Add the file to the `entry` file patterns array in the configuration.
   - Move the export(s) to an entry file.
@@ -428,7 +440,7 @@ To exclude unused exports from the report, there are a few options:
 ## Missing exports?
 
 Did you expect certain exports in the report, but are they missing? They might
-be exported from an entry file. In that case, use [--include-entry-exports][32]
+be exported from an entry file. In that case, use [--include-entry-exports][33]
 to make Knip also report unused exports in entry files.
 
 The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
@@ -446,10 +458,10 @@ knip --include classMembers
 This option is also available in the Knip configuration file. Note that this
 feature comes at a cost: linting will take more time and more memory.
 
-Individual class members can be [tagged using JSDoc syntax][31].
+Individual class members can be [tagged using JSDoc syntax][32].
 
 Classes exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][32] to make Knip also report members of unused exports
+[--include-entry-exports][33] to make Knip also report members of unused exports
 in entry files.
 
 ## Enum members
@@ -461,18 +473,18 @@ members can also be disabled altogether, for example:
 knip --exclude enumMembers
 ```
 
-Individual enum members can be [tagged using JSDoc syntax][31].
+Individual enum members can be [tagged using JSDoc syntax][32].
 
 Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][32] to make Knip also report members of unused exports
+[--include-entry-exports][33] to make Knip also report members of unused exports
 in entry files.
 
 ## Feedback or false positives?
 
 If you believe Knip incorrectly reports something as unused (i.e. there's a
-false positive), feel free to create a [minimal reproduction][33] and open an
+false positive), feel free to create a [minimal reproduction][34] and open an
 issue on GitHub. It'll make Knip better for everyone! Join the [Discord
-channel][34] to discuss any feedback or questions you may have.
+channel][35] to discuss any feedback or questions you may have.
 
 [1]: #dynamic-import-specifiers
 [2]: #unsupported-arguments-in-scripts
@@ -499,13 +511,14 @@ channel][34] to discuss any feedback or questions you may have.
 [23]:
   https://github.com/webpro-nl/knip/blob/6f561ff09b4f1bf36585b64210ee34ea27ae04ea/packages/knip/src/constants.ts#L32-L133
 [24]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[25]: #enumerations
-[26]: #external-libraries
-[27]: ../guides/namespace-imports.md
-[28]: ../reference/cli#--include-libs
-[29]: #class-members
-[30]: ../reference/configuration.md#ignoreexportsusedinfile
-[31]: ../reference/jsdoc-tsdoc-tags.md
-[32]: ../reference/configuration.md#includeentryexports
-[33]: ../guides/issue-reproduction
-[34]: https://discord.gg/r5uXTtbTpc
+[25]: ../reference/configuration.md#paths
+[26]: #enumerations
+[27]: #external-libraries
+[28]: ../guides/namespace-imports.md
+[29]: ../reference/cli#--include-libs
+[30]: #class-members
+[31]: ../reference/configuration.md#ignoreexportsusedinfile
+[32]: ../reference/jsdoc-tsdoc-tags.md
+[33]: ../reference/configuration.md#includeentryexports
+[34]: ../guides/issue-reproduction
+[35]: https://discord.gg/r5uXTtbTpc
