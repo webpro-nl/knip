@@ -30,6 +30,12 @@ const getAllContributors = async (url: URL) => {
       },
     });
 
+    if (!response.ok) {
+      console.error('GitHub API request failed:');
+      console.log(await response.text());
+      return [];
+    }
+
     const contributors = await response.json();
     allContributors.push(...contributors);
 
