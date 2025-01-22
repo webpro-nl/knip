@@ -48,7 +48,7 @@ const resolveConfig: ResolveConfig<MetroConfig> = async config => {
 };
 
 const note = `False positives for platform-specific unused files?
-Override the entry patterns as shown below to match platforms and extensions.`;
+Override the default \`entry\` patterns to match platforms and extensions.`;
 
 /** @public */
 export const docs = { note, production };
