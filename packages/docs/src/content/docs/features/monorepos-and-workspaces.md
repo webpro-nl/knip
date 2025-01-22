@@ -124,9 +124,10 @@ The following options are available inside workspace configurations:
 - [ignoreBinaries][4]
 - [ignoreDependencies][5]
 - [ignoreMembers][6]
-- [includeEntryExports][7]
+- [ignoreUnresolved][7]
+- [includeEntryExports][8]
 
-[Plugins][8] can be configured separately per workspace.
+[Plugins][9] can be configured separately per workspace.
 
 Use `--debug` for verbose output and see the workspaces Knip includes, their
 configurations, enabled plugins, glob options and resolved files.
@@ -149,7 +150,7 @@ workspaces. For two reasons:
 
 To lint the workspace in isolation, there are two options:
 
-- Combine the `workspace` argument with [strict production mode][9].
+- Combine the `workspace` argument with [strict production mode][10].
 - Run Knip from inside the workspace directory.
 
 [1]: ../overview/configuration.md#defaults
@@ -158,6 +159,7 @@ To lint the workspace in isolation, there are two options:
 [4]: ../reference/configuration.md#ignorebinaries
 [5]: ../reference/configuration.md#ignoredependencies
 [6]: ../reference/configuration.md#ignoremembers
-[7]: ../reference/configuration.md#includeentryexports
-[8]: ../reference/configuration.md#plugins
-[9]: ./production-mode.md#strict-mode
+[7]: ../reference/configuration.md#ignoreunresolved
+[8]: ../reference/configuration.md#includeentryexports
+[9]: ../reference/configuration.md#plugins
+[10]: ./production-mode.md#strict-mode

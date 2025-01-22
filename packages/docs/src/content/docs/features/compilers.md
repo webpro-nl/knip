@@ -74,6 +74,9 @@ In this case, you can manually add the `$app` path alias:
 }
 ```
 
+As a last resort, see [ignoredUnresolved][1] to ignore virtual import specifiers
+from the report.
+
 ### CSS
 
 Here's an example, minimal compiler for CSS files:
@@ -134,3 +137,5 @@ const config = {
 
 export default config;
 ```
+
+[1]: ../reference/configuration.md#ignoreunresolved

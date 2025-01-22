@@ -213,6 +213,25 @@ allowed. Example:
 
 Actual regular expressions can be used in dynamic configurations.
 
+### `ignoreUnresolved`
+
+Array of specifiers to exclude from the report. Regular expressions allowed.
+Example:
+
+```json title="knip.json"
+{
+  "ignoreUnresolved": ["ignore-unresolved-import", "#virtual/.+"]
+}
+```
+
+Actual regular expressions can be used in dynamic configurations:
+
+```ts title="knip.ts"
+export default {
+  ignoreUnresolved: [/^#/.+/],
+};
+```
+
 ### `ignoreWorkspaces`
 
 Array of workspaces to ignore, globs allowed. Example:

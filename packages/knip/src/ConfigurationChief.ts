@@ -398,14 +398,20 @@ export class ConfigurationChief {
     const workspaceConfig = this.getWorkspaceConfig(workspaceName);
     const ignoreBinaries = arrayify(workspaceConfig.ignoreBinaries);
     const ignoreDependencies = arrayify(workspaceConfig.ignoreDependencies);
+    const ignoreUnresolved = arrayify(workspaceConfig.ignoreUnresolved);
     if (workspaceName === ROOT_WORKSPACE_NAME) {
-      const { ignoreBinaries: rootIgnoreBinaries, ignoreDependencies: rootIgnoreDependencies } = this.rawConfig ?? {};
+      const {
+        ignoreBinaries: rootIgnoreBinaries,
+        ignoreDependencies: rootIgnoreDependencies,
+        ignoreUnresolved: rootIgnoreUnresolved,
+      } = this.rawConfig ?? {};
       return {
         ignoreBinaries: compact([...ignoreBinaries, ...(rootIgnoreBinaries ?? [])]),
         ignoreDependencies: compact([...ignoreDependencies, ...(rootIgnoreDependencies ?? [])]),
+        ignoreUnresolved: compact([...ignoreUnresolved, ...(rootIgnoreUnresolved ?? [])]),
       };
     }
-    return { ignoreBinaries, ignoreDependencies };
+    return { ignoreBinaries, ignoreDependencies, ignoreUnresolved };
   }
 
   public getConfigForWorkspace(workspaceName: string, extensions?: string[]) {

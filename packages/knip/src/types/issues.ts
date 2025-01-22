@@ -83,7 +83,7 @@ export type Rules = Record<IssueType, IssueSeverity>;
 export type ConfigurationHints = Set<ConfigurationHint>;
 
 export type ConfigurationHint = {
-  type: 'ignoreBinaries' | 'ignoreDependencies' | 'ignoreWorkspaces';
+  type: 'ignoreBinaries' | 'ignoreDependencies' | 'ignoreUnresolved' | 'ignoreWorkspaces';
   identifier: string | RegExp;
   workspaceName?: string;
 };

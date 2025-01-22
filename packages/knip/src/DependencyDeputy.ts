@@ -66,6 +66,7 @@ export class DependencyDeputy {
     manifest,
     ignoreDependencies,
     ignoreBinaries,
+    ignoreUnresolved,
   }: {
     name: string;
     cwd: string;
@@ -74,6 +75,7 @@ export class DependencyDeputy {
     manifest: PackageJson;
     ignoreDependencies: (string | RegExp)[];
     ignoreBinaries: (string | RegExp)[];
+    ignoreUnresolved: (string | RegExp)[];
   }) {
     const dependencies = Object.keys(manifest.dependencies ?? {});
     const peerDependencies = Object.keys(manifest.peerDependencies ?? {});
@@ -110,8 +112,10 @@ export class DependencyDeputy {
       manifestPath,
       ignoreDependencies: ignoreDependencies.map(toRegexOrString),
       ignoreBinaries: ignoreBinaries.map(toRegexOrString),
+      ignoreUnresolved: ignoreUnresolved.map(toRegexOrString),
       usedIgnoreDependencies: new Set<string | RegExp>(),
       usedIgnoreBinaries: new Set<string | RegExp>(),
+      usedIgnoreUnresolved: new Set<string | RegExp>(),
       dependencies,
       devDependencies,
       peerDependencies: new Set(peerDependencies),
@@ -385,6 +389,24 @@ export class DependencyDeputy {
     }
   }
 
+  handleIgnoredUnresolved(issues: Issues, counters: Counters) {
+    for (const key in issues.unresolved) {
+      const issueSet = issues.unresolved[key];
+      for (const issueKey in issueSet) {
+        const issue = issueSet[issueKey];
+        const manifest = this.getWorkspaceManifest(issue.workspace);
+        if (manifest) {
+          const ignoreItem = findMatch(manifest.ignoreUnresolved, issue.symbol);
+          if (ignoreItem) {
+            delete issueSet[issueKey];
+            counters.unresolved--;
+            manifest.usedIgnoreUnresolved.add(ignoreItem);
+          }
+        }
+      }
+    }
+  }
+
   public removeIgnoredIssues({ issues, counters }: { issues: Issues; counters: Counters }) {
     this.handleIgnoredDependencies(issues, counters, 'dependencies');
     this.handleIgnoredDependencies(issues, counters, 'devDependencies');
@@ -392,6 +414,7 @@ export class DependencyDeputy {
     this.handleIgnoredDependencies(issues, counters, 'unlisted');
     this.handleIgnoredDependencies(issues, counters, 'unresolved');
     this.handleIgnoredBinaries(issues, counters, 'binaries');
+    this.handleIgnoredUnresolved(issues, counters);
   }
 
   public getConfigurationHints() {
@@ -407,6 +430,12 @@ export class DependencyDeputy {
       for (const identifier of manifest.ignoreBinaries) {
         if (!manifest.usedIgnoreBinaries.has(identifier)) {
           configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' });
+        }
+      }
+
+      for (const identifier of manifest.ignoreUnresolved) {
+        if (!manifest.usedIgnoreUnresolved.has(identifier)) {
+          configurationHints.add({ workspaceName, identifier, type: 'ignoreUnresolved' });
         }
       }
     }
