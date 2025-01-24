@@ -83,14 +83,14 @@
   "devDependencies": {
     "@jest/types": "^29.6.3",
     "@release-it/bumper": "^7.0.0",
-    "@types/bun": "^1.1.16",
+    "@types/bun": "^1.2.0",
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/picomatch": "3.0.1",
     "@types/webpack": "^5.28.5",
     "@wdio/types": "^9.5.0",
     "glob": "^10.4.2",
-    "release-it": "^18.1.1",
+    "release-it": "^18.1.2",
     "type-fest": "^4.31.0",
     "typescript": "^5.5.2"
   },
