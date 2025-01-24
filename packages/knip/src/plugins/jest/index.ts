@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
 
 const config = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
-const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', '**/__mocks__/**'];
+const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', '**/__mocks__/**/*.[jt]s?(x)'];
 
 const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
   const { configFileDir } = options;
