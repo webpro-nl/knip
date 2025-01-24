@@ -1,6 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { deserialize, serialize } from '../../src/util/serialize.js';
+import { deserialize, serialize } from 'node:v8';
 
 test('Should serialize and deserialize file back to original', () => {
   const file = {

@@ -6,11 +6,11 @@
 import fs from 'node:fs';
 // biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
+import { deserialize, serialize } from 'node:v8';
 import { timerify } from './Performance.js';
 import { debugLog } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
 import { cwd, dirname, isAbsolute, resolve } from './path.js';
-import { deserialize, serialize } from './serialize.js';
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
 
