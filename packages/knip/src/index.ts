@@ -16,7 +16,7 @@ import { getOrCreateFileNode, updateImportMap } from './util/dependency-graph.js
 import { getReferencedInputsHandler } from './util/get-referenced-inputs.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { _glob, negate } from './util/glob.js';
-import { getHasStrictlyNsReferences, getType, hasStrictlyEnumReferences } from './util/has-strictly-ns-references.js';
+import { getType, hasStrictlyEnumReferences, hasStrictlyNsReferences } from './util/has-strictly-ns-references.js';
 import { type Input, isConfigPattern, isEntry, isProductionEntry, toProductionEntry } from './util/input.js';
 import { getIsIdentifierReferencedHandler } from './util/is-identifier-referenced.js';
 import { getPackageNameFromModuleSpecifier } from './util/modules.js';
@@ -545,7 +545,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
               }
             }
 
-            const [hasStrictlyNsRefs, namespace] = getHasStrictlyNsReferences(graph, importsForExport, identifier);
+            const [hasStrictlyNsRefs, namespace] = hasStrictlyNsReferences(graph, importsForExport, identifier);
 
             const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 

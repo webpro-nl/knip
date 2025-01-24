@@ -7,7 +7,7 @@ export const hasStrictlyEnumReferences = (importsForExport: ImportDetails | unde
   return true;
 };
 
-export const getHasStrictlyNsReferences = (
+export const hasStrictlyNsReferences = (
   graph: DependencyGraph,
   importsForExport: ImportDetails | undefined,
   id: string
@@ -26,8 +26,8 @@ export const getHasStrictlyNsReferences = (
       for (const filePath of byFilePaths) {
         const file = graph.get(filePath);
         if (file?.imported) {
-          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, id);
-          if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+          const hasStrictlyNsRefs = hasStrictlyNsReferences(graph, file.imported, id);
+          if (hasStrictlyNsRefs[0] === false) return hasStrictlyNsRefs;
         }
       }
     }
@@ -38,8 +38,8 @@ export const getHasStrictlyNsReferences = (
         for (const filePath of byFilePaths) {
           const file = graph.get(filePath);
           if (file?.imported) {
-            const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, id);
-            if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
+            const hasStrictlyNsRefs = hasStrictlyNsReferences(graph, file.imported, id);
+            if (hasStrictlyNsRefs[0] === false) return hasStrictlyNsRefs;
           }
         }
       }
@@ -53,9 +53,9 @@ export const getHasStrictlyNsReferences = (
     for (const filePath of byFilePaths) {
       const file = graph.get(filePath);
       if (file?.imported) {
-        const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, id);
-        if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
-        namespace = hasStrictlyNsReferences[1];
+        const hasStrictlyNsRefs = hasStrictlyNsReferences(graph, file.imported, id);
+        if (hasStrictlyNsRefs[0] === false) return hasStrictlyNsRefs;
+        namespace = hasStrictlyNsRefs[1];
       }
     }
   }
@@ -66,9 +66,9 @@ export const getHasStrictlyNsReferences = (
       for (const filePath of byFilePaths) {
         const file = graph.get(filePath);
         if (file?.imported) {
-          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, id);
-          if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
-          namespace = hasStrictlyNsReferences[1];
+          const hasStrictlyNsRefs = hasStrictlyNsReferences(graph, file.imported, id);
+          if (hasStrictlyNsRefs[0] === false) return hasStrictlyNsRefs;
+          namespace = hasStrictlyNsRefs[1];
         }
       }
     }
@@ -81,9 +81,9 @@ export const getHasStrictlyNsReferences = (
       for (const filePath of filePaths) {
         const file = graph.get(filePath);
         if (file?.imported) {
-          const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, [alias, ...rest].join('.'));
-          if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
-          namespace = hasStrictlyNsReferences[1];
+          const hasStrictlyNsRefs = hasStrictlyNsReferences(graph, file.imported, [alias, ...rest].join('.'));
+          if (hasStrictlyNsRefs[0] === false) return hasStrictlyNsRefs;
+          namespace = hasStrictlyNsRefs[1];
         }
       }
     }
@@ -93,9 +93,9 @@ export const getHasStrictlyNsReferences = (
     for (const filePath of filePaths) {
       const file = graph.get(filePath);
       if (file?.imported) {
-        const hasStrictlyNsReferences = getHasStrictlyNsReferences(graph, file.imported, `${ns}.${id}`);
-        if (hasStrictlyNsReferences[0] === false) return hasStrictlyNsReferences;
-        namespace = hasStrictlyNsReferences[1];
+        const hasStrictlyNsRefs = hasStrictlyNsReferences(graph, file.imported, `${ns}.${id}`);
+        if (hasStrictlyNsRefs[0] === false) return hasStrictlyNsRefs;
+        namespace = hasStrictlyNsRefs[1];
       }
     }
   }
