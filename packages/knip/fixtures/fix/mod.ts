@@ -17,5 +17,5 @@ export const [g, h, i] = [7, 8, 9];
 
 export default class MyClass {}
 
-/** @knipignore */
+/** @lintignore */
 export type U = number;

@@ -117,6 +117,8 @@ so you can get rid of false positives? A variety of reasons:
 3. In the event you want to remove Knip, just uninstall `knip`. And not
    countless useless comments scattered throughout the codebase.
 
+Tip: use `@lintignore` in JSDoc comments, so other linters can use the same.
+
 [1]: ./entry-files.md
 [2]: ../features/monorepos-and-workspaces.md
 [3]: ../reference/faq.md#why-doesnt-knip-use-an-existing-module-resolver

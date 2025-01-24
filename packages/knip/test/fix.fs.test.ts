@@ -33,7 +33,7 @@ export const [g, , i] = [7, 8, 9];
 
 class MyClass {}
 
-/** @knipignore */
+/** @lintignore */
 export type U = number;
 `,
     ],
@@ -128,7 +128,7 @@ export const {  set: setter } = fn();
     ...baseArguments,
     cwd,
     isFix: true,
-    tags: [[], ['knipignore']],
+    tags: [[], ['lintignore']],
   });
 
   assert(issues.exports['access.js']['UNUSED']);
@@ -185,7 +185,7 @@ export const [g, h, i] = [7, 8, 9];
 
 export default class MyClass {}
 
-/** @knipignore */
+/** @lintignore */
 export type U = number;
 `,
     ],
@@ -226,7 +226,7 @@ export const { get: getter, set: setter } = fn();
     cwd,
     isFix: true,
     fixTypes: ['types'],
-    tags: [[], ['knipignore']],
+    tags: [[], ['lintignore']],
   });
 
   assert(issues.exports['access.js']['ACCESS']);

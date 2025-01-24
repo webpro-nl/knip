@@ -53,7 +53,7 @@ $ knip --production
 $ knip --workspace packages/client --include files,dependencies
 $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
-$ knip --tags=-knipignore
+$ knip --tags=-lintignore
 
 Website: https://knip.dev`;
 

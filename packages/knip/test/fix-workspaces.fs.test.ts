@@ -19,7 +19,7 @@ const d = 2;
 
 type T = number;
 
-/** @knipignore */
+/** @lintignore */
 export type U = number;
 `,
     ],
@@ -45,7 +45,7 @@ const d = 2;
 
 type T = number;
 
-/** @knipignore */
+/** @lintignore */
 export type U = number;
 `,
     ],
@@ -66,7 +66,7 @@ export type U = number;
     ...baseArguments,
     cwd,
     isFix: true,
-    tags: [[], ['knipignore']],
+    tags: [[], ['lintignore']],
   });
 
   assert(issues.exports['exports.ts']['d']);
@@ -111,7 +111,7 @@ export const d = 2;
 
 type T = number;
 
-/** @knipignore */
+/** @lintignore */
 export type U = number;
 `,
     ],
@@ -123,7 +123,7 @@ export const d = 2;
 
 type T = number;
 
-/** @knipignore */
+/** @lintignore */
 export type U = number;
 `,
     ],
@@ -134,7 +134,7 @@ export type U = number;
     cwd,
     isFix: true,
     fixTypes: ['types'],
-    tags: [[], ['knipignore']],
+    tags: [[], ['lintignore']],
   });
 
   assert(issues.exports['exports.ts']['d']);

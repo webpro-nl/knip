@@ -26,10 +26,10 @@ Use arbitrary [tags][1] to exclude or include tagged exports from the report.
 Example:
 
 ```ts
-/** @knipignore */
+/** @lintignore */
 export const myUnusedExport = 1;
 
-/** @knipignore */
+/** @lintignore */
 import Unresolved from './generated/lib.js';
 ```
 
@@ -37,7 +37,7 @@ And then include (`+`) or exclude (`-`) these tagged exports from the report
 like so:
 
 ```shell
-knip --tags=-knipignore,-internal
+knip --tags=-lintignore,-internal
 ```
 
 ## `@public`

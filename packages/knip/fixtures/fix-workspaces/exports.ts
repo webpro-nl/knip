@@ -3,5 +3,5 @@ export const d = 2;
 
 export type T = number;
 
-/** @knipignore */
+/** @lintignore */
 export type U = number;
