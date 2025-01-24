@@ -4,4 +4,6 @@ import { ignored, notIgnored } from './unimported.js';
 
 const x: MyEnum = {};
 
+const xm = MyEnum.UsedUntagged;
+
 const y = new MyClass();
