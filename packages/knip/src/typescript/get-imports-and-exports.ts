@@ -348,16 +348,18 @@ const getImportsAndExports = (
                   const [ns, ...right] = [typeName.left.getText(), typeName.right.getText()].join('.').split('.');
                   const members = right.map((_r, index) => right.slice(0, index + 1).join('.'));
                   addNsMemberRefs(imports, ns, members);
-                } else if (imports.importedNs.has(id) && isConsiderReferencedNS(node)) {
-                  // Pattern: fn(NS), { ...NS } etc. (https://knip.dev/guides/namespace-imports)
-                  imports.refs.add(id);
-                } else if (isObjectEnumerationCallExpressionArgument(node)) {
-                  // Pattern: Object.keys(NS)
-                  imports.refs.add(id);
-                } else if (isInForIteration(node)) {
-                  // Pattern: for (const x in NS) { }
-                  // Pattern: for (const x of NS) { }
-                  imports.refs.add(id);
+                } else if (imports.importedNs.has(id)) {
+                  if (isConsiderReferencedNS(node)) {
+                    // Pattern: fn(NS), { ...NS } etc. (https://knip.dev/guides/namespace-imports)
+                    imports.refs.add(id);
+                  } else if (isObjectEnumerationCallExpressionArgument(node)) {
+                    // Pattern: Object.keys(NS)
+                    imports.refs.add(id);
+                  } else if (isInForIteration(node)) {
+                    // Pattern: for (const x in NS) { }
+                    // Pattern: for (const x of NS) { }
+                    imports.refs.add(id);
+                  }
                 }
               }
             }
