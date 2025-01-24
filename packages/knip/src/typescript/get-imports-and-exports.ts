@@ -17,7 +17,7 @@ import {
   getDestructuredIds,
   getJSDocTags,
   getLineAndCharacterOfPosition,
-  getTypeName,
+  getTypeRef,
   isAccessExpression,
   isConsiderReferencedNS,
   isDestructuring,
@@ -342,12 +342,17 @@ const getImportsAndExports = (
                 const members = getDestructuredIds(node.parent.name);
                 addNsMemberRefs(imports, id, members);
               } else {
-                const typeName = getTypeName(node);
-                if (typeName) {
-                  // Pattern: NS.TypeId
-                  const [ns, ...right] = [typeName.left.getText(), typeName.right.getText()].join('.').split('.');
-                  const members = right.map((_r, index) => right.slice(0, index + 1).join('.'));
-                  addNsMemberRefs(imports, ns, members);
+                const typeRef = getTypeRef(node);
+                if (typeRef) {
+                  if (ts.isQualifiedName(typeRef.typeName)) {
+                    const typeName = typeRef.typeName;
+                    // Pattern: NS.TypeId
+                    const [ns, ...right] = [typeName.left.getText(), typeName.right.getText()].join('.').split('.');
+                    const members = right.map((_r, index) => right.slice(0, index + 1).join('.'));
+                    addNsMemberRefs(imports, ns, members);
+                  } else {
+                    imports.refs.add(id);
+                  }
                 } else if (imports.importedNs.has(id)) {
                   if (isConsiderReferencedNS(node)) {
                     // Pattern: fn(NS), { ...NS } etc. (https://knip.dev/guides/namespace-imports)
@@ -367,7 +372,7 @@ const getImportsAndExports = (
         }
 
         // Store exports referenced in exported types, including `typeof` values
-        // Simplifies and speeds up (*) below while we're still in the realm of bound AST
+        // Simplifies and speeds up (*) below while we still have the typeChecker
         if (!isTopLevel && symbol.exportSymbol && isReferencedInExport(node)) {
           referencedSymbolsInExport.add(symbol.exportSymbol);
         }

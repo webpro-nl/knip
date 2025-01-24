@@ -14,6 +14,7 @@ export class $Dollar {}
 export type $DollarType = string;
 
 export enum Characters {
+  Used = 1,
   ' ' = ' ',
   '-' = '-',
   ',' = ',',

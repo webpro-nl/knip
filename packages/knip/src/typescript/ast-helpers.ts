@@ -193,10 +193,9 @@ export const isInForIteration = (node: ts.Node) =>
 export const isTopLevel = (node: ts.Node) =>
   ts.isSourceFile(node.parent) || (node.parent && ts.isSourceFile(node.parent.parent));
 
-export const getTypeName = (node: ts.Identifier) => {
+export const getTypeRef = (node: ts.Identifier) => {
   if (!node.parent?.parent) return;
-  const typeRef = findAncestor<ts.TypeReferenceNode>(node, _node => ts.isTypeReferenceNode(_node));
-  if (typeRef && ts.isQualifiedName(typeRef.typeName)) return typeRef.typeName;
+  return findAncestor<ts.TypeReferenceNode>(node, _node => ts.isTypeReferenceNode(_node));
 };
 
 export const isImportSpecifier = (node: ts.Node) =>

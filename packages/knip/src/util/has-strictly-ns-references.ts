@@ -1,6 +1,12 @@
 import { IMPORT_STAR } from '../constants.js';
 import type { DependencyGraph, ImportDetails } from '../types/dependency-graph.js';
 
+export const hasStrictlyEnumReferences = (importsForExport: ImportDetails | undefined, id: string) => {
+  if (!importsForExport || !importsForExport.refs.has(id)) return false;
+  for (const ref of importsForExport.refs) if (ref.startsWith(`${id}.`)) return false;
+  return true;
+};
+
 export const getHasStrictlyNsReferences = (
   graph: DependencyGraph,
   importsForExport: ImportDetails | undefined,

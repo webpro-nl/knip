@@ -15,6 +15,13 @@ const myNumber: MyEnum.C_UsedInternal = 1;
 
 type Used = EntryEnum;
 
+const U: EntryEnum.UsedMemberInEntryEnum = 1;
+
 export enum TestEnum {
   '' = 'test',
+}
+
+export enum Category {
+  Ambient = 'Ambient',
+  Playback = 'Playback',
 }

@@ -20,6 +20,8 @@ export const UnusedCustomAndInternal = 1;
  * @internal
  */
 export enum MyEnum {
+  UsedUntagged = 1,
+
   UnusedUntagged = 1,
 
   /**
