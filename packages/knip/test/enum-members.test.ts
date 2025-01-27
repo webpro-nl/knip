@@ -35,11 +35,10 @@ test('Find unused enum members (isIncludeEntryExports)', async () => {
   assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
   assert(issues.enumMembers['members.ts']['MyEnum.B_Unused']);
   assert(issues.enumMembers['members.ts']['MyEnum.D_Key']);
-  assert(issues.enumMembers['index.ts']['EntryEnum.UnusedMemberInEntryEnum']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    enumMembers: 3,
+    enumMembers: 2,
     processed: 2,
     total: 2,
   });

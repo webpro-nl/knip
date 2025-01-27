@@ -25,6 +25,35 @@ test('Handle special characters in named exports and members', async () => {
   assert(issues.classMembers['exports.ts']['DollarMembers.$method']);
   assert(issues.classMembers['exports.ts']['DollarMembers.method$']);
 
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    classMembers: 4,
+    exports: 4,
+    types: 1,
+    processed: 2,
+    total: 2,
+  });
+});
+
+test('Handle special characters in named exports and members (nsTypes)', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    includedIssueTypes: ['nsTypes'],
+  });
+
+  assert(issues.exports['exports.ts']['$dollar']);
+  assert(issues.exports['exports.ts']['dollar$']);
+  assert(issues.exports['exports.ts']['_underscore']);
+  assert(issues.exports['exports.ts']['$Dollar']);
+
+  assert(issues.types['exports.ts']['$DollarType']);
+
+  assert(issues.classMembers['exports.ts']['DollarMembers.$member']);
+  assert(issues.classMembers['exports.ts']['DollarMembers.member$']);
+  assert(issues.classMembers['exports.ts']['DollarMembers.$method']);
+  assert(issues.classMembers['exports.ts']['DollarMembers.method$']);
+
   assert(issues.enumMembers['exports.ts']['Characters.-']);
   assert(issues.enumMembers['exports.ts']['Characters.,']);
   assert(issues.enumMembers['exports.ts']['Characters.:']);

@@ -473,6 +473,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
               if (isReferenced) {
                 if (report.enumMembers && exportedItem.type === 'enum') {
+                  if (!report.nsTypes && importsForExport.refs.has(identifier)) continue;
                   if (hasStrictlyEnumReferences(importsForExport, identifier)) continue;
 
                   for (const member of exportedItem.members) {
