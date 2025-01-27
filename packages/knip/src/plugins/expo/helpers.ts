@@ -1,13 +1,26 @@
-import type { PluginOptions } from '../../types/config.js';
+import type { PluginOptions, ResolveConfig } from '../../types/config.js';
 import { type Input, toDependency, toProductionDependency } from '../../util/input.js';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
+import { join } from '../../util/path.js';
 import type { ExpoConfig } from './types.js';
+
+const getDummyConfigContext = (options: PluginOptions) => ({
+  projectRoot: options.cwd,
+  staticConfigPath: null,
+  packageJsonPath: join(options.cwd, 'package.json'),
+  config: {},
+});
+
+export const getConfig = (localConfig: ExpoConfig, options: PluginOptions) => {
+  const expoConfig = typeof localConfig === 'function' ? localConfig(getDummyConfigContext(options)) : localConfig;
+  return 'expo' in expoConfig ? expoConfig.expo : expoConfig;
+};
 
 // https://docs.expo.dev/versions/latest/config/app
 
-export const getDependencies = async (localConfig: ExpoConfig, { manifest }: PluginOptions) => {
-  const expoConfig = typeof localConfig === 'function' ? localConfig() : localConfig;
-  const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;
+export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, options) => {
+  const { manifest } = options;
+  const config = getConfig(localConfig, options);
 
   const platforms = config.platforms ?? ['ios', 'android'];
 
