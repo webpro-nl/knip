@@ -11,7 +11,7 @@ const enablers = ['nyc'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js', 'package.json'];
+const config = ['.nycrc', '.nycrc.{json,yml,yaml}', 'nyc.config.js', 'package.json'];
 
 const resolveConfig: ResolveConfig<NycConfig> = config => {
   const extend = config?.extends ?? [];
