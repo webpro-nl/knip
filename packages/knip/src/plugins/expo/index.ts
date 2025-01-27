@@ -2,7 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '
 import { toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getDependencies } from './helpers.js';
+import { getConfig, getDependencies } from './helpers.js';
 import type { ExpoConfig } from './types.js';
 
 // https://docs.expo.dev/
@@ -20,9 +20,9 @@ const production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
 /** @public */
 export const docs = { production };
 
-const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (localConfig, { manifest }) => {
-  const expoConfig = typeof localConfig === 'function' ? localConfig() : localConfig;
-  const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;
+const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (localConfig, options) => {
+  const { manifest } = options;
+  const config = getConfig(localConfig, options);
 
   // https://docs.expo.dev/router/installation/#setup-entry-point
   if (manifest.main === 'expo-router/entry') {

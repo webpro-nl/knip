@@ -1,6 +1,7 @@
 // https://github.com/expo/expo/blob/main/packages/%40expo/config-types/src/ExpoConfig.ts
+// https://github.com/expo/expo/blob/main/packages/%40expo/config/src/Config.types.ts
 
-type AppConfig = {
+type BaseConfig = {
   platforms?: ('ios' | 'android' | 'web')[];
   notification?: Record<string, unknown>;
   updates?: {
@@ -18,5 +19,13 @@ type AppConfig = {
   plugins?: (string | [string, Record<string, unknown>])[];
 };
 
-type Config = AppConfig | { expo: AppConfig };
-export type ExpoConfig = Config | (() => Config);
+type ConfigContext = {
+  projectRoot: string;
+  staticConfigPath: string | null;
+  packageJsonPath: string | null;
+  config: Partial<BaseConfig>;
+};
+
+type ExpoConfigOrProp = BaseConfig | { expo: BaseConfig };
+
+export type ExpoConfig = ExpoConfigOrProp | ((cfg: ConfigContext) => ExpoConfigOrProp);
