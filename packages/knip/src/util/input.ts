@@ -19,7 +19,6 @@ export interface ConfigInput extends Input {
 }
 
 type Options = {
-  production?: boolean;
   optional?: boolean;
   dir?: string;
   containingFilePath?: string;
