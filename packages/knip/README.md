@@ -9,15 +9,15 @@
 
 <div align="center">
 
-  [![NPM Version](https://img.shields.io/npm/v/knip)][1]
-  [![NPM Downloads](https://img.shields.io/npm/dm/knip)][1]
-  [![GitHub Repo stars](https://img.shields.io/github/stars/webpro-nl/knip)][2]
+[![NPM Version](https://img.shields.io/npm/v/knip)][1]
+[![NPM Downloads](https://img.shields.io/npm/dm/knip)][1]
+[![GitHub Repo stars](https://img.shields.io/github/stars/webpro-nl/knip)][2]
 
 </div>
 
-Knip finds **unused files, dependencies and exports** in your JavaScript and
-TypeScript projects. Less code and dependencies lead to improved performance,
-less maintenance and easier refactorings.
+Knip finds and fixes **unused files, dependencies and exports** in your
+JavaScript and TypeScript projects. Less code and dependencies lead to improved
+performance, less maintenance and easier refactorings.
 
 - Website: [knip.dev][3]
 - GitHub repo: [webpro-nl/knip][2]

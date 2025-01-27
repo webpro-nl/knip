@@ -10,7 +10,7 @@ in complexity and size, automated and comprehensive tooling becomes critical.
 
 :::tip[TL;DR]
 
-Knip finds and fixes unused files, exports and dependencies.
+Knip finds and fixes unused files, dependencies and exports.
 
 Deep analysis from [fine-grained entry points][1] based on the actual frameworks
 and tooling in [(mono)repos][2] for accurate and actionable results. Advanced

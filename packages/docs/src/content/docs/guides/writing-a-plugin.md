@@ -22,27 +22,27 @@ own!
 
 ## Example 1: entry
 
-Let's dive right in. Here's the entire source code of the Rollup plugin:
+Let's dive right in. Here's the entire source code of the Tailwind plugin:
 
 ```ts
-import { hasDependency } from '~/util/plugin.js';
-import type { IsPluginEnabled } from '~/types/plugins.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import { hasDependency } from '../../util/plugin.js';
 
-const title = 'Rollup';
+const title = 'Tailwind';
 
-const enablers = ['rollup'];
+const enablers = ['tailwindcss'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) =>
   hasDependency(dependencies, enablers);
 
-const entry = ['rollup.config.{js,cjs,mjs,ts}'];
+const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
 
 export default {
   title,
   enablers,
   isEnabled,
   entry,
-};
+} satisfies Plugin;
 ```
 
 Yes, that's the entire plugin! Let's go over each item one by one:
@@ -70,13 +70,13 @@ This function can be kept straightforward with the `hasDependency` helper.
 
 This plugin exports `entry` file patterns.
 
-In summary: if `rollup` is listed as a dependency then `rollup.config.*` files
-are added as entry files.
+In summary: if `tailwind` is listed as a dependency then `tailwind.config.*`
+files are added as entry files.
 
 With many tools, the dynamic configuration file import dependencies such as
 plugins or reporters with regular `require` or `import` statements. In this
 case, we have no extra work in the Knip plugin, as they'll be treated as regular
-entry files. All internal and external dependencies of the `rollup.config.ts`
+entry files. All internal and external dependencies of the `tailwind.config.ts`
 entry file will be marked as used.
 
 The next example shows how to handle a tool that has its own particular
@@ -87,9 +87,14 @@ configuration object.
 Here's the full source code of the `nyc` plugin:
 
 ```ts
+import { toDeferResolve } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { NycConfig } from './types.js';
-import type { ResolveConfig, IsPluginEnabled } from '../../types/config.js';
+import type {
+  IsPluginEnabled,
+  Plugin,
+  ResolveConfig,
+} from '../../types/config.js';
 
 const title = 'nyc';
 
@@ -98,7 +103,12 @@ const enablers = ['nyc'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) =>
   hasDependency(dependencies, enablers);
 
-const config = ['.nycrc', '.nycrc.json', '.nycrc.{yml,yaml}', 'nyc.config.js'];
+const config = [
+  '.nycrc',
+  '.nycrc.{json,yml,yaml}',
+  'nyc.config.js',
+  'package.json',
+];
 
 const resolveConfig: ResolveConfig<NycConfig> = config => {
   const extend = config?.extends ?? [];
@@ -112,7 +122,7 @@ export default {
   isEnabled,
   config,
   resolveConfig,
-};
+} satisfies Plugin;
 ```
 
 Here's an example `config` file that will be handled by this plugin:
@@ -129,8 +139,8 @@ Compared to the first example, this plugin has two new variables:
 ### 5. `config`
 
 The `config` array contains all possible locations of the config file for the
-tool. Knip loads matching files and passes the result into the `resolveConfig`
-function:
+tool. Knip loads matching files and passes the results (i.e. what resolves as
+the default export) into the `resolveConfig` function:
 
 ### 6. `resolveConfig`
 
@@ -163,18 +173,18 @@ this from the configuration object and return it to Knip:
 
 ### 7. resolveEntryPaths
 
-Here's an example from the Ava test runner plugin:
+Here's an example from the Preconstruct plugin:
 
 ```ts
-const resolveEntryPaths: ResolveEntryPaths<AvaConfig> = localConfig => {
-  return (localConfig?.files ?? []).map(toEntry);
+const resolveEntryPaths: ResolveConfig<PreconstructConfig> = async config => {
+  return (config.entrypoints ?? []).map(toEntry);
 };
 ```
 
-With Ava, you can configure `files` to override the default glob patterns to use
-custom locations for test files. If this function is implemented in a plugin,
-Knip will use its return value over the default `entry` patterns. The result is
-that users don't need to duplicate this customization in both Ava and Knip.
+With Preconstruct, you can configure `entrypoints`. If this function is
+implemented in a plugin, Knip will use its return value over the default `entry`
+patterns. The result is that you don't need to duplicate this customization in
+both the tool (e.g. Preconstruct) and Knip.
 
 :::tip[Should I implement resolveEntryPaths?]
 
@@ -182,6 +192,73 @@ You should implement `resolveEntryPaths` if the configuration object contains
 file patterns that override the plugin's default `entry` patterns.
 
 :::
+
+## Inputs
+
+You may have noticed the `toDeferResolve` and `toEntry` functions. They're a way
+for plugins to tell what they've found and how to handle it. The more precise a
+plugin can be, the better it is for results and performance. Here's a list of
+all input type functions:
+
+### toEntry
+
+An `entry` input is just like an `entry` in the configuration. It should either
+be an absolute or relative path, and glob patterns are allowed.
+
+### toProductionEntry
+
+A production `entry` input is just like an `production` in the configuration. It
+should either be an absolute or relative path, and it can have glob patterns.
+
+### toDependency
+
+The `dependency` indicates the entry is a dependency, belonging in either the
+`"dependencies"` or `"devDependencies"` section of `package.json`.
+
+### toProductionDependency
+
+The production `dependency` indicates the entry is a production dependency,
+expected to be listed in `"dependencies"`.
+
+### toDeferResolve
+
+The `deferResolve` input type is used to defer the resolution of a specifier.
+This could be resolved to a dependency or an entry file. For instance, the
+specifier `"input"` could be resolved to `"input.js"`, `"input/index.js"` or the
+`"input"` package name (dependency). If it's a local file, it will be added as
+an entry file, otherwise it's an external dependency.
+
+If this does not lead to a resolution, the specifier will be listed under
+"unresolved imports"
+
+### toDeferResolveEntry
+
+The `deferResolveEntry` input type is similar to `deferResolve`, but it's used
+for entry files only (not dependencies) and unresolved inputs are ignored. It's
+different from `toEntry` as glob patterns are not supported.
+
+### toConfig
+
+The `config` input type is a way for plugins to reference a configuration file
+that should be handled by a different plugin. For instance, Angular
+configurations might contain references to `tsConfig` and `karmaConfig` files,
+so these `config` files can then be handled by the TypeScript and Karma plugins,
+respectively.
+
+Requires the `pluginName` option.
+
+### toBinary
+
+The `binary` input type isn't used by plugins directly, but by the shell script
+parser (through the `getInputsFromScripts` helper). Think of GitHub Actions
+worfklow YAML files or husky scripts. Using this input type, a binary is
+"assigned" to the dependency that has it as a `"bin"` in their `package.json`.
+
+### Input options
+
+When creating inputs from specifiers, extra `options` can be provided. Most
+notably, the optional `dir` argument to indicate something belongs to a
+different workspace.
 
 ## Create a new plugin
 
