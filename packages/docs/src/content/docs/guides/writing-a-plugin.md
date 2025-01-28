@@ -156,7 +156,7 @@ without an extension are provided as plain text strings.
 You should implement `resolveConfig` if any of these are true:
 
 - The tool supports a `config` file in JSON or YAML format
-- The `config` file references dependencies as strings
+- The `config` file references dependencies by strings (not import statements)
 
 :::
 
@@ -188,8 +188,8 @@ both the tool (e.g. Preconstruct) and Knip.
 
 :::tip[Should I implement resolveEntryPaths?]
 
-You should implement `resolveEntryPaths` if the configuration object contains
-file patterns that override the plugin's default `entry` patterns.
+Plugins should have `resolveEntryPaths` implemented if the configuration file
+contains one or more options that represent [entry points][2].
 
 :::
 
@@ -224,12 +224,12 @@ expected to be listed in `"dependencies"`.
 
 The `deferResolve` input type is used to defer the resolution of a specifier.
 This could be resolved to a dependency or an entry file. For instance, the
-specifier `"input"` could be resolved to `"input.js"`, `"input/index.js"` or the
-`"input"` package name (dependency). If it's a local file, it will be added as
-an entry file, otherwise it's an external dependency.
+specifier `"input"` could be resolved to `"input.js"`, `"input.tsx"`,
+`"input/index.js"` or the `"input"` package name. Local files are added as entry
+files, package names are external dependencies.
 
-If this does not lead to a resolution, the specifier will be listed under
-"unresolved imports"
+If this does not lead to a resolution, the specifier will be reported under
+"unresolved imports".
 
 ### toDeferResolveEntry
 
@@ -254,11 +254,45 @@ parser (through the `getInputsFromScripts` helper). Think of GitHub Actions
 worfklow YAML files or husky scripts. Using this input type, a binary is
 "assigned" to the dependency that has it as a `"bin"` in their `package.json`.
 
-### Input options
+### Options
 
-When creating inputs from specifiers, extra `options` can be provided. Most
-notably, the optional `dir` argument to indicate something belongs to a
-different workspace.
+When creating inputs from specifiers, extra `options` can be provided.
+
+#### dir
+
+The optional `dir` argument assigns the input to a different workspace. For
+instance, GitHub Action workflows are always stored in the root workspace, and
+support `working-directory` in job steps. For example:
+
+```yaml
+jobs:
+  stylelint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npx esbuild
+        working-directory: packages/app
+```
+
+The GitHub Action plugin understands `working-directory` and adds this `dir` to
+the input:
+
+```ts
+toDependency('esbuild', { dir: 'packages/app' });
+```
+
+Knip now understands `esbuild` is a dependency of the workspace in the
+`packages/app` directory.
+
+## Argument parsing
+
+As part of the [script parser][3], Knip parses command-line arguments. Plugins
+can implement the `arg` object to add custom argument parsing tailored to the
+executables of the tool.
+
+For now, there are two resources available to learn more:
+
+- [The documented `Args` type in source code][4]
+- [Implemented `args` in existing plugins][5]
 
 ## Create a new plugin
 
@@ -290,7 +324,12 @@ individual plugin pages][1] from the exported plugin values.
 
 Thanks for reading. If you have been following this guide to create a new
 plugin, this might be the right time to open a pull request! Feel free to join
-[the Knip Discord channel][2] if you have any questions.
+[the Knip Discord channel][6] if you have any questions.
 
 [1]: ../reference/plugins.md
-[2]: https://discord.gg/r5uXTtbTpc
+[2]: ../explanations/plugins.md#entry-files-from-config-files
+[3]: ../features/script-parser.md
+[4]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
+[5]:
+  https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
+[6]: https://discord.gg/r5uXTtbTpc
