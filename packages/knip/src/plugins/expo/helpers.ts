@@ -8,7 +8,9 @@ const getDummyConfigContext = (options: PluginOptions) => ({
   projectRoot: options.cwd,
   staticConfigPath: null,
   packageJsonPath: join(options.cwd, 'package.json'),
-  config: {},
+  config: {
+    plugins: [],
+  },
 });
 
 export const getConfig = (localConfig: ExpoConfig, options: PluginOptions) => {
