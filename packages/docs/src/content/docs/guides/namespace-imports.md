@@ -1,5 +1,7 @@
 ---
 title: Namespace Imports
+sidebar:
+  order: 5
 ---
 
 The intention of exports used through namespace imports may not always be clear

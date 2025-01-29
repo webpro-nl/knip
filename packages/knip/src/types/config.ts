@@ -47,6 +47,7 @@ export type GetImportsAndExportsOptions = {
   skipExports: boolean;
   isFixExports: boolean;
   isFixTypes: boolean;
+  isReportTypeMembers: boolean;
   isReportClassMembers: boolean;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   tags: Tags;
@@ -112,7 +113,6 @@ export interface PluginOptions extends BaseOptions {
   configFileName: string;
   configFilePath: string;
   isProduction: boolean;
-  enabledPlugins: string[];
   getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 

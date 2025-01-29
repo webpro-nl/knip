@@ -13,6 +13,19 @@ interface SymbolWithExportSymbol extends ts.Symbol {
   exportSymbol?: ts.Symbol;
 }
 
+type Target = {
+  aliasSymbol?: ts.Symbol;
+  symbol: ts.Symbol;
+};
+
+export interface SymbolWithLinks extends ts.Symbol {
+  links?: {
+    mapper?: {
+      target?: Target | { types: Target[] };
+    };
+  };
+}
+
 type PragmaMap = {
   arguments: {
     factory?: string;
@@ -32,8 +45,6 @@ export interface BoundSourceFile extends ts.SourceFile {
   symbol?: SymbolWithExports;
 
   // Used in `addImport`, but only available in TypeScript <5.3.0
-  resolvedModules?: ts.ModeAwareCache<ts.ResolvedModuleWithFailedLookupLocations>;
-
   // Used in `maybeAddNamespaceAccessAsImport` (perf only)
   locals?: SymbolTable;
 
