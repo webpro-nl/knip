@@ -4,6 +4,7 @@ import { toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import type { PluginConfig, RouteConfigEntry } from './types.js';
+import vite from '../vite/index.js';
 
 // https://reactrouter.com/start/framework/routing
 
@@ -13,7 +14,7 @@ const enablers = ['@react-router/dev'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['react-router.config.{js,ts}'];
+const config: string[] = ['react-router.config.{js,ts}', ...vite.config];
 
 const entry: string[] = [];
 
@@ -23,6 +24,10 @@ const resolveEntryPaths: ResolveEntryPaths<PluginConfig> = async (localConfig, o
   const { configFileDir } = options;
   const appDirectory = localConfig.appDirectory ?? 'app';
   const appDir = join(configFileDir, appDirectory);
+
+  // If using flatRoutes from @react-router/fs-routes it will throw an error if this variable is not defined
+  // @ts-ignore
+  globalThis.__reactRouterAppDirectory = appDir;
 
   let routeConfig: RouteConfigEntry[] = [];
 
