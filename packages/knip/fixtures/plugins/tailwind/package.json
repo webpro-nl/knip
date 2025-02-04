@@ -1,5 +1,5 @@
 {
-  "name": "tailwind",
+  "name": "@fixtures/tailwind",
   "scripts": {
     "css": "tailwindcss"
   },
