@@ -55,6 +55,7 @@ export type PluginName =
   | 'preconstruct'
   | 'prettier'
   | 'react-cosmos'
+  | 'react-router'
   | 'release-it'
   | 'remark'
   | 'remix'
@@ -148,6 +149,7 @@ export const pluginNames = [
   'preconstruct',
   'prettier',
   'react-cosmos',
+  'react-router',
   'release-it',
   'remark',
   'remix',

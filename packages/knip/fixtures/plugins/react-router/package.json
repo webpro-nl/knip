@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/react-router",
+  "version": "*",
+  "devDependencies": {
+    "@react-router/dev": "*"
+  }
+}

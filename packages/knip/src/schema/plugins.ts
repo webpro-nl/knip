@@ -68,6 +68,7 @@ export const pluginsSchema = z.object({
   preconstruct: pluginSchema,
   prettier: pluginSchema,
   'react-cosmos': pluginSchema,
+  'react-router': pluginSchema,
   'release-it': pluginSchema,
   remark: pluginSchema,
   remix: pluginSchema,
