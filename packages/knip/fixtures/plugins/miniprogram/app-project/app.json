@@ -1,0 +1,23 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "Mini Program"
+  },
+  "usingComponents": {
+    "missing-header": "/components/missing-header/index",
+    "used-footer": "/components/used-footer/index"
+  },
+  "workers": "workers/missing-worker.ts",
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "Home",
+        "iconPath": "images/missing-icon.png",
+        "selectedIconPath": "images/used-icon.png"
+      }
+    ]
+  }
+} 

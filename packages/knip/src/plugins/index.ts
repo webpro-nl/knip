@@ -32,6 +32,7 @@ import { default as lockfileLint } from './lockfile-lint/index.js';
 import { default as lostPixel } from './lost-pixel/index.js';
 import { default as markdownlint } from './markdownlint/index.js';
 import { default as metro } from './metro/index.js';
+import { default as miniprogram } from './miniprogram/index.js';
 import { default as mocha } from './mocha/index.js';
 import { default as moonrepo } from './moonrepo/index.js';
 import { default as msw } from './msw/index.js';
@@ -125,6 +126,7 @@ export const Plugins = {
   'lost-pixel': lostPixel,
   markdownlint,
   metro,
+  miniprogram,
   mocha,
   moonrepo,
   msw,

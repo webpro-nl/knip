@@ -2,6 +2,7 @@ import type { RawConfiguration } from '../types/config.js';
 import type { DependencySet } from '../types/workspace.js';
 import Astro from './astro.js';
 import MDX from './mdx.js';
+import Miniprogram from './miniprogram.js';
 import Svelte from './svelte.js';
 import type { AsyncCompilerFn, AsyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
 import Vue from './vue.js';
@@ -37,6 +38,10 @@ const compilers = new Map([
   ['.mdx', MDX],
   ['.svelte', Svelte],
   ['.vue', Vue],
+  ['.wxml', Miniprogram.wxml],
+  ['.wxss', Miniprogram.wxss],
+  ['.wxs', Miniprogram.wxs],
+  ['.json', Miniprogram.json],
 ]);
 
 export const getIncludedCompilers = (

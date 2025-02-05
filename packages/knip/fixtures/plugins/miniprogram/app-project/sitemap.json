@@ -1,0 +1,15 @@
+{
+  "desc": "Configuration for WeChat search crawling",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "pages/index/index",
+      "params": ["id"],
+      "matching": "exact"
+    },
+    {
+      "action": "disallow",
+      "page": "pages/private/*"
+    }
+  ]
+} 
