@@ -3,8 +3,8 @@ import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/con
 import { toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
-import type { PluginConfig, RouteConfigEntry } from './types.js';
 import vite from '../vite/index.js';
+import type { PluginConfig, RouteConfigEntry } from './types.js';
 
 // https://reactrouter.com/start/framework/routing
 
