@@ -4,7 +4,7 @@ import { dirname, join } from '../util/path.js';
 import { _require } from '../util/require.js';
 
 const pnpStatus = {
-  cwd: '',
+  dir: '',
   enabled: false,
 };
 
@@ -28,22 +28,22 @@ const findNearestPnPFile = (startDir: string): string | null => {
   return null;
 };
 
-const tryLoadManifestWithYarnPnp = (cwd: string, packageName: string) => {
-  if (pnpStatus.cwd === cwd && pnpStatus.enabled === false) {
+const tryLoadManifestWithYarnPnp = (dir: string, packageName: string) => {
+  if (pnpStatus.dir === dir && pnpStatus.enabled === false) {
     return null;
   }
 
   try {
-    if (pnpStatus.cwd !== cwd) {
-      const pnpPath = findNearestPnPFile(cwd);
+    if (pnpStatus.dir !== dir) {
+      const pnpPath = findNearestPnPFile(dir);
 
       if (pnpPath != null) {
         const pnp = _require(pnpPath);
         pnp.setup();
-        pnpStatus.cwd = cwd;
+        pnpStatus.dir = dir;
         pnpStatus.enabled = true;
       } else {
-        pnpStatus.cwd = cwd;
+        pnpStatus.dir = dir;
         pnpStatus.enabled = false;
       }
     }
@@ -52,7 +52,7 @@ const tryLoadManifestWithYarnPnp = (cwd: string, packageName: string) => {
       const pnpApi = _require('pnpapi');
 
       if (pnpApi != null) {
-        const resolvedPath = pnpApi.resolveRequest(packageName, cwd);
+        const resolvedPath = pnpApi.resolveRequest(packageName, dir);
 
         if (resolvedPath) {
           const packageLocation = pnpApi.findPackageLocator(resolvedPath);
@@ -76,7 +76,7 @@ const tryLoadManifestWithYarnPnp = (cwd: string, packageName: string) => {
 
 export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManifestOptions) => {
   // 1. Try Yarn PnP first
-  const manifest = tryLoadManifestWithYarnPnp(cwd, packageName);
+  const manifest = tryLoadManifestWithYarnPnp(dir, packageName);
 
   if (manifest != null) {
     return manifest;
