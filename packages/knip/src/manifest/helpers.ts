@@ -22,7 +22,6 @@ const findNearestPnPFile = (startDir: string) => {
       pnpStatus.dir = startDir;
       pnpStatus.pnpPath = pnpPath;
       pnpStatus.enabled = true;
-      
       return;
     }
     // Move up one directory
@@ -30,7 +29,6 @@ const findNearestPnPFile = (startDir: string) => {
     if (parentDir === currentDir) {
       break; // Reached root
     }
-    
     currentDir = parentDir;
   }
   pnpStatus.dir = startDir;
