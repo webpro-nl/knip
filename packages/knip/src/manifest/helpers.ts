@@ -5,27 +5,37 @@ import { _require } from '../util/require.js';
 
 const pnpStatus = {
   dir: '',
+  pnpPath: '',
   enabled: false,
 };
 
 type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 
-const findNearestPnPFile = (startDir: string): string | null => {
+const findNearestPnPFile = (startDir: string) => {
   // Find the nearest .pnp.cjs file by traversing up
   let currentDir = startDir;
   while (currentDir !== '/') {
     const pnpPath = join(currentDir, '.pnp.cjs');
     if (isFile(pnpPath)) {
-      return pnpPath;
+      const pnpApi = _require(pnpPath);
+      pnpApi.setup();
+      pnpStatus.dir = startDir;
+      pnpStatus.pnpPath = pnpPath;
+      pnpStatus.enabled = true;
+      
+      return;
     }
     // Move up one directory
     const parentDir = dirname(currentDir);
     if (parentDir === currentDir) {
       break; // Reached root
     }
+    
     currentDir = parentDir;
   }
-  return null;
+  pnpStatus.dir = startDir;
+  pnpStatus.pnpPath = '';
+  pnpStatus.enabled = false;
 };
 
 const tryLoadManifestWithYarnPnp = (dir: string, packageName: string) => {
@@ -35,21 +45,11 @@ const tryLoadManifestWithYarnPnp = (dir: string, packageName: string) => {
 
   try {
     if (pnpStatus.dir !== dir) {
-      const pnpPath = findNearestPnPFile(dir);
-
-      if (pnpPath != null) {
-        const pnp = _require(pnpPath);
-        pnp.setup();
-        pnpStatus.dir = dir;
-        pnpStatus.enabled = true;
-      } else {
-        pnpStatus.dir = dir;
-        pnpStatus.enabled = false;
-      }
+      findNearestPnPFile(dir);
     }
 
     if (pnpStatus.enabled) {
-      const pnpApi = _require('pnpapi');
+      const pnpApi = _require(pnpStatus.pnpPath);
 
       if (pnpApi != null) {
         const resolvedPath = pnpApi.resolveRequest(packageName, dir);
@@ -68,6 +68,7 @@ const tryLoadManifestWithYarnPnp = (dir: string, packageName: string) => {
       }
     }
   } catch (_error) {
+    console.error(_error);
     // Explicitly suppressing errors here
   }
 
