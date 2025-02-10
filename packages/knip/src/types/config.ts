@@ -125,7 +125,7 @@ export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 export interface Plugin {
   title: string;
   args?: Args;
-  packageJsonPath?: string | ((manifest: PackageJson) => string);
+  packageJsonPath?: string | ((manifest: PackageJson) => unknown);
   enablers?: IgnorePatterns | string;
   isEnabled?: IsPluginEnabled;
   isRootOnly?: boolean;

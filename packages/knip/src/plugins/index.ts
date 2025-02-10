@@ -38,7 +38,6 @@ import { default as msw } from './msw/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
-import { default as nodeTestRunner } from './node-test-runner/index.js';
 import { default as node } from './node/index.js';
 import { default as nodemon } from './nodemon/index.js';
 import { default as npmPackageJsonLint } from './npm-package-json-lint/index.js';
@@ -133,7 +132,6 @@ export const Plugins = {
   netlify,
   next,
   node,
-  'node-test-runner': nodeTestRunner,
   nodemon,
   'npm-package-json-lint': npmPackageJsonLint,
   nuxt,

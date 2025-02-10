@@ -53,7 +53,6 @@ export const pluginsSchema = z.object({
   netlify: pluginSchema,
   next: pluginSchema,
   node: pluginSchema,
-  'node-test-runner': pluginSchema,
   nodemon: pluginSchema,
   'npm-package-json-lint': pluginSchema,
   nuxt: pluginSchema,
