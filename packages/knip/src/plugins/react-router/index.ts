@@ -55,7 +55,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  entry,
-  production,
   resolveEntryPaths,
 } satisfies Plugin;
