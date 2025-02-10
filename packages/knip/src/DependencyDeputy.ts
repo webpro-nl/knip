@@ -1,5 +1,6 @@
 import { isBuiltin } from 'node:module';
 import type { Workspace } from './ConfigurationChief.js';
+import { PackageJsonPeeker } from './PackageJsonPeeker.js';
 import {
   DT_SCOPE,
   IGNORED_DEPENDENCIES,
@@ -63,6 +64,7 @@ export class DependencyDeputy {
     cwd,
     dir,
     manifestPath,
+    manifestStr,
     manifest,
     ignoreDependencies,
     ignoreBinaries,
@@ -72,6 +74,7 @@ export class DependencyDeputy {
     cwd: string;
     dir: string;
     manifestPath: string;
+    manifestStr: string;
     manifest: PackageJson;
     ignoreDependencies: (string | RegExp)[];
     ignoreBinaries: (string | RegExp)[];
@@ -110,6 +113,7 @@ export class DependencyDeputy {
     this._manifests.set(name, {
       workspaceDir: dir,
       manifestPath,
+      manifestStr,
       ignoreDependencies: ignoreDependencies.map(toRegexOrString),
       ignoreBinaries: ignoreBinaries.map(toRegexOrString),
       ignoreUnresolved: ignoreUnresolved.map(toRegexOrString),
@@ -251,9 +255,10 @@ export class DependencyDeputy {
     const devDependencyIssues: Issue[] = [];
     const optionalPeerDependencyIssues: Issue[] = [];
 
-    for (const [workspace, { manifestPath: filePath }] of this._manifests.entries()) {
+    for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspace);
       const hasTypesIncluded = this.getHasTypesIncluded(workspace);
+      const peeker = new PackageJsonPeeker(manifestStr);
 
       // Keeping track of peer dependency recursions to prevent infinite loops for circularly referenced peer deps
       const peerDepRecs: Record<string, number> = {};
@@ -306,15 +311,18 @@ export class DependencyDeputy {
       const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency, false);
 
       for (const symbol of this.getProductionDependencies(workspace).filter(isNotReferencedDependency)) {
-        dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol });
+        const position = peeker.getLocation('dependencies', symbol);
+        dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, ...position });
       }
 
       for (const symbol of this.getDevDependencies(workspace).filter(isNotReferencedDependency)) {
-        devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol });
+        const position = peeker.getLocation('devDependencies', symbol);
+        devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, ...position });
       }
 
       for (const symbol of this.getOptionalPeerDependencies(workspace).filter(d => isReferencedDependency(d))) {
-        optionalPeerDependencyIssues.push({ type: 'optionalPeerDependencies', filePath, workspace, symbol });
+        const pos = peeker.getLocation('optionalPeerDependencies', symbol);
+        optionalPeerDependencyIssues.push({ type: 'optionalPeerDependencies', filePath, workspace, symbol, ...pos });
       }
     }
 
