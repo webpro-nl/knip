@@ -25,6 +25,8 @@ const resolveEntryPaths: ResolveEntryPaths<PackageJson> = localConfig => {
 const args = {
   positional: true,
   nodeImportArgs: true,
+  resolve: ['test-reporter'],
+  args: (args: string[]) => args.filter(arg => !/--test-reporter[= ](spec|tap|dot|junit|lcov)/.test(arg)),
 };
 
 export default {
