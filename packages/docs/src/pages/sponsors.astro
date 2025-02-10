@@ -3,6 +3,7 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import Posts from '../components/Posts.astro';
 import Projects from '../components/Projects.astro';
 import SponsorsComponent from '../components/Sponsors.astro';
+import SponsorsChart from '../components/SponsorsChart.astro';
 import SponsorsPast from '../components/SponsorsPast.astro';
 ---
 
@@ -38,13 +39,12 @@ import SponsorsPast from '../components/SponsorsPast.astro';
       <ul>
         <li><a href="https://github.com/sponsors/webpro">GitHub Sponsors</a></li>
         <li><a href="https://opencollective.com/knip">OpenCollective</a></li>
-        <li><a href="https://polar.sh/webpro-nl">Polar</a></li>
       </ul>
 
       <p>
         You or your company logo will be added to this page if you decide to
         support the project on an ongoing basis. Eternal gratitude to the
-        companies and people that are already supporters:
+        companies and people supporting the project!
       </p>
 
     </div>
@@ -56,6 +56,18 @@ import SponsorsPast from '../components/SponsorsPast.astro';
     </div>
 
   </article>
+
+  <h2 id="projects-using-knip">🧡 Monthly Overview</h2>
+
+  <p>
+    Overview of gross debit GitHub and OpenCollective sponsorships and invoices,
+    since it was openly asked for. The monthly aggregated average over the
+    charted period is $533, actual development started one year before that.
+    GitHub Sponsors is for my GitHub account, which has more repositories, but
+    in practice targets mostly Knip.
+  </p>
+
+  <SponsorsChart />
 
   <h2 id="projects-using-knip">🧡 Past Sponsors</h2>
 
