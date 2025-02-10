@@ -30,6 +30,7 @@
   "devDependencies": {
     "@astrojs/check": "0.9.4",
     "@astrojs/markdown-remark": "^6.1.0",
+    "@octokit/graphql": "^8.2.0",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
     "astro": "5.2.5",
