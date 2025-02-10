@@ -32,8 +32,8 @@ object per file structured like this:
     {
       "file": "package.json",
       "owners": ["@org/admin"],
-      "dependencies": ["jquery", "moment"],
-      "devDependencies": [],
+      "dependencies": [{ "name": "jquery", "line": 5, "col": 6, "pos": 71 }],
+      "devDependencies": [{ "name": "lodash", "line": 9, "col": 6, "pos": 99 }],
       "unlisted": [{ "name": "react" }, { "name": "@org/unresolved" }],
       "exports": [],
       "types": [],

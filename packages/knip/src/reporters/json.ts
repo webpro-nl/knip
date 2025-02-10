@@ -14,9 +14,9 @@ type Item = { name: string; pos?: number; line?: number; col?: number };
 type Row = {
   file: string;
   owners?: Array<{ name: string }>;
-  dependencies?: Array<{ name: string }>;
-  devDependencies?: Array<{ name: string }>;
-  optionalPeerDependencies?: Array<{ name: string }>;
+  dependencies?: Array<Item>;
+  devDependencies?: Array<Item>;
+  optionalPeerDependencies?: Array<Item>;
   unlisted?: Array<{ name: string }>;
   binaries?: Array<{ name: string }>;
   unresolved?: Array<{ name: string }>;
@@ -82,10 +82,10 @@ export default async ({ report, issues, options }: ReporterOptions) => {
               item[parentSymbol].push(convert(issue));
             }
           } else {
-            if (['exports', 'nsExports', 'types', 'nsTypes', 'unresolved'].includes(type)) {
-              json[filePath][type]?.push(convert(issue));
-            } else {
+            if (['unlisted', 'binaries'].includes(type)) {
               json[filePath][type]?.push({ name: symbol });
+            } else {
+              json[filePath][type]?.push(convert(issue));
             }
           }
         }
