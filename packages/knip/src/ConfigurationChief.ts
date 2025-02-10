@@ -12,7 +12,7 @@ import type {
   RawPluginConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { Package, PackageJson } from './types/package-json.js';
+import type { PackageJson, WorkspacePackage } from './types/package-json.js';
 import { arrayify, compact } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
@@ -72,6 +72,7 @@ export type Workspace = {
   ancestors: string[];
   config: WorkspaceConfiguration;
   manifestPath: string;
+  manifestStr: string;
   ignoreMembers: IgnorePatterns;
   srcDir?: string;
   outDir?: string;
@@ -97,7 +98,7 @@ export class ConfigurationChief {
   manifest?: PackageJson;
 
   ignoredWorkspacePatterns: string[] = [];
-  workspacePackages = new Map<string, Package>();
+  workspacePackages = new Map<string, WorkspacePackage>();
   workspacesByPkgName = new Map<string, Workspace>();
   workspacesByName = new Map<string, Workspace>();
   additionalWorkspaceNames = new Set<string>();
@@ -233,7 +234,7 @@ export class ConfigurationChief {
 
     this.workspaceGraph = createWorkspaceGraph(this.cwd, this.availableWorkspaceNames, wsPkgNames, packages);
 
-    this.includedWorkspaces = this.setIncludedWorkspaces();
+    this.includedWorkspaces = this.getIncludedWorkspaces();
 
     for (const workspace of this.includedWorkspaces) {
       this.workspacesByPkgName.set(workspace.pkgName, workspace);
@@ -286,7 +287,7 @@ export class ConfigurationChief {
     );
   }
 
-  private setIncludedWorkspaces() {
+  private getIncludedWorkspaces() {
     if (this.workspace) {
       const dir = resolve(this.workspace);
       if (!isDirectory(dir)) throw new ConfigurationError('Workspace is not a directory');
@@ -331,7 +332,10 @@ export class ConfigurationChief {
       .sort(byPathDepth)
       .map((name): Workspace => {
         const dir = join(this.cwd, name);
-        const pkgName = this.workspacePackages.get(name)?.pkgName ?? `KNIP_ADDED_${name}`;
+        const pkg = this.workspacePackages.get(name);
+        const pkgName = pkg?.pkgName ?? `KNIP_ADDED_${name}`;
+        const manifestPath = pkg?.manifestPath ?? join(dir, 'package.json');
+        const manifestStr = pkg?.manifestStr ?? '';
         const workspaceConfig = this.getWorkspaceConfig(name);
         const ignoreMembers = arrayify(workspaceConfig.ignoreMembers).map(toRegexOrString);
         return {
@@ -340,7 +344,8 @@ export class ConfigurationChief {
           dir,
           config: this.getConfigForWorkspace(name),
           ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
-          manifestPath: join(dir, 'package.json'),
+          manifestPath,
+          manifestStr,
           ignoreMembers,
         };
       });
@@ -350,7 +355,7 @@ export class ConfigurationChief {
     return this.workspacePackages.get(name)?.manifest;
   }
 
-  public getIncludedWorkspaces() {
+  public getWorkspaces() {
     return this.includedWorkspaces;
   }
 

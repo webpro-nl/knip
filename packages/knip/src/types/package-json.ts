@@ -43,4 +43,11 @@ export type PackageJson = {
   typings?: string;
 } & Plugins;
 
-export type Package = { dir: string; name: string; pkgName: string | undefined; manifest: PackageJson };
+export type WorkspacePackage = {
+  dir: string;
+  name: string;
+  pkgName: string | undefined;
+  manifest: PackageJson;
+  manifestPath: string;
+  manifestStr: string;
+};
