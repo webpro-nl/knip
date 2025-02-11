@@ -5,7 +5,7 @@ import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import type { Issue, ReporterOptions } from '../types/issues.js';
 import { relative, toRelative } from '../util/path.js';
 import { truncate } from '../util/string.js';
-import { getTitle, identity, logTitle } from './util.js';
+import { getTitle, identity, logTitle, logTitleDimmed } from './util.js';
 
 const dim = picocolors.gray;
 const bright = picocolors.whiteBright;
@@ -84,7 +84,7 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
 
   if (!noConfigHints) {
     if (configurationHints.size > 0) {
-      logTitle('Configuration hints', configurationHints.size);
+      logTitleDimmed('Configuration hints');
       for (const hint of configurationHints) {
         const { type, workspaceName, identifier } = hint;
         const message = `Unused item in ${type}`;

@@ -10,7 +10,9 @@ export const getTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => {
 };
 
 export const logTitle = (title: string, count: number) =>
-  console.log(`${picocolors.bold(picocolors.yellow(picocolors.underline(title)))} (${count})`);
+  console.log(`${picocolors.yellowBright(picocolors.underline(title))} (${count})`);
+
+export const logTitleDimmed = (title: string) => console.log(`${picocolors.yellow(picocolors.underline(`${title}`))}`);
 
 type LogIssueLine = {
   owner?: string;
