@@ -8,7 +8,7 @@ import type { PluginConfig, RouteConfigEntry } from './types.js';
 
 // https://reactrouter.com/start/framework/routing
 
-const title = 'react-router';
+const title = 'React Router';
 
 const enablers = ['@react-router/dev'];
 
