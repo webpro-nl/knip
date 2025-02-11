@@ -72,8 +72,11 @@ minimum amount of code while leaving it in a working state.
 ### 2. Unused variables
 
 Use a tool like ESLint or Biome to find and remove unused variables inside
-files. This may result in more deleted code, and Knip may then find more unused
-code. Rinse and repeat!
+files. Even better, try [remove-unused-vars][2] to remove unused variables
+within files.
+
+This may result in more deleted code, and Knip may then find more unused code.
+Rinse and repeat!
 
 ### 3. Unused dependencies
 
@@ -312,7 +315,7 @@ referenced internally but meant to be called by an external library. For
 instance, Knip might think `componentDidMount` and `render` in React class
 component are unused and will remove those.
 
-Note that [`classMembers` aren't included by default][2].
+Note that [`classMembers` aren't included by default][3].
 
 ## What's not included
 
@@ -326,4 +329,5 @@ Operations that auto-fix does not (yet) perform and why:
 - Fix duplicate exports (which one should removed?)
 
 [1]: ../reference/issue-types.md
-[2]: ../guides/handling-issues.mdx#class-members
+[2]: https://github.com/webpro-nl/remove-unused-vars
+[3]: ../guides/handling-issues.mdx#class-members
