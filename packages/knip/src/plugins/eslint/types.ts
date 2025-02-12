@@ -24,6 +24,5 @@ type BaseConfig = {
 export type OverrideConfig = BaseConfig & { files: string[]; overrides: OverrideConfig };
 
 export type ESLintConfig = BaseConfig & {
-  env?: Record<string, boolean>;
   overrides?: OverrideConfig[];
 };

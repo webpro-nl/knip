@@ -2,11 +2,11 @@ import ts from 'typescript';
 import { CacheConsultant } from './CacheConsultant.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from './constants.js';
 import type { GetImportsAndExportsOptions } from './types/config.js';
 import type { DependencyGraph, Export, ExportMember, FileNode, UnresolvedImport } from './types/dependency-graph.js';
 import type { PrincipalOptions } from './types/project.js';
-import type { BoundSourceFile } from './typescript/SourceFile.js';
+import type { BoundSourceFile, SymbolWithLinks } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/create-hosts.js';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.js';
@@ -156,6 +156,14 @@ export class ProjectPrincipal {
     this.backend.typeChecker = typeChecker();
   }
 
+  private getFindReferences() {
+    if (!this.findReferences) {
+      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
+      this.findReferences = timerify(languageService.findReferences);
+    }
+    return this.findReferences;
+  }
+
   private hasAcceptedExtension(filePath: string) {
     return this.extensions.has(extname(filePath));
   }
@@ -298,29 +306,84 @@ export class ProjectPrincipal {
     this.backend.fileManager.sourceFileCache.delete(filePath);
   }
 
+  public shouldAnalyzeTypeMembers(filePath: string, exportedItem: Export): boolean {
+    // Analyze members only when the type/interface is used in any of the specific patterns at least once (see comments below)
+    const findReferences = this.getFindReferences();
+
+    const typeChecker = this.backend.typeChecker;
+    if (!typeChecker) return false;
+
+    const referencedSymbols = findReferences(filePath, exportedItem.pos) ?? [];
+    const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
+
+    if (refs.length === 0) return false;
+
+    return refs.some(ref => {
+      const sourceFile = this.backend.program?.getSourceFile(ref.fileName);
+      if (!sourceFile) return false;
+
+      // @ts-expect-error ts.getTokenAtPosition is internal fn
+      const node = ts.getTokenAtPosition(sourceFile, ref.textSpan.start);
+      if (!node) return false;
+
+      switch (true) {
+        case ts.isImportSpecifier(node.parent):
+        case ts.isNamedImports(node.parent.parent):
+        case ts.isNamedExports(node.parent.parent):
+          return false;
+        case ts.isVariableDeclaration(node.parent.parent): // myVar: MyType
+        case ts.isParameter(node.parent.parent): // (myVar: MyType)
+        case ts.isIndexedAccessTypeNode(node.parent.parent): // MyType['member']
+          return true;
+      }
+
+      let current = node;
+      while (current) {
+        if (ts.isVariableDeclaration(current)) {
+          // Function<PropsA> = (props) => {}
+          const name = typeChecker.getSymbolAtLocation(node)?.getName();
+          if (name) {
+            const callSignatures = typeChecker.getTypeAtLocation(current).getCallSignatures();
+            if (callSignatures.length > 0) {
+              const params: SymbolWithLinks[] = callSignatures[0].getParameters();
+              for (const param of params) {
+                const target = param.links?.mapper?.target;
+                if (target) {
+                  for (const type of 'types' in target ? target.types : [target])
+                    if ((type.aliasSymbol ?? type.symbol).name === name) return true;
+                }
+              }
+            }
+          }
+        }
+        current = current.parent;
+      }
+      return false;
+    });
+  }
+
+  public findUnusedMember(filePath: string, member: ExportMember) {
+    const findReferences = this.getFindReferences();
+
+    const referencedSymbols = findReferences(filePath, member.pos) ?? [];
+    const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
+    return refs.length === 0;
+  }
+
   public findUnusedMembers(filePath: string, members: ExportMember[]) {
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
+    const findReferences = this.getFindReferences();
 
     return members.filter(member => {
-      if (member.jsDocTags.has(PUBLIC_TAG)) return false;
-      const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+      const referencedSymbols = findReferences(filePath, member.pos) ?? [];
       const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
       return refs.length === 0;
     });
   }
 
   public hasExternalReferences(filePath: string, exportedItem: Export) {
-    if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
+    const findReferences = this.getFindReferences();
 
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
-
-    const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
+    const referencedSymbols = findReferences(filePath, exportedItem.pos);
 
     if (!referencedSymbols?.length) return false;
 
