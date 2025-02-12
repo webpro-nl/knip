@@ -46,6 +46,7 @@ export const pluginsSchema = z.object({
   'lost-pixel': pluginSchema,
   markdownlint: pluginSchema,
   metro: pluginSchema,
+  miniprogram: pluginSchema,
   mocha: pluginSchema,
   moonrepo: pluginSchema,
   msw: pluginSchema,

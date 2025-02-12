@@ -1,0 +1,16 @@
+<wxs src="/utils/missing-format.wxs" module="format" />
+<wxs src="./helper.wxs" module="helper" />
+
+<import src="/templates/missing-list.wxml" />
+<import src="/templates/used-list.wxml" />
+
+<include src="/templates/used-item.wxml" />
+<include src="/templates/missing-item.wxml" />
+
+<view class="container">
+  <image src="/images/missing-logo.png" />
+  <image src="/images/used-logo.png" />
+  
+  <template is="missing-list" data="{{items}}" />
+  <template is="used-item" data="{{text}}" />
+</view> 

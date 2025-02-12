@@ -1,0 +1,7 @@
+function format(number) {
+  return number.toFixed(2);
+}
+
+module.exports = {
+  format: format
+}; 

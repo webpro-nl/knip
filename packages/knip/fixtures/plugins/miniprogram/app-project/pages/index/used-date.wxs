@@ -1,0 +1,8 @@
+function format(timestamp) {
+  var date = getDate(timestamp);
+  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+}
+
+module.exports = {
+  format: format
+}; 
