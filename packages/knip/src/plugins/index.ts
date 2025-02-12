@@ -38,7 +38,6 @@ import { default as msw } from './msw/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
-import { default as nodeTestRunner } from './node-test-runner/index.js';
 import { default as node } from './node/index.js';
 import { default as nodemon } from './nodemon/index.js';
 import { default as npmPackageJsonLint } from './npm-package-json-lint/index.js';
@@ -54,6 +53,7 @@ import { default as postcss } from './postcss/index.js';
 import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
 import { default as reactCosmos } from './react-cosmos/index.js';
+import { default as reactRouter } from './react-router/index.js';
 import { default as releaseIt } from './release-it/index.js';
 import { default as remark } from './remark/index.js';
 import { default as remix } from './remix/index.js';
@@ -132,7 +132,6 @@ export const Plugins = {
   netlify,
   next,
   node,
-  'node-test-runner': nodeTestRunner,
   nodemon,
   'npm-package-json-lint': npmPackageJsonLint,
   nuxt,
@@ -147,6 +146,7 @@ export const Plugins = {
   preconstruct,
   prettier,
   'react-cosmos': reactCosmos,
+  'react-router': reactRouter,
   'release-it': releaseIt,
   remark,
   remix,

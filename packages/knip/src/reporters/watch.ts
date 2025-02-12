@@ -32,7 +32,7 @@ export default ({ report, issues, streamer, startTime, size, isDebug }: WatchRep
 
       if (issuesForType.length > 0) {
         if (title) {
-          lines.push(`${picocolors.bold(picocolors.yellow(picocolors.underline(title)))} (${issuesForType.length})`);
+          lines.push(`${picocolors.yellowBright(picocolors.underline(title))} (${issuesForType.length})`);
         }
         if (typeof issuesForType[0] === 'string') {
           lines.push(...issuesForType.map(filePath => relative(filePath)));

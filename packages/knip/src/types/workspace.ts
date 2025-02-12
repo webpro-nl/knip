@@ -4,6 +4,7 @@ export type DependencyArray = Array<string>;
 type WorkspaceManifest = {
   workspaceDir: string;
   manifestPath: string;
+  manifestStr: string;
   dependencies: DependencyArray;
   devDependencies: DependencyArray;
   peerDependencies: DependencySet;

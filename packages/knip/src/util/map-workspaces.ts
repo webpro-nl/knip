@@ -1,13 +1,13 @@
+import { readFile } from 'node:fs/promises';
 import fg from 'fast-glob';
-import type { Package, PackageJson } from '../types/package-json.js';
+import type { PackageJson, WorkspacePackage } from '../types/package-json.js';
 import { partition } from './array.js';
 import { debugLog } from './debug.js';
 import { ConfigurationError } from './errors.js';
 import { getPackageName } from './package-name.js';
 import { join } from './path.js';
-import { _require } from './require.js';
 
-type Packages = Map<string, Package>;
+type Packages = Map<string, WorkspacePackage>;
 type WorkspacePkgNames = Set<string>;
 
 export default async function mapWorkspaces(cwd: string, workspaces: string[]): Promise<[Packages, WorkspacePkgNames]> {
@@ -25,17 +25,18 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
 
   for (const name of matches) {
     const dir = join(cwd, name);
-    const filePath = join(dir, 'package.json');
+    const manifestPath = join(dir, 'package.json');
     try {
-      const manifest: PackageJson = _require(filePath);
+      const manifestStr = await readFile(manifestPath, 'utf8');
+      const manifest: PackageJson = JSON.parse(manifestStr);
       const pkgName = getPackageName(manifest, dir);
-      const pkg: Package = { dir, name, pkgName, manifest };
+      const pkg: WorkspacePackage = { dir, name, pkgName, manifestPath, manifestStr, manifest };
       packages.set(name, pkg);
       if (pkgName) wsPkgNames.add(pkgName);
-      else throw new ConfigurationError(`Missing package name in ${filePath}`);
+      else throw new ConfigurationError(`Missing package name in ${manifestPath}`);
     } catch (error) {
       // @ts-expect-error
-      if (error?.code === 'MODULE_NOT_FOUND') debugLog('*', `Unable to load package.json for ${name}`);
+      if (error?.code === 'ENOENT') debugLog('*', `Unable to load package.json for ${name}`);
       else throw error;
     }
   }

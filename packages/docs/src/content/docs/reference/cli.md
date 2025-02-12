@@ -117,7 +117,11 @@ Shortcut: `-c`
 
 ### `--tsConfig [file]`
 
+Shortcut: `-t`
+
 Use an alternative path for the TypeScript configuration file.
+
+Using `-t jsconfig.json` is also supported.
 
 Default location: `tsconfig.json`
 

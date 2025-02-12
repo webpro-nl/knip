@@ -9,7 +9,7 @@ import { resolve as fallbackResolve } from './fallback.js';
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 
-const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader', 'test-reporter'] };
+const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
 
 export const resolve: BinaryResolver = (binary, _args, options) => {
   const { fromArgs, containingFilePath } = options;

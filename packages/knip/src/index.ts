@@ -71,7 +71,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   await chief.init();
 
-  const workspaces = chief.getIncludedWorkspaces();
+  const workspaces = chief.getWorkspaces();
   const report = chief.getIncludedIssueTypes({
     includedIssueTypes,
     excludedIssueTypes,
@@ -110,10 +110,10 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
 
   for (const workspace of workspaces) {
-    const { name, dir, manifestPath } = workspace;
+    const { name, dir, manifestPath, manifestStr } = workspace;
     const manifest = chief.getManifestForWorkspace(name);
     if (!manifest) continue;
-    deputy.addWorkspace({ name, cwd, dir, manifestPath, manifest, ...chief.getIgnores(name) });
+    deputy.addWorkspace({ name, cwd, dir, manifestPath, manifestStr, manifest, ...chief.getIgnores(name) });
   }
 
   for (const workspace of workspaces) {

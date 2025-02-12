@@ -54,6 +54,11 @@ test('getInputsFromScripts (node)', () => {
   t('node ./script.js build', [toBinary('node'), js]);
 });
 
+test('getInputsFromScripts (node --test)', () => {
+  t('node --test --test-reporter=reporter', [toBinary('node'), toDeferResolve('reporter')]);
+  t('node --test --test-reporter=spec', [toBinary('node')]);
+});
+
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toDeferResolve('script.js')]);
   t('node -r package/script', [toBinary('node'), toDeferResolve('package/script')]);

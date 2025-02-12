@@ -40,7 +40,6 @@ export type PluginName =
   | 'netlify'
   | 'next'
   | 'node'
-  | 'node-test-runner'
   | 'nodemon'
   | 'npm-package-json-lint'
   | 'nuxt'
@@ -55,6 +54,7 @@ export type PluginName =
   | 'preconstruct'
   | 'prettier'
   | 'react-cosmos'
+  | 'react-router'
   | 'release-it'
   | 'remark'
   | 'remix'
@@ -133,7 +133,6 @@ export const pluginNames = [
   'netlify',
   'next',
   'node',
-  'node-test-runner',
   'nodemon',
   'npm-package-json-lint',
   'nuxt',
@@ -148,6 +147,7 @@ export const pluginNames = [
   'preconstruct',
   'prettier',
   'react-cosmos',
+  'react-router',
   'release-it',
   'remark',
   'remix',

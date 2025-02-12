@@ -5,7 +5,7 @@ title: Features
 Overview of capabilities in support of the core feature: find many [types of
 issues][1].
 
-There are also [things Knip does **not** do][2].
+Also see [related tooling][2].
 
 ## Overview
 
@@ -31,7 +31,7 @@ There are also [things Knip does **not** do][2].
 | [Workspace][20]                            | Use `--workspace` to lint a single workspace in a monorepo |
 
 [1]: ../reference/issue-types.md
-[2]: ../reference/unsupported.md
+[2]: ../reference/related.md
 [3]: ../features/auto-fix.mdx
 [4]: ../reference/cli.md#--cache
 [5]: ../guides/working-with-commonjs.md
