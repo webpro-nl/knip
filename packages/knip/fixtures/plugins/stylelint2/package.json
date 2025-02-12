@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/stylelint2",
+  "version": "*",
+  "devDependencies": {
+    "postcss-less": "*",
+    "postcss-styl": "*",
+    "stylelint": "*",
+    "stylelint-config-recommended": "*",
+    "stylelint-config-standard": "*"
+  },
+  "dependencies": {
+    "stylelint-config-html": "*"
+  }
+}

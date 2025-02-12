@@ -1,5 +1,5 @@
 export type BaseStyleLintConfig = {
-  customSyntax?: string;
+  customSyntax?: unknown;
   extends?: string | string[];
   plugins?: string[];
 };
