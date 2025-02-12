@@ -17,11 +17,22 @@ const config = ['moon.yml', '.moon/tasks.yml', '.moon/tasks/*.yml'];
 const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) => {
   const tasks = config.tasks ? Object.values(config.tasks) : [];
   const inputs = tasks
-    .map(task => task.command)
-    .filter(command => command)
-    .map(command => command.replace('$workspaceRoot', options.rootCwd))
-    .map(command => command.replace('$projectRoot', options.cwd))
-    .flatMap(command => options.getInputsFromScripts(command));
+    .map((task) => task.command)
+    .filter((command) => command)
+    // Depending on the usage and version of moon, the command can be an array or a string
+    .map((command) => {
+      if (Array.isArray(command)) {
+        return command.map((c) => c.replace("$workspaceRoot", options.rootCwd));
+      }
+      return command.replace("$workspaceRoot", options.rootCwd);
+    })
+    .map((command) => {
+      if (Array.isArray(command)) {
+        return command.map((c) => c.replace("$projectRoot", options.cwd));
+      }
+      return command.replace("$projectRoot", options.cwd);
+    })
+    .flatMap((command) => options.getInputsFromScripts(command));
   return [...inputs];
 };
 
