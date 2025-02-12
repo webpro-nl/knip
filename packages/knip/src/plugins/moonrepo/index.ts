@@ -19,7 +19,6 @@ const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) 
   const inputs = tasks
     .map((task) => task.command)
     .filter((command) => command)
-    // Depending on the usage and version of moon, the command can be an array or a string
     .map((command) => {
       if (Array.isArray(command)) {
         return command.map((c) => c.replace("$workspaceRoot", options.rootCwd));
