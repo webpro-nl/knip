@@ -3,8 +3,42 @@ import { graphql } from '@octokit/graphql';
 const START_DATE = new Date('2023-11-01');
 const RATE_EUR_TO_USD = 1.08;
 
+interface Transaction {
+  id: string;
+  type: string;
+  kind: string;
+  amount: {
+    value: number;
+    currency: string;
+  };
+  createdAt: string;
+  fromAccount: {
+    name: string;
+  };
+}
+
+interface Expense {
+  id: string;
+  amount: number;
+  currency: string;
+  createdAt: string;
+  type: string;
+  status: string;
+}
+
+interface GraphQLResponse {
+  account: {
+    transactions: {
+      nodes: Transaction[];
+    };
+  };
+  expenses: {
+    nodes: Expense[];
+  };
+}
+
 const getMonthlyTotals = async (token: string): Promise<Map<string, number>> => {
-  const { account, expenses } = await graphql({
+  const { account, expenses } = await graphql<GraphQLResponse>({
     query: `
       query {
         account(slug: "knip") {

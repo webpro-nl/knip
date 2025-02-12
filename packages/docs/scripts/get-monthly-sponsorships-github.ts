@@ -2,8 +2,28 @@ import { graphql } from '@octokit/graphql';
 
 const START_DATE = new Date('2023-11-01');
 
+interface SponsorActivity {
+  action: 'NEW_SPONSORSHIP' | 'CANCELLED_SPONSORSHIP';
+  timestamp: string;
+  sponsorsTier: {
+    monthlyPriceInDollars: number;
+    isOneTime: boolean;
+  };
+  sponsor: {
+    login: string;
+  };
+}
+
+interface GraphQLResponse {
+  viewer: {
+    sponsorsActivities: {
+      nodes: SponsorActivity[];
+    };
+  };
+}
+
 const getMonthlyTotals = async (token: string) => {
-  const { viewer } = await graphql({
+  const { viewer } = await graphql<GraphQLResponse>({
     query: `
       query {
         viewer {
