@@ -162,7 +162,7 @@ export class DependencyDeputy {
   }
 
   getHasTypesIncluded(workspaceName: string) {
-    return this.installedBinaries.get(workspaceName);
+    return this.hasTypesIncluded.get(workspaceName);
   }
 
   addReferencedDependency(workspaceName: string, packageName: string) {
@@ -214,7 +214,8 @@ export class DependencyDeputy {
 
     if (closestWorkspaceName || closestWorkspaceNameForTypes) {
       if (closestWorkspaceName) this.addReferencedDependency(closestWorkspaceName, packageName);
-      if (closestWorkspaceNameForTypes) this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+      if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
+        this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
       return true;
     }
     this.addReferencedDependency(workspace.name, packageName);
@@ -277,7 +278,7 @@ export class DependencyDeputy {
           if (IGNORE_DEFINITELY_TYPED.has(typedPackageName)) return true;
 
           // The `pkg` dependency already has types included, i.e. this `@types/pkg` is obsolete
-          if (hasTypesIncluded?.has(typedDependency)) return false;
+          if (hasTypesIncluded?.has(typedPackageName)) return false;
 
           // Ignore typed dependencies that have a host dependency that's referenced
           // Example: `next` (host) has `react-dom` and/or `@types/react-dom` (peer), peers can be ignored if host `next` is referenced
@@ -287,7 +288,7 @@ export class DependencyDeputy {
           ];
           if (hostDependencies.length) return !!hostDependencies.find(host => isReferencedDependency(host.name, true));
 
-          if (!referencedDependencies) return false;
+          if (!referencedDependencies?.has(dependency)) return false;
 
           return referencedDependencies.has(typedPackageName);
         }

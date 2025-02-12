@@ -14,6 +14,7 @@ test('Find unused DT @types', async () => {
   });
 
   assert(issues.devDependencies['package.json']['@types/unused']);
+  assert(issues.devDependencies['package.json']['@types/mocha']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
