@@ -4,10 +4,11 @@
   "devDependencies": {
     "postcss-less": "*",
     "postcss-styl": "*",
-    "stylelint": "*"
+    "stylelint": "*",
+    "stylelint-config-recommended": "*",
+    "stylelint-config-standard": "*"
   },
   "dependencies": {
-    "stylelint-config-html": "*",
-    "stylelint-order": "*"
+    "stylelint-config-html": "*"
   }
 }
