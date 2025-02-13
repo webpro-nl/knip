@@ -2,6 +2,7 @@ import { graphql } from '@octokit/graphql';
 
 const START_DATE = new Date('2023-11-01');
 const RATE_EUR_TO_USD = 1.08;
+const RECURRING_ONLY = process.argv.includes('--recurring-only');
 
 interface Transaction {
   id: string;
@@ -85,18 +86,22 @@ const getMonthlyTotals = async (token: string): Promise<Map<string, number>> => 
   }
 
   for (const transaction of account.transactions.nodes) {
+    if (RECURRING_ONLY && transaction.kind !== 'CONTRIBUTION') continue;
+
     const month = new Date(transaction.createdAt).toISOString().substring(0, 7);
     const amount = Math.round(transaction.amount.value);
     monthlyTotals.set(month, (monthlyTotals.get(month) || 0) + amount);
   }
 
-  for (const expense of expenses.nodes) {
-    const month = new Date(expense.createdAt).toISOString().substring(0, 7);
-    const amount =
-      expense.currency === 'EUR'
-        ? Math.round((expense.amount / 100) * RATE_EUR_TO_USD)
-        : Math.round(expense.amount / 100);
-    monthlyTotals.set(month, (monthlyTotals.get(month) || 0) + amount);
+  if (!RECURRING_ONLY) {
+    for (const expense of expenses.nodes) {
+      const month = new Date(expense.createdAt).toISOString().substring(0, 7);
+      const amount =
+        expense.currency === 'EUR'
+          ? Math.round((expense.amount / 100) * RATE_EUR_TO_USD)
+          : Math.round(expense.amount / 100);
+      monthlyTotals.set(month, (monthlyTotals.get(month) || 0) + amount);
+    }
   }
 
   return monthlyTotals;

@@ -1,6 +1,7 @@
 import { graphql } from '@octokit/graphql';
 
 const START_DATE = new Date('2023-11-01');
+const RECURRING_ONLY = process.argv.includes('--recurring-only');
 
 interface SponsorActivity {
   action: 'NEW_SPONSORSHIP' | 'CANCELLED_SPONSORSHIP';
@@ -63,18 +64,21 @@ const getMonthlyTotals = async (token: string) => {
 
   for (const activity of activities) {
     const { action, sponsor, sponsorsTier, timestamp } = activity;
+    if (RECURRING_ONLY && sponsorsTier?.isOneTime) continue;
     const amount = sponsorsTier?.monthlyPriceInDollars || 0;
     const monthYear = new Date(timestamp).toISOString().substring(0, 7);
 
     if (sponsorsTier?.isOneTime) {
-      if (action === 'NEW_SPONSORSHIP' && monthYear >= START_DATE.toISOString().substring(0, 7)) {
+      if (!RECURRING_ONLY && action === 'NEW_SPONSORSHIP') {
         monthlyTotals.set(monthYear, (monthlyTotals.get(monthYear) || 0) + amount);
       }
     } else {
       if (action === 'NEW_SPONSORSHIP') activeRecurring.set(sponsor.login, amount);
-      else if (action === 'CANCELLED_SPONSORSHIP') activeRecurring.delete(sponsor.login);
-      const recurringTotal = Array.from(activeRecurring.values()).reduce((sum, a) => sum + a, 0);
-      for (const [month] of monthlyTotals) if (month >= monthYear) monthlyTotals.set(month, recurringTotal);
+      if (action === 'CANCELLED_SPONSORSHIP') activeRecurring.delete(sponsor.login);
+      const total = Array.from(activeRecurring.values()).reduce((sum, a) => sum + a, 0);
+      for (const month of monthlyTotals.keys()) {
+        if (month >= monthYear) monthlyTotals.set(month, total);
+      }
     }
   }
 
