@@ -1,7 +1,7 @@
 import picomatch from 'picomatch';
-import { initCounters, initIssues } from './issues/initializers.js';
 import type { ConfigurationHint, Issue, Rules, TagHint } from './types/issues.js';
 import { timerify } from './util/Performance.js';
+import { initCounters, initIssues } from './util/issue-initializers.js';
 import { relative } from './util/path.js';
 
 type Filters = Partial<{

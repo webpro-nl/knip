@@ -1,7 +1,6 @@
 import picomatch from 'picomatch';
 import { partitionCompilers } from './compilers/index.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
-import { defaultRules } from './issues/initializers.js';
 import { knipConfigurationSchema } from './schema/configuration.js';
 import { type PluginName, pluginNames } from './types/PluginNames.js';
 import type {
@@ -20,6 +19,7 @@ import { ConfigurationError } from './util/errors.js';
 import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
 import { type CLIArguments, getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
+import { defaultRules } from './util/issue-initializers.js';
 import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
