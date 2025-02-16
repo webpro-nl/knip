@@ -83,8 +83,8 @@ screenshot:
 
 <img src="/screenshots/trace.png" alt="trace" class="mw500" />
 
-It's like a reversed dependency graph. Instead of traversing imports it goes in
-the opposite direction and shows where exports are imported.
+It's like a reversed module graph. Instead of traversing imports it goes in the
+opposite direction and shows where exports are imported.
 
 #### Legend
 

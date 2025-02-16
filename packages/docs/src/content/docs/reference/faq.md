@@ -6,7 +6,7 @@ date: 2024-08-20
 ## Introduction
 
 Knip finds and fixes unused files, dependencies and exports. As a "kitchen sink"
-in the npm ecosystem, it creates a comprehensive module and dependency graph of
+in the npm ecosystem, it creates comprehensive module and dependency graphs of
 your project.
 
 :::note
@@ -29,9 +29,9 @@ more in-depth than the rest of the docs.
 Linters like ESLint analyze files separately, while Knip lints projects as a
 whole.
 
-Knip requires a full module and dependency graph to find clutter across the
-project. Creating this comprehensive graph is not a trivial task and it seems no
-such tool exists today, even more so when it comes to monorepos.
+Knip requires full module and dependency graphs to find clutter across the
+project. Creating these comprehensive graphs is not a trivial task and it seems
+no such tool exists today, even more so when it comes to monorepos.
 
 File-oriented linters like ESLint and Knip are complementary tools.
 
@@ -83,7 +83,7 @@ imports of internal modules or external dependencies, and so on.
 Even though a modular approach has its merits, for Knip it makes sense to have
 all the pieces in a single tool.
 
-Building up the module and dependency graph requires non-standard module
+Building up the module and dependency graphs requires non-standard module
 resolution and not only static but also dynamic analysis (i.e. actually load and
 execute modules), such as for parsers of plugins to receive the exported value
 of dynamic tooling configuration files. Additionally, [exports consumed by
@@ -92,10 +92,10 @@ backend. Last but not least, shell script parsing is required to find the right
 entry files, configuration files and dependencies accurately.
 
 The rippling effect of plugins and recursively adding entry files and
-dependencies to build up the graph is also exactly what's meant by
+dependencies to build up the graphs is also exactly what's meant by
 ["comprehensive" here][5].
 
-## Building the graph
+## Building the graphs
 
 ### Where does Knip look for entry files?
 
@@ -150,9 +150,9 @@ all nodes of the generated AST to find:
 - Calls to `require.resolve` and `import.meta.resolve`
 - Scripts in template strings (passed to [script parser][7])
 
-### What's in the graph?
+### What's in the graphs?
 
-Once the module and dependency graph is created, it contains the information
+Once the module and dependency graphs are created, they contain the information
 required to create the report including all issue types:
 
 - Unused files
@@ -170,7 +170,7 @@ required to create the report including all issue types:
 And optionally more issue types like individual exports and exported types in
 namespace imports, and unused class members.
 
-This graph allows to report more interesting details, such as:
+The graphs allows to report more interesting details, such as:
 
 - Circular references
 - Usage numbers per export
@@ -211,9 +211,8 @@ combination of [enhanced-resolve][9], the TypeScript module resolver and a few
 customizations. This single custom module resolver function is hooked into the
 TypeScript compiler and language service hosts.
 
-Everything else outside the dependency graph is handled by `enhanced-resolve`
-when doing things like [script parsing][7] and resolving references to files in
-other workspaces.
+Everything else is handled by `enhanced-resolve` for things like [script
+parsing][7] and resolving references to files in other workspaces.
 
 ### How does Knip handle non-standard import syntax?
 
@@ -391,7 +390,7 @@ Examples of features that have been requested include:
 
 - Expose programmatic API
 - Add local/custom plugins
-- Expose module + dependency graph
+- Expose the module and dependency graphs
 - Custom AST visitors, e.g. to find and return:
   - Unused interface/type members
   - Unused object members (and e.g. React component props)

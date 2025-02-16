@@ -24,8 +24,8 @@ plugin will:
 ## Configuration files
 
 Knip uses [entry files][6] as starting points to scan your source code and
-resolve other internal files and external dependencies. The dependency graph can
-be statically resolved through the `require` and `import` statements in those
+resolve other internal files and external dependencies. The module graph can be
+statically resolved through the `require` and `import` statements in those
 source files. However, configuration files reference external dependencies in
 various ways. Knip uses a plugin for each tool to parse configuration files and
 find those dependencies.
@@ -302,7 +302,7 @@ Please see [script parser][8] for more details.
 Plugins are configured with two distinct types of files:
 
 - `config` files are dynamically loaded and parsed by the plugin
-- `entry` files are added to the module dependency graph
+- `entry` files are added to the module graph
 - Both can recursively lead to additional entry files, config files and
   dependencies
 

@@ -83,5 +83,5 @@ Also see [Why isn't Knip an ESLint plugin?][8]
 [4]: ../features/auto-fix.mdx
 [5]: ../features/monorepos-and-workspaces.md
 [6]: ../guides/performance.md#workspace-sharing
-[7]: ../reference/faq.md#whats-in-the-graph
+[7]: ../reference/faq.md#whats-in-the-graphs
 [8]: ../reference/faq.md#why-isnt-knip-an-eslint-plugin
