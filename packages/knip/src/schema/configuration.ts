@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { globSchema, pluginsSchema } from './schema/plugins.js';
+import { globSchema, pluginsSchema } from './plugins.js';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
@@ -85,7 +85,7 @@ const workspacesConfigurationSchema = z.object({
   workspaces: z.record(z.string(), workspaceConfigurationSchema).optional(),
 });
 
-export const ConfigurationValidator = rootConfigurationSchema
+export const knipConfigurationSchema = rootConfigurationSchema
   .merge(reportConfigSchema)
   .merge(workspacesConfigurationSchema)
   .merge(pluginsSchema.partial());

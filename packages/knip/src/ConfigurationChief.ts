@@ -1,8 +1,8 @@
 import picomatch from 'picomatch';
-import { ConfigurationValidator } from './ConfigurationValidator.js';
 import { partitionCompilers } from './compilers/index.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
 import { defaultRules } from './issues/initializers.js';
+import { knipConfigurationSchema } from './schema/configuration.js';
 import { type PluginName, pluginNames } from './types/PluginNames.js';
 import type {
   Configuration,
@@ -153,7 +153,7 @@ export class ConfigurationChief {
       : manifest.knip;
 
     // Have to partition compiler functions before Zod touches them
-    const parsedConfig = this.rawConfig ? ConfigurationValidator.parse(partitionCompilers(this.rawConfig)) : {};
+    const parsedConfig = this.rawConfig ? knipConfigurationSchema.parse(partitionCompilers(this.rawConfig)) : {};
     this.config = this.normalize(parsedConfig);
 
     await this.setWorkspaces();

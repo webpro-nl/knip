@@ -1,6 +1,6 @@
 import type { z } from 'zod';
-import type { ConfigurationValidator } from '../ConfigurationValidator.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
+import type { knipConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
 import type { Input } from '../util/input.js';
 import type { PluginName } from './PluginNames.js';
@@ -32,7 +32,7 @@ export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
 
 export type BinaryResolver = (binary: string, args: string[], options: BinaryResolverOptions) => Input[];
 
-export type RawConfiguration = z.infer<typeof ConfigurationValidator>;
+export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
 
 export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
