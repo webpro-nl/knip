@@ -5,11 +5,11 @@ import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import watchReporter from '../reporters/watch.js';
-import type { DependencyGraph } from '../types/dependency-graph.js';
 import type { Report } from '../types/issues.js';
+import type { ModuleGraph } from '../types/module-graph.js';
 import { debugLog } from './debug.js';
-import { updateImportMap } from './dependency-graph.js';
 import { isFile } from './fs.js';
+import { updateImportMap } from './module-graph.js';
 import { join, toPosix } from './path.js';
 
 type Watch = {
@@ -17,10 +17,10 @@ type Watch = {
   analyzeSourceFile: (filePath: string, principal: ProjectPrincipal) => void;
   chief: ConfigurationChief;
   collector: IssueCollector;
-  collectUnusedExports: () => Promise<void>;
+  analyze: () => Promise<void>;
   cwd: string;
   factory: PrincipalFactory;
-  graph: DependencyGraph;
+  graph: ModuleGraph;
   isDebug: boolean;
   isIgnored: (path: string) => boolean;
   report: Report;
@@ -33,7 +33,7 @@ export const getWatchHandler = async ({
   analyzeSourceFile,
   chief,
   collector,
-  collectUnusedExports,
+  analyze,
   cwd,
   factory,
   graph,
@@ -119,7 +119,7 @@ export const getWatchHandler = async ({
             }
           }
 
-          await collectUnusedExports();
+          await analyze();
 
           const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
           collector.addFilesIssues(unusedFiles);
@@ -130,8 +130,6 @@ export const getWatchHandler = async ({
       }
     }
   };
-
-  await collectUnusedExports();
 
   await reportIssues();
 

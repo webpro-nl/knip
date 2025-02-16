@@ -1,5 +1,5 @@
 import { IMPORT_STAR } from '../constants.js';
-import type { DependencyGraph } from '../types/dependency-graph.js';
+import type { ModuleGraph } from '../types/module-graph.js';
 import { type TraceNode, addNodes, createNode, isTrace } from './trace.js';
 
 type Result = {
@@ -8,7 +8,7 @@ type Result = {
   traceNode: TraceNode;
 };
 
-export const getIsIdentifierReferencedHandler = (graph: DependencyGraph, entryPaths: Set<string>) => {
+export const getIsIdentifierReferencedHandler = (graph: ModuleGraph, entryPaths: Set<string>) => {
   const isIdentifierReferenced = (
     filePath: string,
     id: string,

@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/peer-dependencies');
 
-test('Find unused dependencies', async () => {
+test('Find unused peer dependencies', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

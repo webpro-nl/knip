@@ -1,5 +1,5 @@
 import picocolors from 'picocolors';
-import type { DependencyGraph } from '../types/dependency-graph.js';
+import type { ModuleGraph } from '../types/module-graph.js';
 import parsedArgValues from './cli-arguments.js';
 import { toAbsolute, toRelative } from './path.js';
 
@@ -84,7 +84,7 @@ const addNode = (parent: TraceNode, filePath: string, { hasRef = false, isEntry 
   return node;
 };
 
-export const addNodes = (node: TraceNode, id: string, importedSymbols: DependencyGraph, filePaths?: Set<string>) => {
+export const addNodes = (node: TraceNode, id: string, importedSymbols: ModuleGraph, filePaths?: Set<string>) => {
   if (!filePaths) return;
   for (const filePath of filePaths) {
     addNode(node, filePath, { hasRef: Boolean(importedSymbols.get(filePath)?.traceRefs?.has(id)) });

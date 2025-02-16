@@ -1,5 +1,5 @@
 import { IMPORT_STAR } from '../constants.js';
-import type { DependencyGraph, ImportDetails } from '../types/dependency-graph.js';
+import type { ImportDetails, ModuleGraph } from '../types/module-graph.js';
 
 export const hasStrictlyEnumReferences = (importsForExport: ImportDetails | undefined, id: string) => {
   if (!importsForExport || !importsForExport.refs.has(id)) return false;
@@ -8,7 +8,7 @@ export const hasStrictlyEnumReferences = (importsForExport: ImportDetails | unde
 };
 
 export const hasStrictlyNsReferences = (
-  graph: DependencyGraph,
+  graph: ModuleGraph,
   importsForExport: ImportDetails | undefined,
   id: string
 ): [boolean, string?] => {

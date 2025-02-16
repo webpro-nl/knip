@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import type { Export, ExportMember } from '../types/dependency-graph.js';
+import type { Export, ExportMember } from '../types/module-graph.js';
 import { isIdChar } from '../util/regex.js';
 
 export const isType = (item: Export | ExportMember) =>

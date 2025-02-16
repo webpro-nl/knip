@@ -1,14 +1,13 @@
 import type {
-  DependencyGraph,
   FileNode,
   IdToFileMap,
   IdToNsToFileMap,
   ImportDetails,
   ImportMap,
-} from '../types/dependency-graph.js';
+  ModuleGraph,
+} from '../types/module-graph.js';
 
-export const getOrCreateFileNode = (graph: DependencyGraph, filePath: string) =>
-  graph.get(filePath) ?? createFileNode();
+export const getOrCreateFileNode = (graph: ModuleGraph, filePath: string) => graph.get(filePath) ?? createFileNode();
 
 const updateImportDetails = (importedModule: ImportDetails, importItems: ImportDetails) => {
   for (const id of importItems.refs) importedModule.refs.add(id);
@@ -20,7 +19,7 @@ const updateImportDetails = (importedModule: ImportDetails, importItems: ImportD
   for (const [id, v] of importItems.reExportedNs.entries()) addValues(importedModule.reExportedNs, id, v);
 };
 
-export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: DependencyGraph) => {
+export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: ModuleGraph) => {
   for (const [importedFilePath, importDetails] of importMap.entries()) {
     const importedFileImports = file.imports.internal.get(importedFilePath);
     if (!importedFileImports) file.imports.internal.set(importedFilePath, importDetails);

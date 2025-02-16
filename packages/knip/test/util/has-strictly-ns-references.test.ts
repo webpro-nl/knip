@@ -1,9 +1,9 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import type { DependencyGraph, ImportDetails } from '../../src/types/dependency-graph.js';
+import type { ImportDetails, ModuleGraph } from '../../src/types/module-graph.js';
 import { hasStrictlyNsReferences } from '../../src/util/has-strictly-ns-references.js';
 
-const map: DependencyGraph = new Map();
+const map: ModuleGraph = new Map();
 
 const base: ImportDetails = {
   refs: new Set(),

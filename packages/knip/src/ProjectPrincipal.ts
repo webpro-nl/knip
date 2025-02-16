@@ -4,7 +4,7 @@ import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
 import type { GetImportsAndExportsOptions } from './types/config.js';
-import type { DependencyGraph, Export, ExportMember, FileNode, UnresolvedImport } from './types/dependency-graph.js';
+import type { Export, ExportMember, FileNode, ModuleGraph, UnresolvedImport } from './types/module-graph.js';
 import type { PrincipalOptions } from './types/project.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import type { SourceFileManager } from './typescript/SourceFileManager.js';
@@ -340,7 +340,7 @@ export class ProjectPrincipal {
     return externalRefs.length > 0;
   }
 
-  reconcileCache(graph: DependencyGraph) {
+  reconcileCache(graph: ModuleGraph) {
     for (const [filePath, file] of graph.entries()) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;

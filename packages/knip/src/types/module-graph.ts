@@ -70,4 +70,4 @@ export type FileNode = {
   traceRefs: References;
 };
 
-export type DependencyGraph = Map<FilePath, FileNode>;
+export type ModuleGraph = Map<FilePath, FileNode>;
