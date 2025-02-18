@@ -21,9 +21,10 @@ complicated". Knip and documentation are always a work in progress.
 
 If it doesn't come your way at the first try, please understand this also shows
 the dynamic and innovative nature of the ecosystem. Often only small changes go
-a long way towards success. Consider [opening an issue][5] and/or [ask away on
-Discord][6]. With the help of the community (that's you!) we can improve Knip
-for everyone and make project maintenance easier and more fun!
+a long way towards success. When a bit of configuration doesn't improve things,
+consider [opening an issue][5] and/or [ask away on Discord][6]. With the help of
+the community (that's you!) we can improve Knip for everyone and make project
+maintenance easier and more fun!
 
 :::
 
