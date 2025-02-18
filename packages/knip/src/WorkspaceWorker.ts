@@ -376,7 +376,8 @@ export class WorkspaceWorker {
     do {
       for (const [pluginName, dependencies] of configFiles.entries()) {
         configFiles.delete(pluginName);
-        await runPlugin(pluginName, Array.from(dependencies));
+        if (this.enabledPlugins.includes(pluginName)) await runPlugin(pluginName, Array.from(dependencies));
+        else for (const id of dependencies) addInput(toEntry(id));
       }
     } while (remainingPlugins.size > 0 && configFiles.size > 0);
 
