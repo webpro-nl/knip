@@ -1,3 +1,5 @@
+// biome-ignore lint/nursery/noRestrictedImports: ignore
+import path from 'node:path';
 import picomatch from 'picomatch';
 import { partitionCompilers } from './compilers/index.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
@@ -23,7 +25,7 @@ import { defaultRules } from './util/issue-initializers.js';
 import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
-import { join, relative, resolve } from './util/path.js';
+import { join, relative } from './util/path.js';
 import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { unwrapFunction } from './util/unwrap-function.js';
@@ -289,7 +291,7 @@ export class ConfigurationChief {
 
   private getIncludedWorkspaces() {
     if (this.workspace) {
-      const dir = resolve(this.cwd, this.workspace);
+      const dir = path.resolve(this.cwd, this.workspace);
       if (!isDirectory(dir)) throw new ConfigurationError('Workspace is not a directory');
       if (!isFile(join(dir, 'package.json'))) throw new ConfigurationError('Unable to find package.json in workspace');
     }
