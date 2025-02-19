@@ -261,7 +261,7 @@ export async function build({
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
 
-  const isPackageNameInternalWorkspace = (packageName: string) => chief.availableWorkspacePkgNames.has(packageName);
+  const isInternalWorkspace = (packageName: string) => chief.availableWorkspacePkgNames.has(packageName);
 
   const getPrincipalByFilePath = (filePath: string) => {
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -286,7 +286,7 @@ export async function build({
           tags,
         },
         isGitIgnored,
-        isPackageNameInternalWorkspace,
+        isInternalWorkspace,
         getPrincipalByFilePath
       );
 

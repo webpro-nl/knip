@@ -227,7 +227,7 @@ export class ProjectPrincipal {
     filePath: string,
     options: Omit<GetImportsAndExportsOptions, 'skipExports'>,
     isGitIgnored: (filePath: string) => boolean,
-    isPackageNameInternalWorkspace: (packageName: string) => boolean,
+    isInternalWorkspace: (packageName: string) => boolean,
     getPrincipalByFilePath: (filePath: string) => undefined | ProjectPrincipal
   ) {
     const fd = this.cache.getFileDescriptor(filePath);
@@ -254,7 +254,7 @@ export class ProjectPrincipal {
 
     for (const [specifier, specifierFilePath] of specifiers) {
       const packageName = getPackageNameFromModuleSpecifier(specifier);
-      if (packageName && isPackageNameInternalWorkspace(packageName)) {
+      if (packageName && isInternalWorkspace(packageName)) {
         external.add(packageName);
         const principal = getPrincipalByFilePath(specifierFilePath);
         if (principal && !isGitIgnored(specifierFilePath)) principal.addNonEntryPath(specifierFilePath);
