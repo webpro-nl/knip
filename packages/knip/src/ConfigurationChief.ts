@@ -289,7 +289,7 @@ export class ConfigurationChief {
 
   private getIncludedWorkspaces() {
     if (this.workspace) {
-      const dir = resolve(this.workspace);
+      const dir = resolve(this.cwd, this.workspace);
       if (!isDirectory(dir)) throw new ConfigurationError('Workspace is not a directory');
       if (!isFile(join(dir, 'package.json'))) throw new ConfigurationError('Unable to find package.json in workspace');
     }

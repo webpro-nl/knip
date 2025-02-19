@@ -79,3 +79,20 @@ test('Find unused files, dependencies and exports in workspaces (production)', a
     total: 7,
   });
 });
+
+test('Analyze only ancestor and dependent workspaces', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    workspace: 'packages/shared',
+  });
+
+  assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    types: 1,
+    processed: 4,
+    total: 4,
+  });
+});
