@@ -222,9 +222,9 @@ export async function glob(patterns: string | string[], options: GlobOptions): P
   const paths = await fg.glob(patterns, fgOptions);
 
   debugLogObject(
-    relative(options.cwd, options.dir) || ROOT_WORKSPACE_NAME,
+    relative(options.cwd, dir) || ROOT_WORKSPACE_NAME,
     label ? `Finding ${label} paths` : 'Finding paths',
-    () => ({ patterns, ...fgOptions, ignore: cachedIgnores ? `identical to ${dir} ↑` : ignore, paths })
+    () => ({ patterns, ...fgOptions, ignore: cachedIgnores ? `// identical to ${dir}` : ignore, paths })
   );
 
   if (willCache) cachedGlobIgnores.set(options.dir, ignore);
