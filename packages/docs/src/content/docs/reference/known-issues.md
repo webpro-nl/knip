@@ -17,7 +17,8 @@ load such files differently, in a different environment, or without certain
 environment variables set.
 
 If it isn't clear what's throwing the exception, try another run with `--debug`
-to locate the cause of the issue with more details.
+to locate the cause of the issue with more details. Sometimes the issue is a
+missing environment variable. As a last resort, the [plugin can be disabled][5].
 
 ## Path aliases in config files
 
@@ -40,8 +41,8 @@ the target values are not arrays).
 Potential workarounds:
 
 - Rewrite the import in the configuration file to a relative import.
-- Use Bun with [knip-bun][5].
-- [Disable the plugin][6] (not recommended, try the other options first).
+- Use Bun with [knip-bun][6].
+- [Disable the plugin][5] (not recommended, try the other options first).
 
 ## Nx Daemon
 
@@ -51,65 +52,16 @@ In Nx projects you might encounter this error:
 NX   Daemon process terminated and closed the connection
 ```
 
-The solution is to [turn off the Nx Daemon][7]:
+The solution is to [disable the Nx Daemon][7]:
 
 ```sh
 NX_DAEMON=false knip
 ```
 
-## False positives with external libs
-
-Knip may report false positives when exports are consumed by external libraries.
-
-Please see [external libs][8].
-
-## Definitely Typed packages in `dependencies`
-
-Knip is strict in the divide between `dependencies` and `devDependencies`. Some
-packages are published with one or more DT packages bundled (i.e. listed in
-`dependencies`). Knip does not make exceptions for such type packages
-(`@types/*`) and expects them in `devDependencies`.
-
-## Extensionless imports
-
-Knip does not support extensionless imports for some non-standard extensions,
-such as for `.svg` files. Bundlers like Webpack may support this, but Knip does
-not. Examples:
-
-```ts title="App.vue"
-import Component from './Component'; // → Should resolve to ./Component.vue
-import ArrowIcon from '../icons/Arrow'; // → Does NOT resolve to ../icons/Arrow.svg
-```
-
-The recommendation is to always add the extension when importing such files,
-similar to how standard ES Modules work.
-
-## `unplugin-icons` imports
-
-[unplugin-icons][9] uses aliased imports to import icons from icon sets as
-components. Knip cannot resolve these imports and will report them as unused.
-Use the [`paths` configuration option][10] to tell Knip where to find the icon
-types. For example:
-
-```json title="knip.json"
-{
-  "paths": {
-    "~icons/*": ["node_modules/unplugin-icons/types/[framework].d.ts"]
-  }
-}
-```
-
-Where `[framework]` is the name of the framework you're using (see [available
-types][11]).
-
 [1]: #exceptions-from-config-files
 [2]: #false-positives-with-external-libs
 [3]: #definitely-typed-packages-in-dependencies
 [4]: #extensionless-imports
-[5]: ./cli.md#knip-bun
-[6]: ./configuration.md#plugins
+[5]: ./configuration.md#plugins
+[6]: ./cli.md#knip-bun
 [7]: https://nx.dev/concepts/nx-daemon#turning-it-off
-[8]: ../guides/handling-issues.mdx#external-libraries
-[9]: https://github.com/antfu/unplugin-icons
-[10]: ./configuration.md#paths
-[11]: https://github.com/unplugin/unplugin-icons/tree/main/types

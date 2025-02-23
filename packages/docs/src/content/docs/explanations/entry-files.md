@@ -37,31 +37,34 @@ a monorepo, this is done for each workspace separately.
 
 The values you set override the default values, they are not merged.
 
+Also see [FAQ: Where does Knip look for entry files?][2]
+
 ## Plugins
 
 Plugins often add entry files. For instance, if the Remix, Storybook and Vitest
 plugins are enabled in your project, they'll add additional entry files. See
-[the next page about plugins][2] for more details about this.
+[the next page about plugins][3] for more details about this.
 
 ## Scripts in package.json
 
 The `package.json` is scanned for entry files. The `main`, `bin`, and `exports`
 fields may contain entry files. The `scripts` are also parsed to find entry
-files and dependencies. See [Script Parser][3] for more details.
+files and dependencies. See [Script Parser][4] for more details.
 
 ## Ignored files
 
 Knip respects `.gitignore` files. By default, ignored files are not added as
-entry files. This behavior can be disabled by using the [`--no-gitignore`][4]
+entry files. This behavior can be disabled by using the [`--no-gitignore`][5]
 flag on the CLI.
 
 ## Configuring project files
 
-See [configuring project files][5] for guidance with the `entry`, `project` and
+See [configuring project files][6] for guidance with the `entry`, `project` and
 `ignore` options.
 
 [1]: ../overview/configuration.md#defaults
-[2]: ./plugins.md
-[3]: ../features/script-parser.md
-[4]: ../reference/cli.md#--no-gitignore
-[5]: ../guides/configuring-project-files.md
+[2]: ../reference/faq.md#where-does-knip-look-for-entry-files
+[3]: ./plugins.md
+[4]: ../features/script-parser.md
+[5]: ../reference/cli.md#--no-gitignore
+[6]: ../guides/configuring-project-files.md
