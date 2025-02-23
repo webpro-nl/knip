@@ -9,9 +9,9 @@
 
 <div align="center">
 
-[![NPM Version](https://img.shields.io/npm/v/knip)][1]
-[![NPM Downloads](https://img.shields.io/npm/dm/knip)][1]
-[![GitHub Repo stars](https://img.shields.io/github/stars/webpro-nl/knip)][2]
+[![NPM Version](https://img.shields.io/npm/v/knip?color=f56e0f)][1]
+[![NPM Downloads](https://img.shields.io/npm/dm/knip?color=f56e0f)][1]
+[![GitHub Repo stars](https://img.shields.io/github/stars/webpro-nl/knip?style=flat-square&color=f56e0f)][2]
 
 </div>
 

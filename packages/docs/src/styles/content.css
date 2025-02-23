@@ -169,3 +169,14 @@ section.plugins li {
     color: var(--sl-color-bright-orange);
   }
 }
+
+.badges p {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 4rem auto;
+
+  a {
+    border-bottom: none;
+  }
+}
