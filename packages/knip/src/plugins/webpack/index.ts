@@ -4,10 +4,10 @@ import { compact } from '../../util/array.js';
 import {
   type Input,
   toDeferResolve,
+  toDeferResolveEntry,
+  toDeferResolveProductionEntry,
   toDependency,
   toDevDependency,
-  toEntry,
-  toProductionEntry,
 } from '../../util/input.js';
 import { isAbsolute, isInternal, join, relative } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -99,8 +99,9 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
         } else {
           const absoluteEntry = isAbsolute(entry) ? entry : join(options.context ? options.context : cwd, entry);
           const item = relative(cwd, absoluteEntry);
-          const value = options.mode === 'development' ? toEntry(item) : toProductionEntry(item);
-          inputs.add(value);
+          const input =
+            options.mode === 'development' ? toDeferResolveEntry(item) : toDeferResolveProductionEntry(item);
+          inputs.add(input);
         }
       }
     }

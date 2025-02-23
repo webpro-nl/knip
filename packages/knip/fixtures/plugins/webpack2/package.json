@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/webpack2",
+  "scripts": {
+    "dev": "webpack --config webpack.dev.js",
+    "prod": "webpack --config webpack.prod.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "*",
+    "webpack-cli": "*"
+  }
+}
