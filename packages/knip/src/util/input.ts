@@ -74,6 +74,17 @@ export const toDevDependency = (specifier: string): Input => ({ type: 'dependenc
 
 export const toDeferResolve = (specifier: string): Input => ({ type: 'deferResolve', specifier });
 
+export const isDeferResolve = (input: Input) => input.type === 'deferResolve';
+
+export const toDeferResolveProductionEntry = (specifier: string): Input => ({
+  type: 'deferResolveEntry',
+  specifier,
+  production: true,
+});
+
+export const isDeferResolveProductionEntry = (input: Input) =>
+  input.type === 'deferResolveEntry' && input.production === true;
+
 export const toDeferResolveEntry = (specifier: string): Input => ({ type: 'deferResolveEntry', specifier });
 
 export const isDeferResolveEntry = (input: Input) => input.type === 'deferResolveEntry';

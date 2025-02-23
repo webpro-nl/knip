@@ -179,8 +179,16 @@ export async function build({
       } else if (!isConfigPattern(dependency)) {
         const ws =
           (dependency.containingFilePath && chief.findWorkspaceByFilePath(dependency.containingFilePath)) || workspace;
-        const specifierFilePath = getReferencedInternalFilePath(dependency, ws);
-        if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
+        const resolvedFilePath = getReferencedInternalFilePath(dependency, ws);
+        if (resolvedFilePath) {
+          if (isDeferResolveProductionEntry(dependency)) {
+            productionEntryFilePatterns.add(resolvedFilePath);
+          } else if (isDeferResolveEntry(dependency)) {
+            entryFilePatterns.add(resolvedFilePath);
+          } else {
+            principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: true });
+          }
+        }
       }
     }
 
