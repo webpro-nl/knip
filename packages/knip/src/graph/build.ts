@@ -13,7 +13,15 @@ import type { ModuleGraph } from '../types/module-graph.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
 import { _glob, negate } from '../util/glob.js';
-import { type Input, isConfigPattern, isEntry, isProductionEntry, toProductionEntry } from '../util/input.js';
+import {
+  type Input,
+  isConfigPattern,
+  isDeferResolveEntry,
+  isDeferResolveProductionEntry,
+  isEntry,
+  isProductionEntry,
+  toProductionEntry,
+} from '../util/input.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getEntryPathsFromManifest } from '../util/package-json.js';
 import { dirname, isAbsolute, join, relative } from '../util/path.js';
@@ -129,11 +137,11 @@ export async function build({
 
     await worker.init();
 
-    const deps = new Set<Input>();
+    const inputs = new Set<Input>();
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);
-      for (const id of definitionPaths) deps.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
+      for (const id of definitionPaths) inputs.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
     }
 
     const ignore = worker.getIgnorePatterns();
@@ -143,11 +151,11 @@ export async function build({
 
     // Add entry paths from package.json#main, #bin, #exports
     const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { ...sharedGlobOptions, ignore });
-    for (const id of entryPathsFromManifest.map(id => toProductionEntry(id))) deps.add(id);
+    for (const id of entryPathsFromManifest.map(id => toProductionEntry(id))) inputs.add(id);
 
     // Get dependencies from plugins
-    const dependenciesFromPlugins = await worker.findDependenciesByPlugins();
-    for (const id of dependenciesFromPlugins) deps.add(id);
+    const inputsFromPlugins = await worker.runPlugins();
+    for (const id of inputsFromPlugins) inputs.add(id);
 
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
@@ -170,20 +178,19 @@ export async function build({
     const entryFilePatterns = new Set<string>();
     const productionEntryFilePatterns = new Set<string>();
 
-    for (const dependency of deps) {
-      const s = dependency.specifier;
-      if (isEntry(dependency)) {
+    for (const input of inputs) {
+      const s = input.specifier;
+      if (isEntry(input)) {
         entryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
-      } else if (isProductionEntry(dependency)) {
+      } else if (isProductionEntry(input)) {
         productionEntryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
-      } else if (!isConfigPattern(dependency)) {
-        const ws =
-          (dependency.containingFilePath && chief.findWorkspaceByFilePath(dependency.containingFilePath)) || workspace;
-        const resolvedFilePath = getReferencedInternalFilePath(dependency, ws);
+      } else if (!isConfigPattern(input)) {
+        const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
+        const resolvedFilePath = getReferencedInternalFilePath(input, ws);
         if (resolvedFilePath) {
-          if (isDeferResolveProductionEntry(dependency)) {
+          if (isDeferResolveProductionEntry(input)) {
             productionEntryFilePatterns.add(resolvedFilePath);
-          } else if (isDeferResolveEntry(dependency)) {
+          } else if (isDeferResolveEntry(input)) {
             entryFilePatterns.add(resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: true });

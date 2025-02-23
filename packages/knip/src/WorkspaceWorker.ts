@@ -235,7 +235,7 @@ export class WorkspaceWorker {
     return [...this.rootIgnore, ...this.config.ignore.map(pattern => prependDirToPattern(this.name, pattern))];
   }
 
-  public async findDependenciesByPlugins() {
+  public async runPlugins() {
     const name = this.name;
     const cwd = this.dir;
     const rootCwd = this.cwd;
