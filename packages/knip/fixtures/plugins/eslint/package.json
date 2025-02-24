@@ -1,6 +1,7 @@
 {
   "name": "@fixtures/eslint",
   "devDependencies": {
+    "@eslint/js": "*",
     "eslint": "*",
     "@nrwl/eslint-plugin-nx": "*",
     "@typescript-eslint/eslint-plugin": "*",
