@@ -26,6 +26,19 @@ const config = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 
 
 const resolveConfig: ResolveConfig<ESLintConfig> = (localConfig, options) => getDependencies(localConfig, options);
 
+const note = `For ESLint v8 users: if relying on [configuration cascading](https://eslint.org/docs/v8.x/use/configure/configuration-files#cascading-and-hierarchy),
+consider using something like this:
+
+\`\`\`json
+{
+  "eslint": ["**/.eslintrc.js"]
+}
+\`\`\`
+`;
+
+/** @public */
+export const docs = { note };
+
 export default {
   title,
   enablers,
