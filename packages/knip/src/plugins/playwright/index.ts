@@ -47,7 +47,7 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async config =
   return [...reporters].map(toDeferResolve);
 };
 
-export const args = {
+const args = {
   binaries: ['playwright'],
   positional: true,
   args: (args: string[]) => args.filter(arg => arg !== 'install' && arg !== 'test'),
