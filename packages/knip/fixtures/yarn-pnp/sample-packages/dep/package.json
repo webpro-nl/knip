@@ -1,0 +1,8 @@
+{
+  "name": "@sample-package/dep",
+  "version": "0.0.0",
+  "main": "./index.js",
+  "peerDependencies": {
+    "@sample-package/peer": "*"
+  }
+}
