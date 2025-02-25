@@ -1,5 +1,5 @@
 import type { PluginName } from '../types/PluginNames.js';
-import { toRelative } from './path.js';
+import { isAbsolute, toRelative } from './path.js';
 
 type InputType = 'binary' | 'entry' | 'config' | 'dependency' | 'deferResolve' | 'deferResolveEntry';
 
@@ -14,7 +14,7 @@ export interface Input {
 
 export interface ConfigInput extends Input {
   type: 'config';
-  containingFilePath: string;
+  containingFilePath?: string;
   pluginName: PluginName;
 }
 
@@ -47,14 +47,14 @@ export const toProductionEntry = (specifier: string, options: Options = {}): Inp
 
 export const isProductionEntry = (input: Input) => input.type === 'entry' && input.production === true;
 
-export const toConfig = (pluginName: PluginName, specifier: string, containingFilePath: string): ConfigInput => ({
+export const toConfig = (pluginName: PluginName, specifier: string, containingFilePath?: string): ConfigInput => ({
   type: 'config',
   specifier,
   pluginName,
   containingFilePath,
 });
 
-export const isConfigPattern = (input: Input): input is ConfigInput => input.type === 'config';
+export const isConfig = (input: Input): input is ConfigInput => input.type === 'config';
 
 export const toDependency = (specifier: string, options: Options = {}): Input => ({
   type: 'dependency',
@@ -90,4 +90,4 @@ export const toDeferResolveEntry = (specifier: string): Input => ({ type: 'defer
 export const isDeferResolveEntry = (input: Input) => input.type === 'deferResolveEntry';
 
 export const toDebugString = (input: Input) =>
-  `${input.type}:${input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath)})` : ''}`;
+  `${input.type}:${isAbsolute(input.specifier) ? toRelative(input.specifier) : input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath)})` : ''}`;

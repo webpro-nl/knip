@@ -7,6 +7,7 @@ import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import { WorkspaceWorker } from '../WorkspaceWorker.js';
 import { _getInputsFromScripts } from '../binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
+import type { PluginName } from '../types/PluginNames.js';
 import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
 import type { ModuleGraph } from '../types/module-graph.js';
@@ -15,7 +16,7 @@ import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
 import { _glob, negate } from '../util/glob.js';
 import {
   type Input,
-  isConfigPattern,
+  isConfig,
   isDeferResolveEntry,
   isDeferResolveProductionEntry,
   isEntry,
@@ -78,6 +79,7 @@ export async function build({
 }: BuildOptions) {
   // Handle config files only once across workspaces workers
   const allConfigFilePaths = new Set<string>();
+  const allConfigFilesMap = new Map<string, Map<PluginName, Set<string>>>();
 
   const enabledPluginsStore = new Map<string, string[]>();
 
@@ -124,6 +126,7 @@ export async function build({
       manifest,
       dependencies,
       getReferencedInternalFilePath: (input: Input) => getReferencedInternalFilePath(input, workspace),
+      findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
       isProduction,
       isStrict,
       rootIgnore: chief.config.ignore,
@@ -133,6 +136,7 @@ export async function build({
       isCache,
       cacheLocation,
       allConfigFilePaths,
+      allConfigFilesMap,
     });
 
     await worker.init();
@@ -184,7 +188,7 @@ export async function build({
         entryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
       } else if (isProductionEntry(input)) {
         productionEntryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
-      } else if (!isConfigPattern(input)) {
+      } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = getReferencedInternalFilePath(input, ws);
         if (resolvedFilePath) {

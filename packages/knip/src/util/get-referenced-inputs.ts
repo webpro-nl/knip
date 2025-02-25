@@ -4,7 +4,7 @@ import type { IssueCollector } from '../IssueCollector.js';
 import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import { debugLog } from './debug.js';
 import { isDeferResolve, toDebugString } from './input.js';
-import { type Input, fromBinary, isBinary, isConfigPattern, isDeferResolveEntry, isDependency } from './input.js';
+import { type Input, fromBinary, isBinary, isConfig, isDeferResolveEntry, isDependency } from './input.js';
 import { getPackageNameFromSpecifier } from './modules.js';
 import { dirname, isAbsolute, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
@@ -105,7 +105,7 @@ export const getReferencedInputsHandler =
       });
     } else if (!isGitIgnored(filePath)) {
       // Let's start out conservatively
-      if (!isDeferResolveEntry(input) && !isConfigPattern(input)) {
+      if (!isDeferResolveEntry(input) && !isConfig(input)) {
         collector.addIssue({
           type: 'unresolved',
           filePath: containingFilePath,
