@@ -36,7 +36,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
       if (typeof packageName === 'string') inputs.add(toDependency(packageName));
       if (opts) {
         if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
-          inputs.add(toConfig('typescript', opts.tsConfig, configFilePath));
+          inputs.add(toConfig('typescript', opts.tsConfig, { containingFilePath: configFilePath }));
         }
       }
       const defaultEntriesByOption: EntriesByOption = opts ? entriesByOption(opts) : new Map();
@@ -104,7 +104,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           karma.inputsFromFrameworks(['jasmine']).forEach(inputs.add, inputs);
         }
         if (karmaConfig && !karma.configFiles.includes(karmaConfig)) {
-          inputs.add(toConfig('karma', karmaConfig, options.configFilePath));
+          inputs.add(toConfig('karma', karmaConfig, { containingFilePath: options.configFilePath }));
         }
       }
     }

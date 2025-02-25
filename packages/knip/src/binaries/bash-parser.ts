@@ -1,6 +1,6 @@
 import parse, { type Assignment, type ExpansionNode, type Node, type Prefix } from '../../vendor/bash-parser/index.js';
 import { Plugins, pluginArgsMap } from '../plugins.js';
-import type { GetInputsFromScriptsOptions } from '../types/config.js';
+import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.js';
 import { debugLogObject } from '../util/debug.js';
 import { type Input, toBinary, toDeferResolve } from '../util/input.js';
 import { extractBinary } from '../util/modules.js';
@@ -26,9 +26,10 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   if (!script) return [];
 
   // Helper for recursive calls
-  const fromArgs = (args: string[]) => {
+  const fromArgs: FromArgs = (args, opts): Input[] => {
     return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
       ...options,
+      ...opts,
       knownBinsOnly: false,
     });
   };

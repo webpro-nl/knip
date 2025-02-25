@@ -132,7 +132,7 @@ test('getInputsFromScripts (nx)', () => {
 test('getInputsFromScripts (npm)', () => {
   t('npm run script', []);
   t('npm run publish:latest -- --npm-tag=debug --no-push', []);
-  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts', containingFilePath)]);
+  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
 });
 
 test('getInputsFromScripts (npx)', () => {
@@ -267,6 +267,6 @@ test('getInputsFromScripts (ignore parse error)', () => {
 });
 
 test('getInputsFromScripts (config)', () => {
-  t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json', containingFilePath)]);
-  t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json', containingFilePath)]);
+  t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
+  t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
 });

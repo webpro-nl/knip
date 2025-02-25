@@ -47,11 +47,11 @@ export const toProductionEntry = (specifier: string, options: Options = {}): Inp
 
 export const isProductionEntry = (input: Input) => input.type === 'entry' && input.production === true;
 
-export const toConfig = (pluginName: PluginName, specifier: string, containingFilePath?: string): ConfigInput => ({
+export const toConfig = (pluginName: PluginName, specifier: string, options: Options = {}): ConfigInput => ({
   type: 'config',
   specifier,
   pluginName,
-  containingFilePath,
+  ...options,
 });
 
 export const isConfig = (input: Input): input is ConfigInput => input.type === 'config';

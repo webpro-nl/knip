@@ -20,13 +20,15 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
   const { compilerOptions } = localConfig;
 
   const extend = localConfig.extends
-    ? [localConfig.extends].flat().map(specifier => toConfig('typescript', specifier, options.configFilePath))
+    ? [localConfig.extends]
+        .flat()
+        .map(specifier => toConfig('typescript', specifier, { containingFilePath: options.configFilePath }))
     : [];
 
   const references =
     localConfig.references
       ?.filter(reference => reference.path.endsWith('.json'))
-      .map(reference => toConfig('typescript', reference.path, options.configFilePath)) ?? [];
+      .map(reference => toConfig('typescript', reference.path, { containingFilePath: options.configFilePath })) ?? [];
 
   if (!(compilerOptions && localConfig)) return compact([...extend, ...references]);
 

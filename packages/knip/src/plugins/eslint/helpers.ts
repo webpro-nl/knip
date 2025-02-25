@@ -14,7 +14,9 @@ export const getDependencies = (
   // https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
   if (extendsSpecifiers.some(specifier => specifier?.startsWith('eslint-plugin-prettier')))
     extendsSpecifiers.push('eslint-config-prettier');
-  const extendConfigs = extendsSpecifiers.map(specifier => toConfig('eslint', specifier, options.configFilePath));
+  const extendConfigs = extendsSpecifiers.map(specifier =>
+    toConfig('eslint', specifier, { containingFilePath: options.configFilePath })
+  );
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
   const parser = config.parser ?? config.parserOptions?.parser;
   const babelDependencies = config.parserOptions?.babelOptions

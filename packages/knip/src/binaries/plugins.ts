@@ -4,6 +4,7 @@ import type { BinaryResolver } from '../types/config.js';
 import { compact } from '../util/array.js';
 import { toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.js';
 import { extractBinary } from '../util/modules.js';
+import { dirname } from '../util/path.js';
 import { resolve as fallbackResolve } from './fallback.js';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
@@ -17,26 +18,27 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
 
   if (!pluginArgs) return fallbackResolve(binary, _args, options);
 
-  const opts = pluginArgs;
+  const inputOpts = {};
+  if (options.cwd && dirname(containingFilePath) !== options.cwd) Object.assign(inputOpts, { dir: options.cwd });
 
-  const args = typeof opts.args === 'function' ? opts.args(_args) : _args;
+  const args = typeof pluginArgs.args === 'function' ? pluginArgs.args(_args) : _args;
 
   const parsed = parseArgs(args, {
     string: [
-      ...(opts.nodeImportArgs ? ['import'] : []),
-      ...(opts.config === true ? ['config'] : []),
-      ...(opts.string ?? []),
+      ...(pluginArgs.nodeImportArgs ? ['import'] : []),
+      ...(pluginArgs.config === true ? ['config'] : []),
+      ...(pluginArgs.string ?? []),
     ],
-    boolean: ['quiet', 'verbose', 'watch', ...(opts.boolean ?? [])],
+    boolean: ['quiet', 'verbose', 'watch', ...(pluginArgs.boolean ?? [])],
     alias: {
-      ...(opts.nodeImportArgs ? nodeLoadersArgs : {}),
-      ...(opts.config === true ? { config: ['c'] } : {}),
-      ...opts.alias,
+      ...(pluginArgs.nodeImportArgs ? nodeLoadersArgs : {}),
+      ...(pluginArgs.config === true ? { config: ['c'] } : {}),
+      ...pluginArgs.alias,
     },
   });
 
   const positionals = [];
-  if (opts.positional && parsed._[0]) {
+  if (pluginArgs.positional && parsed._[0]) {
     const id = parsed._[0]; // let's start out safe, but sometimes we'll want more
     if (isGlobLike(id)) positionals.push(toEntry(id));
     else {
@@ -46,28 +48,28 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
   }
 
   const mapToParsedKey = (id: string) => parsed[id];
-  const resolved = compact(opts.resolve ? opts.resolve.flatMap(mapToParsedKey) : []);
+  const resolved = compact(pluginArgs.resolve ? pluginArgs.resolve.flatMap(mapToParsedKey) : []);
 
-  const resolvedImports = opts.nodeImportArgs && parsed.import ? [parsed.import].flat() : [];
+  const resolvedImports = pluginArgs.nodeImportArgs && parsed.import ? [parsed.import].flat() : [];
 
   const resolvedFromArgs =
-    typeof opts.fromArgs === 'function'
-      ? fromArgs(opts.fromArgs(parsed, args))
-      : Array.isArray(opts.fromArgs)
-        ? fromArgs(opts.fromArgs.flatMap(mapToParsedKey))
+    typeof pluginArgs.fromArgs === 'function'
+      ? fromArgs(pluginArgs.fromArgs(parsed, args))
+      : Array.isArray(pluginArgs.fromArgs)
+        ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey))
         : [];
 
-  const config = opts.config === true ? ['config'] : opts.config || [];
+  const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
   const mapToConfigPattern = (value: string | [string, (value: string) => string]) => {
     if (typeof value === 'string')
-      return parsed[value] && pluginName ? [toConfig(pluginName, parsed[value], containingFilePath)] : [];
+      return parsed[value] && pluginName ? [toConfig(pluginName, parsed[value], inputOpts)] : [];
     const [id, fn] = value;
-    return parsed[id] && pluginName ? [toConfig(pluginName, fn(parsed[id]), containingFilePath)] : [];
+    return parsed[id] && pluginName ? [toConfig(pluginName, fn(parsed[id]), inputOpts)] : [];
   };
   const configFilePaths = config.flatMap(mapToConfigPattern);
 
   return [
-    toBinary(binary),
+    toBinary(binary, inputOpts),
     ...positionals,
     ...resolved.map(toDeferResolve),
     ...resolvedImports.map(toDeferResolve),

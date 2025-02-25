@@ -3,6 +3,7 @@ import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.j
 import { isBinary, isDependency, toBinary, toDependency } from '../../util/input.js';
 import { stripVersionFromSpecifier } from '../../util/modules.js';
 import { join } from '../../util/path.js';
+import { argsFrom } from '../util.js';
 
 // https://yarnpkg.com/cli
 
@@ -76,7 +77,6 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   if ((!dir && manifestScriptNames.has(command)) || commands.includes(command)) return [];
 
-  const bin = command === 'exec' ? toBinary(binary) : toBinary(command);
-  if (dir) Object.assign(bin, { dir });
-  return [bin];
+  const opts = dir ? { cwd: dir } : {};
+  return fromArgs(argsFrom(args, command === 'exec' ? binary : command), opts);
 };
