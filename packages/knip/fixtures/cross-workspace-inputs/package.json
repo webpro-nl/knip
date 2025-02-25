@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/state",
+  "workspaces": ["e2e", "components"],
+  "scripts": {
+    "test": "yarn --cwd components vitest -c vitest.components.config.ts"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/state-e2e",
+  "devDependencies": {
+    "@playwright/test": "*"
+  }
+}

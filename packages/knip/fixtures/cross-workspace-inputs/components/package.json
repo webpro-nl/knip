@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/state-components",
+  "devDependencies": {
+    "vitest": "*"
+  }
+}
