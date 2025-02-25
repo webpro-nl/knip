@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/eslint2",
+  "scripts": {
+    "lint": "eslint"
+  },
+  "devDependencies": {
+    "@eslint/js": "*",
+    "eslint": "*",
+    "eslint-import-resolver-typescript": "*",
+    "typescript-eslint": "*"
+  }
+}

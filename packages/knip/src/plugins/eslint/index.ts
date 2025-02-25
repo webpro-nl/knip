@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getDependencies } from './helpers.js';
-import type { ESLintConfig } from './types.js';
+import { getInputs } from './helpers.js';
+import type { ESLintConfigDeprecated } from './types.js';
 
 // New: https://eslint.org/docs/latest/use/configure/configuration-files
 // Old: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated
@@ -24,10 +24,28 @@ const entry = ['eslint.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const config = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
 
-const resolveConfig: ResolveConfig<ESLintConfig> = (localConfig, options) => getDependencies(localConfig, options);
+const resolveConfig: ResolveConfig<ESLintConfigDeprecated> = (localConfig, options) => getInputs(localConfig, options);
 
-const note = `For ESLint v8 users: if relying on [configuration cascading](https://eslint.org/docs/v8.x/use/configure/configuration-files#cascading-and-hierarchy),
-consider using something like this:
+const note = `### ESLint v9
+
+Only regular \`import\` statements are considered by default.
+The configuration object is not resolved to find dependencies for \`settings\` such as \`"eslint-import-resolver-typescript"\`.
+To enable this, lift the \`entry\` to a \`config\` file like so:
+
+\`\`\`json
+{
+  "eslint": ["eslint.config.ts"]
+}
+\`\`\`
+
+This is not enabled by default, since this exception may be thrown by a \`@rushstack/eslint-*\` package:
+
+> \`Error: Failed to patch ESLint because the calling module was not recognized.\`
+
+### ESLint v8
+
+If relying on [configuration cascading](https://eslint.org/docs/v8.x/use/configure/configuration-files#cascading-and-hierarchy),
+consider using an extended glob pattern like this:
 
 \`\`\`json
 {
