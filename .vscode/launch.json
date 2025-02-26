@@ -6,10 +6,9 @@
       "request": "launch",
       "name": "Debug Bun test",
       "program": "${file}",
-      "args": ["test"],
       "cwd": "${workspaceFolder}/packages/knip",
       "runtime": "bun",
-      "runtimeArgs": ["test"],
+      "runtimeArgs": ["test", "--timeout", "999999999"],
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
