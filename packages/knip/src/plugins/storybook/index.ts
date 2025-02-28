@@ -12,7 +12,7 @@ const enablers = [/^@storybook\//, '@nrwl/storybook'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.storybook/{main,test-runner}.{js,ts}'];
+const config = ['.storybook/{main,test-runner}.{js,ts,mts}'];
 
 const stories = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
 
@@ -20,7 +20,7 @@ const restEntry = ['.storybook/{manager,preview}.{js,jsx,ts,tsx}'];
 
 const entry = [...restEntry, ...stories];
 
-const project = ['.storybook/**/*.{js,jsx,ts,tsx}'];
+const project = ['.storybook/**/*.{js,jsx,ts,tsx,mts}'];
 
 const resolveEntryPaths: ResolveEntryPaths<StorybookConfig> = async (localConfig, options) => {
   const { cwd, configFileDir } = options;
