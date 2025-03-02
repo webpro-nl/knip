@@ -81,7 +81,7 @@ const getMonthlyTotals = async (token: string): Promise<Map<string, number>> => 
   const monthlyTotals = new Map<string, number>();
   const now = new Date();
 
-  for (let d = new Date(START_DATE); d <= now; d.setMonth(d.getMonth() + 1)) {
+  for (let d = new Date(START_DATE); d <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
     monthlyTotals.set(d.toISOString().substring(0, 7), 0);
   }
 

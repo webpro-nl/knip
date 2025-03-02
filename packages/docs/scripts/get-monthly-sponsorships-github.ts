@@ -58,7 +58,7 @@ const getMonthlyTotals = async (token: string) => {
   const monthlyTotals = new Map<string, number>();
   const now = new Date();
 
-  for (let d = new Date(START_DATE); d <= now; d.setMonth(d.getMonth() + 1)) {
+  for (let d = new Date(START_DATE); d <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
     monthlyTotals.set(d.toISOString().substring(0, 7), 0);
   }
 
@@ -93,13 +93,15 @@ const main = async () => {
   const monthlyData = await getMonthlyTotals(token);
 
   let grandTotal = 0;
+  const startMonth = START_DATE.toISOString().substring(0, 7);
+  const data = [...monthlyData.entries()].filter(([month]) => month >= startMonth);
 
-  for (const [month, amount] of [...monthlyData.entries()].sort()) {
+  for (const [month, amount] of data.sort()) {
     console.log(`${month} ${amount}`);
     grandTotal += amount;
   }
 
-  console.log(`\nGrand total: ${grandTotal} (${monthlyData.size} months)`);
+  console.log(`\nGrand total: ${grandTotal} (${data.length} months)`);
 };
 
 main().catch(console.error);
