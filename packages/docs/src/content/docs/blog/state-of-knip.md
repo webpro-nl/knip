@@ -62,8 +62,9 @@ Moving the burden to users for them to either not notice at all and get
 incorrect results, or having to override the `next.entry` patterns and include
 `src/pages/**/*.page.tsx` isn't good DX. Knip should take care of it.
 
-Yet now that Knip actually loads and executes `next.config.ts`... trouble is
-right around the corner:
+To get the configuration object and the value of `pageExtensions`, Knip has to
+actually load and execute `next.config.ts` ¹... and trouble is right around the
+corner:
 
 ```ts title="next.config.ts"
 const nextConfig = {
@@ -89,9 +90,11 @@ starts doing this, only for Next.js projects with a configuration file that
 doesn't read environment variables safely (or has other contextual
 dependencies).
 
-Another approach could be to only statically analyze the `next.config.ts`
-configuration file. That would get us only so far, but is definitely useful and
-on the radar. [The ESLint v9 plugin][5] has a similar issue.
+By the way, [the ESLint v9 plugin][5] has a similar issue.
+
+¹ Another approach could be to statically analyze the `next.config.ts`
+configuration file. That would require some additional efforts and get us only
+so far, but is definitely useful in some cases and on the radar.
 
 ### Case 2: Knip does that?!
 
@@ -166,8 +169,8 @@ the aforementioned ones, [compilers for popular frameworks][6] and a [script
 parser][7], and other affordances such as [auto-fix][8].
 
 That said, code organization could be improved to make it more accessible for
-contributions and, for instance, expose programmtic APIs to generate the module
-graph for usage outside of Knip. Additionally, existing plugins can better take
+contributions and, for instance, expose programmatic APIs to use the generated
+module graph outside of Knip. Additionally, existing plugins can better take
 advantage of existing components in the system, and new plugins can be developed
 to further reduce user configuration and false positives.
 
