@@ -5,7 +5,7 @@ description:
   JavaScript and TypeScript projects
 template: splash
 hero:
-  title: Knip!
+  title: Knip
   tagline: Declutter your JavaScript & TypeScript projects
   image:
     file: ../../assets/logo.svg
@@ -31,11 +31,23 @@ import Sponsors from '../../components/Sponsors.astro';
 import Projects from '../../components/Projects.astro';
 import Contributors from '../../components/Contributors.astro';
 
-:::div{.badges}
+:::section{.badges}
 
 [![NPM Version](https://img.shields.io/npm/v/knip?color=f56e0f)](https://www.npmjs.com/package/knip)
 [![NPM Downloads](https://img.shields.io/npm/dm/knip?color=f56e0f)](https://www.npmjs.com/package/knip)
 [![GitHub Repo stars](https://img.shields.io/github/stars/webpro-nl/knip?style=flat&color=f56e0f)](https://github.com/webpro-nl/knip)
+
+:::
+
+:::section{.projects}
+
+<Projects />
+
+:::
+
+:::div{.sponsor}
+
+Using Knip? [You can support it!][2]
 
 :::
 
@@ -64,11 +76,13 @@ import Contributors from '../../components/Contributors.astro';
   </Card>
 </CardGrid>
 
-:::div{.sponsor}
+## 🧡 Sponsors
 
-Enjoying Knip? [Support it!][2]
+Eternal gratitude to the companies and people that are already supporting Knip:
 
-:::
+<Sponsors direction="row" showAll={false} />
+
+Please see [Sponsors][2] for the full list. Consider supporting the project too!
 
 <CardGrid stagger>
   <Card title="Battle-tested" icon="approve-check">
@@ -104,28 +118,12 @@ Enjoying Knip? [Support it!][2]
   </Card>
 </CardGrid>
 
-## 🧡 Projects using Knip
-
-:::section{.columns.min300}
-
-<Projects />
-
-:::
-
 ## 🧡 Introduction video
 
 [James Shopland][6] has a great introduction and overview of Knip (thanks
 James!):
 
 <YouTube id="uhEkgWt-pUM" />
-
-## 🧡 Sponsors
-
-Eternal gratitude to the companies and people that are already supporting Knip:
-
-<Sponsors direction="row" showAll={false} />
-
-Please see [Sponsors][2] for the full list. Consider supporting the project too!
 
 ## 🧡 Contributors
 

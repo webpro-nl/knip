@@ -170,13 +170,19 @@ section.plugins li {
   }
 }
 
-.badges p {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin: 4rem auto;
+.badges {
+  margin: 6rem auto;
+  p {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
 
-  a {
-    border-bottom: none;
+    a {
+      border-bottom: none;
+    }
   }
+}
+
+.projects {
+  margin: 6rem auto;
 }
