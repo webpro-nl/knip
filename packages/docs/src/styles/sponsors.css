@@ -23,16 +23,30 @@
   }
 }
 
+.sl-markdown-content .sponsors-intro {
+  font-style: italic;
+  border: unset;
+  &:hover {
+    border-bottom: inherit;
+  }
+}
+
+.sl-markdown-content p:has(> .sponsors-intro) {
+  text-align: center;
+}
+
 .sponsors {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   gap: 5rem;
 }
 
-.sl-markdown-content .sponsors:not(.column) {
+.sponsors.column {
+  flex-wrap: wrap;
+}
+
+.sl-markdown-content .sponsors.row {
   margin: 3rem 0;
   gap: 3rem;
 }
@@ -50,8 +64,8 @@
   width: 500px;
 }
 
-.sponsors .smaller {
-  margin: 0 2em;
+.sponsors .smaller svg {
+  transform: scale(0.85);
 }
 
 .sponsors .w400 {

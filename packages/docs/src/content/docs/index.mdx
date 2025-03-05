@@ -33,19 +33,17 @@ import Contributors from '../../components/Contributors.astro';
 
 :::section{.badges}
 
-[![NPM Version][2]][1] [![NPM Downloads][3]][1] [![GitHub Repo stars][5]][4]
+[![NPM Version][2]][1] [![NPM Downloads][3]][1] [![GitHub Repo   stars][5]][4]
 
 :::
 
-:::section{.projects}
+:a[Sponsored by:]{href="/sponsors" class="sponsors-intro"}
 
-<Projects />
-
-:::
+<Sponsors direction="row" showAll={false} />
 
 :::div{.sponsor}
 
-Using Knip? [You can support it!][6]
+[Become a Sponsor][6]
 
 :::
 
@@ -92,30 +90,30 @@ Using Knip? [You can support it!][6]
   </Card>
 </CardGrid>
 
-## 🧡 Sponsors
+## Trusted by the world's best software teams
 
-Eternal gratitude to the companies and people that are already supporting Knip:
+:::section{.projects}
 
-<Sponsors direction="row" showAll={false} />
+<Projects />
 
-Please see [Sponsors][6] for the full list. Consider supporting the project too!
+:::
 
-## 🧡 Introduction video
+## Introduction video
 
 [James Shopland][10] has a great introduction and overview of Knip (thanks
 James!):
 
 <YouTube id="uhEkgWt-pUM" />
 
-## 🧡 Contributors
+## Created by awesome contributors
 
 Special thanks to the wonderful people who have contributed to this project:
 
 <Contributors />
 
-## 🧡 Articles
+## Articles about Knip
 
-Most recent article first:
+A curated selection of articles about Knip, most recent first:
 
 - Tom MacWright: [Knip: good software for cleaning up TypeScript tech debt][11]
   (2024-10-25)
@@ -133,7 +131,7 @@ Most recent article first:
 - Effective TypeScript: [Recommendation Update: ✂️ Use knip to detect dead code
   and types][18] (2023-07-29)
 
-## 🧡 Testimonials
+## Don't just take our word for it
 
 <Posts />
 

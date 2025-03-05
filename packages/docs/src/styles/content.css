@@ -98,7 +98,7 @@ section.plugins li {
 .sl-markdown-content .sponsor {
   font-size: 2rem;
   text-align: center;
-  margin: 5rem 0;
+  margin: 4rem 0;
 }
 
 .sl-badge.caution,
@@ -171,7 +171,7 @@ section.plugins li {
 }
 
 .badges {
-  margin: 6rem auto;
+  margin: 4rem auto;
   p {
     display: flex;
     justify-content: center;
