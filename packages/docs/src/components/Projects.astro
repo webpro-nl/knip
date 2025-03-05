@@ -12,8 +12,8 @@ import Mocha from '../assets/projects/mocha.svg';
 import Nuxt from '../assets/projects/nuxt.svg';
 import Prettier from '../assets/projects/prettier.svg';
 import Sentry from '../assets/projects/sentry.svg';
+import Shopify from '../assets/projects/shopify.svg';
 import SourceGraph from '../assets/projects/sourcegraph.svg';
-import Spotify from '../assets/projects/spotify.svg';
 import Stately from '../assets/projects/stately.svg';
 import Storybook from '../assets/projects/storybook.svg';
 import Svelte from '../assets/projects/svelte.svg';
@@ -29,7 +29,7 @@ import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
     align-content: center;
     align-items: center;
     justify-content: center;
-    gap: 3rem;
+    gap: 2.8rem;
     list-style: none;
     padding: 0;
   }
@@ -47,6 +47,10 @@ import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
     filter: brightness(0.6) grayscale(100%)
   }
 
+  [data-theme=light] svg {
+    opacity: 0.7;
+  }
+
   .contrast {
     opacity: 1;
     filter: contrast(1) grayscale(100%)
@@ -54,6 +58,11 @@ import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
 
   svg:hover,
   img:hover {
+    filter: none;
+  }
+
+  [data-theme=light] svg:hover,
+  [data-theme=light] img:hover {
     opacity: 1;
     filter: none;
   }
@@ -67,6 +76,7 @@ import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
     <a href="https://github.com/grafana"><Grafana /></a>
     <a href="https://github.com/prettier"><Prettier class="contrast" /></a>
     <a href="https://github.com/eslint"><ESLint class="contrast" /></a>
+    <a href="https://github.com/shopify"><Shopify /></a>
     <a href="https://github.com/getsentry"><Sentry /></a>
     <a href="https://github.com/sveltejs"><Svelte class="contrast" /></a>
     <a href="https://github.com/JoshuaKGoldberg/create-typescript-app"><img src={CreateTypeScriptApp.src}/></a>
