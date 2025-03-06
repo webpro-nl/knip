@@ -46,10 +46,10 @@ const main = () => {
 
   const cmd = [pm, 'add', getWorkspaceFlag(pm), '-D', 'knip', 'typescript', '@types/node'].filter(Boolean).join(' ');
 
-  execSync(cmd);
+  execSync(cmd, { stdio: "inherit" });
   console.info('✓ Install Knip');
 
-  execSync('npm pkg set scripts.knip=knip');
+  execSync('npm pkg set scripts.knip=knip', { stdio: "inherit" });
   console.info('✓ Add knip to package.json#scripts');
 
   console.info(`✓ Run "${pm} run knip" to run knip`);
