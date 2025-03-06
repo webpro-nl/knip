@@ -28,12 +28,6 @@ const getWorkspaceFlag = pm => {
   if (pm === 'pnpm') {
     return fileExists('pnpm-workspace.yaml') ? '-w' : undefined;
   }
-
-  if (pm === 'yarn') {
-    const packageJsonPath = path.join(process.cwd(), 'package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-    return packageJson.workspaces && packageJson.workspaces.length > 0 ? '-W' : undefined;
-  }
 };
 
 const main = () => {
