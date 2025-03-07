@@ -1,34 +1,38 @@
 import { createHash } from 'node:crypto';
 import type { Entries } from 'type-fest';
 import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, Report, ReporterOptions } from '../types/issues.js';
+import { toRelative } from '../util/path.js';
 import { getTitle } from './util.js';
 
-/**
- * Entry for GitLab Code Quality report. See: https://docs.gitlab.com/ci/testing/code_quality/#code-quality-report-format
- */
-interface CodeQualityEntry {
+type CodeClimateSeverity = 'info' | 'minor' | 'major' | 'critical' | 'blocker';
+
+interface CodeClimateEntry {
+  type: 'issue';
   check_name: string;
   description: string;
-  severity: 'info' | 'minor' | 'major' | 'critical' | 'blocker';
-  fingerprint: string;
+  categories: string[];
   location: {
     path: string;
-    lines: {
-      begin: number;
+    positions: {
+      begin: {
+        line: number;
+        column: number;
+      };
     };
   };
+  severity: CodeClimateSeverity;
+  fingerprint: string;
 }
 
 export default async ({ report, issues }: ReporterOptions) => {
-  const entries: CodeQualityEntry[] = [];
-  const hashes = new Set<string>();
+  const entries: CodeClimateEntry[] = [];
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (!isReportType) {
       continue;
     }
 
-    if (type === 'files' || type === '_files') {
+    if (type === 'files') {
       continue;
     }
 
@@ -38,30 +42,40 @@ export default async ({ report, issues }: ReporterOptions) => {
       if (type === 'duplicates' && issue.symbols) {
         entries.push(
           ...issue.symbols.map(symbol => ({
+            type: 'issue' as const,
             check_name: getTitle(type),
             description: getSymbolDescription({ symbol, parentSymbol: issue.parentSymbol }),
-            severity: convertSeverity(issue.severity),
-            fingerprint: createFingerprint(filePath, symbol.symbol, hashes),
+            categories: ['Duplication'],
             location: {
-              path: filePath,
-              lines: {
-                begin: symbol.line ?? 0,
+              path: toRelative(filePath),
+              positions: {
+                begin: {
+                  line: symbol.line ?? 0,
+                  column: symbol.col ?? 0,
+                },
               },
             },
+            severity: convertSeverity(issue.severity),
+            fingerprint: createFingerprint(filePath, symbol.symbol, symbol.pos),
           }))
         );
       } else {
         entries.push({
+          type: 'issue' as const,
           check_name: getTitle(type),
           description: getIssueDescription(issue),
-          severity: convertSeverity(issue.severity),
-          fingerprint: createFingerprint(filePath, issue.symbol, hashes),
+          categories: ['Bug Risk'],
           location: {
-            path: filePath,
-            lines: {
-              begin: issue.line ?? 0,
+            path: toRelative(filePath),
+            positions: {
+              begin: {
+                line: issue.line ?? 0,
+                column: issue.col ?? 0,
+              },
             },
           },
+          severity: convertSeverity(issue.severity),
+          fingerprint: createFingerprint(filePath, issue.symbol, issue.pos),
         });
       }
     }
@@ -79,18 +93,15 @@ function flatten(issues: IssueRecords): Issue[] {
   return Object.values(issues).flatMap(Object.values);
 }
 
-function convertSeverity(severity?: IssueSeverity): CodeQualityEntry['severity'] {
+function convertSeverity(severity?: IssueSeverity): CodeClimateSeverity {
   switch (severity) {
-    case undefined:
-      return 'info';
-
     case 'error':
       return 'major';
 
     case 'warn':
       return 'minor';
 
-    case 'off':
+    default:
       return 'info';
   }
 }
@@ -105,24 +116,12 @@ function getSymbolDescription({ symbol, parentSymbol }: { symbol: IssueSymbol; p
   return `${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
 }
 
-function createFingerprint(filePath: string, message: string, hashes: Set<string>): string {
+function createFingerprint(filePath: string, message: string, pos?: number): string {
   const md5 = createHash('md5');
 
   md5.update(filePath);
   md5.update(message);
+  md5.update(pos?.toString() ?? '');
 
-  let md5Copy = md5.copy();
-  let hash = md5Copy.digest('hex');
-
-  // To avoid hash collision, we keep generating new hashes until we get a unique one.
-  while (hashes.has(hash)) {
-    md5.update(hash);
-
-    md5Copy = md5.copy();
-    hash = md5Copy.digest('hex');
-  }
-
-  hashes.add(hash);
-
-  return hash;
+  return md5.digest('hex');
 }

@@ -11,7 +11,7 @@ Knip provides the following built-in reporters:
 - [`disclosure`][1]
 - [`json`][2]
 - [`markdown`][3]
-- [`gitlab`][5]
+- [`codeclimate`][5]
 - `symbol` (default)
 
 Example usage:
@@ -157,26 +157,30 @@ my-package     package.json
 
 </details>
 
-### GitLab
+### CodeClimate
 
-The built-in `gitlab` reporter is meant to be used with GitLab CI/CD. It reports
-in the GitLab Code Quality Report JSON format. Example usage:
+The built-in `codeclimate` reporter generates output in the Code Climate Report JSON format. Example usage:
 
 ```text
-$ knip --reporter gitlab
+$ knip --reporter codeclimate
 
 [
   {
+    "type":"issue",
     "check_name":"Unused exports",
     "description":"isUnused",
-    "severity":"major",
-    "fingerprint":"e9789995c1fe9f7d75eed6a0c0f89e84",
+    "categories":["Bug Risk"],
     "location": {
       "path":"path/to/file.ts",
-      "lines": {
-        "begin":6
+      "positions": {
+        "begin": {
+          "line":6,
+          "column":1
+        }
       }
     }
+    "severity":"major",
+    "fingerprint":"e9789995c1fe9f7d75eed6a0c0f89e84",
   }
 ]
 ```
@@ -282,4 +286,4 @@ knip --preprocessor ./preprocess.ts
 [2]: #json
 [3]: #markdown
 [4]: ../reference/issue-types.md
-[5]: #gitlab
+[5]: #codeclimate
