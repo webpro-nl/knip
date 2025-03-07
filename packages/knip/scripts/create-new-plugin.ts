@@ -28,7 +28,7 @@ const newPluginDir = path.join(pluginsDir, name);
 const newPluginFile = path.join(newPluginDir, 'index.ts');
 const schemaFilePath = path.join(cwd, 'schema.json');
 const pluginTestsDir = path.join(cwd, 'test/plugins');
-const validatorFilePath = path.join(cwd, 'src/ConfigurationValidator.ts');
+const pluginSchemaPath = path.join(cwd, 'src/schema/plugins.ts');
 const pluginTestTemplateFilePath = path.join(pluginTestsDir, '_template.test.ts');
 const pluginTestFilePath = path.join(pluginTestsDir, `${name}.test.ts`);
 const pluginTestFixturesDir = path.join(cwd, 'fixtures/plugins');
@@ -46,10 +46,10 @@ await fs.cp(templateDir, newPluginDir, {
 });
 
 // Add plugin to Zod validator
-const validatorContent = String(await fs.readFile(validatorFilePath));
+const validatorContent = String(await fs.readFile(pluginSchemaPath));
 const pluginsPrefix = 'const pluginsSchema = z.object({';
 const pluginsReplacement = `${pluginsPrefix}\n'${name}': pluginSchema,`;
-await fs.writeFile(validatorFilePath, validatorContent.replace(pluginsPrefix, pluginsReplacement));
+await fs.writeFile(pluginSchemaPath, validatorContent.replace(pluginsPrefix, pluginsReplacement));
 
 // Copy fixtures
 await fs.cp(pluginTestFixtureTemplateDir, pluginTestFixturePluginDir, {
