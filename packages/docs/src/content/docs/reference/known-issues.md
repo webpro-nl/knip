@@ -2,12 +2,7 @@
 title: Known Issues
 ---
 
-This page contains a list of known issues you might run into when using Knip:
-
-- [Exceptions from config files][1]
-- [False positives with external libs][2]
-- [DefinitelyTyped packages in dependencies][3]
-- [Extensionless imports][4]
+This page contains a list of known issues you might run into when using Knip.
 
 ## Exceptions from config files
 
@@ -18,7 +13,7 @@ environment variables set.
 
 If it isn't clear what's throwing the exception, try another run with `--debug`
 to locate the cause of the issue with more details. Sometimes the issue is a
-missing environment variable. As a last resort, the [plugin can be disabled][5].
+missing environment variable. As a last resort, the [plugin can be disabled][1].
 
 ## Path aliases in config files
 
@@ -41,8 +36,8 @@ the target values are not arrays).
 Potential workarounds:
 
 - Rewrite the import in the configuration file to a relative import.
-- Use Bun with [knip-bun][6].
-- [Disable the plugin][5] (not recommended, try the other options first).
+- Use Bun with [knip-bun][2].
+- [Disable the plugin][1] (not recommended, try the other options first).
 
 ## Nx Daemon
 
@@ -52,16 +47,12 @@ In Nx projects you might encounter this error:
 NX   Daemon process terminated and closed the connection
 ```
 
-The solution is to [disable the Nx Daemon][7]:
+The solution is to [disable the Nx Daemon][3]:
 
 ```sh
 NX_DAEMON=false knip
 ```
 
-[1]: #exceptions-from-config-files
-[2]: #false-positives-with-external-libs
-[3]: #definitely-typed-packages-in-dependencies
-[4]: #extensionless-imports
-[5]: ./configuration.md#plugins
-[6]: ./cli.md#knip-bun
-[7]: https://nx.dev/concepts/nx-daemon#turning-it-off
+[1]: ./configuration.md#plugins
+[2]: ./cli.md#knip-bun
+[3]: https://nx.dev/concepts/nx-daemon#turning-it-off

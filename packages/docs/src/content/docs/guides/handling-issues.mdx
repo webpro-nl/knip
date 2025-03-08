@@ -320,13 +320,28 @@ This technically works, as `commitlint` is a transitive dependency of
 
 ## Unresolved imports
 
-Knip may be unable to resolve an import specifier or dependency reference.
+Knip may ignore or be unable to resolve an import specifier or dependency
+references. The most common causes for unresolved imports:
 
-The most common causes for unresolved imports:
-
+- [Template strings][29]
 - [Extensionless imports][24]
-- [Unrecognized path aliases][29]
-- [External aliased imports][30]
+- [Unrecognized path aliases][30]
+- [External aliased imports][31]
+
+### Template strings
+
+Using template strings in dynamic imports might be ignored or not handled
+properly by Knip, resulting in false positives. Examples of dynamic import
+template strings:
+
+```ts
+import(`./${value}.ts`);
+import(`@org/name/dist/${value}.js`);
+```
+
+**Solution**: for internal source files, add the file(s) to the `entry`
+patterns. For external dependencies, add the dependency to the
+`ignoreDependencies` list.
 
 ### Extensionless imports
 
@@ -348,11 +363,11 @@ similar to how standard ES Modules specifies file extensions are necessary.
 
 ### Unrecognized path aliases
 
-Knip considers TSconfig path aliases and [paths configured in knip.json][31],
+Knip considers TSconfig path aliases and [paths configured in knip.json][32],
 but not those in e.g. Webpack or Vite configurations.
 
-**Solution**: configure [paths][31] or try relative imports. Otherwise, use
-[`ignoreUnresolved`][32] as a last resort.
+**Solution**: configure [paths][32] or try relative imports. Otherwise, use
+[`ignoreUnresolved`][33] as a last resort.
 
 ### External aliased imports
 
@@ -373,7 +388,7 @@ option][10] to tell Knip where to find the icon types:
 Where `[framework]` is the name of the framework you're using (see [available
 types][11]).
 
-**Solution**: try [--include-libs][33] or configure [paths][31].
+**Solution**: try [--include-libs][34] or configure [paths][32].
 
 ## Unused exports
 
@@ -381,8 +396,8 @@ By default, Knip does not report unused exports of `entry` files.
 
 The most common causes for unused exports include:
 
-- [Namespace enumerations][34]
-- [External libraries][33]
+- [Namespace enumerations][35]
+- [External libraries][34]
 
 Use the `--exports` flag to [filter][13] and focus only on issues related to
 exports:
@@ -391,7 +406,7 @@ exports:
 knip --exports
 ```
 
-Use [includeEntryExports][35] to report unused exports of entry files as well.
+Use [includeEntryExports][36] to report unused exports of entry files as well.
 This can be set per workspace.
 
 ### Namespace enumerations
@@ -403,7 +418,7 @@ are then **not** reported.
 **Solution**: if all exports on imported namespaces should be considered
 individually, include the `nsExports` issue type to disable the heuristic.
 
-See [namepace imports][36] to see all related patterns.
+See [namepace imports][37] to see all related patterns.
 
 ### External libraries
 
@@ -443,22 +458,22 @@ Knip does not include external type definitions by default so it won't see the
 export being referenced.
 
 **Solution**: include the type definitions of external libraries with the
-[--include-libs][37] flag:
+[--include-libs][38] flag:
 
 ```shell
 knip --include-libs
 ```
 
 This comes at a performance and memory penalty, but should give better results
-if you need it. This flag is implied when [classMembers][38] are included (that
+if you need it. This flag is implied when [classMembers][39] are included (that
 feature comes with roughly the same performance penalty).
 
 ### Exclude exports from the report
 
 To exclude false positives from the report, there are a few options:
 
-- [Ignore exports used in file][39] for exports used internally.
-- Individual exports can be [tagged using JSDoc syntax][40].
+- [Ignore exports used in file][40] for exports used internally.
+- Individual exports can be [tagged using JSDoc syntax][41].
 - Have the export in an entry file:
   - Add the file to the `entry` file patterns array in the configuration.
   - Move the export(s) to an entry file.
@@ -468,7 +483,7 @@ To exclude false positives from the report, there are a few options:
 ### Missing unused exports?
 
 Did you expect certain exports in the report, but are they missing? They might
-be exported from an entry file. In that case, use [--include-entry-exports][35]
+be exported from an entry file. In that case, use [--include-entry-exports][36]
 to make Knip also report unused exports in entry files.
 
 The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
@@ -487,10 +502,10 @@ knip --include classMembers
 This option is also available in the Knip configuration file. Note that this
 feature comes at a cost: linting will take more time and more memory.
 
-Individual class members can be [tagged using JSDoc syntax][40].
+Individual class members can be [tagged using JSDoc syntax][41].
 
 Classes exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][35] to make Knip also report members of unused exports
+[--include-entry-exports][36] to make Knip also report members of unused exports
 in entry files.
 
 ### Enum members
@@ -502,18 +517,18 @@ Reporting such members can be disabled:
 knip --exclude enumMembers
 ```
 
-Individual enum members can be [tagged using JSDoc syntax][40].
+Individual enum members can be [tagged using JSDoc syntax][41].
 
 Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][35] to make Knip also report members of unused exports
+[--include-entry-exports][36] to make Knip also report members of unused exports
 in entry files.
 
 ## Feedback or false positives?
 
 If you believe Knip incorrectly reports something as unused (i.e. there's a
-false positive), feel free to create a [minimal reproduction][41] and open an
+false positive), feel free to create a [minimal reproduction][42] and open an
 issue on GitHub. It'll make Knip better for everyone! Join the [Discord
-channel][42] to discuss any feedback or questions you may have.
+channel][43] to discuss any feedback or questions you may have.
 
 [1]: #unused-files
 [2]: #unused-dependencies
@@ -544,17 +559,18 @@ channel][42] to discuss any feedback or questions you may have.
 [27]:
   https://github.com/webpro-nl/knip/blob/b70958a58ea255ee7a7831e404786da807ca93d7/packages/knip/src/constants.ts#L37-L139
 [28]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[29]: #unrecognized-path-aliases
-[30]: #external-aliased-imports
-[31]: ../reference/configuration.md#paths
-[32]: ../reference/configuration.md#ignoreunresolved
-[33]: #external-libraries
-[34]: #namespace-enumerations
-[35]: ../reference/configuration.md#includeentryexports
-[36]: ../guides/namespace-imports.md
-[37]: ../reference/cli#--include-libs
-[38]: #class-members
-[39]: ../reference/configuration.md#ignoreexportsusedinfile
-[40]: ../reference/jsdoc-tsdoc-tags.md
-[41]: ../guides/issue-reproduction
-[42]: https://discord.gg/r5uXTtbTpc
+[29]: #template-strings
+[30]: #unrecognized-path-aliases
+[31]: #external-aliased-imports
+[32]: ../reference/configuration.md#paths
+[33]: ../reference/configuration.md#ignoreunresolved
+[34]: #external-libraries
+[35]: #namespace-enumerations
+[36]: ../reference/configuration.md#includeentryexports
+[37]: ../guides/namespace-imports.md
+[38]: ../reference/cli#--include-libs
+[39]: #class-members
+[40]: ../reference/configuration.md#ignoreexportsusedinfile
+[41]: ../reference/jsdoc-tsdoc-tags.md
+[42]: ../guides/issue-reproduction
+[43]: https://discord.gg/r5uXTtbTpc
