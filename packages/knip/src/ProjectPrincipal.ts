@@ -141,8 +141,8 @@ export class ProjectPrincipal {
   }
 
   /**
-   * `ts.createProgram()` resolves files starting from the provided entry/root files. Calling `program.getTypeChecker()`
-   * binds files and symbols (including symbols and maps like `sourceFile.resolvedModules` and `sourceFile.symbols`)
+   * `ts.createProgram()` resolves files starting from the provided entry/root
+   * files. Calling `program.getTypeChecker()` binds files and symbols
    */
   private createProgram() {
     this.backend.program = tsCreateProgram(

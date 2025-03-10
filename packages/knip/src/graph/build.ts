@@ -183,11 +183,11 @@ export async function build({
     const productionEntryFilePatterns = new Set<string>();
 
     for (const input of inputs) {
-      const s = input.specifier;
+      const specifier = input.specifier;
       if (isEntry(input)) {
-        entryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
+        entryFilePatterns.add(isAbsolute(specifier) ? relative(dir, specifier) : specifier);
       } else if (isProductionEntry(input)) {
-        productionEntryFilePatterns.add(isAbsolute(s) ? relative(dir, s) : s);
+        productionEntryFilePatterns.add(isAbsolute(specifier) ? relative(dir, specifier) : specifier);
       } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = getReferencedInternalFilePath(input, ws);
@@ -322,18 +322,12 @@ export async function build({
 
       graph.set(filePath, node);
 
-      // Handle scripts here since they might lead to more entry files
+      // A bit out of place, but good spot to add source files referenced from scripts recursively
       if (scripts && scripts.size > 0) {
         const dependencies = deputy.getDependencies(workspace.name);
         const manifestScriptNames = new Set(Object.keys(chief.getManifestForWorkspace(workspace.name)?.scripts ?? {}));
         const dir = dirname(filePath);
-        const options = {
-          cwd: dir,
-          rootCwd: cwd,
-          containingFilePath: filePath,
-          dependencies,
-          manifestScriptNames,
-        };
+        const options = { cwd: dir, rootCwd: cwd, containingFilePath: filePath, dependencies, manifestScriptNames };
         const inputs = _getInputsFromScripts(scripts, options);
         for (const input of inputs) {
           input.containingFilePath ??= filePath;

@@ -28,16 +28,10 @@ type PragmaMap = {
 };
 
 export interface BoundSourceFile extends ts.SourceFile {
-  // Used in `maybeAddAliasedExport`
   symbol?: SymbolWithExports;
 
-  // Used in `addImport`, but only available in TypeScript <5.3.0
-  resolvedModules?: ts.ModeAwareCache<ts.ResolvedModuleWithFailedLookupLocations>;
-
-  // Used in `maybeAddNamespaceAccessAsImport` (perf only)
   locals?: SymbolTable;
 
-  // Used in `exportDeclaration`
   getNamedDeclarations?(): Map<string, readonly ts.Declaration[]>;
 
   scriptKind?: ts.ScriptKind;
