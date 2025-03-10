@@ -1,3 +1,4 @@
+import codeclimate from './codeclimate.js';
 import codeowners from './codeowners.js';
 import compact from './compact.js';
 import disclosure from './disclosure.js';
@@ -10,6 +11,7 @@ export default {
   compact,
   codeowners,
   disclosure,
+  codeclimate,
   json,
   markdown,
 };
