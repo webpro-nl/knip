@@ -61,6 +61,8 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const dir = parsed['top-level'] ? rootCwd : parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const [command, binary] = parsed._;
 
+  if (!command && !binary) return [];
+
   if (command === 'run') {
     if (manifestScriptNames.has(binary)) return [];
     const bin = toBinary(binary, { optional: true });

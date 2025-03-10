@@ -196,6 +196,7 @@ test('getInputsFromScripts (yarn)', () => {
   t('yarn run program', [], pkgScripts);
   t('yarn program', [], pkgScripts);
   t('yarn node script.js', [toBinary('node'), toDeferResolveEntry('script.js')]);
+  t('yarn --mode skip-build', []);
 });
 
 test('getInputsFromScripts (yarn dlx)', () => {
