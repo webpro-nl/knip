@@ -295,25 +295,30 @@ dependencies, the [`--include-libs ` flag][4] will trigger the same.
 
 ### Why can't I use path aliases to reference other workspaces?
 
-Some projects use `compilerOptions.paths` to alias paths to other workspaces in
+Projects can use `compilerOptions.paths` to alias paths in other workspaces in
 the same monorepo. Knip doesn't understand those paths might represent internal
-workspaces and might report false positives.
+workspaces and might report false positives. How we ended up here is a bit
+complicated, but a major reason is that Knip does it's job based on the
+workspace graph, while [workspaces are different from TypeScript programs][11]
+and [the workspace graph doesn't match TypeScript project structure][12].
 
-Instead, it's recommended to list such workspaces/dependencies in
-`package.json`, and import them as such. Other tooling has no issues with this
-standard approach either.
+The recommendation and best practice is to list such workspaces/dependencies in
+`package.json`, and import them as such. Other tooling should not have any
+issues with this standard approach either.
+
+Also see the example in [TypeScript path aliases in monorepos][13].
 
 ### What's up with that configurable `tsconfig.json` location?
 
 There's a difference between `--tsConfig [file]` as a CLI argument and the
 `typescript.config` option in Knip configuration.
 
-The [`--tsConfig [file]` option][11] is used to provide an alternative location
+The [`--tsConfig [file]` option][14] is used to provide an alternative location
 for the default root `tsconfig.json` file. Relevant `compilerOptions` include
 `paths` and `moduleResolution`. This setting is only available at the root
 level.
 
-On the other hand, the [`config` option of the plugin][12] can be set per
+On the other hand, the [`config` option of the plugin][15] can be set per
 workspace. The TypeScript plugin extracts referenced external dependencies such
 as those in `extends`, `compilerOptions.types` and JSX settings:
 
@@ -337,7 +342,7 @@ From this example, Knip can determine whether the `@tsconfig/node20` and
   for `tsconfig.json` can be set per workspace.
 - In case path aliases from `compilerOptions.paths` aren't picked up by Knip,
   either use `--tsConfig [file]` to target a different `tsconfig.json`, or
-  manually add [paths][13] to the Knip configuration. The latter can be done per
+  manually add [paths][16] to the Knip configuration. The latter can be done per
   workspace.
 
 ## Compilers
@@ -360,7 +365,7 @@ other file types.
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
 statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][14].
+project. Also see the answer to the previous question and [Compilers][17].
 
 ## Miscellaneous
 
@@ -380,7 +385,7 @@ Which mode should've been the default? They both have their merits:
   tooling, including most issues found in production mode. This mode has the
   most impact on DX, for the same reason.
 
-Also see [production mode][15].
+Also see [production mode][18].
 
 ### Why doesn't Knip have...?
 
@@ -404,7 +409,7 @@ Examples of features that have been requested include:
 
 These are all interesting ideas, but most increase the API surface area, and all
 require more development efforts and maintenance. Time is limited and
-[sponsorships][16] currently don't cover - this can change though!
+[sponsorships][19] currently don't cover - this can change though!
 
 [1]: ../features/auto-fix.mdx
 [2]: ../explanations/why-use-knip.md#less-is-more
@@ -416,9 +421,12 @@ require more development efforts and maintenance. Time is limited and
 [8]: ../guides/handling-issues.mdx#types-packages
 [9]: https://www.npmjs.com/package/enhanced-resolve
 [10]: ../guides/performance.md#workspace-sharing
-[11]: ../reference/cli.md#--tsconfig-file
-[12]: ../explanations/plugins.md#configuration-files
-[13]: ../reference/configuration.md#paths
-[14]: ../features/compilers.md
-[15]: ../features/production-mode.md
-[16]: /sponsors
+[11]: #whats-the-difference-between-workspaces-projects-and-programs
+[12]: #why-doesnt-knip-match-my-typescript-project-structure
+[13]: ../guides/handling-issues.mdx#typescript-path-aliases-in-monorepos
+[14]: ../reference/cli.md#--tsconfig-file
+[15]: ../explanations/plugins.md#configuration-files
+[16]: ../reference/configuration.md#paths
+[17]: ../features/compilers.md
+[18]: ../features/production-mode.md
+[19]: /sponsors
