@@ -143,6 +143,45 @@ See [Rules & Filters][7].
 
 See [Rules & Filters][7].
 
+### `tags`
+
+Exports can be tagged with known or arbitrary JSDoc/TSDoc tags:
+
+```ts
+/**
+ * Description of my exported value
+ *
+ * @type number
+ * @internal Important matters
+ * @lintignore
+ */
+export const myExport = 1;
+```
+
+And then include (`+`) or exclude (`-`) these tagged exports from the report
+like so:
+
+```json
+{
+  "tags": ["-lintignore"]
+}
+```
+
+This way, you can either focus on or ignore specific tagged exports with tags
+you define yourself. This also works for individual class or enum members.
+
+The default directive is `+` (include) and the `@` prefix is ignored, so the
+notation below is valid and will report only exports tagged `@lintignore` or
+`@internal`:
+
+```json
+{
+  "tags": ["@lintignore", "@internal"]
+}
+```
+
+Also see [JSDoc & TSDoc Tags](./jsdoc-tsdoc-tags.md).
+
 ## Ignore Issues
 
 ### `ignore`

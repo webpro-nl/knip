@@ -102,6 +102,11 @@
       "title": "Include entry files when reporting unused exports",
       "type": "boolean"
     },
+    "tags": {
+      "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
+      "examples": ["+custom", "-lintignore", "-@internal"],
+      "$ref": "#/definitions/list"
+    },
     "workspaces": {
       "title": "Configuration for workspaces",
       "type": "object",

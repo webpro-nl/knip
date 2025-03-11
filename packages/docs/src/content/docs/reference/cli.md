@@ -287,8 +287,8 @@ Exports can be tagged with known or arbitrary JSDoc/TSDoc tags:
  * Description of my exported value
  *
  * @type number
- * @internal
- * @custom Unimportant matters
+ * @internal Important matters
+ * @lintignore
  */
 export const myExport = 1;
 ```
@@ -297,19 +297,19 @@ And then include (`+`) or exclude (`-`) these tagged exports from the report
 like so:
 
 ```shell
+knip --tags=-lintignore,-internal
 knip --tags=+custom
-knip --tags=-custom,-internal
 ```
 
 This way, you can either focus on or ignore specific tagged exports with tags
 you define yourself. This also works for individual class or enum members.
 
 The default directive is `+` (include) and the `@` prefix is ignored, so the
-notation below is valid and will report only exports tagged `@custom` or
+notation below is valid and will report only exports tagged `@lintignore` or
 `@internal`:
 
 ```shell
-knip --tags @custom --tags @internal
+knip --tags @lintignore --tags @internal
 ```
 
 ## Reporters & Preprocessors

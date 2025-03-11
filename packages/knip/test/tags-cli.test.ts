@@ -5,7 +5,7 @@ import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/tags');
+const cwd = resolve('fixtures/tags-cli');
 
 test('Include or exclude tagged exports (default)', async () => {
   const { issues, counters } = await main({

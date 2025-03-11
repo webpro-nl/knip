@@ -66,6 +66,7 @@ export interface Configuration {
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;
+  tags: string[];
 }
 
 type NormalizedGlob = string[];

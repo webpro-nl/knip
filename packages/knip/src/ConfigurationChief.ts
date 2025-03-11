@@ -28,6 +28,7 @@ import { getKeysByValue } from './util/object.js';
 import { join, relative } from './util/path.js';
 import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
+import { splitTags } from './util/tag.js';
 import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
 
@@ -57,6 +58,7 @@ const defaultConfig: Configuration = {
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
   rootPluginConfigs: {},
+  tags: [],
 };
 
 type ConfigurationManagerOptions = {
@@ -215,6 +217,7 @@ export class ConfigurationChief {
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})),
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
       rootPluginConfigs,
+      tags: rawConfig.tags ?? [],
     };
   }
 
@@ -470,5 +473,9 @@ export class ConfigurationChief {
         const dir = join(this.cwd, ignoredWorkspaceName);
         return !isDirectory(dir) || isFile(join(dir, 'package.json'));
       });
+  }
+
+  public getTags() {
+    return splitTags(this.config.tags);
   }
 }

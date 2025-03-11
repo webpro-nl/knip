@@ -75,6 +75,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   });
   const rules = chief.getRules();
   const filters = chief.getFilters();
+  const finalTags = tags[0].length > 0 || tags[1].length > 0 ? tags : chief.getTags();
   const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes, isRemoveFiles });
 
   debugLogObject('*', 'Included issue types', report);
@@ -109,7 +110,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isWatch,
     report,
     streamer,
-    tags,
+    tags: finalTags,
     tsConfigFile,
     workspaces,
   });
@@ -129,7 +130,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isProduction,
     report,
     streamer,
-    tags,
+    tags: finalTags,
     unreferencedFiles,
     workspace,
   });

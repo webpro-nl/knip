@@ -20,7 +20,7 @@ report an issue with Knip for false positives).
 JSDoc comments always start with `/**` (not `//`) and can be single or
 multi-line.
 
-## Tags (CLI)
+## Tags
 
 Use arbitrary [tags][1] to exclude or include tagged exports from the report.
 Example:
@@ -39,6 +39,8 @@ like so:
 ```shell
 knip --tags=-lintignore,-internal
 ```
+
+Tags can also be [configured in `knip.json`](./configuration.md#tags).
 
 ## `@public`
 
