@@ -21,7 +21,7 @@ export default ({ report, issues, isShowProgress }: ReporterOptions) => {
           ? Object.values(issues[reportType]).flatMap(Object.values)
           : Object.values(issues[reportType] as IssueRecords).map(issues => {
               const items = Object.values(issues);
-              return { ...items[0], symbols: items.map(issue => issue.symbol) };
+              return { ...items[0], symbols: items };
             });
 
       if (issuesForType.length > 0) {

@@ -68,7 +68,7 @@ export class IssueFixer {
   private async removeUnusedFiles(issues: Issues) {
     if (!this.isFixFiles) return;
 
-    for (const issue of issues._files) {
+    for (const issue of Object.values(issues._files).flatMap(Object.values)) {
       await rm(issue.filePath);
       issue.isFixed = true;
     }

@@ -4,7 +4,7 @@ import type { Counters, Issue, IssueType, Issues, Rules } from '../types/issues.
 export const initIssues = (): Issues => ({
   ...(Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, {}])) as Record<IssueType, never>),
   files: new Set<string>(),
-  _files: new Set<Issue>(),
+  _files: {} as Record<string, Record<string, Issue>>,
 });
 
 export const initCounters = (): Counters => ({

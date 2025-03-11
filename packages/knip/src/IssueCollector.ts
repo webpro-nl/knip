@@ -62,8 +62,9 @@ export class IssueCollector {
       if (this.isMatch(filePath)) continue;
 
       this.issues.files.add(filePath);
+      const symbol = relative(filePath);
       // @ts-expect-error TODO Fix up in next major
-      this.issues._files.add({ type: 'files', filePath, symbol: relative(filePath), severity: this.rules.files });
+      this.issues._files[symbol] = [{ type: 'files', filePath, symbol, severity: this.rules.files }];
 
       this.counters.files++;
       this.counters.processed++;
