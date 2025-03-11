@@ -11,6 +11,14 @@ const exec = execFactory(cwd);
 test('knip --reporter codeclimate (dependencies)', () => {
   const json = [
     {
+      categories: ['Bug Risk'],
+      check_name: 'Unused files',
+      description: 'unused-module.ts',
+      location: { path: 'unused-module.ts', positions: { begin: { column: 0, line: 0 } } },
+      severity: 'major',
+      type: 'issue',
+    },
+    {
       type: 'issue',
       check_name: 'Unused dependencies',
       description: '@tootallnate/once',

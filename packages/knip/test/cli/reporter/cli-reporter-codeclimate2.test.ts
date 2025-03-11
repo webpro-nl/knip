@@ -11,6 +11,14 @@ const exec = execFactory(cwd);
 test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
   const json = [
     {
+      categories: ['Bug Risk'],
+      check_name: 'Unused files',
+      description: 'src/unused.ts',
+      location: { path: 'src/unused.ts', positions: { begin: { column: 0, line: 0 } } },
+      severity: 'major',
+      type: 'issue',
+    },
+    {
       type: 'issue',
       check_name: 'Unlisted dependencies',
       description: 'unresolved',

@@ -32,18 +32,16 @@ export default async ({ report, issues }: ReporterOptions) => {
       continue;
     }
 
-    if (type === 'files') {
-      continue;
-    }
+    const fixedType = type === 'files' ? '_files' : type;
 
-    for (const issue of flatten(issues[type] as IssueRecords)) {
+    for (const issue of flatten(issues[fixedType] as IssueRecords)) {
       const { filePath } = issue;
 
-      if (type === 'duplicates' && issue.symbols) {
+      if (fixedType === 'duplicates' && issue.symbols) {
         entries.push(
           ...issue.symbols.map(symbol => ({
             type: 'issue' as const,
-            check_name: getTitle(type),
+            check_name: getTitle(fixedType),
             description: getSymbolDescription({ symbol, parentSymbol: issue.parentSymbol }),
             categories: ['Duplication'],
             location: {
@@ -62,7 +60,7 @@ export default async ({ report, issues }: ReporterOptions) => {
       } else {
         entries.push({
           type: 'issue' as const,
-          check_name: getTitle(type),
+          check_name: getTitle(fixedType),
           description: getIssueDescription(issue),
           categories: ['Bug Risk'],
           location: {
