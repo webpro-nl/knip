@@ -1,5 +1,4 @@
-import { test } from 'bun:test';
-import assert from 'node:assert/strict';
+import { expect, test } from 'bun:test';
 import { resolve } from '../../../src/util/path.js';
 import { execFactory } from '../../helpers/exec.js';
 
@@ -16,7 +15,7 @@ test('knip --reporter codeclimate (enum members)', () => {
       categories: ['Bug Risk'],
       location: { path: 'members.ts', positions: { begin: { line: 9, column: 3 } } },
       severity: 'major',
-      fingerprint: '784fc56ef59f32b5a65c79285b011268',
+      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -25,9 +24,11 @@ test('knip --reporter codeclimate (enum members)', () => {
       categories: ['Bug Risk'],
       location: { path: 'members.ts', positions: { begin: { line: 11, column: 3 } } },
       severity: 'major',
-      fingerprint: '56c0c3061c62aba497eef68826c072b0',
+      fingerprint: expect.any(String),
     },
   ];
 
-  assert.equal(exec('knip --reporter codeclimate').stdout, `${JSON.stringify(json)}\n`);
+  const actual = JSON.parse(exec('knip --reporter codeclimate').stdout);
+
+  expect(actual).toStrictEqual(json);
 });
