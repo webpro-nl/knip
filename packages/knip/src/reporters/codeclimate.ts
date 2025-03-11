@@ -11,18 +11,29 @@ interface CodeClimateEntry {
   check_name: string;
   description: string;
   categories: string[];
-  location: {
-    path: string;
-    positions: {
-      begin: {
-        line: number;
-        column: number;
-      };
-    };
-  };
+  location: Location;
   severity: CodeClimateSeverity;
   fingerprint: string;
 }
+
+type Location = {
+  path: string;
+} & (
+  | {
+      positions: {
+        begin: {
+          line: number;
+          column: number;
+        };
+      };
+    }
+  | {
+      lines: {
+        begin: number;
+        end: number;
+      };
+    }
+);
 
 export default async ({ report, issues }: ReporterOptions) => {
   const entries: CodeClimateEntry[] = [];
@@ -44,15 +55,7 @@ export default async ({ report, issues }: ReporterOptions) => {
             check_name: getTitle(fixedType),
             description: getSymbolDescription({ symbol, parentSymbol: issue.parentSymbol }),
             categories: ['Duplication'],
-            location: {
-              path: toRelative(filePath),
-              positions: {
-                begin: {
-                  line: symbol.line ?? 0,
-                  column: symbol.col ?? 0,
-                },
-              },
-            },
+            location: createLocation(filePath, symbol.line, symbol.col),
             severity: convertSeverity(issue.severity),
             fingerprint: createFingerprint(filePath, symbol.symbol, symbol.pos),
           }))
@@ -63,15 +66,7 @@ export default async ({ report, issues }: ReporterOptions) => {
           check_name: getTitle(fixedType),
           description: getIssueDescription(issue),
           categories: ['Bug Risk'],
-          location: {
-            path: toRelative(filePath),
-            positions: {
-              begin: {
-                line: issue.line ?? 0,
-                column: issue.col ?? 0,
-              },
-            },
-          },
+          location: createLocation(filePath, issue.line, issue.col),
           severity: convertSeverity(issue.severity),
           fingerprint: createFingerprint(filePath, issue.symbol, issue.pos),
         });
@@ -112,6 +107,28 @@ function getIssueDescription({ symbol, symbols, parentSymbol }: Issue) {
 
 function getSymbolDescription({ symbol, parentSymbol }: { symbol: IssueSymbol; parentSymbol?: string }) {
   return `${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+}
+
+function createLocation(filePath: string, line?: number, col?: number): Location {
+  if (col !== undefined) {
+    return {
+      path: toRelative(filePath),
+      positions: {
+        begin: {
+          line: line ?? 0,
+          column: col,
+        },
+      },
+    };
+  }
+
+  return {
+    path: toRelative(filePath),
+    lines: {
+      begin: line ?? 0,
+      end: line ?? 0,
+    },
+  };
 }
 
 function createFingerprint(filePath: string, message: string, pos?: number): string {

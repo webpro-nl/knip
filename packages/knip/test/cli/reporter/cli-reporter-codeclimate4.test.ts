@@ -14,7 +14,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
       categories: ['Bug Risk'],
       check_name: 'Unused files',
       description: 'unused-module.ts',
-      location: { path: 'unused-module.ts', positions: { begin: { column: 0, line: 0 } } },
+      location: { path: 'unused-module.ts', lines: { begin: 0, end: 0 } },
       severity: 'major',
       type: 'issue',
     },
@@ -47,7 +47,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
       check_name: 'Unlisted binaries',
       description: 'jest',
       categories: ['Bug Risk'],
-      location: { path: 'package.json', positions: { begin: { line: 0, column: 0 } } },
+      location: { path: 'package.json', lines: { begin: 0, end: 0 } },
       severity: 'major',
     },
     {
@@ -55,7 +55,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
       check_name: 'Unlisted binaries',
       description: 'start-server',
       categories: ['Bug Risk'],
-      location: { path: 'package.json', positions: { begin: { line: 0, column: 0 } } },
+      location: { path: 'package.json', lines: { begin: 0, end: 0 } },
       severity: 'major',
     },
   ];

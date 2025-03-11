@@ -14,7 +14,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       categories: ['Bug Risk'],
       check_name: 'Unused files',
       description: 'src/unused.ts',
-      location: { path: 'src/unused.ts', positions: { begin: { column: 0, line: 0 } } },
+      location: { path: 'src/unused.ts', lines: { begin: 0, end: 0 } },
       severity: 'major',
       type: 'issue',
     },
@@ -23,7 +23,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unlisted dependencies',
       description: 'unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', positions: { begin: { line: 0, column: 0 } } },
+      location: { path: 'src/index.ts', lines: { begin: 0, end: 0 } },
       severity: 'major',
     },
     {
@@ -31,7 +31,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unlisted dependencies',
       description: '@org/unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', positions: { begin: { line: 0, column: 0 } } },
+      location: { path: 'src/index.ts', lines: { begin: 0, end: 0 } },
       severity: 'major',
     },
     {
