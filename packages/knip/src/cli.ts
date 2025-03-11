@@ -31,7 +31,7 @@ const {
   'include-libs': isIncludeLibs = false,
   'isolate-workspaces': isIsolateWorkspaces = false,
   'max-issues': maxIssues = '0',
-  'no-config-hints': isHideConfigHints = false,
+  'no-config-hints': isDisableConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
   'no-progress': isNoProgress = isDebug || isTrace,
@@ -42,6 +42,7 @@ const {
   'reporter-options': reporterOptions = '',
   strict: isStrict = false,
   tags = [],
+  'treat-config-hints-as-errors': isTreatConfigHintsAsErrors = false,
   tsConfig,
   version: isVersion,
   watch: isWatch = false,
@@ -77,7 +78,7 @@ const run = async () => {
       isExportsShorthand,
       isFilesShorthand,
       isFix: isFix || fixTypes.length > 0,
-      isHideConfigHints,
+      isDisableConfigHints,
       isIncludeEntryExports,
       isIncludeLibs,
       isIsolateWorkspaces,
@@ -100,7 +101,8 @@ const run = async () => {
       counters,
       tagHints,
       configurationHints,
-      noConfigHints: isHideConfigHints,
+      isDisableConfigHints,
+      isTreatConfigHintsAsErrors,
       cwd,
       isProduction,
       isShowProgress,
@@ -133,7 +135,10 @@ const run = async () => {
       logWarning('WARNING', 'Class members are not tracked when using the --isolate-workspaces flag');
     }
 
-    if (!noExitCode && totalErrorCount > Number(maxIssues)) {
+    if (
+      (!noExitCode && totalErrorCount > Number(maxIssues)) ||
+      (isTreatConfigHintsAsErrors && configurationHints.size > 0)
+    ) {
       process.exit(1);
     }
   } catch (error: unknown) {

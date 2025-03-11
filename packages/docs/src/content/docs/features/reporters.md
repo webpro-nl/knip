@@ -176,8 +176,10 @@ type Reporter = async (options: ReporterOptions): void;
 type ReporterOptions = {
   report: Report;
   issues: Issues;
+  counters: Counters;
   configurationHints: ConfigurationHints;
-  noConfigHints: boolean;
+  isDisableConfigHints: boolean;
+  isTreatConfigHintsAsErrors: boolean;
   cwd: string;
   isProduction: boolean;
   isShowProgress: boolean;

@@ -23,10 +23,6 @@ Shortcut: `-n`
 Don't show dynamic progress updates. Progress is automatically disabled in CI
 environments.
 
-### `--no-config-hints`
-
-Suppress configuration hints.
-
 ### `knip-bun`
 
 Run Knip using the Bun runtime (instead of Node.js + jiti).
@@ -384,6 +380,14 @@ Always exit with code zero (`0`), even when there are lint issues.
 ### `--max-issues`
 
 Maximum number of issues before non-zero exit code. Default: `0`
+
+### `--no-config-hints`
+
+Suppress configuration hints.
+
+### `--treat-config-hints-as-errors`
+
+Exit with non-zero code (`1`) if there are any configuration hints.
 
 [1]: https://bun.sh
 [2]: ../reference/known-issues.md

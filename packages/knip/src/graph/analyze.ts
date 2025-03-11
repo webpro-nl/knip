@@ -24,7 +24,7 @@ interface AnalyzeOptions {
   fixer: IssueFixer;
   graph: ModuleGraph;
   isFix: boolean;
-  isHideConfigHints: boolean;
+  isDisableConfigHints: boolean;
   isIncludeLibs: boolean;
   isProduction: boolean;
   report: Report;
@@ -45,7 +45,7 @@ export const analyze = async (options: AnalyzeOptions) => {
     fixer,
     graph,
     isFix,
-    isHideConfigHints,
+    isDisableConfigHints,
     isIncludeLibs,
     isProduction,
     report,
@@ -60,7 +60,7 @@ export const analyze = async (options: AnalyzeOptions) => {
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;
   const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
-  const isShowConfigHints = !workspace && !isProduction && !isHideConfigHints;
+  const isShowConfigHints = !workspace && !isProduction && !isDisableConfigHints;
 
   const shouldIgnore = getShouldIgnoreHandler(isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);

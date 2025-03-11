@@ -17,7 +17,7 @@ const baseArguments = {
   isExportsShorthand: false,
   isFilesShorthand: false,
   isFix: false,
-  isHideConfigHints: false,
+  isDisableConfigHints: false,
   isIncludeEntryExports: false,
   isIncludeLibs: false,
   isIsolateWorkspaces: false,

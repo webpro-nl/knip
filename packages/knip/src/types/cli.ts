@@ -11,7 +11,7 @@ export interface CommandLineOptions {
   isExportsShorthand: boolean;
   isFilesShorthand: boolean;
   isFix: boolean;
-  isHideConfigHints: boolean;
+  isDisableConfigHints: boolean;
   isIncludeEntryExports: boolean;
   isIncludeLibs: boolean;
   isIsolateWorkspaces: boolean;

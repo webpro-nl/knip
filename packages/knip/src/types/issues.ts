@@ -64,7 +64,8 @@ export type ReporterOptions = {
   counters: Counters;
   tagHints: TagHints;
   configurationHints: ConfigurationHints;
-  noConfigHints: boolean;
+  isDisableConfigHints: boolean;
+  isTreatConfigHintsAsErrors: boolean;
   cwd: string;
   isProduction: boolean;
   isShowProgress: boolean;

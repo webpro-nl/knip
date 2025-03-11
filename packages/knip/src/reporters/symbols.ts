@@ -48,7 +48,15 @@ const logIssueRecord = (issues: Issue[]) => {
   console.log(table.sort(sortByPos).print().trim());
 };
 
-export default ({ report, issues, tagHints, configurationHints, noConfigHints, isShowProgress }: ReporterOptions) => {
+export default ({
+  report,
+  issues,
+  tagHints,
+  configurationHints,
+  isDisableConfigHints,
+  isTreatConfigHintsAsErrors,
+  isShowProgress,
+}: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
@@ -68,15 +76,17 @@ export default ({ report, issues, tagHints, configurationHints, noConfigHints, i
     }
   }
 
-  if (!noConfigHints) {
+  if (!isDisableConfigHints) {
     if (configurationHints.size > 0) {
-      logTitleDimmed('Configuration hints');
+      const _logTitle = isTreatConfigHintsAsErrors ? logTitle : logTitleDimmed;
+      const _color = isTreatConfigHintsAsErrors ? identity : dim;
+      _logTitle('Configuration hints', configurationHints.size);
       for (const hint of configurationHints) {
         const { type, workspaceName, identifier } = hint;
         const message = `Unused item in ${type}`;
         const workspace =
           workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : '';
-        console.warn(dim(`${message}${workspace}:`), identifier);
+        console.warn(_color(`${message}${workspace}:`), identifier);
       }
     }
     if (tagHints.size > 0) {

@@ -33,6 +33,7 @@ Options:
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
   --tags                   Include or exclude tagged exports
   --no-config-hints        Suppress configuration hints
+  --treat-config-hints-as-errors    Exit with non-zero code (1) if there are any configuration hints
   --no-exit-code           Always exit with code zero (0)
   --max-issues             Maximum number of issues before non-zero exit code (default: 0)
   -d, --debug              Show debug output
@@ -97,6 +98,7 @@ try {
       trace: { type: 'boolean' },
       'trace-export': { type: 'string' },
       'trace-file': { type: 'string' },
+      'treat-config-hints-as-errors': { type: 'boolean' },
       tsConfig: { type: 'string', short: 't' },
       version: { type: 'boolean', short: 'V' },
       watch: { type: 'boolean' },
