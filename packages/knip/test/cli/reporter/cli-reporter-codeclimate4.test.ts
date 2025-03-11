@@ -1,5 +1,7 @@
-import { expect, test } from 'bun:test';
+import { test } from 'bun:test';
+import assert from 'node:assert/strict';
 import { resolve } from '../../../src/util/path.js';
+import { assertAndRemoveProperty } from '../../helpers/assertAndRemoveProperty.js';
 import { execFactory } from '../../helpers/exec.js';
 
 const cwd = resolve('fixtures/dependencies');
@@ -15,7 +17,6 @@ test('knip --reporter codeclimate (dependencies)', () => {
       categories: ['Bug Risk'],
       location: { path: 'package.json', positions: { begin: { line: 8, column: 6 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -24,7 +25,6 @@ test('knip --reporter codeclimate (dependencies)', () => {
       categories: ['Bug Risk'],
       location: { path: 'package.json', positions: { begin: { line: 10, column: 6 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -33,7 +33,6 @@ test('knip --reporter codeclimate (dependencies)', () => {
       categories: ['Bug Risk'],
       location: { path: 'package.json', positions: { begin: { line: 23, column: 6 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -42,7 +41,6 @@ test('knip --reporter codeclimate (dependencies)', () => {
       categories: ['Bug Risk'],
       location: { path: 'package.json', positions: { begin: { line: 0, column: 0 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -51,11 +49,16 @@ test('knip --reporter codeclimate (dependencies)', () => {
       categories: ['Bug Risk'],
       location: { path: 'package.json', positions: { begin: { line: 0, column: 0 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
   ];
 
-  const actual = JSON.parse(exec('knip --reporter codeclimate').stdout);
+  const issues = JSON.parse(exec('knip --reporter codeclimate').stdout) as {
+    fingerprint: string;
+    [key: string]: unknown;
+  }[];
+  const issuesWithoutFingerprints = issues.map(issue => {
+    return assertAndRemoveProperty(issue, 'fingerprint', fingerprint => assert.match(fingerprint, /[a-f0-9]{32}/));
+  });
 
-  expect(actual).toStrictEqual(json);
+  assert.deepEqual(issuesWithoutFingerprints, json);
 });

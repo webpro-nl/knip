@@ -1,5 +1,7 @@
-import { expect, test } from 'bun:test';
+import { test } from 'bun:test';
+import assert from 'node:assert/strict';
 import { resolve } from '../../../src/util/path.js';
+import { assertAndRemoveProperty } from '../../helpers/assertAndRemoveProperty.js';
 import { execFactory } from '../../helpers/exec.js';
 
 const cwd = resolve('fixtures/exports');
@@ -15,7 +17,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'my-module.ts', positions: { begin: { line: 23, column: 14 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -24,7 +25,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'my-module.ts', positions: { begin: { line: 24, column: 14 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -33,7 +33,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 8 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -42,7 +41,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'named-exports.ts', positions: { begin: { line: 6, column: 30 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -51,7 +49,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'named-exports.ts', positions: { begin: { line: 7, column: 15 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -60,7 +57,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'dynamic-import.ts', positions: { begin: { line: 3, column: 14 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -69,7 +65,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'my-mix.ts', positions: { begin: { line: 1, column: 14 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -78,7 +73,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'default.ts', positions: { begin: { line: 1, column: 14 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -87,7 +81,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'my-namespace.ts', positions: { begin: { line: 3, column: 14 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -96,7 +89,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'my-module.ts', positions: { begin: { line: 28, column: 13 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -105,7 +97,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'types.ts', positions: { begin: { line: 3, column: 13 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -114,7 +105,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'types.ts', positions: { begin: { line: 8, column: 14 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -123,7 +113,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: { path: 'my-namespace.ts', positions: { begin: { line: 5, column: 18 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -132,7 +121,6 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Duplication'],
       location: { path: 'my-module.ts', positions: { begin: { line: 26, column: 13 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
     {
       type: 'issue',
@@ -141,11 +129,16 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Duplication'],
       location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 15 } } },
       severity: 'major',
-      fingerprint: expect.any(String),
     },
   ];
 
-  const actual = JSON.parse(exec('knip --reporter codeclimate').stdout);
+  const issues = JSON.parse(exec('knip --reporter codeclimate').stdout) as {
+    fingerprint: string;
+    [key: string]: unknown;
+  }[];
+  const issuesWithoutFingerprints = issues.map(issue => {
+    return assertAndRemoveProperty(issue, 'fingerprint', fingerprint => assert.match(fingerprint, /[a-f0-9]{32}/));
+  });
 
-  expect(actual).toStrictEqual(json);
+  assert.deepEqual(issuesWithoutFingerprints, json);
 });
