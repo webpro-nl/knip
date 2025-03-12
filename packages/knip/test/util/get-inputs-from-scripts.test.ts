@@ -2,7 +2,7 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { _getInputsFromScripts } from '../../src/binaries/index.js';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
-import { join, resolve } from '../../src/util/path.js';
+import { join, resolve, cwd as rootCwd } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
@@ -161,13 +161,14 @@ test('getInputsFromScripts (npx)', () => {
   t('npx tsx ./main.ts -- build', [toBinary('tsx'), ts]);
 });
 
-test('getInputsFromScripts (bunx/bun x)', () => {
+test('getInputsFromScripts (bun)', () => {
   t('bunx pkg', [toDependency('pkg', optional)]);
   t('bunx cowsay "Hello world!"', [toDependency('cowsay', optional)]);
   t('bunx my-cli --foo bar', [toDependency('my-cli', optional)]);
   t('bun x pkg', [toDependency('pkg', optional)]);
-  t('bun ./main.ts', [toEntry(resolve(cwd, 'main.ts'))]);
-  t('bun run script.js', [toEntry(resolve(cwd, 'script.js'))]);
+  t('bun ./main.ts', [toEntry(join(rootCwd, 'fixtures/binaries', 'main.ts'))]);
+  t('bun run script.js', [toEntry(join(rootCwd, 'fixtures/binaries', 'script.js'))]);
+  t('bun run --cwd packages/knip watch', []);
 });
 
 test('getInputsFromScripts (pnpm)', () => {
@@ -199,6 +200,8 @@ test('getInputsFromScripts (yarn)', () => {
   t('yarn program', [], pkgScripts);
   t('yarn node script.js', [toBinary('node'), toDeferResolveEntry('script.js')]);
   t('yarn --mode skip-build', []);
+  const dir = join(cwd, 'components');
+  t('yarn --cwd components vitest -c vitest.components.config.ts', [toBinary('vitest', { dir }), toConfig('vitest', 'vitest.components.config.ts', { dir })]);
 });
 
 test('getInputsFromScripts (yarn dlx)', () => {

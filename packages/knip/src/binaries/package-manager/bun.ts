@@ -8,7 +8,7 @@ import { resolveX } from './bunx.js';
 const commands = ['add', 'create', 'init', 'install', 'link', 'pm', 'remove', 'run', 'test', 'update', 'upgrade', 'x'];
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
-  const parsed = parseArgs(args);
+  const parsed = parseArgs(args, { string: ['cwd'] });
   const [command, script] = parsed._;
 
   if (command === 'x') {
@@ -25,5 +25,8 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const filePath = command === 'run' ? script : command;
   const absFilePath = isAbsolute(filePath) ? filePath : join(cwd, filePath);
   if (isFile(absFilePath)) return [toEntry(absFilePath)];
-  return fromArgs(args);
+
+  const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
+  const opts = dir ? { cwd: dir } : {};
+  return command === 'run' ? [] : fromArgs(args, opts);
 };
