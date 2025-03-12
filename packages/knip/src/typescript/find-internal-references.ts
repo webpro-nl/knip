@@ -5,6 +5,12 @@ import { isIdChar } from '../util/regex.js';
 export const isType = (item: Export | ExportMember) =>
   item.type === 'type' || item.type === 'interface' || item.type === 'enum';
 
+const findInFlow = (flowNode: any, targetSymbol: ts.Symbol): boolean => {
+  if (!flowNode?.node) return false;
+  if (flowNode.node.symbol === targetSymbol) return true;
+  return findInFlow(flowNode.antecedent, targetSymbol);
+};
+
 // Find internal references to export item
 // Detect usage of non-types within types (e.g. class or typeof within interface/type) to keep those exported
 export const findInternalReferences = (
@@ -34,7 +40,7 @@ export const findInternalReferences = (
       if (!isExportDeclaration) {
         // @ts-expect-error ts.getTokenAtPosition is internal fn
         const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
-        if (symbol) {
+        if (symbol && id === symbol.escapedName) {
           const isInExport = referencedSymbolsInExport.has(symbol);
 
           if (isInExport) isSymbolInExport = true;
@@ -44,11 +50,10 @@ export const findInternalReferences = (
             if (isBindingElement) return [refCount, true];
           }
 
-          // @ts-expect-error Keep it cheap
           const declaration = symbol.declarations?.[0];
           if (declaration) {
-            // Pattern: export { identifier }
-            if (item.symbol === declaration.name?.flowNode?.node?.symbol) {
+            // @ts-expect-error Keep it cheap
+            if (findInFlow(declaration.name?.flowNode, item.symbol)) {
               return [++refCount, isSymbolInExport];
             }
 
