@@ -40,7 +40,8 @@ const logIssueRecord = (issues: Issue[]) => {
     issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
     issue.symbolType && table.cell('symbolType', print(issue.symbolType));
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
-    const cell = `${relative(issue.filePath)}${pos}`;
+    // @ts-expect-error TODO Fix up in next major
+    const cell = issue.type === 'files' ? '' : `${relative(issue.filePath)}${pos}`;
     table.cell('filePath', print(cell));
     issue.isFixed && table.cell('fixed', print('(removed)'));
     table.newRow();
