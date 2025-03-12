@@ -11,6 +11,7 @@ Knip provides the following built-in reporters:
 - [`disclosure`][1]
 - [`json`][2]
 - [`markdown`][3]
+- [`codeclimate`][5]
 - `symbol` (default)
 
 Example usage:
@@ -156,6 +157,34 @@ my-package     package.json
 
 </details>
 
+### CodeClimate
+
+The built-in `codeclimate` reporter generates output in the Code Climate Report JSON format. Example usage:
+
+```text
+$ knip --reporter codeclimate
+
+[
+  {
+    "type":"issue",
+    "check_name":"Unused exports",
+    "description":"isUnused",
+    "categories":["Bug Risk"],
+    "location": {
+      "path":"path/to/file.ts",
+      "positions": {
+        "begin": {
+          "line":6,
+          "column":1
+        }
+      }
+    }
+    "severity":"major",
+    "fingerprint":"e9789995c1fe9f7d75eed6a0c0f89e84",
+  }
+]
+```
+
 ## Custom Reporters
 
 When the provided built-in reporters are not sufficient, a custom local reporter
@@ -257,3 +286,4 @@ knip --preprocessor ./preprocess.ts
 [2]: #json
 [3]: #markdown
 [4]: ../reference/issue-types.md
+[5]: #codeclimate
