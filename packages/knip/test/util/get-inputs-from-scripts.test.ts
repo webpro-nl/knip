@@ -166,6 +166,8 @@ test('getInputsFromScripts (bunx/bun x)', () => {
   t('bunx cowsay "Hello world!"', [toDependency('cowsay', optional)]);
   t('bunx my-cli --foo bar', [toDependency('my-cli', optional)]);
   t('bun x pkg', [toDependency('pkg', optional)]);
+  t('bun ./main.ts', [toEntry(resolve(cwd, 'main.ts'))]);
+  t('bun run script.js', [toEntry(resolve(cwd, 'script.js'))]);
 });
 
 test('getInputsFromScripts (pnpm)', () => {

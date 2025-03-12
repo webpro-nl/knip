@@ -19,7 +19,9 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const { manifestScriptNames, cwd, fromArgs } = options;
 
   if (command === 'run' && manifestScriptNames.has(script)) return [];
-  if (manifestScriptNames.has(command) || commands.includes(command)) return [];
+  if (manifestScriptNames.has(command)) return [];
+  if (command !== 'run' && commands.includes(command)) return [];
+
   const filePath = command === 'run' ? script : command;
   const absFilePath = isAbsolute(filePath) ? filePath : join(cwd, filePath);
   if (isFile(absFilePath)) return [toEntry(absFilePath)];
