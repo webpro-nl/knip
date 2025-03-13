@@ -5,7 +5,7 @@
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/webpro-nl/knip",
+    "url": "git+https://github.com/webpro-nl/knip.git",
     "directory": "packages/knip"
   },
   "bugs": "https://github.com/webpro-nl/knip/issues",
@@ -30,8 +30,8 @@
   ],
   "main": "./dist/index.js",
   "bin": {
-    "knip": "./bin/knip.js",
-    "knip-bun": "./bin/knip-bun.js"
+    "knip": "bin/knip.js",
+    "knip-bun": "bin/knip-bun.js"
   },
   "type": "module",
   "types": "./dist/index.d.ts",
