@@ -180,7 +180,7 @@ notation below is valid and will report only exports tagged `@lintignore` or
 }
 ```
 
-Also see [JSDoc & TSDoc Tags](./jsdoc-tsdoc-tags.md).
+Also see [JSDoc & TSDoc Tags][8].
 
 ## Ignore Issues
 
@@ -188,7 +188,7 @@ Also see [JSDoc & TSDoc Tags](./jsdoc-tsdoc-tags.md).
 
 :::tip
 
-Please read [project files configuration][8] before using the `ignore` option,
+Please read [project files configuration][9] before using the `ignore` option,
 because in many cases you'll want to **exclude project files** instead.
 
 :::
@@ -340,4 +340,5 @@ configurations individually.
 [5]: ../explanations/plugins.md#entry-files
 [6]: ../explanations/plugins.md
 [7]: ../features/rules-and-filters.md#filters
-[8]: ../guides/configuring-project-files.md
+[8]: ./jsdoc-tsdoc-tags.md
+[9]: ../guides/configuring-project-files.md

@@ -11,7 +11,7 @@ Knip provides the following built-in reporters:
 - [`disclosure`][1]
 - [`json`][2]
 - [`markdown`][3]
-- [`codeclimate`][5]
+- [`codeclimate`][4]
 - `symbol` (default)
 
 Example usage:
@@ -72,7 +72,7 @@ object per file structured like this:
 }
 ```
 
-The keys match the [reported issue types][4]. Example usage:
+The keys match the [reported issue types][5]. Example usage:
 
 ```sh
 knip --reporter json
@@ -159,28 +159,29 @@ my-package     package.json
 
 ### CodeClimate
 
-The built-in `codeclimate` reporter generates output in the Code Climate Report JSON format. Example usage:
+The built-in `codeclimate` reporter generates output in the Code Climate Report
+JSON format. Example usage:
 
 ```text
 $ knip --reporter codeclimate
 
 [
   {
-    "type":"issue",
-    "check_name":"Unused exports",
-    "description":"isUnused",
-    "categories":["Bug Risk"],
+    "type": "issue",
+    "check_name": "Unused exports",
+    "description": "isUnused",
+    "categories": ["Bug Risk"],
     "location": {
-      "path":"path/to/file.ts",
+      "path": "path/to/file.ts",
       "positions": {
         "begin": {
-          "line":6,
-          "column":1
+          "line": 6,
+          "column": 1
         }
       }
     }
-    "severity":"major",
-    "fingerprint":"e9789995c1fe9f7d75eed6a0c0f89e84",
+    "severity": "major",
+    "fingerprint": "e9789995c1fe9f7d75eed6a0c0f89e84",
   }
 ]
 ```
@@ -285,5 +286,5 @@ knip --preprocessor ./preprocess.ts
 [1]: #disclosure
 [2]: #json
 [3]: #markdown
-[4]: ../reference/issue-types.md
-[5]: #codeclimate
+[4]: #codeclimate
+[5]: ../reference/issue-types.md
