@@ -90,7 +90,7 @@
     "@types/webpack": "^5.28.5",
     "@wdio/types": "^9.5.0",
     "glob": "^10.4.2",
-    "release-it": "^18.1.2",
+    "release-it": "^19.0.0-next.1",
     "type-fest": "^4.31.0",
     "typescript": "^5.5.2"
   },
