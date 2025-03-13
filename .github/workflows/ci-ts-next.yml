@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 22
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: npm install --ignore-scripts --legacy-peer-deps
       - name: Install latest peer dependencies
         run: |
           npm install -w packages/knip typescript@next @types/node@latest
