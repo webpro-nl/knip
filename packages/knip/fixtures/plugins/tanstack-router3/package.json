@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/tanstack-router",
+  "version": "*",
+  "devDependencies": {
+    "@tanstack/react-router": "*",
+    "@tanstack/router-plugin": "*"
+  }
+}
