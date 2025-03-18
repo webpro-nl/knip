@@ -40,7 +40,14 @@ const resolveEntryPaths: ResolveEntryPaths<PluginConfig> = async (localConfig, o
     return [join(appDir, route.file), ...(route.children ? route.children.flatMap(mapRoute) : [])];
   };
 
-  const routes = routeConfig.flatMap(mapRoute);
+  const routes = routeConfig
+    .flatMap(mapRoute)
+    // Since these are literal paths, we need to escape any special characters that might
+    // trip up micromatch/fast-glob.
+    // See:
+    //  - https://reactrouter.com/how-to/file-route-conventions#optional-segments
+    //  - https://www.npmjs.com/package/fast-glob#advanced-syntax
+    .map(route => route.replace(/[$^*+?()\[\]]/g, '\\$&'));
 
   return [
     join(appDir, 'routes.{js,ts}'),
