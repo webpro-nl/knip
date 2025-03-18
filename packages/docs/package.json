@@ -33,7 +33,7 @@
     "@octokit/graphql": "^8.2.1",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "5.5.1",
+    "astro": "5.5.2",
     "hastscript": "9.0.1",
     "picocolors": "^1.1.1",
     "rehype-autolink-headings": "^7.1.0",
