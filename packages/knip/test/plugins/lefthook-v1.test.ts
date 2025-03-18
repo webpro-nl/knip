@@ -27,18 +27,13 @@ skipIfBun(() =>
   })
 );
 
-// The order of the tests is meaningful!
-// The first test will execute in the branch checkout worktree folder, and
-// resolve correctly the relative main git folder.
-// The second test will reuse the resolved hooks folder from the first test
-
 skipIfBun(() =>
-  test('Find dependencies with the lefthook v1 in a worktreee branch checkout', async () => {
-    process.chdir(folderWorktree);
+  test('Find dependencies with the lefthook v1 plugin', async () => {
+    process.chdir(folderMain);
     const { main } = await import('../../src/index.js');
     const { counters } = await main({
       ...baseArguments,
-      cwd: folderWorktree,
+      cwd: folderMain,
     });
 
     assert.deepEqual(counters, {
@@ -50,12 +45,12 @@ skipIfBun(() =>
 );
 
 skipIfBun(() =>
-  test('Find dependencies with the lefthook v1 plugin', async () => {
-    process.chdir(folderMain);
+  test('Find dependencies with the lefthook v1 in a worktreee branch checkout', async () => {
+    process.chdir(folderWorktree);
     const { main } = await import('../../src/index.js');
     const { counters } = await main({
       ...baseArguments,
-      cwd: folderMain,
+      cwd: folderWorktree,
     });
 
     assert.deepEqual(counters, {
