@@ -1,4 +1,4 @@
-import { test, beforeAll, afterAll } from 'bun:test';
+import { afterAll, beforeAll, test } from 'bun:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -6,7 +6,7 @@ import { join, resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const skipIfBun = typeof Bun !== 'undefined' && os.platform() === 'win32' ? () => {} : (fn: Function) => fn();
+const skipIfBun = typeof Bun !== 'undefined' && os.platform() === 'win32' ? () => {} : (fn: () => void) => fn();
 
 const originalCwd = process.cwd();
 const folderMain = resolve('fixtures/plugins/lefthook-v1');
