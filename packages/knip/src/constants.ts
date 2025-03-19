@@ -48,6 +48,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'chown',
   'chmod',
   'cksum',
+  'cmd',
   'comm',
   'command',
   'corepack',
