@@ -65,6 +65,7 @@ export type PluginName =
   | 'sentry'
   | 'simple-git-hooks'
   | 'size-limit'
+  | 'sst'
   | 'storybook'
   | 'stryker'
   | 'stylelint'
@@ -158,6 +159,7 @@ export const pluginNames = [
   'sentry',
   'simple-git-hooks',
   'size-limit',
+  'sst',
   'storybook',
   'stryker',
   'stylelint',
