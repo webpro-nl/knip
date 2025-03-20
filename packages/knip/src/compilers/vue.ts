@@ -1,8 +1,8 @@
-import { tsScriptBodies } from './compilers.js';
+import { scriptBodies } from './compilers.js';
 import type { HasDependency } from './types.js';
 
 const condition = (hasDependency: HasDependency) => hasDependency('vue') || hasDependency('nuxt');
 
-const compiler = tsScriptBodies;
+const compiler = scriptBodies;
 
 export default { condition, compiler };
