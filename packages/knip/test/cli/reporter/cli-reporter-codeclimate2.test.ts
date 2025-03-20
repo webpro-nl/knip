@@ -39,7 +39,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unresolved imports',
       description: './unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', positions: { begin: { line: 8, column: 23 } } },
+      location: { path: 'src/index.ts', positions: { begin: { line: 8, column: 23 }, end: { line: 8, column: 23 } } },
       severity: 'major',
     },
   ];

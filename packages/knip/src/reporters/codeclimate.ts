@@ -1,42 +1,12 @@
 import { createHash } from 'node:crypto';
+import type * as codeclimate from 'codeclimate-types';
 import type { Entries } from 'type-fest';
 import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, Report, ReporterOptions } from '../types/issues.js';
 import { toRelative } from '../util/path.js';
 import { getTitle } from './util.js';
 
-type CodeClimateSeverity = 'info' | 'minor' | 'major' | 'critical' | 'blocker';
-
-interface CodeClimateEntry {
-  type: 'issue';
-  check_name: string;
-  description: string;
-  categories: string[];
-  location: Location;
-  severity: CodeClimateSeverity;
-  fingerprint: string;
-}
-
-type Location = {
-  path: string;
-} & (
-  | {
-      positions: {
-        begin: {
-          line: number;
-          column: number;
-        };
-      };
-    }
-  | {
-      lines: {
-        begin: number;
-        end: number;
-      };
-    }
-);
-
 export default async ({ report, issues }: ReporterOptions) => {
-  const entries: CodeClimateEntry[] = [];
+  const entries: codeclimate.Issue[] = [];
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (!isReportType) {
@@ -45,13 +15,13 @@ export default async ({ report, issues }: ReporterOptions) => {
 
     const fixedType = type === 'files' ? '_files' : type;
 
-    for (const issue of flatten(issues[fixedType] as IssueRecords)) {
+    for (const issue of flatten(issues[fixedType])) {
       const { filePath } = issue;
 
       if (fixedType === 'duplicates' && issue.symbols) {
         entries.push(
-          ...issue.symbols.map(symbol => ({
-            type: 'issue' as const,
+          ...issue.symbols.map<codeclimate.Issue>(symbol => ({
+            type: 'issue',
             check_name: getTitle(fixedType),
             description: getSymbolDescription({ symbol, parentSymbol: issue.parentSymbol }),
             categories: ['Duplication'],
@@ -62,7 +32,7 @@ export default async ({ report, issues }: ReporterOptions) => {
         );
       } else {
         entries.push({
-          type: 'issue' as const,
+          type: 'issue',
           check_name: getTitle(fixedType),
           description: getIssueDescription(issue),
           categories: ['Bug Risk'],
@@ -86,7 +56,7 @@ function flatten(issues: IssueRecords): Issue[] {
   return Object.values(issues).flatMap(Object.values);
 }
 
-function convertSeverity(severity?: IssueSeverity): CodeClimateSeverity {
+function convertSeverity(severity?: IssueSeverity): codeclimate.Severity {
   switch (severity) {
     case 'error':
       return 'major';
@@ -109,12 +79,16 @@ function getSymbolDescription({ symbol, parentSymbol }: { symbol: IssueSymbol; p
   return `${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
 }
 
-function createLocation(filePath: string, line?: number, col?: number): Location {
+function createLocation(filePath: string, line?: number, col?: number): codeclimate.Location {
   if (col !== undefined) {
     return {
       path: toRelative(filePath),
       positions: {
         begin: {
+          line: line ?? 0,
+          column: col,
+        },
+        end: {
           line: line ?? 0,
           column: col,
         },

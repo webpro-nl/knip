@@ -15,7 +15,7 @@ test('knip --reporter codeclimate (enum members)', () => {
       check_name: 'Unused exported enum members',
       description: 'B_Unused (MyEnum)',
       categories: ['Bug Risk'],
-      location: { path: 'members.ts', positions: { begin: { line: 9, column: 3 } } },
+      location: { path: 'members.ts', positions: { begin: { line: 9, column: 3 }, end: { line: 9, column: 3 } } },
       severity: 'major',
     },
     {
@@ -23,7 +23,7 @@ test('knip --reporter codeclimate (enum members)', () => {
       check_name: 'Unused exported enum members',
       description: 'D_Key (MyEnum)',
       categories: ['Bug Risk'],
-      location: { path: 'members.ts', positions: { begin: { line: 11, column: 3 } } },
+      location: { path: 'members.ts', positions: { begin: { line: 11, column: 3 }, end: { line: 11, column: 3 } } },
       severity: 'major',
     },
   ];
