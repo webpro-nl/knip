@@ -17,13 +17,13 @@ export const importsWithinScripts: SyncCompilerFn = (text: string) => {
   return scripts.join(';\n');
 };
 
-// Extract body of <script lang="ts"> nodes
-const tsScriptExtractor = /<script\b[^>]*lang="ts"[^>]*>(?<body>[\s\S]*?)<\/script>/gm;
-export const tsScriptBodies: SyncCompilerFn = (text: string) => {
+// Extract body of <script>、<script lang="ts">、<script setup>、<script lang="ts" setup> etc. nodes
+const scriptBodyExtractor = /<script\b[^>]*>(?<body>[\s\S]*?)<\/script>/gm;
+export const scriptBodies: SyncCompilerFn = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
   // biome-ignore lint/suspicious/noAssignInExpressions: ignore
-  while ((scriptMatch = tsScriptExtractor.exec(text))) {
+  while ((scriptMatch = scriptBodyExtractor.exec(text))) {
     if (scriptMatch.groups?.body) scripts.push(scriptMatch.groups.body);
   }
   return scripts.join(';\n');
