@@ -23,7 +23,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
       check_name: 'Unused dependencies',
       description: '@tootallnate/once',
       categories: ['Bug Risk'],
-      location: { path: 'package.json', positions: { begin: { line: 8, column: 6 } } },
+      location: { path: 'package.json', positions: { begin: { line: 8, column: 6 }, end: { line: 8, column: 6 } } },
       severity: 'major',
     },
     {
@@ -31,7 +31,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
       check_name: 'Unused dependencies',
       description: 'fs-extra',
       categories: ['Bug Risk'],
-      location: { path: 'package.json', positions: { begin: { line: 10, column: 6 } } },
+      location: { path: 'package.json', positions: { begin: { line: 10, column: 6 }, end: { line: 10, column: 6 } } },
       severity: 'major',
     },
     {
@@ -39,7 +39,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
       check_name: 'Unused devDependencies',
       description: 'mocha',
       categories: ['Bug Risk'],
-      location: { path: 'package.json', positions: { begin: { line: 23, column: 6 } } },
+      location: { path: 'package.json', positions: { begin: { line: 23, column: 6 }, end: { line: 23, column: 6 } } },
       severity: 'major',
     },
     {

@@ -5,6 +5,7 @@
       "name": "@knip/root",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
+        "codeclimate-types": "^0.3.1",
         "installed-check": "^9.3.0",
       },
     },
@@ -703,6 +704,8 @@
     "clone": ["clone@1.0.4", "", {}, "sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg=="],
 
     "clsx": ["clsx@2.1.1", "", {}, "sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA=="],
+
+    "codeclimate-types": ["codeclimate-types@0.3.1", "", {}, "sha512-JCAaPG3tAYlVQQE9NP5kgsXBxPfSmflUI7manmbllUd9TN+1p/SXZkOsMAlPXCp3gcqNVL0itxMjcgKF0nBmJg=="],
 
     "collapse-white-space": ["collapse-white-space@2.1.0", "", {}, "sha512-loKTxY1zCOuG4j9f6EPnuyyYkf58RnhhWTvRoZEokgB+WbdXehfjFviyOVYkqzEWz1Q5kRiZdBYS5SwxbQYwzw=="],
 
