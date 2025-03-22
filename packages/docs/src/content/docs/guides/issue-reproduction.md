@@ -50,19 +50,25 @@ free dev containers!
 
 ## Alternatives
 
-Other solutions may work well too. For instance, many people choose to create a
-small repository on GitHub. The goal is to have an easy and common understanding
-and reproduction. A link to your existing project repository will likely not be
-considered "minimal". Issues containing just a screenshot, or snippets of output
-or source code don't provide the full picture and aren't complete nor
-actionable. If you're unable to create a reproduction using one of the methods
-described then please clearly explain this in the issue or [contact me][9].
+Other solutions to share a minimal and reproducible case may work well too,
+including:
+
+- A public repository on e.g. GitHub or GitLab.
+- A new [fixtures folder in the Knip repository][9].
+
+The goal is to have an easy and common understanding and reproduction. A link to
+your existing project repository will likely not be considered "minimal". Issues
+containing just a screenshot, or snippets of output or source code don't provide
+the full picture and aren't complete nor actionable.
+
+If you're unable to create a reproduction using one of the methods described
+then please clearly explain this in the issue or [contact me][10].
 
 ## Pull Request
 
 The optimal way is to add fixtures and failing tests to the Knip repository, and
 open a pull request to discuss the issue! Also see [instructions for
-development][10].
+development][11].
 
 [1]: https://github.com/webpro-nl/knip/issues?q=is%3Aissue
 [2]: https://knip.dev/reference/known-issues
@@ -76,5 +82,6 @@ development][10].
   https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/monorepo
 [7]: https://codesandbox.io
 [8]: https://stackblitz.com
-[9]: https://github.com/webpro
-[10]: https://github.com/webpro-nl/knip/blob/main/.github/DEVELOPMENT.md
+[9]: https://github.com/webpro-nl/knip/tree/main/packages/knip/fixtures
+[10]: https://github.com/webpro
+[11]: https://github.com/webpro-nl/knip/blob/main/.github/DEVELOPMENT.md
