@@ -1,4 +1,5 @@
 export enum SymbolType {
+  VARIABLE = 'variable',
   TYPE = 'type',
   INTERFACE = 'interface',
   ENUM = 'enum',

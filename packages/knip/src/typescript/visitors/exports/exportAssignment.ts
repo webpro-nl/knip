@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { FIX_FLAGS } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
-import { SymbolType } from '../../../types/issues.js';
+import { getNodeType } from '../../ast-helpers.js';
 import { isModule } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
 
@@ -14,6 +14,7 @@ export default visit(isModule, (node, { isFixExports }) => {
     const fix: Fix = isFixExports ? [node.getStart(), node.getEnd() + 1, FIX_FLAGS.NONE] : undefined;
     // @ts-expect-error We need the symbol in `addExport`
     const symbol = node.getSourceFile().locals?.get(node.expression.escapedText);
-    return { node, symbol, identifier: 'default', type: SymbolType.UNKNOWN, pos, fix };
+    const type = getNodeType(symbol?.valueDeclaration);
+    return { node, symbol, identifier: 'default', type, pos, fix };
   }
 });

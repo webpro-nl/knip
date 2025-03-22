@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { SymbolType } from '../types/issues.js';
 
 export function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
   return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
@@ -47,6 +48,17 @@ export function isPropertyAccessCall(node: ts.Node, identifier: string): node is
     node.expression.getText() === identifier
   );
 }
+
+export const getNodeType = (node: ts.Node): SymbolType => {
+  if (!node) return SymbolType.UNKNOWN;
+  if (ts.isFunctionDeclaration(node)) return SymbolType.FUNCTION;
+  if (ts.isClassDeclaration(node)) return SymbolType.CLASS;
+  if (ts.isInterfaceDeclaration(node)) return SymbolType.INTERFACE;
+  if (ts.isTypeAliasDeclaration(node)) return SymbolType.TYPE;
+  if (ts.isEnumDeclaration(node)) return SymbolType.ENUM;
+  if (ts.isVariableDeclaration(node)) return SymbolType.VARIABLE;
+  return SymbolType.UNKNOWN;
+};
 
 export function stripQuotes(name: string) {
   const length = name.length;
