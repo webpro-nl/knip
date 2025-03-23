@@ -1,3 +1,4 @@
+import { SomeClass } from './implements';
 import { MyClass } from './members';
 import { AbstractClassGen, ExtendedClassGen } from './iterator-generator';
 import { AbstractClass, ExtendedClass } from './iterator';
@@ -8,6 +9,7 @@ AbstractClass;
 ExtendedClass;
 
 const instance = new MyClass();
+const some = new SomeClass();
 
 export class Parent {
   instance: MyClass;

@@ -2,7 +2,7 @@ import EasyTable from 'easy-table';
 import picocolors from 'picocolors';
 import type { Entries } from 'type-fest';
 import { ROOT_WORKSPACE_NAME } from '../constants.js';
-import type { Issue, ReporterOptions } from '../types/issues.js';
+import { type Issue, type ReporterOptions, SymbolType } from '../types/issues.js';
 import { relative, toRelative } from '../util/path.js';
 import { truncate } from '../util/string.js';
 import { getTitle, identity, logTitle, logTitleDimmed } from './util.js';
@@ -38,7 +38,7 @@ const logIssueRecord = (issues: Issue[]) => {
     const symbols = issue.symbols;
     table.cell('symbol', print(symbols ? truncate(symbols.map(s => s.symbol).join(', '), TRUNCATE_WIDTH) : hl(issue)));
     issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
-    issue.symbolType && table.cell('symbolType', print(issue.symbolType));
+    issue.symbolType && issue.symbolType !== SymbolType.UNKNOWN && table.cell('symbolType', print(issue.symbolType));
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
     // @ts-expect-error TODO Fix up in next major
     const cell = issue.type === 'files' ? '' : `${relative(issue.filePath)}${pos}`;

@@ -33,7 +33,7 @@ Knip requires full module and dependency graphs to find clutter across the
 project. Creating these comprehensive graphs is not a trivial task and it seems
 no such tool exists today, even more so when it comes to monorepos.
 
-File-oriented linters like ESLint and Knip are complementary tools.
+File-oriented linters like ESLint are complementary to Knip.
 
 ### Isn't tree-shaking enough?
 
@@ -46,15 +46,19 @@ size. It typically operates on bundled production code, which might include
 external/third-party code. An optimization in the build process, "out of your
 hands".
 
-On the other hand, Knip is a project linter that should be part of QA. It lints,
-reports and fixes only your own source code. A linter reporting issues hands
-control back to you (unless you [auto-fix][1] everything).
+On the other hand, Knip is a project linter that should be part of the QA phase.
+It lints, reports and fixes only your own source code. Moreover, in contrast
+with other linters, focuses on inter-file dependencies, so dead code within a
+file may not be caught by Knip.
+
+Issues reported by the linter are then for you to handle (except for everything
+that Knip [auto-fixes][1] for you).
 
 Besides those differences, Knip has a broader scope:
 
 - Improve DX (see [less is more][2]).
 - Include non-production code and dependencies in the process by default.
-- Report more [issue types][3] (such as unlisted dependencies).
+- Handle more [types of issues][3] (such as unlisted dependencies).
 
 ## Synergy
 

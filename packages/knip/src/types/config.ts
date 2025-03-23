@@ -6,7 +6,7 @@ import type { Input } from '../util/input.js';
 import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';
 import type { Tags } from './cli.js';
-import type { IssueType, Rules } from './issues.js';
+import type { IssueType, Rules, SymbolType } from './issues.js';
 import type { PackageJson } from './package-json.js';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
@@ -38,7 +38,7 @@ export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
 export type IgnorePatterns = (string | RegExp)[];
 
-type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
+type IgnorableExport = Exclude<SymbolType, SymbolType.UNKNOWN>;
 
 type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
 
