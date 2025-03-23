@@ -9,7 +9,7 @@ import {
   toDependency,
   toDevDependency,
 } from '../../util/input.js';
-import { isAbsolute, isInternal, join, relative } from '../../util/path.js';
+import { isInternal } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { BabelConfigObj } from '../babel/types.js';
@@ -97,10 +97,11 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
         if (!isInternal(entry)) {
           inputs.add(toDependency(entry));
         } else {
-          const absoluteEntry = isAbsolute(entry) ? entry : join(options.context ? options.context : cwd, entry);
-          const item = relative(cwd, absoluteEntry);
+          const dir = options.context ? options.context : cwd;
           const input =
-            options.mode === 'development' ? toDeferResolveEntry(item) : toDeferResolveProductionEntry(item);
+            options.mode === 'development'
+              ? toDeferResolveEntry(entry, { dir })
+              : toDeferResolveProductionEntry(entry, { dir });
           inputs.add(input);
         }
       }

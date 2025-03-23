@@ -76,16 +76,21 @@ export const toDeferResolve = (specifier: string): Input => ({ type: 'deferResol
 
 export const isDeferResolve = (input: Input) => input.type === 'deferResolve';
 
-export const toDeferResolveProductionEntry = (specifier: string): Input => ({
+export const toDeferResolveProductionEntry = (specifier: string, options: Options = {}): Input => ({
   type: 'deferResolveEntry',
   specifier,
   production: true,
+  ...options,
 });
 
 export const isDeferResolveProductionEntry = (input: Input) =>
   input.type === 'deferResolveEntry' && input.production === true;
 
-export const toDeferResolveEntry = (specifier: string): Input => ({ type: 'deferResolveEntry', specifier });
+export const toDeferResolveEntry = (specifier: string, options: Options = {}): Input => ({
+  type: 'deferResolveEntry',
+  specifier,
+  ...options,
+});
 
 export const isDeferResolveEntry = (input: Input) => input.type === 'deferResolveEntry';
 
