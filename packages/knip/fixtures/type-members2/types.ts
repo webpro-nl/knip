@@ -1,7 +1,7 @@
 export type MyType = {
   keyA: string;
   keyB: {
-    subA: string;
+    subA?: string;
     subB: string;
   };
 };

@@ -8,6 +8,7 @@ import { MyType } from './types';
 const i: MyInterface = {
   keyA: '',
   keyB: {
+    // subA: 'Knip also finds unused non-optional members, but the compiler catches those too',
     subB: '',
   },
 };
@@ -15,6 +16,7 @@ const i: MyInterface = {
 const t: MyType = {
   keyA: '',
   keyB: {
+    // subA: 'Knip also finds unused non-optional members, but the compiler catches those too',
     subB: '',
   },
 };

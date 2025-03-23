@@ -44,13 +44,16 @@ In the next example, `Dog.wings` is reported as unused:
 ```ts
 export interface Dog {
   legs: number;
-  wings: boolean;
+  wings?: boolean;
 }
 
 const charlie: Dog = {
   legs: 4,
 };
 ```
+
+Non-optional instance members are reported, but should also be caught by the
+compiler.
 
 ## Type Members
 
@@ -64,7 +67,7 @@ export type Pet = {
 
 export type Cat = {
   legs: Pet['legs'];
-  horn: boolean;
+  horn?: boolean;
 };
 
 const coco: Cat = {
@@ -79,7 +82,7 @@ In the next example, `Args.caseB` is reported as unused:
 ```ts
 export interface Args {
   caseA: boolean;
-  caseB: boolean;
+  caseB?: boolean;
 }
 
 function fn(options: Args) {
@@ -89,14 +92,29 @@ function fn(options: Args) {
 fn({ caseA: true });
 ```
 
-## JSX Component Props
+## Function Arguments
 
-Component props that are not referenced, are reported as unused.
+In the next example `deep.unusedProp` is reported as unused:
 
-Note that props that are referenced inside the component, but never passed in as
-part of the JSX props or argument(s), are not reported.
+```tsx
+export type ComponentProps = {
+  usedProp: boolean;
+  deep: {
+    usedProp: boolean;
+    unusedProp: boolean;
+  };
+};
 
-### Example 1: Passed prop
+const Component: React.FC<ComponentProps> = props => (
+  <span>
+    {props.usedProp} | {props.deep.usedProp}
+  </span>
+);
+
+const App = () => <Component />;
+```
+
+## JSX Attributes
 
 In the next example `unusedProp` is reported as unused:
 
@@ -110,30 +128,11 @@ const Component: React.FC<ComponentProps> = props => null;
 
 const App = () => (
   <>
-    <Component usedProp={true} />;
+    <Component usedProp={true} />
     <Component {...{ usedProp: true }} />
-    { React.createElement(Component, { usedProp: true }); }
+    {React.createElement(Component, { usedProp: true })}
   </>
 );
-```
-
-### Example 2: Used prop
-
-In the next example `deep.unusedProp` is reported as unused:
-
-```tsx
-export type ComponentProps = {
-  usedProp: boolean;
-  deep: {
-    unusedProp: boolean;
-  };
-};
-
-const Component: React.FC<ComponentProps> = props => (
-  <span>{props.usedProp}</span>
-);
-
-const App = () => <Component />;
 ```
 
 ## Rationale
@@ -148,10 +147,8 @@ why even support this? It's just that Knip happens to be in a great position to
 extend its reach from exports to also find and fix unused members on those
 exports. There's value in a tool that finds and fixes unused members of classes,
 enums, types and interfaces in an automated fashion. The question is: does the
-value outweigh the cost of the scope creep? Perhaps, and as it stands today only
-if the scope is kept within the boundaries of exported values and types (and
-does not descend into trying to find and fix "everything"). In any case, it's
-exciting to explore this area. Let's see how it goes!
+value outweigh the cost of the scope creep? In any case, it's exciting to
+explore this area.
 
 ## `ignoreExportsUsedInFile`
 

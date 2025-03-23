@@ -1,7 +1,7 @@
 export interface MyInterface {
   keyA: string;
   keyB: {
-    subA: string;
+    subA?: string;
     subB: string;
   };
 }

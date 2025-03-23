@@ -7,7 +7,7 @@ import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
 import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
-import { getType, hasStrictlyNsReferences } from '../util/has-strictly-ns-references.js';
+import { getType, hasStrictlyEnumReferences, hasStrictlyNsReferences } from '../util/has-strictly-ns-references.js';
 import { getIsIdentifierReferencedHandler } from '../util/is-identifier-referenced.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { findMatch } from '../util/regex.js';
@@ -143,7 +143,8 @@ export const analyze = async (options: AnalyzeOptions) => {
 
               if (isReferenced || isExportedItemReferenced(exportedItem)) {
                 if (report.enumMembers && exportedItem.type === 'enum') {
-                  if (importsForExport.refs.has(identifier)) continue; // consider members referenced (isObjectEnumerationCallExpressionArgument)
+                  if (!report.nsTypes && importsForExport.refs.has(identifier)) continue;
+                  if (hasStrictlyEnumReferences(importsForExport, identifier)) continue;
 
                   for (const member of exportedItem.members) {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;

@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/type-members4",
+  "knip": {
+    "include": ["typeMembers"],
+    "ignoreExportsUsedInFile": {
+      "interface": true,
+      "type": true,
+      "member": false
+    }
+  }
+}
