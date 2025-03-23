@@ -7,6 +7,7 @@ import { getTitle } from './util.js';
 
 export default async ({ report, issues }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];
+  const hashes = new Set<string>()
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (!isReportType) {
@@ -27,7 +28,7 @@ export default async ({ report, issues }: ReporterOptions) => {
             categories: ['Duplication'],
             location: createLocation(filePath, symbol.line, symbol.col),
             severity: convertSeverity(issue.severity),
-            fingerprint: createFingerprint(filePath, symbol.symbol, symbol.pos),
+            fingerprint: createFingerprint(filePath, symbol.symbol, hashes),
           }))
         );
       } else {
@@ -38,7 +39,7 @@ export default async ({ report, issues }: ReporterOptions) => {
           categories: ['Bug Risk'],
           location: createLocation(filePath, issue.line, issue.col),
           severity: convertSeverity(issue.severity),
-          fingerprint: createFingerprint(filePath, issue.symbol, issue.pos),
+          fingerprint: createFingerprint(filePath, issue.symbol, hashes),
         });
       }
     }
@@ -105,12 +106,26 @@ function createLocation(filePath: string, line?: number, col?: number): codeclim
   };
 }
 
-function createFingerprint(filePath: string, message: string, pos?: number): string {
+function createFingerprint(filePath: string, message: string, hashes: Set<string>): string {
   const md5 = createHash('md5');
 
   md5.update(filePath);
   md5.update(message);
-  md5.update(pos?.toString() ?? '');
+
+  // Create copy of hash since md5.digest() will finalize it, not allowing us to .update() again
+  let md5Tmp = md5.copy()
+  let hash = md5Tmp.digest('hex')
+
+  while (hashes.has(hash)) {
+    // Hash collision. This happens if we encounter the same ESLint message in one file
+    // multiple times. Keep generating new hashes until we get a unique one.
+    md5.update(hash)
+
+    md5Tmp = md5.copy()
+    hash = md5Tmp.digest('hex')
+  }
+
+  hashes.add(hash)
 
   return md5.digest('hex');
 }
