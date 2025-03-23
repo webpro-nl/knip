@@ -45,7 +45,19 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
   const setupFiles = [testConfig.setupFiles ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
 
-  return [...[...environments, ...reporters, ...coverage].map(id => toDependency(id)), ...setupFiles, ...globalSetup];
+  const workspaceDependencies: Input[] = [];
+  if (testConfig.workspace !== undefined) {
+    for (const workspaceConfig of testConfig.workspace) {
+      workspaceDependencies.push(...findConfigDependencies(workspaceConfig, options));
+    }
+  }
+
+  return [
+    ...[...environments, ...reporters, ...coverage].map(id => toDependency(id)),
+    ...setupFiles,
+    ...globalSetup,
+    ...workspaceDependencies,
+  ];
 };
 
 const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) => {
