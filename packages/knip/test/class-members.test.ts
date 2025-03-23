@@ -25,8 +25,8 @@ test('Find unused class members', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     classMembers: 7,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
 
@@ -50,7 +50,7 @@ test('Find unused class members (isIncludeEntryExports)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     classMembers: 8,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
