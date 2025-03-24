@@ -7,7 +7,6 @@ import { getTitle } from './util.js';
 
 export default async ({ report, issues }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];
-  const hashes = new Set<string>();
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (!isReportType) {
@@ -28,7 +27,7 @@ export default async ({ report, issues }: ReporterOptions) => {
             categories: ['Duplication'],
             location: createLocation(filePath, symbol.line, symbol.col),
             severity: convertSeverity(issue.severity),
-            fingerprint: createFingerprint(filePath, symbol.symbol, hashes),
+            fingerprint: createFingerprint(filePath, symbol.symbol),
           }))
         );
       } else {
@@ -39,7 +38,7 @@ export default async ({ report, issues }: ReporterOptions) => {
           categories: ['Bug Risk'],
           location: createLocation(filePath, issue.line, issue.col),
           severity: convertSeverity(issue.severity),
-          fingerprint: createFingerprint(filePath, issue.symbol, hashes),
+          fingerprint: createFingerprint(filePath, issue.symbol),
         });
       }
     }
@@ -106,26 +105,11 @@ function createLocation(filePath: string, line?: number, col?: number): codeclim
   };
 }
 
-function createFingerprint(filePath: string, message: string, hashes: Set<string>): string {
+function createFingerprint(filePath: string, message: string): string {
   const md5 = createHash('md5');
 
   md5.update(toRelative(filePath));
   md5.update(message);
-
-  // Create copy of hash since md5.digest() will finalize it, not allowing us to .update() again
-  let md5Tmp = md5.copy();
-  let hash = md5Tmp.digest('hex');
-
-  while (hashes.has(hash)) {
-    // Hash collision. This happens if we encounter the same ESLint message in one file
-    // multiple times. Keep generating new hashes until we get a unique one.
-    md5.update(hash);
-
-    md5Tmp = md5.copy();
-    hash = md5Tmp.digest('hex');
-  }
-
-  hashes.add(hash);
 
   return md5.digest('hex');
 }
