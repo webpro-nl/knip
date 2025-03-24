@@ -64,6 +64,7 @@ import { default as semanticRelease } from './semantic-release/index.js';
 import { default as sentry } from './sentry/index.js';
 import { default as simpleGitHooks } from './simple-git-hooks/index.js';
 import { default as sizeLimit } from './size-limit/index.js';
+import { default as sst } from './sst/index.js';
 import { default as storybook } from './storybook/index.js';
 import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
@@ -158,6 +159,7 @@ export const Plugins = {
   sentry,
   'simple-git-hooks': simpleGitHooks,
   'size-limit': sizeLimit,
+  sst,
   storybook,
   stryker,
   stylelint,
