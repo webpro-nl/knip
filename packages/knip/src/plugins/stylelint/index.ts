@@ -16,7 +16,7 @@ const config = ['package.json', ...toCosmiconfig('stylelint')];
 
 const resolve = (config: StyleLintConfig | BaseStyleLintConfig): Input[] => {
   const extend = config.extends ?? [];
-  const plugins = config.plugins ?? [];
+  const plugins = config.plugins?.flatMap((plugin) => typeof plugin === 'string' ? [plugin] : []) ?? [];
   const customSyntax: string[] = typeof config.customSyntax === 'string' ? [config.customSyntax] : [];
 
   const overrideConfigs = 'overrides' in config ? config.overrides.flatMap(resolve) : [];
