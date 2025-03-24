@@ -72,6 +72,7 @@ export type PluginName =
   | 'svelte'
   | 'syncpack'
   | 'tailwind'
+  | 'tanstack-router'
   | 'travis'
   | 'ts-node'
   | 'tsup'
@@ -166,6 +167,7 @@ export const pluginNames = [
   'svelte',
   'syncpack',
   'tailwind',
+  'tanstack-router',
   'travis',
   'ts-node',
   'tsup',
