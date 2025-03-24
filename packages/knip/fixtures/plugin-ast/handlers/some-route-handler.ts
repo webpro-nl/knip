@@ -1,0 +1,1 @@
+import 'sst-some-dep';

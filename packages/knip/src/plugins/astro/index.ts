@@ -1,6 +1,8 @@
-import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
+import type ts from 'typescript';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveFromAST } from '../../types/config.js';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
+import { getComponentPathsFromSourceFile } from './resolveFromAST.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -10,7 +12,9 @@ const enablers = ['astro'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts', 'src/content.config.ts'];
+const config = ['astro.config.{js,cjs,mjs,ts}'];
+
+const entry = ['src/content/config.ts', 'src/content.config.ts'];
 
 const production = [
   'src/pages/**/*.{astro,mdx,js,ts}',
@@ -18,6 +22,11 @@ const production = [
   'src/middleware.{js,ts}',
   'src/actions/index.{js,ts}',
 ];
+
+const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
+  const componentPaths = getComponentPathsFromSourceFile(sourceFile);
+  return [...entry.map(toEntry), ...[...production, ...componentPaths].map(id => toProductionEntry(id))];
+};
 
 const resolve: Resolve = options => {
   const { manifest, isProduction } = options;
@@ -38,7 +47,9 @@ export default {
   title,
   enablers,
   isEnabled,
+  config,
   entry,
   production,
   resolve,
+  resolveFromAST,
 } satisfies Plugin;
