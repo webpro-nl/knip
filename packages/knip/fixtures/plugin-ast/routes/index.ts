@@ -1,0 +1,1 @@
+import '@tanstack/react-router';

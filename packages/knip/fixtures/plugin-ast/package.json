@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/plugin-ast",
+  "dependencies": {
+    "@tanstack/react-router": "*",
+    "@tanstack/router-plugin": "*",
+    "@vitejs/plugin-react": "*",
+    "astro": "*",
+    "next": "*",
+    "sst": "*",
+    "vite": "*"
+  }
+}
