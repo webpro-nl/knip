@@ -12,8 +12,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) =>
 
 const entry = [
   "sst.config.{js,cjs,mjs,ts}",
-  "{handlers,lambdas}/*.{js,cjs,mjs,ts}",
-  "src/{handlers,lambdas}/*.{js,cjs,mjs,ts}",
+  "{handlers,lambdas}/**/*.{js,cjs,mjs,ts}",
+  "src/{handlers,lambdas}/**/*.{js,cjs,mjs,ts}",
 ];
 
 export default {
