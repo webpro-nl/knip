@@ -17,13 +17,12 @@ const config = ['playwright.config.{js,ts,mjs}'];
 export const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
 const toEntryPatterns = (
-  testMatch: string | RegExp | Array<string | RegExp> | undefined,
+  testMatch: string | RegExp | Array<string | RegExp>,
   cwd: string,
   configDir: string,
   localConfig: PlaywrightTestConfig,
   rootConfig: PlaywrightTestConfig
 ) => {
-  if (!testMatch) return [];
   const testDir = localConfig.testDir ?? rootConfig.testDir;
   const dir = relative(cwd, testDir ? join(configDir, testDir) : configDir);
   const patterns = [testMatch].flat().filter((p): p is string => typeof p === 'string');
@@ -35,7 +34,9 @@ const builtinReporters = ['dot', 'line', 'list', 'junit', 'html', 'blob', 'json'
 export const resolveEntryPaths: ResolveEntryPaths<PlaywrightTestConfig> = async (localConfig, options) => {
   const { cwd, configFileDir } = options;
   const projects = localConfig.projects ? [localConfig, ...localConfig.projects] : [localConfig];
-  return projects.flatMap(config => toEntryPatterns(config.testMatch, cwd, configFileDir, config, localConfig));
+  return projects.flatMap(config =>
+    toEntryPatterns(config.testMatch ?? entry, cwd, configFileDir, config, localConfig)
+  );
 };
 
 export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async config => {
