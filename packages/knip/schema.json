@@ -551,6 +551,10 @@
           "title": "size-limit plugin configuration (https://knip.dev/reference/plugins/size-limit)",
           "$ref": "#/definitions/plugin"
         },
+        "sst": {
+          "title": "sst plugin configuration (https://knip.dev/reference/plugins/sst)",
+          "$ref": "#/definitions/plugin"
+        },
         "storybook": {
           "title": "Storybook plugin configuration (https://knip.dev/reference/plugins/storybook)",
           "$ref": "#/definitions/plugin"

@@ -78,6 +78,7 @@ export const pluginsSchema = z.object({
   sentry: pluginSchema,
   'simple-git-hooks': pluginSchema,
   'size-limit': pluginSchema,
+  sst: pluginSchema,
   storybook: pluginSchema,
   stryker: pluginSchema,
   stylelint: pluginSchema,
