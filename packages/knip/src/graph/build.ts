@@ -134,6 +134,7 @@ export async function build({
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
+      getSourceFile: (filePath: string) => principal.backend.fileManager.getSourceFile(filePath),
       isCache,
       cacheLocation,
       allConfigFilePaths,
@@ -158,12 +159,6 @@ export async function build({
     const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { ...sharedGlobOptions, ignore });
     for (const id of entryPathsFromManifest.map(id => toProductionEntry(id))) inputs.add(id);
 
-    // Get dependencies from plugins
-    const inputsFromPlugins = await worker.runPlugins();
-    for (const id of inputsFromPlugins) inputs.add(id);
-
-    enabledPluginsStore.set(name, worker.enabledPlugins);
-
     // workspace + worker → principal
     const principal = factory.createPrincipal({
       cwd: dir,
@@ -179,6 +174,12 @@ export async function build({
       isCache,
       cacheLocation,
     });
+
+    // Get dependencies from plugins
+    const inputsFromPlugins = await worker.runPlugins();
+    for (const id of inputsFromPlugins) inputs.add(id);
+
+    enabledPluginsStore.set(name, worker.enabledPlugins);
 
     const entryFilePatterns = new Set<string>();
     const productionEntryFilePatterns = new Set<string>();

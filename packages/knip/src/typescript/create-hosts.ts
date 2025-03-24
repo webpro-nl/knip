@@ -5,7 +5,7 @@ import ts from 'typescript';
 import { getCompilerExtensions } from '../compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
-import { SourceFileManager } from './SourceFileManager.js';
+import type { SourceFileManager } from './SourceFileManager.js';
 import { createCustomModuleResolver } from './resolve-module-names.js';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
@@ -18,18 +18,19 @@ type CreateHostsOptions = {
   isSkipLibs: boolean;
   toSourceFilePath: ToSourceFilePath;
   useResolverCache: boolean;
+  fileManager: SourceFileManager;
 };
 
 export const createHosts = ({
   cwd,
   compilerOptions,
+  fileManager,
   entryPaths,
   compilers,
   isSkipLibs,
   toSourceFilePath,
   useResolverCache,
 }: CreateHostsOptions) => {
-  const fileManager = new SourceFileManager({ compilers, isSkipLibs });
   const compilerExtensions = getCompilerExtensions(compilers);
   const resolveModuleNames = createCustomModuleResolver(
     compilerOptions,
