@@ -40,6 +40,7 @@ export default defineConfig({
         github: 'https://github.com/webpro-nl/knip',
         discord: 'https://discord.gg/r5uXTtbTpc',
         blueSky: 'https://bsky.app/profile/webpro.nl',
+        npm: 'https://www.npmjs.com/package/knip',
       },
       components: {
         Head: './src/components/Head.astro',
