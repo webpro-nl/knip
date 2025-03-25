@@ -20,10 +20,10 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => {
 const entry = ['nuxt.config.{js,mjs,ts}'];
 
 const production = [
-  'app.vue',
-  'error.vue',
-  'pages/**/*.vue',
-  'layouts/default.vue',
+  'app.{vue,jsx,tsx}',
+  'error.{vue,jsx,tsx}',
+  'pages/**/*.{vue,jsx,tsx}',
+  'layouts/default.{vue,jsx,tsx}',
   'middleware/**/*.ts',
   'server/api/**/*.ts',
   'server/routes/**/*.ts',
@@ -35,10 +35,10 @@ const resolveEntryPaths: ResolveEntryPaths<NuxtConfig> = async localConfig => {
   const srcDir = localConfig.srcDir ?? '.';
 
   const patterns = [
-    'app.vue',
-    'error.vue',
-    join(typeof localConfig.dir?.pages === 'string' ? localConfig.dir.pages : 'pages', '**/*.vue'),
-    join(typeof localConfig.dir?.layouts === 'string' ? localConfig.dir.layouts : 'layouts', '**/*.vue'),
+    'app.{vue,jsx,tsx}',
+    'error.{vue,jsx,tsx}',
+    join(typeof localConfig.dir?.pages === 'string' ? localConfig.dir.pages : 'pages', '**/*.{vue,jsx,tsx}'),
+    join(typeof localConfig.dir?.layouts === 'string' ? localConfig.dir.layouts : 'layouts', '**/*.{vue,jsx,tsx}'),
     join(typeof localConfig.dir?.middleware === 'string' ? localConfig.dir.middleware : 'middleware', '**/*.ts'),
     'server/api/**/*.ts',
     'server/routes/**/*.ts',

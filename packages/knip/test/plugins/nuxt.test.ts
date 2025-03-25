@@ -20,7 +20,7 @@ test('Find dependencies with the nuxt plugin', async () => {
     ...baseCounters,
     dependencies: 1,
     exports: 1,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });
