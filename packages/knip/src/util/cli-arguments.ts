@@ -5,7 +5,7 @@ export const helpText = `✂️  Find unused files, dependencies and exports in 
 Usage: knip [options]
 
 Options:
-  -c, --config [file]      Configuration file path (default: [.]knip.json[c], knip.js, knip.ts or package.json#knip)
+  -c, --config [file]      Configuration file path (default: [.]knip.json[c], knip.(js|ts), knip.config.(js|ts) or package.json#knip)
   -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
   --production             Analyze only production source files (e.g. no test files, devDependencies)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)

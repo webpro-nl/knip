@@ -81,7 +81,10 @@ page about [entry files][2].
 
 ## Configuration Options
 
-See the [configuration reference documentation][3].
+See [configuration file options][3].
+
+To use JavaScript or TypeScript in the configuration file, see [dynamic
+configuration][4].
 
 ## What's next?
 
@@ -90,19 +93,20 @@ in the "Understanding Knip" sections, starting with [entry files][2].
 
 Want to learn more about some of the main features?
 
-- Working with [monorepos & workspaces][4].
-- Learn more about [production mode][5].
+- Working with [monorepos & workspaces][5].
+- Learn more about [production mode][6].
 
 Having troubles configuring Knip?
 
 - [Configuring project files][1]
-- [Handling issues][6]
+- [Handling issues][7]
 
 Search this website using the bar at the top (`Ctrl+K` or `⌘+K`).
 
 [1]: ../guides/configuring-project-files.md
 [2]: ../explanations/entry-files.md
 [3]: ../reference/configuration.md
-[4]: ../features/monorepos-and-workspaces.md
-[5]: ../features/production-mode.md
-[6]: ../guides/handling-issues.md
+[4]: ../reference/dynamic-configuration.mdx
+[5]: ../features/monorepos-and-workspaces.md
+[6]: ../features/production-mode.md
+[7]: ../guides/handling-issues.md
