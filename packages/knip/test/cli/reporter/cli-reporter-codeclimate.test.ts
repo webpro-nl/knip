@@ -13,7 +13,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'unusedNumber',
+      description: 'Unused export: unusedNumber',
       categories: ['Bug Risk'],
       location: { path: 'my-module.ts', positions: { begin: { line: 23, column: 14 }, end: { line: 23, column: 14 } } },
       severity: 'major',
@@ -21,7 +21,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'unusedFunction',
+      description: 'Unused export: unusedFunction',
       categories: ['Bug Risk'],
       location: { path: 'my-module.ts', positions: { begin: { line: 24, column: 14 }, end: { line: 24, column: 14 } } },
       severity: 'major',
@@ -29,7 +29,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'default',
+      description: 'Unused export: default',
       categories: ['Bug Risk'],
       location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 8 }, end: { line: 30, column: 8 } } },
       severity: 'major',
@@ -37,7 +37,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'renamedExport',
+      description: 'Unused export: renamedExport',
       categories: ['Bug Risk'],
       location: {
         path: 'named-exports.ts',
@@ -48,7 +48,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'namedExport',
+      description: 'Unused export: namedExport',
       categories: ['Bug Risk'],
       location: {
         path: 'named-exports.ts',
@@ -59,7 +59,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'unusedZero',
+      description: 'Unused export: unusedZero',
       categories: ['Bug Risk'],
       location: {
         path: 'dynamic-import.ts',
@@ -70,7 +70,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'unusedInMix',
+      description: 'Unused export: unusedInMix',
       categories: ['Bug Risk'],
       location: { path: 'my-mix.ts', positions: { begin: { line: 1, column: 14 }, end: { line: 1, column: 14 } } },
       severity: 'major',
@@ -78,7 +78,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'NamedExport',
+      description: 'Unused export: NamedExport',
       categories: ['Bug Risk'],
       location: { path: 'default.ts', positions: { begin: { line: 1, column: 14 }, end: { line: 1, column: 14 } } },
       severity: 'major',
@@ -86,7 +86,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exports',
-      description: 'nsUnusedKey (MyNamespace)',
+      description: 'Unused export: nsUnusedKey (MyNamespace)',
       categories: ['Bug Risk'],
       location: {
         path: 'my-namespace.ts',
@@ -97,7 +97,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exported types',
-      description: 'MyAnyType',
+      description: 'Unused exported type: MyAnyType',
       categories: ['Bug Risk'],
       location: { path: 'my-module.ts', positions: { begin: { line: 28, column: 13 }, end: { line: 28, column: 13 } } },
       severity: 'major',
@@ -105,7 +105,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exported types',
-      description: 'MyEnum',
+      description: 'Unused exported type: MyEnum',
       categories: ['Bug Risk'],
       location: { path: 'types.ts', positions: { begin: { line: 3, column: 13 }, end: { line: 3, column: 13 } } },
       severity: 'major',
@@ -113,7 +113,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exported types',
-      description: 'MyType',
+      description: 'Unused exported type: MyType',
       categories: ['Bug Risk'],
       location: { path: 'types.ts', positions: { begin: { line: 8, column: 14 }, end: { line: 8, column: 14 } } },
       severity: 'major',
@@ -121,7 +121,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Unused exported types',
-      description: 'MyNamespace (MyNamespace)',
+      description: 'Unused exported type: MyNamespace (MyNamespace)',
       categories: ['Bug Risk'],
       location: {
         path: 'my-namespace.ts',
@@ -132,7 +132,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Duplicate exports',
-      description: 'exportedResult',
+      description: 'Duplicate export: exportedResult',
       categories: ['Duplication'],
       location: { path: 'my-module.ts', positions: { begin: { line: 26, column: 13 }, end: { line: 26, column: 13 } } },
       severity: 'major',
@@ -140,7 +140,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     {
       type: 'issue',
       check_name: 'Duplicate exports',
-      description: 'default',
+      description: 'Duplicate export: default',
       categories: ['Duplication'],
       location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 15 }, end: { line: 30, column: 15 } } },
       severity: 'major',
@@ -151,6 +151,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     fingerprint: string;
     [key: string]: unknown;
   }[];
+
   const issuesWithoutFingerprints = issues.map(issue => {
     return assertAndRemoveProperty(issue, 'fingerprint', fingerprint => assert.match(fingerprint, /[a-f0-9]{32}/));
   });

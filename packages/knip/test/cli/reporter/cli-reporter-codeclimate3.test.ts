@@ -13,7 +13,7 @@ test('knip --reporter codeclimate (enum members)', () => {
     {
       type: 'issue',
       check_name: 'Unused exported enum members',
-      description: 'B_Unused (MyEnum)',
+      description: 'Unused exported enum member: B_Unused (MyEnum)',
       categories: ['Bug Risk'],
       location: { path: 'members.ts', positions: { begin: { line: 9, column: 3 }, end: { line: 9, column: 3 } } },
       severity: 'major',
@@ -21,7 +21,7 @@ test('knip --reporter codeclimate (enum members)', () => {
     {
       type: 'issue',
       check_name: 'Unused exported enum members',
-      description: 'D_Key (MyEnum)',
+      description: 'Unused exported enum member: D_Key (MyEnum)',
       categories: ['Bug Risk'],
       location: { path: 'members.ts', positions: { begin: { line: 11, column: 3 }, end: { line: 11, column: 3 } } },
       severity: 'major',
@@ -32,6 +32,7 @@ test('knip --reporter codeclimate (enum members)', () => {
     fingerprint: string;
     [key: string]: unknown;
   }[];
+
   const issuesWithoutFingerprints = issues.map(issue => {
     return assertAndRemoveProperty(issue, 'fingerprint', fingerprint => assert.match(fingerprint, /[a-f0-9]{32}/));
   });

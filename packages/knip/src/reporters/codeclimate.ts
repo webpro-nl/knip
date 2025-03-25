@@ -1,7 +1,16 @@
 import { createHash } from 'node:crypto';
 import type * as codeclimate from 'codeclimate-types';
 import type { Entries } from 'type-fest';
-import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, Report, ReporterOptions } from '../types/issues.js';
+import { ISSUE_TYPE_TITLE } from '../constants.js';
+import type {
+  Issue,
+  IssueRecords,
+  IssueSeverity,
+  IssueSymbol,
+  Report,
+  ReporterOptions,
+  SymbolIssueType,
+} from '../types/issues.js';
 import { toRelative } from '../util/path.js';
 import { getTitle } from './util.js';
 
@@ -23,7 +32,7 @@ export default async ({ report, issues }: ReporterOptions) => {
           ...issue.symbols.map<codeclimate.Issue>(symbol => ({
             type: 'issue',
             check_name: getTitle(fixedType),
-            description: getSymbolDescription({ symbol, parentSymbol: issue.parentSymbol }),
+            description: getSymbolDescription({ type: issue.type, symbol, parentSymbol: issue.parentSymbol }),
             categories: ['Duplication'],
             location: createLocation(filePath, symbol.line, symbol.col),
             severity: convertSeverity(issue.severity),
@@ -60,23 +69,28 @@ function convertSeverity(severity?: IssueSeverity): codeclimate.Severity {
   switch (severity) {
     case 'error':
       return 'major';
-
     case 'warn':
       return 'minor';
-
     default:
       return 'info';
   }
 }
 
-function getIssueDescription({ symbol, symbols, parentSymbol }: Issue) {
-  const symbolDescription = symbols ? `${symbols.map(s => s.symbol).join(', ')}` : symbol;
-
-  return `${symbolDescription}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+function getPrefix(type: SymbolIssueType) {
+  return ISSUE_TYPE_TITLE[type].replace(/ies$/, 'y').replace(/s$/, '');
 }
 
-function getSymbolDescription({ symbol, parentSymbol }: { symbol: IssueSymbol; parentSymbol?: string }) {
-  return `${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+function getIssueDescription({ type, symbol, symbols, parentSymbol }: Issue) {
+  const symbolDescription = symbols ? `${symbols.map(s => s.symbol).join(', ')}` : symbol;
+  return `${getPrefix(type)}: ${symbolDescription}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+}
+
+function getSymbolDescription({
+  type,
+  symbol,
+  parentSymbol,
+}: { type: SymbolIssueType; symbol: IssueSymbol; parentSymbol?: string }) {
+  return `${getPrefix(type)}: ${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
 }
 
 function createLocation(filePath: string, line?: number, col?: number): codeclimate.Location {

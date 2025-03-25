@@ -13,7 +13,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
     {
       categories: ['Bug Risk'],
       check_name: 'Unused files',
-      description: 'src/unused.ts',
+      description: 'Unused file: src/unused.ts',
       location: { path: 'src/unused.ts', lines: { begin: 0, end: 0 } },
       severity: 'major',
       type: 'issue',
@@ -21,7 +21,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
     {
       type: 'issue',
       check_name: 'Unlisted dependencies',
-      description: 'unresolved',
+      description: 'Unlisted dependency: unresolved',
       categories: ['Bug Risk'],
       location: { path: 'src/index.ts', lines: { begin: 0, end: 0 } },
       severity: 'major',
@@ -29,7 +29,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
     {
       type: 'issue',
       check_name: 'Unlisted dependencies',
-      description: '@org/unresolved',
+      description: 'Unlisted dependency: @org/unresolved',
       categories: ['Bug Risk'],
       location: { path: 'src/index.ts', lines: { begin: 0, end: 0 } },
       severity: 'major',
@@ -37,7 +37,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
     {
       type: 'issue',
       check_name: 'Unresolved imports',
-      description: './unresolved',
+      description: 'Unresolved import: ./unresolved',
       categories: ['Bug Risk'],
       location: { path: 'src/index.ts', positions: { begin: { line: 8, column: 23 }, end: { line: 8, column: 23 } } },
       severity: 'major',
@@ -48,6 +48,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
     fingerprint: string;
     [key: string]: unknown;
   }[];
+
   const issuesWithoutFingerprints = issues.map(issue => {
     return assertAndRemoveProperty(issue, 'fingerprint', fingerprint => assert.match(fingerprint, /[a-f0-9]{32}/));
   });

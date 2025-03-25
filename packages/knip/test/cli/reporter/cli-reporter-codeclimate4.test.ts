@@ -13,7 +13,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
     {
       categories: ['Bug Risk'],
       check_name: 'Unused files',
-      description: 'unused-module.ts',
+      description: 'Unused file: unused-module.ts',
       location: { path: 'unused-module.ts', lines: { begin: 0, end: 0 } },
       severity: 'major',
       type: 'issue',
@@ -21,7 +21,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
     {
       type: 'issue',
       check_name: 'Unused dependencies',
-      description: '@tootallnate/once',
+      description: 'Unused dependency: @tootallnate/once',
       categories: ['Bug Risk'],
       location: { path: 'package.json', positions: { begin: { line: 8, column: 6 }, end: { line: 8, column: 6 } } },
       severity: 'major',
@@ -29,7 +29,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
     {
       type: 'issue',
       check_name: 'Unused dependencies',
-      description: 'fs-extra',
+      description: 'Unused dependency: fs-extra',
       categories: ['Bug Risk'],
       location: { path: 'package.json', positions: { begin: { line: 10, column: 6 }, end: { line: 10, column: 6 } } },
       severity: 'major',
@@ -37,7 +37,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
     {
       type: 'issue',
       check_name: 'Unused devDependencies',
-      description: 'mocha',
+      description: 'Unused devDependency: mocha',
       categories: ['Bug Risk'],
       location: { path: 'package.json', positions: { begin: { line: 23, column: 6 }, end: { line: 23, column: 6 } } },
       severity: 'major',
@@ -45,7 +45,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
     {
       type: 'issue',
       check_name: 'Unlisted binaries',
-      description: 'jest',
+      description: 'Unlisted binary: jest',
       categories: ['Bug Risk'],
       location: { path: 'package.json', lines: { begin: 0, end: 0 } },
       severity: 'major',
@@ -53,7 +53,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
     {
       type: 'issue',
       check_name: 'Unlisted binaries',
-      description: 'start-server',
+      description: 'Unlisted binary: start-server',
       categories: ['Bug Risk'],
       location: { path: 'package.json', lines: { begin: 0, end: 0 } },
       severity: 'major',
@@ -64,6 +64,7 @@ test('knip --reporter codeclimate (dependencies)', () => {
     fingerprint: string;
     [key: string]: unknown;
   }[];
+
   const issuesWithoutFingerprints = issues.map(issue => {
     return assertAndRemoveProperty(issue, 'fingerprint', fingerprint => assert.match(fingerprint, /[a-f0-9]{32}/));
   });
