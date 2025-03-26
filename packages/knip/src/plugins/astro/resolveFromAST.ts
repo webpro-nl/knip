@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { stripQuotes } from '../../typescript/ast-helpers.js';
+import { getPropertyValues, stripQuotes } from '../../typescript/ast-helpers.js';
 
 export const getComponentPathsFromSourceFile = (sourceFile: ts.SourceFile) => {
   const componentPaths: Set<string> = new Set();
@@ -14,18 +14,8 @@ export const getComponentPathsFromSourceFile = (sourceFile: ts.SourceFile) => {
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === starlightImportName) {
       const firstArg = node.arguments[0];
       if (ts.isObjectLiteralExpression(firstArg)) {
-        const prop = firstArg.properties.find(p => ts.isPropertyAssignment(p) && p.name.getText() === 'components');
-
-        if (prop && ts.isPropertyAssignment(prop)) {
-          const componentsObj = prop.initializer;
-          if (ts.isObjectLiteralExpression(componentsObj)) {
-            for (const prop of componentsObj.properties) {
-              if (ts.isPropertyAssignment(prop)) {
-                if (ts.isStringLiteral(prop.initializer)) componentPaths.add(stripQuotes(prop.initializer.getText()));
-              }
-            }
-          }
-        }
+        const values = getPropertyValues(firstArg, 'components');
+        for (const value of values) componentPaths.add(value);
       }
     }
 

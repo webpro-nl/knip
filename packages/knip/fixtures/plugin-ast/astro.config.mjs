@@ -5,8 +5,8 @@ export default defineConfig({
   integrations: [
     starlight({
       components: {
-        Head: './src/components/Head.astro',
-        Footer: './src/components/Footer.astro',
+        Head: './components/Head.astro',
+        Footer: './components/Footer.astro',
       },
     }),
   ],
