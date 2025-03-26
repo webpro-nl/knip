@@ -15,6 +15,7 @@ test('Find dependencies with Webpack plugin', async () => {
 
   assert(issues.files.has(join(cwd, 'src/unused.ts')));
   assert(issues.devDependencies['package.json']['@babel/plugin-proposal-object-rest-spread']);
+  assert(issues.devDependencies['package.json']['buffer']);
   assert(issues.unresolved['webpack.config.js']['svgo-loader']);
   assert(issues.unlisted['webpack.dev.js']['eslint-webpack-plugin']);
   assert(issues.unlisted['webpack.prod.js']['terser-webpack-plugin']);
@@ -22,10 +23,10 @@ test('Find dependencies with Webpack plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
-    devDependencies: 1,
+    devDependencies: 2,
     unlisted: 2,
     unresolved: 1,
-    processed: 11,
-    total: 11,
+    processed: 12,
+    total: 12,
   });
 });

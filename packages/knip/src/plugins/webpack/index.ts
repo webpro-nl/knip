@@ -13,7 +13,7 @@ import { isInternal } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { BabelConfigObj } from '../babel/types.js';
-import type { Argv, Env, WebpackConfig } from './types.js';
+import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.js';
 
 // https://webpack.js.org/configuration/
 
@@ -80,6 +80,18 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
 
       for (const loader of options.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
         inputs.add(toDeferResolve(loader.replace(/\?.*/, '')));
+      }
+
+      for (const plugin of options?.plugins ?? []) {
+        if (plugin && plugin.constructor.name === 'ProvidePlugin') {
+          const providePluginInstance = plugin as ProvidePlugin;
+          if (providePluginInstance.definitions) {
+            for (const values of Object.values(providePluginInstance.definitions)) {
+              const specifier = typeof values === 'string' ? values : values[0];
+              inputs.add(toDeferResolve(specifier));
+            }
+          }
+        }
       }
 
       if (typeof options.entry === 'string') entries.push(options.entry);

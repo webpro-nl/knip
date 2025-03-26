@@ -1,4 +1,4 @@
-const { basename } = require('node:path');
+const path = require('node:path');
 const esbuild = require('esbuild');
 const HtmlMinimizerPlugin = require('html-minimizer-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -61,7 +61,7 @@ module.exports = () => {
           options: {
             plugins: [
               {
-                cleanupIDs: { prefix: basename(info.resource) },
+                cleanupIDs: { prefix: path.basename(info.resource) },
               },
             ],
           },
@@ -86,7 +86,13 @@ module.exports = () => {
     plugins: [
       new MiniCssExtractPlugin(),
       new webpack.ProvidePlugin({
+        identifier1: 'module1',
+        identifier2: ['module2', 'property'],
+        identifier3: path.resolve(path.join(__dirname, 'src/module1')),
         Buffer: ['buffer', 'Buffer'],
+        _map: ['lodash', 'map'],
+        'window.jQuery': 'jquery',
+        Vue: ['vue/dist/vue.esm.js', 'default'],
       }),
     ],
     optimization: {
