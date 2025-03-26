@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
-import { toEntry } from '../../util/input.js';
+import { toEntry, toProductionEntry } from '../../util/input.js';
 
 const title = 'Node.js';
 
@@ -13,13 +13,14 @@ const packageJsonPath = (id: PackageJson) => id;
 const resolveEntryPaths: ResolveEntryPaths<PackageJson> = localConfig => {
   const scripts = localConfig.scripts;
 
-  const entry = ['server.js'];
+  const entries = [toProductionEntry('server.js')];
 
   if (scripts && Object.keys(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(scripts[script]))) {
-    entry.push(...['**/*{.,-,_}test.?(c|m)js', '**/test-*.?(c|m)js', '**/test.?(c|m)js', '**/test/**/*.?(c|m)js']);
+    const patterns = ['**/*{.,-,_}test.?(c|m)js', '**/test-*.?(c|m)js', '**/test.?(c|m)js', '**/test/**/*.?(c|m)js'];
+    entries.push(...patterns.map(toEntry));
   }
 
-  return entry.map(toEntry);
+  return entries;
 };
 
 const args = {
