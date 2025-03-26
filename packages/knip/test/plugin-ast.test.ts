@@ -23,7 +23,7 @@ test('Allow plugins to implement resolveEntryPathsFromAST and get inputs from so
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 7,
-    total: 11,
-    processed: 11,
+    total: 13,
+    processed: 13,
   });
 });

@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { getPropertyValueEntries } from '../../typescript/ast-helpers.js';
 
 const CONFIG_KEYS = new Set([
   'routeFilePrefix',
@@ -19,15 +20,7 @@ export const getCustomConfig = (sourceFile: ts.SourceFile) => {
       if (ts.isIdentifier(callee) && FUNCTIONS.has(callee.text)) {
         const firstArg = node.arguments[0];
         if (ts.isObjectLiteralExpression(firstArg)) {
-          for (const prop of firstArg.properties) {
-            if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
-              if (CONFIG_KEYS.has(prop.name.text)) {
-                if (ts.isStringLiteral(prop.initializer)) {
-                  config[prop.name.text] = prop.initializer.text;
-                }
-              }
-            }
-          }
+          for (const [key, value] of getPropertyValueEntries(firstArg, CONFIG_KEYS)) config[key] = value;
         }
       }
     }

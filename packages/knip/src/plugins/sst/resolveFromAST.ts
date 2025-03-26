@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import type { ResolveFromAST } from '../../types/config.js';
-import { stripQuotes } from '../../typescript/ast-helpers.js';
-import { type Input, toDeferResolveProductionEntry } from '../../util/input.js';
+import { getImportMap, getPropertyValues } from '../../typescript/ast-helpers.js';
+import { toDeferResolveProductionEntry } from '../../util/input.js';
 
 export const getInputsFromHandlers: ResolveFromAST = (
   sourceFile,
@@ -9,26 +9,14 @@ export const getInputsFromHandlers: ResolveFromAST = (
   getSourceFile,
   getReferencedInternalFilePath
 ) => {
-  const entries: Input[] = [];
-  const importMap = new Map<string, string>();
-
-  // Unbound sourceFile.imports isn't available, maybe create helper
-  for (const statement of sourceFile.statements) {
-    if (ts.isImportDeclaration(statement)) {
-      const importClause = statement.importClause;
-      const importPath = stripQuotes(statement.moduleSpecifier.getText());
-      if (importClause?.name) importMap.set(importClause.name.text, importPath);
-      if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
-        for (const element of importClause.namedBindings.elements) importMap.set(element.name.text, importPath);
-      }
-    }
-  }
+  const entries = new Set<string>();
+  const importMap = getImportMap(sourceFile);
 
   // Maybe too broad, returns string value of any `handler` property in file (although misses are likely ignored)
   function addHandlerSpecifiers(node: ts.Node) {
-    if (ts.isPropertyAssignment(node) && node.name.getText() === 'handler' && ts.isStringLiteral(node.initializer)) {
-      const specifier = stripQuotes(node.initializer.getText());
-      entries.push(toDeferResolveProductionEntry(specifier, { containingFilePath: options.configFilePath }));
+    if (ts.isObjectLiteralExpression(node)) {
+      const specifiers = getPropertyValues(node, 'handler');
+      for (const specifier of specifiers) entries.add(specifier);
     }
     ts.forEachChild(node, addHandlerSpecifiers);
   }
@@ -48,7 +36,6 @@ export const getInputsFromHandlers: ResolveFromAST = (
           const input = toDeferResolveProductionEntry(importPath, { containingFilePath: options.configFilePath });
           const resolvedPath = getReferencedInternalFilePath(input); // Resolve here as well so we can `getSourceFile`
           if (resolvedPath) {
-            entries.push(input);
             const stackFile = getSourceFile(resolvedPath);
             if (stackFile) ts.forEachChild(stackFile, addHandlerSpecifiers);
           }
@@ -60,5 +47,7 @@ export const getInputsFromHandlers: ResolveFromAST = (
 
   ts.forEachChild(sourceFile, visit);
 
-  return entries;
+  return Array.from(entries).map(specifier =>
+    toDeferResolveProductionEntry(specifier, { containingFilePath: options.configFilePath })
+  );
 };
