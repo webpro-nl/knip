@@ -9,8 +9,6 @@ export default defineConfig({
       autoCodeSplitting: true,
       routesDirectory: './routes',
       generatedRouteTree: './gen/routeTree.gen.ts',
-      // routeFileIgnorePrefix: '-',
-      // quoteStyle: 'single',
     }),
     react(),
   ],
