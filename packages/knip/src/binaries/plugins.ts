@@ -43,7 +43,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
     if (isGlobLike(id)) positionals.push(toEntry(id));
     else {
       if (id.includes('node_modules/.bin/')) positionals.push(toBinary(extractBinary(id)));
-      else positionals.push(toDeferResolveEntry(id));
+      else positionals.push(toDeferResolveEntry(id, { optional: true }));
     }
   }
 

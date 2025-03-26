@@ -195,7 +195,7 @@ export async function build({
           if (isDeferResolveProductionEntry(input)) {
             productionEntryFilePatterns.add(resolvedFilePath);
           } else if (isDeferResolveEntry(input)) {
-            entryFilePatterns.add(resolvedFilePath);
+            if (!isProduction || !input.optional) entryFilePatterns.add(resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: true });
           }
