@@ -3,12 +3,8 @@ import type { ResolveFromAST } from '../../types/config.js';
 import { getImportMap, getPropertyValues } from '../../typescript/ast-helpers.js';
 import { toDeferResolveProductionEntry } from '../../util/input.js';
 
-export const getInputsFromHandlers: ResolveFromAST = (
-  sourceFile,
-  options,
-  getSourceFile,
-  getReferencedInternalFilePath
-) => {
+export const getInputsFromHandlers: ResolveFromAST = (sourceFile, options) => {
+  const { getSourceFile, getReferencedInternalFilePath } = options;
   const entries = new Set<string>();
   const importMap = getImportMap(sourceFile);
 

@@ -13,8 +13,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['sst.config.ts'];
 
-const resolveFromAST: ResolveFromAST = (sourceFile, options, getSourceFile, getReferencedInternalFilePath) => {
-  const inputs = getInputsFromHandlers(sourceFile, options, getSourceFile, getReferencedInternalFilePath);
+const resolveFromAST: ResolveFromAST = (sourceFile, options) => {
+  const inputs = getInputsFromHandlers(sourceFile, options);
   return inputs;
 };
 
