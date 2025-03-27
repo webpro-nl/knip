@@ -1,6 +1,6 @@
+import { match } from '@phenomnomnominal/tsquery';
 import ts from 'typescript';
 import { getPropertyValueEntries } from '../../typescript/ast-helpers.js';
-
 const CONFIG_KEYS = new Set([
   'routeFilePrefix',
   'routeFileIgnorePrefix',
@@ -11,24 +11,16 @@ const CONFIG_KEYS = new Set([
 
 const FUNCTIONS = new Set(['TanStackRouterVite', 'TanStackRouterRspack', 'TanStackRouterWebpack']);
 
+// Computes to CallExpression:has(Identifier[name=TanStackRouterVite],Identifier[name=TanStackRouterRspack],Identifier[name=TanStackRouterWebpack]):first-child > ObjectLiteralExpression
+const AST_QUERY = `CallExpression:has(${new Array(...FUNCTIONS.values()).map(functionName => `Identifier[name=${functionName}]`).join(',')}Identifier[name=TanStackRouterVite],Identifier[name=TanStackRouterRspack],Identifier[name=TanStackRouterWebpack]):first-child > ObjectLiteralExpression`;
+
 export const getCustomConfig = (sourceFile: ts.SourceFile) => {
   const config: Record<string, string> = {};
 
-  function visit(node: ts.Node) {
-    if (ts.isCallExpression(node)) {
-      const callee = node.expression;
-      if (ts.isIdentifier(callee) && FUNCTIONS.has(callee.text)) {
-        const firstArg = node.arguments[0];
-        if (ts.isObjectLiteralExpression(firstArg)) {
-          for (const [key, value] of getPropertyValueEntries(firstArg, CONFIG_KEYS)) config[key] = value;
-        }
-      }
-    }
-
-    ts.forEachChild(node, visit);
+  const configNode = match(sourceFile, AST_QUERY);
+  if (configNode.length > 0 && ts.isObjectLiteralExpression(configNode[0])) {
+    for (const [key, value] of getPropertyValueEntries(configNode[0], CONFIG_KEYS)) config[key] = value;
   }
-
-  visit(sourceFile);
 
   return config;
 };

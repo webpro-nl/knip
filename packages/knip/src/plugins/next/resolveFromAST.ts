@@ -1,19 +1,19 @@
+import { match } from '@phenomnomnominal/tsquery';
 import ts from 'typescript';
+
 import { getPropertyValues } from '../../typescript/ast-helpers.js';
 
 export const getPageExtensions = (sourceFile: ts.SourceFile) => {
   const pageExtensions: Set<string> = new Set();
 
-  function visit(node: ts.Node) {
-    if (ts.isObjectLiteralExpression(node)) {
-      const values = getPropertyValues(node, 'pageExtensions');
-      for (const value of values) pageExtensions.add(value);
+  const objectLiteralExpressions = match(sourceFile, 'ObjectLiteralExpression');
+  for (const objectLiteralExpression of objectLiteralExpressions) {
+    if (!ts.isObjectLiteralExpression(objectLiteralExpression)) {
+      continue;
     }
-
-    ts.forEachChild(node, visit);
+    const values = getPropertyValues(objectLiteralExpression, 'pageExtensions');
+    for (const value of values) pageExtensions.add(value);
   }
-
-  visit(sourceFile);
 
   return Array.from(pageExtensions);
 };
