@@ -22,7 +22,7 @@ const config = [
 
 const production = ['./src/routeTree.gen.ts', './src/routes/**/*.{ts,tsx}', '!src/routes/**/-*/**'];
 
-const get = (config: TanstackRouterConfig) => {
+const getEntryPatterns = (config: TanstackRouterConfig) => {
   const dir = config.routesDirectory ?? 'src/routes';
   const entries = [
     toEntry(join(config.generatedRouteTree ?? './src/routeTree.gen.ts')),
@@ -37,14 +37,13 @@ const get = (config: TanstackRouterConfig) => {
 
 const resolveEntryPaths: ResolveEntryPaths<TanstackRouterConfig> = (localConfig, options) => {
   if (extname(options.configFileName) !== '.json') return [];
-  const inputs = get(localConfig);
-  return inputs;
+  return getEntryPatterns(localConfig);
 };
 
 const resolveFromAST: ResolveFromAST = (sourceFile, options) => {
   if (extname(options.configFileName) === '.json') return [];
   const resolvedConfig = getCustomConfig(sourceFile);
-  return get(resolvedConfig);
+  return getEntryPatterns(resolvedConfig);
 };
 
 export default {
