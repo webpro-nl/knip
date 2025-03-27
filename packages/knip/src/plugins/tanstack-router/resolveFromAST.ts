@@ -12,7 +12,7 @@ const CONFIG_KEYS = new Set([
 const FUNCTIONS = new Set(['TanStackRouterVite', 'TanStackRouterRspack', 'TanStackRouterWebpack']);
 
 // Computes to CallExpression:has(Identifier[name=TanStackRouterVite],Identifier[name=TanStackRouterRspack],Identifier[name=TanStackRouterWebpack]):first-child > ObjectLiteralExpression
-const AST_QUERY = `CallExpression:has(${new Array(...FUNCTIONS.values()).map(functionName => `Identifier[name=${functionName}]`).join(',')}Identifier[name=TanStackRouterVite],Identifier[name=TanStackRouterRspack],Identifier[name=TanStackRouterWebpack]):first-child > ObjectLiteralExpression`;
+const AST_QUERY = `CallExpression:has(${new Array(...FUNCTIONS.values()).map(functionName => `Identifier[name=${functionName}]`).join(',')}):first-child > ObjectLiteralExpression`;
 
 export const getCustomConfig = (sourceFile: ts.SourceFile) => {
   const config: Record<string, string> = {};
