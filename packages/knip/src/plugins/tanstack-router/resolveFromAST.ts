@@ -1,4 +1,4 @@
-import { match } from '@phenomnomnominal/tsquery';
+import { query } from '@phenomnomnominal/tsquery';
 import ts from 'typescript';
 import { getPropertyValueEntries } from '../../typescript/ast-helpers.js';
 const CONFIG_KEYS = new Set([
@@ -17,7 +17,7 @@ const AST_QUERY = `CallExpression:has(${new Array(...FUNCTIONS.values()).map(fun
 export const getCustomConfig = (sourceFile: ts.SourceFile) => {
   const config: Record<string, string> = {};
 
-  const configNode = match(sourceFile, AST_QUERY);
+  const configNode = query(sourceFile, AST_QUERY);
   if (configNode.length > 0 && ts.isObjectLiteralExpression(configNode[0])) {
     for (const [key, value] of getPropertyValueEntries(configNode[0], CONFIG_KEYS)) config[key] = value;
   }

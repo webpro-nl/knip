@@ -1,4 +1,4 @@
-import { match } from '@phenomnomnominal/tsquery';
+import { query } from '@phenomnomnominal/tsquery';
 import ts from 'typescript';
 import { getDefaultImportName, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.js';
 
@@ -8,7 +8,7 @@ export const getComponentPathsFromSourceFile = (sourceFile: ts.SourceFile) => {
   const starlightImportName = getDefaultImportName(importMap, '@astrojs/starlight');
   const componentQuery = `CallExpression:has(Identifier[name=${starlightImportName}]):first-child PropertyAssignment:has(Identifier[name=components]) ObjectLiteralExpression`;
 
-  const componentNodes = match(sourceFile, componentQuery);
+  const componentNodes = query(sourceFile, componentQuery);
   for (const componentNode of componentNodes) {
     if (ts.isObjectLiteralExpression(componentNode)) {
       const values = getPropertyValues(componentNode, 'components');

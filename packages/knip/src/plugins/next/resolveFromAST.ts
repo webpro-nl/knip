@@ -1,4 +1,4 @@
-import { match } from '@phenomnomnominal/tsquery';
+import { query } from '@phenomnomnominal/tsquery';
 import ts from 'typescript';
 
 import { getPropertyValues } from '../../typescript/ast-helpers.js';
@@ -6,7 +6,7 @@ import { getPropertyValues } from '../../typescript/ast-helpers.js';
 export const getPageExtensions = (sourceFile: ts.SourceFile) => {
   const pageExtensions: Set<string> = new Set();
 
-  const objectLiteralExpressions = match(sourceFile, 'ObjectLiteralExpression');
+  const objectLiteralExpressions = query(sourceFile, 'ObjectLiteralExpression');
   for (const objectLiteralExpression of objectLiteralExpressions) {
     if (!ts.isObjectLiteralExpression(objectLiteralExpression)) {
       continue;
