@@ -8,7 +8,7 @@ find otherwise. Plugins always do at least one of the following:
 1. Define entry file patterns
 2. Find dependencies in configuration files
 
-Knip v5.1.0 introduces a new plugin API, which makes them a breeze to write and
+Knip v5.1.0 introduced a new plugin API, which makes them a breeze to write and
 maintain.
 
 :::tip[The new plugin API]
@@ -18,7 +18,7 @@ Easy things should be easy, and complex things possible.
 :::
 
 This tutorial walks through example plugins so you'll be ready to write your
-own!
+own! The following examples demonstrate the elements a plugin can implement.
 
 ## Example 1: entry
 
@@ -193,12 +193,119 @@ contains one or more options that represent [entry points][2].
 
 :::
 
+## Example 4: Use the AST directly
+
+For the `resolveEntryPaths` and `resolveFromConfig` functions, Knip loads the
+configuration file and passes the default-exported object to this plugin
+function. However, that object might then not contain the information we need.
+
+Here's an example `astro.config.ts` configuration file with a Starlight
+integration:
+
+```ts
+import starlight from '@astrojs/starlight';
+import { defineConfig } from 'astro/config';
+
+export default defineConfig({
+  integrations: [
+    starlight({
+      components: {
+        Head: './src/components/Head.astro',
+        Footer: './src/components/Footer.astro',
+      },
+    }),
+  ],
+});
+```
+
+With Starlight, components can be defined to override the default internal ones.
+They're not otherwise referenced in your source code, so you'd have to manually
+add them as entry files ([Knip itself did this][3]).
+
+In the Astro plugin, there's no way to access this object containing
+`components` to add the component files as entry files if we were to try:
+
+```ts
+const resolveEntryPaths: ResolveEntryPaths<AstroConfig> = async config => {
+  console.log(config); //  ¯\_(ツ)_/¯
+};
+```
+
+This is why plugins can implement the `resolveFromAST` function.
+
+### 8. resolveFromAST
+
+Let's take a look at the Astro plugin implementation. This example assumes some
+familiarity with Abstract Syntax Trees (AST) and the TypeScript compiler API.
+Knip will provide more and more AST helpers to make implementing plugins more
+fun and a little less tedious.
+
+Anyway, let's dive in. Here's how we're adding the Starlight `components` paths
+to the default `production` file patterns:
+
+```ts
+import ts from 'typescript';
+import {
+  getDefaultImportName,
+  getImportMap,
+  getPropertyValues,
+} from '../../typescript/ast-helpers.js';
+
+const title = 'Astro';
+
+const production = [
+  'src/pages/**/*.{astro,mdx,js,ts}',
+  'src/content/**/*.mdx',
+  'src/middleware.{js,ts}',
+  'src/actions/index.{js,ts}',
+];
+
+const getComponentPathsFromSourceFile = (sourceFile: ts.SourceFile) => {
+  const componentPaths: Set<string> = new Set();
+  const importMap = getImportMap(sourceFile);
+  const importName = getDefaultImportName(importMap, '@astrojs/starlight');
+
+  function visit(node: ts.Node) {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === importName // match the starlight() function call
+    ) {
+      const starlightConfig = node.arguments[0];
+      if (ts.isObjectLiteralExpression(starlightConfig)) {
+        const values = getPropertyValues(starlightConfig, 'components');
+        for (const value of values) componentPaths.add(value);
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+
+  return componentPaths;
+};
+
+const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
+  // Include './src/components/Head.astro' and './src/components/Footer.astro'
+  // as production entry files so they're also part of the analysis
+  const componentPaths = getComponentPathsFromSourceFile(sourceFile);
+  return [...production, ...componentPaths].map(id => toProductionEntry(id));
+};
+
+export default {
+  title,
+  production,
+  resolveFromAST,
+} satisfies Plugin;
+```
+
 ## Inputs
 
-You may have noticed the `toDeferResolve` and `toEntry` functions. They're a way
-for plugins to tell what they've found and how to handle it. The more precise a
-plugin can be, the better it is for results and performance. Here's a list of
-all input type functions:
+You may have noticed functions like `toDeferResolve` and `toEntry`. They're a
+way for plugins to tell what they've found and how Knip should handle those. The
+more precise a plugin can be, the better it is for results and performance.
+Here's an overview of all input type functions:
 
 ### toEntry
 
@@ -262,7 +369,8 @@ worfklow YAML files or husky scripts. Using this input type, a binary is
 
 ### Options
 
-When creating inputs from specifiers, extra `options` can be provided.
+When creating inputs from specifiers, an extra `options` object as the second
+argument can be provided.
 
 #### dir
 
@@ -291,14 +399,14 @@ Knip now understands `esbuild` is a dependency of the workspace in the
 
 ## Argument parsing
 
-As part of the [script parser][3], Knip parses command-line arguments. Plugins
+As part of the [script parser][4], Knip parses command-line arguments. Plugins
 can implement the `arg` object to add custom argument parsing tailored to the
 executables of the tool.
 
 For now, there are two resources available to learn more:
 
-- [The documented `Args` type in source code][4]
-- [Implemented `args` in existing plugins][5]
+- [The documented `Args` type in source code][5]
+- [Implemented `args` in existing plugins][6]
 
 ## Create a new plugin
 
@@ -330,12 +438,14 @@ individual plugin pages][1] from the exported plugin values.
 
 Thanks for reading. If you have been following this guide to create a new
 plugin, this might be the right time to open a pull request! Feel free to join
-[the Knip Discord channel][6] if you have any questions.
+[the Knip Discord channel][7] if you have any questions.
 
 [1]: ../reference/plugins.md
 [2]: ../explanations/plugins.md#entry-files-from-config-files
-[3]: ../features/script-parser.md
-[4]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
-[5]:
+[3]:
+  https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
+[4]: ../features/script-parser.md
+[5]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
+[6]:
   https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
-[6]: https://discord.gg/r5uXTtbTpc
+[7]: https://discord.gg/r5uXTtbTpc
