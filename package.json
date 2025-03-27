@@ -27,5 +27,8 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "installed-check": "^9.3.0"
+  },
+  "dependencies": {
+    "@phenomnomnominal/tsquery": "^6.1.3"
   }
 }
