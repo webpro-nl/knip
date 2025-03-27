@@ -258,6 +258,12 @@ export const getImportMap = (sourceFile: ts.SourceFile) => {
   return importMap;
 };
 
+export const getDefaultImportName = (importMap: ReturnType<typeof getImportMap>, specifier: string) => {
+  for (const [importName, importSpecifier] of importMap) {
+    if (importSpecifier === specifier) return importName;
+  }
+};
+
 export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName: string) => {
   const values = new Set<string>();
   if (ts.isObjectLiteralExpression(node)) {
