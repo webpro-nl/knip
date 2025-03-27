@@ -351,7 +351,7 @@ export class WorkspaceWorker {
       }
 
       for (const configFilePath of remainingConfigFilePaths) {
-        const opts = {
+        const resolveOpts = {
           ...options,
           getInputsFromScripts: createGetInputsFromScripts(configFilePath),
           configFilePath,
@@ -362,17 +362,17 @@ export class WorkspaceWorker {
         let loadedConfig: unknown;
 
         if (plugin.resolveEntryPaths) {
-          if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
+          if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
           if (loadedConfig) {
-            const inputs = await plugin.resolveEntryPaths(loadedConfig, opts);
+            const inputs = await plugin.resolveEntryPaths(loadedConfig, resolveOpts);
             for (const input of inputs) addInput(input, configFilePath);
           }
         }
 
         if (plugin.resolveConfig) {
-          if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
+          if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
           if (loadedConfig) {
-            const inputs = await plugin.resolveConfig(loadedConfig, opts);
+            const inputs = await plugin.resolveConfig(loadedConfig, resolveOpts);
             for (const input of inputs ?? []) {
               if (isConfig(input)) {
                 handleConfigInput(input.pluginName, { ...input, containingFilePath: configFilePath });
@@ -385,13 +385,13 @@ export class WorkspaceWorker {
 
         if (plugin.resolveFromAST) {
           const sourceFile = this.getSourceFile(configFilePath);
+          const resolveASTOpts = {
+            ...resolveOpts,
+            getSourceFile: this.getSourceFile,
+            getReferencedInternalFilePath: this.getReferencedInternalFilePath,
+          };
           if (sourceFile) {
-            const inputs = plugin.resolveFromAST(
-              sourceFile,
-              opts,
-              this.getSourceFile,
-              this.getReferencedInternalFilePath
-            );
+            const inputs = plugin.resolveFromAST(sourceFile, resolveASTOpts);
             for (const input of inputs) addInput(input, configFilePath);
           }
         }
