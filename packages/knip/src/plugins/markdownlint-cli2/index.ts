@@ -13,9 +13,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['.markdownlint-cli2.{jsonc,yaml,cjs,mjs}'];
 
-const resolveConfig: ResolveConfig<MarkdownlintCli2Config> = (config, options) => {
-  const formatters = config?.outputFormatters
-      ? [...config.outputFormatters.map(([formatter]) => formatter)] : [];
+const resolveConfig: ResolveConfig<MarkdownlintCli2Config> = config => {
+  const formatters = config?.outputFormatters ? [...config.outputFormatters.map(([formatter]) => formatter)] : [];
 
   return [...formatters].map(id => toDependency(id));
 };
