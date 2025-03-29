@@ -13,7 +13,7 @@
     "target": "ES2022"
   },
   "references": [
-    { "path": "packages/workspaceA" },
-    { "path": "packages/workspaceB" },
+    { "path": "packages/workspace-a" },
+    { "path": "packages/workspace-b" }
   ]
 }

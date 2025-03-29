@@ -1,10 +1,10 @@
 {
-  "name": "@monorepo/workspaceA",
+  "name": "@monorepo/workspace-a",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
   "dependencies": {
-    "@monorepo/workspaceB": "*"
+    "@monorepo/workspace-b": "*"
   }
 }
