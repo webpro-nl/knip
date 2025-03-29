@@ -317,6 +317,24 @@ component are unused and will remove those.
 
 Note that [`classMembers` aren't included by default][3].
 
+### Type members   <Badge text="experimental" variant="caution" />
+
+Unused members of types and interfaces can be removed:
+
+```diff title="file.ts"
+export type Pet = {
+  legs: number;
+-  fins: boolean;
+};
+
+export interface Dog {
+  legs: number;
+-  wings: boolean;
+}
+```
+
+Note that [`typeMembers` aren't included by default][1].
+
 ## What's not included
 
 Operations that auto-fix does not (yet) perform and why:

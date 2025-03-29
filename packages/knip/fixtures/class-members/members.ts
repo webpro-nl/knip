@@ -54,6 +54,9 @@ export class MyClass {
   public set unusedSetter(value: string) {
     console.log(value);
   }
+
+  /** @public */
+  public set unusedTaggedSetter(value: string) {}
 }
 
 MyClass.displayName = 'My Class';

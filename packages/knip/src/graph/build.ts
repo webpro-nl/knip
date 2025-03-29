@@ -87,6 +87,7 @@ export async function build({
 
   const getReferencedInternalFilePath = getReferencedInputsHandler(collector, deputy, chief, isGitIgnored);
 
+  const isReportTypeMembers = report.typeMembers;
   const isReportClassMembers = report.classMembers;
 
   for (const workspace of workspaces) {
@@ -301,6 +302,7 @@ export async function build({
           isFixExports,
           isFixTypes,
           ignoreExportsUsedInFile: chief.config.ignoreExportsUsedInFile,
+          isReportTypeMembers,
           isReportClassMembers,
           tags,
         },
