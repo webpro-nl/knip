@@ -9,7 +9,7 @@
       "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template/**"]
     },
     "packages/docs": {
-      "entry": ["{remark,scripts}/*.ts", "src/components/{Head,Footer}.astro!"]
+      "entry": ["{remark,scripts}/*.ts"]
     }
   }
 }

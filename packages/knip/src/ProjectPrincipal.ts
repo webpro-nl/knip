@@ -7,7 +7,7 @@ import type { GetImportsAndExportsOptions } from './types/config.js';
 import type { Export, ExportMember, FileNode, ModuleGraph, UnresolvedImport } from './types/module-graph.js';
 import type { PrincipalOptions } from './types/project.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
-import type { SourceFileManager } from './typescript/SourceFileManager.js';
+import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/create-hosts.js';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.js';
 import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
@@ -69,10 +69,9 @@ export class ProjectPrincipal {
 
   toSourceFilePath: ToSourceFilePath;
 
-  // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
   backend: {
     fileManager: SourceFileManager;
-    compilerHost: ts.CompilerHost;
+    compilerHost?: ts.CompilerHost;
     resolveModuleNames: ResolveModuleNames;
     program?: ts.Program;
     typeChecker?: ts.TypeChecker;
@@ -109,10 +108,15 @@ export class ProjectPrincipal {
     this.isWatch = isWatch;
     this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation });
     this.toSourceFilePath = toSourceFilePath;
+
+    // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
+    this.backend = {
+      fileManager: new SourceFileManager({ compilers, isSkipLibs }),
+    };
   }
 
   init() {
-    const { fileManager, compilerHost, resolveModuleNames, languageServiceHost } = createHosts({
+    const { compilerHost, resolveModuleNames, languageServiceHost } = createHosts({
       cwd: this.cwd,
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
@@ -120,14 +124,12 @@ export class ProjectPrincipal {
       isSkipLibs: this.isSkipLibs,
       toSourceFilePath: this.toSourceFilePath,
       useResolverCache: !this.isWatch,
+      fileManager: this.backend.fileManager,
     });
 
-    this.backend = {
-      fileManager,
-      compilerHost,
-      resolveModuleNames,
-      languageServiceHost,
-    };
+    this.backend.compilerHost = compilerHost;
+    this.backend.resolveModuleNames = resolveModuleNames;
+    this.backend.languageServiceHost = languageServiceHost;
   }
 
   addPaths(paths: ts.CompilerOptions['paths']) {
