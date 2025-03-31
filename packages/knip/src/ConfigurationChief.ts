@@ -30,7 +30,7 @@ import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { splitTags } from './util/tag.js';
 import { unwrapFunction } from './util/unwrap-function.js';
-import { byPathDepth } from './util/workspace.js';
+import { byPathDepth, sortWorkspaces } from './util/workspace.js';
 
 const { config: rawConfigArg } = parsedArgValues;
 
@@ -109,7 +109,7 @@ export class ConfigurationChief {
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
   availableWorkspaceDirs: string[] = [];
-  workspaceGraph: WorkspaceGraph | undefined;
+  workspaceGraph: WorkspaceGraph = new Map();
   includedWorkspaces: Workspace[] = [];
 
   resolvedConfigFilePath?: string;
@@ -321,8 +321,8 @@ export class ConfigurationChief {
         const workspaceDirsWithDependents = new Set(initialWorkspaces);
         const addDependents = (dir: string) => {
           seen.add(dir);
-          if (!graph[dir] || graph[dir].size === 0) return;
-          const dirs = graph[dir];
+          const dirs = graph.get(dir);
+          if (!dirs || dirs.size === 0) return;
           if (initialWorkspaces.some(dir => dirs.has(dir))) workspaceDirsWithDependents.add(dir);
           for (const dir of dirs) if (!seen.has(dir)) addDependents(dir);
         };
@@ -361,7 +361,7 @@ export class ConfigurationChief {
   }
 
   public getWorkspaces() {
-    return this.includedWorkspaces;
+    return sortWorkspaces(this.workspaceGraph, this.includedWorkspaces);
   }
 
   private getDescendentWorkspaces(name: string) {

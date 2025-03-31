@@ -1,7 +1,7 @@
 import type { WorkspacePackage } from '../types/package-json.js';
 import { join } from './path.js';
 
-export type WorkspaceGraph = Record<string, Set<string>>;
+export type WorkspaceGraph = Map<string, Set<string>>;
 
 const types = ['peerDependencies', 'devDependencies', 'optionalDependencies', 'dependencies'] as const;
 
@@ -11,7 +11,7 @@ export function createWorkspaceGraph(
   wsPkgNames: Set<string>,
   wsPackages: Map<string, WorkspacePackage>
 ) {
-  const graph: WorkspaceGraph = {};
+  const graph: WorkspaceGraph = new Map();
 
   const packages = Array.from(wsPackages.values());
 
@@ -32,7 +32,7 @@ export function createWorkspaceGraph(
 
   for (const name of wsNames) {
     const pkg = wsPackages.get(name);
-    if (pkg) graph[join(cwd, name)] = getWorkspaceDirs(pkg);
+    if (pkg) graph.set(join(cwd, name), getWorkspaceDirs(pkg));
   }
 
   return graph;
