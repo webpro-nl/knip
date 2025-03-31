@@ -116,6 +116,12 @@ If `src/index.ts` exists, Knip will use that file instead of `dist/index.js`.
 Currently this only works based on `tsconfig.json`, in the future more source
 mappings may be added.
 
+:::tip
+
+Compilation to `outDir` should succeed before Knip can do source mapping.
+
+:::
+
 ## Additional options
 
 The following options are available inside workspace configurations:

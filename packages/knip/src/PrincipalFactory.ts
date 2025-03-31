@@ -40,7 +40,7 @@ export class PrincipalFactory {
     options.compilerOptions = mergePaths(cwd, compilerOptions, paths);
     if (isFile && compilerOptions.module !== ts.ModuleKind.CommonJS)
       compilerOptions.moduleResolution ??= ts.ModuleResolutionKind.Bundler;
-    const principal = this.findReusablePrincipal(cwd, compilerOptions);
+    const principal = this.findReusablePrincipal(compilerOptions);
     if (!isIsolateWorkspaces && principal) {
       this.linkPrincipal(principal, cwd, compilerOptions, pkgName, compilers);
       return principal.principal;
@@ -51,8 +51,7 @@ export class PrincipalFactory {
   /**
    * Principals with shared `compilerOptions.baseUrl` and no `compilerOptions.paths` conflicts are reused.
    */
-  private findReusablePrincipal(cwd: string, compilerOptions: ts.CompilerOptions) {
-    if (compilerOptions.rootDir && cwd !== compilerOptions.rootDir) return;
+  private findReusablePrincipal(compilerOptions: ts.CompilerOptions) {
     const workspacePaths = compilerOptions?.paths ? Object.keys(compilerOptions.paths) : [];
     const principal = Array.from(this.principals).find(principal => {
       if (compilerOptions.pathsBasePath && principal.principal.compilerOptions.pathsBasePath) return false;
@@ -90,7 +89,7 @@ export class PrincipalFactory {
   }
 
   public getPrincipals() {
-    return Array.from(this.principals, p => p.principal).reverse();
+    return Array.from(this.principals, p => p.principal);
   }
 
   public getPrincipalByPackageName(packageName: string) {
