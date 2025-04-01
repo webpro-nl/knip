@@ -14,13 +14,14 @@ import type {
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { PackageJson, WorkspacePackage } from './types/package-json.js';
-import { arrayify, compact } from './util/array.js';
+import { arrayify, compact, partition } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
 import { type CLIArguments, getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
+import { graphSequencer } from './util/graph-sequencer.js';
 import { defaultRules } from './util/issue-initializers.js';
 import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
@@ -30,7 +31,7 @@ import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { splitTags } from './util/tag.js';
 import { unwrapFunction } from './util/unwrap-function.js';
-import { byPathDepth, sortWorkspaces } from './util/workspace.js';
+import { byPathDepth } from './util/workspace.js';
 
 const { config: rawConfigArg } = parsedArgValues;
 
@@ -360,8 +361,14 @@ export class ConfigurationChief {
     return this.workspacePackages.get(name)?.manifest;
   }
 
-  public getWorkspaces() {
-    return sortWorkspaces(this.workspaceGraph, this.includedWorkspaces);
+  public getWorkspaces(): Workspace[] {
+    const sorted = graphSequencer(
+      this.workspaceGraph,
+      this.includedWorkspaces.map(workspace => workspace.dir)
+    );
+    const [root, rest] = partition(sorted.chunks.flat(), dir => dir === this.cwd);
+    // biome-ignore lint/style/noNonNullAssertion: deal with it
+    return [...root, ...rest.reverse()].map(dir => this.includedWorkspaces.find(w => w.dir === dir)!);
   }
 
   private getDescendentWorkspaces(name: string) {
