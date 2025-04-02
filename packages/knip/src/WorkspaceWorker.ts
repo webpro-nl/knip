@@ -53,7 +53,7 @@ type WorkspaceManagerOptions = {
   allConfigFilesMap: Map<string, Map<PluginName, Set<string>>>;
 };
 
-type CacheItem = { resolveEntryPaths?: Input[]; resolveConfig?: Input[] };
+type CacheItem = { resolveEntryPaths?: Input[]; resolveConfig?: Input[]; resolveFromAST?: Input[] };
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
@@ -288,8 +288,13 @@ export class WorkspaceWorker {
     const inputs: Input[] = [];
     const remainingPlugins = new Set(this.enabledPlugins);
 
-    const addInput = (input: Input, containingFilePath = input.containingFilePath) =>
-      inputs.push({ ...input, containingFilePath });
+    const addInput = (input: Input, containingFilePath = input.containingFilePath) => {
+      if (isConfig(input)) {
+        handleConfigInput(input.pluginName, { ...input, containingFilePath });
+      } else {
+        inputs.push({ ...input, containingFilePath });
+      }
+    };
 
     const handleConfigInput = (pluginName: PluginName, input: ConfigInput) => {
       const configFilePath = this.getReferencedInternalFilePath(input);
@@ -351,6 +356,17 @@ export class WorkspaceWorker {
       }
 
       for (const configFilePath of remainingConfigFilePaths) {
+        const isManifest = basename(configFilePath) === 'package.json';
+        const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
+
+        if (fd?.meta?.data && !fd.changed) {
+          const data = fd.meta.data;
+          if (data.resolveEntryPaths) for (const id of data.resolveEntryPaths) addInput(id, configFilePath);
+          if (data.resolveConfig) for (const id of data.resolveConfig) addInput(id, configFilePath);
+          if (data.resolveFromAST) for (const id of data.resolveFromAST) addInput(id, configFilePath);
+          continue;
+        }
+
         const resolveOpts = {
           ...options,
           getInputsFromScripts: createGetInputsFromScripts(configFilePath),
@@ -359,6 +375,7 @@ export class WorkspaceWorker {
           configFileName: basename(configFilePath),
         };
 
+        const cache: CacheItem = {};
         let loadedConfig: unknown;
 
         if (plugin.resolveEntryPaths) {
@@ -366,6 +383,7 @@ export class WorkspaceWorker {
           if (loadedConfig) {
             const inputs = await plugin.resolveEntryPaths(loadedConfig, resolveOpts);
             for (const input of inputs) addInput(input, configFilePath);
+            cache.resolveEntryPaths = inputs;
           }
         }
 
@@ -373,13 +391,8 @@ export class WorkspaceWorker {
           if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
           if (loadedConfig) {
             const inputs = await plugin.resolveConfig(loadedConfig, resolveOpts);
-            for (const input of inputs ?? []) {
-              if (isConfig(input)) {
-                handleConfigInput(input.pluginName, { ...input, containingFilePath: configFilePath });
-              } else {
-                addInput(input, configFilePath);
-              }
-            }
+            for (const input of inputs) addInput(input, configFilePath);
+            cache.resolveConfig = inputs;
           }
         }
 
@@ -393,8 +406,11 @@ export class WorkspaceWorker {
           if (sourceFile) {
             const inputs = plugin.resolveFromAST(sourceFile, resolveASTOpts);
             for (const input of inputs) addInput(input, configFilePath);
+            cache.resolveFromAST = inputs;
           }
         }
+
+        if (!isManifest && fd?.changed && fd.meta) fd.meta.data = cache;
       }
 
       if (plugin.resolve) {
