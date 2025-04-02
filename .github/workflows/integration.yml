@@ -77,9 +77,9 @@ jobs:
           - name: eslint
             repo: eslint/eslint
             commands: |
-              npm install --force
+              npm install
               npm install --prefix docs
-              npm install --force -D $PKG_URL
+              npm install -D $PKG_URL
               npm run lint:unused -- --cache
               npm run lint:unused -- --cache
 
