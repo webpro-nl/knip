@@ -204,7 +204,8 @@ export class WorkspaceWorker {
   }
 
   getPluginEntryFilePatterns(patterns: string[]) {
-    return [patterns, this.ignoredWorkspacePatterns.map(negate)].flat();
+    const negateWorkspaces = patterns.some(pattern => pattern.startsWith('**/')) ? this.negatedWorkspacePatterns : [];
+    return [patterns, negateWorkspaces, this.ignoredWorkspacePatterns.map(negate)].flat();
   }
 
   getProductionEntryFilePatterns(negatedTestFilePatterns: string[]) {
