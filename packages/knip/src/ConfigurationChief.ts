@@ -288,9 +288,11 @@ export class ConfigurationChief {
   }
 
   private getAvailableWorkspaceNames(names: Iterable<string>) {
-    return [...names, ...this.additionalWorkspaceNames].filter(
-      name => !picomatch.isMatch(name, this.ignoredWorkspacePatterns)
-    );
+    const availableWorkspaceNames = [];
+    for (const name of names) {
+      if (!picomatch.isMatch(name, this.ignoredWorkspacePatterns)) availableWorkspaceNames.push(name);
+    }
+    return availableWorkspaceNames;
   }
 
   private getIncludedWorkspaces() {
