@@ -30,6 +30,7 @@ import { default as lintStaged } from './lint-staged/index.js';
 import { default as linthtml } from './linthtml/index.js';
 import { default as lockfileLint } from './lockfile-lint/index.js';
 import { default as lostPixel } from './lost-pixel/index.js';
+import { default as markdownlintCli2 } from './markdownlint-cli2/index.js';
 import { default as markdownlint } from './markdownlint/index.js';
 import { default as metro } from './metro/index.js';
 import { default as mocha } from './mocha/index.js';
@@ -124,6 +125,7 @@ export const Plugins = {
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
   markdownlint,
+  'markdownlint-cli2': markdownlintCli2,
   metro,
   mocha,
   moonrepo,
