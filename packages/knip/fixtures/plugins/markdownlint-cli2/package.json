@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/markdownlint-cli2",
+  "version": "*",
+  "scripts": {
+    "lint:md": "markdownlint-cli2"
+  }
+}

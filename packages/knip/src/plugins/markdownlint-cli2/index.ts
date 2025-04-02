@@ -14,9 +14,10 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['.markdownlint-cli2.{jsonc,yaml,cjs,mjs}'];
 
 const resolveConfig: ResolveConfig<MarkdownlintCli2Config> = config => {
-  const formatters = config?.outputFormatters ? [...config.outputFormatters.map(([formatter]) => formatter)] : [];
+  const customRules = config?.customRules ?? [];
+  const outputFormatters = config?.outputFormatters ? [...config.outputFormatters.map(([formatter]) => formatter)] : [];
 
-  return [...formatters].map(id => toDependency(id));
+  return [...customRules, ...outputFormatters].map(id => toDependency(id));
 };
 
 export default {
