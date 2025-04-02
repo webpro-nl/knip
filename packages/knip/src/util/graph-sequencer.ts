@@ -106,8 +106,9 @@ export function graphSequencer<T>(graph: Graph<T>, includedNodes: T[] = [...grap
     while (queue.length) {
       // biome-ignore lint/style/noNonNullAssertion: deal with it
       const [id, cycle] = queue.shift()!;
-      // biome-ignore lint/style/noNonNullAssertion: deal with it
-      for (const to of graph.get(id)!) {
+      const nodes = graph.get(id);
+      if (!nodes) continue;
+      for (const to of nodes) {
         if (to === startNode) {
           cycleVisited.add(to);
           cycles.push([...cycle]);
