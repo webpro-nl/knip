@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "5.46.2",
+  "version": "5.46.5",
   "description": "Find and fix unused files, dependencies and exports in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
   "repository": {
@@ -62,7 +62,7 @@
     "@nodelib/fs.walk": "3.0.1",
     "@snyk/github-codeowners": "1.1.0",
     "easy-table": "1.2.0",
-    "enhanced-resolve": "^5.18.0",
+    "enhanced-resolve": "^5.18.1",
     "fast-glob": "^3.3.3",
     "jiti": "^2.4.2",
     "js-yaml": "^4.1.0",
@@ -83,7 +83,7 @@
   "devDependencies": {
     "@jest/types": "^29.6.3",
     "@release-it/bumper": "^7.0.2",
-    "@types/bun": "1.2.4",
+    "@types/bun": "1.2.8",
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/picomatch": "3.0.1",

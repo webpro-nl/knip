@@ -14,13 +14,14 @@ import type {
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { PackageJson, WorkspacePackage } from './types/package-json.js';
-import { arrayify, compact } from './util/array.js';
+import { arrayify, compact, partition } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
 import { ConfigurationError } from './util/errors.js';
 import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
 import { type CLIArguments, getIncludedIssueTypes } from './util/get-included-issue-types.js';
 import { _dirGlob } from './util/glob.js';
+import { graphSequencer } from './util/graph-sequencer.js';
 import { defaultRules } from './util/issue-initializers.js';
 import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
@@ -109,7 +110,7 @@ export class ConfigurationChief {
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
   availableWorkspaceDirs: string[] = [];
-  workspaceGraph: WorkspaceGraph | undefined;
+  workspaceGraph: WorkspaceGraph = new Map();
   includedWorkspaces: Workspace[] = [];
 
   resolvedConfigFilePath?: string;
@@ -287,9 +288,11 @@ export class ConfigurationChief {
   }
 
   private getAvailableWorkspaceNames(names: Iterable<string>) {
-    return [...names, ...this.additionalWorkspaceNames].filter(
-      name => !picomatch.isMatch(name, this.ignoredWorkspacePatterns)
-    );
+    const availableWorkspaceNames = [];
+    for (const name of names) {
+      if (!picomatch.isMatch(name, this.ignoredWorkspacePatterns)) availableWorkspaceNames.push(name);
+    }
+    return availableWorkspaceNames;
   }
 
   private getIncludedWorkspaces() {
@@ -321,8 +324,8 @@ export class ConfigurationChief {
         const workspaceDirsWithDependents = new Set(initialWorkspaces);
         const addDependents = (dir: string) => {
           seen.add(dir);
-          if (!graph[dir] || graph[dir].size === 0) return;
-          const dirs = graph[dir];
+          const dirs = graph.get(dir);
+          if (!dirs || dirs.size === 0) return;
           if (initialWorkspaces.some(dir => dirs.has(dir))) workspaceDirsWithDependents.add(dir);
           for (const dir of dirs) if (!seen.has(dir)) addDependents(dir);
         };
@@ -360,8 +363,14 @@ export class ConfigurationChief {
     return this.workspacePackages.get(name)?.manifest;
   }
 
-  public getWorkspaces() {
-    return this.includedWorkspaces;
+  public getWorkspaces(): Workspace[] {
+    const sorted = graphSequencer(
+      this.workspaceGraph,
+      this.includedWorkspaces.map(workspace => workspace.dir)
+    );
+    const [root, rest] = partition(sorted.chunks.flat(), dir => dir === this.cwd);
+    // biome-ignore lint/style/noNonNullAssertion: deal with it
+    return [...root, ...rest.reverse()].map(dir => this.includedWorkspaces.find(w => w.dir === dir)!);
   }
 
   private getDescendentWorkspaces(name: string) {

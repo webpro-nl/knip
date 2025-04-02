@@ -9,6 +9,7 @@ const commands = [
   'add',
   'audit',
   'bin',
+  'cache',
   'config',
   'dedupe',
   'deploy',

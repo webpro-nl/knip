@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/self-and-cross-ref-lib",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./dist/index.js",
+    "./*":  "./dist/*"
+  },
+  "files": ["dist/**/*.js"],
+  "sideEffects": false
+}

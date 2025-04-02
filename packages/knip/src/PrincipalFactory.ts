@@ -89,7 +89,7 @@ export class PrincipalFactory {
   }
 
   public getPrincipals() {
-    return Array.from(this.principals, p => p.principal).reverse();
+    return Array.from(this.principals, p => p.principal);
   }
 
   public getPrincipalByPackageName(packageName: string) {

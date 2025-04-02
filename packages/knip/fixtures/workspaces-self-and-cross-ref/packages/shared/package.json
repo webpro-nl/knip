@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/self-and-cross-ref-shared",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./*": {
+      "default": "./build/*.js"
+    }
+  },
+  "sideEffects": false
+}

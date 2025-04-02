@@ -1,3 +1,3 @@
-import { usedFunction } from '@monorepo/workspaceB';
+import { usedFunction } from '@monorepo/workspace-b';
 
 usedFunction;
