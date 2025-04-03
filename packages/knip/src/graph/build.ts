@@ -21,6 +21,7 @@ import {
   isDeferResolveProductionEntry,
   isEntry,
   isProductionEntry,
+  isProject,
   toProductionEntry,
 } from '../util/input.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
@@ -181,6 +182,7 @@ export async function build({
 
     const entryFilePatterns = new Set<string>();
     const productionEntryFilePatterns = new Set<string>();
+    const projectFilePatterns = new Set<string>();
 
     for (const input of inputs) {
       const specifier = input.specifier;
@@ -188,6 +190,8 @@ export async function build({
         entryFilePatterns.add(isAbsolute(specifier) ? relative(dir, specifier) : specifier);
       } else if (isProductionEntry(input)) {
         productionEntryFilePatterns.add(isAbsolute(specifier) ? relative(dir, specifier) : specifier);
+      } else if (isProject(input)) {
+        projectFilePatterns.add(isAbsolute(specifier) ? relative(dir, specifier) : specifier);
       } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = getReferencedInternalFilePath(input, ws);
@@ -236,7 +240,7 @@ export async function build({
 
       {
         const label = 'project';
-        const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns]);
+        const patterns = worker.getProjectFilePatterns([...productionEntryFilePatterns, ...projectFilePatterns]);
         const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         for (const projectPath of workspaceProjectPaths) principal.addProjectPath(projectPath);
       }

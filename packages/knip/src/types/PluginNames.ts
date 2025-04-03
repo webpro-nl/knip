@@ -19,6 +19,7 @@ export type PluginName =
   | 'eslint'
   | 'expo'
   | 'gatsby'
+  | 'github-action'
   | 'github-actions'
   | 'glob'
   | 'graphql-codegen'
@@ -112,6 +113,7 @@ export const pluginNames = [
   'eslint',
   'expo',
   'gatsby',
+  'github-action',
   'github-actions',
   'glob',
   'graphql-codegen',

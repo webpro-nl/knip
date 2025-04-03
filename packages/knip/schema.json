@@ -371,6 +371,10 @@
           "title": "Gatsby plugin configuration (https://knip.dev/reference/plugins/gatsby)",
           "$ref": "#/definitions/plugin"
         },
+        "github-action": {
+          "title": "github-action plugin configuration (https://knip.dev/reference/plugins/github-action)",
+          "$ref": "#/definitions/plugin"
+        },
         "github-actions": {
           "title": "github-actions plugin configuration (https://knip.dev/reference/plugins/github-actions)",
           "$ref": "#/definitions/plugin"

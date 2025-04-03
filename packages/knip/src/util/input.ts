@@ -1,7 +1,7 @@
 import type { PluginName } from '../types/PluginNames.js';
 import { isAbsolute, toRelative } from './path.js';
 
-type InputType = 'binary' | 'entry' | 'config' | 'dependency' | 'deferResolve' | 'deferResolveEntry';
+type InputType = 'binary' | 'entry' | 'project' | 'config' | 'dependency' | 'deferResolve' | 'deferResolveEntry';
 
 export interface Input {
   type: InputType;
@@ -37,6 +37,10 @@ export const isBinary = (input: Input) => input.type === 'binary';
 export const toEntry = (specifier: string): Input => ({ type: 'entry', specifier });
 
 export const isEntry = (input: Input) => input.type === 'entry' && !input.production;
+
+export const toProject = (specifier: string): Input => ({ type: 'project', specifier });
+
+export const isProject = (input: Input) => input.type === 'project';
 
 export const toProductionEntry = (specifier: string, options: Options = {}): Input => ({
   type: 'entry',

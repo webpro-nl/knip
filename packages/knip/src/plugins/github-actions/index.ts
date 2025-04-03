@@ -20,7 +20,7 @@ const config = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
-const getActionDependencies = (config: any, options: PluginOptions) => {
+export const getActionDependencies = (config: any, options: PluginOptions) => {
   const { configFileDir, configFileName } = options;
   const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
   if (!(isActionManifest && config?.runs?.using?.startsWith('node'))) return [];

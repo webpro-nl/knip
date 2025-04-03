@@ -32,6 +32,7 @@ export const pluginsSchema = z.object({
   eslint: pluginSchema,
   expo: pluginSchema,
   gatsby: pluginSchema,
+  'github-action': pluginSchema,
   'github-actions': pluginSchema,
   glob: pluginSchema,
   'graphql-codegen': pluginSchema,

@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/github-action",
+  "version": "*",
+  "dependencies": {
+    "@actions/core": "*"
+  }
+}

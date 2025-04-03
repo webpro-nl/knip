@@ -179,8 +179,7 @@ export class WorkspaceWorker {
     ].flat();
   }
 
-  getPluginProjectFilePatterns() {
-    const patterns: string[] = [];
+  getPluginProjectFilePatterns(patterns: string[] = []) {
     for (const [pluginName, plugin] of PluginEntries) {
       const pluginConfig = this.getConfigForPlugin(pluginName);
       if (this.enabledPluginsMap[pluginName]) {
