@@ -27,3 +27,17 @@ test('Find dependencies with the lint-staged plugin', async () => {
     total: 1,
   });
 });
+
+test('Find dependencies with the lint-staged plugin (production)', async () => {
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+    isProduction: true,
+  });
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 0,
+    total: 0,
+  });
+});

@@ -23,6 +23,8 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<LintStagedConfig> = async (config, options) => {
+  if (options.isProduction) return [];
+
   if (typeof config === 'function') config = config();
 
   if (!config) return [];
