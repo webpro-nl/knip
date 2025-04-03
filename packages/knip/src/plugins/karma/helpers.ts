@@ -1,4 +1,4 @@
-import { type Input, toDeferResolveEntry, toDevDependency } from '../../util/input.js';
+import { type Input, toDeferResolveEntry, toDependency } from '../../util/input.js';
 import { isInternal } from '../../util/path.js';
 import type { Config, ConfigOptions } from './types.js';
 
@@ -7,7 +7,7 @@ export const configFiles = ['karma.conf.js', 'karma.conf.ts', '.config/karma.con
 
 export const inputsFromFrameworks = (frameworks: readonly string[]): readonly Input[] =>
   frameworks.map(framework => {
-    return toDevDependency(framework === 'jasmine' ? 'jasmine-core' : framework);
+    return toDependency(framework === 'jasmine' ? 'jasmine-core' : framework);
   });
 
 export const inputsFromPlugins = (
@@ -16,12 +16,12 @@ export const inputsFromPlugins = (
 ): readonly Input[] => {
   if (!plugins) {
     const karmaPluginDevDeps = Object.keys(devDependencies ?? {}).filter(name => name.startsWith('karma-'));
-    return karmaPluginDevDeps.map(karmaPluginDevDep => toDevDependency(karmaPluginDevDep));
+    return karmaPluginDevDeps.map(karmaPluginDevDep => toDependency(karmaPluginDevDep));
   }
   return plugins
     .map(plugin => {
       if (typeof plugin !== 'string') return;
-      return isInternal(plugin) ? toDeferResolveEntry(plugin) : toDevDependency(plugin);
+      return isInternal(plugin) ? toDeferResolveEntry(plugin) : toDependency(plugin);
     })
     .filter(input => !!input);
 };

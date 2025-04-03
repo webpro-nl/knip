@@ -1,7 +1,7 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../../src/index.js';
-import { resolve } from '../../src/util/path.js';
+import { join, resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
@@ -28,5 +28,22 @@ test('Find dependencies with Vitest plugin', async () => {
     unresolved: 1,
     processed: 8,
     total: 8,
+  });
+});
+
+test('Find dependencies with Vitest plugin (production)', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    isProduction: true,
+  });
+
+  assert.deepEqual(issues.files, new Set([join(cwd, 'src/setupTests.ts')]));
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    processed: 1,
+    total: 1,
   });
 });

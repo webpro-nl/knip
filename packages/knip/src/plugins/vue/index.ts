@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDevDependency } from '../../util/input.js';
+import { type Input, toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
 import type { VueConfig, WebpackConfiguration } from './types.js';
@@ -41,7 +41,7 @@ const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
     manifest.scripts &&
     Object.values(manifest.scripts).some(script => /(?<=^|\s)vue-cli-service(\s|\s.+\s)lint(?=\s|$)/.test(script))
   ) {
-    inputs.push(toDevDependency('@vue/cli-plugin-eslint'));
+    inputs.push(toDependency('@vue/cli-plugin-eslint'));
   }
 
   return inputs;

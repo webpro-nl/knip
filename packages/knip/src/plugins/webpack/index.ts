@@ -7,7 +7,6 @@ import {
   toDeferResolveEntry,
   toDeferResolveProductionEntry,
   toDependency,
-  toDevDependency,
 } from '../../util/input.js';
 import { isInternal } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -132,7 +131,7 @@ const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options)
   const webpackCLI = scripts.some(script => script && /(?<=^|\s)webpack(?=\s|$)/.test(script)) ? ['webpack-cli'] : [];
   const webpackDevServer = scripts.some(script => script?.includes('webpack serve')) ? ['webpack-dev-server'] : [];
 
-  return compact([...inputs, [...webpackCLI, ...webpackDevServer].map(toDevDependency)].flat());
+  return compact([...inputs, ...[...webpackCLI, ...webpackDevServer].map(id => toDependency(id))]);
 };
 
 const args = {
