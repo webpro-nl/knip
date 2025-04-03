@@ -10,6 +10,7 @@ interface VitestConfig {
     globalSetup?: string | string[];
     reporters?: (string | [string, unknown] | unknown)[];
     setupFiles?: string | string[];
+    workspace?: (ViteConfig & { test: VitestConfig['test'] & { workspace: never }})[];
   };
 }
 
