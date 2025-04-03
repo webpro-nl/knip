@@ -20,7 +20,7 @@ const gitHookPaths = getGitHookPaths('.husky', false);
 const config = [...gitHookPaths, 'package.json'];
 
 const resolveConfig: ResolveConfig = (script, options) => {
-  if (!script) return [];
+  if (!script || options.isProduction) return [];
 
   if (options.configFileName === 'package.json') {
     const hooks = script.hooks;

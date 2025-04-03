@@ -24,3 +24,17 @@ test('Find dependencies with husky plugin (v8)', async () => {
     total: 0,
   });
 });
+
+test('Find dependencies with husky plugin (v8) (production)', async () => {
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+    isProduction: true,
+  });
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 0,
+    total: 0,
+  });
+});
