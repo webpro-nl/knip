@@ -128,7 +128,7 @@ documentation:
 bun format
 bun lint
 bun knip
-bun knip:production
+bun knip --strict
 bun run test
 ```
 
