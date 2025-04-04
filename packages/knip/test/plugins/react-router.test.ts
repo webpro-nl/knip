@@ -15,7 +15,7 @@ test('Find dependencies with the react-router plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 8,
-    total: 8,
+    processed: 9,
+    total: 9,
   });
 });
