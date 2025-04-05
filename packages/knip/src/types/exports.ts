@@ -14,7 +14,6 @@ export type ExportNode = {
   pos: number;
   type: SymbolType;
   members?: ExportNodeMember[];
-  jsDocTags?: Set<string>;
   fix: Fix;
 };
 

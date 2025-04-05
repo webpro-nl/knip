@@ -1,3 +1,2 @@
-export type RsbuildConfig = {
-  plugins?: unknown[];
-};
+// biome-ignore lint/complexity/noBannedTypes: <explanation>
+export type RsbuildConfig = {};

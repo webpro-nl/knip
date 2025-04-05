@@ -26,6 +26,5 @@ export type ESLintConfig = BaseConfig[];
 export type OverrideConfigDeprecated = BaseConfig & { files: string[]; overrides: OverrideConfigDeprecated };
 
 export type ESLintConfigDeprecated = BaseConfig & {
-  env?: Record<string, boolean>;
   overrides?: OverrideConfigDeprecated[];
 };

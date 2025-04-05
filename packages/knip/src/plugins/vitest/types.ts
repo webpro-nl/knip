@@ -15,7 +15,6 @@ interface VitestConfig {
 }
 
 export interface ViteConfig extends VitestConfig {
-  plugins?: unknown[];
   build?: {
     lib?: {
       entry: string | string[] | { [entryAlias: string]: string };
