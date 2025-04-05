@@ -17,7 +17,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => {
   return isEnabled;
 };
 
-const entry = ['nuxt.config.{js,mjs,ts}'];
+const config = ['nuxt.config.{js,mjs,ts}'];
 
 const production = [
   'app.{vue,jsx,tsx}',
@@ -59,7 +59,7 @@ export default {
   title,
   enablers,
   isEnabled,
-  entry,
+  config,
   production,
   resolveEntryPaths,
 } satisfies Plugin;

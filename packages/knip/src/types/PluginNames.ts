@@ -66,12 +66,14 @@ export type PluginName =
   | 'sentry'
   | 'simple-git-hooks'
   | 'size-limit'
+  | 'sst'
   | 'storybook'
   | 'stryker'
   | 'stylelint'
   | 'svelte'
   | 'syncpack'
   | 'tailwind'
+  | 'tanstack-router'
   | 'travis'
   | 'ts-node'
   | 'tsup'
@@ -160,12 +162,14 @@ export const pluginNames = [
   'sentry',
   'simple-git-hooks',
   'size-limit',
+  'sst',
   'storybook',
   'stryker',
   'stylelint',
   'svelte',
   'syncpack',
   'tailwind',
+  'tanstack-router',
   'travis',
   'ts-node',
   'tsup',
