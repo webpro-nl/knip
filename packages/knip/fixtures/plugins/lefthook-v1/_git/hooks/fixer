@@ -54,4 +54,4 @@ call_lefthook()
   fi
 }
 
-call_lefthook run "prepare-commit-msg" "$@"
+call_lefthook run "fixer" "$@"
