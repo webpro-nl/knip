@@ -55,6 +55,7 @@ const commands = [
   'up',
   'update',
   'upgrade',
+  'version',
   'why',
 ];
 
