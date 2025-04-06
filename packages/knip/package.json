@@ -83,7 +83,7 @@
   "devDependencies": {
     "@jest/types": "^29.6.3",
     "@release-it/bumper": "^7.0.2",
-    "@types/bun": "1.2.8",
+    "@types/bun": "1.2.4",
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/picomatch": "3.0.1",
