@@ -210,6 +210,12 @@ be an absolute or relative path, and glob patterns are allowed.
 A production `entry` input is just like an `production` in the configuration. It
 should either be an absolute or relative path, and it can have glob patterns.
 
+### toProject
+
+A `project` input is the equivalent of `project` patterns in the configuration.
+It should either be an absolute or relative path, and (negated) glob patterns
+are allowed.
+
 ### toDependency
 
 The `dependency` indicates the entry is a dependency, belonging in either the
