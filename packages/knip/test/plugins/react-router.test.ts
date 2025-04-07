@@ -1,3 +1,4 @@
+import * as os from 'node:os';
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../../src/index.js';
@@ -7,7 +8,9 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/react-router');
 
-test('Find dependencies with the react-router plugin', async () => {
+const skipIfWindows = os.platform() === 'win32' ? test.skip : test;
+
+skipIfWindows('Find dependencies with the react-router plugin', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
