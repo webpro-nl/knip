@@ -45,6 +45,7 @@ const ignoreExportsUsedInFileSchema = z.union([
 ]);
 
 const rootConfigurationSchema = z.object({
+  $schema: z.string().optional(),
   rules: rulesSchema.optional(),
   entry: globSchema.optional(),
   project: globSchema.optional(),
@@ -89,4 +90,5 @@ const workspacesConfigurationSchema = z.object({
 export const knipConfigurationSchema = rootConfigurationSchema
   .merge(reportConfigSchema)
   .merge(workspacesConfigurationSchema)
-  .merge(pluginsSchema.partial());
+  .merge(pluginsSchema.partial())
+  .strict();

@@ -3,7 +3,7 @@ import { main } from './index.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
 import { perfObserver } from './util/Performance.js';
 import parsedArgValues, { helpText } from './util/cli-arguments.js';
-import { getKnownError, hasCause, isConfigurationError, isKnownError } from './util/errors.js';
+import { getKnownError, isConfigurationError, isDisplayReason, isKnownError } from './util/errors.js';
 import { logError, logWarning } from './util/log.js';
 import { cwd, join, toPosix } from './util/path.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
@@ -146,7 +146,7 @@ const run = async () => {
     if (!isDebug && error instanceof Error && isKnownError(error)) {
       const knownError = getKnownError(error);
       logError('ERROR', knownError.message);
-      if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
+      if (isDisplayReason(knownError)) console.error('Reason:', knownError.cause.message);
       if (isConfigurationError(knownError)) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
     }

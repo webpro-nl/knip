@@ -1,5 +1,5 @@
 import { ZodError } from 'zod';
-import { fromZodError } from 'zod-validation-error';
+import { fromZodError, isValidationError } from 'zod-validation-error';
 
 interface ErrorWithCause extends Error {
   cause: Error;
@@ -12,7 +12,8 @@ export class LoaderError extends Error {}
 export const isKnownError = (error: Error) =>
   error instanceof ConfigurationError || error instanceof LoaderError || error instanceof ZodError;
 
-export const hasCause = (error: Error): error is ErrorWithCause => error.cause instanceof Error;
+export const isDisplayReason = (error: Error): error is ErrorWithCause =>
+  !isValidationError(error) && error.cause instanceof Error;
 
 export const isConfigurationError = (error: Error) => error instanceof ConfigurationError;
 
