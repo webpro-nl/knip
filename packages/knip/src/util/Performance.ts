@@ -3,9 +3,9 @@ import { constants } from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
 import EasyTable from 'easy-table';
 import prettyMilliseconds from 'pretty-ms';
-import Summary from 'summary';
 import parsedArgValues from './cli-arguments.js';
 import { debugLog } from './debug.js';
+import { getStats } from './math.js';
 
 const { performance: isEnabled = false } = parsedArgValues;
 
@@ -87,13 +87,13 @@ class Performance {
     const entriesByName = this.getEntriesByName();
     const table = new EasyTable();
     for (const [name, values] of Object.entries(entriesByName)) {
-      const stats = new Summary(values);
+      const stats = getStats(values);
       table.cell('Name', name);
-      table.cell('size', stats.size(), EasyTable.number(0));
-      table.cell('min', stats.min(), EasyTable.number(2));
-      table.cell('max', stats.max(), EasyTable.number(2));
-      table.cell('median', stats.median(), EasyTable.number(2));
-      table.cell('sum', stats.sum(), EasyTable.number(2));
+      table.cell('size', values.length, EasyTable.number(0));
+      table.cell('min', stats.min, EasyTable.number(2));
+      table.cell('max', stats.max, EasyTable.number(2));
+      table.cell('median', stats.median, EasyTable.number(2));
+      table.cell('sum', stats.sum, EasyTable.number(2));
       table.newRow();
     }
     table.sort(['sum|des']);

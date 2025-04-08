@@ -22,6 +22,5 @@
     "verbatimModuleSyntax": true
   },
   "include": ["./src/**/*.ts"],
-  "exclude": [],
-  "files": ["./@types/summary/index.d.ts"]
+  "exclude": []
 }
