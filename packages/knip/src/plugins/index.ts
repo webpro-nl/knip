@@ -66,6 +66,7 @@ import { default as sentry } from './sentry/index.js';
 import { default as simpleGitHooks } from './simple-git-hooks/index.js';
 import { default as sizeLimit } from './size-limit/index.js';
 import { default as sst } from './sst/index.js';
+import { default as starlight } from './starlight/index.js';
 import { default as storybook } from './storybook/index.js';
 import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
@@ -162,6 +163,7 @@ export const Plugins = {
   'simple-git-hooks': simpleGitHooks,
   'size-limit': sizeLimit,
   sst,
+  starlight,
   storybook,
   stryker,
   stylelint,

@@ -559,6 +559,10 @@
           "title": "sst plugin configuration (https://knip.dev/reference/plugins/sst)",
           "$ref": "#/definitions/plugin"
         },
+        "starlight": {
+          "title": "starlight plugin configuration (https://knip.dev/reference/plugins/starlight)",
+          "$ref": "#/definitions/plugin"
+        },
         "storybook": {
           "title": "Storybook plugin configuration (https://knip.dev/reference/plugins/storybook)",
           "$ref": "#/definitions/plugin"
