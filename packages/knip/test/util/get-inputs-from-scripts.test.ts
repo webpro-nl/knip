@@ -237,9 +237,9 @@ test('getInputsFromScripts (c8)', () => {
 });
 
 test('getInputsFromScripts (nodemon)', () => {
-  t('nodemon --require dotenv/config ./script.js --watch ./script.js', [toBinary('nodemon'), js, toDeferResolve('dotenv/config')]);
-  t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", [toBinary('nodemon'), ts, toBinary('ts-node'), toBinary('pino-pretty')]);
-  t('nodemon ./script.js', [toBinary('nodemon'), js]);
+  t('nodemon --require dotenv/config ./script.js --watch ./script.js', [toBinary('nodemon'), toDeferResolve('dotenv/config')]);
+  t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", [toBinary('nodemon'), toBinary('ts-node'), toBinary('pino-pretty')]);
+  t('nodemon ./script.js', [toBinary('nodemon')]);
 });
 
 test('getInputsFromScripts (double-dash)', () => {

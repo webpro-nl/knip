@@ -3,7 +3,7 @@ import type { Plugin } from '../../types/config.js';
 const title = 'nodemon';
 
 const args = {
-  positional: true,
+  positional: false,
   nodeImportArgs: true,
   string: ['exec'],
   fromArgs: ['exec'],

@@ -54,6 +54,8 @@ test('Unused dependencies in npm scripts', async () => {
     cwd,
   });
 
+  assert.deepEqual(issues.files, new Set([join(cwd, 'script.js')]));
+
   assert(issues.dependencies['package.json']['express']);
 
   assert(issues.devDependencies['package.json']['unused']);
@@ -72,6 +74,7 @@ test('Unused dependencies in npm scripts', async () => {
     dependencies: 1,
     devDependencies: 1,
     binaries: 3,
+    files: 1,
     processed: 2,
     total: 2,
   });
