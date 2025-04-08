@@ -18,7 +18,7 @@ test('Find dependencies with the tanstack-router plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 4,
-    total: 4,
+    processed: 6,
+    total: 6,
   });
 });

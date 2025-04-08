@@ -8,14 +8,22 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/sst');
 
 test('Find dependencies with the sst plugin', async () => {
-  const { counters } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
+  assert(issues.unlisted['handlers/auth.handler.ts']['sst-auth-handler-dep']);
+  assert(issues.unlisted['handlers/auth.ts']['sst-auth-dep']);
+  assert(issues.unlisted['handlers/some-route-handler.ts']['sst-some-dep']);
+  assert(issues.unlisted['stacks/AuthHandlerStack.ts']['sst-auth-handler-stack-dep']);
+  assert(issues.unlisted['stacks/AuthStack.ts']['sst-auth-stack-dep']);
+  assert(issues.unlisted['sst.config.ts']['sst-config-dep']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 0,
-    total: 0,
+    unlisted: 6,
+    processed: 6,
+    total: 6,
   });
 });

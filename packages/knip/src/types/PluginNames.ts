@@ -67,6 +67,7 @@ export type PluginName =
   | 'simple-git-hooks'
   | 'size-limit'
   | 'sst'
+  | 'starlight'
   | 'storybook'
   | 'stryker'
   | 'stylelint'
@@ -163,6 +164,7 @@ export const pluginNames = [
   'simple-git-hooks',
   'size-limit',
   'sst',
+  'starlight',
   'storybook',
   'stryker',
   'stylelint',

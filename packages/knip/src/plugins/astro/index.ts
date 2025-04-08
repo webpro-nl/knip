@@ -1,8 +1,6 @@
-import type ts from 'typescript';
-import type { IsPluginEnabled, Plugin, Resolve, ResolveFromAST } from '../../types/config.js';
-import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getComponentPathsFromSourceFile } from './resolveFromAST.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -22,11 +20,6 @@ const production = [
   'src/middleware.{js,ts}',
   'src/actions/index.{js,ts}',
 ];
-
-const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
-  const componentPaths = getComponentPathsFromSourceFile(sourceFile);
-  return [...entry.map(toEntry), ...[...production, ...componentPaths].map(id => toProductionEntry(id))];
-};
 
 const resolve: Resolve = options => {
   const { manifest, isProduction } = options;
@@ -51,5 +44,4 @@ export default {
   entry,
   production,
   resolve,
-  resolveFromAST,
 } satisfies Plugin;
