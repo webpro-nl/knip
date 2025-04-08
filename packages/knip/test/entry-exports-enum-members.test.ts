@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/entry-exports-enum-members');
 
-test('Find unused enum members re-exported in entry file', async () => {
+test('Find unused exportd, types and enum members re-exported in entry file', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -20,15 +20,20 @@ test('Find unused enum members re-exported in entry file', async () => {
   });
 });
 
-test('Find unused enum members re-exported in entry file (2)', async () => {
-  const { counters } = await main({
+test('Find unused exportd, types and enum members re-exported in entry file (2)', async () => {
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isIncludeEntryExports: true,
   });
 
+  assert(issues.types['fruit.ts'].Farmer);
+  assert(issues.exports['index.ts'].Farmer);
+  assert(issues.exports['index.ts'].Tree);
+
   assert.deepEqual(counters, {
     ...baseCounters,
+    exports: 2,
     types: 1,
     processed: 4,
     total: 4,

@@ -102,8 +102,6 @@ export const analyze = async (options: AnalyzeOptions) => {
           const importsForExport = file.imported;
 
           for (const [identifier, exportedItem] of exportItems.entries()) {
-            if (!isFix && exportedItem.isReExport) continue;
-
             // Skip tagged exports
             if (shouldIgnore(exportedItem.jsDocTags)) continue;
 

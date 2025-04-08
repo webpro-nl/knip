@@ -27,11 +27,12 @@ test('Find unused member on namespace re-exported in entry file (2)', async () =
     isIncludeEntryExports: true,
   });
 
+  assert(issues.exports['index.ts'].NS);
   assert(issues.exports['ns.ts'].y);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 1,
+    exports: 2,
     processed: 4,
     total: 4,
   });
