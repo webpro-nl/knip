@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/tanstack-router",
+  "version": "*",
+  "dependencies": {
+    "@tanstack/react-router": "*",
+    "@tanstack/router-plugin": "*",
+    "@vitejs/plugin-react": "*",
+    "vite": "*"
+  }
+}

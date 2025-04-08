@@ -65,12 +65,15 @@ import { default as semanticRelease } from './semantic-release/index.js';
 import { default as sentry } from './sentry/index.js';
 import { default as simpleGitHooks } from './simple-git-hooks/index.js';
 import { default as sizeLimit } from './size-limit/index.js';
+import { default as sst } from './sst/index.js';
+import { default as starlight } from './starlight/index.js';
 import { default as storybook } from './storybook/index.js';
 import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
+import { default as tanstackRouter } from './tanstack-router/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
 import { default as tsup } from './tsup/index.js';
@@ -159,12 +162,15 @@ export const Plugins = {
   sentry,
   'simple-git-hooks': simpleGitHooks,
   'size-limit': sizeLimit,
+  sst,
+  starlight,
   storybook,
   stryker,
   stylelint,
   svelte,
   syncpack,
   tailwind,
+  'tanstack-router': tanstackRouter,
   travis,
   'ts-node': tsNode,
   tsup,

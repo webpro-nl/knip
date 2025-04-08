@@ -1,3 +1,4 @@
+import type ts from 'typescript';
 import type { z } from 'zod';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema } from '../schema/configuration.js';
@@ -123,6 +124,18 @@ export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Prom
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
+export type GetSourceFile = (filePath: string) => ts.SourceFile | undefined;
+
+export type GetReferencedInternalFilePath = (input: Input) => string | undefined;
+
+export type ResolveFromAST = (
+  sourceFile: ts.SourceFile,
+  options: PluginOptions & {
+    getSourceFile: GetSourceFile;
+    getReferencedInternalFilePath: GetReferencedInternalFilePath;
+  }
+) => Input[];
+
 export interface Plugin {
   title: string;
   args?: Args;
@@ -137,6 +150,7 @@ export interface Plugin {
   resolveEntryPaths?: ResolveEntryPaths;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
+  resolveFromAST?: ResolveFromAST;
 }
 
 export type PluginMap = Record<PluginName, Plugin>;

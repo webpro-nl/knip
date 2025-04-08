@@ -242,3 +242,62 @@ export const hasRequireCall = (node: ts.Node): boolean => {
 
 export const isModuleExportsAccess = (node: ts.PropertyAccessExpression) =>
   ts.isIdentifier(node.expression) && node.expression.escapedText === 'module' && node.name.escapedText === 'exports';
+
+export const getImportMap = (sourceFile: ts.SourceFile) => {
+  const importMap = new Map<string, string>();
+  for (const statement of sourceFile.statements) {
+    if (ts.isImportDeclaration(statement)) {
+      const importClause = statement.importClause;
+      const importPath = stripQuotes(statement.moduleSpecifier.getText());
+      if (importClause?.name) importMap.set(importClause.name.text, importPath);
+      if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+        for (const element of importClause.namedBindings.elements) importMap.set(element.name.text, importPath);
+      }
+    }
+  }
+  return importMap;
+};
+
+export const getDefaultImportName = (importMap: ReturnType<typeof getImportMap>, specifier: string) => {
+  for (const [importName, importSpecifier] of importMap) {
+    if (importSpecifier === specifier) return importName;
+  }
+};
+
+export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName: string) => {
+  const values = new Set<string>();
+  if (ts.isObjectLiteralExpression(node)) {
+    const props = node.properties.find(prop => ts.isPropertyAssignment(prop) && prop.name.getText() === propertyName);
+    if (props && ts.isPropertyAssignment(props)) {
+      const initializer = props.initializer;
+      if (ts.isStringLiteral(initializer)) {
+        values.add(initializer.text);
+      } else if (ts.isArrayLiteralExpression(initializer)) {
+        for (const element of initializer.elements) {
+          if (ts.isStringLiteral(element)) values.add(element.text);
+        }
+      } else if (ts.isObjectLiteralExpression(initializer)) {
+        for (const prop of initializer.properties) {
+          if (ts.isPropertyAssignment(prop)) {
+            if (ts.isStringLiteral(prop.initializer)) values.add(prop.initializer.text);
+          }
+        }
+      }
+    }
+  }
+  return values;
+};
+
+export const getPropertyValueEntries = (node: ts.ObjectLiteralExpression, propertyNames: Set<string>) => {
+  const entries: [string, string][] = [];
+  for (const prop of node.properties) {
+    if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
+      if (propertyNames.has(prop.name.text)) {
+        if (ts.isStringLiteral(prop.initializer)) {
+          entries.push([prop.name.text, prop.initializer.text]);
+        }
+      }
+    }
+  }
+  return entries;
+};

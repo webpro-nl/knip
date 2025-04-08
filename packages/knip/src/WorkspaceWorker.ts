@@ -9,6 +9,8 @@ import type {
   Configuration,
   EnsuredPluginConfiguration,
   GetInputsFromScriptsPartial,
+  GetReferencedInternalFilePath,
+  GetSourceFile,
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { PackageJson } from './types/package-json.js';
@@ -16,10 +18,18 @@ import type { DependencySet } from './types/workspace.js';
 import { compact } from './util/array.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
-import { type ConfigInput, type Input, isConfig, toConfig, toDebugString, toEntry } from './util/input.js';
+import {
+  type ConfigInput,
+  type Input,
+  isConfig,
+  toConfig,
+  toDebugString,
+  toEntry,
+  toProductionEntry,
+} from './util/input.js';
 import { getKeysByValue } from './util/object.js';
 import { basename, dirname, join } from './util/path.js';
-import { getFinalEntryPaths, loadConfigForPlugin } from './util/plugin.js';
+import { loadConfigForPlugin } from './util/plugin.js';
 
 type WorkspaceManagerOptions = {
   name: string;
@@ -28,8 +38,9 @@ type WorkspaceManagerOptions = {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
-  getReferencedInternalFilePath: (input: Input) => string | undefined;
+  getReferencedInternalFilePath: GetReferencedInternalFilePath;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
+  getSourceFile: GetSourceFile;
   rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
@@ -38,11 +49,10 @@ type WorkspaceManagerOptions = {
   isStrict: boolean;
   isCache: boolean;
   cacheLocation: string;
-  allConfigFilePaths: Set<string>;
-  allConfigFilesMap: Map<string, Map<PluginName, Set<string>>>;
+  configFilesMap: Map<string, Map<PluginName, Set<string>>>;
 };
 
-type CacheItem = { resolveEntryPaths?: Input[]; resolveConfig?: Input[] };
+type CacheItem = { resolveEntryPaths?: Input[]; resolveConfig?: Input[]; resolveFromAST?: Input[] };
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
@@ -65,8 +75,9 @@ export class WorkspaceWorker {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
-  getReferencedInternalFilePath: (input: Input) => string | undefined;
+  getReferencedInternalFilePath: GetReferencedInternalFilePath;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
+  getSourceFile: GetSourceFile;
   isProduction;
   isStrict;
   rootIgnore: Configuration['ignore'];
@@ -79,8 +90,7 @@ export class WorkspaceWorker {
 
   cache: CacheConsultant<CacheItem>;
 
-  allConfigFilePaths: Set<string>;
-  allConfigFilesMap: Map<string, Map<PluginName, Set<string>>>;
+  configFilesMap: Map<string, Map<PluginName, Set<string>>>;
 
   constructor({
     name,
@@ -97,10 +107,10 @@ export class WorkspaceWorker {
     enabledPluginsInAncestors,
     getReferencedInternalFilePath,
     findWorkspaceByFilePath,
+    getSourceFile,
     isCache,
     cacheLocation,
-    allConfigFilePaths,
-    allConfigFilesMap,
+    configFilesMap,
   }: WorkspaceManagerOptions) {
     this.name = name;
     this.dir = dir;
@@ -114,11 +124,11 @@ export class WorkspaceWorker {
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
-    this.allConfigFilePaths = allConfigFilePaths;
-    this.allConfigFilesMap = allConfigFilesMap;
+    this.configFilesMap = configFilesMap;
 
     this.getReferencedInternalFilePath = getReferencedInternalFilePath;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
+    this.getSourceFile = getSourceFile;
 
     this.cache = new CacheConsultant({ name: `plugins-${name}`, isEnabled: isCache, cacheLocation });
   }
@@ -246,7 +256,7 @@ export class WorkspaceWorker {
   }
 
   public async runPlugins() {
-    const name = this.name;
+    const wsName = this.name;
     const cwd = this.dir;
     const rootCwd = this.cwd;
     const manifest = this.manifest;
@@ -274,8 +284,16 @@ export class WorkspaceWorker {
     const inputs: Input[] = [];
     const remainingPlugins = new Set(this.enabledPlugins);
 
-    const addInput = (input: Input, containingFilePath = input.containingFilePath) =>
-      inputs.push({ ...input, containingFilePath });
+    const addInput = (input: Input, containingFilePath = input.containingFilePath) => {
+      if (isConfig(input)) {
+        handleConfigInput(input.pluginName, { ...input, containingFilePath });
+      } else {
+        inputs.push({ ...input, containingFilePath });
+      }
+    };
+
+    const configFilesMap = this.configFilesMap;
+    const configFiles = this.configFilesMap.get(wsName);
 
     const handleConfigInput = (pluginName: PluginName, input: ConfigInput) => {
       const configFilePath = this.getReferencedInternalFilePath(input);
@@ -284,10 +302,9 @@ export class WorkspaceWorker {
         if (workspace) {
           // We can only handle root → child transfers, otherwise add to and run in current workspace
           const name = this.name === ROOT_WORKSPACE_NAME ? workspace.name : this.name;
-          const files = this.allConfigFilesMap;
-          if (!files.has(name)) files.set(name, new Map());
-          if (!files.get(name)?.has(pluginName)) files.get(name)?.set(pluginName, new Set());
-          files.get(name)?.get(pluginName)?.add(configFilePath);
+          if (!configFilesMap.has(name)) configFilesMap.set(name, new Map());
+          if (!configFilesMap.get(name)?.has(pluginName)) configFilesMap.get(name)?.set(pluginName, new Set());
+          configFilesMap.get(name)?.get(pluginName)?.add(configFilePath);
         }
       }
     };
@@ -303,24 +320,12 @@ export class WorkspaceWorker {
 
     const runPlugin = async (pluginName: PluginName, patterns: string[]) => {
       const plugin = Plugins[pluginName];
-      const hasResolveEntryPaths = typeof plugin.resolveEntryPaths === 'function';
-      const hasResolveConfig = typeof plugin.resolveConfig === 'function';
-      const hasResolve = typeof plugin.resolve === 'function';
       const config = this.getConfigForPlugin(pluginName);
 
       if (!config) return;
 
       const label = 'config file';
       const configFilePaths = await _glob({ patterns, cwd: rootCwd, dir: cwd, gitignore: false, label });
-
-      const remainingConfigFilePaths = configFilePaths.filter(filePath => !this.allConfigFilePaths.has(filePath));
-      for (const filePath of remainingConfigFilePaths) {
-        if (basename(filePath) !== 'package.json') {
-          this.allConfigFilePaths.add(filePath);
-          addInput(toEntry(filePath));
-          addInput(toConfig(pluginName, filePath));
-        }
-      }
 
       const options = {
         ...baseScriptOptions,
@@ -331,63 +336,91 @@ export class WorkspaceWorker {
         getInputsFromScripts: createGetInputsFromScripts(containingFilePath),
       };
 
-      const configEntryPaths: Input[] = [];
+      if (config.entry) {
+        const toInput = isProduction && plugin.production && plugin.production.length > 0 ? toProductionEntry : toEntry;
+        for (const id of config.entry) addInput(toInput(id));
+      } else if (
+        (!plugin.resolveEntryPaths && !plugin.resolveFromAST) ||
+        (configFilePaths.length === 0 &&
+          (!this.configFilesMap.get(wsName)?.get(pluginName) ||
+            this.configFilesMap.get(wsName)?.get(pluginName)?.size === 0))
+      ) {
+        if (plugin.entry) for (const id of plugin.entry) addInput(toEntry(id));
+        if (plugin.production) for (const id of plugin.production) addInput(toProductionEntry(id));
+      }
 
-      for (const configFilePath of remainingConfigFilePaths) {
-        const opts = {
+      for (const configFilePath of configFilePaths) {
+        const isManifest = basename(configFilePath) === 'package.json';
+        const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
+
+        if (fd?.meta?.data && !fd.changed) {
+          const data = fd.meta.data;
+          if (data.resolveEntryPaths) for (const id of data.resolveEntryPaths) addInput(id, configFilePath);
+          if (data.resolveConfig) for (const id of data.resolveConfig) addInput(id, configFilePath);
+          if (data.resolveFromAST) for (const id of data.resolveFromAST) addInput(id, configFilePath);
+          continue;
+        }
+
+        const resolveOpts = {
           ...options,
           getInputsFromScripts: createGetInputsFromScripts(configFilePath),
           configFilePath,
           configFileDir: dirname(configFilePath),
           configFileName: basename(configFilePath),
         };
-        if (hasResolveEntryPaths || hasResolveConfig) {
-          const isManifest = basename(configFilePath) === 'package.json';
-          const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
 
-          if (fd?.meta?.data && !fd.changed) {
-            if (fd.meta.data.resolveEntryPaths)
-              for (const id of fd.meta.data.resolveEntryPaths) configEntryPaths.push(id);
-            if (fd.meta.data.resolveConfig) for (const id of fd.meta.data.resolveConfig) addInput(id, configFilePath);
-          } else {
-            const config = await loadConfigForPlugin(configFilePath, plugin, opts, pluginName);
-            const data: CacheItem = {};
-            if (config) {
-              if (hasResolveEntryPaths) {
-                const entryPaths = (await plugin.resolveEntryPaths?.(config, opts)) ?? [];
-                for (const entryPath of entryPaths) configEntryPaths.push(entryPath);
-                data.resolveEntryPaths = entryPaths;
-              }
-              if (hasResolveConfig) {
-                const inputs = (await plugin.resolveConfig?.(config, opts)) ?? [];
-                for (const input of inputs) {
-                  if (isConfig(input)) {
-                    handleConfigInput(input.pluginName, { ...input, containingFilePath: configFilePath });
-                  } else {
-                    addInput(input, configFilePath);
-                  }
-                }
-                data.resolveConfig = inputs;
-              }
-              if (!isManifest && fd?.changed && fd.meta) fd.meta.data = data;
-            }
+        const seen = this.configFilesMap.get(wsName)?.get(pluginName)?.has(configFilePath);
+        const cache: CacheItem = {};
+        let loadedConfig: unknown;
+
+        if (plugin.resolveEntryPaths && !seen) {
+          if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
+          if (loadedConfig) {
+            const inputs = await plugin.resolveEntryPaths(loadedConfig, resolveOpts);
+            for (const input of inputs) addInput(input, configFilePath);
+            cache.resolveEntryPaths = inputs;
           }
         }
+
+        if (plugin.resolveConfig && !seen) {
+          if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
+          if (loadedConfig) {
+            const inputs = await plugin.resolveConfig(loadedConfig, resolveOpts);
+            for (const input of inputs) addInput(input, configFilePath);
+            cache.resolveConfig = inputs;
+          }
+        }
+
+        if (plugin.resolveFromAST) {
+          const sourceFile = this.getSourceFile(configFilePath);
+          const resolveASTOpts = {
+            ...resolveOpts,
+            getSourceFile: this.getSourceFile,
+            getReferencedInternalFilePath: this.getReferencedInternalFilePath,
+          };
+          if (sourceFile) {
+            const inputs = plugin.resolveFromAST(sourceFile, resolveASTOpts);
+            for (const input of inputs) addInput(input, configFilePath);
+            cache.resolveFromAST = inputs;
+          }
+        }
+
+        if (basename(configFilePath) !== 'package.json') {
+          addInput(toEntry(configFilePath));
+          addInput(toConfig(pluginName, configFilePath));
+        }
+
+        if (!isManifest && fd?.changed && fd.meta) fd.meta.data = cache;
       }
 
-      const finalEntryPaths = getFinalEntryPaths(plugin, options, configEntryPaths);
-      for (const id of finalEntryPaths) addInput(id, id.containingFilePath);
-
-      if (hasResolve) {
-        const dependencies = (await plugin.resolve?.(options)) ?? [];
+      if (plugin.resolve) {
+        const dependencies = (await plugin.resolve(options)) ?? [];
         for (const id of dependencies) addInput(id, containingFilePath);
       }
     };
 
     const enabledPluginTitles = this.enabledPlugins.map(name => Plugins[name].title);
     debugLogObject(this.name, 'Enabled plugins', enabledPluginTitles);
-
-    const configFiles = this.allConfigFilesMap.get(name);
 
     for (const pluginName of this.enabledPlugins) {
       const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles?.get(pluginName) ?? [])];
@@ -398,7 +431,7 @@ export class WorkspaceWorker {
 
     {
       // Handle config files added from root or current workspace recursively
-      const configFiles = this.allConfigFilesMap.get(name);
+      const configFiles = this.configFilesMap.get(wsName);
       if (configFiles) {
         do {
           for (const [pluginName, dependencies] of configFiles.entries()) {
@@ -410,7 +443,7 @@ export class WorkspaceWorker {
       }
     }
 
-    debugLogArray(name, 'Plugin dependencies', () => compact(inputs.map(toDebugString)));
+    debugLogArray(wsName, 'Plugin dependencies', () => compact(inputs.map(toDebugString)));
 
     return inputs;
   }

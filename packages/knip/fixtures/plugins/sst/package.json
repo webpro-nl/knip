@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/sst",
+  "version": "*",
+  "dependencies": {
+    "sst": "*"
+  }
+}

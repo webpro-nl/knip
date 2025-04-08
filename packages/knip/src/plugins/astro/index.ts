@@ -10,7 +10,9 @@ const enablers = ['astro'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts', 'src/content.config.ts'];
+const config = ['astro.config.{js,cjs,mjs,ts}'];
+
+const entry = ['src/content/config.ts', 'src/content.config.ts'];
 
 const production = [
   'src/pages/**/*.{astro,mdx,js,ts}',
@@ -38,6 +40,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  config,
   entry,
   production,
   resolve,
