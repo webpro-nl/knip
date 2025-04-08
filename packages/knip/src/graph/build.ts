@@ -78,9 +78,7 @@ export async function build({
   tsConfigFile,
   workspaces,
 }: BuildOptions) {
-  // Handle config files only once across workspaces workers
-  const allConfigFilePaths = new Set<string>();
-  const allConfigFilesMap = new Map<string, Map<PluginName, Set<string>>>();
+  const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
 
   const enabledPluginsStore = new Map<string, string[]>();
 
@@ -137,8 +135,7 @@ export async function build({
       getSourceFile: (filePath: string) => principal.backend.fileManager.getSourceFile(filePath),
       isCache,
       cacheLocation,
-      allConfigFilePaths,
-      allConfigFilesMap,
+      configFilesMap,
     });
 
     await worker.init();
