@@ -23,8 +23,5 @@
   },
   "include": ["./src/**/*.ts"],
   "exclude": [],
-  "files": [
-    "./@types/github-codeowners/index.d.ts",
-    "./@types/summary/index.d.ts"
-  ]
+  "files": ["./@types/summary/index.d.ts"]
 }

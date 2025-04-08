@@ -1,7 +1,7 @@
-import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import picocolors from 'picocolors';
 import type { Entries } from 'type-fest';
 import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.js';
+import { createOwnershipEngine } from '../util/codeowners.js';
 import { relative, resolve, toRelative } from '../util/path.js';
 import { getTitle, logIssueLine, logTitle } from './util.js';
 
@@ -32,15 +32,16 @@ export default ({ report, issues, isShowProgress, options }: ReporterOptions) =>
     console.error(error);
   }
   const codeownersFilePath = resolve(opts.path ?? '.github/CODEOWNERS');
-  const codeownersEngine = OwnershipEngine.FromCodeownersFile(codeownersFilePath);
+  const findOwners = createOwnershipEngine(codeownersFilePath);
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
-  const [dependenciesOwner = '[no-owner]'] = codeownersEngine.calcFileOwnership('package.json');
-  const fallbackOwner = dependenciesOwner;
+  const [dependenciesOwner = '[no-owner]'] = findOwners('package.json');
   let totalIssues = 0;
 
-  const calcFileOwnership = (filePath: string) =>
-    codeownersEngine.calcFileOwnership(relative(filePath))[0] ?? fallbackOwner;
-  const addOwner = (issue: Issue) => ({ ...issue, owner: calcFileOwnership(issue.filePath) });
+  const calcFileOwnership = (filePath: string) => findOwners(relative(filePath))[0] ?? dependenciesOwner;
+  const addOwner = (issue: Issue) => ({
+    ...issue,
+    owner: calcFileOwnership(issue.filePath),
+  });
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {

@@ -1,6 +1,6 @@
-import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
 import type { Entries } from 'type-fest';
 import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issues.js';
+import { createOwnershipEngine } from '../util/codeowners.js';
 import { isFile } from '../util/fs.js';
 import { relative, resolve } from '../util/path.js';
 import { convert } from './util.js';
@@ -39,7 +39,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
 
   const json: Record<string, Row> = {};
   const codeownersFilePath = resolve(opts.codeowners ?? '.github/CODEOWNERS');
-  const codeownersEngine = isFile(codeownersFilePath) && OwnershipEngine.FromCodeownersFile(codeownersFilePath);
+  const findOwners = isFile(codeownersFilePath) && createOwnershipEngine(codeownersFilePath);
 
   const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
 
@@ -47,7 +47,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
     const file = relative(filePath);
     const row: Row = {
       file,
-      ...(codeownersEngine && { owners: codeownersEngine.calcFileOwnership(file) }),
+      ...(findOwners && { owners: findOwners(file).map(name => ({ name })) }),
       ...(report.dependencies && { dependencies: [] }),
       ...(report.devDependencies && { devDependencies: [] }),
       ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),

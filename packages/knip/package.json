@@ -60,7 +60,6 @@
   ],
   "dependencies": {
     "@nodelib/fs.walk": "^1.2.3",
-    "@snyk/github-codeowners": "1.1.0",
     "easy-table": "1.2.0",
     "enhanced-resolve": "^5.18.1",
     "fast-glob": "^3.3.3",
