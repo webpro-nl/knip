@@ -10,6 +10,7 @@ export interface Input {
   optional?: boolean;
   dir?: string;
   containingFilePath?: string;
+  skipExportsAnalysis?: string;
 }
 
 export interface ConfigInput extends Input {

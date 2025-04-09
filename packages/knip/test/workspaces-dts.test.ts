@@ -13,11 +13,12 @@ test('Find unused un-built exports across workspaces', async () => {
     cwd,
   });
 
+  assert(issues.exports['packages/shared/src/index.js']['unusedFunction']);
   assert(issues.exports['packages/shared/src/unused-function.js']['unusedFunction']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 1,
+    exports: 2,
     processed: 8,
     total: 8,
   });
