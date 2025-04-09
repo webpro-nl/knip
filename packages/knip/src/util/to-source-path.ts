@@ -20,26 +20,22 @@ export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOpti
 export const getToSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string>();
 
-  const toSourcePath = (filePath: string) => {
+  return (filePath: string) => {
     if (!isInternal(filePath) || hasJSExt.test(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
-    if (workspace) {
-      if (workspace.srcDir && workspace.outDir) {
-        if (filePath.startsWith(workspace.outDir)) {
-          const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, defaultExtensions);
-          const [srcFilePath] = fastGlob.sync(pattern);
-          toSourceMapCache.set(filePath, srcFilePath);
-          if (srcFilePath && srcFilePath !== filePath) {
-            debugLog('*', `Rewiring ${toRelative(filePath)} → ${toRelative(srcFilePath)}`);
-            return srcFilePath;
-          }
+    if (workspace?.srcDir && workspace.outDir) {
+      if (filePath.startsWith(workspace.outDir)) {
+        const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, defaultExtensions);
+        const [srcFilePath] = fastGlob.sync(pattern);
+        toSourceMapCache.set(filePath, srcFilePath);
+        if (srcFilePath && srcFilePath !== filePath) {
+          debugLog('*', `Source mapping ${toRelative(filePath)} → ${toRelative(srcFilePath)}`);
+          return srcFilePath;
         }
       }
     }
   };
-
-  return toSourcePath;
 };
 
 export type ToSourceFilePath = ReturnType<typeof getToSourcePathHandler>;
