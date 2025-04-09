@@ -8,6 +8,7 @@ import { default as capacitor } from './capacitor/index.js';
 import { default as changesets } from './changesets/index.js';
 import { default as commitizen } from './commitizen/index.js';
 import { default as commitlint } from './commitlint/index.js';
+import { default as createTypescriptApp } from './create-typescript-app/index.js';
 import { default as cspell } from './cspell/index.js';
 import { default as cucumber } from './cucumber/index.js';
 import { default as cypress } from './cypress/index.js';
@@ -105,6 +106,7 @@ export const Plugins = {
   changesets,
   commitizen,
   commitlint,
+  'create-typescript-app': createTypescriptApp,
   cspell,
   cucumber,
   cypress,
