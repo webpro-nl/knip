@@ -5,7 +5,7 @@ import { use, StackContext, Function, FunctionProps } from 'sst/constructs';
 export function AuthStack({ stack, app }: StackContext) {
   // Create single Lambda handler
   const handlerProps: FunctionProps = {
-    handler: 'handlers/auth',
+    handler: 'handlers/auth.handler',
     permissions: ['perm1', 'perm2'],
   };
 

@@ -4,7 +4,7 @@ import { AuthStack } from './stacks/AuthStack';
 import { AuthHandlerStack } from './stacks/AuthHandlerStack';
 
 new sst.aws.Function('MyFunction', {
-  handler: 'handlers/some-route-handler', // v3
+  handler: 'handlers/some-route.handler', // v3
   environment: {
     ACCOUNT: aws.getCallerIdentityOutput({}).accountId,
     REGION: aws.getRegionOutput().name,

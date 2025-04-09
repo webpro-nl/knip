@@ -1,3 +1,3 @@
-import 'sst-auth-dep';
+import 'sst-some-dep';
 
 export const handler = () => {};
