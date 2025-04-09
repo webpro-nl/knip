@@ -7,7 +7,7 @@ import type { TanstackRouterConfig } from './types.js';
 
 // https://tanstack.com/router/latest/docs/framework/react/routing/file-based-routing
 
-const title = 'tanstack-router';
+const title = 'TanStack Router';
 
 const enablers = ['@tanstack/react-router', '@tanstack/router-plugin', '@tanstack/router-cli'];
 
