@@ -2,7 +2,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import type { PackageJson } from '../types/package-json.js';
 import { _glob } from './glob.js';
-import { getStringValues } from './object.js';
 
 const INDENT = Symbol.for('indent');
 const NEWLINE = Symbol.for('newline');
@@ -30,6 +29,21 @@ const parseJson = (raw: string): ExtendedPackageJson => {
   return result;
 };
 
+const getEntriesFromExports = (obj: any): string[] => {
+  if (typeof obj === 'string') return [obj];
+  let values: string[] = [];
+  for (const prop in obj) {
+    if (typeof obj[prop] === 'string') {
+      values.push(obj[prop]);
+    } else if (obj[prop] === null) {
+      values.push(`!${prop}`);
+    } else if (typeof obj[prop] === 'object') {
+      values = values.concat(getEntriesFromExports(obj[prop]));
+    }
+  }
+  return values;
+};
+
 export const load = async (filePath: string) => {
   const file = await readFile(filePath, 'utf8');
   return parseJson(file);
@@ -43,10 +57,7 @@ export const save = async (filePath: string, content: ExtendedPackageJson) => {
   await writeFile(filePath, fileContent);
 };
 
-export const getEntryPathsFromManifest = (
-  manifest: PackageJson,
-  sharedGlobOptions: { cwd: string; dir: string; gitignore: boolean; ignore: string[] }
-) => {
+export const getEntryPathsFromManifest = (manifest: PackageJson, options: { cwd: string; ignore: string[] }) => {
   const { main, module, browser, bin, exports, types, typings } = manifest;
 
   const entryPaths = new Set<string>();
@@ -63,15 +74,18 @@ export const getEntryPathsFromManifest = (
   }
 
   if (exports) {
-    for (const item of getStringValues(exports)) entryPaths.add(item);
+    for (const item of getEntriesFromExports(exports)) {
+      if (item === './*') continue;
+      const expanded = item
+        .replace(/\/\*$/, '/**') // /* → /**
+        .replace(/\/\*\./, '/**/*.') // /*. → /**/*.
+        .replace(/\/\*\//, '/**/'); // /*/ → /**/
+      entryPaths.add(expanded);
+    }
   }
 
   if (typeof types === 'string') entryPaths.add(types);
   if (typeof typings === 'string') entryPaths.add(typings);
 
-  // Use glob, as we only want source files that:
-  // - exist
-  // - are not (generated) files that are .gitignore'd
-  // - do not match configured `ignore` patterns
-  return _glob({ ...sharedGlobOptions, patterns: Array.from(entryPaths), label: 'package.json entry' });
+  return _glob({ patterns: Array.from(entryPaths), ...options, gitignore: false, label: 'package.json entry paths' });
 };
