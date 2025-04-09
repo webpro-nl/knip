@@ -18,7 +18,7 @@ const resolveConfig: ResolveConfig<UnbuildConfig> = config => {
     .flat()
     .map(obj => obj.entries)
     .flatMap(entries => entries?.map(entry => (typeof entry === 'string' ? entry : entry.input)) ?? [])
-    .map(toEntry);
+    .map(id => toEntry(id));
 };
 
 export default {

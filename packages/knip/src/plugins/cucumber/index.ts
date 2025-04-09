@@ -16,7 +16,7 @@ const config = ['cucumber.{json,yaml,yml,js,cjs,mjs}'];
 const entry = ['features/**/*.@(js|cjs|mjs)'];
 
 const resolveEntryPaths: ResolveEntryPaths<CucumberConfig> = config => {
-  return (config?.import ? config.import : []).map(toEntry);
+  return (config?.import ? config.import : []).map(id => toEntry(id));
 };
 
 const resolveConfig: ResolveConfig<CucumberConfig> = config => {

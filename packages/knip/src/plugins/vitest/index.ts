@@ -106,7 +106,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     const dir = join(options.configFileDir, cfg.test?.root ?? '.');
     const deps = (typeof entry === 'string' ? [entry] : Object.values(entry))
       .map(specifier => join(dir, specifier))
-      .map(toEntry);
+      .map(id => toEntry(id));
     for (const dependency of deps) inputs.add(dependency);
   }
   return Array.from(inputs);

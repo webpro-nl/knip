@@ -33,7 +33,7 @@ const resolveEntryPaths: ResolveEntryPaths<StorybookConfig> = async (localConfig
     ...(options.config.entry ?? restEntry),
     ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : stories),
   ];
-  return patterns.map(toEntry);
+  return patterns.map(id => toEntry(id));
 };
 
 const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {

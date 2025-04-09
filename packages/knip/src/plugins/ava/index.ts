@@ -28,7 +28,7 @@ const entry = [
 
 const resolveEntryPaths: ResolveEntryPaths<AvaConfig> = localConfig => {
   if (typeof localConfig === 'function') localConfig = localConfig();
-  return (localConfig?.files ?? entry).map(toEntry);
+  return (localConfig?.files ?? entry).map(id => toEntry(id));
 };
 
 const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => {

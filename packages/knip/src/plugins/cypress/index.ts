@@ -31,7 +31,7 @@ const resolveEntryPaths: ResolveEntryPaths = async localConfig => {
   return [
     ...(specPatterns.length > 0 ? specPatterns : TEST_FILE_PATTERNS),
     ...(supportFiles.length > 0 ? supportFiles : SUPPORT_FILE_PATTERNS),
-  ].map(toEntry);
+  ].map(id => toEntry(id));
 };
 
 const resolveConfig: ResolveConfig<CypressConfig> = async (config, options) => {

@@ -25,7 +25,7 @@ const resolveEntryPaths: ResolveEntryPaths<LadleConfig> = (localConfig, options)
   const localStories = typeof localConfig.stories === 'string' ? [localConfig.stories] : localConfig.stories;
   const viteConfig = localConfig.viteConfig ? [toAbsolute(localConfig.viteConfig, options.cwd)] : [];
   const patterns = [...restEntry, ...(localStories ?? stories), ...viteConfig];
-  return patterns.map(toEntry);
+  return patterns.map(id => toEntry(id));
 };
 
 const resolveConfig: ResolveConfig<LadleConfig> = async (localConfig, options) => {

@@ -57,7 +57,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
     }
   }
 
-  return [...inputs, ...getActionDependencies(config, options).map(toEntry)];
+  return [...inputs, ...getActionDependencies(config, options).map(id => toEntry(id))];
 };
 
 export default {

@@ -223,7 +223,7 @@ export async function glob(patterns: string | string[], options: GlobOptions): P
 
   debugLogObject(
     relative(options.cwd, dir) || ROOT_WORKSPACE_NAME,
-    label ? `Finding ${label} paths` : 'Finding paths',
+    label ? `Finding ${label}` : 'Finding paths',
     () => ({ patterns, ...fgOptions, ignore: cachedIgnores ? `// identical to ${dir}` : ignore, paths })
   );
 

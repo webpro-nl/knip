@@ -17,12 +17,12 @@ const entry = ['**/test/*.{js,cjs,mjs}'];
 
 const resolveEntryPaths: ResolveEntryPaths<MochaConfig> = localConfig => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : [];
-  return [...entryPatterns].map(toEntry);
+  return [...entryPatterns].map(id => toEntry(id));
 };
 
 const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
   const require = localConfig.require ? [localConfig.require].flat() : [];
-  return [...require].map(toEntry);
+  return [...require].map(id => toEntry(id));
 };
 
 const args = {

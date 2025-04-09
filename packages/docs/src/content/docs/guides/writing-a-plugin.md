@@ -177,7 +177,7 @@ Here's an example from the Preconstruct plugin:
 
 ```ts
 const resolveEntryPaths: ResolveConfig<PreconstructConfig> = async config => {
-  return (config.entrypoints ?? []).map(toEntry);
+  return (config.entrypoints ?? []).map(id => toEntry(id));
 };
 ```
 

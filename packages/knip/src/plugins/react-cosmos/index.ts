@@ -29,7 +29,7 @@ const resolveEntryPaths: ResolveEntryPaths<ReactCosmosConfig> = async localConfi
     join(fixturesDir ?? '', `**/*.${fixtureFileSuffix ?? 'fixture'}.${ext}`),
     join(fixturesDir ?? '', `**/${fixtureFileSuffix ?? 'fixture'}.${ext}`),
   ];
-  return [...entries, ...decoratorEntry].map(toEntry);
+  return [...entries, ...decoratorEntry].map(id => toEntry(id));
 };
 
 const resolveConfig: ResolveConfig<ReactCosmosConfig> = async localConfig => {

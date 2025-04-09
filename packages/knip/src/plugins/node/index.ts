@@ -17,7 +17,7 @@ const resolveEntryPaths: ResolveEntryPaths<PackageJson> = localConfig => {
 
   if (scripts && Object.keys(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(scripts[script]))) {
     const patterns = ['**/*{.,-,_}test.?(c|m)js', '**/test-*.?(c|m)js', '**/test.?(c|m)js', '**/test/**/*.?(c|m)js'];
-    entries.push(...patterns.map(toEntry));
+    entries.push(...patterns.map(id => toEntry(id)));
   }
 
   return entries;

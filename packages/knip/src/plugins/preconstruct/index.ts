@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['package.json'];
 
 const resolveEntryPaths: ResolveConfig<PreconstructConfig> = async config => {
-  return (config.entrypoints ?? []).map(toEntry);
+  return (config.entrypoints ?? []).map(id => toEntry(id));
 };
 
 export default {
