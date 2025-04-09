@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/entry-exports-enum-members');
 
-test('Find unused exportd, types and enum members re-exported in entry file', async () => {
+test('Find unused exports, types and enum members re-exported in entry file', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -20,7 +20,7 @@ test('Find unused exportd, types and enum members re-exported in entry file', as
   });
 });
 
-test('Find unused exportd, types and enum members re-exported in entry file (2)', async () => {
+test('Find unused exports, types and enum members re-exported in entry file (2)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
