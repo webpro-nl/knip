@@ -78,7 +78,8 @@ export async function build({
   tsConfigFile,
   workspaces,
 }: BuildOptions) {
-  const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
+  const extConfigFilesMap = new Map<string, Map<PluginName, Set<string>>>();
+  const configFilesMap = new Map<PluginName, Set<string>>();
 
   const enabledPluginsStore = new Map<string, string[]>();
 
@@ -135,6 +136,7 @@ export async function build({
       getSourceFile: (filePath: string) => principal.backend.fileManager.getSourceFile(filePath),
       isCache,
       cacheLocation,
+      extConfigFilesMap,
       configFilesMap,
     });
 
