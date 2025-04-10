@@ -1,0 +1,29 @@
+pre-push:
+  parallel: true
+
+pre-commit:
+  commands:
+    frontend-linter:
+      run: yarn eslint {staged_files}
+    backend-linter:
+      run: bundle exec rubocop --force-exclusion {all_files}
+    frontend-style:
+      files: git diff --name-only HEAD @{push}
+      run: yarn stylelint {files}
+
+post-commit:
+  parallel: true
+  commands:
+    format:
+      glob: '*.{ts,tsx,md,json,vue,yml}'
+      run: npx --no prettier {staged_files} --w
+    eslint:
+      glob: '*.{js,ts,jsx,tsx,vue}'
+      run: npx --no eslint --color --fix {staged_files}
+
+fixer:
+  commands:
+    ruby-fixer:
+      run: bundle exec rubocop --force-exclusion --safe-auto-correct {staged_files}
+    js-fixer:
+      run: yarn eslint --fix {staged_files}
