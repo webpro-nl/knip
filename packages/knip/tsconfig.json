@@ -2,25 +2,19 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "baseUrl": ".",
-    "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "lib": ["esnext"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "noEmit": false,
     "outDir": "./dist",
     "removeComments": true,
-    "resolveJsonModule": true,
     "rootDir": "./src",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "sourceMap": false,
     "strict": true,
     "target": "es2022",
     "verbatimModuleSyntax": true
   },
-  "include": ["./src/**/*.ts"],
-  "exclude": []
+  "include": ["./src/**/*"]
 }
