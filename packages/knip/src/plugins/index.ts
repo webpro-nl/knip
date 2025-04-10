@@ -24,6 +24,7 @@ import { default as githubActions } from './github-actions/index.js';
 import { default as glob } from './glob/index.js';
 import { default as graphqlCodegen } from './graphql-codegen/index.js';
 import { default as husky } from './husky/index.js';
+import { default as i18nextParser } from './i18next-parser/index.js';
 import { default as jest } from './jest/index.js';
 import { default as karma } from './karma/index.js';
 import { default as ladle } from './ladle/index.js';
@@ -122,6 +123,7 @@ export const Plugins = {
   glob,
   'graphql-codegen': graphqlCodegen,
   husky,
+  'i18next-parser': i18nextParser,
   jest,
   karma,
   ladle,

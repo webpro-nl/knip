@@ -25,6 +25,7 @@ export type PluginName =
   | 'glob'
   | 'graphql-codegen'
   | 'husky'
+  | 'i18next-parser'
   | 'jest'
   | 'karma'
   | 'ladle'
@@ -123,6 +124,7 @@ export const pluginNames = [
   'glob',
   'graphql-codegen',
   'husky',
+  'i18next-parser',
   'jest',
   'karma',
   'ladle',

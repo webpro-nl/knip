@@ -391,6 +391,10 @@
           "title": "husky plugin configuration (https://knip.dev/reference/plugins/husky)",
           "$ref": "#/definitions/plugin"
         },
+        "i18next-parser": {
+          "title": "i18next-parser plugin configuration (https://knip.dev/reference/plugins/i18next-parser)",
+          "$ref": "#/definitions/plugin"
+        },
         "jest": {
           "title": "Jest plugin configuration (https://knip.dev/reference/plugins/jest)",
           "$ref": "#/definitions/plugin"
