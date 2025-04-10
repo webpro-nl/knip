@@ -1,7 +1,7 @@
 ---
 title: Rules & Filters
 sidebar:
-  order: 4
+  order: 5
 ---
 
 Use rules or filters to customize Knip's output. This has various use cases, a

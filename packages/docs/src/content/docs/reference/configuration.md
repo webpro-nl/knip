@@ -323,10 +323,9 @@ entry files when reporting unused exports:
 }
 ```
 
-If enabled, Knip will report unused exports in entry source files and scripts
-such as those referenced in `package.json`. But not in entry and configuration
-files as configured by plugins, such as `next.config.js` or
-`src/routes/+page.svelte`.
+If enabled, Knip will report unused exports in entry source files. But not in
+entry and configuration files as configured by plugins, such as `next.config.js`
+or `src/routes/+page.svelte`.
 
 This will also enable reporting unused members of exported classes and enums.
 

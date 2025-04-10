@@ -82,58 +82,20 @@ their path to the `workspaces` configuration object the same way as
 
 ## Source mapping
 
-Let's say we have this module in a monorepo that imports `helper` from another
-workspace in the same monorepo:
-
-```ts title="index.js"
-import { helper } from '@org/shared';
-```
-
-The target workspace `@org/shared` has this `package.json`:
-
-```json title="package.json"
-{
-  "name": "@org/shared",
-  "main": "dist/index.js"
-}
-```
-
-The module resolver will resolve `@org/shared` to `dist/index.js`. That file is
-usually compiled and git-ignored, while Knip wants the source file instead. If
-the target workspace has a `tsconfig.json` file with an `outDir` option, Knip
-will try to map the "dist" file to the "src" file:
-
-```json title="tsconfig.json"
-{
-  "compilerOptions": {
-    "baseUrl": "src",
-    "outDir": "dist"
-  }
-}
-```
-
-If `src/index.ts` exists, Knip will use that file instead of `dist/index.js`.
-Currently this only works based on `tsconfig.json`, in the future more source
-mappings may be added.
-
-:::tip
-
-Compilation to `outDir` should succeed before Knip can do source mapping.
-
-:::
+See [Source Mapping][3].
 
 ## Additional options
 
 The following options are available inside workspace configurations:
 
-- [ignore][3]
-- [ignoreBinaries][4]
-- [ignoreDependencies][5]
-- [ignoreMembers][6]
-- [ignoreUnresolved][7]
-- [includeEntryExports][8]
+- [ignore][4]
+- [ignoreBinaries][5]
+- [ignoreDependencies][6]
+- [ignoreMembers][7]
+- [ignoreUnresolved][8]
+- [includeEntryExports][9]
 
-[Plugins][9] can be configured separately per workspace.
+[Plugins][10] can be configured separately per workspace.
 
 Use `--debug` for verbose output and see the workspaces Knip includes, their
 configurations, enabled plugins, glob options and resolved files.
@@ -156,16 +118,17 @@ workspaces. For two reasons:
 
 To lint the workspace in isolation, there are two options:
 
-- Combine the `workspace` argument with [strict production mode][10].
+- Combine the `workspace` argument with [strict production mode][11].
 - Run Knip from inside the workspace directory.
 
 [1]: ../overview/configuration.md#defaults
 [2]: ./integrated-monorepos.md
-[3]: ../reference/configuration.md#ignore
-[4]: ../reference/configuration.md#ignorebinaries
-[5]: ../reference/configuration.md#ignoredependencies
-[6]: ../reference/configuration.md#ignoremembers
-[7]: ../reference/configuration.md#ignoreunresolved
-[8]: ../reference/configuration.md#includeentryexports
-[9]: ../reference/configuration.md#plugins
-[10]: ./production-mode.md#strict-mode
+[3]: ./source-mapping.md
+[4]: ../reference/configuration.md#ignore
+[5]: ../reference/configuration.md#ignorebinaries
+[6]: ../reference/configuration.md#ignoredependencies
+[7]: ../reference/configuration.md#ignoremembers
+[8]: ../reference/configuration.md#ignoreunresolved
+[9]: ../reference/configuration.md#includeentryexports
+[10]: ../reference/configuration.md#plugins
+[11]: ./production-mode.md#strict-mode
