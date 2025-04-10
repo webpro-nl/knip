@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import type { Input } from '../../util/input.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { SimpleGitHooksConfig } from './types.js';
 
@@ -24,7 +25,7 @@ const resolveConfig: ResolveConfig<SimpleGitHooksConfig> = async (config, option
     for (const id of options.getInputsFromScripts(hook)) inputs.add(id);
   }
 
-  return Array.from(inputs);
+  return [toDependency('simple-git-hooks'), ...Array.from(inputs)];
 };
 
 export default {
