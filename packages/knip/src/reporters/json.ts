@@ -9,24 +9,35 @@ type ExtraReporterOptions = {
   codeowners?: string;
 };
 
-type Item = { name: string; pos?: number; line?: number; col?: number };
+interface BaseItem {
+  name: string;
+}
+
+interface Item extends BaseItem {
+  pos?: number;
+  line?: number;
+  col?: number;
+}
+
+type BaseItems = Array<BaseItem>;
+type Items = Array<Item>;
 
 type Row = {
   file: string;
-  owners?: Array<{ name: string }>;
-  dependencies?: Array<Item>;
-  devDependencies?: Array<Item>;
-  optionalPeerDependencies?: Array<Item>;
-  unlisted?: Array<{ name: string }>;
-  binaries?: Array<{ name: string }>;
-  unresolved?: Array<{ name: string }>;
-  exports?: Array<Item>;
-  types?: Array<Item>;
-  nsExports?: Array<Item>;
-  nsTypes?: Array<Item>;
-  duplicates?: Array<Item[]>;
-  enumMembers?: Record<string, Array<Item>>;
-  classMembers?: Record<string, Array<Item>>;
+  owners?: BaseItems;
+  dependencies?: Items;
+  devDependencies?: Items;
+  optionalPeerDependencies?: Items;
+  unlisted?: BaseItems;
+  binaries?: BaseItems;
+  unresolved?: Items;
+  exports?: Items;
+  types?: Items;
+  nsExports?: Items;
+  nsTypes?: Items;
+  duplicates?: Array<Items>;
+  enumMembers?: Record<string, Items>;
+  classMembers?: Record<string, Items>;
 };
 
 export default async ({ report, issues, options }: ReporterOptions) => {
@@ -68,7 +79,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (isReportType) {
       if (type === 'files' || type === '_files') {
-        // Ignore
+        // Ignore, added below - we should probably deprecate and make all issue types consistent
       } else {
         for (const issue of flatten(issues[type] as IssueRecords)) {
           const { filePath, symbol, symbols, parentSymbol } = issue;
