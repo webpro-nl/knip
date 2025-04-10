@@ -8,19 +8,14 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/i18next-parser');
 
 test('Find dependencies with the i18next-parser plugin', async () => {
-  const { issues, counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(issues.binaries['package.json']['i18next']);
-  assert(issues.devDependencies['package.json']['i18next-parser']);
-
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
-    devDependencies: 1,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });
