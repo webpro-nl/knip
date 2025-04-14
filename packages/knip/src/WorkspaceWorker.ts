@@ -304,7 +304,7 @@ export class WorkspaceWorker {
       if (configFilePath) {
         const workspace = this.findWorkspaceByFilePath(configFilePath);
         if (workspace) {
-          // We can only handle root → child transfers, otherwise add to and run in current workspace
+          // TODO Are we handling root → child and vice-versa transfers properly?
           const name = this.name === ROOT_WORKSPACE_NAME ? workspace.name : this.name;
           if (!extMap.has(name)) extMap.set(name, new Map());
           if (!extMap.get(name)?.has(pluginName)) extMap.get(name)?.set(pluginName, new Set());
