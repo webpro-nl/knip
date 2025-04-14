@@ -3,6 +3,7 @@ import { named as renamed } from './aliased-binding';
 import defaultName1, { named as renamed2 } from './default-and-named-binding';
 import defaultName2 from './default-identifier';
 import { named as renamed3 } from './named-object-binding';
+import type {} from './empty-named-bindings';
 
 const fn = (_: any) => {};
 

@@ -53,6 +53,15 @@ export default visit(
             });
           }
         }
+        if (imports.length === 0) {
+          // Pattern: import type {} from 'specifier';
+          imports.push({
+            specifier,
+            identifier: undefined,
+            isTypeOnly: node.importClause?.isTypeOnly,
+            pos: node.importClause.namedBindings.pos,
+          });
+        }
       }
 
       return imports;
