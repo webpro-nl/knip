@@ -7,8 +7,8 @@ import { isDirectory } from './fs.js';
 import { isInternal, join, toRelative } from './path.js';
 
 const defaultExtensions = `.{${DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',')}}`;
-const hasJSExt = /\.(m|c)js$/;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
+const hasDTSExt = /.d\.(m|c)?ts$/;
 const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 
 export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOptions: CompilerOptions) => {
@@ -21,11 +21,14 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string>();
 
   return (filePath: string) => {
-    if (!isInternal(filePath) || hasJSExt.test(filePath) || hasTSExt.test(filePath)) return;
+    if (!isInternal(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
     if (workspace?.srcDir && workspace.outDir) {
-      if (filePath.startsWith(workspace.outDir)) {
+      if (
+        (!filePath.startsWith(workspace.srcDir) && filePath.startsWith(workspace.outDir)) ||
+        (workspace.srcDir === workspace.outDir && hasDTSExt.test(filePath))
+      ) {
         const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, defaultExtensions);
         const [srcFilePath] = fastGlob.sync(pattern);
         toSourceMapCache.set(filePath, srcFilePath);
