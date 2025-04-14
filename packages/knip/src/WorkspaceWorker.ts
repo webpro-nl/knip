@@ -49,8 +49,7 @@ type WorkspaceManagerOptions = {
   isStrict: boolean;
   isCache: boolean;
   cacheLocation: string;
-  extConfigFilesMap: Map<string, Map<PluginName, Set<string>>>;
-  configFilesMap: Map<PluginName, Set<string>>;
+  configFilesMap: Map<string, Map<PluginName, Set<string>>>;
 };
 
 type CacheItem = { resolveEntryPaths?: Input[]; resolveConfig?: Input[]; resolveFromAST?: Input[] };
@@ -91,8 +90,7 @@ export class WorkspaceWorker {
 
   cache: CacheConsultant<CacheItem>;
 
-  extConfigFilesMap: Map<string, Map<PluginName, Set<string>>>;
-  configFilesMap: Map<PluginName, Set<string>>;
+  configFilesMap: Map<string, Map<PluginName, Set<string>>>;
 
   constructor({
     name,
@@ -112,7 +110,6 @@ export class WorkspaceWorker {
     getSourceFile,
     isCache,
     cacheLocation,
-    extConfigFilesMap,
     configFilesMap,
   }: WorkspaceManagerOptions) {
     this.name = name;
@@ -127,7 +124,6 @@ export class WorkspaceWorker {
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
-    this.extConfigFilesMap = extConfigFilesMap;
     this.configFilesMap = configFilesMap;
 
     this.getReferencedInternalFilePath = getReferencedInternalFilePath;
@@ -296,8 +292,9 @@ export class WorkspaceWorker {
       }
     };
 
-    const extMap = this.extConfigFilesMap;
-    const configFiles = this.extConfigFilesMap.get(wsName);
+    const configFilesMap = this.configFilesMap;
+    const configFiles = this.configFilesMap.get(wsName);
+    const seen = new Map<string, Set<string>>();
 
     const handleConfigInput = (pluginName: PluginName, input: ConfigInput) => {
       const configFilePath = this.getReferencedInternalFilePath(input);
@@ -306,9 +303,9 @@ export class WorkspaceWorker {
         if (workspace) {
           // TODO Are we handling root → child and vice-versa transfers properly?
           const name = this.name === ROOT_WORKSPACE_NAME ? workspace.name : this.name;
-          if (!extMap.has(name)) extMap.set(name, new Map());
-          if (!extMap.get(name)?.has(pluginName)) extMap.get(name)?.set(pluginName, new Set());
-          extMap.get(name)?.get(pluginName)?.add(configFilePath);
+          if (!configFilesMap.has(name)) configFilesMap.set(name, new Map());
+          if (!configFilesMap.get(name)?.has(pluginName)) configFilesMap.get(name)?.set(pluginName, new Set());
+          configFilesMap.get(name)?.get(pluginName)?.add(configFilePath);
         }
       }
     };
@@ -329,9 +326,7 @@ export class WorkspaceWorker {
       if (!config) return;
 
       const label = 'config file';
-      const configFilePaths = await _glob({ patterns, cwd, dir: cwd, gitignore: false, label });
-      if (!this.configFilesMap.has(pluginName)) this.configFilesMap.set(pluginName, new Set());
-      const filteredFilePaths = configFilePaths.filter(filePath => !this.configFilesMap.get(pluginName)?.has(filePath));
+      const configFilePaths = await _glob({ patterns, cwd: rootCwd, dir: cwd, gitignore: false, label });
 
       const options = {
         ...baseScriptOptions,
@@ -348,15 +343,14 @@ export class WorkspaceWorker {
       } else if (
         (!plugin.resolveEntryPaths && !plugin.resolveFromAST) ||
         (configFilePaths.length === 0 &&
-          (!this.extConfigFilesMap.get(wsName)?.get(pluginName) ||
-            this.extConfigFilesMap.get(wsName)?.get(pluginName)?.size === 0))
+          (!this.configFilesMap.get(wsName)?.get(pluginName) ||
+            this.configFilesMap.get(wsName)?.get(pluginName)?.size === 0))
       ) {
         if (plugin.entry) for (const id of plugin.entry) addInput(toEntry(id));
         if (plugin.production) for (const id of plugin.production) addInput(toProductionEntry(id));
       }
 
-      for (const configFilePath of filteredFilePaths) {
-        this.configFilesMap.get(pluginName)?.add(configFilePath);
+      for (const configFilePath of configFilePaths) {
         const isManifest = basename(configFilePath) === 'package.json';
         const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
 
@@ -376,11 +370,10 @@ export class WorkspaceWorker {
           configFileName: basename(configFilePath),
         };
 
-        const seen = this.extConfigFilesMap.get(wsName)?.get(pluginName)?.has(configFilePath);
         const cache: CacheItem = {};
         let loadedConfig: unknown;
 
-        if (plugin.resolveEntryPaths && !seen) {
+        if (plugin.resolveEntryPaths && !seen.get(wsName)?.has(configFilePath)) {
           if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
           if (loadedConfig) {
             const inputs = await plugin.resolveEntryPaths(loadedConfig, resolveOpts);
@@ -389,7 +382,7 @@ export class WorkspaceWorker {
           }
         }
 
-        if (plugin.resolveConfig && !seen) {
+        if (plugin.resolveConfig && !seen.get(wsName)?.has(configFilePath)) {
           if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
           if (loadedConfig) {
             const inputs = await plugin.resolveConfig(loadedConfig, resolveOpts);
@@ -415,6 +408,9 @@ export class WorkspaceWorker {
         if (basename(configFilePath) !== 'package.json') {
           addInput(toEntry(configFilePath));
           addInput(toConfig(pluginName, configFilePath));
+
+          if (!seen.has(wsName)) seen.set(wsName, new Set());
+          seen.get(wsName)?.add(configFilePath);
         }
 
         if (!isManifest && fd?.changed && fd.meta) fd.meta.data = cache;
@@ -438,7 +434,7 @@ export class WorkspaceWorker {
 
     {
       // Handle config files added from root or current workspace recursively
-      const configFiles = this.extConfigFilesMap.get(wsName);
+      const configFiles = this.configFilesMap.get(wsName);
       if (configFiles) {
         do {
           for (const [pluginName, dependencies] of configFiles.entries()) {
