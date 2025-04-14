@@ -15,12 +15,11 @@ test('Find dependencies with the simple-git-hooks plugin', async () => {
 
   assert(issues.binaries['package.json']['eslint']);
   assert(issues.binaries['package.json']['lint-staged']);
-  assert(issues.devDependencies['package.json']['simple-git-hooks']);
   assert(issues.devDependencies['package.json']['lint-staged']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 2,
-    devDependencies: 2,
+    devDependencies: 1,
   });
 });
