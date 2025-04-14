@@ -140,7 +140,7 @@ export class ConfigurationChief {
     const pnpmWorkspacesPath = findFile(this.cwd, 'pnpm-workspace.yaml');
     const pnpmWorkspaces = pnpmWorkspacesPath && (await _load(pnpmWorkspacesPath));
 
-    if (this.manifest && !this.manifest.workspaces && pnpmWorkspaces) {
+    if (this.manifest && pnpmWorkspaces) {
       this.manifest.workspaces = pnpmWorkspaces;
     }
 
