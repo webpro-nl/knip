@@ -9,7 +9,7 @@ const spawningBinaries = ['cross-env', 'retry-cli'];
 // Binaries that have a new script behind the double-dash/end-of-command (and don't have custom resolver already)
 const endOfCommandBinaries = ['dotenvx'];
 
-const positionals = new Set(['babel-node', 'esbuild', 'execa', 'vite-node', 'zx']);
+const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'vite-node', 'zx']);
 
 export const resolve: BinaryResolver = (binary, args, { fromArgs }) => {
   const parsed = parseArgs(args, { boolean: ['quiet', 'verbose'], '--': endOfCommandBinaries.includes(binary) });

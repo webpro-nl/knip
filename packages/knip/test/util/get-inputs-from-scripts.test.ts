@@ -226,6 +226,7 @@ test('getInputsFromScripts (execa)', () => {
 test('getInputsFromScripts (zx)', () => {
   t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
   t('npx --yes zx --quiet script.js', [toDeferResolve('script.js')]);
+  t('jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
 });
 
 test('getInputsFromScripts (c8)', () => {
