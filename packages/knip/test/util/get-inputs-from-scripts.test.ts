@@ -73,12 +73,6 @@ test('getInputsFromScripts (node -r)', () => {
   t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toDeferResolve('ts-node/register')]);
 });
 
-test('getInputsFromScripts (ts-node)', () => {
-  t('ts-node --require pkg/register ./main.ts', [toBinary('ts-node'), ts, toDeferResolve('pkg/register')]);
-  t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
-  t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toDeferResolve('./main.ts')]);
-});
-
 test('getInputsFromScripts (tsx)', () => {
   t('tsx ./main.ts', [toBinary('tsx'), ts]);
   t('tsx watch ./main.ts', [toBinary('tsx'), ts]);
@@ -218,15 +212,18 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup --configPlugin @rollup/plugin-typescript', [toBinary('rollup'), toDeferResolve('@rollup/plugin-typescript')]);
 });
 
-test('getInputsFromScripts (execa)', () => {
+test('getInputsFromScripts ("positionals")', () => {
   t('execa --quiet ./script.js', [toBinary('execa'), toDeferResolve('./script.js')]);
   t('npx --yes execa --quiet ./script.js', [toDeferResolve('./script.js')]);
-});
-
-test('getInputsFromScripts (zx)', () => {
+  t('ts-node --require pkg/register ./main.ts', [toBinary('ts-node'), ts, toDeferResolve('pkg/register')]);
+  t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
+  t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toDeferResolve('./main.ts')]);
   t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
   t('npx --yes zx --quiet script.js', [toDeferResolve('script.js')]);
   t('jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
+  t('npx jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
+  t('npx --yes jiti script.js', [toDeferResolve('script.js')]);
+  t('npx --no jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
 });
 
 test('getInputsFromScripts (c8)', () => {
