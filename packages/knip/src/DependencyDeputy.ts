@@ -410,6 +410,16 @@ export class DependencyDeputy {
             delete issueSet[issueKey];
             counters.unresolved--;
             manifest.usedIgnoreUnresolved.add(ignoreItem);
+          } else {
+            const manifest = this.getWorkspaceManifest(ROOT_WORKSPACE_NAME);
+            if (manifest) {
+              const ignoreItem = findMatch(manifest.ignoreUnresolved, issue.symbol);
+              if (ignoreItem) {
+                delete issueSet[issueKey];
+                counters.unresolved--;
+                manifest.usedIgnoreUnresolved.add(ignoreItem);
+              }
+            }
           }
         }
       }

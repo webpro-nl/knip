@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/ignore-unresolved2",
+  "workspaces": ["packages/*"]
+}
