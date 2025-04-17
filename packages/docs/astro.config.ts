@@ -36,12 +36,12 @@ export default defineConfig({
         dark: './src/assets/title-dark.svg',
         replacesTitle: true,
       },
-      social: {
-        github: 'https://github.com/webpro-nl/knip',
-        discord: 'https://discord.gg/r5uXTtbTpc',
-        blueSky: 'https://bsky.app/profile/webpro.nl',
-        npm: 'https://www.npmjs.com/package/knip',
-      },
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/webpro-nl/knip' },
+        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/r5uXTtbTpc' },
+        { icon: 'blueSky', label: 'Bluesky', href: 'https://bsky.app/profile/webpro.nl' },
+        { icon: 'npm', label: 'npm', href: 'https://www.npmjs.com/package/knip' },
+      ],
       components: {
         Head: './src/components/Head.astro',
         Footer: './src/components/Footer.astro',
