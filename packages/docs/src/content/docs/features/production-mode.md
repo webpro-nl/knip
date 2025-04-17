@@ -53,6 +53,18 @@ the `--debug` flag and inspect what entry and project files are used, and the
 plugins that are enabled. For instance, in production mode this shows that files
 such as tests and Storybook files (stories) are excluded from the analysis.
 
+In case files like mocks and test helpers are reported as unused files, use
+negated patterns to exclude those files in production mode:
+
+```json title="knip.json"
+{
+  "entry": ["src/index.ts!"],
+  "project": ["src/**/*.ts!", "!src/test-helpers/**!"]
+}
+```
+
+Also see [Configuring Project Files][2].
+
 ## Strict Mode
 
 Additionally, the `--strict` flag can be added to:
@@ -78,3 +90,4 @@ knip --production --exclude types
 ```
 
 [1]: ../reference/jsdoc-tsdoc-tags.md#internal
+[2]: ../guides/configuring-project-files.md
