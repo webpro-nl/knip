@@ -15,20 +15,14 @@ test('Find dependencies with the aws-cdk plugin', async () => {
 
   console.log(issues);
 
-  // assert(issues.binaries['package.json']['cdk']);
-  assert(issues.dependencies['package.json']['aws-cdk-lib']);
-  assert(issues.dependencies['package.json']['constructs']);
-  // assert(issues.devDependencies['package.json']['aws-cdk']);
-  assert(issues.devDependencies['package.json']['@types/aws-cdk-lib']);
-  assert(issues.devDependencies['package.json']['@types/constructs']);
-  assert(issues.devDependencies['package.json']['ts-node']);
-  // assert(issues.devDependencies['package.json']['typescript']);
+  assert(issues.devDependencies['package.json']['aws-cdk']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 2,
-    devDependencies: 4,
-    processed: 0,
-    total: 0,
+    dependencies: 0,
+    devDependencies: 1,
+    unlisted: 1,
+    processed: 3,
+    total: 3,
   });
 });

@@ -1,0 +1,19 @@
+{
+  "app": "ts-node --project=tsconfig.json --prefer-ts-exts cdk/bin/infra.ts",
+  "watch": {
+    "include": ["cdk/lib/**", "cdk/bin/**"]
+  },
+  "context": {
+    "aws-cdk-lib/core:enableDiffNoFail": true,
+    "aws-cdk-lib/core:bootstrapQualifier": "custom-v2",
+    "aws-cdk-lib/core:checkSecretUsage": true,
+    "aws-cdk-lib/core:target-partitions": [
+      "aws",
+      "aws-cn"
+    ],
+    "aws-cdk-lib/aws-apigateway:disableCloudWatchRole": true,
+    "aws-cdk-lib/aws-apigateway:usagePlanKeyOrderInsensitiveId": true,
+    "aws-cdk-lib/aws-cloudfront:defaultSecurityPolicyTLSv1.2_2021": false,
+    "aws-cdk-lib/aws-lambda:recognizeLayerVersion": true
+  }
+}
