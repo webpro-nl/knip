@@ -2,6 +2,7 @@
 import { default as angular } from './angular/index.js';
 import { default as astro } from './astro/index.js';
 import { default as ava } from './ava/index.js';
+import { default as awsCdk } from './aws-cdk/index.js';
 import { default as babel } from './babel/index.js';
 import { default as c8 } from './c8/index.js';
 import { default as capacitor } from './capacitor/index.js';
@@ -101,6 +102,7 @@ export const Plugins = {
   angular,
   astro,
   ava,
+  'aws-cdk': awsCdk,
   babel,
   c8,
   capacitor,
