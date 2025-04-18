@@ -16,7 +16,7 @@ const config = ['next.config.{js,ts,cjs,mjs}'];
 const defaultPageExtensions = ['{js,jsx,ts,tsx}'];
 
 const productionEntryFilePatterns = [
-  '{instrumentation,middleware}.{js,ts}',
+  '{instrumentation,instrumentation-client,middleware}.{js,ts}',
   'app/global-error.{js,jsx,ts,tsx}',
   'app/**/{error,layout,loading,not-found,page,template,default}.{js,jsx,ts,tsx}',
   'app/**/route.{js,jsx,ts,tsx}',
