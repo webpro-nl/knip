@@ -50,7 +50,7 @@ NX   Daemon process terminated and closed the connection
 The solution is to [disable the Nx Daemon][3]:
 
 ```sh
-NX_DAEMON=false knip
+cross-env NX_DAEMON=false knip
 ```
 
 [1]: ./configuration.md#plugins
