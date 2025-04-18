@@ -16,6 +16,7 @@ export const pluginsSchema = z.object({
   angular: pluginSchema,
   astro: pluginSchema,
   ava: pluginSchema,
+  'aws-cdk': pluginSchema,
   babel: pluginSchema,
   c8: pluginSchema,
   capacitor: pluginSchema,

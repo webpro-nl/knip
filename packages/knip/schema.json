@@ -307,6 +307,10 @@
           "title": "ava plugin configuration (https://knip.dev/reference/plugins/ava)",
           "$ref": "#/definitions/plugin"
         },
+        "aws-cdk": {
+          "title": "aws-cdk plugin configuration (https://knip.dev/reference/plugins/aws-cdk)",
+          "$ref": "#/definitions/plugin"
+        },
         "babel": {
           "title": "Babel plugin configuration (https://knip.dev/reference/plugins/babel)",
           "$ref": "#/definitions/plugin"
