@@ -1,7 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/input.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
 
 // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib-readme.html
 
@@ -13,12 +11,12 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config: string[] = ["cdk.json"];
 
-const production: string[] = [];
+const production: string[] = [
+  '{src/,cdk/,}bin/**/*.{js,ts}',
+  '{src/,cdk/,}lib/**/*.{js,ts}',
+];
 
-const resolveConfig: ResolveConfig<PluginConfig> = async config => {
-  const inputs = config?.plugins ?? [];
-  return [...inputs].map(toDeferResolve);
-};
+
 
 export default {
   title,
@@ -26,5 +24,4 @@ export default {
   isEnabled,
   config,
   production,
-  resolveConfig,
 } satisfies Plugin;
