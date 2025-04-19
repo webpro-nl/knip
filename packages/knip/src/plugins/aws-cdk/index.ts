@@ -14,13 +14,13 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config: string[] = ["cdk.json"];
 
-const resolveConfig: ResolveConfig<AwsCdkConfig> = async config => {
+const resolveConfig: ResolveConfig<AwsCdkConfig> = async (config, options) => {
   if (!config) return [];
 
-  const app = config.app.split(" ")[0];
+  const app = options.getInputsFromScripts(config.app, { knownBinsOnly: true });
   const watch = config.watch?.include ?? [];
   const context = Object.keys(config.context ?? {}).map(key => key.split("/")[0]) ?? [];
-  return compact([app, ...watch, ...context]).map(id => toDependency(id));
+  return compact([...app, ...watch, ...context]).map(id => (typeof id === 'string' ? toDependency(id) : id));
 };
 
 const production: string[] = [
