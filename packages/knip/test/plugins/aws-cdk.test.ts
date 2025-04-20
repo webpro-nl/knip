@@ -20,9 +20,7 @@ test('Find dependencies with the aws-cdk plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
-    dependencies: 0,
     devDependencies: 2,
-    unlisted: 1,
     processed: 3,
     total: 3,
   });
