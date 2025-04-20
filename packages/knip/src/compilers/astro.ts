@@ -3,6 +3,12 @@ import type { HasDependency } from './types.js';
 
 const condition = (hasDependency: HasDependency) => hasDependency('astro');
 
-const compiler = (text: string) => [...text.replace(fencedCodeBlockMatcher, '').matchAll(importMatcher)].join('\n');
+const taggedTemplateMatcher = /\w+(?:\.\w+)*`[\s\S]*?`/g;
+
+const compiler = (text: string) => {
+  const cleanedText = text.replace(fencedCodeBlockMatcher, '').replace(taggedTemplateMatcher, '');
+
+  return [...cleanedText.matchAll(importMatcher)].join('\n');
+};
 
 export default { condition, compiler };
