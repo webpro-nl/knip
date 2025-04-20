@@ -12,7 +12,7 @@
   "github": {
     "release": true,
     "releaseNotes": {
-      "commit": "* ${commit.message} (${sha}){ - thanks @${author.login}!}",
+      "commit": "* ${commit.subject} (${sha}){ - thanks @${author.login}!}",
       "excludeMatches": ["webpro"]
     },
     "comments": {
