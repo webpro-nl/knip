@@ -82,6 +82,8 @@ const {
 
 const defaultName4 = (await import('./default-prop-access')).default;
 
+(await import('./default-prop-access.js'))['elementAccess'];
+
 import('./promise-like').then(f => f).catch(err => err);
 
 const [defaultName5, { default: renamedIdentifier2, namedC }] = await Promise.all([
@@ -90,6 +92,10 @@ const [defaultName5, { default: renamedIdentifier2, namedC }] = await Promise.al
 ]);
 
 const child1 = fn(() => import('./import-c'));
+
+const { identifier15 } = await import('./catch.js').catch(() => {
+  throw new Error('caught');
+});
 
 export default fn({
   components: {
@@ -107,6 +113,7 @@ export default fn({
   defaultName2,
   defaultName3,
   defaultName4,
+  elementAccess,
   defaultName5,
   renamed,
   renamed2,
@@ -115,4 +122,5 @@ export default fn({
   renamedIdentifier2,
   namedC,
   identifier14,
+  identifier15,
 ];

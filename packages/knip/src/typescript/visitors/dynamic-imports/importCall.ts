@@ -56,23 +56,12 @@ export default visit(
                     });
                   }
                 }
+                // Pattern: import('specifier').then(id => id)
                 return { identifier: 'default', specifier, pos };
               }
 
-              const variableDeclaration = findAncestor<ts.AccessExpression>(accessExpression, _node => {
-                if (ts.isCallExpression(_node) || ts.isSourceFile(_node)) return 'STOP';
-                return ts.isVariableDeclaration(_node);
-              });
-
-              if (variableDeclaration) {
-                // @ts-expect-error TODO FIXME Property 'name' does not exist on type 'ElementAccessExpression'.
-                const alias = String(variableDeclaration.name.escapedText);
-                const symbol = getSymbol(variableDeclaration, isTopLevel(variableDeclaration.parent));
-                return { identifier, alias, symbol, specifier, pos };
-              }
-
-              // Pattern: import('side-effects')
-              return { identifier, specifier, pos };
+              // Pattern: (await import('./prop-access')).propAccess;
+              if (identifier !== 'catch') return { identifier, specifier, pos };
             }
 
             if (
@@ -82,72 +71,78 @@ export default visit(
               const name = stripQuotes(accessExpression.argumentExpression.text);
               const pos = accessExpression.argumentExpression.pos;
               const identifier = name;
-              // Pattern: import('side-effects').identifier
+              // Pattern: (await import('specifier'))['identifier']
               return { identifier, specifier, pos };
             }
-          } else {
-            const variableDeclaration = node.parent.parent;
-            if (
-              ts.isVariableDeclaration(variableDeclaration) &&
-              ts.isVariableDeclarationList(variableDeclaration.parent)
-            ) {
-              const isTLA = isTopLevel(variableDeclaration.parent);
-              if (ts.isIdentifier(variableDeclaration.name)) {
-                // Pattern: const identifier = await import('specifier');
-                const alias = String(variableDeclaration.name.escapedText);
-                const symbol = getSymbol(variableDeclaration, isTLA);
-                return { identifier: 'default', alias, symbol, specifier, pos: node.arguments[0].pos };
-              }
-              const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
-              if (bindings.length > 0) {
-                // Pattern: const { identifier } = await import('specifier');
-                return bindings.map(element => {
+          }
+
+          const variableDeclaration =
+            accessExpression &&
+            ts.isPropertyAccessExpression(accessExpression) &&
+            accessExpression.name &&
+            accessExpression.name.escapedText === 'catch'
+              ? node.parent.parent.parent.parent
+              : node.parent.parent;
+          if (
+            ts.isVariableDeclaration(variableDeclaration) &&
+            ts.isVariableDeclarationList(variableDeclaration.parent)
+          ) {
+            const isTLA = isTopLevel(variableDeclaration.parent);
+            if (ts.isIdentifier(variableDeclaration.name)) {
+              // Pattern: const identifier = await import('specifier');
+              const alias = String(variableDeclaration.name.escapedText);
+              const symbol = getSymbol(variableDeclaration, isTLA);
+              return { identifier: 'default', alias, symbol, specifier, pos: node.arguments[0].pos };
+            }
+            const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
+            if (bindings.length > 0) {
+              // Pattern: const { identifier } = await import('specifier');
+              return bindings.map(element => {
+                const identifier = (element.propertyName ?? element.name).getText();
+                const alias = element.propertyName ? element.name.getText() : undefined;
+                const symbol = getSymbol(element, isTLA);
+                return { identifier, alias, symbol, specifier, pos: element.pos };
+              });
+            }
+            // Pattern: import('specifier')
+            return { identifier: ANONYMOUS, specifier, pos: node.arguments[0].pos };
+          }
+          const arrayLiteralExpression = node.parent;
+          const variableDeclarationParent = node.parent.parent?.parent?.parent;
+          if (
+            ts.isArrayLiteralExpression(arrayLiteralExpression) &&
+            variableDeclarationParent &&
+            ts.isVariableDeclarationList(variableDeclarationParent.parent) &&
+            ts.isVariableDeclaration(variableDeclarationParent) &&
+            ts.isArrayBindingPattern(variableDeclarationParent.name)
+          ) {
+            const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
+            const element = variableDeclarationParent.name.elements[index];
+            if (element) {
+              const isTL = isTopLevel(variableDeclarationParent.parent);
+              if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
+                // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
+                return element.name.elements.map(element => {
                   const identifier = (element.propertyName ?? element.name).getText();
                   const alias = element.propertyName ? element.name.getText() : undefined;
-                  const symbol = getSymbol(element, isTLA);
+                  const symbol = getSymbol(element, isTL);
                   return { identifier, alias, symbol, specifier, pos: element.pos };
                 });
               }
-              // Pattern: import('specifier')
-              return { identifier: ANONYMOUS, specifier, pos: node.arguments[0].pos };
-            }
-            const arrayLiteralExpression = node.parent;
-            const variableDeclarationParent = node.parent.parent?.parent?.parent;
-            if (
-              ts.isArrayLiteralExpression(arrayLiteralExpression) &&
-              variableDeclarationParent &&
-              ts.isVariableDeclarationList(variableDeclarationParent.parent) &&
-              ts.isVariableDeclaration(variableDeclarationParent) &&
-              ts.isArrayBindingPattern(variableDeclarationParent.name)
-            ) {
-              const index = arrayLiteralExpression.elements.indexOf(node); // ts.indexOfNode is internal
-              const element = variableDeclarationParent.name.elements[index];
-              if (element) {
-                const isTL = isTopLevel(variableDeclarationParent.parent);
-                if (ts.isBindingElement(element) && ts.isObjectBindingPattern(element.name) && element.name.elements) {
-                  // Pattern: const [{ a }, { default: b, c }] = await Promise.all([import('A'), import('B')]);
-                  return element.name.elements.map(element => {
-                    const identifier = (element.propertyName ?? element.name).getText();
-                    const alias = element.propertyName ? element.name.getText() : undefined;
-                    const symbol = getSymbol(element, isTL);
-                    return { identifier, alias, symbol, specifier, pos: element.pos };
-                  });
-                }
 
-                if (!ts.isOmittedExpression(element) && ts.isIdentifier(element.name)) {
-                  // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
-                  const alias = String(element.name.escapedText);
-                  const symbol = getSymbol(element, isTL);
-                  return { identifier: 'default', symbol, alias, specifier, pos: element.pos };
-                }
-
-                return { identifier: 'default', specifier, pos: element.pos };
+              if (!ts.isOmittedExpression(element) && ts.isIdentifier(element.name)) {
+                // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
+                const alias = String(element.name.escapedText);
+                const symbol = getSymbol(element, isTL);
+                return { identifier: 'default', symbol, alias, specifier, pos: element.pos };
               }
-            }
 
-            // Pattern: import('side-effects')
-            return { identifier: 'default', specifier, pos: node.arguments[0].pos };
+              return { identifier: 'default', specifier, pos: element.pos };
+            }
           }
+
+          // Pattern: return import('side-effects')
+          return { identifier: 'default', specifier, pos: node.arguments[0].pos };
         }
 
         // Fallback, seems to never happen though
