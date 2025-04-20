@@ -50,6 +50,7 @@ export type PluginName =
   | 'nx'
   | 'nyc'
   | 'oclif'
+  | 'oxlint'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -150,6 +151,7 @@ export const pluginNames = [
   'nx',
   'nyc',
   'oclif',
+  'oxlint',
   'playwright',
   'playwright-ct',
   'playwright-test',
