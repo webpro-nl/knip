@@ -8,6 +8,9 @@
     "aws-cdk": "^2.0.0",
     "@types/aws-cdk-lib": "^2.0.0",
     "@types/constructs": "^10.0.0",
+    "@types/jest": "^29.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
     "ts-node": "^10.0.0",
     "typescript": "^5.0.0"
   }

@@ -25,6 +25,7 @@ const resolveConfig: ResolveConfig<AwsCdkConfig> = async (config, options) => {
 const production: string[] = [
   '{src/,cdk/,}bin/**/*.{js,ts}',
   '{src/,cdk/,}lib/**/*.{js,ts}',
+  '{src/,cdk/,}test/**/*.{js,ts}',
 ];
 
 export default {
