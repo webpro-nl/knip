@@ -374,7 +374,7 @@ argument can be provided.
 
 #### dir
 
-The optional `dir` argument assigns the input to a different workspace. For
+The optional `dir` option assigns the input to a different workspace. For
 instance, GitHub Action workflows are always stored in the root workspace, and
 support `working-directory` in job steps. For example:
 
@@ -397,16 +397,35 @@ toDependency('esbuild', { dir: 'packages/app' });
 Knip now understands `esbuild` is a dependency of the workspace in the
 `packages/app` directory.
 
+#### allowIncludeExports
+
+By default, exports of entry files such as `src/index.ts` or the files in
+`package.json#exports` are not reported as unused. When using the
+`--include-entry-exports` flag or `isIncludeExports: true` option, unused
+exports on such entry files are also reported.
+
+Exports of entry files coming from plugins are not included in the analysis,
+even with the option enabled. This is because certain tools and frameworks
+consume named exports from entry files, causing false positives.
+
+The `allowIncludeExports` option allows the exports of entry files to be
+reported as unused when using `--include-entry-exports`. This option is
+typically used with the [toProductionEntry][4] input type. Example:
+
+```ts
+toProductionEntry('./entry.ts', { allowIncludeExports: true });
+```
+
 ## Argument parsing
 
-As part of the [script parser][4], Knip parses command-line arguments. Plugins
+As part of the [script parser][5], Knip parses command-line arguments. Plugins
 can implement the `arg` object to add custom argument parsing tailored to the
 executables of the tool.
 
 For now, there are two resources available to learn more:
 
-- [The documented `Args` type in source code][5]
-- [Implemented `args` in existing plugins][6]
+- [The documented `Args` type in source code][6]
+- [Implemented `args` in existing plugins][7]
 
 ## Create a new plugin
 
@@ -438,14 +457,15 @@ individual plugin pages][1] from the exported plugin values.
 
 Thanks for reading. If you have been following this guide to create a new
 plugin, this might be the right time to open a pull request! Feel free to join
-[the Knip Discord channel][7] if you have any questions.
+[the Knip Discord channel][8] if you have any questions.
 
 [1]: ../reference/plugins.md
 [2]: ../explanations/plugins.md#entry-files-from-config-files
 [3]:
   https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
-[4]: ../features/script-parser.md
-[5]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
-[6]:
+[4]: #toproductionentry
+[5]: ../features/script-parser.md
+[6]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
+[7]:
   https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
-[7]: https://discord.gg/r5uXTtbTpc
+[8]: https://discord.gg/r5uXTtbTpc

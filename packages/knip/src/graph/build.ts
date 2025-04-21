@@ -176,8 +176,7 @@ export async function build({
 
     // Get dependencies from plugins
     const inputsFromPlugins = await worker.runPlugins();
-    for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: true }));
-
+    for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
     const entryPatterns = new Set<string>();
