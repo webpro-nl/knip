@@ -315,6 +315,10 @@
           "title": "Babel plugin configuration (https://knip.dev/reference/plugins/babel)",
           "$ref": "#/definitions/plugin"
         },
+        "bun": {
+          "title": "bun plugin configuration (https://knip.dev/reference/plugins/bun)",
+          "$ref": "#/definitions/plugin"
+        },
         "c8": {
           "title": "c8 plugin configuration (https://knip.dev/reference/plugins/c8)",
           "$ref": "#/definitions/plugin"

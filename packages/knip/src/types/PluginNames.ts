@@ -4,6 +4,7 @@ export type PluginName =
   | 'astro'
   | 'ava'
   | 'babel'
+  | 'bun'
   | 'c8'
   | 'capacitor'
   | 'changesets'
@@ -103,6 +104,7 @@ export const pluginNames = [
   'astro',
   'ava',
   'babel',
+  'bun',
   'c8',
   'capacitor',
   'changesets',

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/bun",
+  "scripts": {
+    "test": "bun test"
+  }
+}
