@@ -1,6 +1,9 @@
+import parseArgs from 'minimist';
 import type { Plugin, ResolveEntryPaths } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { toEntry } from '../../util/input.js';
+
+// https://bun.sh/docs/cli/test
 
 const title = 'Bun';
 
@@ -15,9 +18,14 @@ const packageJsonPath = (id: PackageJson) => id;
 const resolveEntryPaths: ResolveEntryPaths<PackageJson> = localConfig => {
   const scripts = localConfig.scripts;
 
-  if (scripts && Object.keys(scripts).some(script => /(?<=^|\s)bun test/.test(scripts[script]))) {
-    const patterns = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'];
-    return patterns.map(id => toEntry(id));
+  if (scripts) {
+    const testScripts = Object.keys(scripts).filter(script => /(?<=^|\s)bun test/.test(scripts[script]));
+    for (const script of testScripts) {
+      const parsed = parseArgs(scripts[script].split(' '));
+      if (parsed._.filter(id => id !== 'bun' && id !== 'test').length === 0) {
+        return ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'].map(toEntry);
+      }
+    }
   }
 
   return [];
