@@ -164,5 +164,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   if (!isWatch) streamer.clear();
 
-  return { report, issues, counters, rules, tagHints, configurationHints };
+  return {
+    report,
+    issues,
+    counters,
+    rules,
+    tagHints,
+    configurationHints,
+    isTreatConfigHintsAsErrors: chief.config.isTreatConfigHintsAsErrors,
+  };
 };

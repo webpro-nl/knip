@@ -42,7 +42,7 @@ const {
   'reporter-options': reporterOptions = '',
   strict: isStrict = false,
   tags = [],
-  'treat-config-hints-as-errors': isTreatConfigHintsAsErrors = false,
+  'treat-config-hints-as-errors': treatConfigHintsAsErrors = false,
   tsConfig,
   version: isVersion,
   watch: isWatch = false,
@@ -65,7 +65,7 @@ const workspace = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, ''
 
 const run = async () => {
   try {
-    const { report, issues, counters, rules, tagHints, configurationHints } = await main({
+    const { report, issues, counters, rules, tagHints, configurationHints, isTreatConfigHintsAsErrors } = await main({
       cacheLocation,
       cwd,
       excludedIssueTypes,
@@ -137,7 +137,7 @@ const run = async () => {
 
     if (
       (!noExitCode && totalErrorCount > Number(maxIssues)) ||
-      (isTreatConfigHintsAsErrors && configurationHints.size > 0)
+      ((treatConfigHintsAsErrors || isTreatConfigHintsAsErrors) && configurationHints.size > 0)
     ) {
       process.exit(1);
     }

@@ -168,6 +168,10 @@
           "$ref": "#/definitions/ruleValue"
         }
       }
+    },
+    "treatConfigHintsAsErrors": {
+      "title": "Exit with non-zero code (1) if there are any configuration hints",
+      "type": "boolean"
     }
   },
   "unevaluatedProperties": false,

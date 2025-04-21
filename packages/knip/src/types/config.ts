@@ -64,6 +64,7 @@ export interface Configuration {
   ignoreMembers: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
+  isTreatConfigHintsAsErrors: boolean;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;

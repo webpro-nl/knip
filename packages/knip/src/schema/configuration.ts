@@ -62,6 +62,7 @@ const rootConfigurationSchema = z.object({
   syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
   asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
   tags: z.array(z.string()).optional(),
+  treatConfigHintsAsErrors: z.boolean().optional(),
 });
 
 const reportConfigSchema = z.object({

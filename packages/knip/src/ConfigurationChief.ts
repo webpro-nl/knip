@@ -56,6 +56,7 @@ const defaultConfig: Configuration = {
   ignoreExportsUsedInFile: false,
   ignoreWorkspaces: [],
   isIncludeEntryExports: false,
+  isTreatConfigHintsAsErrors: false,
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
   rootPluginConfigs: {},
@@ -193,6 +194,7 @@ export class ConfigurationChief {
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
+    const isTreatConfigHintsAsErrors = rawConfig.treatConfigHintsAsErrors ?? defaultConfig.isTreatConfigHintsAsErrors;
 
     const { syncCompilers, asyncCompilers } = rawConfig;
 
@@ -219,6 +221,7 @@ export class ConfigurationChief {
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
       rootPluginConfigs,
       tags: rawConfig.tags ?? [],
+      isTreatConfigHintsAsErrors,
     };
   }
 
