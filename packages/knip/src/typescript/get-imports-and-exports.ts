@@ -23,6 +23,7 @@ import {
   isDestructuring,
   isImportSpecifier,
   isInForIteration,
+  isInsideStringLiteral,
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
 } from './ast-helpers.js';
@@ -288,7 +289,9 @@ const getImportsAndExports = (
     // @ts-expect-error Skip work by handling only top-level import/export assignments
     const isTopLevel = node !== sourceFile && ts.isInTopLevelContext(node);
 
-    if (isTopLevel) {
+    const isInsideString = isInsideStringLiteral(node);
+
+    if (isTopLevel && !isInsideString) {
       for (const visitor of visitors.import) {
         const result = visitor(node, options);
         result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
@@ -300,9 +303,11 @@ const getImportsAndExports = (
       }
     }
 
-    for (const visitor of visitors.dynamicImport) {
-      const result = visitor(node, options);
-      result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
+    if (!isInsideString) {
+      for (const visitor of visitors.dynamicImport) {
+        const result = visitor(node, options);
+        result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
+      }
     }
 
     for (const visitor of visitors.script) {
