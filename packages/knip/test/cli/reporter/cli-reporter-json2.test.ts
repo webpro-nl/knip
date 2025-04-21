@@ -1,11 +1,9 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { resolve } from '../../../src/util/path.js';
-import { execFactory } from '../../helpers/exec.js';
+import { exec } from '../../helpers/exec.js';
 
 const cwd = resolve('fixtures/module-resolution-non-std');
-
-const exec = execFactory(cwd);
 
 test('knip --reporter json (files, unlisted & unresolved)', () => {
   const json = {
@@ -27,5 +25,5 @@ test('knip --reporter json (files, unlisted & unresolved)', () => {
     ],
   };
 
-  assert.equal(exec('knip --reporter json').stdout, `${JSON.stringify(json)}\n`);
+  assert.equal(exec('knip --reporter json', { cwd }).stdout, JSON.stringify(json));
 });

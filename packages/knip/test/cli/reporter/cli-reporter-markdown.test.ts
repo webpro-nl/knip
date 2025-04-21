@@ -1,11 +1,9 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { resolve } from '../../../src/util/path.js';
-import { execFactory } from '../../helpers/exec.js';
+import { exec } from '../../helpers/exec.js';
 
 const cwd = resolve('fixtures/module-resolution-non-std');
-
-const exec = execFactory(cwd);
 
 test('knip --reporter markdown', () => {
   const markdown = `# Knip report
@@ -25,9 +23,7 @@ test('knip --reporter markdown', () => {
 
 | Name         | Location          | Severity |
 | :----------- | :---------------- | :------- |
-| ./unresolved | src/index.ts:8:23 | error    |
-
-`;
-  const out = exec('knip --reporter markdown').stdout;
+| ./unresolved | src/index.ts:8:23 | error    |`;
+  const out = exec('knip --reporter markdown', { cwd }).stdout;
   assert.equal(out, markdown);
 });

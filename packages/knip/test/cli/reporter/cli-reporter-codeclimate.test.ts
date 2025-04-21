@@ -2,11 +2,9 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { resolve } from '../../../src/util/path.js';
 import { assertAndRemoveProperty } from '../../helpers/assertAndRemoveProperty.js';
-import { execFactory } from '../../helpers/exec.js';
+import { exec } from '../../helpers/exec.js';
 
 const cwd = resolve('fixtures/exports');
-
-const exec = execFactory(cwd);
 
 test('knip --reporter codeclimate (exports & types)', () => {
   const json = [
@@ -147,7 +145,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
     },
   ];
 
-  const issues = JSON.parse(exec('knip --reporter codeclimate').stdout) as {
+  const issues = JSON.parse(exec('knip --reporter codeclimate', { cwd }).stdout) as {
     fingerprint: string;
     [key: string]: unknown;
   }[];
