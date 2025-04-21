@@ -1,9 +1,9 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
-import { main } from '../src/index.js';
-import { join, resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { main } from '../../src/index.js';
+import { join, resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
 
 const cwd = resolve('fixtures/fix-workspaces');
 
