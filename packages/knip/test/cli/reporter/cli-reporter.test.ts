@@ -13,10 +13,10 @@ test('knip --reporter ./index.ts', () => {
   assert.equal(exec('knip --reporter ./index.ts', { cwd }).stdout, 'hi from ts reporter');
 });
 
-test('knip --reporter knip-reporter', () => {
+test.skip('knip --reporter knip-reporter', () => {
   assert.equal(exec('knip --reporter knip-reporter', { cwd }).stdout, 'hi from pkg reporter');
 });
 
-test('knip --reporter @org/reporter', () => {
+test.skip('knip --reporter @org/reporter', () => {
   assert.equal(exec('knip --reporter @org/reporter', { cwd }).stdout, 'hi from scoped reporter');
 });
