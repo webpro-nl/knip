@@ -12,8 +12,6 @@ const enablers = ['lint-staged'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const packageJsonPath = 'lint-staged';
-
 const config = [
   'package.json',
   'package.yaml',
@@ -43,7 +41,6 @@ export default {
   title,
   enablers,
   isEnabled,
-  packageJsonPath,
   config,
   resolveConfig,
 } satisfies Plugin;
