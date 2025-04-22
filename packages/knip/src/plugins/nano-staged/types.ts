@@ -1,6 +1,6 @@
 type Script = string | string[];
 
-type Entry = Script | ((filenames: string[]) => Script | Promise<Script>);
+type Entry = Script | ((api: { filenames: string[] }) => Script | Promise<Script>);
 
 type Config = Record<string, Entry>;
 

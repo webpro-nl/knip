@@ -4,10 +4,7 @@
   "devDependencies": {
     "nano-staged": "*"
   },
-  "nano-staged":{
-   "*.js": [
-      "eslint",
-      "prettier --write"
-    ]
+  "nano-staged": {
+    "*.js": ["eslint", "prettier --write"]
   }
 }

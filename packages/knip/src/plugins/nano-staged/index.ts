@@ -11,8 +11,6 @@ const enablers = ['nano-staged'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const packageJsonPath = 'nano-staged';
-
 const config: string[] = [
   'package.json',
   '.nano-staged.{js,cjs,mjs,json}',
@@ -30,7 +28,8 @@ const resolveConfig: ResolveConfig<NanoStagedConfig> = async (config, options) =
   const inputs = new Set<Input>();
 
   for (const entry of Object.values(config).flat()) {
-    const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
+    const api = { filenames: ['./example.js'] };
+    const scripts = [typeof entry === 'function' ? await entry(api) : entry].flat();
     for (const id of options.getInputsFromScripts(scripts)) inputs.add(id);
   }
 
@@ -41,7 +40,6 @@ export default {
   title,
   enablers,
   isEnabled,
-  packageJsonPath,
   config,
   resolveConfig,
 } satisfies Plugin;
