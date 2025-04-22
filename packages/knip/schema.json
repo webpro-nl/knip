@@ -539,6 +539,10 @@
           "title": "react-router plugin configuration (https://knip.dev/reference/plugins/react-router)",
           "$ref": "#/definitions/plugin"
         },
+        "relay": {
+          "title": "relay plugin configuration (https://knip.dev/reference/plugins/relay)",
+          "$ref": "#/definitions/plugin"
+        },
         "release-it": {
           "title": "Release It plugin configuration (https://knip.dev/reference/plugins/release-it)",
           "$ref": "#/definitions/plugin"

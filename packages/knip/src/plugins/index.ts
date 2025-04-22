@@ -60,6 +60,7 @@ import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
 import { default as reactCosmos } from './react-cosmos/index.js';
 import { default as reactRouter } from './react-router/index.js';
+import { default as relay } from './relay/index.js';
 import { default as releaseIt } from './release-it/index.js';
 import { default as remark } from './remark/index.js';
 import { default as remix } from './remix/index.js';
@@ -162,6 +163,7 @@ export const Plugins = {
   prettier,
   'react-cosmos': reactCosmos,
   'react-router': reactRouter,
+  relay,
   'release-it': releaseIt,
   remark,
   remix,
