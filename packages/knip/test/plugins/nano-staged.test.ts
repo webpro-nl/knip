@@ -29,7 +29,7 @@ test('Find dependencies with the nano-staged plugin', async () => {
 });
 
 test('Find dependencies with the nano-staged plugin (production)', async () => {
-    const { counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
     isProduction: true,

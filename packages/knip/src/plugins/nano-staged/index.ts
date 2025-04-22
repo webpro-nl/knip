@@ -20,7 +20,7 @@ const config: string[] = [
   '.nanostagedrc',
 ];
 
-const resolveConfig: ResolveConfig<NanoStagedConfig> = async (config,options) => {
+const resolveConfig: ResolveConfig<NanoStagedConfig> = async (config, options) => {
   if (options.isProduction) return [];
 
   if (typeof config === 'function') config = config();
