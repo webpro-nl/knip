@@ -5,7 +5,7 @@ import type { NanoStagedConfig } from './types.js';
 
 // https://github.com/usmanyunusov/nano-staged
 
-const title = 'nano-staged';
+const title = 'Nano Staged';
 
 const enablers = ['nano-staged'];
 
