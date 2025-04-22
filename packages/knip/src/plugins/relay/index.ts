@@ -1,9 +1,9 @@
+import parseArgs from 'minimist';
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
 import { toDeferResolve, toEntry } from '../../util/input.js';
 import { isInternal, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { RelayConfig } from './types.js';
-
 // https://relay.dev/docs/next/guides/compiler/#configuration
 // https://github.com/facebook/relay/blob/main/compiler/crates/relay-compiler/relay-compiler-config-schema.json
 
@@ -46,8 +46,8 @@ const resolveEntryPaths: ResolveEntryPaths<RelayConfig> = async config => {
 
 const args = {
   binaries: ['relay-compiler'],
-  // config: // first positional argument is config file
-  // (eg. relay-compiler ./myconfig.js)
+  args: (args: string[]) => ['-c', parseArgs(args)._[0]], // first positional argument is config file
+  config: true,
 };
 
 export default {
