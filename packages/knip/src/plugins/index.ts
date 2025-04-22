@@ -49,6 +49,7 @@ import { default as nuxt } from './nuxt/index.js';
 import { default as nx } from './nx/index.js';
 import { default as nyc } from './nyc/index.js';
 import { default as oclif } from './oclif/index.js';
+import { default as oxlint } from './oxlint/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
 import { default as playwright } from './playwright/index.js';
@@ -149,6 +150,7 @@ export const Plugins = {
   nx,
   nyc,
   oclif,
+  oxlint,
   playwright,
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,

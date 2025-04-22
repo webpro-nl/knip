@@ -499,6 +499,10 @@
           "title": "oclif plugin configuration (https://knip.dev/reference/plugins/oclif)",
           "$ref": "#/definitions/plugin"
         },
+        "oxlint": {
+          "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
+          "$ref": "#/definitions/plugin"
+        },
         "playwright": {
           "title": "Playwright plugin configuration (https://knip.dev/reference/plugins/playwright)",
           "$ref": "#/definitions/plugin"
