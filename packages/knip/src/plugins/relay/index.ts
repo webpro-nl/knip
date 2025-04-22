@@ -9,9 +9,10 @@ import type { RelayConfig } from './types.js';
 
 const title = 'Relay';
 
-const enablers = ['relay-compiler'];
+const enablers = ['vite-plugin-relay', '@swc/plugin-relay', 'babel-plugin-relay'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ dependencies, config }) =>
+  hasDependency(dependencies, enablers) || 'relay' in config;
 
 const config: string[] = ['relay.config.json', 'relay.config.js'];
 
