@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/nano-staged",
+  "version": "*",
+  "devDependencies": {
+    "nano-staged": "*"
+  },
+  "nano-staged":{
+   "*.js": [
+      "eslint",
+      "prettier --write"
+    ]
+  }
+}
