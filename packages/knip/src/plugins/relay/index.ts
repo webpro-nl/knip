@@ -1,6 +1,6 @@
-import path from 'path';
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
 import { toDeferResolve, toEntry } from '../../util/input.js';
+import { isInternal, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { RelayConfig } from './types.js';
 
@@ -24,14 +24,20 @@ const resolveEntryPaths: ResolveEntryPaths<RelayConfig> = async config => {
 
     if (artifactDirectory == null) return [];
 
-    const inputs = [toEntry(path.join(artifactDirectory, '**'))];
+    const inputs = [toEntry(join(artifactDirectory, '**'))];
 
     if (project.requireCustomScalarTypes !== true) {
       return inputs;
     }
 
     const scalars = Object.values(project.customScalarTypes ?? {}).flatMap(customScalarType =>
-      typeof customScalarType === 'object' ? [toDeferResolve(path.join(artifactDirectory, customScalarType.path))] : []
+      typeof customScalarType === 'object'
+        ? [
+            isInternal(customScalarType.path)
+              ? toEntry(join(artifactDirectory, customScalarType.path))
+              : toDeferResolve(customScalarType.path),
+          ]
+        : []
     );
 
     return inputs.concat(scalars);

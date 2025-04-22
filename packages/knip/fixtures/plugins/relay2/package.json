@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/relay",
+  "name": "@fixtures/relay2",
   "version": "*",
   "scripts": {
     "build": "relay-compiler",
