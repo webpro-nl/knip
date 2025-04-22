@@ -4,7 +4,7 @@ export const fencedCodeBlockMatcher = /```[\s\S]*?```/g;
 
 // Extract imports from body of <script> nodes
 const scriptExtractor = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
-export const importMatcher = /import[^'"]+['"]([^'"]+)['"]/g;
+export const importMatcher = /import[^'"]+['"][^'"]+['"]/g;
 export const importsWithinScripts: SyncCompilerFn = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
