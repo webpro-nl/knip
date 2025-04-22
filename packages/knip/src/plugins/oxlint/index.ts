@@ -11,8 +11,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config: string[] = ['.oxlintrc.json'];
 
-const entry: string[] = [];
-
 const args = {
   config: true,
 };
@@ -22,6 +20,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  entry,
   args,
 } satisfies Plugin;
