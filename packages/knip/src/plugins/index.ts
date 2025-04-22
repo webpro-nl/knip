@@ -39,6 +39,7 @@ import { default as metro } from './metro/index.js';
 import { default as mocha } from './mocha/index.js';
 import { default as moonrepo } from './moonrepo/index.js';
 import { default as msw } from './msw/index.js';
+import { default as nanoStaged } from './nano-staged/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
@@ -140,6 +141,7 @@ export const Plugins = {
   mocha,
   moonrepo,
   msw,
+  'nano-staged': nanoStaged,
   nest,
   netlify,
   next,
