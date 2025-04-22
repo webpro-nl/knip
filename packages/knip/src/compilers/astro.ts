@@ -6,7 +6,7 @@ const condition = (hasDependency: HasDependency) => hasDependency('astro');
 const taggedTemplateMatcher = /\w+(?:\.\w+)*`[\s\S]*?`/g;
 
 const compiler = (text: string) => {
-  const cleanedText = text.replace(fencedCodeBlockMatcher, '').replace(taggedTemplateMatcher, '');
+  const cleanedText = text.replace(fencedCodeBlockMatcher, '').replace(taggedTemplateMatcher, '""');
 
   return [...cleanedText.matchAll(importMatcher)].join('\n');
 };

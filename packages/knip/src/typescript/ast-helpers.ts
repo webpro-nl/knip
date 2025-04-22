@@ -288,20 +288,6 @@ export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName
   return values;
 };
 
-export const getPropertyValueEntries = (node: ts.ObjectLiteralExpression, propertyNames: Set<string>) => {
-  const entries: [string, string][] = [];
-  for (const prop of node.properties) {
-    if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
-      if (propertyNames.has(prop.name.text)) {
-        if (ts.isStringLiteral(prop.initializer)) {
-          entries.push([prop.name.text, prop.initializer.text]);
-        }
-      }
-    }
-  }
-  return entries;
-};
-
 export const isInsideStringLiteral = (node: ts.Node): boolean => {
   const isInsideStringLiteralNode = Boolean(
     findAncestor(
