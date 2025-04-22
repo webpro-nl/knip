@@ -1,5 +1,6 @@
 type RelayProject = {
   artifactDirectory?: string;
+  requireCustomScalarTypes?: boolean;
   customScalarTypes?: Record<
     string,
     | string

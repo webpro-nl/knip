@@ -24,13 +24,17 @@ const resolveEntryPaths: ResolveEntryPaths<RelayConfig> = async config => {
 
     if (artifactDirectory == null) return [];
 
-    const scalars = project.customScalarTypes
-      ? Object.values(project.customScalarTypes).flatMap(customScalarType =>
-          typeof customScalarType !== 'string' ? [path.join(artifactDirectory, customScalarType.path)] : []
-        )
-      : [];
+    const inputs = [toEntry(path.join(artifactDirectory, '**'))];
 
-    return [toEntry(path.join(artifactDirectory, '**'))].concat(scalars.map(toDeferResolve));
+    if (project.requireCustomScalarTypes !== true) {
+      return inputs;
+    }
+
+    const scalars = Object.values(project.customScalarTypes ?? {}).flatMap(customScalarType =>
+      typeof customScalarType === 'object' ? [toDeferResolve(path.join(artifactDirectory, customScalarType.path))] : []
+    );
+
+    return inputs.concat(scalars);
   });
 };
 
