@@ -3,37 +3,11 @@ import { createRequire } from 'node:module';
 // biome-ignore lint/nursery/noRestrictedImports: ignore
 import { resolve } from 'node:path';
 
-// We can't import sharp normally because it's a CJS thing and those don't seems to work well with Astro, Vite, everyone
 const require = createRequire(import.meta.url);
 // ts-expect-error TS80005
 const sharp = require('sharp');
 
 const template = readFileSync(resolve('src/assets/og-template.svg'), 'utf-8');
-
-export function breakText(str: string, maxLines: number, maxLineLen: number) {
-  const segmenterTitle = new Intl.Segmenter('en-US', { granularity: 'word' });
-  const segments = segmenterTitle.segment(str);
-
-  const linesOut = [''];
-  let lineNo = 0;
-  let offsetInLine = 0;
-  for (const word of Array.from(segments)) {
-    if (offsetInLine + word.segment.length >= maxLineLen) {
-      lineNo++;
-      offsetInLine = 0;
-      linesOut.push('');
-    }
-
-    if (lineNo >= maxLines) {
-      return linesOut.slice(0, maxLines);
-    }
-
-    linesOut[lineNo] += word.segment.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    offsetInLine += word.segment.length;
-  }
-
-  return linesOut;
-}
 
 const getPages = async () => {
   const data = import.meta.glob(['/src/content/**/*.{md,mdx}'], { eager: true });
@@ -42,47 +16,70 @@ const getPages = async () => {
     const imagePath = filePath.replace(/^\/src\/content\//, '').replace(/(\/index)?\.(md|mdx)$/, '.webp');
     pages[imagePath] = page;
   }
-
-  pages['docs/sponsors.webp'] = {
-    frontmatter: { title: 'Become a sponsor!', description: 'Become a sponsor of Knip' },
-  };
-
-  pages['docs/playground.webp'] = {
-    frontmatter: { title: 'Playground', description: 'Try Knip in your browser' },
-  };
-
   return pages;
 };
 
-const renderSVG = ({ title }: { title: string; description: string[] }) => {
-  const titleText = breakText(title, 2, 45)
-    .map((text, i, texts) => {
-      const m = (texts.length === 1 ? 0 : -75) / 2;
-      const y = (1000 + m + 150 * i) / 2;
-      const s = (texts.length === 1 ? 150 : 96) / 2;
-      return `<text font-size="${s}" xml:space="preserve" fill="#fff"><tspan x="75" y="${y}">${text}</tspan></text>`;
-    })
-    .join('\n');
+const renderSVG = ({ title }: { title: string }) => {
+  const lines = balanceText(title, 30);
+
+  const titleText = `
+    <text
+      text-anchor="start"
+      text-rendering="optimizeLegibility"
+      font-size="${lines.length === 1 ? 80 : 64}"
+      fill="#fff"
+      x="75"
+      y="500"
+    >
+      ${lines.map((line, i) => `<tspan x="75" dy="${i === 0 ? '0' : '1.2em'}" >${encodeXML(line)}</tspan>`).join('')}
+    </text>
+  `;
 
   return template.replace('<!-- titleText -->', titleText);
 };
+
+function encodeXML(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function balanceText(text: string, maxLen: number): string[] {
+  const words = text.split(' ');
+  if (words.join(' ').length <= maxLen) return [text];
+
+  let bestSplit = 0;
+  let bestDiff = Number.POSITIVE_INFINITY;
+
+  for (let i = 0; i < words.length - 1; i++) {
+    const line1 = words.slice(0, i + 1).join(' ');
+    const line2 = words.slice(i + 1).join(' ');
+    const diff = Math.abs(line1.length - line2.length);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      bestSplit = i + 1;
+    }
+  }
+
+  return [words.slice(0, bestSplit).join(' '), words.slice(bestSplit).join(' ')];
+}
 
 export const GET = async ({ params }: { params: { route: string } }) => {
   const pages = await getPages();
   const pageEntry = pages[params.route];
   if (!pageEntry) return new Response('Page not found', { status: 404 });
 
-  const svgBuffer = Buffer.from(
-    renderSVG({
-      // @ts-expect-error TODO type properly
-      title: pageEntry.frontmatter.hero?.tagline ?? pageEntry.frontmatter.title,
-      // @ts-expect-error TODO type properly
-      description: pageEntry.frontmatter.description,
-    })
-  );
-  const body = await sharp(svgBuffer).resize(1200, 630).png().toBuffer();
+  // @ts-expect-error TODO type properly
+  const title = pageEntry.frontmatter.hero?.tagline ?? pageEntry.frontmatter.title;
+  const svgBuffer = Buffer.from(renderSVG({ title }));
+  const body = await sharp(svgBuffer).resize(1200, 630).webp({ lossless: true }).toBuffer();
+
   return new Response(body, {
     headers: {
+      'Content-Type': 'image/webp',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       Pragma: 'no-cache',
       Expires: '0',
