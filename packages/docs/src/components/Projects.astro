@@ -1,5 +1,6 @@
 ---
 import ArkType from '../assets/projects/arktype.svg';
+import AstroLogo from '../assets/projects/astro.svg';
 import AWS from '../assets/projects/aws.svg';
 import Backstage from '../assets/projects/backstage.svg';
 import CreateTypeScriptApp from '../assets/projects/create-typescript-app.png';
@@ -29,7 +30,7 @@ import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
     align-content: center;
     align-items: center;
     justify-content: center;
-    gap: 2.8rem;
+    gap: 2.6rem;
     list-style: none;
     padding: 0;
   }
@@ -66,9 +67,17 @@ import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
     opacity: 1;
     filter: none;
   }
+
+  a[href="https://github.com/withastro"] {
+    transform: translateY(6px);
+  }
+  a[href="https://github.com/aws-samples"] {
+    transform: translateY(6px);
+  }
 </style>
 
 <div id="projects">
+    <a href="https://github.com/withastro"><AstroLogo /></a>
     <a href="https://github.com/guardian"><Guardian /></a>
     <a href="https://github.com/microsoft"><Microsoft /></a>
     <a href="https://github.com/typescript-eslint"><TypeScriptESLint class="contrast"/></a>
