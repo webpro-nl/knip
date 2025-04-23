@@ -363,6 +363,10 @@
           "title": "dotenv plugin configuration (https://knip.dev/reference/plugins/dotenv)",
           "$ref": "#/definitions/plugin"
         },
+        "dotenvx": {
+          "title": "dotenvx plugin configuration (https://knip.dev/reference/plugins/dotenvx)",
+          "$ref": "#/definitions/plugin"
+        },
         "drizzle": {
           "title": "Drizzle plugin configuration (https://knip.dev/reference/plugins/drizzle)",
           "$ref": "#/definitions/plugin"

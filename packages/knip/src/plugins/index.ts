@@ -15,6 +15,7 @@ import { default as cucumber } from './cucumber/index.js';
 import { default as cypress } from './cypress/index.js';
 import { default as dependencyCruiser } from './dependency-cruiser/index.js';
 import { default as dotenv } from './dotenv/index.js';
+import { default as dotenvx } from './dotenvx/index.js';
 import { default as drizzle } from './drizzle/index.js';
 import { default as eleventy } from './eleventy/index.js';
 import { default as eslint } from './eslint/index.js';
@@ -117,6 +118,7 @@ export const Plugins = {
   cypress,
   'dependency-cruiser': dependencyCruiser,
   dotenv,
+  dotenvx,
   drizzle,
   eleventy,
   eslint,

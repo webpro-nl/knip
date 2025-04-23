@@ -16,6 +16,7 @@ export type PluginName =
   | 'cypress'
   | 'dependency-cruiser'
   | 'dotenv'
+  | 'dotenvx'
   | 'drizzle'
   | 'eleventy'
   | 'eslint'
@@ -118,6 +119,7 @@ export const pluginNames = [
   'cypress',
   'dependency-cruiser',
   'dotenv',
+  'dotenvx',
   'drizzle',
   'eleventy',
   'eslint',

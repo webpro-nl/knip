@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/dotenvx",
+  "version": "*",
+  "scripts": {
+    "printenv": "dotenvx get --all",
+    "start": "dotenvx run --strict -- node index.js"
+  }
+}

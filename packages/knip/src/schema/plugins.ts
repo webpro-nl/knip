@@ -29,6 +29,7 @@ export const pluginsSchema = z.object({
   cypress: pluginSchema,
   'dependency-cruiser': pluginSchema,
   dotenv: pluginSchema,
+  dotenvx: pluginSchema,
   drizzle: pluginSchema,
   eleventy: pluginSchema,
   eslint: pluginSchema,
