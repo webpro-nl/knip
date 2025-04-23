@@ -1,4 +1,5 @@
 {
+  "npm.packageManager": "bun",
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
