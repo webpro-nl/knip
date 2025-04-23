@@ -11,6 +11,7 @@ test('Find dependencies with the tanstack-router plugin', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
+    isProduction: true,
   });
 
   assert(issues.files.has(join(cwd, 'routes/-unused.ts')));
@@ -18,7 +19,8 @@ test('Find dependencies with the tanstack-router plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 6,
-    total: 6,
+    processed: 5,
+    total: 5,
+    dependencies: 3,
   });
 });
