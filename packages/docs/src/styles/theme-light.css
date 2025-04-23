@@ -1,4 +1,14 @@
 :root[data-theme='light'] {
+  --sl-color-white: hsl(224, 10%, 10%);
+  --sl-color-black: hsl(0, 0%, 100%);
+  --sl-color-gray-1: hsl(224, 14%, 16%);
+  --sl-color-gray-2: hsl(224, 10%, 23%);
+  --sl-color-gray-3: hsl(224, 7%, 36%);
+  --sl-color-gray-4: hsl(224, 6%, 56%);
+  --sl-color-gray-5: hsl(224, 6%, 77%);
+  --sl-color-gray-6: hsl(224, 20%, 94%);
+  --sl-color-gray-7: hsl(224, 19%, 97%);
+
   --sl-color-orange: #f56e0f;
 
   --sl-color-text-accent: var(--sl-color-white);
