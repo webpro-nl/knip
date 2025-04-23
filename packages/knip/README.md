@@ -15,7 +15,7 @@
 
 </div>
 
-Knip finds and fixes **unused files, dependencies and exports** in your
+Knip finds and fixes **unused dependencies, exports and files** in your
 JavaScript and TypeScript projects. Less code and dependencies lead to improved
 performance, less maintenance and easier refactorings.
 

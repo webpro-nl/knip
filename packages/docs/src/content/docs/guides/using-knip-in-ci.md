@@ -4,7 +4,7 @@ title: Using Knip in CI
 
 Knip is your companion during local development. But it is even more valuable in
 a continuous integration (CI) environment to prevent regressions over time. Knip
-will notify you of unused files, dependencies and exports if you forgot to
+will notify you of unused dependencies, exports and files if you forgot to
 remove them.
 
 Knip will exit the process with code `1` if there are one or more issues.
