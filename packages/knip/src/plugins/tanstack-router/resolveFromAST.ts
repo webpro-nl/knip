@@ -19,7 +19,7 @@ export const getCustomConfig = (sourceFile: ts.SourceFile) => {
       const callee = node.expression;
       if (ts.isIdentifier(callee) && FUNCTIONS.has(callee.text)) {
         const firstArg = node.arguments[0];
-        if (ts.isObjectLiteralExpression(firstArg)) {
+        if (firstArg && ts.isObjectLiteralExpression(firstArg)) {
           for (const [key, value] of getPropertyValueEntries(firstArg, CONFIG_KEYS)) config[key] = value;
         }
       }
