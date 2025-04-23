@@ -22,7 +22,7 @@ const resolveEntryPaths: ResolveEntryPaths<RelayConfig> = async config => {
   return projects.flatMap(project => {
     const artifactDirectory = project.artifactDirectory;
 
-    if (artifactDirectory == null) return [];
+    if (artifactDirectory == null) return [toEntry('**/__generated__/*')];
 
     const inputs = [toEntry(join(artifactDirectory, '**'))];
 
