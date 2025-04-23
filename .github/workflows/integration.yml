@@ -34,20 +34,29 @@ jobs:
       fail-fast: false
       matrix:
         project:
-          - name: create-typescript-app
-            repo: JoshuaKGoldberg/create-typescript-app
-            commands: |
-              pnpm install
-              pnpm dlx $PKG_URL
-
-          - name: slonik
-            repo: gajus/slonik
-            commands: |
-              pnpm install
-              pnpm dlx $PKG_URL
-
           - name: 10ten-ja-reader
             repo: birchill/10ten-ja-reader
+            commands: |
+              pnpm install
+              pnpm dlx $PKG_URL
+
+          - name: argos
+            repo: argos-ci/argos
+            commands: |
+              pnpm i -g pnpm
+              pnpm install
+              pnpm add -D -w $PKG_URL
+              pnpm run knip
+
+          - name: astro
+            repo: withastro/astro
+            commands: |
+              pnpm install
+              pnpm build
+              pnpm add -D -w $PKG_URL
+
+          - name: create-typescript-app
+            repo: JoshuaKGoldberg/create-typescript-app
             commands: |
               pnpm install
               pnpm dlx $PKG_URL
@@ -58,22 +67,6 @@ jobs:
               pnpm install
               pnpm dlx $PKG_URL
 
-          - name: query
-            repo: TanStack/query
-            commands: |
-              pnpm install
-              pnpm add -D -w $PKG_URL
-              pnpm test:knip --cache --max-issues 1
-              pnpm test:knip --cache --max-issues 1
-
-          - name: argos
-            repo: argos-ci/argos
-            commands: |
-              pnpm i -g pnpm
-              pnpm install
-              pnpm add -D -w $PKG_URL
-              pnpm run knip
-
           - name: eslint
             repo: eslint/eslint
             commands: |
@@ -83,12 +76,15 @@ jobs:
               npm run lint:unused -- --cache
               npm run lint:unused -- --cache
 
-          - name: TypeScript
-            repo: microsoft/TypeScript
+          - name: freeCodeCamp
+            repo: freeCodeCamp/freeCodeCamp
             commands: |
-              npm ci
-              npm install -D $PKG_URL
-              npm run knip
+              pnpm i -g pnpm
+              pnpm install
+              cp sample.env .env
+              pnpm run --dir client create:env
+              # No exit code, since freeCodeCamp project does not use Knip in CI
+              pnpm run knip:all --no-exit-code
 
           - name: mocha
             repo: mochajs/mocha
@@ -119,15 +115,26 @@ jobs:
               yarn add -D knip@$PKG_URL
               yarn knip
 
-          - name: freeCodeCamp
-            repo: freeCodeCamp/freeCodeCamp
+          - name: query
+            repo: TanStack/query
             commands: |
-              pnpm i -g pnpm
               pnpm install
-              cp sample.env .env
-              pnpm run --dir client create:env
-              # No exit code, since freeCodeCamp project does not use Knip in CI
-              pnpm run knip:all --no-exit-code
+              pnpm add -D -w $PKG_URL
+              pnpm test:knip --cache --max-issues 1
+              pnpm test:knip --cache --max-issues 1
+
+          - name: slonik
+            repo: gajus/slonik
+            commands: |
+              pnpm install
+              pnpm dlx $PKG_URL
+
+          - name: TypeScript
+            repo: microsoft/TypeScript
+            commands: |
+              npm ci
+              npm install -D $PKG_URL
+              npm run knip
 
     steps:
       - uses: actions/checkout@v4
