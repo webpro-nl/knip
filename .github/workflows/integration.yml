@@ -120,8 +120,8 @@ jobs:
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
-              pnpm test:knip --cache --max-issues 1
-              pnpm test:knip --cache --max-issues 1
+              pnpm test:knip --cache
+              pnpm test:knip --cache
 
           - name: slonik
             repo: gajus/slonik
