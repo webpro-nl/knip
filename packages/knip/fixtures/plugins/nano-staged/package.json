@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/nano-staged",
-  "version": "*",
   "devDependencies": {
     "nano-staged": "*"
   },

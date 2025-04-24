@@ -1,3 +1,3 @@
-export const utilOne = () => console.log('utilOne');
-const utilTwo = () => console.log('utilTwo');
+export const utilOne = () => 1;
+const utilTwo = () => 2;
 export default utilTwo;

@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/webdriver-io",
-  "version": "*",
   "scripts": {
     "test": "wdio"
   },

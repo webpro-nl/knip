@@ -9,7 +9,7 @@ const cwd = resolve('fixtures/fix-workspaces');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-test('Remove exports and dependencies (workspaces)', async () => {
+test('Remove exports and dependencies in workspaces', async () => {
   const tests = [
     [
       'exports.ts',
@@ -101,7 +101,7 @@ export type U = number;
   }
 });
 
-test('Remove exports (--fix-type types)', async () => {
+test('Remove exports in workspaces (--fix-type types)', async () => {
   const tests = [
     [
       'exports.ts',

@@ -1,29 +1,29 @@
 // https://vike.dev/onRenderHtml
-export { onRenderHtml }
+export { onRenderHtml };
 
-import ReactDOMServer from 'react-dom/server'
-import { Layout } from './Layout'
-import { escapeInject, dangerouslySkipEscape } from 'vike/server'
-import logoUrl from './logo.svg'
-import type { OnRenderHtmlAsync } from 'vike/types'
-import { getPageTitle } from './getPageTitle'
+import ReactDOMServer from 'react-dom/server';
+import { Layout } from './Layout';
+import { escapeInject, dangerouslySkipEscape } from 'vike/server';
+import logoUrl from './logo.svg';
+import type { OnRenderHtmlAsync } from 'vike/types';
+import { getPageTitle } from './getPageTitle';
 
 const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRenderHtmlAsync> => {
-  const { Page } = pageContext
+  const { Page } = pageContext;
 
   // This onRenderHtml() hook only supports SSR, see https://vike.dev/render-modes for how to modify
   // onRenderHtml() to support SPA
-  if (!Page) throw new Error('My onRenderHtml() hook expects pageContext.Page to be defined')
+  if (!Page) throw new Error('My onRenderHtml() hook expects pageContext.Page to be defined');
 
   // Alternativly, we can use an HTML stream, see https://vike.dev/streaming
   const pageHtml = ReactDOMServer.renderToString(
     <Layout pageContext={pageContext}>
       <Page />
     </Layout>
-  )
+  );
 
-  const title = getPageTitle(pageContext)
-  const desc = pageContext.data?.description || pageContext.config.description || 'Demo of using Vike'
+  const title = getPageTitle(pageContext);
+  const desc = pageContext.data?.description || pageContext.config.description || 'Demo of using Vike';
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="en">
@@ -37,12 +37,12 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
       <body>
         <div id="react-root">${dangerouslySkipEscape(pageHtml)}</div>
       </body>
-    </html>`
+    </html>`;
 
   return {
     documentHtml,
     pageContext: {
       // We can add custom pageContext properties here, see https://vike.dev/pageContext#custom
-    }
-  }
-}
+    },
+  };
+};

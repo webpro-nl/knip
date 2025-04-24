@@ -17,7 +17,9 @@ test('Remove exports and dependencies', async () => {
       `const x = 1;
 const y = 2;
 
+// biome-ignore lint/suspicious/noEmptyInterface:  fixture festa
 interface McInterFace {}
+// biome-ignore lint/complexity/noBannedTypes:  fixture festa
 type McType = {};
 enum McEnum {}
 
@@ -169,7 +171,9 @@ test('Remove exports (--fix-type types)', async () => {
       `export const x = 1;
 export const y = 2;
 
+// biome-ignore lint/suspicious/noEmptyInterface:  fixture festa
 interface McInterFace {}
+// biome-ignore lint/complexity/noBannedTypes:  fixture festa
 type McType = {};
 enum McEnum {}
 

@@ -1,18 +1,11 @@
 {
   "name": "@workspaces-self-reference/root",
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "knip": {
     "workspaces": {
       "packages/*": {
-        "entry": [
-          "entry.ts!"
-        ],
-        "project": [
-          "*.ts!",
-          "*.js"
-        ]
+        "entry": ["entry.ts!"],
+        "project": ["*.ts!", "*.js"]
       }
     }
   }

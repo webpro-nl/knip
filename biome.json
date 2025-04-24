@@ -4,7 +4,6 @@
     "ignore": [
       "**/dist",
       "**/tmp",
-      "**/fixtures",
       "packages/knip/package.json",
       "packages/knip/vendor/bash-parser/index.js",
       "packages/docs/.astro"
@@ -49,7 +48,10 @@
     "enabled": true,
     "lineWidth": 120,
     "indentStyle": "space",
-    "formatWithErrors": true
+    "formatWithErrors": true,
+    "ignore": [
+      "packages/knip/fixtures/ignore-exports-used-in-file-alias-exclude/more.ts"
+    ]
   },
   "javascript": {
     "formatter": {
@@ -83,6 +85,8 @@
     {
       "include": [
         "packages/docs",
+        "packages/knip/fixtures/cli-preprocessor",
+        "packages/knip/fixtures/cli-reporter",
         "packages/knip/scripts",
         "packages/knip/src/cli.ts",
         "packages/knip/src/reporters",
@@ -110,6 +114,11 @@
           },
           "style": {
             "useImportType": "off"
+          },
+          "nursery": {
+            "noRestrictedImports": {
+              "level": "off"
+            }
           }
         }
       }

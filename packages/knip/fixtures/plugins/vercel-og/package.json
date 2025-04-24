@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/vercel-og",
-  "version": "*",
   "dependencies": {
     "@vercel/og": "*",
     "next": "*"

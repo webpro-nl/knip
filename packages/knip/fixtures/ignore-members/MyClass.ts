@@ -1,4 +1,5 @@
 class BaseClass {
+  // biome-ignore lint/complexity/noUselessConstructor:  fixture festa
   constructor() {}
   init() {}
   used() {}
@@ -6,6 +7,7 @@ class BaseClass {
 }
 
 export class MyClass extends BaseClass {
+  // biome-ignore lint/complexity/noUselessConstructor:  fixture festa
   constructor() {
     super();
   }

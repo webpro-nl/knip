@@ -12,16 +12,7 @@
     "tsx": "*"
   },
   "knip": {
-    "ignoreBinaries": [
-      "eslint",
-      "^ts.+",
-      ".*unused-bins.*"
-    ],
-    "ignoreDependencies": [
-      "stream",
-      "^@org/.*",
-      "^rc-.*",
-      ".+unused-deps.+"
-    ]
+    "ignoreBinaries": ["eslint", "^ts.+", ".*unused-bins.*"],
+    "ignoreDependencies": ["stream", "^@org/.*", "^rc-.*", ".+unused-deps.+"]
   }
 }

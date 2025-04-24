@@ -1,4 +1,4 @@
 export enum Fruits {
-  apple = "apple",
-  orange = "orange",
+  apple = 'apple',
+  orange = 'orange',
 }

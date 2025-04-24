@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/metro",
-  "version": "*",
   "dependencies": {
     "expo-asset": "*",
     "react": "*",

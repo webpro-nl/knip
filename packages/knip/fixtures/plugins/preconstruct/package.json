@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/preconstruct",
-  "version": "*",
   "scripts": {
     "build": "preconstruct build"
   },

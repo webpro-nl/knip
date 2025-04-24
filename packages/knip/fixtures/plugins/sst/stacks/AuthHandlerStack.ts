@@ -1,6 +1,6 @@
 import sst from 'sst';
-import { d } from 'sst-auth-handler-stack-dep';
-import { use, StackContext, Function, FunctionProps } from 'sst/constructs';
+import 'sst-auth-handler-stack-dep';
+import { StackContext } from 'sst/constructs';
 
 export function AuthHandlerStack({ stack, app }: StackContext) {
   new sst.aws.Function('MyFunction', {
@@ -10,6 +10,6 @@ export function AuthHandlerStack({ stack, app }: StackContext) {
   });
 
   return {
-    handler,
+    handler: 'handler',
   };
 }

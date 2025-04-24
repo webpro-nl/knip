@@ -4,6 +4,7 @@ const { add } = require('./dir/exports');
 const ts = require('./ts-ext');
 
 const templateStringInternal = value => {
+  // biome-ignore lint/style/noUnusedTemplateLiteral:  fixture festa
   const baz = require(`./dir/mod1`);
   baz;
 };

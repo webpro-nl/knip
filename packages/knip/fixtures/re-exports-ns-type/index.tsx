@@ -21,7 +21,7 @@ interface Props {
 
 const pictureToken = (): PictureKey => 'dog';
 
-const Picture = (props: Props) => <img source={pictures[pictureToken()]} />;
+const Picture = (props: Props) => <img source={pictures[pictureToken()]} alt="" />;
 
 const PictureB = (props: Props) => <Picture pictureKey={pictureToken()} />;
 

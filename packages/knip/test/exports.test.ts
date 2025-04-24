@@ -42,7 +42,7 @@ test('Find unused exports', async () => {
 
   assert.equal(issues.types['my-module.ts']['MyAnyType'].line, 28);
   assert.equal(issues.types['my-module.ts']['MyAnyType'].col, 13);
-  assert.equal(issues.types['my-namespace.ts']['MyNamespace'].line, 5);
+  assert.equal(issues.types['my-namespace.ts']['MyNamespace'].line, 6);
   assert.equal(issues.types['my-namespace.ts']['MyNamespace'].col, 18);
 
   assert.deepEqual(counters, {

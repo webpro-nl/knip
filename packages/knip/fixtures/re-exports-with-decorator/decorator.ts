@@ -1,5 +1,5 @@
 function MyDeco() {
-  return function (...args: any[]) {};
+  return (...args: any[]) => {};
 }
 
 @MyDeco()

@@ -16,7 +16,7 @@ test('knip --reporter json (files, unlisted & unresolved)', () => {
         optionalPeerDependencies: [],
         unlisted: [{ name: 'unresolved' }, { name: '@org/unresolved' }],
         binaries: [],
-        unresolved: [{ name: './unresolved', line: 8, col: 23, pos: 403 }],
+        unresolved: [{ name: './unresolved', line: 8, col: 23, pos: 407 }],
         exports: [],
         types: [],
         enumMembers: {},

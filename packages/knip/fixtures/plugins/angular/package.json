@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/angular",
-  "version": "*",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

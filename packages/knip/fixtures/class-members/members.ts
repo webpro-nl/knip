@@ -44,7 +44,7 @@ export class MyClass {
   }
 
   public set usedSetter(value: string) {
-    console.log(value);
+    value;
   }
 
   public get unusedGetter(): string {
@@ -52,7 +52,7 @@ export class MyClass {
   }
 
   public set unusedSetter(value: string) {
-    console.log(value);
+    value;
   }
 }
 

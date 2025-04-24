@@ -22,7 +22,7 @@ test('knip --reporter json (enum members)', () => {
         enumMembers: {
           MyEnum: [
             { name: 'B_Unused', line: 9, col: 3, pos: 127 },
-            { name: 'D_Key', line: 11, col: 3, pos: 165 },
+            { name: 'D-Key', line: 11, col: 3, pos: 165 },
           ],
         },
         duplicates: [],

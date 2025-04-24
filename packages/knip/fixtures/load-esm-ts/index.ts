@@ -14,7 +14,9 @@ function meow(target: unknown, _: unknown) {}
 
 @meow
 export class Cat {
-  constructor() {}
+  constructor() {
+    this;
+  }
 }
 
 // SyntaxError: await is only valid in async functions and the top level bodies of modules

@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/i18next-parser",
-  "version": "*",
   "scripts": {
     "i18next": "i18next -c custom.config.js"
   },

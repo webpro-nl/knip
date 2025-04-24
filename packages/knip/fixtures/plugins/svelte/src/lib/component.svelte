@@ -1,6 +1,6 @@
 <script>
-	import { withStore } from '$lib/store.svelte';
-	let store = withStore(0);
+import { withStore } from '$lib/store.svelte';
+const store = withStore(0);
 </script>
 
 <button onclick={store.increment}>
