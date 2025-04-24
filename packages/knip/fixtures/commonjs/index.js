@@ -14,12 +14,12 @@ const dynamicRequire = value => {
 };
 
 const templateStringExternal = value => {
-  return require(`no-substitution-tpl-literal`);
+  return require('no-substitution-tpl-literal');
 };
 
 const templateStringInternal = value => {
-  const baz = require(`./dir/mod1`);
-  const { identifier } = require(`./dir/mod1`);
+  const baz = require('./dir/mod1');
+  const { identifier } = require('./dir/mod1');
 
   baz;
   identifier;
@@ -34,11 +34,11 @@ const requireExportedShorthandsHeuristic = value => {
   [identifier9, identifier10];
 };
 
-const staticResolve = () => {
+const staticResolve2 = () => {
   return require.resolve('string-literal-resolve');
 };
 
-const staticResolved = () => {
+const staticResolve3 = () => {
   return require.resolve('resolved');
 };
 

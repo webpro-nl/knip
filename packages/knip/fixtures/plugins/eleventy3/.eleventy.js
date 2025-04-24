@@ -1,12 +1,14 @@
+// biome-ignore lint/suspicious/noRedundantUseStrict:  fixture festa
 'use strict';
 
 const eleventyNavigationPlugin = require('@11ty/eleventy-navigation');
 const syntaxHighlight = require('@11ty/eleventy-plugin-syntaxhighlight');
-const path = require('path');
+const path = require('node:path');
 const highlighter = require('./src/_plugins/syntax-highlighter');
 path;
 highlighter;
 
+// biome-ignore lint/complexity/useArrowFunction:  fixture festa
 module.exports = function (eleventyConfig) {
   eleventyConfig.addGlobalData('site_name', 'example');
   eleventyConfig.addDataExtension('yml', () => {});

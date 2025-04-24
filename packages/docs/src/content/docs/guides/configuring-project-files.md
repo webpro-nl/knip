@@ -123,7 +123,7 @@ Also see the [ignoreExportsUsedInFile][3] configuration option.
 ## Production Mode
 
 In default mode, Knip includes all test files and other non-production files in
-the analysis. To find out what files, dependencies and exports are unused in
+the analysis. To find out what dependencies, exports and files are unused in
 production source files, use [production mode][4].
 
 How to exclude test and other non-production files from the analysis? For a

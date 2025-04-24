@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/create-typescript-app",
-  "version": "*",
   "devDependencies": {
     "create-typescript-app": "*"
   }

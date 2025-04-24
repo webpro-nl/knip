@@ -1,7 +1,6 @@
 {
   "name": "@fixtures/astro",
   "type": "module",
-  "version": "*",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",

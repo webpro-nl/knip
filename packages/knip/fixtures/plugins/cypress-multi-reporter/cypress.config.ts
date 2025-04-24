@@ -4,7 +4,7 @@ import { defineConfig } from 'cypress';
 const cypressJsonConfig = {};
 
 export default defineConfig({
-  reporter: "cypress-multi-reporters",
+  reporter: 'cypress-multi-reporters',
   reporterOptions: {
     configFile: 'reporter-config.json',
   },

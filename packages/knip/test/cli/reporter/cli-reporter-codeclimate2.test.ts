@@ -1,13 +1,14 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import type { Issue } from 'codeclimate-types';
 import { resolve } from '../../../src/util/path.js';
-import { assertAndRemoveProperty } from '../../helpers/assertAndRemoveProperty.js';
+import { assertAndRemoveFingerprint, orderByPos } from '../../helpers/assertAndRemoveProperty.js';
 import { exec } from '../../helpers/exec.js';
 
 const cwd = resolve('fixtures/module-resolution-non-std');
 
 test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
-  const json = [
+  const json: Issue[] = [
     {
       categories: ['Bug Risk'],
       check_name: 'Unused files',
@@ -42,14 +43,9 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
     },
   ];
 
-  const issues = JSON.parse(exec('knip --reporter codeclimate', { cwd }).stdout) as {
-    fingerprint: string;
-    [key: string]: unknown;
-  }[];
+  const issues: Issue[] = JSON.parse(exec('knip --reporter codeclimate', { cwd }).stdout);
 
-  const issuesWithoutFingerprints = issues.map(issue => {
-    return assertAndRemoveProperty(issue, 'fingerprint', fingerprint => assert.match(fingerprint, /[a-f0-9]{32}/));
-  });
+  const issuesWithoutFingerprints = issues.map(assertAndRemoveFingerprint);
 
-  assert.deepEqual(issuesWithoutFingerprints, json);
+  assert.deepEqual(issuesWithoutFingerprints.sort(orderByPos), json.sort(orderByPos));
 });

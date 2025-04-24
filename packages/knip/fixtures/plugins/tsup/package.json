@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/tsup",
-  "version": "*",
   "devDependencies": {
     "tsup": "*"
   },

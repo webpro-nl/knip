@@ -2,7 +2,5 @@
   "name": "@fixtures/workspaces-dts",
   "version": "0.0.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ]
+  "workspaces": ["packages/*"]
 }

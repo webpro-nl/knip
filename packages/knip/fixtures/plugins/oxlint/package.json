@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/oxlint",
-  "version": "*",
   "devDependencies": {
     "oxlint": "*"
   },

@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/rsbuild",
-  "version": "*",
   "scripts": {
     "dev": "rsbuild dev --open",
     "build": "rsbuild build",

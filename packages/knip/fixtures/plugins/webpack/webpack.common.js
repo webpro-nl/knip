@@ -71,13 +71,15 @@ module.exports = () => {
           oneOf: [
             {
               resourceQuery: /inline/,
-              loader: 'url-loader'
-            }, 
+              loader: 'url-loader',
+            },
             {
               resourceQuery: /external/,
-              use: [{
-                loader: 'file-loader',
-              }]
+              use: [
+                {
+                  loader: 'file-loader',
+                },
+              ],
             },
           ],
         },

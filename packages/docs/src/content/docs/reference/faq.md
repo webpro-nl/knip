@@ -5,7 +5,7 @@ date: 2024-08-20
 
 ## Introduction
 
-Knip finds and fixes unused files, dependencies and exports. As a "kitchen sink"
+Knip finds and fixes unused dependencies, exports and files. As a "kitchen sink"
 in the npm ecosystem, it creates comprehensive module and dependency graphs of
 your project.
 

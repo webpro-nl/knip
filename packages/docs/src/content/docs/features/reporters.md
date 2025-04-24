@@ -47,7 +47,7 @@ object per file structured like this:
       "devDependencies": [],
       "binaries": [],
       "unresolved": [
-        { "name": "./unresolved", "line": 8, "col": 23, "pos": 403 }
+        { "name": "./unresolved", "line": 8, "col": 23, "pos": 407 }
       ],
       "exports": [{ "name": "unusedExport", "line": 1, "col": 14, "pos": 13 }],
       "types": [

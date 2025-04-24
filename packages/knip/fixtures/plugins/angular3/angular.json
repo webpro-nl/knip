@@ -17,9 +17,7 @@
               "entry": "src/server.ts"
             },
             "server": "src/main.server-for-non-prod.ts",
-            "polyfills": [
-              "src/polyfill.js"
-            ]
+            "polyfills": ["src/polyfill.js"]
           },
           "configurations": {
             "production": {

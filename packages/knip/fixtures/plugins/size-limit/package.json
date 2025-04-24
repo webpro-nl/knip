@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/size-limit",
-  "version": "*",
   "scripts": {
     "size": "size-limit"
   },

@@ -10,8 +10,7 @@ const title = 'Prettier';
 
 const enablers = ['prettier'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies, config }) =>
-  hasDependency(dependencies, enablers) || 'prettier' in config;
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = [
   '.prettierrc',

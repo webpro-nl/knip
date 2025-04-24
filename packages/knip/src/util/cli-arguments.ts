@@ -1,6 +1,6 @@
 import { parseArgs } from 'node:util';
 
-export const helpText = `✂️  Find unused files, dependencies and exports in your JavaScript and TypeScript projects
+export const helpText = `✂️  Find unused dependencies, exports and files in your JavaScript and TypeScript projects
 
 Usage: knip [options]
 

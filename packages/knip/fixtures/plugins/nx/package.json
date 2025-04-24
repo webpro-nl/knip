@@ -20,12 +20,12 @@
   },
   "nx": {
     "targets": {
-        "clean": {
-            "executor": "nx:run-commands",
-            "options": {
-                "command": "rimraf dist"
-            }
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "rimraf dist"
         }
+      }
     }
   }
 }

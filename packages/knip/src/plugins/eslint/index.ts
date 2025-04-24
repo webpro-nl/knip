@@ -13,9 +13,8 @@ const title = 'ESLint';
 
 const enablers = ['eslint', '@eslint/js'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies, manifest, config }) =>
+const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
   hasDependency(dependencies, enablers) ||
-  'eslint' in config ||
   Boolean(manifest.name && /(^eslint-config|\/eslint-config)/.test(manifest.name));
 
 const packageJsonPath = 'eslintConfig';

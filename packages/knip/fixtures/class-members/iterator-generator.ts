@@ -11,6 +11,7 @@ export abstract class AbstractClassGen {
 export class ExtendedClassGen extends AbstractClassGen {
   public constructor() {
     super();
+    this;
   }
 
   public implemented(): AbstractClassGen {
