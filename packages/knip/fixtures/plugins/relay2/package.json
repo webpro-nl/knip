@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/relay2",
+  "version": "*",
+  "scripts": {
+    "build": "relay-compiler",
+    "dev": "vite dev"
+  },
+  "devDependencies": {
+    "relay-compiler": "*",
+    "vite-plugin-relay": "*",
+    "vite": "*"
+  }
+}
