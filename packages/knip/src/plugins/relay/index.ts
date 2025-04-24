@@ -1,9 +1,10 @@
 import parseArgs from 'minimist';
 import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
-import { toDeferResolve, toEntry } from '../../util/input.js';
-import { isInternal, join } from '../../util/path.js';
+import { toProductionEntry } from '../../util/input.js';
+import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { RelayConfig } from './types.js';
+
 // https://relay.dev/docs/next/guides/compiler/#configuration
 // https://github.com/facebook/relay/blob/main/compiler/crates/relay-compiler/relay-compiler-config-schema.json
 
@@ -11,36 +12,21 @@ const title = 'Relay';
 
 const enablers = ['vite-plugin-relay', '@swc/plugin-relay', 'babel-plugin-relay'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies, config }) =>
-  hasDependency(dependencies, enablers) || 'relay' in config;
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config: string[] = ['relay.config.json', 'relay.config.js'];
 
 const resolveEntryPaths: ResolveEntryPaths<RelayConfig> = async config => {
   const projects = 'projects' in config ? Object.values(config.projects) : [config];
 
-  return projects.flatMap(project => {
+  return projects.map(project => {
     const artifactDirectory = project.artifactDirectory;
 
-    if (artifactDirectory == null) return [toEntry('**/__generated__/*')];
-
-    const inputs = [toEntry(join(artifactDirectory, '**'))];
-
-    if (project.requireCustomScalarTypes !== true) {
-      return inputs;
+    if (artifactDirectory == null) {
+      return toProductionEntry('**/__generated__/*');
     }
 
-    const scalars = Object.values(project.customScalarTypes ?? {}).flatMap(customScalarType =>
-      typeof customScalarType === 'object'
-        ? [
-            isInternal(customScalarType.path)
-              ? toEntry(join(artifactDirectory, customScalarType.path))
-              : toDeferResolve(customScalarType.path),
-          ]
-        : []
-    );
-
-    return inputs.concat(scalars);
+    return toProductionEntry(join(artifactDirectory, '**'));
   });
 };
 
