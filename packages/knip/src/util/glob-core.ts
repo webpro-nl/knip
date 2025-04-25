@@ -151,7 +151,7 @@ export const findAndParseGitignores = async (cwd: string) => {
     const cacheDir = ancestor ? cwd : dir;
     const cacheForDir = cachedGitIgnores.get(cwd);
 
-    if (ancestor && cacheForDir) {
+    if (cacheForDir) {
       for (const pattern of dirIgnores) cacheForDir?.ignores.add(pattern);
       cacheForDir.unignores = Array.from(new Set([...cacheForDir.unignores, ...dirUnignores]));
     } else {
