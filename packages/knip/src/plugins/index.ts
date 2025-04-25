@@ -79,7 +79,6 @@ import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
-import { default as tanstackRouter } from './tanstack-router/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
 import { default as tsup } from './tsup/index.js';
@@ -182,7 +181,6 @@ export const Plugins = {
   svelte,
   syncpack,
   tailwind,
-  'tanstack-router': tanstackRouter,
   travis,
   'ts-node': tsNode,
   tsup,
