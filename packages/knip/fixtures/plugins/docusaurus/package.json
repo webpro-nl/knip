@@ -1,0 +1,15 @@
+{
+  "name": "@fixtures/docusaurus",
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "docusaurus build"
+  },
+  "dependencies": {
+    "@docusaurus/core": "*",
+    "@docusaurus/theme-mermaid": "*"
+  },
+  "devDependencies": {
+    "@docusaurus/types": "*"
+  }
+}

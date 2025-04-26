@@ -28,6 +28,7 @@ export const pluginsSchema = z.object({
   cucumber: pluginSchema,
   cypress: pluginSchema,
   'dependency-cruiser': pluginSchema,
+  docusaurus: pluginSchema,
   dotenv: pluginSchema,
   drizzle: pluginSchema,
   eleventy: pluginSchema,

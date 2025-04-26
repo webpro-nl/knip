@@ -15,6 +15,7 @@ export type PluginName =
   | 'cucumber'
   | 'cypress'
   | 'dependency-cruiser'
+  | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
   | 'eleventy'
@@ -119,6 +120,7 @@ export const pluginNames = [
   'cucumber',
   'cypress',
   'dependency-cruiser',
+  'docusaurus',
   'dotenv',
   'drizzle',
   'eleventy',
