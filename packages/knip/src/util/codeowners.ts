@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { debugLog } from './debug.js';
-import { convertGitignoreToPicomatchIgnorePatterns } from './glob-core.js';
+import { convertGitignoreToPicomatchIgnorePatterns } from './parse-and-convert-gitignores.js';
 
 /** @internal */
 export function parseCodeowners(content: string) {
