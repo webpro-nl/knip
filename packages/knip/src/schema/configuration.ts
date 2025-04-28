@@ -3,7 +3,7 @@ import { globSchema, pluginsSchema } from './plugins.js';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
-const syncCompilerSchema = z.function().args(z.string(), z.string()).returns(z.string());
+const syncCompilerSchema = z.union([z.function().args(z.string(), z.string()).returns(z.string()), z.literal(true)]);
 const asyncCompilerSchema = z.function().args(z.string(), z.string()).returns(z.promise(z.string()));
 const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
 const compilersSchema = z.record(z.string(), compilerSchema);

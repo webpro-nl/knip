@@ -2,6 +2,7 @@
 import path from 'node:path';
 import picomatch from 'picomatch';
 import { partitionCompilers } from './compilers/index.js';
+import type { SyncCompilers } from './compilers/types.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
 import { knipConfigurationSchema } from './schema/configuration.js';
 import { type PluginName, pluginNames } from './types/PluginNames.js';
@@ -217,7 +218,7 @@ export class ConfigurationChief {
       ignoreExportsUsedInFile,
       ignoreWorkspaces,
       isIncludeEntryExports,
-      syncCompilers: new Map(Object.entries(syncCompilers ?? {})),
+      syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
       rootPluginConfigs,
       tags: rawConfig.tags ?? [],
