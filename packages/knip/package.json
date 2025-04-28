@@ -128,5 +128,8 @@
     "unresolved",
     "unused",
     "workspace"
-  ]
+  ],
+  "optionalDependencies": {
+    "@actions/core": "^1.11.1"
+  }
 }
