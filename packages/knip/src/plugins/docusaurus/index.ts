@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toDeferResolve } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { DocusaurusConfig } from './types.js';
+import type { ConfigItem, DocusaurusConfig } from './types.js';
 
 // https://docusaurus.io/docs/configuration
 
@@ -17,10 +17,20 @@ const entry: string[] = [];
 
 const production: string[] = [];
 
-const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
-  const themes = config?.themes ?? [];
+const resolveConfigItem = (item: ConfigItem): string | null => {
+  if (!item) return null;
+  if (Array.isArray(item)) return item[0];
+  return item;
+};
 
-  return [themes].flat().map(toDeferResolve);
+const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
+  const themes = (config?.themes ?? []).map(resolveConfigItem);
+  const plugins = (config?.plugins ?? []).map(resolveConfigItem);
+  const presets = (config?.presets ?? []).map(resolveConfigItem);
+
+  return [...themes, ...plugins, ...presets]
+    .filter((item): item is string => typeof item === 'string')
+    .map(toDeferResolve);
 };
 
 export default {

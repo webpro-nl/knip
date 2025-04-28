@@ -5,4 +5,23 @@ export default {
   markdown: {
     mermaid: true,
   },
+  plugins: [
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        path: 'blog',
+        routeBasePath: 'blog',
+        include: ['*.md', '*.mdx'],
+      },
+    ],
+    '@docusaurus/plugin-content-pages',
+  ],
+  presets: [
+    [
+      '@docusaurus/preset-classic',
+      {
+        debug: false,
+      },
+    ],
+  ],
 };

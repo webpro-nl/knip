@@ -14,10 +14,11 @@ test('Find dependencies with the docusaurus plugin', async () => {
   });
 
   assert(issues.unresolved['docusaurus.config.js']['@docusaurus/theme-search-algolia']);
+  assert(issues.unresolved['docusaurus.config.js']['@docusaurus/plugin-content-blog']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unresolved: 1,
+    unresolved: 2,
     processed: 2,
     total: 2,
   });

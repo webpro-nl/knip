@@ -7,7 +7,9 @@
   },
   "dependencies": {
     "@docusaurus/core": "*",
-    "@docusaurus/theme-mermaid": "*"
+    "@docusaurus/theme-mermaid": "*",
+    "@docusaurus/preset-classic": "*",
+    "@docusaurus/plugin-content-pages": "*"
   },
   "devDependencies": {
     "@docusaurus/types": "*"
