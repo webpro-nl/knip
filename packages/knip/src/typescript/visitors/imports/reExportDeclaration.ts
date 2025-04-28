@@ -1,13 +1,10 @@
 import ts from 'typescript';
 import { IMPORT_STAR } from '../../../constants.js';
-import { isInsideStringLiteral } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
   () => true,
   node => {
-    if (isInsideStringLiteral(node)) return;
-
     if (ts.isExportDeclaration(node)) {
       if (node.moduleSpecifier && ts.isStringLiteralLike(node.moduleSpecifier)) {
         // Re-exports

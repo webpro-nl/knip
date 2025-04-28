@@ -287,22 +287,3 @@ export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName
   }
   return values;
 };
-
-export const isInsideStringLiteral = (node: ts.Node): boolean => {
-  const isInsideStringLiteralNode = Boolean(
-    findAncestor(
-      node,
-      _node => ts.isStringLiteral(_node) || ts.isNoSubstitutionTemplateLiteral(_node) || ts.isTemplateExpression(_node)
-    )
-  );
-
-  const isInsideTaggedTemplate = Boolean(
-    findAncestor(node, _node => {
-      if (!ts.isTaggedTemplateExpression(_node)) return false;
-      const tag = _node.tag.getText();
-      return tag !== '$' && tag !== '$sync';
-    })
-  );
-
-  return isInsideStringLiteralNode || isInsideTaggedTemplate;
-};

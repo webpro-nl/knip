@@ -1,6 +1,5 @@
 import ts from 'typescript';
 import type { ImportNode } from '../../../types/imports.js';
-import { isInsideStringLiteral } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 const supportsJSDocImportTag = 'isJSDocImportTag' in ts;
@@ -36,8 +35,6 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
 export default visit(
   () => true,
   node => {
-    if (isInsideStringLiteral(node)) return;
-
     if ('jsDoc' in node && node.jsDoc) {
       const jsDoc = node.jsDoc as ts.JSDoc[];
       if (jsDoc.length > 0 && jsDoc[0].parent.parent === node.parent) {

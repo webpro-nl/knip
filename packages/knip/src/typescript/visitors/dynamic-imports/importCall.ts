@@ -5,7 +5,6 @@ import {
   findDescendants,
   isAccessExpression,
   isImportCall,
-  isInsideStringLiteral,
   isTopLevel,
   stripQuotes,
 } from '../../ast-helpers.js';
@@ -17,8 +16,6 @@ const getSymbol = (node: ts.Node, isTopLevel: boolean) => (isTopLevel ? node.sym
 export default visit(
   () => true,
   node => {
-    if (isInsideStringLiteral(node)) return;
-
     if (isImportCall(node)) {
       if (node.arguments[0] && ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;

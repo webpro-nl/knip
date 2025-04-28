@@ -1,11 +1,8 @@
 import ts from 'typescript';
-import { isInsideStringLiteral } from '../../ast-helpers.js';
 import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(isNotJS, node => {
-  if (isInsideStringLiteral(node)) return;
-
   if (
     ts.isImportEqualsDeclaration(node) &&
     ts.isExternalModuleReference(node.moduleReference) &&

@@ -1,21 +1,12 @@
 import ts from 'typescript';
 import { IMPORT_STAR } from '../../../constants.js';
-import {
-  findAncestor,
-  findDescendants,
-  isInsideStringLiteral,
-  isModuleExportsAccess,
-  isRequireCall,
-  isTopLevel,
-} from '../../ast-helpers.js';
+import { findAncestor, findDescendants, isModuleExportsAccess, isRequireCall, isTopLevel } from '../../ast-helpers.js';
 import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
   () => true,
   node => {
-    if (isInsideStringLiteral(node)) return;
-
     if (isRequireCall(node)) {
       if (ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
