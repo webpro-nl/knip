@@ -7,6 +7,7 @@ import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import { WorkspaceWorker } from '../WorkspaceWorker.js';
 import { _getInputsFromScripts } from '../binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
+import { DEFAULT_EXTENSIONS } from '../constants.js';
 import type { PluginName } from '../types/PluginNames.js';
 import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
@@ -110,6 +111,7 @@ export async function build({
 
     const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
     const extensions = getCompilerExtensions(compilers);
+    const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
     const config = chief.getConfigForWorkspace(name, extensions);
 
     const tsConfigFilePath = join(dir, tsConfigFile ?? 'tsconfig.json');
@@ -155,7 +157,7 @@ export async function build({
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { cwd: dir, ignore });
     for (const filePath of entryPathsFromManifest) {
-      inputs.add(toProductionEntry(toSourceFilePath(filePath) ?? filePath));
+      inputs.add(toProductionEntry(toSourceFilePath(filePath, extensionGlobStr) ?? filePath));
     }
 
     // workspace + worker → principal

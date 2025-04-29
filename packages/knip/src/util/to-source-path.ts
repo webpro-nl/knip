@@ -20,7 +20,7 @@ export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOpti
 export const getToSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string>();
 
-  return (filePath: string) => {
+  return (filePath: string, extensions = defaultExtensions) => {
     if (!isInternal(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -29,7 +29,7 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
         (!filePath.startsWith(workspace.srcDir) && filePath.startsWith(workspace.outDir)) ||
         (workspace.srcDir === workspace.outDir && hasDTSExt.test(filePath))
       ) {
-        const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, defaultExtensions);
+        const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, extensions);
         const [srcFilePath] = fastGlob.sync(pattern);
         toSourceMapCache.set(filePath, srcFilePath);
         if (srcFilePath && srcFilePath !== filePath) {
