@@ -14,8 +14,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = [
   '.prettierrc',
-  '.prettierrc.{json,js,cjs,mjs,yml,yaml,toml,json5}',
-  'prettier.config.{js,cjs,mjs}',
+  '.prettierrc.{json,js,cjs,mjs,ts,cts,mts,yml,yaml,toml,json5}',
+  'prettier.config.{js,cjs,mjs,ts,cts,mts}',
   'package.{json,yaml}',
 ];
 
