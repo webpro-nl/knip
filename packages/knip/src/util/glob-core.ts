@@ -153,7 +153,7 @@ export async function glob(patterns: string | string[], options: GlobOptions): P
   if (Array.isArray(patterns) && patterns.length === 0) return [];
 
   const hasCache = cachedGlobIgnores.has(options.dir);
-  const willCache = !hasCache && options.gitignore;
+  const willCache = !hasCache && options.gitignore && options.label;
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
   const _ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
@@ -185,11 +185,14 @@ export async function glob(patterns: string | string[], options: GlobOptions): P
 
   const paths = await fg.glob(patterns, fgOptions);
 
-  debugLogObject(
-    relative(options.cwd, dir) || ROOT_WORKSPACE_NAME,
-    label ? `Finding ${label}` : 'Finding paths',
-    () => ({ patterns, ...fgOptions, ignore: hasCache ? `// identical to ${dir}` : ignore, paths })
-  );
+  const name = relative(options.cwd, dir);
+
+  debugLogObject(name || ROOT_WORKSPACE_NAME, label ? `Finding ${label}` : 'Finding paths', () => ({
+    patterns,
+    ...fgOptions,
+    ignore: hasCache ? `// identical to ${name}` : ignore,
+    paths,
+  }));
 
   return paths;
 }
