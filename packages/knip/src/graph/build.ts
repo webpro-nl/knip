@@ -29,7 +29,7 @@ import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getEntryPathsFromManifest } from '../util/package-json.js';
 import { dirname, isAbsolute, join, relative } from '../util/path.js';
 import {} from '../util/tag.js';
-import { augmentWorkspace, getToSourcePathHandler } from '../util/to-source-path.js';
+import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 import { loadTSConfig } from '../util/tsconfig-loader.js';
 
 interface BuildOptions {
@@ -84,6 +84,7 @@ export async function build({
   const enabledPluginsStore = new Map<string, string[]>();
 
   const toSourceFilePath = getToSourcePathHandler(chief);
+  const toSourceFilePaths = getToSourcePathsHandler(chief);
 
   const getReferencedInternalFilePath = getReferencedInputsHandler(collector, deputy, chief, isGitIgnored);
 
@@ -155,9 +156,9 @@ export async function build({
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
-    const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { cwd: dir, ignore });
-    for (const filePath of entryPathsFromManifest) {
-      inputs.add(toProductionEntry(toSourceFilePath(filePath, extensionGlobStr) ?? filePath));
+    const entryPathsFromManifest = getEntryPathsFromManifest(manifest);
+    for (const filePath of await toSourceFilePaths(entryPathsFromManifest, dir, extensionGlobStr)) {
+      inputs.add(toProductionEntry(filePath));
     }
 
     // workspace + worker → principal
