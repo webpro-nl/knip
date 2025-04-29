@@ -377,9 +377,10 @@ export async function build({
 
     principal.init();
 
-    streamer.cast('Running async compilers...');
-
-    await principal.runAsyncCompilers();
+    if (principal.asyncCompilers.size > 0) {
+      streamer.cast('Running async compilers...');
+      await principal.runAsyncCompilers();
+    }
 
     streamer.cast('Analyzing source files...');
 
