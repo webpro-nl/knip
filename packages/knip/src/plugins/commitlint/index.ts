@@ -32,7 +32,9 @@ const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
         ? [parserPreset.path ?? parserPreset]
         : []
     : [];
-  return [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths].map(id => toDependency(id));
+  return ['@commitlint/cli', ...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths].map(id =>
+    toDependency(id)
+  );
 };
 
 export default {

@@ -27,7 +27,7 @@ test('Find dependencies with the Commitizen plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
+    devDependencies: 0,
     unlisted: 9,
     processed: 1,
     total: 1,
