@@ -7,9 +7,14 @@
   },
   "dependencies": {
     "@docusaurus/core": "*",
-    "@docusaurus/theme-mermaid": "*",
+    "@docusaurus/plugin-content-pages": "*",
+    "@docusaurus/plugin-sitemap": "*",
     "@docusaurus/preset-classic": "*",
-    "@docusaurus/plugin-content-pages": "*"
+    "@docusaurus/theme-mermaid": "*",
+    "@my-company/docusaurus-plugin": "*",
+    "@my-company/docusaurus-plugin-awesome": "*",
+    "@my-company/docusaurus-plugin-cool": "*",
+    "docusaurus-plugin-awesome": "*"
   },
   "devDependencies": {
     "@docusaurus/types": "*"

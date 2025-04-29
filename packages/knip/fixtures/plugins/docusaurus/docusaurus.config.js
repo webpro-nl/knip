@@ -15,6 +15,11 @@ export default {
       },
     ],
     '@docusaurus/plugin-content-pages',
+    ['sitemap', { changefreq: 'weekly' }],
+    'awesome',
+    '@my-company',
+    '@my-company/awesome',
+    '@my-company/cool/web',
   ],
   presets: [
     [
