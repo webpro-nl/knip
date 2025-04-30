@@ -11,6 +11,7 @@
     "@docusaurus/plugin-sitemap": "*",
     "@docusaurus/preset-classic": "*",
     "@docusaurus/theme-mermaid": "*",
+    "@mdx-js/react": "^3.0.0",
     "@my-company/docusaurus-plugin": "*",
     "@my-company/docusaurus-plugin-awesome": "*",
     "@my-company/docusaurus-plugin-cool": "*",

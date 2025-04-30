@@ -16,10 +16,13 @@ test('Find dependencies with the docusaurus plugin', async () => {
   assert(issues.unresolved['docusaurus.config.js']['@docusaurus/theme-search-algolia']);
   assert(issues.unresolved['docusaurus.config.js']['@docusaurus/plugin-content-blog']);
 
+  assert(issues.dependencies['package.json']['@mdx-js/react']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     unresolved: 2,
-    processed: 2,
-    total: 2,
+    dependencies: 1,
+    processed: 5,
+    total: 5,
   });
 });
