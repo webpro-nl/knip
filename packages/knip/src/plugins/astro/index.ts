@@ -10,7 +10,7 @@ const enablers = ['astro'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['astro.config.{js,cjs,mjs,ts}'];
+export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
 
 const entry = ['src/content/config.ts', 'src/content.config.ts'];
 
