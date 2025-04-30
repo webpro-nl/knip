@@ -34,6 +34,7 @@ const commands = [
   'patch-commit',
   'patch-remove',
   'patch',
+  'prepare',
   'prune',
   'publish',
   'rb',
@@ -62,9 +63,9 @@ const commands = [
 export const resolve: BinaryResolver = (_binary, args, options) => {
   const parsed = parseArgs(args, {
     boolean: ['recursive', 'silent', 'shell-mode'],
-    alias: { recursive: 'r', silent: 's', 'shell-mode': 'c' },
+    alias: { recursive: 'r', silent: 's', 'shell-mode': 'c', filter: 'F' },
   });
-  const [command, binary] = parsed._;
+  const [command] = parsed._;
 
   if (command === 'dlx') {
     const argsForDlx = args.filter(arg => arg !== 'dlx');
@@ -73,12 +74,11 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   const { manifestScriptNames, fromArgs } = options;
 
+  if (parsed.filter) return [];
+
   if (manifestScriptNames.has(command) || commands.includes(command)) return [];
 
-  if (command === 'exec') {
-    if (parsed._.length > 2) return [toBinary(binary), ...fromArgs(parsed._.slice(1))];
-    return [toBinary(binary)];
-  }
+  if (command === 'exec') return fromArgs(parsed._.slice(1));
 
   return command ? [toBinary(command)] : [];
 };
