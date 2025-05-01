@@ -179,6 +179,7 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --silent run program script.js', [], pkgScripts);
   t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, []);
   t('pnpm --filter docs typedoc:check', []);
+  t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {

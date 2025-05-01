@@ -74,7 +74,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   const { manifestScriptNames, fromArgs } = options;
 
-  if (parsed.filter) return [];
+  if (parsed.filter && !parsed.recursive) return [];
 
   if (manifestScriptNames.has(command) || commands.includes(command)) return [];
 
