@@ -77,6 +77,7 @@ import { default as storybook } from './storybook/index.js';
 import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
+import { default as svgo } from './svgo/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
 import { default as travis } from './travis/index.js';
@@ -179,6 +180,7 @@ export const Plugins = {
   stryker,
   stylelint,
   svelte,
+  svgo,
   syncpack,
   tailwind,
   travis,

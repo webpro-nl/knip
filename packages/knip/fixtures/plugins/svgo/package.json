@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/svgo",
+  "scripts": {
+    "svgo": "svgo --folder icons"
+  },
+  "dependencies": {
+    "svgo": "*"
+  }
+}

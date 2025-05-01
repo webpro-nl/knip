@@ -1,9 +1,9 @@
 ---
-title: Plugins (100)
+title: Plugins (101)
 tableOfContents: false
 ---
 
-:::section{.columns.min200}
+\:::section\{.columns.min200}
 
 - [Angular][1]
 - [Astro][2]
@@ -66,47 +66,48 @@ tableOfContents: false
 - [Prettier][59]
 - [React Cosmos][60]
 - [React Router][61]
-- [Release It!][62]
-- [Remark][63]
-- [Remix][64]
-- [Rollup][65]
-- [Rsbuild][66]
-- [Rspack][67]
-- [Semantic Release][68]
-- [Sentry][69]
-- [simple-git-hooks][70]
-- [size-limit][71]
-- [SST][72]
-- [Starlight][73]
-- [Storybook][74]
-- [Stryker][75]
-- [Stylelint][76]
-- [Svelte][77]
-- [Syncpack][78]
-- [Tailwind][79]
-- [TanStack Router][80]
-- [Travis CI][81]
-- [ts-node][82]
-- [tsup][83]
-- [tsx][84]
-- [TypeDoc][85]
-- [TypeScript][86]
-- [unbuild][87]
-- [UnoCSS][88]
-- [Vercel OG][89]
-- [Vike][90]
-- [Vite][91]
-- [Vitest][92]
-- [Vue][93]
-- [WebdriverIO][94]
-- [webpack][95]
-- [Wireit][96]
-- [Wrangler][97]
-- [xo][98]
-- [Yarn][99]
-- [yorkie][100]
+- [Relay][62]
+- [Release It!][63]
+- [Remark][64]
+- [Remix][65]
+- [Rollup][66]
+- [Rsbuild][67]
+- [Rspack][68]
+- [Semantic Release][69]
+- [Sentry][70]
+- [simple-git-hooks][71]
+- [size-limit][72]
+- [SST][73]
+- [Starlight][74]
+- [Storybook][75]
+- [Stryker][76]
+- [Stylelint][77]
+- [Svelte][78]
+- [SVGO][79]
+- [Syncpack][80]
+- [Tailwind][81]
+- [Travis CI][82]
+- [ts-node][83]
+- [tsup][84]
+- [tsx][85]
+- [TypeDoc][86]
+- [TypeScript][87]
+- [unbuild][88]
+- [UnoCSS][89]
+- [Vercel OG][90]
+- [Vike][91]
+- [Vite][92]
+- [Vitest][93]
+- [Vue][94]
+- [WebdriverIO][95]
+- [webpack][96]
+- [Wireit][97]
+- [Wrangler][98]
+- [xo][99]
+- [Yarn][100]
+- [yorkie][101]
 
-:::
+\:::
 
 [1]: /reference/plugins/angular 'Angular'
 [2]: /reference/plugins/astro 'Astro'
@@ -169,42 +170,43 @@ tableOfContents: false
 [59]: /reference/plugins/prettier 'Prettier'
 [60]: /reference/plugins/react-cosmos 'React Cosmos'
 [61]: /reference/plugins/react-router 'React Router'
-[62]: /reference/plugins/release-it 'Release It!'
-[63]: /reference/plugins/remark 'Remark'
-[64]: /reference/plugins/remix 'Remix'
-[65]: /reference/plugins/rollup 'Rollup'
-[66]: /reference/plugins/rsbuild 'Rsbuild'
-[67]: /reference/plugins/rspack 'Rspack'
-[68]: /reference/plugins/semantic-release 'Semantic Release'
-[69]: /reference/plugins/sentry 'Sentry'
-[70]: /reference/plugins/simple-git-hooks 'simple-git-hooks'
-[71]: /reference/plugins/size-limit 'size-limit'
-[72]: /reference/plugins/sst 'SST'
-[73]: /reference/plugins/starlight 'Starlight'
-[74]: /reference/plugins/storybook 'Storybook'
-[75]: /reference/plugins/stryker 'Stryker'
-[76]: /reference/plugins/stylelint 'Stylelint'
-[77]: /reference/plugins/svelte 'Svelte'
-[78]: /reference/plugins/syncpack 'Syncpack'
-[79]: /reference/plugins/tailwind 'Tailwind'
-[80]: /reference/plugins/tanstack-router 'TanStack Router'
-[81]: /reference/plugins/travis 'Travis CI'
-[82]: /reference/plugins/ts-node 'ts-node'
-[83]: /reference/plugins/tsup 'tsup'
-[84]: /reference/plugins/tsx 'tsx'
-[85]: /reference/plugins/typedoc 'TypeDoc'
-[86]: /reference/plugins/typescript 'TypeScript'
-[87]: /reference/plugins/unbuild 'unbuild'
-[88]: /reference/plugins/unocss 'UnoCSS'
-[89]: /reference/plugins/vercel-og 'Vercel OG'
-[90]: /reference/plugins/vike 'Vike'
-[91]: /reference/plugins/vite 'Vite'
-[92]: /reference/plugins/vitest 'Vitest'
-[93]: /reference/plugins/vue 'Vue'
-[94]: /reference/plugins/webdriver-io 'WebdriverIO'
-[95]: /reference/plugins/webpack 'webpack'
-[96]: /reference/plugins/wireit 'Wireit'
-[97]: /reference/plugins/wrangler 'Wrangler'
-[98]: /reference/plugins/xo 'xo'
-[99]: /reference/plugins/yarn 'Yarn'
-[100]: /reference/plugins/yorkie 'yorkie'
+[62]: /reference/plugins/relay 'Relay'
+[63]: /reference/plugins/release-it 'Release It!'
+[64]: /reference/plugins/remark 'Remark'
+[65]: /reference/plugins/remix 'Remix'
+[66]: /reference/plugins/rollup 'Rollup'
+[67]: /reference/plugins/rsbuild 'Rsbuild'
+[68]: /reference/plugins/rspack 'Rspack'
+[69]: /reference/plugins/semantic-release 'Semantic Release'
+[70]: /reference/plugins/sentry 'Sentry'
+[71]: /reference/plugins/simple-git-hooks 'simple-git-hooks'
+[72]: /reference/plugins/size-limit 'size-limit'
+[73]: /reference/plugins/sst 'SST'
+[74]: /reference/plugins/starlight 'Starlight'
+[75]: /reference/plugins/storybook 'Storybook'
+[76]: /reference/plugins/stryker 'Stryker'
+[77]: /reference/plugins/stylelint 'Stylelint'
+[78]: /reference/plugins/svelte 'Svelte'
+[79]: /reference/plugins/svgo 'SVGO'
+[80]: /reference/plugins/syncpack 'Syncpack'
+[81]: /reference/plugins/tailwind 'Tailwind'
+[82]: /reference/plugins/travis 'Travis CI'
+[83]: /reference/plugins/ts-node 'ts-node'
+[84]: /reference/plugins/tsup 'tsup'
+[85]: /reference/plugins/tsx 'tsx'
+[86]: /reference/plugins/typedoc 'TypeDoc'
+[87]: /reference/plugins/typescript 'TypeScript'
+[88]: /reference/plugins/unbuild 'unbuild'
+[89]: /reference/plugins/unocss 'UnoCSS'
+[90]: /reference/plugins/vercel-og 'Vercel OG'
+[91]: /reference/plugins/vike 'Vike'
+[92]: /reference/plugins/vite 'Vite'
+[93]: /reference/plugins/vitest 'Vitest'
+[94]: /reference/plugins/vue 'Vue'
+[95]: /reference/plugins/webdriver-io 'WebdriverIO'
+[96]: /reference/plugins/webpack 'webpack'
+[97]: /reference/plugins/wireit 'Wireit'
+[98]: /reference/plugins/wrangler 'Wrangler'
+[99]: /reference/plugins/xo 'xo'
+[100]: /reference/plugins/yarn 'Yarn'
+[101]: /reference/plugins/yorkie 'yorkie'
