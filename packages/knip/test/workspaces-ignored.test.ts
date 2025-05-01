@@ -19,7 +19,7 @@ test('Ignore workspaces', async () => {
   assert.deepEqual(
     configurationHints,
     new Set([
-      { type: 'ignoreWorkspaces', identifier: 'packages/f' },
+      { type: 'ignoreWorkspaces', identifier: 'packages/not-found' },
       { type: 'ignoreWorkspaces', identifier: 'packages/wut/*' },
       { type: 'ignoreWorkspaces', identifier: 'packages/un/**/used' },
     ])

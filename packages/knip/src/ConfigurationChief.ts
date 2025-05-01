@@ -392,7 +392,7 @@ export class ConfigurationChief {
   public getNegatedWorkspacePatterns(name: string) {
     const descendentWorkspaces = this.getDescendentWorkspaces(name);
     const matchName = new RegExp(`^${name}/`);
-    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name);
+    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name).map(p => p.replace(/\/\*$/, '/**'));
     return [...ignoredWorkspaces, ...descendentWorkspaces]
       .map(workspaceName => workspaceName.replace(matchName, ''))
       .map(workspaceName => `!${workspaceName}`);
