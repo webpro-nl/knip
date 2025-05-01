@@ -12,6 +12,7 @@ export default {
         path: 'blog',
         routeBasePath: 'blog',
         include: ['*.md', '*.mdx'],
+        sidebarPath: './sidebars.js',
       },
     ],
     '@docusaurus/plugin-content-pages',

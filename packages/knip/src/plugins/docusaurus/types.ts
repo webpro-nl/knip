@@ -1,11 +1,34 @@
 export type ModuleType = 'plugin' | 'theme' | 'preset';
 
-export type ConfigItem = string | [string, { [key: string]: unknown }] | false | null;
+type DocsConfig = {
+  sidebarPath?: string;
+  [key: string]: unknown;
+};
+
+export type PluginOptions = {
+  sidebarPath?: string;
+  [key: string]: unknown;
+};
+
+export type PresetOptions = {
+  docs?: DocsConfig;
+  [key: string]: unknown;
+};
+
+type PluginConfig = string | [string, PluginOptions] | false | null;
+type PresetConfig = string | [string, PresetOptions] | false | null;
+
+export type ConfigItem = PresetConfig | PluginConfig;
 
 export type DocusaurusConfig = {
   title: string;
   url: string;
-  themes?: ConfigItem[];
-  plugins?: ConfigItem[];
-  presets: ConfigItem[];
+  themes?: PluginConfig[];
+  plugins?: PluginConfig[];
+  presets: PresetConfig[];
+};
+
+export type ResolveResult = {
+  dependencies: string[];
+  entries?: string[];
 };
