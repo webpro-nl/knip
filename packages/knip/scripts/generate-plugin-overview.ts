@@ -2,8 +2,8 @@ import fs from 'node:fs/promises';
 // biome-ignore lint/nursery/noRestrictedImports: script
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import Table from 'easy-table';
 import type { Plugin } from '../src/types/config.js';
+import { Table } from '../src/util/table.js';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const knipDir = path.join(rootDir, '../../packages/knip');

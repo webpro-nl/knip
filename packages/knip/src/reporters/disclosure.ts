@@ -1,7 +1,7 @@
-import EasyTable from 'easy-table';
 import type { Entries } from 'type-fest';
 import type { Issue, ReporterOptions } from '../types/issues.js';
 import { relative } from '../util/path.js';
+import { Table } from '../util/table.js';
 import { getTitle } from './util.js';
 
 const printHeader = (size: number, title?: string) =>
@@ -10,18 +10,18 @@ const printHeader = (size: number, title?: string) =>
 const printFooter = () => console.log('```\n\n</details>\n');
 
 const logIssueRecord = (issues: Issue[]) => {
-  const table = new EasyTable();
+  const table = new Table();
   for (const issue of issues) {
     table.cell('symbol', issue.symbols ? issue.symbols.map(s => s.symbol).join(', ') : issue.symbol);
-    issue.parentSymbol && table.cell('parentSymbol', issue.parentSymbol);
-    issue.symbolType && table.cell('symbolType', issue.symbolType);
+    table.cell('parentSymbol', issue.parentSymbol && issue.parentSymbol);
+    table.cell('symbolType', issue.symbolType && issue.symbolType);
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
     // @ts-expect-error TODO Fix up in next major
     const cell = issue.type === 'files' ? '' : `${relative(issue.filePath)}${pos}`;
     table.cell('filePath', cell);
     table.newRow();
   }
-  console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
+  console.log(table.sort('filePath').toString());
 };
 
 export default ({ report, issues }: ReporterOptions) => {

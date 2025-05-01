@@ -1,10 +1,10 @@
-import EasyTable from 'easy-table';
 import picocolors from 'picocolors';
 import type { Entries } from 'type-fest';
 import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { type Issue, type ReporterOptions, SymbolType } from '../types/issues.js';
 import { relative, toRelative } from '../util/path.js';
 import { truncate } from '../util/string.js';
+import { Table } from '../util/table.js';
 import { getTitle, identity, logTitle, logTitleDimmed } from './util.js';
 
 const dim = picocolors.gray;
@@ -13,9 +13,9 @@ const bright = picocolors.whiteBright;
 const TRUNCATE_WIDTH = 40;
 const truncateStart = (text: string, width: number) => (text.length > width ? `...${text.slice(-(width - 3))}` : text);
 
-const sortByPos = (a: Issue, b: Issue) => {
-  const [f, r, c] = a.filePath.split(':');
-  const [f2, r2, c2] = b.filePath.split(':');
+const sortByPos = (a: any, b: any) => {
+  const [f, r, c] = a.filePath.value.split(':');
+  const [f2, r2, c2] = b.filePath.value.split(':');
   return f === f2 ? (Number(r) === Number(r2) ? Number(c) - Number(c2) : Number(r) - Number(r2)) : f.localeCompare(f2);
 };
 
@@ -32,21 +32,21 @@ const hl = (issue: Issue) => {
 };
 
 const logIssueRecord = (issues: Issue[]) => {
-  const table = new EasyTable();
+  const table = new Table({ truncateStart: ['filePath'], noTruncate: ['symbolType'] });
   for (const issue of issues) {
+    table.newRow();
     const print = issue.isFixed || issue.severity === 'warn' ? dim : identity;
     const symbols = issue.symbols;
     table.cell('symbol', print(symbols ? truncate(symbols.map(s => s.symbol).join(', '), TRUNCATE_WIDTH) : hl(issue)));
-    issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
-    issue.symbolType && issue.symbolType !== SymbolType.UNKNOWN && table.cell('symbolType', print(issue.symbolType));
+    table.cell('parentSymbol', issue.parentSymbol && print(issue.parentSymbol));
+    table.cell('symbolType', issue.symbolType && issue.symbolType !== SymbolType.UNKNOWN && print(issue.symbolType));
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
     // @ts-expect-error TODO Fix up in next major
     const cell = issue.type === 'files' ? '' : `${relative(issue.filePath)}${pos}`;
     table.cell('filePath', print(cell));
-    issue.isFixed && table.cell('fixed', print('(removed)'));
-    table.newRow();
+    table.cell('fixed', issue.isFixed && print('(removed)'));
   }
-  console.log(table.sort(sortByPos).print().trim());
+  console.log(table.sort(sortByPos).toString());
 };
 
 export default ({
