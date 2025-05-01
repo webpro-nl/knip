@@ -342,7 +342,7 @@ export class WorkspaceWorker {
         for (const id of config.entry) addInput(toInput(id));
       } else if (
         (!plugin.resolveEntryPaths && !plugin.resolveFromAST) ||
-        (configFilePaths.length === 0 &&
+        (configFilePaths.filter(path => basename(path) !== 'package.json').length === 0 &&
           (!this.configFilesMap.get(wsName)?.get(pluginName) ||
             this.configFilesMap.get(wsName)?.get(pluginName)?.size === 0))
       ) {
