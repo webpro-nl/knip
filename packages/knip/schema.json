@@ -607,6 +607,10 @@
           "title": "svelte plugin configuration (https://knip.dev/reference/plugins/svelte)",
           "$ref": "#/definitions/plugin"
         },
+        "svgo": {
+          "title": "svgo plugin configuration (https://knip.dev/reference/plugins/svgo)",
+          "$ref": "#/definitions/plugin"
+        },
         "syncpack": {
           "title": "syncpack plugin configuration (https://knip.dev/reference/plugins/syncpack)",
           "$ref": "#/definitions/plugin"

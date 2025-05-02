@@ -91,6 +91,7 @@ export const pluginsSchema = z.object({
   stryker: pluginSchema,
   stylelint: pluginSchema,
   svelte: pluginSchema,
+  svgo: pluginSchema,
   syncpack: pluginSchema,
   tailwind: pluginSchema,
   travis: pluginSchema,
