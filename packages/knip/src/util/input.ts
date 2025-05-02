@@ -10,7 +10,8 @@ export interface Input {
   optional?: boolean;
   dir?: string;
   containingFilePath?: string;
-  skipExportsAnalysis?: string;
+  allowIncludeExports?: boolean;
+  skipExportsAnalysis?: boolean;
 }
 
 export interface ConfigInput extends Input {
@@ -23,6 +24,7 @@ type Options = {
   optional?: boolean;
   dir?: string;
   containingFilePath?: string;
+  allowIncludeExports?: boolean;
 };
 
 export const fromBinary = (input: Input) => input.specifier;

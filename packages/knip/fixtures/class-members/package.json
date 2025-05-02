@@ -2,14 +2,8 @@
   "name": "@fixtures/class-members",
   "dependencies": {},
   "knip": {
-    "entry": [
-      "index.ts"
-    ],
-    "project": [
-      "*.ts"
-    ],
-    "include": [
-      "classMembers"
-    ]
+    "entry": ["index.ts"],
+    "project": ["*.ts"],
+    "include": ["classMembers"]
   }
 }

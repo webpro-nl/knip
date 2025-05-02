@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/linthtml",
-  "version": "*",
   "scripts": {
     "lint:html": "npx @linthtml/linthtml \"**/*.html\""
   },

@@ -2,6 +2,7 @@
 import path from 'node:path';
 import picomatch from 'picomatch';
 import { partitionCompilers } from './compilers/index.js';
+import type { SyncCompilers } from './compilers/types.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
 import { knipConfigurationSchema } from './schema/configuration.js';
 import { type PluginName, pluginNames } from './types/PluginNames.js';
@@ -56,6 +57,7 @@ const defaultConfig: Configuration = {
   ignoreExportsUsedInFile: false,
   ignoreWorkspaces: [],
   isIncludeEntryExports: false,
+  isTreatConfigHintsAsErrors: false,
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
   rootPluginConfigs: {},
@@ -193,6 +195,7 @@ export class ConfigurationChief {
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
+    const isTreatConfigHintsAsErrors = rawConfig.treatConfigHintsAsErrors ?? defaultConfig.isTreatConfigHintsAsErrors;
 
     const { syncCompilers, asyncCompilers } = rawConfig;
 
@@ -215,10 +218,11 @@ export class ConfigurationChief {
       ignoreExportsUsedInFile,
       ignoreWorkspaces,
       isIncludeEntryExports,
-      syncCompilers: new Map(Object.entries(syncCompilers ?? {})),
+      syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
       rootPluginConfigs,
       tags: rawConfig.tags ?? [],
+      isTreatConfigHintsAsErrors,
     };
   }
 
@@ -388,7 +392,7 @@ export class ConfigurationChief {
   public getNegatedWorkspacePatterns(name: string) {
     const descendentWorkspaces = this.getDescendentWorkspaces(name);
     const matchName = new RegExp(`^${name}/`);
-    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name);
+    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name).map(p => p.replace(/\/\*$/, '/**'));
     return [...ignoredWorkspaces, ...descendentWorkspaces]
       .map(workspaceName => workspaceName.replace(matchName, ''))
       .map(workspaceName => `!${workspaceName}`);

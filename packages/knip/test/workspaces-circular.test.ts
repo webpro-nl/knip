@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/workspaces-circular');
 
-test('Find unused files, dependencies and exports in workspaces (circular)', async () => {
+test('Find unused dependencies, exports and files in workspaces (circular)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

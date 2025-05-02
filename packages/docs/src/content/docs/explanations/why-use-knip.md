@@ -10,7 +10,7 @@ in complexity and size, automated and comprehensive tooling becomes critical.
 
 :::tip[TL;DR]
 
-Knip finds and fixes unused files, dependencies and exports.
+Knip finds and fixes unused dependencies, exports and files.
 
 Deep analysis from [fine-grained entry points][1] based on the actual frameworks
 and tooling in [(mono)repos][2] for accurate and actionable results. Advanced
@@ -39,7 +39,7 @@ code":
   project and/or taking over responsibilities this is harder to grasp.
 - Prevent regressions: tools like TypeScript, ESLint and Prettier do all sorts
   of checks and linting to report violations and prevent regressions. Knip does
-  the same for files, dependencies and exports that you forgot to delete.
+  the same for dependencies, exports and files that you forgot to delete.
 - Keeping dead code around has a negative value on readability, as it can be
   misleading and distracting. Even if it serves no purpose it will need to be
   maintained (source: [Safe dead code removal → YAGNI][8]).
@@ -67,7 +67,7 @@ inside files, Knip might find even more unused code. Rinse and repeat!
 ## Comprehensive
 
 You can use alternative tools that do the same. However, the advantage of a
-strategy that addresses all of files, dependencies and exports is in their
+strategy that addresses all of dependencies, exports and files is in their
 synergy:
 
 - Utilizing plugins to find their dependencies includes the capacity to find

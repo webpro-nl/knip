@@ -7,6 +7,7 @@ import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import { WorkspaceWorker } from '../WorkspaceWorker.js';
 import { _getInputsFromScripts } from '../binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
+import { DEFAULT_EXTENSIONS } from '../constants.js';
 import type { PluginName } from '../types/PluginNames.js';
 import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
@@ -28,7 +29,7 @@ import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getEntryPathsFromManifest } from '../util/package-json.js';
 import { dirname, isAbsolute, join, relative } from '../util/path.js';
 import {} from '../util/tag.js';
-import { augmentWorkspace, getToSourcePathHandler } from '../util/to-source-path.js';
+import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 import { loadTSConfig } from '../util/tsconfig-loader.js';
 
 interface BuildOptions {
@@ -83,6 +84,7 @@ export async function build({
   const enabledPluginsStore = new Map<string, string[]>();
 
   const toSourceFilePath = getToSourcePathHandler(chief);
+  const toSourceFilePaths = getToSourcePathsHandler(chief);
 
   const getReferencedInternalFilePath = getReferencedInputsHandler(collector, deputy, chief, isGitIgnored);
 
@@ -110,6 +112,7 @@ export async function build({
 
     const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
     const extensions = getCompilerExtensions(compilers);
+    const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
     const config = chief.getConfigForWorkspace(name, extensions);
 
     const tsConfigFilePath = join(dir, tsConfigFile ?? 'tsconfig.json');
@@ -153,9 +156,9 @@ export async function build({
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
-    const entryPathsFromManifest = await getEntryPathsFromManifest(manifest, { cwd: dir, ignore });
-    for (const filePath of entryPathsFromManifest) {
-      inputs.add(toProductionEntry(toSourceFilePath(filePath) ?? filePath));
+    const entryPathsFromManifest = getEntryPathsFromManifest(manifest);
+    for (const filePath of await toSourceFilePaths(entryPathsFromManifest, dir, extensionGlobStr)) {
+      inputs.add(toProductionEntry(filePath));
     }
 
     // workspace + worker → principal
@@ -176,8 +179,7 @@ export async function build({
 
     // Get dependencies from plugins
     const inputsFromPlugins = await worker.runPlugins();
-    for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: true }));
-
+    for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
     const entryPatterns = new Set<string>();
@@ -378,9 +380,10 @@ export async function build({
 
     principal.init();
 
-    streamer.cast('Running async compilers...');
-
-    await principal.runAsyncCompilers();
+    if (principal.asyncCompilers.size > 0) {
+      streamer.cast('Running async compilers...');
+      await principal.runAsyncCompilers();
+    }
 
     streamer.cast('Analyzing source files...');
 

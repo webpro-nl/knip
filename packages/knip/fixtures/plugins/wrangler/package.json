@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/wrangler",
-  "version": "*",
   "scripts": {
     "dev": "wrangler dev"
   },

@@ -1,0 +1,11 @@
+{
+  "name": "@fixures/workspaces-noconfig-plugin",
+  "version": "*",
+  "workspaces": ["lib"],
+  "dependencies": {
+    "@workspaces-noconfig-plugin/lib": "workspace:*"
+  },
+  "devDependencies": {
+    "jest": "*"
+  }
+}

@@ -10,8 +10,7 @@ const title = 'xo';
 
 const enablers = ['xo'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies, config }) =>
-  hasDependency(dependencies, enablers) || 'xo' in config;
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['package.json', '.xo-config', '.xo-config.{js,cjs,json}', 'xo.config.{js,cjs}'];
 

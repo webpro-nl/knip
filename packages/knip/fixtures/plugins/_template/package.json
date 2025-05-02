@@ -1,4 +1,3 @@
 {
-  "name": "@fixtures/__PLUGIN_NAME__",
-  "version": "*"
+  "name": "@fixtures/__PLUGIN_NAME__"
 }

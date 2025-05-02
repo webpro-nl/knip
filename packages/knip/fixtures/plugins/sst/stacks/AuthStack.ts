@@ -1,6 +1,7 @@
 import sst from 'sst';
-import { d } from 'sst-auth-stack-dep';
-import { use, StackContext, Function, FunctionProps } from 'sst/constructs';
+import 'sst-auth-stack-dep';
+// biome-ignore lint/suspicious/noShadowRestrictedNames:  fixture festa
+import { StackContext, Function, FunctionProps } from 'sst/constructs';
 
 export function AuthStack({ stack, app }: StackContext) {
   // Create single Lambda handler

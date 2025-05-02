@@ -8,10 +8,8 @@ export default ({ report, issues }: ReporterOptions) => {
       const issuesForType = isSet
         ? Array.from(issues[reportType] as IssueSet)
         : reportType === 'duplicates'
-        ? Object.values(issues[reportType]).map(Object.values).flat()
-        : Object.values(issues[reportType] as IssueRecords);
-
-      console.log(reportType, issuesForType.length);
+          ? Object.values(issues[reportType]).flatMap(Object.values)
+          : Object.values(issues[reportType] as IssueRecords);
     }
   }
 };

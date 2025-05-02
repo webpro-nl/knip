@@ -1,13 +1,9 @@
 import { defineConfig } from 'vitest/config';
 
-class ReporterClass { };
+class ReporterClass {}
 
 export default defineConfig({
   test: {
-    reporters: [
-      'ReporterString',
-      ['ReporterArray', { options: {} }],
-      ReporterClass
-    ]
+    reporters: ['ReporterString', ['ReporterArray', { options: {} }], ReporterClass],
   },
 });

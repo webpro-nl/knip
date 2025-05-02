@@ -5,6 +5,7 @@ export type PluginName =
   | 'ava'
   | 'aws-cdk'
   | 'babel'
+  | 'bun'
   | 'c8'
   | 'capacitor'
   | 'changesets'
@@ -40,6 +41,7 @@ export type PluginName =
   | 'mocha'
   | 'moonrepo'
   | 'msw'
+  | 'nano-staged'
   | 'nest'
   | 'netlify'
   | 'next'
@@ -50,6 +52,7 @@ export type PluginName =
   | 'nx'
   | 'nyc'
   | 'oclif'
+  | 'oxlint'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -59,6 +62,7 @@ export type PluginName =
   | 'prettier'
   | 'react-cosmos'
   | 'react-router'
+  | 'relay'
   | 'release-it'
   | 'remark'
   | 'remix'
@@ -75,9 +79,9 @@ export type PluginName =
   | 'stryker'
   | 'stylelint'
   | 'svelte'
+  | 'svgo'
   | 'syncpack'
   | 'tailwind'
-  | 'tanstack-router'
   | 'travis'
   | 'ts-node'
   | 'tsup'
@@ -105,6 +109,7 @@ export const pluginNames = [
   'ava',
   'aws-cdk',
   'babel',
+  'bun',
   'c8',
   'capacitor',
   'changesets',
@@ -140,6 +145,7 @@ export const pluginNames = [
   'mocha',
   'moonrepo',
   'msw',
+  'nano-staged',
   'nest',
   'netlify',
   'next',
@@ -150,6 +156,7 @@ export const pluginNames = [
   'nx',
   'nyc',
   'oclif',
+  'oxlint',
   'playwright',
   'playwright-ct',
   'playwright-test',
@@ -159,6 +166,7 @@ export const pluginNames = [
   'prettier',
   'react-cosmos',
   'react-router',
+  'relay',
   'release-it',
   'remark',
   'remix',
@@ -175,9 +183,9 @@ export const pluginNames = [
   'stryker',
   'stylelint',
   'svelte',
+  'svgo',
   'syncpack',
   'tailwind',
-  'tanstack-router',
   'travis',
   'ts-node',
   'tsup',

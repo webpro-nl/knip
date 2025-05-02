@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/vite",
-  "version": "*",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

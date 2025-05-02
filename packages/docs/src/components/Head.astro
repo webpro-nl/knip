@@ -2,9 +2,9 @@
 import Default from '@astrojs/starlight/components/Head.astro';
 
 const slug = Astro.locals.starlightRoute.slug;
+
 const url = new URL(Astro.url);
 url.pathname = `/og/docs${slug ? `/${slug}` : ''}.webp`;
-url.searchParams.append('v', '4');
 ---
 
 <Default {...Astro.props} />

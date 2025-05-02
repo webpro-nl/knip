@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/treat-config-hints-as-errors",
+  "knip": {
+    "ignoreDependencies": ["pineapple"]
+  }
+}

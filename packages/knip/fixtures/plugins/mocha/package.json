@@ -1,9 +1,7 @@
 {
   "name": "@fixtures/mocha",
   "mocha": {
-    "extension": [
-      "ts"
-    ],
+    "extension": ["ts"],
     "require": "ts-node/register"
   }
 }

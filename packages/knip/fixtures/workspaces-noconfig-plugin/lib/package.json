@@ -1,0 +1,6 @@
+{
+  "name": "@workspaces-noconfig-plugin/lib",
+  "exports": {
+    "./util": "./src/util.ts"
+  }
+}

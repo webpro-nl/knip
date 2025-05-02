@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/stylelint2",
-  "version": "*",
   "devDependencies": {
     "postcss-less": "*",
     "postcss-styl": "*",

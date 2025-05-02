@@ -4,12 +4,16 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 const {
-  values: { name },
+  values: { name, force = false, graceful = !force },
 } = parseArgs({
   options: {
     name: { type: 'string' },
+    force: { type: 'boolean' },
+    graceful: { type: 'boolean' },
   },
 });
+
+const errorOnExist = force ? false : !graceful;
 
 if (!name) {
   console.error('Usage: npm run create-plugin -- --name [name]');
@@ -41,8 +45,8 @@ const relative = to => path.relative(cwd, to);
 // Copy plugin implementation
 await fs.cp(templateDir, newPluginDir, {
   recursive: true,
-  errorOnExist: true,
-  force: false,
+  errorOnExist,
+  force,
 });
 
 // Add plugin to Zod validator
@@ -54,20 +58,24 @@ await fs.writeFile(pluginSchemaPath, validatorContent.replace(pluginsPrefix, plu
 // Copy fixtures
 await fs.cp(pluginTestFixtureTemplateDir, pluginTestFixturePluginDir, {
   recursive: true,
-  errorOnExist: true,
-  force: false,
+  errorOnExist,
+  force,
 });
 
 // Copy test file
 await fs.cp(pluginTestTemplateFilePath, pluginTestFilePath, {
-  errorOnExist: true,
-  force: false,
+  errorOnExist,
+  force,
 });
 
 // String replacements
 for (const filePath of [newPluginFile, pluginTestFilePath, pluginTestFixtureManifest]) {
-  const content = String(await fs.readFile(filePath));
-  await fs.writeFile(filePath, content.replaceAll('_template', name).replaceAll('__PLUGIN_NAME__', name));
+  const isFileExists = await fs.exists(filePath);
+  if (isFileExists) console.error(`File ${relative(filePath)} already exists.`);
+  if (!isFileExists || force) {
+    const content = String(await fs.readFile(filePath));
+    await fs.writeFile(filePath, content.replaceAll('_template', name).replaceAll('__PLUGIN_NAME__', name));
+  }
 }
 
 // Add plugin to JSON Schema

@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/starlight",
-  "version": "*",
   "dependencies": {
     "@astrojs/starlight": "*",
     "astro": "*"

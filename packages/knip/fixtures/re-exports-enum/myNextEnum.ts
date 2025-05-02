@@ -1,4 +1,4 @@
-// biome-ignore lint/style/useEnumInitializers: <explanation>
+// biome-ignore lint/style/useEnumInitializers:  fixture festa
 export enum MyNextEnum {
   Three,
   Four,

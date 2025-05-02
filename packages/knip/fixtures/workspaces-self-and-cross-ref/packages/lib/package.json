@@ -4,7 +4,7 @@
   "private": true,
   "exports": {
     ".": "./dist/index.js",
-    "./*":  "./dist/*"
+    "./*": "./dist/*"
   },
   "files": ["dist/**/*.js"],
   "sideEffects": false

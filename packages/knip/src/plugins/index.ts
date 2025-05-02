@@ -4,6 +4,7 @@ import { default as astro } from './astro/index.js';
 import { default as ava } from './ava/index.js';
 import { default as awsCdk } from './aws-cdk/index.js';
 import { default as babel } from './babel/index.js';
+import { default as bun } from './bun/index.js';
 import { default as c8 } from './c8/index.js';
 import { default as capacitor } from './capacitor/index.js';
 import { default as changesets } from './changesets/index.js';
@@ -39,6 +40,7 @@ import { default as metro } from './metro/index.js';
 import { default as mocha } from './mocha/index.js';
 import { default as moonrepo } from './moonrepo/index.js';
 import { default as msw } from './msw/index.js';
+import { default as nanoStaged } from './nano-staged/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
@@ -49,6 +51,7 @@ import { default as nuxt } from './nuxt/index.js';
 import { default as nx } from './nx/index.js';
 import { default as nyc } from './nyc/index.js';
 import { default as oclif } from './oclif/index.js';
+import { default as oxlint } from './oxlint/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
 import { default as playwright } from './playwright/index.js';
@@ -58,6 +61,7 @@ import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
 import { default as reactCosmos } from './react-cosmos/index.js';
 import { default as reactRouter } from './react-router/index.js';
+import { default as relay } from './relay/index.js';
 import { default as releaseIt } from './release-it/index.js';
 import { default as remark } from './remark/index.js';
 import { default as remix } from './remix/index.js';
@@ -74,9 +78,9 @@ import { default as storybook } from './storybook/index.js';
 import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
+import { default as svgo } from './svgo/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
-import { default as tanstackRouter } from './tanstack-router/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
 import { default as tsup } from './tsup/index.js';
@@ -104,6 +108,7 @@ export const Plugins = {
   ava,
   'aws-cdk': awsCdk,
   babel,
+  bun,
   c8,
   capacitor,
   changesets,
@@ -139,6 +144,7 @@ export const Plugins = {
   mocha,
   moonrepo,
   msw,
+  'nano-staged': nanoStaged,
   nest,
   netlify,
   next,
@@ -149,6 +155,7 @@ export const Plugins = {
   nx,
   nyc,
   oclif,
+  oxlint,
   playwright,
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,
@@ -158,6 +165,7 @@ export const Plugins = {
   prettier,
   'react-cosmos': reactCosmos,
   'react-router': reactRouter,
+  relay,
   'release-it': releaseIt,
   remark,
   remix,
@@ -174,9 +182,9 @@ export const Plugins = {
   stryker,
   stylelint,
   svelte,
+  svgo,
   syncpack,
   tailwind,
-  'tanstack-router': tanstackRouter,
   travis,
   'ts-node': tsNode,
   tsup,

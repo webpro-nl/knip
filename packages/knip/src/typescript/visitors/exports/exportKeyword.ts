@@ -4,11 +4,11 @@ import type { Fix } from '../../../types/exports.js';
 import { SymbolType } from '../../../types/issues.js';
 import { compact } from '../../../util/array.js';
 import {
+  getClassMember,
   getDefaultKeywordNode,
+  getEnumMember,
   getExportKeywordNode,
-  isGetOrSetAccessorDeclaration,
-  isPrivateMember,
-  stripQuotes,
+  isNonPrivatePropertyOrMethodDeclaration,
 } from '../../ast-helpers.js';
 import { isModule } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
@@ -87,22 +87,7 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
       const pos = (node.name ?? node).getStart();
       const fix = getFix(exportKeyword, defaultKeyword);
       const members = isReportClassMembers
-        ? node.members
-            .filter(
-              (member): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
-                (ts.isPropertyDeclaration(member) ||
-                  ts.isMethodDeclaration(member) ||
-                  isGetOrSetAccessorDeclaration(member)) &&
-                !isPrivateMember(member)
-            )
-            .map(member => ({
-              node: member,
-              identifier: member.name.getText(),
-              // Naive, but [does.the.job()]
-              pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
-              type: SymbolType.MEMBER,
-              fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
-            }))
+        ? node.members.filter(isNonPrivatePropertyOrMethodDeclaration).map(member => getClassMember(member, isFixTypes))
         : [];
 
       return { node, identifier, type: SymbolType.CLASS, pos, members, fix };
@@ -126,16 +111,7 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
       const identifier = node.name.getText();
       const pos = node.name.getStart();
       const fix = getTypeFix(exportKeyword);
-      const members = node.members.map(member => ({
-        node: member,
-        identifier: stripQuotes(member.name.getText()),
-        pos: member.name.getStart(),
-        type: SymbolType.MEMBER,
-        fix: isFixTypes
-          ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
-          : undefined,
-      }));
-
+      const members = node.members.map(member => getEnumMember(member, isFixExports));
       return { node, identifier, type: SymbolType.ENUM, pos, members, fix };
     }
   }

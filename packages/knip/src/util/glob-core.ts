@@ -8,6 +8,7 @@ import { timerify } from './Performance.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
 import { isFile } from './fs.js';
+import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
 import { dirname, join, relative, toPosix } from './path.js';
 
 const walk = promisify(_walk);
@@ -29,45 +30,6 @@ type Gitignores = { ignores: Set<string>; unignores: string[] };
 
 const cachedGitIgnores = new Map<string, Gitignores>();
 const cachedGlobIgnores = new Map<string, string[]>();
-
-/** @internal */
-export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
-  const negated = pattern[0] === '!';
-
-  if (negated) pattern = pattern.slice(1);
-
-  let extPattern: string;
-
-  if (pattern.endsWith('/')) pattern = pattern.slice(0, -1);
-  if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
-
-  if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  else if (!pattern.startsWith('**/')) pattern = `**/${pattern}`;
-
-  if (pattern.endsWith('/*')) extPattern = pattern;
-  else extPattern = `${pattern}/**`;
-
-  return { negated, patterns: [pattern, extPattern] };
-};
-
-/** @internal */
-export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: string) => {
-  const matchFrom = ancestor ? new RegExp(`^(!?/?)(${ancestor})`) : undefined;
-  return patterns
-    .split(/\r?\n/)
-    .filter(line => line.trim() && !line.startsWith('#'))
-    .flatMap(line => {
-      const pattern = line.replace(/^\\(?=#)/, '').trim();
-      if (ancestor && matchFrom) {
-        if (pattern.match(matchFrom)) return [pattern.replace(matchFrom, '$1')];
-        if (pattern.startsWith('/**/')) return [pattern.slice(1)];
-        if (pattern.startsWith('!/**/')) return [`!${pattern.slice(2)}`];
-        if (pattern.startsWith('/') || pattern.startsWith('!/')) return [];
-      }
-      return [pattern];
-    })
-    .map(pattern => convertGitignoreToPicomatchIgnorePatterns(pattern));
-};
 
 const findAncestorGitignoreFiles = (cwd: string): string[] => {
   const gitignorePaths: string[] = [];
@@ -151,7 +113,7 @@ export const findAndParseGitignores = async (cwd: string) => {
     const cacheDir = ancestor ? cwd : dir;
     const cacheForDir = cachedGitIgnores.get(cwd);
 
-    if (ancestor && cacheForDir) {
+    if (cacheForDir) {
       for (const pattern of dirIgnores) cacheForDir?.ignores.add(pattern);
       cacheForDir.unignores = Array.from(new Set([...cacheForDir.unignores, ...dirUnignores]));
     } else {
@@ -190,9 +152,9 @@ const _parseFindGitignores = timerify(findAndParseGitignores);
 export async function glob(patterns: string | string[], options: GlobOptions): Promise<string[]> {
   if (Array.isArray(patterns) && patterns.length === 0) return [];
 
-  const canCache = options.label && options.gitignore;
-  const willCache = canCache && !cachedGlobIgnores.has(options.dir);
-  const cachedIgnores = canCache && cachedGlobIgnores.get(options.dir);
+  const hasCache = cachedGlobIgnores.has(options.dir);
+  const willCache = !hasCache && options.gitignore && options.label;
+  const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
   const _ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
 
@@ -217,17 +179,20 @@ export async function glob(patterns: string | string[], options: GlobOptions): P
 
   const ignore = cachedIgnores || compact(_ignore);
 
+  if (willCache) cachedGlobIgnores.set(options.dir, compact(_ignore));
+
   const { dir, label, ...fgOptions } = { ...options, ignore };
 
   const paths = await fg.glob(patterns, fgOptions);
 
-  debugLogObject(
-    relative(options.cwd, dir) || ROOT_WORKSPACE_NAME,
-    label ? `Finding ${label}` : 'Finding paths',
-    () => ({ patterns, ...fgOptions, ignore: cachedIgnores ? `// identical to ${dir}` : ignore, paths })
-  );
+  const name = relative(options.cwd, dir);
 
-  if (willCache) cachedGlobIgnores.set(options.dir, ignore);
+  debugLogObject(name || ROOT_WORKSPACE_NAME, label ? `Finding ${label}` : 'Finding paths', () => ({
+    patterns,
+    ...fgOptions,
+    ignore: hasCache ? `// identical to ${name}` : ignore,
+    paths,
+  }));
 
   return paths;
 }
@@ -237,8 +202,8 @@ export async function getGitIgnoredHandler(options: Options): Promise<(path: str
 
   if (options.gitignore === false) return () => false;
 
-  const gitignore = await _parseFindGitignores(options.cwd);
-  const matcher = _picomatch(Array.from(gitignore.ignores), { ignore: gitignore.unignores });
+  const { ignores, unignores } = await _parseFindGitignores(options.cwd);
+  const matcher = _picomatch(Array.from(ignores), { ignore: unignores });
 
   const isGitIgnored = (filePath: string) => matcher(relative(options.cwd, filePath));
 

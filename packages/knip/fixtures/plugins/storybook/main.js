@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('node:path');
 const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {

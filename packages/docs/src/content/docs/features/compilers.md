@@ -27,7 +27,15 @@ might represent component properties. This results in those exports being
 reported as unused by Knip.
 
 The built-in functions seem to do a decent job, but override them however you
-like.
+like. They can enabled manually if none if the enabling dependencies were found:
+
+```ts title="knip.ts"
+export default {
+  compilers: {
+    mdx: true,
+  },
+};
+```
 
 ## Custom compilers
 

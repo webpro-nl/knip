@@ -25,9 +25,6 @@ export default defineConfig({
     remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
     rehypePlugins: [rehypeHeadingIds, rehypeAutolinkHeadings],
   },
-  experimental: {
-    svg: true,
-  },
   integrations: [
     starlight({
       title: 'Knip',

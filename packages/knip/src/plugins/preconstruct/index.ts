@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
+import { toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PreconstructConfig } from './types.js';
 
@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['package.json'];
 
 const resolveEntryPaths: ResolveConfig<PreconstructConfig> = async config => {
-  return (config.entrypoints ?? []).map(id => toEntry(id));
+  return (config.entrypoints ?? []).map(id => toProductionEntry(id, { allowIncludeExports: true }));
 };
 
 export default {

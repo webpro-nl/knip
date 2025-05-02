@@ -24,7 +24,7 @@ const resolveConfig: ResolveConfig<TsupConfig> = async config => {
       if (Array.isArray(config.entry)) return config.entry;
       return Object.values(config.entry);
     })
-    .map(id => toProductionEntry(id));
+    .map(id => toProductionEntry(id, { allowIncludeExports: true }));
 
   return entryPatterns;
 };

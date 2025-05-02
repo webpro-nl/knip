@@ -32,7 +32,7 @@ that are not imported anywhere, and reports them.
 files and provide a detailed report of unused exports, and much more.
 
 <div style="display: flex; justify-content: center; margin: 4rem auto;">
-  <img src="/logo.svg" alt="Logo of Knip, to find unused files, dependencies and exports" class="logo-border" />
+  <img src="/logo.svg" alt="Logo of Knip, to find unused dependencies, exports and files" class="logo-border" />
 </div>
 
 ## How does Knip identify unused exports?

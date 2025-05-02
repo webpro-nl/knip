@@ -10,13 +10,12 @@ const title = 'Prettier';
 
 const enablers = ['prettier'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies, config }) =>
-  hasDependency(dependencies, enablers) || 'prettier' in config;
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = [
   '.prettierrc',
-  '.prettierrc.{json,js,cjs,mjs,yml,yaml,toml,json5}',
-  'prettier.config.{js,cjs,mjs}',
+  '.prettierrc.{json,js,cjs,mjs,ts,cts,mts,yml,yaml,toml,json5}',
+  'prettier.config.{js,cjs,mjs,ts,cts,mts}',
   'package.{json,yaml}',
 ];
 

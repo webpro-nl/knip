@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const Hello = () => <h2>Simple Story</h2>;
 
 export const Responsive = () => {
@@ -17,6 +19,7 @@ export const Responsive = () => {
         Header
       </div>
       <button
+        type="button"
         style={{
           padding: '16px 102px',
           fontFamily: 'arial',
@@ -36,4 +39,3 @@ export const Responsive = () => {
 Responsive.meta = {
   width: 'xsmall',
 };
-

@@ -7,8 +7,6 @@
     "remark-cli": "*"
   },
   "remarkConfig": {
-    "plugins": [
-      "preset-webpro"
-    ]
+    "plugins": ["preset-webpro"]
   }
 }

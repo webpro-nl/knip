@@ -2,7 +2,7 @@
   "name": "@knip/root",
   "version": "0.0.0",
   "private": true,
-  "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects",
+  "description": "Find unused dependencies, exports and files in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",

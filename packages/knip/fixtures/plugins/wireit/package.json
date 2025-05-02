@@ -1,9 +1,7 @@
 {
   "name": "@fixtures/wireit",
   "version": "1.0.0",
-  "workspaces": [
-    "apps/*"
-  ],
+  "workspaces": ["apps/*"],
   "scripts": {
     "build": "wireit",
     "dev": "wireit"

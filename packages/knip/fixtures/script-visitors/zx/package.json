@@ -14,8 +14,6 @@
     "zx": "*"
   },
   "knip": {
-    "ignoreBinaries": [
-      "sleep"
-    ]
+    "ignoreBinaries": ["sleep"]
   }
 }

@@ -20,6 +20,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   if (command === 'run' && manifestScriptNames.has(script)) return [];
   if (manifestScriptNames.has(command)) return [];
+  if (command === 'test') return parsed._.filter(id => id !== command).map(toEntry);
   if (command !== 'run' && commands.includes(command)) return [];
 
   const filePath = command === 'run' ? script : command;

@@ -1,8 +1,8 @@
-import type { Tree } from "./tree";
+import type { Tree } from './tree';
 
 export enum Fruit {
-  apple = "apple",
-  orange = "orange",
+  apple = 'apple',
+  orange = 'orange',
 }
 
 export interface Farmer {

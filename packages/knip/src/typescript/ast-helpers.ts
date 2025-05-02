@@ -1,11 +1,13 @@
 import ts from 'typescript';
+import { FIX_FLAGS } from '../constants.js';
+import type { Fix } from '../types/exports.js';
 import { SymbolType } from '../types/issues.js';
 
-export function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
+function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
   return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
 }
 
-export function isPrivateMember(
+function isPrivateMember(
   node: ts.MethodDeclaration | ts.PropertyDeclaration | ts.SetAccessorDeclaration | ts.GetAccessorDeclaration
 ): boolean {
   return node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.PrivateKeyword) ?? false;
@@ -59,6 +61,31 @@ export const getNodeType = (node: ts.Node): SymbolType => {
   if (ts.isVariableDeclaration(node)) return SymbolType.VARIABLE;
   return SymbolType.UNKNOWN;
 };
+
+export const isNonPrivatePropertyOrMethodDeclaration = (
+  member: ts.ClassElement
+): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
+  (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member) || isGetOrSetAccessorDeclaration(member)) &&
+  !isPrivateMember(member);
+
+export const getClassMember = (member: ts.MethodDeclaration | ts.PropertyDeclaration, isFixTypes: boolean) => ({
+  node: member,
+  identifier: member.name.getText(),
+  // Naive, but [does.the.job()]
+  pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
+  type: SymbolType.MEMBER,
+  fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
+});
+
+export const getEnumMember = (member: ts.EnumMember, isFixTypes: boolean) => ({
+  node: member,
+  identifier: stripQuotes(member.name.getText()),
+  pos: member.name.getStart(),
+  type: SymbolType.MEMBER,
+  fix: isFixTypes
+    ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
+    : undefined,
+});
 
 export function stripQuotes(name: string) {
   const length = name.length;
@@ -286,18 +313,4 @@ export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName
     }
   }
   return values;
-};
-
-export const getPropertyValueEntries = (node: ts.ObjectLiteralExpression, propertyNames: Set<string>) => {
-  const entries: [string, string][] = [];
-  for (const prop of node.properties) {
-    if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
-      if (propertyNames.has(prop.name.text)) {
-        if (ts.isStringLiteral(prop.initializer)) {
-          entries.push([prop.name.text, prop.initializer.text]);
-        }
-      }
-    }
-  }
-  return entries;
 };

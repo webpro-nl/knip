@@ -1,11 +1,6 @@
 {
   "name": "@workspaces/root",
-  "workspaces": [
-    "docs",
-    "apps/*",
-    "local/tsconfig",
-    "packages/*"
-  ],
+  "workspaces": ["docs", "apps/*", "local/tsconfig", "packages/*"],
   "dependencies": {
     "cypress": "*",
     "minimist": "*",
@@ -16,9 +11,7 @@
     "build": "tsc"
   },
   "knip": {
-    "ignoreWorkspaces": [
-      "apps/ignored-workspace"
-    ],
+    "ignoreWorkspaces": ["apps/ignored-workspace"],
     "workspaces": {
       "apps/*": {
         "entry": "index.ts!",
@@ -26,10 +19,7 @@
       },
       "packages/*": {
         "entry": "index.ts!",
-        "project": [
-          "**/*.ts!",
-          "!ignored/*.ts"
-        ]
+        "project": ["**/*.ts!", "!ignored/*.ts"]
       }
     }
   }
