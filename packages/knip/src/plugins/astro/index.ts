@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
+import { hasDependency, load } from '../../util/plugin.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -12,14 +12,26 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
 
-const entry = ['src/content/config.ts', 'src/content.config.ts'];
+const resolveEntryPaths: ResolveEntryPaths = async (_, options) => {
+  const { configFilePath } = options;
+  const astroConfig = await load(configFilePath);
+  const srcDir = astroConfig?.srcDir ?? 'src';
 
-const production = [
-  'src/pages/**/*.{astro,mdx,js,ts}',
-  'src/content/**/*.mdx',
-  'src/middleware.{js,ts}',
-  'src/actions/index.{js,ts}',
-];
+  return [`${srcDir}/content/config.ts`, `${srcDir}/content.config.ts`].map(path => toEntry(path));
+};
+
+const resolveConfig: ResolveConfig = async (_, options) => {
+  const { configFilePath } = options;
+  const astroConfig = await load(configFilePath);
+  const srcDir = astroConfig?.srcDir ?? 'src';
+
+  return [
+    `${srcDir}/pages/**/*.{astro,mdx,js,ts}`,
+    `${srcDir}/content/**/*.mdx`,
+    `${srcDir}/middleware.{js,ts}`,
+    `${srcDir}/actions/index.{js,ts}`,
+  ].map(path => toProductionEntry(path));
+};
 
 const resolve: Resolve = options => {
   const { manifest, isProduction } = options;
@@ -41,7 +53,7 @@ export default {
   enablers,
   isEnabled,
   config,
-  entry,
-  production,
+  resolveEntryPaths,
+  resolveConfig,
   resolve,
 } satisfies Plugin;
