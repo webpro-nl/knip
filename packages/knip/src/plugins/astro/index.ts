@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
 import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -12,18 +12,14 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
 
-const resolveEntryPaths: ResolveEntryPaths = async (_, options) => {
-  const { configFilePath } = options;
-  const astroConfig = await load(configFilePath);
-  const srcDir = astroConfig?.srcDir ?? 'src';
+const resolveEntryPaths: ResolveEntryPaths = async config => {
+  const srcDir = config?.srcDir ?? 'src';
 
   return [`${srcDir}/content/config.ts`, `${srcDir}/content.config.ts`].map(path => toEntry(path));
 };
 
-const resolveConfig: ResolveConfig = async (_, options) => {
-  const { configFilePath } = options;
-  const astroConfig = await load(configFilePath);
-  const srcDir = astroConfig?.srcDir ?? 'src';
+const resolveConfig: ResolveConfig = async config => {
+  const srcDir = config?.srcDir ?? 'src';
 
   return [
     `${srcDir}/pages/**/*.{astro,mdx,js,ts}`,
