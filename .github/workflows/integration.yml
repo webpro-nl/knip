@@ -101,7 +101,7 @@ jobs:
               pnpm install
               pnpm add -D $PKG_URL
               bunx --bun knip --tags=-knipignore
-              bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files
+              bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files --format
               bunx --bun knip --tags=-knipignore --production
 
           - name: prettier
