@@ -22,6 +22,7 @@ Options:
   --files                  Shortcut for --include files
   --fix                    Fix issues
   --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
+  --format                 Format modified files after --fix using the local formatter
   --allow-remove-files     Allow Knip to remove files (with --fix)
   --include-libs           Include type definitions from external dependencies (default: false)
   --include-entry-exports  Include entry files when reporting unused exports
@@ -78,6 +79,7 @@ try {
       files: { type: 'boolean' },
       fix: { type: 'boolean' },
       'fix-type': { type: 'string', multiple: true },
+      format: { type: 'boolean' },
       'allow-remove-files': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
       'ignore-internal': { type: 'boolean' },
