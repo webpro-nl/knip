@@ -40,7 +40,9 @@ Options:
   --trace                  Show trace output
   --trace-export [name]    Show trace output for named export(s)
   --trace-file [file]      Show trace output for exports in file
-  --performance            Measure count and running time of expensive functions and display stats table
+  --performance            Measure count and running time of key functions and display stats table
+  --memory                 Measure memory usage and display data table
+  --memory-realtime        Log memory usage in realtime
   -h, --help               Print this help text
   -V, --version            Print version
 
@@ -84,6 +86,8 @@ try {
       'include-entry-exports': { type: 'boolean' },
       'isolate-workspaces': { type: 'boolean' },
       'max-issues': { type: 'string' },
+      memory: { type: 'boolean' },
+      'memory-realtime': { type: 'boolean' },
       'no-config-hints': { type: 'boolean' },
       'no-exit-code': { type: 'boolean' },
       'no-gitignore': { type: 'boolean' },

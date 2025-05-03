@@ -118,12 +118,13 @@ const run = async () => {
       .filter(reportGroup => finalData.report[reportGroup] && rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
+    if (perfObserver.isEnabled) await perfObserver.finalize();
+    if (perfObserver.isPerformanceEnabled) console.log(`\n${perfObserver.getPerformanceTable()}`);
+    if (perfObserver.isMemoryEnabled) console.log(`\n${perfObserver.getMemoryTable()}`);
+
     if (perfObserver.isEnabled) {
-      await perfObserver.finalize();
-      console.log(`\n${perfObserver.getTable()}`);
-      const mem = perfObserver.getCurrentMemUsageInMb();
       const duration = perfObserver.getCurrentDurationInMs();
-      console.log('\nTotal running time:', prettyMilliseconds(duration), `(mem: ${mem}MB)`);
+      console.log('\nTotal running time:', prettyMilliseconds(duration));
       perfObserver.reset();
     }
 

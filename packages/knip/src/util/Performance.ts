@@ -1,64 +1,96 @@
+import os from 'node:os';
 import { type PerformanceEntry, PerformanceObserver, performance } from 'node:perf_hooks';
-import { constants } from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
 import parsedArgValues from './cli-arguments.js';
-import { debugLog } from './debug.js';
 import { getStats } from './math.js';
-import { prettyMilliseconds } from './string.js';
 import { Table } from './table.js';
 
-const { performance: isEnabled = false } = parsedArgValues;
+const {
+  performance: isPerformanceEnabled = false,
+  memory: isMemoryEnabled = false,
+  'memory-realtime': memoryRealtime = false,
+} = parsedArgValues;
 
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
-  if (!isEnabled) return fn;
+  if (!isPerformanceEnabled) return fn;
   return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));
 };
 
+type MemInfo = {
+  heapUsed: number;
+  heapTotal: number;
+  freemem: number;
+};
+
+interface MemoryEntry extends PerformanceEntry {
+  detail: MemInfo;
+}
+
+const getMemInfo = (): MemInfo => Object.assign({ freemem: os.freemem() }, memoryUsage());
+
+const twoFixed = (value: any) => (typeof value === 'number' ? value.toFixed(2) : value);
+
+const inMB = (bytes: number) => bytes / 1024 / 1024;
+
+const keys = ['heapUsed', 'heapTotal', 'freemem'] as const;
+const logHead = () => console.log(keys.map(key => key.padStart(10)).join('  '));
+const log = (memInfo: MemInfo) => console.log(keys.map(key => twoFixed(inMB(memInfo[key])).padStart(10)).join('  '));
+
 class Performance {
   isEnabled: boolean;
+  isPerformanceEnabled: boolean;
+  isMemoryEnabled: boolean;
   startTime = 0;
   endTime = 0;
-  entries: PerformanceEntry[] = [];
-  instanceId?: number;
+  perfEntries: PerformanceEntry[] = [];
+  memEntries: MemoryEntry[] = [];
+  perfId?: string;
+  memId?: string;
   fnObserver?: PerformanceObserver;
-  gcObserver?: PerformanceObserver;
+  memObserver?: PerformanceObserver;
   memoryUsageStart?: ReturnType<typeof memoryUsage>;
+  freeMemoryStart?: number;
 
-  constructor(isEnabled: boolean) {
-    if (isEnabled) {
-      this.startTime = performance.now();
-      this.instanceId = Math.floor(performance.now() * 100);
+  constructor({ isPerformanceEnabled = false, isMemoryEnabled = false }) {
+    this.isEnabled = isPerformanceEnabled || isMemoryEnabled;
+    this.isPerformanceEnabled = isPerformanceEnabled;
+    this.isMemoryEnabled = isMemoryEnabled;
 
+    this.startTime = performance.now();
+    const instanceId = Math.floor(performance.now() * 100);
+    this.perfId = `perf-${instanceId}`;
+    this.memId = `mem-${instanceId}`;
+
+    if (isPerformanceEnabled) {
       // timerified functions
       this.fnObserver = new PerformanceObserver(items => {
         for (const entry of items.getEntries()) {
-          this.entries.push(entry);
+          this.perfEntries.push(entry);
         }
       });
-      this.fnObserver.observe({ entryTypes: ['function'] });
-
-      // major garbage collection events
-      this.gcObserver = new PerformanceObserver(items => {
-        for (const item of items.getEntries()) {
-          if ((item.detail as { kind: number })?.kind === constants.NODE_PERFORMANCE_GC_MAJOR) {
-            debugLog('*', `GC (after ${prettyMilliseconds(item.startTime)} in ${prettyMilliseconds(item.duration)})`);
-          }
-        }
-      });
-      this.gcObserver.observe({ entryTypes: ['gc'] });
-
-      this.memoryUsageStart = memoryUsage();
+      this.fnObserver.observe({ type: 'function' });
     }
-    this.isEnabled = isEnabled;
+
+    if (isMemoryEnabled) {
+      this.memObserver = new PerformanceObserver(items => {
+        for (const entry of items.getEntries() as MemoryEntry[]) {
+          this.memEntries.push(entry);
+        }
+      });
+      this.memObserver.observe({ type: 'mark' });
+
+      if (memoryRealtime) logHead();
+      this.addMemoryMark(0);
+    }
   }
 
   private setMark(name: string) {
-    const id = `${this.instanceId}:${name}`;
+    const id = `${this.perfId}:${name}`;
     performance.mark(`${id}:start`);
   }
 
   private clearMark(name: string) {
-    const id = `${this.instanceId}:${name}`;
+    const id = `${this.perfId}:${name}`;
     performance.mark(`${id}:end`);
     performance.measure(id, `${id}:start`, `${id}:end`);
     performance.clearMarks(`${id}:start`);
@@ -71,10 +103,10 @@ class Performance {
     this.clearMark('_flush');
   }
 
-  private getEntriesByName() {
-    return this.entries.reduce(
+  private getPerfEntriesByName() {
+    return this.perfEntries.reduce(
       (entries, entry) => {
-        const name = entry.name.replace(`${this.instanceId}:`, '');
+        const name = entry.name.replace(`${this.perfId}:`, '');
         entries[name] = entries[name] ?? [];
         entries[name].push(entry.duration);
         return entries;
@@ -83,10 +115,9 @@ class Performance {
     );
   }
 
-  getTable() {
-    const entriesByName = this.getEntriesByName();
+  getPerformanceTable() {
+    const entriesByName = this.getPerfEntriesByName();
     const table = new Table({ header: true });
-    const twoFixed = (value: any) => (typeof value === 'number' ? value.toFixed(2) : value);
     for (const [name, values] of Object.entries(entriesByName)) {
       const stats = getStats(values);
       table.newRow();
@@ -98,7 +129,27 @@ class Performance {
       table.cell('sum', stats.sum, twoFixed);
     }
     table.sort('sum|desc');
-    return table.toString().trim();
+    return table.toString();
+  }
+
+  addMemoryMark(index: number) {
+    if (!this.isMemoryEnabled) return;
+    const id = `${this.memId}:${index}`;
+    const detail = getMemInfo();
+    performance.mark(id, { detail });
+    if (memoryRealtime && detail) log(detail);
+  }
+
+  getMemoryTable() {
+    const table = new Table({ header: true });
+    for (const entry of this.memEntries) {
+      if (!entry.detail) continue;
+      table.newRow();
+      table.cell('heapUsed', inMB(entry.detail.heapUsed), twoFixed);
+      table.cell('heapTotal', inMB(entry.detail.heapTotal), twoFixed);
+      table.cell('freemem', inMB(entry.detail.freemem), twoFixed);
+    }
+    return table.toString();
   }
 
   getCurrentDurationInMs(startTime?: number) {
@@ -110,7 +161,7 @@ class Performance {
   }
 
   getCurrentMemUsageInMb() {
-    return Math.round((this.getMemHeapUsage() / 1024 / 1024) * 100) / 100;
+    return twoFixed(inMB(this.getMemHeapUsage()));
   }
 
   public async finalize() {
@@ -120,9 +171,10 @@ class Performance {
   }
 
   public reset() {
-    this.entries = [];
+    this.perfEntries = [];
     this.fnObserver?.disconnect();
+    this.memObserver?.disconnect();
   }
 }
 
-export const perfObserver = new Performance(isEnabled);
+export const perfObserver = new Performance({ isPerformanceEnabled, isMemoryEnabled });

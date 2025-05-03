@@ -12,6 +12,7 @@ import type { PluginName } from '../types/PluginNames.js';
 import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
 import type { ModuleGraph } from '../types/module-graph.js';
+import { perfObserver } from '../util/Performance.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
 import { _glob, negate } from '../util/glob.js';
@@ -409,6 +410,7 @@ export async function build({
       factory.deletePrincipal(principal);
       principals[i] = undefined;
     }
+    perfObserver.addMemoryMark(factory.principals.size);
   }
 
   if (isIsolateWorkspaces) {
