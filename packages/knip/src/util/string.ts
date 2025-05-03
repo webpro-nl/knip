@@ -10,3 +10,12 @@ export const pad = (value: string, width: number, fillString?: string, align?: '
     : align === 'center'
       ? value.padStart((value.length + width) / 2, fillString).padEnd(width, fillString)
       : value.padEnd(width, fillString);
+
+export const prettyMilliseconds = (ms: number): string => {
+  const seconds = ms / 1000;
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  if (hours > 0) return `${hours}h ${minutes % 60}m ${Math.floor(seconds % 60)}s`;
+  if (minutes > 0) return `${minutes}m ${Math.floor(seconds % 60)}s`;
+  return seconds % 1 ? `${seconds.toFixed(1)}s` : `${Math.floor(seconds)}s`;
+};

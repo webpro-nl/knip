@@ -1,10 +1,10 @@
 import picocolors from 'picocolors';
-import prettyMilliseconds from 'pretty-ms';
 import type { Entries } from 'type-fest';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { IssueSet, Issues, Report } from '../types/issues.js';
 import { perfObserver } from '../util/Performance.js';
 import { relative } from '../util/path.js';
+import { prettyMilliseconds } from '../util/string.js';
 import { getTitle } from './util.js';
 
 interface WatchReporter {

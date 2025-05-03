@@ -1,4 +1,3 @@
-import prettyMilliseconds from 'pretty-ms';
 import { main } from './index.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
 import { perfObserver } from './util/Performance.js';
@@ -7,6 +6,7 @@ import { getKnownError, isConfigurationError, isDisplayReason, isKnownError } fr
 import { logError, logWarning } from './util/log.js';
 import { cwd, join, toPosix } from './util/path.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
+import { prettyMilliseconds } from './util/string.js';
 import { splitTags } from './util/tag.js';
 import { isTrace } from './util/trace.js';
 import { version } from './version.js';

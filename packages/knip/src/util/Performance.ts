@@ -1,10 +1,10 @@
 import { type PerformanceEntry, PerformanceObserver, performance } from 'node:perf_hooks';
 import { constants } from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
-import prettyMilliseconds from 'pretty-ms';
 import parsedArgValues from './cli-arguments.js';
 import { debugLog } from './debug.js';
 import { getStats } from './math.js';
+import { prettyMilliseconds } from './string.js';
 import { Table } from './table.js';
 
 const { performance: isEnabled = false } = parsedArgValues;
