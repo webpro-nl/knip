@@ -100,21 +100,23 @@ export const findAndParseGitignores = async (cwd: string) => {
           dirIgnores.add(pattern1);
           dirIgnores.add(pattern2);
         } else {
-          const ignore = join(base, pattern1);
-          const extraIgnore = join(base, pattern2);
-          ignores.add(ignore);
-          ignores.add(extraIgnore);
-          dirIgnores.add(ignore);
-          dirIgnores.add(extraIgnore);
+          if (!(pattern1.startsWith('**/') && ignores.has(pattern1))) {
+            const ignore = join(base, pattern1);
+            const extraIgnore = join(base, pattern2);
+            ignores.add(ignore);
+            ignores.add(extraIgnore);
+            dirIgnores.add(ignore);
+            dirIgnores.add(extraIgnore);
+          }
         }
       }
     }
 
     const cacheDir = ancestor ? cwd : dir;
-    const cacheForDir = cachedGitIgnores.get(cwd);
+    const cacheForDir = cachedGitIgnores.get(cacheDir);
 
     if (cacheForDir) {
-      for (const pattern of dirIgnores) cacheForDir?.ignores.add(pattern);
+      for (const pattern of dirIgnores) cacheForDir.ignores.add(pattern);
       cacheForDir.unignores = Array.from(new Set([...cacheForDir.unignores, ...dirUnignores]));
     } else {
       cachedGitIgnores.set(cacheDir, { ignores: dirIgnores, unignores: Array.from(dirUnignores) });
