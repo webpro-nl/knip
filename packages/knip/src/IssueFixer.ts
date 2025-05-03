@@ -45,9 +45,11 @@ export class IssueFixer {
   }
 
   public async fixIssues(issues: Issues) {
+    const touchedFiles = new Set<string>();
     await this.removeUnusedFiles(issues);
-    await this.removeUnusedExports(issues);
-    await this.removeUnusedDependencies(issues);
+    for (const filePath of await this.removeUnusedExports(issues)) touchedFiles.add(filePath);
+    for (const filePath of await this.removeUnusedDependencies(issues)) touchedFiles.add(filePath);
+    return touchedFiles;
   }
 
   private markExportFixed(issues: Issues, filePath: string) {
@@ -75,6 +77,7 @@ export class IssueFixer {
   }
 
   private async removeUnusedExports(issues: Issues) {
+    const touchedFiles = new Set<string>();
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
       const types = (this.isFixUnusedTypes && this.unusedTypeNodes.get(filePath)) || [];
@@ -89,13 +92,17 @@ export class IssueFixer {
 
         await writeFile(filePath, sourceFileText);
 
+        touchedFiles.add(filePath);
+
         this.markExportFixed(issues, filePath);
       }
     }
+    return touchedFiles;
   }
 
   private async removeUnusedDependencies(issues: Issues) {
-    if (!this.isFixDependencies) return;
+    const touchedFiles = new Set<string>();
+    if (!this.isFixDependencies) return touchedFiles;
 
     const filePaths = new Set([...Object.keys(issues.dependencies), ...Object.keys(issues.devDependencies)]);
 
@@ -122,6 +129,10 @@ export class IssueFixer {
       }
 
       await save(absFilePath, pkg);
+
+      touchedFiles.add(filePath);
     }
+
+    return touchedFiles;
   }
 }
