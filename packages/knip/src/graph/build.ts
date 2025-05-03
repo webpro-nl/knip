@@ -406,14 +406,14 @@ export async function build({
     principal.reconcileCache(graph);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (!isIsolateWorkspaces && isSkipLibs && !isWatch) {
+    if (isIsolateWorkspaces || (isSkipLibs && !isWatch)) {
       factory.deletePrincipal(principal);
       principals[i] = undefined;
     }
     perfObserver.addMemoryMark(factory.principals.size);
   }
 
-  if (isIsolateWorkspaces) {
+  if (!isWatch && isSkipLibs && !isIsolateWorkspaces) {
     for (const principal of principals) {
       if (principal) factory.deletePrincipal(principal);
     }
