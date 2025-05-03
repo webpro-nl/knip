@@ -4,6 +4,10 @@
     "size": "size-limit"
   },
   "dependencies": {
-    "size-limit": "*"
+    "size-limit": "*",
+    "@size-limit/preset-app": "*"
+  },
+  "devDependencies": {
+    "@size-limit/file": "*"
   }
 }
