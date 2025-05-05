@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config: string[] = ['docusaurus.config.{js,ts}'];
 
-const production: string[] = ['src/pages/index.js', '{blog,docs}/**/*.mdx'];
+const production: string[] = ['src/pages/index.{js,ts,jsx,tsx}', '{blog,docs}/**/*.mdx'];
 
 const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
   const themes = (config?.themes ?? []).map(item => resolveConfigItem(item, 'theme'));
