@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { type Input, toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -14,8 +14,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = configFiles;
 
-const entry: string[] = [];
-
 const resolveConfig: ResolveConfig<ConfigFile> = async (localConfig, options) => {
   const inputs = new Set<Input>();
 
@@ -25,16 +23,8 @@ const resolveConfig: ResolveConfig<ConfigFile> = async (localConfig, options) =>
   if (config.frameworks) {
     inputsFromFrameworks(config.frameworks).forEach(inputs.add, inputs);
   }
+
   inputsFromPlugins(config.plugins, options.manifest.devDependencies).forEach(inputs.add, inputs);
-
-  return Array.from(inputs);
-};
-
-const resolveEntryPaths: ResolveEntryPaths<ConfigFile> = (localConfig, options) => {
-  const inputs = new Set<Input>();
-
-  const config = loadConfig(localConfig);
-  if (!config) return [];
 
   const basePath = config.basePath ?? '';
   if (config.files) {
@@ -57,7 +47,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  entry,
   resolveConfig,
-  resolveEntryPaths,
 } satisfies Plugin;

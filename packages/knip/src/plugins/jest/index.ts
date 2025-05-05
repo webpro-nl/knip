@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
 import { isInternal, join, toAbsolute } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -98,15 +98,6 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   ].map(id => (typeof id === 'string' ? toDeferResolve(id) : id));
 };
 
-const resolveEntryPaths: ResolveEntryPaths<JestConfig> = async (localConfig, options) => {
-  const { configFileDir } = options;
-  if (typeof localConfig === 'function') localConfig = await localConfig();
-  const rootDir = localConfig.rootDir ?? configFileDir;
-  const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
-  if (localConfig.testMatch) return localConfig.testMatch.map(replaceRootDir).map(id => toEntry(id));
-  return entry.map(id => toEntry(id));
-};
-
 const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
@@ -115,12 +106,16 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
 
   const inputs = await resolveDependencies(localConfig, options);
 
+  const entries = localConfig.testMatch
+    ? localConfig.testMatch.map(replaceRootDir).map(id => toEntry(id))
+    : entry.map(id => toEntry(id));
+
   const result = inputs.map(dependency => {
     dependency.specifier = replaceRootDir(dependency.specifier);
     return dependency;
   });
 
-  return result;
+  return entries.concat(result);
 };
 
 const args = {
@@ -133,7 +128,6 @@ export default {
   isEnabled,
   config,
   entry,
-  resolveEntryPaths,
   resolveConfig,
   args,
 } satisfies Plugin;

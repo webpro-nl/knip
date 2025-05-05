@@ -13,7 +13,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['package.json'];
 
-const resolveEntryPaths: ResolveConfig<PreconstructConfig> = async config => {
+const resolveConfig: ResolveConfig<PreconstructConfig> = async config => {
   return (config.entrypoints ?? []).map(id => toProductionEntry(id, { allowIncludeExports: true }));
 };
 
@@ -22,5 +22,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;

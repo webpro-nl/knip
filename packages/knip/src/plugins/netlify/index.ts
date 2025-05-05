@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toDependency, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -21,20 +21,19 @@ const NETLIFY_FUNCTIONS_EXTS = 'js,mjs,cjs,ts,mts,cts';
 
 const production = [`${NETLIFY_FUNCTIONS_DIR}/**/*.{${NETLIFY_FUNCTIONS_EXTS}}`];
 
-const resolveEntryPaths: ResolveEntryPaths<NetlifyConfig> = localConfig => {
+const resolveConfig: ResolveConfig<NetlifyConfig> = async localConfig => {
   return [
     ...extractFunctionsConfigProperty(localConfig.functions || {}, 'included_files'),
     join(localConfig.functions?.directory ?? NETLIFY_FUNCTIONS_DIR, `**/*.{${NETLIFY_FUNCTIONS_EXTS}}`),
   ]
     .filter(file => !file.startsWith('!'))
-    .map(id => toProductionEntry(id));
-};
-
-const resolveConfig: ResolveConfig<NetlifyConfig> = async localConfig => {
-  return [
-    ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []).map(id => toDependency(id)),
-    ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules').map(id => toDependency(id)),
-  ];
+    .map(id => toProductionEntry(id))
+    .concat([
+      ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []).map(id => toDependency(id)),
+      ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules').map(id =>
+        toDependency(id)
+      ),
+    ]);
 };
 
 export default {
@@ -43,6 +42,5 @@ export default {
   isEnabled,
   config,
   production,
-  resolveEntryPaths,
   resolveConfig,
 } satisfies Plugin;

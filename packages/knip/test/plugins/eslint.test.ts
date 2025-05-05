@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/eslint');
 
-test('Find dependencies with the ESLint plugin', async () => {
+test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -43,7 +43,7 @@ test('Find dependencies with the ESLint plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unresolved: 23,
-    processed: 5,
-    total: 5,
+    processed: 3,
+    total: 3,
   });
 });

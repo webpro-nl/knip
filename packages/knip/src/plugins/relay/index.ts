@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config: string[] = ['relay.config.json', 'relay.config.js'];
 
-const resolveEntryPaths: ResolveEntryPaths<RelayConfig> = async config => {
+const resolveConfig: ResolveConfig<RelayConfig> = async config => {
   const projects = 'projects' in config ? Object.values(config.projects) : [config];
 
   return projects.map(project => {
@@ -41,6 +41,6 @@ export default {
   enablers,
   isEnabled,
   config,
-  resolveEntryPaths,
+  resolveConfig,
   args,
 } satisfies Plugin;

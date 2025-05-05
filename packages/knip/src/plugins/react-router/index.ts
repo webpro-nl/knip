@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['react-router.config.{js,ts}', ...vite.config];
 
-const resolveEntryPaths: ResolveEntryPaths<PluginConfig> = async (localConfig, options) => {
+const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   const appDirectory = localConfig.appDirectory ?? 'app';
   const appDir = join(configFileDir, appDirectory);
@@ -62,5 +62,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;

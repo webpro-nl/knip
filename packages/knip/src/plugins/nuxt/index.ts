@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -31,7 +31,7 @@ const production = [
   'server/plugins/**/*.ts',
 ];
 
-const resolveEntryPaths: ResolveEntryPaths<NuxtConfig> = async localConfig => {
+const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
   const srcDir = localConfig.srcDir ?? '.';
 
   const patterns = [
@@ -61,5 +61,5 @@ export default {
   isEnabled,
   config,
   production,
-  resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;

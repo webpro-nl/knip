@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
-import { resolveConfig, resolveEntryPaths } from '../vitest/index.js';
+import { resolveConfig } from '../vitest/index.js';
 
 // https://vitejs.dev/config/
 
@@ -17,6 +17,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  resolveEntryPaths,
   resolveConfig,
 } satisfies Plugin;

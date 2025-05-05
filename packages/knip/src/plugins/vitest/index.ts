@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { type Input, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
@@ -79,36 +79,30 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
   return configs;
 };
 
-export const resolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspaceConfig> = async (
-  localConfig,
-  options
-) => {
+export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig> = async (localConfig, options) => {
   const inputs = new Set<Input>();
+
   inputs.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
+
   const configs = await getConfigs(localConfig);
+
   for (const cfg of configs) {
     const dir = join(options.configFileDir, cfg.test?.root ?? '.');
+
     if (cfg.test?.include) {
       for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
     } else {
       for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
     }
-  }
-  return Array.from(inputs);
-};
 
-export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig> = async (localConfig, options) => {
-  const inputs = new Set<Input>();
-  const configs = await getConfigs(localConfig);
-  for (const cfg of configs) {
     for (const dependency of findConfigDependencies(cfg, options)) inputs.add(dependency);
-    const entry = cfg.build?.lib?.entry ?? [];
-    const dir = join(options.configFileDir, cfg.test?.root ?? '.');
-    const deps = (typeof entry === 'string' ? [entry] : Object.values(entry))
+    const _entry = cfg.build?.lib?.entry ?? [];
+    const deps = (typeof _entry === 'string' ? [_entry] : Object.values(_entry))
       .map(specifier => join(dir, specifier))
       .map(id => toEntry(id));
     for (const dependency of deps) inputs.add(dependency);
   }
+
   return Array.from(inputs);
 };
 
@@ -122,7 +116,6 @@ export default {
   isEnabled,
   config,
   entry,
-  resolveEntryPaths,
   resolveConfig,
   args,
 } satisfies Plugin;
