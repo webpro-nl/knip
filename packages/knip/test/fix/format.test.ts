@@ -12,7 +12,7 @@ const readContents = async (fileName: string) => await readFile(join(cwd, fileNa
 
 const skipIfWindows = os.platform() !== 'win32' ? test : test.skip;
 
-skipIfWindows('Remove exports and dependencies', async () => {
+skipIfWindows('Fix and format exports and dependencies', async () => {
   const tests = [
     [
       'mod.ts',
@@ -155,7 +155,7 @@ export const { set: setter } = fn();
   }
 });
 
-skipIfWindows('Remove exports (--fix-type types)', async () => {
+skipIfWindows('Fix and format only exported types', async () => {
   const tests = [
     [
       'mod.ts',
