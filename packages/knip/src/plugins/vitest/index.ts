@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { type Input, toAlias, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
+import { join, toPosix } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
@@ -86,12 +86,12 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   const configs = await getConfigs(localConfig);
 
   const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
-  const fn = (aliasOptions: AliasOptions) => {
+  const addAliases = (aliasOptions: AliasOptions) => {
     for (const [alias, value] of Object.entries(aliasOptions)) {
       if (!value) continue;
-      const prefixes = [value].flat().map(id => {
-        if (id.startsWith(options.cwd)) return id;
-        return join(options.cwd, id);
+      const prefixes = [value].flat().map(prefix => {
+        if (toPosix(prefix).startsWith(options.cwd)) return prefix;
+        return join(options.cwd, prefix);
       });
       if (alias.length > 1) inputs.add(toAlias(alias, prefixes));
       inputs.add(toAlias(addStar(alias), prefixes.map(addStar)));
@@ -108,10 +108,10 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
         for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
       }
 
-      if (cfg.test.alias) fn(cfg.test.alias);
+      if (cfg.test.alias) addAliases(cfg.test.alias);
     }
 
-    if (cfg.resolve?.alias) fn(cfg.resolve.alias);
+    if (cfg.resolve?.alias) addAliases(cfg.resolve.alias);
 
     for (const dependency of findConfigDependencies(cfg, options)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];
