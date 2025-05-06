@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve, toDeferResolveEntry } from '../../util/input.js';
+import { toAlias, toDeferResolve, toDeferResolveEntry, toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import { resolveConfigItem } from './helpers.js';
 import type { DocusaurusConfig, ResolveResult } from './types.js';
@@ -26,6 +26,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
   );
 
   return [
+    toAlias('@site/*', './*'),
     ...resolveResults.flatMap(result => result.dependencies).map(dep => toDeferResolve(dep)),
     ...resolveResults.flatMap(result => result.entries ?? []).map(entry => toDeferResolveEntry(entry)),
   ];
