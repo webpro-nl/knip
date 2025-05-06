@@ -52,12 +52,13 @@ const note = `False positives for platform-specific unused files?
 Override the default \`entry\` patterns to match platforms and extensions.`;
 
 /** @public */
-export const docs = { note, production };
+export const docs = { note };
 
 export default {
   title,
   enablers,
   isEnabled,
   config,
+  production,
   resolveConfig,
 } satisfies Plugin;
