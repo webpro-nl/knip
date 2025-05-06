@@ -28,7 +28,7 @@ import {
 } from '../util/input.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getEntryPathsFromManifest } from '../util/package-json.js';
-import { dirname, isAbsolute, join, relative } from '../util/path.js';
+import { dirname, isAbsolute, join, relative, toRelative } from '../util/path.js';
 import {} from '../util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 import { loadTSConfig } from '../util/tsconfig-loader.js';
@@ -101,7 +101,7 @@ export async function build({
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName } = workspace;
 
-    streamer.cast(`Analyzing workspace ${name}...`);
+    streamer.cast(`Analyzing workspace (${name})...`);
 
     const manifest = chief.getManifestForWorkspace(name);
 
@@ -386,7 +386,7 @@ export async function build({
       await principal.runAsyncCompilers();
     }
 
-    streamer.cast('Analyzing source files...');
+    streamer.cast(`Analyzing source files (${toRelative(principal.cwd) || '.'})...`);
 
     let size = principal.entryPaths.size;
     let round = 0;
