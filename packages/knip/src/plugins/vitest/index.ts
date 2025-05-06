@@ -89,7 +89,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   const addAliases = (aliasOptions: AliasOptions) => {
     for (const [alias, value] of Object.entries(aliasOptions)) {
       if (!value) continue;
-      const prefixes = [value].flat().map(prefix => {
+      const prefixes = [value].flat().filter((value) => typeof value === 'string').map(prefix => {
         if (toPosix(prefix).startsWith(options.cwd)) return prefix;
         return join(options.cwd, prefix);
       });
