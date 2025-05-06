@@ -13,6 +13,15 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
 
+const entry = ['src/content/config.ts', 'src/content.config.ts'];
+
+const production = [
+  'src/pages/**/*.{astro,mdx,js,ts}',
+  'src/content/**/*.mdx',
+  'src/middleware.{js,ts}',
+  'src/actions/index.{js,ts}',
+];
+
 const resolveFromAST: ResolveFromAST = sourceFile => {
   const srcDir = getSrcDir(sourceFile);
 
@@ -48,6 +57,8 @@ export default {
   enablers,
   isEnabled,
   config,
+  entry,
+  production,
   resolveFromAST,
   resolve,
 } satisfies Plugin;
