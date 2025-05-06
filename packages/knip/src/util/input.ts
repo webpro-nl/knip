@@ -112,10 +112,10 @@ export const toDeferResolveEntry = (specifier: string, options: Options = {}): I
 
 export const isDeferResolveEntry = (input: Input) => input.type === 'deferResolveEntry';
 
-export const toAlias = (specifier: string, prefixes: string[], options: Options = {}): AliasInput => ({
+export const toAlias = (specifier: string, prefix: string | string[], options: Options = {}): AliasInput => ({
   type: 'alias',
   specifier,
-  prefixes,
+  prefixes: Array.isArray(prefix) ? prefix : [prefix],
   ...options,
 });
 
