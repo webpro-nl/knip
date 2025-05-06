@@ -16,7 +16,7 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-          # - windows-latest
+          - windows-latest
         node:
           - 18
           - 20
@@ -30,8 +30,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
-        run: |
-          npm install typescript@5.0.4 @types/node@18 --ignore-scripts --legacy-peer-deps
+        run: npm install typescript@5.0.4 @types/node@18 --ignore-scripts
       - name: Build knip
         run: npm run build
         working-directory: packages/knip
@@ -40,5 +39,4 @@ jobs:
       - name: Run knip (production/strict)
         run: npx --yes knip --production --strict
       - name: Test knip
-        run: npm run test:node
-        working-directory: packages/knip
+        run: npm run --workspace packages/knip test:node:smoke
