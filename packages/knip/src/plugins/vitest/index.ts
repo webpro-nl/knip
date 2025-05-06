@@ -1,10 +1,10 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
-import { type Input, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
+import { type Input, toAlias, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
-import type { COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
+import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
 
 // https://vitest.dev/config/
 
@@ -28,7 +28,7 @@ const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
     : false;
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
-  const { manifest, configFileDir } = options;
+  const { manifest, cwd: dir } = options;
   const testConfig = localConfig.test;
 
   if (!testConfig) return [];
@@ -41,7 +41,6 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
     (testConfig.coverage && testConfig.coverage.enabled !== false) || hasScriptWithCoverage(manifest.scripts);
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
-  const dir = join(configFileDir, testConfig.root ?? '.');
   const setupFiles = [testConfig.setupFiles ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
 
@@ -86,14 +85,33 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
   const configs = await getConfigs(localConfig);
 
-  for (const cfg of configs) {
-    const dir = join(options.configFileDir, cfg.test?.root ?? '.');
-
-    if (cfg.test?.include) {
-      for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
-    } else {
-      for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
+  const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
+  const fn = (aliasOptions: AliasOptions) => {
+    for (const [alias, value] of Object.entries(aliasOptions)) {
+      if (!value) continue;
+      const prefixes = [value].flat().map(id => {
+        if (id.startsWith(options.cwd)) return id;
+        return join(options.cwd, id);
+      });
+      if (alias.length > 1) inputs.add(toAlias(alias, prefixes));
+      inputs.add(toAlias(addStar(alias), prefixes.map(addStar)));
     }
+  };
+
+  for (const cfg of configs) {
+    const dir = join(options.cwd, cfg.test?.root ?? '.');
+
+    if (cfg.test) {
+      if (cfg.test?.include) {
+        for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
+      } else {
+        for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
+      }
+
+      if (cfg.test.alias) fn(cfg.test.alias);
+    }
+
+    if (cfg.resolve?.alias) fn(cfg.resolve.alias);
 
     for (const dependency of findConfigDependencies(cfg, options)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];

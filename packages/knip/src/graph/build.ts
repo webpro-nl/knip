@@ -18,6 +18,7 @@ import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
 import { _glob, negate } from '../util/glob.js';
 import {
   type Input,
+  isAlias,
   isConfig,
   isDeferResolveEntry,
   isDeferResolveProductionEntry,
@@ -165,7 +166,6 @@ export async function build({
     // workspace + worker → principal
     const principal = factory.createPrincipal({
       cwd: dir,
-      paths: config.paths,
       isFile,
       compilerOptions,
       compilers,
@@ -177,6 +177,8 @@ export async function build({
       isCache,
       cacheLocation,
     });
+
+    principal.addPaths(config.paths, dir);
 
     // Get dependencies from plugins
     const inputsFromPlugins = await worker.runPlugins();
@@ -207,6 +209,8 @@ export async function build({
         }
       } else if (isProject(input)) {
         projectFilePatterns.add(isAbsolute(specifier) ? relative(dir, specifier) : specifier);
+      } else if (isAlias(input)) {
+        principal.addPaths({ [input.specifier]: input.prefixes }, input.dir ?? dir);
       } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = getReferencedInternalFilePath(input, ws);

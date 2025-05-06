@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['vue.config.{js,ts}'];
 
 const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
-  const { cwd, manifest } = options;
+  const { manifest } = options;
 
   const inputs: Input[] = [];
 
@@ -30,10 +30,7 @@ const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
     } satisfies WebpackConfiguration;
     const modifiedConfig =
       typeof config.configureWebpack === 'function' ? config.configureWebpack(baseConfig) : config.configureWebpack;
-    const inputsFromConfig = await findWebpackDependenciesFromConfig({
-      config: modifiedConfig ?? baseConfig,
-      cwd,
-    });
+    const inputsFromConfig = await findWebpackDependenciesFromConfig(modifiedConfig ?? baseConfig, options);
     for (const input of inputsFromConfig) inputs.push(input);
   }
 

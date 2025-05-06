@@ -8,7 +8,6 @@ export type PrincipalOptions = {
   cwd: string;
   isFile: boolean;
   compilerOptions: ts.CompilerOptions;
-  paths: Paths;
   compilers: [SyncCompilers, AsyncCompilers];
   pkgName: string;
   isIsolateWorkspaces: boolean;
