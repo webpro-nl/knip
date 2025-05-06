@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/prisma",
+  "version": "*",
+  "devDependencies": {
+    "prisma": "*"
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "generate-with-config": "prisma generate --config prisma.config.ts"
+  }
+}
