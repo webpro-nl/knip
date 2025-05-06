@@ -33,7 +33,16 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
   use.loader === 'babel-loader' &&
   typeof use.options === 'object';
 
-const info = { compiler: '', issuer: '', realResource: '', resource: '', resourceQuery: '' };
+const info = {
+  compiler: '',
+  issuer: '',
+  realResource: '',
+  resource: '',
+  resourceQuery: '',
+  dependency: '',
+  descriptionData: {},
+  issuerLayer: '',
+};
 
 const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | ''): string[] => {
   if (!rule || typeof rule === 'string') return [];
