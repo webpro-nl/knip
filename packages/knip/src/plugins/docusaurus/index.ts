@@ -12,9 +12,9 @@ const enablers = ['@docusaurus/core'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['docusaurus.config.{js,ts}'];
+const config = ['docusaurus.config.{js,ts}'];
 
-const production: string[] = ['src/pages/index.js', '{blog,docs}/**/*.mdx'];
+const production = ['src/pages/index.js', '{blog,docs}/**/*.mdx'];
 
 const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
   const themes = (config?.themes ?? []).map(item => resolveConfigItem(item, 'theme'));
@@ -27,6 +27,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
 
   return [
     toAlias('@site/*', './*'),
+    ...production.map(id => toProductionEntry(id)),
     ...resolveResults.flatMap(result => result.dependencies).map(dep => toDeferResolve(dep)),
     ...resolveResults.flatMap(result => result.entries ?? []).map(entry => toDeferResolveEntry(entry)),
   ];
