@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from 'node:util';
 import { pad, truncate, truncateStart } from './string.js';
 
 type Value = string | number | undefined | false | null;
@@ -80,7 +81,13 @@ export class Table {
 
     const columnWidths = columns.reduce(
       (acc, col) => {
-        acc[col] = Math.max(...this.rows.map(row => String(row[col]?.formatted || row[col]?.value || '').length));
+        acc[col] = Math.max(
+          ...this.rows.map(row =>
+            row[col]?.formatted
+              ? stripVTControlCharacters(row[col].formatted).length
+              : String(row[col]?.value || '').length
+          )
+        );
         return acc;
       },
       {} as Record<string, number>

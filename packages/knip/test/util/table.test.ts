@@ -12,8 +12,8 @@ test('table with column gaps and truncated values', () => {
   table.cell('col-2', 'packages/astro/src/core/client-directive/default.ts:5:28');
 
   const expected = `
-../../runtime/client/idle.p...  ...core/client-directive/default.ts:1:25
-../../runtime/client/visibl...  ...core/client-directive/default.ts:5:28`;
+../../runtime/client/idle.pre…  …c/core/client-directive/default.ts:1:25
+../../runtime/client/visible.…  …c/core/client-directive/default.ts:5:28`;
 
   const output = table.toString();
   assert.equal(expected.trimStart(), output);
@@ -39,9 +39,9 @@ test('table with no- and start-truncated values', () => {
   table.cell('col-4', 'packages/astro/src/integrations/hooks.ts:157:17');
 
   const expected = `
-renderFontFace           function  ...lementations/css-renderer.ts:15:17
-telemetryNotice     msg            .../astro/src/core/messages.ts:123:17
-normalizeInject...       function  ...o/src/integrations/hooks.ts:157:17`;
+renderFontFace           function  …mplementations/css-renderer.ts:15:17
+telemetryNotice     msg            …es/astro/src/core/messages.ts:123:17
+normalizeInjected…       function  …tro/src/integrations/hooks.ts:157:17`;
 
   const output = table.toString();
   assert.equal(expected.trimStart(), output);
