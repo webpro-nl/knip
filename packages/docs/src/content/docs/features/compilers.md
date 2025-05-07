@@ -61,30 +61,6 @@ to Knip. This means you don't need to add something like `**/*.{ts,vue}` to the
 
 :::
 
-### Svelte
-
-In a project with Svelte, the compiler is automatically enabled, but you may
-have unresolved imports starting with `$app/`:
-
-```shell
-Unresolved imports (5)
-$app/stores       src/routes/Header.svelte:1:9
-$app/environment  src/routes/about/+page.ts:1:9
-```
-
-In this case, you can manually add the `$app` path alias:
-
-```json title="knip.json"
-{
-  "paths": {
-    "$app/*": ["node_modules/@sveltejs/kit/src/runtime/app/*"]
-  }
-}
-```
-
-As a last resort, see [ignoredUnresolved][1] to ignore virtual import specifiers
-from the report.
-
 ### CSS
 
 Here's an example, minimal compiler for CSS files:
@@ -145,5 +121,3 @@ const config = {
 
 export default config;
 ```
-
-[1]: ../reference/configuration.md#ignoreunresolved
