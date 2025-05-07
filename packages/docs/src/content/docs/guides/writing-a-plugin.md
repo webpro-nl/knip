@@ -139,14 +139,14 @@ Compared to the first example, this plugin has two new variables:
 ### 5. `config`
 
 The `config` array contains all possible locations of the config file for the
-tool. Knip loads matching files and passes the results (i.e. what resolves as
-the default export) into the `resolveConfig` function:
+tool. Knip loads matching files and passes the results (i.e. its default export)
+into the `resolveConfig` function:
 
 ### 6. `resolveConfig`
 
-This function receives the exported value of the `config` files, and executes
-the `resolveConfig` function with this object. The plugin should return the
-dependencies referenced in this object.
+This function receives the exported value of the `config` file, and executes the
+`resolveConfig` function with this object. The plugin should return the entry
+paths and dependencies referenced in this object.
 
 Knip supports JSON, YAML, TOML, JavaScript and TypeScript config files. Files
 without an extension are provided as plain text strings.
@@ -155,12 +155,13 @@ without an extension are provided as plain text strings.
 
 You should implement `resolveConfig` if any of these are true:
 
-- The tool supports a `config` file in JSON or YAML format
+- The `config` file contains one or more options that represent [entry
+  points][2]
 - The `config` file references dependencies by strings (not import statements)
 
 :::
 
-## Example 3: custom entry paths
+## Example 3: entry paths
 
 Some tools operate mostly on entry files, some examples:
 
@@ -168,36 +169,29 @@ Some tools operate mostly on entry files, some examples:
 - Storybook looks for stories at `*.stories.@(mdx|js|jsx|tsx)`
 
 And some of those tools allow to configure those locations and patterns. If
-that's the case, than we can define `resolveEntryPaths` in our plugin to take
-this from the configuration object and return it to Knip:
+that's the case we can define `resolveConfig` in our plugin to take this from
+the configuration object and return it to Knip:
 
-### 7. resolveEntryPaths
-
-Here's an example from the Preconstruct plugin:
+Here's an example from the Mocha plugin:
 
 ```ts
-const resolveEntryPaths: ResolveConfig<PreconstructConfig> = async config => {
-  return (config.entrypoints ?? []).map(id => toEntry(id));
+const entry = ['**/test/*.{js,cjs,mjs}'];
+
+const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
+  const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
+  return entryPatterns.map(id => toEntry(id));
 };
 ```
 
-With Preconstruct, you can configure `entrypoints`. If this function is
-implemented in a plugin, Knip will use its return value over the default `entry`
-patterns. The result is that you don't need to duplicate this customization in
-both the tool (e.g. Preconstruct) and Knip.
-
-:::tip[Should I implement resolveEntryPaths?]
-
-Plugins should have `resolveEntryPaths` implemented if the configuration file
-contains one or more options that represent [entry points][2].
-
-:::
+With Mocha, you can configure `spec` file patterns. The result of implementing
+`resolveConfig` is that users don't need to duplicate this configuration in both
+the tool (e.g. Mocha) and Knip.
 
 ## Example 4: Use the AST directly
 
-For the `resolveEntryPaths` and `resolveFromConfig` functions, Knip loads the
-configuration file and passes the default-exported object to this plugin
-function. However, that object might then not contain the information we need.
+If the `resolveFromConfig` function is impemented, Knip loads the configuration
+file and passes the default-exported object to this plugin function. However,
+that object might then not contain the information we need.
 
 Here's an example `astro.config.ts` configuration file with a Starlight
 integration:
@@ -226,7 +220,7 @@ In the Astro plugin, there's no way to access this object containing
 `components` to add the component files as entry files if we were to try:
 
 ```ts
-const resolveEntryPaths: ResolveEntryPaths<AstroConfig> = async config => {
+const resolveConfig: ResolveConfig<AstroConfig> = async config => {
   console.log(config); //  ¯\_(ツ)_/¯
 };
 ```

@@ -52,7 +52,7 @@ type WorkspaceManagerOptions = {
   configFilesMap: Map<string, Map<PluginName, Set<string>>>;
 };
 
-type CacheItem = { resolveEntryPaths?: Input[]; resolveConfig?: Input[]; resolveFromAST?: Input[] };
+type CacheItem = { resolveConfig?: Input[]; resolveFromAST?: Input[] };
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
@@ -341,7 +341,7 @@ export class WorkspaceWorker {
         const toInput = isProduction && plugin.production && plugin.production.length > 0 ? toProductionEntry : toEntry;
         for (const id of config.entry) addInput(toInput(id));
       } else if (
-        (!plugin.resolveEntryPaths && !plugin.resolveFromAST) ||
+        (!plugin.resolveConfig && !plugin.resolveFromAST) ||
         (configFilePaths.filter(path => basename(path) !== 'package.json').length === 0 &&
           (!this.configFilesMap.get(wsName)?.get(pluginName) ||
             this.configFilesMap.get(wsName)?.get(pluginName)?.size === 0))
@@ -356,7 +356,6 @@ export class WorkspaceWorker {
 
         if (fd?.meta?.data && !fd.changed) {
           const data = fd.meta.data;
-          if (data.resolveEntryPaths) for (const id of data.resolveEntryPaths) addInput(id, configFilePath);
           if (data.resolveConfig) for (const id of data.resolveConfig) addInput(id, configFilePath);
           if (data.resolveFromAST) for (const id of data.resolveFromAST) addInput(id, configFilePath);
           continue;
@@ -371,21 +370,11 @@ export class WorkspaceWorker {
         };
 
         const cache: CacheItem = {};
-        let loadedConfig: unknown;
-
-        if (plugin.resolveEntryPaths && !seen.get(wsName)?.has(configFilePath)) {
-          if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
-          if (loadedConfig) {
-            const inputs = await plugin.resolveEntryPaths(loadedConfig, resolveOpts);
-            for (const input of inputs) addInput(input, configFilePath);
-            cache.resolveEntryPaths = inputs;
-          }
-        }
 
         if (plugin.resolveConfig && !seen.get(wsName)?.has(configFilePath)) {
-          if (!loadedConfig) loadedConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
-          if (loadedConfig) {
-            const inputs = await plugin.resolveConfig(loadedConfig, resolveOpts);
+          const localConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
+          if (localConfig) {
+            const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
             for (const input of inputs) addInput(input, configFilePath);
             cache.resolveConfig = inputs;
           }

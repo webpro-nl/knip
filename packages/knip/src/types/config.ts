@@ -119,8 +119,6 @@ export interface PluginOptions extends BaseOptions {
   getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 
-export type ResolveEntryPaths<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
-
 export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
@@ -148,7 +146,6 @@ export interface Plugin {
   entry?: string[];
   production?: string[];
   project?: string[];
-  resolveEntryPaths?: ResolveEntryPaths;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   resolveFromAST?: ResolveFromAST;

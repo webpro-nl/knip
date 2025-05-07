@@ -1,6 +1,7 @@
-import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveFromAST } from '../../types/config.js';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
+import { getSrcDir } from './resolveFromAST.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -20,6 +21,21 @@ const production = [
   'src/middleware.{js,ts}',
   'src/actions/index.{js,ts}',
 ];
+
+const resolveFromAST: ResolveFromAST = sourceFile => {
+  const srcDir = getSrcDir(sourceFile);
+
+  return [
+    ...[`${srcDir}/content/config.ts`, `${srcDir}/content.config.ts`].map(path => toEntry(path)),
+
+    ...[
+      `${srcDir}/pages/**/*.{astro,mdx,js,ts}`,
+      `${srcDir}/content/**/*.mdx`,
+      `${srcDir}/middleware.{js,ts}`,
+      `${srcDir}/actions/index.{js,ts}`,
+    ].map(path => toProductionEntry(path)),
+  ];
+};
 
 const resolve: Resolve = options => {
   const { manifest, isProduction } = options;
@@ -43,5 +59,6 @@ export default {
   config,
   entry,
   production,
+  resolveFromAST,
   resolve,
 } satisfies Plugin;

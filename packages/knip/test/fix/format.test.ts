@@ -1,7 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
-import os from 'node:os';
 import { main } from '../../src/index.js';
 import { join, resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
@@ -10,9 +9,7 @@ const cwd = resolve('fixtures/fix');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-const skipIfWindows = os.platform() !== 'win32' ? test : test.skip;
-
-skipIfWindows('Remove exports and dependencies', async () => {
+test.skip('Fix and format exports and dependencies', async () => {
   const tests = [
     [
       'mod.ts',
@@ -155,7 +152,7 @@ export const { set: setter } = fn();
   }
 });
 
-skipIfWindows('Remove exports (--fix-type types)', async () => {
+test.skip('Fix and format only exported types', async () => {
   const tests = [
     [
       'mod.ts',

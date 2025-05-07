@@ -1,5 +1,3 @@
-import type { EleventyConfig } from './types.js';
-
 // https://github.com/11ty/eleventy/blob/main/src/UserConfig.js
 
 /** @public */
@@ -150,7 +148,7 @@ export class DummyEleventyConfig {
 }
 
 // https://www.11ty.dev/docs/config/#configuration-options
-export const defaultEleventyConfig: EleventyConfig = {
+export const defaultEleventyConfig = {
   dir: {
     input: '.',
     output: '_site',

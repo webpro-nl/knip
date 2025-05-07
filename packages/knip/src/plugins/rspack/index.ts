@@ -14,11 +14,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['rspack.config*.{js,ts,mjs,cjs}'];
 
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
-  const { cwd } = options;
+  const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
 
-  const inputs = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
-
-  return Array.from(inputs).filter(input => !input.specifier.startsWith('builtin:'));
+  return inputs.filter(input => !input.specifier.startsWith('builtin:'));
 };
 
 export default {

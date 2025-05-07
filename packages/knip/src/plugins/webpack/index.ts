@@ -3,12 +3,13 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { compact } from '../../util/array.js';
 import {
   type Input,
+  toAlias,
   toDeferResolve,
   toDeferResolveEntry,
   toDeferResolveProductionEntry,
   toDependency,
 } from '../../util/input.js';
-import { isInternal } from '../../util/path.js';
+import { isInternal, join, toAbsolute } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { BabelConfigObj } from '../babel/types.js';
@@ -32,7 +33,16 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
   use.loader === 'babel-loader' &&
   typeof use.options === 'object';
 
-const info = { compiler: '', issuer: '', realResource: '', resource: '', resourceQuery: '' };
+const info = {
+  compiler: '',
+  issuer: '',
+  realResource: '',
+  resource: '',
+  resourceQuery: '',
+  dependency: '',
+  descriptionData: {},
+  issuerLayer: '',
+};
 
 const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | ''): string[] => {
   if (!rule || typeof rule === 'string') return [];
@@ -61,7 +71,9 @@ const resolveUseItem = (use: RuleSetUseItem) => {
   return [];
 };
 
-export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { config: WebpackConfig; cwd: string }) => {
+export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = async (config, options) => {
+  const { cwd } = options;
+
   // Projects may use a single config function for both development and production modes, so resolve it twice
   // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
   const passes = typeof config === 'function' ? [false, true] : [false];
@@ -74,14 +86,14 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
     const argv: Argv = { mode };
     const resolvedConfig = typeof config === 'function' ? await config(env, argv) : config;
 
-    for (const options of [resolvedConfig].flat()) {
+    for (const opts of [resolvedConfig].flat()) {
       const entries = [];
 
-      for (const loader of options.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
+      for (const loader of opts.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
         inputs.add(toDeferResolve(loader.replace(/\?.*/, '')));
       }
 
-      for (const plugin of options?.plugins ?? []) {
+      for (const plugin of opts?.plugins ?? []) {
         if (plugin && plugin.constructor.name === 'ProvidePlugin') {
           const providePluginInstance = plugin as ProvidePlugin;
           if (providePluginInstance.definitions) {
@@ -93,10 +105,10 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
         }
       }
 
-      if (typeof options.entry === 'string') entries.push(options.entry);
-      else if (Array.isArray(options.entry)) entries.push(...options.entry);
-      else if (typeof options.entry === 'object') {
-        for (const entry of Object.values(options.entry)) {
+      if (typeof opts.entry === 'string') entries.push(opts.entry);
+      else if (Array.isArray(opts.entry)) entries.push(...opts.entry);
+      else if (typeof opts.entry === 'object') {
+        for (const entry of Object.values(opts.entry)) {
           if (typeof entry === 'string') entries.push(entry);
           else if (Array.isArray(entry)) entries.push(...entry);
           else if (typeof entry === 'function') entries.push((entry as () => string)());
@@ -108,24 +120,40 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
         if (!isInternal(entry)) {
           inputs.add(toDependency(entry));
         } else {
-          const dir = options.context ? options.context : cwd;
+          const dir = opts.context ? opts.context : cwd;
           const input =
-            options.mode === 'development'
+            opts.mode === 'development'
               ? toDeferResolveEntry(entry, { dir })
               : toDeferResolveProductionEntry(entry, { dir });
           inputs.add(input);
         }
       }
+
+      if (opts.resolve?.alias) {
+        const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
+        for (const [alias, value] of Object.entries(opts.resolve.alias)) {
+          if (!value) continue;
+          const prefixes = Array.isArray(value) ? value : [value];
+          if (alias.endsWith('$')) {
+            inputs.add(toAlias(alias.slice(0, -1), prefixes));
+          } else {
+            if (alias.length > 1) inputs.add(toAlias(alias, prefixes));
+            for (const prefix of prefixes) {
+              inputs.add(toAlias(addStar(alias), [addStar(toAbsolute(prefix, options.configFileDir))]));
+            }
+          }
+        }
+      }
     }
   }
 
-  return inputs;
+  return Array.from(inputs);
 };
 
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
-  const { cwd, manifest } = options;
+  const { manifest } = options;
 
-  const inputs = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
+  const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
 
   const scripts = Object.values(manifest.scripts ?? {});
   const webpackCLI = scripts.some(script => script && /(?<=^|\s)webpack(?=\s|$)/.test(script)) ? ['webpack-cli'] : [];

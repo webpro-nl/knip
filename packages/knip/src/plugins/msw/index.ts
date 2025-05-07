@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -16,7 +16,7 @@ const config = ['package.json'];
 
 const entry = ['mockServiceWorker.js'];
 
-const resolveEntryPaths: ResolveEntryPaths<MSWConfig> = async localConfig => {
+const resolveConfig: ResolveConfig<MSWConfig> = async localConfig => {
   const workerDirectory = localConfig?.workerDirectory;
   const dir = workerDirectory ? [workerDirectory].flat()[0] : '.';
   return entry.map(pattern => toEntry(join(dir, pattern)));
@@ -28,5 +28,5 @@ export default {
   isEnabled,
   config,
   entry,
-  resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;

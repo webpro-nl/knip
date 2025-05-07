@@ -3,8 +3,16 @@ import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import { debugLog } from './debug.js';
-import { isDeferResolve, toDebugString } from './input.js';
-import { type Input, fromBinary, isBinary, isConfig, isDeferResolveEntry, isDependency } from './input.js';
+import {
+  type Input,
+  fromBinary,
+  isBinary,
+  isConfig,
+  isDeferResolve,
+  isDeferResolveEntry,
+  isDependency,
+  toDebugString,
+} from './input.js';
 import { getPackageNameFromSpecifier } from './modules.js';
 import { dirname, isAbsolute, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
@@ -49,7 +57,7 @@ export const getReferencedInputsHandler =
 
     const packageName = getPackageNameFromSpecifier(specifier);
 
-    if (packageName) {
+    if (packageName && (isDependency(input) || isDeferResolve(input) || isConfig(input))) {
       // Attempt fast path first for external dependencies and internal workspaces
       const isWorkspace = chief.workspacesByPkgName.has(packageName);
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);

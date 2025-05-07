@@ -9,7 +9,7 @@ const PMap: PluginMap = Plugins;
 
 const { performance: isEnabled = false } = parsedArgValues;
 
-const timerifyMethods = ['resolve', 'resolveConfig', 'resolveEntryPaths'] as const;
+const timerifyMethods = ['resolve', 'resolveConfig', 'resolveAST'] as const;
 
 const PluginEntries = Object.entries(PMap) as Entries;
 

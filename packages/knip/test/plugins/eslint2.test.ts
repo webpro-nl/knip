@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/eslint2');
 
-test('Find dependencies with the ESLint plugin (2)', async () => {
+test('Find dependencies with the ESLint plugin (deprecated/2)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
