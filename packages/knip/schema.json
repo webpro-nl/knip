@@ -531,6 +531,10 @@
           "title": "Prettier plugin configuration (https://knip.dev/reference/plugins/prettier)",
           "$ref": "#/definitions/plugin"
         },
+        "prisma": {
+          "title": "Prisma plugin configuration (https://knip.dev/reference/plugins/prisma)",
+          "$ref": "#/definitions/plugin"
+        },
         "react-cosmos": {
           "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
           "$ref": "#/definitions/plugin"

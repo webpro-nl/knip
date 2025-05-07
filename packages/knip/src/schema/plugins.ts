@@ -72,6 +72,7 @@ export const pluginsSchema = z.object({
   postcss: pluginSchema,
   preconstruct: pluginSchema,
   prettier: pluginSchema,
+  prisma: pluginSchema,
   'react-cosmos': pluginSchema,
   'react-router': pluginSchema,
   relay: pluginSchema,

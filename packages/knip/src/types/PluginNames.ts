@@ -59,6 +59,7 @@ export type PluginName =
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
+  | 'prisma'
   | 'react-cosmos'
   | 'react-router'
   | 'relay'
@@ -162,6 +163,7 @@ export const pluginNames = [
   'postcss',
   'preconstruct',
   'prettier',
+  'prisma',
   'react-cosmos',
   'react-router',
   'relay',
