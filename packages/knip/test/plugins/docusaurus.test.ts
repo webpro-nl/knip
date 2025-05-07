@@ -22,7 +22,7 @@ test('Find dependencies with the docusaurus plugin', async () => {
     ...baseCounters,
     unresolved: 2,
     dependencies: 1,
-    processed: 7,
-    total: 7,
+    processed: 8,
+    total: 8,
   });
 });
