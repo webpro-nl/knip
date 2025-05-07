@@ -72,11 +72,11 @@ const resolveUseItem = (use: RuleSetUseItem) => {
 };
 
 export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = async (config, options) => {
-  const { cwd } = options;
+  const { cwd, isProduction } = options;
 
   // Projects may use a single config function for both development and production modes, so resolve it twice
   // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
-  const passes = typeof config === 'function' ? [false, true] : [false];
+  const passes = typeof config === 'function' ? [false, true] : [isProduction];
 
   const inputs = new Set<Input>();
 
@@ -117,15 +117,14 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
       }
 
       for (const entry of entries) {
-        if (!isInternal(entry)) {
-          inputs.add(toDependency(entry));
-        } else {
+        if (isInternal(entry)) {
           const dir = opts.context ? opts.context : cwd;
-          const input =
-            opts.mode === 'development'
-              ? toDeferResolveEntry(entry, { dir })
-              : toDeferResolveProductionEntry(entry, { dir });
+          const input = isProduction
+            ? toDeferResolveProductionEntry(entry, { dir })
+            : toDeferResolveEntry(entry, { dir });
           inputs.add(input);
+        } else {
+          inputs.add(toDeferResolve(entry));
         }
       }
 
