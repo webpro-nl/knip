@@ -2,10 +2,13 @@
   "name": "@fixtures/prisma",
   "version": "*",
   "devDependencies": {
-    "prisma": "*"
+    "prisma": "*",
+    "tsx": "*"
   },
   "scripts": {
-    "generate": "prisma generate",
-    "generate-with-config": "prisma generate --config prisma.config.ts"
+    "generate": "prisma generate --config config/prisma.custom-config.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
