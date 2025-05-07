@@ -15,9 +15,8 @@ const config: string[] = ['prisma.config.ts', 'package.json'];
 
 const resolveConfig: ResolveConfig<PrismaConfig> = async (config, options) => {
   // if config is a package.json file
-  if (config.seed) {
-    const inputs = options.getInputsFromScripts(config.seed);
-    return [...inputs.map(input => (isDeferResolveEntry(input) ? toEntry(input.specifier) : input))];
+  if (options.configFileName === 'package.json' && config.seed) {
+    return options.getInputsFromScripts(config.seed);
   }
   return [];
 };
