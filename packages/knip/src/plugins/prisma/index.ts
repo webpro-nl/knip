@@ -1,4 +1,3 @@
-import { isDeferResolveEntry, toEntry } from 'src/util/input.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PrismaConfig } from './types.js';
