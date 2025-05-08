@@ -156,6 +156,8 @@ const run = async () => {
     // We shouldn't arrive here, but not swallow either, so re-throw
     throw error;
   }
+
+  process.exit(0);
 };
 
 await run();
