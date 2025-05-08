@@ -23,7 +23,7 @@ const config = ['docusaurus.config.{js,ts}'];
 
 const production = ['src/pages/index.{js,ts,jsx,tsx}', '{blog,docs}/**/*.mdx'];
 
-const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
+const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) => {
   const themes = (config?.themes ?? []).map(item => resolveConfigItem(item, 'theme'));
   const plugins = (config?.plugins ?? []).map(item => resolveConfigItem(item, 'plugin'));
   const presets = (config?.presets ?? []).map(item => resolveConfigItem(item, 'preset'));
@@ -32,10 +32,14 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
     (result): result is ResolveResult => result !== null
   );
 
+  const hasClassicTheme =
+    options.manifest.dependencies?.['@docusaurus/theme-classic'] ||
+    options.manifest.dependencies?.['@docusaurus/preset-classic'];
+
   return [
     toAlias('@site/*', './*'),
     toDependency('@docusaurus/module-type-aliases', { optional: true }),
-    toIgnore('@theme/(Heading|Layout)', 'dependencies'),
+    ...(hasClassicTheme ? [toIgnore('@theme/(Heading|Layout)', 'dependencies')] : []),
     toIgnore('@docusaurus/(Link|useDocusaurusContext)', 'dependencies'),
     ...production.map(id => toProductionEntry(id)),
     ...resolveResults.flatMap(result => result.dependencies).map(dep => toDeferResolve(dep)),
