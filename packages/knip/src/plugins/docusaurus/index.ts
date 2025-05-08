@@ -39,8 +39,13 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
   return [
     toAlias('@site/*', './*'),
     toDependency('@docusaurus/module-type-aliases', { optional: true }),
-    ...(hasClassicTheme ? [toIgnore('@theme/(Heading|Layout)', 'dependencies')] : []),
-    toIgnore('@docusaurus/(Link|useDocusaurusContext)', 'dependencies'),
+    // Ignore aliases for @docusaurus/theme-classic/lib/theme/
+    ...(hasClassicTheme ? [toIgnore('(@theme|@theme-internal|@theme-original)/*', 'dependencies')] : []),
+    // Ignore aliases for @docusaurus/core/lib/client/exports/
+    toIgnore(
+      '@docusaurus/(BrowserOnly|ComponentCreator|constants|ExecutionEnvironment|Head|Interpolate|isInternalUrl|Link|Noop|renderRoutes|router|Translate|useBaseUrl|useBrokenLinks|useDocusaurusContext|useGlobalData|useIsBrowser|useIsomorphicLayoutEffect|useRouteContext)',
+      'dependencies'
+    ),
     ...production.map(id => toProductionEntry(id)),
     ...resolveResults.flatMap(result => result.dependencies).map(dep => toDeferResolve(dep)),
     ...resolveResults.flatMap(result => result.entries ?? []).map(entry => toDeferResolveEntry(entry)),
