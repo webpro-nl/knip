@@ -40,7 +40,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     toAlias('@site/*', './*'),
     toDependency('@docusaurus/module-type-aliases', { optional: true }),
     // Ignore aliases for @docusaurus/theme-classic/lib/theme/
-    ...(hasClassicTheme ? [toIgnore('(@theme|@theme-internal|@theme-original)/*', 'dependencies')] : []),
+    ...(hasClassicTheme ? [toIgnore('(@theme|@theme-init|@theme-original)/*', 'dependencies')] : []),
     // Ignore aliases for @docusaurus/core/lib/client/exports/
     toIgnore(
       '@docusaurus/(BrowserOnly|ComponentCreator|constants|ExecutionEnvironment|Head|Interpolate|isInternalUrl|Link|Noop|renderRoutes|router|Translate|useBaseUrl|useBrokenLinks|useDocusaurusContext|useGlobalData|useIsBrowser|useIsomorphicLayoutEffect|useRouteContext)',
