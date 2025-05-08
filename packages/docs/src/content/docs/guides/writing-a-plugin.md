@@ -193,13 +193,12 @@ With Mocha, you can configure `spec` file patterns. The result of implementing
 the tool (e.g. Mocha) and Knip.
 
 Use `production` entries to target source files that represent production code.
-Some examples will follow.
 
 :::tip
 
-Regardless of the presence `resolveConfig`, add `entry` and `production` to the
-default export to be picked up by the documentation generator and display those
-as the default values.
+Regardless of the presence of `resolveConfig`, add `entry` and `production` to
+the default export so they will be displayed in the plugin's documentation as
+default values.
 
 :::
 
