@@ -36,7 +36,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async config => {
     toAlias('@site/*', './*'),
     toDependency('@docusaurus/module-type-aliases', { optional: true }),
     toIgnore('@theme/(Heading|Layout)', 'dependencies'),
-    toIgnore('@docusaurus/Link', 'dependencies'),
+    toIgnore('@docusaurus/(Link|useDocusaurusContext)', 'dependencies'),
     ...production.map(id => toProductionEntry(id)),
     ...resolveResults.flatMap(result => result.dependencies).map(dep => toDeferResolve(dep)),
     ...resolveResults.flatMap(result => result.entries ?? []).map(entry => toDeferResolveEntry(entry)),
