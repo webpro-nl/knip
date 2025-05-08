@@ -77,7 +77,7 @@ export const analyze = async (options: AnalyzeOptions) => {
 
   const analyzeGraph = async () => {
     if (isReportValues || isReportTypes) {
-      streamer.cast('Connecting the dots...');
+      streamer.cast('Connecting the dots');
 
       for (const [filePath, file] of graph.entries()) {
         const exportItems = file.exports;

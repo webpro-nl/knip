@@ -102,7 +102,7 @@ export async function build({
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName } = workspace;
 
-    streamer.cast(`Analyzing workspace (${name})...`);
+    streamer.cast('Analyzing workspace', name);
 
     const manifest = chief.getManifestForWorkspace(name);
 
@@ -386,11 +386,11 @@ export async function build({
     principal.init();
 
     if (principal.asyncCompilers.size > 0) {
-      streamer.cast('Running async compilers...');
+      streamer.cast('Running async compilers');
       await principal.runAsyncCompilers();
     }
 
-    streamer.cast(`Analyzing source files (${toRelative(principal.cwd) || '.'})...`);
+    streamer.cast('Analyzing source files', toRelative(principal.cwd));
 
     let size = principal.entryPaths.size;
     let round = 0;

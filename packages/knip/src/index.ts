@@ -63,7 +63,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
-  streamer.cast('Reading workspace configuration(s)...');
+  streamer.cast('Reading workspace configuration');
 
   await chief.init();
 
