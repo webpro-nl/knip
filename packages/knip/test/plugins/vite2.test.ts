@@ -12,7 +12,7 @@ test('Find extension issues with incomplete config', async () => {
     ...baseArguments,
     cwd,
   });
-console.log('Issues:', issues);
+
   assert.ok(issues.files.size > 0);
 
   const fileIssues = Array.from(issues.files).filter(
