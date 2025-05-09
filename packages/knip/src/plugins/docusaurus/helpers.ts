@@ -1,4 +1,7 @@
-import type { ConfigItem, ModuleType, PluginOptions, PresetOptions, ResolveResult } from './types.js';
+import type { PluginOptions as Options } from '../../types/config.js';
+import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.js';
+import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
+import type { ConfigItem, ModuleType, PluginOptions, PresetOptions } from './types.js';
 
 const FIRST_PARTY_MODULES = new Set([
   'content-docs',
@@ -56,35 +59,40 @@ const resolveModuleName = (name: string, type: ModuleType): string => {
   return `${scope}/docusaurus-${type}${baseName}`;
 };
 
-const createResult = (dependencies: string[], entries?: string[]): ResolveResult => ({
-  dependencies,
-  ...(entries && { entries }),
-});
-
 const resolveSidebarPath = (config: PresetOptions | PluginOptions): string | undefined => {
   const path = config?.sidebarPath ?? (config as PresetOptions)?.docs?.sidebarPath;
   return typeof path === 'string' ? path : undefined;
 };
 
-const resolveArrayConfig = ([name, config]: [string, unknown], type: ModuleType): ResolveResult | null => {
-  if (typeof name !== 'string') return null;
+const resolveArrayConfig = ([name, config]: [string, unknown], type: ModuleType) => {
+  if (typeof name !== 'string') return [];
 
   const resolvedName = resolveModuleName(name, type);
   const sidebarPath = type !== 'theme' ? resolveSidebarPath(config as PresetOptions | PluginOptions) : undefined;
 
-  return createResult([resolvedName], sidebarPath ? [sidebarPath] : undefined);
+  return [toDeferResolve(resolvedName), ...(sidebarPath ? [toProductionEntry(sidebarPath)] : [])];
 };
 
-export const resolveConfigItem = (item: ConfigItem, type: ModuleType): ResolveResult | null => {
-  if (!item) return null;
+export const resolveConfigItems = async (items: ConfigItem[], type: ModuleType, options: Options) => {
+  const inputs = new Set<Input>();
 
-  if (typeof item === 'string') {
-    return createResult([resolveModuleName(item, type)]);
+  for (let item of items) {
+    if (typeof item === 'function') item = item();
+
+    if (!item) continue;
+
+    if (typeof item === 'string') {
+      inputs.add(toDeferResolve(resolveModuleName(item, type)));
+    } else if (Array.isArray(item)) {
+      for (const input of resolveArrayConfig(item, type)) inputs.add(input);
+    } else if (typeof item.configureWebpack === 'function') {
+      const utils = { getStyleLoaders: () => [], getJSLoader: () => null };
+      const config = item.configureWebpack({}, false, utils);
+      for (const input of await findWebpackDependenciesFromConfig(config, options)) inputs.add(input);
+    } else if (typeof item.configurePostCss === 'function') {
+      // ignore
+    }
   }
 
-  if (Array.isArray(item)) {
-    return resolveArrayConfig(item, type);
-  }
-
-  return null;
+  return inputs;
 };

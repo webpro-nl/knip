@@ -1,3 +1,5 @@
+import type { WebpackConfig } from '../webpack/types.js';
+
 export type ModuleType = 'plugin' | 'theme' | 'preset';
 
 type DocsConfig = {
@@ -15,10 +17,33 @@ export type PresetOptions = {
   [key: string]: unknown;
 };
 
-type PluginConfig = string | [string, PluginOptions] | false | null;
+type Loader = unknown;
+
+type PluginConfig =
+  | string
+  | [string, PluginOptions]
+  | false
+  | null
+  | {
+      name?: string;
+      configureWebpack?: (
+        config?: PluginConfig,
+        isServer?: boolean,
+        utils?: {
+          getStyleLoaders(isServer: boolean, cssOptions: { [key: string]: any }): Loader[];
+          // biome-ignore lint/complexity/noBannedTypes: deal with it
+          getJSLoader(isServer: boolean, cacheOptions?: {}): Loader | null;
+        },
+        content?: unknown
+      ) => WebpackConfig;
+      configurePostCss?: (postcssOptions: { plugins: unknown[] }) => { plugins: unknown[] };
+    };
+
 type PresetConfig = string | [string, PresetOptions] | false | null;
 
-export type ConfigItem = PresetConfig | PluginConfig;
+type Config = PresetConfig | PluginConfig;
+
+export type ConfigItem = Config | (() => Config);
 
 export type DocusaurusConfig = {
   title: string;
@@ -26,9 +51,4 @@ export type DocusaurusConfig = {
   themes?: PluginConfig[];
   plugins?: PluginConfig[];
   presets: PresetConfig[];
-};
-
-export type ResolveResult = {
-  dependencies: string[];
-  entries?: string[];
 };
