@@ -27,6 +27,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
   const themes = (config?.themes ?? []).map(item => resolveConfigItem(item, 'theme'));
   const plugins = (config?.plugins ?? []).map(item => resolveConfigItem(item, 'plugin'));
   const presets = (config?.presets ?? []).map(item => resolveConfigItem(item, 'preset'));
+const entry = ['babel.config.{js,cjs,mjs,cts}'];
 
   const resolveResults = [...themes, ...plugins, ...presets].filter(
     (result): result is ResolveResult => result !== null
@@ -46,6 +47,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     ...production.map(id => toProductionEntry(id)),
     ...resolveResults.flatMap(result => result.dependencies).map(dep => toDeferResolve(dep)),
     ...resolveResults.flatMap(result => result.entries ?? []).map(entry => toDeferResolveEntry(entry)),
+    ...entry.map(id => toEntry(id)),
   ];
 };
 
@@ -54,6 +56,7 @@ export default {
   enablers,
   isEnabled,
   config,
+  entry,
   production,
   resolveConfig,
 } satisfies Plugin;
