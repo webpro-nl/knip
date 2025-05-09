@@ -42,7 +42,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     // Ignore aliases for @docusaurus/theme-classic/lib/theme/ https://docusaurus.io/docs/advanced/client#theme-aliases
     ...(hasClassicTheme ? [toIgnore('(@theme|@theme-init|@theme-original)/*', 'dependencies')] : []),
     // Ignore aliases for @docusaurus/core/lib/client/exports/ https://docusaurus.io/docs/docusaurus-core
-    toIgnore(`@docusaurus/(${[...CORE_CLIENT_API].join('|')})`, 'dependencies'),
+    toIgnore(`@docusaurus/(${CORE_CLIENT_API.join('|')})`, 'dependencies'),
     ...production.map(id => toProductionEntry(id)),
     ...resolveResults.flatMap(result => result.dependencies).map(dep => toDeferResolve(dep)),
     ...resolveResults.flatMap(result => result.entries ?? []).map(entry => toDeferResolveEntry(entry)),

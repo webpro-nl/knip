@@ -20,7 +20,7 @@ const FIRST_PARTY_MODULES = new Set([
   'mermaid',
 ]);
 
-export const CORE_CLIENT_API = new Set([
+export const CORE_CLIENT_API = [
   'BrowserOnly',
   'ComponentCreator',
   'constants',
@@ -40,7 +40,7 @@ export const CORE_CLIENT_API = new Set([
   'useIsBrowser',
   'useIsomorphicLayoutEffect',
   'useRouteContext',
-]);
+];
 
 const resolveModuleName = (name: string, type: ModuleType): string => {
   // If it's already a full package name, return it
