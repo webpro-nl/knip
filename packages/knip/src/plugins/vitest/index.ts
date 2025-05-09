@@ -115,7 +115,12 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     }
 
     if (cfg.resolve?.alias) addAliases(cfg.resolve.alias);
-
+    if (cfg.resolve?.extensions) {
+      for (const ext of cfg.resolve.extensions) {
+        if (!ext.startsWith('.')) continue;
+        inputs.add(toEntry(join(dir, `**/*${ext}`)));
+      }
+    }
     for (const dependency of findConfigDependencies(cfg, options)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];
     const deps = (typeof _entry === 'string' ? [_entry] : Object.values(_entry))
