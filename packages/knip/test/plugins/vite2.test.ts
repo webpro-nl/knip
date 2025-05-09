@@ -4,15 +4,15 @@ import { main } from '../../src/index.js';
 import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 
-const cwd = resolve('fixtures/plugins/vite');
-const cwd2 = resolve('fixtures/plugins/vite2');
+const cwd = resolve('fixtures/plugins/vite2');
+const cwd2 = resolve('fixtures/plugins/vite3');
 
 test('Find extension issues with incomplete config', async () => {
   const { issues } = await main({
     ...baseArguments,
     cwd,
   });
-
+console.log('Issues:', issues);
   assert.ok(issues.files.size > 0);
 
   const fileIssues = Array.from(issues.files).filter(
