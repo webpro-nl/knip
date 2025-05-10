@@ -62,7 +62,7 @@
   ],
   "dependencies": {
     "@nodelib/fs.walk": "^1.2.3",
-    "enhanced-resolve": "^5.18.1",
+    "@rspack/resolver": "^0.1.4",
     "fast-glob": "^3.3.3",
     "formatly": "^0.2.3",
     "jiti": "^2.4.2",
