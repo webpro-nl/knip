@@ -23,6 +23,7 @@ import {
   isDeferResolveEntry,
   isDeferResolveProductionEntry,
   isEntry,
+  isIgnore,
   isProductionEntry,
   isProject,
   toProductionEntry,
@@ -211,6 +212,12 @@ export async function build({
         projectFilePatterns.add(isAbsolute(specifier) ? relative(dir, specifier) : specifier);
       } else if (isAlias(input)) {
         principal.addPaths({ [input.specifier]: input.prefixes }, input.dir ?? dir);
+      } else if (isIgnore(input)) {
+        if (input.issueType === 'dependencies' || input.issueType === 'unlisted') {
+          deputy.addIgnoredDependencies(name, input.specifier);
+        } else if (input.issueType === 'binaries') {
+          deputy.addIgnoredBinaries(name, input.specifier);
+        }
       } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = getReferencedInternalFilePath(input, ws);

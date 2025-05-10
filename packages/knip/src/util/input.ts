@@ -1,4 +1,5 @@
 import type { PluginName } from '../types/PluginNames.js';
+import type { IssueType } from '../types/issues.js';
 import { isAbsolute, toRelative } from './path.js';
 
 type InputType =
@@ -9,7 +10,8 @@ type InputType =
   | 'dependency'
   | 'deferResolve'
   | 'deferResolveEntry'
-  | 'alias';
+  | 'alias'
+  | 'ignore';
 
 export interface Input {
   type: InputType;
@@ -31,6 +33,11 @@ export interface ConfigInput extends Input {
 interface AliasInput extends Input {
   type: 'alias';
   prefixes: string[];
+}
+
+interface IgnoreInput extends Input {
+  type: 'ignore';
+  issueType: IssueType;
 }
 
 type Options = {
@@ -120,6 +127,15 @@ export const toAlias = (specifier: string, prefix: string | string[], options: O
 });
 
 export const isAlias = (input: Input): input is AliasInput => input.type === 'alias';
+
+/** @public not used yet */
+export const toIgnore = (specifier: string, issueType: IssueType): IgnoreInput => ({
+  type: 'ignore',
+  specifier,
+  issueType,
+});
+
+export const isIgnore = (input: Input): input is IgnoreInput => input.type === 'ignore';
 
 export const toDebugString = (input: Input) =>
   `${input.type}:${isAbsolute(input.specifier) ? toRelative(input.specifier) : input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath)})` : ''}`;
