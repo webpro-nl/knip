@@ -1,25 +1,29 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../../src/index.js';
-import { resolve } from '../../src/util/path.js';
+import { join, resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/vite2');
 const cwd2 = resolve('fixtures/plugins/vite3');
-
 test('Find extension issues with incomplete config', async () => {
-  const { issues } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert.ok(issues.files.size > 0);
+  assert(issues.files.has(join(cwd, 'src/mock.ts')));
+  assert(issues.files.has(join(cwd, 'src/mock.desktop.ts')));
 
-  const fileIssues = Array.from(issues.files).filter(
-    issue => issue && (issue.includes('mock.ts') || issue.includes('mock.desktop.ts'))
-  );
-
-  assert.ok(fileIssues.length > 0, 'Should find issues with mock files');
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    devDependencies: 0,
+    unlisted: 0,
+    processed: 6,
+    total: 6,
+  });
 });
 
 test('Should find 0 issues with proper extensions config', async () => {
@@ -28,7 +32,14 @@ test('Should find 0 issues with proper extensions config', async () => {
     cwd: cwd2,
   });
 
-  assert.strictEqual(issues.files.size, 0, 'Should find no issues with complete extension config');
+  assert.strictEqual(issues.files.size, 0);
 
-  assert.ok(counters.processed > 0, 'Should process at least one file');
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 0,
+    devDependencies: 2,
+    unlisted: 0,
+    processed: 5,
+    total: 5,
+  });
 });
