@@ -461,4 +461,12 @@ export class DependencyDeputy {
 
     return configurationHints;
   }
+
+  public addIgnoredDependencies(workspaceName: string, identifier: string) {
+    this._manifests.get(workspaceName)?.ignoreDependencies.push(toRegexOrString(identifier));
+  }
+
+  public addIgnoredBinaries(workspaceName: string, identifier: string) {
+    this._manifests.get(workspaceName)?.ignoreBinaries.push(toRegexOrString(identifier));
+  }
 }
