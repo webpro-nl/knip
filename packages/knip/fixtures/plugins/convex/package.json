@@ -1,3 +1,6 @@
 {
-  "name": "@fixtures/convex"
+  "name": "@fixtures/convex",
+  "devDependencies": {
+    "convex": "*"
+  }
 }

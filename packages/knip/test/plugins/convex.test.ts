@@ -1,23 +1,24 @@
-import { test } from "bun:test";
-import assert from "node:assert/strict";
-import { main } from "../../src/index.js";
-import { resolve } from "../../src/util/path.js";
-import baseArguments from "../helpers/baseArguments.js";
-import baseCounters from "../helpers/baseCounters.js";
+import { test } from 'bun:test';
+import assert from 'node:assert/strict';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve("fixtures/plugins/_template");
+const cwd = resolve('fixtures/plugins/convex');
 
-test("Find dependencies with the convex plugin", async () => {
+test('Find dependencies with the convex plugin', async () => {
   const { /* issues, */ counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  // console.log(issues);
+  // console.log({ issues });
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 0,
-    total: 0,
+    devDependencies: 1,
+    processed: 3,
+    total: 3,
   });
 });
