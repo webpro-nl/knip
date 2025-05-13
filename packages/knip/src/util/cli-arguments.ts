@@ -42,6 +42,7 @@ Options:
   --trace-export [name]    Show trace output for named export(s)
   --trace-file [file]      Show trace output for exports in file
   --performance            Measure count and running time of key functions and display stats table
+  --performance-fn [name]  Measure only function [name]
   --memory                 Measure memory usage and display data table
   --memory-realtime        Log memory usage in realtime
   -h, --help               Print this help text
@@ -95,6 +96,7 @@ try {
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
       performance: { type: 'boolean' },
+      'performance-fn': { type: 'string' },
       production: { type: 'boolean' },
       preprocessor: { type: 'string', multiple: true },
       'preprocessor-options': { type: 'string' },
