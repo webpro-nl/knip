@@ -17,9 +17,6 @@ const config = ['app.json', 'app.config.{ts,js}'];
 
 const production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
 
-/** @public */
-export const docs = { production };
-
 const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) => {
   const { manifest } = options;
   const config = getConfig(localConfig, options);
@@ -51,5 +48,6 @@ export default {
   enablers,
   isEnabled,
   config,
+  production,
   resolveConfig,
 } satisfies Plugin;

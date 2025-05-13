@@ -15,6 +15,7 @@ export type PluginName =
   | 'cucumber'
   | 'cypress'
   | 'dependency-cruiser'
+  | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
   | 'eleventy'
@@ -59,6 +60,7 @@ export type PluginName =
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
+  | 'prisma'
   | 'react-cosmos'
   | 'react-router'
   | 'relay'
@@ -118,6 +120,7 @@ export const pluginNames = [
   'cucumber',
   'cypress',
   'dependency-cruiser',
+  'docusaurus',
   'dotenv',
   'drizzle',
   'eleventy',
@@ -162,6 +165,7 @@ export const pluginNames = [
   'postcss',
   'preconstruct',
   'prettier',
+  'prisma',
   'react-cosmos',
   'react-router',
   'relay',

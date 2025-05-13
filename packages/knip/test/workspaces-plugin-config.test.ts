@@ -40,7 +40,7 @@ test('Use root plugin config in workspaces (strict production)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 3,
-    total: 7,
-    processed: 7,
+    total: 8,
+    processed: 8,
   });
 });

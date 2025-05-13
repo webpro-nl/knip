@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/alias",
+  "devDependencies": {
+    "filenamify": "*",
+    "jquery": "*",
+    "lodash-es": "*",
+    "vite": "*",
+    "webpack": "*"
+  }
+}

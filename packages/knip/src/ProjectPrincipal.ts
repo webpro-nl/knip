@@ -5,7 +5,7 @@ import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
 import type { GetImportsAndExportsOptions } from './types/config.js';
 import type { Export, ExportMember, FileNode, ModuleGraph, UnresolvedImport } from './types/module-graph.js';
-import type { PrincipalOptions } from './types/project.js';
+import type { Paths, PrincipalOptions } from './types/project.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/create-hosts.js';
@@ -14,7 +14,7 @@ import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
-import { dirname, extname, isInNodeModules, join } from './util/path.js';
+import { dirname, extname, isInNodeModules, join, toAbsolute } from './util/path.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
 // These compiler options override local options
@@ -132,8 +132,17 @@ export class ProjectPrincipal {
     this.backend.languageServiceHost = languageServiceHost;
   }
 
-  addPaths(paths: ts.CompilerOptions['paths']) {
-    this.compilerOptions.paths = { ...this.compilerOptions.paths, ...paths };
+  addPaths(paths: Paths, basePath: string) {
+    if (!paths) return;
+    this.compilerOptions.paths ??= {};
+    for (const key in paths) {
+      const prefixes = paths[key].map(prefix => toAbsolute(prefix, basePath));
+      if (key in this.compilerOptions.paths) {
+        this.compilerOptions.paths[key] = compact([...this.compilerOptions.paths[key], ...prefixes]);
+      } else {
+        this.compilerOptions.paths[key] = prefixes;
+      }
+    }
   }
 
   addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {

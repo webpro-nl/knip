@@ -359,6 +359,10 @@
           "title": "dependency-cruiser plugin configuration (https://knip.dev/reference/plugins/dependency-cruiser)",
           "$ref": "#/definitions/plugin"
         },
+        "docusaurus": {
+          "title": "Docusaurus plugin configuration (https://knip.dev/reference/plugins/docusaurus)",
+          "$ref": "#/definitions/plugin"
+        },
         "dotenv": {
           "title": "dotenv plugin configuration (https://knip.dev/reference/plugins/dotenv)",
           "$ref": "#/definitions/plugin"
@@ -529,6 +533,10 @@
         },
         "prettier": {
           "title": "Prettier plugin configuration (https://knip.dev/reference/plugins/prettier)",
+          "$ref": "#/definitions/plugin"
+        },
+        "prisma": {
+          "title": "Prisma plugin configuration (https://knip.dev/reference/plugins/prisma)",
           "$ref": "#/definitions/plugin"
         },
         "react-cosmos": {

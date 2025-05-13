@@ -65,6 +65,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'exec',
   'exit',
   'expand',
+  'export',
   'expr',
   'factor',
   'false',
