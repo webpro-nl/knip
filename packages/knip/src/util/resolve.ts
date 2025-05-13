@@ -25,3 +25,5 @@ export const createSyncResolver = (extensions: string[]) => {
 const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.json']);
 
 export const _resolveSync = timerify(resolveSync);
+
+export const _createSyncResolver: typeof createSyncResolver = extensions => timerify(createSyncResolver(extensions));
