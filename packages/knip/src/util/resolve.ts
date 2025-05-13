@@ -12,7 +12,7 @@ export const createSyncResolver = (extensions: string[]) => {
   return function resolveSync(specifier: string, baseDir: string) {
     try {
       const resolved = resolver.sync(baseDir, specifier);
-      if (resolved && resolved.path) return toPosix(resolved.path);
+      if (resolved?.path) return toPosix(resolved.path);
     } catch (_error) {}
   };
 };
