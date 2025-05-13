@@ -3,7 +3,7 @@ import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { timerify } from './Performance.js';
 import { toPosix } from './path.js';
 
-export const createSyncResolver = (extensions: string[]) => {
+const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({
     extensions,
     conditionNames: ['require', 'import', 'node', 'default'],
