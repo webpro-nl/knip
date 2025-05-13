@@ -6,13 +6,17 @@ import { getStats } from './math.js';
 import { Table } from './table.js';
 
 const {
-  performance: isPerformanceEnabled = false,
+  performance: enableTimerify = false,
+  'performance-fn': timerifyOnlyFnName,
   memory: isMemoryEnabled = false,
   'memory-realtime': memoryRealtime = false,
 } = parsedArgValues;
 
+const isTimerifyFunctions = enableTimerify || !!timerifyOnlyFnName;
+
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
-  if (!isPerformanceEnabled) return fn;
+  if (!isTimerifyFunctions) return fn;
+  if (timerifyOnlyFnName && name !== timerifyOnlyFnName) return fn;
   return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));
 };
 
@@ -38,7 +42,7 @@ const log = (memInfo: MemInfo) => console.log(keys.map(key => twoFixed(inMB(memI
 
 class Performance {
   isEnabled: boolean;
-  isPerformanceEnabled: boolean;
+  isTimerifyFunctions: boolean;
   isMemoryEnabled: boolean;
   startTime = 0;
   endTime = 0;
@@ -51,9 +55,9 @@ class Performance {
   memoryUsageStart?: ReturnType<typeof memoryUsage>;
   freeMemoryStart?: number;
 
-  constructor({ isPerformanceEnabled = false, isMemoryEnabled = false }) {
-    this.isEnabled = isPerformanceEnabled || isMemoryEnabled;
-    this.isPerformanceEnabled = isPerformanceEnabled;
+  constructor({ isTimerifyFunctions = false, isMemoryEnabled = false }) {
+    this.isEnabled = isTimerifyFunctions || isMemoryEnabled;
+    this.isTimerifyFunctions = isTimerifyFunctions;
     this.isMemoryEnabled = isMemoryEnabled;
 
     this.startTime = performance.now();
@@ -61,7 +65,7 @@ class Performance {
     this.perfId = `perf-${instanceId}`;
     this.memId = `mem-${instanceId}`;
 
-    if (isPerformanceEnabled) {
+    if (isTimerifyFunctions) {
       // timerified functions
       this.fnObserver = new PerformanceObserver(items => {
         for (const entry of items.getEntries()) {
@@ -115,7 +119,7 @@ class Performance {
     );
   }
 
-  getPerformanceTable() {
+  getTimerifiedFunctionsTable() {
     const entriesByName = this.getPerfEntriesByName();
     const table = new Table({ header: true });
     for (const [name, values] of Object.entries(entriesByName)) {
@@ -140,7 +144,7 @@ class Performance {
     if (memoryRealtime && detail) log(detail);
   }
 
-  getMemoryTable() {
+  getMemoryUsageTable() {
     const table = new Table({ header: true });
     for (const entry of this.memEntries) {
       if (!entry.detail) continue;
@@ -177,4 +181,4 @@ class Performance {
   }
 }
 
-export const perfObserver = new Performance({ isPerformanceEnabled, isMemoryEnabled });
+export const perfObserver = new Performance({ isTimerifyFunctions, isMemoryEnabled });

@@ -121,8 +121,8 @@ const run = async () => {
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
     if (perfObserver.isEnabled) await perfObserver.finalize();
-    if (perfObserver.isPerformanceEnabled) console.log(`\n${perfObserver.getPerformanceTable()}`);
-    if (perfObserver.isMemoryEnabled) console.log(`\n${perfObserver.getMemoryTable()}`);
+    if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
+    if (perfObserver.isMemoryEnabled) console.log(`\n${perfObserver.getMemoryUsageTable()}`);
 
     if (perfObserver.isEnabled) {
       const duration = perfObserver.getCurrentDurationInMs();
