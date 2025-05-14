@@ -124,7 +124,7 @@ class Performance {
     const table = new Table({ header: true });
     for (const [name, values] of Object.entries(entriesByName)) {
       const stats = getStats(values);
-      table.newRow();
+      table.row();
       table.cell('Name', name);
       table.cell('size', values.length);
       table.cell('min', stats.min, twoFixed);
@@ -148,7 +148,7 @@ class Performance {
     const table = new Table({ header: true });
     for (const entry of this.memEntries) {
       if (!entry.detail) continue;
-      table.newRow();
+      table.row();
       table.cell('heapUsed', inMB(entry.detail.heapUsed), twoFixed);
       table.cell('heapTotal', inMB(entry.detail.heapTotal), twoFixed);
       table.cell('freemem', inMB(entry.detail.freemem), twoFixed);
