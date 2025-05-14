@@ -212,7 +212,7 @@ Watch current directory, and update reported issues when a file is modified,
 added or deleted.
 
 Watch mode focuses on imports and exports in source files. During watch mode,
-changes in `package.json` and/or `node_modules` are not supported.
+changes in `package.json` or `node_modules` may not cause an updated report.
 
 ## Filters
 
