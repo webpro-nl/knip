@@ -177,6 +177,7 @@ export async function build({
       toSourceFilePath,
       isCache,
       cacheLocation,
+      isProduction,
     });
 
     principal.addPaths(config.paths, dir);

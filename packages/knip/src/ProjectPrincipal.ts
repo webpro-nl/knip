@@ -90,6 +90,7 @@ export class ProjectPrincipal {
     toSourceFilePath,
     isCache,
     cacheLocation,
+    isProduction,
   }: PrincipalOptions) {
     this.cwd = cwd;
 
@@ -106,7 +107,7 @@ export class ProjectPrincipal {
     this.asyncCompilers = asyncCompilers;
     this.isSkipLibs = isSkipLibs;
     this.isWatch = isWatch;
-    this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation });
+    this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation, isProduction });
     this.toSourceFilePath = toSourceFilePath;
 
     // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
