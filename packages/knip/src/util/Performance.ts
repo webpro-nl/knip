@@ -8,11 +8,12 @@ import { Table } from './table.js';
 const {
   performance: enableTimerify = false,
   'performance-fn': timerifyOnlyFnName,
-  memory: isMemoryEnabled = false,
+  memory: enableMemoryUsage = false,
   'memory-realtime': memoryRealtime = false,
 } = parsedArgValues;
 
 const isTimerifyFunctions = enableTimerify || !!timerifyOnlyFnName;
+const isMemoryUsageEnabled = enableMemoryUsage || memoryRealtime;
 
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
   if (!isTimerifyFunctions) return fn;
@@ -43,7 +44,7 @@ const log = (memInfo: MemInfo) => console.log(keys.map(key => twoFixed(inMB(memI
 class Performance {
   isEnabled: boolean;
   isTimerifyFunctions: boolean;
-  isMemoryEnabled: boolean;
+  isMemoryUsageEnabled: boolean;
   startTime = 0;
   endTime = 0;
   perfEntries: PerformanceEntry[] = [];
@@ -55,10 +56,10 @@ class Performance {
   memoryUsageStart?: ReturnType<typeof memoryUsage>;
   freeMemoryStart?: number;
 
-  constructor({ isTimerifyFunctions = false, isMemoryEnabled = false }) {
-    this.isEnabled = isTimerifyFunctions || isMemoryEnabled;
+  constructor({ isTimerifyFunctions = false, isMemoryUsageEnabled = false }) {
+    this.isEnabled = isTimerifyFunctions || isMemoryUsageEnabled;
     this.isTimerifyFunctions = isTimerifyFunctions;
-    this.isMemoryEnabled = isMemoryEnabled;
+    this.isMemoryUsageEnabled = isMemoryUsageEnabled;
 
     this.startTime = performance.now();
     const instanceId = Math.floor(performance.now() * 100);
@@ -75,7 +76,7 @@ class Performance {
       this.fnObserver.observe({ type: 'function' });
     }
 
-    if (isMemoryEnabled) {
+    if (isMemoryUsageEnabled) {
       this.memObserver = new PerformanceObserver(items => {
         for (const entry of items.getEntries() as MemoryEntry[]) {
           this.memEntries.push(entry);
@@ -137,7 +138,7 @@ class Performance {
   }
 
   addMemoryMark(index: number) {
-    if (!this.isMemoryEnabled) return;
+    if (!this.isMemoryUsageEnabled) return;
     const id = `${this.memId}:${index}`;
     const detail = getMemInfo();
     performance.mark(id, { detail });
@@ -181,4 +182,4 @@ class Performance {
   }
 }
 
-export const perfObserver = new Performance({ isTimerifyFunctions, isMemoryEnabled });
+export const perfObserver = new Performance({ isTimerifyFunctions, isMemoryUsageEnabled });

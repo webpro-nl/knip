@@ -123,7 +123,7 @@ const run = async () => {
 
     if (perfObserver.isEnabled) await perfObserver.finalize();
     if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
-    if (perfObserver.isMemoryEnabled) console.log(`\n${perfObserver.getMemoryUsageTable()}`);
+    if (perfObserver.isMemoryUsageEnabled) console.log(`\n${perfObserver.getMemoryUsageTable()}`);
 
     if (perfObserver.isEnabled) {
       const duration = perfObserver.getCurrentDurationInMs();
