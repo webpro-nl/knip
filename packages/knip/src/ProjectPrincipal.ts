@@ -39,7 +39,7 @@ const baseCompilerOptions: ts.CompilerOptions = {
 const tsCreateProgram = timerify(ts.createProgram);
 
 /**
- * This class aims to abstract away TypeScript specific things from the main flow.
+ * Abstracts away TypeScript API from the main flow
  *
  * - Provided by the principal factory
  * - Collects entry and project paths
@@ -54,7 +54,7 @@ export class ProjectPrincipal {
   projectPaths = new Set<string>();
   nonEntryPaths = new Set<string>();
 
-  // We don't want to report unused exports of config/plugin entry files
+  // Don't report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
 
   cwd: string;
@@ -246,7 +246,7 @@ export class ProjectPrincipal {
 
     const typeChecker = this.backend.typeChecker;
 
-    if (!typeChecker) throw new Error('Must initialize TypeChecker before source file analysis');
+    if (!typeChecker) throw new Error('TypeChecker must be initialized before source file analysis');
 
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
     const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
