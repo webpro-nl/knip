@@ -57,6 +57,8 @@ Show debug output.
 ```txt frame=terminal
 knip --memory
 
+(results)
+
 heapUsed  heapTotal  freemem
 --------  ---------  -------
    42.09      70.91  2251.00
@@ -93,6 +95,8 @@ heapUsed  heapTotal  freemem
    42.09      70.91  2251.00
   927.04    1042.58  1166.47
 ...mem info keeps being logged...
+
+(results)
 ```
 
 ### `--performance`
@@ -102,6 +106,8 @@ functions in a table. Example:
 
 ```txt frame=terminal
 $ knip --performance
+
+(results)
 
 Name                           size  min       max       median    sum
 -----------------------------  ----  --------  --------  --------  --------
@@ -133,6 +139,8 @@ overhead of the `timerify` Node.js built-in and focus on that function alone:
 
 ```txt frame=terminal
 $ knip --performance-fn resolveSync
+
+(results)
 
 Name         size   min   max   median   sum
 -----------  -----  ----  ----  ------  ------
