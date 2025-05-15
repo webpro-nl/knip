@@ -32,10 +32,11 @@ const {
   'include-libs': isIncludeLibs = false,
   'isolate-workspaces': isIsolateWorkspaces = false,
   'max-issues': maxIssues = '0',
+  'memory-realtime': memoryRealtime = false,
   'no-config-hints': isDisableConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
-  'no-progress': isNoProgress = isDebug || isTrace,
+  'no-progress': isNoProgress = isDebug || isTrace || memoryRealtime,
   preprocessor = [],
   'preprocessor-options': preprocessorOptions = '',
   production: isProduction = false,
@@ -122,7 +123,7 @@ const run = async () => {
 
     if (perfObserver.isEnabled) await perfObserver.finalize();
     if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
-    if (perfObserver.isMemoryEnabled) console.log(`\n${perfObserver.getMemoryUsageTable()}`);
+    if (perfObserver.isMemoryUsageEnabled && !memoryRealtime) console.log(`\n${perfObserver.getMemoryUsageTable()}`);
 
     if (perfObserver.isEnabled) {
       const duration = perfObserver.getCurrentDurationInMs();

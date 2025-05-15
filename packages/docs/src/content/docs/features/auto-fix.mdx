@@ -26,6 +26,8 @@ necessary.
 
 ## Flags
 
+### Fix
+
 Add the `--fix` flag to remove unused exports and dependencies:
 
 ```sh
@@ -52,8 +54,10 @@ knip --fix-type exports,types
 knip --fix-type exports --fix-type types   # same as above
 ```
 
+### Format
+
 Add `--format` to format the modified files using the formatter and
-configuration in your project. Supports Biome, deno fmt, dprint or Prettier
+configuration in your project. Supports Biome, deno fmt, dprint and Prettier
 (using [Formatly][2]):
 
 ```sh

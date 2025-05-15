@@ -130,7 +130,7 @@ export class WorkspaceWorker {
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
     this.getSourceFile = getSourceFile;
 
-    this.cache = new CacheConsultant({ name: `plugins-${name}`, isEnabled: isCache, cacheLocation });
+    this.cache = new CacheConsultant({ name: `plugins-${name}`, isEnabled: isCache, cacheLocation, isProduction });
   }
 
   public async init() {

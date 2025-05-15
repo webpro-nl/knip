@@ -177,6 +177,7 @@ export async function build({
       toSourceFilePath,
       isCache,
       cacheLocation,
+      isProduction,
     });
 
     principal.addPaths(config.paths, dir);
@@ -421,7 +422,7 @@ export async function build({
       factory.deletePrincipal(principal);
       principals[i] = undefined;
     }
-    perfObserver.addMemoryMark(factory.principals.size);
+    perfObserver.addMemoryMark(factory.getPrincipalCount());
   }
 
   if (!isWatch && isSkipLibs && !isIsolateWorkspaces) {
