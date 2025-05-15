@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/changelogen",
+  "devDependencies": {
+    "changelogen": "*"
+  }
+}
