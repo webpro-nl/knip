@@ -51,3 +51,7 @@ export const toUnconfig = toConfigMap(['json', 'ts', 'mts', 'cts', 'js', 'mjs', 
   rcSuffix: '',
   configFiles: false,
 });
+export const toC12config = toConfigMap(
+  ['json', 'jsonc', 'json5', 'yaml', 'yml', 'js', 'ts', 'mjs', 'cjs', 'mts', 'cts', 'toml'],
+  { configDir: true }
+);

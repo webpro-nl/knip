@@ -327,6 +327,10 @@
           "title": "Capacitor plugin configuration (https://knip.dev/reference/plugins/capacitor)",
           "$ref": "#/definitions/plugin"
         },
+        "changelogen": {
+          "title": "changelogen plugin configuration (https://knip.dev/reference/plugins/changelogen)",
+          "$ref": "#/definitions/plugin"
+        },
         "changesets": {
           "title": "Changesets plugin configuration (https://knip.dev/reference/plugins/changesets)",
           "$ref": "#/definitions/plugin"
