@@ -22,7 +22,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
   const appDir = join(configFileDir, appDirectory);
 
   // If using flatRoutes from @react-router/fs-routes it will throw an error if this variable is not defined
-  // @ts-ignore
+  // @ts-expect-error
   globalThis.__reactRouterAppDirectory = appDir;
 
   let routeConfig: RouteConfigEntry[] = [];

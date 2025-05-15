@@ -17,9 +17,9 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
       }
     }
 
-    // @ts-ignore - added in TS v5.5.0
+    // @ts-ignore ts.isJSDocImportTag/node.moduleSpecifier added in TS v5.5.0
     if (supportsJSDocImportTag && ts.isJSDocImportTag(node) && ts.isStringLiteralLike(node.moduleSpecifier)) {
-      // @ts-ignore - added in TS v5.5.0
+      // @ts-ignore node.moduleSpecifier added in TS v5.5.0
       const moduleSpecifier = node.moduleSpecifier;
       imports.push({ specifier: moduleSpecifier.text, identifier: undefined, pos: moduleSpecifier.pos });
     }
