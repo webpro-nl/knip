@@ -399,6 +399,10 @@
           "title": "graphql-codegen plugin configuration (https://knip.dev/reference/plugins/graphql-codegen)",
           "$ref": "#/definitions/plugin"
         },
+        "hardhat": {
+          "title": "hardhat plugin configuration (https://knip.dev/reference/plugins/hardhat)",
+          "$ref": "#/definitions/plugin"
+        },
         "husky": {
           "title": "husky plugin configuration (https://knip.dev/reference/plugins/husky)",
           "$ref": "#/definitions/plugin"

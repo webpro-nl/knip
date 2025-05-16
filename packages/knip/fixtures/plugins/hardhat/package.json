@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/hardhat",
+  "devDependencies": {
+    "hardhat": "*"
+  }
+}

@@ -39,6 +39,7 @@ export const pluginsSchema = z.object({
   'github-actions': pluginSchema,
   glob: pluginSchema,
   'graphql-codegen': pluginSchema,
+  hardhat: pluginSchema,
   husky: pluginSchema,
   'i18next-parser': pluginSchema,
   jest: pluginSchema,
