@@ -1,8 +1,6 @@
-import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
 import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 import { defineConfig } from 'astro/config';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import remarkDirective from 'remark-directive';
 import { fixInternalLinks } from './remark/fixInternalLinks.ts';
 import { transformDirectives } from './remark/transformDirectives.ts';
@@ -23,7 +21,6 @@ export default defineConfig({
   },
   markdown: {
     remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
-    rehypePlugins: [rehypeHeadingIds, rehypeAutolinkHeadings],
   },
   integrations: [
     starlight({

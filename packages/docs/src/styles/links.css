@@ -1,40 +1,26 @@
 .sl-markdown-content a {
-  color: var(--sl-color-text);
   text-decoration: none;
   padding-bottom: 0.0675rem;
-  border-bottom: 1px solid var(--sl-color-gray-1);
   transition: border-color 300ms;
 }
 
-.sl-markdown-content {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    position: relative;
+.sl-markdown-content a:not(:where(.not-content *)) {
+  color: var(--sl-color-text);
+  border-bottom: 1px solid var(--sl-color-gray-1);
+}
 
-    a::before {
-      content: '#';
-    }
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+  border-color: var(--sl-color-white);
+}
 
-    a {
-      position: absolute;
-      top: 0;
-      left: 0;
-      margin-left: -1.5rem;
-      text-decoration: none;
-      border-bottom: none;
-      opacity: 0;
-      color: var(--sl-color-text);
-      transition: color 0.3s, opacity 0.3s;
-    }
+.sl-markdown-content .sl-anchor-link {
+  color: var(--sl-color-text);
+  text-decoration: none;
+  border-bottom: none;
+}
 
-    &:hover a {
-      opacity: 1;
-    }
-  }
+.sl-markdown-content .sl-anchor-link:hover {
+  color: var(--sl-color-text-accent);
 }
 
 .right-sidebar a:hover,
@@ -63,12 +49,6 @@ footer .pagination-links a:hover {
 :root {
   .starlight-aside a {
     color: var(--sl-color-white);
-  }
-}
-
-:root {
-  .sl-markdown-content a:hover {
-    border-color: var(--sl-color-white);
   }
 }
 
