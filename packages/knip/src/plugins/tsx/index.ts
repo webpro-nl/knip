@@ -1,5 +1,5 @@
 import type { PackageJson } from 'src/types/package-json.js';
-import { toBinary, toDependency, toEntry } from 'src/util/input.js';
+import { toDependency, toEntry } from 'src/util/input.js';
 import { hasDependency } from 'src/util/plugin.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 
@@ -18,7 +18,7 @@ const packageJsonPath = (id: PackageJson) => id;
 const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
   const scripts = localConfig.scripts;
 
-  const entries = [toBinary('tsx'), toDependency('tsx')];
+  const entries = [toDependency('tsx')];
 
   if (scripts && Object.keys(scripts).some(script => /(?<=^|\s)tsx\s(.*)--test/.test(scripts[script]))) {
     const patterns = [
