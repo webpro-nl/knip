@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/tsx",
+  "devDependencies": {
+    "tsx": "*"
+  },
+  "scripts": {
+    "test": "tsx --test"
+  }
+}
