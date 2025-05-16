@@ -14,7 +14,7 @@ const entry: string[] = ['hardhat.config.{js,cjs,mjs,ts}'];
 
 const resolve: Resolve = async () => {
   return [toDependency('hardhat')];
-}
+};
 
 export default {
   title,
