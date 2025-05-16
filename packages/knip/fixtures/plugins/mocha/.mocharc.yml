@@ -1,3 +1,5 @@
-extension:
-  - ts
-require: ts-node/register
+spec:
+  - "**/*.test.ts"
+require:
+  - ts-node/register
+  - hooks.ts
