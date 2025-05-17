@@ -1,9 +1,8 @@
-import picocolors from 'picocolors';
 import type { Entries } from 'type-fest';
-import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.js';
+import type { Issue, ReporterOptions } from '../types/issues.js';
 import { createOwnershipEngine } from '../util/codeowners.js';
-import { relative, resolve, toRelative } from '../util/path.js';
-import { getTitle, logIssueLine, logTitle } from './util.js';
+import { relative, resolve } from '../util/path.js';
+import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util.js';
 
 type OwnedIssue = Issue & { owner: string };
 
@@ -11,16 +10,10 @@ type ExtraReporterOptions = {
   path?: string;
 };
 
-const logIssueSet = (issues: { symbol: string; owner: string }[]) => {
-  for (const issue of issues.sort((a, b) => (a.owner < b.owner ? -1 : 1))) {
-    console.log(picocolors.cyan(issue.owner), toRelative(issue.symbol));
-  }
-};
-
 const logIssueRecord = (issues: OwnedIssue[]) => {
   const sortedByFilePath = issues.sort((a, b) => (a.owner < b.owner ? -1 : 1));
   for (const { filePath, symbols, owner, parentSymbol } of sortedByFilePath) {
-    logIssueLine({ owner, filePath, symbols, parentSymbol });
+    console.log(getIssueLine({ owner, filePath, symbols, parentSymbol }));
   }
 };
 
@@ -43,32 +36,22 @@ export default ({ report, issues, isShowProgress, options }: ReporterOptions) =>
     owner: calcFileOwnership(issue.filePath),
   });
 
-  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
-    if (isReportType) {
-      const title = reportMultipleGroups && getTitle(reportType);
-      const isSet = issues[reportType] instanceof Set;
-      const toIssue = (filePath: string) => ({ type: reportType, filePath, symbol: filePath }) as Issue;
+  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+    if (reportType === 'files') reportType = '_files';
 
-      const issuesForType =
-        issues[reportType] instanceof Set
-          ? Array.from(issues[reportType] as IssueSet)
-              .map(toIssue)
-              .map(addOwner)
-          : reportType === 'duplicates'
-            ? Object.values(issues[reportType]).flatMap(Object.values).map(addOwner)
-            : Object.values(issues[reportType] as IssueRecords).map(issues => {
-                const symbols = Object.values(issues);
-                return addOwner({ ...symbols[0], symbols });
-              });
+    if (isReportType) {
+      const title = reportMultipleGroups && getIssueTypeTitle(reportType);
+
+      const issuesForType = Object.values(issues[reportType]).flatMap(issues => {
+        if (reportType === 'duplicates') return Object.values(issues).map(addOwner);
+        const symbols = Object.values(issues);
+        return addOwner({ ...symbols[0], symbols });
+      });
 
       if (issuesForType.length > 0) {
         if (totalIssues) console.log();
-        title && logTitle(title, issuesForType.length);
-        if (isSet) {
-          logIssueSet(issuesForType);
-        } else {
-          logIssueRecord(issuesForType);
-        }
+        title && console.log(getColoredTitle(title, issuesForType.length));
+        logIssueRecord(issuesForType);
       }
 
       totalIssues = totalIssues + issuesForType.length;

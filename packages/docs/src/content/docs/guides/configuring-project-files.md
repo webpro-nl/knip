@@ -27,15 +27,18 @@ calculated like so:
 unused files = project files - (entry files + resolved files)
 ```
 
-:::tip
-
-To exclude files from the set of project files, first look at using negated
-`project` patterns. This is recommended over `ignore` patterns.
-
-:::
-
 See [entry files][1] to see where Knip looks for entry files. Read on to learn
 more about fine-tuning the sets of entry and project files.
+
+:::tip
+
+Use negated `project` patterns to fine-tune the files that should be included in
+the analysis.
+
+Use `ignore` patterns to exclude issues in matching files from the report. These
+files are not excluded from the analysis.
+
+:::
 
 ## Negated patterns
 
@@ -43,8 +46,8 @@ Let's take a look at using negated patterns for `entry` and `project` files. If
 you think there are too many files in the analysis, this is the first step in
 selecting the right files for the analysis.
 
-For example, we need to explicitly add route files as entry files, except those
-starting with an underscore. Then we can use a negated pattern like so:
+For example, if we need to explicitly add route files as entry files, except
+those starting with an underscore. Then we can use a negated pattern like so:
 
 ```json
 {
@@ -53,7 +56,8 @@ starting with an underscore. Then we can use a negated pattern like so:
 ```
 
 If certain files are not part of our project source files and are unwantedly
-reported as unused files, we can use negated `project` patterns:
+reported as unused files (i.e. false positives), we can use negated `project`
+patterns:
 
 ```json
 {
@@ -144,8 +148,11 @@ not excluded from the analysis, only their issues are not reported.
 
 :::tip
 
-The goal of `ignore` patterns is to exclude the issues in matching files from
-the report. These files are not excluded from the analysis.
+Use negated `project` patterns to fine-tune the files that should be included in
+the analysis.
+
+Use `ignore` patterns to exclude issues in matching files from the report. These
+files are not excluded from the analysis.
 
 :::
 
@@ -201,6 +208,13 @@ then be excluded in production mode:
 
 Remember to keep adding the exclamation mark `suffix!` for production file
 patterns.
+
+:::tip
+
+Use the exclamation mark (`!`) on both ends (`!`) to exclude files in production
+mode.
+
+:::
 
 In rare occasions, for large projects where a single configuration for both
 default and production mode gets unwieldy, it might be interesting to consider

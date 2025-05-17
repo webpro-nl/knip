@@ -88,7 +88,7 @@ export const getWatchHandler = async ({
               break;
           }
 
-          const filePaths = principal.getUsedResolvedFiles();
+          const filePaths = factory.getPrincipals().flatMap(p => p.getUsedResolvedFiles());
 
           if (event === 'added' || event === 'deleted') {
             // Flush to reset imports/exports
@@ -103,7 +103,7 @@ export const getWatchHandler = async ({
                 // Remove files no longer referenced
                 graph.delete(filePath);
                 analyzedFiles.delete(filePath);
-                if (filePath.startsWith(cwd)) cachedUnusedFiles.add(filePath);
+                if (principal.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
               }
             }
 

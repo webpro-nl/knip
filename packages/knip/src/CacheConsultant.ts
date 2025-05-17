@@ -8,6 +8,7 @@ type CacheOptions = {
   name: string;
   isEnabled: boolean;
   cacheLocation: string;
+  isProduction: boolean;
 };
 
 export class CacheConsultant<T> {
@@ -17,7 +18,7 @@ export class CacheConsultant<T> {
   constructor(options: CacheOptions) {
     this.isEnabled = options.isEnabled;
     if (this.isEnabled) {
-      const cacheName = `${options.name.replace(/[^a-z0-9]/g, '-').replace(/-*$/, '')}-${version}`;
+      const cacheName = `${options.name.replace(/[^a-z0-9]/g, '-').replace(/-*$/, '')}-${options.isProduction ? '-prod' : ''}-${version}`;
       this.cache = new FileEntryCache(cacheName, options.cacheLocation);
       this.reconcile = timerify(this.cache.reconcile).bind(this.cache);
       this.getFileDescriptor = timerify(this.cache.getFileDescriptor).bind(this.cache);

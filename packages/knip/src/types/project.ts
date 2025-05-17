@@ -16,4 +16,5 @@ export type PrincipalOptions = {
   toSourceFilePath: ToSourceFilePath;
   isCache: boolean;
   cacheLocation: string;
+  isProduction: boolean;
 };
