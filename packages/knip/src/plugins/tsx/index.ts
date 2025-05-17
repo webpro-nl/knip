@@ -1,5 +1,5 @@
 import type { PackageJson } from 'src/types/package-json.js';
-import { toDependency, toEntry } from 'src/util/input.js';
+import { toEntry } from 'src/util/input.js';
 import { hasDependency } from 'src/util/plugin.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 
