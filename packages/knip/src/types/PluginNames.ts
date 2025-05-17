@@ -10,6 +10,7 @@ export type PluginName =
   | 'changesets'
   | 'commitizen'
   | 'commitlint'
+  | 'convex'
   | 'create-typescript-app'
   | 'cspell'
   | 'cucumber'
@@ -115,6 +116,7 @@ export const pluginNames = [
   'changesets',
   'commitizen',
   'commitlint',
+  'convex',
   'create-typescript-app',
   'cspell',
   'cucumber',

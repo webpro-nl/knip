@@ -23,6 +23,7 @@ export const pluginsSchema = z.object({
   changesets: pluginSchema,
   commitizen: pluginSchema,
   commitlint: pluginSchema,
+  convex: pluginSchema,
   'create-typescript-app': pluginSchema,
   cspell: pluginSchema,
   cucumber: pluginSchema,

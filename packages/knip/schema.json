@@ -339,6 +339,10 @@
           "title": "commitlint plugin configuration (https://knip.dev/reference/plugins/commitlint)",
           "$ref": "#/definitions/plugin"
         },
+        "convex": {
+          "title": "convex plugin configuration (https://knip.dev/reference/plugins/convex)",
+          "$ref": "#/definitions/plugin"
+        },
         "create-typescript-app": {
           "title": "create-typescript-app plugin configuration (https://knip.dev/reference/plugins/create-typescript-app)",
           "$ref": "#/definitions/plugin"
