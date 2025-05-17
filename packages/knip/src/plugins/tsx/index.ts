@@ -18,7 +18,7 @@ const packageJsonPath = (id: PackageJson) => id;
 const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
   const scripts = localConfig.scripts;
 
-  const entries = [toDependency('tsx')];
+  const entries = [];
 
   if (scripts && Object.keys(scripts).some(script => /(?<=^|\s)tsx\s(.*)--test/.test(scripts[script]))) {
     const patterns = [
