@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/convex",
+  "dependencies": {
+    "convex": "*"
+  }
+}
