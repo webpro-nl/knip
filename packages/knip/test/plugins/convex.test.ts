@@ -8,16 +8,13 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/convex');
 
 test('Find dependencies with the convex plugin', async () => {
-  const { /* issues, */ counters } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  // console.log({ issues });
-
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     processed: 3,
     total: 3,
   });

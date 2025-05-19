@@ -9,7 +9,7 @@ const enablers = ['convex'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry: string[] = ['convex/*.config.@(js|jsx|ts|tsx)', 'convex/_generated/*.@(js|jsx|ts|tsx)'];
+const entry: string[] = ['convex/*.config.@(js|ts)', 'convex/_generated/*.@(js|ts)'];
 
 export default {
   title,
