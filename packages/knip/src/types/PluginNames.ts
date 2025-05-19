@@ -27,6 +27,7 @@ export type PluginName =
   | 'github-actions'
   | 'glob'
   | 'graphql-codegen'
+  | 'hardhat'
   | 'husky'
   | 'i18next-parser'
   | 'jest'
@@ -133,6 +134,7 @@ export const pluginNames = [
   'github-actions',
   'glob',
   'graphql-codegen',
+  'hardhat',
   'husky',
   'i18next-parser',
   'jest',
