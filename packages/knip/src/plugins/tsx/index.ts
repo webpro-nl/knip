@@ -1,7 +1,7 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 
 // https://tsx.is
 
