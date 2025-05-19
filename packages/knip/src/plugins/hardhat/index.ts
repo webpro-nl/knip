@@ -1,4 +1,4 @@
-import { toDependency } from 'src/util/input.js';
+import { toDependency } from '../../util/input.js';
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
 
