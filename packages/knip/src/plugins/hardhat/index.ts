@@ -1,5 +1,5 @@
-import { toDependency } from '../../util/input.js';
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 
 // https://hardhat.org/docs
