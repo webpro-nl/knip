@@ -10,11 +10,7 @@ const enablers = ['changelogen', 'changelogithub'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const resolveConfig = () => {
-  return [];
-};
-
-const config = ['package.json', ...toC12config('changelog')];
+const entry = ['package.json', ...toC12config('changelog')];
 
 const isRootOnly = true;
 
@@ -23,6 +19,5 @@ export default {
   enablers,
   isEnabled,
   isRootOnly,
-  resolveConfig,
-  config,
+  entry,
 } satisfies Plugin;

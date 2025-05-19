@@ -1,5 +1,8 @@
 {
   "name": "@fixtures/changelogen",
+  "scripts": {
+    "changelogen": "changelogen --config ./changelogen.config.ts"
+  },
   "devDependencies": {
     "changelogen": "*"
   }

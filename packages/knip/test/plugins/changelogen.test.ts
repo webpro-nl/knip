@@ -15,7 +15,6 @@ test('Find dependencies with the Changelogen plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     processed: 1,
     total: 1,
   });
