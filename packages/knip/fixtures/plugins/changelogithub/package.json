@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/changelogithub",
+  "scripts": {
+    "changelogithub": "changelogithub"
+  },
+  "devDependencies": {
+    "changelogithub": "*"
+  }
+}

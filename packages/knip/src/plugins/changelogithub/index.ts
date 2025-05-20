@@ -2,15 +2,15 @@ import type { IsPluginEnabled, Plugin } from '../../types/config.js';
 import { toC12config } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
 
-// https://github.com/unjs/changelogen
+// https://github.com/antfu/changelogithub
 
-const title = 'Changelogen';
+const title = 'Changelogithub';
 
-const enablers = ['changelogen'];
+const enablers = ['changelogithub'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['package.json', ...toC12config('changelog')];
+const entry = ['package.json', ...toC12config('changelogithub')];
 
 const isRootOnly = true;
 
