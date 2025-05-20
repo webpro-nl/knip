@@ -59,7 +59,10 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .flatMap(target => {
       if (target.command) return [target.command];
       if (target.options?.command) return [target.options.command];
-      if (target.options?.commands) return target.options.commands;
+      if (target.options?.commands)
+        return target.options.commands.map(commandConfig =>
+          typeof commandConfig === 'string' ? commandConfig : commandConfig.command
+        );
       return [];
     });
 
