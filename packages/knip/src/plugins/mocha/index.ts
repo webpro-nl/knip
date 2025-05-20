@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { MochaConfig } from './types.js';
 
@@ -18,7 +18,11 @@ const entry = ['**/test/*.{js,cjs,mjs}'];
 const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
   const require = localConfig.require ? [localConfig.require].flat() : [];
-  return [...entryPatterns, ...require].map(id => toEntry(id));
+
+  const inputs: Input[] = [];
+  inputs.push(...entryPatterns.map(id => toEntry(id)));
+  inputs.push(...require.map(id => toDeferResolve(id)));
+  return inputs;
 };
 
 const args = {
