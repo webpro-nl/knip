@@ -7,6 +7,8 @@ export type PluginName =
   | 'bun'
   | 'c8'
   | 'capacitor'
+  | 'changelogen'
+  | 'changelogithub'
   | 'changesets'
   | 'commitizen'
   | 'commitlint'
@@ -114,6 +116,8 @@ export const pluginNames = [
   'bun',
   'c8',
   'capacitor',
+  'changelogen',
+  'changelogithub',
   'changesets',
   'commitizen',
   'commitlint',

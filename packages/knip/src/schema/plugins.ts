@@ -20,6 +20,8 @@ export const pluginsSchema = z.object({
   bun: pluginSchema,
   c8: pluginSchema,
   capacitor: pluginSchema,
+  changelogen: pluginSchema,
+  changelogithub: pluginSchema,
   changesets: pluginSchema,
   commitizen: pluginSchema,
   commitlint: pluginSchema,
