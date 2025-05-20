@@ -8,6 +8,7 @@ export type PluginName =
   | 'c8'
   | 'capacitor'
   | 'changelogen'
+  | 'changelogithub'
   | 'changesets'
   | 'commitizen'
   | 'commitlint'
@@ -116,6 +117,7 @@ export const pluginNames = [
   'c8',
   'capacitor',
   'changelogen',
+  'changelogithub',
   'changesets',
   'commitizen',
   'commitlint',

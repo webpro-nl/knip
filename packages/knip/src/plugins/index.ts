@@ -7,6 +7,7 @@ import { default as bun } from './bun/index.js';
 import { default as c8 } from './c8/index.js';
 import { default as capacitor } from './capacitor/index.js';
 import { default as changelogen } from './changelogen/index.js';
+import { default as changelogithub } from './changelogithub/index.js';
 import { default as changesets } from './changesets/index.js';
 import { default as commitizen } from './commitizen/index.js';
 import { default as commitlint } from './commitlint/index.js';
@@ -115,6 +116,7 @@ export const Plugins = {
   c8,
   capacitor,
   changelogen,
+  changelogithub,
   changesets,
   commitizen,
   commitlint,

@@ -331,6 +331,10 @@
           "title": "changelogen plugin configuration (https://knip.dev/reference/plugins/changelogen)",
           "$ref": "#/definitions/plugin"
         },
+        "changelogithub": {
+          "title": "changelogithub plugin configuration (https://knip.dev/reference/plugins/changelogithub)",
+          "$ref": "#/definitions/plugin"
+        },
         "changesets": {
           "title": "Changesets plugin configuration (https://knip.dev/reference/plugins/changesets)",
           "$ref": "#/definitions/plugin"
