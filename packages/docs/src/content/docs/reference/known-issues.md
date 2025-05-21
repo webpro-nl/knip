@@ -12,8 +12,14 @@ load such files differently, in a different environment, or without certain
 environment variables set.
 
 If it isn't clear what's throwing the exception, try another run with `--debug`
-to locate the cause of the issue with more details. Sometimes the issue is a
-missing environment variable. As a last resort, the [plugin can be disabled][1].
+to locate the cause of the issue with more details. Examples of issues when Knip
+loads configuration files:
+
+- Missing environment variable
+- Relative path in a workspace (e.g. only `'.'` is set, try
+  `import.meta.dirname` or `__dirname`)
+
+As a last resort, the [plugin can be disabled][1].
 
 ## Path aliases in config files
 
