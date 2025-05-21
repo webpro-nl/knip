@@ -1,0 +1,15 @@
+{
+  "name": "@workspaces-plugin-overlap/workspace-a",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "docs": "typedoc"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "*",
+    "@types/node": "*",
+    "typedoc": "*",
+    "typedoc-plugin-markdown": "*",
+    "typescript": "*"
+  }
+}

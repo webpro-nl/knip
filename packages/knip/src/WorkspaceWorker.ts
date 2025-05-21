@@ -371,7 +371,8 @@ export class WorkspaceWorker {
 
         const cache: CacheItem = {};
 
-        if (plugin.resolveConfig && !seen.get(wsName)?.has(configFilePath)) {
+        const key = `${wsName}:${pluginName}`;
+        if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
           const localConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
           if (localConfig) {
             const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
@@ -398,8 +399,8 @@ export class WorkspaceWorker {
           addInput(toEntry(configFilePath));
           addInput(toConfig(pluginName, configFilePath));
 
-          if (!seen.has(wsName)) seen.set(wsName, new Set());
-          seen.get(wsName)?.add(configFilePath);
+          if (!seen.has(key)) seen.set(key, new Set());
+          seen.get(key)?.add(configFilePath);
         }
 
         if (!isManifest && fd?.changed && fd.meta) fd.meta.data = cache;
