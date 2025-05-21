@@ -31,7 +31,6 @@ import {
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getEntryPathsFromManifest } from '../util/package-json.js';
 import { dirname, isAbsolute, join, relative, toRelative } from '../util/path.js';
-import {} from '../util/tag.js';
 import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 import { loadTSConfig } from '../util/tsconfig-loader.js';
 
