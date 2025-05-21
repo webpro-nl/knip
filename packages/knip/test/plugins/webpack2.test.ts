@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/webpack2');
 
-test('Find dependencies with Webpack plugin (2)', async () => {
+test('Find dependencies with the Webpack plugin (2)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -20,7 +20,7 @@ test('Find dependencies with Webpack plugin (2)', async () => {
   });
 });
 
-test('Find dependencies with Webpack plugin (2) (production)', async () => {
+test('Find dependencies with the Webpack plugin (2) (production)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

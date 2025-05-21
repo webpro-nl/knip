@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/prisma",
-  "version": "*",
   "devDependencies": {
     "prisma": "*",
     "tsx": "*"
