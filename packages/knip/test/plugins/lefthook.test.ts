@@ -17,6 +17,7 @@ test('Find dependencies with the Lefthook plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     binaries: 1,
     processed: 1,
     total: 1,
