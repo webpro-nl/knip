@@ -16,7 +16,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
 
 const config = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
-const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', '**/__mocks__/**/*.[jt]s'];
+const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
+
+const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', ...mocks];
 
 const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
   const { configFileDir } = options;
@@ -109,6 +111,8 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
   const entries = localConfig.testMatch
     ? localConfig.testMatch.map(replaceRootDir).map(id => toEntry(id))
     : entry.map(id => toEntry(id));
+
+  if (localConfig.testMatch && !options.config.entry) entries.push(...mocks.map(id => toEntry(id)));
 
   const result = inputs.map(dependency => {
     dependency.specifier = replaceRootDir(dependency.specifier);

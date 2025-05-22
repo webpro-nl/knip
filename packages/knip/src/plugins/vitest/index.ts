@@ -16,7 +16,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['vitest.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{js,mjs,ts,cjs,mts,cts,json}'];
 
-const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)', '**/__mocks__/**/*.[jt]s?(x)'];
+const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
+
+const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)', ...mocks];
 
 const isVitestCoverageCommand = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
 
@@ -107,6 +109,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     if (cfg.test) {
       if (cfg.test?.include) {
         for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
+        if (!options.config.entry) for (const dependency of mocks) inputs.add(toEntry(join(dir, dependency)));
       } else {
         for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
       }
