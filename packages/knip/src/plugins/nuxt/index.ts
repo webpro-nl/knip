@@ -8,14 +8,7 @@ const title = 'Nuxt';
 
 const enablers = ['nuxt'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) => {
-  const isEnabled = hasDependency(dependencies, enablers);
-
-  // TODO Add generic way for plugins to init?
-  if (isEnabled && !('defineNuxtConfig' in globalThis)) (globalThis as any).defineNuxtConfig = (c: any) => c;
-
-  return isEnabled;
-};
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['nuxt.config.{js,mjs,ts}'];
 
@@ -30,6 +23,12 @@ const production = [
   'server/middleware/**/*.ts',
   'server/plugins/**/*.ts',
 ];
+
+const setup = async () => {
+  if (globalThis && !('defineNuxtConfig' in globalThis)) {
+    Object.defineProperty(globalThis, 'defineNuxtConfig', { value: (id: any) => id });
+  }
+};
 
 const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
   const srcDir = localConfig.srcDir ?? '.';
@@ -61,5 +60,6 @@ export default {
   isEnabled,
   config,
   production,
+  setup,
   resolveConfig,
 } satisfies Plugin;
