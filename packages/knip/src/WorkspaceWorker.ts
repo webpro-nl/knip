@@ -373,12 +373,16 @@ export class WorkspaceWorker {
 
         const key = `${wsName}:${pluginName}`;
         if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
+          if (typeof plugin.setup === 'function') await plugin.setup(resolveOpts);
+
           const localConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
           if (localConfig) {
             const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
             for (const input of inputs) addInput(input, configFilePath);
             cache.resolveConfig = inputs;
           }
+
+          if (typeof plugin.teardown === 'function') await plugin.teardown(resolveOpts);
         }
 
         if (plugin.resolveFromAST) {

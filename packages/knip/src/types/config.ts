@@ -119,6 +119,10 @@ export interface PluginOptions extends BaseOptions {
   getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 
+type PluginSetup = (options: PluginOptions) => Promise<void> | void;
+
+type PluginTeardown = (options: PluginOptions) => Promise<void> | void;
+
 export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
@@ -146,6 +150,8 @@ export interface Plugin {
   entry?: string[];
   production?: string[];
   project?: string[];
+  setup?: PluginSetup;
+  teardown?: PluginTeardown;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   resolveFromAST?: ResolveFromAST;
