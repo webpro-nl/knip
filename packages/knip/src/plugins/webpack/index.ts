@@ -1,4 +1,4 @@
-import type { RuleSetRule, RuleSetUseItem } from 'webpack';
+import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
 import {
@@ -128,9 +128,9 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
         }
       }
 
-      if (opts.resolve?.alias) {
+      const processAlias = (aliases: NonNullable<ResolveOptions['alias']>) => {
         const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
-        for (const [alias, value] of Object.entries(opts.resolve.alias)) {
+        for (const [alias, value] of Object.entries(aliases)) {
           if (!value) continue;
           const prefixes = Array.isArray(value) ? value : [value];
           if (alias.endsWith('$')) {
@@ -142,6 +142,13 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
             }
           }
         }
+      };
+
+      if (opts.resolve?.alias) {
+        processAlias(opts.resolve.alias);
+      }
+      if (opts.resolveLoader?.alias) {
+        processAlias(opts.resolveLoader.alias);
       }
     }
   }
