@@ -97,6 +97,11 @@ module.exports = () => {
         Vue: ['vue/dist/vue.esm.js', 'default'],
       }),
     ],
+    resolveLoader: {
+      alias: {
+        'my-loader': path.resolve(__dirname, 'src/my-loader.js'),
+      },
+    },
     optimization: {
       minimizer: [new HtmlMinimizerPlugin({ parallel: true })],
     },
