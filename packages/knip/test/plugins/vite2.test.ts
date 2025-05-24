@@ -15,8 +15,8 @@ test('Should not find issues with extensions when build_type is desktop', async 
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 0,
     devDependencies: 2,
+    files: 0,
     unlisted: 0,
     processed: 3,
     total: 3,
