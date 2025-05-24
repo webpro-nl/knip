@@ -32,6 +32,7 @@ export interface ViteConfig extends VitestConfig {
   };
   resolve?: {
     alias?: AliasOptions;
+    extensions?: string[];
   };
 }
 

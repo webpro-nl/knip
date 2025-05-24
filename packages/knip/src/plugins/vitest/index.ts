@@ -1,3 +1,4 @@
+import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { type Input, toAlias, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
@@ -118,7 +119,16 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     }
 
     if (cfg.resolve?.alias) addAliases(cfg.resolve.alias);
+    if (cfg.resolve?.extensions) {
+      // Filter out default extensions from resolve.extensions
+      const customExtensions = cfg.resolve.extensions.filter(
+        ext => ext.startsWith('.') && !DEFAULT_EXTENSIONS.includes(ext)
+      );
 
+      for (const ext of customExtensions) {
+        inputs.add(toEntry(`src/**/*${ext}`));
+      }
+    }
     for (const dependency of findConfigDependencies(cfg, options)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];
     const deps = (typeof _entry === 'string' ? [_entry] : Object.values(_entry))
