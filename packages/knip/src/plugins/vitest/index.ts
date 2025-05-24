@@ -124,7 +124,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       const customExtensions = cfg.resolve.extensions.filter(
         ext => ext.startsWith('.') && !DEFAULT_EXTENSIONS.includes(ext)
       );
-      
+
       for (const ext of customExtensions) {
         inputs.add(toEntry(`src/**/*${ext}`));
       }
