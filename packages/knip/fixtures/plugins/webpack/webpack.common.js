@@ -99,7 +99,7 @@ module.exports = () => {
     ],
     resolveLoader: {
       alias: {
-        'my-loader': path.resolve(__dirname, 'src/my-loader.js'),
+        'my-loader': path.resolve(__dirname, 'src/my-custom-loader.js'),
       },
     },
     optimization: {
