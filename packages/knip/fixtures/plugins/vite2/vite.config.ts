@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
-const isDesktop = process.env.build_type === 'desktop';
+const isDesktop = true;
 function getExtensions() {
   const extensions = ['.js', '.ts', '.tsx', '.json'];
   if (isDesktop) {
