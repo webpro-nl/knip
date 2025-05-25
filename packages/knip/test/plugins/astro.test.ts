@@ -8,14 +8,16 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/astro');
 
 test('Find dependencies with the Astro plugin', async () => {
-  const { counters } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
+  console.log('Issues:', issues);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 19,
-    total: 19,
+    processed: 21,
+    total: 21,
   });
 });

@@ -28,3 +28,16 @@ export const scriptBodies: SyncCompilerFn = (text: string) => {
   }
   return scripts.join(';\n');
 };
+
+// Extract paths as imports from frontmatter for given keys (e.g., 'layout')
+const frontmatterMatcher = /---[\s\S]*?---/g;
+export const importsWithinFrontmatter = (text: string, keys: string[] = []) => {
+  const imports = [...text.matchAll(frontmatterMatcher)].flatMap(([frontmatter]) => {
+    return keys.flatMap(key => {
+      const valueMatcher = new RegExp(`${key}:\\s*["']([^"']+)["']`, 'i');
+      const match = frontmatter.match(valueMatcher);
+      return match?.[1] ? [`import ${key} from "${match[1]}";`] : [];
+    });
+  });
+  return imports.join('\n');
+};
