@@ -2,7 +2,7 @@ import { fencedCodeBlockMatcher, importMatcher, importsWithinFrontmatter } from 
 import type { HasDependency } from './types.js';
 
 // https://docs.astro.build/en/guides/integrations-guide/mdx/
-const astroMDXDependencies = ['@astrojs/mdx'];
+const astroMDXDependencies = ['@astrojs/mdx', '@astrojs/starlight'];
 
 // Fields in frontmatter that could contain imports
 const frontmatterImportFields = ['layout'];
