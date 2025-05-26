@@ -15,20 +15,17 @@ const mdxDependencies = [
   'remark-mdx',
 ];
 
+// Fields in frontmatter that could contain imports
+const frontmatterImportFields = ['layout'];
+
 const condition = (hasDependency: HasDependency) => mdxDependencies.some(hasDependency);
 
 const compiler = (text: string) => {
-  // Get imports from the MDX content ignoring imports within fenced code blocks
-  const imports = [...text.replace(fencedCodeBlockMatcher, '').matchAll(importMatcher)].map(match => match[0]);
+  const imports = text.replace(fencedCodeBlockMatcher, '').matchAll(importMatcher);
 
-  let frontmatterImports = '';
+  const frontmatterImports = [importsWithinFrontmatter(text, frontmatterImportFields)];
 
-  // If this is an Astro project, also treat the layout path in the frontmatter as an import
-  if (mdxDependencies.includes('astro')) {
-    frontmatterImports = importsWithinFrontmatter(text, ['layout']);
-  }
-
-  return [...imports, frontmatterImports].filter(Boolean).join('\n');
+  return [...imports, ...frontmatterImports].join('\n');
 };
 
 export default { condition, compiler };
