@@ -1,4 +1,4 @@
-import { A } from '@workspaces-cross-reference/lib-a/mod-a';
+import { A } from '@fixtures/workspaces-cross-reference__lib-a/mod-a';
 
 export const B1 = 'B1';
 

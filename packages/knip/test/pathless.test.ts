@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Resolve local modules without a relative path', async () => {
-  const cwd = resolve('fixtures/pathless');
+const cwd = resolve('fixtures/pathless');
 
+test('Resolve local modules without a relative path', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

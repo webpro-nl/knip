@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/workspaces-pnpm__app-b",
+  "main": "./index.js",
+  "dependencies": {
+    "@fixtures/workspaces-pnpm__lib-a": "*",
+    "@fixtures/workspaces-pnpm__lib-b": "*"
+  }
+}

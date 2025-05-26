@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/wrangler",
+  "name": "@plugins/wrangler",
   "scripts": {
     "dev": "wrangler dev"
   },

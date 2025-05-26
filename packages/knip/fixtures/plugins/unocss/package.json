@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/unocss",
+  "name": "@plugins/unocss",
   "scripts": {
     "dev": "unocss \"site/{snippets,templates}/**/*.php\" --watch",
     "build": "unocss \"site/{snippets,templates}/**/*.php\""

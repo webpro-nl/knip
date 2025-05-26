@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/nuxt",
+  "name": "@plugins/nuxt",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",

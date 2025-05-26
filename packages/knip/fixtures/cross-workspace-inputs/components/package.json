@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/state-components",
+  "name": "@fixtures/cross-workspace-inputs__components",
   "devDependencies": {
     "vitest": "*"
   }

@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Support CommonJS-style imports and exports (w tsconfig.json)', async () => {
-  const cwd = resolve('fixtures/commonjs-tsconfig');
+const cwd = resolve('fixtures/commonjs-tsconfig');
 
+test('Support CommonJS-style imports and exports (w tsconfig.json)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

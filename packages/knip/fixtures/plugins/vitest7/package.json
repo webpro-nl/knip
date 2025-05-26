@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vitest7",
+  "name": "@plugins/vitest7",
   "devDependencies": {
     "vitest": "*",
     "ReporterString": "*",

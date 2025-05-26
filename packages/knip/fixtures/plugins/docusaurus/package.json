@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/docusaurus",
+  "name": "@plugins/docusaurus",
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",

@@ -70,8 +70,7 @@ await fs.cp(pluginTestTemplateFilePath, pluginTestFilePath, {
 
 // String replacements
 for (const filePath of [newPluginFile, pluginTestFilePath, pluginTestFixtureManifest]) {
-  const isFileExists = await fs.exists(filePath);
-  if (!isFileExists || force) {
+  if (await fs.exists(filePath)) {
     const content = String(await fs.readFile(filePath));
     await fs.writeFile(filePath, content.replaceAll('_template', name).replaceAll('__PLUGIN_NAME__', name));
   }

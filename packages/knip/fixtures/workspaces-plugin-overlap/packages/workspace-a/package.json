@@ -1,6 +1,5 @@
 {
-  "name": "@workspaces-plugin-overlap/workspace-a",
-  "version": "1.0.0",
+  "name": "@fixtures/workspaces-plugin-overlap__workspace-a",
   "private": true,
   "scripts": {
     "docs": "typedoc"

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/github-actions",
+  "name": "@plugins/github-actions",
   "scripts": {
     "build": "",
     "dev:seed-db": "",

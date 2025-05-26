@@ -1,6 +1,5 @@
 {
-  "name": "@workspaces-paths-compilers/root",
-  "version": "1.0.0",
+  "name": "@fixtures/workspaces-plugin-overlap",
   "private": true,
   "workspaces": ["packages/*"]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/size-limit",
+  "name": "@plugins/size-limit",
   "scripts": {
     "size": "size-limit"
   },

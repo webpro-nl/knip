@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/changelogithub",
+  "name": "@plugins/changelogithub",
   "scripts": {
     "changelogithub": "changelogithub"
   },

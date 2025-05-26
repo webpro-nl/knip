@@ -53,7 +53,7 @@ export type U = number;
       'packages/lib/package.json',
       await readContents('packages/lib/package.json'),
       `{
-  "name": "@org/lib",
+  "name": "@fixtures/fix-workspaces__lib",
   "dependencies": {
     "ignored": "*"
   }

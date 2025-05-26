@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-tooling/frontend",
+  "name": "@fixtures/workspaces-tooling__frontend",
   "scripts": {
     "lint": "eslint",
     "test": "jest"

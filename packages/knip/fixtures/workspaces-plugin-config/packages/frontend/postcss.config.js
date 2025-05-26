@@ -1,1 +1,1 @@
-module.exports = require('@internal/tailwind/postcss');
+module.exports = require('@fixtures/workspaces-plugin-config__tailwind/postcss');

@@ -1,10 +1,10 @@
 {
-  "name": "@workspaces-plugin-config/backend",
+  "name": "@fixtures/workspaces-plugin-config__backend",
   "scripts": {
     "test": "vitest"
   },
   "devDependencies": {
-    "@workspaces-plugin-config/shared": "*",
+    "@fixtures/workspaces-plugin-config__shared": "*",
     "eslint-plugin-no-secrets": "*",
     "eslint-plugin-prettier": "*",
     "vitest": "^0.34.6"

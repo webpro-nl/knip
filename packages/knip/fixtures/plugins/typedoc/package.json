@@ -1,5 +1,5 @@
 {
-  "name": "typedoc",
+  "name": "@plugins/typedoc",
   "devDependencies": {
     "typedoc": "*"
   },

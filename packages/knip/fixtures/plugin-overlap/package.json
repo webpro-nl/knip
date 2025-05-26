@@ -1,6 +1,5 @@
 {
   "name": "@fixtures/plugin-overlap",
-  "version": "1.0.0",
   "private": true,
   "scripts": {
     "docs": "typedoc"

@@ -1,5 +1,5 @@
-import defaultA, { usedExportFromLibA } from '@workspaces/shared';
-import defaultB, { usedExportFromLibB } from '@workspaces/tools';
+import defaultA, { usedExportFromLibA } from '@fixtures/workspaces__shared';
+import defaultB, { usedExportFromLibB } from '@fixtures/workspaces__tools';
 import { globby } from 'globby';
 import yaml from 'js-yaml';
 

@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Resolve modules properly with extended ts config', async () => {
-  const cwd = resolve('fixtures/tsconfig-extends');
+const cwd = resolve('fixtures/tsconfig-extends');
 
+test('Resolve modules properly with extended ts config', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

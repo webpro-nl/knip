@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/gatsby",
+  "name": "@plugins/gatsby",
   "scripts": {
     "serve": "gatsby serve -p 8000"
   },

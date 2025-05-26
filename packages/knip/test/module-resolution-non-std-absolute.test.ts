@@ -13,7 +13,7 @@ test('Resolve non-standard absolute specifiers', async () => {
     cwd,
   });
 
-  assert(issues.unlisted['self/index.ts']['other']);
+  assert(issues.unlisted['x-self/index.ts']['x-other']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

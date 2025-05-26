@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/relay2",
+  "name": "@plugins/relay2",
   "scripts": {
     "build": "relay-compiler",
     "dev": "vite dev"

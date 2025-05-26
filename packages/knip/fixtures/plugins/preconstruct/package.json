@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/preconstruct",
+  "name": "@plugins/preconstruct",
   "scripts": {
     "build": "preconstruct build"
   },

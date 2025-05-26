@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/state",
+  "name": "@fixtures/cross-workspace-inputs",
   "workspaces": ["e2e", "components"],
   "scripts": {
     "test": "yarn --cwd components vitest -c vitest.components.config.ts"

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/lefthook-v1",
+  "name": "@plugins/lefthook-v1",
   "scripts": {},
   "devDependencies": {
     "eslint": "*",

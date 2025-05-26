@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/tags",
+  "name": "@fixtures/tags-cli",
   "knip": {
     "include": ["classMembers"]
   }

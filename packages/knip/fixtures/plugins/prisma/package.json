@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/prisma",
+  "name": "@plugins/prisma",
   "devDependencies": {
     "prisma": "*",
     "tsx": "*"

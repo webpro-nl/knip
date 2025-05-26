@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/eslint4",
+  "name": "@plugins/eslint4",
   "devDependencies": {
     "eslint": "*",
     "@eslint/js": "*"

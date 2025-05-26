@@ -1,8 +1,7 @@
 {
-  "name": "@workspaces-circular/lib-a",
-  "version": "1.0.0",
+  "name": "@fixtures/workspaces-circular__lib-a",
   "dependencies": {
-    "@workspaces-circular/lib-b": "1.0.0",
-    "@workspaces-circular/lib-c": "1.0.0"
+    "@fixtures/workspaces__lib-b": "1.0.0",
+    "@fixtures/workspaces__lib-c": "1.0.0"
   }
 }

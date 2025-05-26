@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Trace', async () => {
-  const cwd = resolve('fixtures/trace');
+const cwd = resolve('fixtures/trace');
 
+test('Trace', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
