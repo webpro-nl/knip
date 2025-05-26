@@ -33,7 +33,7 @@ const {
   'isolate-workspaces': isIsolateWorkspaces = false,
   'max-issues': maxIssues = '0',
   'memory-realtime': memoryRealtime = false,
-  'no-config-hints': isDisableConfigHints = false,
+  'no-config-hints': isNoConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
   'no-progress': isNoProgress = isDebug || isTrace || memoryRealtime,
@@ -81,7 +81,6 @@ const run = async () => {
       isFilesShorthand,
       isFix: isFix || fixTypes.length > 0,
       isFormat,
-      isDisableConfigHints,
       isIncludeEntryExports,
       isIncludeLibs,
       isIsolateWorkspaces,
@@ -94,6 +93,9 @@ const run = async () => {
       tsConfigFile: tsConfig,
       workspace,
     });
+
+    // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in certain modes
+    const isDisableConfigHints = isNoConfigHints || isProduction || Boolean(workspace);
 
     // These modes have their own reporting mechanism
     if (isWatch || isTrace) return;

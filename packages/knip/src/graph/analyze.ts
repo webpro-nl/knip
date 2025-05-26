@@ -24,14 +24,12 @@ interface AnalyzeOptions {
   fixer: IssueFixer;
   graph: ModuleGraph;
   isFix: boolean;
-  isDisableConfigHints: boolean;
   isIncludeLibs: boolean;
   isProduction: boolean;
   report: Report;
   streamer: ConsoleStreamer;
   tags: Tags;
   unreferencedFiles: Set<string>;
-  workspace?: string;
 }
 
 export const analyze = async (options: AnalyzeOptions) => {
@@ -45,14 +43,12 @@ export const analyze = async (options: AnalyzeOptions) => {
     fixer,
     graph,
     isFix,
-    isDisableConfigHints,
     isIncludeLibs,
     isProduction,
     report,
     streamer,
     tags,
     unreferencedFiles,
-    workspace,
   } = options;
 
   const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
@@ -60,7 +56,6 @@ export const analyze = async (options: AnalyzeOptions) => {
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;
   const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
-  const isShowConfigHints = !workspace && !isProduction && !isDisableConfigHints;
 
   const shouldIgnore = getShouldIgnoreHandler(isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
@@ -295,18 +290,13 @@ export const analyze = async (options: AnalyzeOptions) => {
 
       deputy.removeIgnoredIssues(collector.getIssues());
 
-      // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in production/strict mode
-      if (isShowConfigHints) {
-        const configurationHints = deputy.getConfigurationHints();
-        for (const hint of configurationHints) collector.addConfigurationHint(hint);
-      }
+      const configurationHints = deputy.getConfigurationHints();
+      for (const hint of configurationHints) collector.addConfigurationHint(hint);
     }
 
-    if (isShowConfigHints) {
-      const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
-      for (const identifier of unusedIgnoredWorkspaces) {
-        collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
-      }
+    const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
+    for (const identifier of unusedIgnoredWorkspaces) {
+      collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
     }
   };
 

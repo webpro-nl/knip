@@ -33,7 +33,7 @@ test('Respect ignored binaries and dependencies, including regex, show config hi
 });
 
 test('Respect ignored binaries and dependencies, including regex, no config hints (production)', async () => {
-  const { counters, configurationHints } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
     isProduction: true,
@@ -44,6 +44,4 @@ test('Respect ignored binaries and dependencies, including regex, no config hint
     processed: 2,
     total: 2,
   });
-
-  assert.deepEqual(configurationHints, new Set());
 });

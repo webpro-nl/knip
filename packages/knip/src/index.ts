@@ -42,7 +42,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isFilesShorthand,
     isFix,
     isFormat,
-    isDisableConfigHints,
     isIncludeEntryExports,
     isIncludeLibs,
     isIsolateWorkspaces,
@@ -127,14 +126,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     fixer,
     graph,
     isFix,
-    isDisableConfigHints,
     isIncludeLibs,
     isProduction,
     report,
     streamer,
     tags: finalTags,
     unreferencedFiles,
-    workspace,
   });
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();

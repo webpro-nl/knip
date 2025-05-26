@@ -90,7 +90,7 @@ test('Unused dependencies in npm scripts', async () => {
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {
-  const { issues, counters, configurationHints } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isProduction: true,
@@ -107,6 +107,4 @@ test('Unused dependencies in npm scripts (strict)', async () => {
     processed: 1,
     total: 2,
   });
-
-  assert.deepEqual(configurationHints, new Set());
 });
