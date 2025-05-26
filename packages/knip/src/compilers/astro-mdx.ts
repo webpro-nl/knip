@@ -1,13 +1,13 @@
 import { fencedCodeBlockMatcher, importMatcher, importsWithinFrontmatter } from './compilers.js';
 import type { HasDependency } from './types.js';
 
-// https://mdxjs.com/packages/
-const mdxDependencies = ['@astrojs/mdx'];
+// https://docs.astro.build/en/guides/integrations-guide/mdx/
+const astroMDXDependencies = ['@astrojs/mdx'];
 
 // Fields in frontmatter that could contain imports
 const frontmatterImportFields = ['layout'];
 
-const condition = (hasDependency: HasDependency) => mdxDependencies.some(hasDependency);
+const condition = (hasDependency: HasDependency) => astroMDXDependencies.some(hasDependency);
 
 const compiler = (text: string) => {
   const imports = text.replace(fencedCodeBlockMatcher, '').matchAll(importMatcher);
