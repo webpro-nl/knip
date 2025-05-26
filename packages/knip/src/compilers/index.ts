@@ -1,5 +1,6 @@
 import type { RawConfiguration } from '../types/config.js';
 import type { DependencySet } from '../types/workspace.js';
+import AstroMDX from './astro-mdx.js';
 import Astro from './astro.js';
 import MDX from './mdx.js';
 import Svelte from './svelte.js';
@@ -50,6 +51,12 @@ export const getIncludedCompilers = (
   const hasDependency = (packageName: string) => dependencies.has(packageName);
 
   for (const [extension, { condition, compiler }] of compilers.entries()) {
+    // For MDX, try Astro compiler first if available
+    if (extension === '.mdx' && AstroMDX.condition(hasDependency)) {
+      syncCompilers.set(extension, AstroMDX.compiler);
+      continue;
+    }
+
     if ((!syncCompilers.has(extension) && condition(hasDependency)) || syncCompilers.get(extension) === true) {
       syncCompilers.set(extension, compiler);
     }
