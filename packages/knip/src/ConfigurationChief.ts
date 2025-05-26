@@ -39,7 +39,11 @@ import { byPathDepth } from './util/workspace.js';
 
 const { config: rawConfigArg } = parsedArgValues;
 
-export const defaultBaseFilenamePattern = '{index,cli,main}';
+const defaultBaseFilenamePattern = '{index,cli,main}';
+
+export const isDefaultPattern = (id: string) =>
+  id.startsWith('{index,cli,main}.{js,mjs,cjs,jsx,ts,tsx,mts,cts') ||
+  id.startsWith('src/{index,cli,main}.{js,mjs,cjs,jsx,ts,tsx,mts,cts');
 
 const getDefaultWorkspaceConfig = (extensions: string[] = []) => {
   const exts = [...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',');

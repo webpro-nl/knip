@@ -1,6 +1,6 @@
 import picomatch from 'picomatch';
 import { CacheConsultant } from './CacheConsultant.js';
-import { type Workspace, defaultBaseFilenamePattern } from './ConfigurationChief.js';
+import { type Workspace, isDefaultPattern } from './ConfigurationChief.js';
 import { _getInputsFromScripts } from './binaries/index.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { getFilteredScripts } from './manifest/helpers.js';
@@ -458,11 +458,7 @@ export class WorkspaceWorker {
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
     const workspaceName = this.name;
 
-    const isNotDefaultPattern = (pattern: string) =>
-      !pattern.startsWith(`${defaultBaseFilenamePattern}.`) &&
-      !pattern.startsWith(`src/${defaultBaseFilenamePattern}.`);
-
-    if (entries.filter(isNotDefaultPattern).length === 0) {
+    if (entries.filter(id => !isDefaultPattern(id)).length === 0) {
       return hints;
     }
 
@@ -473,7 +469,7 @@ export class WorkspaceWorker {
     }
 
     for (const pattern of patterns) {
-      if (pattern.startsWith('!') || !isNotDefaultPattern(pattern)) continue;
+      if (pattern.startsWith('!')) continue;
       const filePathOrPattern = join(this.dir, pattern.replace(/!$/, ''));
       if (includedPaths.has(filePathOrPattern)) {
         hints.add({ type: `${type}-redundant`, identifier: pattern, workspaceName });
