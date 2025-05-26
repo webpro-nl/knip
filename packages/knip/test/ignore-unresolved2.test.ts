@@ -22,6 +22,7 @@ test('Respect ignored unresolved imports, including regex, show config hints', a
   assert.deepEqual(
     configurationHints,
     new Set([
+      { type: 'project-empty', workspaceName: '.', identifier: '[**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}!]' },
       { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-top-level' },
       { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-root' },
       { type: 'ignoreUnresolved', workspaceName: 'packages/client', identifier: 'unused-workspace' },

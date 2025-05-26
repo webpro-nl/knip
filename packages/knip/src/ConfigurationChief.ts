@@ -1,6 +1,7 @@
 // biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 import picomatch from 'picomatch';
+import type { z } from 'zod';
 import { partitionCompilers } from './compilers/index.js';
 import type { SyncCompilers } from './compilers/types.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
@@ -14,6 +15,7 @@ import type {
   RawPluginConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
+import type { ConfigurationHints } from './types/issues.js';
 import type { PackageJson, WorkspacePackage } from './types/package-json.js';
 import { arrayify, compact, partition } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
@@ -30,16 +32,19 @@ import { getKeysByValue } from './util/object.js';
 import { join, relative } from './util/path.js';
 import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
+import { ELLIPSIS } from './util/string.js';
 import { splitTags } from './util/tag.js';
 import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
 
 const { config: rawConfigArg } = parsedArgValues;
 
+export const defaultBaseFilenamePattern = '{index,cli,main}';
+
 const getDefaultWorkspaceConfig = (extensions: string[] = []) => {
   const exts = [...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',');
   return {
-    entry: [`{index,cli,main}.{${exts}}!`, `src/{index,cli,main}.{${exts}}!`],
+    entry: [`${defaultBaseFilenamePattern}.{${exts}}!`, `src/${defaultBaseFilenamePattern}.{${exts}}!`],
     project: [`**/*.{${exts}}!`],
   };
 };
@@ -118,6 +123,7 @@ export class ConfigurationChief {
   resolvedConfigFilePath?: string;
 
   rawConfig?: any;
+  parsedConfig?: z.infer<typeof knipConfigurationSchema>;
 
   constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace }: ConfigurationManagerOptions) {
     this.cwd = cwd;
@@ -160,10 +166,31 @@ export class ConfigurationChief {
       : manifest.knip;
 
     // Have to partition compiler functions before Zod touches them
-    const parsedConfig = this.rawConfig ? knipConfigurationSchema.parse(partitionCompilers(this.rawConfig)) : {};
-    this.config = this.normalize(parsedConfig);
+    this.parsedConfig = this.rawConfig ? knipConfigurationSchema.parse(partitionCompilers(this.rawConfig)) : {};
+
+    this.config = this.normalize(this.parsedConfig);
 
     await this.setWorkspaces();
+  }
+
+  public async getConfigurationHints() {
+    const hints: ConfigurationHints = new Set();
+    const config = this.parsedConfig;
+    if (config) {
+      if (this.workspacePackages.size > 1) {
+        const entry = arrayify(config.entry);
+        if (entry.length > 0) {
+          const identifier = `[${entry[0]}${entry.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
+          hints.add({ type: 'entry-top-level', identifier });
+        }
+        const project = arrayify(config.project);
+        if (project.length > 0) {
+          const identifier = `[${project[0]}${project.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
+          hints.add({ type: 'project-top-level', identifier });
+        }
+      }
+    }
+    return hints;
   }
 
   private async loadResolvedConfigurationFile(configPath: string) {

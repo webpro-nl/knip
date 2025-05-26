@@ -84,8 +84,22 @@ export type Rules = Record<IssueType, IssueSeverity>;
 
 export type ConfigurationHints = Set<ConfigurationHint>;
 
+export type ConfigurationHintType =
+  | 'ignoreBinaries'
+  | 'ignoreDependencies'
+  | 'ignoreUnresolved'
+  | 'ignoreWorkspaces'
+  | 'entry'
+  | 'project'
+  | 'entry-redundant'
+  | 'project-redundant'
+  | 'entry-top-level'
+  | 'project-top-level'
+  | 'entry-empty'
+  | 'project-empty';
+
 export type ConfigurationHint = {
-  type: 'ignoreBinaries' | 'ignoreDependencies' | 'ignoreUnresolved' | 'ignoreWorkspaces';
+  type: ConfigurationHintType;
   identifier: string | RegExp;
   workspaceName?: string;
 };

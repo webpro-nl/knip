@@ -19,6 +19,8 @@ test('Ignore workspaces', async () => {
   assert.deepEqual(
     configurationHints,
     new Set([
+      { type: 'project-empty', identifier: '[**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}!]', workspaceName: '.' },
+      { type: 'project-empty', identifier: '[**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}!]', workspaceName: 'packages/e' },
       { type: 'ignoreWorkspaces', identifier: 'packages/not-found' },
       { type: 'ignoreWorkspaces', identifier: 'packages/wut/*' },
       { type: 'ignoreWorkspaces', identifier: 'packages/un/**/used' },
