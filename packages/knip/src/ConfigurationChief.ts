@@ -392,10 +392,11 @@ export class ConfigurationChief {
   public getNegatedWorkspacePatterns(name: string) {
     const descendentWorkspaces = this.getDescendentWorkspaces(name);
     const matchName = new RegExp(`^${name}/`);
-    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name).map(p => p.replace(/\/\*$/, '/**'));
+    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name);
+    const endMatch = /\/\*{1,2}$|\/$|$/;
     return [...ignoredWorkspaces, ...descendentWorkspaces]
       .map(workspaceName => workspaceName.replace(matchName, ''))
-      .map(workspaceName => `!${workspaceName}`);
+      .map(workspaceName => `!${workspaceName.replace(endMatch, '/**')}`);
   }
 
   private getConfigKeyForWorkspace(workspaceName: string) {
