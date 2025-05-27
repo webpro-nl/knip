@@ -154,7 +154,30 @@ export class DependencyDeputy {
   }
 
   getInstalledBinaries(workspaceName: string) {
-    return this.installedBinaries.get(workspaceName);
+    // In strict mode, only return binaries from the specific workspace
+    if (this.isStrict) {
+      return this.installedBinaries.get(workspaceName);
+    }
+
+    // In non-strict mode, merge binaries from all workspaces to support cross-workspace binary resolution
+    const workspaceBinaries = this.installedBinaries.get(workspaceName);
+    const mergedBinaries = workspaceBinaries ? new Map(workspaceBinaries) : new Map<string, Set<string>>();
+
+    for (const [, binaries] of this.installedBinaries) {
+      if (binaries === workspaceBinaries) continue; // Skip the current workspace
+      for (const [binaryName, dependencies] of binaries) {
+        if (mergedBinaries.has(binaryName)) {
+          const existingDeps = mergedBinaries.get(binaryName)!;
+          for (const dep of dependencies) {
+            existingDeps.add(dep);
+          }
+        } else {
+          mergedBinaries.set(binaryName, new Set(dependencies));
+        }
+      }
+    }
+
+    return mergedBinaries;
   }
 
   setHasTypesIncluded(workspaceName: string, hasTypesIncluded: Set<string>) {
@@ -213,7 +236,9 @@ export class DependencyDeputy {
       typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName));
 
     if (closestWorkspaceName || closestWorkspaceNameForTypes) {
-      if (closestWorkspaceName) this.addReferencedDependency(closestWorkspaceName, packageName);
+      if (closestWorkspaceName) {
+        this.addReferencedDependency(closestWorkspaceName, packageName);
+      }
       if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
         this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
       return true;
@@ -235,7 +260,16 @@ export class DependencyDeputy {
       if (binaries?.has(binaryName)) {
         const dependencies = binaries.get(binaryName);
         if (dependencies?.size) {
-          for (const dependency of dependencies) this.addReferencedDependency(name, dependency);
+          for (const dependency of dependencies) {
+            // Find the workspace that actually has this dependency
+            const dependencyWorkspace = workspaceNames.find(wsName => this.isInDependencies(wsName, dependency));
+            if (dependencyWorkspace) {
+              this.addReferencedDependency(dependencyWorkspace, dependency);
+            } else {
+              // Fallback to original behavior if dependency not found in any workspace
+              this.addReferencedDependency(name, dependency);
+            }
+          }
           return true;
         }
       }

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/tools",
+  "devDependencies": {
+    "typescript": "*"
+  }
+} 
