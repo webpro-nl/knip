@@ -17,6 +17,7 @@ import type {
 import type { ConfigurationHints } from './types/issues.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
+import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
@@ -134,6 +135,8 @@ export class WorkspaceWorker {
     this.getSourceFile = getSourceFile;
 
     this.cache = new CacheConsultant({ name: `plugins-${name}`, isEnabled: isCache, cacheLocation, isProduction });
+
+    this.getConfigurationHints = timerify(this.getConfigurationHints.bind(this), 'worker.getConfigurationHints');
   }
 
   public async init() {
