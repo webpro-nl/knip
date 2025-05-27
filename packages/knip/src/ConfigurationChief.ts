@@ -177,7 +177,7 @@ export class ConfigurationChief {
     await this.setWorkspaces();
   }
 
-  public async getConfigurationHints() {
+  public getConfigurationHints() {
     const hints: ConfigurationHints = new Set();
     const config = this.parsedConfig;
     if (config) {
