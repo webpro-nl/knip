@@ -12,9 +12,9 @@ const condition = (hasDependency: HasDependency) => astroMDXDependencies.some(ha
 const compiler = (text: string) => {
   const imports = text.replace(fencedCodeBlockMatcher, '').matchAll(importMatcher);
 
-  const frontmatterImports = [importsWithinFrontmatter(text, frontmatterImportFields)];
+  const frontmatterImports = importsWithinFrontmatter(text, frontmatterImportFields);
 
-  return [...imports, ...frontmatterImports].join('\n');
+  return [...imports, frontmatterImports].join('\n');
 };
 
 export default { condition, compiler };
