@@ -199,6 +199,7 @@ export const pluginNames = [
   'tailwind',
   'travis',
   'ts-node',
+  'tsdown',
   'tsup',
   'tsx',
   'typedoc',
