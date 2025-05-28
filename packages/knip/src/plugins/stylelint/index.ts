@@ -2,7 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { type Input, toDeferResolve } from '../../util/input.js';
 import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { BaseStyleLintConfig, StyleLintConfig } from './types.js';
+import type { StyleLintConfig } from './types.js';
 
 // https://stylelint.io/user-guide/configure/
 
@@ -14,16 +14,20 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['package.json', ...toCosmiconfig('stylelint')];
 
-const resolve = (config: StyleLintConfig | BaseStyleLintConfig): Input[] => {
-  const extend = config.extends ?? [];
-  const plugins = config.plugins?.flatMap(plugin => (typeof plugin === 'string' ? [plugin] : [])) ?? [];
-  const customSyntax: string[] = typeof config.customSyntax === 'string' ? [config.customSyntax] : [];
-
-  const overrideConfigs = 'overrides' in config ? config.overrides.flatMap(resolve) : [];
-  return [...[extend, plugins, customSyntax].flat().map(toDeferResolve), ...overrideConfigs];
+const resolveConfig: ResolveConfig<StyleLintConfig> = async (config, options) => {
+  const inputs: Input[] = [];
+  const extend = Array.isArray(config.extends) ? config.extends : config.extends ? [config.extends] : [];
+  for (const id of extend) {
+    if (typeof id === 'string') inputs.push(toDeferResolve(id));
+    else for (const x of await resolveConfig(id, options)) inputs.push(x);
+  }
+  for (const plugin of config.plugins ?? []) if (typeof plugin === 'string') inputs.push(toDeferResolve(plugin));
+  if (typeof config.customSyntax === 'string') inputs.push(toDeferResolve(config.customSyntax));
+  for (const override of config.overrides ?? []) {
+    for (const input of await resolveConfig(override, options)) inputs.push(input);
+  }
+  return inputs;
 };
-
-const resolveConfig: ResolveConfig<StyleLintConfig> = config => resolve(config);
 
 export default {
   title,
