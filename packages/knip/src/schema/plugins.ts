@@ -102,6 +102,7 @@ export const pluginsSchema = z.object({
   tailwind: pluginSchema,
   travis: pluginSchema,
   'ts-node': pluginSchema,
+  tsdown: pluginSchema,
   tsup: pluginSchema,
   tsx: pluginSchema,
   typedoc: pluginSchema,

@@ -88,6 +88,7 @@ import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
+import { default as tsdown } from './tsdown/index.js';
 import { default as tsup } from './tsup/index.js';
 import { default as tsx } from './tsx/index.js';
 import { default as typedoc } from './typedoc/index.js';
@@ -197,6 +198,7 @@ export const Plugins = {
   tailwind,
   travis,
   'ts-node': tsNode,
+  tsdown,
   tsup,
   tsx,
   typedoc,
