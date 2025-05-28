@@ -3,7 +3,6 @@ import type { HasDependency } from './types.js';
 
 // https://mdxjs.com/packages/
 const mdxDependencies = [
-  'astro',
   '@mdx-js/esbuild',
   '@mdx-js/loader',
   '@mdx-js/mdx',

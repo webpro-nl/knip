@@ -15,7 +15,7 @@ test('Find dependencies with the Astro plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 19,
-    total: 19,
+    processed: 21,
+    total: 21,
   });
 });
