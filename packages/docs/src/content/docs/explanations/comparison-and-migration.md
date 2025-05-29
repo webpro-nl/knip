@@ -107,6 +107,9 @@ Additional alternative and related projects include:
 - [npm-check][14]
 - [renoma][15]
 
+In general, the [e18e.dev][16] website and in particular the [Cleanup][17]
+section is a great resource when dealing with technical debt.
+
 [1]: ./why-use-knip.md#comprehensive
 [2]: ../features/monorepos-and-workspaces.md
 [3]: ../overview/getting-started.mdx
@@ -122,3 +125,5 @@ Additional alternative and related projects include:
 [13]: https://github.com/pacocoursey/next-unused
 [14]: https://github.com/dylang/npm-check
 [15]: https://github.com/bluwy/renoma
+[16]: https://e18e.dev
+[17]: https://e18e.dev/guide/cleanup.html
