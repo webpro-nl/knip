@@ -105,10 +105,7 @@ export async function build({
     streamer.cast('Analyzing workspace', name);
 
     const manifest = chief.getManifestForWorkspace(name);
-
-    if (!manifest) {
-      continue;
-    }
+    if (!manifest) continue;
 
     const dependencies = deputy.getDependencies(name);
 

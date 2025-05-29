@@ -36,8 +36,8 @@ import { byPathDepth } from './util/workspace.js';
 
 const { config: rawConfigArg } = parsedArgValues;
 
-const getDefaultWorkspaceConfig = (extensions?: string[]) => {
-  const exts = [...DEFAULT_EXTENSIONS, ...(extensions ?? [])].map(ext => ext.slice(1)).join(',');
+const getDefaultWorkspaceConfig = (extensions: string[] = []) => {
+  const exts = [...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',');
   return {
     entry: [`{index,cli,main}.{${exts}}!`, `src/{index,cli,main}.{${exts}}!`],
     project: [`**/*.{${exts}}!`],
