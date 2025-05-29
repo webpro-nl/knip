@@ -2,11 +2,12 @@
 title: Comparison & Migration
 ---
 
-First of all, Knip owes a lot to the projects on this page that exist longer and
-they've all been inspirational in their own way. For best results, Knip has [a
-vision embracing comprehensiveness][1] which is larger in scope than any of the
-alternatives. So if any of those tools has the right scope for your
-requirements, then by all means, use what suits you best.
+First of all, Knip owes a lot to the projects on this page and they've all been
+inspirational in their own way. For best results, Knip has [a vision embracing
+comprehensiveness][1] which is larger in scope than any of the alternatives. So
+if any of those tools has the right scope for your requirements, then by all
+means, use what suits you best. Note that most projects are no longer
+maintained.
 
 All tools have in common that they have less features and don't support the
 concept of [monorepos/workspaces][2]. Feel free to send in projects that Knip
