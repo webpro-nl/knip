@@ -8,7 +8,6 @@ import baseCounters from './helpers/baseCounters.js';
 const cwd = resolve('fixtures/workspaces-nested');
 
 const expectedConfigurationHints = new Set([
-  { type: 'project-empty', identifier: '[**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}!]', workspaceName: '.' },
   { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
   { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-global', workspaceName: '.' },
   { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-L-2', workspaceName: 'L-1-1/L-1-2' },

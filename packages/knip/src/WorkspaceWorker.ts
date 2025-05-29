@@ -461,7 +461,7 @@ export class WorkspaceWorker {
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
     const workspaceName = this.name;
 
-    if (entries.filter(id => !isDefaultPattern(id)).length === 0) {
+    if (entries.filter(id => !isDefaultPattern(type, id)).length === 0) {
       return hints;
     }
 

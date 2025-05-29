@@ -41,9 +41,13 @@ const { config: rawConfigArg } = parsedArgValues;
 
 const defaultBaseFilenamePattern = '{index,cli,main}';
 
-export const isDefaultPattern = (id: string) =>
-  id.startsWith('{index,cli,main}.{js,mjs,cjs,jsx,ts,tsx,mts,cts') ||
-  id.startsWith('src/{index,cli,main}.{js,mjs,cjs,jsx,ts,tsx,mts,cts');
+export const isDefaultPattern = (type: 'entry' | 'project', id: string) => {
+  if (type === 'project') return id.startsWith('**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts');
+  return (
+    id.startsWith('{index,cli,main}.{js,mjs,cjs,jsx,ts,tsx,mts,cts') ||
+    id.startsWith('src/{index,cli,main}.{js,mjs,cjs,jsx,ts,tsx,mts,cts')
+  );
+};
 
 const getDefaultWorkspaceConfig = (extensions: string[] = []) => {
   const exts = [...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',');
