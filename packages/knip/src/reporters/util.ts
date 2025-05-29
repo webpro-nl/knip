@@ -6,7 +6,7 @@ import { Table } from '../util/table.js';
 
 export const plain = (text: string) => text;
 export const dim = picocolors.gray;
-const bright = picocolors.whiteBright;
+export const bright = picocolors.whiteBright;
 
 export const getIssueTypeTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => ISSUE_TYPE_TITLE[reportType];
 

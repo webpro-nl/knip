@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/entry.js", "lib/index.js"],
+  "project": ["src/**"],
+  "workspaces": {
+    ".": {
+      "entry": ["src/entry.js", "lib/index.js"],
+      "project": ["src/**", "lib/**"]
+    }
+  }
+}

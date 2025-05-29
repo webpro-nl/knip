@@ -265,13 +265,6 @@ export async function build({
       }
     } else {
       {
-        const label = 'entry paths';
-        const patterns = worker.getEntryFilePatterns();
-        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false, label });
-        principal.addEntryPaths(workspaceEntryPaths);
-      }
-
-      {
         const label = 'entry paths from plugins (skip exports analysis)';
         const patterns = worker.getPluginEntryFilePatterns([
           ...entryPatternsSkipExports,
@@ -289,10 +282,14 @@ export async function build({
       }
 
       {
-        const label = 'project paths';
-        const patterns = worker.getProjectFilePatterns([...productionPatternsSkipExports, ...projectFilePatterns]);
-        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns, label });
-        for (const projectPath of workspaceProjectPaths) principal.addProjectPath(projectPath);
+        const label = 'entry paths';
+        const patterns = worker.getEntryFilePatterns();
+        const entryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false, label });
+        if (!chief.rawConfig?.workspaces || name in chief.rawConfig.workspaces) {
+          const hints = worker.getConfigurationHints('entry', patterns, entryPaths, principal.entryPaths);
+          for (const hint of hints) collector.addConfigurationHint(hint);
+        }
+        principal.addEntryPaths(entryPaths);
       }
 
       {
@@ -307,6 +304,17 @@ export async function build({
         const patterns = worker.getPluginConfigPatterns();
         const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
+      }
+
+      {
+        const label = 'project paths';
+        const patterns = worker.getProjectFilePatterns([...productionPatternsSkipExports, ...projectFilePatterns]);
+        const projectPaths = await _glob({ ...sharedGlobOptions, patterns, label });
+        if (!chief.rawConfig?.workspaces || name in chief.rawConfig.workspaces) {
+          const hints = worker.getConfigurationHints('project', config.project, projectPaths, principal.projectPaths);
+          for (const hint of hints) collector.addConfigurationHint(hint);
+        }
+        for (const projectPath of projectPaths) principal.addProjectPath(projectPath);
       }
     }
 
