@@ -314,29 +314,28 @@ control, security and stability.
 ### Unlisted binaries
 
 Binaries are executable Node.js scripts. Some npm packages, when installed, add
-one or more executable files to use from scripts in `package.json`. Examples
+one or more executable files to be used from scripts in `package.json`. Examples
 include TypeScript that comes with the `tsc` binary, ESLint comes with `eslint`,
 Next.js with `next`, and so on.
 
 Knip detects such binaries in scripts and checks whether there's a package
 installed that includes that binary. It looks up the `bin` field in the
 `package.json` file of installed packages. If it doesn't find it, it will be
-reported as an unlisted binary as there is no package listed that contains it.
+reported as an unlisted binary as there is no package that contains it.
 
 Binaries that are installed on the OS already and thus likely not meant to be
 installed from npm are not reported as unlisted (details: [list of ignored
 binaries in source][30]).
 
-### Missing binaries
+#### Missing binaries
 
-In case unused (dev) dependencies look like a match against unlisted binaries,
-then this might be caused by `node_modules` not containing the packages. And
-this might have been caused by either the way your package manager installs
-dependencies and binaries, or by not running Knip from the root of the
-repository.
+An unused dependency and an unlisted binary with the same name indicates
+`node_modules` not containing the relevant package. And this might be caused by
+either the way your package manager installs dependencies and binaries, or by
+not running Knip from the root of the repository.
 
-**Solution**: run Knip from the project root. From there you can [lint
-individual workspaces][31].
+**Solution**: run Knip from the project root. If needed, [lint workspaces
+individually][31].
 
 Sometimes binaries and how they're reported can be a bit confusing. See this
 example:
@@ -357,8 +356,15 @@ This example works fine without anything reported, as the `@commitlint/cli`
 package includes the `commitlint` binary. However, some script may contain
 `npx commitlint` and here Knip assumes `commitlint` is the name of the package.
 This technically works, as `commitlint` is a transitive dependency of
-`@commitlint/cli`. However, correct and recommeded usage is by the package name:
-`npx @commitlint/cli`.
+`@commitlint/cli`.
+
+**Solution**: use `npx @commitlint/cli`
+
+In some cases, using `npx` in a script may result in Knip not understanding
+intention without an explicit `--yes` or `--no-install` flag.
+
+**Solution**: use `npx --yes` or `npx --no-install` so Knip will either ignore
+or consider the binary and package(s) referenced, respectively.
 
 ## Unresolved imports
 
