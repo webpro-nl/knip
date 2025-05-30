@@ -1,6 +1,6 @@
-import { toDependency } from 'src/util/input.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { AwsCdkConfig } from './types.ts';
 
