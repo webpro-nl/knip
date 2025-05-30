@@ -5,7 +5,7 @@ export interface NxProjectConfiguration {
       executor?: string;
       options?: {
         command?: string;
-        commands?: string[];
+        commands?: Array<string | { command: string }>;
       };
     };
   };

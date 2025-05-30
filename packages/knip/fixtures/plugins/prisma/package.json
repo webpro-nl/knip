@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/prisma",
+  "devDependencies": {
+    "prisma": "*",
+    "tsx": "*"
+  },
+  "scripts": {
+    "generate": "prisma generate --config config/prisma.custom-config.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

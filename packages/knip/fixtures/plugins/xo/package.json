@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/xo",
+  "name": "@plugins/xo",
   "scripts": {
     "test": "xo"
   },

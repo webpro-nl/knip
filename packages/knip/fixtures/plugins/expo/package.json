@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/expo",
+  "name": "@plugins/expo",
   "scripts": {
     "start": "expo start"
   },

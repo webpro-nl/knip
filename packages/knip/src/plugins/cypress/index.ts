@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toDeferResolve, toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import { resolveDependencies } from './helpers.js';
@@ -25,18 +25,15 @@ const SUPPORT_FILE_PATTERNS = [
 
 const entry = [...TEST_FILE_PATTERNS, ...SUPPORT_FILE_PATTERNS];
 
-const resolveEntryPaths: ResolveEntryPaths = async localConfig => {
+const resolveConfig: ResolveConfig<CypressConfig> = async (localConfig, options) => {
   const specPatterns = [localConfig.e2e?.specPattern ?? [], localConfig.component?.specPattern ?? []].flat();
   const supportFiles = [localConfig.e2e?.supportFile || [], localConfig.component?.supportFile || []].flat();
+  const inputs = await resolveDependencies(localConfig, options);
   return [
-    ...(specPatterns.length > 0 ? specPatterns : TEST_FILE_PATTERNS),
-    ...(supportFiles.length > 0 ? supportFiles : SUPPORT_FILE_PATTERNS),
-  ].map(id => toEntry(id));
-};
-
-const resolveConfig: ResolveConfig<CypressConfig> = async (config, options) => {
-  const inputs = await resolveDependencies(config, options);
-  return inputs.map(toDeferResolve);
+    ...inputs.map(toDeferResolve),
+    ...(specPatterns.length > 0 ? specPatterns : TEST_FILE_PATTERNS).map(id => toEntry(id)),
+    ...(supportFiles.length > 0 ? supportFiles : SUPPORT_FILE_PATTERNS).map(id => toEntry(id)),
+  ];
 };
 
 export default {
@@ -45,6 +42,5 @@ export default {
   isEnabled,
   config,
   entry,
-  resolveEntryPaths,
   resolveConfig,
 } satisfies Plugin;

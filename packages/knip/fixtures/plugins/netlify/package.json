@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/netlify",
+  "name": "@plugins/netlify",
   "devDependencies": {
     "netlify-cli": "*"
   }

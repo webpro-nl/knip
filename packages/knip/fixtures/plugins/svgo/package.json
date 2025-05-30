@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/svgo",
+  "name": "@plugins/svgo",
   "scripts": {
     "svgo": "svgo --folder icons"
   },

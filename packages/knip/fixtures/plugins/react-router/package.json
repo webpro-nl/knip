@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/react-router",
+  "name": "@plugins/react-router",
   "devDependencies": {
     "@react-router/dev": "*"
   }

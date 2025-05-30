@@ -189,7 +189,7 @@ Also see [JSDoc & TSDoc Tags][8].
 :::tip
 
 Please read [project files configuration][9] before using the `ignore` option,
-because in many cases you'll want to **exclude project files** instead.
+because in many cases you'll want to **fine-tune project files** instead.
 
 :::
 

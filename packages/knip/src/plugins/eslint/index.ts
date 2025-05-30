@@ -3,8 +3,8 @@ import { hasDependency } from '../../util/plugin.js';
 import { getInputs } from './helpers.js';
 import type { ESLintConfigDeprecated } from './types.js';
 
-// New: https://eslint.org/docs/latest/use/configure/configuration-files
-// Old: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated
+// https://eslint.org/docs/latest/use/configure/configuration-files
+// Deprecated: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated
 
 // Note: shareable configs should use `peerDependencies` for plugins
 // https://eslint.org/docs/latest/extend/shareable-configs#publishing-a-shareable-config

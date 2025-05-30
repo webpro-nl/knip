@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/graphql-codegen",
+  "name": "@plugins/graphql-codegen",
   "scripts": {
     "codegen": "graphql-codegen"
   },

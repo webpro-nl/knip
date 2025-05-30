@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toDeferResolve, toDependency, toEntry } from '../../util/input.js';
 import { join, relative } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -22,7 +22,7 @@ const entry = [...restEntry, ...stories];
 
 const project = ['.storybook/**/*.{js,jsx,ts,tsx,mts}'];
 
-const resolveEntryPaths: ResolveEntryPaths<StorybookConfig> = async (localConfig, options) => {
+const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, options) => {
   const { cwd, configFileDir } = options;
   const strs = typeof localConfig?.stories === 'function' ? await localConfig.stories(stories) : localConfig?.stories;
   const relativePatterns = strs?.map(pattern => {
@@ -33,10 +33,7 @@ const resolveEntryPaths: ResolveEntryPaths<StorybookConfig> = async (localConfig
     ...(options.config.entry ?? restEntry),
     ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : stories),
   ];
-  return patterns.map(id => toEntry(id));
-};
 
-const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {
   const addons = localConfig.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
   const builder =
     localConfig?.core?.builder &&
@@ -49,7 +46,9 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async localConfig => {
 
   const framework = typeof localConfig.framework === 'string' ? localConfig.framework : localConfig.framework?.name;
   const frameworks = framework ? [framework] : [];
+
   return [
+    ...patterns.map(id => toEntry(id)),
     ...addons.map(toDeferResolve),
     ...builderPackages.map(id => toDependency(id)),
     ...frameworks.map(id => toDependency(id)),
@@ -63,6 +62,5 @@ export default {
   config,
   entry,
   project,
-  resolveEntryPaths,
   resolveConfig,
 } satisfies Plugin;

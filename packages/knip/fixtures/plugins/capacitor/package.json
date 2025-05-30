@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/capacitor",
+  "name": "@plugins/capacitor",
   "devDependencies": {
     "@capacitor/cli": "*"
   }

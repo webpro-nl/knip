@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { MochaConfig } from './types.js';
 
@@ -15,14 +15,14 @@ const config = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
 
 const entry = ['**/test/*.{js,cjs,mjs}'];
 
-const resolveEntryPaths: ResolveEntryPaths<MochaConfig> = localConfig => {
-  const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : [];
-  return [...entryPatterns].map(id => toEntry(id));
-};
-
 const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
+  const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
   const require = localConfig.require ? [localConfig.require].flat() : [];
-  return [...require].map(id => toEntry(id));
+
+  const inputs: Input[] = [];
+  inputs.push(...entryPatterns.map(id => toEntry(id)));
+  inputs.push(...require.map(id => toDeferResolve(id)));
+  return inputs;
 };
 
 const args = {
@@ -36,6 +36,5 @@ export default {
   config,
   entry,
   resolveConfig,
-  resolveEntryPaths,
   args,
 } satisfies Plugin;

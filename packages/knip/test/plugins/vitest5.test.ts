@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/vitest5');
 
-test('Find dependencies with Vitest plugin (5)', async () => {
+test('Find dependencies with the Vitest plugin (5)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

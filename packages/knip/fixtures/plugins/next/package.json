@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/next",
+  "name": "@plugins/next",
   "scripts": {
     "dev": "next dev"
   },

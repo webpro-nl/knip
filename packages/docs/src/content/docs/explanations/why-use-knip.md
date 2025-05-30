@@ -4,9 +4,9 @@ sidebar:
   order: 3
 ---
 
-The value of removing clutter from your code is undeniable. However, finding
-them is a manual and tedious job. This is where Knip comes in. As codebases grow
-in complexity and size, automated and comprehensive tooling becomes critical.
+The value of removing clutter from your code is undeniable. However, finding it
+is a tedious job. This is where Knip comes in. As codebases grow in complexity
+and size, comprehensive and automated tooling is indispensable.
 
 :::tip[TL;DR]
 
@@ -57,7 +57,7 @@ times better and faster than trying to do it manually.
 
 :::tip
 
-Knip not only finds clutter, it can also [clean it][7]!
+Knip not only finds clutter, it can also [remove the clutter][7]!
 
 Use Knip next to a linter like ESLint or Biome: after removing unused variables
 inside files, Knip might find even more unused code. Rinse and repeat!

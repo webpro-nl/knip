@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -8,14 +8,7 @@ const title = 'Nuxt';
 
 const enablers = ['nuxt'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) => {
-  const isEnabled = hasDependency(dependencies, enablers);
-
-  // TODO Add generic way for plugins to init?
-  if (isEnabled && !('defineNuxtConfig' in globalThis)) (globalThis as any).defineNuxtConfig = (c: any) => c;
-
-  return isEnabled;
-};
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['nuxt.config.{js,mjs,ts}'];
 
@@ -31,7 +24,13 @@ const production = [
   'server/plugins/**/*.ts',
 ];
 
-const resolveEntryPaths: ResolveEntryPaths<NuxtConfig> = async localConfig => {
+const setup = async () => {
+  if (globalThis && !('defineNuxtConfig' in globalThis)) {
+    Object.defineProperty(globalThis, 'defineNuxtConfig', { value: (id: any) => id });
+  }
+};
+
+const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
   const srcDir = localConfig.srcDir ?? '.';
 
   const patterns = [
@@ -61,5 +60,6 @@ export default {
   isEnabled,
   config,
   production,
-  resolveEntryPaths,
+  setup,
+  resolveConfig,
 } satisfies Plugin;

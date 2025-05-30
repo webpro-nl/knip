@@ -26,6 +26,7 @@ bun install
 cd packages/knip
 bun run build
 bun run test
+bun run test:smoke # skip slower cli/fix related tests
 ```
 
 Depending on the goals and the way you like to work, below are a few things that

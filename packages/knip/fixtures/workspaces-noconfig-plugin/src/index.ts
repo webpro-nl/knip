@@ -1,3 +1,3 @@
-import { funktion } from '@workspaces-noconfig-plugin/lib/util';
+import { funktion } from '@fixtures/workspaces__lib/util';
 
 funktion();

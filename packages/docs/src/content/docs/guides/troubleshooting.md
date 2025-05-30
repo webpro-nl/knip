@@ -92,6 +92,7 @@ opposite direction and shows where exports are imported.
 |     | Description                                 |
 | --- | :------------------------------------------ |
 | `✓` | Contains import and reference to the export |
+| `x` | Is not imported                             |
 | `◯` | Entry file                                  |
 
 ## Opening an issue

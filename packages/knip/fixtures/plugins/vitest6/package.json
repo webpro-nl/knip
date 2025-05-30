@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vitest6",
+  "name": "@plugins/vitest6",
   "scripts": {
     "test": "vitest -c config/fiep.ts"
   },

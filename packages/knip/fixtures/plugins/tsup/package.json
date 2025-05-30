@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/tsup",
+  "name": "@plugins/tsup",
   "devDependencies": {
     "tsup": "*"
   },

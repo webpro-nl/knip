@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/oclif",
+  "name": "@plugins/oclif",
   "scripts": {
     "start": "oclif"
   },

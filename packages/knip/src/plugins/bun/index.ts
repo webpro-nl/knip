@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import type { Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { Plugin, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { toEntry } from '../../util/input.js';
 
@@ -15,7 +15,7 @@ const config = ['package.json'];
 
 const packageJsonPath = (id: PackageJson) => id;
 
-const resolveEntryPaths: ResolveEntryPaths<PackageJson> = localConfig => {
+const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
   const scripts = localConfig.scripts;
 
   if (scripts) {
@@ -37,5 +37,5 @@ export default {
   isEnabled,
   config,
   packageJsonPath,
-  resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;

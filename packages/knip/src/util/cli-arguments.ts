@@ -22,6 +22,7 @@ Options:
   --files                  Shortcut for --include files
   --fix                    Fix issues
   --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
+  --format                 Format modified files after --fix using the local formatter
   --allow-remove-files     Allow Knip to remove files (with --fix)
   --include-libs           Include type definitions from external dependencies (default: false)
   --include-entry-exports  Include entry files when reporting unused exports
@@ -40,7 +41,10 @@ Options:
   --trace                  Show trace output
   --trace-export [name]    Show trace output for named export(s)
   --trace-file [file]      Show trace output for exports in file
-  --performance            Measure count and running time of expensive functions and display stats table
+  --performance            Measure count and running time of key functions and display stats table
+  --performance-fn [name]  Measure only function [name]
+  --memory                 Measure memory usage and display data table
+  --memory-realtime        Log memory usage in realtime
   -h, --help               Print this help text
   -V, --version            Print version
 
@@ -76,6 +80,7 @@ try {
       files: { type: 'boolean' },
       fix: { type: 'boolean' },
       'fix-type': { type: 'string', multiple: true },
+      format: { type: 'boolean' },
       'allow-remove-files': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
       'ignore-internal': { type: 'boolean' },
@@ -84,11 +89,14 @@ try {
       'include-entry-exports': { type: 'boolean' },
       'isolate-workspaces': { type: 'boolean' },
       'max-issues': { type: 'string' },
+      memory: { type: 'boolean' },
+      'memory-realtime': { type: 'boolean' },
       'no-config-hints': { type: 'boolean' },
       'no-exit-code': { type: 'boolean' },
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
       performance: { type: 'boolean' },
+      'performance-fn': { type: 'string' },
       production: { type: 'boolean' },
       preprocessor: { type: 'string', multiple: true },
       'preprocessor-options': { type: 'string' },

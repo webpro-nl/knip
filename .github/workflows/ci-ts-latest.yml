@@ -1,4 +1,4 @@
-name: Tests (against typescript@latest in Node.js v20)
+name: Tests (against typescript@latest in Node.js v22)
 
 on:
   workflow_dispatch:
@@ -12,12 +12,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Ubuntu/Node v20
+    name: Ubuntu/Node v22
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - name: Install dependencies
         run: npm install --ignore-scripts --legacy-peer-deps
       - name: Install latest peer dependencies

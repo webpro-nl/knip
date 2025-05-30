@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused exports in zero-config mode', async () => {
-  const cwd = resolve('fixtures/zero-config');
+const cwd = resolve('fixtures/zero-config');
 
+test('Find unused exports in zero-config mode', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

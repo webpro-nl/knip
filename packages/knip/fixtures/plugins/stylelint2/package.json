@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/stylelint2",
+  "name": "@plugins/stylelint2",
   "devDependencies": {
     "postcss-less": "*",
     "postcss-styl": "*",

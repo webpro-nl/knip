@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/playwright-ct2",
+  "name": "@plugins/playwright-ct2",
   "knip": {
     "playwright-ct": true
   },

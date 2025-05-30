@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces/root",
+  "name": "@fixtures/workspaces",
   "workspaces": ["docs", "apps/*", "local/tsconfig", "packages/*"],
   "dependencies": {
     "cypress": "*",

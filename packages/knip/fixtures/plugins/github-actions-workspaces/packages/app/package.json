@@ -1,5 +1,5 @@
 {
-  "name": "@github-actions-workspaces/app",
+  "name": "@plugins/github-actions-workspaces__app",
   "scripts": {
     "stylelint": "stylelint",
     "hello-world": "yarn run --top-level hello"

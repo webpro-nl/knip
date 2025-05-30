@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/wireit-apps-example-configuration",
-  "version": "1.0.0",
+  "name": "@plugins/wireit__example-configuration",
   "scripts": {
     "build": "wireit",
     "bundle": "wireit"

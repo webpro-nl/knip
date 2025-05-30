@@ -12,23 +12,25 @@ import type { PluginName } from '../types/PluginNames.js';
 import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
 import type { ModuleGraph } from '../types/module-graph.js';
+import { perfObserver } from '../util/Performance.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
 import { _glob, negate } from '../util/glob.js';
 import {
   type Input,
+  isAlias,
   isConfig,
   isDeferResolveEntry,
   isDeferResolveProductionEntry,
   isEntry,
+  isIgnore,
   isProductionEntry,
   isProject,
   toProductionEntry,
 } from '../util/input.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getEntryPathsFromManifest } from '../util/package-json.js';
-import { dirname, isAbsolute, join, relative } from '../util/path.js';
-import {} from '../util/tag.js';
+import { dirname, isAbsolute, join, relative, toRelative } from '../util/path.js';
 import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 import { loadTSConfig } from '../util/tsconfig-loader.js';
 
@@ -100,13 +102,10 @@ export async function build({
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName } = workspace;
 
-    streamer.cast(`Analyzing workspace ${name}...`);
+    streamer.cast('Analyzing workspace', name);
 
     const manifest = chief.getManifestForWorkspace(name);
-
-    if (!manifest) {
-      continue;
-    }
+    if (!manifest) continue;
 
     const dependencies = deputy.getDependencies(name);
 
@@ -164,7 +163,6 @@ export async function build({
     // workspace + worker → principal
     const principal = factory.createPrincipal({
       cwd: dir,
-      paths: config.paths,
       isFile,
       compilerOptions,
       compilers,
@@ -175,7 +173,10 @@ export async function build({
       toSourceFilePath,
       isCache,
       cacheLocation,
+      isProduction,
     });
+
+    principal.addPaths(config.paths, dir);
 
     // Get dependencies from plugins
     const inputsFromPlugins = await worker.runPlugins();
@@ -206,6 +207,14 @@ export async function build({
         }
       } else if (isProject(input)) {
         projectFilePatterns.add(isAbsolute(specifier) ? relative(dir, specifier) : specifier);
+      } else if (isAlias(input)) {
+        principal.addPaths({ [input.specifier]: input.prefixes }, input.dir ?? dir);
+      } else if (isIgnore(input)) {
+        if (input.issueType === 'dependencies' || input.issueType === 'unlisted') {
+          deputy.addIgnoredDependencies(name, input.specifier);
+        } else if (input.issueType === 'binaries') {
+          deputy.addIgnoredBinaries(name, input.specifier);
+        }
       } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = getReferencedInternalFilePath(input, ws);
@@ -381,11 +390,11 @@ export async function build({
     principal.init();
 
     if (principal.asyncCompilers.size > 0) {
-      streamer.cast('Running async compilers...');
+      streamer.cast('Running async compilers');
       await principal.runAsyncCompilers();
     }
 
-    streamer.cast('Analyzing source files...');
+    streamer.cast('Analyzing source files', toRelative(principal.cwd));
 
     let size = principal.entryPaths.size;
     let round = 0;
@@ -405,13 +414,14 @@ export async function build({
     principal.reconcileCache(graph);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (!isIsolateWorkspaces && isSkipLibs && !isWatch) {
+    if (isIsolateWorkspaces || (isSkipLibs && !isWatch)) {
       factory.deletePrincipal(principal);
       principals[i] = undefined;
     }
+    perfObserver.addMemoryMark(factory.getPrincipalCount());
   }
 
-  if (isIsolateWorkspaces) {
+  if (!isWatch && isSkipLibs && !isIsolateWorkspaces) {
     for (const principal of principals) {
       if (principal) factory.deletePrincipal(principal);
     }

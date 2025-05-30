@@ -1,0 +1,23 @@
+{
+  "name": "@plugins/docusaurus",
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "docusaurus build"
+  },
+  "dependencies": {
+    "@docusaurus/core": "*",
+    "@docusaurus/plugin-content-pages": "*",
+    "@docusaurus/plugin-sitemap": "*",
+    "@docusaurus/preset-classic": "*",
+    "@docusaurus/theme-mermaid": "*",
+    "@mdx-js/react": "*",
+    "@my-company/docusaurus-plugin": "*",
+    "@my-company/docusaurus-plugin-awesome": "*",
+    "@my-company/docusaurus-plugin-cool": "*",
+    "docusaurus-plugin-awesome": "*"
+  },
+  "devDependencies": {
+    "@docusaurus/types": "*"
+  }
+}

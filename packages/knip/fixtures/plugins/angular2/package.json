@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/angular2",
+  "name": "@plugins/angular2",
   "scripts": {
     "ng": "ng"
   },

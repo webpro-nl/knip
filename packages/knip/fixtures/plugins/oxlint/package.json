@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/oxlint",
+  "name": "@plugins/oxlint",
   "devDependencies": {
     "oxlint": "*"
   },

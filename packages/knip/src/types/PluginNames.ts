@@ -8,14 +8,18 @@ export type PluginName =
   | 'bun'
   | 'c8'
   | 'capacitor'
+  | 'changelogen'
+  | 'changelogithub'
   | 'changesets'
   | 'commitizen'
   | 'commitlint'
+  | 'convex'
   | 'create-typescript-app'
   | 'cspell'
   | 'cucumber'
   | 'cypress'
   | 'dependency-cruiser'
+  | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
   | 'eleventy'
@@ -26,6 +30,7 @@ export type PluginName =
   | 'github-actions'
   | 'glob'
   | 'graphql-codegen'
+  | 'hardhat'
   | 'husky'
   | 'i18next-parser'
   | 'jest'
@@ -60,6 +65,7 @@ export type PluginName =
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
+  | 'prisma'
   | 'react-cosmos'
   | 'react-router'
   | 'relay'
@@ -84,6 +90,7 @@ export type PluginName =
   | 'tailwind'
   | 'travis'
   | 'ts-node'
+  | 'tsdown'
   | 'tsup'
   | 'tsx'
   | 'typedoc'
@@ -112,14 +119,18 @@ export const pluginNames = [
   'bun',
   'c8',
   'capacitor',
+  'changelogen',
+  'changelogithub',
   'changesets',
   'commitizen',
   'commitlint',
+  'convex',
   'create-typescript-app',
   'cspell',
   'cucumber',
   'cypress',
   'dependency-cruiser',
+  'docusaurus',
   'dotenv',
   'drizzle',
   'eleventy',
@@ -130,6 +141,7 @@ export const pluginNames = [
   'github-actions',
   'glob',
   'graphql-codegen',
+  'hardhat',
   'husky',
   'i18next-parser',
   'jest',
@@ -164,6 +176,7 @@ export const pluginNames = [
   'postcss',
   'preconstruct',
   'prettier',
+  'prisma',
   'react-cosmos',
   'react-router',
   'relay',
@@ -188,6 +201,7 @@ export const pluginNames = [
   'tailwind',
   'travis',
   'ts-node',
+  'tsdown',
   'tsup',
   'tsx',
   'typedoc',

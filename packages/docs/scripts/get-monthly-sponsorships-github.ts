@@ -1,7 +1,13 @@
 import { graphql } from '@octokit/graphql';
 
-const START_DATE = new Date('2023-11-01');
-const RECURRING_ONLY = process.argv.includes('--recurring-only');
+const token = process.env.GITHUB_TOKEN;
+
+type Options = {
+  token?: string;
+  startDate: Date;
+  endDate?: Date;
+  recurringOnly: boolean;
+};
 
 interface SponsorActivity {
   action: 'NEW_SPONSORSHIP' | 'CANCELLED_SPONSORSHIP';
@@ -23,7 +29,9 @@ interface GraphQLResponse {
   };
 }
 
-const getMonthlyTotals = async (token: string) => {
+const getMonthlyTotals = async (options: Options) => {
+  const { token, startDate, recurringOnly } = options;
+
   const { viewer } = await graphql<GraphQLResponse>({
     query: `
       query {
@@ -58,18 +66,18 @@ const getMonthlyTotals = async (token: string) => {
   const monthlyTotals = new Map<string, number>();
   const now = new Date();
 
-  for (let d = new Date(START_DATE); d <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+  for (let d = new Date(startDate); d <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
     monthlyTotals.set(d.toISOString().substring(0, 7), 0);
   }
 
   for (const activity of activities) {
     const { action, sponsor, sponsorsTier, timestamp } = activity;
-    if (RECURRING_ONLY && sponsorsTier?.isOneTime) continue;
+    if (recurringOnly && sponsorsTier?.isOneTime) continue;
     const amount = sponsorsTier?.monthlyPriceInDollars || 0;
     const monthYear = new Date(timestamp).toISOString().substring(0, 7);
 
     if (sponsorsTier?.isOneTime) {
-      if (!RECURRING_ONLY && action === 'NEW_SPONSORSHIP') {
+      if (!recurringOnly && action === 'NEW_SPONSORSHIP') {
         monthlyTotals.set(monthYear, (monthlyTotals.get(monthYear) || 0) + amount);
       }
     } else {
@@ -85,23 +93,13 @@ const getMonthlyTotals = async (token: string) => {
   return monthlyTotals;
 };
 
-const main = async () => {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    throw new Error('GITHUB_TOKEN environment variable is not set');
+export const getGitHubTotals = async (options: Options) => {
+  if (!token) throw new Error('GITHUB_TOKEN is not set');
+  const monthlyData = await getMonthlyTotals({ ...options, token });
+  const startMonth = options.startDate.toISOString().substring(0, 7);
+  const endMonth = options.endDate?.toISOString().substring(0, 7);
+  for (const month of monthlyData.keys()) {
+    if (month < startMonth || (endMonth && month > endMonth)) monthlyData.delete(month);
   }
-  const monthlyData = await getMonthlyTotals(token);
-
-  let grandTotal = 0;
-  const startMonth = START_DATE.toISOString().substring(0, 7);
-  const data = [...monthlyData.entries()].filter(([month]) => month >= startMonth);
-
-  for (const [month, amount] of data.sort()) {
-    console.log(`${month} ${amount}`);
-    grandTotal += amount;
-  }
-
-  console.log(`\nGrand total: ${grandTotal} (${data.length} months)`);
+  return monthlyData;
 };
-
-main().catch(console.error);

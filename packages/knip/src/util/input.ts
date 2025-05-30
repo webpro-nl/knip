@@ -1,7 +1,17 @@
 import type { PluginName } from '../types/PluginNames.js';
+import type { IssueType } from '../types/issues.js';
 import { isAbsolute, toRelative } from './path.js';
 
-type InputType = 'binary' | 'entry' | 'project' | 'config' | 'dependency' | 'deferResolve' | 'deferResolveEntry';
+type InputType =
+  | 'binary'
+  | 'entry'
+  | 'project'
+  | 'config'
+  | 'dependency'
+  | 'deferResolve'
+  | 'deferResolveEntry'
+  | 'alias'
+  | 'ignore';
 
 export interface Input {
   type: InputType;
@@ -18,6 +28,16 @@ export interface ConfigInput extends Input {
   type: 'config';
   containingFilePath?: string;
   pluginName: PluginName;
+}
+
+interface AliasInput extends Input {
+  type: 'alias';
+  prefixes: string[];
+}
+
+interface IgnoreInput extends Input {
+  type: 'ignore';
+  issueType: IssueType;
 }
 
 type Options = {
@@ -98,6 +118,24 @@ export const toDeferResolveEntry = (specifier: string, options: Options = {}): I
 });
 
 export const isDeferResolveEntry = (input: Input) => input.type === 'deferResolveEntry';
+
+export const toAlias = (specifier: string, prefix: string | string[], options: Options = {}): AliasInput => ({
+  type: 'alias',
+  specifier,
+  prefixes: Array.isArray(prefix) ? prefix : [prefix],
+  ...options,
+});
+
+export const isAlias = (input: Input): input is AliasInput => input.type === 'alias';
+
+/** @public not used yet */
+export const toIgnore = (specifier: string, issueType: IssueType): IgnoreInput => ({
+  type: 'ignore',
+  specifier,
+  issueType,
+});
+
+export const isIgnore = (input: Input): input is IgnoreInput => input.type === 'ignore';
 
 export const toDebugString = (input: Input) =>
   `${input.type}:${isAbsolute(input.specifier) ? toRelative(input.specifier) : input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath)})` : ''}`;

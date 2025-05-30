@@ -1,5 +1,5 @@
 {
-  "name": "my-package",
+  "name": "@fixtures/subpath-import",
   "imports": {
     "#dep": {
       "node": "dep-node-native",

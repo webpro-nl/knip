@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/plugin-disable-workspace",
+  "name": "@fixtures/plugin-disable__ws",
   "scripts": {
     "playwright-test": "playwright test --config playwright.config.ts"
   }

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/svelte",
+  "name": "@plugins/svelte",
   "//": "Generated from `npm create svelte@latest my-app`",
   "scripts": {
     "dev": "vite dev",

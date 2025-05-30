@@ -1,3 +1,3 @@
-import { usedFunction } from '@workspaces-dts/shared';
+import { usedFunction } from '@fixtures/workspaces-dts__shared';
 
 usedFunction();

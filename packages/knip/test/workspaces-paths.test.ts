@@ -5,8 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
+const cwd = resolve('fixtures/workspaces-paths');
+
 test('Find unused dependencies, exports and files in workspaces (w/ paths)', async () => {
-  const cwd = resolve('fixtures/workspaces-paths');
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

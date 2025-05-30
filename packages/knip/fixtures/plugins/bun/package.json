@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/bun",
+  "name": "@plugins/bun",
   "scripts": {
     "test": "bun test"
   }

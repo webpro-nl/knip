@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { toEntry, toProductionEntry } from '../../util/input.js';
 
@@ -10,7 +10,7 @@ const config = ['package.json'];
 
 const packageJsonPath = (id: PackageJson) => id;
 
-const resolveEntryPaths: ResolveEntryPaths<PackageJson> = localConfig => {
+const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
   const scripts = localConfig.scripts;
 
   const entries = [toProductionEntry('server.js')];
@@ -35,6 +35,6 @@ export default {
   isEnabled,
   packageJsonPath,
   config,
-  resolveEntryPaths,
+  resolveConfig,
   args,
 } satisfies Plugin;

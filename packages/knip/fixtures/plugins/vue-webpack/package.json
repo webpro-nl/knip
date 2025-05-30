@@ -1,5 +1,5 @@
 {
-  "name": "compilers-vue",
+  "name": "@plugins/vue-webpack",
   "dependencies": {
     "vue": "*"
   },

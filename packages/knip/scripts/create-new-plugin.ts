@@ -40,7 +40,7 @@ const pluginTestFixtureTemplateDir = path.join(pluginTestFixturesDir, '_template
 const pluginTestFixturePluginDir = path.join(pluginTestFixturesDir, name);
 const pluginTestFixtureManifest = path.join(pluginTestFixturePluginDir, 'package.json');
 
-const relative = to => path.relative(cwd, to);
+const relative = (to: string) => path.relative(cwd, to);
 
 // Copy plugin implementation
 await fs.cp(templateDir, newPluginDir, {
@@ -70,9 +70,7 @@ await fs.cp(pluginTestTemplateFilePath, pluginTestFilePath, {
 
 // String replacements
 for (const filePath of [newPluginFile, pluginTestFilePath, pluginTestFixtureManifest]) {
-  const isFileExists = await fs.exists(filePath);
-  if (isFileExists) console.error(`File ${relative(filePath)} already exists.`);
-  if (!isFileExists || force) {
+  if (await fs.exists(filePath)) {
     const content = String(await fs.readFile(filePath));
     await fs.writeFile(filePath, content.replaceAll('_template', name).replaceAll('__PLUGIN_NAME__', name));
   }

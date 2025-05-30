@@ -5,7 +5,7 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/script-visitors/bun');
+const cwd = resolve('fixtures/script-visitors-bun');
 
 test('Find dependencies with custom script visitors (bun)', async () => {
   const { issues, counters } = await main({

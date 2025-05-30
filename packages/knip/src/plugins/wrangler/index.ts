@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { WranglerConfig } from './types.js';
@@ -13,7 +13,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['wrangler.{json,toml}'];
 
-const resolveEntryPaths: ResolveEntryPaths<WranglerConfig> = async config => {
+const resolveConfig: ResolveConfig<WranglerConfig> = async config => {
   return (config.main ? [config.main] : []).map(id => toProductionEntry(id));
 };
 
@@ -22,5 +22,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;

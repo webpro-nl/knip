@@ -1,4 +1,5 @@
 {
+  "name": "@fixtures/workspaces-plugin-config",
   "scripts": {
     "test": "jest"
   },

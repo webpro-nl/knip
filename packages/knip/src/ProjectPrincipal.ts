@@ -5,7 +5,7 @@ import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
 import type { GetImportsAndExportsOptions } from './types/config.js';
 import type { Export, ExportMember, FileNode, ModuleGraph, UnresolvedImport } from './types/module-graph.js';
-import type { PrincipalOptions } from './types/project.js';
+import type { Paths, PrincipalOptions } from './types/project.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/create-hosts.js';
@@ -14,7 +14,7 @@ import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
-import { dirname, extname, isInNodeModules, join } from './util/path.js';
+import { dirname, extname, isInNodeModules, join, toAbsolute } from './util/path.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
 // These compiler options override local options
@@ -39,7 +39,7 @@ const baseCompilerOptions: ts.CompilerOptions = {
 const tsCreateProgram = timerify(ts.createProgram);
 
 /**
- * This class aims to abstract away TypeScript specific things from the main flow.
+ * Abstracts away TypeScript API from the main flow
  *
  * - Provided by the principal factory
  * - Collects entry and project paths
@@ -54,7 +54,7 @@ export class ProjectPrincipal {
   projectPaths = new Set<string>();
   nonEntryPaths = new Set<string>();
 
-  // We don't want to report unused exports of config/plugin entry files
+  // Don't report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
 
   cwd: string;
@@ -90,6 +90,7 @@ export class ProjectPrincipal {
     toSourceFilePath,
     isCache,
     cacheLocation,
+    isProduction,
   }: PrincipalOptions) {
     this.cwd = cwd;
 
@@ -106,7 +107,7 @@ export class ProjectPrincipal {
     this.asyncCompilers = asyncCompilers;
     this.isSkipLibs = isSkipLibs;
     this.isWatch = isWatch;
-    this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation });
+    this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation, isProduction });
     this.toSourceFilePath = toSourceFilePath;
 
     // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
@@ -132,8 +133,17 @@ export class ProjectPrincipal {
     this.backend.languageServiceHost = languageServiceHost;
   }
 
-  addPaths(paths: ts.CompilerOptions['paths']) {
-    this.compilerOptions.paths = { ...this.compilerOptions.paths, ...paths };
+  addPaths(paths: Paths, basePath: string) {
+    if (!paths) return;
+    this.compilerOptions.paths ??= {};
+    for (const key in paths) {
+      const prefixes = paths[key].map(prefix => toAbsolute(prefix, basePath));
+      if (key in this.compilerOptions.paths) {
+        this.compilerOptions.paths[key] = compact([...this.compilerOptions.paths[key], ...prefixes]);
+      } else {
+        this.compilerOptions.paths[key] = prefixes;
+      }
+    }
   }
 
   addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
@@ -237,7 +247,7 @@ export class ProjectPrincipal {
 
     const typeChecker = this.backend.typeChecker;
 
-    if (!typeChecker) throw new Error('Must initialize TypeChecker before source file analysis');
+    if (!typeChecker) throw new Error('TypeChecker must be initialized before source file analysis');
 
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
     const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);

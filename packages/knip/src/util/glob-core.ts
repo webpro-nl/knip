@@ -17,18 +17,18 @@ const _picomatch = timerify(picomatch);
 
 type Options = { gitignore: boolean; cwd: string };
 
-type GlobOptions = {
-  readonly gitignore: boolean;
-  readonly cwd: string;
-  readonly dir: string;
+interface GlobOptions extends FastGlobOptions {
+  gitignore: boolean;
+  cwd: string;
+  dir: string;
   label?: string;
-} & FastGlobOptionsWithoutCwd;
+}
 
-type FastGlobOptionsWithoutCwd = Pick<FastGlobOptions, 'onlyDirectories' | 'ignore' | 'absolute' | 'dot'>;
+type Gitignores = { ignores: Set<string>; unignores: Set<string> };
 
-type Gitignores = { ignores: Set<string>; unignores: string[] };
-
+// ignore patterns are cached per gitignore file
 const cachedGitIgnores = new Map<string, Gitignores>();
+// ignore patterns are cached per directory as a product of .gitignore in current and ancestor directories
 const cachedGlobIgnores = new Map<string, string[]>();
 
 const findAncestorGitignoreFiles = (cwd: string): string[] => {
@@ -70,57 +70,58 @@ export const findAndParseGitignores = async (cwd: string) => {
     const dir = dirname(toPosix(filePath));
     const base = relative(cwd, dir);
     const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
-    const dirIgnores = new Set(base === '' ? init : []);
-    const dirUnignores = new Set<string>();
+
+    const ignoresForDir = new Set(base === '' ? init : []);
+    const unignoresForDir = new Set<string>();
 
     const patterns = readFileSync(filePath, 'utf8');
 
     for (const rule of parseAndConvertGitignorePatterns(patterns, ancestor)) {
-      const [pattern1, pattern2] = rule.patterns;
+      const [pattern, extraPattern] = rule.patterns;
       if (rule.negated) {
         if (base === '' || base.startsWith('..')) {
-          if (!unignores.includes(pattern2)) {
+          if (!unignores.includes(extraPattern)) {
             unignores.push(...rule.patterns);
-            dirUnignores.add(pattern1);
-            dirUnignores.add(pattern2);
+            unignoresForDir.add(pattern);
+            unignoresForDir.add(extraPattern);
           }
         } else {
-          if (!unignores.includes(pattern2.startsWith('**/') ? pattern2 : `**/${pattern2}`)) {
-            const unignore = join(base, pattern1);
-            const extraUnignore = join(base, pattern2);
+          if (!unignores.includes(extraPattern.startsWith('**/') ? extraPattern : `**/${extraPattern}`)) {
+            const unignore = join(base, pattern);
+            const extraUnignore = join(base, extraPattern);
             unignores.push(unignore, extraUnignore);
-            dirUnignores.add(unignore);
-            dirUnignores.add(extraUnignore);
+            unignoresForDir.add(unignore);
+            unignoresForDir.add(extraUnignore);
           }
         }
       } else {
         if (base === '' || base.startsWith('..')) {
-          ignores.add(pattern1);
-          ignores.add(pattern2);
-          dirIgnores.add(pattern1);
-          dirIgnores.add(pattern2);
-        } else {
-          const ignore = join(base, pattern1);
-          const extraIgnore = join(base, pattern2);
+          ignores.add(pattern);
+          ignores.add(extraPattern);
+          ignoresForDir.add(pattern);
+          ignoresForDir.add(extraPattern);
+        } else if (!unignores.includes(extraPattern.startsWith('**/') ? extraPattern : `**/${extraPattern}`)) {
+          const ignore = join(base, pattern);
+          const extraIgnore = join(base, extraPattern);
           ignores.add(ignore);
           ignores.add(extraIgnore);
-          dirIgnores.add(ignore);
-          dirIgnores.add(extraIgnore);
+          ignoresForDir.add(ignore);
+          ignoresForDir.add(extraIgnore);
         }
       }
     }
 
     const cacheDir = ancestor ? cwd : dir;
-    const cacheForDir = cachedGitIgnores.get(cwd);
+    const cacheForDir = cachedGitIgnores.get(cacheDir);
 
     if (cacheForDir) {
-      for (const pattern of dirIgnores) cacheForDir?.ignores.add(pattern);
-      cacheForDir.unignores = Array.from(new Set([...cacheForDir.unignores, ...dirUnignores]));
+      for (const pattern of ignoresForDir) cacheForDir.ignores.add(pattern);
+      for (const pattern of unignoresForDir) cacheForDir.unignores.add(pattern);
     } else {
-      cachedGitIgnores.set(cacheDir, { ignores: dirIgnores, unignores: Array.from(dirUnignores) });
+      cachedGitIgnores.set(cacheDir, { ignores: ignoresForDir, unignores: unignoresForDir });
     }
 
-    for (const pattern of dirIgnores) matchers.add(_picomatch(pattern, pmOptions));
+    for (const pattern of ignoresForDir) matchers.add(_picomatch(pattern, pmOptions));
   };
 
   findAncestorGitignoreFiles(cwd).forEach(addFile);
@@ -185,12 +186,12 @@ export async function glob(patterns: string | string[], options: GlobOptions): P
 
   const paths = await fg.glob(patterns, fgOptions);
 
-  const name = relative(options.cwd, dir);
+  const name = relative(options.cwd, dir) || ROOT_WORKSPACE_NAME;
 
-  debugLogObject(name || ROOT_WORKSPACE_NAME, label ? `Finding ${label}` : 'Finding paths', () => ({
+  debugLogObject(name, label ? `Finding ${label}` : 'Finding paths', () => ({
     patterns,
     ...fgOptions,
-    ignore: hasCache ? `// identical to ${name}` : ignore,
+    ignore: hasCache ? `// using cache from ${name}` : ignore,
     paths,
   }));
 

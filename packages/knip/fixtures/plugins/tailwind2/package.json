@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/tailwind2",
+  "name": "@plugins/tailwind2",
   "dependencies": {
     "tailwindcss": "^4.0.3"
   }

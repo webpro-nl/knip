@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/unbuild",
+  "name": "@plugins/unbuild",
   "devDependencies": {
     "unbuild": "^2.0.0"
   }

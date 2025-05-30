@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toDeferResolve, toEntry } from '../../util/input.js';
 import { join, relative } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -31,21 +31,17 @@ const toEntryPatterns = (
 
 const builtinReporters = ['dot', 'line', 'list', 'junit', 'html', 'blob', 'json', 'github'];
 
-export const resolveEntryPaths: ResolveEntryPaths<PlaywrightTestConfig> = async (localConfig, options) => {
+export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localConfig, options) => {
   const { cwd, configFileDir } = options;
   const projects = localConfig.projects ? [localConfig, ...localConfig.projects] : [localConfig];
-  return projects.flatMap(config =>
-    toEntryPatterns(config.testMatch ?? entry, cwd, configFileDir, config, localConfig)
-  );
-};
-
-export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async config => {
-  const reporters = [config.reporter].flat().flatMap(reporter => {
+  const reporters = [localConfig.reporter].flat().flatMap(reporter => {
     const name = typeof reporter === 'string' ? reporter : reporter?.[0];
     if (!name || builtinReporters.includes(name)) return [];
     return [name];
   });
-  return [...reporters].map(toDeferResolve);
+  return projects
+    .flatMap(config => toEntryPatterns(config.testMatch ?? entry, cwd, configFileDir, config, localConfig))
+    .concat(reporters.map(toDeferResolve));
 };
 
 const args = {
@@ -62,6 +58,5 @@ export default {
   config,
   entry,
   resolveConfig,
-  resolveEntryPaths,
   args,
 } satisfies Plugin;

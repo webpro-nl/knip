@@ -1,4 +1,0 @@
-{
-  "root": true,
-  "extends": ["@workspaces-self-reference/self-reference/build", "./file"]
-}

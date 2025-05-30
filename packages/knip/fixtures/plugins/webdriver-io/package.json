@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/webdriver-io",
+  "name": "@plugins/webdriver-io",
   "scripts": {
     "test": "wdio"
   },

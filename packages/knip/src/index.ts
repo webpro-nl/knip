@@ -1,4 +1,5 @@
 import { watch } from 'node:fs';
+import { formatly } from 'formatly';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
@@ -8,7 +9,7 @@ import { PrincipalFactory } from './PrincipalFactory.js';
 import { analyze } from './graph/analyze.js';
 import { build } from './graph/build.js';
 import type { CommandLineOptions } from './types/cli.js';
-import { debugLogObject } from './util/debug.js';
+import { debugLogArray, debugLogObject } from './util/debug.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { getWatchHandler } from './util/watch.js';
 
@@ -40,7 +41,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isExportsShorthand,
     isFilesShorthand,
     isFix,
-    isDisableConfigHints,
+    isFormat,
     isIncludeEntryExports,
     isIncludeLibs,
     isIsolateWorkspaces,
@@ -61,7 +62,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
 
-  streamer.cast('Reading workspace configuration(s)...');
+  streamer.cast('Reading workspace configuration');
 
   await chief.init();
 
@@ -125,14 +126,12 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     fixer,
     graph,
     isFix,
-    isDisableConfigHints,
     isIncludeLibs,
     isProduction,
     report,
     streamer,
     tags: finalTags,
     unreferencedFiles,
-    workspace,
   });
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
@@ -160,7 +159,17 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     watch('.', { recursive: true }, watchHandler);
   }
 
-  if (isFix) await fixer.fixIssues(issues);
+  if (isFix) {
+    const touchedFiles = await fixer.fixIssues(issues);
+    if (isFormat) {
+      const report = await formatly(Array.from(touchedFiles), { cwd });
+      if (report.ran && report.result.code === 0) {
+        debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);
+      } else {
+        debugLogObject('*', 'Formatting files failed', report);
+      }
+    }
+  }
 
   if (!isWatch) streamer.clear();
 

@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/husky-v8');
 
-test('Find dependencies with husky plugin (v8)', async () => {
+test('Find dependencies with the husky plugin (v8)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -25,7 +25,7 @@ test('Find dependencies with husky plugin (v8)', async () => {
   });
 });
 
-test('Find dependencies with husky plugin (v8) (production)', async () => {
+test('Find dependencies with the husky plugin (v8) (production)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/webpack2",
+  "name": "@plugins/webpack2",
   "scripts": {
     "dev": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js"

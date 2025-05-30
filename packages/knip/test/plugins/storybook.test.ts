@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/storybook');
 
-test('Find dependencies with Storybook plugin', async () => {
+test('Find dependencies with the Storybook plugin', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

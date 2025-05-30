@@ -9,7 +9,7 @@ const cwd = resolve('fixtures/fix');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-test('Remove exports and dependencies', async () => {
+test('Fix exports and dependencies', async () => {
   const tests = [
     [
       'mod.ts',
@@ -163,7 +163,7 @@ export const {  set: setter } = fn();
   }
 });
 
-test('Remove exports (--fix-type types)', async () => {
+test('Fix only exported types', async () => {
   const tests = [
     [
       'mod.ts',

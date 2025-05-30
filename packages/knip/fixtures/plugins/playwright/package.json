@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/playwright",
+  "name": "@plugins/playwright",
   "scripts": {
     "test": "playwright test"
   },

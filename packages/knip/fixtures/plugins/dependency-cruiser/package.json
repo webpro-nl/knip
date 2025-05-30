@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/dependency-cruiser",
+  "name": "@plugins/dependency-cruiser",
   "devDependencies": {
     "dependency-cruiser": "*"
   },

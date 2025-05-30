@@ -6,11 +6,10 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
+const cwd = resolve('fixtures/jsdoc');
 const supportsJSDocImportTag = 'isJSDocImportTag' in ts;
 
 test('Find imports from jsdoc @type tags', async () => {
-  const cwd = resolve('fixtures/jsdoc');
-
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

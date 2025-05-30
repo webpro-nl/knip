@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/eslint-config-self-reference-from-plugin",
+  "name": "@fixtures/eslint-config-x-self-reference-from-plugin",
   "type": "commonjs",
   "exports": {
     ".": {

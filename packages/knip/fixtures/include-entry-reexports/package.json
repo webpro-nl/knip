@@ -1,6 +1,5 @@
 {
-  "name": "@include-entry-reexports/root",
-  "version": "1.0.0",
+  "name": "@fixtures/include-entry-reexports",
   "private": true,
   "type": "module",
   "workspaces": ["packages/*"]

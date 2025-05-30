@@ -1,11 +1,10 @@
 import picocolors from 'picocolors';
-import prettyMilliseconds from 'pretty-ms';
 import type { Entries } from 'type-fest';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
-import type { IssueSet, Issues, Report } from '../types/issues.js';
+import type { Issues, Report } from '../types/issues.js';
 import { perfObserver } from '../util/Performance.js';
-import { relative } from '../util/path.js';
-import { getTitle } from './util.js';
+import { prettyMilliseconds } from '../util/string.js';
+import { getIssueTypeTitle, getTableForType } from './util.js';
 
 interface WatchReporter {
   report: Report;
@@ -20,30 +19,19 @@ export default ({ report, issues, streamer, startTime, size, isDebug }: WatchRep
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
   const lines: string[] = [];
-  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
-    if (reportType === '_files') continue;
+
+  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+    if (reportType === 'files') reportType = '_files';
 
     if (isReportType) {
-      const title = reportMultipleGroups && getTitle(reportType);
-      const isSet = issues[reportType] instanceof Set;
-      const issuesForType = isSet
-        ? Array.from(issues[reportType] as IssueSet)
-        : Object.values(issues[reportType]).flatMap(Object.values);
+      const title = reportMultipleGroups && getIssueTypeTitle(reportType);
+      const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
 
       if (issuesForType.length > 0) {
         if (title) {
           lines.push(`${picocolors.yellowBright(picocolors.underline(title))} (${issuesForType.length})`);
         }
-        if (typeof issuesForType[0] === 'string') {
-          lines.push(...issuesForType.map(filePath => relative(filePath)));
-        } else {
-          const width = issuesForType.reduce((max, issue) => Math.max(max, issue.symbol.length), 0) + 1;
-          for (const issue of issuesForType) {
-            const filePath = relative(issue.filePath);
-            const pos = issue.line ? `:${issue.line}:${issue.col}` : '';
-            lines.push(`${issue.symbol.padEnd(width)} ${filePath}${pos}`);
-          }
-        }
+        lines.push(...getTableForType(issuesForType).toRows());
       }
 
       totalIssues = totalIssues + issuesForType.length;

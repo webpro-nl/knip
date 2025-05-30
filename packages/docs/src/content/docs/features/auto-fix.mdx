@@ -26,6 +26,8 @@ necessary.
 
 ## Flags
 
+### Fix
+
 Add the `--fix` flag to remove unused exports and dependencies:
 
 ```sh
@@ -52,6 +54,16 @@ knip --fix-type exports,types
 knip --fix-type exports --fix-type types   # same as above
 ```
 
+### Format
+
+Add `--format` to format the modified files using the formatter and
+configuration in your project. Supports Biome, deno fmt, dprint and Prettier
+(using [Formatly][2]):
+
+```sh
+knip --fix --format
+```
+
 ## Demo
 
 <video controls width="500">
@@ -69,10 +81,17 @@ After Knip has fixed issues, there are four things to consider:
 Use a tool like Prettier or Biome if the code needs formatting. Knip removes the
 minimum amount of code while leaving it in a working state.
 
+:::tip
+
+Add the `--format` flag to format the modified files using the formatter and
+configuration in your project.
+
+:::
+
 ### 2. Unused variables
 
 Use a tool like ESLint or Biome to find and remove unused variables inside
-files. Even better, try [remove-unused-vars][2] to remove unused variables
+files. Even better, try [remove-unused-vars][3] to remove unused variables
 within files.
 
 This may result in more deleted code, and Knip may then find more unused code.
@@ -119,7 +138,8 @@ manager.
 
 ### 4. Install unlisted dependencies
 
-If Knip reports unlisted dependencies or binaries, they should be installed.
+If Knip reports unlisted dependencies or binaries, they should be installed
+using the package manager in the project, for example:
 
 <Tabs syncKey="pm">
   <TabItem label="npm">
@@ -315,7 +335,7 @@ referenced internally but meant to be called by an external library. For
 instance, Knip might think `componentDidMount` and `render` in React class
 component are unused and will remove those.
 
-Note that [`classMembers` aren't included by default][3].
+Note that [`classMembers` aren't included by default][4].
 
 ## What's not included
 
@@ -329,5 +349,6 @@ Operations that auto-fix does not (yet) perform and why:
 - Fix duplicate exports (which one should removed?)
 
 [1]: ../reference/issue-types.md
-[2]: https://github.com/webpro-nl/remove-unused-vars
-[3]: ../guides/handling-issues.mdx#class-members
+[2]: https://github.com/JoshuaKGoldberg/formatly
+[3]: https://github.com/webpro-nl/remove-unused-vars
+[4]: ../guides/handling-issues.mdx#class-members

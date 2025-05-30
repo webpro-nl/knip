@@ -5,9 +5,9 @@ import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused files and exports with JS entry file', async () => {
-  const cwd = resolve('fixtures/entry-js');
+const cwd = resolve('fixtures/entry-js');
 
+test('Find unused files and exports with JS entry file', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

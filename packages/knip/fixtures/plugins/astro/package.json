@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/astro",
+  "name": "@plugins/astro",
   "type": "module",
   "scripts": {
     "dev": "astro dev",

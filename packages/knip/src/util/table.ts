@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from 'node:util';
 import { pad, truncate, truncateStart } from './string.js';
 
 type Value = string | number | undefined | false | null;
@@ -29,32 +30,25 @@ export class Table {
     this.noTruncate = options?.noTruncate || [];
   }
 
-  cell(column: string, value: Value, formatter?: (value: Value) => string) {
-    if (!this.columns.includes(column)) this.columns.push(column);
-    const row = this.rows[this.rows.length - 1];
-    row[column] = {
-      value,
-      formatted: formatter ? formatter(value) : undefined,
-      align: typeof value === 'number' ? 'right' : 'left',
-    };
-    return this;
-  }
-
-  newRow() {
+  row() {
     this.rows.push({});
     return this;
   }
 
-  sort(compareFn: ((a: any, b: any) => number) | string) {
-    if (typeof compareFn === 'function') {
-      this.rows.sort(compareFn);
-      return this;
-    }
+  cell(column: string, value: Value, formatter?: (value: Value) => string) {
+    if (!this.columns.includes(column)) this.columns.push(column);
+    const row = this.rows[this.rows.length - 1];
+    const align = typeof value === 'number' ? 'right' : 'left';
+    const formatted = formatter ? formatter(value) : undefined;
+    row[column] = { value, formatted, align };
+    return this;
+  }
 
+  sort(column: string) {
     this.rows.sort((a, b) => {
-      const [col, order] = compareFn.split('|');
-      const vA = a[col].value;
-      const vB = b[col].value;
+      const [columnName, order] = column.split('|');
+      const vA = a[columnName].value;
+      const vB = b[columnName].value;
       if (typeof vA === 'string' && typeof vB === 'string') return (order === 'desc' ? -1 : 1) * vA.localeCompare(vB);
       if (typeof vA === 'number' && typeof vB === 'number') return order === 'desc' ? vB - vA : vA - vB;
       return !vA ? 1 : !vB ? -1 : 0;
@@ -62,7 +56,7 @@ export class Table {
     return this;
   }
 
-  toString() {
+  toCells() {
     const columns = this.columns.filter(col =>
       this.rows.some(row => typeof row[col].value === 'string' || typeof row[col].value === 'number')
     );
@@ -80,7 +74,13 @@ export class Table {
 
     const columnWidths = columns.reduce(
       (acc, col) => {
-        acc[col] = Math.max(...this.rows.map(row => String(row[col]?.formatted || row[col]?.value || '').length));
+        acc[col] = Math.max(
+          ...this.rows.map(row =>
+            row[col]?.formatted
+              ? stripVTControlCharacters(row[col].formatted).length
+              : String(row[col]?.value || '').length
+          )
+        );
         return acc;
       },
       {} as Record<string, number>
@@ -113,19 +113,23 @@ export class Table {
       }
     }
 
-    return this.rows
-      .map(row =>
-        columns
-          .map((col, index) => {
-            const cell = row[col];
-            const width = columnWidths[col];
-            const fill = cell.fill || ' ';
-            const padded = pad(String(cell.formatted || cell.value || ''), width, fill, cell.align);
-            const truncated = this.truncateStart.includes(col) ? truncateStart(padded, width) : truncate(padded, width);
-            return index === 0 ? truncated : COLUMN_SEPARATOR + truncated;
-          })
-          .join('')
-      )
-      .join('\n');
+    return this.rows.map(row =>
+      columns.map((col, index) => {
+        const cell = row[col];
+        const width = columnWidths[col];
+        const fill = cell.fill || ' ';
+        const padded = pad(String(cell.formatted || cell.value || ''), width, fill, cell.align);
+        const truncated = this.truncateStart.includes(col) ? truncateStart(padded, width) : truncate(padded, width);
+        return index === 0 ? truncated : COLUMN_SEPARATOR + truncated;
+      })
+    );
+  }
+
+  toRows() {
+    return this.toCells().map(row => row.join(''));
+  }
+
+  toString() {
+    return this.toRows().join('\n');
   }
 }

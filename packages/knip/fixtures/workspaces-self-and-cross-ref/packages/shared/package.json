@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/self-and-cross-ref-shared",
+  "name": "@fixtures/workspaces-self-and-cross-ref__shared",
   "type": "module",
   "private": true,
   "exports": {

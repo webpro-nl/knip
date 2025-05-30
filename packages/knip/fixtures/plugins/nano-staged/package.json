@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/nano-staged",
+  "name": "@plugins/nano-staged",
   "devDependencies": {
     "nano-staged": "*"
   },
