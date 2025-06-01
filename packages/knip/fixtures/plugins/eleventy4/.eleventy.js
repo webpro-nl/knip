@@ -49,7 +49,7 @@ module.exports.config = {
     input: 'src',
     includes: '_includes',
     layouts: '_includes/layouts',
-    data: '_data',
+    data: '_siteData',
     output: '_site',
   },
 };
