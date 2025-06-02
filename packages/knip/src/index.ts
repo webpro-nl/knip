@@ -172,7 +172,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
   }
 
   if (!isWatch) streamer.clear();
-
+  
   return {
     report,
     issues,

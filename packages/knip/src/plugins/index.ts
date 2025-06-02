@@ -3,6 +3,7 @@ import { default as angular } from './angular/index.js';
 import { default as astro } from './astro/index.js';
 import { default as ava } from './ava/index.js';
 import { default as babel } from './babel/index.js';
+import { default as biome } from './biome/index.js';
 import { default as bun } from './bun/index.js';
 import { default as c8 } from './c8/index.js';
 import { default as capacitor } from './capacitor/index.js';
@@ -113,6 +114,7 @@ export const Plugins = {
   astro,
   ava,
   babel,
+  biome,
   bun,
   c8,
   capacitor,
