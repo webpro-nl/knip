@@ -11,7 +11,9 @@ test('Find dependencies with the biome plugin', async () => {
     ...baseArguments,
     cwd,
   });
+  console.log(issues);
 
   assert(issues.devDependencies['package.json']['@org/unused-config']);
+  assert(issues.unresolved['biome.json']['./shared/non-exist-base.json']);
   assert(issues.unlisted['biome.json']['@org/unlisted-configs']);
 });
