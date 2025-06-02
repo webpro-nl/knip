@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/biome",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "latest",
+    "knip": "^5.59.1",
+    "@org/shared-configs": "1.0.0",
+    "@org/unused-config": "1.0.0"
+  }
+}
