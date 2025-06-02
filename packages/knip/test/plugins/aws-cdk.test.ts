@@ -23,7 +23,6 @@ test('Find dependencies with the aws-cdk plugin', async () => {
     devDependencies: 4,
     processed: 4,
     total: 4,
-    files: 1,
     unresolved: 0,
   });
 });
