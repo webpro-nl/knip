@@ -121,8 +121,8 @@ knip --directory fixtures/feature
 
 ### Attach debugger to Node.js
 
-To debug Knip in [VS Code][10], open the built-in terminal and allow the
-debugger to connect:
+To debug Knip in an IDE (e.g. [VS Code][10] or [WebStorm][11]), open the
+built-in terminal and allow the debugger to connect:
 
 ```shell
 cd fixtures/feature
@@ -132,16 +132,20 @@ tsx --inspect ../../src/cli.ts
 Make sure VS Code is set up to attach to the Node.js process ("Always" or "With
 flag").
 
-### VS Code: Attach debugger to Bun from a test
+### Attach debugger to Bun from a test
 
-A launch configuration for VS Code is set up in the repo. This a great way to
-debug almost anything in Knip:
+Run configurations for VS Code and WebStorm² are set up in the repo. This a
+great way to debug almost anything in Knip:
 
-- Ensure the [Bun extension][11] is enabled
+- VS Code: ensure the [Bun extension][12] is enabled
+- WebStorm: ensure the [Bun plugin][13] is enabled
 - Optionally set a breakpoint anywhere in source or test code
-- From any test file, run the "Debug Bun test" launch configuration
+- From any test file, run the "Debug Bun test" run configuration
 
-From now on, just hit `F5` from any test file to run and debug.
+From now on, just hit `F5` (Code) or `ctrl-r` (WS) from any test file to run and
+debug.
+
+² Requires at least WebStorm 2025.2 EAP
 
 ### Attach debugger to tests
 
@@ -167,21 +171,20 @@ bun run test
 
 ## GitHub Action
 
-The [ci.yml][12] workflow runs the tests across Bun, recent Node.js versions,
+The [ci.yml][14] workflow runs the tests across Bun, recent Node.js versions,
 Ubuntu, macOS and Windows. QA in CI must be all green before a pull request can
-be merged. The [integration.yml][13] workflow runs Knip in multiple repositories
+be merged. The [integration.yml][15] workflow runs Knip in multiple repositories
 using Knip, against the latest version of the code.
 
 ## Previews
 
-Thanks to [pkg.pr.new][14] pull requests can be previewed by installing it as a
+Thanks to [pkg.pr.new][16] pull requests can be previewed by installing it as a
 regular package. Every push is published to their registry. Look for the
 `pkg-pr-new` bot in your pull request.
 
 [1]: #qa
 [2]: https://docs.github.com/get-started/quickstart/fork-a-repo
-[3]:
-  https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
+[3]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
 [4]: https://github.com/webpro-nl/knip
 [5]: https://cli.github.com/
 [6]: https://knip.dev/guides/writing-a-plugin/
@@ -189,7 +192,9 @@ regular package. Every push is published to their registry. Look for the
 [8]: #without-compilation
 [9]: https://knip.dev/guides/writing-a-plugin#create-a-new-plugin
 [10]: https://code.visualstudio.com/docs/nodejs/nodejs-debugging
-[11]: https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode
-[12]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
-[13]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
-[14]: https://pkg.pr.new
+[11]: https://www.jetbrains.com/help/webstorm/running-and-debugging-node-js.html
+[12]: https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode
+[13]: https://www.jetbrains.com/help/webstorm/bun.html#bun_before_you_start
+[14]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
+[15]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
+[16]: https://pkg.pr.new
