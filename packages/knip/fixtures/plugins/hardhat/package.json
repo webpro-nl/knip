@@ -1,6 +1,7 @@
 {
   "name": "@plugins/hardhat",
   "devDependencies": {
+    "@solidstate/contracts": "*",
     "hardhat": "*"
   }
 }
