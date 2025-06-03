@@ -460,10 +460,9 @@ export class WorkspaceWorker {
     const hints: ConfigurationHints = new Set();
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
     const workspaceName = this.name;
+    const userDefinedPatterns = entries.filter(id => !isDefaultPattern(type, id));
 
-    if (entries.filter(id => !isDefaultPattern(type, id)).length === 0) {
-      return hints;
-    }
+    if (userDefinedPatterns.length === 0) return hints;
 
     if (filePaths.length === 0) {
       const identifier = `[${entries[0]}${entries.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
@@ -479,7 +478,7 @@ export class WorkspaceWorker {
       } else {
         const matcher = picomatch(filePathOrPattern);
         if (!filePaths.some(filePath => matcher(filePath))) {
-          hints.add({ type, identifier: pattern, workspaceName });
+          hints.add({ type: `${type}-empty`, identifier: pattern, workspaceName });
         }
       }
     }

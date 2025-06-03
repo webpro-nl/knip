@@ -18,8 +18,8 @@ test('Provide configuration hints (2)', async () => {
     new Set([
       { type: 'entry-top-level', identifier: '[src/entry.js, …]' },
       { type: 'project-top-level', identifier: '[src/**]' },
-      { type: 'project', identifier: 'lib/**', workspaceName: '.' },
-      { type: 'entry', identifier: 'lib/index.js', workspaceName: '.' },
+      { type: 'project-empty', identifier: 'lib/**', workspaceName: '.' },
+      { type: 'entry-empty', identifier: 'lib/index.js', workspaceName: '.' },
     ])
   );
 

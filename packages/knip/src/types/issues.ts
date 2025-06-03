@@ -1,3 +1,5 @@
+import type { Workspace } from '../ConfigurationChief.js';
+
 export enum SymbolType {
   VARIABLE = 'variable',
   TYPE = 'type',
@@ -72,6 +74,7 @@ export type ReporterOptions = {
   isShowProgress: boolean;
   options: string;
   preprocessorOptions: string;
+  includedWorkspaces: Workspace[];
 };
 
 export type Reporter = (options: ReporterOptions) => void;
@@ -89,19 +92,19 @@ export type ConfigurationHintType =
   | 'ignoreDependencies'
   | 'ignoreUnresolved'
   | 'ignoreWorkspaces'
-  | 'entry'
-  | 'project'
   | 'entry-redundant'
   | 'project-redundant'
   | 'entry-top-level'
   | 'project-top-level'
   | 'entry-empty'
-  | 'project-empty';
+  | 'project-empty'
+  | 'workspace-unconfigured';
 
 export type ConfigurationHint = {
   type: ConfigurationHintType;
   identifier: string | RegExp;
   workspaceName?: string;
+  size?: number;
 };
 
 type TagHints = Set<TagHint>;
