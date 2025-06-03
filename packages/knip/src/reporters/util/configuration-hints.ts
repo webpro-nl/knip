@@ -75,7 +75,7 @@ export const printConfigurationHints = ({
 
     for (const hint of configurationHints) {
       const hintPrinter = hintPrinters.get(hint.type);
-      if (hintPrinter) console.log(style(hintPrinter.print(hint)));
+      if (hintPrinter) console.warn(style(hintPrinter.print(hint)));
     }
   }
 
