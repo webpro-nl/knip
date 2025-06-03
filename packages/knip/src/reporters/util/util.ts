@@ -1,12 +1,13 @@
 import picocolors from 'picocolors';
-import { ISSUE_TYPE_TITLE } from '../constants.js';
-import { type Issue, type IssueSeverity, type IssueSymbol, SymbolType } from '../types/issues.js';
-import { relative } from '../util/path.js';
-import { Table } from '../util/table.js';
+import { ISSUE_TYPE_TITLE } from '../../constants.js';
+import { type Issue, type IssueSeverity, type IssueSymbol, SymbolType } from '../../types/issues.js';
+import { relative } from '../../util/path.js';
+import { Table } from '../../util/table.js';
 
 export const plain = (text: string) => text;
 export const dim = picocolors.gray;
 export const bright = picocolors.whiteBright;
+export const yellow = picocolors.yellow;
 
 export const getIssueTypeTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => ISSUE_TYPE_TITLE[reportType];
 
@@ -14,7 +15,7 @@ export const getColoredTitle = (title: string, count: number) =>
   `${picocolors.yellowBright(picocolors.underline(title))} (${count})`;
 
 export const getDimmedTitle = (title: string, count: number) =>
-  `${picocolors.yellow(`${picocolors.underline(title)} (${count})`)}`;
+  `${yellow(`${picocolors.underline(title)} (${count})`)}`;
 
 type LogIssueLine = {
   owner?: string;

@@ -12,7 +12,7 @@ import type {
   SymbolIssueType,
 } from '../types/issues.js';
 import { toRelative } from '../util/path.js';
-import { getIssueTypeTitle } from './util.js';
+import { getIssueTypeTitle } from './util/util.js';
 
 export default async ({ report, issues }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];

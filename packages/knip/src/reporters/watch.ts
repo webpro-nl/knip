@@ -4,7 +4,7 @@ import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { Issues, Report } from '../types/issues.js';
 import { perfObserver } from '../util/Performance.js';
 import { prettyMilliseconds } from '../util/string.js';
-import { getIssueTypeTitle, getTableForType } from './util.js';
+import { getIssueTypeTitle, getTableForType } from './util/util.js';
 
 interface WatchReporter {
   report: Report;
