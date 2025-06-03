@@ -17,8 +17,6 @@ const enablers = ["hardhat"];
 const isEnabled: IsPluginEnabled = ({ dependencies }) =>
   hasDependency(dependencies, enablers);
 
-const entry: string[] = ["hardhat.config.{js,cjs,mjs,ts}"];
-
 const config = ["hardhat.config.{js,cjs,mjs,ts}"];
 
 const resolve: Resolve = async () => {
@@ -42,7 +40,6 @@ export default {
   title,
   enablers,
   isEnabled,
-  entry,
   config,
   resolve,
   resolveConfig,

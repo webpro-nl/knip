@@ -1,3 +1,4 @@
+import "@solidstate/hardhat-contract-sizer";
 import type { HardhatUserConfig } from "../../../src/plugins/hardhat/types.js";
 
 const config: HardhatUserConfig = {

@@ -2,6 +2,7 @@
   "name": "@plugins/hardhat",
   "devDependencies": {
     "@solidstate/contracts": "*",
+    "@solidstate/hardhat-contract-sizer": "*",
     "hardhat": "*"
   }
 }
