@@ -6,24 +6,30 @@ import { bright, dim, getColoredTitle, getDimmedTitle, plain, yellow } from './u
 interface PrintHintOptions {
   type: ConfigurationHintType;
   identifier: string | RegExp;
+  isRootOnly: boolean;
   workspaceName?: string;
   size?: number;
 }
 
+const id = (id: string | RegExp) => bright(id.toString() + (id === '.' ? ' (root)' : ''));
+const type = (id: ConfigurationHintType) => yellow(id.split('-').at(0));
+const workspace = ({ isRootOnly, workspaceName: id }: PrintHintOptions) =>
+  isRootOnly ? '' : id === '.' ? ` in root ${yellow('"."')} workspace` : ` in ${yellow(id ?? '.')}`;
+
 const unused = (options: PrintHintOptions) =>
-  `Remove from ${yellow(options.type)}: ${bright(options.identifier.toString())}`;
+  `Remove from ${type(options.type)}${options.workspaceName === '.' ? '' : `${workspace(options)}`}: ${id(options.identifier)}`;
 
 const empty = (options: PrintHintOptions) =>
-  `Refine in ${options.workspaceName === '.' ? `top-level or root ${yellow('"."')}` : yellow(`"${options.workspaceName}"`)} workspace: ${bright(options.identifier.toString())}${options.identifier === '.' ? ' (root)' : ''} (no files found)`;
+  `Refine ${type(options.type)}${workspace(options)}: ${id(options.identifier)} (no files found)`;
 
 const remove = (options: PrintHintOptions) =>
-  `Remove ${yellow(options.type.split('-').at(0))} from ${options.workspaceName === '.' ? `top-level or root ${yellow('"."')} workspace` : `"${options.workspaceName}" workspace`}: ${bright(options.identifier.toString())}`;
+  `Remove ${type(options.type)}${workspace(options)}: ${id(options.identifier)}`;
 
-const refine = (options: PrintHintOptions) =>
-  `Refine in ${yellow('"workspaces"')}: ${bright(options.identifier.toString())}${options.identifier === '.' ? ' (root)' : ''} (${options.size} unused files)`;
+const add = (options: PrintHintOptions) =>
+  `Add to or refine in ${yellow('workspaces')}: ${id(options.identifier)} (${options.size} unused files)`;
 
 const topLevel = (options: PrintHintOptions) =>
-  `Remove or move unused ${yellow(`top-level "${options.type.split('-').at(0)}"`)} to ${yellow('"."')} workspace: ${bright(options.identifier.toString())}`;
+  `Remove or move unused top-level ${type(options.type)} to ${yellow('"."')}: ${id(options.identifier)}`;
 
 const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignoreBinaries', { print: unused }],
@@ -34,7 +40,7 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
   ['project-empty', { print: empty }],
   ['entry-redundant', { print: remove }],
   ['project-redundant', { print: remove }],
-  ['workspace-unconfigured', { print: refine }],
+  ['workspace-unconfigured', { print: add }],
   ['entry-top-level', { print: topLevel }],
   ['project-top-level', { print: topLevel }],
 ]);
@@ -73,9 +79,10 @@ export const printConfigurationHints = ({
 
     console.log(getTitle('Configuration hints', configurationHints.size));
 
+    const isRootOnly = includedWorkspaces.length === 1 && includedWorkspaces[0].name === '.';
     for (const hint of configurationHints) {
       const hintPrinter = hintPrinters.get(hint.type);
-      if (hintPrinter) console.warn(style(hintPrinter.print(hint)));
+      if (hintPrinter) console.warn(style(hintPrinter.print({ ...hint, isRootOnly })));
     }
   }
 
