@@ -128,7 +128,6 @@ export const toAlias = (specifier: string, prefix: string | string[], options: O
 
 export const isAlias = (input: Input): input is AliasInput => input.type === 'alias';
 
-/** @public not used yet */
 export const toIgnore = (specifier: string, issueType: IssueType): IgnoreInput => ({
   type: 'ignore',
   specifier,
