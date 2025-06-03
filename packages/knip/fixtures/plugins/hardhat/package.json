@@ -1,6 +1,7 @@
 {
   "name": "@plugins/hardhat",
   "devDependencies": {
+    "@openzeppelin/contracts": "*",
     "@solidstate/contracts": "*",
     "@solidstate/hardhat-contract-sizer": "*",
     "hardhat": "*"
