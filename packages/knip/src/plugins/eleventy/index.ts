@@ -59,20 +59,6 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
     );
 };
 
-const note = `### Eleventy Configuration File Format
-
-Eleventy supports several different configuration file formats, as detailed in the
-[Eleventy docs](https://www.11ty.dev/docs/config-shapes/). This plugin assumes that the configuration uses
-either the [callback function returning an object](https://www.11ty.dev/docs/config-shapes/#callback-function)
-or the [export default object](https://www.11ty.dev/docs/config-shapes/#export-default-object) format.
-If the [callback function with \`config\` export](https://www.11ty.dev/docs/config-shapes/#callback-function)
-format is used then knip will ignore the \`config\` object and use the default values, which may provide
-unexpected or incorrect results.
-`;
-
-/** @public */
-export const docs = { note };
-
 export default {
   title,
   enablers,

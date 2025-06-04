@@ -8,7 +8,7 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/eleventy4');
 
 // Uses a config file with default and `config` export. While this is not
-// supported by the plugin, this test ensures that an error is not thrown.
+// currently supported, this test ensures that an error is not thrown.
 test('Find dependencies with the Eleventy plugin (4)', async () => {
   const { counters } = await main({
     ...baseArguments,
