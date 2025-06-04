@@ -6,9 +6,6 @@
     "build:website:watch": "eleventy --serve --port=2023"
   },
   "devDependencies": {
-    "@11ty/eleventy": "*",
-    "@11ty/eleventy-navigation": "*",
-    "@11ty/eleventy-plugin-syntaxhighlight": "*",
-    "@org/lib": "*"
+    "@11ty/eleventy": "*"
   }
 }
