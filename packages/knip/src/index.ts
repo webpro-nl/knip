@@ -136,6 +136,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
+  for (const hint of chief.getConfigurationHints()) collector.addConfigurationHint(hint);
+
   if (isWatch) {
     const isIgnored = (filePath: string) =>
       filePath.startsWith(cacheLocation) || filePath.includes('/.git/') || isGitIgnored(filePath);
@@ -181,5 +183,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     tagHints,
     configurationHints,
     isTreatConfigHintsAsErrors: chief.config.isTreatConfigHintsAsErrors,
+    includedWorkspaces: chief.includedWorkspaces,
   };
 };

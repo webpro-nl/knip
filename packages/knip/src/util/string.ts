@@ -2,7 +2,7 @@ import { stripVTControlCharacters } from 'node:util';
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: deal with it
 const CONTROL_CHARACTERS = /\u001b\[[0-9;]+m/g;
-const ELLIPSIS = '…';
+export const ELLIPSIS = '…';
 
 const getTruncatedParts = (input: string, limit: number, fromStart: boolean) => {
   const parts = [];

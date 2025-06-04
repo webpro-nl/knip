@@ -3,7 +3,7 @@ import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issu
 import { createOwnershipEngine } from '../util/codeowners.js';
 import { isFile } from '../util/fs.js';
 import { relative, resolve } from '../util/path.js';
-import { convert } from './util.js';
+import { convert } from './util/util.js';
 
 type ExtraReporterOptions = {
   codeowners?: string;
