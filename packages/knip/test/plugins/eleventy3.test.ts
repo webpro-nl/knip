@@ -15,7 +15,7 @@ test('Find dependencies with the Eleventy plugin (3)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    processed: 5,
+    total: 5,
   });
 });
