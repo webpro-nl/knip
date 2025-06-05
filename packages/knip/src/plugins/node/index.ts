@@ -15,7 +15,7 @@ const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
 
   const entries = [toProductionEntry('server.js')];
 
-  if (scripts && Object.values(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(scripts[script]))) {
+  if (scripts && Object.values(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(script))) {
     // From https://nodejs.org/api/test.html#running-tests-from-the-command-line
     const patterns = [
       '**/*{.,-,_}test.{cjs,mjs,js,cts,mts,ts}',

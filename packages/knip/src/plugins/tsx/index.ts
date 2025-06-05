@@ -20,7 +20,7 @@ const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
 
   const entries = [];
 
-  if (scripts && Object.keys(scripts).some(script => /(?<=^|\s)tsx\s(.*)--test/.test(scripts[script]))) {
+  if (scripts && Object.values(scripts).some(script => /(?<=^|\s)tsx\s(.*)--test/.test(script))) {
     const patterns = [
       '**/*{.,-,_}test.?(c|m)(j|t)s',
       '**/test-*.?(c|m)(j|t)s',

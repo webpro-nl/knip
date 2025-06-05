@@ -24,11 +24,7 @@ const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)', ...mocks];
 const isVitestCoverageCommand = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
 
 const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
-  scripts
-    ? Object.values(scripts).some(script => {
-        return isVitestCoverageCommand.test(script);
-      })
-    : false;
+  scripts ? Object.values(scripts).some(script => isVitestCoverageCommand.test(script)) : false;
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
   const { manifest, cwd: dir } = options;
