@@ -1,4 +1,4 @@
-import type { ConfigurationHintType, ReporterOptions } from '../../types/issues.js';
+import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.js';
 import { toRelative } from '../../util/path.js';
 import { byPathDepth } from '../../util/workspace.js';
 import { bright, dim, getColoredTitle, getDimmedTitle, plain, yellow } from './util.js';
@@ -29,7 +29,7 @@ const add = (options: PrintHintOptions) =>
   `Add to or refine in ${yellow('workspaces')}: ${id(options.identifier)} (${options.size} unused files)`;
 
 const topLevel = (options: PrintHintOptions) =>
-  `Remove or move unused top-level ${type(options.type)} to ${yellow('"."')}: ${id(options.identifier)}`;
+  `Remove or move unused top-level ${type(options.type)} to ${yellow('"."')} workspace: ${id(options.identifier)}`;
 
 const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignoreBinaries', { print: unused }],
@@ -74,13 +74,17 @@ export const printConfigurationHints = ({
   }
 
   if (configurationHints.size > 0) {
+    const isTopLevel = (type: ConfigurationHintType) => type.includes('top-level');
+    const hintOrderer = (a: ConfigurationHint, b: ConfigurationHint) =>
+      isTopLevel(a.type) && !isTopLevel(b.type) ? -1 : !isTopLevel(a.type) && isTopLevel(b.type) ? 1 : 0;
+
     const getTitle = isTreatConfigHintsAsErrors ? getColoredTitle : getDimmedTitle;
     const style = isTreatConfigHintsAsErrors ? plain : dim;
 
     console.log(getTitle('Configuration hints', configurationHints.size));
 
     const isRootOnly = includedWorkspaces.length === 1 && includedWorkspaces[0].name === '.';
-    for (const hint of configurationHints) {
+    for (const hint of Array.from(configurationHints).sort(hintOrderer)) {
       const hintPrinter = hintPrinters.get(hint.type);
       if (hintPrinter) console.warn(style(hintPrinter.print({ ...hint, isRootOnly })));
     }
