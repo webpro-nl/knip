@@ -28,7 +28,7 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
 
   const inputDir = localConfig?.dir?.input || defaultEleventyConfig.dir.input;
   const dataDir = localConfig?.dir?.data || defaultEleventyConfig.dir.data;
-  const templateFormats = localConfig.templateFormats || defaultEleventyConfig.templateFormats;
+  const templateFormats = localConfig?.templateFormats || defaultEleventyConfig.templateFormats;
 
   const exts = DEFAULT_EXTENSIONS.map(extname => extname.slice(1)).join(',');
   const copiedEntries = new Set<string>();
