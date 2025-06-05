@@ -16,7 +16,7 @@ const config = ['.{storybook,rnstorybook}/{main,test-runner}.{js,ts,mts}'];
 
 const stories = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
 
-const restEntry = ['.{storybook,rnstorybook}/{manager,preview,index}.{js,jsx,ts,tsx}'];
+const restEntry = ['.{storybook,rnstorybook}/{manager,preview,index,vitest.setup}.{js,jsx,ts,tsx}'];
 
 const entry = [...restEntry, ...stories];
 
