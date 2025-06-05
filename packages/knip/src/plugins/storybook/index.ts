@@ -12,15 +12,15 @@ const enablers = [/^@storybook\//, '@nrwl/storybook'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.storybook/{main,test-runner}.{js,ts,mts}'];
+const config = ['.{storybook,rnstorybook}/{main,test-runner}.{js,ts,mts}'];
 
 const stories = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
 
-const restEntry = ['.storybook/{manager,preview,vitest.setup}.{js,jsx,ts,tsx}'];
+const restEntry = ['.{storybook,rnstorybook}/{manager,preview,index,vitest.setup}.{js,jsx,ts,tsx}'];
 
 const entry = [...restEntry, ...stories];
 
-const project = ['.storybook/**/*.{js,jsx,ts,tsx,mts}'];
+const project = ['.{storybook,rnstorybook}/**/*.{js,jsx,ts,tsx,mts}'];
 
 const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, options) => {
   const { cwd, configFileDir } = options;
