@@ -85,6 +85,14 @@ export class DummyEleventyConfig {
   setDataFileSuffixes() {}
   setDataFileBaseName() {}
   getMergingConfigObject() {}
+  isVirtualTemplate() {}
+  setInputDirectory() {}
+  setOutputDirectory() {}
+  setDataDirectory() {}
+  setIncludesDirectory() {}
+  setLayoutsDirectory() {}
+  setFreezeReservedData() {}
+  addDateParsing() {}
 
   _uniqueId = {};
   events = {};
