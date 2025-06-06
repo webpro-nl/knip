@@ -8,7 +8,7 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/biome');
 
 test('Find dependencies with the biome plugin', async () => {
-  const { counters, issues } = await main({
+  const { counters } = await main({
     ...baseArguments,
     cwd,
   });
