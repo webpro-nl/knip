@@ -7,10 +7,7 @@ const title = 'biome';
 
 const enablers = ['@biomejs/biome', 'biome'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) => {
-  const enabled = hasDependency(dependencies, enablers);
-  return enabled;
-};
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config: string[] = ['biome.json', 'biome.jsonc'];
 
