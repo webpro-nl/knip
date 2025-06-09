@@ -54,7 +54,12 @@
     "postcreate-plugin": "bun run build && biome format --write schema.json schema-jsonc.json src/schema/plugins.ts",
     "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && biome check --write src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts"
   },
-  "files": ["dist", "vendor", "schema.json", "schema-jsonc.json"],
+  "files": [
+    "dist",
+    "vendor",
+    "schema.json",
+    "schema-jsonc.json"
+  ],
   "dependencies": {
     "@nodelib/fs.walk": "^1.2.3",
     "fast-glob": "^3.3.3",

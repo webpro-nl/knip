@@ -145,6 +145,7 @@ export class ConfigurationChief {
   public async init() {
     const manifestPath = findFile(this.cwd, 'package.json');
     const manifest = manifestPath && (await loadJSON(manifestPath));
+
     if (!(manifestPath && manifest)) {
       throw new ConfigurationError('Unable to find package.json');
     }
