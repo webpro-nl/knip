@@ -8,8 +8,7 @@ import baseCounters from '../helpers/baseCounters.js';
 const cwd = resolve('fixtures/plugins/_template');
 
 test('Find dependencies with the __PLUGIN_NAME__ plugin', async () => {
-  // NOTE: The `issues` object is provided only for debugging purposes.
-  // Generally, plugin tests should have no issues left and only `total` and `processed` values in `counters`.
+  // Ideally, plugin tests have no `issues` left and only `total` and `processed` values in `counters`
   const { /* issues, */ counters } = await main({
     ...baseArguments,
     cwd,
