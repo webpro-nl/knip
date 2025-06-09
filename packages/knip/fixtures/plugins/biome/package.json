@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/biome",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "biome lint ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "*",
+    "@org/shared-configs": "*"
+  }
+}
