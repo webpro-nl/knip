@@ -3,7 +3,7 @@ import { type Input, toConfig } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { BiomeConfig } from './types.js';
 
-const title = 'biome';
+const title = 'Biome';
 
 const enablers = ['@biomejs/biome', 'biome'];
 
