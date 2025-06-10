@@ -4,6 +4,9 @@
   "files": {
     "ignore": ["**/dist", "package.json", "vendor/bash-parser/index.js"]
   },
+  "formatter": {
+    "ignore": ["ignore-exports-used-in-file-alias-exclude/more.ts"]
+  },
   "overrides": [
     {
       "include": ["test/util/get-inputs-from-scripts.test.ts"],
