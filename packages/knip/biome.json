@@ -1,0 +1,58 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "extends": ["../../biome.json"],
+  "files": {
+    "ignore": ["**/dist", "package.json", "vendor/bash-parser/index.js"]
+  },
+  "formatter": {
+    "ignore": ["ignore-exports-used-in-file-alias-exclude/more.ts"]
+  },
+  "overrides": [
+    {
+      "include": ["test/util/get-inputs-from-scripts.test.ts"],
+      "formatter": {
+        "lineWidth": 200
+      }
+    },
+    {
+      "include": [
+        "fixtures/cli-preprocessor",
+        "fixtures/cli-reporter",
+        "scripts",
+        "src/cli.ts",
+        "src/reporters",
+        "src/util/cli-arguments.ts",
+        "src/util/debug.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["fixtures"],
+      "organizeImports": {
+        "enabled": false
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          },
+          "style": {
+            "useImportType": "off"
+          },
+          "nursery": {
+            "noRestrictedImports": {
+              "level": "off"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
