@@ -5,6 +5,7 @@ import { join } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import vite from '../vite/index.js';
 import type { PluginConfig, RouteConfigEntry } from './types.js';
+import os from 'node:os';
 
 // https://reactrouter.com/start/framework/routing
 
@@ -47,7 +48,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     // See:
     //  - https://reactrouter.com/how-to/file-route-conventions#optional-segments
     //  - https://www.npmjs.com/package/fast-glob#advanced-syntax
-    .map(route => route.replace(/[$^*+?()\[\]]/g, '\\$&'));
+    .map(route => os.platform() === "win32" ? route : route.replace(/[$^*+?()\[\]]/g, '\\$&'));
 
   return [
     join(appDir, 'routes.{js,ts}'),
