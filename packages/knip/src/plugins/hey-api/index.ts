@@ -11,14 +11,14 @@ import type { PluginConfig } from "./types.js";
 
 const title = "hey-api";
 
-const enablers = ["hey-api"];
+const enablers = [/^@hey-api\//];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) =>
   hasDependency(dependencies, enablers);
 
 const config: string[] = [];
 
-const entry: string[] = [];
+const entry: string[] = ["openapi-ts.config.@(ts|cjs|mjs)"];
 
 const production: string[] = [];
 

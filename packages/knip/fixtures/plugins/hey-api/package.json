@@ -1,3 +1,6 @@
 {
-  "name": "@plugins/hey-api"
+  "name": "@plugins/hey-api",
+  "dependencies": {
+    "@hey-api/openapi-ts": "*"
+  }
 }
