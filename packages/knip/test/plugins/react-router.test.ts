@@ -22,6 +22,6 @@ test('Find dependencies with the react-router plugin', async () => {
     total: 9,
     // There is a bug with routes that include () on Windows so they will not be found there, revert when
     // the bug is fixed
-    files: isWindows ? 0 : 1,
+    files: isWindows ? 1 : 0,
   });
 });
