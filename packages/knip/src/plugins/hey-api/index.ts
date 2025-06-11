@@ -3,7 +3,7 @@ import type {
   Plugin,
   ResolveConfig,
 } from "../../types/config.js";
-import { toDeferResolve } from "../../util/input.js";
+import { toDeferResolve, toEntry, type Input } from "../../util/input.js";
 import { hasDependency } from "../../util/plugin.js";
 import type { PluginConfig } from "./types.js";
 
@@ -16,15 +16,19 @@ const enablers = [/^@hey-api\//];
 const isEnabled: IsPluginEnabled = ({ dependencies }) =>
   hasDependency(dependencies, enablers);
 
-const config: string[] = [];
+const config: string[] = ["openapi-ts.config.@(ts|cjs|mjs)"];
 
-const entry: string[] = ["openapi-ts.config.@(ts|cjs|mjs)"];
-
-const production: string[] = [];
-
-const resolveConfig: ResolveConfig<PluginConfig> = async (config) => {
-  const inputs = config?.plugins ?? [];
-  return [...inputs].map(toDeferResolve);
+const resolveConfig: ResolveConfig<PluginConfig> = async (
+  config,
+): Promise<Input[]> => {
+  const plugins = (config.plugins ?? []).map((plugin) => {
+    const pluginName = typeof plugin === "string" ? plugin : plugin.name;
+    return toDeferResolve(pluginName);
+  });
+  const outputPath =
+    typeof config.output === "string" ? config.output : config.output.path;
+  const ignored = [`./${outputPath}/**/*`].map(toEntry);
+  return [...plugins, ...ignored];
 };
 
 export default {
@@ -32,7 +36,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  entry,
-  production,
   resolveConfig,
 } satisfies Plugin;

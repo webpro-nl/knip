@@ -1,4 +1,4 @@
 export type PluginConfig = {
-  plugins?: string[];
-  entryPathsOrPatterns?: string[];
+  output: string | { path: string };
+  plugins?: (string | { name: string })[];
 };

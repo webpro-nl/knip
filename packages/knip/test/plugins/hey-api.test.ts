@@ -9,17 +9,17 @@ const cwd = resolve("fixtures/plugins/hey-api");
 
 test("Find dependencies with the hey-api plugin", async () => {
   // Ideally, plugin tests have no `issues` left and only `total` and `processed` values in `counters`
-  const { /* issues, */ counters } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
   // TODO: Remove the console.log() before submitting a PR.
-  // console.log(issues);
+  // console.dir(issues, { depth: null });
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });
