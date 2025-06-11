@@ -419,6 +419,10 @@
           "title": "hardhat plugin configuration (https://knip.dev/reference/plugins/hardhat)",
           "$ref": "#/definitions/plugin"
         },
+        "hey-api": {
+          "title": "hey-api plugin configuration (https://knip.dev/reference/plugins/hey-api)",
+          "$ref": "#/definitions/plugin"
+        },
         "husky": {
           "title": "husky plugin configuration (https://knip.dev/reference/plugins/husky)",
           "$ref": "#/definitions/plugin"

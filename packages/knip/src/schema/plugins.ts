@@ -44,6 +44,7 @@ export const pluginsSchema = z.object({
   glob: pluginSchema,
   'graphql-codegen': pluginSchema,
   hardhat: pluginSchema,
+  'hey-api': pluginSchema,
   husky: pluginSchema,
   'i18next-parser': pluginSchema,
   jest: pluginSchema,
