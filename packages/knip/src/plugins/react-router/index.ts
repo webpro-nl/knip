@@ -1,12 +1,13 @@
 import { existsSync } from 'node:fs';
+import os from 'node:os';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import vite from '../vite/index.js';
 import type { PluginConfig, RouteConfigEntry } from './types.js';
-import os from 'node:os';
 
+const isWindows = os.platform() === 'win32';
 // https://reactrouter.com/start/framework/routing
 
 const title = 'React Router';
@@ -48,7 +49,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     // See:
     //  - https://reactrouter.com/how-to/file-route-conventions#optional-segments
     //  - https://www.npmjs.com/package/fast-glob#advanced-syntax
-    .map(route => os.platform() === "win32" ? route : route.replace(/[$^*+?()\[\]]/g, '\\$&'));
+    .map(route => (isWindows ? route : route.replace(/[$^*+?()\[\]]/g, '\\$&')));
 
   return [
     join(appDir, 'routes.{js,ts}'),
