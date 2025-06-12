@@ -7,7 +7,7 @@ import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
-import { isFile } from './fs.js';
+import { isDirectory, isFile } from './fs.js';
 import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
 import { dirname, join, relative, toPosix } from './path.js';
 
@@ -33,11 +33,13 @@ const cachedGlobIgnores = new Map<string, string[]>();
 
 const findAncestorGitignoreFiles = (cwd: string): string[] => {
   const gitignorePaths: string[] = [];
+  if (isDirectory(join(cwd, '.git'))) return gitignorePaths;
   let dir = dirname(cwd);
   let prev: string;
   while (dir) {
     const filePath = join(dir, '.gitignore');
     if (isFile(filePath)) gitignorePaths.push(filePath);
+    if (isDirectory(join(dir, '.git'))) break;
     // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
     dir = dirname((prev = dir));
     if (prev === dir || dir === '.') break;
@@ -124,7 +126,7 @@ export const findAndParseGitignores = async (cwd: string) => {
     for (const pattern of ignoresForDir) matchers.add(_picomatch(pattern, pmOptions));
   };
 
-  findAncestorGitignoreFiles(cwd).forEach(addFile);
+  for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);
 
   if (isFile('.git/info/exclude')) addFile('.git/info/exclude', cwd);
 
