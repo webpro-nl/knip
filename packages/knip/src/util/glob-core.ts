@@ -64,10 +64,10 @@ export const findAndParseGitignores = async (cwd: string) => {
     return false;
   };
 
-  const addFile = (filePath: string) => {
+  const addFile = (filePath: string, baseDir?: string) => {
     gitignoreFiles.push(relative(cwd, filePath));
 
-    const dir = dirname(toPosix(filePath));
+    const dir = baseDir ?? dirname(toPosix(filePath));
     const base = relative(cwd, dir);
     const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
 
@@ -126,7 +126,7 @@ export const findAndParseGitignores = async (cwd: string) => {
 
   findAncestorGitignoreFiles(cwd).forEach(addFile);
 
-  if (isFile('.git/info/exclude')) addFile('.git/info/exclude');
+  if (isFile('.git/info/exclude')) addFile('.git/info/exclude', cwd);
 
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
