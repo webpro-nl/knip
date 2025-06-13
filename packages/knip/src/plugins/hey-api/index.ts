@@ -7,7 +7,7 @@ import type { PluginConfig } from './types.js';
 
 const title = 'Hey API';
 
-const enablers = [/^@hey-api\//];
+const enablers = ['@hey-api/openapi-ts'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
