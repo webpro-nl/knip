@@ -7,7 +7,7 @@ import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
-import { isFile } from './fs.js';
+import { isDirectory, isFile } from './fs.js';
 import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
 import { dirname, join, relative, toPosix } from './path.js';
 
@@ -33,11 +33,13 @@ const cachedGlobIgnores = new Map<string, string[]>();
 
 const findAncestorGitignoreFiles = (cwd: string): string[] => {
   const gitignorePaths: string[] = [];
+  if (isDirectory(join(cwd, '.git'))) return gitignorePaths;
   let dir = dirname(cwd);
   let prev: string;
   while (dir) {
     const filePath = join(dir, '.gitignore');
     if (isFile(filePath)) gitignorePaths.push(filePath);
+    if (isDirectory(join(dir, '.git'))) break;
     // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
     dir = dirname((prev = dir));
     if (prev === dir || dir === '.') break;
@@ -64,10 +66,10 @@ export const findAndParseGitignores = async (cwd: string) => {
     return false;
   };
 
-  const addFile = (filePath: string) => {
+  const addFile = (filePath: string, baseDir?: string) => {
     gitignoreFiles.push(relative(cwd, filePath));
 
-    const dir = dirname(toPosix(filePath));
+    const dir = baseDir ?? dirname(toPosix(filePath));
     const base = relative(cwd, dir);
     const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
 
@@ -124,9 +126,9 @@ export const findAndParseGitignores = async (cwd: string) => {
     for (const pattern of ignoresForDir) matchers.add(_picomatch(pattern, pmOptions));
   };
 
-  findAncestorGitignoreFiles(cwd).forEach(addFile);
+  for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);
 
-  if (isFile('.git/info/exclude')) addFile('.git/info/exclude');
+  if (isFile('.git/info/exclude')) addFile('.git/info/exclude', cwd);
 
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
