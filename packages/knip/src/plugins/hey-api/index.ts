@@ -19,8 +19,8 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (config): Promise<Input
     return toDeferResolve(pluginName);
   });
   const outputPath = typeof config.output === 'string' ? config.output : config.output.path;
-  const ignored = [`./${outputPath}/**/*`].map(toEntry);
-  return [...plugins, ...ignored];
+  const entries = outputPath ? [toEntry(`./${outputPath}/**`)] : [];
+  return [...plugins, ...entries];
 };
 
 export default {
