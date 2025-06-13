@@ -11,7 +11,7 @@ const enablers = ['@hey-api/openapi-ts'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['openapi-ts.config.@(ts|cjs|mjs)'];
+const config: string[] = ['openapi-ts.config.@(js|ts|cjs|mjs)'];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async (config): Promise<Input[]> => {
   const plugins = (config.plugins ?? []).map(plugin => {
