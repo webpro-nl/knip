@@ -2,6 +2,7 @@
   "name": "@plugins/hey-api",
   "dependencies": {
     "@hey-api/openapi-ts": "*",
-    "@hey-api/client-fetch": "*"
+    "@hey-api/client-fetch": "*",
+    "@hey-api/typescript": "*"
   }
 }

@@ -14,10 +14,20 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config: string[] = ['openapi-ts.config.@(js|ts|cjs|mjs)'];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async (config): Promise<Input[]> => {
-  const plugins = (config.plugins ?? []).map(plugin => {
-    const pluginName = typeof plugin === 'string' ? plugin : plugin.name;
-    return toDependency(pluginName);
-  });
+  const plugins = (config.plugins ?? []).reduce<Input[]>((acc, plugin) => {
+    if (typeof plugin === 'string') {
+      acc.push(toDependency(plugin));
+      return acc;
+    }
+
+    const dependencies = plugin._dependencies ?? [];
+
+    for (const dep of dependencies) {
+      acc.push(toDependency(dep));
+    }
+
+    return acc;
+  }, []);
   const outputPath = typeof config.output === 'string' ? config.output : config.output.path;
   const entries = outputPath ? [toEntry(`./${outputPath}/**`)] : [];
   return [...plugins, ...entries];
