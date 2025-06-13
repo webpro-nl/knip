@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
+import { type Input, toDependency, toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 
@@ -16,7 +16,7 @@ const config: string[] = ['openapi-ts.config.@(js|ts|cjs|mjs)'];
 const resolveConfig: ResolveConfig<PluginConfig> = async (config): Promise<Input[]> => {
   const plugins = (config.plugins ?? []).map(plugin => {
     const pluginName = typeof plugin === 'string' ? plugin : plugin.name;
-    return toDeferResolve(pluginName);
+    return toDependency(pluginName);
   });
   const outputPath = typeof config.output === 'string' ? config.output : config.output.path;
   const entries = outputPath ? [toEntry(`./${outputPath}/**`)] : [];
