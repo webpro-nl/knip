@@ -5,7 +5,7 @@ import type { PluginConfig } from './types.js';
 
 // https://heyapi.dev/openapi-ts/get-started
 
-const title = 'hey-api';
+const title = 'Hey API';
 
 const enablers = [/^@hey-api\//];
 
