@@ -8,6 +8,7 @@ import { timerify } from './Performance.js';
 import { compact } from './array.js';
 import { debugLogObject } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
+import { getGitConfigValue } from './git.js';
 import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
 import { dirname, join, relative, toPosix } from './path.js';
 
@@ -129,6 +130,17 @@ export const findAndParseGitignores = async (cwd: string) => {
   for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);
 
   if (isFile('.git/info/exclude')) addFile('.git/info/exclude', cwd);
+
+  const globalExcludesFile = getGitConfigValue('core.excludesFile', undefined, '--global');
+  if (globalExcludesFile !== undefined) {
+    if (isFile(globalExcludesFile)) addFile(globalExcludesFile, cwd);
+  } else if (typeof process.env.XDG_CONFIG_HOME === 'string' && process.env.XDG_CONFIG_HOME.trim() !== '') {
+    const xdgIgnore = `${process.env.XDG_CONFIG_HOME}/git/ignore`;
+    if (isFile(xdgIgnore)) addFile(xdgIgnore, cwd);
+  } else if (typeof process.env.HOME === 'string' && process.env.HOME.trim() !== '') {
+    const homeIgnore = `${process.env.HOME}/.config/git/ignore`;
+    if (isFile(homeIgnore)) addFile(homeIgnore, cwd);
+  }
 
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {

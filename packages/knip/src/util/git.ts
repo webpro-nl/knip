@@ -12,15 +12,18 @@ const hookFileNames = [
   'post-{checkout,commit,merge,rewrite}',
 ];
 
-const getGitHooksPath = (defaultPath = '.git/hooks') => {
+export const getGitConfigValue = <T>(optionName: string, fallbackValue: T, commandOptions = ''): string | T => {
   try {
-    return execSync('git config --get core.hooksPath', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    return execSync(`git config --get ${commandOptions} ${optionName}`, {
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'ignore'],
+    }).trim();
   } catch (_error) {
-    return defaultPath;
+    return fallbackValue;
   }
 };
 
 export const getGitHookPaths = (defaultPath = '.git/hooks', followGitConfig = true) => {
-  const gitHooksPath = followGitConfig ? getGitHooksPath(defaultPath) : defaultPath;
+  const gitHooksPath = followGitConfig ? getGitConfigValue('core.hooksPath', defaultPath) : defaultPath;
   return hookFileNames.map(fileName => join(gitHooksPath, fileName));
 };
