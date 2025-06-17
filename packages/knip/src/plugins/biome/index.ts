@@ -5,19 +5,14 @@ import type { BiomeConfig } from './types.js';
 
 const title = 'Biome';
 
-const enablers = ['@biomejs/biome', 'biome'];
+const enablers = ['@biomejs/biome'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config: string[] = ['biome.json', 'biome.jsonc'];
 
 const resolveExtends = (extendsArray: string[], options: PluginOptions): Input[] => {
-  return extendsArray.map(specifier => {
-    if (specifier.endsWith('.json') || specifier.endsWith('.jsonc')) {
-      return toConfig('biome', specifier);
-    }
-    return toConfig('biome', specifier, { containingFilePath: options.configFilePath });
-  });
+  return extendsArray.map(specifier => toConfig('biome', specifier, { containingFilePath: options.configFilePath }));
 };
 
 const resolveConfig: ResolveConfig<BiomeConfig> = (config, options) => {
