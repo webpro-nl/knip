@@ -33,7 +33,19 @@ const args = {
   positional: true,
   nodeImportArgs: true,
   resolve: ['test-reporter'],
-  boolean: ['deprecation', 'experimental-strip-types', 'harmony', 'test-only', 'test', 'warnings', 'watch'],
+  boolean: [
+    'deprecation',
+    'experimental-strip-types',
+    'experimental-transform-types',
+    'harmony',
+    'inspect-brk',
+    'inspect-wait',
+    'inspect',
+    'test-only',
+    'test',
+    'warnings',
+    'watch',
+  ],
   args: (args: string[]) => args.filter(arg => !/--test-reporter[= ](spec|tap|dot|junit|lcov)/.test(arg)),
 };
 
