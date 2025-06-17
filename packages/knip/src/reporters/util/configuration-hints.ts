@@ -29,7 +29,7 @@ const add = (options: PrintHintOptions) =>
   `Add to or refine in ${yellow('workspaces')}: ${id(options.identifier)} (${options.size} unused files)`;
 
 const topLevel = (options: PrintHintOptions) =>
-  `Remove or move unused top-level ${type(options.type)} to ${yellow('"."')} workspace: ${id(options.identifier)}`;
+  `Remove or move unused top-level ${type(options.type)} to one of ${yellow('workspaces')}: ${id(options.identifier)}`;
 
 const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignoreBinaries', { print: unused }],
