@@ -97,7 +97,11 @@ export const toProductionDependency = (specifier: string): Input => ({
   production: true,
 });
 
-export const toDeferResolve = (specifier: string): Input => ({ type: 'deferResolve', specifier });
+export const toDeferResolve = (specifier: string, options: Options = {}): Input => ({
+  type: 'deferResolve',
+  specifier,
+  ...options,
+});
 
 export const isDeferResolve = (input: Input) => input.type === 'deferResolve';
 

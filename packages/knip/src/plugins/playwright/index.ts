@@ -41,7 +41,7 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
   });
   return projects
     .flatMap(config => toEntryPatterns(config.testMatch ?? entry, cwd, configFileDir, config, localConfig))
-    .concat(reporters.map(toDeferResolve));
+    .concat(reporters.map(id => toDeferResolve(id)));
 };
 
 const args = {

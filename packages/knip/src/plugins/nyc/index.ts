@@ -16,7 +16,7 @@ const config = ['.nycrc', '.nycrc.{json,yml,yaml}', 'nyc.config.js', 'package.js
 const resolveConfig: ResolveConfig<NycConfig> = config => {
   const extend = config?.extends ?? [];
   const requires = config?.require ?? [];
-  return [extend, requires].flat().map(toDeferResolve);
+  return [extend, requires].flat().map(id => toDeferResolve(id));
 };
 
 export default {

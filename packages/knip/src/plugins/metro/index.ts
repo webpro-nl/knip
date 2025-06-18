@@ -45,7 +45,7 @@ const resolveConfig: ResolveConfig<MetroConfig> = async config => {
   if (transformer?.minifierPath) inputs.push(transformer.minifierPath);
   if (transformer?.babelTransformerPath) inputs.push(transformer.babelTransformerPath);
 
-  return Array.from(i).concat([...inputs].map(toDeferResolve));
+  return Array.from(i).concat([...inputs].map(id => toDeferResolve(id)));
 };
 
 const note = `False positives for platform-specific unused files?

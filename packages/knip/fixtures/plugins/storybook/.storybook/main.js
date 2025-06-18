@@ -12,7 +12,8 @@ module.exports = {
     '@storybook/addon-a11y',
     '@storybook/addon-knobs/preset',
     'storybook-addon-export-to-codesandbox',
-    './addon/register',
+    '../addon/register',
+    '@storybook/addon-vitest',
   ],
   webpackFinal: config => {
     return config;

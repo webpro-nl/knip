@@ -19,7 +19,7 @@ const config = ['package.json', ...toCosmiconfig('linthtml')];
 const resolveConfig: ResolveConfig<LintHTMLConfig> = config => {
   const extensions = config.extends ?? [];
   const plugins = config.plugins ?? [];
-  return [extensions, plugins].flat().map(toDeferResolve);
+  return [extensions, plugins].flat().map(id => toDeferResolve(id));
 };
 
 export default {

@@ -70,7 +70,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
               .map(arg => parseNodeArgs(arg.split(' ')))
               .filter(args => args.require)
               .flatMap(arg => arg.require)
-              .map(toDeferResolve) ?? [];
+              .map(id => toDeferResolve(id)) ?? [];
 
           if (binary in PackageManagerResolvers) {
             const resolver = PackageManagerResolvers[binary as KnownResolver];

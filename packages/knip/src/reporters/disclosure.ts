@@ -1,6 +1,6 @@
 import type { Entries } from 'type-fest';
 import type { ReporterOptions } from '../types/issues.js';
-import { getIssueTypeTitle, getTableForType } from './util.js';
+import { getIssueTypeTitle, getTableForType } from './util/util.js';
 
 export default ({ report, issues }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;

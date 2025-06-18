@@ -1,5 +1,5 @@
 ---
-title: Plugins (107)
+title: Plugins (108)
 tableOfContents: false
 ---
 
@@ -94,24 +94,25 @@ tableOfContents: false
 - [Tailwind][87]
 - [Travis CI][88]
 - [ts-node][89]
-- [tsup][90]
-- [tsx][91]
-- [TypeDoc][92]
-- [TypeScript][93]
-- [unbuild][94]
-- [UnoCSS][95]
-- [Vercel OG][96]
-- [Vike][97]
-- [Vite][98]
-- [Vitest][99]
-- [Vue][100]
-- [WebdriverIO][101]
-- [webpack][102]
-- [Wireit][103]
-- [Wrangler][104]
-- [xo][105]
-- [Yarn][106]
-- [yorkie][107]
+- [tsdown][90]
+- [tsup][91]
+- [tsx][92]
+- [TypeDoc][93]
+- [TypeScript][94]
+- [unbuild][95]
+- [UnoCSS][96]
+- [Vercel OG][97]
+- [Vike][98]
+- [Vite][99]
+- [Vitest][100]
+- [Vue][101]
+- [WebdriverIO][102]
+- [webpack][103]
+- [Wireit][104]
+- [Wrangler][105]
+- [xo][106]
+- [Yarn][107]
+- [yorkie][108]
 
 :::
 
@@ -204,21 +205,22 @@ tableOfContents: false
 [87]: /reference/plugins/tailwind 'Tailwind'
 [88]: /reference/plugins/travis 'Travis CI'
 [89]: /reference/plugins/ts-node 'ts-node'
-[90]: /reference/plugins/tsup 'tsup'
-[91]: /reference/plugins/tsx 'tsx'
-[92]: /reference/plugins/typedoc 'TypeDoc'
-[93]: /reference/plugins/typescript 'TypeScript'
-[94]: /reference/plugins/unbuild 'unbuild'
-[95]: /reference/plugins/unocss 'UnoCSS'
-[96]: /reference/plugins/vercel-og 'Vercel OG'
-[97]: /reference/plugins/vike 'Vike'
-[98]: /reference/plugins/vite 'Vite'
-[99]: /reference/plugins/vitest 'Vitest'
-[100]: /reference/plugins/vue 'Vue'
-[101]: /reference/plugins/webdriver-io 'WebdriverIO'
-[102]: /reference/plugins/webpack 'webpack'
-[103]: /reference/plugins/wireit 'Wireit'
-[104]: /reference/plugins/wrangler 'Wrangler'
-[105]: /reference/plugins/xo 'xo'
-[106]: /reference/plugins/yarn 'Yarn'
-[107]: /reference/plugins/yorkie 'yorkie'
+[90]: /reference/plugins/tsdown 'tsdown'
+[91]: /reference/plugins/tsup 'tsup'
+[92]: /reference/plugins/tsx 'tsx'
+[93]: /reference/plugins/typedoc 'TypeDoc'
+[94]: /reference/plugins/typescript 'TypeScript'
+[95]: /reference/plugins/unbuild 'unbuild'
+[96]: /reference/plugins/unocss 'UnoCSS'
+[97]: /reference/plugins/vercel-og 'Vercel OG'
+[98]: /reference/plugins/vike 'Vike'
+[99]: /reference/plugins/vite 'Vite'
+[100]: /reference/plugins/vitest 'Vitest'
+[101]: /reference/plugins/vue 'Vue'
+[102]: /reference/plugins/webdriver-io 'WebdriverIO'
+[103]: /reference/plugins/webpack 'webpack'
+[104]: /reference/plugins/wireit 'Wireit'
+[105]: /reference/plugins/wrangler 'Wrangler'
+[106]: /reference/plugins/xo 'xo'
+[107]: /reference/plugins/yarn 'Yarn'
+[108]: /reference/plugins/yorkie 'yorkie'

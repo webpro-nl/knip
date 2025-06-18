@@ -14,7 +14,7 @@ const enablers = [/^@babel\//];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['babel.config.{json,js,cjs,mjs,cts}', '.babelrc.{json,js,cjs,mjs,cts}', '.babelrc', 'package.json'];
+const config = ['babel.config.{json,js,cjs,mjs,cts,ts}', '.babelrc.{json,js,cjs,mjs,cts}', '.babelrc', 'package.json'];
 
 const getName = (value: string | [string, unknown]) =>
   [Array.isArray(value) ? value[0] : value].filter(name => typeof name === 'string');
@@ -24,7 +24,12 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): Input[] => {
   const plugins = config.plugins?.flatMap(getName).map(name => resolveName(name, 'plugin')) ?? [];
   const nested = config.env ? Object.values(config.env).flatMap(getDependenciesFromConfig) : [];
   const overrides = config.overrides ? [config.overrides].flat().flatMap(getDependenciesFromConfig) : [];
-  return compact([...presets.map(toDeferResolve), ...plugins.map(toDeferResolve), ...nested, ...overrides]);
+  return compact([
+    ...presets.map(id => toDeferResolve(id)),
+    ...plugins.map(id => toDeferResolve(id)),
+    ...nested,
+    ...overrides,
+  ]);
 };
 
 const resolveConfig: ResolveConfig<BabelConfig> = async config => {

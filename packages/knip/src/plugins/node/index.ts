@@ -15,8 +15,14 @@ const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
 
   const entries = [toProductionEntry('server.js')];
 
-  if (scripts && Object.keys(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(scripts[script]))) {
-    const patterns = ['**/*{.,-,_}test.?(c|m)js', '**/test-*.?(c|m)js', '**/test.?(c|m)js', '**/test/**/*.?(c|m)js'];
+  if (scripts && Object.values(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(script))) {
+    // From https://nodejs.org/api/test.html#running-tests-from-the-command-line
+    const patterns = [
+      '**/*{.,-,_}test.{cjs,mjs,js,cts,mts,ts}',
+      '**/test-*.{cjs,mjs,js,cts,mts,ts}',
+      '**/test.{cjs,mjs,js,cts,mts,ts}',
+      '**/test/**/*.{cjs,mjs,js,cts,mts,ts}',
+    ];
     entries.push(...patterns.map(id => toEntry(id)));
   }
 
@@ -27,6 +33,19 @@ const args = {
   positional: true,
   nodeImportArgs: true,
   resolve: ['test-reporter'],
+  boolean: [
+    'deprecation',
+    'experimental-strip-types',
+    'experimental-transform-types',
+    'harmony',
+    'inspect-brk',
+    'inspect-wait',
+    'inspect',
+    'test-only',
+    'test',
+    'warnings',
+    'watch',
+  ],
   args: (args: string[]) => args.filter(arg => !/--test-reporter[= ](spec|tap|dot|junit|lcov)/.test(arg)),
 };
 
