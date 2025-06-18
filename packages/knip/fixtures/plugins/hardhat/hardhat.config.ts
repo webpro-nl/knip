@@ -1,3 +1,4 @@
+import "@nomicfoundation/hardhat-node-test-reporter";
 import "@solidstate/hardhat-contract-sizer";
 import type { HardhatUserConfig } from "../../../src/plugins/hardhat/types.js";
 
