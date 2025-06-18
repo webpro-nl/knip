@@ -4,7 +4,7 @@ import type {
   Resolve,
   ResolveConfig,
 } from "../../types/config.js";
-import { toDeferResolve, toDependency } from "../../util/input.js";
+import { toDeferResolve, toDependency, toEntry } from "../../util/input.js";
 import { hasDependency } from "../../util/plugin.js";
 import type { HardhatUserConfig } from "./types.js";
 
@@ -20,7 +20,19 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) =>
 const config = ["hardhat.config.{js,cjs,mjs,ts}"];
 
 const resolve: Resolve = async () => {
-  return [toDependency("hardhat")];
+  const inputs = [toDependency("hardhat")];
+
+  // TODO: only add test files if a Hardhat test reporter is installed
+  // TODO: get test path from config
+  const patterns = [
+    "**/*{.,-,_}test.?(c|m)(j|t)s",
+    "**/test-*.?(c|m)(j|t)s",
+    "**/test.?(c|m)(j|t)s",
+    "**/test/**/*.?(c|m)(j|t)s",
+  ];
+  inputs.push(...patterns.map((id) => toEntry(id)));
+
+  return inputs;
 };
 
 const resolveConfig: ResolveConfig<HardhatUserConfig> = (config) => {
