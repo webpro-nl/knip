@@ -35,6 +35,11 @@ const getPackageManager = () => {
   return 'npm';
 };
 
+const getBinX = pm => {
+  if (pm === 'npm') return 'npx';
+  return pm;
+};
+
 const getWorkspaceFlag = pm => {
   if (pm === 'pnpm') {
     return fileExists('pnpm-workspace.yaml') ? '-w' : undefined;
@@ -63,10 +68,14 @@ const main = () => {
   execSync(cmd, { stdio: 'inherit' });
   console.info('✓ Install Knip');
 
-  execSync('npm pkg set scripts.knip=knip', { stdio: 'inherit' });
-  console.info('✓ Add knip to package.json#scripts');
-
-  console.info(`✓ Run "${bin} run knip" to run knip`);
+  try {
+    execSync('npm pkg set scripts.knip=knip', { stdio: 'inherit' });
+    console.info('✓ Add knip to package.json#scripts');
+    console.info(`→ Run "${bin} run knip" to run knip`);
+  } catch {
+    console.warn('× Failed to add knip to package.json#scripts');
+    console.info(`→ Run "${getBinX(bin)} knip" to run knip`);
+  }
 };
 
 main();
