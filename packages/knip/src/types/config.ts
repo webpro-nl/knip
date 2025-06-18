@@ -123,6 +123,8 @@ type PluginSetup = (options: PluginOptions) => Promise<void> | void;
 
 type PluginTeardown = (options: PluginOptions) => Promise<void> | void;
 
+export type IsLoadConfig = (options: PluginOptions, dependencies: Set<string>) => boolean;
+
 export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
@@ -152,6 +154,7 @@ export interface Plugin {
   project?: string[];
   setup?: PluginSetup;
   teardown?: PluginTeardown;
+  isLoadConfig?: IsLoadConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   resolveFromAST?: ResolveFromAST;

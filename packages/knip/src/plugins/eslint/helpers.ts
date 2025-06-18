@@ -20,7 +20,7 @@ export const getInputs = (
     config.settings ? getDependenciesFromSettings(config.settings).filter(id => id !== '@typescript-eslint/parser') : []
   );
 
-  return compact(dependencies).map(id => toDeferResolve(id));
+  return compact(dependencies).map(id => toDeferResolve(id, { optional: true }));
 };
 
 const getInputsDeprecated = (
