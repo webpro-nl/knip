@@ -24,7 +24,7 @@ const resolveConfig: ResolveConfig<RemarkConfig> = config => {
         return [];
       })
       .map(plugin => (plugin.startsWith('remark-') ? plugin : `remark-${plugin}`)) ?? [];
-  return plugins.map(toDeferResolve);
+  return plugins.map(id => toDeferResolve(id));
 };
 
 export default {

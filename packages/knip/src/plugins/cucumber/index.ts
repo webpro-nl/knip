@@ -19,7 +19,7 @@ const resolveConfig: ResolveConfig<CucumberConfig> = config => {
   const imports = (config?.import ? config.import : entry).map(id => toEntry(id));
   const formatters = config?.format ? config.format : [];
   const requires = config?.require ? config.require : [];
-  return imports.concat([...formatters, ...requires].map(toDeferResolve));
+  return imports.concat([...formatters, ...requires].map(id => toDeferResolve(id)));
 };
 
 export default {

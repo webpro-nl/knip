@@ -28,7 +28,7 @@ const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
       })
     : [];
 
-  const inputs = plugins.map(toDeferResolve);
+  const inputs = plugins.map(id => toDeferResolve(id));
 
   // Because postcss is not included in peerDependencies of tailwindcss
   return ['tailwindcss', '@tailwindcss/postcss'].some(tailwindPlugin => plugins.includes(tailwindPlugin))

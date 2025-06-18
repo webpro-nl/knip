@@ -49,7 +49,7 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
 
   return [
     ...patterns.map(id => toEntry(id)),
-    ...addons.map(toDeferResolve),
+    ...addons.map(id => toDeferResolve(id)),
     ...builderPackages.map(id => toDependency(id)),
     ...frameworks.map(id => toDependency(id)),
   ];

@@ -40,7 +40,12 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
     : [];
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
 
-  return compact([...extend, ...references, ...[...types, ...plugins, ...importHelpers].map(toDeferResolve), ...jsx]);
+  return compact([
+    ...extend,
+    ...references,
+    ...[...types, ...plugins, ...importHelpers].map(id => toDeferResolve(id)),
+    ...jsx,
+  ]);
 };
 
 const args = {
