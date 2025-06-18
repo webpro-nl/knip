@@ -1,12 +1,20 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { readFileSync, statSync } from 'node:fs';
+import { closeSync, openSync, readFileSync, readSync, statSync } from 'node:fs';
 // biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 
 const fileExists = filePath => {
   const stat = statSync(filePath, { throwIfNoEntry: false });
   return stat?.isFile();
+};
+
+const readFirstBytes = (filePath, length = 128) => {
+  const fd = openSync(filePath, 'r');
+  const buffer = Buffer.alloc(length);
+  const bytesRead = readSync(fd, buffer, 0, length, 0);
+  closeSync(fd);
+  return buffer.subarray(0, bytesRead).toString('utf-8');
 };
 
 const getPackageManager = () => {
@@ -20,9 +28,8 @@ const getPackageManager = () => {
 
   if (fileExists(path.join(repositoryRoot, 'bun.lockb'))) return 'bun';
   if (fileExists(path.join(repositoryRoot, 'yarn.lock'))) {
-    // Read the first 128 bytes to determine yarn version
-    const yarnLock = readFileSync(path.join(repositoryRoot, 'yarn.lock'), 'utf-8');
-    return yarnLock.slice(0, 128).includes('yarn lockfile v1') ? 'yarn' : 'yarn-berry';
+    const yarnLock = readFirstBytes(path.join(repositoryRoot, 'yarn.lock'), 128);
+    return yarnLock.includes('yarn lockfile v1') ? 'yarn' : 'yarn-berry';
   }
   if (fileExists(path.join(repositoryRoot, 'pnpm-lock.yaml'))) return 'pnpm';
   return 'npm';
