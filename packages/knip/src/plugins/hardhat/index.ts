@@ -33,7 +33,7 @@ const resolveConfig: ResolveConfig<HardhatUserConfig> = (config) => {
     )
     .map((solidityConfig) => solidityConfig.dependenciesToCompile ?? [])
     .flat()
-    .map(toDeferResolve);
+    .map((dependency) => toDeferResolve(dependency));
 };
 
 export default {
