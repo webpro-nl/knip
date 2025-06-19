@@ -128,11 +128,106 @@ const rulesAndFiltersSchema = z
   .merge(reportConfigSchema);
 
 const ignoreIssuesSchema = z.object({
+  /**
+   * Array of glob patterns to ignore issues from matching files.
+   *
+   * @remarks
+   * Please read {@link https://knip.dev/guides/configuring-project-files | project files configuration} before using the `ignore` option,
+   * because in many cases you'll want to **fine-tune project files** instead.
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "ignore": ["src/generated.ts", "fixtures/**"]
+   * }
+   * ```
+   */
   ignore: globSchema.optional(),
+  /**
+   * Exclude binaries that are used but not provided by any dependency from the report.
+   *
+   * Value is an array of binary names or regular expressions.
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "ignoreBinaries": ["zip", "docker-compose", "pm2-.+"]
+   * }
+   * ```
+   *
+   * @example
+   * Actual regular expressions can be used in dynamic configurations:
+   * ```ts title="knip.ts"
+   * export default {
+   *   ignoreBinaries: [/^pm2-.+/],
+   * };
+   * ```
+   */
   ignoreBinaries: stringOrRegexSchema.optional(),
+  /**
+   * Array of package names to exclude from the report. Regular expressions allowed.
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "ignoreDependencies": ["hidden-package", "@org/.+"]
+   * }
+   * ```
+   *
+   * @example
+   * Actual regular expressions can be used in dynamic configurations.
+   * ```ts title="knip.ts"
+   * export default {
+   *   ignoreDependencies: [/@org\/.*\/, /^lib-.+/],
+   * };
+   * ```
+   */
   ignoreDependencies: stringOrRegexSchema.optional(),
+  /**
+   * Array of class and enum members to exclude from the report. Regular expressions allowed.
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "ignoreMembers": ["render", "on.+"]
+   * }
+   * ```
+   *
+   * Actual regular expressions can be used in dynamic configurations.
+   */
   ignoreMembers: stringOrRegexSchema.optional(),
+  /**
+   * Array of specifiers to exclude from the report. Regular expressions allowed.
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "ignoreUnresolved": ["ignore-unresolved-import", "#virtual/.+"]
+   * }
+   * ```
+   * @example
+   * Actual regular expressions can be used in dynamic configurations:
+   * ```ts title="knip.ts"
+   * export default {
+   *  ignoreUnresolved: [/^#/.+/],
+   * }:
+   * ```
+   */
   ignoreUnresolved: stringOrRegexSchema.optional(),
+  /**
+   * Array of workspaces to ignore. Globs allowed.
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "ignoreWorkspaces": [
+   *     "packages/go-server",
+   *     "packages/flat/*",
+   *     "packages/deep/**"
+   *   ]
+   * }
+   * ```
+   */
   ignoreWorkspaces: z.array(z.string()).optional(),
 });
 
