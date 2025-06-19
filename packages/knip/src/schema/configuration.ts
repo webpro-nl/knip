@@ -44,30 +44,9 @@ const ignoreExportsUsedInFileSchema = z.union([
   ),
 ]);
 
-const rootConfigurationSchema = z.object({
-  $schema: z.string().optional(),
-  rules: rulesSchema.optional(),
-  entry: globSchema.optional(),
-  project: globSchema.optional(),
-  paths: pathsSchema.optional(),
-  ignore: globSchema.optional(),
-  ignoreBinaries: stringOrRegexSchema.optional(),
-  ignoreDependencies: stringOrRegexSchema.optional(),
-  ignoreMembers: stringOrRegexSchema.optional(),
-  ignoreUnresolved: stringOrRegexSchema.optional(),
+const exportsSchema = z.object({
   ignoreExportsUsedInFile: ignoreExportsUsedInFileSchema.optional(),
-  ignoreWorkspaces: z.array(z.string()).optional(),
   includeEntryExports: z.boolean().optional(),
-  compilers: compilersSchema.optional(),
-  syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
-  asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
-  tags: z.array(z.string()).optional(),
-  treatConfigHintsAsErrors: z.boolean().optional(),
-});
-
-const reportConfigSchema = z.object({
-  include: z.array(issueTypeSchema).optional(),
-  exclude: z.array(issueTypeSchema).optional(),
 });
 
 const baseWorkspaceConfigurationSchema = z.object({
@@ -82,14 +61,51 @@ const baseWorkspaceConfigurationSchema = z.object({
   includeEntryExports: z.boolean().optional(),
 });
 
-const workspaceConfigurationSchema = baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial());
+const projectSchema = z
+  .object({
+    entry: globSchema.optional(),
+    project: globSchema.optional(),
+    paths: pathsSchema.optional(),
+    workspaces: z.record(z.string(), baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial())).optional(),
+  })
+  .merge(pluginsSchema.partial());
 
-const workspacesConfigurationSchema = z.object({
-  workspaces: z.record(z.string(), workspaceConfigurationSchema).optional(),
+const reportConfigSchema = z.object({
+  include: z.array(issueTypeSchema).optional(),
+  exclude: z.array(issueTypeSchema).optional(),
 });
 
-export const knipConfigurationSchema = rootConfigurationSchema
-  .merge(reportConfigSchema)
-  .merge(workspacesConfigurationSchema)
-  .merge(pluginsSchema.partial())
+const rulesAndFiltersSchema = z
+  .object({
+    rules: rulesSchema.optional(),
+    tags: z.array(z.string()).optional(),
+  })
+  .merge(reportConfigSchema);
+
+const ignoreIssuesSchema = z.object({
+  ignore: globSchema.optional(),
+  ignoreBinaries: stringOrRegexSchema.optional(),
+  ignoreDependencies: stringOrRegexSchema.optional(),
+  ignoreMembers: stringOrRegexSchema.optional(),
+  ignoreUnresolved: stringOrRegexSchema.optional(),
+  ignoreWorkspaces: z.array(z.string()).optional(),
+});
+
+const fileTypesSchema = z.object({
+  $schema: z.string().optional(),
+});
+
+const undocumentedSchema = z.object({
+  compilers: compilersSchema.optional(),
+  syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
+  asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
+  treatConfigHintsAsErrors: z.boolean().optional(),
+});
+
+export const knipConfigurationSchema = fileTypesSchema
+  .merge(projectSchema)
+  .merge(rulesAndFiltersSchema)
+  .merge(ignoreIssuesSchema)
+  .merge(exportsSchema)
+  .merge(undocumentedSchema)
   .strict();
