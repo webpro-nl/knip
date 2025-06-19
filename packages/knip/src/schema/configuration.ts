@@ -44,8 +44,53 @@ const ignoreExportsUsedInFileSchema = z.union([
   ),
 ]);
 
-const exportsSchema = z.object({
+export const exportsSchema = z.object({
+  /**
+   * In files with multiple exports, some of them might be used only internally. If
+   * these exports should not be reported, there is a `ignoreExportsUsedInFile`
+   * option available. With this option enabled, when something is also no longer
+   * used internally, it will be reported as unused.
+   *
+   * ```json title="knip.json"
+   * {
+   *   "ignoreExportsUsedInFile": true
+   * }
+   * ```
+   *
+   * In a more fine-grained manner, to ignore only specific issue types:
+   *
+   * ```json title="knip.json"
+   * {
+   *   "ignoreExportsUsedInFile": {
+   *     "interface": true,
+   *     "type": true
+   *   }
+   * }
+   * ```
+   */
   ignoreExportsUsedInFile: ignoreExportsUsedInFileSchema.optional(),
+
+  /**
+   * By default, Knip does not report unused exports in entry files. When a
+   * repository (or workspace) is self-contained or private, you may want to include
+   * entry files when reporting unused exports:
+   *
+   * ```json title="knip.json"
+   * {
+   *   "includeEntryExports": true
+   * }
+   * ```
+   *
+   * If enabled, Knip will report unused exports in entry source files. But not in
+   * entry and configuration files as configured by plugins, such as `next.config.js`
+   * or `src/routes/+page.svelte`.
+   *
+   * This will also enable reporting unused members of exported classes and enums.
+   *
+   * Set this option at root level to enable this globally, or within workspace
+   * configurations individually.
+   *
+   */
   includeEntryExports: z.boolean().optional(),
 });
 
