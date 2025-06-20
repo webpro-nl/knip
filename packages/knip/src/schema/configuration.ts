@@ -106,14 +106,71 @@ const baseWorkspaceConfigurationSchema = z.object({
   includeEntryExports: z.boolean().optional(),
 });
 
-const projectSchema = z
-  .object({
-    entry: globSchema.optional(),
-    project: globSchema.optional(),
-    paths: pathsSchema.optional(),
-    workspaces: z.record(z.string(), baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial())).optional(),
-  })
-  .merge(pluginsSchema.partial());
+const projectSchema = z.object({
+  /**
+   * Array of glob patterns to find entry files. Prefix with `!` for negation.
+   *
+   * @example
+   * ```json
+   * {
+   *   "entry": ["src/index.ts", "scripts/*.ts", "!scripts/except-this-one.ts"]
+   * }
+   * ```
+   *
+   * @see {@link https://knip.dev/guides/configuration | configuration} and {@link https://knip.dev/guides/entry-files | entry files}
+   */
+  entry: globSchema.optional(),
+  /**
+   * Array of glob patterns to find project files.
+   *
+   * @example
+   * ```json
+   * {
+   *     "project": ["src\/**\/*.ts", "scripts\/**\/*.ts"]
+   * }
+   * ```
+   *
+   * @see {@link https://knip.dev/guides/configuration | configuration} and {@link https://knip.dev/guides/entry-files | entry files}
+   */
+  project: globSchema.optional(),
+  /**
+   * Tools like TypeScript, webpack and Babel support import aliases in various ways. Knip automatically
+   * includes `compilerOptions.paths` from the TypeScript configuration, but does not automatically use other
+   * types of import aliases. They can be configured manually:
+   *
+   * @example
+   * ```json
+   * {
+   *   "paths": {
+   *     "@lib": ["./lib/index.ts"],
+   *     "@lib/*": ["./lib/*"]
+   *   }
+   * }
+   * ```
+   *
+   * @remarks
+   * Each workspace can have its own `paths` configured. Knip paths follow the TypeScript semantics:
+   * - Path values are an array of relative paths
+   * - Paths without an `*` are exact matches
+   *
+   */
+  paths: pathsSchema.optional(),
+  /**
+   * Individual workspace configurations may contain all other options listed on this
+   * page, except for the following root-only options:
+   *
+   * - `exclude` / `include`
+   * - `ignoreExportsUsedInFile`
+   * - `ignoreWorkspaces`
+   * - `workspaces`
+   *
+   * Workspaces can't be nested in a Knip configuration, but they can be nested in a
+   * monorepo folder structure.
+   *
+   * @see {@link https://knip.dev/guides/monorepos-and-workspaces | Monorepos and workspaces}
+   */
+  workspaces: z.record(z.string(), baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial())).optional(),
+});
 
 const reportConfigSchema = z.object({
   /**
@@ -289,6 +346,7 @@ const undocumentedSchema = z.object({
 
 export const knipConfigurationSchema = fileTypesSchema
   .merge(projectSchema)
+  .merge(pluginsSchema.partial())
   .merge(rulesAndFiltersSchema)
   .merge(ignoreIssuesSchema)
   .merge(exportsSchema)

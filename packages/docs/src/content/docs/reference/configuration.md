@@ -100,7 +100,7 @@ TypeScript semantics:
 - Path values are an array of relative paths.
 - Paths without an `*` are exact matches.
 
-### Plugins
+## Plugins
 
 There are a few options to modify the behavior of a plugin:
 
