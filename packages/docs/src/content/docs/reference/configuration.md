@@ -182,6 +182,16 @@ notation below is valid and will report only exports tagged `@lintignore` or
 
 Also see [JSDoc & TSDoc Tags][8].
 
+### `treatConfigHintsAsErrors`
+
+Exit with non-zero code (1) if there are any configuration hints.
+
+```json title="knip.json"
+{
+  "treatConfigHintsAsErrors": true
+}
+```
+
 ## Ignore Issues
 
 ### `ignore`

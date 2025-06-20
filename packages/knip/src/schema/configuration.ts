@@ -226,6 +226,17 @@ const rulesAndFiltersSchema = z
      * @see {@link https://knip.dev/reference/jsdoc-tsdoc-tags | JSDoc & TSDoc Tags }
      */
     tags: z.array(z.string()).optional(),
+    /**
+     * Exit with non-zero code (1) if there are any configuration hints.
+     *
+     * @example
+     * ```json title="knip.json"
+     * {
+     *  "treatConfigHintsAsErrors": true
+     * }
+     * ```
+     */
+    treatConfigHintsAsErrors: z.boolean().optional(),
   })
   .merge(reportConfigSchema);
 
@@ -361,11 +372,10 @@ const fileTypesSchema = z.object({
   $schema: z.string().optional(),
 });
 
-const undocumentedSchema = z.object({
+const compilersConfigSchema = z.object({
   compilers: compilersSchema.optional(),
   syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
   asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
-  treatConfigHintsAsErrors: z.boolean().optional(),
 });
 
 export const knipConfigurationSchema = fileTypesSchema
@@ -374,5 +384,5 @@ export const knipConfigurationSchema = fileTypesSchema
   .merge(rulesAndFiltersSchema)
   .merge(ignoreIssuesSchema)
   .merge(exportsSchema)
-  .merge(undocumentedSchema)
+  .merge(compilersConfigSchema)
   .strict();
