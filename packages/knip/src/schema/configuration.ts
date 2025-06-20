@@ -412,39 +412,9 @@ const compilersConfigSchema = z.object({
    * @see {@link https://knip.dev/features/compilers | Compilers}
    */
   compilers: compilersSchema.optional(),
-  /**
-   * Synchronous compilers that run in the main thread and block execution until transformation is complete.
-   * Use these for simple, fast transformations.
-   *
-   * @example
-   * ```ts
-   * export default {
-   *   syncCompilers: {
-   *         css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
-   *   }
-   * };
-   * ```
-   *
-   * @see {@link https://knip.dev/features/compilers | Compilers}
-   */
+  /** @internal */
   syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
-  /**
-   * Explicitly define asynchronous compilers that run concurrently.
-   *
-   * @example
-   * ```ts
-   * import { compile } from '@mdx-js/mdx';
-   *
-   * export default {
-   *   asyncCompilers: {
-   *     mdx: async text => (await compile(text)).toString(),
-   *     }
-   *   }
-   * };
-   * ```
-   *
-   * @see {@link https://knip.dev/features/compilers | Compilers}
-   */
+  /** @internal */
   asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
 });
 

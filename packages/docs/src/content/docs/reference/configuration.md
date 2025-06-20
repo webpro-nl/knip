@@ -373,38 +373,10 @@ export default {
     css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
 
     // Override built-in Vue compiler
-    vue: (text: string, filename: string) => {
+    vue: async (text: string, filename: string) => {
       // Custom Vue compilation logic
-      return transformedText;
+      return await transformVue(text);
     },
-  },
-};
-```
-
-### `syncCompilers`
-
-Explicitly define synchronous compilers that run in the main thread and block
-execution until transformation is complete. Use these for simple, fast
-transformations.
-
-```ts title="knip.ts"
-export default {
-  syncCompilers: {
-    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
-  },
-};
-```
-
-### `asyncCompilers`
-
-Explicitly define asynchronous compilers that run concurrently.
-
-```ts title="knip.ts"
-import { compile } from '@mdx-js/mdx';
-
-export default {
-  asyncCompilers: {
-    mdx: async text => (await compile(text)).toString(),
   },
 };
 ```
