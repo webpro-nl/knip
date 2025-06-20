@@ -44,7 +44,7 @@ const ignoreExportsUsedInFileSchema = z.union([
   ),
 ]);
 
-export const exportsSchema = z.object({
+const exportsSchema = z.object({
   /**
    * In files with multiple exports, some of them might be used only internally. If
    * these exports should not be reported, there is a `ignoreExportsUsedInFile`
