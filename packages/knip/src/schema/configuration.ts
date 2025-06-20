@@ -334,6 +334,30 @@ const ignoreIssuesSchema = z.object({
 });
 
 const fileTypesSchema = z.object({
+  /**
+   * A $schema field is a URL that you put at the top of your JSON file. This allows you to get red squiggly lines
+   * inside of your IDE when you make a typo or provide an otherwise invalid configuration option.
+   *
+   * @example
+   * In JSON, use the provided JSON schema:
+   * ```json title="knip.json"
+   * {
+   *  "$schema": "https://unpkg.com/knip@5/schema.json"
+   * }
+   * ```
+   *
+   * @example
+   * In JSONC, use the provided JSONC schema:
+   * ```jsonc title="knip.jsonc"
+   * {
+   * "$schema": "https://unpkg.com/knip@5/schema-jsonc.json
+   * }
+   * ```
+   *
+   * @remarks
+   * Use JSONC if you want to use comments and/or trailing commas.
+   *
+   */
   $schema: z.string().optional(),
 });
 
