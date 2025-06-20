@@ -100,7 +100,7 @@ TypeScript semantics:
 - Path values are an array of relative paths.
 - Paths without an `*` are exact matches.
 
-### Plugins
+## Plugins
 
 There are a few options to modify the behavior of a plugin:
 
@@ -181,6 +181,16 @@ notation below is valid and will report only exports tagged `@lintignore` or
 ```
 
 Also see [JSDoc & TSDoc Tags][8].
+
+### `treatConfigHintsAsErrors`
+
+Exit with non-zero code (1) if there are any configuration hints.
+
+```json title="knip.json"
+{
+  "treatConfigHintsAsErrors": true
+}
+```
 
 ## Ignore Issues
 
@@ -332,6 +342,45 @@ This will also enable reporting unused members of exported classes and enums.
 Set this option at root level to enable this globally, or within workspace
 configurations individually.
 
+## Compilers
+
+Knip supports custom compilers to transform files before analysis. Knip has
+built-in compilers for `.astro`, `.mdx`, `.svelte`, and `.vue` files that are
+automatically enabled when the relevant dependencies are found.
+
+:::note
+
+Since compilers are functions, they can only be used in dynamic configuration
+files (`.js` or `.ts`), not in JSON configuration files.
+
+:::
+
+Also see [Compilers][10].
+
+### `compilers`
+
+Override built-in compilers or add custom compilers for additional file types.
+Each compiler is a function with the signature
+`(source: string, filename: string) => string` or async equivalent.
+
+```ts title="knip.ts"
+export default {
+  compilers: {
+    // Enable a built-in compiler manually
+    mdx: true,
+
+    // Custom compiler for CSS files
+    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
+
+    // Override built-in Vue compiler
+    vue: async (text: string, filename: string) => {
+      // Custom Vue compilation logic
+      return await transformVue(text);
+    },
+  },
+};
+```
+
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
 [3]: ../explanations/entry-files.md
@@ -341,3 +390,4 @@ configurations individually.
 [7]: ../features/rules-and-filters.md#filters
 [8]: ./jsdoc-tsdoc-tags.md
 [9]: ../guides/configuring-project-files.md
+[10]: ../features/compilers.md
