@@ -373,8 +373,58 @@ const fileTypesSchema = z.object({
 });
 
 const compilersConfigSchema = z.object({
+  /**
+   * Override built-in compilers or add custom compilers for additional file types.
+   * Each compiler is a function with the signature `(source: string, filename: string) => string` or
+   * `(source: string, filename: string) => Promise<string>`.
+   *
+   * @example
+   * ```ts
+   * export default {
+   *   compilers: {
+   *     mdx: true, // Enable built-in compiler
+   *     css: (text: string) => extractImports(text), // Custom sync compiler
+   *     vue: async (text: string) => await transformVue(text) // Custom async compiler
+   *   }
+   * };
+   * ```
+   *
+   * @see {@link https://knip.dev/features/compilers | Compilers}
+   */
   compilers: compilersSchema.optional(),
+  /**
+   * Synchronous compilers that run in the main thread and block execution until transformation is complete.
+   * Use these for simple, fast transformations.
+   *
+   * @example
+   * ```ts
+   * export default {
+   *   syncCompilers: {
+   *         css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
+   *   }
+   * };
+   * ```
+   *
+   * @see {@link https://knip.dev/features/compilers | Compilers}
+   */
   syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
+  /**
+   * Explicitly define asynchronous compilers that run concurrently.
+   *
+   * @example
+   * ```ts
+   * import { compile } from '@mdx-js/mdx';
+   *
+   * export default {
+   *   asyncCompilers: {
+   *     mdx: async text => (await compile(text)).toString(),
+   *     }
+   *   }
+   * };
+   * ```
+   *
+   * @see {@link https://knip.dev/features/compilers | Compilers}
+   */
   asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
 });
 
