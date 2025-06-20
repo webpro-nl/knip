@@ -116,13 +116,58 @@ const projectSchema = z
   .merge(pluginsSchema.partial());
 
 const reportConfigSchema = z.object({
+  /**
+   * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
+   */
   include: z.array(issueTypeSchema).optional(),
+  /**
+   * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
+   */
   exclude: z.array(issueTypeSchema).optional(),
 });
 
 const rulesAndFiltersSchema = z
   .object({
+    /**
+     * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
+     */
     rules: rulesSchema.optional(),
+    /**
+     * Exports can be tagged with known or arbitrary JSDoc/TSDoc tags.
+     *
+     * @example
+     * ```js
+     * // \**
+     * //  * Description of my exported value
+     * //  *
+     * //  * \@type number
+     * //  * \@internal Important matters
+     * //  * \@lintignore
+     * //  *\/
+     * export const myExport = 1;
+     * ```
+     * And then include (+) or exclude (-) these tagged exports from the report like so:
+     *
+     * ```json
+     * {
+     * "tags": ["-lintignore"]
+     * }
+     * ```
+     *
+     * This way, you can either focus on or ignore specific tagged exports with tags you define yourself. This also works for individual class or enum members.
+     *
+     *
+     * @example
+     * The default directive is `+` (include) and the `@` prefix is ignored.
+     * This also works for individual class or enum members.
+     * ```json
+     * {
+     *   "tags": ["-lintignore", "@internal"]
+     * }
+     * ```
+     *
+     * @see {@link https://knip.dev/reference/jsdoc-tsdoc-tags | JSDoc & TSDoc Tags }
+     */
     tags: z.array(z.string()).optional(),
   })
   .merge(reportConfigSchema);
