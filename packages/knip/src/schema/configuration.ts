@@ -51,12 +51,16 @@ const exportsSchema = z.object({
    * option available. With this option enabled, when something is also no longer
    * used internally, it will be reported as unused.
    *
+   * @default false
+   *
+   * @example
    * ```json title="knip.json"
    * {
    *   "ignoreExportsUsedInFile": true
    * }
    * ```
    *
+   * @example
    * In a more fine-grained manner, to ignore only specific issue types:
    *
    * ```json title="knip.json"
@@ -75,12 +79,16 @@ const exportsSchema = z.object({
    * repository (or workspace) is self-contained or private, you may want to include
    * entry files when reporting unused exports:
    *
+   * @default false
+   *
+   * @example
    * ```json title="knip.json"
    * {
    *   "includeEntryExports": true
    * }
    * ```
    *
+   * @remarks
    * If enabled, Knip will report unused exports in entry source files. But not in
    * entry and configuration files as configured by plugins, such as `next.config.js`
    * or `src/routes/+page.svelte`.
@@ -174,10 +182,14 @@ const projectSchema = z.object({
 
 const reportConfigSchema = z.object({
   /**
+   * @default []
+   *
    * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
    */
   include: z.array(issueTypeSchema).optional(),
   /**
+   * @default []
+   *
    * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
    */
   exclude: z.array(issueTypeSchema).optional(),
@@ -186,11 +198,15 @@ const reportConfigSchema = z.object({
 const rulesAndFiltersSchema = z
   .object({
     /**
+     * @default {}
+     *
      * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
      */
     rules: rulesSchema.optional(),
     /**
      * Exports can be tagged with known or arbitrary JSDoc/TSDoc tags.
+     *
+     * @default []
      *
      * @example
      * ```js
@@ -228,6 +244,8 @@ const rulesAndFiltersSchema = z
     tags: z.array(z.string()).optional(),
     /**
      * Exit with non-zero code (1) if there are any configuration hints.
+     *
+     * @default false
      *
      * @example
      * ```json title="knip.json"
@@ -348,6 +366,8 @@ const fileTypesSchema = z.object({
   /**
    * A $schema field is a URL that you put at the top of your JSON file. This allows you to get red squiggly lines
    * inside of your IDE when you make a typo or provide an otherwise invalid configuration option.
+   *
+   * @default undefined
    *
    * @example
    * In JSON, use the provided JSON schema:
