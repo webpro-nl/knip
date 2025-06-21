@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/exec-staged",
+  "devDependencies": {
+    "exec-staged": "*"
+  },
+  "exec-staged": {
+    "*.js": [
+      "eslint",
+      "prettier --write $FILES"
+    ]
+  }
+}
