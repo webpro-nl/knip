@@ -59,6 +59,7 @@ const fileTypesSchema = z.object({
  *
  * @see {@link https://knip.dev/reference/dynamic-configuration | Dynamic Configuration}
  * @group File Types
+ * @public
  */
 export interface FileTypes extends z.TypeOf<typeof fileTypesSchema> {}
 
@@ -154,6 +155,7 @@ const projectSchema = z.object({
 
 /**
  * @group Project
+ * @public
  */
 export interface Project extends z.TypeOf<typeof projectSchema> {}
 
@@ -190,6 +192,7 @@ export interface Project extends z.TypeOf<typeof projectSchema> {}
  *
  * @see {@link https://knip.dev/features/monorepos-and-workspaces | Monorepos and workspaces}
  * @group Workspaces
+ * @public
  */
 export type Workspaces = z.infer<typeof workspacesSchema>;
 
@@ -223,6 +226,7 @@ export type Workspaces = z.infer<typeof workspacesSchema>;
  *
  * @see {@link https://knip.dev/explanations/plugins | Plugins}
  * @group Plugins
+ * @public
  */
 export type Plugins = z.infer<typeof pluginsSchema>;
 
@@ -312,6 +316,7 @@ const rulesAndFiltersSchema = z
 
 /**
  * @group Rules & Filters
+ * @public
  */
 export interface RulesAndFilters extends z.TypeOf<typeof rulesAndFiltersSchema> {}
 
@@ -426,6 +431,7 @@ const ignoreIssuesSchema = z.object({
 
 /**
  * @group Ignore Issues
+ * @public
  */
 export interface IgnoreIssues extends z.TypeOf<typeof ignoreIssuesSchema> {}
 
@@ -504,6 +510,7 @@ const exportsSchema = z.object({
 
 /**
  * @group Exports
+ * @public
  */
 export interface Exports extends z.TypeOf<typeof exportsSchema> {}
 
@@ -554,6 +561,7 @@ const compilersConfigSchema = z.object({
  * :::
  *
  * @group Compilers
+ * @public
  */
 export interface Compilers extends z.TypeOf<typeof compilersConfigSchema> {}
 
