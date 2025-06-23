@@ -3,10 +3,8 @@
   "devDependencies": {
     "exec-staged": "*"
   },
-  "exec-staged": {
-    "*.js": [
-      "eslint",
-      "prettier --write $FILES"
-    ]
-  }
+  "exec-staged": [
+    "eslint",
+    "prettier --write $FILES"
+  ]
 }
