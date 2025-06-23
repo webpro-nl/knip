@@ -1,0 +1,38 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["../../knip/src/schema/configuration.ts"],
+
+  "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-frontmatter"],
+  "readme": "none",
+  "hideBreadcrumbs": true,
+  "hidePageHeader": true,
+  "hidePageTitle": true,
+  "hideGroupHeadings": true,
+  "disableSources": true,
+  "excludeInternal": true,
+  "gitRevision": "main",
+  "tsconfig": "../../knip/tsconfig.json",
+  "sort": ["source-order"],
+  "groupOrder": [
+    "File Types",
+    "Project",
+    "Workspaces",
+    "Plugins",
+    "Rules & Filters",
+    "Ignore Issues",
+    "Exports",
+    "Compilers"
+  ],
+  "indexFrontmatter": {
+    "title": "Configuration",
+    "tableOfContents": {
+      "maxHeadingLevel": 4
+    }
+  },
+  "flattenOutputFiles": true,
+  "outputFileStrategy": "modules",
+  "cleanOutputDir": false,
+  "out": "../src/content/docs/reference",
+  "entryFileName": "configuration",
+  "fileExtension": ".md"
+}

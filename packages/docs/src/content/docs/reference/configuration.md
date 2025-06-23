@@ -1,16 +1,49 @@
 ---
 title: Configuration
+tableOfContents:
+  maxHeadingLevel: 4
 ---
 
 This page lists all configuration file options.
 
-## File Types
+## FileTypes
 
-### JSON Schema
+### JSON and JSONC
+
+Knip supports a JSON or JSONC (JSON with comments) configuration file. Add the
+[\`$schema\`](#schema) to the top of your JSON file to enable validation in your
+IDE.
+
+### TypeScript
+
+Knip can also use
+[dynamic and typed configuration files.](https://knip.dev/reference/dynamic-configuration)
+
+### See
+
+[Dynamic Configuration](https://knip.dev/reference/dynamic-configuration)
+
+### Extends
+
+- `TypeOf`\<_typeof_ `fileTypesSchema`\>
+
+### Properties
+
+#### $schema?
+
+> `optional` **$schema**: `string`
 
 A `$schema` field is a URL that you put at the top of your JSON file. This
 allows you to get red squiggly lines inside of your IDE when you make a typo or
 provide an otherwise invalid configuration option.
+
+##### Default
+
+```ts
+undefined;
+```
+
+##### Examples
 
 In JSON, use the provided JSON schema:
 
@@ -20,28 +53,39 @@ In JSON, use the provided JSON schema:
 }
 ```
 
-### JSONC
-
 In JSONC, use the provided JSONC schema:
 
-```json title="knip.jsonc"
+```jsonc title="knip.jsonc"
 {
-  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json"
+  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
 }
 ```
 
+##### Remarks
+
 Use JSONC if you want to use comments and/or trailing commas.
 
-### TypeScript
+##### Inherited from
 
-See [dynamic configuration][1] about dynamic and typed configuration files.
+`z.TypeOf.$schema`
+
+---
 
 ## Project
 
-### `entry`
+### Extends
+
+- `TypeOf`\<_typeof_ `projectSchema`\>
+
+### Properties
+
+#### entry?
+
+> `optional` **entry**: `string` \| `string`[]
 
 Array of glob patterns to find entry files. Prefix with `!` for negation.
-Example:
+
+##### Example
 
 ```json title="knip.json"
 {
@@ -49,11 +93,22 @@ Example:
 }
 ```
 
-Also see [configuration][2] and [entry files][3].
+##### See
 
-### `project`
+[configuration](https://knip.dev/overview/configuration) and
+[entry files](https://knip.dev/explanations/entry-files)
 
-Array of glob patterns to find project files. Example:
+##### Inherited from
+
+`z.TypeOf.entry`
+
+#### project?
+
+> `optional` **project**: `string` \| `string`[]
+
+Array of glob patterns to find project files.
+
+##### Example
 
 ```json title="knip.json"
 {
@@ -61,9 +116,52 @@ Array of glob patterns to find project files. Example:
 }
 ```
 
-Also see [configuration][2] and [entry files][3].
+##### See
 
-### `workspaces`
+[configuration](https://knip.dev/overview/configuration) and
+[entry files](https://knip.dev/explanations/entry-files)
+
+##### Inherited from
+
+`z.TypeOf.project`
+
+#### paths?
+
+> `optional` **paths**: `Record`\<`string`, `string`[]\>
+
+Tools like TypeScript, webpack and Babel support import aliases in various ways.
+Knip automatically includes `compilerOptions.paths` from the TypeScript
+configuration, but does not automatically use other types of import aliases.
+They can be configured manually:
+
+##### Example
+
+```json title="knip.json"
+{
+  "paths": {
+    "@lib": ["./lib/index.ts"],
+    "@lib/*": ["./lib/*"]
+  }
+}
+```
+
+##### Remarks
+
+Each workspace can have its own `paths` configured. Knip `paths` follow the
+TypeScript semantics:
+
+- Path values are an array of relative paths
+- Paths without an `*` are exact matches
+
+##### Inherited from
+
+`z.TypeOf.paths`
+
+---
+
+## Workspaces
+
+> **Workspaces** = `z.infer`\<_typeof_ `workspacesSchema`\>
 
 Individual workspace configurations may contain all other options listed on this
 page, except for the following root-only options:
@@ -76,37 +174,44 @@ page, except for the following root-only options:
 Workspaces can't be nested in a Knip configuration, but they can be nested in a
 monorepo folder structure.
 
-Also see [Monorepos and workspaces][4].
-
-### `paths`
-
-Tools like TypeScript, webpack and Babel support import aliases in various ways.
-Knip automatically includes `compilerOptions.paths` from the TypeScript
-configuration, but does not automatically use other types of import aliases.
-They can be configured manually:
+### Example
 
 ```json title="knip.json"
 {
-  "paths": {
-    "@lib": ["./lib/index.ts"],
-    "@lib/*": ["./lib/*"]
+  "workspaces": {
+    "packages/frontend": {
+      "entry": ["src/index.tsx"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignoreDependencies": ["@types/*"]
+    },
+    "packages/backend": {
+      "entry": ["src/server.ts"],
+      "project": ["src/**/*.ts"],
+      "jest": {
+        "entry": ["**/*.test.ts"]
+      }
+    }
   }
 }
 ```
 
-Each workspace can have its own `paths` configured. Knip `paths` follow the
-TypeScript semantics:
+### See
 
-- Path values are an array of relative paths.
-- Paths without an `*` are exact matches.
+[Monorepos and workspaces](https://knip.dev/features/monorepos-and-workspaces)
+
+---
 
 ## Plugins
+
+> **Plugins** = `z.infer`\<_typeof_ `pluginsSchema`\>
 
 There are a few options to modify the behavior of a plugin:
 
 - Override a plugin's `config` or `entry` location
 - Force-enable a plugin by setting its value to `true`
 - Disable a plugin by setting its value to `false`
+
+### Example
 
 ```json title="knip.json"
 {
@@ -119,42 +224,117 @@ There are a few options to modify the behavior of a plugin:
 }
 ```
 
+### Remarks
+
 It should be rarely necessary to override the `entry` patterns, since plugins
-also read custom entry file patterns from the tooling configuration (see
-[Plugins → entry files][5]).
+also read custom entry file patterns from the tooling configuration
+([Plugins → entry files](https://knip.dev/explanations/plugins#entry-files)).
 
 Plugin configuration can be set on root and on a per-workspace level. If enabled
 on root level, it can be disabled on workspace level by setting it to `false`
 there, and vice versa.
 
-Also see [Plugins][6].
+### See
 
-## Rules & Filters
+[Plugins](https://knip.dev/explanations/plugins)
 
-### `rules`
+---
 
-See [Rules & Filters][7].
+## RulesAndFilters
 
-### `include`
+### Extends
 
-See [Rules & Filters][7].
+- `TypeOf`\<_typeof_ `rulesAndFiltersSchema`\>
 
-### `exclude`
+### Properties
 
-See [Rules & Filters][7].
+#### rules?
 
-### `tags`
+> `optional` **rules**: `Partial`\<`Record`\<`"dependencies"` \| `"exports"` \|
+> `"files"` \| `"devDependencies"` \| `"optionalPeerDependencies"` \|
+> `"unlisted"` \| `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"`
+> \| `"nsTypes"` \| `"duplicates"` \| `"enumMembers"` \| `"classMembers"`,
+> `"error"` \| `"warn"` \| `"off"`\>\>
 
-Exports can be tagged with known or arbitrary JSDoc/TSDoc tags:
+##### Default
 
 ```ts
-/**
- * Description of my exported value
- *
- * @type number
- * @internal Important matters
- * @lintignore
- */
+{
+}
+```
+
+##### See
+
+[Rules & Filters](https://knip.dev/features/rules-and-filters)
+
+##### Inherited from
+
+`z.TypeOf.rules`
+
+#### include?
+
+> `optional` **include**: (`"dependencies"` \| `"exports"` \| `"files"` \|
+> `"devDependencies"` \| `"optionalPeerDependencies"` \| `"unlisted"` \|
+> `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"` \| `"nsTypes"` \|
+> `"duplicates"` \| `"enumMembers"` \| `"classMembers"`)[]
+
+##### Default
+
+```ts
+[];
+```
+
+##### See
+
+[Rules & Filters](https://knip.dev/features/rules-and-filters)
+
+##### Inherited from
+
+`z.TypeOf.include`
+
+#### exclude?
+
+> `optional` **exclude**: (`"dependencies"` \| `"exports"` \| `"files"` \|
+> `"devDependencies"` \| `"optionalPeerDependencies"` \| `"unlisted"` \|
+> `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"` \| `"nsTypes"` \|
+> `"duplicates"` \| `"enumMembers"` \| `"classMembers"`)[]
+
+##### Default
+
+```ts
+[];
+```
+
+##### See
+
+[Rules & Filters](https://knip.dev/features/rules-and-filters)
+
+##### Inherited from
+
+`z.TypeOf.exclude`
+
+#### tags?
+
+> `optional` **tags**: `string`[]
+
+Exports can be tagged with known or arbitrary JSDoc/TSDoc tags.
+
+##### Default
+
+```ts
+[];
+```
+
+##### Examples
+
+```ts
+// \**
+//  * Description of my exported value
+//  *
+//  * \@type number
+//  * \@internal Important matters
+//  * \@lintignore
+//  */
 export const myExport = 1;
 ```
 
@@ -180,11 +360,27 @@ notation below is valid and will report only exports tagged `@lintignore` or
 }
 ```
 
-Also see [JSDoc & TSDoc Tags][8].
+##### See
 
-### `treatConfigHintsAsErrors`
+[JSDoc & TSDoc Tags](https://knip.dev/reference/jsdoc-tsdoc-tags)
+
+##### Inherited from
+
+`z.TypeOf.tags`
+
+#### treatConfigHintsAsErrors?
+
+> `optional` **treatConfigHintsAsErrors**: `boolean`
 
 Exit with non-zero code (1) if there are any configuration hints.
+
+##### Default
+
+```ts
+false;
+```
+
+##### Example
 
 ```json title="knip.json"
 {
@@ -192,18 +388,36 @@ Exit with non-zero code (1) if there are any configuration hints.
 }
 ```
 
-## Ignore Issues
+##### Inherited from
 
-### `ignore`
+`z.TypeOf.treatConfigHintsAsErrors`
+
+---
+
+## IgnoreIssues
+
+### Extends
+
+- `TypeOf`\<_typeof_ `ignoreIssuesSchema`\>
+
+### Properties
+
+#### ignore?
+
+> `optional` **ignore**: `string` \| `string`[]
 
 :::tip
 
-Please read [project files configuration][9] before using the `ignore` option,
-because in many cases you'll want to **fine-tune project files** instead.
+Please read
+[project files configuration](https://knip.dev/guides/configuring-project-files)
+before using the `ignore` option, because in many cases you'll want to
+**fine-tune project files** instead.
 
 :::
 
-Array of glob patterns to ignore issues from matching files. Example:
+Array of glob patterns to ignore issues from matching files.
+
+##### Example
 
 ```json title="knip.json"
 {
@@ -211,10 +425,18 @@ Array of glob patterns to ignore issues from matching files. Example:
 }
 ```
 
-### `ignoreBinaries`
+##### Inherited from
+
+`z.TypeOf.ignore`
+
+#### ignoreBinaries?
+
+> `optional` **ignoreBinaries**: (`string` \| `RegExp`)[]
 
 Exclude binaries that are used but not provided by any dependency from the
-report. Value is an array of binary names or regular expressions. Example:
+report. Value is an array of binary names or regular expressions.
+
+##### Examples
 
 ```json title="knip.json"
 {
@@ -230,10 +452,17 @@ export default {
 };
 ```
 
-### `ignoreDependencies`
+##### Inherited from
+
+`z.TypeOf.ignoreBinaries`
+
+#### ignoreDependencies?
+
+> `optional` **ignoreDependencies**: (`string` \| `RegExp`)[]
 
 Array of package names to exclude from the report. Regular expressions allowed.
-Example:
+
+##### Examples
 
 ```json title="knip.json"
 {
@@ -241,18 +470,26 @@ Example:
 }
 ```
 
-Actual regular expressions can be used in dynamic configurations:
+Actual regular expressions can be used in dynamic configurations.
 
 ```ts title="knip.ts"
 export default {
-  ignoreDependencies: [/@org\/.*/, /^lib-.+/],
+  ignoreDependencies: [/@org/.*/, /^lib-.+/],
 };
 ```
 
-### `ignoreMembers`
+##### Inherited from
+
+`z.TypeOf.ignoreDependencies`
+
+#### ignoreMembers?
+
+> `optional` **ignoreMembers**: (`string` \| `RegExp`)[]
 
 Array of class and enum members to exclude from the report. Regular expressions
-allowed. Example:
+allowed.
+
+##### Example
 
 ```json title="knip.json"
 {
@@ -262,10 +499,17 @@ allowed. Example:
 
 Actual regular expressions can be used in dynamic configurations.
 
-### `ignoreUnresolved`
+##### Inherited from
+
+`z.TypeOf.ignoreMembers`
+
+#### ignoreUnresolved?
+
+> `optional` **ignoreUnresolved**: (`string` \| `RegExp`)[]
 
 Array of specifiers to exclude from the report. Regular expressions allowed.
-Example:
+
+##### Examples
 
 ```json title="knip.json"
 {
@@ -281,28 +525,60 @@ export default {
 };
 ```
 
-### `ignoreWorkspaces`
+##### Inherited from
 
-Array of workspaces to ignore, globs allowed. Example:
+`z.TypeOf.ignoreUnresolved`
+
+#### ignoreWorkspaces?
+
+> `optional` **ignoreWorkspaces**: `string`[]
+
+Array of workspaces to ignore, globs allowed.
+
+##### Example
 
 ```json title="knip.json"
 {
   "ignoreWorkspaces": [
     "packages/go-server",
-    "packages/flat/*"
+    "packages/flat/*",
     "packages/deep/**"
   ]
 }
 ```
 
+##### Inherited from
+
+`z.TypeOf.ignoreWorkspaces`
+
+---
+
 ## Exports
 
-### `ignoreExportsUsedInFile`
+### Extends
+
+- `TypeOf`\<_typeof_ `exportsSchema`\>
+
+### Properties
+
+#### ignoreExportsUsedInFile?
+
+> `optional` **ignoreExportsUsedInFile**: `boolean` \|
+> `Partial`\<`Record`\<`"function"` \| `"type"` \| `"enum"` \| `"class"` \|
+> `"interface"` \| `"member"`, `boolean`\>\>
 
 In files with multiple exports, some of them might be used only internally. If
 these exports should not be reported, there is a `ignoreExportsUsedInFile`
 option available. With this option enabled, when something is also no longer
 used internally, it will be reported as unused.
+
+##### Default
+
+```ts
+false;
+```
+
+##### Examples
 
 ```json title="knip.json"
 {
@@ -321,17 +597,33 @@ In a more fine-grained manner, to ignore only specific issue types:
 }
 ```
 
-### `includeEntryExports`
+##### Inherited from
+
+`z.TypeOf.ignoreExportsUsedInFile`
+
+#### includeEntryExports?
+
+> `optional` **includeEntryExports**: `boolean`
 
 By default, Knip does not report unused exports in entry files. When a
 repository (or workspace) is self-contained or private, you may want to include
 entry files when reporting unused exports:
+
+##### Default
+
+```ts
+false;
+```
+
+##### Example
 
 ```json title="knip.json"
 {
   "includeEntryExports": true
 }
 ```
+
+##### Remarks
 
 If enabled, Knip will report unused exports in entry source files. But not in
 entry and configuration files as configured by plugins, such as `next.config.js`
@@ -341,6 +633,12 @@ This will also enable reporting unused members of exported classes and enums.
 
 Set this option at root level to enable this globally, or within workspace
 configurations individually.
+
+##### Inherited from
+
+`z.TypeOf.includeEntryExports`
+
+---
 
 ## Compilers
 
@@ -355,13 +653,22 @@ files (`.js` or `.ts`), not in JSON configuration files.
 
 :::
 
-Also see [Compilers][10].
+### Extends
 
-### `compilers`
+- `TypeOf`\<_typeof_ `compilersConfigSchema`\>
+
+### Properties
+
+#### compilers?
+
+> `optional` **compilers**: `Record`\<`string`, `true` \| (...`args`) =>
+> `string` \| (...`args`) => `Promise`\<`string`\>\>
 
 Override built-in compilers or add custom compilers for additional file types.
 Each compiler is a function with the signature
 `(source: string, filename: string) => string` or async equivalent.
+
+##### Example
 
 ```ts title="knip.ts"
 export default {
@@ -381,13 +688,10 @@ export default {
 };
 ```
 
-[1]: ../reference/dynamic-configuration.mdx
-[2]: ../overview/configuration.md
-[3]: ../explanations/entry-files.md
-[4]: ../features/monorepos-and-workspaces.md
-[5]: ../explanations/plugins.md#entry-files
-[6]: ../explanations/plugins.md
-[7]: ../features/rules-and-filters.md#filters
-[8]: ./jsdoc-tsdoc-tags.md
-[9]: ../guides/configuring-project-files.md
-[10]: ../features/compilers.md
+##### See
+
+[Compilers](https://knip.dev/features/compilers)
+
+##### Inherited from
+
+`z.TypeOf.compilers`
