@@ -265,15 +265,15 @@ export class DependencyDeputy {
       const hasTypesIncluded = this.getHasTypesIncluded(workspace);
       const peeker = new PackagePeeker(manifestStr);
 
-      // Keeping track of peer dependency recursions to prevent infinite loops for circularly referenced peer deps
-      const peerDepRecs: Record<string, number> = {};
+      // Keeping track of peer dependencies to prevent infinite loops for circularly referenced peer deps
+      const peerDepCount: Record<string, number> = {};
 
       const isReferencedDependency = (dependency: string, isPeerDep?: boolean): boolean => {
         // Is referenced, ignore
         if (referencedDependencies?.has(dependency)) return true;
 
         // Returning peer dependency, ignore
-        if (isPeerDep && peerDepRecs[dependency]) return false;
+        if (isPeerDep && peerDepCount[dependency]) return false;
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === DT_SCOPE) {
@@ -303,8 +303,8 @@ export class DependencyDeputy {
         const hostDependencies = this.getHostDependenciesFor(workspace, dependency);
 
         for (const { name } of hostDependencies) {
-          if (!peerDepRecs[name]) peerDepRecs[name] = 1;
-          else peerDepRecs[name]++;
+          if (!peerDepCount[name]) peerDepCount[name] = 1;
+          else peerDepCount[name]++;
         }
 
         return hostDependencies.some(
