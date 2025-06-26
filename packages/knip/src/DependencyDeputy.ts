@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import type { Workspace } from './ConfigurationChief.js';
-import { PackageJsonPeeker } from './PackageJsonPeeker.js';
+import { PackagePeeker } from './PackagePeeker.js';
 import {
   DT_SCOPE,
   IGNORED_DEPENDENCIES,
@@ -263,7 +263,7 @@ export class DependencyDeputy {
     for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspace);
       const hasTypesIncluded = this.getHasTypesIncluded(workspace);
-      const peeker = new PackageJsonPeeker(manifestStr);
+      const peeker = new PackagePeeker(manifestStr);
 
       // Keeping track of peer dependency recursions to prevent infinite loops for circularly referenced peer deps
       const peerDepRecs: Record<string, number> = {};
