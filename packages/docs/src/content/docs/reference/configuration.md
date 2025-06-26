@@ -98,25 +98,6 @@ page, except for the following root-only options:
 Workspaces can't be nested in a Knip configuration, but they can be nested in a
 monorepo folder structure.
 
-```json title="knip.json"
-{
-  "workspaces": {
-    "packages/frontend": {
-      "entry": ["src/index.tsx"],
-      "project": ["src/**/*.{ts,tsx}"],
-      "ignoreDependencies": ["@types/*"]
-    },
-    "packages/backend": {
-      "entry": ["src/server.ts"],
-      "project": ["src/**/*.ts"],
-      "jest": {
-        "entry": ["**/*.test.ts"]
-      }
-    }
-  }
-}
-```
-
 Also see [Monorepos and workspaces][4].
 
 ## Plugins
@@ -363,9 +344,7 @@ configurations individually.
 
 ## Compilers
 
-Knip supports custom compilers to transform files before analysis. Knip has
-built-in compilers for `.astro`, `.mdx`, `.svelte`, and `.vue` files that are
-automatically enabled when the relevant dependencies are found.
+Knip supports custom compilers to transform files before analysis.
 
 :::note
 
@@ -374,31 +353,11 @@ files (`.js` or `.ts`), not in JSON configuration files.
 
 :::
 
-Also see [Compilers][10].
-
 ### `compilers`
 
 Override built-in compilers or add custom compilers for additional file types.
-Each compiler is a function with the signature
-`(source: string, filename: string) => string` or async equivalent.
 
-```ts title="knip.ts"
-export default {
-  compilers: {
-    // Enable a built-in compiler manually
-    mdx: true,
-
-    // Custom compiler for CSS files
-    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
-
-    // Override built-in Vue compiler
-    vue: async (text: string, filename: string) => {
-      // Custom Vue compilation logic
-      return await transformVue(text);
-    },
-  },
-};
-```
+Also see [Compilers][10].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
