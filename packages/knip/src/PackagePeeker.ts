@@ -1,4 +1,4 @@
-export class PackageJsonPeeker {
+export class PackagePeeker {
   private lines: string[] = [];
   private sections: Record<string, { startLine: number; startPos: number }> = {};
   private ready = false;

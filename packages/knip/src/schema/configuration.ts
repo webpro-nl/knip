@@ -160,7 +160,8 @@ const projectSchema = z.object({
 export interface Project extends z.TypeOf<typeof projectSchema> {}
 
 /**
- * Individual workspace configurations may contain all other options listed on this page, except for the following root-only options:
+ * Individual workspace configurations may contain all other options listed on this
+ * page, except for the following root-only options:
  *
  * - `exclude` / `include`
  * - `ignoreExportsUsedInFile`
@@ -170,25 +171,6 @@ export interface Project extends z.TypeOf<typeof projectSchema> {}
  * Workspaces can't be nested in a Knip configuration, but they can be nested in a
  * monorepo folder structure.
  *
- * @example
- * ```json title="knip.json"
- * {
- *   "workspaces": {
- *     "packages/frontend": {
- *       "entry": ["src/index.tsx"],
- *       "project": ["src/**\/*.{ts,tsx}"],
- *       "ignoreDependencies": ["@types/*"]
- *     },
- *     "packages/backend": {
- *       "entry": ["src/server.ts"],
- *       "project": ["src/**\/*.ts"],
- *       "jest": {
- *         "entry": ["**\/*.test.ts"]
- *       }
- *     }
- *   }
- * }
- * ```
  *
  * @see {@link https://knip.dev/features/monorepos-and-workspaces | Monorepos and workspaces}
  * @group Workspaces
@@ -517,27 +499,6 @@ export interface Exports extends z.TypeOf<typeof exportsSchema> {}
 const compilersConfigSchema = z.object({
   /**
    * Override built-in compilers or add custom compilers for additional file types.
-   * Each compiler is a function with the signature
-   * `(source: string, filename: string) => string` or async equivalent.
-   *
-   * @example
-   * ```ts title="knip.ts"
-   * export default {
-   *   compilers: {
-   *     // Enable a built-in compiler manually
-   *     mdx: true,
-   *
-   *     // Custom compiler for CSS files
-   *     css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
-   *
-   *     // Override built-in Vue compiler
-   *     vue: async (text: string, filename: string) => {
-   *       // Custom Vue compilation logic
-   *       return await transformVue(text);
-   *     },
-   *   },
-   * };
-   * ```
    *
    * @see {@link https://knip.dev/features/compilers | Compilers}
    */
@@ -549,9 +510,7 @@ const compilersConfigSchema = z.object({
 });
 
 /**
- * Knip supports custom compilers to transform files before analysis. Knip has
- * built-in compilers for `.astro`, `.mdx`, `.svelte`, and `.vue` files that are
- * automatically enabled when the relevant dependencies are found.
+ * Knip supports custom compilers to transform files before analysis.
  *
  * :::note
  *

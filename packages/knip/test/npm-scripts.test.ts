@@ -17,7 +17,7 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
     packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
   };
 
-  const { hostDependencies, installedBinaries } = await getDependencyMetaData(config);
+  const { hostDependencies, installedBinaries } = getDependencyMetaData(config);
 
   const expectedHostDependencies = new Map();
   expectedHostDependencies.set('pm2-peer-dep', [{ name: 'pm2', isPeerOptional: false }]);

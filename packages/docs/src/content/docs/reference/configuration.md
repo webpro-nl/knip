@@ -10,14 +10,12 @@ This page lists all configuration file options.
 
 ### JSON and JSONC
 
-Knip supports a JSON or JSONC (JSON with comments) configuration file. Add the
-[\`$schema\`](#schema) to the top of your JSON file to enable validation in your
-IDE.
+Knip supports a JSON or JSONC (JSON with comments) configuration file. Add the [\`$schema\`](#schema)
+to the top of your JSON file to enable validation in your IDE.
 
 ### TypeScript
 
-Knip can also use
-[dynamic and typed configuration files.](https://knip.dev/reference/dynamic-configuration)
+Knip can also use [dynamic and typed configuration files.](https://knip.dev/reference/dynamic-configuration)
 
 ### See
 
@@ -25,7 +23,7 @@ Knip can also use
 
 ### Extends
 
-- `TypeOf`\<_typeof_ `fileTypesSchema`\>
+- `TypeOf`\<*typeof* `fileTypesSchema`\>
 
 ### Properties
 
@@ -40,7 +38,7 @@ provide an otherwise invalid configuration option.
 ##### Default
 
 ```ts
-undefined;
+undefined
 ```
 
 ##### Examples
@@ -54,10 +52,9 @@ In JSON, use the provided JSON schema:
 ```
 
 In JSONC, use the provided JSONC schema:
-
 ```jsonc title="knip.jsonc"
 {
-  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
+  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json"
 }
 ```
 
@@ -69,13 +66,13 @@ Use JSONC if you want to use comments and/or trailing commas.
 
 `z.TypeOf.$schema`
 
----
+***
 
 ## Project
 
 ### Extends
 
-- `TypeOf`\<_typeof_ `projectSchema`\>
+- `TypeOf`\<*typeof* `projectSchema`\>
 
 ### Properties
 
@@ -95,8 +92,7 @@ Array of glob patterns to find entry files. Prefix with `!` for negation.
 
 ##### See
 
-[configuration](https://knip.dev/overview/configuration) and
-[entry files](https://knip.dev/explanations/entry-files)
+[configuration](https://knip.dev/overview/configuration) and [entry files](https://knip.dev/explanations/entry-files)
 
 ##### Inherited from
 
@@ -118,8 +114,7 @@ Array of glob patterns to find project files.
 
 ##### See
 
-[configuration](https://knip.dev/overview/configuration) and
-[entry files](https://knip.dev/explanations/entry-files)
+[configuration](https://knip.dev/overview/configuration) and [entry files](https://knip.dev/explanations/entry-files)
 
 ##### Inherited from
 
@@ -157,11 +152,11 @@ TypeScript semantics:
 
 `z.TypeOf.paths`
 
----
+***
 
 ## Workspaces
 
-> **Workspaces** = `z.infer`\<_typeof_ `workspacesSchema`\>
+> **Workspaces** = `z.infer`\<*typeof* `workspacesSchema`\>
 
 Individual workspace configurations may contain all other options listed on this
 page, except for the following root-only options:
@@ -174,36 +169,15 @@ page, except for the following root-only options:
 Workspaces can't be nested in a Knip configuration, but they can be nested in a
 monorepo folder structure.
 
-### Example
-
-```json title="knip.json"
-{
-  "workspaces": {
-    "packages/frontend": {
-      "entry": ["src/index.tsx"],
-      "project": ["src/**/*.{ts,tsx}"],
-      "ignoreDependencies": ["@types/*"]
-    },
-    "packages/backend": {
-      "entry": ["src/server.ts"],
-      "project": ["src/**/*.ts"],
-      "jest": {
-        "entry": ["**/*.test.ts"]
-      }
-    }
-  }
-}
-```
-
 ### See
 
 [Monorepos and workspaces](https://knip.dev/features/monorepos-and-workspaces)
 
----
+***
 
 ## Plugins
 
-> **Plugins** = `z.infer`\<_typeof_ `pluginsSchema`\>
+> **Plugins** = `z.infer`\<*typeof* `pluginsSchema`\>
 
 There are a few options to modify the behavior of a plugin:
 
@@ -227,8 +201,7 @@ There are a few options to modify the behavior of a plugin:
 ### Remarks
 
 It should be rarely necessary to override the `entry` patterns, since plugins
-also read custom entry file patterns from the tooling configuration
-([Plugins → entry files](https://knip.dev/explanations/plugins#entry-files)).
+also read custom entry file patterns from the tooling configuration ([Plugins → entry files](https://knip.dev/explanations/plugins#entry-files)).
 
 Plugin configuration can be set on root and on a per-workspace level. If enabled
 on root level, it can be disabled on workspace level by setting it to `false`
@@ -238,29 +211,24 @@ there, and vice versa.
 
 [Plugins](https://knip.dev/explanations/plugins)
 
----
+***
 
 ## RulesAndFilters
 
 ### Extends
 
-- `TypeOf`\<_typeof_ `rulesAndFiltersSchema`\>
+- `TypeOf`\<*typeof* `rulesAndFiltersSchema`\>
 
 ### Properties
 
 #### rules?
 
-> `optional` **rules**: `Partial`\<`Record`\<`"dependencies"` \| `"exports"` \|
-> `"files"` \| `"devDependencies"` \| `"optionalPeerDependencies"` \|
-> `"unlisted"` \| `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"`
-> \| `"nsTypes"` \| `"duplicates"` \| `"enumMembers"` \| `"classMembers"`,
-> `"error"` \| `"warn"` \| `"off"`\>\>
+> `optional` **rules**: `Partial`\<`Record`\<`"dependencies"` \| `"exports"` \| `"files"` \| `"devDependencies"` \| `"optionalPeerDependencies"` \| `"unlisted"` \| `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"` \| `"nsTypes"` \| `"duplicates"` \| `"enumMembers"` \| `"classMembers"`, `"error"` \| `"warn"` \| `"off"`\>\>
 
 ##### Default
 
 ```ts
-{
-}
+{}
 ```
 
 ##### See
@@ -273,15 +241,12 @@ there, and vice versa.
 
 #### include?
 
-> `optional` **include**: (`"dependencies"` \| `"exports"` \| `"files"` \|
-> `"devDependencies"` \| `"optionalPeerDependencies"` \| `"unlisted"` \|
-> `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"` \| `"nsTypes"` \|
-> `"duplicates"` \| `"enumMembers"` \| `"classMembers"`)[]
+> `optional` **include**: (`"dependencies"` \| `"exports"` \| `"files"` \| `"devDependencies"` \| `"optionalPeerDependencies"` \| `"unlisted"` \| `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"` \| `"nsTypes"` \| `"duplicates"` \| `"enumMembers"` \| `"classMembers"`)[]
 
 ##### Default
 
 ```ts
-[];
+[]
 ```
 
 ##### See
@@ -294,15 +259,12 @@ there, and vice versa.
 
 #### exclude?
 
-> `optional` **exclude**: (`"dependencies"` \| `"exports"` \| `"files"` \|
-> `"devDependencies"` \| `"optionalPeerDependencies"` \| `"unlisted"` \|
-> `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"` \| `"nsTypes"` \|
-> `"duplicates"` \| `"enumMembers"` \| `"classMembers"`)[]
+> `optional` **exclude**: (`"dependencies"` \| `"exports"` \| `"files"` \| `"devDependencies"` \| `"optionalPeerDependencies"` \| `"unlisted"` \| `"binaries"` \| `"unresolved"` \| `"types"` \| `"nsExports"` \| `"nsTypes"` \| `"duplicates"` \| `"enumMembers"` \| `"classMembers"`)[]
 
 ##### Default
 
 ```ts
-[];
+[]
 ```
 
 ##### See
@@ -322,7 +284,7 @@ Exports can be tagged with known or arbitrary JSDoc/TSDoc tags.
 ##### Default
 
 ```ts
-[];
+[]
 ```
 
 ##### Examples
@@ -377,7 +339,7 @@ Exit with non-zero code (1) if there are any configuration hints.
 ##### Default
 
 ```ts
-false;
+false
 ```
 
 ##### Example
@@ -392,13 +354,13 @@ false;
 
 `z.TypeOf.treatConfigHintsAsErrors`
 
----
+***
 
 ## IgnoreIssues
 
 ### Extends
 
-- `TypeOf`\<_typeof_ `ignoreIssuesSchema`\>
+- `TypeOf`\<*typeof* `ignoreIssuesSchema`\>
 
 ### Properties
 
@@ -408,10 +370,8 @@ false;
 
 :::tip
 
-Please read
-[project files configuration](https://knip.dev/guides/configuring-project-files)
-before using the `ignore` option, because in many cases you'll want to
-**fine-tune project files** instead.
+Please read [project files configuration](https://knip.dev/guides/configuring-project-files) before using the `ignore` option,
+because in many cases you'll want to **fine-tune project files** instead.
 
 :::
 
@@ -471,7 +431,6 @@ Array of package names to exclude from the report. Regular expressions allowed.
 ```
 
 Actual regular expressions can be used in dynamic configurations.
-
 ```ts title="knip.ts"
 export default {
   ignoreDependencies: [/@org/.*/, /^lib-.+/],
@@ -551,21 +510,19 @@ Array of workspaces to ignore, globs allowed.
 
 `z.TypeOf.ignoreWorkspaces`
 
----
+***
 
 ## Exports
 
 ### Extends
 
-- `TypeOf`\<_typeof_ `exportsSchema`\>
+- `TypeOf`\<*typeof* `exportsSchema`\>
 
 ### Properties
 
 #### ignoreExportsUsedInFile?
 
-> `optional` **ignoreExportsUsedInFile**: `boolean` \|
-> `Partial`\<`Record`\<`"function"` \| `"type"` \| `"enum"` \| `"class"` \|
-> `"interface"` \| `"member"`, `boolean`\>\>
+> `optional` **ignoreExportsUsedInFile**: `boolean` \| `Partial`\<`Record`\<`"function"` \| `"type"` \| `"enum"` \| `"class"` \| `"interface"` \| `"member"`, `boolean`\>\>
 
 In files with multiple exports, some of them might be used only internally. If
 these exports should not be reported, there is a `ignoreExportsUsedInFile`
@@ -575,7 +532,7 @@ used internally, it will be reported as unused.
 ##### Default
 
 ```ts
-false;
+false
 ```
 
 ##### Examples
@@ -612,7 +569,7 @@ entry files when reporting unused exports:
 ##### Default
 
 ```ts
-false;
+false
 ```
 
 ##### Example
@@ -638,13 +595,11 @@ configurations individually.
 
 `z.TypeOf.includeEntryExports`
 
----
+***
 
 ## Compilers
 
-Knip supports custom compilers to transform files before analysis. Knip has
-built-in compilers for `.astro`, `.mdx`, `.svelte`, and `.vue` files that are
-automatically enabled when the relevant dependencies are found.
+Knip supports custom compilers to transform files before analysis.
 
 :::note
 
@@ -655,38 +610,15 @@ files (`.js` or `.ts`), not in JSON configuration files.
 
 ### Extends
 
-- `TypeOf`\<_typeof_ `compilersConfigSchema`\>
+- `TypeOf`\<*typeof* `compilersConfigSchema`\>
 
 ### Properties
 
 #### compilers?
 
-> `optional` **compilers**: `Record`\<`string`, `true` \| (...`args`) =>
-> `string` \| (...`args`) => `Promise`\<`string`\>\>
+> `optional` **compilers**: `Record`\<`string`, `true` \| (...`args`) => `string` \| (...`args`) => `Promise`\<`string`\>\>
 
 Override built-in compilers or add custom compilers for additional file types.
-Each compiler is a function with the signature
-`(source: string, filename: string) => string` or async equivalent.
-
-##### Example
-
-```ts title="knip.ts"
-export default {
-  compilers: {
-    // Enable a built-in compiler manually
-    mdx: true,
-
-    // Custom compiler for CSS files
-    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
-
-    // Override built-in Vue compiler
-    vue: async (text: string, filename: string) => {
-      // Custom Vue compilation logic
-      return await transformVue(text);
-    },
-  },
-};
-```
 
 ##### See
 
