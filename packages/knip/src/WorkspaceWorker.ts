@@ -408,16 +408,18 @@ export class WorkspaceWorker {
           }
         }
 
-        if (basename(configFilePath) !== 'package.json') {
+        if (!isManifest) {
           addInput(toEntry(configFilePath));
           addInput(toConfig(pluginName, configFilePath));
           cache.configFile = toEntry(configFilePath);
 
+          if (fd?.changed && fd.meta && !seen.get(key)?.has(configFilePath)) {
+            fd.meta.data = cache;
+          }
+
           if (!seen.has(key)) seen.set(key, new Set());
           seen.get(key)?.add(configFilePath);
         }
-
-        if (!isManifest && fd?.changed && fd.meta) fd.meta.data = cache;
       }
 
       if (plugin.resolve) {
