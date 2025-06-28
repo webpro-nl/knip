@@ -16,7 +16,9 @@ const config = [
   'package.json',
   'package.yaml',
   'package.yml',
-  ...toLilconfig('lint-staged'),
+  ...toLilconfig('lint-staged', {
+    additionalExtensions: ['ts'],
+  }),
   ...toLilconfig('lintstaged'),
 ];
 
