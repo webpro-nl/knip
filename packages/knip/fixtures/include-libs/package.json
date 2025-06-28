@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/include-libs",
+  "dependencies": {
+    "@loadable/component": "^5.16.3",
+    "@types/loadable__component": "^5.13.9"
+  }
+}

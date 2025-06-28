@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/nyc",
+  "devDependencies": {
+    "nyc": "*"
+  }
+}

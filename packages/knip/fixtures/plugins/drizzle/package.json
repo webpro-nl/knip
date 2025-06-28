@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/drizzle",
+  "name": "@plugins/drizzle",
   "scripts": {
     "migrate": "drizzle-kit push:pg"
   },

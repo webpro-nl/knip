@@ -1,58 +1,66 @@
-import { dirname, join, relative } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve, toDependency, toEntry } from '../../util/input.js';
+import { join, relative } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { StorybookConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://storybook.js.org/docs/react/configure/overview
 
-export const NAME = 'Storybook';
+const title = 'Storybook';
 
-/** @public */
-export const ENABLERS = [/^@storybook\//, '@nrwl/storybook'];
+const enablers = [/^@storybook\//, '@nrwl/storybook'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = ['.storybook/{main,test-runner}.{js,ts}'];
+const config = ['.{storybook,rnstorybook}/{main,test-runner}.{js,ts,mts}'];
 
-const STORIES_FILE_PATTERNS = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
+const stories = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
 
-const REST_ENTRY_FILE_PATTERNS = ['.storybook/{manager,preview}.{js,jsx,ts,tsx}'];
+const restEntry = ['.{storybook,rnstorybook}/{manager,preview,index,vitest.setup}.{js,jsx,ts,tsx}'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = [...REST_ENTRY_FILE_PATTERNS, ...STORIES_FILE_PATTERNS];
+const entry = [...restEntry, ...stories];
 
-export const PROJECT_FILE_PATTERNS = ['.storybook/**/*.{js,jsx,ts,tsx}'];
+const project = ['.{storybook,rnstorybook}/**/*.{js,jsx,ts,tsx,mts}'];
 
-const findStorybookDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { isProduction, cwd, config } = options;
-
-  const localConfig: StorybookConfig | undefined = await load(configFilePath);
-
-  const stories =
-    typeof localConfig?.stories === 'function'
-      ? await localConfig.stories(STORIES_FILE_PATTERNS)
-      : localConfig?.stories;
-  const relativePatterns = stories?.map(pattern => {
-    if (typeof pattern === 'string') return relative(cwd, join(dirname(configFilePath), pattern));
-    return relative(cwd, join(dirname(configFilePath), pattern.directory, pattern.files ?? STORIES_FILE_PATTERNS[0]));
+const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, options) => {
+  const { cwd, configFileDir } = options;
+  const strs = typeof localConfig?.stories === 'function' ? await localConfig.stories(stories) : localConfig?.stories;
+  const relativePatterns = strs?.map(pattern => {
+    if (typeof pattern === 'string') return relative(cwd, join(configFileDir, pattern));
+    return relative(cwd, join(configFileDir, pattern.directory, pattern.files ?? stories[0]));
   });
   const patterns = [
-    ...(config?.entry ?? REST_ENTRY_FILE_PATTERNS),
-    ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : STORIES_FILE_PATTERNS),
+    ...(options.config.entry ?? restEntry),
+    ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : stories),
   ];
-  const entryPatterns = patterns.map(toEntryPattern);
-
-  if (!localConfig || isProduction) return entryPatterns;
 
   const addons = localConfig.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
-  const builder = localConfig?.core?.builder;
-  const builderPackages =
-    builder && /webpack/.test(builder) ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`] : [];
-  const frameworks = localConfig.framework?.name ? [localConfig.framework.name] : [];
+  const builder =
+    localConfig?.core?.builder &&
+    (typeof localConfig.core.builder === 'string' ? localConfig.core.builder : localConfig.core.builder.name);
+  const builderPackages = builder
+    ? builder.startsWith('webpack')
+      ? [`@storybook/builder-${builder}`, `@storybook/manager-${builder}`]
+      : [builder]
+    : [];
 
-  return [...entryPatterns, ...addons, ...builderPackages, ...frameworks];
+  const framework = typeof localConfig.framework === 'string' ? localConfig.framework : localConfig.framework?.name;
+  const frameworks = framework ? [framework] : [];
+
+  return [
+    ...patterns.map(id => toEntry(id)),
+    ...addons.map(id => toDeferResolve(id)),
+    ...builderPackages.map(id => toDependency(id)),
+    ...frameworks.map(id => toDependency(id)),
+  ];
 };
 
-export const findDependencies = timerify(findStorybookDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  entry,
+  project,
+  resolveConfig,
+} satisfies Plugin;

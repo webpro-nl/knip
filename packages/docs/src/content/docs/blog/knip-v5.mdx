@@ -1,0 +1,198 @@
+---
+title: Announcing Knip v5
+date: 2024-02-10
+sidebar:
+  order: 3
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+_Published: 2024-02-10_
+
+Today brings the smallest major release so far. Tiny yet mighty!
+
+Below are two cases to demonstrate the change in how unused exports are
+reported.
+
+## Case 1
+
+The first case shows two exports with a namespaced import that references one of
+those exports explicitly:
+
+```ts title="knip.js"
+export const version = 'v5';
+export const getRocket = () => '🚀';
+```
+
+```ts title="index.js"
+import * as NS from './knip.js';
+
+console.log(NS.version);
+```
+
+In this case we see that `getRocket` is an unused export.
+
+Previously it would go into the "Unused exports in namespaces" category
+(`nsExports`). This issue has been moved to the "Unused exports" category
+(`exports`).
+
+## Case 2
+
+The second case is similar, but only the imported namespace itself is
+referenced. None of the individual exports is referenced:
+
+```ts title="index.js"
+import * as NS from './knip.js';
+import send from 'stats';
+
+send(NS);
+```
+
+Are the `version` and `getRocket` exports used? We can't know. The same is true
+for the spread object pattern:
+
+```ts title="index.js"
+import * as NS from './knip.js';
+
+const Spread = { ...NS };
+```
+
+Previously those exports would go into the "Unused exports in namespaces"
+category. This is still the case, but this category is no longer enabled by
+default.
+
+## Include unused exports in namespaces
+
+To enable this type of issues in Knip v5, add this argument to the command:
+
+```shell
+knip --include nsExports
+```
+
+Or in your configuration file:
+
+```json title="knip.json"
+{
+  "include": ["nsExports", "nsTypes"]
+}
+```
+
+Now `version` and `getRocket` will be reported as "Unused exports in
+namespaces".
+
+Note that `nsExports` and `nsTypes` are split for more granular control.
+
+## Handling exports in namespaced imports
+
+You have a few options to handle namespaced imports when it comes to unused
+exports.
+
+### 1. Use named imports
+
+Regardless of whether `nsExports` is enabled or not, it's often good practice to
+replace the namespaced imports with named imports:
+
+```ts title="index.js"
+import { version, getRocket } from './knip.js';
+
+send({ version, getRocket });
+```
+
+Whenever possible, explicit over implicit is often the better choice.
+
+### 2. Standardized JSDoc tags
+
+Using one of the available JSDoc tags like `@public` or `@internal`:
+
+```ts title="knip.js"
+export const version = 'v5';
+/** @public */
+export const getRocket = () => '🚀';
+```
+
+Assuming only imported using a namespace (like in the example cases above), this
+will exclude the `getRocket` export from the report, even though it isn't
+explicitly referenced.
+
+### 3. Arbitrary JSDoc tags
+
+Another solution is to tag individual exports arbitrarily:
+
+```ts title="knip.js"
+export const version = 'v5';
+/** @launch */
+export const getRocket = () => '🚀';
+```
+
+And then exclude the tag like so:
+
+```shell
+$ knip --experimental-tags=-launch
+Exports in used namespace (1)
+version  NS  unknown  knip.js:1:1
+```
+
+Assuming only imported using a namespace (like in the example cases above), this
+will exclude the `getRocket` export from the report, even though it isn't
+explicitly referenced.
+
+## A better default
+
+I believe this behavior in v5 is the better default: have all exports you want
+to know about in a single category, and those you probably want to ignore in
+another that's disabled by default.
+
+Before the [v4 refactoring][1], this would be a lot harder to implement. That
+refactoring turns out to be a better investment than expected. Combined with a
+better understanding of how people write code and use Knip, this change is a
+natural iteration.
+
+Why the major bump? It's not breaking for the large majority of users, but for
+some it may be breaking. For instance when relying on the [JSON reporter][2],
+other reporter output, or custom [preprocessing][3]. It's not a bug fix, it's
+not a new feature, but since semver is all about setting expectations I feel the
+change is large enough to warrant a major bump.
+
+## Let's Go!
+
+What are you waiting for? Start using Knip v5 today!
+
+<Tabs syncKey="pm">
+  <TabItem label="npm">
+
+    ```shell
+    npm install -D knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm add -D knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="bun">
+
+    ```shell
+    bun add -D knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="yarn">
+
+    ```shell
+    yarn add -D knip
+    ```
+
+  </TabItem>
+</Tabs>
+
+Remember, Knip it before you ship it! Have a great day ☀️
+
+[1]: ../blog/slim-down-to-speed-up.md
+[2]: ../features/reporters.md#json
+[3]: ../features/reporters.md#preprocessors

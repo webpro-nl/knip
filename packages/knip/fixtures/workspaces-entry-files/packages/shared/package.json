@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspaces-entry-files__shared",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts"
+}

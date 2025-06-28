@@ -1,34 +1,35 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
+import type { ChangesetsConfig } from './types.js';
 
 // https://github.com/changesets/changesets/blob/main/docs/config-file-options.md
 
-type ChangesetsConfig = {
-  changelog: string | string[];
+const title = 'Changesets';
+
+const enablers = ['@changesets/cli'];
+
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+
+const isRootOnly = true;
+
+const config = ['.changeset/config.json'];
+
+const resolveConfig: ResolveConfig<ChangesetsConfig> = config => {
+  return (
+    Array.isArray(config.changelog)
+      ? [config.changelog[0]]
+      : typeof config.changelog === 'string'
+        ? [config.changelog]
+        : []
+  ).map(id => toDependency(id));
 };
 
-export const NAME = 'Changesets';
-
-/** @public */
-export const ENABLERS = ['@changesets/cli'];
-
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
-
-export const CONFIG_FILE_PATTERNS = ['.changeset/config.json'];
-
-const findChangesetsDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
-  if (isProduction) return [];
-
-  const localConfig: ChangesetsConfig | undefined = await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return Array.isArray(localConfig.changelog)
-    ? [localConfig.changelog[0]]
-    : typeof localConfig.changelog === 'string'
-      ? [localConfig.changelog]
-      : [];
-};
-
-export const findDependencies = timerify(findChangesetsDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  isRootOnly,
+  config,
+  resolveConfig,
+} satisfies Plugin;

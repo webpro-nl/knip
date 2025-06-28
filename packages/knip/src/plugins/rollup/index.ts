@@ -1,23 +1,29 @@
-import { timerify } from '../../util/Performance.js';
+import type { Args } from '../../types/args.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://rollupjs.org/guide/en/#configuration-files
 
-export const NAME = 'Rollup';
+const title = 'Rollup';
 
-/** @public */
-export const ENABLERS = ['rollup'];
+const enablers = ['rollup'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['rollup.config.{js,cjs,mjs,ts}'];
+const entry = ['rollup.config.{js,cjs,mjs,ts}'];
 
-const findRollupDependencies: GenericPluginCallback = async () => {
-  const entryPatterns = ENTRY_FILE_PATTERNS.map(toEntryPattern);
-  return entryPatterns;
+const args: Args = {
+  alias: { plugin: ['p'] },
+  // minimist has an issue with dots like in `--watch.onEnd` so we remap it
+  args: (args: string[]) => args.map(arg => (arg.startsWith('--watch.onEnd') ? `--_exec${arg.slice(13)}` : arg)),
+  fromArgs: ['_exec'],
+  resolve: ['plugin', 'configPlugin'],
 };
 
-export const findDependencies = timerify(findRollupDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  entry,
+  args,
+} satisfies Plugin;

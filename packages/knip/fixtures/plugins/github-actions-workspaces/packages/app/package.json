@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/github-actions-workspaces__app",
+  "scripts": {
+    "stylelint": "stylelint",
+    "hello-world": "yarn run --top-level hello"
+  },
+  "devDependencies": {
+    "stylelint": "*",
+    "goodbye": "*"
+  }
+}

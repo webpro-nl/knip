@@ -1,0 +1,22 @@
+{
+  "name": "@plugins/graphql-codegen-graphql-config2",
+  "scripts": {
+    "codegen": "graphql-codegen"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "*"
+  },
+  "graphql": {
+    "schema": "schema.graphql",
+    "documents": ["src/**/*.tsx", "!src/gql/**/*"],
+    "extensions": {
+      "codegen": {
+        "generates": {
+          "./src/gql/": {
+            "preset": "client"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/workspaces-dts__client",
+  "private": true,
+  "type": "module",
+  "types": "client.d.ts",
+  "dependencies": {
+    "@fixtures/workspaces-dts__shared": "*"
+  }
+}

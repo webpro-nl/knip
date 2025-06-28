@@ -1,33 +1,43 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toProductionEntry } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { TsupConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://paka.dev/npm/tsup/api
+// https://github.com/egoist/tsup/blob/dev/src/load.ts
 
-export const NAME = 'tsup';
+const title = 'tsup';
 
-/** @public */
-export const ENABLERS = ['tsup'];
+const enablers = ['tsup'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = ['tsup.config.js'];
+const config = ['tsup.config.{js,ts,cjs,mjs,json}', 'package.json'];
 
-const findTsupDependencies: GenericPluginCallback = async configFilePath => {
-  let localConfig: TsupConfig | undefined = await load(configFilePath);
-  if (typeof localConfig === 'function') localConfig = await localConfig({});
+const resolveConfig: ResolveConfig<TsupConfig> = async config => {
+  if (typeof config === 'function') config = await config({});
 
-  if (!localConfig) return [];
-
-  const entryPatterns = [localConfig].flat().flatMap(config => {
-    if (!config.entry) return [];
-    if (Array.isArray(config.entry)) return config.entry.map(toEntryPattern);
-    return Object.values(config.entry).map(toEntryPattern);
-  });
+  const entryPatterns = [config]
+    .flat()
+    .flatMap(config => {
+      if (!config.entry) return [];
+      if (Array.isArray(config.entry)) return config.entry;
+      return Object.values(config.entry);
+    })
+    .map(id => toProductionEntry(id, { allowIncludeExports: true }));
 
   return entryPatterns;
 };
 
-export const findDependencies = timerify(findTsupDependencies);
+const args = {
+  config: true,
+};
+
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+  args,
+} satisfies Plugin;

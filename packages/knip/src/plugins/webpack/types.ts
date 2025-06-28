@@ -1,8 +1,9 @@
-import type { Configuration } from 'webpack';
+import type { Configuration, ProvidePlugin } from 'webpack';
 
 type Mode = 'none' | 'development' | 'production';
-export type Env = { production: boolean };
+export type Env = { production: boolean; mode: Mode };
 export type Argv = { mode: Mode };
+export type { ProvidePlugin };
 
 type Configurations = Configuration | Configuration[];
 

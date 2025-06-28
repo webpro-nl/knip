@@ -1,39 +1,40 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { MochaConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://mochajs.org/#configuring-mocha-nodejs
 
-export const NAME = 'Mocha';
+const title = 'Mocha';
 
-/** @public */
-export const ENABLERS = ['mocha'];
+const enablers = ['mocha'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
+const config = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['**/test/*.{js,cjs,mjs}'];
+const entry = ['**/test/*.{js,cjs,mjs}'];
 
-const findMochaDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { config, manifest, isProduction } = options;
-
-  const localConfig: MochaConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.mocha : await load(configFilePath);
-
-  const entryPatterns = (config.entry ?? (localConfig?.spec ? [localConfig.spec].flat() : ENTRY_FILE_PATTERNS)).map(
-    toEntryPattern
-  );
-
-  if (isProduction || !localConfig) return entryPatterns;
-
+const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
+  const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
   const require = localConfig.require ? [localConfig.require].flat() : [];
 
-  return [...require, ...entryPatterns];
+  const inputs: Input[] = [];
+  inputs.push(...entryPatterns.map(id => toEntry(id)));
+  inputs.push(...require.map(id => toDeferResolve(id)));
+  return inputs;
 };
 
-export const findDependencies = timerify(findMochaDependencies);
+const args = {
+  nodeImportArgs: true,
+};
+
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  entry,
+  resolveConfig,
+  args,
+} satisfies Plugin;

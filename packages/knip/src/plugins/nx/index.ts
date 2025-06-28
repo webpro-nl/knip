@@ -1,39 +1,85 @@
+import type { ParsedArgs } from 'minimist';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency, load } from '../../util/plugin.js';
-import type { NxProjectConfiguration } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
+import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
 
-export const NAME = 'Nx';
+const title = 'Nx';
 
-/** @public */
-export const ENABLERS = ['nx', /^@nrwl\//, /^@nx\//];
+const enablers = ['nx', /^@nrwl\//, /^@nx\//];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = ['project.json', '{apps,libs}/**/project.json'];
+const config = ['nx.json', 'project.json', '{apps,libs}/**/project.json', 'package.json'];
 
-const findNxDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfig => {
+  const targetsDefault = localConfig.targetDefaults
+    ? Object.keys(localConfig.targetDefaults)
+        // Ensure we only grab executors from plugins instead of manual targets
+        // Limiting to scoped packages to ensure we don't have false positives
+        .filter(it => it.includes(':') && it.startsWith('@'))
+        .map(it => it.split(':')[0])
+    : [];
 
-  if (isProduction) return [];
+  const plugins =
+    localConfig.plugins && Array.isArray(localConfig.plugins)
+      ? localConfig.plugins
+          .map(value => (typeof value === 'string' ? value : value.plugin))
+          .filter(value => value !== undefined)
+      : [];
 
-  const localConfig: NxProjectConfiguration | undefined = await load(configFilePath);
+  const generators = localConfig.generators
+    ? Object.keys(localConfig.generators)
+        .filter(value => value !== undefined)
+        .map(value => value.split(':')[0])
+    : [];
 
-  if (!localConfig) return [];
+  return compact([...targetsDefault, ...plugins, ...generators]).map(id => toDependency(id));
+};
 
-  const targets = localConfig.targets ? Object.values(localConfig.targets) : [];
+const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = async (localConfig, options) => {
+  const { configFileName } = options;
+
+  if (configFileName === 'nx.json') {
+    return findNxDependenciesInNxJson(localConfig as NxConfigRoot, options);
+  }
+
+  const config = localConfig as NxProjectConfiguration;
+
+  const targets = config.targets ? Object.values(config.targets) : [];
 
   const executors = targets
     .map(target => target?.executor)
     .filter(executor => executor && !executor.startsWith('.'))
     .map(executor => executor?.split(':')[0]);
-  const scripts = targets
-    .filter(target => target.executor === 'nx:run-commands')
-    .flatMap(target => target.options?.commands ?? (target.options?.command ? [target.options.command] : []));
-  const dependencies = getDependenciesFromScripts(scripts, { cwd, manifest });
 
-  return compact([...executors, ...dependencies]);
+  const scripts = targets
+    .filter(target => target.executor === 'nx:run-commands' || target.command)
+    .flatMap(target => {
+      if (target.command) return [target.command];
+      if (target.options?.command) return [target.options.command];
+      if (target.options?.commands)
+        return target.options.commands.map(commandConfig =>
+          typeof commandConfig === 'string' ? commandConfig : commandConfig.command
+        );
+      return [];
+    });
+
+  const inputs = options.getInputsFromScripts(scripts);
+
+  return compact([...executors, ...inputs]).map(id => (typeof id === 'string' ? toDependency(id) : id));
 };
 
-export const findDependencies = timerify(findNxDependencies);
+const args = {
+  fromArgs: (parsed: ParsedArgs) => (parsed._[0] === 'exec' ? parsed._.slice(1) : []),
+};
+
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+  args,
+} satisfies Plugin;

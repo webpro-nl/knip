@@ -1,0 +1,16 @@
+{
+  "name": "@plugins/angular2",
+  "scripts": {
+    "ng": "ng"
+  },
+  "dependencies": {
+    "zone.js": "*"
+  },
+  "devDependencies": {
+    "@angular/cli": "*",
+    "@angular/ssr": "*",
+    "@angular-builders/custom-esbuild": "*",
+    "@angular-devkit/build-angular": "*",
+    "karma": "*"
+  }
+}

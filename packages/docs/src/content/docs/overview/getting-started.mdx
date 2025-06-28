@@ -8,13 +8,93 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Requirements
 
-Knip v3 requires Node.js v18.6 or higher. Or Bun.
+Knip v5 requires Node.js v18.18.0 or higher. Or Bun.
+
+Want to try Knip without installation? Visit [the playground][1].
 
 ## Installation
 
-The recommended way to install Knip is by using your package manager:
+This is the easiest and recommended way to install Knip:
 
-<Tabs>
+<Tabs syncKey="pm">
+  <TabItem label="npm">
+
+    ```shell
+    npm init @knip/config
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm create @knip/config
+    ```
+
+  </TabItem>
+
+  <TabItem label="bun">
+
+    ```shell
+    bun create @knip/config
+    ```
+
+  </TabItem>
+
+  <TabItem label="yarn">
+
+    ```shell
+    yarn create @knip/config
+    ```
+
+  </TabItem>
+</Tabs>
+
+Now you can run Knip to lint your project:
+
+<Tabs syncKey="pm">
+  <TabItem label="npm">
+
+    ```shell
+    npm run knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="bun">
+
+    ```shell
+    bun knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="yarn">
+
+    ```shell
+    yarn knip
+    ```
+
+  </TabItem>
+</Tabs>
+
+Knip will lint your project and report unused dependencies, exports and files.
+
+You can skip the rest of this page and go to [configuration][2].
+
+## Manual
+
+Alternatively, manually install Knip using your package manager:
+
+<Tabs syncKey="pm">
   <TabItem label="npm">
 
     ```shell
@@ -22,6 +102,7 @@ The recommended way to install Knip is by using your package manager:
     ```
 
   </TabItem>
+
   <TabItem label="pnpm">
 
     ```shell
@@ -29,6 +110,7 @@ The recommended way to install Knip is by using your package manager:
     ```
 
   </TabItem>
+
   <TabItem label="bun">
 
     ```shell
@@ -36,6 +118,7 @@ The recommended way to install Knip is by using your package manager:
     ```
 
   </TabItem>
+
   <TabItem label="yarn">
 
     ```shell
@@ -46,10 +129,10 @@ The recommended way to install Knip is by using your package manager:
 </Tabs>
 
 Knip uses `typescript` and ` @types/node` as peer dependencies to increase
-compatibility with your project (they are likely already in your `node_modules`
-anyway).
+compatibility with your project. No worries, they're probably in your
+`node_modules` already.
 
-Add a `knip` script to your `package.json`:
+Then add a `knip` script to your `package.json`:
 
 ```json title="package.json"
 {
@@ -60,48 +143,11 @@ Add a `knip` script to your `package.json`:
 }
 ```
 
-## Run Knip
+## Without installation
 
-Now you can run Knip to lint your project:
+To run Knip without adding it to your project:
 
-<Tabs>
-  <TabItem label="npm">
-
-    ```shell
-    npm run knip
-    ```
-
-  </TabItem>
-  <TabItem label="pnpm">
-
-    ```shell
-    pnpm knip
-    ```
-
-  </TabItem>
-  <TabItem label="bun">
-
-    ```shell
-    bun knip
-    ```
-
-  </TabItem>
-  <TabItem label="yarn">
-
-    ```shell
-    yarn knip
-    ```
-
-  </TabItem>
-</Tabs>
-
-Knip will lint your project and output unused files, dependencies and exports.
-
-## Without Installation
-
-Alternatively, try Knip without adding it to your project:
-
-<Tabs>
+<Tabs syncKey="pm">
   <TabItem label="npm">
 
     ```shell
@@ -109,6 +155,7 @@ Alternatively, try Knip without adding it to your project:
     ```
 
   </TabItem>
+
   <TabItem label="pnpm">
 
     ```shell
@@ -116,6 +163,7 @@ Alternatively, try Knip without adding it to your project:
     ```
 
   </TabItem>
+
   <TabItem label="bun">
 
     ```shell
@@ -124,3 +172,9 @@ Alternatively, try Knip without adding it to your project:
 
   </TabItem>
 </Tabs>
+
+In this scenario `typescript` and `@types/node` are expected to be installed
+already.
+
+[1]: /playground
+[2]: ./configuration.md

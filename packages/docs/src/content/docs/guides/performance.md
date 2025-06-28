@@ -8,43 +8,23 @@ improve it.
 Knip does not want to tell you how to structure files or how to write your code,
 but it might still be good to understand inefficient patterns for Knip.
 
-## Star Imports and Barrel Files
+Use the `--debug` and `--performance` flags to find potential bottlenecks.
 
-Knip builds up a simplified graph of imports and exports and can quickly match
-them against each other to find unused exports. However, there might not be a
-literal match for exports that are imported using the `import *` syntax. In this
-case, Knip will ask the TypeScript compiler to find references, which is a lot
-more work. More levels of re-exports and star imports are more expensive.
+## Ignoring files
 
-Barrel files with re-exports look like this:
+Files matching the `ignore` patterns are not excluded from the analysis. They're
+just not printed in the report. Use negated `entry` and `project` patterns to
+exclude files from the analysis.
 
-```ts
-export * from './model';
-export * from './util';
-```
+Read [project file configuration][1] for more details and examples. Improving
+configuration may have a significant impact on performance.
 
-Example of a star import:
-
-```ts
-import * as MyNamespace from './helpers';
-```
-
-Use the `--performance` flag to see how often [`findReferences`][1] is used and
-how much time is spent there.
-
-This article explains the issue in more detail: [Speeding up the JavaScript
-ecosystem - The barrel file debacle][2]. The conclusion: "Get rid of all barrel
-files".
-
-## Workspace Sharing
+## Workspace sharing
 
 Knip shares files from separate workspaces if the configuration in
-`tsconfig.json` allows this. This reduces memory consumption and run duration.
-The relevant compiler options are `baseUrl` and `paths`, and a workspace is
-shared if the following is true:
-
-- The `compilerOptions.baseUrl` is not set explicitly
-- There are no conflicting keys in `compilerOptions.paths`
+`tsconfig.json` allows this. This aims to reduce memory consumption and run
+duration. Relevant compiler options include `baseUrl`, `paths` and
+`moduleResolution`.
 
 With the `--debug` flag you can see how many programs Knip uses. Look for
 messages like this:
@@ -61,77 +41,53 @@ messages like this:
 ...
 ```
 
-The first number in `P1/1` is the number of the program, the second number
-indicates additional entry files were found in the previous round so it does
-another round of analysis on those files.
+The first number in `P1/1` is the number of the programs, the second number
+indicates additional entry files were found so it does another round of analysis
+on those files.
 
-## findReferences
+Use [--isolate-workspaces][2] to disable this behavior. This is usually not
+necessary, but more of an escape hatch in cases with memory usage issues or
+incompatible `compilerOptions` across workspaces. Workspaces are analyzed
+sequentially to spread out memory usage more evenly, which may prevent crashes
+on large monorepos.
 
-The `findReferences` function (from the TypeScript Language Service) is invoked
-for exports that are imported using the `import *` syntax, and for each class
-and enum member. Use the `--performance` flag to see how many times this
-function is invoked and how much time is spent there:
+## Language Service
 
-```sh
-knip --performance
-```
+Knip does not install the TypeScript Language Service (LS) by default. This is
+expensive, as TypeScript needs to set up symbols and caching for the rather slow
+`findReferences` function.
 
-The first invocation (per program) is especially expensive, as TypeScript sets
-up symbols and caching.
+There are two cases that enforce Knip to install the LS.
 
-If you have lots of classes or enums with many members in your codebase, Knip
-can run faster by excluding (one of) them from the report:
+### 1. Class members
 
-```sh
-knip --performance --exclude classMembers,enumMembers
-```
+The `findReferences` function is used to find unused members of imported classes
+(i.e. when the issue type `classMembers` is included).
 
-When the codebase contains namespaced imports, the following command will give
-incomplete results and is not recommended. But for the sake of completeness in
-this topic, calls to `findReferences` can be (mostly) prevented:
+### 2. Include external type definitions
 
-```sh
-knip --performance --exclude classMembers,enumMembers,nsTypes,nsExports
-```
+When [`--include-libs`][3] is enabled, Knip enables loading type definitions of
+external dependencies. This will also install the LS to access its
+`findReferences` function. It acts as an extra line of defense: only exports
+that weren't referenced to during default procedure go through this.
 
-This should approach the performance without namespaced imports (see [star
-imports and barrel files][3]).
+## Metrics
 
-## GitIgnore
-
-Knip looks up `.gitignore` files and uses them to filter out matching entry and
-project files. This increases correctness, but it slows down finding files using
-glob patterns and in some cases significantly. Your project may have multiple
-`.gitignore` files across all folders.
-
-You might want see if it's possible to disable that with `--no-gitignore` and
-enjoy a performance boost.
-
-To help determine whether this trade-off might be worth it for you, first check
-the difference in unused files:
+Use [the `--performance` flag][4] to see how many times potentially expensive
+functions (e.g. `findReferences`) are invoked and how much time is spent in
+those functions. Example usage:
 
 ```sh
-diff <(knip --no-gitignore --include files) <(knip --include files)
+knip --include classMembers --performance
 ```
 
-And to measure the difference of this flag in seconds:
+## A last resort
 
-```sh
-SECONDS=0; knip > /dev/null; t1=$SECONDS; SECONDS=0; knip --no-gitignore > /dev/null; t2=$SECONDS; echo "Difference: $((t1 - t2)) seconds"
-```
+In case Knip is unbearably slow (or even crashes), you could resort to [lint
+individual workspaces][5].
 
-If there is no difference in unused files, and runs are significantly faster,
-you could consider using the `--no-gitignore` flag.
-
-Analysis on a sample large project went down from 33 to 9 seconds (that's >70%
-faster).
-
-## A Last Resort
-
-In case Knip is unbearable slow (or even crashes), you could resort to [lint
-individual workspaces][4].
-
-[1]: #findreferences
-[2]: https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
-[3]: #star-imports-and-barrel-files
-[4]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[1]: ./configuring-project-files.md
+[2]: ../reference/cli.md#--isolate-workspaces
+[3]: ../guides/handling-issues.mdx#external-libraries
+[4]: ../reference/cli.md#--performance
+[5]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace

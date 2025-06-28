@@ -1,8 +1,9 @@
 {
+  "name": "@plugins/lint-staged",
+  "devDependencies": {
+    "lint-staged": "*"
+  },
   "lint-staged": {
-    "*.js": [
-      "eslint",
-      "prettier --write"
-    ]
+    "*.js": ["eslint", "prettier --write"]
   }
 }

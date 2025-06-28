@@ -1,0 +1,157 @@
+---
+title: Announcing Knip v4
+date: 2024-01-16
+sidebar:
+  order: 4
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+_Published: 2024-01-16_
+
+I'm happy to announce that Knip v4 is available!
+
+The work took over a month and the process of [slimming down to speed up][1]
+ended up really well: significant faster runs and reduced memory usage. In the
+meantime, v3 continued to receive more contributions, plugins and bug fixes.
+
+## Highlights
+
+Compared to v3, here are the highlights:
+
+- Performance: significant speed bump (up to 80%!)
+- Performance: globbing in combo with `.gitignore` is a lot more efficient
+- Configuration: [built-in compilers][2] (for Astro, MDX, Svelte & Vue)
+- The `ignore` option has been improved
+- Internal refactoring to serialize data for future improvements like caching.
+
+The actual performance win in your projects depends on various factors like size
+and complexity.
+
+## Major Changes
+
+The changes have been tested against various repositories, but it's possible
+that you will encounter false positives caused by the major refactoring that has
+been done. If you do, [please report][3]!
+
+### Unused Class Members
+
+Finding unused class members is no longer enabled by default. Here's why it's
+now opt-in:
+
+- When using Knip for the first time on a large repository it can crash after a
+  while with an out of memory error. This is a terrible experience.
+- Plenty of codebases don't use classes at all, keeping TS programs in memory is
+  a waste of resources.
+- Many configurations already exclude `classMembers` from the output.
+
+Enable unused class members by using the CLI argument or the configuration
+option:
+
+```shell
+knip --include classMembers
+```
+
+```json
+{
+  "include": ["classMembers"]
+}
+```
+
+Now that unused class members is opt-in and better organized within Knip, it
+might be interesting to start looking at opt-ins for other unused members, such
+as those of types and interfaces.
+
+By the way, enum members are "cheap" with the v4 refactor, so those are still
+included by default.
+
+### Compilers
+
+You can remove the `compilers` option from your configuration. Since you can
+override them, your custom compilers can stay where they are. This also means
+that you can go back from `knip.ts` to `knip.json` if you prefer.
+
+### Ignore Files
+
+The `ignore` option accepted patterns like `examples/`, but if you want to
+ignore the files inside this folder you should update to globs like
+`examples/**`.
+
+## What's Next?
+
+The refactoring for this release opens the door to more optimizations, such as
+caching. I'm also very excited to see how deeper integrations such as in GitHub
+Actions or IDEs like VS Code or WebStorm may further develop.
+
+Remember, if you are you using Knip at work your company can [sponsor me][4]!
+
+## One More Thing...
+
+An idea I've been toying with is "tagged exports". The idea is that you can tag
+exports in a JSDoc comment. The tag does not need to be part of the JSDoc or
+TSDoc spec. For example:
+
+```ts
+/** @custom */
+export const myExport = 1;
+```
+
+Then, include or exclude such tagged exports from the report like so:
+
+```shell
+knip --experimental-tags=+custom
+knip --experimental-tags=-custom,-internal
+```
+
+This way, you can either focus on or ignore specific tagged exports with tags
+you define yourself. This also works for individual class or enum members.
+
+Once this feature is intuitive and stable, the `experimental` flag will be
+removed and option(s) added to the Knip configuration file. The docs are in the
+[CLI reference][5].
+
+## Let's Go!
+
+What are you waiting for? Start using Knip v4 today!
+
+<Tabs syncKey="pm">
+  <TabItem label="npm">
+
+    ```shell
+    npm install -D knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm add -D knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="bun">
+
+    ```shell
+    bun add -D knip
+    ```
+
+  </TabItem>
+
+  <TabItem label="yarn">
+
+    ```shell
+    yarn add -D knip
+    ```
+
+  </TabItem>
+</Tabs>
+
+Remember, Knip it before you ship it! Have a great day ☀️
+
+[1]: ./slim-down-to-speed-up.md
+[2]: ../features/compilers.md
+[3]: ../guides/issue-reproduction
+[4]: https://github.com/sponsors/webpro
+[5]: ../reference/cli#--experimental-tags

@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/cspell",
+  "devDependencies": {
+    "cspell": "*"
+  }
+}

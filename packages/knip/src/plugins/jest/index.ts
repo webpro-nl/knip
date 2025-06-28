@@ -1,67 +1,63 @@
-import { basename, join, isInternal, toAbsolute, dirname } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { toEntryPattern } from '../../util/protocols.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
+import { isInternal, join, toAbsolute } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
+import { getReportersDependencies, resolveExtensibleConfig } from './helpers.js';
 import type { JestConfig, JestInitialOptions } from './types.js';
-import type {
-  IsPluginEnabledCallback,
-  GenericPluginCallback,
-  GenericPluginCallbackOptions,
-} from '../../types/plugins.js';
 
 // https://jestjs.io/docs/configuration
 
-export const NAME = 'Jest';
+const title = 'Jest';
 
-/** @public */
-export const ENABLERS = ['jest'];
+const enablers = ['jest'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies, manifest }) =>
-  hasDependency(dependencies, ENABLERS) || Boolean(manifest.name?.startsWith('jest-presets'));
+const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
+  hasDependency(dependencies, enablers) || Boolean(manifest.name?.startsWith('jest-presets'));
 
-export const CONFIG_FILE_PATTERNS = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
+const config = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
+const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
-const resolveExtensibleConfig = async (configFilePath: string) => {
-  const config = await load(configFilePath);
+const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', ...mocks];
+
+const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
+  const { configFileDir } = options;
+
   if (config?.preset) {
     const { preset } = config;
     if (isInternal(preset)) {
-      const presetConfigPath = toAbsolute(preset, dirname(configFilePath));
+      const presetConfigPath = toAbsolute(preset, configFileDir);
       const presetConfig = await resolveExtensibleConfig(presetConfigPath);
-      Object.assign(config, presetConfig);
+      config = Object.assign({}, presetConfig, config);
     }
   }
-  return config;
-};
-
-const resolveDependencies = (config: JestInitialOptions, options: GenericPluginCallbackOptions): string[] => {
-  const { isProduction } = options;
-
-  const entryPatterns = (options.config?.entry ?? config.testMatch ?? ENTRY_FILE_PATTERNS).map(toEntryPattern);
-
-  if (isProduction) return entryPatterns;
 
   const presets = (config.preset ? [config.preset] : []).map(preset =>
     isInternal(preset) ? preset : join(preset, 'jest-preset')
   );
-  const projects = Array.isArray(config.projects)
-    ? config.projects.map(config => (typeof config === 'string' ? config : resolveDependencies(config, options))).flat()
-    : [];
+
+  const projects = [];
+  for (const project of config.projects ?? []) {
+    if (typeof project === 'string') {
+      projects.push(project);
+    } else {
+      const dependencies = await resolveDependencies(project, options);
+      for (const dependency of dependencies) projects.push(dependency);
+    }
+  }
+
   const runner = config.runner ? [config.runner] : [];
-  const environments = config.testEnvironment === 'jsdom' ? ['jest-environment-jsdom'] : [];
+  const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
+  const environments =
+    config.testEnvironment === 'jsdom'
+      ? ['jest-environment-jsdom']
+      : config.testEnvironment
+        ? [config.testEnvironment]
+        : [];
   const resolvers = config.resolver ? [config.resolver] : [];
-  const reporters = config.reporters
-    ? config.reporters
-        .map(reporter => (typeof reporter === 'string' ? reporter : reporter[0]))
-        .filter(reporter => !['default', 'github-actions', 'summary'].includes(reporter))
-    : [];
+  const reporters = getReportersDependencies(config, options);
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
-  const setupFiles = config.setupFiles ?? [];
-  const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
   const transform = config.transform
     ? Object.values(config.transform).map(transform => (typeof transform === 'string' ? transform : transform[0]))
     : [];
@@ -70,14 +66,23 @@ const resolveDependencies = (config: JestInitialOptions, options: GenericPluginC
       ? Object.values(config.moduleNameMapper).map(mapper => (typeof mapper === 'string' ? mapper : mapper[0]))
       : []
   ).filter(value => !/\$[0-9]/.test(value));
+
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
+  const snapshotSerializers = config.snapshotSerializers ?? [];
+  const testSequencer = config.testSequencer ? [config.testSequencer] : [];
+
+  // const resolve = (specifier: string) => resolveEntry(options, specifier);
+  const setupFiles = config.setupFiles ?? [];
+  const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
+  const globalSetup = config.globalSetup ? [config.globalSetup] : [];
+  const globalTeardown = config.globalTeardown ? [config.globalTeardown] : [];
 
   return [
-    ...entryPatterns,
     ...presets,
     ...projects,
     ...runner,
+    ...runtime,
     ...environments,
     ...resolvers,
     ...reporters,
@@ -88,28 +93,45 @@ const resolveDependencies = (config: JestInitialOptions, options: GenericPluginC
     ...moduleNameMapper,
     ...testResultsProcessor,
     ...snapshotResolver,
-  ];
+    ...snapshotSerializers,
+    ...testSequencer,
+    ...globalSetup,
+    ...globalTeardown,
+  ].map(id => (typeof id === 'string' ? toDeferResolve(id) : id));
 };
 
-const findJestDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, cwd } = options;
-
-  let localConfig: JestConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.jest : await resolveExtensibleConfig(configFilePath);
-
+const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {
+  const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
+  const rootDir = localConfig.rootDir ?? configFileDir;
+  const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
 
-  // Normally we should bail out here, but to avoid duplication and keep it easy we carry on with fake local config
-  if (!localConfig) localConfig = {};
+  const inputs = await resolveDependencies(localConfig, options);
 
-  const rootDir = localConfig.rootDir ? join(dirname(configFilePath), localConfig.rootDir) : dirname(configFilePath);
+  const entries = localConfig.testMatch
+    ? localConfig.testMatch.map(replaceRootDir).map(id => toEntry(id))
+    : entry.map(id => toEntry(id));
 
-  const replaceRootDir = (name: string) => (name.includes('<rootDir>') ? name.replace(/<rootDir>/, rootDir) : name);
+  if (localConfig.testMatch && !options.config.entry) entries.push(...mocks.map(id => toEntry(id)));
 
-  const dependencies = resolveDependencies(localConfig, options);
+  const result = inputs.map(dependency => {
+    dependency.specifier = replaceRootDir(dependency.specifier);
+    return dependency;
+  });
 
-  const matchCwd = new RegExp('^' + toEntryPattern(cwd) + '/');
-  return dependencies.map(replaceRootDir).map(dependency => dependency.replace(matchCwd, toEntryPattern('')));
+  return entries.concat(result);
 };
 
-export const findDependencies = timerify(findJestDependencies);
+const args = {
+  config: true,
+};
+
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  entry,
+  resolveConfig,
+  args,
+} satisfies Plugin;

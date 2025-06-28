@@ -8,7 +8,10 @@ Knip provides the following built-in reporters:
 
 - `codeowners`
 - `compact`
-- `json`
+- [`disclosure`][1]
+- [`json`][2]
+- [`markdown`][3]
+- [`codeclimate`][4]
 - `symbol` (default)
 
 Example usage:
@@ -17,7 +20,7 @@ Example usage:
 knip --reporter compact
 ```
 
-## JSON
+### JSON
 
 The built-in `json` reporter output is meant to be consumed by other tools. It
 reports in JSON format with unused `files` and `issues` as an array with one
@@ -30,8 +33,8 @@ object per file structured like this:
     {
       "file": "package.json",
       "owners": ["@org/admin"],
-      "dependencies": ["jquery", "moment"],
-      "devDependencies": [],
+      "dependencies": [{ "name": "jquery", "line": 5, "col": 6, "pos": 71 }],
+      "devDependencies": [{ "name": "lodash", "line": 9, "col": 6, "pos": 99 }],
       "unlisted": [{ "name": "react" }, { "name": "@org/unresolved" }],
       "exports": [],
       "types": [],
@@ -44,7 +47,7 @@ object per file structured like this:
       "devDependencies": [],
       "binaries": [],
       "unresolved": [
-        { "name": "./unresolved", "line": 8, "col": 23, "pos": 403 }
+        { "name": "./unresolved", "line": 8, "col": 23, "pos": 407 }
       ],
       "exports": [{ "name": "unusedExport", "line": 1, "col": 14, "pos": 13 }],
       "types": [
@@ -69,17 +72,125 @@ object per file structured like this:
 }
 ```
 
-The keys match the [reported issue types][1]. Example usage:
+The keys match the [reported issue types][5]. Example usage:
 
 ```sh
 knip --reporter json
 ```
 
+### Markdown
+
+The built-in `markdown` reporter output is meant to be saved to a Markdown file.
+This allows following the changes in issues over time. It reports issues in
+Markdown tables separated by issue types as headings, for example:
+
+```md
+# Knip report
+
+## Unused files (1)
+
+- src/unused.ts
+
+## Unlisted dependencies (2)
+
+| Name            | Location          | Severity |
+| :-------------- | :---------------- | :------- |
+| unresolved      | src/index.ts:8:23 | error    |
+| @org/unresolved | src/index.ts:9:23 | error    |
+
+## Unresolved imports (1)
+
+| Name         | Location           | Severity |
+| :----------- | :----------------- | :------- |
+| ./unresolved | src/index.ts:10:12 | error    |
+```
+
+### Disclosure
+
+This reporter is useful for sharing large reports. Groups of issues are rendered
+in a closed state initially. The reporter renders this:
+
+````text
+$ knip --reporter disclosure
+
+<details>
+<summary>Unused files (2)</summary>
+
+```
+unused.ts
+dangling.js
+```
+
+</details>
+
+<details>
+<summary>Unused dependencies (2)</summary>
+
+```
+unused-dep     package.json
+my-package     package.json
+```
+
+</details>
+````
+
+The above can be copy-pasted where HTML and Markdown is supported, such as a
+GitHub issue or pull request, and renders like so:
+
+<details>
+  <summary>Unused files (2)</summary>
+
+```
+unused.ts
+dangling.js
+```
+
+</details>
+
+<details>
+  <summary>Unused dependencies (2)</summary>
+
+```
+unused-dep     package.json
+my-package     package.json
+```
+
+</details>
+
+### CodeClimate
+
+The built-in `codeclimate` reporter generates output in the Code Climate Report
+JSON format. Example usage:
+
+```text
+$ knip --reporter codeclimate
+
+[
+  {
+    "type": "issue",
+    "check_name": "Unused exports",
+    "description": "isUnused",
+    "categories": ["Bug Risk"],
+    "location": {
+      "path": "path/to/file.ts",
+      "positions": {
+        "begin": {
+          "line": 6,
+          "column": 1
+        }
+      }
+    }
+    "severity": "major",
+    "fingerprint": "e9789995c1fe9f7d75eed6a0c0f89e84",
+  }
+]
+```
+
 ## Custom Reporters
 
-When the provided built-in reporters are not quite sufficient, a custom local
-reporter can be implemented or an external reporter can be used. Multiple
-reporters can be used at once by repeating the `--reporter` argument.
+When the provided built-in reporters are not sufficient, a custom local reporter
+can be implemented or an external reporter can be used. Multiple reporters can
+be used at once by repeating the `--reporter` argument.
 
 The results are passed to the function from its default export and can be used
 to write issues to `stdout`, a JSON or CSV file, or sent to a service. It
@@ -90,13 +201,15 @@ supports a local JavaScript or TypeScript file or an external dependency.
 The default export of the reporter should be a function with this interface:
 
 ```ts
-type Reporter = async (options: ReporterOptions) => void;
+type Reporter = async (options: ReporterOptions): void;
 
 type ReporterOptions = {
   report: Report;
   issues: Issues;
+  counters: Counters;
   configurationHints: ConfigurationHints;
-  noConfigHints: boolean;
+  isDisableConfigHints: boolean;
+  isTreatConfigHintsAsErrors: boolean;
   cwd: string;
   isProduction: boolean;
   isShowProgress: boolean;
@@ -134,15 +247,18 @@ function of the `main` script (default: `index.js`) will be invoked with the
 
 ## Preprocessors
 
-A preprocessor is a function that receives the results and should return data in
-the same shape/structure (unless you pass it to only your own reporter). Just
-like reporters, use e.g. `--preprocessor ./my-preprocessor` from the command
-line (can be repeated).
+A preprocessor is a function that runs after the analysis is finished. It
+receives the results from the analysis and should return data in the same
+shape/structure (unless you pass it to only your own reporter).
+
+The data goes through the preprocessors before the final data is passed to the
+reporters. There are no built-in preprocessors. Just like reporters, use e.g.
+`--preprocessor ./my-preprocessor` from the command line (can be repeated).
 
 The default export of the preprocessor should be a function with this interface:
 
 ```ts
-type Preprocessor = async (options: ReporterOptions) =>  ReporterOptions;
+type Preprocessor = async (options: ReporterOptions) => ReporterOptions;
 ```
 
 Like reporters, you can use local JavaScript or TypeScript files and external
@@ -167,4 +283,8 @@ Example usage:
 knip --preprocessor ./preprocess.ts
 ```
 
-[1]: ../reference/issue-types.md
+[1]: #disclosure
+[2]: #json
+[3]: #markdown
+[4]: #codeclimate
+[5]: ../reference/issue-types.md

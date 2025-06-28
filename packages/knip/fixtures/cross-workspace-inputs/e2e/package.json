@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/cross-workspace-inputs__e2e",
+  "devDependencies": {
+    "@playwright/test": "*"
+  }
+}

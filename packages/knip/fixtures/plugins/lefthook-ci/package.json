@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/lefthook-ci",
+  "name": "@plugins/lefthook-ci",
   "scripts": {},
   "devDependencies": {
     "@evilmartians/lefthook": "*",

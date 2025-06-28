@@ -1,86 +1,79 @@
 import fg from 'fast-glob';
-import { globby } from 'globby';
-import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
-import { compact } from './array.js';
-import { debugLogObject } from './debug.js';
-import { join, relative } from './path.js';
+import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { timerify } from './Performance.js';
+import { compact } from './array.js';
+import { glob } from './glob-core.js';
+import { isAbsolute, join, relative } from './path.js';
 
-export const prependDirToPattern = (workingDir: string, pattern: string) => {
-  if (pattern.startsWith('!')) return '!' + join(workingDir, pattern.slice(1));
-  return join(workingDir, pattern);
+interface GlobOptions {
+  cwd: string;
+  dir?: string;
+  patterns: string[];
+  gitignore?: boolean;
+  name?: boolean;
+  label?: string;
+}
+
+const prepend = (pattern: string, relativePath: string) =>
+  isAbsolute(pattern.replace(/^!/, '')) ? pattern : prependDirToPattern(relativePath, pattern);
+
+// Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
+const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) => {
+  const relativePath = relative(cwd, dir);
+  return compact([patterns].flat().map(p => removeProductionSuffix(prepend(p, relativePath)))).sort(negatedLast);
+};
+
+const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
+
+const negatedLast = (pattern: string) => (pattern.startsWith('!') ? 1 : -1);
+
+export const prependDirToPattern = (dir: string, pattern: string) => {
+  if (pattern.startsWith('!')) return `!${join(dir, pattern.slice(1))}`;
+  return join(dir, pattern);
 };
 
 export const negate = (pattern: string) => pattern.replace(/^!?/, '!');
 export const hasProductionSuffix = (pattern: string) => pattern.endsWith('!');
 export const hasNoProductionSuffix = (pattern: string) => !pattern.endsWith('!');
 
-const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
-
-const negatedLast = (pattern: string) => (pattern.startsWith('!') ? 1 : -1);
-
-interface BaseGlobOptions {
-  cwd: string;
-  patterns: string[];
-  ignore?: string[];
-  gitignore?: boolean;
-}
-
-interface GlobOptions extends BaseGlobOptions {
-  workingDir?: string;
-}
-
-const glob = async ({ cwd, workingDir = cwd, patterns, ignore = [], gitignore = true }: GlobOptions) => {
+const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }: GlobOptions) => {
   if (patterns.length === 0) return [];
 
-  const relativePath = relative(cwd, workingDir);
-
-  // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
-  const prepend = (pattern: string) => prependDirToPattern(relativePath, pattern);
-  const globPatterns = compact([patterns].flat().map(prepend).map(removeProductionSuffix)).sort(negatedLast);
+  const globPatterns = prependDirToPatterns(cwd, dir, patterns);
 
   // Only negated patterns? Bail out.
   if (globPatterns[0].startsWith('!')) return [];
 
-  const ignorePatterns = compact([...ignore, ...GLOBAL_IGNORE_PATTERNS]);
-
-  debugLogObject(relativePath || ROOT_WORKSPACE_NAME, `Glob options`, { cwd, globPatterns, ignorePatterns, gitignore });
-
-  return globby(globPatterns, {
+  return glob(globPatterns, {
     cwd,
-    ignore: ignorePatterns,
+    dir,
     gitignore,
     absolute: true,
     dot: true,
+    label,
   });
 };
 
-const pureGlob = async ({ cwd, patterns, ignore = [], gitignore = true }: BaseGlobOptions) => {
-  if (patterns.length === 0) return [];
-  return globby(patterns, {
-    cwd,
-    ignore: [...ignore, ...GLOBAL_IGNORE_PATTERNS],
-    gitignore,
-    absolute: true,
-  });
-};
+const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) => fg.sync(patterns, { cwd });
 
-const firstGlob = async ({ cwd, patterns }: BaseGlobOptions) => {
-  const stream = fg.stream(patterns.map(removeProductionSuffix), { cwd, ignore: GLOBAL_IGNORE_PATTERNS });
+const firstGlob = async ({ cwd, patterns }: GlobOptions) => {
+  const stream = fg.globStream(patterns.map(removeProductionSuffix), { cwd, ignore: GLOBAL_IGNORE_PATTERNS });
   for await (const entry of stream) {
     return entry;
   }
 };
 
-const dirGlob = async ({ cwd, patterns }: BaseGlobOptions) =>
-  globby(patterns, {
+const dirGlob = async ({ cwd, patterns, gitignore = true }: GlobOptions) =>
+  glob(patterns, {
     cwd,
+    dir: cwd,
     onlyDirectories: true,
+    gitignore,
   });
 
-export const _glob = timerify(glob);
+export const _glob = timerify(defaultGlob);
 
-export const _pureGlob = timerify(pureGlob);
+export const _syncGlob = timerify(syncGlob);
 
 export const _firstGlob = timerify(firstGlob);
 

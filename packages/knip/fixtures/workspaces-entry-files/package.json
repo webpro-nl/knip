@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "storybook": "storybook dev"
+  },
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "storybook": "*",
+    "@storybook/react": "*"
+  },
+  "name": "@fixtures/workspaces-entry-files"
+}

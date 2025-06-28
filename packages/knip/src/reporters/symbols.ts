@@ -1,63 +1,30 @@
-import chalk from 'chalk';
-import EasyTable from 'easy-table';
-import { ROOT_WORKSPACE_NAME } from '../constants.js';
-import { relative } from '../util/path.js';
-import { getTitle, logTitle, logIssueSet, identity } from './util.js';
-import type { Issue, ReporterOptions, IssueSet } from '../types/issues.js';
 import type { Entries } from 'type-fest';
+import type { ReporterOptions } from '../types/issues.js';
+import { printConfigurationHints } from './util/configuration-hints.js';
+import { getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.js';
 
-const TRUNCATE_WIDTH = 40;
-const truncate = (text: string) => (text.length > TRUNCATE_WIDTH ? text.slice(0, TRUNCATE_WIDTH - 3) + '...' : text);
-
-const logIssueRecord = (issues: Issue[]) => {
-  const table = new EasyTable();
-  issues.forEach(issue => {
-    const print = issue.severity === 'warn' ? chalk.grey : identity;
-    table.cell('symbol', print(issue.symbols ? truncate(issue.symbols.map(s => s.symbol).join(', ')) : issue.symbol));
-    issue.parentSymbol && table.cell('parentSymbol', print(issue.parentSymbol));
-    issue.symbolType && table.cell('symbolType', print(issue.symbolType));
-    const filePath = `${relative(issue.filePath)}${
-      issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`
-    }`;
-    table.cell('filePath', print(filePath));
-    table.newRow();
-  });
-  console.log(table.sort(['filePath', 'parentSymbol', 'symbol']).print().trim());
-};
-
-export default ({ report, issues, configurationHints, noConfigHints, isShowProgress }: ReporterOptions) => {
+export default (options: ReporterOptions) => {
+  const { report, issues, isDisableConfigHints, isShowProgress } = options;
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
-  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+    if (reportType === 'files') reportType = '_files';
+
     if (isReportType) {
-      const title = reportMultipleGroups && getTitle(reportType);
-      const isSet = issues[reportType] instanceof Set;
-      const issuesForType = isSet
-        ? Array.from(issues[reportType] as IssueSet)
-        : Object.values(issues[reportType]).map(Object.values).flat();
+      const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
+      const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
       if (issuesForType.length > 0) {
-        title && logTitle(title, issuesForType.length);
-        if (isSet) {
-          logIssueSet(issuesForType);
-        } else {
-          logIssueRecord(issuesForType);
-        }
+        title && console.log(getColoredTitle(title, issuesForType.length));
+        console.log(getTableForType(issuesForType).toString());
+        totalIssues = totalIssues + issuesForType.length;
       }
-
-      totalIssues = totalIssues + issuesForType.length;
     }
   }
 
-  if (!noConfigHints && configurationHints.size > 0) {
-    logTitle('Configuration issues', configurationHints.size);
-    configurationHints.forEach(hint => {
-      const { type, workspaceName, identifier } = hint;
-      const message = `Unused item in ${type}`;
-      const workspace = workspaceName && workspaceName !== ROOT_WORKSPACE_NAME ? ` (workspace: ${workspaceName})` : ``;
-      console.warn(chalk.grey(`${message}${workspace}:`), identifier);
-    });
+  if (!isDisableConfigHints) {
+    printConfigurationHints(options);
   }
 
   if (totalIssues === 0 && isShowProgress) {

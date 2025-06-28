@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/dts-compiled",
+  "private": true,
+  "type": "module"
+}

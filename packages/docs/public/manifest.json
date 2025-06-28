@@ -18,8 +18,8 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#181818",
-  "background_color": "#f68a22",
+  "theme_color": "#fbfbfb",
+  "background_color": "#f56e0f",
   "display": "standalone",
   "scope": "/",
   "start_url": "/overview/getting-started/"

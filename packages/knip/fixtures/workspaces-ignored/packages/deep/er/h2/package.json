@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspaces-ignored__h2",
+  "scripts": {
+    "start": "ignored"
+  }
+}

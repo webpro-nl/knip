@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/postcss-next",
+  "name": "@plugins/postcss-next",
   "scripts": {
     "start": "next"
   },
@@ -10,8 +10,6 @@
     "postcss-rtlcss": "*"
   },
   "postcss": {
-    "plugins": [
-      "autoprefixer"
-    ]
+    "plugins": ["autoprefixer"]
   }
 }

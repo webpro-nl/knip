@@ -1,9 +1,6 @@
 {
-  "name": "@workspaces-include-entry-exports/root",
-  "version": "1.0.0",
-  "workspaces": [
-    "packages/*"
-  ],
+  "name": "@fixtures/workspaces-include-entry-exports",
+  "workspaces": ["packages/*"],
   "knip": {
     "workspaces": {
       "packages/app": {},

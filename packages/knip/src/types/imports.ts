@@ -1,17 +1,13 @@
-type FilePath = string;
-type Specifier = string;
-type Identifier = string;
+import type ts from 'typescript';
 
-type ImportItems = Set<Identifier>;
-
-export type ImportedModule = {
-  specifier: Specifier;
-  symbols: ImportItems;
-  hasStar: boolean;
-  isReExport: boolean;
-  isReExportedBy: Set<string>;
-};
-
-export type Imports = Map<FilePath, ImportedModule>;
-
-export type UnresolvedImport = { specifier: string; pos?: number; line?: number; col?: number };
+export interface ImportNode {
+  specifier: string;
+  identifier: string | undefined;
+  alias?: string | undefined;
+  namespace?: string | undefined;
+  pos: number | undefined;
+  symbol?: ts.Symbol;
+  isTypeOnly?: boolean;
+  isReExport?: boolean;
+  resolve?: boolean;
+}

@@ -1,20 +1,25 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import * as ava from '../../src/plugins/ava/index.js';
-import { join, resolve } from '../../src/util/path.js';
-import { getManifest, pluginConfig as config } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/ava');
-const manifest = getManifest(cwd);
 
-test('Find dependencies in ava configuration (package.json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await ava.findDependencies(configFilePath, { cwd, manifest, config });
-  assert.deepEqual(dependencies, ['entry:**/*.test.*', 'ts-node']);
-});
+test('Find dependencies with the Ava plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in ava configuration (ava.config.mjs)', async () => {
-  const configFilePath = join(cwd, 'ava.config.mjs');
-  const dependencies = await ava.findDependencies(configFilePath, { cwd, manifest, config });
-  assert.deepEqual(dependencies, ['entry:**/*.test.*', 'tsconfig-paths']);
+  assert(issues.unresolved['package.json']['ts-node/esm/transpile-only']);
+  assert(issues.unresolved['ava.config.mjs']['tsconfig-paths/register']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    unresolved: 2,
+    processed: 1,
+    total: 1,
+  });
 });

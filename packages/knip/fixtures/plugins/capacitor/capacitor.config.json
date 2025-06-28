@@ -3,7 +3,6 @@
   "appName": "name",
   "includePlugins": [
     "@capacitor-community/http",
-    "@capacitor/android",
     "@capacitor/app",
     "@capacitor/splash-screen",
     "@capacitor/status-bar",

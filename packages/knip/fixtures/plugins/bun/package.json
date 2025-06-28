@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/bun",
+  "scripts": {
+    "test": "bun test"
+  }
+}

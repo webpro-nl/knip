@@ -1,11 +1,23 @@
 {
-  "name": "@fixtures/angular",
-  "version": "*",
+  "name": "@plugins/angular",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
+  },
+  "dependencies": {
+    "zone.js": "*"
+  },
+  "devDependencies": {
+    "@angular/cli": "*",
+    "karma": "*",
+    "karma-chrome-launcher": "*",
+    "karma-coverage": "*",
+    "karma-jasmine": "*",
+    "karma-jasmine-html-reporter": "*",
+    "jasmine-core": "*",
+    "typescript": "*"
   }
 }

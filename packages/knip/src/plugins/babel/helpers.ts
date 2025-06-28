@@ -32,6 +32,6 @@ export const api = {
   assertVersion: () => true,
   cache: cacheFn,
   caller: () => true,
-  env: () => true,
+  env: (env?: string) => (typeof env === 'string' ? true : 'development'),
   version: '0.0.0',
 };

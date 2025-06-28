@@ -1,40 +1,51 @@
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
+import { toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
+import { getPageExtensions } from './resolveFromAST.js';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
-export const NAME = 'Next.js';
+const title = 'Next.js';
 
-/** @public */
-export const ENABLERS = ['next'];
+const enablers = ['next'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['next.config.{js,ts,cjs,mjs}'];
+const config = ['next.config.{js,ts,cjs,mjs}'];
 
-const productionEntryFilePatternsWithoutSrc = [
-  'middleware.{js,ts}',
-  'app/**/route.{js,ts}',
-  'app/**/{error,layout,loading,not-found,page,template}.{js,jsx,ts,tsx}',
-  'instrumentation.{js,ts}',
+const defaultPageExtensions = ['{js,jsx,ts,tsx}'];
+
+const productionEntryFilePatterns = [
+  '{instrumentation,instrumentation-client,middleware}.{js,ts}',
+  'app/global-error.{js,jsx,ts,tsx}',
+  'app/**/{error,layout,loading,not-found,page,template,default}.{js,jsx,ts,tsx}',
+  'app/**/route.{js,jsx,ts,tsx}',
   'app/{manifest,sitemap,robots}.{js,ts}',
-  'app/**/{icon,apple-icon}.{js,ts,tsx}',
-  'app/**/{opengraph,twitter}-image.{js,ts,tsx}',
-  'pages/**/*.{js,jsx,ts,tsx}',
+  'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
+  'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
+  'mdx-components.{js,jsx,ts,tsx}',
 ];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = [
-  ...productionEntryFilePatternsWithoutSrc,
-  ...productionEntryFilePatternsWithoutSrc.map(pattern => `src/${pattern}`),
-];
-
-export const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { config } = options;
-
-  return config.entry
-    ? config.entry.map(toProductionEntryPattern)
-    : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
+const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {
+  const pages = pageExtensions.map(ext => `pages/**/*.${ext}`);
+  const patterns = [...productionEntryFilePatterns, ...pages];
+  return [...patterns, ...patterns.map(pattern => `src/${pattern}`)];
 };
+
+const production = getEntryFilePatterns();
+
+const resolveFromAST: ResolveFromAST = sourceFile => {
+  const pageExtensions = getPageExtensions(sourceFile);
+  const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
+  const patterns = getEntryFilePatterns(extensions);
+  return patterns.map(id => toProductionEntry(id));
+};
+
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  production,
+  resolveFromAST,
+} satisfies Plugin;

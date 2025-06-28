@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/babel",
+  "name": "@plugins/babel",
   "scripts": {},
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "*",
@@ -11,13 +11,6 @@
     "underscore": "*"
   },
   "babel": {
-    "presets": [
-      "@babel/env"
-    ]
-  },
-  "knip": {
-    "entry": [],
-    "project": [],
-    "babel": ".babelrc.js"
+    "presets": ["@babel/env"]
   }
 }

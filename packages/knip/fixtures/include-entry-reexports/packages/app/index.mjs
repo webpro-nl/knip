@@ -1,3 +1,3 @@
-import { foo } from '@kp/shared';
+import { foo } from '@fixtures/include-entry-reexports__shared';
 
-console.log(foo());
+foo();

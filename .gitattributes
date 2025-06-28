@@ -1,0 +1,16 @@
+# Convert all files to use "\n" line endings.
+* text eol=lf
+
+# Specify the file type for some binary files to prevent Git from changing the line endings upon
+# cloning the repository.
+*.gif binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.png binary
+*.otf binary
+*.mov binary
+*.mp3 binary
+*.mp4 binary
+*.webm binary
+*.webp binary

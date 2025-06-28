@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/plugin-overlap",
+  "private": true,
+  "scripts": {
+    "docs": "typedoc"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "*",
+    "@types/node": "*",
+    "typedoc": "*",
+    "typedoc-plugin-markdown": "*",
+    "typescript": "*"
+  }
+}

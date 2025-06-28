@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/webdriver-io",
+  "scripts": {
+    "test": "wdio"
+  },
+  "dependencies": {
+    "@wdio/cli": "*",
+    "@wdio/mocha-framework": "*",
+    "@wdio/concise-reporter": "*",
+    "@wdio/browser-runner": "*"
+  }
+}

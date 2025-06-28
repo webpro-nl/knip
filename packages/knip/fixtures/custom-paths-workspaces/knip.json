@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@2/schema.json",
+  "workspaces": {
+    ".": {
+      "paths": {
+        "~/*": ["./*"],
+        "@lib": ["./lib/index.ts"],
+        "@lib/*": ["./lib/*"]
+      }
+    },
+    "ws": {
+      "paths": {
+        "#util-foo/*": ["./util/*"],
+        "~images/*": ["./assets/img/*"],
+        "lib/*": ["./lib/*"]
+      }
+    }
+  }
+}

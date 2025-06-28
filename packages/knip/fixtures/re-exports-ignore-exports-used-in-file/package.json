@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/re-exports-ignore-exports-used-in-file",
+  "knip": {
+    "ignoreExportsUsedInFile": true,
+    "includeEntryExports": true
+  }
+}

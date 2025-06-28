@@ -1,6 +1,6 @@
 import { h } from 'hastscript';
-import { visit, type Visitor } from 'unist-util-visit';
 import type { Node, Parent } from 'unist';
+import { type Visitor, visit } from 'unist-util-visit';
 
 interface DirectiveNode extends Node {
   type: 'textDirective' | 'leafDirective' | 'containerDirective';
@@ -16,6 +16,7 @@ export const transformDirectives = () => (tree: Parent) => {
   const visitor: Visitor<Node> = node => {
     if (isDirectiveNode(node)) {
       const hast = h(node.name, node.attributes);
+      // biome-ignore lint/suspicious/noAssignInExpressions: ignore
       const data = node.data || (node.data = {});
       data.hName = hast.tagName;
       data.hProperties = hast.properties;

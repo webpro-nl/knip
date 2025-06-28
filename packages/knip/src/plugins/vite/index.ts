@@ -1,26 +1,30 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { findVitestDependencies } from '../vitest/index.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
-import type { ViteConfigOrFn } from '../vitest/types.js';
+import type ts from 'typescript';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
+import { resolveConfig } from '../vitest/index.js';
+import { getReactBabelPlugins } from './helpers.js';
 
 // https://vitejs.dev/config/
 
-export const NAME = 'Vite';
+const title = 'Vite';
 
-/** @public */
-export const ENABLERS = ['vite'];
+const enablers = ['vite', 'vitest'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = ['vite*.config.{js,mjs,ts,cjs,mts,cts}'];
+export const config = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
-const findViteDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const localConfig: ViteConfigOrFn | undefined = await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return findVitestDependencies(configFilePath, localConfig, options);
+const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
+  const babelPlugins = getReactBabelPlugins(sourceFile);
+  return babelPlugins.map(plugin => toDependency(plugin));
 };
 
-export const findDependencies = timerify(findViteDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+  resolveFromAST,
+} satisfies Plugin;

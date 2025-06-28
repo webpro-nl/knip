@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspaces-self-and-cross-ref",
+  "type": "module",
+  "private": true
+}

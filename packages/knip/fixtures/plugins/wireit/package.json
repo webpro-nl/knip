@@ -1,0 +1,19 @@
+{
+  "name": "@plugins/wireit",
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "build": "wireit",
+    "dev": "wireit"
+  },
+  "devDependencies": {
+    "wireit": "*"
+  },
+  "wireit": {
+    "build": {
+      "command": "tsc"
+    },
+    "dev": {
+      "command": "tsc --watch"
+    }
+  }
+}

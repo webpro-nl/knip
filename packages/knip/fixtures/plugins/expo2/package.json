@@ -1,0 +1,16 @@
+{
+  "name": "@plugins/expo2",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start"
+  },
+  "dependencies": {
+    "expo": "*",
+    "expo-dev-client": "*",
+    "expo-insights": "*",
+    "expo-navigation-bar": "*",
+    "expo-router": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}

@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -18,7 +18,6 @@ test('Allows subpath-imports', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
-    files: 1,
     processed: 3,
     total: 3,
   });
@@ -36,7 +35,6 @@ test('Allows subpath-imports (production)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
-    files: 1,
     processed: 3,
     total: 3,
   });
@@ -55,7 +53,6 @@ test('Allows subpath-imports (strict)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
-    files: 1,
     processed: 3,
     total: 3,
   });

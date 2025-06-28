@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/tags-cli",
+  "knip": {
+    "include": ["classMembers"]
+  }
+}

@@ -1,13 +1,13 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
-import { resolve, join } from '../src/util/path.js';
+import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/workspaces');
 
-test('Find unused files, dependencies and exports in workspaces (default)', async () => {
+test('Find unused dependencies, exports and files in workspaces (default)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -23,13 +23,11 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
   assert(issues.dependencies['apps/backend/package.json']['next']);
   assert(issues.dependencies['apps/backend/package.json']['picomatch']);
 
-  assert.equal(Object.keys(issues.unlisted).length, 5);
+  assert.equal(Object.keys(issues.unlisted).length, 3);
   assert(issues.unlisted['apps/frontend/index.ts']['vanilla-js']);
   assert(issues.unlisted['apps/backend/index.ts']['globby']);
   assert(issues.unlisted['apps/backend/index.ts']['js-yaml']);
-  assert(issues.unlisted['apps/backend/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
-  assert(issues.unlisted['apps/frontend/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
-  assert(issues.unlisted['packages/tools/tsconfig.json']['@workspaces/tsconfig/tsconfig.base.json']);
+  assert(issues.unlisted['packages/tools/tsconfig.json']['@fixtures/workspaces__tsconfig']);
 
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
 
@@ -39,13 +37,13 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
     exports: 1,
     types: 1,
     dependencies: 4,
-    unlisted: 6,
+    unlisted: 4,
     processed: 7,
     total: 7,
   });
 });
 
-test('Find unused files, dependencies and exports in workspaces (production)', async () => {
+test('Find unused dependencies, exports and files in workspaces (production)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -79,5 +77,22 @@ test('Find unused files, dependencies and exports in workspaces (production)', a
     unlisted: 3,
     processed: 7,
     total: 7,
+  });
+});
+
+test('Analyze only ancestor and dependent workspaces', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    workspace: 'packages/shared',
+  });
+
+  assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    types: 1,
+    processed: 4,
+    total: 4,
   });
 });

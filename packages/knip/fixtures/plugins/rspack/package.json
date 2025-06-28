@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/rspack",
+  "scripts": {
+    "dev": "rspack serve",
+    "build": "rspack build"
+  },
+  "devDependencies": {
+    "@rspack/core": "*",
+    "@rspack/cli": "*"
+  }
+}

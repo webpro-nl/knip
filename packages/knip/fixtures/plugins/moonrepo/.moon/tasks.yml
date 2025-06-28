@@ -1,0 +1,3 @@
+tasks:
+  lint.filenames:
+    command: 'ls-lint -workdir . -config $workspaceRoot/.ls-lint.yml'

@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -15,8 +15,8 @@ test('Use root plugin config in workspaces', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    total: 25,
-    processed: 25,
+    total: 26,
+    processed: 26,
   });
 });
 
@@ -32,14 +32,15 @@ test('Use root plugin config in workspaces (strict production)', async () => {
     issues.files,
     new Set([
       join(cwd, 'packages/frontend/components/component.js'),
-      join(cwd, 'packages/package1/components/component.js'),
+      join(cwd, 'packages/shared/components/component.js'),
+      join(cwd, 'packages/shared/jest-setup.ts'),
     ])
   );
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
-    total: 6,
-    processed: 6,
+    files: 3,
+    total: 8,
+    processed: 8,
   });
 });

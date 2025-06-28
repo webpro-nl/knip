@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/plop",
+  "type": "module",
+  "scripts": {
+    "plop": "plop"
+  },
+  "dependencies": {
+    "plop": "*"
+  }
+}

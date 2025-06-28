@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/linthtml",
+  "scripts": {
+    "lint:html": "npx @linthtml/linthtml \"**/*.html\""
+  },
+  "devDependencies": {
+    "@linthtml/linthtml": "*",
+    "@linthtml/linthtml-config-recommended": "*"
+  }
+}

@@ -1,12 +1,13 @@
 import { ISSUE_TYPES } from '../constants.js';
-import { ConfigurationError } from './errors.js';
 import type { Report } from '../types/issues.js';
+import { ConfigurationError } from './errors.js';
 
-type CLIArguments = {
-  include: string[];
-  exclude: string[];
-  dependencies: boolean;
-  exports: boolean;
+export type CLIArguments = {
+  includedIssueTypes: string[];
+  excludedIssueTypes: string[];
+  isDependenciesShorthand: boolean;
+  isExportsShorthand: boolean;
+  isFilesShorthand: boolean;
 };
 
 type Options = {
@@ -17,32 +18,38 @@ type Options = {
   exports?: boolean;
 };
 
-const normalize = (values: string[]) => values.map(value => value.split(',')).flat();
+/** @internal */
+export const defaultExcludedIssueTypes = ['classMembers', 'nsExports', 'nsTypes'];
+const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.includes(type));
+
+const normalize = (values: string[]) => values.flatMap(value => value.split(','));
 
 export const getIncludedIssueTypes = (
   cliArgs: CLIArguments,
   { include = [], exclude = [], isProduction = false }: Options = {}
 ) => {
   // Allow space-separated argument values (--include files,dependencies)
-  let incl = normalize(cliArgs.include);
-  let excl = normalize(cliArgs.exclude);
+  let incl = normalize(cliArgs.includedIssueTypes);
+  const excl = normalize(cliArgs.excludedIssueTypes);
 
   // Naming is hard...
-  [...incl, ...excl, ...include, ...exclude].forEach(type => {
+  for (const type of [...incl, ...excl, ...include, ...exclude]) {
     // @ts-expect-error The point is that we're checking for invalid issue types
     if (!ISSUE_TYPES.includes(type)) throw new ConfigurationError(`Invalid issue type: ${type}`);
-  });
+  }
 
   // CLI arguments override local options
   const excludes = exclude.filter(exclude => !incl.includes(exclude));
   const includes = include.filter(include => !excl.includes(include));
 
-  if (cliArgs.dependencies) {
+  if (cliArgs.isDependenciesShorthand) {
     incl = [...incl, 'dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
   }
-  if (cliArgs.exports) {
-    const exports = ['exports', 'nsExports', 'classMembers', 'types', 'nsTypes', 'enumMembers', 'duplicates'];
-    incl = [...incl, ...exports];
+  if (cliArgs.isExportsShorthand) {
+    incl = [...incl, 'exports', 'types', 'enumMembers', 'duplicates'];
+  }
+  if (cliArgs.isFilesShorthand) {
+    incl = [...incl, 'files'];
   }
 
   const _include = [...incl, ...includes];
@@ -57,7 +64,16 @@ export const getIncludedIssueTypes = (
     if (_exclude.includes('dependencies')) _exclude.push('devDependencies', 'optionalPeerDependencies');
   }
 
-  const included = (_include.length > 0 ? _include : ISSUE_TYPES).filter(group => !_exclude.includes(group));
+  const included = (
+    _include.length > 0
+      ? _include.some(type => !defaultExcludedIssueTypes.includes(type))
+        ? _include
+        : [..._include, ...defaultIssueTypes]
+      : defaultIssueTypes
+  ).filter(group => !_exclude.includes(group));
 
-  return ISSUE_TYPES.reduce((types, group) => ((types[group] = included.includes(group)), types), {} as Report);
+  return ISSUE_TYPES.filter(i => i !== '_files').reduce((types, group) => {
+    types[group] = included.includes(group);
+    return types;
+  }, {} as Report);
 };

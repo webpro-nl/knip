@@ -1,42 +1,45 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { TypeDocConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://typedoc.org/guides/overview/
+// https://github.com/TypeStrong/typedoc/blob/9f0fb048399c7a1273dc452d01cca92b34f4675b/src/lib/utils/options/readers/typedoc.ts#L168
 
-export const NAME = 'TypeDoc';
+const title = 'TypeDoc';
 
-/** @public */
-export const ENABLERS = ['typedoc'];
+const enablers = ['typedoc'];
 
-export const PACKAGE_JSON_PATH = 'typedocOptions';
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const packageJsonPath = 'typedocOptions';
 
-export const CONFIG_FILE_PATTERNS = [
-  'typedoc.{js,cjs,json,jsonc}',
-  'typedoc.config.{js,cjs}',
-  '.config/typedoc.{js,cjs,json,jsonc}',
-  '.config/typedoc.config.{js,cjs}',
+const config = [
+  'typedoc.{js,cjs,mjs,json,jsonc}',
+  'typedoc.config.{js,cjs,mjs}',
+  '.config/typedoc.{js,cjs,mjs,json,jsonc}',
+  '.config/typedoc.config.{js,cjs,mjs}',
   'package.json',
   'tsconfig.json',
 ];
 
-const findTypeDocDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: TypeDocConfig | undefined =
-    basename(configFilePath) === 'package.json'
-      ? manifest[PACKAGE_JSON_PATH]
-      : basename(configFilePath) === 'tsconfig.json'
-        ? (await load(configFilePath)).typedocOptions
-        : await load(configFilePath);
-
-  return localConfig?.plugin ?? [];
+const resolveConfig: ResolveConfig<TypeDocConfig | { typedocOptions: TypeDocConfig }> = config => {
+  const cfg = 'typedocOptions' in config ? config.typedocOptions : config; // exception for `tsconfig.json`
+  const plugins = cfg?.plugin ?? [];
+  const themes = cfg?.theme ?? [];
+  return [...plugins, ...themes].map(id => toDeferResolve(id));
 };
 
-export const findDependencies = timerify(findTypeDocDependencies);
+const args = {
+  resolve: ['plugin', 'theme'],
+};
+
+export default {
+  title,
+  enablers,
+  isEnabled,
+  packageJsonPath,
+  config,
+  resolveConfig,
+  args,
+} satisfies Plugin;

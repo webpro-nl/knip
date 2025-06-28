@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/size-limit",
+  "scripts": {
+    "size": "size-limit"
+  },
+  "dependencies": {
+    "size-limit": "*",
+    "@size-limit/preset-app": "*"
+  },
+  "devDependencies": {
+    "@size-limit/file": "*"
+  }
+}

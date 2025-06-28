@@ -1,28 +1,27 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 import type { SymbolType } from './issues.js';
 
-type FilePath = string;
 type Identifier = string;
-export type ExportPos = [number, number] | [];
 
-export type ExportItem = {
+type ExportPosTuple = [number, number, number];
+export type Fix = ExportPosTuple | undefined;
+export type Fixes = Array<ExportPosTuple>;
+
+export type ExportNode = {
   node: ts.Node;
+  symbol?: ts.Symbol;
+  identifier: Identifier;
   pos: number;
-  posDecl?: number; // declPos (position of declaration) is sometimes required for `findReferences`
   type: SymbolType;
-  members?: ExportItemMember[];
+  members?: ExportNodeMember[];
   jsDocTags?: Set<string>;
-  fix: ExportPos;
+  fix: Fix;
 };
 
-export type ExportItemMember = {
+export type ExportNodeMember = {
   node: ts.Node;
   identifier: Identifier;
   pos: number;
   type: SymbolType;
-  fix: ExportPos;
+  fix: Fix;
 };
-
-export type ExportItems = Map<string, Required<ExportItem>>;
-
-export type Exports = Map<FilePath, ExportItems>;

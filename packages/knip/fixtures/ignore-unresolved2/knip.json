@@ -1,0 +1,16 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreUnresolved": [
+    "./unresolved-top-level",
+    "unused-top-level",
+    "./unresolved-workspace"
+  ],
+  "workspaces": {
+    ".": {
+      "ignoreUnresolved": [".+unresolved-root", "unused-root"]
+    },
+    "packages/client": {
+      "ignoreUnresolved": [".*unresolved-workspace", "unused-workspace"]
+    }
+  }
+}

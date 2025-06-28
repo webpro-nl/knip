@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/lost-pixel",
+  "devDependencies": {
+    "lost-pixel": "*"
+  }
+}

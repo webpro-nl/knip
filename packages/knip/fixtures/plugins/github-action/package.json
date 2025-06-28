@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/github-action",
+  "dependencies": {
+    "@actions/core": "*"
+  }
+}

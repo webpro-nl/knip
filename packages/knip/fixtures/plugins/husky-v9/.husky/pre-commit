@@ -1,0 +1,9 @@
+npx lint-staged
+npx --no-install commitlint --edit "$1"
+npm test
+
+if ! command -v yalc check &> /dev/null
+then
+    echo "yalc could not be found"
+    exit
+fi

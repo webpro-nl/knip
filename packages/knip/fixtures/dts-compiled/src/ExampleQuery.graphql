@@ -1,0 +1,6 @@
+query ExampleQuery {
+  example {
+    name
+    description
+  }
+}

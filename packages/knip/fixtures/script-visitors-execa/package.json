@@ -1,0 +1,31 @@
+{
+  "name": "@fixtures/script-visitors-execa",
+  "scripts": {
+    "execa1": "node ./execa-docs.mjs",
+    "execa2": "node ./script.js",
+    "execa3": "node ./node.mjs",
+    "execa4": "node ./options.mjs",
+    "execa5": "node ./methods.mjs"
+  },
+  "dependencies": {
+    "dep": "*"
+  },
+  "devDependencies": {
+    "all-contributors-cli": "*",
+    "c8": "*",
+    "octokit": "*",
+    "execa": "*"
+  },
+  "knip": {
+    "ignoreBinaries": [
+      "executable1",
+      "executable2",
+      "executable3",
+      "executable4",
+      "executable5",
+      "executable6",
+      "executable7",
+      "executable8"
+    ]
+  }
+}

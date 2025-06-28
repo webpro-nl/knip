@@ -1,63 +1,52 @@
+import type { PluginOptions } from '../../types/config.js';
 import { compact } from '../../util/array.js';
+import { type ConfigInput, type Input, toConfig, toDeferResolve } from '../../util/input.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.js';
-import { basename, isInternal, dirname, toAbsolute, isAbsolute } from '../../util/path.js';
-import { load } from '../../util/plugin.js';
-import { _resolve } from '../../util/require.js';
+import { extname, isAbsolute, isInternal } from '../../util/path.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
-import { fallback } from './fallback.js';
-import { PACKAGE_JSON_PATH } from './index.js';
-import type { ESLintConfig, OverrideConfig } from './types.js';
-import type { PackageJsonWithPlugins } from '../../types/package-json.js';
+import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated } from './types.js';
 
-const getDependencies = (config: ESLintConfig | OverrideConfig) => {
-  const extendsSpecifiers = config.extends ? [config.extends].flat().map(resolveExtendSpecifier) : [];
+export const getInputs = (
+  config: ESLintConfigDeprecated | OverrideConfigDeprecated | ESLintConfig,
+  options: PluginOptions
+): (Input | ConfigInput)[] => {
+  const { configFileName } = options;
+
+  if (extname(configFileName) === '.json' || !/eslint\.config/.test(configFileName)) {
+    return getInputsDeprecated(config as ESLintConfigDeprecated | OverrideConfigDeprecated, options);
+  }
+
+  const dependencies = (config as ESLintConfig).flatMap(config =>
+    config.settings ? getDependenciesFromSettings(config.settings).filter(id => id !== '@typescript-eslint/parser') : []
+  );
+
+  return compact(dependencies).map(id => toDeferResolve(id, { optional: true }));
+};
+
+const getInputsDeprecated = (
+  config: ESLintConfigDeprecated | OverrideConfigDeprecated,
+  options: PluginOptions
+): (Input | ConfigInput)[] => {
+  const extendsSpecifiers = config.extends ? compact([config.extends].flat().map(resolveExtendSpecifier)) : [];
   // https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
   if (extendsSpecifiers.some(specifier => specifier?.startsWith('eslint-plugin-prettier')))
     extendsSpecifiers.push('eslint-config-prettier');
-
+  const extendConfigs = extendsSpecifiers.map(specifier =>
+    toConfig('eslint', specifier, { containingFilePath: options.configFilePath })
+  );
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
-  const parser = config.parser;
+  const parser = config.parser ?? config.parserOptions?.parser;
   const babelDependencies = config.parserOptions?.babelOptions
     ? getDependenciesFromConfig(config.parserOptions.babelOptions)
     : [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
-  const overrides: string[] = config.overrides ? [config.overrides].flat().flatMap(getDependencies) : [];
-
-  return compact([...extendsSpecifiers, ...plugins, parser, ...babelDependencies, ...settings, ...overrides]);
-};
-
-type GetDependenciesDeep = (
-  configFilePath: string,
-  options: { cwd: string; manifest: PackageJsonWithPlugins },
-  dependencies?: Set<string>
-) => Promise<Set<string>>;
-
-export const getDependenciesDeep: GetDependenciesDeep = async (configFilePath, options, dependencies = new Set()) => {
-  const addAll = (deps: string[] | Set<string>) => deps.forEach(dependency => dependencies.add(dependency));
-
-  const localConfig: ESLintConfig | undefined =
-    basename(configFilePath) === 'package.json'
-      ? options.manifest[PACKAGE_JSON_PATH]
-      : /(\.(jsonc?|ya?ml)|rc)$/.test(configFilePath)
-        ? await load(configFilePath)
-        : await fallback(configFilePath);
-
-  if (localConfig) {
-    if (localConfig.extends) {
-      for (const extend of [localConfig.extends].flat()) {
-        if (isInternal(extend)) {
-          const filePath = toAbsolute(extend, dirname(configFilePath));
-          const extendConfigFilePath = _resolve(filePath);
-          dependencies.add(extendConfigFilePath);
-          addAll(await getDependenciesDeep(extendConfigFilePath, options, dependencies));
-        }
-      }
-    }
-
-    addAll(getDependencies(localConfig));
-  }
-
-  return dependencies;
+  // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
+  const rules = getDependenciesFromRules({});
+  const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getInputsDeprecated(d, options)) : [];
+  const deferred = compact([...extendsSpecifiers, ...plugins, parser, ...settings, ...rules]).map(id =>
+    toDeferResolve(id)
+  );
+  return [...extendConfigs, ...deferred, ...babelDependencies, ...overrides];
 };
 
 const isQualifiedSpecifier = (specifier: string) =>
@@ -70,7 +59,9 @@ const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config', rawSpeci
   const specifier = rawSpecifier.replace(/(^plugin:|:.+$)/, '');
   if (isQualifiedSpecifier(specifier)) return specifier;
   if (!specifier.startsWith('@')) {
-    const id = rawSpecifier.startsWith('plugin:') ? getPackageNameFromModuleSpecifier(specifier) : specifier;
+    const id = rawSpecifier.startsWith('plugin:')
+      ? getPackageNameFromModuleSpecifier(specifier)
+      : specifier.split('/')[0];
     return `${namespace}-${id}`;
   }
   const [scope, name, ...rest] = specifier.split('/');
@@ -83,15 +74,16 @@ const resolvePluginSpecifier = (specifier: string) => resolveSpecifier('eslint-p
 const resolveExtendSpecifier = (specifier: string) => {
   if (isInternal(specifier)) return;
 
-  // Exception: eslint-config-next → next
-  if (/^next(\/.+)?$/.test(specifier)) return specifier;
-
   const namespace = specifier.startsWith('plugin:') ? 'eslint-plugin' : 'eslint-config';
   return resolveSpecifier(namespace, specifier);
 };
 
-// Super custom: find dependencies of specific ESLint plugins through settings
-const getDependenciesFromSettings = (settings: ESLintConfig['settings'] = {}) => {
+const getDependenciesFromRules = (rules: ESLintConfigDeprecated['rules'] = {}) =>
+  Object.keys(rules).flatMap(ruleKey =>
+    ruleKey.includes('/') ? [resolveSpecifier('eslint-plugin', ruleKey.split('/').slice(0, -1).join('/'))] : []
+  );
+
+const getDependenciesFromSettings = (settings: ESLintConfigDeprecated['settings'] = {}) => {
   return Object.entries(settings).flatMap(([settingKey, settings]) => {
     if (settingKey === 'import/resolver') {
       return (typeof settings === 'string' ? [settings] : Object.keys(settings))

@@ -1,13 +1,20 @@
+import type { IsPluginEnabled, Plugin } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback } from '../../types/plugins.js';
 
 // https://tailwindcss.com/docs/configuration
+// Tailwinds lilconfig dependency is only used for postcss
 
-export const NAME = 'Tailwind';
+const title = 'Tailwind';
 
-/** @public */
-export const ENABLERS = ['tailwindcss'];
+const enablers = ['tailwindcss'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = ['tailwind.config.{js,cjs,mjs,ts}'];
+const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
+
+export default {
+  title,
+  enablers,
+  isEnabled,
+  entry,
+} satisfies Plugin;

@@ -11,7 +11,13 @@
     "ignore": "node ignore.js",
     "ignore-artifact": "node dist/ignore.js",
     "start": "package",
-    "go": "runnable"
+    "go": "runnable",
+    "go-live": "deploy -r repo_name",
+    "tsup": "tsup -c tsup.cool.json",
+    "tsuppy": "tsup --config tsup.cool.json",
+    "serve": "http-server",
+    "@ignore": "ignored",
+    "#ignore": "ignored"
   },
   "dependencies": {
     "express": "*",
@@ -23,6 +29,7 @@
   "devDependencies": {
     "pm2": "*",
     "nx": "*",
+    "tsup": "*",
     "unused": "*",
     "eslint": "8.28.0",
     "eslint-v6": "npm:eslint@6.0.1",
@@ -33,10 +40,6 @@
   },
   "knip": {
     "ignore": "ignore.js",
-    "ignoreBinaries": [
-      "rm",
-      "bash",
-      "eslint"
-    ]
+    "ignoreBinaries": ["rm", "bash", "deploy", "eslint"]
   }
 }

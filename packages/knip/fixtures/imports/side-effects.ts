@@ -1,1 +1,1 @@
-console.log('side effect');
+// side effect

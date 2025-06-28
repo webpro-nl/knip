@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/moonrepo",
+  "devDependencies": {
+    "@moonrepo/cli": "*",
+    "vite-node": "*",
+    "eslint": "*"
+  }
+}

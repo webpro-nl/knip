@@ -1,0 +1,20 @@
+name: 📘 Documentation
+description: An idea for or issue with the documentation website (knip.dev)
+title: '📘 '
+labels: ['documentation']
+body:
+  - type: markdown
+    attributes:
+      value: An idea for or issue with the documentation website
+  - type: input
+    id: link
+    attributes:
+      label: Link
+      description: If possible or relevant, please link to the location
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the issue
+      description: Please describe the issue
+    validations:
+      required: true

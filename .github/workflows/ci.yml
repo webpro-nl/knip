@@ -1,0 +1,43 @@
+name: Tests (against typescript@5.0.4)
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '!**'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        node:
+          - 18.19.0 # 18.18.0 is fine, but transform-test.js requires 18.19.0 for module.register
+          - 20
+          - 22
+
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} (Node v${{ matrix.node }})
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install dependencies
+        run: npm install typescript@5.0.4 @types/node@18 --ignore-scripts
+      - name: Build knip
+        run: npm run build
+        working-directory: packages/knip
+      - name: Run knip
+        run: npx --yes knip
+      - name: Run knip (production/strict)
+        run: npx --yes knip --production --strict
+      - name: Test knip
+        run: npm run --workspace packages/knip test:node:smoke

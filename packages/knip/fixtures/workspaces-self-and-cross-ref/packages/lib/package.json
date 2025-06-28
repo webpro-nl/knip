@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/workspaces-self-and-cross-ref__lib",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": "./dist/*"
+  },
+  "files": ["dist/**/*.js"],
+  "sideEffects": false
+}

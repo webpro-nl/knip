@@ -25,6 +25,12 @@
     },
     "tsc": {
       "executor": "./tools/executors/tsc:tsc"
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [{ "command": "biome lint ." }]
+      }
     }
   }
 }

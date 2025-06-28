@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "include": ["classMembers"],
+  "workspaces": {
+    ".": {
+      "project": ["!templates/**"]
+    },
+    "packages/knip": {
+      "project": [
+        "src/**/*.ts!",
+        "test/**/*.ts",
+        "!src/util/empty.ts",
+        "!**/_template/**"
+      ]
+    },
+    "packages/docs": {
+      "entry": ["{remark,scripts}/*.ts"]
+    }
+  }
+}

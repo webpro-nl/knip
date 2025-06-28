@@ -29,4 +29,13 @@ module.exports = {
       plugins: [['@babel/plugin-proposal-decorators', { decoratorsBeforeExport: true }]],
     },
   },
+  overrides: [
+    {
+      extends: ['plugin:@org/name/typescript'],
+      rules: {
+        '@other-org/no-unused-expressions': 'error',
+        '@other-org/no-unused-vars': 'error',
+      },
+    },
+  ],
 };

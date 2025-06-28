@@ -1,0 +1,101 @@
+---
+import ArkType from '../assets/projects/arktype.svg';
+import AstroLogo from '../assets/projects/astro.svg';
+import AWS from '../assets/projects/aws.svg';
+import Backstage from '../assets/projects/backstage.svg';
+import CreateTypeScriptApp from '../assets/projects/create-typescript-app.png';
+import ESLint from '../assets/projects/eslint.svg';
+import FreeCodeCamp from '../assets/projects/freecodecamp.svg';
+import Grafana from '../assets/projects/grafana.svg';
+import Guardian from '../assets/projects/guardian.svg';
+import Microsoft from '../assets/projects/microsoft.svg';
+import Mocha from '../assets/projects/mocha.svg';
+import Nuxt from '../assets/projects/nuxt.svg';
+import Prettier from '../assets/projects/prettier.svg';
+import Sentry from '../assets/projects/sentry.svg';
+import Shopify from '../assets/projects/shopify.svg';
+import SourceGraph from '../assets/projects/sourcegraph.svg';
+import Stately from '../assets/projects/stately.svg';
+import Storybook from '../assets/projects/storybook.svg';
+import Svelte from '../assets/projects/svelte.svg';
+import TanStack from '../assets/projects/tanstack.png';
+import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
+---
+
+<style>
+  div {
+    margin-top: 4rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    gap: 2.6rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  a {
+    border-bottom: none !important;
+  }
+
+  svg, img {
+    width: auto;
+    height: 32px !important;
+    margin: 0 !important;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    filter: brightness(0.6) grayscale(100%)
+  }
+
+  [data-theme=light] svg {
+    opacity: 0.7;
+  }
+
+  .contrast {
+    opacity: 1;
+    filter: contrast(1) grayscale(100%)
+  }
+
+  svg:hover,
+  img:hover {
+    filter: none;
+  }
+
+  [data-theme=light] svg:hover,
+  [data-theme=light] img:hover {
+    opacity: 1;
+    filter: none;
+  }
+
+  a[href="https://github.com/withastro"] {
+    transform: translateY(6px);
+  }
+  a[href="https://github.com/aws-samples"] {
+    transform: translateY(6px);
+  }
+</style>
+
+<div id="projects">
+    <a href="https://github.com/withastro"><AstroLogo /></a>
+    <a href="https://github.com/guardian"><Guardian /></a>
+    <a href="https://github.com/microsoft"><Microsoft /></a>
+    <a href="https://github.com/typescript-eslint"><TypeScriptESLint class="contrast"/></a>
+    <a href="https://github.com/aws-samples"><AWS /></a>
+    <a href="https://github.com/grafana"><Grafana /></a>
+    <a href="https://github.com/prettier"><Prettier class="contrast" /></a>
+    <a href="https://github.com/eslint"><ESLint class="contrast" /></a>
+    <a href="https://github.com/shopify"><Shopify /></a>
+    <a href="https://github.com/getsentry"><Sentry /></a>
+    <a href="https://github.com/sveltejs"><Svelte class="contrast" /></a>
+    <a href="https://github.com/JoshuaKGoldberg/create-typescript-app"><img src={CreateTypeScriptApp.src}/></a>
+    <a href="https://github.com/sourcegraph"><SourceGraph /></a>
+    <a href="https://github.com/tanstack"><img src={TanStack.src} class="contrast"/></a>
+    <a href="https://github.com/nuxt"><Nuxt /></a>
+    <a href="https://github.com/freeCodeCamp"><FreeCodeCamp  /></a>
+    <a href="https://github.com/arktypeio"><ArkType  /></a>
+    <a href="https://github.com/statelyai"><Stately /></a>
+    <a href="https://github.com/mochajs"><Mocha class="contrast" /></a>
+    <a href="https://github.com/backstage"><Backstage /></a>
+    <a href="https://github.com/storybookjs"><Storybook  /></a>
+</div>

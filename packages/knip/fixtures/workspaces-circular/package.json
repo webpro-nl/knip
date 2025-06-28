@@ -1,6 +1,4 @@
 {
-  "name": "@workspaces-circular/root",
-  "workspaces": [
-    "packages/*"
-  ]
+  "name": "@fixtures/workspaces-circular",
+  "workspaces": ["packages/*"]
 }

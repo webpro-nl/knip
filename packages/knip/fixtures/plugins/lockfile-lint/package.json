@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/lockfile-lint",
+  "scripts": {
+    "lockfile-lint": "lockfile-lint"
+  },
+  "dependencies": {
+    "lockfile-lint": "*"
+  }
+}

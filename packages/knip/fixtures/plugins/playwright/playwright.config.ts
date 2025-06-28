@@ -8,6 +8,7 @@ const config: PlaywrightTestConfig = {
       use: devices['Desktop Chrome'],
     },
   ],
+  reporter: ['html', ['junit', { outputFile: '' }], ['./custom-reporter.ts']],
 };
 
 export default config;

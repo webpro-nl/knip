@@ -2,18 +2,30 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
+      "type": "bun",
       "request": "launch",
-      "name": "Run current test file",
-      "skipFiles": ["<node_internals>/**"],
-      "runtimeArgs": ["--loader", "tsx", "--test", "${file}"]
+      "name": "Debug Bun test",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}/packages/knip",
+      "runtime": "bun",
+      "runtimeArgs": ["test", "--timeout", "999999999"],
+      "internalConsoleOptions": "openOnSessionStart"
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Run current test file with --test-only",
-      "skipFiles": ["<node_internals>/**"],
-      "runtimeArgs": ["--loader", "tsx", "--test-only", "${file}"]
+      "name": "Debug Node test",
+      "program": "${workspaceFolder}/node_modules/.bin/tsx",
+      "args": ["--test", "--import", "./transform-test.js", "${file}"],
+      "cwd": "${workspaceFolder}/packages/knip",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "type": "bun",
+      "request": "attach",
+      "name": "Attach to Bun",
+      "url": "ws://localhost:6499/knip"
     }
   ]
 }

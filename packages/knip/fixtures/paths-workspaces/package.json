@@ -1,6 +1,0 @@
-{
-  "name": "@fixtures/paths-workspaces",
-  "workspaces": [
-    "ws"
-  ]
-}

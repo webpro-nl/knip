@@ -1,0 +1,10 @@
+{
+  "name": "@monorepo/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "dependencies": {
+    "tinyglobby": "^0.2.6"
+  }
+}

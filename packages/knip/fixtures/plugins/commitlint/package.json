@@ -1,7 +1,10 @@
 {
+  "name": "@plugins/commitlint",
+  "devDependencies": {
+    "@commitlint/cli": "*"
+  },
   "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
+    "extends": ["@commitlint/config-conventional"],
+    "plugins": ["commitlint-plugin-tense"]
   }
 }

@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -16,7 +16,7 @@ test('Resolve modules properly using tsconfig paths and globs', async () => {
   assert.equal(issues.dependencies['package.json']['internal'].symbol, 'internal');
 
   assert.equal(issues.unlisted['index.ts']['@unknown'].symbol, '@unknown');
-  assert.equal(issues.unlisted['index.ts']['unresolved/dir'].symbol, 'unresolved/dir');
+  assert.equal(issues.unlisted['index.ts']['unresolved'].symbol, 'unresolved');
 
   assert.equal(issues.exports['internal-package/index.ts']['unused'].symbol, 'unused');
   assert.equal(issues.exports['unprefixed/module.ts']['unused'].symbol, 'unused');

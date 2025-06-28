@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../../src/index.js';
 import { join, resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/playwright-ct2');
 
-test('Find dependencies in Playwright for components configuration (2)', async () => {
+test('Find dependencies with the Playwright for components plugin (2)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

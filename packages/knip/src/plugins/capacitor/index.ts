@@ -1,27 +1,34 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { isFile } from '../../util/fs.js';
+import { toDependency } from '../../util/input.js';
+import { join } from '../../util/path.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { CapacitorConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://capacitorjs.com/docs/config
 
-export const NAME = 'Capacitor';
+const title = 'Capacitor';
 
-/** @public */
-export const ENABLERS = [/^@capacitor\//];
+const enablers = [/^@capacitor\//];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = ['capacitor.config.ts'];
+const config = ['capacitor.config.{json,ts}'];
 
-const findCapacitorDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
-  if (isProduction) return [];
+const resolveConfig: ResolveConfig<CapacitorConfig> = async (config, { configFileDir }) => {
+  const exists = (filePath: string) => isFile(join(configFileDir, filePath));
 
-  const localConfig: CapacitorConfig | undefined = await load(configFilePath);
+  const plugins = config.includePlugins ?? [];
+  const android = (await exists('android/capacitor.settings.gradle')) ? ['@capacitor/android'] : [];
+  const ios = (await exists('ios/App/Podfile')) ? ['@capacitor/ios'] : [];
 
-  if (!localConfig) return [];
-
-  return localConfig.includePlugins ?? [];
+  return [...plugins, ...android, ...ios].map(id => toDependency(id));
 };
 
-export const findDependencies = timerify(findCapacitorDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+} satisfies Plugin;

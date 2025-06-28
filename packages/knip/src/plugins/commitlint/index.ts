@@ -1,38 +1,44 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
+import type { CommitLintConfig } from './types.js';
 
 // https://commitlint.js.org
 // https://github.com/conventional-changelog/commitlint#config
+// https://github.com/conventional-changelog/commitlint/blob/master/%40commitlint/load/src/utils/load-config.ts
 
-type CommitLintConfig = {
-  extends: string[];
+const title = 'commitlint';
+
+const enablers = ['@commitlint/cli'];
+
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+
+const config = ['package.json', 'package.yaml', ...toCosmiconfig('commitlint', { additionalExtensions: ['cts'] })];
+
+const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
+  const extendsConfigs = config.extends
+    ? [config.extends]
+        .flat()
+        .map(id => (id.startsWith('@') || id.startsWith('commitlint-config-') ? id : `commitlint-config-${id}`))
+    : [];
+  const plugins = config.plugins ? [config.plugins].flat().filter(s => typeof s === 'string') : [];
+  const formatter = config.formatter ? [config.formatter] : [];
+  const parserPreset = await config.parserPreset;
+  const parserPresetPaths: string[] = parserPreset
+    ? typeof parserPreset === 'string'
+      ? [parserPreset]
+      : parserPreset.path
+        ? [parserPreset.path ?? parserPreset]
+        : []
+    : [];
+  return [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths].map(id => toDependency(id));
 };
 
-export const NAME = 'commitlint';
-
-/** @public */
-export const ENABLERS = ['@commitlint/cli'];
-
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
-
-export const CONFIG_FILE_PATTERNS = [
-  '.commitlintrc',
-  '.commitlintrc.{json,yaml,yml,js,cjs,ts,cts}',
-  'commitlint.config.{js,cjs,ts,cts}',
-  'package.json',
-];
-
-const findCommitLintDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
-  if (isProduction) return [];
-
-  const localConfig: CommitLintConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.commitlint : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return localConfig.extends ? [localConfig.extends].flat() : [];
-};
-
-export const findDependencies = timerify(findCommitLintDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+} satisfies Plugin;

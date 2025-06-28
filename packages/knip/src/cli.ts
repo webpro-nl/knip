@@ -1,33 +1,54 @@
-import './util/register.js';
-import prettyMilliseconds from 'pretty-ms';
-import parsedArgValues, { helpText } from './util/cli-arguments.js';
-import { isKnownError, getKnownError, isConfigurationError, hasCause } from './util/errors.js';
-import { cwd } from './util/path.js';
-import { Performance } from './util/Performance.js';
-import { runPreprocessors, runReporters } from './util/reporter.js';
-import { version } from './version.js';
 import { main } from './index.js';
-import type { ReporterOptions, IssueType } from './types/issues.js';
+import type { IssueType, ReporterOptions } from './types/issues.js';
+import { perfObserver } from './util/Performance.js';
+import parsedArgValues, { helpText } from './util/cli-arguments.js';
+import { getKnownError, isConfigurationError, isDisplayReason, isKnownError } from './util/errors.js';
+import { logError, logWarning } from './util/log.js';
+import { cwd, join, toPosix } from './util/path.js';
+import { runPreprocessors, runReporters } from './util/reporter.js';
+import { prettyMilliseconds } from './util/string.js';
+import { splitTags } from './util/tag.js';
+import { isTrace } from './util/trace.js';
+import { version } from './version.js';
+
+const defaultCacheLocation = join(cwd, 'node_modules', '.cache', 'knip');
 
 const {
+  'allow-remove-files': isRemoveFiles = false,
+  cache: isCache = false,
+  'cache-location': cacheLocation = defaultCacheLocation,
   debug: isDebug = false,
+  dependencies: isDependenciesShorthand = false,
+  exclude: excludedIssueTypes = [],
+  'experimental-tags': experimentalTags = [],
+  exports: isExportsShorthand = false,
+  files: isFilesShorthand = false,
+  fix: isFix = false,
+  format: isFormat = false,
+  'fix-type': fixTypes = [],
   help: isHelp,
+  include: includedIssueTypes = [],
+  'include-entry-exports': isIncludeEntryExports = false,
+  'include-libs': isIncludeLibs = false,
+  'isolate-workspaces': isIsolateWorkspaces = false,
   'max-issues': maxIssues = '0',
-  'no-config-hints': noConfigHints = false,
+  'memory-realtime': memoryRealtime = false,
+  'no-config-hints': isNoConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
-  'no-progress': isNoProgress = false,
-  'include-entry-exports': isIncludeEntryExports = false,
-  'isolate-workspaces': isIsolateWorkspaces = false,
-  performance: isObservePerf = false,
-  production: isProduction = false,
-  'reporter-options': reporterOptions = '',
+  'no-progress': isNoProgress = isDebug || isTrace || memoryRealtime,
+  preprocessor = [],
   'preprocessor-options': preprocessorOptions = '',
+  production: isProduction = false,
+  reporter = ['symbols'],
+  'reporter-options': reporterOptions = '',
   strict: isStrict = false,
-  fix: isFix = false,
-  'fix-type': fixTypes = [],
+  tags = [],
+  'treat-config-hints-as-errors': treatConfigHintsAsErrors = false,
   tsConfig,
   version: isVersion,
+  watch: isWatch = false,
+  workspace: rawWorkspaceArg,
 } = parsedArgValues;
 
 if (isHelp) {
@@ -40,70 +61,116 @@ if (isVersion) {
   process.exit(0);
 }
 
-const isShowProgress =
-  !isDebug && isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
+const isShowProgress = isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
+
+const workspace = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, '').replace(/\/$/, '') : undefined;
 
 const run = async () => {
   try {
-    const perfObserver = new Performance(isObservePerf);
-
-    const { report, issues, counters, rules, configurationHints } = await main({
+    const {
+      report,
+      issues,
+      counters,
+      rules,
+      tagHints,
+      configurationHints,
+      isTreatConfigHintsAsErrors,
+      includedWorkspaces,
+    } = await main({
+      cacheLocation,
       cwd,
-      tsConfigFile: tsConfig,
-      gitignore: !isNoGitIgnore,
-      isProduction,
-      isStrict,
-      isShowProgress,
-      isIncludeEntryExports,
-      isIsolateWorkspaces,
-      isFix: isFix || fixTypes.length > 0,
+      excludedIssueTypes,
       fixTypes: fixTypes.flatMap(type => type.split(',')),
+      gitignore: !isNoGitIgnore,
+      includedIssueTypes,
+      isCache,
+      isDebug,
+      isDependenciesShorthand,
+      isExportsShorthand,
+      isFilesShorthand,
+      isFix: isFix || fixTypes.length > 0,
+      isFormat,
+      isIncludeEntryExports,
+      isIncludeLibs,
+      isIsolateWorkspaces,
+      isProduction: isStrict || isProduction,
+      isRemoveFiles,
+      isShowProgress,
+      isStrict,
+      isWatch,
+      tags: tags.length > 0 ? splitTags(tags) : splitTags(experimentalTags),
+      tsConfigFile: tsConfig,
+      workspace,
     });
+
+    // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in certain modes
+    const isDisableConfigHints = isNoConfigHints || isProduction || Boolean(workspace);
+
+    // These modes have their own reporting mechanism
+    if (isWatch || isTrace) return;
 
     const initialData: ReporterOptions = {
       report,
       issues,
       counters,
+      tagHints,
       configurationHints,
-      noConfigHints,
+      isDisableConfigHints,
+      isTreatConfigHintsAsErrors,
       cwd,
       isProduction,
       isShowProgress,
       options: reporterOptions,
       preprocessorOptions,
+      includedWorkspaces,
     };
 
-    const finalData = await runPreprocessors(initialData);
+    const finalData = await runPreprocessors(preprocessor, initialData);
 
-    await runReporters(finalData);
+    await runReporters(reporter, finalData);
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
       .filter(reportGroup => finalData.report[reportGroup] && rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
-    if (isObservePerf) {
-      await perfObserver.finalize();
-      console.log('\n' + perfObserver.getTable());
-      const mem = Math.round((perfObserver.getMemHeapUsage() / 1024 / 1024) * 100) / 100;
-      console.log('\nTotal running time:', prettyMilliseconds(perfObserver.getTotalTime()), `(mem: ${mem}MB)`);
+    if (perfObserver.isEnabled) await perfObserver.finalize();
+    if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
+    if (perfObserver.isMemoryUsageEnabled && !memoryRealtime) console.log(`\n${perfObserver.getMemoryUsageTable()}`);
+
+    if (perfObserver.isEnabled) {
+      const duration = perfObserver.getCurrentDurationInMs();
+      console.log('\nTotal running time:', prettyMilliseconds(duration));
       perfObserver.reset();
     }
 
-    if (!noExitCode && totalErrorCount > Number(maxIssues)) {
+    if (experimentalTags.length > 0) {
+      logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
+    }
+
+    if (isIsolateWorkspaces && report.classMembers) {
+      logWarning('WARNING', 'Class members are not tracked when using the --isolate-workspaces flag');
+    }
+
+    if (
+      (!noExitCode && totalErrorCount > Number(maxIssues)) ||
+      ((treatConfigHintsAsErrors || isTreatConfigHintsAsErrors) && configurationHints.size > 0)
+    ) {
       process.exit(1);
     }
   } catch (error: unknown) {
     process.exitCode = 2;
     if (!isDebug && error instanceof Error && isKnownError(error)) {
       const knownError = getKnownError(error);
-      console.error(knownError.message);
-      if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
-      if (isConfigurationError(knownError)) console.log('\n' + helpText);
+      logError('ERROR', knownError.message);
+      if (isDisplayReason(knownError)) console.error('Reason:', knownError.cause.message);
+      if (isConfigurationError(knownError)) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
     throw error;
   }
+
+  process.exit(0);
 };
 
 await run();

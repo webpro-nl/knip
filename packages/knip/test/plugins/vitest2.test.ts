@@ -1,13 +1,13 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../../src/index.js';
-import { resolve, join } from '../../src/util/path.js';
+import { join, resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/vitest2');
 
-test('Find dependencies in vitest configuration (entry) 2', async () => {
+test('Find dependencies with the Vitest plugin (2)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

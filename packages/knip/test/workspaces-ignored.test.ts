@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -16,7 +16,14 @@ test('Ignore workspaces', async () => {
   assert.equal(Object.keys(issues.binaries).length, 1);
   assert(issues.binaries['packages/e/package.json']['not-ignored']);
 
-  assert.deepEqual(configurationHints, new Set([{ type: 'ignoreWorkspaces', identifier: 'packages/f' }]));
+  assert.deepEqual(
+    configurationHints,
+    new Set([
+      { type: 'ignoreWorkspaces', identifier: 'packages/not-found' },
+      { type: 'ignoreWorkspaces', identifier: 'packages/wut/*' },
+      { type: 'ignoreWorkspaces', identifier: 'packages/un/**/used' },
+    ])
+  );
 
   assert.deepEqual(counters, {
     ...baseCounters,

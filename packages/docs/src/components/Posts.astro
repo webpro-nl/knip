@@ -1,0 +1,100 @@
+---
+import { readFile } from 'node:fs/promises';
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import { type PostResponse, formatTimestamp } from '../util/post.js';
+import Post from './Post.astro';
+
+const BEARER_TOKEN = import.meta.env.BEARER_TOKEN;
+
+// const ENVIRONMENT = import.meta.env.ENVIRONMENT;
+// const isFetch = ENVIRONMENT !== 'development' && Boolean(BEARER_TOKEN);
+const isFetch = false;
+
+const tweetIds = [
+  '1745972825490604506',
+  '1730180003453927560',
+  '1691460974518353920',
+  '1729181106715632088',
+  '1729157761215369264',
+  '1727040036334424406',
+  '1726807293583609935',
+  '1714023231689031941',
+  '1696221274039595363',
+  '1693944495472046382',
+  '1691120132901240832',
+  '1685298103094554625',
+  '1581910299846012928',
+  '1693502146128281657',
+  '1692942539614028086',
+];
+
+const tweet_url = new URL('/2/tweets', 'https://api.twitter.com');
+tweet_url.searchParams.set('ids', tweetIds.join(','));
+tweet_url.searchParams.set('expansions', ['author_id', 'attachments.media_keys'].join(','));
+tweet_url.searchParams.set('user.fields', ['name', 'username', 'profile_image_url'].join(','));
+tweet_url.searchParams.set('tweet.fields', ['note_tweet', 'created_at', 'public_metrics', 'entities'].join(','));
+tweet_url.searchParams.set('media.fields', ['type', 'preview_image_url', 'url', 'alt_text', 'variants'].join(','));
+
+const tweets: PostResponse = isFetch
+  ? await fetch(tweet_url.href, {
+      headers: {
+        Authorization: `Bearer ${BEARER_TOKEN}`,
+      },
+    }).then(res => res.json())
+  : JSON.parse(await readFile('mock/posts.json', 'utf-8'));
+
+if (!tweets.data) console.log(tweets);
+
+interface Testimonial {
+  name: string;
+  text: string;
+  timestamp: string;
+  url: string;
+}
+
+const testimonials: Testimonial[] = JSON.parse(await readFile('mock/testimonials.json', 'utf-8'));
+---
+
+<style>
+  .text {
+    color: var(--sl-color-text-accent);
+  }
+</style>
+
+<div class="no-title-cards">
+  <CardGrid stagger>
+    {
+      (tweets?.data ?? []).map(tweet => (
+        <Card title="">
+          <Post
+            data={{
+              ...tweet,
+              user: tweets.includes.users.find(
+                user => user.id === tweet.author_id
+              ),
+              media: tweets.includes.media?.filter(media =>
+                tweet.entities.urls
+                  ?.map(url => url.media_key)
+                  .includes(media.media_key)
+              ),
+            }}
+          />
+        </Card>
+      ))
+    }
+    {
+      testimonials.map(testimonial => {
+        const date = formatTimestamp(testimonial.timestamp);
+        return (
+          <Card title={testimonial.name}>
+            <p class="text">{testimonial.text}</p>
+            <p>
+              {testimonial.url ? <a href={testimonial.url}>{date}</a> : date}
+            </p>
+          </Card>
+        );
+      })
+    }
+    <CardGrid />
+  </CardGrid>
+</div>

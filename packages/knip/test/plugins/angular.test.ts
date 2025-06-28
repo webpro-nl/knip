@@ -1,14 +1,28 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import * as angular from '../../src/plugins/angular/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { getManifest } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/angular');
-const manifest = getManifest(cwd);
 
-test('Find dependencies in angular configuration (json)', async () => {
-  const configFilePath = join(cwd, 'angular.json');
-  const dependencies = await angular.findDependencies(configFilePath, { cwd, manifest });
-  assert.deepEqual(dependencies, ['@angular-devkit/build-angular', join(cwd, 'src/main.ts'), 'jasmine']);
+test('Find dependencies with the Angular plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert(issues.unlisted['angular.json']['@angular-devkit/build-angular']);
+  assert(issues.unresolved['tsconfig.spec.json']['jasmine']);
+  assert(issues.devDependencies['package.json']['karma']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unlisted: 1,
+    unresolved: 1,
+    processed: 4,
+    total: 4,
+  });
 });

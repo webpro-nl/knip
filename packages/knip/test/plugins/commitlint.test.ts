@@ -1,26 +1,35 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import * as commitlint from '../../src/plugins/commitlint/index.js';
-import { join, resolve } from '../../src/util/path.js';
-import { getManifest } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/commitlint');
-const manifest = getManifest(cwd);
 
-test('Find dependencies in commitlint configuration (js)', async () => {
-  const configFilePath = join(cwd, 'commitlint.config.js');
-  const dependencies = await commitlint.findDependencies(configFilePath, {});
-  assert.deepEqual(dependencies, ['@commitlint/config-conventional']);
-});
+test('Find dependencies with the Commitizen plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in commitlint configuration (json)', async () => {
-  const configFilePath = join(cwd, '.commitlintrc.json');
-  const dependencies = await commitlint.findDependencies(configFilePath, {});
-  assert.deepEqual(dependencies, ['@commitlint/config-conventional']);
-});
+  assert(issues.unlisted['.commitlintrc.json']['@commitlint/config-conventional']);
+  assert(issues.unlisted['.commitlintrc.json']['commitlint-plugin-tense']);
+  assert(issues.unlisted['.commitlintrc.json']['conventional-changelog-atom']);
 
-test('Find dependencies in commitlint configuration (package.json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await commitlint.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['@commitlint/config-conventional']);
+  assert(issues.unlisted['commitlint.config.js']['@commitlint/config-conventional']);
+  assert(issues.unlisted['commitlint.config.js']['commitlint-plugin-tense']);
+  assert(issues.unlisted['commitlint.config.js']['commitlint-config-lerna']);
+  assert(issues.unlisted['commitlint.config.js']['@commitlint/format']);
+
+  assert(issues.unlisted['package.json']['@commitlint/config-conventional']);
+  assert(issues.unlisted['package.json']['commitlint-plugin-tense']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unlisted: 9,
+    processed: 1,
+    total: 1,
+  });
 });

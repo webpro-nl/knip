@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/workspaces-dts__shared",
+  "private": true,
+  "main": "src/index.js",
+  "types": "build/index.d.ts",
+  "type": "module"
+}

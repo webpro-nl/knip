@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/netlify",
+  "devDependencies": {
+    "netlify-cli": "*"
+  }
+}

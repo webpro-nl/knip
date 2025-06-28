@@ -1,31 +1,30 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { NpmPkgJsonLintConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://npmpackagejsonlint.org/docs/
 
-export const NAME = 'npm-package-json-lint';
+const title = 'npm-package-json-lint';
 
-/** @public */
-export const ENABLERS = ['npm-package-json-lint'];
+const enablers = ['npm-package-json-lint'];
 
-export const PACKAGE_JSON_PATH = 'npmpackagejsonlint';
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const packageJsonPath = 'npmpackagejsonlint';
 
-export const CONFIG_FILE_PATTERNS = ['.npmpackagejsonlintrc.json', 'npmpackagejsonlint.config.js', 'package.json'];
+const config = ['package.json', ...toCosmiconfig('npmpackagejsonlint')];
 
-const findNpmPkgJsonLintConfigDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: NpmPkgJsonLintConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
-
-  return localConfig?.extends ? [localConfig.extends] : [];
+const resolveConfig: ResolveConfig<NpmPkgJsonLintConfig> = localConfig => {
+  return localConfig?.extends ? [localConfig.extends].map(id => toDependency(id)) : [];
 };
 
-export const findDependencies = timerify(findNpmPkgJsonLintConfigDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  packageJsonPath,
+  config,
+  resolveConfig,
+} satisfies Plugin;

@@ -1,6 +1,0 @@
-{
-  "name": "compilers-vue",
-  "dependencies": {
-    "vue": "*"
-  }
-}

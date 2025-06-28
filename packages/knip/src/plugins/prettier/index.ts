@@ -1,40 +1,36 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve, toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { PrettierConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://prettier.io/docs/en/configuration.html
+// https://github.com/prettier/prettier/blob/main/src/config/prettier-config/config-searcher.js
 
-export const NAME = 'Prettier';
+const title = 'Prettier';
 
-/** @public */
-export const ENABLERS = ['prettier'];
+const enablers = ['prettier'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies, config }) =>
-  hasDependency(dependencies, ENABLERS) || 'prettier' in config;
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = [
+const config = [
   '.prettierrc',
-  '.prettierrc.{json,js,cjs,mjs,yml,yaml}',
-  'prettier.config.{js,cjs,mjs}',
-  'package.json',
+  '.prettierrc.{json,js,cjs,mjs,ts,cts,mts,yml,yaml,toml,json5}',
+  'prettier.config.{js,cjs,mjs,ts,cts,mts}',
+  'package.{json,yaml}',
 ];
 
-const findPrettierDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
-  if (isProduction) return [];
+const resolveConfig: ResolveConfig<PrettierConfig> = config => {
+  if (typeof config === 'string') return [toDeferResolve(config)];
 
-  const localConfig: PrettierConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.prettier : await load(configFilePath);
-
-  // https://prettier.io/docs/en/configuration.html#sharing-configurations
-  if (typeof localConfig === 'string') {
-    return [localConfig];
-  }
-
-  return localConfig && Array.isArray(localConfig.plugins)
-    ? localConfig.plugins.filter((plugin): plugin is string => typeof plugin === 'string')
+  return Array.isArray(config.plugins)
+    ? config.plugins.filter((plugin): plugin is string => typeof plugin === 'string').map(id => toDependency(id))
     : [];
 };
 
-export const findDependencies = timerify(findPrettierDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+} satisfies Plugin;

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/ignore-exports-used-in-file-alias-exclude",
+  "knip": {
+    "ignoreExportsUsedInFile": true
+  }
+}

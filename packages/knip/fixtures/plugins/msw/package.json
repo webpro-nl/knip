@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/msw",
+  "knip": {
+    "msw": true
+  },
+  "devDependencies": {
+    "msw": "*"
+  },
+  "msw": {
+    "workerDirectory": "bob"
+  }
+}

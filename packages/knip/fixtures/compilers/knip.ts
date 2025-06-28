@@ -1,16 +1,13 @@
-module.exports = {
+import '@mdx-js/mdx';
+
+export default {
   compilers: {
     md: (text, path) => {
-      if (!path)
-        throw new Error('Path not passed to compiler')
-
-      return text
+      if (!path) throw new Error('Path not passed to compiler');
+      return '';
     },
-    mdx: async (text, path) => {
-      if (!path)
-        throw new Error('Path not passed to compiler')
-
-      return text
+    css: async (text: string) => {
+      return [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n');
     },
   },
 };

@@ -1,0 +1,3 @@
+{
+  "reporterEnabled": "mochawesome, mocha-junit-reporter ,  @testing-library/my-fake-reporter"
+}

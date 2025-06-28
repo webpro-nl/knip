@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspaces-dts",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

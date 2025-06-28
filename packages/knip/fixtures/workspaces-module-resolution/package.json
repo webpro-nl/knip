@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspaces-module-resolution",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

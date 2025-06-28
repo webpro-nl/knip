@@ -1,10 +1,10 @@
 import bin from '../dist/cli.cjs';
 import Icon from './icon.svg?raw';
 import Icon404 from './icon-404.svg';
-import Styles from 'style-loader!css-loader?modules!./styles.css';
-import Styles from '!style-loader!css-loader?modules!./styles.css';
-import Styles from '!!style-loader!css-loader?modules!./styles.css';
-import Styles from '-!style-loader!css-loader?modules!./styles.css';
+import Styles1 from 'style-loader!css-loader?modules!./styles.css';
+import Styles2 from '!style-loader!css-loader?modules!./styles.css';
+import Styles3 from '!!style-loader!css-loader?modules!./styles.css';
+import Styles4 from '-!style-loader!css-loader?modules!./styles.css';
 import unresolved from './unresolved';
 import unresolvedPkg from 'unresolved';
 import unresolvedOrg from '@org/unresolved';
@@ -17,3 +17,6 @@ import SomePNG from 'common/image.png';
 
 import './globals.css';
 import 'styles/base.css';
+
+import '~/styles/aliased.css';
+import '~/common/aliased.svg';

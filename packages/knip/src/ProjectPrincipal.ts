@@ -1,25 +1,23 @@
 import ts from 'typescript';
-import { DEFAULT_EXTENSIONS } from './constants.js';
-import { IGNORED_FILE_EXTENSIONS } from './constants.js';
-import { getJSDocTags, getLineAndCharacterOfPosition, isInModuleBlock } from './typescript/ast-helpers.js';
-import { createHosts } from './typescript/createHosts.js';
-import { _getImportsAndExports } from './typescript/getImportsAndExports.js';
-import { createCustomModuleResolver } from './typescript/resolveModuleNames.js';
+import { CacheConsultant } from './CacheConsultant.js';
+import { getCompilerExtensions } from './compilers/index.js';
+import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, PUBLIC_TAG } from './constants.js';
+import type { GetImportsAndExportsOptions } from './types/config.js';
+import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.js';
+import type { Paths, PrincipalOptions } from './types/project.js';
+import type { BoundSourceFile } from './typescript/SourceFile.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
-import { compact } from './util/array.js';
-import { debugLog } from './util/debug.js';
-import { isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
-import { dirname, extname, isInNodeModules, join } from './util/path.js';
+import { createHosts } from './typescript/create-hosts.js';
+import { _getImportsAndExports } from './typescript/get-imports-and-exports.js';
+import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
-import type { PrincipalOptions } from './PrincipalFactory.js';
-import type { SyncCompilers, AsyncCompilers } from './types/compilers.js';
-import type { ExportItem, ExportItemMember } from './types/exports.js';
-import type { UnresolvedImport } from './types/imports.js';
-import type { BoundSourceFile, GetResolvedModule, ProgramMaybe53 } from './typescript/SourceFile.js';
-import type { GlobbyFilterFunction } from 'globby';
+import { compact } from './util/array.js';
+import { extname, isInNodeModules, toAbsolute } from './util/path.js';
+import type { ToSourceFilePath } from './util/to-source-path.js';
 
 // These compiler options override local options
-const baseCompilerOptions = {
+const baseCompilerOptions: ts.CompilerOptions = {
   allowJs: true,
   allowSyntheticDefaultImports: true,
   declaration: false,
@@ -30,17 +28,17 @@ const baseCompilerOptions = {
   jsx: ts.JsxEmit.Preserve,
   jsxImportSource: undefined,
   lib: [],
-  types: ['node'],
   noEmit: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   sourceMap: false,
+  types: ['node'],
 };
 
 const tsCreateProgram = timerify(ts.createProgram);
 
 /**
- * This class aims to abstract away TypeScript specific things from the main flow.
+ * Abstracts away TypeScript API from the main flow
  *
  * - Provided by the principal factory
  * - Collects entry and project paths
@@ -53,75 +51,120 @@ export class ProjectPrincipal {
   // Configured by user and returned from plugins
   entryPaths = new Set<string>();
   projectPaths = new Set<string>();
+  nonEntryPaths = new Set<string>();
 
-  // We don't want to report unused exports of config/plugin entry files
+  // Don't report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
 
-  isGitIgnored: GlobbyFilterFunction;
   cwd: string;
   compilerOptions: ts.CompilerOptions;
   extensions: Set<string>;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
+  isSkipLibs: boolean;
+  isWatch: boolean;
+
+  cache: CacheConsultant<FileNode>;
+
+  toSourceFilePath: ToSourceFilePath;
 
   backend: {
     fileManager: SourceFileManager;
-    compilerHost: ts.CompilerHost;
-    resolveModuleNames: ReturnType<typeof createCustomModuleResolver>;
-    lsFindReferences: ts.LanguageService['findReferences'];
-    program?: ProgramMaybe53;
+    compilerHost?: ts.CompilerHost;
+    resolveModuleNames: ResolveModuleNames;
+    program?: ts.Program;
+    typeChecker?: ts.TypeChecker;
+    languageServiceHost: ts.LanguageServiceHost;
   };
 
-  constructor({ compilerOptions, cwd, compilers, isGitIgnored }: PrincipalOptions) {
-    this.cwd = cwd;
+  findReferences?: ts.LanguageService['findReferences'];
 
-    this.isGitIgnored = isGitIgnored;
+  constructor({
+    compilerOptions,
+    cwd,
+    compilers,
+    isSkipLibs,
+    isWatch,
+    pkgName,
+    toSourceFilePath,
+    isCache,
+    cacheLocation,
+    isProduction,
+  }: PrincipalOptions) {
+    this.cwd = cwd;
 
     this.compilerOptions = {
       ...compilerOptions,
       ...baseCompilerOptions,
-      types: compact([...(compilerOptions.types ?? []), ...baseCompilerOptions.types]),
+      types: compact([...(compilerOptions.types ?? []), ...(baseCompilerOptions.types ?? [])]),
       allowNonTsExtensions: true,
     };
 
     const [syncCompilers, asyncCompilers] = compilers;
-    this.extensions = new Set([...DEFAULT_EXTENSIONS, ...syncCompilers.keys(), ...asyncCompilers.keys()]);
+    this.extensions = new Set([...DEFAULT_EXTENSIONS, ...getCompilerExtensions(compilers)]);
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
+    this.isSkipLibs = isSkipLibs;
+    this.isWatch = isWatch;
+    this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation, isProduction });
+    this.toSourceFilePath = toSourceFilePath;
 
-    const { fileManager, compilerHost, languageServiceHost, resolveModuleNames } = createHosts({
+    // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
+    this.backend = {
+      fileManager: new SourceFileManager({ compilers, isSkipLibs }),
+    };
+  }
+
+  init() {
+    const { compilerHost, resolveModuleNames, languageServiceHost } = createHosts({
       cwd: this.cwd,
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
       compilers: [this.syncCompilers, this.asyncCompilers],
+      isSkipLibs: this.isSkipLibs,
+      toSourceFilePath: this.toSourceFilePath,
+      useResolverCache: !this.isWatch,
+      fileManager: this.backend.fileManager,
     });
 
-    const languageService = ts.createLanguageService(languageServiceHost, ts.createDocumentRegistry());
+    this.backend.compilerHost = compilerHost;
+    this.backend.resolveModuleNames = resolveModuleNames;
+    this.backend.languageServiceHost = languageServiceHost;
+  }
 
-    const lsFindReferences = timerify(languageService?.findReferences);
+  addPaths(paths: Paths, basePath: string) {
+    if (!paths) return;
+    this.compilerOptions.paths ??= {};
+    for (const key in paths) {
+      const prefixes = paths[key].map(prefix => toAbsolute(prefix, basePath));
+      if (key in this.compilerOptions.paths) {
+        this.compilerOptions.paths[key] = compact([...this.compilerOptions.paths[key], ...prefixes]);
+      } else {
+        this.compilerOptions.paths[key] = prefixes;
+      }
+    }
+  }
 
-    this.backend = {
-      fileManager,
-      compilerHost,
-      resolveModuleNames,
-      lsFindReferences,
-    };
+  addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
+    this.syncCompilers = new Map([...this.syncCompilers, ...compilers[0]]);
+    this.asyncCompilers = new Map([...this.asyncCompilers, ...compilers[1]]);
+    this.extensions = new Set([...this.extensions, ...getCompilerExtensions(compilers)]);
   }
 
   /**
-   * `ts.createProgram()` resolves files starting from the provided entry/root files. Calling `program.getTypeChecker()`
-   * binds files and symbols (including symbols and maps like `sourceFile.resolvedModules` and `sourceFile.symbols`)
+   * `ts.createProgram()` resolves files starting from the provided entry/root
+   * files. Calling `program.getTypeChecker()` binds files and symbols
    */
   private createProgram() {
     this.backend.program = tsCreateProgram(
-      Array.from(this.entryPaths),
+      [...this.entryPaths, ...this.nonEntryPaths],
       this.compilerOptions,
       this.backend.compilerHost,
       this.backend.program
     );
 
     const typeChecker = timerify(this.backend.program.getTypeChecker);
-    typeChecker();
+    this.backend.typeChecker = typeChecker();
   }
 
   private hasAcceptedExtension(filePath: string) {
@@ -137,13 +180,29 @@ export class ProjectPrincipal {
   }
 
   public addEntryPaths(filePaths: Set<string> | string[], options?: { skipExportsAnalysis: boolean }) {
-    filePaths.forEach(filePath => this.addEntryPath(filePath, options));
+    for (const filePath of filePaths) this.addEntryPath(filePath, options);
+  }
+
+  public addNonEntryPath(filePath: string) {
+    if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
+      this.nonEntryPaths.add(filePath);
+    }
   }
 
   public addProjectPath(filePath: string) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
       this.projectPaths.add(filePath);
+      this.deletedFiles.delete(filePath);
     }
+  }
+
+  // TODO Organize better
+  deletedFiles = new Set();
+  public removeProjectPath(filePath: string) {
+    this.entryPaths.delete(filePath);
+    this.projectPaths.delete(filePath);
+    this.invalidateFile(filePath);
+    this.deletedFiles.add(filePath);
   }
 
   /**
@@ -175,10 +234,14 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(
-    filePath: string,
-    { skipTypeOnly, isFixExports, isFixTypes }: { skipTypeOnly: boolean; isFixExports: boolean; isFixTypes: boolean }
-  ) {
+  public analyzeSourceFile(filePath: string, options: Omit<GetImportsAndExportsOptions, 'skipExports'>) {
+    const fd = this.cache.getFileDescriptor(filePath);
+    if (!fd.changed && fd.meta?.data) return fd.meta.data;
+
+    const typeChecker = this.backend.typeChecker;
+
+    if (!typeChecker) throw new Error('TypeChecker must be initialized before source file analysis');
+
     // We request it from `fileManager` directly as `program` does not contain cross-referenced files
     const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
 
@@ -186,120 +249,65 @@ export class ProjectPrincipal {
 
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
-    const getResolvedModule: GetResolvedModule = specifier =>
-      this.backend.program?.getResolvedModule
-        ? this.backend.program.getResolvedModule(sourceFile, specifier, /* mode */ undefined)
-        : sourceFile.resolvedModules?.get(specifier, /* mode */ undefined);
+    const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
-    const { imports, exports, scripts } = _getImportsAndExports(sourceFile, getResolvedModule, {
-      skipTypeOnly,
-      skipExports,
-      isFixExports,
-      isFixTypes,
-    });
-
-    const { internal, unresolved, external } = imports;
-
-    const unresolvedImports = new Set<UnresolvedImport>();
-
-    unresolved.forEach(unresolvedImport => {
-      const { specifier } = unresolvedImport;
-      if (specifier.startsWith('http')) {
-        // Ignore Deno style http import specifiers.
-        return;
-      }
-      const resolvedModule = this.resolveModule(specifier, filePath);
-      if (resolvedModule) {
-        if (resolvedModule.isExternalLibraryImport) {
-          const sanitizedSpecifier = sanitizeSpecifier(specifier);
-          external.add(sanitizedSpecifier);
-        } else {
-          const isIgnored = this.isGitIgnored(resolvedModule.resolvedFileName);
-          if (!isIgnored) this.addEntryPath(resolvedModule.resolvedFileName, { skipExportsAnalysis: true });
-        }
-      } else {
-        const sanitizedSpecifier = sanitizeSpecifier(specifier);
-        if (isStartsLikePackageName(sanitizedSpecifier)) {
-          // Should never end up here; maybe a dependency that was not installed.
-          external.add(sanitizedSpecifier);
-        } else {
-          const isIgnored = this.isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
-          if (!isIgnored) {
-            const ext = extname(sanitizedSpecifier);
-            const hasIgnoredExtension = IGNORED_FILE_EXTENSIONS.has(ext);
-            if (!ext || (ext !== '.json' && !hasIgnoredExtension)) {
-              unresolvedImports.add(unresolvedImport);
-            }
-          }
-        }
-      }
-    });
-
-    return {
-      imports: {
-        internal,
-        unresolved: unresolvedImports,
-        external,
-      },
-      exports,
-      scripts,
-    };
+    return _getImportsAndExports(sourceFile, resolve, typeChecker, { ...options, skipExports });
   }
 
-  public resolveModule(specifier: string, filePath: string = specifier) {
-    return this.backend.resolveModuleNames([specifier], filePath)[0];
+  invalidateFile(filePath: string) {
+    this.backend.fileManager.snapshotCache.delete(filePath);
+    this.backend.fileManager.sourceFileCache.delete(filePath);
   }
 
-  public getHasReferences(filePath: string, exportedItem: ExportItem) {
-    const hasReferences = { external: false, internal: false };
-
-    const pos = exportedItem.posDecl ?? exportedItem.pos;
-    const symbolReferences = this.findReferences(filePath, pos).flatMap(f => f.references);
-
-    for (const reference of symbolReferences) {
-      if (reference.fileName === filePath) {
-        if (!reference.isDefinition) {
-          hasReferences.internal = true;
-        }
-      } else {
-        hasReferences.external = true;
-      }
+  public findUnusedMembers(filePath: string, members: ExportMember[]) {
+    if (!this.findReferences) {
+      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
+      this.findReferences = timerify(languageService.findReferences);
     }
 
-    if (!hasReferences.external && hasReferences.internal) {
-      // Consider exports in module blocks (namespaces) referenced in the same file as external refs
-      // Pattern: namespace NS { export type T }; type U = NS.T;
-      hasReferences.external = isInModuleBlock(exportedItem.node);
-    }
-
-    return hasReferences;
-  }
-
-  public findUnusedMembers(filePath: string, members: ExportItemMember[]) {
     return members.filter(member => {
-      if (getJSDocTags(member.node).has('@public')) return false;
-      const referencedSymbols = this.findReferences(filePath, member.pos);
-      const files = referencedSymbols
-        .flatMap(refs => refs.references)
-        .filter(ref => !ref.isDefinition)
-        .map(ref => ref.fileName);
-      const internalRefs = files.filter(f => f === filePath);
-      const externalRefs = files.filter(f => f !== filePath);
-      return externalRefs.length === 0 && internalRefs.length === 0;
+      if (member.jsDocTags.has(PUBLIC_TAG)) return false;
+      const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+      const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
+      return refs.length === 0;
     });
   }
 
-  private findReferences(filePath: string, pos: number) {
-    try {
-      return this.backend.lsFindReferences(filePath, pos) ?? [];
-    } catch (error) {
-      // TS throws for (cross-referenced) files not in the program
-      debugLog('*', String(error));
-      return [];
+  public hasExternalReferences(filePath: string, exportedItem: Export) {
+    if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
+
+    if (!this.findReferences) {
+      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
+      this.findReferences = timerify(languageService.findReferences);
     }
+
+    const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
+
+    if (!referencedSymbols?.length) return false;
+
+    const externalRefs = referencedSymbols
+      .flatMap(refs => refs.references)
+      .filter(ref => !ref.isDefinition && ref.fileName !== filePath)
+      .filter(ref => {
+        // Filter out are re-exports
+        const sourceFile = this.backend.program?.getSourceFile(ref.fileName);
+        if (!sourceFile) return true;
+        // @ts-expect-error ts.getTokenAtPosition is internal fn
+        const node = ts.getTokenAtPosition(sourceFile, ref.textSpan.start);
+        if (!node?.parent?.parent?.parent) return true;
+        return !(ts.isExportSpecifier(node.parent) && node.parent.parent.parent.moduleSpecifier);
+      });
+
+    return externalRefs.length > 0;
   }
 
-  public getPos(node: ts.Node, pos: number) {
-    return getLineAndCharacterOfPosition(node, pos);
+  reconcileCache(graph: ModuleGraph) {
+    for (const [filePath, file] of graph.entries()) {
+      const fd = this.cache.getFileDescriptor(filePath);
+      if (!fd?.meta) continue;
+      const { imported, internalImportCache, ...clone } = file;
+      fd.meta.data = clone;
+    }
+    this.cache.reconcile();
   }
 }

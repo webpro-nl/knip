@@ -1,0 +1,13 @@
+name: CI
+
+on: push
+
+jobs:
+  stylelint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run stylelint check
+        run: yarn stylelint
+        working-directory: packages/app

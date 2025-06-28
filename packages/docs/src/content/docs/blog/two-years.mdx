@@ -1,0 +1,107 @@
+---
+title: Two Years
+date: 2024-10-04
+sidebar:
+  order: 2
+---
+
+_Published: 2024-10-04_
+
+import EmojiBlastButton from '../../../components/EmojiBlastButton.astro';
+import Projects from '../../../components/Projects.astro';
+import Sponsors from '../../../components/Sponsors.astro';
+
+Exactly two years ago the first commit was pushed to GitHub and the first
+version of Knip was published to the npm registry. The name was initially
+[Exportman][1]! We've come a loooong way... The JavaScript ecosystem is highly
+dynamic and I've been crazy enough to even start, try and keep up with it! But
+here we are.
+
+October 4th is World Animal Day, so there was really no choice but bring in the
+crazy mascot that early adopters may remember:
+
+![Crazy cow with orange scissors in Van Gogh style][2]
+
+Today we celebrate an unknown but CRAZY amount of clutter removed from so many
+codebases with Knip's help. Every single day I see many of those little red
+blocks for thousands of lines of deleted code and dependencies. Call me crazy,
+but to me this is pure joy and never gets old!    🟩 🟥 🟥 🟥 🟥
+
+<EmojiBlastButton />
+
+## Smiling faces
+
+The actual amount of code and dependencies removed and the number of smiling
+faces this brings is what matters most, but also remain a good mystery. Clearly
+more and more projects add Knip to their projects and CI workflows to keep
+ever-growing codebases tidy. It's wonderful to see if Knip plays its part in
+today's ecosystem to help with that. Thanks for bearing with me, here's to a lot
+more little red blocks in your PRs!    🟩 🟥 🟥 🟥 🟥
+
+## Updates
+
+Why not throw in some freshly cooked updates in [v5.31.0][3] for you while we're
+at it:
+
+- [The auto-fix feature][4] has been completely revamped, it's much better and a
+  lot more comprehensive! You have to see it to believe it.
+- Knip has upgraded to [Jiti v2][5], resolving a bunch of known issues when
+  loading configuration files authored in TypeScript and ESM, such as:
+
+```
+Cannot use 'import.meta' outside a module
+await is only valid in async functions and the top level bodies of modules
+Unexpected identifier 'Promise'
+Reflect.metadata is not a function
+```
+
+And that pesky "CJS build of Vite's Node API is deprecated" warning is finally
+gone!
+
+Thanks to everyone involved in making this happen, it's truly much appreciated.
+
+## Stable
+
+If you haven't tried Knip recently, it's worth taking another look! Version 5
+was released 8 months ago, and even though there were no breaking changes, it
+includes many enhancements. In fact, Knip has been largely stable since version
+3, which came out a year ago. Many releases have a compound effect, as Knip has
+kept the pace for two years now.
+
+## Projects using Knip
+
+This list of projects using Knip to keep their codebases tidy is something I
+couldn't be more proud of:
+
+:::section{.columns.min200}
+
+<Projects />
+
+:::
+
+And so many more on and off the radar. Very, very cool!
+
+## Sponsors
+
+Last but not least, eternal gratitude for all the sponsors that have been
+supporting me along the way. THANK YOU, THANK YOU, THANK YOU!
+
+And eh.. gotta take my chances: how about [joining this awesome club][6]?
+
+:::section{.columns.min300.mt}
+
+<Sponsors />
+
+:::
+
+## Acknowledgements
+
+Thanks to Joshua Goldberg for [emoji-blast][7]! 🎉
+
+[1]: https://www.npmjs.com/package/exportman/v/0.0.1
+[2]: /cow-with-orange-scissors-van-gogh-style.webp
+[3]: https://github.com/webpro-nl/knip/releases/tag/5.31.0
+[4]: ../features/auto-fix.md
+[5]: https://github.com/unjs/jiti
+[6]: /sponsors
+[7]: https://www.emojiblast.dev

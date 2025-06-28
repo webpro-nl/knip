@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Knip configuration for JSON",
-  "description": "See https://github.com/webpro/knip",
+  "description": "See https://github.com/webpro-nl/knip",
   "type": "object",
   "allOf": [
     {
@@ -31,6 +31,16 @@
       "examples": ["husky", "lint-staged"],
       "$ref": "#/definitions/list"
     },
+    "ignoreMembers": {
+      "title": "Class and enum members to ignore (regex allowed)",
+      "examples": ["render", "on.*"],
+      "$ref": "#/definitions/list"
+    },
+    "ignoreUnresolved": {
+      "title": "Unresolved imports to ignore (regex allowed)",
+      "examples": ["#/virtual"],
+      "$ref": "#/definitions/list"
+    },
     "ignoreWorkspaces": {
       "title": "Workspaces to ignore",
       "examples": ["packages/ignore-me"],
@@ -49,7 +59,9 @@
     "ignoreExportsUsedInFile": {
       "title": "Ignore exports used in file",
       "examples": [
-        { "ignoreExportsUsedInFile": true },
+        {
+          "ignoreExportsUsedInFile": true
+        },
         {
           "ignoreExportsUsedInFile": {
             "interface": true,
@@ -64,12 +76,24 @@
         {
           "type": "object",
           "properties": {
-            "class": { "type": "boolean" },
-            "enum": { "type": "boolean" },
-            "function": { "type": "boolean" },
-            "interface": { "type": "boolean" },
-            "member": { "type": "boolean" },
-            "type": { "type": "boolean" }
+            "class": {
+              "type": "boolean"
+            },
+            "enum": {
+              "type": "boolean"
+            },
+            "function": {
+              "type": "boolean"
+            },
+            "interface": {
+              "type": "boolean"
+            },
+            "member": {
+              "type": "boolean"
+            },
+            "type": {
+              "type": "boolean"
+            }
           }
         }
       ]
@@ -77,6 +101,11 @@
     "includeEntryExports": {
       "title": "Include entry files when reporting unused exports",
       "type": "boolean"
+    },
+    "tags": {
+      "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
+      "examples": ["+custom", "-lintignore", "-@internal"],
+      "$ref": "#/definitions/list"
     },
     "workspaces": {
       "title": "Configuration for workspaces",
@@ -96,18 +125,53 @@
     "rules": {
       "type": "object",
       "properties": {
-        "classMembers": { "$ref": "#/definitions/ruleValue" },
-        "dependencies": { "$ref": "#/definitions/ruleValue" },
-        "duplicates": { "$ref": "#/definitions/ruleValue" },
-        "enumMembers": { "$ref": "#/definitions/ruleValue" },
-        "exports": { "$ref": "#/definitions/ruleValue" },
-        "files": { "$ref": "#/definitions/ruleValue" },
-        "nsExports": { "$ref": "#/definitions/ruleValue" },
-        "nsTypes": { "$ref": "#/definitions/ruleValue" },
-        "types": { "$ref": "#/definitions/ruleValue" },
-        "unlisted": { "$ref": "#/definitions/ruleValue" },
-        "unresolved": { "$ref": "#/definitions/ruleValue" }
+        "binaries": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "classMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "dependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "devDependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "optionalPeerDependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "duplicates": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "enumMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "exports": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "files": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "nsExports": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "nsTypes": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "types": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "unlisted": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "unresolved": {
+          "$ref": "#/definitions/ruleValue"
+        }
       }
+    },
+    "treatConfigHintsAsErrors": {
+      "title": "Exit with non-zero code (1) if there are any configuration hints",
+      "type": "boolean"
     }
   },
   "unevaluatedProperties": false,
@@ -139,7 +203,7 @@
       }
     },
     "globPatterns": {
-      "description": "Use file paths and glob patterns to match files. Knip uses fast-glob and minimatch (https://github.com/micromatch/micromatch#matching-features)",
+      "description": "Use file paths and glob patterns to match files. Knip uses fast-glob and picomatch (https://github.com/micromatch/picomatch)",
       "anyOf": [
         {
           "type": "string"
@@ -191,6 +255,11 @@
           "examples": ["husky", "lint-staged"],
           "$ref": "#/definitions/list"
         },
+        "ignoreUnresolved": {
+          "title": "Unresolved imports to ignore (regex allowed)",
+          "examples": ["#/virtual"],
+          "$ref": "#/definitions/list"
+        },
         "includeEntryExports": {
           "title": "Include entry files when reporting unused exports",
           "type": "boolean"
@@ -198,7 +267,7 @@
       }
     },
     "plugin": {
-      "description": "Knip plugin configuration. See https://github.com/webpro/knip#plugins",
+      "description": "Knip plugin configuration. See https://knip.dev/explanations/plugins",
       "anyOf": [
         {
           "type": "boolean"
@@ -210,7 +279,7 @@
           "type": "object",
           "properties": {
             "config": {
-              "title": "The custom dependency resolver of this plugin is applied to the files listed here. Also see https://github.com/webpro/knip/blob/main/README.md#config",
+              "title": "The custom dependency resolver of this plugin is applied to the files listed here. Also see https://knip.dev/explanations/plugins",
               "examples": [".eslintrc.json"],
               "$ref": "#/definitions/globPatterns"
             },
@@ -231,191 +300,435 @@
     "plugins": {
       "properties": {
         "angular": {
-          "title": "angular plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/angular/README.md)",
+          "title": "angular plugin configuration (https://knip.dev/reference/plugins/angular)",
           "$ref": "#/definitions/plugin"
         },
         "astro": {
-          "title": "astro plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/astro/README.md)",
+          "title": "astro plugin configuration (https://knip.dev/reference/plugins/astro)",
           "$ref": "#/definitions/plugin"
         },
         "ava": {
-          "title": "ava plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/ava/README.md)",
+          "title": "ava plugin configuration (https://knip.dev/reference/plugins/ava)",
           "$ref": "#/definitions/plugin"
         },
         "babel": {
-          "title": "Babel plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/babel/README.md)",
+          "title": "Babel plugin configuration (https://knip.dev/reference/plugins/babel)",
+          "$ref": "#/definitions/plugin"
+        },
+        "biome": {
+          "title": "biome plugin configuration (https://knip.dev/reference/plugins/biome)",
+          "$ref": "#/definitions/plugin"
+        },
+        "bun": {
+          "title": "bun plugin configuration (https://knip.dev/reference/plugins/bun)",
+          "$ref": "#/definitions/plugin"
+        },
+        "c8": {
+          "title": "c8 plugin configuration (https://knip.dev/reference/plugins/c8)",
           "$ref": "#/definitions/plugin"
         },
         "capacitor": {
-          "title": "Capacitor plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/capacitor/README.md)",
+          "title": "Capacitor plugin configuration (https://knip.dev/reference/plugins/capacitor)",
+          "$ref": "#/definitions/plugin"
+        },
+        "changelogen": {
+          "title": "changelogen plugin configuration (https://knip.dev/reference/plugins/changelogen)",
+          "$ref": "#/definitions/plugin"
+        },
+        "changelogithub": {
+          "title": "changelogithub plugin configuration (https://knip.dev/reference/plugins/changelogithub)",
           "$ref": "#/definitions/plugin"
         },
         "changesets": {
-          "title": "Changesets plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/changesets/README.md)",
+          "title": "Changesets plugin configuration (https://knip.dev/reference/plugins/changesets)",
           "$ref": "#/definitions/plugin"
         },
         "commitizen": {
-          "title": "commitizen plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/commitizen/README.md)",
+          "title": "commitizen plugin configuration (https://knip.dev/reference/plugins/commitizen)",
           "$ref": "#/definitions/plugin"
         },
         "commitlint": {
-          "title": "commitlint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/commitlint/README.md)",
+          "title": "commitlint plugin configuration (https://knip.dev/reference/plugins/commitlint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "convex": {
+          "title": "convex plugin configuration (https://knip.dev/reference/plugins/convex)",
+          "$ref": "#/definitions/plugin"
+        },
+        "create-typescript-app": {
+          "title": "create-typescript-app plugin configuration (https://knip.dev/reference/plugins/create-typescript-app)",
           "$ref": "#/definitions/plugin"
         },
         "cspell": {
-          "title": "cspell plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/cspell/README.md)",
+          "title": "cspell plugin configuration (https://knip.dev/reference/plugins/cspell)",
+          "$ref": "#/definitions/plugin"
+        },
+        "cucumber": {
+          "title": "cucumber plugin configuration (https://knip.dev/reference/plugins/cucumber)",
           "$ref": "#/definitions/plugin"
         },
         "cypress": {
-          "title": "Cypress plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/cypress/README.md)",
+          "title": "Cypress plugin configuration (https://knip.dev/reference/plugins/cypress)",
+          "$ref": "#/definitions/plugin"
+        },
+        "dependency-cruiser": {
+          "title": "dependency-cruiser plugin configuration (https://knip.dev/reference/plugins/dependency-cruiser)",
+          "$ref": "#/definitions/plugin"
+        },
+        "docusaurus": {
+          "title": "Docusaurus plugin configuration (https://knip.dev/reference/plugins/docusaurus)",
+          "$ref": "#/definitions/plugin"
+        },
+        "dotenv": {
+          "title": "dotenv plugin configuration (https://knip.dev/reference/plugins/dotenv)",
           "$ref": "#/definitions/plugin"
         },
         "drizzle": {
-          "title": "Drizzle plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/drizzle/README.md)",
+          "title": "Drizzle plugin configuration (https://knip.dev/reference/plugins/drizzle)",
+          "$ref": "#/definitions/plugin"
+        },
+        "eleventy": {
+          "title": "eleventy plugin configuration (https://knip.dev/reference/plugins/eleventy)",
           "$ref": "#/definitions/plugin"
         },
         "eslint": {
-          "title": "ESLint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/eslint/README.md)",
+          "title": "ESLint plugin configuration (https://knip.dev/reference/plugins/eslint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "expo": {
+          "title": "Expo plugin configuration (https://knip.dev/reference/plugins/expo)",
           "$ref": "#/definitions/plugin"
         },
         "gatsby": {
-          "title": "Gatsby plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/gatsby/README.md)",
+          "title": "Gatsby plugin configuration (https://knip.dev/reference/plugins/gatsby)",
+          "$ref": "#/definitions/plugin"
+        },
+        "github-action": {
+          "title": "github-action plugin configuration (https://knip.dev/reference/plugins/github-action)",
           "$ref": "#/definitions/plugin"
         },
         "github-actions": {
-          "title": "github-actions plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/github-actions/README.md)",
+          "title": "github-actions plugin configuration (https://knip.dev/reference/plugins/github-actions)",
           "$ref": "#/definitions/plugin"
         },
         "graphql-codegen": {
-          "title": "graphql-codegen plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/graphql-codegen/README.md)",
+          "title": "graphql-codegen plugin configuration (https://knip.dev/reference/plugins/graphql-codegen)",
+          "$ref": "#/definitions/plugin"
+        },
+        "hardhat": {
+          "title": "hardhat plugin configuration (https://knip.dev/reference/plugins/hardhat)",
           "$ref": "#/definitions/plugin"
         },
         "husky": {
-          "title": "husky plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/husky/README.md)",
+          "title": "husky plugin configuration (https://knip.dev/reference/plugins/husky)",
+          "$ref": "#/definitions/plugin"
+        },
+        "i18next-parser": {
+          "title": "i18next-parser plugin configuration (https://knip.dev/reference/plugins/i18next-parser)",
           "$ref": "#/definitions/plugin"
         },
         "jest": {
-          "title": "Jest plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/jest/README.md)",
+          "title": "Jest plugin configuration (https://knip.dev/reference/plugins/jest)",
+          "$ref": "#/definitions/plugin"
+        },
+        "karma": {
+          "title": "karma plugin configuration (https://knip.dev/reference/plugins/karma)",
+          "$ref": "#/definitions/plugin"
+        },
+        "ladle": {
+          "title": "ladle plugin configuration (https://knip.dev/reference/plugins/ladle)",
           "$ref": "#/definitions/plugin"
         },
         "lefthook": {
-          "title": "lefthook plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/lefthook/README.md)",
+          "title": "lefthook plugin configuration (https://knip.dev/reference/plugins/lefthook)",
           "$ref": "#/definitions/plugin"
         },
         "lint-staged": {
-          "title": "lint-staged plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/lint-staged/README.md)",
+          "title": "lint-staged plugin configuration (https://knip.dev/reference/plugins/lint-staged)",
+          "$ref": "#/definitions/plugin"
+        },
+        "linthtml": {
+          "title": "linthtml plugin configuration (https://knip.dev/reference/plugins/linthtml)",
+          "$ref": "#/definitions/plugin"
+        },
+        "lockfile-lint": {
+          "title": "lockfile-lint plugin configuration (https://knip.dev/reference/plugins/lockfile-lint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "lost-pixel": {
+          "title": "lost-pixel plugin configuration (https://knip.dev/reference/plugins/lost-pixel)",
           "$ref": "#/definitions/plugin"
         },
         "markdownlint": {
-          "title": "markdownlint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/markdownlint/README.md)",
+          "title": "markdownlint plugin configuration (https://knip.dev/reference/plugins/markdownlint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "metro": {
+          "title": "metro plugin configuration (https://knip.dev/reference/plugins/metro)",
           "$ref": "#/definitions/plugin"
         },
         "mocha": {
-          "title": "Mocha plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/mocha/README.md)",
+          "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/mocha)",
+          "$ref": "#/definitions/plugin"
+        },
+        "moonrepo": {
+          "title": "moonrepo plugin configuration (https://knip.dev/reference/plugins/moonrepo)",
+          "$ref": "#/definitions/plugin"
+        },
+        "msw": {
+          "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/msw)",
+          "$ref": "#/definitions/plugin"
+        },
+        "nano-staged": {
+          "title": "nano-staged plugin configuration (https://knip.dev/reference/plugins/nano-staged)",
+          "$ref": "#/definitions/plugin"
+        },
+        "nest": {
+          "title": "nest plugin configuration (https://knip.dev/reference/plugins/nest)",
+          "$ref": "#/definitions/plugin"
+        },
+        "netlify": {
+          "title": "Netlify plugin configuration (https://knip.dev/reference/plugins/netlify)",
           "$ref": "#/definitions/plugin"
         },
         "next": {
-          "title": "Next.js plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/main/README.md)",
+          "title": "Next.js plugin configuration (https://knip.dev/reference/plugins/main)",
+          "$ref": "#/definitions/plugin"
+        },
+        "node": {
+          "title": "node plugin configuration (https://knip.dev/reference/plugins/node)",
           "$ref": "#/definitions/plugin"
         },
         "node-test-runner": {
-          "title": "node-test-runner plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/node-test-runner/README.md)",
+          "title": "node-test-runner plugin configuration (https://knip.dev/reference/plugins/node-test-runner)",
+          "$ref": "#/definitions/plugin"
+        },
+        "nodemon": {
+          "title": "nodemon plugin configuration (https://knip.dev/reference/plugins/nodemon)",
           "$ref": "#/definitions/plugin"
         },
         "npm-package-json-lint": {
-          "title": "npm-package-json-lint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/npm-package-json-lint/README.md)",
+          "title": "npm-package-json-lint plugin configuration (https://knip.dev/reference/plugins/npm-package-json-lint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "nuxt": {
+          "title": "Nuxt plugin configuration (https://knip.dev/reference/plugins/nuxt)",
           "$ref": "#/definitions/plugin"
         },
         "nx": {
-          "title": "Nx plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/nx/README.md)",
+          "title": "Nx plugin configuration (https://knip.dev/reference/plugins/nx)",
           "$ref": "#/definitions/plugin"
         },
         "nyc": {
-          "title": "nyc plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/nyc/README.md)",
+          "title": "nyc plugin configuration (https://knip.dev/reference/plugins/nyc)",
+          "$ref": "#/definitions/plugin"
+        },
+        "oclif": {
+          "title": "oclif plugin configuration (https://knip.dev/reference/plugins/oclif)",
+          "$ref": "#/definitions/plugin"
+        },
+        "oxlint": {
+          "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
           "$ref": "#/definitions/plugin"
         },
         "playwright": {
-          "title": "Playwright plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/playwright/README.md)",
+          "title": "Playwright plugin configuration (https://knip.dev/reference/plugins/playwright)",
           "$ref": "#/definitions/plugin"
         },
         "playwright-ct": {
-          "title": "Playwright for components plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/playwright-ct/README.md)",
+          "title": "Playwright for components plugin configuration (https://knip.dev/reference/plugins/playwright-ct)",
+          "$ref": "#/definitions/plugin"
+        },
+        "playwright-test": {
+          "title": "playwright-test plugin configuration (https://knip.dev/reference/plugins/playwright-test)",
           "$ref": "#/definitions/plugin"
         },
         "postcss": {
-          "title": "PostCSS plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/postcss/README.md)",
+          "title": "PostCSS plugin configuration (https://knip.dev/reference/plugins/postcss)",
+          "$ref": "#/definitions/plugin"
+        },
+        "preconstruct": {
+          "title": "preconstruct plugin configuration (https://knip.dev/reference/plugins/preconstruct)",
           "$ref": "#/definitions/plugin"
         },
         "prettier": {
-          "title": "Prettier plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/prettier/README.md)",
+          "title": "Prettier plugin configuration (https://knip.dev/reference/plugins/prettier)",
+          "$ref": "#/definitions/plugin"
+        },
+        "prisma": {
+          "title": "Prisma plugin configuration (https://knip.dev/reference/plugins/prisma)",
+          "$ref": "#/definitions/plugin"
+        },
+        "react-cosmos": {
+          "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
+          "$ref": "#/definitions/plugin"
+        },
+        "react-router": {
+          "title": "react-router plugin configuration (https://knip.dev/reference/plugins/react-router)",
+          "$ref": "#/definitions/plugin"
+        },
+        "relay": {
+          "title": "relay plugin configuration (https://knip.dev/reference/plugins/relay)",
           "$ref": "#/definitions/plugin"
         },
         "release-it": {
-          "title": "Release It plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/release-it/README.md)",
+          "title": "Release It plugin configuration (https://knip.dev/reference/plugins/release-it)",
           "$ref": "#/definitions/plugin"
         },
         "remark": {
-          "title": "Remark plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/remark/README.md)",
+          "title": "Remark plugin configuration (https://knip.dev/reference/plugins/remark)",
           "$ref": "#/definitions/plugin"
         },
         "remix": {
-          "title": "Remix plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/remix/README.md)",
+          "title": "Remix plugin configuration (https://knip.dev/reference/plugins/remix)",
           "$ref": "#/definitions/plugin"
         },
         "rollup": {
-          "title": "Rollup plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/rollup/README.md)",
+          "title": "Rollup plugin configuration (https://knip.dev/reference/plugins/rollup)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rsbuild": {
+          "title": "rsbuild plugin configuration (https://knip.dev/reference/plugins/rsbuild)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rspack": {
+          "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
           "$ref": "#/definitions/plugin"
         },
         "semantic-release": {
-          "title": "semantic-release plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/semantic-release/README.md)",
+          "title": "semantic-release plugin configuration (https://knip.dev/reference/plugins/semantic-release)",
           "$ref": "#/definitions/plugin"
         },
         "sentry": {
-          "title": "Sentry plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/sentry/README.md)",
+          "title": "Sentry plugin configuration (https://knip.dev/reference/plugins/sentry)",
+          "$ref": "#/definitions/plugin"
+        },
+        "simple-git-hooks": {
+          "title": "simple-git-hooks plugin configuration (https://knip.dev/reference/plugins/simple-git-hooks)",
+          "$ref": "#/definitions/plugin"
+        },
+        "size-limit": {
+          "title": "size-limit plugin configuration (https://knip.dev/reference/plugins/size-limit)",
+          "$ref": "#/definitions/plugin"
+        },
+        "sst": {
+          "title": "sst plugin configuration (https://knip.dev/reference/plugins/sst)",
+          "$ref": "#/definitions/plugin"
+        },
+        "starlight": {
+          "title": "starlight plugin configuration (https://knip.dev/reference/plugins/starlight)",
           "$ref": "#/definitions/plugin"
         },
         "storybook": {
-          "title": "Storybook plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/storybook/README.md)",
+          "title": "Storybook plugin configuration (https://knip.dev/reference/plugins/storybook)",
           "$ref": "#/definitions/plugin"
         },
         "stryker": {
-          "title": "Stryker plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/stryker/README.md)",
+          "title": "Stryker plugin configuration (https://knip.dev/reference/plugins/stryker)",
           "$ref": "#/definitions/plugin"
         },
         "stylelint": {
-          "title": "stylelint plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/stylelint/README.md)",
+          "title": "stylelint plugin configuration (https://knip.dev/reference/plugins/stylelint)",
           "$ref": "#/definitions/plugin"
         },
         "svelte": {
-          "title": "svelte plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/svelte/README.md)",
+          "title": "svelte plugin configuration (https://knip.dev/reference/plugins/svelte)",
+          "$ref": "#/definitions/plugin"
+        },
+        "svgo": {
+          "title": "svgo plugin configuration (https://knip.dev/reference/plugins/svgo)",
+          "$ref": "#/definitions/plugin"
+        },
+        "syncpack": {
+          "title": "syncpack plugin configuration (https://knip.dev/reference/plugins/syncpack)",
           "$ref": "#/definitions/plugin"
         },
         "tailwind": {
-          "title": "tailwind plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/tailwind/README.md)",
+          "title": "tailwind plugin configuration (https://knip.dev/reference/plugins/tailwind)",
+          "$ref": "#/definitions/plugin"
+        },
+        "travis": {
+          "title": "travis plugin configuration (https://knip.dev/reference/plugins/travis)",
+          "$ref": "#/definitions/plugin"
+        },
+        "ts-node": {
+          "title": "ts-node plugin configuration (https://knip.dev/reference/plugins/ts-node)",
+          "$ref": "#/definitions/plugin"
+        },
+        "tsdown": {
+          "title": "tsdown plugin configuration (https://knip.dev/reference/plugins/tsdown)",
           "$ref": "#/definitions/plugin"
         },
         "tsup": {
-          "title": "tsup plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/tsup/README.md)",
+          "title": "tsup plugin configuration (https://knip.dev/reference/plugins/tsup)",
+          "$ref": "#/definitions/plugin"
+        },
+        "tsx": {
+          "title": "tsx plugin configuration (https://knip.dev/reference/plugins/tsx)",
           "$ref": "#/definitions/plugin"
         },
         "typedoc": {
-          "title": "typedoc plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/typedoc/README.md)",
+          "title": "typedoc plugin configuration (https://knip.dev/reference/plugins/typedoc)",
           "$ref": "#/definitions/plugin"
         },
         "typescript": {
-          "title": "TypeScript plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/typescript/README.md)",
+          "title": "TypeScript plugin configuration (https://knip.dev/reference/plugins/typescript)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unbuild": {
+          "title": "unbuild plugin configuration (https://knip.dev/reference/plugins/unbuild)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unocss": {
+          "title": "unocss plugin configuration (https://knip.dev/reference/plugins/unocss)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vercel-og": {
+          "title": "vercel-og plugin configuration (https://knip.dev/reference/plugins/vercel-og)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vike": {
+          "title": "vike plugin configuration (https://knip.dev/reference/plugins/vike)",
           "$ref": "#/definitions/plugin"
         },
         "vite": {
-          "title": "vite plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/vite/README.md)",
+          "title": "vite plugin configuration (https://knip.dev/reference/plugins/vite)",
           "$ref": "#/definitions/plugin"
         },
         "vitest": {
-          "title": "vitest plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/vitest/README.md)",
+          "title": "vitest plugin configuration (https://knip.dev/reference/plugins/vitest)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vue": {
+          "title": "vue plugin configuration (https://knip.dev/reference/plugins/vue)",
+          "$ref": "#/definitions/plugin"
+        },
+        "webdriver-io": {
+          "title": "webdriver-io plugin configuration (https://knip.dev/reference/plugins/webdriver-io)",
           "$ref": "#/definitions/plugin"
         },
         "webpack": {
-          "title": "Webpack plugin configuration (https://github.com/webpro/knip/blob/main/src/plugins/webpack/README.md)",
+          "title": "Webpack plugin configuration (https://knip.dev/reference/plugins/webpack)",
+          "$ref": "#/definitions/plugin"
+        },
+        "wireit": {
+          "title": "Wireit plugin configuration (https://knip.dev/reference/plugins/wireit)",
+          "$ref": "#/definitions/plugin"
+        },
+        "wrangler": {
+          "title": "wrangler plugin configuration (https://knip.dev/reference/plugins/wrangler)",
+          "$ref": "#/definitions/plugin"
+        },
+        "xo": {
+          "title": "xo plugin configuration (https://knip.dev/reference/plugins/xo)",
+          "$ref": "#/definitions/plugin"
+        },
+        "yarn": {
+          "title": "yarn plugin configuration (https://knip.dev/reference/plugins/yarn)",
+          "$ref": "#/definitions/plugin"
+        },
+        "yorkie": {
+          "title": "yorkie plugin configuration (https://knip.dev/reference/plugins/yorkie)",
           "$ref": "#/definitions/plugin"
         }
       }

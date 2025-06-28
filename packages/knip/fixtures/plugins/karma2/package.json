@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/karma2",
+  "scripts": {},
+  "devDependencies": {
+    "karma": "*"
+  }
+}

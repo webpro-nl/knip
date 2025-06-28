@@ -1,36 +1,64 @@
+import type { IsPluginEnabled, Plugin, Resolve, ResolveFromAST } from '../../types/config.js';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import { toEntryPattern, toProductionEntryPattern } from '../../util/protocols.js';
-import type { GenericPluginCallback, IsPluginEnabledCallback } from '../../types/plugins.js';
+import { getSrcDir } from './resolveFromAST.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
-export const NAME = 'Astro';
+const title = 'Astro';
 
-/** @public */
-export const ENABLERS = ['astro'];
+const enablers = ['astro'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-/** @public */
-export const ENTRY_FILE_PATTERNS = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts'];
+export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
 
-/** @public */
-export const PRODUCTION_ENTRY_FILE_PATTERNS = ['src/pages/**/*.{astro,mdx,js,ts}', 'src/content/**/*.mdx'];
+const entry = ['src/content/config.ts', 'src/content.config.ts'];
 
-export const findDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { config, manifest, isProduction } = options;
+const production = [
+  'src/pages/**/*.{astro,mdx,js,ts}',
+  'src/content/**/*.mdx',
+  'src/middleware.{js,ts}',
+  'src/actions/index.{js,ts}',
+];
 
-  const dependencies = config.entry
-    ? config.entry.map(toProductionEntryPattern)
-    : [...ENTRY_FILE_PATTERNS.map(toEntryPattern), ...PRODUCTION_ENTRY_FILE_PATTERNS.map(toProductionEntryPattern)];
+const resolveFromAST: ResolveFromAST = sourceFile => {
+  const srcDir = getSrcDir(sourceFile);
+
+  return [
+    ...[`${srcDir}/content/config.ts`, `${srcDir}/content.config.ts`].map(path => toEntry(path)),
+
+    ...[
+      `${srcDir}/pages/**/*.{astro,mdx,js,ts}`,
+      `${srcDir}/content/**/*.mdx`,
+      `${srcDir}/middleware.{js,ts}`,
+      `${srcDir}/actions/index.{js,ts}`,
+    ].map(path => toProductionEntry(path)),
+  ];
+};
+
+const resolve: Resolve = options => {
+  const { manifest, isProduction } = options;
+  const inputs = [];
 
   if (
     !isProduction &&
     manifest.scripts &&
     Object.values(manifest.scripts).some(script => /(?<=^|\s)astro(\s|\s.+\s)check(?=\s|$)/.test(script))
   ) {
-    dependencies.push('@astrojs/check');
+    inputs.push(toDependency('@astrojs/check'));
   }
 
-  return dependencies;
+  return inputs;
 };
+
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  entry,
+  production,
+  resolveFromAST,
+  resolve,
+} satisfies Plugin;

@@ -1,0 +1,38 @@
+name: Tests (Bun)
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '!**'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --ignore-scripts --frozen-lockfile
+      - name: Run formatter, linter, import sorter
+        run: bun ci
+      - name: Build knip
+        run: bun run build
+        working-directory: packages/knip
+      - name: Run knip
+        run: bunx --bun knip
+      - name: Run knip (production/strict)
+        run: bunx --bun knip --production --strict
+      - name: Test knip
+        run: bun run test
+        working-directory: packages/knip

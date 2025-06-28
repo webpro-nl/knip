@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/preconstruct",
+  "scripts": {
+    "build": "preconstruct build"
+  },
+  "devDependencies": {
+    "@preconstruct/cli": "*"
+  },
+  "preconstruct": {
+    "entrypoints": ["index.js", "other.js"]
+  }
+}

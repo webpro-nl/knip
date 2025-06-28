@@ -1,8 +1,6 @@
 {
   "name": "@fixtures/gitignore",
-  "workspaces": [
-    "packages/a"
-  ],
+  "workspaces": ["packages/a"],
   "knip": {
     "workspaces": {
       ".": {

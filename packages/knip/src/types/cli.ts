@@ -1,12 +1,28 @@
 export interface CommandLineOptions {
+  cacheLocation: string;
   cwd: string;
-  tsConfigFile?: string;
-  gitignore: boolean;
-  isStrict: boolean;
-  isProduction: boolean;
-  isShowProgress: boolean;
-  isIncludeEntryExports: boolean;
-  isIsolateWorkspaces: boolean;
-  isFix: boolean;
+  excludedIssueTypes: string[];
   fixTypes: string[];
+  gitignore: boolean;
+  includedIssueTypes: string[];
+  isCache: boolean;
+  isDebug: boolean;
+  isDependenciesShorthand: boolean;
+  isExportsShorthand: boolean;
+  isFilesShorthand: boolean;
+  isFix: boolean;
+  isFormat: boolean;
+  isIncludeEntryExports: boolean;
+  isIncludeLibs: boolean;
+  isIsolateWorkspaces: boolean;
+  isProduction: boolean;
+  isRemoveFiles: boolean;
+  isShowProgress: boolean;
+  isStrict: boolean;
+  isWatch: boolean;
+  tags: Tags;
+  tsConfigFile: string | undefined;
+  workspace: string | undefined;
 }
+
+export type Tags = [string[], string[]];

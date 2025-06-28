@@ -1,35 +1,45 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve, toDependency } from '../../util/input.js';
+import { toLilconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { PostCSSConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-export const NAME = 'PostCSS';
+// https://github.com/postcss/postcss-load-config/blob/main/src/index.js#L110
+// Additionally postcss.config.json is loaded by nextjs
 
-/** @public */
-export const ENABLERS = ['postcss', 'next'];
+const title = 'PostCSS';
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const enablers = ['postcss', 'postcss-cli', 'next'];
 
-export const CONFIG_FILE_PATTERNS = ['postcss.config.{cjs,js}', 'postcss.config.json', 'package.json'];
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const findPostCSSDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
+const config = [
+  'package.json',
+  'postcss.config.json',
+  ...toLilconfig('postcss', { configDir: false, additionalExtensions: ['ts', 'mts', 'cts', 'yaml', 'yml'] }),
+];
 
-  if (isProduction) return [];
-
-  const localConfig: PostCSSConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest?.postcss : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return localConfig.plugins
-    ? (Array.isArray(localConfig.plugins) ? localConfig.plugins : Object.keys(localConfig.plugins)).flatMap(plugin => {
+const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
+  const plugins = config.plugins
+    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).flatMap(plugin => {
         if (typeof plugin === 'string') return plugin;
         if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
         return [];
       })
     : [];
+
+  const inputs = plugins.map(id => toDeferResolve(id));
+
+  // Because postcss is not included in peerDependencies of tailwindcss
+  return ['tailwindcss', '@tailwindcss/postcss'].some(tailwindPlugin => plugins.includes(tailwindPlugin))
+    ? [...inputs, toDependency('postcss')]
+    : inputs;
 };
 
-export const findDependencies = timerify(findPostCSSDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+} satisfies Plugin;

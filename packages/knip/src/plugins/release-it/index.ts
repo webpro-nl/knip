@@ -1,48 +1,38 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { ReleaseItConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/release-it/release-it/blob/master/docs/plugins.md#using-a-plugin
+// Uses CosmiConfig but with custom searchPlaces
+// https://github.com/release-it/release-it/blob/main/lib/config.js
 
-export const NAME = 'Release It';
+const title = 'Release It!';
 
-/** @public */
-export const ENABLERS = ['release-it'];
+const enablers = ['release-it'];
 
-export const PACKAGE_JSON_PATH = 'release-it';
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const config = ['.release-it.{json,js,cjs,ts,yml,yaml,toml}', 'package.json'];
 
-export const CONFIG_FILE_PATTERNS = [
-  '.release-it.json',
-  '.release-it.{js,cjs}',
-  '.release-it.{yml,yaml}',
-  'package.json',
-];
-
-const findReleaseItDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: ReleaseItConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  const plugins = localConfig.plugins ? Object.keys(localConfig.plugins) : [];
-  const scripts = localConfig.hooks ? Object.values(localConfig.hooks).flat() : [];
-  if (typeof localConfig.github?.releaseNotes === 'string') {
-    scripts.push(localConfig.github.releaseNotes);
+const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
+  const plugins = config.plugins ? Object.keys(config.plugins) : [];
+  const scripts = config.hooks ? Object.values(config.hooks).flat() : [];
+  if (typeof config.github?.releaseNotes === 'string') {
+    scripts.push(config.github.releaseNotes);
   }
-  if (typeof localConfig.gitlab?.releaseNotes === 'string') {
-    scripts.push(localConfig.gitlab.releaseNotes);
+  if (typeof config.gitlab?.releaseNotes === 'string') {
+    scripts.push(config.gitlab.releaseNotes);
   }
-  const dependencies = getDependenciesFromScripts(scripts, { cwd, manifest });
+  const inputs = options.getInputsFromScripts(scripts);
 
-  return [...plugins, ...dependencies];
+  return [...plugins.map(id => toDependency(id)), ...inputs];
 };
 
-export const findDependencies = timerify(findReleaseItDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+} satisfies Plugin;

@@ -1,38 +1,38 @@
-import { basename, isInternal } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Input, toDeferResolve } from '../../util/input.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
+import type { StyleLintConfig } from './types.js';
 
 // https://stylelint.io/user-guide/configure/
 
-export const NAME = 'Stylelint';
+const title = 'Stylelint';
 
-/** @public */
-export const ENABLERS = ['stylelint'];
+const enablers = ['stylelint'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = [
-  '.stylelintrc',
-  '.stylelintrc.{cjs,js,json,yaml,yml}',
-  'stylelint.config.{cjs,mjs,js}',
-];
+const config = ['package.json', ...toCosmiconfig('stylelint')];
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: PluginConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.stylelint : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  const extend = localConfig.extends ? [localConfig.extends].flat().filter(extend => !isInternal(extend)) : [];
-  const plugins = localConfig.plugins ? [localConfig.plugins].flat().filter(plugin => !isInternal(plugin)) : [];
-
-  return [...extend, ...plugins];
+const resolveConfig: ResolveConfig<StyleLintConfig> = async (config, options) => {
+  const inputs: Input[] = [];
+  const extend = Array.isArray(config.extends) ? config.extends : config.extends ? [config.extends] : [];
+  for (const id of extend) {
+    if (typeof id === 'string') inputs.push(toDeferResolve(id));
+    else for (const x of await resolveConfig(id, options)) inputs.push(x);
+  }
+  for (const plugin of config.plugins ?? []) if (typeof plugin === 'string') inputs.push(toDeferResolve(plugin));
+  if (typeof config.customSyntax === 'string') inputs.push(toDeferResolve(config.customSyntax));
+  for (const override of config.overrides ?? []) {
+    for (const input of await resolveConfig(override, options)) inputs.push(input);
+  }
+  return inputs;
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+} satisfies Plugin;

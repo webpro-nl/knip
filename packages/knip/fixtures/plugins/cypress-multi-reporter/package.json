@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/cypress-multi-reporter",
+  "devDependencies": {
+    "cypress": "*",
+    "cypress-multi-reporters": "*",
+    "mocha-junit-reporter": "*",
+    "mochawesome": "*"
+  }
+}

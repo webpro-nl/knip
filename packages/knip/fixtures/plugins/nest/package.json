@@ -1,0 +1,17 @@
+{
+  "name": "@plugins/nest",
+  "scripts": {
+    "start": "nest start"
+  },
+  "dependencies": {
+    "@nestjs/common": "*",
+    "@nestjs/core": "*"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "*",
+    "@nestjs/schematics": "*",
+    "@nestjs/testing": "*",
+    "supertest": "*",
+    "ts-jest": "*"
+  }
+}

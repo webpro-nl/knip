@@ -1,33 +1,31 @@
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { CSpellConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
-// https://github.com/streetsidesoftware/cspell/tree/main/packages/cspell#customization
+// https://cspell.org/configuration/
 
-export const NAME = 'cspell';
+const title = 'CSpell';
 
-/** @public */
-export const ENABLERS = ['cspell'];
+const enablers = ['cspell'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const CONFIG_FILE_PATTERNS = [
+const config = [
   'cspell.config.{js,cjs,json,yaml,yml}',
   'cspell.{json,yaml,yml}',
   '.c{s,S}pell.json',
-  'cSpell.json',
+  'c{s,S}pell.json',
 ];
 
-const findCspellDependencies: GenericPluginCallback = async (configFilePath, { isProduction }) => {
-  if (isProduction) return [];
-
-  const localConfig: CSpellConfig | undefined = await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  const imports = localConfig.import ?? [];
-  return imports;
+const resolveConfig: ResolveConfig<CSpellConfig> = config => {
+  return [config?.import ?? []].flat().map(id => toDeferResolve(id));
 };
 
-export const findDependencies = timerify(findCspellDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+} satisfies Plugin;

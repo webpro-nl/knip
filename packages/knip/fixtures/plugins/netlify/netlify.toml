@@ -1,0 +1,18 @@
+[[plugins]]
+package = "netlify-plugin-check-output-for-puppy-references"
+  [plugins.inputs]
+  breeds = ["pomeranian", "chihuahua", "bulldog"]
+
+[functions]
+  directory = "myfunctions/"
+  node_bundler = "esbuild"
+  external_node_modules = ["package-1"]
+  included_files = ["files/*.md"]
+
+[functions."api_*"]
+  external_node_modules = ["package-2"]
+  included_files = ["!files/post-1.md"]
+
+[functions.api_payment]
+  external_node_modules = ["package-3", "package-4"]
+  included_files = ["!files/post-2.md", "package.json", "images/**"]

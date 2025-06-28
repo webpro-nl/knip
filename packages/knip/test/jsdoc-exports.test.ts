@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -11,12 +11,13 @@ test('Find exports from jsdoc @type tags', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
+    tags: [[], ['ignoreunresolved']],
   });
 
-  assert(issues.exports['module.js']['alphaFn']);
-  assert(issues.exports['module.js']['internalUnusedFn']);
-  assert(issues.exports['module.js']['invalidTaggedFn']);
-  assert(issues.exports['module.js']['unusedFn']);
+  assert(issues.exports['module.ts']['alphaFn']);
+  assert(issues.exports['module.ts']['internalUnusedFn']);
+  assert(issues.exports['module.ts']['invalidTaggedFn']);
+  assert(issues.exports['module.ts']['unusedFn']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -31,11 +32,12 @@ test('Find exports from jsdoc @type tags (production)', async () => {
     ...baseArguments,
     cwd,
     isProduction: true,
+    tags: [[], ['ignoreunresolved']],
   });
 
-  assert(issues.exports['module.js']['alphaFn']);
-  assert(issues.exports['module.js']['invalidTaggedFn']);
-  assert(issues.exports['module.js']['unusedFn']);
+  assert(issues.exports['module.ts']['alphaFn']);
+  assert(issues.exports['module.ts']['invalidTaggedFn']);
+  assert(issues.exports['module.ts']['unusedFn']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

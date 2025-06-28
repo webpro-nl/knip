@@ -1,11 +1,10 @@
 ---
-import type { Props } from '@astrojs/starlight/props';
 import Default from '@astrojs/starlight/components/Head.astro';
 
-const slug = Astro.props.slug;
+const slug = Astro.locals.starlightRoute.slug;
+
 const url = new URL(Astro.url);
-url.pathname = `/og/docs${slug ? '/' + slug : ''}.webp`;
-url.searchParams.append('v', '2');
+url.pathname = `/og/docs${slug ? `/${slug}` : ''}.webp`;
 ---
 
 <Default {...Astro.props} />

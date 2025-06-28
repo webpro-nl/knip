@@ -1,9 +1,26 @@
 .sl-markdown-content a {
-  color: var(--sl-color-text);
   text-decoration: none;
   padding-bottom: 0.0675rem;
-  border-bottom: 1px solid var(--sl-color-gray-1);
   transition: border-color 300ms;
+}
+
+.sl-markdown-content a:not(:where(.not-content *)) {
+  color: var(--sl-color-text);
+  border-bottom: 1px solid var(--sl-color-gray-1);
+}
+
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+  border-color: var(--sl-color-white);
+}
+
+.sl-markdown-content .sl-anchor-link {
+  color: var(--sl-color-text);
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.sl-markdown-content .sl-anchor-link:hover {
+  color: var(--sl-color-text-accent);
 }
 
 .right-sidebar a:hover,
@@ -32,12 +49,6 @@ footer .pagination-links a:hover {
 :root {
   .starlight-aside a {
     color: var(--sl-color-white);
-  }
-}
-
-:root {
-  .sl-markdown-content a:hover {
-    border-color: var(--sl-color-white);
   }
 }
 

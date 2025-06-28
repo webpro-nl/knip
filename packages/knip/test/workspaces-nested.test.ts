@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -7,15 +7,11 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/workspaces-nested');
 
-const expectedConfigurationHintsProduction = new Set([
-  { type: 'ignoreDependencies', identifier: 'ignored-dep-global', workspaceName: '.' },
-  { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
-]);
-
 const expectedConfigurationHints = new Set([
-  ...expectedConfigurationHintsProduction,
+  { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
   { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-global', workspaceName: '.' },
   { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-L-2', workspaceName: 'L-1-1/L-1-2' },
+  { type: 'ignoreDependencies', identifier: 'ignored-dep-global', workspaceName: '.' },
   { type: 'ignoreDependencies', identifier: 'unused-ignored-dep-global', workspaceName: '.' },
   { type: 'ignoreDependencies', identifier: 'unused-ignored-dep-L-3', workspaceName: 'L-1-1/L-1-2/L-1-3' },
 ]);
@@ -48,7 +44,7 @@ test('Find unused dependencies in nested workspaces with default config in produ
 });
 
 test('Find unused dependencies in nested workspaces with default config in production mode (production)', async () => {
-  const { issues, counters, configurationHints } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isStrict: false,
@@ -67,12 +63,10 @@ test('Find unused dependencies in nested workspaces with default config in produ
     processed: 3,
     total: 3,
   });
-
-  assert.deepEqual(configurationHints, expectedConfigurationHintsProduction);
 });
 
 test('Find unused dependencies in nested workspaces with default config in production mode (strict)', async () => {
-  const { issues, counters, configurationHints } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isStrict: true,
@@ -92,6 +86,4 @@ test('Find unused dependencies in nested workspaces with default config in produ
     processed: 3,
     total: 3,
   });
-
-  assert.deepEqual(configurationHints, expectedConfigurationHintsProduction);
 });

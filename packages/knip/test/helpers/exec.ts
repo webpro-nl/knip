@@ -1,24 +1,23 @@
-import { execSync } from 'node:child_process';
-// eslint-disable-next-line n/no-restricted-import
+import { spawnSync } from 'node:child_process';
+// biome-ignore lint/nursery/noRestrictedImports: ignore
 import { resolve } from 'node:path';
 
-const cliPath = resolve('dist/cli.js');
+const runtime = process.argv[0];
+const cliPath = runtime.endsWith('bun') ? resolve('src/cli.ts') : resolve('dist/cli.js');
 
-export const execFactory = (cwd: string) => {
-  return (command: string) => {
-    try {
-      const output = execSync(command.replace(/^knip/, `node ${cliPath}`), { cwd });
-      return { stdout: output.toString().trim(), stderr: '', status: 0 };
-    } catch (error) {
-      if (error instanceof Error && 'stdout' in error && Buffer.isBuffer(error['stdout'])) {
-        return {
-          stdout: error['stdout'].toString(),
-          stderr: error['stderr'].toString(),
-          status: error.status,
-        };
-      }
-      // Unknown error
-      throw error;
-    }
+export const exec = (command: string, options: { cwd: string }) => {
+  const args = command.replace(/^knip/, '').trim().split(' ').filter(Boolean);
+  const output = spawnSync(runtime, [cliPath, ...args], {
+    cwd: options.cwd,
+    env: {
+      PATH: process.env.PATH,
+      NO_COLOR: '1',
+    },
+  });
+
+  return {
+    stdout: output.stdout.toString().trim(),
+    stderr: output.stderr.toString().trim(),
+    status: output.status,
   };
 };

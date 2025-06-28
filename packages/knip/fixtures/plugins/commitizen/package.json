@@ -1,8 +1,7 @@
 {
-  "name": "@fixtures/commitizen",
-  "version": "*",
-  "dependencies": {
-    "@commitlint/config-conventional": "*"
+  "name": "@plugins/commitizen",
+  "devDependencies": {
+    "commitizen": "*"
   },
   "config": {
     "commitizen": {

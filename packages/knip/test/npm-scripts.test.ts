@@ -1,44 +1,26 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
-import * as npm from '../src/manifest/index.js';
-import { resolve, join } from '../src/util/path.js';
+import { getDependencyMetaData } from '../src/manifest/index.js';
+import { join, resolve } from '../src/util/path.js';
+import { load } from '../src/util/plugin.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
-import { getManifest } from './helpers/index.js';
 
 const cwd = resolve('fixtures/npm-scripts');
-const manifest = getManifest(cwd);
+const manifest = await load(join(cwd, 'package.json'));
 
-test('Referenced dependencies in npm scripts', async () => {
+test('Get metadata from dependencies (getDependencyMetaData)', async () => {
   const config = {
-    manifest,
-    isProduction: false,
-    isStrict: false,
     dir: cwd,
     cwd,
+    packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
   };
 
-  const { dependencies, hostDependencies, installedBinaries } = await npm.findDependencies(config);
-
-  assert.deepEqual(dependencies, [
-    'bin:nodemon',
-    join(cwd, 'script.js'),
-    'bin:rm',
-    'bin:dotenv',
-    'bin:nx',
-    'bin:pm2',
-    'bin:pm2-dev',
-    'bin:eslint',
-    'bin:commitlint',
-    'bin:bash',
-    join(cwd, 'ignore.js'),
-    'bin:package',
-    'bin:runnable',
-  ]);
+  const { hostDependencies, installedBinaries } = getDependencyMetaData(config);
 
   const expectedHostDependencies = new Map();
-  expectedHostDependencies.set('pm2-peer-dep', new Set([{ name: 'pm2', isPeerOptional: false }]));
+  expectedHostDependencies.set('pm2-peer-dep', [{ name: 'pm2', isPeerOptional: false }]);
 
   assert.deepEqual(hostDependencies, expectedHostDependencies);
 
@@ -60,6 +42,7 @@ test('Referenced dependencies in npm scripts', async () => {
       ['eslint-v8', new Set(['eslint'])],
       ['@commitlint/cli', new Set(['commitlint'])],
       ['@org/runnable', new Set(['runnable'])],
+      ['tsup', new Set(['tsup'])],
       ['commitlint', new Set(['@commitlint/cli'])],
     ])
   );
@@ -71,6 +54,8 @@ test('Unused dependencies in npm scripts', async () => {
     cwd,
   });
 
+  assert.deepEqual(issues.files, new Set([join(cwd, 'script.js')]));
+
   assert(issues.dependencies['package.json']['express']);
 
   assert(issues.devDependencies['package.json']['unused']);
@@ -80,6 +65,7 @@ test('Unused dependencies in npm scripts', async () => {
 
   assert(issues.binaries['package.json']['nodemon']);
   assert(issues.binaries['package.json']['dotenv']);
+  assert(issues.binaries['package.json']['http-server']);
   assert(!issues.binaries['package.json']['rm']);
   assert(!issues.binaries['package.json']['bash']);
 
@@ -87,9 +73,10 @@ test('Unused dependencies in npm scripts', async () => {
     ...baseCounters,
     dependencies: 1,
     devDependencies: 1,
-    binaries: 2,
-    processed: 1,
-    total: 1,
+    binaries: 3,
+    files: 1,
+    processed: 2,
+    total: 2,
   });
 
   assert.deepEqual(
@@ -103,7 +90,7 @@ test('Unused dependencies in npm scripts', async () => {
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {
-  const { issues, counters, configurationHints } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isProduction: true,
@@ -118,14 +105,6 @@ test('Unused dependencies in npm scripts (strict)', async () => {
     files: 1,
     dependencies: 2,
     processed: 1,
-    total: 1,
+    total: 2,
   });
-
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
-    ])
-  );
 });

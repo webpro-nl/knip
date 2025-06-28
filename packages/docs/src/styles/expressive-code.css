@@ -1,3 +1,19 @@
+.expressive-code figure {
+  box-shadow: none;
+}
+
+.expressive-code .frame.has-title:not(.is-terminal) .header .title::after {
+  border-bottom: none;
+}
+
+:root[data-theme='light'] {
+  .expressive-code .frame pre,
+  .expressive-code .frame.has-title:not(.is-terminal) .header .title {
+    background-color: #151419;
+    border-color: #151419;
+  }
+}
+
 .expressive-code .frame pre,
 .expressive-code .frame div {
   margin-top: unset;

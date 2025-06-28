@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/yarn",
+  "devDependencies": {
+    "@yarnpkg/types": "latest"
+  }
+}

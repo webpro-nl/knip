@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/workspaces-entry-files__client",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@monorepo/shared": "*"
+  }
+}

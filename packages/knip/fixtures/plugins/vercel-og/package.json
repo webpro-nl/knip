@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/vercel-og",
+  "dependencies": {
+    "@vercel/og": "*",
+    "next": "*"
+  }
+}

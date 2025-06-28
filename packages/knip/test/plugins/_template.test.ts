@@ -1,14 +1,25 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import * as __PLUGIN_CAMELCASED_NAME__ from '../../src/plugins/_template/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { getManifest, pluginConfig as config } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/_template');
-const manifest = getManifest(cwd);
 
-test('Find dependencies in _template configuration (json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await __PLUGIN_CAMELCASED_NAME__.findDependencies(configFilePath, { manifest, config });
-  assert.deepEqual(dependencies, []);
+test('Find dependencies with the __PLUGIN_NAME__ plugin', async () => {
+  // Ideally, plugin tests have no `issues` left and only `total` and `processed` values in `counters`
+  const { /* issues, */ counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  // TODO: Remove the console.log() before submitting a PR.
+  // console.log(issues);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 0,
+    total: 0,
+  });
 });

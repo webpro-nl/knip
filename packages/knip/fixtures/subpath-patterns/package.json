@@ -1,6 +1,8 @@
 {
-  "name": "my-package",
+  "name": "@fixtures/subpath-patterns",
   "imports": {
-    "#internals/*": "./src/internals/*.ts"
+    "#internals/*": "./src/internals/*.ts",
+    "#internals-explicit-ext/*": "./src/internals/*",
+    "#internals-alias/used.alt": "./src/internals/used.alt"
   }
 }

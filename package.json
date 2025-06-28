@@ -2,26 +2,30 @@
   "name": "@knip/root",
   "version": "0.0.0",
   "private": true,
-  "description": "Find unused files, dependencies and exports in your TypeScript and JavaScript projects",
+  "description": "Find unused dependencies, exports and files in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
-  "repository": "github:webpro/knip",
-  "bugs": "https://github.com/webpro/knip/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webpro-nl/knip"
+  },
+  "bugs": "https://github.com/webpro-nl/knip/issues",
   "license": "ISC",
   "type": "module",
   "author": {
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "scripts": {
-    "knip": "knip",
-    "watch": "npm run watch --workspace packages/knip",
-    "docs": "npm run dev --workspace packages/docs",
-    "test": "npm run qa --workspaces --if-present"
+    "watch": "bun run --cwd packages/knip watch",
+    "docs": "bun run --cwd packages/docs dev",
+    "test": "bun run --cwd packages/knip test",
+    "format": "biome check --write",
+    "lint": "biome lint .",
+    "ci": "biome ci . && installed-check --ignore-dev"
   },
-  "peerDependencies": {
-    "knip": "file:packages/knip"
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "installed-check": "^9.3.0"
   }
 }

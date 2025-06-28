@@ -2,7 +2,7 @@
 title: Slim down to speed up
 date: 2023-12-14
 sidebar:
-  order: 1
+  order: 5
 ---
 
 _Published: 2023-12-14_
@@ -158,7 +158,7 @@ The main takeaways here:
 - In v4, `getImportsAndExports` is more comprehensive to compensate for the
   absence of `findReferences` - more on that below
 
-Remember, unused class members are no longer reported in v4.
+Remember, unused class members are no longer reported by default in v4.
 
 ## The story of `findReferences`
 
@@ -167,7 +167,7 @@ that's not easy to find. Here's an example of an export/import match that **is**
 easy to find:
 
 ```ts title="import.ts"
-import { MyThing } = './thing.ts';
+import { MyThing } from './thing.ts';
 ```
 
 ```ts title="export.ts"
@@ -266,4 +266,4 @@ Remember, Knip it before you ship it! Have a great day ☀️
 
 [1]: #the-story-of-findreferences
 [2]: https://github.com/remix-run/remix
-[3]: https://github.com/webpro/knip/issues
+[3]: https://github.com/webpro-nl/knip/issues

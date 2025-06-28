@@ -1,20 +1,26 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import * as commitizen from '../../src/plugins/commitizen/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { getManifest } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/commitizen');
-const manifest = getManifest(cwd);
 
-test('Find dependencies in commitizen configuration (package.json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await commitizen.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, ['cz-conventional-changelog']);
-});
+test('Find dependencies with the Commitizen plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in commitizen configuration (.czrc)', async () => {
-  const configFilePath = join(cwd, '.czrc');
-  const dependencies = await commitizen.findDependencies(configFilePath, {});
-  assert.deepEqual(dependencies, ['cz-conventional-changelog']);
+  assert(issues.unlisted['.czrc']['cz-conventional-changelog']);
+  assert(issues.unlisted['package.json']['cz-conventional-changelog']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unlisted: 2,
+    processed: 0,
+    total: 0,
+  });
 });

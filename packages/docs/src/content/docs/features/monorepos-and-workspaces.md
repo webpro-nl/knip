@@ -46,8 +46,9 @@ above).
 
 :::caution
 
-In a project with workspaces, customized `entry` and `project` options at the
-root level are ignored, they must be moved to the `"."` workspace.
+In a project with workspaces, the `entry` and `project` options at the root
+level are ignored. Use the workspace named `"."` for those (like in the example
+above).
 
 :::
 
@@ -72,16 +73,29 @@ A workspace must have a `package.json` file.
 For projects with only a root `package.json`, please see [integrated
 monorepos][2].
 
+## Additional workspaces
+
+If a workspaces is not configured as such in `package.json#workspaces` (or
+`pnpm-workspace.yaml`) it can be added to the Knip configuration manually. Add
+their path to the `workspaces` configuration object the same way as
+`"packages/cli": {}` in the example above.
+
+## Source mapping
+
+See [Source Mapping][3].
+
 ## Additional options
 
 The following options are available inside workspace configurations:
 
-- [ignore][3]
-- [ignoreBinaries][4]
-- [ignoreDependencies][5]
-- [includeEntryExports][6]
+- [ignore][4]
+- [ignoreBinaries][5]
+- [ignoreDependencies][6]
+- [ignoreMembers][7]
+- [ignoreUnresolved][8]
+- [includeEntryExports][9]
 
-[Plugins][7] can be configured separately per workspace.
+[Plugins][10] can be configured separately per workspace.
 
 Use `--debug` for verbose output and see the workspaces Knip includes, their
 configurations, enabled plugins, glob options and resolved files.
@@ -95,20 +109,26 @@ Knip run faster). Example:
 knip --workspace packages/my-lib
 ```
 
-This will include ancestor and dependent workspaces, for two reasons:
+This will include the target workspace, but also ancestor and dependent
+workspaces. For two reasons:
 
 - Ancestor workspaces may list dependencies in `package.json` the linted
   workspace uses.
 - Dependent workspaces may reference exports from the linted workspace.
 
-To lint the workspace in isolation, you can combine this with [strict production
-mode][8].
+To lint the workspace in isolation, there are two options:
+
+- Combine the `workspace` argument with [strict production mode][11].
+- Run Knip from inside the workspace directory.
 
 [1]: ../overview/configuration.md#defaults
 [2]: ./integrated-monorepos.md
-[3]: ../reference/configuration.md#ignore-files
-[4]: ../reference/configuration.md#ignore-binaries
-[5]: ../reference/configuration.md#ignore-dependencies
-[6]: ../reference/configuration.md#includeentryexports
-[7]: ../reference/configuration.md#plugins
-[8]: ./production-mode.md#strict-mode
+[3]: ./source-mapping.md
+[4]: ../reference/configuration.md#ignore
+[5]: ../reference/configuration.md#ignorebinaries
+[6]: ../reference/configuration.md#ignoredependencies
+[7]: ../reference/configuration.md#ignoremembers
+[8]: ../reference/configuration.md#ignoreunresolved
+[9]: ../reference/configuration.md#includeentryexports
+[10]: ../reference/configuration.md#plugins
+[11]: ./production-mode.md#strict-mode

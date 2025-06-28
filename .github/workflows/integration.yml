@@ -9,55 +9,155 @@ on:
     tags:
       - '!**'
 
+env:
+  PKG_URL: |
+    https://pkg.pr.new/knip@${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
-  integration:
-    name: integration
+  prepare:
+    name: Build and publish Knip
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      - run: cd packages/knip && npm install && npm run build && npm link
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --ignore-scripts --frozen-lockfile
+        working-directory: packages/knip
+      - run: bun run build
+        working-directory: packages/knip
+      - run: bunx pkg-pr-new publish --compact ./packages/knip
 
-      - name: Test Knip against create-typescript-app
+  test:
+    name: Run
+    runs-on: ubuntu-latest
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - name: 10ten-ja-reader
+            repo: birchill/10ten-ja-reader
+            commands: |
+              pnpm install
+              pnpm dlx $PKG_URL
+
+          - name: argos
+            repo: argos-ci/argos
+            commands: |
+              pnpm install
+              pnpm add -D -w $PKG_URL
+              pnpm run knip
+
+          - name: astro
+            repo: withastro/astro
+            commands: |
+              pnpm install
+              pnpm build
+              pnpm add -D -w $PKG_URL
+
+          - name: create-typescript-app
+            repo: JoshuaKGoldberg/create-typescript-app
+            commands: |
+              pnpm install
+              pnpm dlx $PKG_URL
+
+          - name: DefinitelyTyped-tools
+            repo: microsoft/DefinitelyTyped-tools
+            commands: |
+              pnpm install
+              pnpm dlx $PKG_URL
+
+          - name: eslint
+            repo: eslint/eslint
+            commands: |
+              npm install
+              npm install --prefix docs
+              npm install -D $PKG_URL
+              npm run lint:unused -- --cache
+              npm run lint:unused -- --cache
+
+          - name: mocha
+            repo: mochajs/mocha
+            commands: |
+              npm ci
+              npm install -D $PKG_URL
+              npm run lint:knip
+
+          - name: InvokeAI
+            repo: invoke-ai/InvokeAI
+            sparse-checkout: invokeai/frontend/web
+            commands: |
+              cd invokeai/frontend/web
+              pnpm install
+              pnpm add -D $PKG_URL
+              bunx --bun knip --tags=-knipignore
+              bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files --format
+              bunx --bun knip --tags=-knipignore --production
+
+          - name: prettier
+            repo: prettier/prettier
+            commands: |
+              yarn
+              yarn --cwd scripts/release
+              yarn --cwd scripts/tools/bundle-test
+              yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules
+              yarn --cwd website
+              yarn add -D knip@$PKG_URL
+              yarn knip
+
+          - name: query
+            repo: TanStack/query
+            commands: |
+              pnpm install
+              pnpm add -D -w $PKG_URL
+              pnpm test:knip --cache
+              pnpm test:knip --cache
+
+          - name: rolldown
+            repo: rolldown/rolldown
+            commands: |
+              pnpm install
+              pnpm add -D -w knip@$PKG_URL
+              pnpm knip
+
+          - name: sentry
+            repo: getsentry/sentry
+            commands: |
+              pnpm install
+              pnpm dlx $PKG_URL
+
+          - name: slonik
+            repo: gajus/slonik
+            commands: |
+              pnpm install --no-frozen-lockfile
+              pnpm dlx $PKG_URL
+
+          - name: TypeScript
+            repo: microsoft/TypeScript
+            commands: |
+              npm ci
+              npm install -D $PKG_URL
+              npm run knip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out ${{ matrix.project.repo }}
         uses: actions/checkout@v4
         with:
-          repository: JoshuaKGoldberg/create-typescript-app
-          path: create-typescript-app
-      - run: cd create-typescript-app && pnpm install && knip
+          repository: ${{ matrix.project.repo }}
+          path: ${{ matrix.project.name }}
+          sparse-checkout: ${{ matrix.project.sparse-checkout }}
 
-      - name: Test Knip against slonik
-        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          repository: gajus/slonik
-          path: slonik
-      - run: cd slonik && npm ci && knip
+          node-version: 20
 
-      - name: Test Knip against 10ten-ja-reader
-        uses: actions/checkout@v4
-        with:
-          repository: birchill/10ten-ja-reader
-          path: 10ten-ja-reader
-      - run: cd 10ten-ja-reader && pnpm install && knip
+      - uses: oven-sh/setup-bun@v2
 
-      - name: Test Knip against DefinitelyTyped-tools
-        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
-          repository: microsoft/DefinitelyTyped-tools
-          path: DefinitelyTyped-tools
-      - run: cd DefinitelyTyped-tools && pnpm install && knip
+          version: 10
 
-      - name: Test Knip against TanStack/query
-        uses: actions/checkout@v4
-        with:
-          repository: TanStack/query
-          path: query
-      - run: cd query && pnpm install && knip
-
-      - name: Test Knip against argos-ci/argos
-        uses: actions/checkout@v4
-        with:
-          repository: argos-ci/argos
-          path: argos
-      - run: cd argos && npm install && knip
+      - name: Run Knip in ${{ matrix.project.repo }}
+        working-directory: ${{ matrix.project.name }}
+        run: ${{ matrix.project.commands }}

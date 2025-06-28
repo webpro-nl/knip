@@ -1,0 +1,8 @@
+on: push
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - run: playwright test -c playwright.e2e.config.ts
+        working-directory: e2e

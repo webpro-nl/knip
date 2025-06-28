@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "nuxt": ["../node_modules/nuxt"],
+      "~": [".."],
+      "~/*": ["../*"],
+      "@": [".."],
+      "@/*": ["../*"],
+      "~~": [".."],
+      "~~/*": ["../*"],
+      "@@": [".."],
+      "@@/*": ["../*"],
+      "assets": ["../assets"],
+      "public": ["../public"],
+      "public/*": ["../public/*"],
+      "#build": ["."],
+      "#build/*": ["./*"],
+      "#components": ["./components"]
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitOverride": true,
+    "module": "ESNext",
+    "noEmit": true,
+    "lib": ["ESNext", "dom", "dom.iterable", "webworker"],
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": [],
+    "moduleResolution": "Bundler",
+    "useDefineForClassFields": true,
+    "noImplicitThis": true,
+    "allowSyntheticDefaultImports": true
+  }
+}

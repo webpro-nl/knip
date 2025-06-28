@@ -5,13 +5,5 @@
   "arrowParens": "avoid",
   "proseWrap": "always",
   "trailingComma": "es5",
-  "overrides": [
-    {
-      "files": ["*.(ts|js|mjs)"],
-      "options": {
-        "printWidth": 120
-      }
-    }
-  ],
-  "plugins": ["prettier-plugin-astro"]
+  "bracketSameLine": true
 }

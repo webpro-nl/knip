@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/wrangler",
+  "scripts": {
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "wrangler": "^3.37.0"
+  }
+}

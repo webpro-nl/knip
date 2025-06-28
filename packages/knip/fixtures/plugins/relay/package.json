@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/relay",
+  "scripts": {
+    "build": "relay-compiler myrelay.config.js",
+    "dev": "vite dev"
+  },
+  "devDependencies": {
+    "relay-compiler": "*",
+    "vite-plugin-relay": "*",
+    "vite": "*"
+  }
+}

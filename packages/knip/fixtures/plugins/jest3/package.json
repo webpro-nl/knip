@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/jest3",
+  "scripts": {},
+  "devDependencies": {
+    "jest": "*",
+    "jest-junit": "*"
+  }
+}

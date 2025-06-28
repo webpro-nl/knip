@@ -1,46 +1,59 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { getGitHookPaths } from '../../util/git.js';
-import { getValuesByKeyDeep } from '../../util/object.js';
+import { fromBinary, toDependency } from '../../util/input.js';
+import { findByKeyDeep } from '../../util/object.js';
 import { extname } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency, load, loadFile } from '../../util/plugin.js';
-import { fromBinary } from '../../util/protocols.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://github.com/evilmartians/lefthook
 
-export const NAME = 'Lefthook';
+const title = 'Lefthook';
 
-/** @public */
-export const ENABLERS = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
+const enablers = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const gitHookPaths = getGitHookPaths();
 
-export const CONFIG_FILE_PATTERNS = ['lefthook.yml', ...gitHookPaths];
+const config = ['lefthook.yml', ...gitHookPaths];
 
-const findLefthookDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+type Command = {
+  run: string;
+  root: string;
+};
 
-  if (isProduction) return [];
+const resolveConfig: ResolveConfig = async (localConfig, options) => {
+  const { manifest, configFileName, cwd, getInputsFromScripts } = options;
 
-  const dependencies = manifest.devDependencies ? Object.keys(manifest.devDependencies) : [];
+  const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(id => toDependency(id)) : [];
 
-  if (extname(configFilePath) === '.yml') {
-    const localConfig = await load(configFilePath);
-    if (!localConfig) return [];
-    const scripts = getValuesByKeyDeep(localConfig, 'run').filter((run): run is string => typeof run === 'string');
-    const lefthook = process.env.CI ? ENABLERS.filter(dependency => dependencies.includes(dependency)) : [];
-    return [...lefthook, ...getDependenciesFromScripts(scripts, { cwd, manifest, knownGlobalsOnly: true })];
+  if (extname(configFileName) === '.yml') {
+    const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
+      const deps = getInputsFromScripts([command.run], { ...options, knownBinsOnly: true });
+      const dir = command.root ?? cwd;
+      return deps.flatMap(dependency => ({ ...dependency, dir }));
+    });
+
+    const lefthook = process.env.CI
+      ? enablers.filter(dependency => inputs.some(d => d.specifier === dependency)).map(id => toDependency(id))
+      : [];
+
+    return [...scripts, ...lefthook];
   }
 
-  const script = await loadFile(configFilePath);
+  const script = localConfig;
 
   if (!script) return [];
 
-  const scriptDependencies = getDependenciesFromScripts([script], { cwd, manifest, knownGlobalsOnly: false });
-  const matches = scriptDependencies.find(dep => dependencies.includes(fromBinary(dep)));
+  const scriptInputs = getInputsFromScripts(script);
+  const matches = scriptInputs.find(dep => inputs.some(d => d.specifier === fromBinary(dep)));
   return matches ? [matches] : [];
 };
 
-export const findDependencies = timerify(findLefthookDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  resolveConfig,
+} satisfies Plugin;

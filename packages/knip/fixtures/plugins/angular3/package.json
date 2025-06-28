@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/angular3",
+  "devDependencies": {
+    "@angular-devkit/build-angular": "*",
+    "@angular/cli": "*",
+    "jasmine-core": "*",
+    "karma-chrome-launcher": "*",
+    "karma-coverage": "*",
+    "karma-jasmine": "*",
+    "karma-jasmine-html-reporter": "*",
+    "typescript": "*"
+  }
+}

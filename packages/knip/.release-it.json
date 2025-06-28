@@ -1,0 +1,29 @@
+{
+  "$schema": "https://unpkg.com/release-it@18/schema/release-it.json",
+  "hooks": {
+    "before:init": [
+      "bun run lint",
+      "bun run build",
+      "bun run knip",
+      "bun run knip:production",
+      "bun run test"
+    ]
+  },
+  "github": {
+    "release": true,
+    "releaseNotes": {
+      "commit": "* ${commit.subject} (${sha}){ - thanks @${author.login}!}",
+      "excludeMatches": ["webpro"]
+    },
+    "comments": {
+      "submit": true,
+      "issue": ":rocket: _This issue has been resolved in v${version}. See [${releaseName}](${releaseUrl}) for release notes._\n\n_Using Knip in a commercial project? Please consider [becoming a sponsor](https://knip.dev/sponsors)._",
+      "pr": ":rocket: _This pull request is included in v${version}. See [${releaseName}](${releaseUrl}) for release notes._\n\n_Using Knip in a commercial project? Please consider [becoming a sponsor](https://knip.dev/sponsors)._"
+    }
+  },
+  "plugins": {
+    "@release-it/bumper": {
+      "out": "{dist,src}/version.*"
+    }
+  }
+}

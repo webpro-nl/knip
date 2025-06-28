@@ -1,4 +1,8 @@
 {
   "root": true,
-  "extends": ["@fixtures/self-reference", "@fixtures/self-reference/local"]
+  "extends": [
+    "@fixtures/x-self-reference-from-plugin",
+    "@fixtures/x-self-reference-from-plugin/local",
+    "@fixtures/x-self-reference-from-plugin/data"
+  ]
 }

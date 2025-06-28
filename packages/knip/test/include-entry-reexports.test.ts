@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -28,11 +28,11 @@ test('Report unused nsExports in entry source files', async () => {
     isIncludeEntryExports: true,
   });
 
-  assert(issues.nsExports['packages/shared/bar.mjs']['bar']);
+  assert(issues.exports['packages/shared/bar.mjs']['bar']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    nsExports: 1,
+    exports: 1,
     processed: 4,
     total: 4,
   });

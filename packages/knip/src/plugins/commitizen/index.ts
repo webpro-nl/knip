@@ -1,31 +1,32 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { CommitizenConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/commitizen/cz-cli
 
-export const NAME = 'Commitizen';
+const title = 'Commitizen';
 
-/** @public */
-export const ENABLERS = ['commitizen'];
+const enablers = ['commitizen'];
 
-export const PACKAGE_JSON_PATH = 'config.commitizen';
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isRootOnly = true;
 
-export const CONFIG_FILE_PATTERNS = ['.czrc', '.cz.json', 'package.json'];
+const packageJsonPath = 'config.commitizen';
 
-const findPluginDependencies: GenericPluginCallback = async (configFilePath, { manifest, isProduction }) => {
-  if (isProduction) return [];
+const config = ['.czrc', '.cz.json', 'package.json'];
 
-  const localConfig: CommitizenConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest.config?.commitizen : await load(configFilePath);
-
-  if (!localConfig) return [];
-
-  return localConfig.path ? [localConfig.path] : [];
+const resolveConfig: ResolveConfig<CommitizenConfig> = config => {
+  return config.path ? [toDependency(config.path)] : [];
 };
 
-export const findDependencies = timerify(findPluginDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  isRootOnly,
+  packageJsonPath,
+  config,
+  resolveConfig,
+} satisfies Plugin;

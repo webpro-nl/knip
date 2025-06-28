@@ -1,0 +1,62 @@
+name: 🔄 Regression
+description: Something that worked a certain way before, but no longer does
+title: '🔄 '
+labels: ['regression']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please make sure you have read the docs and are using the latest version of Knip.
+        Use common sense and provide the necessary information that helps me or others to help you.
+
+        A minimal reproduction is mandatory: only the code and configuration required to demonstrate the issue.
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      description: Please check existing information about your issue
+      options:
+        - label: I've read the relevant [documentation](https://knip.dev)
+          required: true
+        - label:
+            I've searched for [existing
+            issues](https://github.com/webpro-nl/knip/issues?q=is%3Aissue)
+          required: true
+        - label:
+            I've read the [issue reproduction
+            guide](https://knip.dev/guides/issue-reproduction)
+          required: true
+  - type: input
+    id: reproduction
+    attributes:
+      label: Reproduction url
+      description: Please link to the location of the issue reproduction
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Reproduction access
+      description: For instance, a CodeSandbox seems private by default
+      options:
+        - label: I've made sure the reproduction is publicly accessible
+          required: true
+  - type: input
+    id: good-version
+    attributes:
+      label: Good version
+      description: What's the latest version it worked as expected?
+    validations:
+      required: true
+  - type: input
+    id: bad-version
+    attributes:
+      label: Bad version
+      description: What's the first version it no longer works as expected?
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the regression
+      description: What happened before, what happens now?
+    validations:
+      required: true

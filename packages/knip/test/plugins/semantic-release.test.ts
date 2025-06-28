@@ -1,34 +1,31 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import * as semanticRelease from '../../src/plugins/semantic-release/index.js';
-import { resolve, join } from '../../src/util/path.js';
-import { getManifest } from '../helpers/index.js';
+import { main } from '../../src/index.js';
+import { resolve } from '../../src/util/path.js';
+import baseArguments from '../helpers/baseArguments.js';
+import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/semantic-release');
-const manifest = getManifest(cwd);
 
-test('Find dependencies in semantic-release package.json configuration (json)', async () => {
-  const configFilePath = join(cwd, 'package.json');
-  const dependencies = await semanticRelease.findDependencies(configFilePath, { manifest });
-  assert.deepEqual(dependencies, [
-    '@semantic-release/commit-analyzer',
-    '@semantic-release/release-notes-generator',
-    '@semantic-release/changelog',
-    '@semantic-release/git',
-    '@semantic-release/npm',
-    '@semantic-release/github',
-  ]);
-});
+test('Find dependencies with the semantic-release plugin', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
 
-test('Find dependencies in semantic-release .releaserc configuration (yaml)', async () => {
-  const configFilePath = join(cwd, '.releaserc');
-  const dependencies = await semanticRelease.findDependencies(configFilePath, {});
-  assert.deepEqual(dependencies, [
-    '@semantic-release/commit-analyzer',
-    '@semantic-release/release-notes-generator',
-    '@semantic-release/changelog',
-    '@semantic-release/git',
-    '@semantic-release/npm',
-    '@semantic-release/github',
-  ]);
+  assert(issues.devDependencies['package.json']['semantic-release']);
+
+  assert(issues.unresolved['.releaserc']['@semantic-release/changelog']);
+  assert(issues.unresolved['.releaserc']['@semantic-release/git']);
+
+  assert(issues.unresolved['package.json']['@semantic-release/changelog']);
+  assert(issues.unresolved['package.json']['@semantic-release/git']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    unresolved: 4,
+    processed: 0,
+    total: 0,
+  });
 });

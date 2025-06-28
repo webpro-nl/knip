@@ -1,0 +1,35 @@
+name: Tests (against typescript@next in Node.js v24)
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '!**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Ubuntu/Node v24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install dependencies
+        run: npm install --ignore-scripts --legacy-peer-deps
+      - name: Install latest peer dependencies
+        run: |
+          npm install -w packages/knip typescript@next @types/node@latest
+      - name: Build knip
+        run: npm run build
+        working-directory: packages/knip
+      - name: Test knip
+        run: npm run test:node
+        working-directory: packages/knip
+      - name: Run knip
+        run: npx --yes knip
+      - name: Run knip --production --strict
+        run: npx --yes knip --production --strict

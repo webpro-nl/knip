@@ -10,6 +10,8 @@ export default visit(isNotJS, node => {
   ) {
     // Pattern: import identifier = require('specifier')
     const specifier = node.moduleReference.expression.text;
-    return { specifier, identifier: 'default', pos: node.moduleReference.expression.pos };
+    const alias = String(node.name.escapedText);
+    // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportEqualsDeclaration'.
+    return { specifier, alias, identifier: 'default', symbol: node.symbol, pos: node.moduleReference.expression.pos };
   }
 });

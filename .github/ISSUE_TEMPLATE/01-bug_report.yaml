@@ -1,0 +1,53 @@
+name: 🐛 Bug report
+description: Create a report to help us improve
+title: '🐛 '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use common sense and provide the necessary information that helps us to help you.
+
+        A minimal reproduction is mandatory: only the code and configuration required to demonstrate the issue.
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      description: Please check existing information about your issue
+      options:
+        - label: I'm using the latest version
+          required: true
+        - label: I've read the relevant [documentation](https://knip.dev)
+          required: true
+        - label:
+            I've searched for [existing
+            issues](https://github.com/webpro-nl/knip/issues?q=is%3Aissue)
+          required: true
+        - label:
+            I've checked the [list of known
+            issues](https://knip.dev/reference/known-issues)
+          required: true
+        - label:
+            I've read the [issue reproduction
+            guide](https://knip.dev/guides/issue-reproduction)
+          required: true
+  - type: input
+    id: reproduction
+    attributes:
+      label: Reproduction url
+      description: Please link to the location of the issue reproduction
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Reproduction access
+      description: For instance, a CodeSandbox seems private by default
+      options:
+        - label: I've made sure the reproduction is publicly accessible
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the issue
+      description: What happened, and what would you expect to happen?
+    validations:
+      required: true

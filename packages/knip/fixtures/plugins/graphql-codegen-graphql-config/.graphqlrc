@@ -1,0 +1,40 @@
+projects:
+  app:
+    schema: schema.graphql
+    extensions:
+      codegen:
+        overwrite: true
+        generates:
+          ../../packages/graphql-types/src/types.ts:
+            config:
+              documents:
+                'src/documents/**/*.graphql':
+              skipGraphQLImport: false
+            plugins:
+              - typescript
+              - typescript-operations
+              - typed-document-node
+              - ./codegen/UserErrorsPlugin.cjs
+              - add:
+                  content: "/* cSpell:disable */\nimport { type SerializedMoney } from '@contra/money';"
+  server:
+    schema: schema.graphql
+    extensions:
+      codegen:
+        overwrite: true
+        generates:
+          src/contra-api/__generated__/types.ts:
+            config:
+              contextType: ../types.js#ResolverContext
+              mappers:
+                ActivePaidProjectAnalytics: ../types.js#ActivePaidProjectAnalytics
+                Workspace: '@contra/temporary-common/domain/workspace/WorkspaceService.js#Workspace'
+            plugins:
+              - typescript
+              - typescript-resolvers
+              - ./codegen/UserErrorsPlugin.cjs
+              - ./codegen/GraphQLResolverBuilderPlugin.cjs
+              - add:
+                  content:
+                    "/* cSpell:disable */\nimport type { DeepPartial } from 'utility-types';\nimport { type Money as
+                    ContraMoney, type USD } from '@contra/money';"

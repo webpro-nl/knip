@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/workspaces-self-and-cross-ref__app",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@fixtures/self-and-cross-ref-lib": "workspace:*",
+    "@fixtures/self-and-cross-ref-shared": "workspace:*"
+  },
+  "sideEffects": false
+}

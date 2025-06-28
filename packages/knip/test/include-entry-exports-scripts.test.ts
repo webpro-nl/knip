@@ -1,5 +1,5 @@
+import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { main } from '../src/index.js';
 import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
@@ -21,7 +21,7 @@ test('Skip unused exports in entry source files and scripts', async () => {
   });
 });
 
-test('Report unused exports in source files and scripts (skip for plugin entry files)', async () => {
+test('Report unused exports in source files (skip for scripts and plugin entry files)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -30,7 +30,7 @@ test('Report unused exports in source files and scripts (skip for plugin entry f
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 5,
+    exports: 0, // skip for scripts and plugin entry files
     processed: 5,
     total: 5,
   });

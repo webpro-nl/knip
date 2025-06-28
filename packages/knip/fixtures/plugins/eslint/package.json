@@ -1,12 +1,11 @@
 {
-  "name": "@fixtures/eslint",
+  "name": "@plugins/eslint",
   "devDependencies": {
     "eslint": "*",
     "@nrwl/eslint-plugin-nx": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
     "eslint-config-prettier": "*",
-    "eslint-plugin-no-secrets": "*",
     "eslint-plugin-prettier": "*"
   }
 }

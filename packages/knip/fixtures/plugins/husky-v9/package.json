@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/husky-v9",
+  "scripts": {
+    "prepare": "husky",
+    "build": "node",
+    "test": "node"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "*",
+    "husky": "9.0.0",
+    "lint-staged": "*"
+  }
+}

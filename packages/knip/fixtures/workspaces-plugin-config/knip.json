@@ -7,7 +7,7 @@
   "babel": { "config": "rollup.config.ts" },
   "workspaces": {
     "packages/*": {},
-    "packages/package1": {
+    "packages/shared": {
       "storybook": {
         "config": "components/storybook/main.ts",
         "entry": ["components/storybook/{manager,preview}.ts"]

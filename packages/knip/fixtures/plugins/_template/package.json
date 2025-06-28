@@ -1,4 +1,3 @@
 {
-  "name": "@fixtures/_template",
-  "version": "*"
+  "name": "@plugins/_template"
 }

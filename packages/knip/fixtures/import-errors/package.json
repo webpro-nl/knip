@@ -1,5 +1,5 @@
 {
-  "name": "import-error",
+  "name": "@fixtures/import-errors",
   "devDependencies": {
     "package": "*"
   }

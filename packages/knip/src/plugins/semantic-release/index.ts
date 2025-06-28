@@ -1,37 +1,41 @@
-import { basename } from '../../util/path.js';
-import { timerify } from '../../util/Performance.js';
-import { hasDependency, load } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolve } from '../../util/input.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
+import { hasDependency } from '../../util/plugin.js';
 import type { SemanticReleaseConfig } from './types.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
 
 // https://github.com/semantic-release/semantic-release/blob/master/docs/usage/configuration.md#configuration-file
 
-export const NAME = 'Semantic Release';
+const title = 'Semantic Release';
 
-/** @public */
-export const ENABLERS = ['semantic-release'];
+const enablers = ['semantic-release'];
 
-export const PACKAGE_JSON_PATH = 'release';
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isRootOnly = true;
 
-export const CONFIG_FILE_PATTERNS = [
-  '.releaserc',
-  '.releaserc.{yaml,yml,json,js,cjs}',
-  'release.config.{js,cjs}',
-  'package.json',
+const packageJsonPath = 'release';
+
+const config = ['package.json', ...toCosmiconfig('release')];
+
+const excludePackages = [
+  '@semantic-release/commit-analyzer',
+  '@semantic-release/github',
+  '@semantic-release/npm',
+  '@semantic-release/release-notes-generator',
 ];
 
-const findSemanticReleaseDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { manifest, isProduction } = options;
-
-  if (isProduction) return [];
-
-  const localConfig: SemanticReleaseConfig | undefined =
-    basename(configFilePath) === 'package.json' ? manifest[PACKAGE_JSON_PATH] : await load(configFilePath);
-
-  const plugins = (localConfig?.plugins ?? []).map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));
-  return plugins;
+const resolveConfig: ResolveConfig<SemanticReleaseConfig> = config => {
+  const plugins = (config?.plugins ?? []).map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));
+  return plugins.filter(plugin => !excludePackages.includes(plugin)).map(id => toDeferResolve(id));
 };
 
-export const findDependencies = timerify(findSemanticReleaseDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  isRootOnly,
+  packageJsonPath,
+  config,
+  resolveConfig,
+} satisfies Plugin;

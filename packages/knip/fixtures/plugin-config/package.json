@@ -7,7 +7,5 @@
     "vitest": "*",
     "happy-dom": "*"
   },
-  "workspaces": [
-    "packages/*"
-  ]
+  "workspaces": ["packages/*"]
 }

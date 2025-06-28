@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/production-strict-test",
+  "name": "@fixtures/jsdoc-exports",
   "scripts": {
     "test": "node --test"
   }

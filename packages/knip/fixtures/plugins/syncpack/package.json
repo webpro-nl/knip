@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/syncpack",
+  "devDependencies": {
+    "syncpack": "*"
+  }
+}

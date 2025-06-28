@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+/** @internal */
 export const getValuesByKeyDeep = (obj: any, key: string): unknown[] => {
   const objects = [];
   if (obj && typeof obj === 'object') {
@@ -14,20 +14,23 @@ export const getValuesByKeyDeep = (obj: any, key: string): unknown[] => {
   return objects;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getStringValues = (obj: any): string[] => {
-  if (typeof obj === 'string') return [obj];
-  let values: string[] = [];
-  for (const prop in obj) {
-    if (obj[prop]) {
-      if (typeof obj[prop] === 'string') {
-        values.push(obj[prop]);
-      } else if (typeof obj[prop] === 'object') {
-        values = values.concat(getStringValues(obj[prop]));
+export const findByKeyDeep = <T>(obj: any, key: string): T[] => {
+  const objects = [];
+  if (obj && typeof obj === 'object') {
+    if (key in obj) {
+      objects.push(obj);
+    }
+    for (const value of Object.values(obj)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          objects.push(...findByKeyDeep(item, key));
+        }
+      } else if (typeof value === 'object') {
+        objects.push(...findByKeyDeep(value, key));
       }
     }
   }
-  return values;
+  return objects;
 };
 
 export const getKeysByValue = <T>(obj: T, value: unknown): (keyof T)[] => {
@@ -38,5 +41,4 @@ export const getKeysByValue = <T>(obj: T, value: unknown): (keyof T)[] => {
   return keys;
 };
 
-// @ts-expect-error just pass good objects alright
-export const get = (obj: unknown, path: string) => path.split('.').reduce((o, p) => o && o[p], obj);
+export const get = <T>(obj: T, path: string) => path.split('.').reduce((o: any, p) => o?.[p], obj);

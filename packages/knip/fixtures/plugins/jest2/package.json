@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/jest2",
+  "scripts": {},
+  "devDependencies": {
+    "jest": "*",
+    "@testing-library/jest-dom": "*",
+    "jest-junit": "*"
+  }
+}

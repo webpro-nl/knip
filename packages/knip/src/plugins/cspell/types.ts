@@ -1,3 +1,3 @@
 export type CSpellConfig = {
-  import?: string[];
+  import?: string | string[];
 };

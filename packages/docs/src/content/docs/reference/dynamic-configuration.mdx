@@ -6,71 +6,75 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## TypeScript
 
-Instead of `knip.json`, you can use a TypeScript file (`knip.ts`) for a dynamic
-configuration and type annotations:
+Instead of a JSON file, you can use a JavaScript or TypeScript file for a
+dynamic configuration and type annotations:
 
-<Tabs>
+<Tabs syncKey="lang">
   <TabItem label="TypeScript">
 
-```ts title="knip.ts"
-import type { KnipConfig } from 'knip';
+    ```ts title="knip.ts"
+    import type { KnipConfig } from 'knip';
 
-const config: KnipConfig = {
-  entry: ['src/index.ts'],
-  project: ['src/**/*.ts'],
-};
+    const config: KnipConfig = {
+      entry: ['src/index.ts'],
+      project: ['src/**/*.ts'],
+    };
 
-export default config;
-```
+    export default config;
+    ```
 
   </TabItem>
+
   <TabItem label="JavaScript">
 
-```js title="knip.js"
-const config = {
-  entry: ['src/index.ts'],
-  project: ['src/**/*.ts'],
-};
+    ```js title="knip.js"
+    /** @type {import('knip').KnipConfig} */
+    const config = {
+      entry: ['src/index.ts'],
+      project: ['src/**/*.ts'],
+    };
 
-export default config;
-```
+    export default config;
+    ```
 
   </TabItem>
 </Tabs>
 
 ## Function
 
-For special cases you can export an async function:
+You can export a regular or async function that returns the configuration object
+as well:
 
-<Tabs>
+<Tabs syncKey="lang">
   <TabItem label="TypeScript">
 
-```ts title="knip.ts"
-import type { KnipConfig } from 'knip';
+    ```ts title="knip.ts"
+    import type { KnipConfig } from 'knip';
 
-const config = async (): Promise<KnipConfig> => {
-  const items = await fetchRepoInfo();
+    const config = async (): Promise<KnipConfig> => {
+      const items = await fetchRepoInfo();
 
-  return {
-    entry: ['src/index.ts', ...items],
-    project: ['src/**/*.ts'],
-  };
-};
+      return {
+        entry: ['src/index.ts', ...items],
+        project: ['src/**/*.ts'],
+      };
+    };
 
-export default config;
-```
+    export default config;
+    ```
 
   </TabItem>
+
   <TabItem label="JavaScript">
 
-```ts title="knip.js"
-const config = async () => ({
-  entry: ['src/index.ts'],
-  project: ['src/**/*.ts'],
-});
+    ```ts title="knip.js"
+    const config = async () => ({
+      entry: ['src/index.ts'],
+      project: ['src/**/*.ts'],
+    });
 
-export default config;
-```
+    export default config;
+    ```
 
   </TabItem>
 </Tabs>

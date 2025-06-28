@@ -1,37 +1,43 @@
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { getGitHookPaths } from '../../util/git.js';
-import { FAKE_PATH } from '../../util/loader.js';
-import { timerify } from '../../util/Performance.js';
-import { getDependenciesFromScripts, hasDependency, loadFile } from '../../util/plugin.js';
-import type { IsPluginEnabledCallback, GenericPluginCallback } from '../../types/plugins.js';
+import { toDependency } from '../../util/input.js';
+import { hasDependency } from '../../util/plugin.js';
 
 // https://typicode.github.io/husky
-// https://git-scm.com/docs/githooks
 
-export const NAME = 'husky';
+const title = 'husky';
 
-/** @public */
-export const ENABLERS = ['husky'];
+const enablers = ['husky'];
 
-export const isEnabled: IsPluginEnabledCallback = ({ dependencies }) => hasDependency(dependencies, ENABLERS);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const gitHookPaths = getGitHookPaths('.husky');
+const isRootOnly = true;
 
-export const CONFIG_FILE_PATTERNS = [...gitHookPaths];
+// husky v9 registers hooks in .husky/_/, so need to set "false" here to get same lookup as in v8
+const gitHookPaths = getGitHookPaths('.husky', false);
 
-const findHuskyDependencies: GenericPluginCallback = async (configFilePath, options) => {
-  const { cwd, manifest, isProduction } = options;
+// Add patterns for both v8 and v9 because we can't know which version is installed at this point
+const config = [...gitHookPaths, 'package.json'];
 
-  if (isProduction || configFilePath === FAKE_PATH) return [];
+const resolveConfig: ResolveConfig = (script, options) => {
+  if (!script || options.isProduction) return [];
 
-  const script = await loadFile(configFilePath);
+  if (options.configFileName === 'package.json') {
+    const hooks = script.hooks;
+    if (hooks) {
+      const scripts: string[] = Object.values(hooks);
+      return [toDependency('husky'), ...options.getInputsFromScripts(scripts, { ...options })];
+    }
+  }
 
-  if (!script) return [];
-
-  return getDependenciesFromScripts(String(script), {
-    cwd,
-    manifest,
-    knownGlobalsOnly: true,
-  });
+  return options.getInputsFromScripts(String(script), { knownBinsOnly: true });
 };
 
-export const findDependencies = timerify(findHuskyDependencies);
+export default {
+  title,
+  enablers,
+  isEnabled,
+  isRootOnly,
+  config,
+  resolveConfig,
+} satisfies Plugin;

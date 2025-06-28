@@ -1,8 +1,6 @@
 {
-  "name": "@workspaces-paths/root",
-  "workspaces": [
-    "packages/*"
-  ],
+  "name": "@fixtures/workspaces-paths",
+  "workspaces": ["packages/*"],
   "dependencies": {},
   "knip": {
     "workspaces": {
@@ -12,9 +10,7 @@
       },
       "packages/lib-e": {
         "paths": {
-          "@/*": [
-            "src/*"
-          ]
+          "@/*": ["src/*"]
         }
       }
     }

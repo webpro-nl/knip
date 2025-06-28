@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/custom-paths-workspaces",
+  "workspaces": ["ws"]
+}
