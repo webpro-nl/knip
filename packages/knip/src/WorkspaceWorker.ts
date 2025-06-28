@@ -56,7 +56,7 @@ type WorkspaceManagerOptions = {
   configFilesMap: Map<string, Map<PluginName, Set<string>>>;
 };
 
-type CacheItem = { resolveConfig?: Input[]; resolveFromAST?: Input[] };
+type CacheItem = { resolveConfig?: Input[]; resolveFromAST?: Input[]; configFile?: Input };
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
@@ -364,6 +364,7 @@ export class WorkspaceWorker {
           const data = fd.meta.data;
           if (data.resolveConfig) for (const id of data.resolveConfig) addInput(id, configFilePath);
           if (data.resolveFromAST) for (const id of data.resolveFromAST) addInput(id, configFilePath);
+          if (data.configFile) addInput(data.configFile);
           continue;
         }
 
@@ -410,6 +411,7 @@ export class WorkspaceWorker {
         if (basename(configFilePath) !== 'package.json') {
           addInput(toEntry(configFilePath));
           addInput(toConfig(pluginName, configFilePath));
+          cache.configFile = toEntry(configFilePath);
 
           if (!seen.has(key)) seen.set(key, new Set());
           seen.get(key)?.add(configFilePath);
