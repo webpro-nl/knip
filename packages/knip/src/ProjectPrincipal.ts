@@ -260,25 +260,28 @@ export class ProjectPrincipal {
 
     const { imports, ...rest } = _getImportsAndExports(sourceFile, resolve, typeChecker, { ...options, skipExports });
 
-    const { internal, resolved, specifiers, unresolved, external } = imports;
+    const { internal, resolved: _resolved, specifiers: _specifiers, unresolved: _unresolved, external } = imports;
 
-    const unresolvedImports = new Set<UnresolvedImport>();
+    // Post-processing (1)
+    const specifiers = new Set<string>();
+    const resolved = new Set<string>();
+    const unresolved = new Set<UnresolvedImport>();
 
-    for (const [specifier, specifierFilePath] of specifiers) {
+    for (const [specifier, specifierFilePath] of _specifiers) {
       const packageName = getPackageNameFromModuleSpecifier(specifier);
       if (packageName && isInternalWorkspace(packageName)) {
         external.add(packageName);
         const principal = getPrincipalByFilePath(specifierFilePath);
-        if (principal && !isGitIgnored(specifierFilePath)) principal.addNonEntryPath(specifierFilePath);
+        if (principal && !isGitIgnored(specifierFilePath)) specifiers.add(specifierFilePath);
       }
     }
 
-    for (const filePath of resolved) {
+    for (const filePath of _resolved) {
       const isIgnored = isGitIgnored(filePath);
-      if (!isIgnored) this.addEntryPath(filePath, { skipExportsAnalysis: true });
+      if (!isIgnored) resolved.add(filePath);
     }
 
-    for (const unresolvedImport of unresolved) {
+    for (const unresolvedImport of _unresolved) {
       const { specifier } = unresolvedImport;
 
       // Ignore Deno style http import specifiers
@@ -295,14 +298,12 @@ export class ProjectPrincipal {
         if (!isIgnored) {
           const ext = extname(sanitizedSpecifier);
           const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);
-          if (!ext || (ext !== '.json' && !hasIgnoredExtension)) {
-            unresolvedImports.add(unresolvedImport);
-          }
+          if (!ext || (ext !== '.json' && !hasIgnoredExtension)) unresolved.add(unresolvedImport);
         }
       }
     }
 
-    return { imports: { internal, unresolved: unresolvedImports, external }, ...rest };
+    return { imports: { internal, external, specifiers, resolved, unresolved }, ...rest };
   }
 
   invalidateFile(filePath: string) {

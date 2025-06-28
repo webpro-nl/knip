@@ -374,7 +374,10 @@ export async function build({
 
       graph.set(filePath, node);
 
-      // A bit out of place, but good spot to add source files referenced from scripts recursively
+      // Post-processing (2)
+      for (const filePath of imports.resolved) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
+      for (const filePath of imports.specifiers) principal.addNonEntryPath(filePath);
+
       if (scripts && scripts.size > 0) {
         const dependencies = deputy.getDependencies(workspace.name);
         const manifestScriptNames = new Set(Object.keys(chief.getManifestForWorkspace(workspace.name)?.scripts ?? {}));
@@ -385,7 +388,7 @@ export async function build({
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
           const specifierFilePath = getReferencedInternalFilePath(input, workspace);
-          if (specifierFilePath) analyzeSourceFile(specifierFilePath, principal);
+          if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }
       }
     }
