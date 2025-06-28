@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = [
   'package.json',
   'postcss.config.json',
-  ...toLilconfig('postcss', { configDir: false, additionalExtensions: ['ts', 'mts', 'cts', 'yaml', 'yml'] }),
+  ...toLilconfig('postcss', { configDir: false, additionalExtensions: ['mts', 'cts', 'yaml', 'yml'] }),
 ];
 
 const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
