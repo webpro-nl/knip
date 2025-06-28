@@ -62,7 +62,7 @@ export type FileNode = {
     external: Set<string>;
     unresolved: Set<UnresolvedImport>;
     resolved: Set<FilePath>;
-    specifiers: Set<FilePath>;
+    specifiers: Set<[string, FilePath]>;
   };
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
