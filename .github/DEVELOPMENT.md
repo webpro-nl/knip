@@ -153,6 +153,16 @@ debug.
 
 ² Requires at least WebStorm 2025.2 EAP
 
+### Attach debugger to Node.js from a test
+
+Run configurations for VS Code and WebStorm are set up in the repo.
+
+- Optionally set a breakpoint anywhere in source or test code
+- From any test file, run the "Debug Node test" run configuration
+
+From now on, just hit `F5` (Code) or `ctrl-r` (WS) from any test file to run and
+debug.
+
 ### Attach debugger to tests
 
 In case you're wondering if or why some code is ever hit, attach the debugger to
