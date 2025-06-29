@@ -30,6 +30,7 @@ import { default as githubActions } from './github-actions/index.js';
 import { default as glob } from './glob/index.js';
 import { default as graphqlCodegen } from './graphql-codegen/index.js';
 import { default as hardhat } from './hardhat/index.js';
+import { default as heyApi } from './hey-api/index.js';
 import { default as husky } from './husky/index.js';
 import { default as i18nextParser } from './i18next-parser/index.js';
 import { default as jest } from './jest/index.js';
@@ -141,6 +142,7 @@ export const Plugins = {
   glob,
   'graphql-codegen': graphqlCodegen,
   hardhat,
+  'hey-api': heyApi,
   husky,
   'i18next-parser': i18nextParser,
   jest,
