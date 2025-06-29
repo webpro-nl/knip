@@ -23,6 +23,7 @@ import { default as dotenv } from './dotenv/index.js';
 import { default as drizzle } from './drizzle/index.js';
 import { default as eleventy } from './eleventy/index.js';
 import { default as eslint } from './eslint/index.js';
+import { default as execStaged } from './exec-staged/index.js';
 import { default as expo } from './expo/index.js';
 import { default as gatsby } from './gatsby/index.js';
 import { default as githubAction } from './github-action/index.js';
@@ -134,6 +135,7 @@ export const Plugins = {
   drizzle,
   eleventy,
   eslint,
+  'exec-staged': execStaged,
   expo,
   gatsby,
   'github-action': githubAction,
