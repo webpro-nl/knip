@@ -12,7 +12,7 @@ Knip provides the following built-in reporters:
 - [`json`][2]
 - [`markdown`][3]
 - [`codeclimate`][4]
-- `symbol` (default)
+- `symbols` (default)
 
 Example usage:
 
