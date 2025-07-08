@@ -5,7 +5,7 @@ import { toEntry } from '../../util/input.js';
 import { isAbsolute, join } from '../../util/path.js';
 import { resolveX } from './bunx.js';
 
-const commands = ['add', 'create', 'init', 'install', 'link', 'pm', 'remove', 'run', 'test', 'update', 'upgrade', 'x'];
+const commands = ['add', 'audit', 'create', 'init', 'install', 'link', 'pm', 'remove', 'run', 'test', 'update', 'upgrade', 'x'];
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
   const parsed = parseArgs(args, { string: ['cwd'] });
