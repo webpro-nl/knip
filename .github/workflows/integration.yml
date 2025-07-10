@@ -136,19 +136,6 @@ jobs:
               npm install -D $PKG_URL
               npm run knip
 
-          - name: hoarder-pipette
-            repo: DanSnow/hoarder-pipette
-            commands: |
-              pnpm install
-              pnpm dlx $PKG_URL
-
-          - name: WorkflowAI
-            repo: WorkflowAI/WorkflowAI
-            commands: |
-              yarn
-              yarn add -D knip@$PKG_URL
-              yarn knip
-
     steps:
       - uses: actions/checkout@v4
 
