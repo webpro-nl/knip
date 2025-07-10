@@ -145,7 +145,6 @@ jobs:
           - name: WorkflowAI
             repo: WorkflowAI/WorkflowAI
             commands: |
-              cd client
               yarn
               yarn add -D knip@$PKG_URL
               yarn knip
