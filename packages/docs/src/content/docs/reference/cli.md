@@ -217,6 +217,14 @@ knip --include-entry-exports
 
 Also see [includeEntryExports][10].
 
+### `--ignore-class-member-implementations`
+
+By default, Knip treats references to implementations of abstract members as
+references to the abstract member itself. This flag changes that behavior so
+that only direct references are taken into account.
+
+Also see [ignoreClassMemberImplementations][19].
+
 ### `--include-libs`
 
 Getting false positives for exports consumed by external libraries? Try the
@@ -475,3 +483,4 @@ Exit with non-zero code (`1`) if there are any configuration hints.
 [16]: ./issue-types.md
 [17]: #--tags
 [18]: ../features/reporters.md
+[19]: ./configuration.md#ignoreclassmemberimplementations

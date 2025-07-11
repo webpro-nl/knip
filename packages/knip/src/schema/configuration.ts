@@ -58,6 +58,7 @@ const rootConfigurationSchema = z.object({
   ignoreExportsUsedInFile: ignoreExportsUsedInFileSchema.optional(),
   ignoreWorkspaces: z.array(z.string()).optional(),
   includeEntryExports: z.boolean().optional(),
+  ignoreClassMemberImplementations: z.boolean().optional(),
   compilers: compilersSchema.optional(),
   syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
   asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
@@ -80,6 +81,7 @@ const baseWorkspaceConfigurationSchema = z.object({
   ignoreMembers: stringOrRegexSchema.optional(),
   ignoreUnresolved: stringOrRegexSchema.optional(),
   includeEntryExports: z.boolean().optional(),
+  ignoreClassMemberImplementations: z.boolean().optional(),
 });
 
 const workspaceConfigurationSchema = baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial());

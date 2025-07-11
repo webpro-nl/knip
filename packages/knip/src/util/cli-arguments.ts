@@ -26,6 +26,7 @@ Options:
   --allow-remove-files     Allow Knip to remove files (with --fix)
   --include-libs           Include type definitions from external dependencies (default: false)
   --include-entry-exports  Include entry files when reporting unused exports
+  --ignore-class-member-implementations  Ignore implementations when evaluating class member references
   --isolate-workspaces     Isolate workspaces into separate programs
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
@@ -87,6 +88,7 @@ try {
       include: { type: 'string', multiple: true },
       'include-libs': { type: 'boolean' },
       'include-entry-exports': { type: 'boolean' },
+      'ignore-class-member-implementations': { type: 'boolean' },
       'isolate-workspaces': { type: 'boolean' },
       'max-issues': { type: 'string' },
       memory: { type: 'boolean' },
