@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/vitest9",
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

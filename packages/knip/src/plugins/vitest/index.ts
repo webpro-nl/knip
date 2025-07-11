@@ -2,7 +2,9 @@ import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { type Input, toAlias, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
+import { _glob } from '../../util/glob.js';
 import { join, toPosix } from '../../util/path.js';
+import { _load } from '../../util/loader.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
@@ -50,11 +52,21 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
     }
   }
 
+  const projectsDependencies: Input[] = [];
+  if (testConfig.projects !== undefined) {
+    for (const projectConfig of testConfig.projects) {
+      if (typeof projectConfig !== 'string') {
+        projectsDependencies.push(...findConfigDependencies(projectConfig, options));
+      }
+    }
+  }
+
   return [
     ...[...environments, ...reporters, ...coverage].map(id => toDependency(id)),
     ...setupFiles,
     ...globalSetup,
     ...workspaceDependencies,
+    ...projectsDependencies,
   ];
 };
 
@@ -67,10 +79,26 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
           for (const mode of ['development', 'production'] as MODE[]) {
             const cfg = await config({ command, mode, ssrBuild: undefined });
             configs.push(cfg);
+            // Expand projects into individual configs
+            if (cfg.test?.projects) {
+              for (const project of cfg.test.projects) {
+                if (typeof project !== 'string') {
+                  configs.push(project);
+                }
+              }
+            }
           }
         }
       } else {
         configs.push(config);
+        // Expand projects into individual configs
+        if (config.test?.projects) {
+          for (const project of config.test.projects) {
+            if (typeof project !== 'string') {
+              configs.push(project);
+            }
+          }
+        }
       }
     }
   }
@@ -83,6 +111,38 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   inputs.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
 
   const configs = await getConfigs(localConfig);
+
+  // Handle external project files from glob patterns
+  const externalProjectFiles: string[] = [];
+  for (const cfg of configs) {
+    if (cfg.test?.projects) {
+      for (const project of cfg.test.projects) {
+        if (typeof project === 'string') {
+          // Resolve glob patterns to actual files
+          const projectFiles = await _glob({
+            cwd: options.cwd,
+            patterns: [project],
+            gitignore: false,
+          });
+          externalProjectFiles.push(...projectFiles);
+        }
+      }
+    }
+  }
+
+  // Load external project configuration files and add them to configs
+  for (const projectFile of externalProjectFiles) {
+    try {
+      inputs.add(toEntry(projectFile));
+      // Load the external config file using knip's loader
+      const externalConfig = await _load(projectFile);
+      if (externalConfig) {
+        configs.push(externalConfig);
+      }
+    } catch (error) {
+      // Skip files that can't be loaded - they will show up as unresolved
+    }
+  }
 
   const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
   const addAliases = (aliasOptions: AliasOptions) => {
