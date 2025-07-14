@@ -59,9 +59,7 @@ consider using an extended glob pattern like this:
 
 ### \`eslint-import-resolver-typescript\`
 
-If you're using \`eslint-plugin-import\` or \`eslint-plugin-import-x\` with custom resolvers, you have to specify them in ESLint's config even if they're normally picked up automatically by those plugins:
-
-consider using an extended glob pattern like this:
+If you're using \`eslint-plugin-import\` or \`eslint-plugin-import-x\` with custom resolvers, you have to specify them in ESLint's config:
 
 \`\`\`js
 
