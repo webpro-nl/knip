@@ -1,0 +1,7 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
+  "extends": ["@org/shared-configs/biome"],
+  "files": {
+    "includes": ["**", "!**/node_modules/**"]
+  }
+}
