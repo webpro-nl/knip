@@ -29,7 +29,7 @@ import { defaultRules } from './util/issue-initializers.js';
 import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
-import { join, relative } from './util/path.js';
+import { isAbsolute, join, relative } from './util/path.js';
 import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { ELLIPSIS } from './util/string.js';
@@ -161,7 +161,7 @@ export class ConfigurationChief {
     }
 
     for (const configPath of rawConfigArg ? [rawConfigArg] : KNIP_CONFIG_LOCATIONS) {
-      this.resolvedConfigFilePath = findFile(this.cwd, configPath);
+      this.resolvedConfigFilePath = isAbsolute(configPath) ? configPath : findFile(this.cwd, configPath);
       if (this.resolvedConfigFilePath) break;
     }
 
