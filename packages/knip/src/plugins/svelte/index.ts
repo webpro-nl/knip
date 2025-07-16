@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.js';
-import { toAlias, toEntry } from '../../util/input.js';
+import { toAlias, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { config as viteConfig } from '../vite/index.js';
@@ -43,7 +43,7 @@ const resolveConfig: ResolveConfig<SvelteKitConfig> = localConfig => {
     serviceWorkerPath += '{.js,.ts,/index.js,/index.ts}';
   }
 
-  return [toEntry(serviceWorkerPath)];
+  return [toProductionEntry(serviceWorkerPath)];
 };
 
 export default {
