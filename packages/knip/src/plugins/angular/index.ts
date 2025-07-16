@@ -33,7 +33,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
     for (const [targetName, target] of Object.entries(project.architect)) {
       const { options: opts, configurations: configs } = target;
       const [packageName] = typeof target.builder === 'string' ? target.builder.split(':') : [];
-      if (typeof packageName === 'string') inputs.add(toDependency(packageName));
+      if (packageName) inputs.add(toDependency(packageName));
       if (opts) {
         if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
           inputs.add(toConfig('typescript', opts.tsConfig, { containingFilePath: configFilePath }));
@@ -79,7 +79,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           );
         }
       }
-      if (target.builder === '@angular-devkit/build-angular:karma' && opts) {
+      if (target.builder && isAngularBuilderRefWithName({ builderRef: target.builder, name: 'karma' }) && opts) {
         const karmaBuilderOptions = opts as KarmaTarget;
         // https://github.com/angular/angular-cli/blob/19.0.6/packages/angular_devkit/build_angular/src/builders/karma/schema.json#L143
         const testFilePatterns = karmaBuilderOptions.include ?? ['**/*.spec.ts'];
@@ -147,6 +147,11 @@ const entriesByOption = (opts: TargetOptions): EntriesByOption =>
           : [],
     })
   );
+
+const isAngularBuilderRefWithName = ({ builderRef, name }: { builderRef: string; name: string }) => {
+  const [pkg, builderName] = builderRef.split(':');
+  return (pkg === '@angular-devkit/build-angular' || pkg === '@angular/build') && builderName === name;
+};
 
 type TargetOptions = Exclude<Target['options'], undefined>;
 type Target = Architect[string];

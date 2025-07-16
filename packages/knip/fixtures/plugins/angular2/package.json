@@ -10,7 +10,7 @@
     "@angular/cli": "*",
     "@angular/ssr": "*",
     "@angular-builders/custom-esbuild": "*",
-    "@angular-devkit/build-angular": "*",
+    "@angular/build": "*",
     "karma": "*"
   }
 }
