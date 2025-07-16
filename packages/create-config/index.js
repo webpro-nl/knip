@@ -26,6 +26,7 @@ const getPackageManager = () => {
       .trim();
   } catch {}
 
+  if (fileExists(path.join(repositoryRoot, 'bun.lock'))) return 'bun';
   if (fileExists(path.join(repositoryRoot, 'bun.lockb'))) return 'bun';
   if (fileExists(path.join(repositoryRoot, 'yarn.lock'))) {
     const yarnLock = readFirstBytes(path.join(repositoryRoot, 'yarn.lock'), 128);
