@@ -28,12 +28,12 @@ import {
   isProject,
   toProductionEntry,
 } from '../util/input.js';
+import { loadTSConfig } from '../util/load-tsconfig.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { getEntryPathsFromManifest } from '../util/package-json.js';
 import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
 import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
-import { loadTSConfig } from '../util/tsconfig-loader.js';
 
 interface BuildOptions {
   cacheLocation: string;
