@@ -181,7 +181,7 @@ const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => 
   }
 
   if (ts.isPropertyAccessExpression(node)) {
-    return [node.name.escapedText as string];
+    return [node.name.getText()];
   }
 };
 
