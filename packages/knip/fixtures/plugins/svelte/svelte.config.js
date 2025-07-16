@@ -6,6 +6,9 @@ const config = {
   preprocess: vitePreprocess(),
   kit: {
     adapter: adapter(),
+    files: {
+      serviceWorker: 'src/sw',
+    },
   },
 };
 
