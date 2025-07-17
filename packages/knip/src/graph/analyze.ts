@@ -287,12 +287,12 @@ export const analyze = async (options: AnalyzeOptions) => {
       for (const issue of dependencyIssues) collector.addIssue(issue);
       if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
       for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
-
-      deputy.removeIgnoredIssues(collector.getIssues());
-
-      const configurationHints = deputy.getConfigurationHints();
-      for (const hint of configurationHints) collector.addConfigurationHint(hint);
     }
+
+    deputy.removeIgnoredIssues(collector.getIssues());
+
+    const configurationHints = deputy.getConfigurationHints();
+    for (const hint of configurationHints) collector.addConfigurationHint(hint);
 
     const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
     for (const identifier of unusedIgnoredWorkspaces) {
