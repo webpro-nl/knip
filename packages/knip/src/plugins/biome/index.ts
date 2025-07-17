@@ -26,7 +26,7 @@ const resolveExtends = (extendsArray: string[], options: PluginOptions): Input[]
 };
 
 const resolveConfig: ResolveConfig<BiomeConfig> = (config, options) => {
-  return [...resolveExtends(arrayify(config.extends || []), options)];
+  return [...resolveExtends(arrayify(config.extends), options)];
 };
 
 export default {
