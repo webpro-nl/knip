@@ -2,7 +2,12 @@
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "extends": ["../../biome.json"],
   "files": {
-    "ignore": ["**/dist", "package.json", "vendor/bash-parser/index.js"]
+    "ignore": [
+      "**/dist",
+      "package.json",
+      "vendor/bash-parser/index.js",
+      "fixtures/plugins/biome-workspace/packages/stub"
+    ]
   },
   "formatter": {
     "ignore": ["ignore-exports-used-in-file-alias-exclude/more.ts"]
