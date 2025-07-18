@@ -3,13 +3,12 @@ import { MyClass } from './members';
 import { AbstractClassGen, ExtendedClassGen } from './iterator-generator';
 import { AbstractClass, ExtendedClass } from './iterator';
 
-AbstractClassGen;
-ExtendedClassGen;
 AbstractClass;
-ExtendedClass;
 
 const instance = new MyClass();
 const some = new SomeClass();
+const instance2 = new ExtendedClass();
+const instance3: AbstractClassGen = new ExtendedClassGen();
 
 export class Parent {
   instance: MyClass;
@@ -27,3 +26,5 @@ instance.bUsedExternal;
 instance.cUsedExternal;
 instance.dUsedExternal();
 MyClass.eUsedExternal;
+instance2.implemented;
+instance3.implemented;

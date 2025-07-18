@@ -70,6 +70,7 @@ const defaultConfig: Configuration = {
   ignoreExportsUsedInFile: false,
   ignoreWorkspaces: [],
   isIncludeEntryExports: false,
+  isIgnoreClassMemberImplementations: false,
   isTreatConfigHintsAsErrors: false,
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
@@ -82,6 +83,7 @@ type ConfigurationManagerOptions = {
   isProduction: boolean;
   isStrict: boolean;
   isIncludeEntryExports: boolean;
+  isIgnoreClassMemberImplementations: boolean;
   workspace: string | undefined;
 };
 
@@ -111,6 +113,7 @@ export class ConfigurationChief {
   isProduction = false;
   isStrict = false;
   isIncludeEntryExports = false;
+  isIgnoreClassMemberImplementations = false;
   config: Configuration;
   workspace: string | undefined;
 
@@ -133,11 +136,19 @@ export class ConfigurationChief {
   rawConfig?: any;
   parsedConfig?: z.infer<typeof knipConfigurationSchema>;
 
-  constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace }: ConfigurationManagerOptions) {
+  constructor({
+    cwd,
+    isProduction,
+    isStrict,
+    isIncludeEntryExports,
+    isIgnoreClassMemberImplementations,
+    workspace,
+  }: ConfigurationManagerOptions) {
     this.cwd = cwd;
     this.isProduction = isProduction;
     this.isStrict = isStrict;
     this.isIncludeEntryExports = isIncludeEntryExports;
+    this.isIgnoreClassMemberImplementations = isIgnoreClassMemberImplementations;
     this.config = defaultConfig;
     this.workspace = workspace;
   }
@@ -230,6 +241,8 @@ export class ConfigurationChief {
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
+    const isIgnoreClassMemberImplementations =
+      rawConfig.ignoreClassMemberImplementations ?? this.isIgnoreClassMemberImplementations;
     const isTreatConfigHintsAsErrors = rawConfig.treatConfigHintsAsErrors ?? defaultConfig.isTreatConfigHintsAsErrors;
 
     const { syncCompilers, asyncCompilers } = rawConfig;
@@ -253,6 +266,7 @@ export class ConfigurationChief {
       ignoreExportsUsedInFile,
       ignoreWorkspaces,
       isIncludeEntryExports,
+      isIgnoreClassMemberImplementations,
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
       rootPluginConfigs,
@@ -482,6 +496,8 @@ export class ConfigurationChief {
     const paths = workspaceConfig.paths ?? {};
     const ignore = arrayify(workspaceConfig.ignore);
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
+    const isIgnoreClassMemberImplementations =
+      workspaceConfig.ignoreClassMemberImplementations ?? this.config.isIgnoreClassMemberImplementations;
 
     const plugins: Partial<PluginsConfiguration> = {};
 
@@ -495,7 +511,7 @@ export class ConfigurationChief {
       }
     }
 
-    return { entry, project, paths, ignore, isIncludeEntryExports, ...plugins };
+    return { entry, project, paths, ignore, isIncludeEntryExports, isIgnoreClassMemberImplementations, ...plugins };
   }
 
   public getIncludedIssueTypes(cliArgs: CLIArguments) {

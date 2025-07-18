@@ -82,7 +82,7 @@ export const analyze = async (options: AnalyzeOptions) => {
         const workspace = chief.findWorkspaceByFilePath(filePath);
 
         if (workspace) {
-          const { isIncludeEntryExports } = workspace.config;
+          const { isIncludeEntryExports, isIgnoreClassMemberImplementations } = workspace.config;
 
           const principal = factory.getPrincipalByPackageName(workspace.pkgName);
 
@@ -175,7 +175,10 @@ export const analyze = async (options: AnalyzeOptions) => {
                   const members = exportedItem.members.filter(
                     member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
                   );
-                  for (const member of principal.findUnusedMembers(filePath, members)) {
+                  const unusedMembers = principal.findUnusedMembers(filePath, members, {
+                    ignoreImplementations: isIgnoreClassMemberImplementations,
+                  });
+                  for (const member of unusedMembers) {
                     if (shouldIgnoreTags(member.jsDocTags)) {
                       const identifier = `${exportedItem.identifier}.${member.identifier}`;
                       for (const tagName of exportedItem.jsDocTags) {

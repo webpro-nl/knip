@@ -78,6 +78,7 @@ export class ProjectPrincipal {
   };
 
   findReferences?: ts.LanguageService['findReferences'];
+  getImplementationAtPosition?: ts.LanguageService['getImplementationAtPosition'];
 
   constructor({
     compilerOptions,
@@ -259,15 +260,32 @@ export class ProjectPrincipal {
     this.backend.fileManager.sourceFileCache.delete(filePath);
   }
 
-  public findUnusedMembers(filePath: string, members: ExportMember[]) {
-    if (!this.findReferences) {
+  public findUnusedMembers(filePath: string, members: ExportMember[], options?: { ignoreImplementations: boolean }) {
+    if (!this.findReferences || !this.getImplementationAtPosition) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
       this.findReferences = timerify(languageService.findReferences);
+      this.getImplementationAtPosition = timerify(languageService.getImplementationAtPosition);
     }
 
     return members.filter(member => {
       if (member.jsDocTags.has(PUBLIC_TAG)) return false;
-      const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+      const implementations = options?.ignoreImplementations
+        ? (this.getImplementationAtPosition?.(filePath, member.pos)?.filter(
+            impl => impl.fileName !== filePath || impl.textSpan.start !== member.pos
+          ) ?? [])
+        : [];
+
+      const referencedSymbols =
+        this.findReferences?.(filePath, member.pos)?.filter(
+          sym =>
+            !implementations.some(
+              impl =>
+                impl.fileName === sym.definition.fileName &&
+                impl.textSpan.start === sym.definition.textSpan.start &&
+                impl.textSpan.length === sym.definition.textSpan.length
+            )
+        ) ?? [];
+
       const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
       return refs.length === 0;
     });
@@ -276,9 +294,10 @@ export class ProjectPrincipal {
   public hasExternalReferences(filePath: string, exportedItem: Export) {
     if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
 
-    if (!this.findReferences) {
+    if (!this.findReferences || !this.getImplementationAtPosition) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
       this.findReferences = timerify(languageService.findReferences);
+      this.getImplementationAtPosition = timerify(languageService.getImplementationAtPosition);
     }
 
     const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
