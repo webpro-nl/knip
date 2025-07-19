@@ -25,6 +25,5 @@ export const getSrcDir = (sourceFile: ts.SourceFile): string => {
     return result;
   }
 
-  const foundValue = visit(sourceFile);
-  return foundValue ?? srcDir;
+  return visit(sourceFile) ?? srcDir;
 };

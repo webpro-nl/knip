@@ -24,16 +24,11 @@ const production = [
 
 const resolveFromAST: ResolveFromAST = sourceFile => {
   const srcDir = getSrcDir(sourceFile);
+  const setSrcDir = (entry: string) => entry.replace(/^`src\//, `${srcDir}/`);
 
   return [
-    ...[`${srcDir}/content/config.ts`, `${srcDir}/content.config.ts`].map(path => toEntry(path)),
-
-    ...[
-      `${srcDir}/pages/**/*.{astro,mdx,js,ts}`,
-      `${srcDir}/content/**/*.mdx`,
-      `${srcDir}/middleware.{js,ts}`,
-      `${srcDir}/actions/index.{js,ts}`,
-    ].map(path => toProductionEntry(path)),
+    ...entry.map(setSrcDir).map(path => toEntry(path)),
+    ...production.map(setSrcDir).map(path => toProductionEntry(path)),
   ];
 };
 

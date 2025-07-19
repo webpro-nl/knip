@@ -112,28 +112,33 @@ dependencies to build up the graphs is also exactly what's meant by
 - In `require.resolve('./entry.js')`
 - In `import.meta.resolve('./entry.mjs')`
 - Through scripts inside template strings in source files such as:
-  ```ts
-  await $({ stdio: 'inherit' })`c8 node hydrate.js`; // execa
-  await $`node scripts/parse.js`; // bun/zx
-  ```
+
+```ts
+await $({ stdio: 'inherit' })`c8 node hydrate.js`; // execa
+await $`node scripts/parse.js`; // bun/zx
+```
+
 - Through scripts in `package.json` such as:
-  ```json
-  {
-    "name": "my-lib",
-    "scripts": {
-      "start": "node --import tsx/esm run.ts",
-      "start": "vitest -c config/vitest.config.ts"
-    }
+
+```json
+{
+  "name": "my-lib",
+  "scripts": {
+    "start": "node --import tsx/esm run.ts",
+    "start": "vitest -c config/vitest.config.ts"
   }
-  ```
+}
+```
+
 - Through plugins handling CI workflow files like `.github/workflows/ci.yml`:
-  ```yaml
-  jobs:
-    test:
-      steps:
-        run: playwright test e2e/**/*.spec.ts --config playwright.e2e.config.ts
-        run: node --import tsx/esm run.ts
-  ```
+
+```yaml
+jobs:
+  test:
+    steps:
+      run: playwright test e2e/**/*.spec.ts --config playwright.e2e.config.ts
+      run: node --import tsx/esm run.ts
+```
 
 Scripts like the ones shown here may also contain references to configuration
 files (`config/vitest.config.ts` and `playwright.e2e.config.ts` in the examples
