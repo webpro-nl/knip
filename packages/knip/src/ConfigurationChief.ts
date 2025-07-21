@@ -315,6 +315,8 @@ export class ConfigurationChief {
     const workspaceKeys = this.getConfiguredWorkspaceKeys();
     const patterns = workspaceKeys.filter(key => key.includes('*'));
     const dirs = workspaceKeys.filter(key => !key.includes('*'));
+    // @ts-ignore
+    console.log((Date.now() - global.startKnipTime), 'getAdditionalWorkspaceNames - globbing with patterns', patterns);
     const globbedDirs = await _dirGlob({ patterns, cwd: this.cwd });
     return new Set(
       [...dirs, ...globbedDirs].filter(

@@ -55,6 +55,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     workspace,
   } = unresolvedConfiguration;
 
+  // @ts-ignore
+  global.startKnipTime = Date.now();
+  // @ts-ignore
+  console.log((Date.now() - global.startKnipTime), 'main started');
+
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
   const chief = new ConfigurationChief({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace });

@@ -332,6 +332,8 @@ export class WorkspaceWorker {
       if (!config) return;
 
       const label = 'config file';
+      // @ts-ignore
+    console.log((Date.now() - global.startKnipTime), 'runPlugin - globbing with patterns', patterns);
       const configFilePaths = await _glob({ patterns, cwd: rootCwd, dir: cwd, gitignore: false, label });
 
       const options = {
