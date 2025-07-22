@@ -1,1 +1,1 @@
-export const clutterTwo = true
+export const clutterTwo = true;

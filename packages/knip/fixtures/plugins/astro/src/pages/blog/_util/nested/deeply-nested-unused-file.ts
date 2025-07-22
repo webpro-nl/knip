@@ -1,1 +1,1 @@
-export const nestedOne = true
+export const nestedOne = true;
