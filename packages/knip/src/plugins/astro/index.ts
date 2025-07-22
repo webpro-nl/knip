@@ -14,9 +14,12 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
 
 const entry = ['src/content/config.ts', 'src/content.config.ts'];
+const project = ["src/**/*"]
 
 const production = [
   'src/pages/**/*.{astro,mdx,js,ts}',
+  '!src/pages/**/_*', // negate files prefixed with _
+  '!src/pages/**/_*/**', // negate folders prefixed with _. '_**' would be collapsed into '_*' so we have to use '**/_*/**' 
   'src/content/**/*.mdx',
   'src/middleware.{js,ts}',
   'src/actions/index.{js,ts}',
@@ -56,4 +59,5 @@ export default {
   production,
   resolveFromAST,
   resolve,
+  project
 } satisfies Plugin;
