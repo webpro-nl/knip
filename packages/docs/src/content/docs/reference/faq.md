@@ -217,12 +217,12 @@ seem to meet all requirements to be usable on its own by Knip:
   `module.js`
 
 A few strategies have been tried and tweaked, and Knip currently uses a
-combination of [enhanced-resolve][9], the TypeScript module resolver and a few
+combination of [oxc-resolver][9], the TypeScript module resolver and a few
 customizations. This single custom module resolver function is hooked into the
 TypeScript compiler and language service hosts.
 
-Everything else is handled by `enhanced-resolve` for things like [script
-parsing][7] and resolving references to files in other workspaces.
+Everything else is handled by `oxc-resolver` for things like [script parsing][7]
+and resolving references to files in other workspaces.
 
 ### How does Knip handle non-standard import syntax?
 
@@ -428,7 +428,7 @@ require more development efforts and maintenance. Time is limited and
 [6]: #module-resolution
 [7]: ../features/script-parser.md
 [8]: ../guides/handling-issues.mdx#types-packages
-[9]: https://www.npmjs.com/package/enhanced-resolve
+[9]: https://oxc.rs/docs/guide/usage/resolver.html
 [10]: ../guides/performance.md#workspace-sharing
 [11]: #whats-the-difference-between-workspaces-projects-and-programs
 [12]: #why-doesnt-knip-match-my-typescript-project-structure
