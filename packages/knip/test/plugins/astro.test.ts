@@ -11,7 +11,6 @@ test('Find dependencies with the Astro plugin', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
-    isDebug: true,
   });
 
   assert(issues.exports['src/consts.ts']['UNUSED']);
