@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import os from 'node:os';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
+import { toEntry, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import vite from '../vite/index.js';
@@ -52,11 +52,11 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     .map(route => (isWindows ? route : route.replace(/[$^*+?()\[\]]/g, '\\$&')));
 
   return [
-    join(appDir, 'routes.{js,ts}'),
-    join(appDir, 'root.{jsx,tsx}'),
-    join(appDir, 'entry.{client,server}.{js,jsx,ts,tsx}'),
-    ...routes,
-  ].map(id => toEntry(id));
+    toEntry(join(appDir, 'routes.{js,ts}')),
+    toProductionEntry(join(appDir, 'root.{jsx,tsx}')),
+    toProductionEntry(join(appDir, 'entry.{client,server}.{js,jsx,ts,tsx}')),
+    ...routes.map(id => toProductionEntry(id)),
+  ];
 };
 
 export default {
