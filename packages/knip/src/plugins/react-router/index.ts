@@ -50,7 +50,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     // See:
     //  - https://reactrouter.com/how-to/file-route-conventions#optional-segments
     //  - https://www.npmjs.com/package/fast-glob#advanced-syntax
-    .map(route => (isWindows ? route : route.replace(/[$^*+?()\[\]]/g, '\\$&')));
+    .map(route => (isWindows ? route : route.replace(/[\^*+?()\[\]]/g, '\\$&')));
 
   const resolved = [
     // routes.{ts,js} is only used as input to the bundler build system
