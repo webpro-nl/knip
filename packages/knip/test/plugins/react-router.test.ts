@@ -18,8 +18,8 @@ test('Find dependencies with the react-router plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 9,
-    total: 9,
+    processed: 11,
+    total: 11,
     // There is a bug with routes that include () on Windows so they will not be found there, revert when
     // the bug is fixed
     files: isWindows ? 1 : 0,
