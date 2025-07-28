@@ -25,9 +25,17 @@ test('Respect ignored binaries and dependencies, including regex, show config hi
   assert.deepEqual(
     configurationHints,
     new Set([
-      { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
+      {
+        type: 'ignoreBinaries',
+        workspaceName: '.',
+        identifier: /.*unused-bins.*/,
+      },
       { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
+      {
+        type: 'ignoreDependencies',
+        workspaceName: '.',
+        identifier: /.+unused-deps.+/,
+      },
     ])
   );
 });
@@ -37,6 +45,21 @@ test('Respect ignored binaries and dependencies, including regex, no config hint
     ...baseArguments,
     cwd,
     isProduction: true,
+  });
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 2,
+    total: 2,
+  });
+});
+
+test('Respect ignored binaries when excluding dependencies,unlisted,unresolved', async () => {
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+    isProduction: true,
+    excludedIssueTypes: ['dependencies', 'unlisted', 'unresolved'],
   });
 
   assert.deepEqual(counters, {
