@@ -25,17 +25,9 @@ test('Respect ignored binaries and dependencies, including regex, show config hi
   assert.deepEqual(
     configurationHints,
     new Set([
-      {
-        type: 'ignoreBinaries',
-        workspaceName: '.',
-        identifier: /.*unused-bins.*/,
-      },
+      { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
       { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
-      {
-        type: 'ignoreDependencies',
-        workspaceName: '.',
-        identifier: /.+unused-deps.+/,
-      },
+      { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
     ])
   );
 });
