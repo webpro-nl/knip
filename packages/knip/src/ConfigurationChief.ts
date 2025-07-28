@@ -23,7 +23,7 @@ import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspa
 import { ConfigurationError } from './util/errors.js';
 import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
 import { type CLIArguments, getIncludedIssueTypes } from './util/get-included-issue-types.js';
-import { _dirGlob } from './util/glob.js';
+import { _dirGlob, removeProductionSuffix } from './util/glob.js';
 import { graphSequencer } from './util/graph-sequencer.js';
 import { defaultRules } from './util/issue-initializers.js';
 import { _load } from './util/loader.js';
@@ -296,18 +296,24 @@ export class ConfigurationChief {
     return workspaces.map(pattern => pattern.replace(/(?<=!?)\.\//, ''));
   }
 
+  private getIgnoredWorkspaces() {
+    const ignoreWorkspaces = this.config.ignoreWorkspaces;
+    if (this.isProduction) return ignoreWorkspaces.map(removeProductionSuffix);
+    return ignoreWorkspaces.filter(pattern => !pattern.endsWith('!'));
+  }
+
   private getIgnoredWorkspacePatterns() {
     const ignoredWorkspacesManifest = this.getListedWorkspaces()
       .filter(name => name.startsWith('!'))
       .map(name => name.replace(/^!/, ''));
-    return [...ignoredWorkspacesManifest, ...this.config.ignoreWorkspaces];
+    return [...ignoredWorkspacesManifest, ...this.getIgnoredWorkspaces()];
   }
 
   private getConfiguredWorkspaceKeys() {
     const initialWorkspaces = this.rawConfig?.workspaces
       ? Object.keys(this.rawConfig.workspaces)
       : [ROOT_WORKSPACE_NAME];
-    const ignoreWorkspaces = this.rawConfig?.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
+    const ignoreWorkspaces = this.getIgnoredWorkspaces();
     return initialWorkspaces.filter(workspaceName => !ignoreWorkspaces.includes(workspaceName));
   }
 
@@ -514,7 +520,7 @@ export class ConfigurationChief {
   }
 
   public getUnusedIgnoredWorkspaces() {
-    const ignoredWorkspaceNames = this.config.ignoreWorkspaces;
+    const ignoredWorkspaceNames = this.config.ignoreWorkspaces.map(removeProductionSuffix);
     const workspaceNames = [...this.workspacePackages.keys(), ...this.additionalWorkspaceNames];
     return ignoredWorkspaceNames
       .filter(ignoredWorkspaceName => !workspaceNames.some(name => picomatch.isMatch(name, ignoredWorkspaceName)))
