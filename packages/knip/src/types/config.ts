@@ -64,7 +64,6 @@ export interface Configuration {
   ignoreMembers: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
-  isIgnoreClassMemberImplementations: boolean;
   isTreatConfigHintsAsErrors: boolean;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
@@ -86,7 +85,6 @@ interface BaseWorkspaceConfiguration {
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
   isIncludeEntryExports: boolean;
-  isIgnoreClassMemberImplementations: boolean;
 }
 
 type PluginConfiguration = EnsuredPluginConfiguration | boolean;

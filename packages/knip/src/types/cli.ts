@@ -13,7 +13,6 @@ export interface CommandLineOptions {
   isFix: boolean;
   isFormat: boolean;
   isIncludeEntryExports: boolean;
-  isIgnoreClassMemberImplementations: boolean;
   isIncludeLibs: boolean;
   isIsolateWorkspaces: boolean;
   isProduction: boolean;

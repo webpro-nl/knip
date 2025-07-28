@@ -102,10 +102,6 @@
       "title": "Include entry files when reporting unused exports",
       "type": "boolean"
     },
-    "ignoreClassMemberImplementations": {
-      "title": "Ignore implementations when evaluating class member references",
-      "type": "boolean"
-    },
     "tags": {
       "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
       "examples": ["+custom", "-lintignore", "-@internal"],
@@ -266,10 +262,6 @@
         },
         "includeEntryExports": {
           "title": "Include entry files when reporting unused exports",
-          "type": "boolean"
-        },
-        "ignoreClassMemberImplementations": {
-          "title": "Ignore implementations when evaluating class member references",
           "type": "boolean"
         }
       }

@@ -342,23 +342,6 @@ This will also enable reporting unused members of exported classes and enums.
 Set this option at root level to enable this globally, or within workspace
 configurations individually.
 
-## Class Members
-
-### `ignoreClassMemberImplementations`
-
-By default, Knip treats references to implementations of abstract members as
-references to the abstract member itself. This flag changes that behavior so
-that only direct references are taken into account.
-
-```json title="knip.json"
-{
-  "ignoreClassMemberImplementations": true
-}
-```
-
-Set this option at root level to enable this globally, or within workspace
-configurations individually.
-
 ## Compilers
 
 Knip supports custom compilers to transform files before analysis.

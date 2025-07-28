@@ -15,6 +15,7 @@ test('Find unused class members', async () => {
 
   assert.equal(Object.keys(issues.classMembers['members.ts']).length, 6);
   assert(issues.classMembers['iterator-generator.ts']['AbstractClassGen.unimplemented']);
+  assert(issues.classMembers['iterator.ts']['AbstractClass.implemented']);
   assert(issues.classMembers['members.ts']['MyClass.bUnusedPublic']);
   assert(issues.classMembers['members.ts']['MyClass.cUnusedProp']);
   assert(issues.classMembers['members.ts']['MyClass.dUnusedMember']);
@@ -24,7 +25,7 @@ test('Find unused class members', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    classMembers: 7,
+    classMembers: 8,
     processed: 5,
     total: 5,
   });
@@ -39,6 +40,7 @@ test('Find unused class members (isIncludeEntryExports)', async () => {
 
   assert.equal(Object.keys(issues.classMembers['members.ts']).length, 6);
   assert(issues.classMembers['iterator-generator.ts']['AbstractClassGen.unimplemented']);
+  assert(issues.classMembers['iterator.ts']['AbstractClass.implemented']);
   assert(issues.classMembers['index.ts']['Parent.unusedMemberInEntry']);
   assert(issues.classMembers['members.ts']['MyClass.bUnusedPublic']);
   assert(issues.classMembers['members.ts']['MyClass.cUnusedProp']);
@@ -49,32 +51,7 @@ test('Find unused class members (isIncludeEntryExports)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    classMembers: 8,
-    processed: 5,
-    total: 5,
-  });
-});
-
-test('Find unused class members (isIgnoreClassMemberImplementations)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIgnoreClassMemberImplementations: true,
-  });
-
-  assert.equal(Object.keys(issues.classMembers['members.ts']).length, 6);
-  assert(issues.classMembers['iterator-generator.ts']['AbstractClassGen.unimplemented']);
-  assert(issues.classMembers['iterator.ts']['AbstractClass.implemented']);
-  assert(issues.classMembers['members.ts']['MyClass.bUnusedPublic']);
-  assert(issues.classMembers['members.ts']['MyClass.cUnusedProp']);
-  assert(issues.classMembers['members.ts']['MyClass.dUnusedMember']);
-  assert(issues.classMembers['members.ts']['MyClass.eUnusedStatic']);
-  assert(issues.classMembers['members.ts']['MyClass.unusedGetter']);
-  assert(issues.classMembers['members.ts']['MyClass.unusedSetter']);
-
-  assert.deepEqual(counters, {
-    ...baseCounters,
-    classMembers: 8,
+    classMembers: 9,
     processed: 5,
     total: 5,
   });

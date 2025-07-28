@@ -20,7 +20,6 @@ const baseArguments = {
   isFormat: false,
   isDisableConfigHints: false,
   isIncludeEntryExports: false,
-  isIgnoreClassMemberImplementations: false,
   isIncludeLibs: false,
   isIsolateWorkspaces: false,
   isProduction: false,

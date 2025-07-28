@@ -260,7 +260,7 @@ export class ProjectPrincipal {
     this.backend.fileManager.sourceFileCache.delete(filePath);
   }
 
-  public findUnusedMembers(filePath: string, members: ExportMember[], options?: { ignoreImplementations: boolean }) {
+  public findUnusedMembers(filePath: string, members: ExportMember[]) {
     if (!this.findReferences || !this.getImplementationAtPosition) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
       this.findReferences = timerify(languageService.findReferences);
@@ -269,11 +269,10 @@ export class ProjectPrincipal {
 
     return members.filter(member => {
       if (member.jsDocTags.has(PUBLIC_TAG)) return false;
-      const implementations = options?.ignoreImplementations
-        ? (this.getImplementationAtPosition?.(filePath, member.pos)?.filter(
-            impl => impl.fileName !== filePath || impl.textSpan.start !== member.pos
-          ) ?? [])
-        : [];
+      const implementations =
+        this.getImplementationAtPosition?.(filePath, member.pos)?.filter(
+          impl => impl.fileName !== filePath || impl.textSpan.start !== member.pos
+        ) ?? [];
 
       const referencedSymbols =
         this.findReferences?.(filePath, member.pos)?.filter(

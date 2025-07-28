@@ -43,7 +43,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     isFix,
     isFormat,
     isIncludeEntryExports,
-    isIgnoreClassMemberImplementations,
     isIncludeLibs,
     isIsolateWorkspaces,
     isProduction,
@@ -58,14 +57,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
 
-  const chief = new ConfigurationChief({
-    cwd,
-    isProduction,
-    isStrict,
-    isIncludeEntryExports,
-    isIgnoreClassMemberImplementations,
-    workspace,
-  });
+  const chief = new ConfigurationChief({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace });
   const deputy = new DependencyDeputy({ isProduction, isStrict });
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
