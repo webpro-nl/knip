@@ -289,7 +289,7 @@ Array of workspaces to ignore, globs allowed. Example:
 {
   "ignoreWorkspaces": [
     "packages/go-server",
-    "packages/flat/*"
+    "packages/flat/*",
     "packages/deep/**"
   ]
 }
