@@ -1,6 +1,6 @@
-import type { TsConfigJson } from 'type-fest';
 import type { ConfigArg } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { TsConfigJson } from '../../types/tsconfig-json.js';
 import { compact } from '../../util/array.js';
 import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.js';
 import { join } from '../../util/path.js';

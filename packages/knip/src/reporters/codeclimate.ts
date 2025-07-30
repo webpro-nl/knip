@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type * as codeclimate from 'codeclimate-types';
-import type { Entries } from 'type-fest';
 import { ISSUE_TYPE_TITLE } from '../constants.js';
+import type { Entries } from '../types/entries.js';
 import type {
   Issue,
   IssueRecords,

@@ -92,7 +92,6 @@
     "glob": "^11.0.2",
     "release-it": "^19.0.4",
     "tsx": "^4.20.3",
-    "type-fest": "^4.31.0",
     "typescript": "^5.5.2"
   },
   "engines": {

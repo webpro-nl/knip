@@ -1,4 +1,4 @@
-import type { Entries } from 'type-fest';
+import type { Entries } from '../types/entries.js';
 import type { Issue, IssueSet, ReporterOptions } from '../types/issues.js';
 import { relative, toRelative } from '../util/path.js';
 import { getIssueTypeTitle } from './util/util.js';

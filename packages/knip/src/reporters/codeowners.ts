@@ -1,4 +1,4 @@
-import type { Entries } from 'type-fest';
+import type { Entries } from '../types/entries.js';
 import type { Issue, ReporterOptions } from '../types/issues.js';
 import { createOwnershipEngine } from '../util/codeowners.js';
 import { relative, resolve } from '../util/path.js';

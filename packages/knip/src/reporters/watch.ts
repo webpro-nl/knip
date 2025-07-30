@@ -1,6 +1,6 @@
 import picocolors from 'picocolors';
-import type { Entries } from 'type-fest';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
+import type { Entries } from '../types/entries.js';
 import type { Issues, Report } from '../types/issues.js';
 import { perfObserver } from '../util/Performance.js';
 import { prettyMilliseconds } from '../util/string.js';

@@ -1,4 +1,4 @@
-import type { Entries } from 'type-fest';
+import type { Entries } from '../types/entries.js';
 import type { ReporterOptions } from '../types/issues.js';
 import { printConfigurationHints } from './util/configuration-hints.js';
 import { getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.js';
