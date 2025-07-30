@@ -51,7 +51,7 @@ export const analyze = async (options: AnalyzeOptions) => {
     unreferencedFiles,
   } = options;
 
-  const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
+  const isReportDependencies = report.dependencies || report.unlisted || report.unresolved || report.binaries;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;

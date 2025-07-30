@@ -45,3 +45,29 @@ test('Respect ignored binaries and dependencies, including regex, no config hint
     total: 2,
   });
 });
+
+test('Respect ignored binaries when excluding dependencies+unlisted+unresolved', async () => {
+  const { issues, counters, configurationHints } = await main({
+    ...baseArguments,
+    cwd,
+    excludedIssueTypes: ['dependencies', 'unlisted', 'unresolved'],
+  });
+
+  assert(issues.binaries['package.json']['formatter']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 1,
+    processed: 2,
+    total: 2,
+  });
+
+  assert.deepEqual(
+    configurationHints,
+    new Set([
+      { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
+      { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
+      { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
+    ])
+  );
+});
