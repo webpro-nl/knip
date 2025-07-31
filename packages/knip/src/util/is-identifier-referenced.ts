@@ -104,23 +104,6 @@ export const getIsIdentifierReferencedHandler = (graph: ModuleGraph, entryPaths:
       }
     }
 
-    const reExported = file.reExported.get(identifier) ?? file.reExported.get(IMPORT_STAR);
-
-    if (reExported) {
-      for (const byFilePath of reExported) {
-        if (!seen.has(byFilePath)) {
-          const child = createNode(byFilePath);
-          traceNode.children.add(child);
-          const result = isIdentifierReferenced(byFilePath, id, isIncludeEntryExports, child, seen);
-          if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
-          if (result.isReferenced) {
-            isReferenced = true;
-            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
-          }
-        }
-      }
-    }
-
     const reExportedAs = file.reExportedAs.get(identifier);
 
     if (reExportedAs) {
@@ -136,6 +119,23 @@ export const getIsIdentifierReferencedHandler = (graph: ModuleGraph, entryPaths:
               isReferenced = true;
               if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
             }
+          }
+        }
+      }
+    }
+
+    const reExported = file.reExported.get(identifier) ?? file.reExported.get(IMPORT_STAR);
+
+    if (reExported) {
+      for (const byFilePath of reExported) {
+        if (!seen.has(byFilePath)) {
+          const child = createNode(byFilePath);
+          traceNode.children.add(child);
+          const result = isIdentifierReferenced(byFilePath, id, isIncludeEntryExports, child, seen);
+          if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
+          if (result.isReferenced) {
+            isReferenced = true;
+            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
           }
         }
       }
