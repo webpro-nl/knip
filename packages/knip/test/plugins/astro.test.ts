@@ -2,9 +2,9 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../../src/index.js';
 import { resolve } from '../../src/util/path.js';
+import { join } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
-import { join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/astro');
 
