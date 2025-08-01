@@ -5,9 +5,9 @@ on:
   pull_request:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '!**'
+      - "!**"
 
 env:
   PKG_URL: |
@@ -150,7 +150,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - uses: oven-sh/setup-bun@v2
 
