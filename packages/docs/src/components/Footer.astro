@@ -1,6 +1,5 @@
 ---
 import Default from '@astrojs/starlight/components/Footer.astro';
-import SimpleAnalytics from './SimpleAnalytics.html';
 ---
 
 <style>
@@ -23,4 +22,10 @@ import SimpleAnalytics from './SimpleAnalytics.html';
   > © 2024
   <a href="https://www.webpro.nl">Lars Kappert</a>
 </p>
-<SimpleAnalytics />
+<script async defer src="https://smplnltcs.knip.dev/latest.js"></script>
+<noscript>
+  <img
+    src="https://smplnltcs.knip.dev/noscript.gif"
+    alt=""
+    referrerpolicy="no-referrer-when-downgrade" />
+</noscript>
