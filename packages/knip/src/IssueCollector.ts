@@ -79,8 +79,7 @@ export class IssueCollector {
     issue.severity = this.rules[type];
     const issues = this.issues[type];
     issues[key] = issues[key] ?? {};
-    const symbol =
-      type.endsWith('Members') && issue.parentSymbol ? `${issue.parentSymbol}.${issue.symbol}` : issue.symbol;
+    const symbol = issue.parentSymbol ? `${issue.parentSymbol}.${issue.symbol}` : issue.symbol;
     if (!issues[key][symbol]) {
       issues[key][symbol] = issue;
       this.counters[issue.type]++;

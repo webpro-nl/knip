@@ -14,7 +14,7 @@ test('Find unused exports when identifiers begin with two underscores', async ()
   });
 
   assert.equal(issues.exports['imported.ts']['__underscoresUnused'].symbol, '__underscoresUnused');
-  assert.equal(issues.exports['namespace.ts']['__underscoresUnused'].symbol, '__underscoresUnused');
+  assert.equal(issues.exports['namespace.ts']['NS.__underscoresUnused'].symbol, '__underscoresUnused');
 
   assert.deepEqual(counters, {
     ...baseCounters,

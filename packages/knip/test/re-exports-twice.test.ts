@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/re-exports-twice');
 
-test('Find exports through re-exported aliased namespace', async () => {
+test('Find exports through re-exported aliased namespace (twice)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

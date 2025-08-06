@@ -7,13 +7,13 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/tags-exclude');
 
-test('Include or exclude tagged exports (default)', async () => {
+test('Include or exclude tagged exports (exclude)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(issues.exports['tags.ts']['untagged']);
+  assert(issues.exports['tags.ts']['NS.untagged']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

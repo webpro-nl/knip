@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/tags-cli');
 
-test('Include or exclude tagged exports (default)', async () => {
+test('Include or exclude tagged exports (package.json)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -15,11 +15,11 @@ test('Include or exclude tagged exports (default)', async () => {
 
   assert(issues.exports['unimported.ts']['unimported']);
   assert(issues.exports['unimported.ts']['unimportedUntagged']);
-  assert(issues.exports['tags.ts']['UnusedUntagged']);
-  assert(issues.exports['tags.ts']['UnusedCustom']);
-  assert(issues.exports['tags.ts']['UnusedInternal']);
-  assert(issues.exports['tags.ts']['UnusedCustomAndInternal']);
-  assert(issues.exports['tags.ts']['MyCustomClass']);
+  assert(issues.exports['tags.ts']['NS.UnusedUntagged']);
+  assert(issues.exports['tags.ts']['NS.UnusedCustom']);
+  assert(issues.exports['tags.ts']['NS.UnusedInternal']);
+  assert(issues.exports['tags.ts']['NS.UnusedCustomAndInternal']);
+  assert(issues.exports['tags.ts']['NS.MyCustomClass']);
   assert(issues.classMembers['tags.ts']['MyClass.UnusedUntagged']);
   assert(issues.classMembers['tags.ts']['MyClass.UnusedCustom']);
   assert(issues.classMembers['tags.ts']['MyClass.UnusedInternal']);
@@ -28,7 +28,7 @@ test('Include or exclude tagged exports (default)', async () => {
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedCustom']);
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedInternal']);
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedCustomAndInternal']);
-  assert(issues.types['tags.ts']['MyCustomEnum']);
+  assert(issues.types['tags.ts']['NS.MyCustomEnum']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -41,7 +41,7 @@ test('Include or exclude tagged exports (default)', async () => {
   });
 });
 
-test('Include or exclude tagged exports (include)', async () => {
+test('Include or exclude tagged exports (package.json/include)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -49,10 +49,10 @@ test('Include or exclude tagged exports (include)', async () => {
   });
 
   assert(issues.exports['unimported.ts']['unimported']);
-  assert(issues.exports['tags.ts']['UnusedCustom']);
-  assert(issues.exports['tags.ts']['UnusedCustomAndInternal']);
-  assert(issues.exports['tags.ts']['MyCustomClass']);
-  assert(issues.types['tags.ts']['MyCustomEnum']);
+  assert(issues.exports['tags.ts']['NS.UnusedCustom']);
+  assert(issues.exports['tags.ts']['NS.UnusedCustomAndInternal']);
+  assert(issues.exports['tags.ts']['NS.MyCustomClass']);
+  assert(issues.types['tags.ts']['NS.MyCustomEnum']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -63,7 +63,7 @@ test('Include or exclude tagged exports (include)', async () => {
   });
 });
 
-test('Include or exclude tagged exports (exclude)', async () => {
+test('Include or exclude tagged exports (package.json/exclude)', async () => {
   const { issues, counters, tagHints } = await main({
     ...baseArguments,
     cwd,
@@ -71,8 +71,8 @@ test('Include or exclude tagged exports (exclude)', async () => {
   });
 
   assert(issues.exports['unimported.ts']['unimportedUntagged']);
-  assert(issues.exports['tags.ts']['UnusedUntagged']);
-  assert(issues.exports['tags.ts']['UnusedInternal']);
+  assert(issues.exports['tags.ts']['NS.UnusedUntagged']);
+  assert(issues.exports['tags.ts']['NS.UnusedInternal']);
   assert(issues.classMembers['tags.ts']['MyClass.UnusedUntagged']);
   assert(issues.classMembers['tags.ts']['MyClass.UnusedInternal']);
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedUntagged']);
