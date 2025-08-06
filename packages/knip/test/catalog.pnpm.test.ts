@@ -24,17 +24,14 @@ test('Should track referenced named catalog entries', async () => {
 
   const { issues, counters } = await main({ ...baseArguments, cwd });
 
-  assert(issues.catalog['pnpm-workspace.yaml']['default.react']);
   assert(issues.catalog['pnpm-workspace.yaml']['default.lodash']);
-  assert(issues.catalog['pnpm-workspace.yaml']['frontend.vue']);
   assert(issues.catalog['pnpm-workspace.yaml']['frontend.nuxt']);
-  assert(issues.catalog['pnpm-workspace.yaml']['backend.express']);
   assert(issues.catalog['pnpm-workspace.yaml']['backend.fastify']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    catalog: 6,
-    processed: 0,
-    total: 0,
+    catalog: 3,
+    processed: 1,
+    total: 1,
   });
 });

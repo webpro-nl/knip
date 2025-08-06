@@ -1,5 +1,10 @@
 {
   "name": "@fixtures/catalog-named",
   "private": true,
-  "workspaces": ["packages/*"]
+  "workspaces": ["packages/*"],
+  "dependencies": {
+    "react": "catalog:",
+    "vue": "catalog:frontend",
+    "express": "catalog:backend"
+  }
 }

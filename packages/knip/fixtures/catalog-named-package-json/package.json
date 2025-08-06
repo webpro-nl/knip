@@ -1,6 +1,11 @@
 {
   "name": "@fixtures/catalog-named-package-json",
   "private": true,
+  "dependencies": {
+    "react": "catalog:",
+    "vue": "catalog:frontend",
+    "express": "catalog:backend"
+  },
   "workspaces": {
     "packages": [
       "packages/*"
@@ -11,7 +16,7 @@
     },
     "catalogs": {
       "frontend": {
-        "vue": "^3.0.0,",
+        "vue": "^3.0.0",
         "nuxt": "^3.0.0"
       },
       "backend": {

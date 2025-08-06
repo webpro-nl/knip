@@ -1,8 +1,6 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import yaml from 'js-yaml';
 import type { Fix, Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
-import type { PackageJson } from './types/package-json.js';
 import { DEFAULT_CATALOG } from './util/catalog.js';
 import { load, save } from './util/package-json.js';
 import { extname, join, relative } from './util/path.js';
@@ -149,31 +147,40 @@ export class IssueFixer {
     const filePaths = new Set(Object.keys(issues.catalog));
 
     for (const filePath of filePaths) {
-      const isYaml = extname(filePath) === '.yaml';
-      const absFilePath = join(this.cwd, filePath);
-      const pkg = isYaml ? (yaml.load(await readFile(absFilePath, 'utf-8')) as PackageJson) : await load(absFilePath);
-
-      for (const [key, issue] of Object.entries(issues.catalog[filePath])) {
-        if (issue.parentSymbol === DEFAULT_CATALOG) {
-          if (pkg.catalog) {
-            delete pkg.catalog[issue.symbol];
-            issues.catalog[filePath][key].isFixed = true;
-          }
-        } else {
-          if (pkg.catalogs && issue.parentSymbol) {
-            delete pkg.catalogs[issue.parentSymbol][issue.symbol];
+      if (extname(filePath) === '.yaml') {
+        const absFilePath = join(this.cwd, filePath);
+        const fileContent = await readFile(absFilePath, 'utf-8');
+        const remove = new Set<number>();
+        const isRemove = (_: string, i: number) => !remove.has(i);
+        for (const [key, issue] of Object.entries(issues.catalog[filePath])) {
+          if (issue.line) {
+            remove.add(issue.line - 1);
             issues.catalog[filePath][key].isFixed = true;
           }
         }
-      }
-
-      if (isYaml) {
-        await writeFile(filePath, yaml.dump(pkg, { indent: 2, lineWidth: -1, noRefs: true, sortKeys: false }));
+        await writeFile(absFilePath, fileContent.split('\n').filter(isRemove).join('\n'));
+        touchedFiles.add(filePath);
       } else {
+        const absFilePath = join(this.cwd, filePath);
+        const pkg = await load(absFilePath);
+        const catalog = pkg.catalog || (!Array.isArray(pkg.workspaces) && pkg.workspaces?.catalog);
+        const catalogs = pkg.catalogs || (!Array.isArray(pkg.workspaces) && pkg.workspaces?.catalogs);
+        for (const [key, issue] of Object.entries(issues.catalog[filePath])) {
+          if (issue.parentSymbol === DEFAULT_CATALOG) {
+            if (catalog) {
+              delete catalog[issue.symbol];
+              issues.catalog[filePath][key].isFixed = true;
+            }
+          } else {
+            if (catalogs && issue.parentSymbol) {
+              delete catalogs[issue.parentSymbol][issue.symbol];
+              issues.catalog[filePath][key].isFixed = true;
+            }
+          }
+        }
         await save(absFilePath, pkg);
+        touchedFiles.add(filePath);
       }
-
-      touchedFiles.add(filePath);
     }
 
     return touchedFiles;

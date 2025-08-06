@@ -21,7 +21,7 @@ test('knip --reporter json (catalog)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
-        catalog: [{ name: 'lodash' }],
+        catalog: [{ name: 'lodash', line: 7, col: 3 }],
       },
     ],
   };

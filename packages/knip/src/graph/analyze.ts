@@ -297,7 +297,7 @@ export const analyze = async (options: AnalyzeOptions) => {
       for (const hint of configurationHints) collector.addConfigurationHint(hint);
     }
 
-    const catalogIssues = counselor.settleCatalogIssues();
+    const catalogIssues = await counselor.settleCatalogIssues();
     for (const issue of catalogIssues) collector.addIssue(issue);
 
     const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
