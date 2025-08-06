@@ -1,9 +1,11 @@
+import type { CatalogContainer } from '../CatalogCounselor.js';
 import { partitionCompilers } from '../compilers/index.js';
 import { KNIP_CONFIG_LOCATIONS } from '../constants.js';
 import { knipConfigurationSchema } from '../schema/configuration.js';
 import type { RawConfiguration } from '../types/config.js';
 import type { IssueType } from '../types/issues.js';
 import type { Options } from '../types/options.js';
+import type { PackageJson } from '../types/package-json.js';
 import type { ParsedCLIArgs } from './cli-arguments.js';
 import { ConfigurationError } from './errors.js';
 import { findFile, loadJSON } from './fs.js';
@@ -31,7 +33,7 @@ export const createOptions = async (options: CreateOptions) => {
   const cwd = normalize(toPosix(toAbsolute(options.cwd ?? parsedCLIArgs.directory ?? pcwd, pcwd)));
 
   const manifestPath = findFile(cwd, 'package.json');
-  const manifest = manifestPath && (await loadJSON(manifestPath));
+  const manifest: PackageJson = manifestPath && (await loadJSON(manifestPath));
 
   if (!(manifestPath && manifest)) {
     throw new ConfigurationError('Unable to find package.json');
@@ -60,11 +62,11 @@ export const createOptions = async (options: CreateOptions) => {
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
-  const pnpmWorkspacesPath = findFile(cwd, 'pnpm-workspace.yaml');
-  const pnpmWorkspaces = pnpmWorkspacesPath && (await _load(pnpmWorkspacesPath));
+  const pnpmWorkspacePath = findFile(cwd, 'pnpm-workspace.yaml');
+  const pnpmWorkspace = pnpmWorkspacePath && (await _load(pnpmWorkspacePath));
 
   const workspaces =
-    pnpmWorkspaces?.packages ??
+    pnpmWorkspace?.packages ??
     (manifest.workspaces
       ? Array.isArray(manifest.workspaces)
         ? manifest.workspaces
@@ -103,8 +105,21 @@ export const createOptions = async (options: CreateOptions) => {
     parsedCLIArgs.tags ?? options.tags ?? parsedConfig.tags ?? parsedCLIArgs['experimental-tags'] ?? []
   );
 
+  const catalog: CatalogContainer = {
+    filePath: pnpmWorkspacePath ?? manifestPath,
+    catalog:
+      pnpmWorkspace?.catalog ??
+      manifest.catalog ??
+      ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalog) || {}),
+    catalogs:
+      pnpmWorkspace?.catalogs ??
+      manifest.catalogs ??
+      ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalogs) || {}),
+  };
+
   return {
     cacheLocation: parsedCLIArgs['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
+    catalog,
     config: parsedCLIArgs.config,
     configFilePath,
     cwd,
@@ -119,6 +134,7 @@ export const createOptions = async (options: CreateOptions) => {
     isDebug: parsedCLIArgs.debug ?? false,
     isDisableConfigHints: parsedCLIArgs['no-config-hints'] || isProduction || Boolean(parsedCLIArgs.workspace),
     isFix: parsedCLIArgs.fix ?? options.isFix ?? isFixFiles ?? fixTypes.length > 0,
+    isFixCatalog: fixTypes.length === 0 || fixTypes.includes('catalog'),
     isFixDependencies: fixTypes.length === 0 || fixTypes.includes('dependencies'),
     isFixFiles,
     isFixUnusedExports: fixTypes.length === 0 || fixTypes.includes('exports'),

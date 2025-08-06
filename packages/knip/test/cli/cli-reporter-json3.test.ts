@@ -26,6 +26,7 @@ test('knip --reporter json (enum members)', () => {
           ],
         },
         duplicates: [],
+        catalog: [],
       },
     ],
   };

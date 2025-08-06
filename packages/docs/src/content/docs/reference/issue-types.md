@@ -13,6 +13,7 @@ Knip reports the following types of issues:
 | Referenced optional peerDependencies | Optional peer dependency is referenced                     |       | `dependencies` |
 | Unlisted dependencies                | Used dependencies not listed in package.json               |       | `unlisted`     |
 | Unlisted binaries                    | Binaries from dependencies not listed in package.json      |       | `binaries`     |
+| Unused catalog entries               | Unable to find a reference to this catalog entry           | 🔧    | `catalog`      |
 | Unresolved imports                   | Unable to resolve this (import) specifier                  |       | `unresolved`   |
 | Unused exports                       | Unable to find a reference to this export                  | 🔧    | `exports`      |
 | Unused exported types                | Unable to find a reference to this exported type           | 🔧    | `types`        |

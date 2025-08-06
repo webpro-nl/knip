@@ -21,6 +21,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'dynamic-import.ts',
@@ -34,6 +35,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'my-mix.ts',
@@ -47,6 +49,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'my-module.ts',
@@ -69,6 +72,7 @@ test('knip --reporter json (exports & types)', () => {
             { name: 'default', line: 30, col: 15, pos: 854 },
           ],
         ],
+        catalog: [],
       },
       {
         file: 'my-namespace.ts',
@@ -82,6 +86,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [{ name: 'MyNamespace', line: 6, col: 18, pos: 169 }],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'named-exports.ts',
@@ -98,6 +103,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'types.ts',
@@ -114,6 +120,7 @@ test('knip --reporter json (exports & types)', () => {
         ],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
     ],
   };

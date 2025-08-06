@@ -1,5 +1,6 @@
 import { watch } from 'node:fs';
 import { formatly } from 'formatly';
+import { CatalogCounselor } from './CatalogCounselor.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
@@ -37,6 +38,7 @@ export const main = async (options: MainOptions) => {
   const streamer = new ConsoleStreamer(options);
   const fixer = new IssueFixer(options);
   const collector = new IssueCollector(options);
+  const counselor = new CatalogCounselor(options);
 
   streamer.cast('Reading workspace configuration');
 
@@ -54,6 +56,7 @@ export const main = async (options: MainOptions) => {
   const { graph, entryPaths, analyzedFiles, unreferencedFiles, analyzeSourceFile } = await build({
     chief,
     collector,
+    counselor,
     deputy,
     factory,
     isGitIgnored,
@@ -64,6 +67,7 @@ export const main = async (options: MainOptions) => {
 
   const reAnalyze = await analyze({
     analyzedFiles,
+    counselor,
     chief,
     collector,
     deputy,

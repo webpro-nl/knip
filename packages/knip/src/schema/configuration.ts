@@ -29,6 +29,7 @@ const issueTypeSchema = z.union([
   z.literal('duplicates'),
   z.literal('enumMembers'),
   z.literal('classMembers'),
+  z.literal('catalog'),
 ]);
 
 const rulesSchema = z.partialRecord(issueTypeSchema, z.enum(['error', 'warn', 'off']));

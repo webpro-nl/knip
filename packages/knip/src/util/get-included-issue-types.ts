@@ -16,7 +16,7 @@ const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.
 
 const normalize = (values: string[]) => values.flatMap(value => value.split(','));
 
-export const shorthandDeps = ['dependencies', 'unlisted', 'binaries', 'unresolved'];
+export const shorthandDeps = ['dependencies', 'unlisted', 'binaries', 'unresolved', 'catalog'];
 export const shorthandExports = ['exports', 'types', 'enumMembers', 'duplicates'];
 export const shorthandFiles = ['files'];
 
@@ -41,6 +41,7 @@ export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => 
   if (options.isProduction) {
     // Ignore devDependencies when analyzing production code
     _exclude.push('devDependencies');
+    _exclude.push('catalog');
   } else {
     // Auto-add (or remove) `devDependencies` when `dependencies` are included (or excluded)
     if (_include.includes('dependencies')) _include.push('devDependencies', 'optionalPeerDependencies');
