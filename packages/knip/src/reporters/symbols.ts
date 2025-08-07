@@ -27,7 +27,11 @@ export default (options: ReporterOptions) => {
     printConfigurationHints(options);
   }
 
-  if (totalIssues === 0 && isShowProgress) {
+  if (
+    totalIssues === 0 &&
+    isShowProgress &&
+    (!options.isTreatConfigHintsAsErrors || options.configurationHints.size === 0)
+  ) {
     console.log('✂️  Excellent, Knip found no issues.');
   }
 };

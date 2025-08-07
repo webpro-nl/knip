@@ -116,7 +116,7 @@ const run = async () => {
       tagHints,
       configurationHints,
       isDisableConfigHints,
-      isTreatConfigHintsAsErrors,
+      isTreatConfigHintsAsErrors: treatConfigHintsAsErrors ?? isTreatConfigHintsAsErrors,
       cwd,
       isProduction,
       isShowProgress,
