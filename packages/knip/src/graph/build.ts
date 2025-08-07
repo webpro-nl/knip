@@ -31,7 +31,7 @@ import {
 import { loadTSConfig } from '../util/load-tsconfig.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { getEntryPathsFromManifest } from '../util/package-json.js';
+import { getEntryPathsFromManifest, getManifestImportDependencies } from '../util/package-json.js';
 import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
 import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 
@@ -160,6 +160,9 @@ export async function build({
     for (const filePath of await toSourceFilePaths(entryPathsFromManifest, dir, extensionGlobStr)) {
       inputs.add(toProductionEntry(filePath));
     }
+
+    // Consider dependencies in package.json#imports used
+    for (const dep of getManifestImportDependencies(manifest)) deputy.addReferencedDependency(name, dep);
 
     // workspace + worker → principal
     const principal = factory.createPrincipal({

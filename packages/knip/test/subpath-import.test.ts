@@ -17,7 +17,6 @@ test('Allows subpath-imports', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 1,
     processed: 3,
     total: 3,
   });
@@ -34,7 +33,6 @@ test('Allows subpath-imports (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 1,
     processed: 3,
     total: 3,
   });
@@ -52,7 +50,6 @@ test('Allows subpath-imports (strict)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 1,
     processed: 3,
     total: 3,
   });

@@ -88,3 +88,15 @@ export const getEntryPathsFromManifest = (manifest: PackageJson) => {
 
   return entryPaths;
 };
+
+export const getManifestImportDependencies = (manifest: PackageJson) => {
+  const dependencies = new Set<string>();
+  if (!manifest.imports) return dependencies;
+  for (const [entry, exportValue] of Object.entries(manifest.imports)) {
+    if (!entry.startsWith('#')) continue;
+    for (const item of getEntriesFromExports(exportValue)) {
+      if (!item.startsWith('.') && !item.startsWith('!')) dependencies.add(item);
+    }
+  }
+  return dependencies;
+};
