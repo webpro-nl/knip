@@ -3,8 +3,8 @@ import { globSchema, pluginsSchema } from './plugins.js';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
-const syncCompilerSchema = z.union([z.function().args(z.string(), z.string()).returns(z.string()), z.literal(true)]);
-const asyncCompilerSchema = z.function().args(z.string(), z.string()).returns(z.promise(z.string()));
+const syncCompilerSchema = z.union([z.custom<(from: string, content: string) => string>((val) => typeof val === 'function'), z.literal(true)]);
+const asyncCompilerSchema = z.custom<(from: string, content: string) => Promise<string>>((val) => typeof val === 'function');
 const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
 const compilersSchema = z.record(z.string(), compilerSchema);
 
@@ -31,17 +31,14 @@ const rulesSchema = z.record(issueTypeSchema, z.enum(['error', 'warn', 'off']));
 
 const ignoreExportsUsedInFileSchema = z.union([
   z.boolean(),
-  z.record(
-    z.union([
-      z.literal('class'),
-      z.literal('enum'),
-      z.literal('function'),
-      z.literal('interface'),
-      z.literal('member'),
-      z.literal('type'),
-    ]),
-    z.boolean()
-  ),
+  z.object({
+    class: z.boolean().optional(),
+    enum: z.boolean().optional(),
+    function: z.boolean().optional(),
+    interface: z.boolean().optional(),
+    member: z.boolean().optional(),
+    type: z.boolean().optional(),
+  }).strict(),
 ]);
 
 const rootConfigurationSchema = z.object({
