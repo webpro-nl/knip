@@ -1,6 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "include": ["classMembers"],
+  "ignore": [".github/workflows/ci-worktree.yml"],
   "workspaces": {
     ".": {
       "project": ["!templates/**"]
