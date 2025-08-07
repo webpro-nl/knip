@@ -31,14 +31,14 @@ const rulesSchema = z.record(issueTypeSchema, z.enum(['error', 'warn', 'off']));
 
 const ignoreExportsUsedInFileSchema = z.union([
   z.boolean(),
-  z.object({
+  z.strictObject({
     class: z.boolean().optional(),
     enum: z.boolean().optional(),
     function: z.boolean().optional(),
     interface: z.boolean().optional(),
     member: z.boolean().optional(),
     type: z.boolean().optional(),
-  }).strict(),
+  }),
 ]);
 
 const rootConfigurationSchema = z.object({
@@ -383,14 +383,18 @@ const baseWorkspaceConfigurationSchema = z.object({
   includeEntryExports: z.boolean().optional(),
 });
 
-const workspaceConfigurationSchema = baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial());
+const workspaceConfigurationSchema = z.object({
+  ...baseWorkspaceConfigurationSchema.shape,
+  ...pluginsSchema.partial().shape,
+});
 
 const workspacesConfigurationSchema = z.object({
   workspaces: z.record(z.string(), workspaceConfigurationSchema).optional(),
 });
 
-export const knipConfigurationSchema = rootConfigurationSchema
-  .merge(reportConfigSchema)
-  .merge(workspacesConfigurationSchema)
-  .merge(pluginsSchema.partial())
-  .strict();
+export const knipConfigurationSchema = z.strictObject({
+  ...rootConfigurationSchema.shape,
+  ...reportConfigSchema.shape,
+  ...workspacesConfigurationSchema.shape,
+  ...pluginsSchema.partial().shape,
+});
