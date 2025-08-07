@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 import os from 'node:os';
-import fg from 'fast-glob';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry, toIgnore, toProductionEntry } from '../../util/input.js';
+import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
+import { _glob } from '../../util/glob.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import vite from '../vite/index.js';
 import type { PluginConfig, RouteConfigEntry } from './types.js';
@@ -20,7 +20,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['react-router.config.{js,ts}', ...vite.config];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) => {
-  const { configFileDir, manifest } = options;
+  const { configFileDir } = options;
   const appDirectory = localConfig.appDirectory ?? 'app';
   const appDir = join(configFileDir, appDirectory);
 
@@ -61,22 +61,18 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     ...routes.map(id => toProductionEntry(id)),
   ];
 
-  // When using @react-router/serve,  @react-router/node and isbot will also
-  // need to be installed. Since the server entry is optional, knip will flag
-  // these dependencies as unused.
-  // So add them to as ignored if
-  //  - there's no server entry and
-  //  - they're found in the manifest.
-  const hasServerEntry = fg.sync(join(appDir, 'entry.server.{js,ts,jsx,tsx}')).length !== 0;
-  if (!hasServerEntry) {
-    const hasRRNode = manifest.dependencies?.['@react-router/node'];
-    if (hasRRNode) {
-      resolved.push(toIgnore('@react-router/node', 'dependencies'));
-    }
-    const hasIsBot = manifest.dependencies?.['isbot'];
-    if (hasIsBot) {
-      resolved.push(toIgnore('isbot', 'dependencies'));
-    }
+  const serverEntries = await _glob({
+    cwd: appDir,
+    patterns: ['entry.server.{js,ts,jsx,tsx}'],
+  });
+
+  // If there are no server entries, then we need to add these as implicit
+  // production dependencies, as @react-router/dev will add the
+  // default entry.server.tsx automatically which depends on these.
+  // See: https://github.com/remix-run/react-router/blob/dev/packages/react-router-dev/config/defaults/entry.server.node.tsx
+  if (serverEntries.length === 0) {
+    resolved.push(toProductionDependency('@react-router/node'));
+    resolved.push(toProductionDependency('isbot'));
   }
 
   return resolved;
