@@ -16,7 +16,5 @@ export class MyStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY, // Not for production
       autoDeleteObjects: true,
     });
-
   }
 }
-

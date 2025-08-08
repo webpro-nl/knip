@@ -13,8 +13,6 @@ test('Find dependencies with the aws-cdk plugin', async () => {
     cwd,
   });
 
-  console.log(issues);
-
   assert(issues.devDependencies['package.json']['aws-cdk']);
 
   assert.deepEqual(counters, {
