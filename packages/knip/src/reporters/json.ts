@@ -1,9 +1,9 @@
-import type { Entries } from 'type-fest';
+import type { Entries } from '../types/entries.js';
 import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issues.js';
 import { createOwnershipEngine } from '../util/codeowners.js';
 import { isFile } from '../util/fs.js';
 import { relative, resolve } from '../util/path.js';
-import { convert } from './util.js';
+import { convert } from './util/util.js';
 
 type ExtraReporterOptions = {
   codeowners?: string;

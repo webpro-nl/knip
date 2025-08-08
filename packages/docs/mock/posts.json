@@ -2,6 +2,24 @@
   "data": [
     {
       "entities": {
+        "urls": []
+      },
+      "id": "1932778410691949034",
+      "author_id": "10",
+      "created_at": "2025-06-11T14:34:00.000Z",
+      "text": "\"Thanks Knip!\"\neveryday,\nevery team member,\nliterally..\nknip.dev 🏅"
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "url": "https://github.com/webpro-nl/knip/issues/1120#issuecomment-2943978262",
+      "author_id": "9",
+      "created_at": "2025-06-05T14:00:00.000Z",
+      "text": "Thank you so much for this incredible piece of software! Knip is one of the most impressive tools I've seen in my career."
+    },
+    {
+      "entities": {
         "urls": [
           {
             "url": "https://github.com/webpro-nl/knip/pull/1022",
@@ -128,14 +146,6 @@
       "entities": {
         "urls": [
           {
-            "url": "https://t.co/JyMwFtAeGG",
-            "expanded_url": "https://knip.dev",
-            "display_url": "knip.dev",
-            "title": "Knip",
-            "description": "Project linter to find unused dependencies, exports and files in JavaScript and TypeScript projects",
-            "unwound_url": "https://knip.dev"
-          },
-          {
             "url": "https://t.co/dummy-01",
             "display_url": "pic.twitter.com/uOuO1ch5ij",
             "media_key": "1"
@@ -146,7 +156,7 @@
       "author_id": "1",
       "created_at": "2024-01-13T01:55:00.000Z",
       "attachments": { "media_keys": ["1"] },
-      "text": "warning: do not use a tool like https://t.co/JyMwFtAeGG + code search to delete a ton of unused code. It works too well.\n\nI just did this in https://github.com/sourcegraph/cody/pull/2705, and my boss said if I end the week with net negative lines of code committed, I'm in deep trouble. https://t.co/dummy-01"
+      "text": "warning: do not use a tool like knip.dev + code search to delete a ton of unused code. It works too well.\n\nI just did this in https://github.com/sourcegraph/cody/pull/2705, and my boss said if I end the week with net negative lines of code committed, I'm in deep trouble. https://t.co/dummy-01"
     },
     {
       "entities": {
@@ -174,26 +184,6 @@
         ],
         "urls": [
           {
-            "url": "https://t.co/JyMwFtAeGG",
-            "expanded_url": "http://knip.dev",
-            "display_url": "knip.dev",
-            "images": [
-              {
-                "url": "https://pbs.twimg.com/news_img/1730151538373304320/3Nd8wXmH?format=jpg&name=orig",
-                "width": 1200,
-                "height": 630
-              },
-              {
-                "url": "https://pbs.twimg.com/news_img/1730151538373304320/3Nd8wXmH?format=jpg&name=150x150",
-                "width": 150,
-                "height": 150
-              }
-            ],
-            "title": "Knip",
-            "description": "Project linter to find unused dependencies, exports and files in JavaScript and TypeScript projects",
-            "unwound_url": "https://knip.dev/"
-          },
-          {
             "url": "https://t.co/uOuO1ch5ij",
             "expanded_url": "https://twitter.com/gregberge_/status/1730180003453927560/photo/1",
             "display_url": "pic.twitter.com/uOuO1ch5ij",
@@ -202,7 +192,7 @@
         ]
       },
       "author_id": "22918124",
-      "text": "Ran https://t.co/JyMwFtAeGG in @argos_ci, and boom 💥! Dead code detected instantly. With a good config, it can run on CI to keep projects clean. Installing this tool should be a no-brainer, like Prettier or ESLint.\n\nKudos, @webprolific! 👏 https://t.co/uOuO1ch5ij",
+      "text": "Ran knip.dev in @argos_ci, and boom 💥! Dead code detected instantly. With a good config, it can run on CI to keep projects clean. Installing this tool should be a no-brainer, like Prettier or ESLint.\n\nKudos, @webprolific! 👏 https://t.co/uOuO1ch5ij",
 
       "id": "1730180003453927560",
       "created_at": "2023-11-30T11:00:32.000Z",
@@ -706,6 +696,18 @@
         "username": "beaussan.io",
         "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:opw3iapscc55nlgrx6q2yjah/bafkreiaj72657msogojjdk4wr76fe3umimydon3pzzrquuj7opcftntrqa@jpeg",
         "name": "Nicolas Beaussart"
+      },
+      {
+        "id": "9",
+        "username": "MidnightDesign",
+        "name": "Rudolph Gottesheim",
+        "profile_image_url": "https://avatars.githubusercontent.com/u/743172?v=4"
+      },
+      {
+        "id": "10",
+        "username": "stephaneledorze",
+        "name": "stephane le dorze",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1587561006317899777/y8cgxyI7_400x400.jpg"
       },
       {
         "id": "22918124",

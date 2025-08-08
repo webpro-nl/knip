@@ -1,5 +1,6 @@
+import picomatch from 'picomatch';
 import { CacheConsultant } from './CacheConsultant.js';
-import type { Workspace } from './ConfigurationChief.js';
+import { type Workspace, isDefaultPattern } from './ConfigurationChief.js';
 import { _getInputsFromScripts } from './binaries/index.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { getFilteredScripts } from './manifest/helpers.js';
@@ -13,8 +14,10 @@ import type {
   GetSourceFile,
   WorkspaceConfiguration,
 } from './types/config.js';
+import type { ConfigurationHints } from './types/issues.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
+import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
@@ -30,6 +33,7 @@ import {
 import { getKeysByValue } from './util/object.js';
 import { basename, dirname, join } from './util/path.js';
 import { loadConfigForPlugin } from './util/plugin.js';
+import { ELLIPSIS } from './util/string.js';
 
 type WorkspaceManagerOptions = {
   name: string;
@@ -52,7 +56,7 @@ type WorkspaceManagerOptions = {
   configFilesMap: Map<string, Map<PluginName, Set<string>>>;
 };
 
-type CacheItem = { resolveConfig?: Input[]; resolveFromAST?: Input[] };
+type CacheItem = { resolveConfig?: Input[]; resolveFromAST?: Input[]; configFile?: Input };
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
@@ -131,6 +135,8 @@ export class WorkspaceWorker {
     this.getSourceFile = getSourceFile;
 
     this.cache = new CacheConsultant({ name: `plugins-${name}`, isEnabled: isCache, cacheLocation, isProduction });
+
+    this.getConfigurationHints = timerify(this.getConfigurationHints.bind(this), 'worker.getConfigurationHints');
   }
 
   public async init() {
@@ -358,6 +364,7 @@ export class WorkspaceWorker {
           const data = fd.meta.data;
           if (data.resolveConfig) for (const id of data.resolveConfig) addInput(id, configFilePath);
           if (data.resolveFromAST) for (const id of data.resolveFromAST) addInput(id, configFilePath);
+          if (data.configFile) addInput(data.configFile);
           continue;
         }
 
@@ -374,8 +381,10 @@ export class WorkspaceWorker {
         const key = `${wsName}:${pluginName}`;
         if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
           if (typeof plugin.setup === 'function') await plugin.setup(resolveOpts);
+          const isLoad =
+            typeof plugin.isLoadConfig === 'function' ? plugin.isLoadConfig(resolveOpts, this.dependencies) : true;
 
-          const localConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
+          const localConfig = isLoad && (await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName));
           if (localConfig) {
             const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
             for (const input of inputs) addInput(input, configFilePath);
@@ -399,15 +408,18 @@ export class WorkspaceWorker {
           }
         }
 
-        if (basename(configFilePath) !== 'package.json') {
+        if (!isManifest) {
           addInput(toEntry(configFilePath));
           addInput(toConfig(pluginName, configFilePath));
+          cache.configFile = toEntry(configFilePath);
+
+          if (fd?.changed && fd.meta && !seen.get(key)?.has(configFilePath)) {
+            fd.meta.data = cache;
+          }
 
           if (!seen.has(key)) seen.set(key, new Set());
           seen.get(key)?.add(configFilePath);
         }
-
-        if (!isManifest && fd?.changed && fd.meta) fd.meta.data = cache;
       }
 
       if (plugin.resolve) {
@@ -443,6 +455,41 @@ export class WorkspaceWorker {
     debugLogArray(wsName, 'Plugin dependencies', () => compact(inputs.map(toDebugString)));
 
     return inputs;
+  }
+
+  public getConfigurationHints(
+    type: 'entry' | 'project',
+    patterns: string[],
+    filePaths: string[],
+    includedPaths: Set<string>
+  ) {
+    const hints: ConfigurationHints = new Set();
+    const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
+    const workspaceName = this.name;
+    const userDefinedPatterns = entries.filter(id => !isDefaultPattern(type, id));
+
+    if (userDefinedPatterns.length === 0) return hints;
+
+    if (filePaths.length === 0) {
+      const identifier = `[${entries[0]}${entries.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
+      hints.add({ type: `${type}-empty`, identifier, workspaceName });
+      return hints;
+    }
+
+    for (const pattern of patterns) {
+      if (pattern.startsWith('!')) continue;
+      const filePathOrPattern = join(this.dir, pattern.replace(/!$/, ''));
+      if (includedPaths.has(filePathOrPattern)) {
+        hints.add({ type: `${type}-redundant`, identifier: pattern, workspaceName });
+      } else {
+        const matcher = picomatch(filePathOrPattern);
+        if (!filePaths.some(filePath => matcher(filePath))) {
+          hints.add({ type: `${type}-empty`, identifier: pattern, workspaceName });
+        }
+      }
+    }
+
+    return hints;
   }
 
   public onDispose() {

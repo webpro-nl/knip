@@ -13,8 +13,8 @@ test('Find destructured props of member-accessed imported symbol', async () => {
     cwd,
   });
 
-  assert(issues.exports['member-ab.ts']['unusedMemberA']);
-  assert(issues.exports['member-cd.ts']['unusedMemberC']);
+  assert(issues.exports['member-ab.ts']['NS.unusedMemberA']);
+  assert(issues.exports['member-cd.ts']['pseudo.unusedMemberC']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

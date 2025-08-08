@@ -1,6 +1,6 @@
-import type { TsConfigJson } from 'type-fest';
 import type { ConfigArg } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { TsConfigJson } from '../../types/tsconfig-json.js';
 import { compact } from '../../util/array.js';
 import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.js';
 import { join } from '../../util/path.js';
@@ -40,7 +40,12 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
     : [];
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
 
-  return compact([...extend, ...references, ...[...types, ...plugins, ...importHelpers].map(toDeferResolve), ...jsx]);
+  return compact([
+    ...extend,
+    ...references,
+    ...[...types, ...plugins, ...importHelpers].map(id => toDeferResolve(id)),
+    ...jsx,
+  ]);
 };
 
 const args = {

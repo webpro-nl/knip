@@ -7,11 +7,11 @@ import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import { WorkspaceWorker } from '../WorkspaceWorker.js';
 import { _getInputsFromScripts } from '../binaries/index.js';
 import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
-import { DEFAULT_EXTENSIONS } from '../constants.js';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import type { PluginName } from '../types/PluginNames.js';
 import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
-import type { ModuleGraph } from '../types/module-graph.js';
+import type { ModuleGraph, UnresolvedImport } from '../types/module-graph.js';
 import { perfObserver } from '../util/Performance.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
@@ -28,11 +28,12 @@ import {
   isProject,
   toProductionEntry,
 } from '../util/input.js';
+import { loadTSConfig } from '../util/load-tsconfig.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
-import { getEntryPathsFromManifest } from '../util/package-json.js';
-import { dirname, isAbsolute, join, relative, toRelative } from '../util/path.js';
+import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
+import { getEntryPathsFromManifest, getManifestImportDependencies } from '../util/package-json.js';
+import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
 import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
-import { loadTSConfig } from '../util/tsconfig-loader.js';
 
 interface BuildOptions {
   cacheLocation: string;
@@ -160,6 +161,9 @@ export async function build({
       inputs.add(toProductionEntry(filePath));
     }
 
+    // Consider dependencies in package.json#imports used
+    for (const dep of getManifestImportDependencies(manifest)) deputy.addReferencedDependency(name, dep);
+
     // workspace + worker → principal
     const principal = factory.createPrincipal({
       cwd: dir,
@@ -262,13 +266,6 @@ export async function build({
       }
     } else {
       {
-        const label = 'entry paths';
-        const patterns = worker.getEntryFilePatterns();
-        const workspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false, label });
-        principal.addEntryPaths(workspaceEntryPaths);
-      }
-
-      {
         const label = 'entry paths from plugins (skip exports analysis)';
         const patterns = worker.getPluginEntryFilePatterns([
           ...entryPatternsSkipExports,
@@ -286,10 +283,14 @@ export async function build({
       }
 
       {
-        const label = 'project paths';
-        const patterns = worker.getProjectFilePatterns([...productionPatternsSkipExports, ...projectFilePatterns]);
-        const workspaceProjectPaths = await _glob({ ...sharedGlobOptions, patterns, label });
-        for (const projectPath of workspaceProjectPaths) principal.addProjectPath(projectPath);
+        const label = 'entry paths';
+        const patterns = worker.getEntryFilePatterns();
+        const entryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false, label });
+
+        const hints = worker.getConfigurationHints('entry', patterns, entryPaths, principal.entryPaths);
+        for (const hint of hints) collector.addConfigurationHint(hint);
+
+        principal.addEntryPaths(entryPaths);
       }
 
       {
@@ -304,6 +305,17 @@ export async function build({
         const patterns = worker.getPluginConfigPatterns();
         const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
+      }
+
+      {
+        const label = 'project paths';
+        const patterns = worker.getProjectFilePatterns([...productionPatternsSkipExports, ...projectFilePatterns]);
+        const projectPaths = await _glob({ ...sharedGlobOptions, patterns, label });
+
+        const hints = worker.getConfigurationHints('project', config.project, projectPaths, principal.projectPaths);
+        for (const hint of hints) collector.addConfigurationHint(hint);
+
+        for (const projectPath of projectPaths) principal.addProjectPath(projectPath);
       }
     }
 
@@ -338,48 +350,79 @@ export async function build({
     const workspace = chief.findWorkspaceByFilePath(filePath);
 
     if (workspace) {
-      const { imports, exports, duplicates, scripts, traceRefs } = principal.analyzeSourceFile(
-        filePath,
-        {
-          skipTypeOnly: isStrict,
-          isFixExports,
-          isFixTypes,
-          ignoreExportsUsedInFile: chief.config.ignoreExportsUsedInFile,
-          isReportClassMembers,
-          tags,
-        },
-        isGitIgnored,
-        isInternalWorkspace,
-        getPrincipalByFilePath
-      );
+      const file = principal.analyzeSourceFile(filePath, {
+        skipTypeOnly: isStrict,
+        isFixExports,
+        isFixTypes,
+        ignoreExportsUsedInFile: chief.config.ignoreExportsUsedInFile,
+        isReportClassMembers,
+        tags,
+      });
 
-      const node = getOrCreateFileNode(graph, filePath);
+      // Post-processing
+      const _unresolved = new Set<UnresolvedImport>();
+      for (const unresolvedImport of file.imports.unresolved) {
+        const { specifier } = unresolvedImport;
 
-      node.imports = imports;
-      node.exports = exports;
-      node.duplicates = duplicates;
-      node.scripts = scripts;
-      node.traceRefs = traceRefs;
+        // Ignore Deno style http import specifiers
+        if (specifier.startsWith('http')) continue;
 
-      updateImportMap(node, imports.internal, graph);
-      node.internalImportCache = imports.internal;
+        // All bets are off after failing to resolve module:
+        // - either add to external dependencies if it quacks like that so it'll end up as unused or unlisted dependency
+        // - or maintain unresolved status if not ignored and not foreign
+        const sanitizedSpecifier = sanitizeSpecifier(specifier);
+        if (isStartsLikePackageName(sanitizedSpecifier)) {
+          file.imports.external.add(sanitizedSpecifier);
+        } else {
+          const isIgnored = isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
+          if (!isIgnored) {
+            const ext = extname(sanitizedSpecifier);
+            const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);
+            if (!ext || (ext !== '.json' && !hasIgnoredExtension)) _unresolved.add(unresolvedImport);
+          }
+        }
+      }
 
-      graph.set(filePath, node);
+      for (const filePath of file.imports.resolved) {
+        const isIgnored = isGitIgnored(filePath);
+        if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
+      }
 
-      // A bit out of place, but good spot to add source files referenced from scripts recursively
-      if (scripts && scripts.size > 0) {
+      for (const [specifier, specifierFilePath] of file.imports.specifiers) {
+        const packageName = getPackageNameFromModuleSpecifier(specifier);
+        if (packageName && isInternalWorkspace(packageName)) {
+          file.imports.external.add(packageName);
+          const principal = getPrincipalByFilePath(specifierFilePath);
+          if (principal && !isGitIgnored(specifierFilePath)) {
+            principal.addNonEntryPath(specifierFilePath);
+          }
+        }
+      }
+
+      if (file.scripts && file.scripts.size > 0) {
         const dependencies = deputy.getDependencies(workspace.name);
         const manifestScriptNames = new Set(Object.keys(chief.getManifestForWorkspace(workspace.name)?.scripts ?? {}));
         const dir = dirname(filePath);
         const options = { cwd: dir, rootCwd: cwd, containingFilePath: filePath, dependencies, manifestScriptNames };
-        const inputs = _getInputsFromScripts(scripts, options);
+        const inputs = _getInputsFromScripts(file.scripts, options);
         for (const input of inputs) {
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
           const specifierFilePath = getReferencedInternalFilePath(input, workspace);
-          if (specifierFilePath) analyzeSourceFile(specifierFilePath, principal);
+          if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }
       }
+
+      const node = getOrCreateFileNode(graph, filePath);
+
+      file.imports.unresolved = _unresolved;
+
+      Object.assign(node, file);
+
+      updateImportMap(node, file.imports.internal, graph);
+      node.internalImportCache = file.imports.internal;
+
+      graph.set(filePath, node);
     }
   };
 

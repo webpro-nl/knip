@@ -11,8 +11,6 @@ test('findAndParseGitignores', async () => {
     ignores: new Set([
       '**/.cache',
       '**/.cache/**',
-      '**/.idea',
-      '**/.idea/**',
       '.git',
       '**/node_modules',
       '**/node_modules/**',
@@ -38,8 +36,6 @@ test('findAndParseGitignores (/a)', async () => {
       '**/b/c/**',
       '**/.cache',
       '**/.cache/**',
-      '**/.idea',
-      '**/.idea/**',
     ]),
     unignores: [],
   });
@@ -65,8 +61,6 @@ test('findAndParseGitignores (/a/b', async () => {
       '**/c/**',
       '**/.cache',
       '**/.cache/**',
-      '**/.idea',
-      '**/.idea/**',
     ]),
     unignores: [],
   });

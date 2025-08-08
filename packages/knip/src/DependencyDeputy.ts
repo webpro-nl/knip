@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import type { Workspace } from './ConfigurationChief.js';
-import { PackageJsonPeeker } from './PackageJsonPeeker.js';
+import { PackagePeeker } from './PackagePeeker.js';
 import {
   DT_SCOPE,
   IGNORED_DEPENDENCIES,
@@ -66,9 +66,9 @@ export class DependencyDeputy {
     manifestPath,
     manifestStr,
     manifest,
-    ignoreDependencies,
-    ignoreBinaries,
-    ignoreUnresolved,
+    ignoreDependencies: id,
+    ignoreBinaries: ib,
+    ignoreUnresolved: iu,
   }: {
     name: string;
     cwd: string;
@@ -110,16 +110,20 @@ export class DependencyDeputy {
     this.setInstalledBinaries(name, installedBinaries);
     this.setHasTypesIncluded(name, hasTypesIncluded);
 
+    const ignoreDependencies = id.map(toRegexOrString);
+    const ignoreBinaries = ib.map(toRegexOrString);
+    const ignoreUnresolved = iu.map(toRegexOrString);
+
     this._manifests.set(name, {
       workspaceDir: dir,
       manifestPath,
       manifestStr,
-      ignoreDependencies: ignoreDependencies.map(toRegexOrString),
-      ignoreBinaries: ignoreBinaries.map(toRegexOrString),
-      ignoreUnresolved: ignoreUnresolved.map(toRegexOrString),
-      usedIgnoreDependencies: new Set<string | RegExp>(),
-      usedIgnoreBinaries: new Set<string | RegExp>(),
-      usedIgnoreUnresolved: new Set<string | RegExp>(),
+      ignoreDependencies,
+      ignoreBinaries,
+      ignoreUnresolved,
+      unusedIgnoreDependencies: new Set(ignoreDependencies),
+      unusedIgnoreBinaries: new Set(ignoreBinaries),
+      unusedIgnoreUnresolved: new Set(ignoreUnresolved),
       dependencies,
       devDependencies,
       peerDependencies: new Set(peerDependencies),
@@ -259,17 +263,17 @@ export class DependencyDeputy {
     for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests.entries()) {
       const referencedDependencies = this.referencedDependencies.get(workspace);
       const hasTypesIncluded = this.getHasTypesIncluded(workspace);
-      const peeker = new PackageJsonPeeker(manifestStr);
+      const peeker = new PackagePeeker(manifestStr);
 
-      // Keeping track of peer dependency recursions to prevent infinite loops for circularly referenced peer deps
-      const peerDepRecs: Record<string, number> = {};
+      // Keeping track of peer dependencies to prevent infinite loops for circularly referenced peer deps
+      const peerDepCount: Record<string, number> = {};
 
       const isReferencedDependency = (dependency: string, isPeerDep?: boolean): boolean => {
         // Is referenced, ignore
         if (referencedDependencies?.has(dependency)) return true;
 
         // Returning peer dependency, ignore
-        if (isPeerDep && peerDepRecs[dependency]) return false;
+        if (isPeerDep && peerDepCount[dependency]) return false;
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === DT_SCOPE) {
@@ -299,8 +303,8 @@ export class DependencyDeputy {
         const hostDependencies = this.getHostDependenciesFor(workspace, dependency);
 
         for (const { name } of hostDependencies) {
-          if (!peerDepRecs[name]) peerDepRecs[name] = 1;
-          else peerDepRecs[name]++;
+          if (!peerDepCount[name]) peerDepCount[name] = 1;
+          else peerDepCount[name]++;
         }
 
         return hostDependencies.some(
@@ -347,7 +351,7 @@ export class DependencyDeputy {
             if (ignoreItem) {
               delete issueSet[issueKey];
               counters[type]--;
-              manifest.usedIgnoreDependencies.add(ignoreItem);
+              manifest.unusedIgnoreDependencies.delete(ignoreItem);
             } else if (issue.workspace !== ROOT_WORKSPACE_NAME) {
               const manifest = this.getWorkspaceManifest(ROOT_WORKSPACE_NAME);
               if (manifest) {
@@ -355,7 +359,7 @@ export class DependencyDeputy {
                 if (ignoreItem) {
                   delete issueSet[issueKey];
                   counters[type]--;
-                  manifest.usedIgnoreDependencies.add(ignoreItem);
+                  manifest.unusedIgnoreDependencies.delete(ignoreItem);
                 }
               }
             }
@@ -381,7 +385,7 @@ export class DependencyDeputy {
           if (ignoreItem) {
             delete issueSet[issueKey];
             counters[type]--;
-            manifest.usedIgnoreBinaries.add(ignoreItem);
+            manifest.unusedIgnoreBinaries.delete(ignoreItem);
           } else {
             const manifest = this.getWorkspaceManifest(ROOT_WORKSPACE_NAME);
             if (manifest) {
@@ -389,7 +393,7 @@ export class DependencyDeputy {
               if (ignoreItem) {
                 delete issueSet[issueKey];
                 counters[type]--;
-                manifest.usedIgnoreBinaries.add(ignoreItem);
+                manifest.unusedIgnoreBinaries.delete(ignoreItem);
               }
             }
           }
@@ -409,7 +413,7 @@ export class DependencyDeputy {
           if (ignoreItem) {
             delete issueSet[issueKey];
             counters.unresolved--;
-            manifest.usedIgnoreUnresolved.add(ignoreItem);
+            manifest.unusedIgnoreUnresolved.delete(ignoreItem);
           } else {
             const manifest = this.getWorkspaceManifest(ROOT_WORKSPACE_NAME);
             if (manifest) {
@@ -417,7 +421,7 @@ export class DependencyDeputy {
               if (ignoreItem) {
                 delete issueSet[issueKey];
                 counters.unresolved--;
-                manifest.usedIgnoreUnresolved.add(ignoreItem);
+                manifest.unusedIgnoreUnresolved.delete(ignoreItem);
               }
             }
           }
@@ -440,22 +444,16 @@ export class DependencyDeputy {
     const configurationHints: ConfigurationHints = new Set();
 
     for (const [workspaceName, manifest] of this._manifests.entries()) {
-      for (const identifier of manifest.ignoreDependencies) {
-        if (!manifest.usedIgnoreDependencies.has(identifier)) {
-          configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' });
-        }
+      for (const identifier of manifest.unusedIgnoreDependencies) {
+        configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' });
       }
 
-      for (const identifier of manifest.ignoreBinaries) {
-        if (!manifest.usedIgnoreBinaries.has(identifier)) {
-          configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' });
-        }
+      for (const identifier of manifest.unusedIgnoreBinaries) {
+        configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' });
       }
 
-      for (const identifier of manifest.ignoreUnresolved) {
-        if (!manifest.usedIgnoreUnresolved.has(identifier)) {
-          configurationHints.add({ workspaceName, identifier, type: 'ignoreUnresolved' });
-        }
+      for (const identifier of manifest.unusedIgnoreUnresolved) {
+        configurationHints.add({ workspaceName, identifier, type: 'ignoreUnresolved' });
       }
     }
 

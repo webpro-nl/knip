@@ -12,6 +12,16 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Node test",
+      "program": "${workspaceFolder}/node_modules/.bin/tsx",
+      "args": ["--test", "--import", "./transform-test.js", "${file}"],
+      "cwd": "${workspaceFolder}/packages/knip",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
       "type": "bun",
       "request": "attach",
       "name": "Attach to Bun",

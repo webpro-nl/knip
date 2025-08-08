@@ -67,7 +67,16 @@ const workspace = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, ''
 
 const run = async () => {
   try {
-    const { report, issues, counters, rules, tagHints, configurationHints, isTreatConfigHintsAsErrors } = await main({
+    const {
+      report,
+      issues,
+      counters,
+      rules,
+      tagHints,
+      configurationHints,
+      isTreatConfigHintsAsErrors,
+      includedWorkspaces,
+    } = await main({
       cacheLocation,
       cwd,
       excludedIssueTypes,
@@ -107,12 +116,13 @@ const run = async () => {
       tagHints,
       configurationHints,
       isDisableConfigHints,
-      isTreatConfigHintsAsErrors,
+      isTreatConfigHintsAsErrors: treatConfigHintsAsErrors ?? isTreatConfigHintsAsErrors,
       cwd,
       isProduction,
       isShowProgress,
       options: reporterOptions,
       preprocessorOptions,
+      includedWorkspaces,
     };
 
     const finalData = await runPreprocessors(preprocessor, initialData);

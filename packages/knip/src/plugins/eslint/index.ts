@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getInputs } from './helpers.js';
 import type { ESLintConfigDeprecated } from './types.js';
@@ -19,27 +19,32 @@ const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
 
 const packageJsonPath = 'eslintConfig';
 
-const entry = ['eslint.config.{js,cjs,mjs,ts,cts,mts}'];
+const config = [
+  'eslint.config.{js,cjs,mjs,ts,cts,mts}',
+  '.eslintrc',
+  '.eslintrc.{js,json,cjs}',
+  '.eslintrc.{yml,yaml}',
+  'package.json',
+];
 
-const config = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
+const isLoadConfig: IsLoadConfig = ({ manifest }, dependencies) => {
+  const version = manifest.devDependencies?.['eslint'] || manifest.dependencies?.['eslint'];
+  if (version) {
+    const major = version.match(/\d+/);
+    if (major && Number.parseInt(major[0], 10) === 9 && dependencies.has('eslint-config-next')) {
+      return false;
+    }
+  }
+  return true;
+};
 
 const resolveConfig: ResolveConfig<ESLintConfigDeprecated> = (localConfig, options) => getInputs(localConfig, options);
 
 const note = `### ESLint v9
 
-Only regular \`import\` statements are considered by default.
-The configuration object is not resolved to find dependencies for \`settings\` such as \`"eslint-import-resolver-typescript"\`.
-To enable this, lift the \`entry\` to a \`config\` file like so:
+The ESLint plugin config resolver is disabled when using \`eslint-config-next\` (\`next lint\`).
 
-\`\`\`json
-{
-  "eslint": ["eslint.config.ts"]
-}
-\`\`\`
-
-This is not enabled by default, since this exception may be thrown by a \`@rushstack/eslint-*\` package:
-
-> \`Error: Failed to patch ESLint because the calling module was not recognized.\`
+Root cause: [microsoft/rushstack#4965](https://github.com/microsoft/rushstack/issues/4965)/[#5049](https://github.com/microsoft/rushstack/issues/5049)
 
 ### ESLint v8
 
@@ -61,7 +66,7 @@ export default {
   enablers,
   isEnabled,
   packageJsonPath,
-  entry,
   config,
+  isLoadConfig,
   resolveConfig,
 } satisfies Plugin;

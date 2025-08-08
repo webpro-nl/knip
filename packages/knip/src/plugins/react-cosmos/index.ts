@@ -31,7 +31,7 @@ const resolveConfig: ResolveConfig<ReactCosmosConfig> = async localConfig => {
   ];
   return [...entries, ...decoratorEntry]
     .map(id => toEntry(id))
-    .concat((localConfig?.plugins ?? []).map(toDeferResolve));
+    .concat((localConfig?.plugins ?? []).map(id => toDeferResolve(id)));
 };
 
 export default {

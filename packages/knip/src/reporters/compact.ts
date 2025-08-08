@@ -1,7 +1,7 @@
-import type { Entries } from 'type-fest';
+import type { Entries } from '../types/entries.js';
 import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.js';
 import { toRelative } from '../util/path.js';
-import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util.js';
+import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.js';
 
 const logIssueSet = (issues: string[]) => {
   for (const filePath of issues.sort()) console.log(toRelative(filePath));

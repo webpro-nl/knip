@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = [
   'package.json',
   'postcss.config.json',
-  ...toLilconfig('postcss', { configDir: false, additionalExtensions: ['ts', 'mts', 'cts', 'yaml', 'yml'] }),
+  ...toLilconfig('postcss', { configDir: false, additionalExtensions: ['mts', 'cts', 'yaml', 'yml'] }),
 ];
 
 const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
@@ -28,7 +28,7 @@ const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
       })
     : [];
 
-  const inputs = plugins.map(toDeferResolve);
+  const inputs = plugins.map(id => toDeferResolve(id));
 
   // Because postcss is not included in peerDependencies of tailwindcss
   return ['tailwindcss', '@tailwindcss/postcss'].some(tailwindPlugin => plugins.includes(tailwindPlugin))

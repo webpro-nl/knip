@@ -27,7 +27,7 @@ const resolveConfig: ResolveConfig<TypeDocConfig | { typedocOptions: TypeDocConf
   const cfg = 'typedocOptions' in config ? config.typedocOptions : config; // exception for `tsconfig.json`
   const plugins = cfg?.plugin ?? [];
   const themes = cfg?.theme ?? [];
-  return [...plugins, ...themes].map(toDeferResolve);
+  return [...plugins, ...themes].map(id => toDeferResolve(id));
 };
 
 const args = {

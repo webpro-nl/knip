@@ -96,6 +96,8 @@ By the way, [the ESLint v9 plugin][5] has a similar issue.
 configuration file. That would require some additional efforts and get us only
 so far, but is definitely useful in some cases and on the radar.
 
+**EDIT:** This has been solved in the Next.js plugin in v5.48.0.
+
 ### Case 2: Knip does that?!
 
 To further bring down user configuration and the number of false positives, the

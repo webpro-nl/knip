@@ -19,6 +19,7 @@ interface VitestConfig {
     reporters?: (string | [string, unknown] | unknown)[];
     setupFiles?: string | string[];
     workspace?: (ViteConfig & { test: VitestConfig['test'] & { workspace: never } })[];
+    projects?: (string | (ViteConfig & { test: VitestConfig['test'] & { projects: never } }))[];
     alias?: AliasOptions;
   };
 }

@@ -136,6 +136,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
+  for (const hint of chief.getConfigurationHints()) collector.addConfigurationHint(hint);
+
   if (isWatch) {
     const isIgnored = (filePath: string) =>
       filePath.startsWith(cacheLocation) || filePath.includes('/.git/') || isGitIgnored(filePath);
@@ -163,7 +165,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     const touchedFiles = await fixer.fixIssues(issues);
     if (isFormat) {
       const report = await formatly(Array.from(touchedFiles), { cwd });
-      if (report.ran && report.result.code === 0) {
+      if (report.ran && report.result && (report.result.runner === 'virtual' || report.result.code === 0)) {
         debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);
       } else {
         debugLogObject('*', 'Formatting files failed', report);
@@ -181,5 +183,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     tagHints,
     configurationHints,
     isTreatConfigHintsAsErrors: chief.config.isTreatConfigHintsAsErrors,
+    includedWorkspaces: chief.includedWorkspaces,
   };
 };

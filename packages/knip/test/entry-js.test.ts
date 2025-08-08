@@ -19,11 +19,11 @@ test('Find unused files and exports with JS entry file', async () => {
   assert.equal(Object.values(issues.exports).length, 2);
   assert.equal(issues.exports['my-module.ts']['unused'].symbol, 'unused');
   assert.equal(issues.exports['my-module.ts']['default'].symbol, 'default');
-  assert.equal(issues.exports['my-namespace.ts']['key'].symbol, 'key');
+  assert.equal(issues.exports['my-namespace.ts']['MyNamespace.key'].symbol, 'key');
 
   assert.equal(Object.values(issues.types).length, 2);
   assert.equal(issues.types['my-module.ts']['AnyType'].symbolType, 'type');
-  assert.equal(issues.types['my-namespace.ts']['MyNamespace'].symbol, 'MyNamespace');
+  assert.equal(issues.types['my-namespace.ts']['MyNamespace.MyNamespace'].symbol, 'MyNamespace');
 
   assert.equal(Object.values(issues.duplicates).length, 1);
   assert.equal(issues.duplicates['my-module.ts']['myExport|default'].symbols?.length, 2);

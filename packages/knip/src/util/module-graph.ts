@@ -38,6 +38,8 @@ const createFileNode = (): FileNode => ({
     internal: new Map(),
     external: new Set(),
     unresolved: new Set(),
+    resolved: new Set(),
+    specifiers: new Set(),
   },
   exports: new Map(),
   duplicates: new Set(),

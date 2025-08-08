@@ -23,7 +23,7 @@ const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) => {
   return compact([patterns].flat().map(p => removeProductionSuffix(prepend(p, relativePath)))).sort(negatedLast);
 };
 
-const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
+export const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
 
 const negatedLast = (pattern: string) => (pattern.startsWith('!') ? 1 : -1);
 

@@ -17,7 +17,7 @@ const createSyncResolver = (extensions: string[]) => {
   };
 };
 
-const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.json']);
+const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
 
 export const _resolveSync = timerify(resolveSync);
 

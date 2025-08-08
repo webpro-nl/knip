@@ -14,9 +14,12 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
 
 const entry = ['src/content/config.ts', 'src/content.config.ts'];
+const project = ['src/**/*'];
 
 const production = [
   'src/pages/**/*.{astro,mdx,js,ts}',
+  '!src/pages/**/_*', // negate files prefixed with _.
+  '!src/pages/**/_*/**', // negate folders prefixed with _. The pattern _** would be collapsed into _* so we have to use **/_*/**
   'src/content/**/*.mdx',
   'src/middleware.{js,ts}',
   'src/actions/index.{js,ts}',
@@ -24,16 +27,11 @@ const production = [
 
 const resolveFromAST: ResolveFromAST = sourceFile => {
   const srcDir = getSrcDir(sourceFile);
+  const setSrcDir = (entry: string) => entry.replace(/^`src\//, `${srcDir}/`);
 
   return [
-    ...[`${srcDir}/content/config.ts`, `${srcDir}/content.config.ts`].map(path => toEntry(path)),
-
-    ...[
-      `${srcDir}/pages/**/*.{astro,mdx,js,ts}`,
-      `${srcDir}/content/**/*.mdx`,
-      `${srcDir}/middleware.{js,ts}`,
-      `${srcDir}/actions/index.{js,ts}`,
-    ].map(path => toProductionEntry(path)),
+    ...entry.map(setSrcDir).map(path => toEntry(path)),
+    ...production.map(setSrcDir).map(path => toProductionEntry(path)),
   ];
 };
 
@@ -61,4 +59,5 @@ export default {
   production,
   resolveFromAST,
   resolve,
+  project,
 } satisfies Plugin;

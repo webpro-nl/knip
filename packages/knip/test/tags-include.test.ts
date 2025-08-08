@@ -7,14 +7,14 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/tags-include');
 
-test('Include or exclude tagged exports (default)', async () => {
+test('Include or exclude tagged exports (include)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
   });
 
-  assert(issues.exports['tags.ts']['tagged']);
-  assert(issues.exports['tags.ts']['taggedToo']);
+  assert(issues.exports['tags.ts']['NS.tagged']);
+  assert(issues.exports['tags.ts']['NS.taggedToo']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

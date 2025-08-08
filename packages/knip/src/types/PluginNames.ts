@@ -5,6 +5,7 @@ export type PluginName =
   | 'ava'
   | 'aws-cdk'
   | 'babel'
+  | 'biome'
   | 'bun'
   | 'c8'
   | 'capacitor'
@@ -116,6 +117,7 @@ export const pluginNames = [
   'ava',
   'aws-cdk',
   'babel',
+  'biome',
   'bun',
   'c8',
   'capacitor',

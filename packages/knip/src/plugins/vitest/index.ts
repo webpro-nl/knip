@@ -1,7 +1,8 @@
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
-import { type Input, toAlias, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
+import { _glob } from '../../util/glob.js';
+import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
 import { join, toPosix } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
@@ -24,11 +25,7 @@ const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)', ...mocks];
 const isVitestCoverageCommand = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
 
 const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
-  scripts
-    ? Object.values(scripts).some(script => {
-        return isVitestCoverageCommand.test(script);
-      })
-    : false;
+  scripts ? Object.values(scripts).some(script => isVitestCoverageCommand.test(script)) : false;
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
   const { manifest, cwd: dir } = options;
@@ -54,11 +51,21 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
     }
   }
 
+  const projectsDependencies: Input[] = [];
+  if (testConfig.projects !== undefined) {
+    for (const projectConfig of testConfig.projects) {
+      if (typeof projectConfig !== 'string') {
+        projectsDependencies.push(...findConfigDependencies(projectConfig, options));
+      }
+    }
+  }
+
   return [
     ...[...environments, ...reporters, ...coverage].map(id => toDependency(id)),
     ...setupFiles,
     ...globalSetup,
     ...workspaceDependencies,
+    ...projectsDependencies,
   ];
 };
 
@@ -71,10 +78,24 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
           for (const mode of ['development', 'production'] as MODE[]) {
             const cfg = await config({ command, mode, ssrBuild: undefined });
             configs.push(cfg);
+            if (cfg.test?.projects) {
+              for (const project of cfg.test.projects) {
+                if (typeof project !== 'string') {
+                  configs.push(project);
+                }
+              }
+            }
           }
         }
       } else {
         configs.push(config);
+        if (config.test?.projects) {
+          for (const project of config.test.projects) {
+            if (typeof project !== 'string') {
+              configs.push(project);
+            }
+          }
+        }
       }
     }
   }
@@ -87,6 +108,23 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   inputs.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
 
   const configs = await getConfigs(localConfig);
+
+  for (const cfg of configs) {
+    if (cfg.test?.projects) {
+      for (const project of cfg.test.projects) {
+        if (typeof project === 'string') {
+          const projectFiles = await _glob({
+            cwd: options.cwd,
+            patterns: [project],
+            gitignore: false,
+          });
+          for (const projectFile of projectFiles) {
+            inputs.add(toConfig('vitest', projectFile, { containingFilePath: options.configFilePath }));
+          }
+        }
+      }
+    }
+  }
 
   const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
   const addAliases = (aliasOptions: AliasOptions) => {

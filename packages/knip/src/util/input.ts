@@ -97,7 +97,11 @@ export const toProductionDependency = (specifier: string): Input => ({
   production: true,
 });
 
-export const toDeferResolve = (specifier: string): Input => ({ type: 'deferResolve', specifier });
+export const toDeferResolve = (specifier: string, options: Options = {}): Input => ({
+  type: 'deferResolve',
+  specifier,
+  ...options,
+});
 
 export const isDeferResolve = (input: Input) => input.type === 'deferResolve';
 
@@ -128,7 +132,6 @@ export const toAlias = (specifier: string, prefix: string | string[], options: O
 
 export const isAlias = (input: Input): input is AliasInput => input.type === 'alias';
 
-/** @public not used yet */
 export const toIgnore = (specifier: string, issueType: IssueType): IgnoreInput => ({
   type: 'ignore',
   specifier,

@@ -319,6 +319,10 @@
           "title": "Babel plugin configuration (https://knip.dev/reference/plugins/babel)",
           "$ref": "#/definitions/plugin"
         },
+        "biome": {
+          "title": "biome plugin configuration (https://knip.dev/reference/plugins/biome)",
+          "$ref": "#/definitions/plugin"
+        },
         "bun": {
           "title": "bun plugin configuration (https://knip.dev/reference/plugins/bun)",
           "$ref": "#/definitions/plugin"

@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug Node test" type="NodeJSConfigurationType" node-parameters="--test --import tsx --import ./transform-test.js" path-to-js-file="$FilePath$" working-dir="$PROJECT_DIR$/packages/knip">
+    <method v="2" />
+  </configuration>
+</component>

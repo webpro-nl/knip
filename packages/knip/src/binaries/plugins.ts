@@ -71,8 +71,8 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
   return [
     toBinary(binary, inputOpts),
     ...positionals,
-    ...resolved.map(toDeferResolve),
-    ...resolvedImports.map(toDeferResolve),
+    ...resolved.map(id => toDeferResolve(id)),
+    ...resolvedImports.map(id => toDeferResolve(id)),
     ...resolvedFromArgs,
     ...configFilePaths,
   ];

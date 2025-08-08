@@ -51,7 +51,7 @@ export const analyze = async (options: AnalyzeOptions) => {
     unreferencedFiles,
   } = options;
 
-  const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
+  const isReportDependencies = report.dependencies || report.unlisted || report.unresolved || report.binaries;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;
@@ -111,7 +111,7 @@ export const analyze = async (options: AnalyzeOptions) => {
 
               if ((isReferenced || exportedItem.refs[1]) && isIgnored) {
                 for (const tagName of exportedItem.jsDocTags) {
-                  if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                  if (tags[1].includes(tagName.replace(/^@/, ''))) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                   }
                 }
@@ -162,7 +162,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                         if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                       } else if (isIgnored) {
                         for (const tagName of exportedItem.jsDocTags) {
-                          if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                          if (tags[1].includes(tagName.replace(/^@/, ''))) {
                             collector.addTagHint({ type: 'tag', filePath, identifier: id, tagName });
                           }
                         }
@@ -179,7 +179,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                     if (shouldIgnoreTags(member.jsDocTags)) {
                       const identifier = `${exportedItem.identifier}.${member.identifier}`;
                       for (const tagName of exportedItem.jsDocTags) {
-                        if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                        if (tags[1].includes(tagName.replace(/^@/, ''))) {
                           collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                         }
                       }

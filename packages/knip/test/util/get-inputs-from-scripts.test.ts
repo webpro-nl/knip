@@ -243,6 +243,10 @@ test('getInputsFromScripts (nodemon)', () => {
   t('nodemon ./script.js', [toBinary('nodemon')]);
 });
 
+test('getInputsFromScripts (concurrently)', () => {
+  t('concurrently "tsx watch s.ts" "tsx watch c.ts"', [toBinary('concurrently'), toBinary('tsx'), toDeferResolveEntry('s.ts', opt), toBinary('tsx'), toDeferResolveEntry('c.ts', opt)]);
+});
+
 test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toDeferResolveEntry('src/index.ts', opt)]);
 });

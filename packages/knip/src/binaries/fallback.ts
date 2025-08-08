@@ -14,11 +14,15 @@ const endOfCommandBinaries = ['dotenvx'];
 // Binaries with entry at first positional arg
 const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);
 
+// Binaries where each positional arg is a separate script
+const positionalBinaries = new Set(['concurrently']);
+
 export const resolve: BinaryResolver = (binary, args, { fromArgs }) => {
   const parsed = parseArgs(args, { boolean: ['quiet', 'verbose'], '--': endOfCommandBinaries.includes(binary) });
   const bin = binary.startsWith('.') ? toEntry(binary) : toBinary(binary);
   const shiftedArgs = spawningBinaries.includes(binary) ? fromArgs(args) : [];
   const pos = positionals.has(binary) ? [toDeferResolve(parsed._[0])] : [];
   const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
-  return compact([bin, ...shiftedArgs, ...pos, ...newCommand]);
+  const commands = positionalBinaries.has(binary) ? parsed._.flatMap(cmd => fromArgs([cmd])) : [];
+  return compact([bin, ...shiftedArgs, ...pos, ...newCommand, ...commands]);
 };

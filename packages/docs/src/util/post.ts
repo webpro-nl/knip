@@ -61,6 +61,7 @@ interface Post {
     text: string;
   };
   id: string;
+  url?: string;
   edit_history_tweet_ids: string[];
   created_at: string;
 }

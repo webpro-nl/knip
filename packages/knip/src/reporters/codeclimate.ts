@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type * as codeclimate from 'codeclimate-types';
-import type { Entries } from 'type-fest';
 import { ISSUE_TYPE_TITLE } from '../constants.js';
+import type { Entries } from '../types/entries.js';
 import type {
   Issue,
   IssueRecords,
@@ -12,7 +12,7 @@ import type {
   SymbolIssueType,
 } from '../types/issues.js';
 import { toRelative } from '../util/path.js';
-import { getIssueTypeTitle } from './util.js';
+import { getIssueTypeTitle } from './util/util.js';
 
 export default async ({ report, issues }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];

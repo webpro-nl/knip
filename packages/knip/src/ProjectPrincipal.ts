@@ -2,9 +2,9 @@ import ts from 'typescript';
 import { CacheConsultant } from './CacheConsultant.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, PUBLIC_TAG } from './constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, PUBLIC_TAG } from './constants.js';
 import type { GetImportsAndExportsOptions } from './types/config.js';
-import type { Export, ExportMember, FileNode, ModuleGraph, UnresolvedImport } from './types/module-graph.js';
+import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.js';
 import type { Paths, PrincipalOptions } from './types/project.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
 import { SourceFileManager } from './typescript/SourceFileManager.js';
@@ -13,8 +13,7 @@ import { _getImportsAndExports } from './typescript/get-imports-and-exports.js';
 import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
-import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from './util/modules.js';
-import { dirname, extname, isInNodeModules, join, toAbsolute } from './util/path.js';
+import { extname, isInNodeModules, toAbsolute } from './util/path.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
 // These compiler options override local options
@@ -79,6 +78,7 @@ export class ProjectPrincipal {
   };
 
   findReferences?: ts.LanguageService['findReferences'];
+  getImplementationAtPosition?: ts.LanguageService['getImplementationAtPosition'];
 
   constructor({
     compilerOptions,
@@ -235,13 +235,7 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(
-    filePath: string,
-    options: Omit<GetImportsAndExportsOptions, 'skipExports'>,
-    isGitIgnored: (filePath: string) => boolean,
-    isInternalWorkspace: (packageName: string) => boolean,
-    getPrincipalByFilePath: (filePath: string) => undefined | ProjectPrincipal
-  ) {
+  public analyzeSourceFile(filePath: string, options: Omit<GetImportsAndExportsOptions, 'skipExports'>) {
     const fd = this.cache.getFileDescriptor(filePath);
     if (!fd.changed && fd.meta?.data) return fd.meta.data;
 
@@ -258,51 +252,7 @@ export class ProjectPrincipal {
 
     const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
-    const { imports, ...rest } = _getImportsAndExports(sourceFile, resolve, typeChecker, { ...options, skipExports });
-
-    const { internal, resolved, specifiers, unresolved, external } = imports;
-
-    const unresolvedImports = new Set<UnresolvedImport>();
-
-    for (const [specifier, specifierFilePath] of specifiers) {
-      const packageName = getPackageNameFromModuleSpecifier(specifier);
-      if (packageName && isInternalWorkspace(packageName)) {
-        external.add(packageName);
-        const principal = getPrincipalByFilePath(specifierFilePath);
-        if (principal && !isGitIgnored(specifierFilePath)) principal.addNonEntryPath(specifierFilePath);
-      }
-    }
-
-    for (const filePath of resolved) {
-      const isIgnored = isGitIgnored(filePath);
-      if (!isIgnored) this.addEntryPath(filePath, { skipExportsAnalysis: true });
-    }
-
-    for (const unresolvedImport of unresolved) {
-      const { specifier } = unresolvedImport;
-
-      // Ignore Deno style http import specifiers
-      if (specifier.startsWith('http')) continue;
-
-      // All bets are off after failing to resolve module:
-      // - either add to external dependencies if it quacks like that so it'll end up as unused or unlisted dependency
-      // - or maintain unresolved status if not ignored and not foreign
-      const sanitizedSpecifier = sanitizeSpecifier(specifier);
-      if (isStartsLikePackageName(sanitizedSpecifier)) {
-        external.add(sanitizedSpecifier);
-      } else {
-        const isIgnored = isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
-        if (!isIgnored) {
-          const ext = extname(sanitizedSpecifier);
-          const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);
-          if (!ext || (ext !== '.json' && !hasIgnoredExtension)) {
-            unresolvedImports.add(unresolvedImport);
-          }
-        }
-      }
-    }
-
-    return { imports: { internal, unresolved: unresolvedImports, external }, ...rest };
+    return _getImportsAndExports(sourceFile, resolve, typeChecker, { ...options, skipExports });
   }
 
   invalidateFile(filePath: string) {
@@ -311,14 +261,30 @@ export class ProjectPrincipal {
   }
 
   public findUnusedMembers(filePath: string, members: ExportMember[]) {
-    if (!this.findReferences) {
+    if (!this.findReferences || !this.getImplementationAtPosition) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
       this.findReferences = timerify(languageService.findReferences);
+      this.getImplementationAtPosition = timerify(languageService.getImplementationAtPosition);
     }
 
     return members.filter(member => {
       if (member.jsDocTags.has(PUBLIC_TAG)) return false;
-      const referencedSymbols = this.findReferences?.(filePath, member.pos) ?? [];
+      const implementations =
+        this.getImplementationAtPosition?.(filePath, member.pos)?.filter(
+          impl => impl.fileName !== filePath || impl.textSpan.start !== member.pos
+        ) ?? [];
+
+      const referencedSymbols =
+        this.findReferences?.(filePath, member.pos)?.filter(
+          sym =>
+            !implementations.some(
+              impl =>
+                impl.fileName === sym.definition.fileName &&
+                impl.textSpan.start === sym.definition.textSpan.start &&
+                impl.textSpan.length === sym.definition.textSpan.length
+            )
+        ) ?? [];
+
       const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
       return refs.length === 0;
     });
@@ -327,9 +293,10 @@ export class ProjectPrincipal {
   public hasExternalReferences(filePath: string, exportedItem: Export) {
     if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
 
-    if (!this.findReferences) {
+    if (!this.findReferences || !this.getImplementationAtPosition) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
       this.findReferences = timerify(languageService.findReferences);
+      this.getImplementationAtPosition = timerify(languageService.getImplementationAtPosition);
     }
 
     const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
