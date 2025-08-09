@@ -1,5 +1,6 @@
 import { watch } from 'node:fs';
 import { formatly } from 'formatly';
+import { CatalogCounselor } from './CatalogCounselor.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
@@ -66,6 +67,8 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   await chief.init();
 
+  const counselor = new CatalogCounselor(chief.manifestCatalog);
+
   const workspaces = chief.getWorkspaces();
   const report = chief.getIncludedIssueTypes({
     includedIssueTypes,
@@ -96,6 +99,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     cacheLocation,
     chief,
     collector,
+    counselor,
     cwd,
     deputy,
     factory,
@@ -118,6 +122,7 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
 
   const reAnalyze = await analyze({
     analyzedFiles,
+    counselor,
     chief,
     collector,
     deputy,

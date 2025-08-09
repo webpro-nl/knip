@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/catalog-pnpm",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

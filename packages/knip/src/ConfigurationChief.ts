@@ -16,7 +16,7 @@ import type {
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { ConfigurationHints } from './types/issues.js';
-import type { PackageJson, WorkspacePackage } from './types/package-json.js';
+import type { Catalog, Catalogs, PackageJson, WorkspacePackage } from './types/package-json.js';
 import { arrayify, compact, partition } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
 import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
@@ -98,6 +98,8 @@ export type Workspace = {
   outDir?: string;
 };
 
+export type ManifestCatalog = { filePath: string; catalog?: Catalog; catalogs?: Catalogs };
+
 /**
  * - Loads package.json
  * - Loads knip.json/jsonc
@@ -116,6 +118,7 @@ export class ConfigurationChief {
 
   manifestPath?: string;
   manifest?: PackageJson;
+  manifestCatalog?: ManifestCatalog;
 
   ignoredWorkspacePatterns: string[] = [];
   workspacePackages = new Map<string, WorkspacePackage>();
@@ -160,6 +163,8 @@ export class ConfigurationChief {
       this.manifest.workspaces = pnpmWorkspaces;
     }
 
+    this.setCatalog(pnpmWorkspacesPath);
+
     for (const configPath of rawConfigArg ? [rawConfigArg] : KNIP_CONFIG_LOCATIONS) {
       this.resolvedConfigFilePath = isAbsolute(configPath) ? configPath : findFile(this.cwd, configPath);
       if (this.resolvedConfigFilePath) break;
@@ -179,6 +184,17 @@ export class ConfigurationChief {
     this.config = this.normalize(this.parsedConfig);
 
     await this.setWorkspaces();
+  }
+
+  private setCatalog(pnpmWorkspacesPath?: string) {
+    const filePath = pnpmWorkspacesPath ?? this.manifestPath ?? '';
+    const catalog =
+      this.manifest?.catalog ??
+      ((!Array.isArray(this.manifest?.workspaces) && this.manifest?.workspaces?.catalog) || {});
+    const catalogs =
+      this.manifest?.catalogs ??
+      ((!Array.isArray(this.manifest?.workspaces) && this.manifest?.workspaces?.catalogs) || {});
+    this.manifestCatalog = { filePath, catalog, catalogs };
   }
 
   public getConfigurationHints() {

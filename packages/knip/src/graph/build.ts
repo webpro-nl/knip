@@ -13,6 +13,7 @@ import type { Tags } from '../types/cli.js';
 import type { Report } from '../types/issues.js';
 import type { ModuleGraph, UnresolvedImport } from '../types/module-graph.js';
 import { perfObserver } from '../util/Performance.js';
+
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
 import { _glob, negate } from '../util/glob.js';
@@ -39,6 +40,7 @@ interface BuildOptions {
   cacheLocation: string;
   chief: ConfigurationChief;
   collector: IssueCollector;
+  counselor: import('../CatalogCounselor.js').CatalogCounselor;
   cwd: string;
   deputy: DependencyDeputy;
   factory: PrincipalFactory;
@@ -63,6 +65,7 @@ export async function build({
   cacheLocation,
   chief,
   collector,
+  counselor,
   cwd,
   deputy,
   factory,
@@ -97,7 +100,10 @@ export async function build({
     const { name, dir, manifestPath, manifestStr } = workspace;
     const manifest = chief.getManifestForWorkspace(name);
     if (!manifest) continue;
+
     deputy.addWorkspace({ name, cwd, dir, manifestPath, manifestStr, manifest, ...chief.getIgnores(name) });
+
+    counselor.addWorkspace(manifest);
   }
 
   for (const workspace of workspaces) {
