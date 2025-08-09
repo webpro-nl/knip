@@ -1,8 +1,9 @@
 import { existsSync } from 'node:fs';
 import os from 'node:os';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
+import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
+import { _glob } from '../../util/glob.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import vite from '../vite/index.js';
 import type { PluginConfig, RouteConfigEntry } from './types.js';
@@ -49,14 +50,32 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     // See:
     //  - https://reactrouter.com/how-to/file-route-conventions#optional-segments
     //  - https://www.npmjs.com/package/fast-glob#advanced-syntax
-    .map(route => (isWindows ? route : route.replace(/[$^*+?()\[\]]/g, '\\$&')));
+    .map(route => (isWindows ? route : route.replace(/[\^*+?()\[\]]/g, '\\$&')));
 
-  return [
-    join(appDir, 'routes.{js,ts}'),
-    join(appDir, 'root.{jsx,tsx}'),
-    join(appDir, 'entry.{client,server}.{js,jsx,ts,tsx}'),
-    ...routes,
-  ].map(id => toEntry(id));
+  const resolved = [
+    // routes.{ts,js} is only used as input to the bundler build system
+    toEntry(join(appDir, 'routes.{js,ts}')),
+    // routes and entries are part of the actual build
+    toProductionEntry(join(appDir, 'root.{jsx,tsx}')),
+    toProductionEntry(join(appDir, 'entry.{client,server}.{js,jsx,ts,tsx}')),
+    ...routes.map(id => toProductionEntry(id)),
+  ];
+
+  const serverEntries = await _glob({
+    cwd: appDir,
+    patterns: ['entry.server.{js,ts,jsx,tsx}'],
+  });
+
+  // If there are no server entries, then we need to add these as implicit
+  // production dependencies, as @react-router/dev will add the
+  // default entry.server.tsx automatically which depends on these.
+  // See: https://github.com/remix-run/react-router/blob/dev/packages/react-router-dev/config/defaults/entry.server.node.tsx
+  if (serverEntries.length === 0) {
+    resolved.push(toProductionDependency('@react-router/node'));
+    resolved.push(toProductionDependency('isbot'));
+  }
+
+  return resolved;
 };
 
 export default {
