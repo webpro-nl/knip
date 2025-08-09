@@ -26,7 +26,7 @@ test('Find dependencies with the react-router plugin', async () => {
 });
 
 test('Find dependencies with the react-router plugin [with entries]', async () => {
-  const cwd = resolve('fixtures/plugins/react-router-with-entries');
+  const cwd = resolve('fixtures/plugins/react-router-with-server-entry');
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -34,10 +34,7 @@ test('Find dependencies with the react-router plugin [with entries]', async () =
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 11,
-    total: 11,
-    // There is a bug with routes that include () on Windows so they will not be found there, revert when
-    // the bug is fixed
-    files: isWindows ? 1 : 0,
+    processed: 5,
+    total: 5,
   });
 });
