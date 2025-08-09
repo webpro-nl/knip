@@ -7,7 +7,7 @@ import baseCounters from './helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/skip-exports-analysis');
 
-test('Skip exports analysis', async () => {
+test('ignore exports', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -30,7 +30,7 @@ test('Skip exports analysis', async () => {
   });
 });
 
-test('Skip exports analysis (isIncludeEntryExports)', async () => {
+test('ignore exports (isIncludeEntryExports)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -59,7 +59,7 @@ test('Skip exports analysis (isIncludeEntryExports)', async () => {
   });
 });
 
-test('Skip exports analysis (production)', async () => {
+test('ignore exports (production)', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,

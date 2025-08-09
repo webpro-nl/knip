@@ -245,7 +245,7 @@ export async function build({
       }
 
       {
-        const label = 'production entry paths from plugins (skip exports analysis)';
+        const label = 'production entry paths from plugins (ignore exports)';
         const patterns = Array.from(productionPatternsSkipExports);
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
@@ -266,7 +266,7 @@ export async function build({
       }
     } else {
       {
-        const label = 'entry paths from plugins (skip exports analysis)';
+        const label = 'entry paths from plugins (ignore exports)';
         const patterns = worker.getPluginEntryFilePatterns([
           ...entryPatternsSkipExports,
           ...productionPatternsSkipExports,
@@ -301,7 +301,7 @@ export async function build({
       }
 
       {
-        const label = 'plugin configuration paths (skip exports analysis)';
+        const label = 'plugin configuration paths (ignore exports)';
         const patterns = worker.getPluginConfigPatterns();
         const configurationEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(configurationEntryPaths, { skipExportsAnalysis: true });
