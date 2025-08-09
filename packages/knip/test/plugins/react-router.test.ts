@@ -25,7 +25,7 @@ test('Find dependencies with the react-router plugin', async () => {
   });
 });
 
-test('Find dependencies with the react-router plugin [with entries]', async () => {
+test('Find dependencies with the react-router plugin [with custom server entry]', async () => {
   const cwd = resolve('fixtures/plugins/react-router-with-server-entry');
   const { counters } = await main({
     ...baseArguments,
