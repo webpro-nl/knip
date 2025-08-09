@@ -215,7 +215,7 @@ export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isArrayLiteralExpression(node.parent) ||
   ts.isExportAssignment(node.parent) ||
   (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
-  ts.isTypeQueryNode(node.parent);
+  ts.isTypeQueryNode(node.parent.parent);
 
 const objectEnumerationMethods = new Set(['keys', 'entries', 'values', 'getOwnPropertyNames']);
 export const isObjectEnumerationCallExpressionArgument = (node: ts.Identifier) =>
