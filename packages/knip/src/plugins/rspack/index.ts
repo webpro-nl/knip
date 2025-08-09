@@ -11,7 +11,7 @@ const enablers = ['@rspack/core'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['rspack.config*.{js,ts,mjs,cjs}'];
+const config = ['rspack.config*.{js,ts,mjs,mts,cjs,cts}'];
 
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
   const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
