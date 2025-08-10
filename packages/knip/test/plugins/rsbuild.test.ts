@@ -13,12 +13,10 @@ test('Find dependencies with the rsbuild plugin', async () => {
     cwd,
   });
 
-  // console.log(issues);
-
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });
