@@ -10,6 +10,8 @@ body:
         Use common sense and provide the necessary information that helps me or others to help you.
 
         A minimal reproduction is mandatory: only the code and configuration required to demonstrate the issue.
+
+        Issues that do not meet these requirements may be closed without further investigation.
   - type: checkboxes
     attributes:
       label: Prerequisites
