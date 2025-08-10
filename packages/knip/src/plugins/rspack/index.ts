@@ -3,7 +3,7 @@ import { hasDependency } from '../../util/plugin.js';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
 import type { WebpackConfig } from '../webpack/types.js';
 
-// https://www.rspack.dev/config
+// https://rspack.rs/config/
 
 const title = 'Rspack';
 

@@ -591,6 +591,10 @@
           "title": "rsbuild plugin configuration (https://knip.dev/reference/plugins/rsbuild)",
           "$ref": "#/definitions/plugin"
         },
+        "rslib": {
+          "title": "rslib plugin configuration (https://knip.dev/reference/plugins/rslib)",
+          "$ref": "#/definitions/plugin"
+        },
         "rspack": {
           "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
           "$ref": "#/definitions/plugin"

@@ -74,6 +74,7 @@ export type PluginName =
   | 'remix'
   | 'rollup'
   | 'rsbuild'
+  | 'rslib'
   | 'rspack'
   | 'semantic-release'
   | 'sentry'
@@ -185,6 +186,7 @@ export const pluginNames = [
   'remix',
   'rollup',
   'rsbuild',
+  'rslib',
   'rspack',
   'semantic-release',
   'sentry',
