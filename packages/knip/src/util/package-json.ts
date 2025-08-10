@@ -56,21 +56,18 @@ export const save = async (filePath: string, content: ExtendedPackageJson) => {
   await writeFile(filePath, fileContent);
 };
 
-export const getEntryPathsFromManifest = (manifest: PackageJson) => {
+export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   const { main, module, browser, bin, exports, types, typings } = manifest;
 
   const entryPaths = new Set<string>();
 
   if (typeof main === 'string') entryPaths.add(main);
-
   if (typeof module === 'string') entryPaths.add(module);
-
   if (typeof browser === 'string') entryPaths.add(browser);
-
-  if (bin) {
-    if (typeof bin === 'string') entryPaths.add(bin);
-    if (typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
-  }
+  if (typeof bin === 'string') entryPaths.add(bin);
+  if (bin && typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
+  if (typeof types === 'string') entryPaths.add(types);
+  if (typeof typings === 'string') entryPaths.add(typings);
 
   if (exports) {
     for (const item of getEntriesFromExports(exports)) {
@@ -82,9 +79,6 @@ export const getEntryPathsFromManifest = (manifest: PackageJson) => {
       entryPaths.add(expanded);
     }
   }
-
-  if (typeof types === 'string') entryPaths.add(types);
-  if (typeof typings === 'string') entryPaths.add(typings);
 
   return entryPaths;
 };

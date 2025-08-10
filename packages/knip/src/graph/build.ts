@@ -31,7 +31,7 @@ import {
 import { loadTSConfig } from '../util/load-tsconfig.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { getEntryPathsFromManifest, getManifestImportDependencies } from '../util/package-json.js';
+import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.js';
 import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
 import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 
@@ -156,8 +156,8 @@ export async function build({
     collector.addIgnorePatterns(ignore.map(pattern => join(cwd, pattern)));
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
-    const entryPathsFromManifest = getEntryPathsFromManifest(manifest);
-    for (const filePath of await toSourceFilePaths(entryPathsFromManifest, dir, extensionGlobStr)) {
+    const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
+    for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr)) {
       inputs.add(toProductionEntry(filePath));
     }
 
