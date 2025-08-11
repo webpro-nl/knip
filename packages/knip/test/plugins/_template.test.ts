@@ -14,9 +14,6 @@ test('Find dependencies with the __PLUGIN_NAME__ plugin', async () => {
     cwd,
   });
 
-  // TODO: Remove the console.log() before submitting a PR.
-  // console.log(issues);
-
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 0,

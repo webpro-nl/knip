@@ -87,6 +87,7 @@ export const pluginsSchema = z.object({
   remix: pluginSchema,
   rollup: pluginSchema,
   rsbuild: pluginSchema,
+  rslib: pluginSchema,
   rspack: pluginSchema,
   'semantic-release': pluginSchema,
   sentry: pluginSchema,

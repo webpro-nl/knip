@@ -8,9 +8,8 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const isWindows = os.platform() === 'win32';
 
-const cwd = resolve('fixtures/plugins/react-router');
-
 test('Find dependencies with the react-router plugin', async () => {
+  const cwd = resolve('fixtures/plugins/react-router');
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -23,5 +22,19 @@ test('Find dependencies with the react-router plugin', async () => {
     // There is a bug with routes that include () on Windows so they will not be found there, revert when
     // the bug is fixed
     files: isWindows ? 1 : 0,
+  });
+});
+
+test('Find dependencies with the react-router plugin [with custom server entry]', async () => {
+  const cwd = resolve('fixtures/plugins/react-router-with-server-entry');
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+  });
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 5,
+    total: 5,
   });
 });

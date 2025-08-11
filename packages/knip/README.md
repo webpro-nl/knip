@@ -20,29 +20,28 @@ performance, less maintenance and easier refactorings.
 - Website: [knip.dev][6]
 - GitHub repo: [webpro-nl/knip][4]
 - npm package: [knip][1]
-- [Discord][7]
-- [Contributing Guide][8]
-- [Sponsor Knip!][9]
+- [Contributing Guide][7]
+- [Sponsor Knip!][8]
 
 ## Contributors
 
-Special thanks to [the wonderful people who have contributed to Knip][10]!
+Special thanks to [the wonderful people who have contributed to Knip][9]!
 
 ## Knip
 
-/'knɪp/ means "(to) cut" and is [pronounced with a hard "K"][11] 🇳🇱
+/'knɪp/ means "(to) cut" and is [pronounced with a hard "K"][10] 🇳🇱
 
 ## License
 
-Knip is free and open-source software licensed under the [ISC License][12].
+Knip is free and open-source software licensed under the [ISC License][11].
 
 Parts of Knip have been inspired by and/or partially copy code from the
 following projects:
 
-- [@npmcli/package-json][17] ([ISC][18])
-- [@pnpm/deps.graph-sequencer][15] ([MIT][16])
-- [file-entry-cache][13] ([MIT][14])
-- [json-parse-even-better-errors][19] ([MIT][20])
+- [@npmcli/package-json][12] ([ISC][13])
+- [@pnpm/deps.graph-sequencer][14] ([MIT][15])
+- [file-entry-cache][16] ([MIT][17])
+- [json-parse-even-better-errors][18] ([MIT][19])
 
 [1]: https://www.npmjs.com/package/knip
 [2]: https://img.shields.io/npm/v/knip?color=f56e0f
@@ -51,18 +50,17 @@ following projects:
 [5]:
   https://img.shields.io/github/stars/webpro-nl/knip?style=flat-square&color=f56e0f
 [6]: https://knip.dev
-[7]: https://discord.gg/r5uXTtbTpc
-[8]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
-[9]: https://knip.dev/sponsors
-[10]: https://knip.dev/#created-by-awesome-contributors
-[11]: https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s
-[12]: ./license
-[13]: https://github.com/jaredwray/cacheable/tree/main/packages/file-entry-cache
-[14]:
+[7]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
+[8]: https://knip.dev/sponsors
+[9]: https://knip.dev/#created-by-awesome-contributors
+[10]: https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s
+[11]: ./license
+[12]: https://github.com/npm/package-json
+[13]: https://github.com/npm/package-json/blob/main/LICENSE
+[14]: https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer
+[15]: https://github.com/pnpm/pnpm/blob/main/LICENSE
+[16]: https://github.com/jaredwray/cacheable/tree/main/packages/file-entry-cache
+[17]:
   https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
-[15]: https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer
-[16]: https://github.com/pnpm/pnpm/blob/main/LICENSE
-[17]: https://github.com/npm/package-json
-[18]: https://github.com/npm/package-json/blob/main/LICENSE
-[19]: https://github.com/npm/json-parse-even-better-errors
-[20]: https://github.com/npm/json-parse-even-better-errors/blob/main/LICENSE.md
+[18]: https://github.com/npm/json-parse-even-better-errors
+[19]: https://github.com/npm/json-parse-even-better-errors/blob/main/LICENSE.md

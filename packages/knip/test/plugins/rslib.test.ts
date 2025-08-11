@@ -5,18 +5,18 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/plugins/rsbuild');
+const cwd = resolve('fixtures/plugins/rslib');
 
-test('Find dependencies with the rsbuild plugin', async () => {
-  const { counters } = await main({
+test('Find dependencies with the rslib plugin', async () => {
+  // Ideally, plugin tests have no `issues` left and only `total` and `processed` values in `counters`
+  const { /* issues, */ counters } = await main({
     ...baseArguments,
     cwd,
   });
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
-    processed: 2,
-    total: 2,
+    processed: 0,
+    total: 0,
   });
 });

@@ -5,9 +5,9 @@ import { resolve } from '../../src/util/path.js';
 import baseArguments from '../helpers/baseArguments.js';
 import baseCounters from '../helpers/baseCounters.js';
 
-const cwd = resolve('fixtures/plugins/rsbuild');
+const cwd = resolve('fixtures/plugins/tailwind2');
 
-test('Find dependencies with the rsbuild plugin', async () => {
+test('Find dependencies with the Tailwind plugin (2)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
@@ -15,8 +15,7 @@ test('Find dependencies with the rsbuild plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
