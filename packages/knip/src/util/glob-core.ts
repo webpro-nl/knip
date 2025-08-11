@@ -5,7 +5,7 @@ import fg, { type Options as FastGlobOptions } from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { timerify } from './Performance.js';
-import { compact } from './array.js';
+import { compact, partition } from './array.js';
 import { debugLogObject } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
 import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
@@ -152,14 +152,15 @@ export const findAndParseGitignores = async (cwd: string) => {
 
 const _parseFindGitignores = timerify(findAndParseGitignores);
 
-export async function glob(patterns: string | string[], options: GlobOptions): Promise<string[]> {
-  if (Array.isArray(patterns) && patterns.length === 0) return [];
+export async function glob(_patterns: string[], options: GlobOptions): Promise<string[]> {
+  if (Array.isArray(_patterns) && _patterns.length === 0) return [];
 
   const hasCache = cachedGlobIgnores.has(options.dir);
   const willCache = !hasCache && options.gitignore && options.label;
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
-  const _ignore = options.gitignore && Array.isArray(options.ignore) ? [...options.ignore] : [];
+  const _ignore = [];
+  const [negatedPatterns, patterns] = partition(_patterns, pattern => pattern.startsWith('!'));
 
   if (options.gitignore) {
     if (willCache) {
@@ -180,11 +181,11 @@ export async function glob(patterns: string | string[], options: GlobOptions): P
     _ignore.push(...GLOBAL_IGNORE_PATTERNS);
   }
 
-  const ignore = cachedIgnores || compact(_ignore);
-
   if (willCache) cachedGlobIgnores.set(options.dir, compact(_ignore));
 
-  const { dir, label, ...fgOptions } = { ...options, ignore };
+  const ignorePatterns = (cachedIgnores || _ignore).concat(negatedPatterns);
+
+  const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns };
 
   const paths = await fg.glob(patterns, fgOptions);
 
@@ -193,7 +194,7 @@ export async function glob(patterns: string | string[], options: GlobOptions): P
   debugLogObject(name, label ? `Finding ${label}` : 'Finding paths', () => ({
     patterns,
     ...fgOptions,
-    ignore: hasCache ? `// using cache from ${name}` : ignore,
+    ignore: hasCache ? `// using cache from ${name}` : ignorePatterns,
     paths,
   }));
 
