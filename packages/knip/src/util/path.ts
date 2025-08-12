@@ -19,7 +19,7 @@ export const toPosix = (value: string) => value.split(path.sep).join(path.posix.
 export const cwd = directory ? path.posix.resolve(directory) : toPosix(process.cwd());
 
 export const resolve = (...paths: string[]) =>
-  paths.length === 1 && !isAbsolute(paths[0]) ? path.posix.join(cwd, paths[0]) : path.posix.resolve(...paths);
+  paths.length === 1 ? path.posix.join(cwd, paths[0]) : path.posix.resolve(...paths);
 
 export const relative = (from: string, to?: string) => toPosix(path.relative(to ? from : cwd, to ?? from));
 
