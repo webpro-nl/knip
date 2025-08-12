@@ -4,10 +4,10 @@ import { type Issue, type IssueSeverity, type IssueSymbol, SymbolType } from '..
 import { relative } from '../../util/path.js';
 import { Table } from '../../util/table.js';
 
-export const plain = (text: string) => text;
+const plain = (text: string) => text;
 export const dim = picocolors.gray;
 export const bright = picocolors.whiteBright;
-export const yellow = picocolors.yellow;
+const yellow = picocolors.yellow;
 
 export const getIssueTypeTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => ISSUE_TYPE_TITLE[reportType];
 

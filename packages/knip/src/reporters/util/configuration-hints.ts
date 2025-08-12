@@ -127,7 +127,7 @@ export const printConfigurationHints = ({
       })
     );
 
-    console.log(getTableForHints(rows).toString());
+    console.warn(getTableForHints(rows).toString());
   }
 
   if (tagHints.size > 0) {
