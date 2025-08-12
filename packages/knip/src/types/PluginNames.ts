@@ -51,6 +51,7 @@ export type PluginName =
   | 'netlify'
   | 'next'
   | 'node'
+  | 'node-modules-inspector'
   | 'nodemon'
   | 'npm-package-json-lint'
   | 'nuxt'
@@ -163,6 +164,7 @@ export const pluginNames = [
   'netlify',
   'next',
   'node',
+  'node-modules-inspector',
   'nodemon',
   'npm-package-json-lint',
   'nuxt',
