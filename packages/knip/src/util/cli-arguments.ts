@@ -32,6 +32,7 @@ Options:
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
   --reporter               Select reporter: symbols, compact, codeowners, json, codeclimate, markdown, disclosure, can be repeated (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
+  --lsp                    Run Knip as a Language Server Protocol server
   --tags                   Include or exclude tagged exports
   --no-config-hints        Suppress configuration hints
   --treat-config-hints-as-errors    Exit with non-zero code (1) if there are any configuration hints
@@ -88,6 +89,7 @@ try {
       'include-libs': { type: 'boolean' },
       'include-entry-exports': { type: 'boolean' },
       'isolate-workspaces': { type: 'boolean' },
+      lsp: { type: 'boolean' },
       'max-issues': { type: 'string' },
       memory: { type: 'boolean' },
       'memory-realtime': { type: 'boolean' },

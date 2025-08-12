@@ -423,6 +423,29 @@ knip --preprocessor preprocessor-package
 
 ### `--preprocessor-options [json]`
 
+Pass extra options to the preprocessor (as JSON string).
+
+## Language Server Protocol (LSP)
+
+### `--lsp`
+
+Start Knip as a Language Server Protocol server. This enables real-time
+integration with LSP-compatible editors like VS Code, Neovim, Zed, and Emacs.
+
+```sh
+knip --lsp
+```
+
+The LSP server provides:
+- Real-time diagnostics as you code
+- Code actions for quick fixes
+- Automatic re-analysis when files change
+- Support for workspace folders
+
+See [Language Server Protocol][19] for detailed setup instructions.
+
+### `--preprocessor-options [json]`
+
 Pass extra options to the preprocessor as JSON string.
 
 ```sh
@@ -475,3 +498,4 @@ Exit with non-zero code (`1`) if there are any configuration hints.
 [16]: ./issue-types.md
 [17]: #--tags
 [18]: ../features/reporters.md
+[19]: ../features/language-server-protocol.md
