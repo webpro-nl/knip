@@ -21,10 +21,6 @@
     {
       "type": "opencollective",
       "url": "https://opencollective.com/knip"
-    },
-    {
-      "type": "polar",
-      "url": "https://polar.sh/webpro-nl"
     }
   ],
   "bin": "index.js",
