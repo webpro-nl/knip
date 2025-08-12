@@ -1,35 +1,53 @@
 import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.js';
-import { toRelative } from '../../util/path.js';
+import { relative, toRelative } from '../../util/path.js';
+import { Table } from '../../util/table.js';
 import { byPathDepth } from '../../util/workspace.js';
-import { bright, dim, getColoredTitle, getDimmedTitle, plain, yellow } from './util.js';
+import { bright, dim, getColoredTitle, getDimmedTitle } from './util.js';
 
 interface PrintHintOptions {
   type: ConfigurationHintType;
   identifier: string | RegExp;
-  isRootOnly: boolean;
+  filePath?: string;
+  configFilePath?: string;
   workspaceName?: string;
   size?: number;
 }
 
-const id = (id: string | RegExp) => bright(id.toString() + (id === '.' ? ' (root)' : ''));
-const type = (id: ConfigurationHintType) => yellow(id.split('-').at(0));
-const workspace = ({ isRootOnly, workspaceName: id }: PrintHintOptions) =>
-  isRootOnly ? '' : id === '.' ? ` in root ${yellow('"."')} workspace` : ` in ${yellow(id ?? '.')}`;
+type TableRow = ConfigurationHint & { message: string };
 
-const unused = (options: PrintHintOptions) =>
-  `Remove from ${type(options.type)}${options.workspaceName === '.' ? '' : `${workspace(options)}`}: ${id(options.identifier)}`;
+const getWorkspaceName = (hint: ConfigurationHint) =>
+  hint.workspaceName &&
+  hint.workspaceName !== '.' &&
+  hint.type !== 'workspace-unconfigured' &&
+  hint.type !== 'package-entry'
+    ? hint.workspaceName
+    : '';
 
-const empty = (options: PrintHintOptions) =>
-  `Refine ${type(options.type)}${workspace(options)}: ${id(options.identifier)} (no files found)`;
+const getTableForHints = (hints: TableRow[]) => {
+  const table = new Table({ truncateStart: ['identifier', 'workspace'] });
+  for (const hint of hints) {
+    table.row();
+    table.cell('identifier', hint.identifier.toString());
+    table.cell('workspace', getWorkspaceName(hint));
+    table.cell('filePath', hint.filePath ? relative(hint.filePath) : '');
+    table.cell('description', dim(hint.message));
+  }
+  return table;
+};
 
-const remove = (options: PrintHintOptions) =>
-  `Remove ${type(options.type)}${workspace(options)}: ${id(options.identifier)}`;
+const type = (id: ConfigurationHintType) => bright(id.split('-').at(0));
 
-const add = (options: PrintHintOptions) =>
-  `Add to or refine in ${yellow('workspaces')}: ${id(options.identifier)} (${options.size} unused files)`;
-
+const unused = (options: PrintHintOptions) => `Remove from ${type(options.type)}`;
+const empty = (options: PrintHintOptions) => `Refine ${type(options.type)} pattern (no matches)`;
+const remove = (options: PrintHintOptions) => `Remove redundant ${type(options.type)} pattern`;
 const topLevel = (options: PrintHintOptions) =>
-  `Remove or move unused top-level ${type(options.type)} to one of ${yellow('workspaces')}: ${id(options.identifier)}`;
+  `Remove, or move unused top-level ${type(options.type)} to one of ${bright('"workspaces"')}`;
+const add = (options: PrintHintOptions) =>
+  options.configFilePath
+    ? `Add ${bright('entry')} and/or refine ${bright('project')} files in ${bright(`workspaces["${options.workspaceName}"]`)} (${options.size} unused files)`
+    : `Create ${bright('knip.json')} configuration file with ${bright(`workspaces["${options.workspaceName}"]`)} object (${options.size} unused files)`;
+
+const packageEntry = () => 'Package entry file not found';
 
 const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignoreBinaries', { print: unused }],
@@ -43,7 +61,19 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
   ['workspace-unconfigured', { print: add }],
   ['entry-top-level', { print: topLevel }],
   ['project-top-level', { print: topLevel }],
+  ['package-entry', { print: packageEntry }],
 ]);
+
+const hintTypesOrder: ConfigurationHintType[][] = [
+  ['workspace-unconfigured'],
+  ['entry-top-level', 'project-top-level'],
+  ['ignoreWorkspaces'],
+  ['ignoreDependencies'],
+  ['ignoreBinaries'],
+  ['ignoreUnresolved'],
+  ['entry-empty', 'project-empty', 'entry-redundant', 'project-redundant'],
+  ['package-entry'],
+];
 
 export const printConfigurationHints = ({
   counters,
@@ -52,6 +82,7 @@ export const printConfigurationHints = ({
   configurationHints,
   isTreatConfigHintsAsErrors,
   includedWorkspaces,
+  configFilePath,
 }: ReporterOptions) => {
   if (counters.files > 20) {
     const workspaces = includedWorkspaces
@@ -74,20 +105,29 @@ export const printConfigurationHints = ({
   }
 
   if (configurationHints.size > 0) {
-    const isTopLevel = (type: ConfigurationHintType) => type.includes('top-level');
-    const hintOrderer = (a: ConfigurationHint, b: ConfigurationHint) =>
-      isTopLevel(a.type) && !isTopLevel(b.type) ? -1 : !isTopLevel(a.type) && isTopLevel(b.type) ? 1 : 0;
-
     const getTitle = isTreatConfigHintsAsErrors ? getColoredTitle : getDimmedTitle;
-    const style = isTreatConfigHintsAsErrors ? plain : dim;
 
     console.log(getTitle('Configuration hints', configurationHints.size));
 
-    const isRootOnly = includedWorkspaces.length === 1 && includedWorkspaces[0].name === '.';
-    for (const hint of Array.from(configurationHints).sort(hintOrderer)) {
-      const hintPrinter = hintPrinters.get(hint.type);
-      if (hintPrinter) console.warn(style(hintPrinter.print({ ...hint, isRootOnly })));
+    const hintsByType = new Map<ConfigurationHintType, ConfigurationHint[]>();
+    for (const hint of configurationHints) {
+      const hints = hintsByType.get(hint.type) ?? [];
+      hintsByType.set(hint.type, [...hints, hint]);
     }
+
+    const rows: TableRow[] = hintTypesOrder.flatMap(hintTypes =>
+      hintTypes.flatMap(hintType => {
+        const hints = hintsByType.get(hintType) ?? [];
+        return hints.map(hint => {
+          hint.filePath ??= configFilePath;
+          const hintPrinter = hintPrinters.get(hint.type);
+          const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath }) : '';
+          return { ...hint, message };
+        });
+      })
+    );
+
+    console.log(getTableForHints(rows).toString());
   }
 
   if (tagHints.size > 0) {

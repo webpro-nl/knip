@@ -173,6 +173,8 @@ export class ConfigurationChief {
       ? await this.loadResolvedConfigurationFile(this.resolvedConfigFilePath)
       : manifest.knip;
 
+    if (manifest.knip) this.resolvedConfigFilePath = manifestPath;
+
     // Have to partition compiler functions before Zod touches them
     this.parsedConfig = this.rawConfig ? knipConfigurationSchema.parse(partitionCompilers(this.rawConfig)) : {};
 

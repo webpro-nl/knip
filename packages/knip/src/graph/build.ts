@@ -15,7 +15,7 @@ import type { ModuleGraph, UnresolvedImport } from '../types/module-graph.js';
 import { perfObserver } from '../util/Performance.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
-import { _glob, negate } from '../util/glob.js';
+import { _glob, _syncGlob, negate } from '../util/glob.js';
 import {
   type Input,
   isAlias,
@@ -101,7 +101,7 @@ export async function build({
   }
 
   for (const workspace of workspaces) {
-    const { name, dir, ancestors, pkgName } = workspace;
+    const { name, dir, ancestors, pkgName, manifestPath: filePath } = workspace;
 
     streamer.cast('Analyzing workspace', name);
 
@@ -159,6 +159,16 @@ export async function build({
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
     for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr)) {
       inputs.add(toProductionEntry(filePath));
+    }
+
+    // Add configuration hints for missing package.json#main|exports|etc. targets (that aren't git-ignored)
+    for (const identifier of entrySpecifiersFromManifest) {
+      if (!identifier.startsWith('!') && !isGitIgnored(join(dir, identifier))) {
+        const files = _syncGlob({ patterns: [identifier], cwd: dir });
+        if (files.length === 0) {
+          collector.addConfigurationHint({ type: 'package-entry', filePath, identifier, workspaceName: name });
+        }
+      }
     }
 
     // Consider dependencies in package.json#imports used

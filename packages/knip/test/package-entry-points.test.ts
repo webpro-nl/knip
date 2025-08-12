@@ -8,7 +8,7 @@ import baseCounters from './helpers/baseCounters.js';
 const cwd = resolve('fixtures/package-entry-points');
 
 test('Resolve package entry points to source files', async () => {
-  const { issues, counters } = await main({
+  const { issues, counters, configurationHints } = await main({
     ...baseArguments,
     cwd,
   });
@@ -16,6 +16,15 @@ test('Resolve package entry points to source files', async () => {
   assert(issues.exports['feature/internal/system/used.ts'].unused);
   assert(issues.files.has(join(cwd, 'feature/internal/system/unused.ts')));
   assert(issues.files.has(join(cwd, 'src/public/lib/rary/lost.js')));
+
+  const filePath = join(cwd, 'package.json');
+  assert.deepEqual(
+    configurationHints,
+    new Set([
+      { type: 'package-entry', identifier: './feature/index.js', workspaceName: '.', filePath },
+      { type: 'package-entry', identifier: './not-found.tsx', workspaceName: '.', filePath },
+    ])
+  );
 
   assert.deepEqual(counters, {
     ...baseCounters,

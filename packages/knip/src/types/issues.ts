@@ -75,6 +75,7 @@ export type ReporterOptions = {
   options: string;
   preprocessorOptions: string;
   includedWorkspaces: Workspace[];
+  configFilePath?: string;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
@@ -98,11 +99,13 @@ export type ConfigurationHintType =
   | 'project-top-level'
   | 'entry-empty'
   | 'project-empty'
+  | 'package-entry'
   | 'workspace-unconfigured';
 
 export type ConfigurationHint = {
   type: ConfigurationHintType;
   identifier: string | RegExp;
+  filePath?: string;
   workspaceName?: string;
   size?: number;
 };

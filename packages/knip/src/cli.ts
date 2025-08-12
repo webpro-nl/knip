@@ -76,6 +76,7 @@ const run = async () => {
       configurationHints,
       isTreatConfigHintsAsErrors,
       includedWorkspaces,
+      configFilePath,
     } = await main({
       cacheLocation,
       cwd,
@@ -123,6 +124,7 @@ const run = async () => {
       options: reporterOptions,
       preprocessorOptions,
       includedWorkspaces,
+      configFilePath,
     };
 
     const finalData = await runPreprocessors(preprocessor, initialData);

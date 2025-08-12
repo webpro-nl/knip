@@ -184,5 +184,6 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     configurationHints,
     isTreatConfigHintsAsErrors: chief.config.isTreatConfigHintsAsErrors,
     includedWorkspaces: chief.includedWorkspaces,
+    configFilePath: chief.resolvedConfigFilePath,
   };
 };
