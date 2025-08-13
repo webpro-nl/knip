@@ -1,0 +1,19 @@
+{
+    "controller": "pl-rich-text-editor.py",
+    "dependencies": {
+      "nodeModulesScripts": [
+        "dompurify/dist/purify.min.js"
+      ],
+      "nodeModulesStyles": [
+        "quill/dist/quill.snow.css"
+      ],
+      "elementScripts": ["pl-rich-text-editor.js"],
+      "elementStyles": ["pl-rich-text-editor.css"]
+    },
+    "dynamicDependencies": {
+      "nodeModulesScripts": {
+        "marked": "marked/lib/marked.esm.js"
+      }
+    }
+  }
+  

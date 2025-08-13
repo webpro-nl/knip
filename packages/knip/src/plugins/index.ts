@@ -63,6 +63,7 @@ import { default as playwrightTest } from './playwright-test/index.js';
 import { default as playwright } from './playwright/index.js';
 import { default as plop } from './plop/index.js';
 import { default as postcss } from './postcss/index.js';
+import { default as prairielearn } from './prairielearn/index.js';
 import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
 import { default as prisma } from './prisma/index.js';
@@ -176,6 +177,7 @@ export const Plugins = {
   'playwright-test': playwrightTest,
   plop,
   postcss,
+  prairielearn,
   preconstruct,
   prettier,
   prisma,

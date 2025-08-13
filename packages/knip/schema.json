@@ -551,6 +551,10 @@
           "title": "PostCSS plugin configuration (https://knip.dev/reference/plugins/postcss)",
           "$ref": "#/definitions/plugin"
         },
+        "prairielearn": {
+          "title": "prairielearn plugin configuration (https://knip.dev/reference/plugins/prairielearn)",
+          "$ref": "#/definitions/plugin"
+        },
         "preconstruct": {
           "title": "preconstruct plugin configuration (https://knip.dev/reference/plugins/preconstruct)",
           "$ref": "#/definitions/plugin"

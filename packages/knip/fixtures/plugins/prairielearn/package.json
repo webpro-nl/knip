@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/prairielearn",
+  "dependencies": {
+    "quill": "*",
+    "marked": "*",
+    "dompurify": "*"
+  }
+}

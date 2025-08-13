@@ -64,6 +64,7 @@ export type PluginName =
   | 'playwright-test'
   | 'plop'
   | 'postcss'
+  | 'prairielearn'
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
@@ -177,6 +178,7 @@ export const pluginNames = [
   'playwright-test',
   'plop',
   'postcss',
+  'prairielearn',
   'preconstruct',
   'prettier',
   'prisma',
