@@ -97,6 +97,7 @@ test('Resolve included issue types (--dependencies)', async () => {
     unlisted: true,
     binaries: true,
     unresolved: true,
+    catalog: true,
   });
 });
 

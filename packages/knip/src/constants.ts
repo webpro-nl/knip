@@ -192,6 +192,7 @@ export const ISSUE_TYPES: IssueType[] = [
   'enumMembers',
   'classMembers',
   'duplicates',
+  'catalog',
 ];
 
 export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
@@ -210,6 +211,7 @@ export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   enumMembers: 'Unused exported enum members',
   classMembers: 'Unused exported class members',
   duplicates: 'Duplicate exports',
+  catalog: 'Unused catalog entries',
 };
 
 export const FIX_FLAGS = {

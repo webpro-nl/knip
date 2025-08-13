@@ -22,6 +22,8 @@ export class PackagePeeker {
       if (section) this.sections[section] = { startLine: i, startPos: pos };
       pos += line.length + 1;
     }
+
+    this.ready = true;
   }
 
   getLocation(type: 'dependencies' | 'devDependencies' | 'optionalPeerDependencies', packageName: string) {

@@ -1,8 +1,9 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import type { Fix, Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
+import { DEFAULT_CATALOG } from './util/catalog.js';
 import { load, save } from './util/package-json.js';
-import { join, relative } from './util/path.js';
+import { extname, join, relative } from './util/path.js';
 import { removeExport } from './util/remove-export.js';
 
 interface Fixer {
@@ -19,6 +20,7 @@ export class IssueFixer {
   isFixDependencies = true;
   isFixUnusedTypes = true;
   isFixUnusedExports = true;
+  isFixCatalog = true;
 
   unusedTypeNodes: Map<string, Set<Fix>> = new Map();
   unusedExportNodes: Map<string, Set<Fix>> = new Map();
@@ -30,6 +32,7 @@ export class IssueFixer {
     this.isFixDependencies = fixTypes.length === 0 || fixTypes.includes('dependencies');
     this.isFixUnusedTypes = fixTypes.length === 0 || fixTypes.includes('types');
     this.isFixUnusedExports = fixTypes.length === 0 || fixTypes.includes('exports');
+    this.isFixCatalog = fixTypes.length === 0 || fixTypes.includes('catalog');
   }
 
   public addUnusedTypeNode(filePath: string, fixes: Fixes | undefined) {
@@ -49,6 +52,7 @@ export class IssueFixer {
     await this.removeUnusedFiles(issues);
     for (const filePath of await this.removeUnusedExports(issues)) touchedFiles.add(filePath);
     for (const filePath of await this.removeUnusedDependencies(issues)) touchedFiles.add(filePath);
+    for (const filePath of await this.removeUnusedCatalogEntries(issues)) touchedFiles.add(filePath);
     return touchedFiles;
   }
 
@@ -131,6 +135,52 @@ export class IssueFixer {
       await save(absFilePath, pkg);
 
       touchedFiles.add(filePath);
+    }
+
+    return touchedFiles;
+  }
+
+  private async removeUnusedCatalogEntries(issues: Issues) {
+    const touchedFiles = new Set<string>();
+    if (!this.isFixCatalog) return touchedFiles;
+
+    const filePaths = new Set(Object.keys(issues.catalog));
+
+    for (const filePath of filePaths) {
+      if (extname(filePath) === '.yaml') {
+        const absFilePath = join(this.cwd, filePath);
+        const fileContent = await readFile(absFilePath, 'utf-8');
+        const remove = new Set<number>();
+        const isRemove = (_: string, i: number) => !remove.has(i);
+        for (const [key, issue] of Object.entries(issues.catalog[filePath])) {
+          if (issue.line) {
+            remove.add(issue.line - 1);
+            issues.catalog[filePath][key].isFixed = true;
+          }
+        }
+        await writeFile(absFilePath, fileContent.split('\n').filter(isRemove).join('\n'));
+        touchedFiles.add(filePath);
+      } else {
+        const absFilePath = join(this.cwd, filePath);
+        const pkg = await load(absFilePath);
+        const catalog = pkg.catalog || (!Array.isArray(pkg.workspaces) && pkg.workspaces?.catalog);
+        const catalogs = pkg.catalogs || (!Array.isArray(pkg.workspaces) && pkg.workspaces?.catalogs);
+        for (const [key, issue] of Object.entries(issues.catalog[filePath])) {
+          if (issue.parentSymbol === DEFAULT_CATALOG) {
+            if (catalog) {
+              delete catalog[issue.symbol];
+              issues.catalog[filePath][key].isFixed = true;
+            }
+          } else {
+            if (catalogs && issue.parentSymbol) {
+              delete catalogs[issue.parentSymbol][issue.symbol];
+              issues.catalog[filePath][key].isFixed = true;
+            }
+          }
+        }
+        await save(absFilePath, pkg);
+        touchedFiles.add(filePath);
+      }
     }
 
     return touchedFiles;

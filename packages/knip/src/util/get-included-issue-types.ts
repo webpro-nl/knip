@@ -43,7 +43,7 @@ export const getIncludedIssueTypes = (
   const includes = include.filter(include => !excl.includes(include));
 
   if (cliArgs.isDependenciesShorthand) {
-    incl = [...incl, 'dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
+    incl = [...incl, 'dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved', 'catalog'];
   }
   if (cliArgs.isExportsShorthand) {
     incl = [...incl, 'exports', 'types', 'enumMembers', 'duplicates'];

@@ -28,12 +28,15 @@ type Plugins = PluginConfig<PluginMap>;
 
 export type Scripts = Record<string, string>;
 
+export type Catalog = Record<string, string>;
+export type Catalogs = Record<string, Catalog>;
+
 export type PackageJson = {
   name?: string;
   main?: string;
   bin?: string | Record<string, string>;
   version?: string;
-  workspaces?: string[] | { packages?: string[] };
+  workspaces?: string[] | { packages?: string[]; catalog?: Catalog; catalogs?: Catalogs };
   exports?: Exports;
   imports?: Imports;
   scripts?: Scripts;
@@ -46,6 +49,8 @@ export type PackageJson = {
   browser?: string;
   types?: string;
   typings?: string;
+  catalog?: Catalog;
+  catalogs?: Catalogs;
 } & Plugins;
 
 export type WorkspacePackage = {
