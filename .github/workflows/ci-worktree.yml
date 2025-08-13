@@ -1,0 +1,37 @@
+name: Tests git worktree
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '!**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Checkout worktree
+        run: git worktree add --detach /tmp/worktree
+      - name: Install dependencies
+        run: |
+          cd /tmp/worktree
+          npm install typescript@5.0.4 @types/node@18 --ignore-scripts
+      - name: Build knip
+        run: |
+          cd /tmp/worktree/packages/knip
+          npm run build
+      - name: Verify that knip can run from a worktree
+        run: |
+          cd /tmp/worktree
+          npm install --save-dev lefthook@1.12.2
+          npx lefthook install
+          touch lefthook.yml
+          ./packages/knip/bin/knip.js
