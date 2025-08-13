@@ -29,3 +29,8 @@ test.skip(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake
   const { stdout } = exec(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake"}`, { cwd });
   assert.equal(stdout, 'hi from with-args preprocessor, you gave me: cupcake');
 });
+
+test('knip --preprocessor {cwd}/index.js', () => {
+  const { stdout } = exec(`knip --preprocessor ${cwd}/index.js`, { cwd });
+  assert.equal(stdout, 'hi from js preprocessor');
+});
