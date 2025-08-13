@@ -28,23 +28,6 @@ Protocol.
 
 ## Editor Setup
 
-### Visual Studio Code
-
-You'll need an extension that can launch Knip as an LSP server. You can either
-use a generic LSP client extension or wait for a dedicated Knip extension.
-
-#### Using a Generic LSP Client
-
-1. Install the [Generic LSP Client](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension
-2. Add to your `.vscode/settings.json`:
-
-```json
-{
-  "clangd.path": "knip",
-  "clangd.arguments": ["--lsp"]
-}
-```
-
 ### Neovim
 
 Add this to your Neovim configuration:
@@ -147,7 +130,6 @@ Add to your Emacs configuration:
   :activation-fn (lsp-activate-on "javascript" "typescript" "javascriptreact" "typescriptreact")
   :server-id 'knip-lsp))
 ```
-
 ### Helix
 
 Add to your `~/.config/helix/languages.toml`:
@@ -204,6 +186,16 @@ server supports these settings:
   }
 }
 ```
+
+### Visual Studio Code
+
+You'll need an extension that can launch Knip as an LSP server. You can either
+use a generic LSP client extension or wait for a dedicated Knip extension.
+
+### Zed
+
+You'll need an extension that can launch Knip as an LSP server. You can either
+use a generic LSP client extension or wait for a dedicated Knip extension.
 
 ## Commands
 

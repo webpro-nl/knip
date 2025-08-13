@@ -423,7 +423,13 @@ knip --preprocessor preprocessor-package
 
 ### `--preprocessor-options [json]`
 
-Pass extra options to the preprocessor (as JSON string).
+Pass extra options to the preprocessor as JSON string.
+
+```sh
+knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
+```
+
+Also see [Reporters & Preprocessors][18].
 
 ## Language Server Protocol (LSP)
 
@@ -436,23 +442,7 @@ integration with LSP-compatible editors like VS Code, Neovim, Zed, and Emacs.
 knip --lsp
 ```
 
-The LSP server provides:
-- Real-time diagnostics as you code
-- Code actions for quick fixes
-- Automatic re-analysis when files change
-- Support for workspace folders
-
 See [Language Server Protocol][19] for detailed setup instructions.
-
-### `--preprocessor-options [json]`
-
-Pass extra options to the preprocessor as JSON string.
-
-```sh
-knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
-```
-
-Also see [Reporters & Preprocessors][18].
 
 ## Exit code
 
