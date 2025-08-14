@@ -1,3 +1,1 @@
-export default [
-  { file: 'routes/home.tsx', index: true },
-];
+export default [{ file: 'routes/home.tsx', index: true }];

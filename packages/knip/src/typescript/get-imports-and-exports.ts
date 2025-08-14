@@ -14,9 +14,10 @@ import type {
   UnresolvedImport,
 } from '../types/module-graph.js';
 import { timerify } from '../util/Performance.js';
+import { isGlobPattern, resolveGlobImport } from '../util/glob-imports.js';
 import { addNsValue, addValue, createImports } from '../util/module-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { isInNodeModules } from '../util/path.js';
+import { dirname, isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import {
@@ -170,6 +171,21 @@ const getImportsAndExports = (
   const addImport = (options: ImportNode, node: ts.Node) => {
     const { specifier, isTypeOnly, pos, identifier = ANONYMOUS, isReExport = false } = options;
     if (isBuiltin(specifier)) return;
+
+    // Handle glob pattern imports
+    if (isGlobPattern(specifier)) {
+      const currentFileDir = dirname(sourceFile.fileName);
+      const matchedFiles = resolveGlobImport(specifier, currentFileDir);
+
+      if (matchedFiles.length > 0) {
+        for (const filePath of matchedFiles) {
+          addInternalImport({ ...options, identifier, filePath, isReExport });
+          resolved.add(filePath);
+        }
+        return;
+      }
+      // Fall through to normal resolution if no files matched
+    }
 
     const module = resolveModule(specifier);
 

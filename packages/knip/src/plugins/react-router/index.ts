@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 import os from 'node:os';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { _glob } from '../../util/glob.js';
 import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
-import { _glob } from '../../util/glob.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import vite from '../vite/index.js';
 import type { PluginConfig, RouteConfigEntry } from './types.js';
