@@ -15,7 +15,9 @@
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
   },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "watch": "bun run --cwd packages/knip watch",
     "docs": "bun run --cwd packages/docs dev",
