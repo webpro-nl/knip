@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import { type ChildProcess, spawn } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 
 /**
@@ -34,11 +34,11 @@ export class MockLSPClient extends EventEmitter {
       console.error('LSP Server Error:', data.toString());
     });
 
-    this.process.on('error', (error) => {
+    this.process.on('error', error => {
       this.emit('error', error);
     });
 
-    this.process.on('exit', (code) => {
+    this.process.on('exit', code => {
       this.emit('exit', code);
     });
   }
@@ -53,12 +53,12 @@ export class MockLSPClient extends EventEmitter {
 
       const header = this.messageBuffer.slice(0, headerEnd);
       const contentLengthMatch = header.match(/Content-Length: (\d+)/);
-      
+
       if (!contentLengthMatch) {
         throw new Error('Invalid LSP message header');
       }
 
-      const contentLength = parseInt(contentLengthMatch[1], 10);
+      const contentLength = Number.parseInt(contentLengthMatch[1], 10);
       const messageStart = headerEnd + 4;
       const messageEnd = messageStart + contentLength;
 
@@ -139,7 +139,7 @@ export class MockLSPClient extends EventEmitter {
     const content = JSON.stringify(message);
     const contentLength = Buffer.byteLength(content, 'utf8');
     const header = `Content-Length: ${contentLength}\r\n\r\n`;
-    
+
     this.process.stdin.write(header);
     this.process.stdin.write(content);
   }
@@ -196,21 +196,58 @@ export class MockLSPClient extends EventEmitter {
 
   /**
    * Collect all diagnostics within a timeout period
+   * Resolves early if we receive diagnostics for expected files
    */
-  async collectDiagnostics(timeout = 3000): Promise<Map<string, any>> {
+  async collectDiagnostics(timeout = 1000, expectedFiles = 2): Promise<Map<string, any>> {
     const diagnostics = new Map<string, any>();
-    
-    return new Promise((resolve) => {
+
+    return new Promise(resolve => {
+      let receivedCount = 0;
+      let earlyResolveTimer: NodeJS.Timeout | null = null;
+
       const handler = (params: any) => {
         diagnostics.set(params.uri, params);
+        receivedCount++;
+
+        // Clear any existing early resolve timer
+        if (earlyResolveTimer) {
+          clearTimeout(earlyResolveTimer);
+        }
+
+        // If we've received diagnostics for expected number of files,
+        // wait a short time for any stragglers then resolve
+        if (receivedCount >= expectedFiles) {
+          earlyResolveTimer = setTimeout(() => {
+            this.off('textDocument/publishDiagnostics', handler);
+            resolve(diagnostics);
+          }, 100); // Short wait for any additional diagnostics
+        }
       };
 
       this.on('textDocument/publishDiagnostics', handler);
 
+      // Fallback timeout in case we don't get expected diagnostics
       setTimeout(() => {
+        if (earlyResolveTimer) {
+          clearTimeout(earlyResolveTimer);
+        }
         this.off('textDocument/publishDiagnostics', handler);
         resolve(diagnostics);
       }, timeout);
+    });
+  }
+
+  /**
+   * Open a text document in the server
+   */
+  async openTextDocument(uri: string, text: string, languageId = 'typescript'): Promise<void> {
+    this.sendNotification('textDocument/didOpen', {
+      textDocument: {
+        uri,
+        languageId,
+        version: 1,
+        text,
+      },
     });
   }
 
@@ -223,9 +260,9 @@ export class MockLSPClient extends EventEmitter {
     try {
       await this.sendRequest('shutdown');
       this.sendNotification('exit');
-      
+
       // Give the process time to exit gracefully
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
     } finally {
       if (this.process && !this.process.killed) {
         this.process.kill();

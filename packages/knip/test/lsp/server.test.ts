@@ -5,7 +5,7 @@ test('LSP reporter - should format messages with correct Content-Length header',
   const testMessage = {
     jsonrpc: '2.0' as const,
     method: 'test',
-    params: { test: true }
+    params: { test: true },
   };
 
   const json = JSON.stringify(testMessage);
@@ -31,31 +31,17 @@ test('LSP reporter - should calculate correct byte length for UTF-8', () => {
   assert.ok(unicodeLength > unicodeJson.length); // UTF-8 bytes > string length for Chinese characters
 });
 
-test('LSP reporter - diagnostic severity values', () => {
-  // Test LSP diagnostic severity constants
-  const Error = 1;
-  const Warning = 2;
-  const Information = 3;
-  const Hint = 4;
-
-  // Verify severity mappings make sense
-  assert.equal(Error, 1);
-  assert.equal(Warning, 2);
-  assert.equal(Information, 3);
-  assert.equal(Hint, 4);
-});
-
 test('LSP reporter - diagnostic range structure', () => {
   // Test diagnostic range structure
   const diagnostic = {
     range: {
       start: { line: 0, character: 0 },
-      end: { line: 0, character: 10 }
+      end: { line: 0, character: 10 },
     },
     message: 'Test diagnostic',
     severity: 2,
     source: 'knip',
-    code: 'test-code'
+    code: 'test-code',
   };
 
   assert.equal(diagnostic.range.start.line, 0);
@@ -85,7 +71,7 @@ test('LSP reporter - JSON-RPC message structure', () => {
     jsonrpc: '2.0',
     id: 1,
     method: 'initialize',
-    params: {}
+    params: {},
   };
 
   assert.equal(request.jsonrpc, '2.0');
@@ -99,8 +85,8 @@ test('LSP reporter - JSON-RPC message structure', () => {
     method: 'textDocument/publishDiagnostics',
     params: {
       uri: 'file:///test.ts',
-      diagnostics: []
-    }
+      diagnostics: [],
+    },
   };
 
   assert.equal(notification.jsonrpc, '2.0');
@@ -111,33 +97,33 @@ test('LSP reporter - JSON-RPC message structure', () => {
 test('LSP reporter - issue type to severity mapping logic', () => {
   // Define expected mappings
   const severityMap = {
-    'unresolved': 1, // Error
-    'unlisted': 2, // Warning
-    'binaries': 2, // Warning
-    'dependencies': 2, // Warning
-    'devDependencies': 2, // Warning
-    'optionalPeerDependencies': 2, // Warning
-    'exports': 3, // Information
-    'types': 3, // Information
-    'nsExports': 3, // Information
-    'nsTypes': 3, // Information
-    'duplicates': 3, // Information
-    'enumMembers': 4, // Hint
-    'classMembers': 4, // Hint
+    unresolved: 1, // Error
+    unlisted: 2, // Warning
+    binaries: 2, // Warning
+    dependencies: 2, // Warning
+    devDependencies: 2, // Warning
+    optionalPeerDependencies: 2, // Warning
+    exports: 3, // Information
+    types: 3, // Information
+    nsExports: 3, // Information
+    nsTypes: 3, // Information
+    duplicates: 3, // Information
+    enumMembers: 4, // Hint
+    classMembers: 4, // Hint
   };
 
   // Test each mapping
-  Object.entries(severityMap).forEach(([issueType, expectedSeverity]) => {
+  for (const [issueType, expectedSeverity] of Object.entries(severityMap)) {
     assert.ok(expectedSeverity >= 1 && expectedSeverity <= 4, `Severity for ${issueType} should be between 1 and 4`);
-  });
+  }
 
   // Ensure critical issues are errors
   assert.equal(severityMap['unresolved'], 1);
-  
+
   // Ensure dependency issues are warnings
   assert.equal(severityMap['dependencies'], 2);
   assert.equal(severityMap['devDependencies'], 2);
-  
+
   // Ensure code quality issues are hints
   assert.equal(severityMap['enumMembers'], 4);
   assert.equal(severityMap['classMembers'], 4);

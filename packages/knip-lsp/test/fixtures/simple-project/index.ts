@@ -8,7 +8,7 @@ import { something } from './non-existent';
 
 // Unused export (will trigger warning)
 export const unusedFunction = () => {
-  console.log('This function is never imported');
+  console.debug('This function is never imported');
 };
 
 // Used export
@@ -34,7 +34,7 @@ export class TestClass {
   usedMethod() {
     return 'used';
   }
-  
+
   unusedMethod() {
     return 'unused';
   }

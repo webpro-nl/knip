@@ -1,36 +1,27 @@
 import {
-  createConnection,
-  TextDocuments,
-  Diagnostic,
-  DiagnosticSeverity,
-  type InitializeParams,
-  TextDocumentSyncKind,
-  type InitializeResult,
+  type CodeAction,
   CodeActionKind,
-  CodeAction,
   type CodeActionParams,
-  type ExecuteCommandParams,
-  type DidChangeWatchedFilesParams,
-  WorkspaceFolder,
   type Connection,
+  type Diagnostic,
+  DiagnosticSeverity,
   DidChangeConfigurationNotification,
-} from "vscode-languageserver/node.js";
+  type DidChangeWatchedFilesParams,
+  type ExecuteCommandParams,
+  type InitializeParams,
+  type InitializeResult,
+  TextDocumentSyncKind,
+  TextDocuments,
+  type WorkspaceFolder,
+  createConnection,
+} from 'vscode-languageserver/node.js';
 
-import { TextDocument } from "vscode-languageserver-textdocument";
+import { TextDocument } from 'vscode-languageserver-textdocument';
 
-import type {
-  ReporterOptions,
-  Issue,
-  IssueRecords,
-  CommandLineOptions,
-} from "knip";
-import { main } from "knip";
-import { pathToFileURL, fileURLToPath } from "node:url";
-import path from "node:path";
-
-function toAbsolute(id: string, base: string = process.cwd()) {
-  return path.isAbsolute(id) ? id : path.join(base, id);
-}
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import type { CommandLineOptions, Issue, IssueRecords, ReporterOptions } from 'knip';
+import { main } from 'knip';
+import { toAbsolute } from './util/path.js';
 
 interface KnipSettings {
   enableDiagnostics: boolean;
@@ -69,17 +60,10 @@ class KnipLanguageServer {
   private setupHandlers() {
     this.connection.onInitialize((params: InitializeParams) => {
       const capabilities = params.capabilities;
-      this.hasConfigurationCapability = !!(
-        capabilities.workspace && !!capabilities.workspace.configuration
-      );
-      this.hasWorkspaceFolderCapability = !!(
-        capabilities.workspace && !!capabilities.workspace.workspaceFolders
-      );
-      this.hasDiagnosticRelatedInformationCapability = !!(
-        capabilities.textDocument &&
-        capabilities.textDocument.publishDiagnostics &&
-        capabilities.textDocument.publishDiagnostics.relatedInformation
-      );
+      this.hasConfigurationCapability = !!capabilities.workspace?.configuration;
+      this.hasWorkspaceFolderCapability = !!capabilities.workspace?.workspaceFolders;
+      this.hasDiagnosticRelatedInformationCapability =
+        !!capabilities.textDocument?.publishDiagnostics?.relatedInformation;
 
       if (params.workspaceFolders) {
         this.workspaceFolders = params.workspaceFolders;
@@ -92,19 +76,10 @@ class KnipLanguageServer {
             resolveProvider: false,
           },
           codeActionProvider: {
-            codeActionKinds: [
-              CodeActionKind.QuickFix,
-              CodeActionKind.Source,
-              CodeActionKind.SourceFixAll,
-            ],
+            codeActionKinds: [CodeActionKind.QuickFix, CodeActionKind.Source, CodeActionKind.SourceFixAll],
           },
           executeCommandProvider: {
-            commands: [
-              "knip.analyze",
-              "knip.fix",
-              "knip.fixAll",
-              "knip.showOutput",
-            ],
+            commands: ['knip.analyze', 'knip.fix', 'knip.fixAll', 'knip.showOutput'],
           },
           workspace: {
             workspaceFolders: {
@@ -128,19 +103,13 @@ class KnipLanguageServer {
 
     this.connection.onInitialized(() => {
       if (this.hasConfigurationCapability) {
-        this.connection.client.register(
-          DidChangeConfigurationNotification.type,
-          undefined,
-        );
+        this.connection.client.register(DidChangeConfigurationNotification.type, undefined);
       }
 
       if (this.hasWorkspaceFolderCapability) {
-        this.connection.workspace.onDidChangeWorkspaceFolders((event) => {
+        this.connection.workspace.onDidChangeWorkspaceFolders(event => {
           this.workspaceFolders = event.added.concat(
-            this.workspaceFolders.filter(
-              (folder) =>
-                !event.removed.some((removed) => removed.uri === folder.uri),
-            ),
+            this.workspaceFolders.filter(folder => !event.removed.some(removed => removed.uri === folder.uri))
           );
           this.runKnipAnalysis(); // re-run analysis for new workspace folders
         });
@@ -149,7 +118,7 @@ class KnipLanguageServer {
       this.runKnipAnalysis(); // initial analysis
     });
 
-    this.connection.onDidChangeConfiguration((change) => {
+    this.connection.onDidChangeConfiguration(_change => {
       if (this.hasConfigurationCapability) {
         // Reset all cached settings
         this.updateSettings();
@@ -158,33 +127,31 @@ class KnipLanguageServer {
       this.documents.all().forEach(this.validateTextDocument.bind(this));
     });
 
-    this.connection.onDidChangeWatchedFiles(
-      (params: DidChangeWatchedFilesParams) => {
-        const shouldReanalyze = params.changes.some((change) => {
-          const filePath = fileURLToPath(change.uri);
-          return (
-            filePath.endsWith("package.json") ||
-            filePath.endsWith("tsconfig.json") ||
-            filePath.endsWith("knip.json") ||
-            filePath.endsWith("knip.ts") ||
-            filePath.endsWith(".knip.json") ||
-            filePath.endsWith(".knip.ts")
-          );
-        });
+    this.connection.onDidChangeWatchedFiles((params: DidChangeWatchedFilesParams) => {
+      const shouldReanalyze = params.changes.some(change => {
+        const filePath = fileURLToPath(change.uri);
+        return (
+          filePath.endsWith('package.json') ||
+          filePath.endsWith('tsconfig.json') ||
+          filePath.endsWith('knip.json') ||
+          filePath.endsWith('knip.ts') ||
+          filePath.endsWith('.knip.json') ||
+          filePath.endsWith('.knip.ts')
+        );
+      });
 
-        if (shouldReanalyze) {
-          this.runKnipAnalysis();
-        }
-      },
-    );
+      if (shouldReanalyze) {
+        this.runKnipAnalysis();
+      }
+    });
 
-    this.documents.onDidChangeContent((change) => {
+    this.documents.onDidChangeContent(change => {
       if (this.settings.runOnSave) {
         this.validateTextDocument(change.document);
       }
     });
 
-    this.documents.onDidSave((change) => {
+    this.documents.onDidSave(_change => {
       if (this.settings.runOnSave) {
         this.runKnipAnalysis();
       }
@@ -201,37 +168,37 @@ class KnipLanguageServer {
       const diagnostics = params.context.diagnostics;
 
       for (const diagnostic of diagnostics) {
-        if (diagnostic.source === "knip") {
+        if (diagnostic.source === 'knip') {
           const issueType = diagnostic.code as string;
 
           switch (issueType) {
-            case "exports":
-            case "types":
-            case "nsExports":
-            case "nsTypes":
-            case "enumMembers":
-            case "classMembers":
+            case 'exports':
+            case 'types':
+            case 'nsExports':
+            case 'nsTypes':
+            case 'enumMembers':
+            case 'classMembers':
               actions.push({
                 title: `Remove unused ${issueType}`,
                 kind: CodeActionKind.QuickFix,
                 diagnostics: [diagnostic],
                 command: {
-                  title: "Fix with Knip",
-                  command: "knip.fix",
+                  title: 'Fix with Knip',
+                  command: 'knip.fix',
                   arguments: [params.textDocument.uri, diagnostic],
                 },
               });
               break;
 
-            case "unlisted":
-            case "unresolved":
+            case 'unlisted':
+            case 'unresolved':
               actions.push({
-                title: `Add to package.json`,
+                title: 'Add to package.json',
                 kind: CodeActionKind.QuickFix,
                 diagnostics: [diagnostic],
                 command: {
-                  title: "Fix dependencies",
-                  command: "knip.fix",
+                  title: 'Fix dependencies',
+                  command: 'knip.fix',
                   arguments: [params.textDocument.uri, diagnostic],
                 },
               });
@@ -240,16 +207,13 @@ class KnipLanguageServer {
         }
       }
 
-      if (
-        diagnostics.length > 1 &&
-        diagnostics.some((d) => d.source === "knip")
-      ) {
+      if (diagnostics.length > 1 && diagnostics.some(d => d.source === 'knip')) {
         actions.push({
-          title: "Fix all Knip issues in file",
+          title: 'Fix all Knip issues in file',
           kind: CodeActionKind.SourceFixAll,
           command: {
-            title: "Fix all",
-            command: "knip.fixAll",
+            title: 'Fix all',
+            command: 'knip.fixAll',
             arguments: [params.textDocument.uri],
           },
         });
@@ -260,17 +224,17 @@ class KnipLanguageServer {
 
     this.connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
       switch (params.command) {
-        case "knip.analyze":
+        case 'knip.analyze':
           await this.runKnipAnalysis();
           break;
-        case "knip.fix":
+        case 'knip.fix':
           await this.runKnipFix(params.arguments);
           break;
-        case "knip.fixAll":
+        case 'knip.fixAll':
           await this.runKnipFixAll(params.arguments);
           break;
-        case "knip.showOutput":
-          this.connection.console.log("Knip analysis complete");
+        case 'knip.showOutput':
+          this.connection.console.log('Knip analysis complete');
           break;
       }
     });
@@ -278,8 +242,7 @@ class KnipLanguageServer {
 
   private async updateSettings() {
     if (this.hasConfigurationCapability) {
-      const configuration =
-        await this.connection.workspace.getConfiguration("knip");
+      const configuration = await this.connection.workspace.getConfiguration('knip');
       this.settings = {
         enableDiagnostics: configuration.enableDiagnostics ?? true,
         runOnSave: configuration.runOnSave ?? true,
@@ -290,9 +253,7 @@ class KnipLanguageServer {
     }
   }
 
-  private async validateTextDocument(
-    textDocument: TextDocument,
-  ): Promise<void> {
+  private async validateTextDocument(textDocument: TextDocument): Promise<void> {
     if (!this.knipResults || !this.settings.enableDiagnostics) {
       return;
     }
@@ -309,22 +270,20 @@ class KnipLanguageServer {
     }
 
     this.analysisInProgress = true;
-    this.connection.console.log("Running Knip analysis...");
+    this.connection.console.log('Running Knip analysis...');
 
     try {
       const workspaceRoot =
-        this.workspaceFolders.length > 0
-          ? fileURLToPath(this.workspaceFolders[0].uri)
-          : process.cwd();
+        this.workspaceFolders.length > 0 ? fileURLToPath(this.workspaceFolders[0].uri) : process.cwd();
 
       const excludedIssueTypes: string[] = [];
 
       if (!this.settings.includeExports) {
-        excludedIssueTypes.push("exports", "nsExports", "types", "nsTypes");
+        excludedIssueTypes.push('exports', 'nsExports', 'types', 'nsTypes');
       }
 
       if (!this.settings.includeFiles) {
-        excludedIssueTypes.push("files");
+        excludedIssueTypes.push('files');
       }
 
       const config: CommandLineOptions = {
@@ -349,7 +308,7 @@ class KnipLanguageServer {
         isWatch: false,
         tags: [[], []],
         fixTypes: [],
-        cacheLocation: "",
+        cacheLocation: '',
         tsConfigFile: undefined,
         workspace: undefined,
       };
@@ -366,13 +325,13 @@ class KnipLanguageServer {
         cwd: workspaceRoot,
         isProduction: !this.settings.includeDevDependencies,
         isShowProgress: false,
-        options: "",
-        preprocessorOptions: "",
+        options: '',
+        preprocessorOptions: '',
         includedWorkspaces: results.includedWorkspaces,
         configFilePath: results.configFilePath,
       });
 
-      this.connection.console.log("Knip analysis complete");
+      this.connection.console.log('Knip analysis complete');
     } catch (error) {
       this.connection.window.showErrorMessage(`Knip analysis failed: ${error}`);
       this.connection.console.error(`Knip analysis error: ${error}`);
@@ -381,12 +340,10 @@ class KnipLanguageServer {
     }
   }
 
-  private async runKnipFix(args?: any[]): Promise<void> {
+  private async runKnipFix(_args?: any[]): Promise<void> {
     try {
       const workspaceRoot =
-        this.workspaceFolders.length > 0
-          ? fileURLToPath(this.workspaceFolders[0].uri)
-          : process.cwd();
+        this.workspaceFolders.length > 0 ? fileURLToPath(this.workspaceFolders[0].uri) : process.cwd();
 
       const config: CommandLineOptions = {
         cwd: workspaceRoot,
@@ -409,15 +366,15 @@ class KnipLanguageServer {
         isStrict: false,
         isWatch: false,
         tags: [[], []],
-        fixTypes: ["dependencies", "exports", "types"], // Fix all fixable types
-        cacheLocation: "",
+        fixTypes: ['dependencies', 'exports', 'types'], // Fix all fixable types
+        cacheLocation: '',
         tsConfigFile: undefined,
         workspace: undefined,
       };
 
       await main(config);
 
-      this.connection.console.log("Knip fix applied");
+      this.connection.console.log('Knip fix applied');
 
       // Re-run analysis after fix
       await this.runKnipAnalysis();
@@ -448,14 +405,11 @@ class KnipLanguageServer {
           },
           end: {
             line: Math.max(0, (issue.line ?? 1) - 1),
-            character: Math.max(
-              0,
-              (issue.col ?? 0) + (issue.symbol?.length ?? 1) - 1,
-            ),
+            character: Math.max(0, (issue.col ?? 0) + (issue.symbol?.length ?? 1) - 1),
           },
         },
         message: this.formatDiagnosticMessage(issue, issueType),
-        source: "knip",
+        source: 'knip',
         code: issueType,
       };
 
@@ -484,25 +438,25 @@ class KnipLanguageServer {
           }
 
           const diagnostic = issueToDiagnostic(issue, issueType);
-          this.diagnosticsCache.get(uri)!.push(diagnostic);
+          this.diagnosticsCache.get(uri)?.push(diagnostic);
         }
       }
     };
 
     const issueTypes: Array<[keyof typeof report, keyof typeof issues]> = [
-      ["dependencies", "dependencies"],
-      ["devDependencies", "devDependencies"],
-      ["optionalPeerDependencies", "optionalPeerDependencies"],
-      ["unlisted", "unlisted"],
-      ["binaries", "binaries"],
-      ["unresolved", "unresolved"],
-      ["exports", "exports"],
-      ["types", "types"],
-      ["nsExports", "nsExports"],
-      ["nsTypes", "nsTypes"],
-      ["duplicates", "duplicates"],
-      ["enumMembers", "enumMembers"],
-      ["classMembers", "classMembers"],
+      ['dependencies', 'dependencies'],
+      ['devDependencies', 'devDependencies'],
+      ['optionalPeerDependencies', 'optionalPeerDependencies'],
+      ['unlisted', 'unlisted'],
+      ['binaries', 'binaries'],
+      ['unresolved', 'unresolved'],
+      ['exports', 'exports'],
+      ['types', 'types'],
+      ['nsExports', 'nsExports'],
+      ['nsTypes', 'nsTypes'],
+      ['duplicates', 'duplicates'],
+      ['enumMembers', 'enumMembers'],
+      ['classMembers', 'classMembers'],
     ];
 
     for (const [reportKey, issueKey] of issueTypes) {
@@ -524,54 +478,38 @@ class KnipLanguageServer {
     }
   }
 
-  private getIssueSeverity(issueType: string): DiagnosticSeverity {
-    switch (issueType) {
-      case "unresolved":
-      case "unlisted":
-      case "binaries":
-      case "optionalPeerDependencies":
-      case "enumMembers":
-      case "classMembers":
-      case "exports":
-      case "types":
-      case "dependencies":
-      case "devDependencies":
-      case "nsExports":
-      case "nsTypes":
-      case "duplicates":
-      default:
-        return DiagnosticSeverity.Warning;
-    }
+  private getIssueSeverity(_issueType: string): DiagnosticSeverity {
+    return DiagnosticSeverity.Warning;
   }
 
   private getIssueLabel(issueType: string): string {
     switch (issueType) {
-      case "dependencies":
-        return "Unused dependency";
-      case "devDependencies":
-        return "Unused dev dependency";
-      case "optionalPeerDependencies":
-        return "Unused optional peer dependency";
-      case "unlisted":
-        return "Unlisted dependency";
-      case "binaries":
-        return "Unlisted binary";
-      case "unresolved":
-        return "Unresolved import";
-      case "exports":
-        return "Unused export";
-      case "types":
-        return "Unused type export";
-      case "nsExports":
-        return "Unused namespace export";
-      case "nsTypes":
-        return "Unused namespace type";
-      case "duplicates":
-        return "Duplicate export";
-      case "enumMembers":
-        return "Unused enum member";
-      case "classMembers":
-        return "Unused class member";
+      case 'dependencies':
+        return 'Unused dependency';
+      case 'devDependencies':
+        return 'Unused dev dependency';
+      case 'optionalPeerDependencies':
+        return 'Unused optional peer dependency';
+      case 'unlisted':
+        return 'Unlisted dependency';
+      case 'binaries':
+        return 'Unlisted binary';
+      case 'unresolved':
+        return 'Unresolved import';
+      case 'exports':
+        return 'Unused export';
+      case 'types':
+        return 'Unused type export';
+      case 'nsExports':
+        return 'Unused namespace export';
+      case 'nsTypes':
+        return 'Unused namespace type';
+      case 'duplicates':
+        return 'Duplicate export';
+      case 'enumMembers':
+        return 'Unused enum member';
+      case 'classMembers':
+        return 'Unused class member';
       default:
         return issueType;
     }
@@ -579,7 +517,7 @@ class KnipLanguageServer {
 
   private formatDiagnosticMessage(issue: Issue, issueType: string): string {
     const label = this.getIssueLabel(issueType);
-    const symbol = issue.symbol || "unknown";
+    const symbol = issue.symbol || 'unknown';
 
     if (issue.parentSymbol) {
       return `${label}: ${issue.parentSymbol}.${symbol}`;
