@@ -20,3 +20,7 @@ test.skip('knip --reporter knip-reporter', () => {
 test.skip('knip --reporter @org/reporter', () => {
   assert.equal(exec('knip --reporter @org/reporter', { cwd }).stdout, 'hi from scoped reporter');
 });
+
+test('knip --reporter {cwd}/index.js', () => {
+  assert.equal(exec(`knip --reporter ${cwd}/index.js`, { cwd }).stdout, 'hi from js reporter');
+});
