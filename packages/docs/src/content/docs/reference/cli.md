@@ -431,19 +431,6 @@ knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 
 Also see [Reporters & Preprocessors][18].
 
-## Language Server Protocol (LSP)
-
-### `--lsp`
-
-Start Knip as a Language Server Protocol server. This enables real-time
-integration with LSP-compatible editors like VS Code, Neovim, Zed, and Emacs.
-
-```sh
-knip --lsp
-```
-
-See [Language Server Protocol][19] for detailed setup instructions.
-
 ## Exit code
 
 The default exit codes:
@@ -488,4 +475,3 @@ Exit with non-zero code (`1`) if there are any configuration hints.
 [16]: ./issue-types.md
 [17]: #--tags
 [18]: ../features/reporters.md
-[19]: ../features/language-server-protocol.md

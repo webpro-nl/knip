@@ -14,7 +14,8 @@ import { getGitIgnoredHandler } from './util/glob-core.js';
 import { getWatchHandler } from './util/watch.js';
 
 export type { RawConfiguration as KnipConfig } from './types/config.js';
-export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
+export type { Preprocessor, Reporter, ReporterOptions, Issue, IssueRecords, Issues } from './types/issues.js';
+export type { CommandLineOptions } from './types/cli.js';
 
 /**
  * The main sequence

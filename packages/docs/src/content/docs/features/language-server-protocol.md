@@ -2,10 +2,16 @@
 title: Language Server Protocol (LSP)
 ---
 
-Knip can run as a Language Server Protocol (LSP) server, providing real-time
-analysis and diagnostics directly in your editor. This enables a seamless
-development experience with instant feedback on unused code, missing
-dependencies, and other issues.
+The Knip Language Server Protocol (LSP) implementation is available as a separate
+package `@knip/lsp`, providing real-time analysis and diagnostics directly in your
+editor. This enables a seamless development experience with instant feedback on
+unused code, missing dependencies, and other issues.
+
+## Package Information
+
+- **Package**: `@knip/lsp`
+- **Binary**: `knip-lsp`
+- **Repository**: [webpro-nl/knip](https://github.com/webpro-nl/knip/tree/main/packages/knip-lsp)
 
 ## Features
 
@@ -15,16 +21,27 @@ dependencies, and other issues.
 - **Multi-workspace support**: Handle complex project structures
 - **Editor agnostic**: Works with any LSP-compatible editor
 
-## Starting the LSP Server
+## Installation
 
-Run Knip in LSP mode:
+Install the LSP server globally:
 
 ```sh
-knip --lsp
+npm install -g @knip/lsp
 ```
 
-The server communicates via standard input/output using the Language Server
-Protocol.
+Or add it to your project:
+
+```sh
+npm install --save-dev @knip/lsp
+```
+
+## Starting the LSP Server
+
+Run the Knip LSP server:
+
+```sh
+knip-lsp
+```
 
 ## Editor Setup
 
@@ -39,7 +56,7 @@ local configs = require('lspconfig.configs')
 -- Define Knip LSP configuration
 configs.knip = {
   default_config = {
-    cmd = { 'knip', '--lsp' },
+    cmd = { 'knip-lsp' },
     filetypes = {
       'javascript',
       'javascriptreact',
@@ -67,7 +84,7 @@ For a quick test or minimal setup without lspconfig, save this as `init.lua` and
 
 ```lua
 -- Minimal Neovim config for testing Knip LSP
-local knip_path = vim.fn.expand('~/path/to/knip/packages/knip/dist/cli.js')
+-- Make sure @knip/lsp is installed globally: npm install -g @knip/lsp
 
 -- Auto-start Knip LSP for JS/TS files
 vim.api.nvim_create_autocmd('FileType', {
@@ -75,7 +92,7 @@ vim.api.nvim_create_autocmd('FileType', {
   callback = function()
     vim.lsp.start({
       name = 'knip-lsp',
-      cmd = {'node', knip_path, '--lsp'},
+      cmd = {'knip-lsp'},
       root_dir = vim.fn.getcwd(),
       settings = {
         knip = {
@@ -119,7 +136,7 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 Add to your Emacs configuration:
 
 ```elisp
-(defcustom lsp-knip-server-command '("knip" "--lsp")
+(defcustom lsp-knip-server-command '("knip-lsp")
   "Command to start Knip LSP server."
   :type '(repeat string)
   :group 'lsp-knip)
@@ -144,26 +161,9 @@ name = "javascript"
 language-servers = ["typescript-language-server", "knip-lsp"]
 
 [language-server.knip-lsp]
-command = "knip"
-args = ["--lsp"]
+command = "knip-lsp"
+args = []
 ```
-
-## Diagnostic Severities
-
-Knip issues are mapped to standard LSP diagnostic severities:
-
-| Issue Type | Severity | Description |
-|------------|----------|-------------|
-| `unresolved` | Error | Cannot resolve import/require |
-| `unlisted` | Warning | Dependency not listed in package.json |
-| `binaries` | Warning | Binary not listed in package.json |
-| `dependencies` | Warning | Unused dependency |
-| `devDependencies` | Warning | Unused dev dependency |
-| `exports` | Information | Unused export |
-| `types` | Information | Unused type export |
-| `duplicates` | Information | Duplicate export |
-| `enumMembers` | Hint | Unused enum member |
-| `classMembers` | Hint | Unused class member |
 
 ## Configuration
 
@@ -189,13 +189,15 @@ server supports these settings:
 
 ### Visual Studio Code
 
-You'll need an extension that can launch Knip as an LSP server. You can either
-use a generic LSP client extension or wait for a dedicated Knip extension.
+For VSCode, you can either:
+1. Use a generic LSP client extension configured to launch `knip-lsp`
+2. Wait for a dedicated Knip extension that will automatically use `@knip/lsp`
 
 ### Zed
 
-You'll need an extension that can launch Knip as an LSP server. You can either
-use a generic LSP client extension or wait for a dedicated Knip extension.
+For Zed, you can either:
+1. Use a generic LSP client extension configured to launch `knip-lsp`
+2. Wait for a dedicated Knip extension that will automatically use `@knip/lsp`
 
 ## Commands
 
@@ -225,8 +227,9 @@ The LSP server runs Knip analysis in the background. For large projects:
 
 ### Server doesn't start
 
-- Ensure Knip is installed: `npm install -g knip`
-- Verify Node.js version compatibility
+- Ensure the LSP server is installed: `npm install -g @knip/lsp`
+- Ensure Knip itself is installed: `npm install -g knip` (or in your project)
+- Verify Node.js version compatibility (>=18.18.0)
 - Check editor's LSP client logs for errors
 
 ### No diagnostics appearing

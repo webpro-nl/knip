@@ -1,0 +1,16 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "extends": ["../../biome.json"],
+  "files": {
+    "ignore": ["**/dist", "package.json"]
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "off"
+        }
+      }
+    }
+  }
+}

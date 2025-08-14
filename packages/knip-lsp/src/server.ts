@@ -3,7 +3,6 @@ import {
   TextDocuments,
   Diagnostic,
   DiagnosticSeverity,
-  ProposedFeatures,
   type InitializeParams,
   TextDocumentSyncKind,
   type InitializeResult,
@@ -19,12 +18,19 @@ import {
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 
-import type { ReporterOptions, Issue, IssueRecords } from "../types/issues.js";
-import { toAbsolute } from "../util/path.js";
+import type {
+  ReporterOptions,
+  Issue,
+  IssueRecords,
+  CommandLineOptions,
+} from "knip";
+import { main } from "knip";
 import { pathToFileURL, fileURLToPath } from "node:url";
-import { main } from "../index.js";
-import { runReporters } from "../util/reporter.js";
-import type { CommandLineOptions } from "../types/cli.js";
+import path from "node:path";
+
+function toAbsolute(id: string, base: string = process.cwd()) {
+  return path.isAbsolute(id) ? id : path.join(base, id);
+}
 
 interface KnipSettings {
   enableDiagnostics: boolean;
@@ -53,18 +59,9 @@ class KnipLanguageServer {
   private analysisInProgress = false;
 
   constructor() {
-    // Create a connection for the server using stdio
-    this.connection = createConnection(
-      process.stdin,
-      process.stdout
-    );
-
-    // Create a simple text document manager
+    this.connection = createConnection(process.stdin, process.stdout);
     this.documents = new TextDocuments(TextDocument);
-
     this.setupHandlers();
-
-    // Listen on the connection
     this.documents.listen(this.connection);
     this.connection.listen();
   }
@@ -72,8 +69,6 @@ class KnipLanguageServer {
   private setupHandlers() {
     this.connection.onInitialize((params: InitializeParams) => {
       const capabilities = params.capabilities;
-
-      // Does the client support the `workspace/configuration` request?
       this.hasConfigurationCapability = !!(
         capabilities.workspace && !!capabilities.workspace.configuration
       );
@@ -93,7 +88,6 @@ class KnipLanguageServer {
       const result: InitializeResult = {
         capabilities: {
           textDocumentSync: TextDocumentSyncKind.Incremental,
-          // Tell the client that this server supports code completion
           completionProvider: {
             resolveProvider: false,
           },
@@ -134,7 +128,6 @@ class KnipLanguageServer {
 
     this.connection.onInitialized(() => {
       if (this.hasConfigurationCapability) {
-        // Register for all configuration changes
         this.connection.client.register(
           DidChangeConfigurationNotification.type,
           undefined,
@@ -149,30 +142,24 @@ class KnipLanguageServer {
                 !event.removed.some((removed) => removed.uri === folder.uri),
             ),
           );
-          // Re-run analysis for new workspace folders
-          this.runKnipAnalysis();
+          this.runKnipAnalysis(); // re-run analysis for new workspace folders
         });
       }
 
-      // Run initial analysis
-      this.runKnipAnalysis();
+      this.runKnipAnalysis(); // initial analysis
     });
 
-    // Configuration change
     this.connection.onDidChangeConfiguration((change) => {
       if (this.hasConfigurationCapability) {
         // Reset all cached settings
         this.updateSettings();
       }
 
-      // Revalidate all open text documents
       this.documents.all().forEach(this.validateTextDocument.bind(this));
     });
 
-    // File watching
     this.connection.onDidChangeWatchedFiles(
       (params: DidChangeWatchedFilesParams) => {
-        // Monitored files have changed
         const shouldReanalyze = params.changes.some((change) => {
           const filePath = fileURLToPath(change.uri);
           return (
@@ -191,7 +178,6 @@ class KnipLanguageServer {
       },
     );
 
-    // Document changes
     this.documents.onDidChangeContent((change) => {
       if (this.settings.runOnSave) {
         this.validateTextDocument(change.document);
@@ -200,12 +186,10 @@ class KnipLanguageServer {
 
     this.documents.onDidSave((change) => {
       if (this.settings.runOnSave) {
-        // Run full analysis on save
         this.runKnipAnalysis();
       }
     });
 
-    // Code actions
     this.connection.onCodeAction((params: CodeActionParams): CodeAction[] => {
       const actions: CodeAction[] = [];
       const textDocument = this.documents.get(params.textDocument.uri);
@@ -220,43 +204,42 @@ class KnipLanguageServer {
         if (diagnostic.source === "knip") {
           const issueType = diagnostic.code as string;
 
-          // Create fix action based on issue type
-          if (
-            issueType === "exports" ||
-            issueType === "types" ||
-            issueType === "nsExports" ||
-            issueType === "nsTypes" ||
-            issueType === "enumMembers" ||
-            issueType === "classMembers"
-          ) {
-            actions.push({
-              title: `Remove unused ${issueType}`,
-              kind: CodeActionKind.QuickFix,
-              diagnostics: [diagnostic],
-              command: {
-                title: "Fix with Knip",
-                command: "knip.fix",
-                arguments: [params.textDocument.uri, diagnostic],
-              },
-            });
-          }
+          switch (issueType) {
+            case "exports":
+            case "types":
+            case "nsExports":
+            case "nsTypes":
+            case "enumMembers":
+            case "classMembers":
+              actions.push({
+                title: `Remove unused ${issueType}`,
+                kind: CodeActionKind.QuickFix,
+                diagnostics: [diagnostic],
+                command: {
+                  title: "Fix with Knip",
+                  command: "knip.fix",
+                  arguments: [params.textDocument.uri, diagnostic],
+                },
+              });
+              break;
 
-          if (issueType === "unlisted" || issueType === "unresolved") {
-            actions.push({
-              title: `Add to package.json`,
-              kind: CodeActionKind.QuickFix,
-              diagnostics: [diagnostic],
-              command: {
-                title: "Fix dependencies",
-                command: "knip.fix",
-                arguments: [params.textDocument.uri, diagnostic],
-              },
-            });
+            case "unlisted":
+            case "unresolved":
+              actions.push({
+                title: `Add to package.json`,
+                kind: CodeActionKind.QuickFix,
+                diagnostics: [diagnostic],
+                command: {
+                  title: "Fix dependencies",
+                  command: "knip.fix",
+                  arguments: [params.textDocument.uri, diagnostic],
+                },
+              });
+              break;
           }
         }
       }
 
-      // Add "Fix all" action if there are multiple issues
       if (
         diagnostics.length > 1 &&
         diagnostics.some((d) => d.source === "knip")
@@ -275,7 +258,6 @@ class KnipLanguageServer {
       return actions;
     });
 
-    // Execute command
     this.connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
       switch (params.command) {
         case "knip.analyze":
@@ -311,7 +293,6 @@ class KnipLanguageServer {
   private async validateTextDocument(
     textDocument: TextDocument,
   ): Promise<void> {
-    // Only validate if we have results and diagnostics are enabled
     if (!this.knipResults || !this.settings.enableDiagnostics) {
       return;
     }
@@ -319,7 +300,6 @@ class KnipLanguageServer {
     const uri = textDocument.uri;
     const diagnostics = this.diagnosticsCache.get(uri) || [];
 
-    // Send the diagnostics to the client
     this.connection.sendDiagnostics({ uri, diagnostics });
   }
 
@@ -332,21 +312,19 @@ class KnipLanguageServer {
     this.connection.console.log("Running Knip analysis...");
 
     try {
-      // Get workspace root
       const workspaceRoot =
         this.workspaceFolders.length > 0
           ? fileURLToPath(this.workspaceFolders[0].uri)
           : process.cwd();
 
-      // Build configuration for Knip main function
       const excludedIssueTypes: string[] = [];
-      
+
       if (!this.settings.includeExports) {
-        excludedIssueTypes.push('exports', 'nsExports', 'types', 'nsTypes');
+        excludedIssueTypes.push("exports", "nsExports", "types", "nsTypes");
       }
-      
+
       if (!this.settings.includeFiles) {
-        excludedIssueTypes.push('files');
+        excludedIssueTypes.push("files");
       }
 
       const config: CommandLineOptions = {
@@ -364,22 +342,19 @@ class KnipLanguageServer {
         isFix: false,
         isFormat: false,
         isIncludeEntryExports: false,
-        isIncludeLibs: false,
+        isIncludeLibs: true,
         isIsolateWorkspaces: false,
         isRemoveFiles: false,
         isStrict: false,
         isWatch: false,
         tags: [[], []],
         fixTypes: [],
-        cacheLocation: '',
+        cacheLocation: "",
         tsConfigFile: undefined,
         workspace: undefined,
       };
 
-      // Run Knip analysis directly using the main function
       const results = await main(config);
-      
-      // Process the results
       this.processKnipResults({
         report: results.report,
         issues: results.issues,
@@ -391,8 +366,8 @@ class KnipLanguageServer {
         cwd: workspaceRoot,
         isProduction: !this.settings.includeDevDependencies,
         isShowProgress: false,
-        options: '',
-        preprocessorOptions: '',
+        options: "",
+        preprocessorOptions: "",
         includedWorkspaces: results.includedWorkspaces,
         configFilePath: results.configFilePath,
       });
@@ -413,7 +388,6 @@ class KnipLanguageServer {
           ? fileURLToPath(this.workspaceFolders[0].uri)
           : process.cwd();
 
-      // Run Knip with fix mode enabled
       const config: CommandLineOptions = {
         cwd: workspaceRoot,
         gitignore: true,
@@ -429,14 +403,14 @@ class KnipLanguageServer {
         isFix: true, // Enable fix mode
         isFormat: false,
         isIncludeEntryExports: false,
-        isIncludeLibs: false,
+        isIncludeLibs: true,
         isIsolateWorkspaces: false,
         isRemoveFiles: false,
         isStrict: false,
         isWatch: false,
         tags: [[], []],
-        fixTypes: ['dependencies', 'exports', 'types'], // Fix all fixable types
-        cacheLocation: '',
+        fixTypes: ["dependencies", "exports", "types"], // Fix all fixable types
+        cacheLocation: "",
         tsConfigFile: undefined,
         workspace: undefined,
       };
@@ -453,7 +427,6 @@ class KnipLanguageServer {
   }
 
   private async runKnipFixAll(args?: any[]): Promise<void> {
-    // Same as fix for now, but could be customized per file
     await this.runKnipFix(args);
   }
 
@@ -461,10 +434,8 @@ class KnipLanguageServer {
     this.knipResults = options;
     const { issues, report } = options;
 
-    // Clear previous diagnostics
     this.diagnosticsCache.clear();
 
-    // Helper to convert issue to diagnostic
     const issueToDiagnostic = (issue: Issue, issueType: string): Diagnostic => {
       const severity = this.getIssueSeverity(issueType);
 
@@ -488,7 +459,6 @@ class KnipLanguageServer {
         code: issueType,
       };
 
-      // Add related information if available
       if (this.hasDiagnosticRelatedInformationCapability && issue.specifier) {
         diagnostic.relatedInformation = [
           {
@@ -504,7 +474,6 @@ class KnipLanguageServer {
       return diagnostic;
     };
 
-    // Process each issue type
     const processIssueRecords = (records: IssueRecords, issueType: string) => {
       for (const [_, issuesForFile] of Object.entries(records)) {
         for (const [__, issue] of Object.entries(issuesForFile)) {
@@ -520,7 +489,6 @@ class KnipLanguageServer {
       }
     };
 
-    // Process all enabled issue types
     const issueTypes: Array<[keyof typeof report, keyof typeof issues]> = [
       ["dependencies", "dependencies"],
       ["devDependencies", "devDependencies"],
@@ -543,12 +511,10 @@ class KnipLanguageServer {
       }
     }
 
-    // Send diagnostics to client
     for (const [uri, diagnostics] of this.diagnosticsCache) {
       this.connection.sendDiagnostics({ uri, diagnostics });
     }
 
-    // Clear diagnostics for files that no longer have issues
     const allFiles = new Set(issues.files);
     for (const filePath of allFiles) {
       const uri = pathToFileURL(toAbsolute(filePath)).toString();
@@ -558,28 +524,23 @@ class KnipLanguageServer {
     }
   }
 
-
   private getIssueSeverity(issueType: string): DiagnosticSeverity {
     switch (issueType) {
       case "unresolved":
-        return DiagnosticSeverity.Error;
       case "unlisted":
       case "binaries":
-      case "dependencies":
-      case "devDependencies":
       case "optionalPeerDependencies":
-        return DiagnosticSeverity.Warning;
+      case "enumMembers":
+      case "classMembers":
       case "exports":
       case "types":
+      case "dependencies":
+      case "devDependencies":
       case "nsExports":
       case "nsTypes":
       case "duplicates":
-        return DiagnosticSeverity.Information;
-      case "enumMembers":
-      case "classMembers":
-        return DiagnosticSeverity.Hint;
       default:
-        return DiagnosticSeverity.Information;
+        return DiagnosticSeverity.Warning;
     }
   }
 
@@ -632,17 +593,6 @@ class KnipLanguageServer {
   }
 }
 
-// Create and start the language server when running in LSP mode
-let server: KnipLanguageServer | null = null;
+const server = new KnipLanguageServer();
 
-// Check if we're being run as an LSP server
-const isLspMode = process.argv.includes("--lsp");
-
-if (isLspMode) {
-  server = new KnipLanguageServer();
-}
-
-// This module is only used for LSP server mode (--lsp flag)
-// It's not exported as a reporter since LSP requires an interactive server
-export default {};
-
+export { KnipLanguageServer, server as runningServer };

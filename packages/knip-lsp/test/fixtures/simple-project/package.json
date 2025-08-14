@@ -1,0 +1,12 @@
+{
+  "name": "test-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.18.0",
+    "unused-dep": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "unused-dev-dep": "^2.0.0"
+  }
+}

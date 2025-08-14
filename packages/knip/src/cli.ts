@@ -31,7 +31,6 @@ const {
   'include-entry-exports': isIncludeEntryExports = false,
   'include-libs': isIncludeLibs = false,
   'isolate-workspaces': isIsolateWorkspaces = false,
-  lsp: isLsp = false,
   'max-issues': maxIssues = '0',
   'memory-realtime': memoryRealtime = false,
   'no-config-hints': isNoConfigHints = false,
@@ -67,12 +66,6 @@ const isShowProgress = isNoProgress === false && process.stdout.isTTY && typeof 
 const workspace = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, '').replace(/\/$/, '') : undefined;
 
 const run = async () => {
-  if (isLsp) {
-    // Start the LSP server mode
-    await import('./lsp/server.js');
-    // The LSP server will handle its own lifecycle
-    return;
-  }
   try {
     const {
       report,
