@@ -24,7 +24,7 @@ const getWorkspaceName = (hint: ConfigurationHint) =>
     : '';
 
 const getTableForHints = (hints: TableRow[]) => {
-  const table = new Table({ truncateStart: ['identifier', 'workspace'] });
+  const table = new Table({ truncateStart: ['identifier', 'workspace', 'filePath'] });
   for (const hint of hints) {
     table.row();
     table.cell('identifier', hint.identifier.toString());
