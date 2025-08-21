@@ -63,7 +63,7 @@
     "jiti": "^2.5.1",
     "js-yaml": "^4.1.0",
     "minimist": "^1.2.8",
-    "oxc-resolver": "^11.6.0",
+    "oxc-resolver": "^11.6.2",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.1",
     "smol-toml": "^1.4.1",
