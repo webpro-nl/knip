@@ -15,8 +15,9 @@ test('Find dependencies with the rsbuild plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     binaries: 1,
-    processed: 2,
-    total: 2,
+    processed: 5,
+    total: 5,
   });
 });
