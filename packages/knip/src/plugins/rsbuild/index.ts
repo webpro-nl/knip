@@ -21,7 +21,7 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
       else if (Array.isArray(entry)) for (const e of entry) inputs.add(toEntry(e));
       else {
         if (typeof entry.import === 'string') inputs.add(toEntry(entry.import));
-        if (Array.isArray(entry.import)) for (const e of entry.import) inputs.add(toEntry(e));
+        else if (Array.isArray(entry.import)) for (const e of entry.import) inputs.add(toEntry(e));
       }
     }
   }
