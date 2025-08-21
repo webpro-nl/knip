@@ -9,6 +9,21 @@
       "fixtures/plugins/biome-workspace/packages/stub"
     ]
   },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "node:path": "Please use src/util/path.js instead.",
+              "path": "Please use src/util/path.js instead."
+            }
+          }
+        }
+      }
+    }
+  },
   "formatter": {
     "ignore": ["ignore-exports-used-in-file-alias-exclude/more.ts"]
   },

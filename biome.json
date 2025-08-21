@@ -2,7 +2,7 @@
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "extends": ["packages/knip/biome.json"],
   "files": {
-    "ignore": ["**/dist", "**/tmp", "packages/docs/.astro"]
+    "ignore": ["**/dist", "**/tmp", "packages/docs/.astro", ".vscode"]
   },
   "organizeImports": {
     "enabled": true
@@ -17,17 +17,6 @@
       },
       "complexity": {
         "useLiteralKeys": "off"
-      },
-      "nursery": {
-        "noRestrictedImports": {
-          "level": "error",
-          "options": {
-            "paths": {
-              "node:path": "Please use src/util/path.js instead.",
-              "path": "Please use src/util/path.js instead."
-            }
-          }
-        }
       },
       "style": {
         "noParameterAssign": "off",
