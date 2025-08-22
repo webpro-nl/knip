@@ -1,7 +1,7 @@
 import external from 'external-package';
-import index from 'my-package';
-import build from 'my-package/build';
-import local from 'my-package/local';
+import index from '@fixtures/self-reference';
+import build from '@fixtures/self-reference/build';
+import local from '@fixtures/self-reference/local';
 
 index;
 build;

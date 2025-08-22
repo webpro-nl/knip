@@ -5,9 +5,9 @@ import { resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused exports in zero-config mode', async () => {
-  const cwd = resolve('fixtures/zero-config');
+const cwd = resolve('fixtures/zero-config');
 
+test('Find unused exports in zero-config mode', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -18,12 +18,12 @@ test('Find unused exports in zero-config mode', async () => {
   assert.equal(Object.values(issues.exports).length, 2);
   assert.equal(issues.exports['my-module.ts']['unused'].symbol, 'unused');
   assert.equal(issues.exports['my-module.ts']['default'].symbol, 'default');
-  assert.equal(issues.exports['my-namespace.ts']['z'].symbol, 'z');
+  assert.equal(issues.exports['my-namespace.ts']['MyNamespace.z'].symbol, 'z');
   assert(!issues.exports['index.ts']);
 
   assert.equal(Object.values(issues.types).length, 2);
   assert.equal(issues.types['my-module.ts']['AnyType'].symbolType, 'type');
-  assert.equal(issues.types['my-namespace.ts']['NS'].symbol, 'NS');
+  assert.equal(issues.types['my-namespace.ts']['MyNamespace.NS'].symbol, 'NS');
 
   assert.equal(Object.values(issues.duplicates).length, 1);
   assert.equal(issues.duplicates['my-module.ts']['myExport|default'].symbols?.length, 2);

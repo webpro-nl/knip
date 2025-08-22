@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/github-actions-workspaces",
+  "name": "@plugins/github-actions-workspaces",
   "workspaces": ["packages/*"],
   "scripts": {
     "hello-app": "yarn run --cwd packages/app goodbye"

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/typescript",
+  "name": "@plugins/typescript",
   "scripts": {
     "build-base": "tsc -p tsconfig.base.json",
     "build-ext": "tsc -p tsconfig.ext.json",

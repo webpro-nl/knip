@@ -15,7 +15,9 @@
     "go-live": "deploy -r repo_name",
     "tsup": "tsup -c tsup.cool.json",
     "tsuppy": "tsup --config tsup.cool.json",
-    "serve": "http-server"
+    "serve": "http-server",
+    "@ignore": "ignored",
+    "#ignore": "ignored"
   },
   "dependencies": {
     "express": "*",

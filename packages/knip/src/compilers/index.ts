@@ -1,9 +1,10 @@
 import type { RawConfiguration } from '../types/config.js';
 import type { DependencySet } from '../types/workspace.js';
+import AstroMDX from './astro-mdx.js';
 import Astro from './astro.js';
 import MDX from './mdx.js';
 import Svelte from './svelte.js';
-import type { AsyncCompilerFn, AsyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
+import type { AsyncCompilerFn, AsyncCompilers, RawSyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
 import Vue from './vue.js';
 
 // TODO This does not detect functions returning a promise (just the async keyword)
@@ -17,10 +18,13 @@ export const partitionCompilers = (rawLocalConfig: RawConfiguration) => {
 
   for (const extension in rawLocalConfig.compilers) {
     const ext = normalizeExt(extension);
-    if (!rawLocalConfig.asyncCompilers?.[ext] && isAsync(rawLocalConfig.compilers[extension])) {
-      asyncCompilers[ext] = rawLocalConfig.compilers[extension] as AsyncCompilerFn;
-    } else {
-      syncCompilers[ext] = rawLocalConfig.compilers[extension] as SyncCompilerFn;
+    const compilerFn = rawLocalConfig.compilers[extension];
+    if (typeof compilerFn === 'function') {
+      if (!rawLocalConfig.asyncCompilers?.[ext] && isAsync(compilerFn)) {
+        asyncCompilers[ext] = compilerFn as AsyncCompilerFn;
+      } else {
+        syncCompilers[ext] = compilerFn as SyncCompilerFn;
+      }
     }
   }
 
@@ -40,18 +44,21 @@ const compilers = new Map([
 ]);
 
 export const getIncludedCompilers = (
-  syncCompilers: SyncCompilers,
+  syncCompilers: RawSyncCompilers,
   asyncCompilers: AsyncCompilers,
   dependencies: DependencySet
 ): [SyncCompilers, AsyncCompilers] => {
   const hasDependency = (packageName: string) => dependencies.has(packageName);
 
   for (const [extension, { condition, compiler }] of compilers.entries()) {
-    if (!syncCompilers.has(extension) && condition(hasDependency)) {
+    // For MDX, try Astro compiler first if available
+    if (extension === '.mdx' && AstroMDX.condition(hasDependency)) {
+      syncCompilers.set(extension, AstroMDX.compiler);
+    } else if ((!syncCompilers.has(extension) && condition(hasDependency)) || syncCompilers.get(extension) === true) {
       syncCompilers.set(extension, compiler);
     }
   }
-  return [syncCompilers, asyncCompilers];
+  return [syncCompilers as SyncCompilers, asyncCompilers];
 };
 
 export const getCompilerExtensions = (compilers: [SyncCompilers, AsyncCompilers]) => [

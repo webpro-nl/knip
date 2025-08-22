@@ -1,0 +1,14 @@
+{
+  "name": "@plugins/tsdown",
+  "devDependencies": {
+    "tsdown": "*"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "build-3": "tsdown --config tsdown.config-3.ts",
+    "build-4": "tsdown -c tsdown.config-4.ts"
+  },
+  "tsdown": {
+    "entry": ["entry-5.ts"]
+  }
+}

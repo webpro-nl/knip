@@ -4,12 +4,14 @@ sidebar:
   order: 4
 ---
 
-Knip is mostly interested in source code, and analyzing build artifacts hurts
-performance and often leads to false positives. That's why Knip tries to map
-such build artifacts back to their original source files and analyze those
-instead. This is done based on `tsconfig.json` settings.
+Knip is mostly interested in source code. Analyzing build artifacts hurts
+performance and often leads to false positives, as they potentially contain
+bundled code and unresolvable imports.
 
-## Example 1
+That's why Knip tries to map such build artifacts back to their original source
+files and analyze those instead. This is done based on `tsconfig.json` settings.
+
+## Example 1: package.json
 
 Let's look at an example case with `package.json` and `tsconfig.json` files, and
 see how "dist" files are mapped to "src" files.
@@ -60,7 +62,7 @@ as entry files. By default, unused exports of entry files are not reported. Use
 
 :::
 
-## Example 2
+## Example 2: monorepo
 
 Let's say we have this module in a monorepo that imports `helper` from another
 workspace in the same monorepo:
@@ -83,7 +85,8 @@ usually compiled and git-ignored, while Knip wants the source file instead.
 
 :::tip
 
-Compilation to `outDir` should succeed before Knip can apply source mapping.
+You may need to compile build artifacts to `outDir` first before Knip can
+successfully apply source mapping for internal references in a monorepo.
 
 :::
 

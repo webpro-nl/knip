@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/storybook",
+  "name": "@plugins/storybook",
   "scripts": {
     "storybook": "storybook"
   },
@@ -7,12 +7,8 @@
     "tsconfig-paths-webpack-plugin": "*",
     "@storybook/addon-essentials": "*",
     "@storybook/addon-a11y": "*",
-    "storybook-addon-performance": "*"
-  },
-  "knip": {
-    "storybook": {
-      "config": "main.js",
-      "entry": "preview.js"
-    }
+    "@storybook/addon-vitest": "*",
+    "storybook-addon-performance": "*",
+    "vitest": "*"
   }
 }

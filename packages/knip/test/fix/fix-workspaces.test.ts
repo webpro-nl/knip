@@ -9,7 +9,7 @@ const cwd = resolve('fixtures/fix-workspaces');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-test('Remove exports and dependencies in workspaces', async () => {
+test('Fix exports and dependencies in workspaces', async () => {
   const tests = [
     [
       'exports.ts',
@@ -53,7 +53,7 @@ export type U = number;
       'packages/lib/package.json',
       await readContents('packages/lib/package.json'),
       `{
-  "name": "@org/lib",
+  "name": "@fixtures/fix-workspaces__lib",
   "dependencies": {
     "ignored": "*"
   }
@@ -101,7 +101,7 @@ export type U = number;
   }
 });
 
-test('Remove exports in workspaces (--fix-type types)', async () => {
+test('Fix exported types in workspaces', async () => {
   const tests = [
     [
       'exports.ts',

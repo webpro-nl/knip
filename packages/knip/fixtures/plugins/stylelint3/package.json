@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/stylelint3",
+  "devDependencies": {
+    "stylelint": "*",
+    "stylelint-config-recommended": "*",
+    "stylelint-plugin-logical-css": "*",
+    "postcss-styled-syntax": "*"
+  }
+}

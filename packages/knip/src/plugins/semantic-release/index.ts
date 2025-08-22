@@ -27,7 +27,7 @@ const excludePackages = [
 
 const resolveConfig: ResolveConfig<SemanticReleaseConfig> = config => {
   const plugins = (config?.plugins ?? []).map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));
-  return plugins.filter(plugin => !excludePackages.includes(plugin)).map(toDeferResolve);
+  return plugins.filter(plugin => !excludePackages.includes(plugin)).map(id => toDeferResolve(id));
 };
 
 export default {

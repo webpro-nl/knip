@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/webpack-cli');
 
-test('Find dependencies with Webpack plugin (webpack-cli only)', async () => {
+test('Find dependencies with the Webpack plugin (webpack-cli only)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,

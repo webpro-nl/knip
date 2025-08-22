@@ -1,13 +1,8 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "extends": ["packages/knip/biome.json"],
   "files": {
-    "ignore": [
-      "**/dist",
-      "**/tmp",
-      "packages/knip/package.json",
-      "packages/knip/vendor/bash-parser/index.js",
-      "packages/docs/.astro"
-    ]
+    "ignore": ["**/dist", "**/tmp", "packages/docs/.astro", ".vscode"]
   },
   "organizeImports": {
     "enabled": true
@@ -23,17 +18,6 @@
       "complexity": {
         "useLiteralKeys": "off"
       },
-      "nursery": {
-        "noRestrictedImports": {
-          "level": "error",
-          "options": {
-            "paths": {
-              "node:path": "Please use src/util/path.js instead.",
-              "path": "Please use src/util/path.js instead."
-            }
-          }
-        }
-      },
       "style": {
         "noParameterAssign": "off",
         "useNodeAssertStrict": "error"
@@ -48,10 +32,7 @@
     "enabled": true,
     "lineWidth": 120,
     "indentStyle": "space",
-    "formatWithErrors": true,
-    "ignore": [
-      "packages/knip/fixtures/ignore-exports-used-in-file-alias-exclude/more.ts"
-    ]
+    "formatWithErrors": true
   },
   "javascript": {
     "formatter": {
@@ -83,50 +64,13 @@
       }
     },
     {
-      "include": [
-        "packages/docs",
-        "packages/knip/fixtures/cli-preprocessor",
-        "packages/knip/fixtures/cli-reporter",
-        "packages/knip/scripts",
-        "packages/knip/src/cli.ts",
-        "packages/knip/src/reporters",
-        "packages/knip/src/util/cli-arguments.ts",
-        "packages/knip/src/util/debug.ts"
-      ],
+      "include": ["packages/docs"],
       "linter": {
         "rules": {
           "suspicious": {
             "noConsoleLog": "off"
           }
         }
-      }
-    },
-    {
-      "include": ["packages/knip/fixtures"],
-      "organizeImports": {
-        "enabled": false
-      },
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noUnusedVariables": "off",
-            "noUnusedImports": "off"
-          },
-          "style": {
-            "useImportType": "off"
-          },
-          "nursery": {
-            "noRestrictedImports": {
-              "level": "off"
-            }
-          }
-        }
-      }
-    },
-    {
-      "include": ["packages/knip/test/util/get-inputs-from-scripts.test.ts"],
-      "formatter": {
-        "lineWidth": 200
       }
     }
   ]

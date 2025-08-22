@@ -20,7 +20,7 @@ const resolveConfig: ResolveConfig<StrykerConfig> = localConfig => {
     : [];
   const plugins = localConfig.plugins ?? [];
 
-  return [...runners, ...checkers, ...plugins].map(toDeferResolve);
+  return [...runners, ...checkers, ...plugins].map(id => toDeferResolve(id));
 };
 
 export default {

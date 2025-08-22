@@ -20,6 +20,9 @@ Easy things should be easy, and complex things possible.
 This tutorial walks through example plugins so you'll be ready to write your
 own! The following examples demonstrate the elements a plugin can implement.
 
+There's a handy command available to easily [create a new plugin][1] and get
+started right away.
+
 ## Example 1: entry
 
 Let's dive right in. Here's the entire source code of the Tailwind plugin:
@@ -49,7 +52,7 @@ Yes, that's the entire plugin! Let's go over each item one by one:
 
 ### 1. `title`
 
-The title of the plugin displayed in the [list of plugins][1] and in debug
+The title of the plugin displayed in the [list of plugins][2] and in debug
 output.
 
 ### 2. `enablers`
@@ -68,16 +71,10 @@ This function can be kept straightforward with the `hasDependency` helper.
 
 ### 4. `entry`
 
-This plugin exports `entry` file patterns.
-
-In summary: if `tailwind` is listed as a dependency then `tailwind.config.*`
-files are added as entry files.
-
-With many tools, the dynamic configuration file import dependencies such as
-plugins or reporters with regular `require` or `import` statements. In this
-case, we have no extra work in the Knip plugin, as they'll be treated as regular
-entry files. All internal and external dependencies of the `tailwind.config.ts`
-entry file will be marked as used.
+This plugin exports `entry` file patterns. This means that if the Tailwind
+plugin is enabled, then `tailwind.config.*` files are added as entry files. A
+Tailwind configuration file does not contain anything particular, so adding it
+as an `entry` to treat it as a regular source file is enough.
 
 The next example shows how to handle a tool that has its own particular
 configuration object.
@@ -113,7 +110,7 @@ const config = [
 const resolveConfig: ResolveConfig<NycConfig> = config => {
   const extend = config?.extends ?? [];
   const requires = config?.require ?? [];
-  return [extend, requires].flat().map(toDeferResolve);
+  return [extend, requires].flat().map(id => toDeferResolve(id));
 };
 
 export default {
@@ -139,14 +136,14 @@ Compared to the first example, this plugin has two new variables:
 ### 5. `config`
 
 The `config` array contains all possible locations of the config file for the
-tool. Knip loads matching files and passes the results (i.e. what resolves as
-the default export) into the `resolveConfig` function:
+tool. Knip loads matching files and passes the results (i.e. its default export)
+into the `resolveConfig` function:
 
 ### 6. `resolveConfig`
 
-This function receives the exported value of the `config` files, and executes
-the `resolveConfig` function with this object. The plugin should return the
-dependencies referenced in this object.
+This function receives the exported value of the `config` file, and executes the
+`resolveConfig` function with this object. The plugin should return the entry
+paths and dependencies referenced in this object.
 
 Knip supports JSON, YAML, TOML, JavaScript and TypeScript config files. Files
 without an extension are provided as plain text strings.
@@ -155,49 +152,61 @@ without an extension are provided as plain text strings.
 
 You should implement `resolveConfig` if any of these are true:
 
-- The tool supports a `config` file in JSON or YAML format
+- The `config` file contains one or more options that represent [entry
+  points][3]
 - The `config` file references dependencies by strings (not import statements)
 
 :::
 
-## Example 3: custom entry paths
+## Example 3: entry paths
+
+### 7. entry and production
 
 Some tools operate mostly on entry files, some examples:
 
 - Mocha looks for test files at `test/*.{js,cjs,mjs}`
 - Storybook looks for stories at `*.stories.@(mdx|js|jsx|tsx)`
 
-And some of those tools allow to configure those locations and patterns. If
-that's the case, than we can define `resolveEntryPaths` in our plugin to take
-this from the configuration object and return it to Knip:
+And some of those tools allow to configure those locations and patterns in
+configuration files, such as `next.config.js` or `vite.config.ts`. If that's the
+case we can define `resolveConfig` in our plugin to take this from the
+configuration object and return it to Knip:
 
-### 7. resolveEntryPaths
-
-Here's an example from the Preconstruct plugin:
+Here's an example from the Mocha plugin:
 
 ```ts
-const resolveEntryPaths: ResolveConfig<PreconstructConfig> = async config => {
-  return (config.entrypoints ?? []).map(id => toEntry(id));
+const entry = ['**/test/*.{js,cjs,mjs}'];
+
+const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
+  const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
+  return entryPatterns.map(id => toEntry(id));
+};
+
+export default {
+  entry,
+  resolveConfig,
 };
 ```
 
-With Preconstruct, you can configure `entrypoints`. If this function is
-implemented in a plugin, Knip will use its return value over the default `entry`
-patterns. The result is that you don't need to duplicate this customization in
-both the tool (e.g. Preconstruct) and Knip.
+With Mocha, you can configure `spec` file patterns. The result of implementing
+`resolveConfig` is that users don't need to duplicate this configuration in both
+the tool (e.g. Mocha) and Knip.
 
-:::tip[Should I implement resolveEntryPaths?]
+Use `production` entries to target source files that represent production code.
 
-Plugins should have `resolveEntryPaths` implemented if the configuration file
-contains one or more options that represent [entry points][2].
+:::tip
+
+Regardless of the presence of `resolveConfig`, add `entry` and `production` to
+the default export so they will be displayed in the plugin's documentation as
+default values.
 
 :::
 
 ## Example 4: Use the AST directly
 
-For the `resolveEntryPaths` and `resolveFromConfig` functions, Knip loads the
-configuration file and passes the default-exported object to this plugin
-function. However, that object might then not contain the information we need.
+If the `resolveFromConfig` function is impemented, Knip loads the configuration
+file and passes the default-exported object to this plugin function. However,
+that object might then not contain the information we need.
 
 Here's an example `astro.config.ts` configuration file with a Starlight
 integration:
@@ -220,20 +229,20 @@ export default defineConfig({
 
 With Starlight, components can be defined to override the default internal ones.
 They're not otherwise referenced in your source code, so you'd have to manually
-add them as entry files ([Knip itself did this][3]).
+add them as entry files ([Knip itself did this][4]).
 
 In the Astro plugin, there's no way to access this object containing
 `components` to add the component files as entry files if we were to try:
 
 ```ts
-const resolveEntryPaths: ResolveEntryPaths<AstroConfig> = async config => {
+const resolveConfig: ResolveConfig<AstroConfig> = async config => {
   console.log(config); //  ¯\_(ツ)_/¯
 };
 ```
 
 This is why plugins can implement the `resolveFromAST` function.
 
-### 8. resolveFromAST
+### 7. resolveFromAST
 
 Let's take a look at the Astro plugin implementation. This example assumes some
 familiarity with Abstract Syntax Trees (AST) and the TypeScript compiler API.
@@ -410,7 +419,7 @@ consume named exports from entry files, causing false positives.
 
 The `allowIncludeExports` option allows the exports of entry files to be
 reported as unused when using `--include-entry-exports`. This option is
-typically used with the [toProductionEntry][4] input type. Example:
+typically used with the [toProductionEntry][5] input type. Example:
 
 ```ts
 toProductionEntry('./entry.ts', { allowIncludeExports: true });
@@ -418,14 +427,14 @@ toProductionEntry('./entry.ts', { allowIncludeExports: true });
 
 ## Argument parsing
 
-As part of the [script parser][5], Knip parses command-line arguments. Plugins
+As part of the [script parser][6], Knip parses command-line arguments. Plugins
 can implement the `arg` object to add custom argument parsing tailored to the
 executables of the tool.
 
 For now, there are two resources available to learn more:
 
-- [The documented `Args` type in source code][6]
-- [Implemented `args` in existing plugins][7]
+- [The documented `Args` type in source code][7]
+- [Implemented `args` in existing plugins][8]
 
 ## Create a new plugin
 
@@ -453,19 +462,18 @@ Feel free to check out the implementation of other similar plugins, and borrow
 ideas and code from those!
 
 The documentation website takes care of generating the [plugin list and the
-individual plugin pages][1] from the exported plugin values.
+individual plugin pages][2] from the exported plugin values.
 
 Thanks for reading. If you have been following this guide to create a new
-plugin, this might be the right time to open a pull request! Feel free to join
-[the Knip Discord channel][8] if you have any questions.
+plugin, this might be the right time to open a pull request!
 
-[1]: ../reference/plugins.md
-[2]: ../explanations/plugins.md#entry-files-from-config-files
-[3]:
+[1]: #create-a-new-plugin
+[2]: ../reference/plugins.md
+[3]: ../explanations/plugins.md#entry-files-from-config-files
+[4]:
   https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
-[4]: #toproductionentry
-[5]: ../features/script-parser.md
-[6]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
-[7]:
+[5]: #toproductionentry
+[6]: ../features/script-parser.md
+[7]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
+[8]:
   https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
-[8]: https://discord.gg/r5uXTtbTpc

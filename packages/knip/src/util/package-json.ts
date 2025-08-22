@@ -1,7 +1,6 @@
 // Borrowed from https://github.com/npm/package-json + https://github.com/npm/json-parse-even-better-errors
 import { readFile, writeFile } from 'node:fs/promises';
 import type { PackageJson } from '../types/package-json.js';
-import { _glob } from './glob.js';
 
 const INDENT = Symbol.for('indent');
 const NEWLINE = Symbol.for('newline');
@@ -57,21 +56,18 @@ export const save = async (filePath: string, content: ExtendedPackageJson) => {
   await writeFile(filePath, fileContent);
 };
 
-export const getEntryPathsFromManifest = (manifest: PackageJson, options: { cwd: string; ignore: string[] }) => {
+export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   const { main, module, browser, bin, exports, types, typings } = manifest;
 
   const entryPaths = new Set<string>();
 
   if (typeof main === 'string') entryPaths.add(main);
-
   if (typeof module === 'string') entryPaths.add(module);
-
   if (typeof browser === 'string') entryPaths.add(browser);
-
-  if (bin) {
-    if (typeof bin === 'string') entryPaths.add(bin);
-    if (typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
-  }
+  if (typeof bin === 'string') entryPaths.add(bin);
+  if (bin && typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
+  if (typeof types === 'string') entryPaths.add(types);
+  if (typeof typings === 'string') entryPaths.add(typings);
 
   if (exports) {
     for (const item of getEntriesFromExports(exports)) {
@@ -84,8 +80,17 @@ export const getEntryPathsFromManifest = (manifest: PackageJson, options: { cwd:
     }
   }
 
-  if (typeof types === 'string') entryPaths.add(types);
-  if (typeof typings === 'string') entryPaths.add(typings);
+  return entryPaths;
+};
 
-  return _glob({ patterns: Array.from(entryPaths), ...options, gitignore: false, label: 'package.json entry paths' });
+export const getManifestImportDependencies = (manifest: PackageJson) => {
+  const dependencies = new Set<string>();
+  if (!manifest.imports) return dependencies;
+  for (const [entry, exportValue] of Object.entries(manifest.imports)) {
+    if (!entry.startsWith('#')) continue;
+    for (const item of getEntriesFromExports(exportValue)) {
+      if (!item.startsWith('.') && !item.startsWith('!')) dependencies.add(item);
+    }
+  }
+  return dependencies;
 };

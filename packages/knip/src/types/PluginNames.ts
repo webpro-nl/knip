@@ -4,17 +4,22 @@ export type PluginName =
   | 'astro'
   | 'ava'
   | 'babel'
+  | 'biome'
   | 'bun'
   | 'c8'
   | 'capacitor'
+  | 'changelogen'
+  | 'changelogithub'
   | 'changesets'
   | 'commitizen'
   | 'commitlint'
+  | 'convex'
   | 'create-typescript-app'
   | 'cspell'
   | 'cucumber'
   | 'cypress'
   | 'dependency-cruiser'
+  | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
   | 'eleventy'
@@ -25,6 +30,7 @@ export type PluginName =
   | 'github-actions'
   | 'glob'
   | 'graphql-codegen'
+  | 'hardhat'
   | 'husky'
   | 'i18next-parser'
   | 'jest'
@@ -45,6 +51,7 @@ export type PluginName =
   | 'netlify'
   | 'next'
   | 'node'
+  | 'node-modules-inspector'
   | 'nodemon'
   | 'npm-package-json-lint'
   | 'nuxt'
@@ -59,6 +66,7 @@ export type PluginName =
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
+  | 'prisma'
   | 'react-cosmos'
   | 'react-router'
   | 'relay'
@@ -67,6 +75,7 @@ export type PluginName =
   | 'remix'
   | 'rollup'
   | 'rsbuild'
+  | 'rslib'
   | 'rspack'
   | 'semantic-release'
   | 'sentry'
@@ -78,10 +87,12 @@ export type PluginName =
   | 'stryker'
   | 'stylelint'
   | 'svelte'
+  | 'svgo'
   | 'syncpack'
   | 'tailwind'
   | 'travis'
   | 'ts-node'
+  | 'tsdown'
   | 'tsup'
   | 'tsx'
   | 'typedoc'
@@ -106,17 +117,22 @@ export const pluginNames = [
   'astro',
   'ava',
   'babel',
+  'biome',
   'bun',
   'c8',
   'capacitor',
+  'changelogen',
+  'changelogithub',
   'changesets',
   'commitizen',
   'commitlint',
+  'convex',
   'create-typescript-app',
   'cspell',
   'cucumber',
   'cypress',
   'dependency-cruiser',
+  'docusaurus',
   'dotenv',
   'drizzle',
   'eleventy',
@@ -127,6 +143,7 @@ export const pluginNames = [
   'github-actions',
   'glob',
   'graphql-codegen',
+  'hardhat',
   'husky',
   'i18next-parser',
   'jest',
@@ -147,6 +164,7 @@ export const pluginNames = [
   'netlify',
   'next',
   'node',
+  'node-modules-inspector',
   'nodemon',
   'npm-package-json-lint',
   'nuxt',
@@ -161,6 +179,7 @@ export const pluginNames = [
   'postcss',
   'preconstruct',
   'prettier',
+  'prisma',
   'react-cosmos',
   'react-router',
   'relay',
@@ -169,6 +188,7 @@ export const pluginNames = [
   'remix',
   'rollup',
   'rsbuild',
+  'rslib',
   'rspack',
   'semantic-release',
   'sentry',
@@ -180,10 +200,12 @@ export const pluginNames = [
   'stryker',
   'stylelint',
   'svelte',
+  'svgo',
   'syncpack',
   'tailwind',
   'travis',
   'ts-node',
+  'tsdown',
   'tsup',
   'tsx',
   'typedoc',

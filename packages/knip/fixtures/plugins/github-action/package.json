@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/github-action",
+  "name": "@plugins/github-action",
   "dependencies": {
     "@actions/core": "*"
   }

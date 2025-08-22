@@ -16,6 +16,7 @@ test('Handle special characters in named exports and members', async () => {
   assert(issues.exports['exports.ts']['$dollar']);
   assert(issues.exports['exports.ts']['dollar$']);
   assert(issues.exports['exports.ts']['_underscore']);
+  assert(issues.exports['exports.ts']['__underscores']);
   assert(issues.exports['exports.ts']['$Dollar']);
 
   assert(issues.types['exports.ts']['$DollarType']);
@@ -28,7 +29,7 @@ test('Handle special characters in named exports and members', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     classMembers: 4,
-    exports: 4,
+    exports: 5,
     types: 1,
     processed: 2,
     total: 2,
@@ -45,6 +46,7 @@ test('Handle special characters in named exports and members (nsTypes)', async (
   assert(issues.exports['exports.ts']['$dollar']);
   assert(issues.exports['exports.ts']['dollar$']);
   assert(issues.exports['exports.ts']['_underscore']);
+  assert(issues.exports['exports.ts']['__underscores']);
   assert(issues.exports['exports.ts']['$Dollar']);
 
   assert(issues.types['exports.ts']['$DollarType']);
@@ -79,7 +81,7 @@ test('Handle special characters in named exports and members (nsTypes)', async (
     ...baseCounters,
     classMembers: 4,
     enumMembers: 20,
-    exports: 4,
+    exports: 5,
     types: 1,
     processed: 2,
     total: 2,

@@ -9,7 +9,7 @@ const cwd = resolve('fixtures/fix-members');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-test('Remove exports and dependencies', async () => {
+test('Fix enum members', async () => {
   const tests = [
     [
       'class.ts',

@@ -1,5 +1,5 @@
-import circularB from '@workspaces-circular/lib-b';
-import circularC from '@workspaces-circular/lib-c';
+import circularB from '@fixtures/workspaces__lib-b';
+import circularC from '@fixtures/workspaces__lib-c';
 
 circularB;
 circularC;

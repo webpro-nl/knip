@@ -6,7 +6,12 @@
       "project": ["!templates/**"]
     },
     "packages/knip": {
-      "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template/**"]
+      "project": [
+        "src/**/*.ts!",
+        "test/**/*.ts",
+        "!src/util/empty.ts",
+        "!**/_template/**"
+      ]
     },
     "packages/docs": {
       "entry": ["{remark,scripts}/*.ts"]

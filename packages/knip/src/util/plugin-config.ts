@@ -44,10 +44,14 @@ const toConfigMap =
   };
 
 export const toCosmiconfig = toConfigMap(['json', 'yaml', 'yml', 'js', 'ts', 'cjs', 'mjs'], { configDir: true });
-export const toLilconfig = toConfigMap(['json', 'js', 'cjs', 'mjs'], { configDir: true });
+export const toLilconfig = toConfigMap(['json', 'ts', 'js', 'cjs', 'mjs'], { configDir: true });
 export const toUnconfig = toConfigMap(['json', 'ts', 'mts', 'cts', 'js', 'mjs', 'cjs'], {
   configDir: false,
   rcPrefix: '',
   rcSuffix: '',
   configFiles: false,
 });
+export const toC12config = toConfigMap(
+  ['json', 'jsonc', 'json5', 'yaml', 'yml', 'js', 'ts', 'mjs', 'cjs', 'mts', 'cts', 'toml'],
+  { configDir: true }
+);

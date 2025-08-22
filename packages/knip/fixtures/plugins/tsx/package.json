@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/tsx",
+  "devDependencies": {
+    "tsx": "*"
+  },
+  "scripts": {
+    "test": "tsx --test"
+  }
+}

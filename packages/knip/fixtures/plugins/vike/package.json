@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vike",
+  "name": "@plugins/vike",
   "scripts": {
     "dev": "npm run server:dev",
     "prod": "npm run lint && npm run build && npm run server:prod",

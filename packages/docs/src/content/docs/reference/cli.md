@@ -52,12 +52,63 @@ Shortcut: `-d`
 
 Show debug output.
 
+### `--memory`
+
+```txt frame=terminal
+knip --memory
+
+(results)
+
+heapUsed  heapTotal  freemem
+--------  ---------  -------
+   42.09      70.91  2251.00
+  927.04    1042.58  1166.47
+  973.29    1047.33  1160.92
+  971.54    1079.83  1121.66
+  997.80    1080.33  1120.34
+ 1001.88    1098.08  1100.72
+ 1038.69    1116.58  1100.72
+ 1082.12    1166.33  1100.72
+ 1145.46    1224.50  1100.72
+ 1115.82    1240.25  1100.72
+ 1182.35    1249.75   973.05
+  637.32    1029.17   943.63
+  674.30    1029.33   943.39
+  682.24    1029.33   941.63
+  707.70    1029.33   937.48
+
+Total running time: 4.3s
+```
+
+Can be used with [--isolate-workspaces][5] to see the difference in garbage
+collection during the process.
+
+### `--memory-realtime`
+
+Use this if Knip crashes to still see memory usage info over time:
+
+```txt frame=terminal
+knip --memory-realtime
+
+heapUsed  heapTotal  freemem
+--------  ---------  -------
+   42.09      70.91  2251.00
+  927.04    1042.58  1166.47
+...mem info keeps being logged...
+
+(results)
+```
+
 ### `--performance`
 
 Use this flag to get the count and execution time of potentially expensive
 functions in a table. Example:
 
 ```txt frame=terminal
+$ knip --performance
+
+(results)
+
 Name                           size  min       max       median    sum
 -----------------------------  ----  --------  --------  --------  --------
 findReferences                  648     84.98   7698.61     96.41  70941.70
@@ -68,7 +119,7 @@ findGithubActionsDependencies     6      0.16     12.71      0.65     23.45
 findBabelDependencies             2      0.00     38.75     19.37     38.75
 ...
 
-Total running time: 5s (mem: 631.27MB)
+Total running time: 5s
 ```
 
 - `name`: the internal Knip function name
@@ -79,21 +130,38 @@ Total running time: 5s (mem: 631.27MB)
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][5]).
+`performance.timerify` ([GitHub issue][6]).
+
+### `--performance-fn`
+
+Limit the output of `--performance` to a single function to minimize the
+overhead of the `timerify` Node.js built-in and focus on that function alone:
+
+```txt frame=terminal
+$ knip --performance-fn resolveSync
+
+(results)
+
+Name         size   min   max   median   sum
+-----------  -----  ----  ----  ------  ------
+resolveSync  66176  0.00  5.69    0.00  204.85
+
+Total running time: 12.9s
+```
 
 ### `--trace`
 
 Trace exports to see where they are imported.
 
-Also see [Trace][6].
+Also see [Trace][7].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][7].
+Trace export name to see where it's imported. Implies [--trace][8].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][7].
+Trace file to see where its exports are imported. Implies [--trace][8].
 
 ## Configuration
 
@@ -123,7 +191,7 @@ Default location: `tsconfig.json`
 
 ### `--workspace [dir]`
 
-[Lint a single workspace][8] including its ancestor and dependent workspaces.
+[Lint a single workspace][9] including its ancestor and dependent workspaces.
 The default behavior is to lint all configured workspaces.
 
 Shortcut: `-W`
@@ -147,7 +215,7 @@ files when reporting unused exports:
 knip --include-entry-exports
 ```
 
-Also see [includeEntryExports][9].
+Also see [includeEntryExports][10].
 
 ### `--include-libs`
 
@@ -158,14 +226,14 @@ Getting false positives for exports consumed by external libraries? Try the
 knip --include-libs
 ```
 
-Also see [external libs][10].
+Also see [external libs][11].
 
 ### `--isolate-workspaces`
 
-By default, Knip optimizes performance using [workspace sharing][11] to existing
+By default, Knip optimizes performance using [workspace sharing][12] to existing
 TypeScript programs, based on the compatibility of their `compilerOptions`. This
 flag disables this behavior and creates one program per workspace, which is
-slower but memory is spread more evenly over time.
+slower but memory usage is spread more evenly over time.
 
 ## Modes
 
@@ -179,18 +247,18 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][12].
+Read more at [Production Mode][13].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][13].
+mode][14].
 
-Read more at [Production Mode][12].
+Read more at [Production Mode][13].
 
 ### `--fix`
 
-Read more at [auto-fix][14].
+Read more at [auto-fix][15].
 
 ### `--cache`
 
@@ -212,11 +280,11 @@ Watch current directory, and update reported issues when a file is modified,
 added or deleted.
 
 Watch mode focuses on imports and exports in source files. During watch mode,
-changes in `package.json` and/or `node_modules` are not supported.
+changes in `package.json` or `node_modules` may not cause an updated report.
 
 ## Filters
 
-Available [issue types][15] when filtering output using `--include` or
+Available [issue types][16] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -272,7 +340,7 @@ Shortcut to include all types of export issues:
 
 ### `--experimental-tags`
 
-Deprecated. Use [--tags][16] instead.
+Deprecated. Use [--tags][17] instead.
 
 ### `--tags`
 
@@ -326,7 +394,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][17].
+Also see [Reporters & Preprocessors][18].
 
 ### `--reporter-options [json]`
 
@@ -361,7 +429,7 @@ Pass extra options to the preprocessor as JSON string.
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
 
-Also see [Reporters & Preprocessors][17].
+Also see [Reporters & Preprocessors][18].
 
 ## Exit code
 
@@ -393,16 +461,17 @@ Exit with non-zero code (`1`) if there are any configuration hints.
 [2]: ../reference/known-issues.md
 [3]: https://no-color.org/
 [4]: https://www.npmjs.com/package/picocolors
-[5]: https://github.com/oven-sh/bun/issues/9271
-[6]: ../guides/troubleshooting.md#trace
-[7]: #--trace
-[8]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
-[9]: ./configuration.md#includeentryexports
-[10]: ../guides/handling-issues.mdx#external-libraries
-[11]: ../guides/performance.md#workspace-sharing
-[12]: ../features/production-mode.md
-[13]: #--production
-[14]: ../features/auto-fix.mdx
-[15]: ./issue-types.md
-[16]: #--tags
-[17]: ../features/reporters.md
+[5]: #--isolate-workspaces
+[6]: https://github.com/oven-sh/bun/issues/9271
+[7]: ../guides/troubleshooting.md#trace
+[8]: #--trace
+[9]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[10]: ./configuration.md#includeentryexports
+[11]: ../guides/handling-issues.mdx#external-libraries
+[12]: ../guides/performance.md#workspace-sharing
+[13]: ../features/production-mode.md
+[14]: #--production
+[15]: ../features/auto-fix.mdx
+[16]: ./issue-types.md
+[17]: #--tags
+[18]: ../features/reporters.md

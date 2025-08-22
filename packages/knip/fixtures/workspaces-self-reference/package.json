@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-self-reference/root",
+  "name": "@fixtures/workspaces-self-reference",
   "workspaces": ["packages/*"],
   "knip": {
     "workspaces": {

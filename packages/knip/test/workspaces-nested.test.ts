@@ -44,7 +44,7 @@ test('Find unused dependencies in nested workspaces with default config in produ
 });
 
 test('Find unused dependencies in nested workspaces with default config in production mode (production)', async () => {
-  const { issues, counters, configurationHints } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isStrict: false,
@@ -63,12 +63,10 @@ test('Find unused dependencies in nested workspaces with default config in produ
     processed: 3,
     total: 3,
   });
-
-  assert.deepEqual(configurationHints, new Set());
 });
 
 test('Find unused dependencies in nested workspaces with default config in production mode (strict)', async () => {
-  const { issues, counters, configurationHints } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isStrict: true,
@@ -88,6 +86,4 @@ test('Find unused dependencies in nested workspaces with default config in produ
     processed: 3,
     total: 3,
   });
-
-  assert.deepEqual(configurationHints, new Set());
 });

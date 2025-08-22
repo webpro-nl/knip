@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/eslint4",
+  "devDependencies": {
+    "eslint": "*",
+    "@eslint/js": "*"
+  }
+}

@@ -7,4 +7,10 @@ export default [
   {
     file: 'routes/route.(with).$special[.chars].tsx',
   },
+  {
+    file: 'routes/$/route.tsx',
+  },
+  {
+    file: 'routes/$.tsx',
+  },
 ];

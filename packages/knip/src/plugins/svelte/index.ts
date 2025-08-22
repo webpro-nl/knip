@@ -1,4 +1,6 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
+import { toAlias } from '../../util/input.js';
+import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { config as viteConfig } from '../vite/index.js';
 
@@ -18,10 +20,16 @@ const production = [
   'src/params/*.{js,ts}',
 ];
 
+const resolve: Resolve = options => {
+  const alias = toAlias('$app/*', [join(options.cwd, 'node_modules/@sveltejs/kit/src/runtime/app/*')]);
+  return [alias];
+};
+
 export default {
   title,
   enablers,
   isEnabled,
   entry,
   production,
+  resolve,
 } satisfies Plugin;

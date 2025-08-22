@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/husky-lint-staged",
+  "name": "@plugins/husky-lint-staged",
   "devDependencies": {
     "husky": "*",
     "lint-staged": "*",

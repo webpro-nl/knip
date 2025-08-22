@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/eslint2",
+  "name": "@plugins/eslint2",
   "scripts": {
     "lint": "eslint"
   },

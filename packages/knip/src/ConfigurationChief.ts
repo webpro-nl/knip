@@ -1,7 +1,9 @@
 // biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 import picomatch from 'picomatch';
+import type { z } from 'zod';
 import { partitionCompilers } from './compilers/index.js';
+import type { SyncCompilers } from './compilers/types.js';
 import { DEFAULT_EXTENSIONS, KNIP_CONFIG_LOCATIONS, ROOT_WORKSPACE_NAME } from './constants.js';
 import { knipConfigurationSchema } from './schema/configuration.js';
 import { type PluginName, pluginNames } from './types/PluginNames.js';
@@ -13,6 +15,7 @@ import type {
   RawPluginConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
+import type { ConfigurationHints } from './types/issues.js';
 import type { PackageJson, WorkspacePackage } from './types/package-json.js';
 import { arrayify, compact, partition } from './util/array.js';
 import parsedArgValues from './util/cli-arguments.js';
@@ -20,25 +23,36 @@ import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspa
 import { ConfigurationError } from './util/errors.js';
 import { findFile, isDirectory, isFile, loadJSON } from './util/fs.js';
 import { type CLIArguments, getIncludedIssueTypes } from './util/get-included-issue-types.js';
-import { _dirGlob } from './util/glob.js';
+import { _dirGlob, removeProductionSuffix } from './util/glob.js';
 import { graphSequencer } from './util/graph-sequencer.js';
 import { defaultRules } from './util/issue-initializers.js';
 import { _load } from './util/loader.js';
 import mapWorkspaces from './util/map-workspaces.js';
 import { getKeysByValue } from './util/object.js';
-import { join, relative } from './util/path.js';
+import { isAbsolute, join, relative } from './util/path.js';
 import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
+import { ELLIPSIS } from './util/string.js';
 import { splitTags } from './util/tag.js';
 import { unwrapFunction } from './util/unwrap-function.js';
 import { byPathDepth } from './util/workspace.js';
 
 const { config: rawConfigArg } = parsedArgValues;
 
-const getDefaultWorkspaceConfig = (extensions?: string[]) => {
-  const exts = [...DEFAULT_EXTENSIONS, ...(extensions ?? [])].map(ext => ext.slice(1)).join(',');
+const defaultBaseFilenamePattern = '{index,cli,main}';
+
+export const isDefaultPattern = (type: 'entry' | 'project', id: string) => {
+  if (type === 'project') return id.startsWith('**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts');
+  return (
+    id.startsWith('{index,cli,main}.{js,mjs,cjs,jsx,ts,tsx,mts,cts') ||
+    id.startsWith('src/{index,cli,main}.{js,mjs,cjs,jsx,ts,tsx,mts,cts')
+  );
+};
+
+const getDefaultWorkspaceConfig = (extensions: string[] = []) => {
+  const exts = [...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',');
   return {
-    entry: [`{index,cli,main}.{${exts}}!`, `src/{index,cli,main}.{${exts}}!`],
+    entry: [`${defaultBaseFilenamePattern}.{${exts}}!`, `src/${defaultBaseFilenamePattern}.{${exts}}!`],
     project: [`**/*.{${exts}}!`],
   };
 };
@@ -117,6 +131,7 @@ export class ConfigurationChief {
   resolvedConfigFilePath?: string;
 
   rawConfig?: any;
+  parsedConfig?: z.infer<typeof knipConfigurationSchema>;
 
   constructor({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace }: ConfigurationManagerOptions) {
     this.cwd = cwd;
@@ -146,7 +161,7 @@ export class ConfigurationChief {
     }
 
     for (const configPath of rawConfigArg ? [rawConfigArg] : KNIP_CONFIG_LOCATIONS) {
-      this.resolvedConfigFilePath = findFile(this.cwd, configPath);
+      this.resolvedConfigFilePath = isAbsolute(configPath) ? configPath : findFile(this.cwd, configPath);
       if (this.resolvedConfigFilePath) break;
     }
 
@@ -158,11 +173,34 @@ export class ConfigurationChief {
       ? await this.loadResolvedConfigurationFile(this.resolvedConfigFilePath)
       : manifest.knip;
 
+    if (manifest.knip) this.resolvedConfigFilePath = manifestPath;
+
     // Have to partition compiler functions before Zod touches them
-    const parsedConfig = this.rawConfig ? knipConfigurationSchema.parse(partitionCompilers(this.rawConfig)) : {};
-    this.config = this.normalize(parsedConfig);
+    this.parsedConfig = this.rawConfig ? knipConfigurationSchema.parse(partitionCompilers(this.rawConfig)) : {};
+
+    this.config = this.normalize(this.parsedConfig);
 
     await this.setWorkspaces();
+  }
+
+  public getConfigurationHints() {
+    const hints: ConfigurationHints = new Set();
+    const config = this.parsedConfig;
+    if (config) {
+      if (this.workspacePackages.size > 1) {
+        const entry = arrayify(config.entry);
+        if (entry.length > 0) {
+          const identifier = `[${entry[0]}${entry.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
+          hints.add({ type: 'entry-top-level', identifier });
+        }
+        const project = arrayify(config.project);
+        if (project.length > 0) {
+          const identifier = `[${project[0]}${project.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
+          hints.add({ type: 'project-top-level', identifier });
+        }
+      }
+    }
+    return hints;
   }
 
   private async loadResolvedConfigurationFile(configPath: string) {
@@ -217,7 +255,7 @@ export class ConfigurationChief {
       ignoreExportsUsedInFile,
       ignoreWorkspaces,
       isIncludeEntryExports,
-      syncCompilers: new Map(Object.entries(syncCompilers ?? {})),
+      syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
       rootPluginConfigs,
       tags: rawConfig.tags ?? [],
@@ -260,18 +298,24 @@ export class ConfigurationChief {
     return workspaces.map(pattern => pattern.replace(/(?<=!?)\.\//, ''));
   }
 
+  private getIgnoredWorkspaces() {
+    const ignoreWorkspaces = this.config.ignoreWorkspaces;
+    if (this.isProduction) return ignoreWorkspaces.map(removeProductionSuffix);
+    return ignoreWorkspaces.filter(pattern => !pattern.endsWith('!'));
+  }
+
   private getIgnoredWorkspacePatterns() {
     const ignoredWorkspacesManifest = this.getListedWorkspaces()
       .filter(name => name.startsWith('!'))
       .map(name => name.replace(/^!/, ''));
-    return [...ignoredWorkspacesManifest, ...this.config.ignoreWorkspaces];
+    return [...ignoredWorkspacesManifest, ...this.getIgnoredWorkspaces()];
   }
 
   private getConfiguredWorkspaceKeys() {
     const initialWorkspaces = this.rawConfig?.workspaces
       ? Object.keys(this.rawConfig.workspaces)
       : [ROOT_WORKSPACE_NAME];
-    const ignoreWorkspaces = this.rawConfig?.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
+    const ignoreWorkspaces = this.getIgnoredWorkspaces();
     return initialWorkspaces.filter(workspaceName => !ignoreWorkspaces.includes(workspaceName));
   }
 
@@ -392,9 +436,10 @@ export class ConfigurationChief {
     const descendentWorkspaces = this.getDescendentWorkspaces(name);
     const matchName = new RegExp(`^${name}/`);
     const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name);
+    const endMatch = /\/\*{1,2}$|\/$|$/;
     return [...ignoredWorkspaces, ...descendentWorkspaces]
       .map(workspaceName => workspaceName.replace(matchName, ''))
-      .map(workspaceName => `!${workspaceName}`);
+      .map(workspaceName => `!${workspaceName.replace(endMatch, '/**')}`);
   }
 
   private getConfigKeyForWorkspace(workspaceName: string) {
@@ -477,7 +522,7 @@ export class ConfigurationChief {
   }
 
   public getUnusedIgnoredWorkspaces() {
-    const ignoredWorkspaceNames = this.config.ignoreWorkspaces;
+    const ignoredWorkspaceNames = this.config.ignoreWorkspaces.map(removeProductionSuffix);
     const workspaceNames = [...this.workspacePackages.keys(), ...this.additionalWorkspaceNames];
     return ignoredWorkspaceNames
       .filter(ignoredWorkspaceName => !workspaceNames.some(name => picomatch.isMatch(name, ignoredWorkspaceName)))

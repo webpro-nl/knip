@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/node-modules-inspector",
+  "dependencies": {
+    "node-modules-inspector": "*"
+  },
+  "scripts": {
+    "build": "node-modules-inspector build",
+    "build-3": "node-modules-inspector --config .nmrc.js"
+  }
+}

@@ -1,6 +1,5 @@
 {
-  "name": "@workspaces-paths-compilers/root",
-  "version": "1.0.0",
+  "name": "@fixtures/workspaces-paths-compilers",
   "workspaces": ["packages/*"],
   "dependencies": {
     "vue": "*"

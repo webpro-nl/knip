@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/angular2",
+  "name": "@plugins/angular2",
   "scripts": {
     "ng": "ng"
   },
@@ -10,7 +10,7 @@
     "@angular/cli": "*",
     "@angular/ssr": "*",
     "@angular-builders/custom-esbuild": "*",
-    "@angular-devkit/build-angular": "*",
+    "@angular/build": "*",
     "karma": "*"
   }
 }

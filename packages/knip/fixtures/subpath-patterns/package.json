@@ -1,5 +1,5 @@
 {
-  "name": "my-package",
+  "name": "@fixtures/subpath-patterns",
   "imports": {
     "#internals/*": "./src/internals/*.ts",
     "#internals-explicit-ext/*": "./src/internals/*",

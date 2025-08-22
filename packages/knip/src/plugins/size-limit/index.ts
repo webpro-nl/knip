@@ -1,4 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
 import { toLilconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
 
@@ -14,12 +15,24 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = [
   'package.json',
-  ...toLilconfig('size-limit', { configDir: false, additionalExtensions: ['ts', 'mts', 'cts'], rcSuffix: '' }),
+  ...toLilconfig('size-limit', { configDir: false, additionalExtensions: ['mts', 'cts'], rcSuffix: '' }),
 ];
+
+const resolve: Resolve = options => {
+  const allDeps = [
+    ...Object.keys(options.manifest.dependencies || {}),
+    ...Object.keys(options.manifest.devDependencies || {}),
+  ];
+
+  const sizeLimitDeps = allDeps.filter(dep => dep.startsWith('@size-limit/'));
+
+  return sizeLimitDeps.map(dep => toDependency(dep));
+};
 
 export default {
   title,
   enablers,
   isEnabled,
   config,
+  resolve,
 } satisfies Plugin;

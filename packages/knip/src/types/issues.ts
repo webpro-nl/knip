@@ -1,3 +1,5 @@
+import type { Workspace } from '../ConfigurationChief.js';
+
 export enum SymbolType {
   VARIABLE = 'variable',
   TYPE = 'type',
@@ -72,6 +74,8 @@ export type ReporterOptions = {
   isShowProgress: boolean;
   options: string;
   preprocessorOptions: string;
+  includedWorkspaces: Workspace[];
+  configFilePath?: string;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
@@ -84,10 +88,26 @@ export type Rules = Record<IssueType, IssueSeverity>;
 
 export type ConfigurationHints = Set<ConfigurationHint>;
 
+export type ConfigurationHintType =
+  | 'ignoreBinaries'
+  | 'ignoreDependencies'
+  | 'ignoreUnresolved'
+  | 'ignoreWorkspaces'
+  | 'entry-redundant'
+  | 'project-redundant'
+  | 'entry-top-level'
+  | 'project-top-level'
+  | 'entry-empty'
+  | 'project-empty'
+  | 'package-entry'
+  | 'workspace-unconfigured';
+
 export type ConfigurationHint = {
-  type: 'ignoreBinaries' | 'ignoreDependencies' | 'ignoreUnresolved' | 'ignoreWorkspaces';
+  type: ConfigurationHintType;
   identifier: string | RegExp;
+  filePath?: string;
   workspaceName?: string;
+  size?: number;
 };
 
 type TagHints = Set<TagHint>;

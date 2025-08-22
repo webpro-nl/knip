@@ -5,9 +5,9 @@ import { join, resolve } from '../src/util/path.js';
 import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
 
-test('Find unused files and exports with only JS files', async () => {
-  const cwd = resolve('fixtures/js-only');
+const cwd = resolve('fixtures/js-only');
 
+test('Find unused files and exports with only JS files', async () => {
   const { issues, counters } = await main({
     ...baseArguments,
     cwd,
@@ -18,8 +18,8 @@ test('Find unused files and exports with only JS files', async () => {
 
   assert.equal(Object.values(issues.exports).length, 1);
   assert.equal(Object.values(issues.exports['my-namespace.js']).length, 2);
-  assert.equal(issues.exports['my-namespace.js']['x'].symbol, 'x');
-  assert.equal(issues.exports['my-namespace.js']['z'].symbol, 'z');
+  assert.equal(issues.exports['my-namespace.js']['MyNamespace.x'].symbol, 'x');
+  assert.equal(issues.exports['my-namespace.js']['MyNamespace.z'].symbol, 'z');
 
   assert.deepEqual(counters, {
     ...baseCounters,

@@ -12,9 +12,5 @@
     "strict": true,
     "target": "ES2022"
   },
-  "references": [
-    { "path": "packages/client" },
-    { "path": "packages/server" },
-    { "path": "packages/shared" }
-  ]
+  "references": [{ "path": "packages/client" }, { "path": "packages/lib" }]
 }

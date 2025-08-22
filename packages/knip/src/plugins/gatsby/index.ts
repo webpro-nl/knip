@@ -29,7 +29,7 @@ const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConf
   if (/gatsby-config/.test(configFileName)) {
     return (localConfig as GatsbyConfig).plugins
       .map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve))
-      .map(toDeferResolve);
+      .map(id => toDeferResolve(id));
   }
 
   if (/gatsby-node/.test(configFileName)) {

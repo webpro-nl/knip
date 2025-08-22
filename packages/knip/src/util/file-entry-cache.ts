@@ -127,7 +127,6 @@ export class FileEntryCache<T> {
     try {
       const dir = dirname(this.filePath);
       if (!isDirectory(dir)) fs.mkdirSync(dir, { recursive: true });
-      // @ts-ignore please bun
       fs.writeFileSync(this.filePath, serialize(this.cache));
     } catch (_err) {
       debugLog('*', `Error writing cache to ${this.filePath}`);

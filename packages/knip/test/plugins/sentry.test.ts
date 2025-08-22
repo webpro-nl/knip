@@ -7,10 +7,20 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/sentry');
 
-test('Find dependencies with the Sentry plugin', async () => {
+test('Find dependencies with the Sentry plugin (non-production)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
+  });
+
+  assert.deepEqual(counters, { ...baseCounters, processed: 3, total: 3 });
+});
+
+test('Find dependencies with the Sentry plugin (production)', async () => {
+  const { counters } = await main({
+    ...baseArguments,
+    cwd,
+    isProduction: true,
   });
 
   assert.deepEqual(counters, { ...baseCounters, processed: 3, total: 3 });

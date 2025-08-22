@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-nested/root",
+  "name": "@fixtures/workspaces-nested",
   "workspaces": ["L-1-1", "L-1-1/L-1-2", "L-1-1/L-1-2/L-1-3"],
   "dependencies": {
     "ignored-dep-global": "*"

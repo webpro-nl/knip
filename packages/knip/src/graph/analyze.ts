@@ -24,14 +24,12 @@ interface AnalyzeOptions {
   fixer: IssueFixer;
   graph: ModuleGraph;
   isFix: boolean;
-  isDisableConfigHints: boolean;
   isIncludeLibs: boolean;
   isProduction: boolean;
   report: Report;
   streamer: ConsoleStreamer;
   tags: Tags;
   unreferencedFiles: Set<string>;
-  workspace?: string;
 }
 
 export const analyze = async (options: AnalyzeOptions) => {
@@ -45,22 +43,19 @@ export const analyze = async (options: AnalyzeOptions) => {
     fixer,
     graph,
     isFix,
-    isDisableConfigHints,
     isIncludeLibs,
     isProduction,
     report,
     streamer,
     tags,
     unreferencedFiles,
-    workspace,
   } = options;
 
-  const isReportDependencies = report.dependencies || report.unlisted || report.unresolved;
+  const isReportDependencies = report.dependencies || report.unlisted || report.unresolved || report.binaries;
   const isReportValues = report.exports || report.nsExports || report.classMembers;
   const isReportTypes = report.types || report.nsTypes || report.enumMembers;
   const isReportClassMembers = report.classMembers;
   const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
-  const isShowConfigHints = !workspace && !isProduction && !isDisableConfigHints;
 
   const shouldIgnore = getShouldIgnoreHandler(isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
@@ -77,7 +72,7 @@ export const analyze = async (options: AnalyzeOptions) => {
 
   const analyzeGraph = async () => {
     if (isReportValues || isReportTypes) {
-      streamer.cast('Connecting the dots...');
+      streamer.cast('Connecting the dots');
 
       for (const [filePath, file] of graph.entries()) {
         const exportItems = file.exports;
@@ -116,7 +111,7 @@ export const analyze = async (options: AnalyzeOptions) => {
 
               if ((isReferenced || exportedItem.refs[1]) && isIgnored) {
                 for (const tagName of exportedItem.jsDocTags) {
-                  if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                  if (tags[1].includes(tagName.replace(/^@/, ''))) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                   }
                 }
@@ -167,7 +162,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                         if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                       } else if (isIgnored) {
                         for (const tagName of exportedItem.jsDocTags) {
-                          if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                          if (tags[1].includes(tagName.replace(/^@/, ''))) {
                             collector.addTagHint({ type: 'tag', filePath, identifier: id, tagName });
                           }
                         }
@@ -184,7 +179,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                     if (shouldIgnoreTags(member.jsDocTags)) {
                       const identifier = `${exportedItem.identifier}.${member.identifier}`;
                       for (const tagName of exportedItem.jsDocTags) {
-                        if (tags[1].includes(tagName.replace(/^\@/, ''))) {
+                        if (tags[1].includes(tagName.replace(/^@/, ''))) {
                           collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                         }
                       }
@@ -295,18 +290,13 @@ export const analyze = async (options: AnalyzeOptions) => {
 
       deputy.removeIgnoredIssues(collector.getIssues());
 
-      // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in production/strict mode
-      if (isShowConfigHints) {
-        const configurationHints = deputy.getConfigurationHints();
-        for (const hint of configurationHints) collector.addConfigurationHint(hint);
-      }
+      const configurationHints = deputy.getConfigurationHints();
+      for (const hint of configurationHints) collector.addConfigurationHint(hint);
     }
 
-    if (isShowConfigHints) {
-      const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
-      for (const identifier of unusedIgnoredWorkspaces) {
-        collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
-      }
+    const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
+    for (const identifier of unusedIgnoredWorkspaces) {
+      collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
     }
   };
 

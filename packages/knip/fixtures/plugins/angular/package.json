@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/angular",
+  "name": "@plugins/angular",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

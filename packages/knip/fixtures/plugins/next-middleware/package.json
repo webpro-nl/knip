@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/next-middleware",
+  "name": "@plugins/next-middleware",
   "dependencies": {
     "next": "*"
   }

@@ -5,9 +5,9 @@ on:
   pull_request:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '!**'
+      - "!**"
 
 env:
   PKG_URL: |
@@ -43,7 +43,6 @@ jobs:
           - name: argos
             repo: argos-ci/argos
             commands: |
-              pnpm i -g pnpm
               pnpm install
               pnpm add -D -w $PKG_URL
               pnpm run knip
@@ -76,16 +75,6 @@ jobs:
               npm run lint:unused -- --cache
               npm run lint:unused -- --cache
 
-          - name: freeCodeCamp
-            repo: freeCodeCamp/freeCodeCamp
-            commands: |
-              pnpm i -g pnpm
-              pnpm install
-              cp sample.env .env
-              pnpm run --dir client create:env
-              # No exit code, since freeCodeCamp project does not use Knip in CI
-              pnpm run knip:all --no-exit-code
-
           - name: mocha
             repo: mochajs/mocha
             commands: |
@@ -101,7 +90,7 @@ jobs:
               pnpm install
               pnpm add -D $PKG_URL
               bunx --bun knip --tags=-knipignore
-              bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files
+              bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files --format
               bunx --bun knip --tags=-knipignore --production
 
           - name: prettier
@@ -123,10 +112,23 @@ jobs:
               pnpm test:knip --cache
               pnpm test:knip --cache
 
+          - name: rolldown
+            repo: rolldown/rolldown
+            commands: |
+              pnpm install
+              pnpm add -D -w knip@$PKG_URL
+              pnpm knip
+
+          - name: sentry
+            repo: getsentry/sentry
+            commands: |
+              pnpm install
+              pnpm dlx $PKG_URL
+
           - name: slonik
             repo: gajus/slonik
             commands: |
-              pnpm install
+              pnpm install --no-frozen-lockfile
               pnpm dlx $PKG_URL
 
           - name: TypeScript
@@ -139,22 +141,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - uses: oven-sh/setup-bun@v2
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-
       - name: Check out ${{ matrix.project.repo }}
         uses: actions/checkout@v4
         with:
           repository: ${{ matrix.project.repo }}
           path: ${{ matrix.project.name }}
           sparse-checkout: ${{ matrix.project.sparse-checkout }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Run Knip in ${{ matrix.project.repo }}
         working-directory: ${{ matrix.project.name }}

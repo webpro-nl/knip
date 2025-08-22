@@ -3,17 +3,22 @@ import { default as angular } from './angular/index.js';
 import { default as astro } from './astro/index.js';
 import { default as ava } from './ava/index.js';
 import { default as babel } from './babel/index.js';
+import { default as biome } from './biome/index.js';
 import { default as bun } from './bun/index.js';
 import { default as c8 } from './c8/index.js';
 import { default as capacitor } from './capacitor/index.js';
+import { default as changelogen } from './changelogen/index.js';
+import { default as changelogithub } from './changelogithub/index.js';
 import { default as changesets } from './changesets/index.js';
 import { default as commitizen } from './commitizen/index.js';
 import { default as commitlint } from './commitlint/index.js';
+import { default as convex } from './convex/index.js';
 import { default as createTypescriptApp } from './create-typescript-app/index.js';
 import { default as cspell } from './cspell/index.js';
 import { default as cucumber } from './cucumber/index.js';
 import { default as cypress } from './cypress/index.js';
 import { default as dependencyCruiser } from './dependency-cruiser/index.js';
+import { default as docusaurus } from './docusaurus/index.js';
 import { default as dotenv } from './dotenv/index.js';
 import { default as drizzle } from './drizzle/index.js';
 import { default as eleventy } from './eleventy/index.js';
@@ -24,6 +29,7 @@ import { default as githubAction } from './github-action/index.js';
 import { default as githubActions } from './github-actions/index.js';
 import { default as glob } from './glob/index.js';
 import { default as graphqlCodegen } from './graphql-codegen/index.js';
+import { default as hardhat } from './hardhat/index.js';
 import { default as husky } from './husky/index.js';
 import { default as i18nextParser } from './i18next-parser/index.js';
 import { default as jest } from './jest/index.js';
@@ -43,6 +49,7 @@ import { default as nanoStaged } from './nano-staged/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
+import { default as nodeModulesInspector } from './node-modules-inspector/index.js';
 import { default as node } from './node/index.js';
 import { default as nodemon } from './nodemon/index.js';
 import { default as npmPackageJsonLint } from './npm-package-json-lint/index.js';
@@ -58,6 +65,7 @@ import { default as plop } from './plop/index.js';
 import { default as postcss } from './postcss/index.js';
 import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
+import { default as prisma } from './prisma/index.js';
 import { default as reactCosmos } from './react-cosmos/index.js';
 import { default as reactRouter } from './react-router/index.js';
 import { default as relay } from './relay/index.js';
@@ -66,6 +74,7 @@ import { default as remark } from './remark/index.js';
 import { default as remix } from './remix/index.js';
 import { default as rollup } from './rollup/index.js';
 import { default as rsbuild } from './rsbuild/index.js';
+import { default as rslib } from './rslib/index.js';
 import { default as rspack } from './rspack/index.js';
 import { default as semanticRelease } from './semantic-release/index.js';
 import { default as sentry } from './sentry/index.js';
@@ -77,10 +86,12 @@ import { default as storybook } from './storybook/index.js';
 import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
+import { default as svgo } from './svgo/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
+import { default as tsdown } from './tsdown/index.js';
 import { default as tsup } from './tsup/index.js';
 import { default as tsx } from './tsx/index.js';
 import { default as typedoc } from './typedoc/index.js';
@@ -105,17 +116,22 @@ export const Plugins = {
   astro,
   ava,
   babel,
+  biome,
   bun,
   c8,
   capacitor,
+  changelogen,
+  changelogithub,
   changesets,
   commitizen,
   commitlint,
+  convex,
   'create-typescript-app': createTypescriptApp,
   cspell,
   cucumber,
   cypress,
   'dependency-cruiser': dependencyCruiser,
+  docusaurus,
   dotenv,
   drizzle,
   eleventy,
@@ -126,6 +142,7 @@ export const Plugins = {
   'github-actions': githubActions,
   glob,
   'graphql-codegen': graphqlCodegen,
+  hardhat,
   husky,
   'i18next-parser': i18nextParser,
   jest,
@@ -146,6 +163,7 @@ export const Plugins = {
   netlify,
   next,
   node,
+  'node-modules-inspector': nodeModulesInspector,
   nodemon,
   'npm-package-json-lint': npmPackageJsonLint,
   nuxt,
@@ -160,6 +178,7 @@ export const Plugins = {
   postcss,
   preconstruct,
   prettier,
+  prisma,
   'react-cosmos': reactCosmos,
   'react-router': reactRouter,
   relay,
@@ -168,6 +187,7 @@ export const Plugins = {
   remix,
   rollup,
   rsbuild,
+  rslib,
   rspack,
   'semantic-release': semanticRelease,
   sentry,
@@ -179,10 +199,12 @@ export const Plugins = {
   stryker,
   stylelint,
   svelte,
+  svgo,
   syncpack,
   tailwind,
   travis,
   'ts-node': tsNode,
+  tsdown,
   tsup,
   tsx,
   typedoc,

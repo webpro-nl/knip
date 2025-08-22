@@ -5,7 +5,14 @@ import type { GetImportsAndExportsOptions } from '../types/config.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
-import type { ExportMap, ExportMember, ImportDetails, ImportMap, UnresolvedImport } from '../types/module-graph.js';
+import type {
+  ExportMap,
+  ExportMember,
+  FileNode,
+  ImportDetails,
+  ImportMap,
+  UnresolvedImport,
+} from '../types/module-graph.js';
 import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/module-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
@@ -68,7 +75,7 @@ const getImportsAndExports = (
   resolveModule: (specifier: string) => ts.ResolvedModuleFull | undefined,
   typeChecker: ts.TypeChecker,
   options: GetImportsAndExportsOptions
-) => {
+): FileNode => {
   const { skipTypeOnly, tags, ignoreExportsUsedInFile } = options;
   const internal: ImportMap = new Map();
   const external = new Set<string>();

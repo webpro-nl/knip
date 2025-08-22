@@ -1,7 +1,7 @@
-import type { Entries } from 'type-fest';
+import type { Entries } from '../types/entries.js';
 import type { Issue, IssueSet, ReporterOptions } from '../types/issues.js';
 import { relative, toRelative } from '../util/path.js';
-import { getTitle } from './util.js';
+import { getIssueTypeTitle } from './util/util.js';
 
 export default ({ report, issues }: ReporterOptions) => {
   console.log('# Knip report\n');
@@ -15,7 +15,7 @@ export default ({ report, issues }: ReporterOptions) => {
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
-      const title = getTitle(reportType);
+      const title = getIssueTypeTitle(reportType);
       const isSet = issues[reportType] instanceof Set;
       const issuesForType = isSet
         ? Array.from(issues[reportType] as IssueSet)

@@ -17,10 +17,12 @@ export const getInputs = (
   }
 
   const dependencies = (config as ESLintConfig).flatMap(config =>
-    config.settings ? getDependenciesFromSettings(config.settings).filter(id => id !== '@typescript-eslint/parser') : []
+    config.settings ? getDependenciesFromSettings(config.settings) : []
   );
 
-  return compact(dependencies).map(id => toDeferResolve(id));
+  dependencies.push('eslint-import-resolver-typescript');
+
+  return compact(dependencies).map(id => toDeferResolve(id, { optional: true }));
 };
 
 const getInputsDeprecated = (
@@ -43,7 +45,9 @@ const getInputsDeprecated = (
   // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
   const rules = getDependenciesFromRules({});
   const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getInputsDeprecated(d, options)) : [];
-  const deferred = compact([...extendsSpecifiers, ...plugins, parser, ...settings, ...rules]).map(toDeferResolve);
+  const deferred = compact([...extendsSpecifiers, ...plugins, parser, ...settings, ...rules]).map(id =>
+    toDeferResolve(id)
+  );
   return [...extendConfigs, ...deferred, ...babelDependencies, ...overrides];
 };
 

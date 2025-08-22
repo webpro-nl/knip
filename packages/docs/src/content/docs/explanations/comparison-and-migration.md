@@ -2,11 +2,12 @@
 title: Comparison & Migration
 ---
 
-First of all, Knip owes a lot to the projects on this page that exist longer and
-they've all been inspirational in their own way. For best results, Knip has [a
-vision embracing comprehensiveness][1] which is larger in scope than any of the
-alternatives. So if any of those tools has the right scope for your
-requirements, then by all means, use what suits you best.
+First of all, Knip owes a lot to the projects on this page and they've all been
+inspirational in their own way. For best results, Knip has [a vision embracing
+comprehensiveness][1] which is larger in scope than any of the alternatives. So
+if any of those tools has the right scope for your requirements, then by all
+means, use what suits you best. Note that most projects are no longer
+maintained.
 
 All tools have in common that they have less features and don't support the
 concept of [monorepos/workspaces][2]. Feel free to send in projects that Knip
@@ -106,6 +107,9 @@ Additional alternative and related projects include:
 - [npm-check][14]
 - [renoma][15]
 
+In general, the [e18e.dev][16] website and in particular the [Cleanup][17]
+section is a great resource when dealing with technical debt.
+
 [1]: ./why-use-knip.md#comprehensive
 [2]: ../features/monorepos-and-workspaces.md
 [3]: ../overview/getting-started.mdx
@@ -121,3 +125,5 @@ Additional alternative and related projects include:
 [13]: https://github.com/pacocoursey/next-unused
 [14]: https://github.com/dylang/npm-check
 [15]: https://github.com/bluwy/renoma
+[16]: https://e18e.dev
+[17]: https://e18e.dev/guide/cleanup.html

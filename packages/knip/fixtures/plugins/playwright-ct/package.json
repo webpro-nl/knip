@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/playwright-ct",
+  "name": "@plugins/playwright-ct",
   "scripts": {
     "test-ct": "playwright test -c playwright-ct.config.ts"
   },

@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/relay",
-  "version": "*",
+  "name": "@plugins/relay",
   "scripts": {
     "build": "relay-compiler myrelay.config.js",
     "dev": "vite dev"

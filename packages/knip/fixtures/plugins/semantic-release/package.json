@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/semantic-release",
+  "name": "@plugins/semantic-release",
   "devDependencies": {
     "semantic-release": "*"
   },

@@ -7,3 +7,5 @@ import Icon from './icon.svg';
 import './global.css';
 
 import 'styles/base.css';
+
+import png from './not-found.png';

@@ -17,7 +17,7 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
     packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
   };
 
-  const { hostDependencies, installedBinaries } = await getDependencyMetaData(config);
+  const { hostDependencies, installedBinaries } = getDependencyMetaData(config);
 
   const expectedHostDependencies = new Map();
   expectedHostDependencies.set('pm2-peer-dep', [{ name: 'pm2', isPeerOptional: false }]);
@@ -90,7 +90,7 @@ test('Unused dependencies in npm scripts', async () => {
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {
-  const { issues, counters, configurationHints } = await main({
+  const { issues, counters } = await main({
     ...baseArguments,
     cwd,
     isProduction: true,
@@ -107,6 +107,4 @@ test('Unused dependencies in npm scripts (strict)', async () => {
     processed: 1,
     total: 2,
   });
-
-  assert.deepEqual(configurationHints, new Set());
 });

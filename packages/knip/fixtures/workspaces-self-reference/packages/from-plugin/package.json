@@ -1,0 +1,19 @@
+{
+  "name": "@fixtures/workspaces-self-reference__from-plugin",
+  "scripts": {
+    "lint": "eslint"
+  },
+  "exports": {
+    ".": {
+      "default": "./data.json"
+    },
+    "./local": {
+      "require": "./file.js",
+      "import": "./file.js"
+    }
+  },
+  "devDependencies": {
+    "eslint": "*",
+    "@fixtures/eslint-config-x-self-reference": "*"
+  }
+}

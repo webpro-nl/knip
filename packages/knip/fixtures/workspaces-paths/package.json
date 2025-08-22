@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-paths/root",
+  "name": "@fixtures/workspaces-paths",
   "workspaces": ["packages/*"],
   "dependencies": {},
   "knip": {

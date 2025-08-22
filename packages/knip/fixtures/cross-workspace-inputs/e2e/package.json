@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/state-e2e",
+  "name": "@fixtures/cross-workspace-inputs__e2e",
   "devDependencies": {
     "@playwright/test": "*"
   }

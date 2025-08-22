@@ -1,11 +1,13 @@
 {
-  "name": "@workspaces-ignored/root",
+  "name": "@fixtures/workspaces-ignored",
   "knip": {
     "ignoreWorkspaces": [
       "packages/c",
       "packages/d*",
-      "packages/f",
+      "packages/not-found",
       "packages/g",
+      "packages/production!",
+      "packages/production-not-found!",
       "packages/deep/**",
       "packages/flat/*",
       "packages/un/**/used",

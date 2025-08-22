@@ -1,5 +1,5 @@
-import a from '@workspaces/shared';
-import b from '@workspaces/tools';
+import a from '@fixtures/workspaces__shared';
+import b from '@fixtures/workspaces__tools';
 import { n } from 'vanilla-js';
 
 a;

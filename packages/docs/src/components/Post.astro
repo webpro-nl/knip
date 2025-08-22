@@ -60,7 +60,7 @@ const post: PostWithUser = replaceShortenedUrls(Astro.props.data);
       <p class="text" set:html={post.text.trim().replace(/\n/g, '<br />')} />
       <p class="timestamp">
         <a
-          href={`${post.id.length > 17 ? `https://twitter.com/${post.user.username}/status/${post.id}` : `https://bsky.app/profile/${post.user.username}/post/${post.id}`}`}>
+          href={`${post.url ? post.url : post.id.length > 17 ? `https://twitter.com/${post.user.username}/status/${post.id}` : `https://bsky.app/profile/${post.user.username}/post/${post.id}`}`}>
           {formatTimestamp(post.created_at)}
         </a>
       </p>

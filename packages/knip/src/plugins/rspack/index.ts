@@ -3,7 +3,7 @@ import { hasDependency } from '../../util/plugin.js';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
 import type { WebpackConfig } from '../webpack/types.js';
 
-// https://www.rspack.dev/config
+// https://rspack.rs/config/
 
 const title = 'Rspack';
 
@@ -11,14 +11,12 @@ const enablers = ['@rspack/core'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['rspack.config*.{js,ts,mjs,cjs}'];
+const config = ['rspack.config*.{js,ts,mjs,mts,cjs,cts}'];
 
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
-  const { cwd } = options;
+  const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
 
-  const inputs = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
-
-  return Array.from(inputs).filter(input => !input.specifier.startsWith('builtin:'));
+  return inputs.filter(input => !input.specifier.startsWith('builtin:'));
 };
 
 export default {

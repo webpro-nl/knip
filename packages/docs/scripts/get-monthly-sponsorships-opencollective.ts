@@ -1,8 +1,14 @@
 import { graphql } from '@octokit/graphql';
 
-const START_DATE = new Date('2023-11-01');
+const token = process.env.OPENCOLLECTIVE_TOKEN;
 const RATE_EUR_TO_USD = 1.08;
-const RECURRING_ONLY = process.argv.includes('--recurring-only');
+
+type Options = {
+  token?: string;
+  startDate: Date;
+  endDate?: Date;
+  recurringOnly: boolean;
+};
 
 interface Transaction {
   id: string;
@@ -38,7 +44,9 @@ interface GraphQLResponse {
   };
 }
 
-const getMonthlyTotals = async (token: string): Promise<Map<string, number>> => {
+const getMonthlyTotals = async (options: Options): Promise<Map<string, number>> => {
+  const { token, startDate, recurringOnly } = options;
+
   const { account, expenses } = await graphql<GraphQLResponse>({
     query: `
       query {
@@ -81,19 +89,19 @@ const getMonthlyTotals = async (token: string): Promise<Map<string, number>> => 
   const monthlyTotals = new Map<string, number>();
   const now = new Date();
 
-  for (let d = new Date(START_DATE); d <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+  for (let d = new Date(startDate); d <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
     monthlyTotals.set(d.toISOString().substring(0, 7), 0);
   }
 
   for (const transaction of account.transactions.nodes) {
-    if (RECURRING_ONLY && transaction.kind !== 'CONTRIBUTION') continue;
+    if (recurringOnly && transaction.kind !== 'CONTRIBUTION') continue;
 
     const month = new Date(transaction.createdAt).toISOString().substring(0, 7);
     const amount = Math.round(transaction.amount.value);
     monthlyTotals.set(month, (monthlyTotals.get(month) || 0) + amount);
   }
 
-  if (!RECURRING_ONLY) {
+  if (!recurringOnly) {
     for (const expense of expenses.nodes) {
       const month = new Date(expense.createdAt).toISOString().substring(0, 7);
       const amount =
@@ -107,18 +115,13 @@ const getMonthlyTotals = async (token: string): Promise<Map<string, number>> => 
   return monthlyTotals;
 };
 
-const main = async () => {
-  const token = process.env.OPENCOLLECTIVE_TOKEN;
+export const getOpenCollectiveTotals = async (options: Options) => {
   if (!token) throw new Error('OPENCOLLECTIVE_TOKEN is not set');
-  const monthlyData = await getMonthlyTotals(token);
-
-  let grandTotal = 0;
-  for (const [month, amount] of [...monthlyData.entries()].sort()) {
-    console.log(`${month} ${amount}`);
-    grandTotal += amount;
+  const monthlyData = await getMonthlyTotals({ ...options, token });
+  const startMonth = options.startDate.toISOString().substring(0, 7);
+  const endMonth = options.endDate?.toISOString().substring(0, 7);
+  for (const month of monthlyData.keys()) {
+    if (month < startMonth || (endMonth && month > endMonth)) monthlyData.delete(month);
   }
-
-  console.log(`\nGrand total: ${grandTotal} (${monthlyData.size} months)`);
+  return monthlyData;
 };
-
-main().catch(console.error);

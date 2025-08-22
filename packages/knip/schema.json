@@ -315,6 +315,10 @@
           "title": "Babel plugin configuration (https://knip.dev/reference/plugins/babel)",
           "$ref": "#/definitions/plugin"
         },
+        "biome": {
+          "title": "biome plugin configuration (https://knip.dev/reference/plugins/biome)",
+          "$ref": "#/definitions/plugin"
+        },
         "bun": {
           "title": "bun plugin configuration (https://knip.dev/reference/plugins/bun)",
           "$ref": "#/definitions/plugin"
@@ -327,6 +331,14 @@
           "title": "Capacitor plugin configuration (https://knip.dev/reference/plugins/capacitor)",
           "$ref": "#/definitions/plugin"
         },
+        "changelogen": {
+          "title": "changelogen plugin configuration (https://knip.dev/reference/plugins/changelogen)",
+          "$ref": "#/definitions/plugin"
+        },
+        "changelogithub": {
+          "title": "changelogithub plugin configuration (https://knip.dev/reference/plugins/changelogithub)",
+          "$ref": "#/definitions/plugin"
+        },
         "changesets": {
           "title": "Changesets plugin configuration (https://knip.dev/reference/plugins/changesets)",
           "$ref": "#/definitions/plugin"
@@ -337,6 +349,10 @@
         },
         "commitlint": {
           "title": "commitlint plugin configuration (https://knip.dev/reference/plugins/commitlint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "convex": {
+          "title": "convex plugin configuration (https://knip.dev/reference/plugins/convex)",
           "$ref": "#/definitions/plugin"
         },
         "create-typescript-app": {
@@ -357,6 +373,10 @@
         },
         "dependency-cruiser": {
           "title": "dependency-cruiser plugin configuration (https://knip.dev/reference/plugins/dependency-cruiser)",
+          "$ref": "#/definitions/plugin"
+        },
+        "docusaurus": {
+          "title": "Docusaurus plugin configuration (https://knip.dev/reference/plugins/docusaurus)",
           "$ref": "#/definitions/plugin"
         },
         "dotenv": {
@@ -393,6 +413,10 @@
         },
         "graphql-codegen": {
           "title": "graphql-codegen plugin configuration (https://knip.dev/reference/plugins/graphql-codegen)",
+          "$ref": "#/definitions/plugin"
+        },
+        "hardhat": {
+          "title": "hardhat plugin configuration (https://knip.dev/reference/plugins/hardhat)",
           "$ref": "#/definitions/plugin"
         },
         "husky": {
@@ -475,6 +499,10 @@
           "title": "node plugin configuration (https://knip.dev/reference/plugins/node)",
           "$ref": "#/definitions/plugin"
         },
+        "node-modules-inspector": {
+          "title": "node-modules-inspector plugin configuration (https://knip.dev/reference/plugins/node-modules-inspector)",
+          "$ref": "#/definitions/plugin"
+        },
         "node-test-runner": {
           "title": "node-test-runner plugin configuration (https://knip.dev/reference/plugins/node-test-runner)",
           "$ref": "#/definitions/plugin"
@@ -531,6 +559,10 @@
           "title": "Prettier plugin configuration (https://knip.dev/reference/plugins/prettier)",
           "$ref": "#/definitions/plugin"
         },
+        "prisma": {
+          "title": "Prisma plugin configuration (https://knip.dev/reference/plugins/prisma)",
+          "$ref": "#/definitions/plugin"
+        },
         "react-cosmos": {
           "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
           "$ref": "#/definitions/plugin"
@@ -561,6 +593,10 @@
         },
         "rsbuild": {
           "title": "rsbuild plugin configuration (https://knip.dev/reference/plugins/rsbuild)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rslib": {
+          "title": "rslib plugin configuration (https://knip.dev/reference/plugins/rslib)",
           "$ref": "#/definitions/plugin"
         },
         "rspack": {
@@ -607,6 +643,10 @@
           "title": "svelte plugin configuration (https://knip.dev/reference/plugins/svelte)",
           "$ref": "#/definitions/plugin"
         },
+        "svgo": {
+          "title": "svgo plugin configuration (https://knip.dev/reference/plugins/svgo)",
+          "$ref": "#/definitions/plugin"
+        },
         "syncpack": {
           "title": "syncpack plugin configuration (https://knip.dev/reference/plugins/syncpack)",
           "$ref": "#/definitions/plugin"
@@ -621,6 +661,10 @@
         },
         "ts-node": {
           "title": "ts-node plugin configuration (https://knip.dev/reference/plugins/ts-node)",
+          "$ref": "#/definitions/plugin"
+        },
+        "tsdown": {
+          "title": "tsdown plugin configuration (https://knip.dev/reference/plugins/tsdown)",
           "$ref": "#/definitions/plugin"
         },
         "tsup": {

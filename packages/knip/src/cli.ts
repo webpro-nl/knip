@@ -1,4 +1,3 @@
-import prettyMilliseconds from 'pretty-ms';
 import { main } from './index.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
 import { perfObserver } from './util/Performance.js';
@@ -7,6 +6,7 @@ import { getKnownError, isConfigurationError, isDisplayReason, isKnownError } fr
 import { logError, logWarning } from './util/log.js';
 import { cwd, join, toPosix } from './util/path.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
+import { prettyMilliseconds } from './util/string.js';
 import { splitTags } from './util/tag.js';
 import { isTrace } from './util/trace.js';
 import { version } from './version.js';
@@ -24,6 +24,7 @@ const {
   exports: isExportsShorthand = false,
   files: isFilesShorthand = false,
   fix: isFix = false,
+  format: isFormat = false,
   'fix-type': fixTypes = [],
   help: isHelp,
   include: includedIssueTypes = [],
@@ -31,10 +32,11 @@ const {
   'include-libs': isIncludeLibs = false,
   'isolate-workspaces': isIsolateWorkspaces = false,
   'max-issues': maxIssues = '0',
-  'no-config-hints': isDisableConfigHints = false,
+  'memory-realtime': memoryRealtime = false,
+  'no-config-hints': isNoConfigHints = false,
   'no-exit-code': noExitCode = false,
   'no-gitignore': isNoGitIgnore = false,
-  'no-progress': isNoProgress = isDebug || isTrace,
+  'no-progress': isNoProgress = isDebug || isTrace || memoryRealtime,
   preprocessor = [],
   'preprocessor-options': preprocessorOptions = '',
   production: isProduction = false,
@@ -65,7 +67,17 @@ const workspace = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, ''
 
 const run = async () => {
   try {
-    const { report, issues, counters, rules, tagHints, configurationHints, isTreatConfigHintsAsErrors } = await main({
+    const {
+      report,
+      issues,
+      counters,
+      rules,
+      tagHints,
+      configurationHints,
+      isTreatConfigHintsAsErrors,
+      includedWorkspaces,
+      configFilePath,
+    } = await main({
       cacheLocation,
       cwd,
       excludedIssueTypes,
@@ -78,7 +90,7 @@ const run = async () => {
       isExportsShorthand,
       isFilesShorthand,
       isFix: isFix || fixTypes.length > 0,
-      isDisableConfigHints,
+      isFormat,
       isIncludeEntryExports,
       isIncludeLibs,
       isIsolateWorkspaces,
@@ -92,6 +104,9 @@ const run = async () => {
       workspace,
     });
 
+    // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in certain modes
+    const isDisableConfigHints = isNoConfigHints || isProduction || Boolean(workspace);
+
     // These modes have their own reporting mechanism
     if (isWatch || isTrace) return;
 
@@ -102,12 +117,14 @@ const run = async () => {
       tagHints,
       configurationHints,
       isDisableConfigHints,
-      isTreatConfigHintsAsErrors,
+      isTreatConfigHintsAsErrors: treatConfigHintsAsErrors ?? isTreatConfigHintsAsErrors,
       cwd,
       isProduction,
       isShowProgress,
       options: reporterOptions,
       preprocessorOptions,
+      includedWorkspaces,
+      configFilePath,
     };
 
     const finalData = await runPreprocessors(preprocessor, initialData);
@@ -118,12 +135,13 @@ const run = async () => {
       .filter(reportGroup => finalData.report[reportGroup] && rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
+    if (perfObserver.isEnabled) await perfObserver.finalize();
+    if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
+    if (perfObserver.isMemoryUsageEnabled && !memoryRealtime) console.log(`\n${perfObserver.getMemoryUsageTable()}`);
+
     if (perfObserver.isEnabled) {
-      await perfObserver.finalize();
-      console.log(`\n${perfObserver.getTable()}`);
-      const mem = perfObserver.getCurrentMemUsageInMb();
       const duration = perfObserver.getCurrentDurationInMs();
-      console.log('\nTotal running time:', prettyMilliseconds(duration), `(mem: ${mem}MB)`);
+      console.log('\nTotal running time:', prettyMilliseconds(duration));
       perfObserver.reset();
     }
 
@@ -153,6 +171,8 @@ const run = async () => {
     // We shouldn't arrive here, but not swallow either, so re-throw
     throw error;
   }
+
+  process.exit(0);
 };
 
 await run();

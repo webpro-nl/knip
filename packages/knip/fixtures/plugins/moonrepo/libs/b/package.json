@@ -1,5 +1,5 @@
 {
-  "name": "b",
+  "name": "@plugins/moonrepo__b",
   "devDependencies": {
     "vitest": "*"
   }

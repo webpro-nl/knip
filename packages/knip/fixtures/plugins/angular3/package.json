@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/angular3",
+  "name": "@plugins/angular3",
   "devDependencies": {
     "@angular-devkit/build-angular": "*",
     "@angular/cli": "*",

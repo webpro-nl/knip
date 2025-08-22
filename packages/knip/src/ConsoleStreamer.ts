@@ -29,10 +29,10 @@ export class ConsoleStreamer {
     this.lines = messages.length;
   }
 
-  cast(message: string | string[]) {
+  cast(message: string | string[], sub?: string) {
     if (!this.isEnabled) return;
     if (Array.isArray(message)) this.update(message);
-    else this.update([message]);
+    else this.update([`${message}${!sub || sub === '.' ? '' : ` (${sub})`}…`]);
   }
 
   clear() {

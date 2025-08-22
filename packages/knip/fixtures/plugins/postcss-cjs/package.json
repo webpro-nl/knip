@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/postcss-cjs",
+  "name": "@plugins/postcss-cjs",
   "scripts": {
     "postcss": "postcss"
   },

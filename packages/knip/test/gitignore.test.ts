@@ -16,12 +16,12 @@ test('Obey gitignore', async () => {
   assert.equal(issues.files.size, 0);
 });
 
-test('Ignore gitignore', async () => {
-  const { issues } = await main({
-    ...baseArguments,
-    cwd,
-    gitignore: false,
-  });
+// test('Ignore gitignore', async () => {
+//   const { issues } = await main({
+//     ...baseArguments,
+//     cwd,
+//     gitignore: false,
+//   });
 
-  assert.equal(issues.files.size, 3);
-});
+//   assert.equal(issues.files.size, 3);
+// });

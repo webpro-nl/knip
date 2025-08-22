@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveEntryPaths } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toEntry, toProject } from '../../util/input.js';
 import { relative } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -16,7 +16,7 @@ const config = ['action.{yml,yaml}'];
 
 const isAssumeArtifact = (specifier: string) => /^(dist|build)\//.test(specifier);
 
-const resolveEntryPaths: ResolveEntryPaths = async (config, options) => {
+const resolveConfig: ResolveConfig = async (config, options) => {
   const inputs = [];
   const filePaths = getActionDependencies(config, options);
   for (const filePath of new Set(filePaths)) {
@@ -32,5 +32,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  resolveEntryPaths,
+  resolveConfig,
 } satisfies Plugin;

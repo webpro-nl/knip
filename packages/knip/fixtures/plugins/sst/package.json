@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/sst",
+  "name": "@plugins/sst",
   "dependencies": {
     "sst": "*"
   }

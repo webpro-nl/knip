@@ -29,6 +29,7 @@ export const getFilteredScripts = (scripts: Scripts) => {
   const developmentScripts: Scripts = {};
 
   for (const scriptName in scripts) {
+    if (!/^\w/.test(scriptName)) continue;
     if (scriptFilter.has(scriptName)) productionScripts[scriptName] = scripts[scriptName];
     else developmentScripts[scriptName] = scripts[scriptName];
   }

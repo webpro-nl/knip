@@ -13,7 +13,7 @@ test('Find exports through re-exported aliased namespace', async () => {
     cwd,
   });
 
-  assert(issues.exports['2-second.ts']['second']);
+  assert(issues.exports['2-second.ts']['NS.second']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

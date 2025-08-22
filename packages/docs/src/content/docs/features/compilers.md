@@ -27,7 +27,15 @@ might represent component properties. This results in those exports being
 reported as unused by Knip.
 
 The built-in functions seem to do a decent job, but override them however you
-like.
+like. They can enabled manually if none if the enabling dependencies were found:
+
+```ts title="knip.ts"
+export default {
+  compilers: {
+    mdx: true,
+  },
+};
+```
 
 ## Custom compilers
 
@@ -53,31 +61,13 @@ to Knip. This means you don't need to add something like `**/*.{ts,vue}` to the
 
 :::
 
-### Svelte
+### Examples
 
-In a project with Svelte, the compiler is automatically enabled, but you may
-have unresolved imports starting with `$app/`:
+- [CSS][1]
+- [MDX][2]
+- [Vue][3]
 
-```shell
-Unresolved imports (5)
-$app/stores       src/routes/Header.svelte:1:9
-$app/environment  src/routes/about/+page.ts:1:9
-```
-
-In this case, you can manually add the `$app` path alias:
-
-```json title="knip.json"
-{
-  "paths": {
-    "$app/*": ["node_modules/@sveltejs/kit/src/runtime/app/*"]
-  }
-}
-```
-
-As a last resort, see [ignoredUnresolved][1] to ignore virtual import specifiers
-from the report.
-
-### CSS
+#### CSS
 
 Here's an example, minimal compiler for CSS files:
 
@@ -93,7 +83,21 @@ You may wonder why the CSS compiler is not included by default. It's currently
 not clear if it should be included. And if so, what would be the best way to
 determine it should be enabled, and what syntax(es) it should support.
 
-### Vue
+#### MDX
+
+Another example, in case the built-in MDX compiler is not enough:
+
+```ts
+import { compile } from '@mdx-js/mdx';
+
+export default {
+  compilers: {
+    mdx: async text => (await compile(text)).toString(),
+  },
+};
+```
+
+#### Vue
 
 In a project with Vue, the compiler is automatically enabled. Override and use
 Vue's parser for better results if the built-in "compiler" is not enough:
@@ -138,4 +142,6 @@ const config = {
 export default config;
 ```
 
-[1]: ../reference/configuration.md#ignoreunresolved
+[1]: #css
+[2]: #mdx
+[3]: #vue

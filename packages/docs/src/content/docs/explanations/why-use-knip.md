@@ -4,9 +4,9 @@ sidebar:
   order: 3
 ---
 
-The value of removing clutter from your code is undeniable. However, finding
-them is a manual and tedious job. This is where Knip comes in. As codebases grow
-in complexity and size, automated and comprehensive tooling becomes critical.
+The value of removing clutter from your code is undeniable. However, finding it
+is a tedious job. This is where Knip comes in. As codebases grow in complexity
+and size, comprehensive and automated tooling is indispensable.
 
 :::tip[TL;DR]
 
@@ -39,7 +39,7 @@ code":
   project and/or taking over responsibilities this is harder to grasp.
 - Prevent regressions: tools like TypeScript, ESLint and Prettier do all sorts
   of checks and linting to report violations and prevent regressions. Knip does
-  the same for dependencies, exports and files that you forgot to delete.
+  the same for dependencies, exports and files that are obsolete.
 - Keeping dead code around has a negative value on readability, as it can be
   misleading and distracting. Even if it serves no purpose it will need to be
   maintained (source: [Safe dead code removal → YAGNI][8]).
@@ -48,16 +48,14 @@ code":
 
 ## Automation
 
-Code and dependency management is often not the most fulfilling task. It is
-Knip's mission to automate the part where it comes to finding clutter. Because
-finding them manually is such a tedious job, and where do you even start? Knip
-contains a lot of standards and heuristics to search for clutter. Knip is not
-without flaws. But even a list of results with a few false positives is many
-times better and faster than trying to do it manually.
+Code and dependency management is usually not the most exciting task for most of
+us. Knip's mission is to automate finding clutter. This is such a tedious job if
+you were to do it manually, and where would you even start? Knip applies many
+techniques and heuristics to report what you need and save a lot of time.
 
 :::tip
 
-Knip not only finds clutter, it can also [clean it][7]!
+Knip not only finds clutter, it can also [remove clutter][7]!
 
 Use Knip next to a linter like ESLint or Biome: after removing unused variables
 inside files, Knip might find even more unused code. Rinse and repeat!
@@ -93,8 +91,8 @@ Use Knip in a CI environment to prevent future regressions.
 
 In large and/or legacy projects, Knip may report false positives and require
 some configuration. Yet it can be a great assistant when cleaning up parts of
-the project or doing large refactors. Again, even a list of results with a few
-false positives is many times better and faster than trying to do it manually.
+the project or doing large refactors. Even a list of results with a few false
+positives is many times better and faster than if you were to do it manually.
 
 ## Unobtrusive
 
@@ -110,12 +108,11 @@ consider comments like the following:
 Maybe you wonder why Knip does not have similar comments like `// knip-ignore`
 so you can get rid of false positives? A variety of reasons:
 
-1. A false positive may be a bug in Knip, and should be reported (not
-   dismissed).
-2. Instead of proprietary comments, use [standardized annotations][11] serving
-   as documentation as well.
-3. In the event you want to remove Knip, just uninstall `knip`. And not
-   countless useless comments scattered throughout the codebase.
+1. A false positive may be a bug in Knip, and should be reported, not dismissed.
+2. Instead of proprietary comments, use [standardized annotations][11] that also
+   serve as documentation.
+3. In the event you want to remove Knip, just uninstall `knip` without having to
+   remove useless comments scattered throughout the codebase.
 
 Tip: use `@lintignore` in JSDoc comments, so other linters can use the same.
 

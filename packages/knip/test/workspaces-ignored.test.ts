@@ -13,17 +13,35 @@ test('Ignore workspaces', async () => {
     cwd,
   });
 
-  assert.equal(Object.keys(issues.binaries).length, 1);
+  assert.equal(Object.keys(issues.binaries).length, 2);
   assert(issues.binaries['packages/e/package.json']['not-ignored']);
+  assert(issues.binaries['packages/production/package.json']['ignored-in-production-mode']);
 
   assert.deepEqual(
     configurationHints,
     new Set([
-      { type: 'ignoreWorkspaces', identifier: 'packages/f' },
+      { type: 'ignoreWorkspaces', identifier: 'packages/not-found' },
+      { type: 'ignoreWorkspaces', identifier: 'packages/production-not-found' },
       { type: 'ignoreWorkspaces', identifier: 'packages/wut/*' },
       { type: 'ignoreWorkspaces', identifier: 'packages/un/**/used' },
     ])
   );
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 2,
+  });
+});
+
+test('Ignore workspaces (production)', async () => {
+  const { issues, counters } = await main({
+    ...baseArguments,
+    cwd,
+    isProduction: true,
+  });
+
+  assert.equal(Object.keys(issues.binaries).length, 1);
+  assert(issues.binaries['packages/e/package.json']['not-ignored']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

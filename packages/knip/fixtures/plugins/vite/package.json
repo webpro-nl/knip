@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vite",
+  "name": "@plugins/vite",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "*",
+    "@emotion/babel-plugin": "*",
     "vite": "*"
   }
 }

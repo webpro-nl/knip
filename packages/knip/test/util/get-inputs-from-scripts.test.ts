@@ -177,6 +177,9 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm program script.js', [], pkgScripts);
   t('pnpm --silent program script.js', [], pkgScripts);
   t('pnpm --silent run program script.js', [], pkgScripts);
+  t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, []);
+  t('pnpm --filter docs typedoc:check', []);
+  t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
@@ -240,6 +243,12 @@ test('getInputsFromScripts (nodemon)', () => {
   t('nodemon ./script.js', [toBinary('nodemon')]);
 });
 
+test('getInputsFromScripts (concurrently)', () => {
+  t('concurrently "tsx watch s.ts" "tsx watch c.ts"', [toBinary('concurrently'), toBinary('tsx'), toDeferResolveEntry('s.ts', opt), toBinary('tsx'), toDeferResolveEntry('c.ts', opt)]);
+  t('sleep 2 && concurrently "npm:watch-*"', [toBinary('sleep'), toBinary('concurrently')]);
+  t('concurrently -g -c red,green,yellow,blue,magenta pnpm:lint:*', [toBinary('concurrently')]);
+});
+
 test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toDeferResolveEntry('src/index.ts', opt)]);
 });
@@ -268,6 +277,7 @@ test('getInputsFromScripts (bail outs)', () => {
 
 test('getInputsFromScripts (ignore parse error)', () => {
   t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', []); // unclosed '
+  t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, []); // Unexpected 'OPEN_PAREN'
 });
 
 test('getInputsFromScripts (config)', () => {

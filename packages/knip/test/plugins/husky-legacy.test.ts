@@ -7,7 +7,7 @@ import baseCounters from '../helpers/baseCounters.js';
 
 const cwd = resolve('fixtures/plugins/husky-lint-staged');
 
-test('Find dependencies with husky plugin (legacy)', async () => {
+test('Find dependencies with the husky plugin (legacy)', async () => {
   const { counters } = await main({
     ...baseArguments,
     cwd,
