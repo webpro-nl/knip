@@ -1,6 +1,43 @@
-import core from '@actions/core';
 import { ISSUE_TYPES, ISSUE_TYPE_TITLE } from 'src/constants.js';
 import type { ReporterOptions } from '../types/issues.js';
+
+const createGitHubActionsLogger = () => {
+  const formatAnnotation = (
+    level: 'error' | 'warning',
+    message: string,
+    options?: {
+      file?: string;
+      startLine?: number;
+      endLine?: number;
+      startColumn?: number;
+      endColumn?: number;
+    }
+  ) => {
+    if (!options?.file) {
+      // Just log the message without annotation
+      console.log(message);
+      return;
+    }
+
+    const params = [];
+    if (options.file) params.push(`file=${options.file}`);
+    if (options.startLine) params.push(`line=${options.startLine}`);
+    if (options.endLine) params.push(`endLine=${options.endLine}`);
+    if (options.startColumn) params.push(`col=${options.startColumn}`);
+    if (options.endColumn) params.push(`endColumn=${options.endColumn}`);
+
+    const paramString = params.length > 0 ? ` ${params.join(',')}` : '';
+    console.log(`::${level}${paramString}::${message}`);
+  };
+
+  return {
+    info: (message: string) => console.log(message),
+    error: (message: string, options?: any) => formatAnnotation('error', message, options),
+    warning: (message: string, options?: any) => formatAnnotation('warning', message, options),
+  };
+};
+
+const core = createGitHubActionsLogger();
 
 export default ({ issues }: ReporterOptions) => {
   for (const issueName of ISSUE_TYPES) {
