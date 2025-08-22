@@ -1,4 +1,4 @@
-import { ISSUE_TYPES, ISSUE_TYPE_TITLE } from 'src/constants.js';
+import { ISSUE_TYPES, ISSUE_TYPE_TITLE } from '../constants.js';
 import type { ReporterOptions } from '../types/issues.js';
 
 const createGitHubActionsLogger = () => {
@@ -35,6 +35,7 @@ const core = createGitHubActionsLogger();
 export default ({ issues }: ReporterOptions) => {
   for (const issueName of ISSUE_TYPES) {
     const issue = issues[issueName];
+    if (!issue) continue;
 
     const issueSet =
       issue instanceof Set ? Array.from(issue) : Object.values(issue).flatMap(record => Object.values(record));
