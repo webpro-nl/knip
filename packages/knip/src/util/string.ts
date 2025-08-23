@@ -76,12 +76,11 @@ export const prettyMilliseconds = (ms: number): string => {
  * @example
  * ```ts
  * const processor = createCommandProcessor({ '$projectRoot': '/path/to/project' });
- * const command = processor('echo $projectRoot');
  * 
- * console.log(command);
+ * console.log(processor('echo $projectRoot'));
  * // 'echo /path/to/project'
  * 
- * processor(['npx', 'tsx', '$projectRoot/server/worker.js', '--', '--force']);
+ * console.log(processor(['npx', 'tsx', '$projectRoot/server/worker.js', '--', '--force']));
  * // ['npx', 'tsx', '/path/to/project/server/worker.js', '--', '--force']
  * ```
  */
