@@ -49,6 +49,7 @@ export type Issues = {
   duplicates: IssueRecords;
   enumMembers: IssueRecords;
   classMembers: IssueRecords;
+  catalog: IssueRecords;
 };
 
 export type IssueType = keyof Issues;

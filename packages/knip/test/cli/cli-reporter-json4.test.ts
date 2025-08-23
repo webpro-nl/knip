@@ -24,6 +24,7 @@ test('knip --reporter json (dependencies)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
     ],
   };
