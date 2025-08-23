@@ -68,3 +68,41 @@ export const prettyMilliseconds = (ms: number): string => {
   if (minutes > 0) return `${minutes}m ${Math.floor(seconds % 60)}s`;
   return seconds % 1 ? `${seconds.toFixed(1)}s` : `${Math.floor(seconds)}s`;
 };
+
+/**
+ * Template literal processor for commands that might be 
+ * strings or arrays of strings.
+ * 
+ * @example
+ * ```ts
+ * const processor = createCommandProcessor({ '$projectRoot': '/path/to/project' });
+ * const command = processor('echo $projectRoot');
+ * console.log(command); // 'echo /path/to/project'
+ * ```
+ */
+export const createCommandProcessor = <T extends object>(context: T) => {
+
+  const templater = (template: string):string => {
+    return template.replace(/\$(\w+)/g, (_, key) => {
+      const value = context[key as keyof T];
+      if (!value) {
+        return key;
+      }
+      return String(value);
+    });
+  }
+
+  const processor = <C extends string | string[]>(command: C): C => {
+    if (typeof command === 'string') {
+      return templater(command) as C;
+    }
+
+    if (Array.isArray(command)) {
+      return command.map(cmd => processor(cmd)) as C;
+    }
+
+    throw new TypeError('Command must be a string or an array of strings');
+  }
+
+  return processor
+}
