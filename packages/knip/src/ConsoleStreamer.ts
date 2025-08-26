@@ -1,3 +1,5 @@
+import type { MainOptions } from './util/create-options.js';
+
 /**
  * - Casts messages as a stream to stdout during the process
  */
@@ -5,8 +7,8 @@ export class ConsoleStreamer {
   isEnabled = false;
   private lines = 0;
 
-  constructor({ isEnabled = false }) {
-    this.isEnabled = isEnabled;
+  constructor(options: MainOptions) {
+    this.isEnabled = options.isShowProgress;
   }
 
   private clearLines(count: number) {

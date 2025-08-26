@@ -62,10 +62,8 @@ $ knip --tags=-lintignore
 
 Website: https://knip.dev`;
 
-// biome-ignore lint/suspicious/noImplicitAnyLet: TODO
-let parsedArgs;
-try {
-  parsedArgs = parseArgs({
+export default function () {
+  return parseArgs({
     options: {
       cache: { type: 'boolean' },
       'cache-location': { type: 'string' },
@@ -112,14 +110,5 @@ try {
       watch: { type: 'boolean' },
       workspace: { type: 'string', short: 'W' },
     },
-  });
-} catch (error: unknown) {
-  if (error instanceof Error) {
-    console.error(error.message);
-    console.log(`\n${helpText}`);
-    process.exit(1);
-  }
-  throw error;
+  }).values;
 }
-
-export default parsedArgs.values;

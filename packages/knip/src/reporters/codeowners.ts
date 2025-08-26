@@ -10,14 +10,14 @@ type ExtraReporterOptions = {
   path?: string;
 };
 
-const logIssueRecord = (issues: OwnedIssue[]) => {
+const logIssueRecord = (issues: OwnedIssue[], cwd: string) => {
   const sortedByFilePath = issues.sort((a, b) => (a.owner < b.owner ? -1 : 1));
   for (const { filePath, symbols, owner, parentSymbol } of sortedByFilePath) {
-    console.log(getIssueLine({ owner, filePath, symbols, parentSymbol }));
+    console.log(getIssueLine({ owner, filePath, symbols, parentSymbol }, cwd));
   }
 };
 
-export default ({ report, issues, isShowProgress, options }: ReporterOptions) => {
+export default ({ report, issues, isShowProgress, options, cwd }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;
@@ -30,7 +30,7 @@ export default ({ report, issues, isShowProgress, options }: ReporterOptions) =>
   const [dependenciesOwner = '[no-owner]'] = findOwners('package.json');
   let totalIssues = 0;
 
-  const calcFileOwnership = (filePath: string) => findOwners(relative(filePath))[0] ?? dependenciesOwner;
+  const calcFileOwnership = (filePath: string) => findOwners(relative(cwd, filePath))[0] ?? dependenciesOwner;
   const addOwner = (issue: Issue) => ({
     ...issue,
     owner: calcFileOwnership(issue.filePath),
@@ -51,7 +51,7 @@ export default ({ report, issues, isShowProgress, options }: ReporterOptions) =>
       if (issuesForType.length > 0) {
         if (totalIssues) console.log();
         title && console.log(getColoredTitle(title, issuesForType.length));
-        logIssueRecord(issuesForType);
+        logIssueRecord(issuesForType, cwd);
       }
 
       totalIssues = totalIssues + issuesForType.length;

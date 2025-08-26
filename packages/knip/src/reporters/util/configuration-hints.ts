@@ -7,7 +7,7 @@ import { bright, dim, getColoredTitle, getDimmedTitle } from './util.js';
 interface PrintHintOptions {
   type: ConfigurationHintType;
   identifier: string | RegExp;
-  filePath?: string;
+  filePath: string;
   configFilePath?: string;
   workspaceName?: string;
   size?: number;
@@ -29,7 +29,7 @@ const getTableForHints = (hints: TableRow[]) => {
     table.row();
     table.cell('identifier', hint.identifier.toString());
     table.cell('workspace', getWorkspaceName(hint));
-    table.cell('filePath', hint.filePath ? relative(hint.filePath) : '');
+    table.cell('filePath', hint.filePath);
     table.cell('description', dim(hint.message));
   }
   return table;
@@ -76,17 +76,17 @@ const hintTypesOrder: ConfigurationHintType[][] = [
 ];
 
 export const printConfigurationHints = ({
+  cwd,
   counters,
   issues,
   tagHints,
   configurationHints,
   isTreatConfigHintsAsErrors,
-  includedWorkspaces,
+  includedWorkspaceDirs,
   configFilePath,
 }: ReporterOptions) => {
   if (counters.files > 20) {
-    const workspaces = includedWorkspaces
-      .map(workspace => workspace.dir)
+    const workspaces = includedWorkspaceDirs
       .sort(byPathDepth)
       .reverse()
       .map(dir => ({ dir, size: 0 }));
@@ -99,7 +99,7 @@ export const printConfigurationHints = ({
     const hlWorkspaces = workspaces.sort((a, b) => b.size - a.size).filter(ws => ws.size > 1);
 
     for (const { dir, size } of hlWorkspaces) {
-      const identifier = toRelative(dir) || '.';
+      const identifier = toRelative(dir, cwd) || '.';
       configurationHints.add({ type: 'workspace-unconfigured', workspaceName: identifier, identifier, size });
     }
   }
@@ -119,8 +119,9 @@ export const printConfigurationHints = ({
       hintTypes.flatMap(hintType => {
         const hints = hintsByType.get(hintType) ?? [];
         return hints.map(hint => {
-          hint.filePath ??= configFilePath;
+          hint.filePath = relative(cwd, hint.filePath ?? configFilePath ?? '');
           const hintPrinter = hintPrinters.get(hint.type);
+          // @ts-ignore
           const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath }) : '';
           return { ...hint, message };
         });
@@ -134,7 +135,7 @@ export const printConfigurationHints = ({
     console.log(getColoredTitle('Tag issues', tagHints.size));
     for (const hint of tagHints) {
       const { filePath, identifier, tagName } = hint;
-      const message = `Unused tag in ${toRelative(filePath)}:`;
+      const message = `Unused tag in ${toRelative(filePath, cwd)}:`;
       console.warn(dim(message), `${identifier} → ${tagName}`);
     }
   }

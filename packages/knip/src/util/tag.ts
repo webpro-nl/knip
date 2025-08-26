@@ -1,5 +1,5 @@
 import { ALIAS_TAG, BETA_TAG, INTERNAL_TAG, PUBLIC_TAG } from '../constants.js';
-import type { Tags } from '../types/cli.js';
+import type { Tags } from '../types/options.js';
 
 export const splitTags = (rawTags: string[]) => {
   const tags = rawTags.flatMap(tag => tag.split(','));

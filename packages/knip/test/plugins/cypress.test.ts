@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../../src/index.js';
-import { resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
+import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/cypress');
 
 test('Find dependencies with the Cypress plugin', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.unlisted['cypress.config.ts']['@nrwl/cypress']);
   assert(issues.unlisted['cypress/support/commands.ts']['@faker-js/faker']);

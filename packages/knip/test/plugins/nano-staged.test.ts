@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../../src/index.js';
-import { resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
+import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/nano-staged');
 
 test('Find dependencies with the nano-staged plugin', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.binaries['package.json']['eslint']);
   assert(issues.binaries['package.json']['prettier']);
@@ -29,11 +27,8 @@ test('Find dependencies with the nano-staged plugin', async () => {
 });
 
 test('Find dependencies with the nano-staged plugin (production)', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-  });
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,

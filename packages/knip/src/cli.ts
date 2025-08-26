@@ -1,143 +1,75 @@
 import { main } from './index.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
 import { perfObserver } from './util/Performance.js';
-import parsedArgValues, { helpText } from './util/cli-arguments.js';
+import { helpText } from './util/cli-arguments.js';
+import parseArgs from './util/cli-arguments.js';
+import { createOptions } from './util/create-options.js';
 import { getKnownError, isConfigurationError, isDisplayReason, isKnownError } from './util/errors.js';
 import { logError, logWarning } from './util/log.js';
-import { cwd, join, toPosix } from './util/path.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { prettyMilliseconds } from './util/string.js';
-import { splitTags } from './util/tag.js';
-import { isTrace } from './util/trace.js';
 import { version } from './version.js';
 
-const defaultCacheLocation = join(cwd, 'node_modules', '.cache', 'knip');
-
-const {
-  'allow-remove-files': isRemoveFiles = false,
-  cache: isCache = false,
-  'cache-location': cacheLocation = defaultCacheLocation,
-  debug: isDebug = false,
-  dependencies: isDependenciesShorthand = false,
-  exclude: excludedIssueTypes = [],
-  'experimental-tags': experimentalTags = [],
-  exports: isExportsShorthand = false,
-  files: isFilesShorthand = false,
-  fix: isFix = false,
-  format: isFormat = false,
-  'fix-type': fixTypes = [],
-  help: isHelp,
-  include: includedIssueTypes = [],
-  'include-entry-exports': isIncludeEntryExports = false,
-  'include-libs': isIncludeLibs = false,
-  'isolate-workspaces': isIsolateWorkspaces = false,
-  'max-issues': maxIssues = '0',
-  'memory-realtime': memoryRealtime = false,
-  'no-config-hints': isNoConfigHints = false,
-  'no-exit-code': noExitCode = false,
-  'no-gitignore': isNoGitIgnore = false,
-  'no-progress': isNoProgress = isDebug || isTrace || memoryRealtime,
-  preprocessor = [],
-  'preprocessor-options': preprocessorOptions = '',
-  production: isProduction = false,
-  reporter = ['symbols'],
-  'reporter-options': reporterOptions = '',
-  strict: isStrict = false,
-  tags = [],
-  'treat-config-hints-as-errors': treatConfigHintsAsErrors = false,
-  tsConfig,
-  version: isVersion,
-  watch: isWatch = false,
-  workspace: rawWorkspaceArg,
-} = parsedArgValues;
-
-if (isHelp) {
-  console.log(helpText);
-  process.exit(0);
+let parsedCLIArgs: ReturnType<typeof parseArgs> = {};
+try {
+  parsedCLIArgs = parseArgs();
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error(error.message);
+    console.log(`\n${helpText}`);
+    process.exit(1);
+  }
+  throw error;
 }
-
-if (isVersion) {
-  console.log(version);
-  process.exit(0);
-}
-
-const isShowProgress = isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
-
-const workspace = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, '').replace(/\/$/, '') : undefined;
 
 const run = async () => {
   try {
-    const {
-      report,
-      issues,
-      counters,
-      rules,
-      tagHints,
-      configurationHints,
-      isTreatConfigHintsAsErrors,
-      includedWorkspaces,
-      configFilePath,
-    } = await main({
-      cacheLocation,
-      cwd,
-      excludedIssueTypes,
-      fixTypes: fixTypes.flatMap(type => type.split(',')),
-      gitignore: !isNoGitIgnore,
-      includedIssueTypes,
-      isCache,
-      isDebug,
-      isDependenciesShorthand,
-      isExportsShorthand,
-      isFilesShorthand,
-      isFix: isFix || fixTypes.length > 0,
-      isFormat,
-      isIncludeEntryExports,
-      isIncludeLibs,
-      isIsolateWorkspaces,
-      isProduction: isStrict || isProduction,
-      isRemoveFiles,
-      isShowProgress,
-      isStrict,
-      isWatch,
-      tags: tags.length > 0 ? splitTags(tags) : splitTags(experimentalTags),
-      tsConfigFile: tsConfig,
-      workspace,
-    });
+    const options = await createOptions({ parsedCLIArgs });
 
-    // Hints about ignored dependencies/binaries can be confusing/annoying/incorrect in certain modes
-    const isDisableConfigHints = isNoConfigHints || isProduction || Boolean(workspace);
+    if (parsedCLIArgs.help) {
+      console.log(helpText);
+      process.exit(0);
+    }
+
+    if (parsedCLIArgs.version) {
+      console.log(version);
+      process.exit(0);
+    }
+
+    const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs } = await main(options);
 
     // These modes have their own reporting mechanism
-    if (isWatch || isTrace) return;
+    if (options.isWatch || options.isTrace) return;
 
     const initialData: ReporterOptions = {
-      report,
+      report: options.includedIssueTypes,
       issues,
       counters,
       tagHints,
       configurationHints,
-      isDisableConfigHints,
-      isTreatConfigHintsAsErrors: treatConfigHintsAsErrors ?? isTreatConfigHintsAsErrors,
-      cwd,
-      isProduction,
-      isShowProgress,
-      options: reporterOptions,
-      preprocessorOptions,
-      includedWorkspaces,
-      configFilePath,
+      includedWorkspaceDirs,
+      cwd: options.cwd,
+      configFilePath: options.configFilePath,
+      isDisableConfigHints: options.isDisableConfigHints,
+      isProduction: options.isProduction,
+      isShowProgress: options.isShowProgress,
+      isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
+      options: parsedCLIArgs['reporter-options'] ?? '',
+      preprocessorOptions: parsedCLIArgs['preprocessor-options'] ?? '',
     };
 
-    const finalData = await runPreprocessors(preprocessor, initialData);
+    const finalData = await runPreprocessors(parsedCLIArgs.preprocessor ?? [], initialData);
 
-    await runReporters(reporter, finalData);
+    await runReporters(parsedCLIArgs.reporter ?? ['symbols'], finalData);
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
-      .filter(reportGroup => finalData.report[reportGroup] && rules[reportGroup] === 'error')
+      .filter(reportGroup => finalData.report[reportGroup] && options.rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
     if (perfObserver.isEnabled) await perfObserver.finalize();
     if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
-    if (perfObserver.isMemoryUsageEnabled && !memoryRealtime) console.log(`\n${perfObserver.getMemoryUsageTable()}`);
+    if (perfObserver.isMemoryUsageEnabled && !parsedCLIArgs['memory-realtime'])
+      console.log(`\n${perfObserver.getMemoryUsageTable()}`);
 
     if (perfObserver.isEnabled) {
       const duration = perfObserver.getCurrentDurationInMs();
@@ -145,23 +77,23 @@ const run = async () => {
       perfObserver.reset();
     }
 
-    if (experimentalTags.length > 0) {
+    if (parsedCLIArgs['experimental-tags'] && parsedCLIArgs['experimental-tags'].length > 0) {
       logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
     }
 
-    if (isIsolateWorkspaces && report.classMembers) {
+    if (options.isIsolateWorkspaces && options.includedIssueTypes.classMembers) {
       logWarning('WARNING', 'Class members are not tracked when using the --isolate-workspaces flag');
     }
 
     if (
-      (!noExitCode && totalErrorCount > Number(maxIssues)) ||
-      ((treatConfigHintsAsErrors || isTreatConfigHintsAsErrors) && configurationHints.size > 0)
+      (!parsedCLIArgs['no-exit-code'] && totalErrorCount > Number(parsedCLIArgs['max-issues'] ?? 0)) ||
+      (options.isTreatConfigHintsAsErrors && configurationHints.size > 0)
     ) {
       process.exit(1);
     }
   } catch (error: unknown) {
     process.exitCode = 2;
-    if (!isDebug && error instanceof Error && isKnownError(error)) {
+    if (!parsedCLIArgs.debug && error instanceof Error && isKnownError(error)) {
       const knownError = getKnownError(error);
       logError('ERROR', knownError.message);
       if (isDisplayReason(knownError)) console.error('Reason:', knownError.cause.message);

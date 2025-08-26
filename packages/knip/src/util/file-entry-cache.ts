@@ -10,7 +10,7 @@ import { deserialize, serialize } from 'node:v8';
 import { timerify } from './Performance.js';
 import { debugLog } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
-import { cwd, dirname, isAbsolute, resolve } from './path.js';
+import { dirname, isAbsolute, resolve } from './path.js';
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
 
@@ -38,7 +38,7 @@ export class FileEntryCache<T> {
   normalizedEntries = new Map<string, FileDescriptor<T>>();
 
   constructor(cacheId: string, _path: string) {
-    this.filePath = isAbsolute(_path) ? path.resolve(_path, cacheId) : path.resolve(cwd, _path, cacheId);
+    this.filePath = path.resolve(_path, cacheId);
     if (isFile(this.filePath)) this.cache = create(this.filePath);
     this.removeNotFoundFiles();
   }
@@ -97,7 +97,7 @@ export class FileEntryCache<T> {
   }
 
   removeEntry(entryName: string) {
-    if (!isAbsolute(entryName)) entryName = resolve(cwd, entryName);
+    if (!isAbsolute(entryName)) entryName = resolve(entryName);
     this.normalizedEntries.delete(entryName);
     this.cache.delete(entryName);
   }

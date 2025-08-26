@@ -5,8 +5,8 @@ import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import watchReporter from '../reporters/watch.js';
-import type { Report } from '../types/issues.js';
 import type { ModuleGraph } from '../types/module-graph.js';
+import type { MainOptions } from './create-options.js';
 import { debugLog } from './debug.js';
 import { isFile } from './fs.js';
 import { updateImportMap } from './module-graph.js';
@@ -18,34 +18,31 @@ type Watch = {
   chief: ConfigurationChief;
   collector: IssueCollector;
   analyze: () => Promise<void>;
-  cwd: string;
   factory: PrincipalFactory;
   graph: ModuleGraph;
-  isDebug: boolean;
   isIgnored: (path: string) => boolean;
-  report: Report;
   streamer: ConsoleStreamer;
   unreferencedFiles: Set<string>;
 };
 
-export const getWatchHandler = async ({
-  analyzedFiles,
-  analyzeSourceFile,
-  chief,
-  collector,
-  analyze,
-  cwd,
-  factory,
-  graph,
-  isDebug,
-  isIgnored,
-  report,
-  streamer,
-  unreferencedFiles,
-}: Watch) => {
+export const getWatchHandler = async (
+  options: MainOptions,
+  {
+    analyzedFiles,
+    analyzeSourceFile,
+    chief,
+    collector,
+    analyze,
+    factory,
+    graph,
+    isIgnored,
+    streamer,
+    unreferencedFiles,
+  }: Watch
+) => {
   const reportIssues = async (startTime?: number) => {
     const { issues } = collector.getIssues();
-    watchReporter({ report, issues, streamer, startTime, size: analyzedFiles.size, isDebug });
+    watchReporter(options, { issues, streamer, startTime, size: analyzedFiles.size });
   };
 
   const listener: WatchListener<string | Buffer> = async (eventType: string, filename: string | Buffer | null) => {
@@ -53,7 +50,7 @@ export const getWatchHandler = async ({
 
     if (typeof filename === 'string') {
       const startTime = performance.now();
-      const filePath = join(cwd, toPosix(filename));
+      const filePath = join(options.cwd, toPosix(filename));
 
       if (isIgnored(filePath)) {
         debugLog('*', `ignoring ${eventType} ${filename}`);

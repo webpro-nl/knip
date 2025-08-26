@@ -121,7 +121,7 @@ export const getReferencedInputsHandler =
           symbol: specifier,
         });
       } else {
-        debugLog(workspace.name, `Unable to resolve ${toDebugString(input)}`);
+        debugLog(workspace.name, `Unable to resolve ${toDebugString(input, chief.cwd)}`);
       }
     }
   };

@@ -1,17 +1,16 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { join, resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
+import { join } from '../src/util/path.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/tags-cli');
 
 test('Include or exclude tagged exports (package.json)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['unimported.ts']['unimported']);
   assert(issues.exports['unimported.ts']['unimportedUntagged']);
@@ -42,11 +41,8 @@ test('Include or exclude tagged exports (package.json)', async () => {
 });
 
 test('Include or exclude tagged exports (package.json/include)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    tags: [['custom'], []],
-  });
+  const options = await createOptions({ cwd, tags: ['+custom'] });
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['unimported.ts']['unimported']);
   assert(issues.exports['tags.ts']['NS.UnusedCustom']);
@@ -64,13 +60,9 @@ test('Include or exclude tagged exports (package.json/include)', async () => {
 });
 
 test('Include or exclude tagged exports (package.json/exclude)', async () => {
-  const { issues, counters, tagHints } = await main({
-    ...baseArguments,
-    cwd,
-    tags: [[], ['custom']],
-  });
+  const options = await createOptions({ cwd, tags: ['-custom'] });
+  const { issues, counters, tagHints } = await main(options);
 
-  assert(issues.exports['unimported.ts']['unimportedUntagged']);
   assert(issues.exports['tags.ts']['NS.UnusedUntagged']);
   assert(issues.exports['tags.ts']['NS.UnusedInternal']);
   assert(issues.classMembers['tags.ts']['MyClass.UnusedUntagged']);

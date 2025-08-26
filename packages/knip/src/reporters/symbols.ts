@@ -17,7 +17,7 @@ export default (options: ReporterOptions) => {
       const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
       if (issuesForType.length > 0) {
         title && console.log(getColoredTitle(title, issuesForType.length));
-        console.log(getTableForType(issuesForType).toString());
+        console.log(getTableForType(issuesForType, options.cwd).toString());
         totalIssues = totalIssues + issuesForType.length;
       }
     }

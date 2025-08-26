@@ -1,18 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/include-entry-exports-scripts');
 
 test('Skip unused exports in entry source files and scripts', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: false,
-  });
+  const options = await createOptions({ cwd, isIncludeEntryExports: false });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -22,11 +19,8 @@ test('Skip unused exports in entry source files and scripts', async () => {
 });
 
 test('Report unused exports in source files (skip for scripts and plugin entry files)', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: true,
-  });
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,

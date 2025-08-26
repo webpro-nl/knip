@@ -140,5 +140,5 @@ export const toIgnore = (specifier: string, issueType: IssueType): IgnoreInput =
 
 export const isIgnore = (input: Input): input is IgnoreInput => input.type === 'ignore';
 
-export const toDebugString = (input: Input) =>
-  `${input.type}:${isAbsolute(input.specifier) ? toRelative(input.specifier) : input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath)})` : ''}`;
+export const toDebugString = (input: Input, cwd: string) =>
+  `${input.type}:${isAbsolute(input.specifier) ? toRelative(input.specifier, cwd) : input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath, cwd)})` : ''}`;

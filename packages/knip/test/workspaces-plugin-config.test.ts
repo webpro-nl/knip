@@ -1,17 +1,16 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { join, resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
+import { join } from '../src/util/path.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/workspaces-plugin-config');
 
 test('Use root plugin config in workspaces', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -21,12 +20,8 @@ test('Use root plugin config in workspaces', async () => {
 });
 
 test('Use root plugin config in workspaces (strict production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-    isStrict: true,
-  });
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues, counters } = await main(options);
 
   assert.deepEqual(
     issues.files,

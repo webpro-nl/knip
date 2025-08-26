@@ -40,7 +40,7 @@ type Row = {
   classMembers?: Record<string, Items>;
 };
 
-export default async ({ report, issues, options }: ReporterOptions) => {
+export default async ({ report, issues, options, cwd }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;
@@ -55,7 +55,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
   const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
 
   const initRow = (filePath: string) => {
-    const file = relative(filePath);
+    const file = relative(cwd, filePath);
     const row: Row = {
       file,
       ...(findOwners && { owners: findOwners(file).map(name => ({ name })) }),
@@ -105,7 +105,7 @@ export default async ({ report, issues, options }: ReporterOptions) => {
   }
 
   const output = JSON.stringify({
-    files: Array.from(issues.files).map(filePath => relative(filePath)),
+    files: Array.from(issues.files).map(filePath => relative(cwd, filePath)),
     issues: Object.values(json),
   });
 

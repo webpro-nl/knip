@@ -1,7 +1,7 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { findAndParseGitignores } from '../../src/util/glob-core.js';
-import { resolve } from '../../src/util/path.js';
+import { resolve } from '../helpers/resolve.js';
 
 test('findAndParseGitignores', async () => {
   const cwd = resolve('fixtures/glob');

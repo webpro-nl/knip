@@ -8,7 +8,7 @@ import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import { analyze } from './graph/analyze.js';
 import { build } from './graph/build.js';
-import type { CommandLineOptions } from './types/cli.js';
+import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { getWatchHandler } from './util/watch.js';
@@ -27,93 +27,38 @@ export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js'
  *    - Settle dependency related issues in DependencyDeputy
  */
 
-export const main = async (unresolvedConfiguration: CommandLineOptions) => {
-  const {
-    cacheLocation,
-    cwd,
-    excludedIssueTypes,
-    fixTypes,
-    gitignore,
-    includedIssueTypes,
-    isCache,
-    isDebug,
-    isDependenciesShorthand,
-    isExportsShorthand,
-    isFilesShorthand,
-    isFix,
-    isFormat,
-    isIncludeEntryExports,
-    isIncludeLibs,
-    isIsolateWorkspaces,
-    isProduction,
-    isRemoveFiles,
-    isShowProgress,
-    isStrict,
-    isWatch,
-    tags,
-    tsConfigFile,
-    workspace,
-  } = unresolvedConfiguration;
+export const main = async (options: MainOptions) => {
+  const { cwd } = options;
 
-  debugLogObject('*', 'Unresolved configuration (from CLI arguments)', unresolvedConfiguration);
+  debugLogObject('*', 'Unresolved configuration', options);
+  debugLogObject('*', 'Included issue types', options.includedIssueTypes);
 
-  const chief = new ConfigurationChief({ cwd, isProduction, isStrict, isIncludeEntryExports, workspace });
-  const deputy = new DependencyDeputy({ isProduction, isStrict });
+  const chief = new ConfigurationChief(options);
+  const deputy = new DependencyDeputy(options);
   const factory = new PrincipalFactory();
-  const streamer = new ConsoleStreamer({ isEnabled: isShowProgress });
+  const streamer = new ConsoleStreamer(options);
+  const fixer = new IssueFixer(options);
+  const collector = new IssueCollector(options);
 
   streamer.cast('Reading workspace configuration');
 
-  await chief.init();
+  const workspaces = await chief.getWorkspaces();
+  const isGitIgnored = await getGitIgnoredHandler(options);
 
-  const workspaces = chief.getWorkspaces();
-  const report = chief.getIncludedIssueTypes({
-    includedIssueTypes,
-    excludedIssueTypes,
-    isDependenciesShorthand,
-    isExportsShorthand,
-    isFilesShorthand,
-  });
-  const rules = chief.getRules();
-  const filters = chief.getFilters();
-  const finalTags = tags[0].length > 0 || tags[1].length > 0 ? tags : chief.getTags();
-  const fixer = new IssueFixer({ isEnabled: isFix, cwd, fixTypes, isRemoveFiles });
-
-  debugLogObject('*', 'Included issue types', report);
-
-  const isReportClassMembers = report.classMembers;
-  const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
-
-  const collector = new IssueCollector({ cwd, rules, filters });
-
-  const o = () => workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }));
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
-  debugLogObject('*', 'Included workspace configs', o);
-
-  const isGitIgnored = await getGitIgnoredHandler({ cwd, gitignore });
+  debugLogObject('*', 'Included workspace configs', () =>
+    workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }))
+  );
 
   const { graph, entryPaths, analyzedFiles, unreferencedFiles, analyzeSourceFile } = await build({
-    cacheLocation,
     chief,
     collector,
-    cwd,
     deputy,
     factory,
-    gitignore,
-    isCache,
-    isFixExports: fixer.isEnabled && fixer.isFixUnusedExports,
-    isFixTypes: fixer.isEnabled && fixer.isFixUnusedTypes,
     isGitIgnored,
-    isIsolateWorkspaces,
-    isProduction,
-    isSkipLibs,
-    isStrict,
-    isWatch,
-    report,
     streamer,
-    tags: finalTags,
-    tsConfigFile,
     workspaces,
+    options,
   });
 
   const reAnalyze = await analyze({
@@ -125,35 +70,24 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     factory,
     fixer,
     graph,
-    isFix,
-    isIncludeLibs,
-    isProduction,
-    report,
     streamer,
-    tags: finalTags,
     unreferencedFiles,
+    options,
   });
 
-  const { issues, counters, tagHints, configurationHints } = collector.getIssues();
-
-  for (const hint of chief.getConfigurationHints()) collector.addConfigurationHint(hint);
-
-  if (isWatch) {
+  if (options.isWatch) {
     const isIgnored = (filePath: string) =>
-      filePath.startsWith(cacheLocation) || filePath.includes('/.git/') || isGitIgnored(filePath);
+      filePath.startsWith(options.cacheLocation) || filePath.includes('/.git/') || isGitIgnored(filePath);
 
-    const watchHandler = await getWatchHandler({
+    const watchHandler = await getWatchHandler(options, {
       analyzedFiles,
       analyzeSourceFile,
       chief,
       collector,
       analyze: reAnalyze,
-      cwd,
       factory,
       graph,
-      isDebug,
       isIgnored,
-      report,
       streamer,
       unreferencedFiles,
     });
@@ -161,9 +95,11 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     watch('.', { recursive: true }, watchHandler);
   }
 
-  if (isFix) {
+  const { issues, counters, tagHints, configurationHints } = collector.getIssues();
+
+  if (options.isFix) {
     const touchedFiles = await fixer.fixIssues(issues);
-    if (isFormat) {
+    if (options.isFormat) {
       const report = await formatly(Array.from(touchedFiles), { cwd });
       if (report.ran && report.result && (report.result.runner === 'virtual' || report.result.code === 0)) {
         debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);
@@ -173,17 +109,13 @@ export const main = async (unresolvedConfiguration: CommandLineOptions) => {
     }
   }
 
-  if (!isWatch) streamer.clear();
+  if (!options.isWatch) streamer.clear();
 
   return {
-    report,
     issues,
     counters,
-    rules,
     tagHints,
     configurationHints,
-    isTreatConfigHintsAsErrors: chief.config.isTreatConfigHintsAsErrors,
-    includedWorkspaces: chief.includedWorkspaces,
-    configFilePath: chief.resolvedConfigFilePath,
+    includedWorkspaceDirs: chief.includedWorkspaces.map(w => w.dir),
   };
 };

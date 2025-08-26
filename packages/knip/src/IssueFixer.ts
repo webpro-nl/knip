@@ -1,35 +1,19 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import type { Fix, Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
+import type { MainOptions } from './util/create-options.js';
 import { load, save } from './util/package-json.js';
 import { join, relative } from './util/path.js';
 import { removeExport } from './util/remove-export.js';
 
-interface Fixer {
-  isEnabled: boolean;
-  cwd: string;
-  fixTypes: string[];
-  isRemoveFiles: boolean;
-}
-
 export class IssueFixer {
-  isEnabled = false;
-  cwd: string = process.cwd();
-  isFixFiles = true;
-  isFixDependencies = true;
-  isFixUnusedTypes = true;
-  isFixUnusedExports = true;
+  options: MainOptions;
 
   unusedTypeNodes: Map<string, Set<Fix>> = new Map();
   unusedExportNodes: Map<string, Set<Fix>> = new Map();
 
-  constructor({ isEnabled, cwd, fixTypes = [], isRemoveFiles }: Fixer) {
-    this.isEnabled = isEnabled;
-    this.cwd = cwd;
-    this.isFixFiles = isRemoveFiles && (fixTypes.length === 0 || fixTypes.includes('files'));
-    this.isFixDependencies = fixTypes.length === 0 || fixTypes.includes('dependencies');
-    this.isFixUnusedTypes = fixTypes.length === 0 || fixTypes.includes('types');
-    this.isFixUnusedExports = fixTypes.length === 0 || fixTypes.includes('exports');
+  constructor(options: MainOptions) {
+    this.options = options;
   }
 
   public addUnusedTypeNode(filePath: string, fixes: Fixes | undefined) {
@@ -53,11 +37,11 @@ export class IssueFixer {
   }
 
   private markExportFixed(issues: Issues, filePath: string) {
-    const relPath = relative(filePath);
+    const relPath = relative(this.options.cwd, filePath);
 
     const types = [
-      ...(this.isFixUnusedTypes ? (['types', 'nsTypes', 'classMembers', 'enumMembers'] as const) : []),
-      ...(this.isFixUnusedExports ? (['exports', 'nsExports'] as const) : []),
+      ...(this.options.isFixUnusedTypes ? (['types', 'nsTypes', 'classMembers', 'enumMembers'] as const) : []),
+      ...(this.options.isFixUnusedExports ? (['exports', 'nsExports'] as const) : []),
     ];
 
     for (const type of types) {
@@ -68,7 +52,7 @@ export class IssueFixer {
   }
 
   private async removeUnusedFiles(issues: Issues) {
-    if (!this.isFixFiles) return;
+    if (!this.options.isFixFiles) return;
 
     for (const issue of Object.values(issues._files).flatMap(Object.values)) {
       await rm(issue.filePath);
@@ -80,8 +64,8 @@ export class IssueFixer {
     const touchedFiles = new Set<string>();
     const filePaths = new Set([...this.unusedTypeNodes.keys(), ...this.unusedExportNodes.keys()]);
     for (const filePath of filePaths) {
-      const types = (this.isFixUnusedTypes && this.unusedTypeNodes.get(filePath)) || [];
-      const exports = (this.isFixUnusedExports && this.unusedExportNodes.get(filePath)) || [];
+      const types = (this.options.isFixUnusedTypes && this.unusedTypeNodes.get(filePath)) || [];
+      const exports = (this.options.isFixUnusedExports && this.unusedExportNodes.get(filePath)) || [];
       const exportPositions = [...types, ...exports].filter(fix => fix !== undefined).sort((a, b) => b[0] - a[0]);
 
       if (exportPositions.length > 0) {
@@ -102,12 +86,12 @@ export class IssueFixer {
 
   private async removeUnusedDependencies(issues: Issues) {
     const touchedFiles = new Set<string>();
-    if (!this.isFixDependencies) return touchedFiles;
+    if (!this.options.isFixDependencies) return touchedFiles;
 
     const filePaths = new Set([...Object.keys(issues.dependencies), ...Object.keys(issues.devDependencies)]);
 
     for (const filePath of filePaths) {
-      const absFilePath = join(this.cwd, filePath);
+      const absFilePath = join(this.options.cwd, filePath);
       const pkg = await load(absFilePath);
 
       if (filePath in issues.dependencies) {

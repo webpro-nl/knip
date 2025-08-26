@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/class-members');
 
 test('Find unused class members', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.classMembers['members.ts']).length, 6);
   assert(issues.classMembers['iterator-generator.ts']['AbstractClassGen.unimplemented']);
@@ -32,11 +30,8 @@ test('Find unused class members', async () => {
 });
 
 test('Find unused class members (isIncludeEntryExports)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: true,
-  });
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.classMembers['members.ts']).length, 6);
   assert(issues.classMembers['iterator-generator.ts']['AbstractClassGen.unimplemented']);

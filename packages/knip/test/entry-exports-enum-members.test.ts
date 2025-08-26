@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/entry-exports-enum-members');
 
 test('Find unused exports, types and enum members re-exported in entry file', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -21,11 +19,8 @@ test('Find unused exports, types and enum members re-exported in entry file', as
 });
 
 test('Find unused exports, types and enum members re-exported in entry file (2)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: true,
-  });
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { issues, counters } = await main(options);
 
   assert(issues.types['fruit.ts'].Farmer);
   assert(issues.exports['index.ts'].Farmer);

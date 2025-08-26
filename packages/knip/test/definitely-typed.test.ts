@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/definitely-typed');
 
 test('Find unused DT @types', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.devDependencies['package.json']['@types/unused']);
   assert(issues.devDependencies['package.json']['@types/mocha']);
@@ -25,12 +23,8 @@ test('Find unused DT @types', async () => {
 });
 
 test('Find type imports in production dependencies (strict)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    isProduction: true,
-    isStrict: true,
-    cwd,
-  });
+  const options = await createOptions({ cwd, isProduction: true, isStrict: true });
+  const { issues, counters } = await main(options);
 
   assert(issues.dependencies['package.json']['type-only-production-types']);
 

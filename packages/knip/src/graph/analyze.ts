@@ -4,9 +4,8 @@ import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { IssueFixer } from '../IssueFixer.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
-import type { Tags } from '../types/cli.js';
-import type { Report } from '../types/issues.js';
 import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
+import type { MainOptions } from '../util/create-options.js';
 import { getType, hasStrictlyEnumReferences, hasStrictlyNsReferences } from '../util/has-strictly-ns-references.js';
 import { getIsIdentifierReferencedHandler } from '../util/is-identifier-referenced.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
@@ -23,44 +22,28 @@ interface AnalyzeOptions {
   factory: PrincipalFactory;
   fixer: IssueFixer;
   graph: ModuleGraph;
-  isFix: boolean;
-  isIncludeLibs: boolean;
-  isProduction: boolean;
-  report: Report;
   streamer: ConsoleStreamer;
-  tags: Tags;
   unreferencedFiles: Set<string>;
+  options: MainOptions;
 }
 
-export const analyze = async (options: AnalyzeOptions) => {
-  const {
-    analyzedFiles,
-    chief,
-    collector,
-    deputy,
-    entryPaths,
-    factory,
-    fixer,
-    graph,
-    isFix,
-    isIncludeLibs,
-    isProduction,
-    report,
-    streamer,
-    tags,
-    unreferencedFiles,
-  } = options;
+export const analyze = async ({
+  analyzedFiles,
+  chief,
+  collector,
+  deputy,
+  entryPaths,
+  factory,
+  fixer,
+  graph,
+  streamer,
+  unreferencedFiles,
+  options,
+}: AnalyzeOptions) => {
+  const shouldIgnore = getShouldIgnoreHandler(options.isProduction);
+  const shouldIgnoreTags = getShouldIgnoreTagHandler(options.tags);
 
-  const isReportDependencies = report.dependencies || report.unlisted || report.unresolved || report.binaries;
-  const isReportValues = report.exports || report.nsExports || report.classMembers;
-  const isReportTypes = report.types || report.nsTypes || report.enumMembers;
-  const isReportClassMembers = report.classMembers;
-  const isSkipLibs = !(isIncludeLibs || isReportClassMembers);
-
-  const shouldIgnore = getShouldIgnoreHandler(isProduction);
-  const shouldIgnoreTags = getShouldIgnoreTagHandler(tags);
-
-  const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths);
+  const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths, options.isTrace);
 
   const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
   const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
@@ -71,7 +54,7 @@ export const analyze = async (options: AnalyzeOptions) => {
         : ignoreExportsUsedInFile));
 
   const analyzeGraph = async () => {
-    if (isReportValues || isReportTypes) {
+    if (options.isReportValues || options.isReportTypes) {
       streamer.cast('Connecting the dots');
 
       for (const [filePath, file] of graph.entries()) {
@@ -90,7 +73,7 @@ export const analyze = async (options: AnalyzeOptions) => {
 
           // Bail out when in entry file (unless `isIncludeEntryExports`)
           if (!isIncludeEntryExports && isEntry) {
-            createAndPrintTrace(filePath, { isEntry });
+            createAndPrintTrace(filePath, options, { isEntry });
             continue;
           }
 
@@ -111,7 +94,7 @@ export const analyze = async (options: AnalyzeOptions) => {
 
               if ((isReferenced || exportedItem.refs[1]) && isIgnored) {
                 for (const tagName of exportedItem.jsDocTags) {
-                  if (tags[1].includes(tagName.replace(/^@/, ''))) {
+                  if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                   }
                 }
@@ -121,7 +104,7 @@ export const analyze = async (options: AnalyzeOptions) => {
 
               if (reExportingEntryFile) {
                 if (!isIncludeEntryExports) {
-                  createAndPrintTrace(filePath, { identifier, isEntry, hasRef: isReferenced });
+                  createAndPrintTrace(filePath, options, { identifier, isEntry, hasRef: isReferenced });
                   continue;
                 }
                 // Skip exports if re-exported from entry file and tagged
@@ -129,11 +112,11 @@ export const analyze = async (options: AnalyzeOptions) => {
                 if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
               }
 
-              if (traceNode) printTrace(traceNode, filePath, identifier);
+              if (traceNode) printTrace(traceNode, filePath, options, identifier);
 
               if (isReferenced) {
-                if (report.enumMembers && exportedItem.type === 'enum') {
-                  if (!report.nsTypes && importsForExport.refs.has(identifier)) continue;
+                if (options.includedIssueTypes.enumMembers && exportedItem.type === 'enum') {
+                  if (!options.includedIssueTypes.nsTypes && importsForExport.refs.has(identifier)) continue;
                   if (hasStrictlyEnumReferences(importsForExport, identifier)) continue;
 
                   for (const member of exportedItem.members) {
@@ -159,10 +142,11 @@ export const analyze = async (options: AnalyzeOptions) => {
                           col: member.col,
                         });
 
-                        if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
+                        if (options.isFix && isIssueAdded && member.fix)
+                          fixer.addUnusedTypeNode(filePath, [member.fix]);
                       } else if (isIgnored) {
                         for (const tagName of exportedItem.jsDocTags) {
-                          if (tags[1].includes(tagName.replace(/^@/, ''))) {
+                          if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
                             collector.addTagHint({ type: 'tag', filePath, identifier: id, tagName });
                           }
                         }
@@ -171,7 +155,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                   }
                 }
 
-                if (principal && isReportClassMembers && exportedItem.type === 'class') {
+                if (principal && options.isReportClassMembers && exportedItem.type === 'class') {
                   const members = exportedItem.members.filter(
                     member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
                   );
@@ -179,7 +163,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                     if (shouldIgnoreTags(member.jsDocTags)) {
                       const identifier = `${exportedItem.identifier}.${member.identifier}`;
                       for (const tagName of exportedItem.jsDocTags) {
-                        if (tags[1].includes(tagName.replace(/^@/, ''))) {
+                        if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
                           collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                         }
                       }
@@ -197,7 +181,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                       col: member.col,
                     });
 
-                    if (isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
+                    if (options.isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                   }
                 }
 
@@ -210,11 +194,15 @@ export const analyze = async (options: AnalyzeOptions) => {
 
             const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
-            if (hasStrictlyNsRefs && ((!report.nsTypes && isType) || !(report.nsExports || isType))) continue;
+            if (
+              hasStrictlyNsRefs &&
+              ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType))
+            )
+              continue;
 
             if (!isExportedItemReferenced(exportedItem)) {
               if (isIgnored) continue;
-              if (!isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
+              if (!options.isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
 
               const type = getType(hasStrictlyNsRefs, isType);
               const isIssueAdded = collector.addIssue({
@@ -229,7 +217,7 @@ export const analyze = async (options: AnalyzeOptions) => {
                 col: exportedItem.col,
               });
 
-              if (isFix && isIssueAdded) {
+              if (options.isFix && isIssueAdded) {
                 if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
                 else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
               }
@@ -282,10 +270,10 @@ export const analyze = async (options: AnalyzeOptions) => {
 
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
-    if (isReportDependencies) {
+    if (options.isReportDependencies) {
       const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
       for (const issue of dependencyIssues) collector.addIssue(issue);
-      if (!isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
+      if (!options.isProduction) for (const issue of devDependencyIssues) collector.addIssue(issue);
       for (const issue of optionalPeerDependencyIssues) collector.addIssue(issue);
 
       deputy.removeIgnoredIssues(collector.getIssues());
@@ -298,6 +286,8 @@ export const analyze = async (options: AnalyzeOptions) => {
     for (const identifier of unusedIgnoredWorkspaces) {
       collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
     }
+
+    for (const hint of chief.getConfigurationHints()) collector.addConfigurationHint(hint);
   };
 
   await analyzeGraph();

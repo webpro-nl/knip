@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/re-exports-export-declaration');
 
 test('Find re-exports through namespaces (1)', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -21,11 +19,8 @@ test('Find re-exports through namespaces (1)', async () => {
 });
 
 test('Find re-exports through namespaces (1) including entry files', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: true,
-  });
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,

@@ -2,7 +2,8 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { _getInputsFromScripts } from '../../src/binaries/index.js';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
-import { join, resolve, cwd as rootCwd } from '../../src/util/path.js';
+import { join } from '../../src/util/path.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
@@ -160,8 +161,8 @@ test('getInputsFromScripts (bun)', () => {
   t('bunx cowsay "Hello world!"', [toDependency('cowsay', opt)]);
   t('bunx my-cli --foo bar', [toDependency('my-cli', opt)]);
   t('bun x pkg', [toDependency('pkg', opt)]);
-  t('bun ./main.ts', [toEntry(join(rootCwd, 'fixtures/binaries', 'main.ts'))]);
-  t('bun run script.js', [toEntry(join(rootCwd, 'fixtures/binaries', 'script.js'))]);
+  t('bun ./main.ts', [toEntry(join(cwd, 'main.ts'))]);
+  t('bun run script.js', [toEntry(join(cwd, 'script.js'))]);
   t('bun run --cwd packages/knip watch', []);
 });
 

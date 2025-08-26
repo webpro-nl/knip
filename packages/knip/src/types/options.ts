@@ -1,4 +1,4 @@
-export interface CommandLineOptions {
+export interface Options {
   cacheLocation: string;
   cwd: string;
   excludedIssueTypes: string[];
@@ -20,7 +20,7 @@ export interface CommandLineOptions {
   isShowProgress: boolean;
   isStrict: boolean;
   isWatch: boolean;
-  tags: Tags;
+  tags: string[];
   tsConfigFile: string | undefined;
   workspace: string | undefined;
 }

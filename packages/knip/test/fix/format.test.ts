@@ -2,8 +2,9 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { main } from '../../src/index.js';
-import { join, resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
+import { createOptions } from '../../src/util/create-options.js';
+import { join } from '../../src/util/path.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/fix');
 
@@ -114,13 +115,8 @@ export const { set: setter } = fn();
     ],
   ];
 
-  const { issues } = await main({
-    ...baseArguments,
-    cwd,
-    isFix: true,
-    isFormat: true,
-    tags: [[], ['lintignore']],
-  });
+  const options = await createOptions({ cwd, isFix: true, isFormat: true, tags: ['-lintignore'] });
+  const { issues } = await main(options);
 
   assert(issues.exports['access.js']['UNUSED']);
   assert(issues.exports['access.js']['ACCESS']);
@@ -213,14 +209,14 @@ export const { get: getter, set: setter } = fn();
     ],
   ];
 
-  const { issues } = await main({
-    ...baseArguments,
+  const options = await createOptions({
     cwd,
     isFix: true,
     isFormat: true,
     fixTypes: ['types'],
-    tags: [[], ['lintignore']],
+    tags: ['-lintignore'],
   });
+  const { issues } = await main(options);
 
   assert(issues.exports['access.js']['ACCESS']);
   assert(issues.exports['access.js']['UNUSED']);

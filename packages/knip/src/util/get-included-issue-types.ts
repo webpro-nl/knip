@@ -2,20 +2,12 @@ import { ISSUE_TYPES } from '../constants.js';
 import type { Report } from '../types/issues.js';
 import { ConfigurationError } from './errors.js';
 
-export type CLIArguments = {
-  includedIssueTypes: string[];
-  excludedIssueTypes: string[];
-  isDependenciesShorthand: boolean;
-  isExportsShorthand: boolean;
-  isFilesShorthand: boolean;
-};
-
-type Options = {
+type GetIncludedIssueTypesOptions = {
   isProduction?: boolean;
-  include?: string[];
-  exclude?: string[];
-  dependencies?: boolean;
-  exports?: boolean;
+  include: string[];
+  exclude: string[];
+  includeOverrides?: string[];
+  excludeOverrides?: string[];
 };
 
 /** @internal */
@@ -24,38 +16,29 @@ const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.
 
 const normalize = (values: string[]) => values.flatMap(value => value.split(','));
 
-export const getIncludedIssueTypes = (
-  cliArgs: CLIArguments,
-  { include = [], exclude = [], isProduction = false }: Options = {}
-) => {
+export const shorthandDeps = ['dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
+export const shorthandTypes = ['types', 'nsTypes', 'enumMembers', 'duplicates'];
+export const shorthandFiles = ['files'];
+
+export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => {
   // Allow space-separated argument values (--include files,dependencies)
-  let incl = normalize(cliArgs.includedIssueTypes);
-  const excl = normalize(cliArgs.excludedIssueTypes);
+  const incl = normalize(options.includeOverrides ?? []);
+  const excl = normalize(options.excludeOverrides ?? []);
 
   // Naming is hard...
-  for (const type of [...incl, ...excl, ...include, ...exclude]) {
+  for (const type of [...incl, ...excl, ...options.include, ...options.exclude]) {
     // @ts-expect-error The point is that we're checking for invalid issue types
     if (!ISSUE_TYPES.includes(type)) throw new ConfigurationError(`Invalid issue type: ${type}`);
   }
 
   // CLI arguments override local options
-  const excludes = exclude.filter(exclude => !incl.includes(exclude));
-  const includes = include.filter(include => !excl.includes(include));
-
-  if (cliArgs.isDependenciesShorthand) {
-    incl = [...incl, 'dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
-  }
-  if (cliArgs.isExportsShorthand) {
-    incl = [...incl, 'exports', 'types', 'enumMembers', 'duplicates'];
-  }
-  if (cliArgs.isFilesShorthand) {
-    incl = [...incl, 'files'];
-  }
+  const excludes = options.exclude.filter(exclude => !incl.includes(exclude));
+  const includes = options.include.filter(include => !excl.includes(include));
 
   const _include = [...incl, ...includes];
   const _exclude = [...excl, ...excludes];
 
-  if (isProduction) {
+  if (options.isProduction) {
     // Ignore devDependencies when analyzing production code
     _exclude.push('devDependencies');
   } else {

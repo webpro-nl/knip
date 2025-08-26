@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main as knip } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { main } from '../src/index.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/import-star-iteration');
 
 test('Handle usage of members of a namespace when imported using * and iterating', async () => {
-  const { counters } = await knip({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
 
   // Classes Orange and Apple are both used using a for (...in) loop
   // Classes Broccoli and Spinach are both used using a for (...of) loop
