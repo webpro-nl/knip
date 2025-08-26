@@ -30,9 +30,8 @@ const createGitHubActionsLogger = () => {
   };
 };
 
-const core = createGitHubActionsLogger();
-
 export default ({ issues }: ReporterOptions) => {
+  const core = createGitHubActionsLogger();
   for (const issueName of ISSUE_TYPES) {
     const issue = issues[issueName];
     if (!issue) continue;

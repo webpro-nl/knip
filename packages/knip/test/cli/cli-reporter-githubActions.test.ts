@@ -3,14 +3,41 @@ import assert from 'node:assert/strict';
 import { resolve } from '../../src/util/path.js';
 import { exec } from '../helpers/exec.js';
 
-const cwd = resolve('fixtures/module-resolution-non-std');
+const moduleCwd = resolve('fixtures/module-resolution-non-std');
 
 test('knip --reporter githubActions (files, unlisted & unresolved)', () => {
   assert.equal(
-    exec('knip --reporter githubActions', { cwd }).stdout,
-    `${cwd}/src/unused.ts
-::error file=${cwd}/src/index.ts::Unlisted dependencies
-::error file=${cwd}/src/index.ts::Unlisted dependencies
-::error file=${cwd}/src/index.ts,line=8,endLine=8,col=23,endColumn=23::Unresolved imports`
+    exec('knip --reporter githubActions', { cwd: moduleCwd }).stdout,
+    `${moduleCwd}/src/unused.ts
+::error file=${moduleCwd}/src/index.ts::Unlisted dependencies
+::error file=${moduleCwd}/src/index.ts::Unlisted dependencies
+::error file=${moduleCwd}/src/index.ts,line=8,endLine=8,col=23,endColumn=23::Unresolved imports`
   );
+});
+
+const rulesCwd = resolve('fixtures/rules');
+
+test('knip --reporter githubActions (rules: unused export, unused dep, unresolved)', () => {
+  const output = exec('knip --reporter githubActions', { cwd: rulesCwd }).stdout;
+  assert.match(output, new RegExp(`::warning file=${rulesCwd}/exports.ts.*Unused export`));
+  assert.match(output, new RegExp(`::warning file=${rulesCwd}/package.json::Unused dependencies`));
+  assert.match(output, new RegExp(`::warning file=${rulesCwd}/package.json::Unused devDependencies`));
+  assert.match(output, new RegExp(`::warning file=${rulesCwd}/index.ts.*Unresolved imports`));
+});
+
+const workspacesCwd = resolve('fixtures/workspaces');
+
+test('knip --reporter githubActions (workspaces: unused export, unused dep, unlisted dep)', () => {
+  const output = exec('knip --reporter githubActions', { cwd: workspacesCwd }).stdout;
+  assert.match(output, new RegExp(`::error file=${workspacesCwd}/.*Unused export`));
+  assert.match(output, new RegExp(`::error file=${workspacesCwd}/.*Unused dependencies`));
+  assert.match(output, new RegExp(`::error file=${workspacesCwd}/.*Unlisted dependencies`));
+});
+
+const nuxtCwd = resolve('fixtures/plugins/nuxt');
+
+test('knip --reporter githubActions (nuxt: unused export, unused dep)', () => {
+  const output = exec('knip --reporter githubActions', { cwd: nuxtCwd }).stdout;
+  assert.match(output, new RegExp(`::error file=${nuxtCwd}/.*Unused export`));
+  assert.match(output, new RegExp(`::error file=${nuxtCwd}/.*Unused dependencies`));
 });
