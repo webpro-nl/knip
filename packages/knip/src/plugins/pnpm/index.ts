@@ -4,7 +4,7 @@ import type { IsPluginEnabled, Plugin } from '../../types/config.js';
 
 const title = 'pnpm';
 
-const isEnabled: IsPluginEnabled = ({ manifest }) => manifest.packageManager?.startsWith('pnpm@') ?? true;
+const isEnabled: IsPluginEnabled = ({ manifest }) => Boolean(manifest.packageManager?.startsWith('pnpm@'));
 
 const config: string[] = ['.pnpmfile.cjs'];
 
