@@ -244,6 +244,7 @@ test('getInputsFromScripts (nodemon)', () => {
 });
 
 test('getInputsFromScripts (concurrently)', () => {
+  t('concurrently some:script npm:version:node', [toBinary('concurrently')]);
   t('concurrently "tsx watch s.ts" "tsx watch c.ts"', [toBinary('concurrently'), toBinary('tsx'), toDeferResolveEntry('s.ts', opt), toBinary('tsx'), toDeferResolveEntry('c.ts', opt)]);
   t('sleep 2 && concurrently "npm:watch-*"', [toBinary('sleep'), toBinary('concurrently')]);
   t('concurrently -g -c red,green,yellow,blue,magenta pnpm:lint:*', [toBinary('concurrently')]);
