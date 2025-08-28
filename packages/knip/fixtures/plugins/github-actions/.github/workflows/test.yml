@@ -30,6 +30,7 @@ jobs:
       - run: pnpm build
       - run: pnpm eslint
       - run: pnpm lint
+      - run: pnpm self-update
       - run: pnpm release-it
       - run: pnpm run setup:test
       - run: pnpm run test --coverage
