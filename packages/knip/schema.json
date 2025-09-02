@@ -547,6 +547,10 @@
           "title": "playwright-test plugin configuration (https://knip.dev/reference/plugins/playwright-test)",
           "$ref": "#/definitions/plugin"
         },
+        "pnpm": {
+          "title": "pnpm plugin configuration (https://knip.dev/reference/plugins/pnpm)",
+          "$ref": "#/definitions/plugin"
+        },
         "postcss": {
           "title": "PostCSS plugin configuration (https://knip.dev/reference/plugins/postcss)",
           "$ref": "#/definitions/plugin"
