@@ -15,5 +15,5 @@ export default {
   codeclimate,
   json,
   markdown,
-  githubActions,
+  'github-actions': githubActions,
 };
