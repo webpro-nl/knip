@@ -42,12 +42,13 @@
     },
     "packages/knip": {
       "name": "knip",
-      "version": "5.62.0",
+      "version": "5.63.0",
       "bin": {
         "knip": "bin/knip.js",
         "knip-bun": "bin/knip-bun.js",
       },
       "dependencies": {
+        "@astrojs/compiler": "^2.12.2",
         "@nodelib/fs.walk": "^1.2.3",
         "fast-glob": "^3.3.3",
         "formatly": "^0.3.0",

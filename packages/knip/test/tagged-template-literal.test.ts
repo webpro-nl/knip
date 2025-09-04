@@ -7,7 +7,7 @@ import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/tagged-template-literal');
 
-test('Exclude imports from tagged template literals', async () => {
+test.only("Exclude imports from tagged template literals", async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 

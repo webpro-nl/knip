@@ -55,7 +55,7 @@ export const getIncludedCompilers = (
     if (extension === '.mdx' && AstroMDX.condition(hasDependency)) {
       syncCompilers.set(extension, AstroMDX.compiler);
     } else if ((!syncCompilers.has(extension) && condition(hasDependency)) || syncCompilers.get(extension) === true) {
-      syncCompilers.set(extension, compiler);
+      asyncCompilers.set(extension, compiler);
     }
   }
   return [syncCompilers as SyncCompilers, asyncCompilers];

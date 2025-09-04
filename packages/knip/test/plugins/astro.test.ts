@@ -8,7 +8,7 @@ import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/astro');
 
-test('Find dependencies with the Astro plugin', async () => {
+test.only('Find dependencies with the Astro plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
