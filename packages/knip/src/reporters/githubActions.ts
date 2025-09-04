@@ -1,5 +1,6 @@
 import { ISSUE_TYPES, ISSUE_TYPE_TITLE } from '../constants.js';
 import type { ReporterOptions } from '../types/issues.js';
+import { relative } from '../util/path.js';
 
 const createGitHubActionsLogger = () => {
   const formatAnnotation = (
@@ -30,7 +31,7 @@ const createGitHubActionsLogger = () => {
   };
 };
 
-export default ({ issues }: ReporterOptions) => {
+export default ({ issues, cwd }: ReporterOptions) => {
   const core = createGitHubActionsLogger();
   for (const issueName of ISSUE_TYPES) {
     const issue = issues[issueName];
@@ -41,7 +42,7 @@ export default ({ issues }: ReporterOptions) => {
 
     for (const issueItem of issueSet) {
       if (typeof issueItem === 'string') {
-        core.info(issueItem);
+        core.info(relative(cwd, issueItem));
         continue;
       }
       if (issueItem.isFixed || issueItem.severity === 'off') {
@@ -51,7 +52,7 @@ export default ({ issues }: ReporterOptions) => {
       const log = issueItem.severity === 'error' ? core.error : core.warning;
 
       log(ISSUE_TYPE_TITLE[issueItem.type], {
-        file: issueItem.filePath,
+        file: relative(cwd, issueItem.filePath),
         startLine: issueItem.line,
         endLine: issueItem.line,
         endColumn: issueItem.col,
