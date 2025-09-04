@@ -36,7 +36,7 @@ jobs:
         run: npm run build
         working-directory: packages/knip
       - name: Run knip
-        run: npx --yes knip
+        run: npx --yes knip --reporter github-actions
       - name: Run knip (production/strict)
         run: npx --yes knip --production --strict
       - name: Test knip
