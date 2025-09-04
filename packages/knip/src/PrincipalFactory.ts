@@ -2,6 +2,7 @@ import ts from 'typescript';
 import { ProjectPrincipal } from './ProjectPrincipal.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import type { PrincipalOptions } from './types/project.js';
+import type { MainOptions } from './util/create-options.js';
 import { debugLog } from './util/debug.js';
 import { toRelative } from './util/path.js';
 
@@ -19,18 +20,18 @@ export class PrincipalFactory {
     return this.principals.size;
   }
 
-  public createPrincipal(options: PrincipalOptions) {
-    const { cwd, compilerOptions, isFile, pkgName, isIsolateWorkspaces, compilers } = options;
+  public createPrincipal(options: MainOptions, opts: PrincipalOptions) {
+    const { dir, compilerOptions, isFile, pkgName, compilers } = opts;
     if (isFile && compilerOptions.module !== ts.ModuleKind.CommonJS)
       compilerOptions.moduleResolution ??= ts.ModuleResolutionKind.Bundler;
-    if (!isIsolateWorkspaces) {
+    if (!options.isIsolateWorkspaces) {
       const principal = this.findReusablePrincipal(compilerOptions);
       if (principal) {
-        this.linkPrincipal(principal, cwd, compilerOptions, pkgName, compilers);
+        this.linkPrincipal(principal, dir, compilerOptions, pkgName, compilers);
         return principal.principal;
       }
     }
-    return this.addNewPrincipal(options);
+    return this.addNewPrincipal(options, opts);
   }
 
   /**
@@ -64,11 +65,11 @@ export class PrincipalFactory {
     principal.pkgNames.add(pkgName);
   }
 
-  private addNewPrincipal(options: PrincipalOptions) {
-    const { cwd, compilerOptions, pkgName } = options;
+  private addNewPrincipal(options: MainOptions, opts: PrincipalOptions) {
+    const { dir, compilerOptions, pkgName } = opts;
     const pathKeys = new Set(Object.keys(compilerOptions?.paths ?? {}));
-    const principal = new ProjectPrincipal(options);
-    this.principals.add({ principal, wsDirs: new Set([cwd]), pathKeys, pkgNames: new Set([pkgName]) });
+    const principal = new ProjectPrincipal(options, opts);
+    this.principals.add({ principal, wsDirs: new Set([dir]), pathKeys, pkgNames: new Set([pkgName]) });
     return principal;
   }
 
@@ -80,10 +81,13 @@ export class PrincipalFactory {
     return Array.from(this.principals).find(principal => principal.pkgNames.has(packageName))?.principal;
   }
 
-  public deletePrincipal(principal: ProjectPrincipal) {
+  public deletePrincipal(principal: ProjectPrincipal, cwd: string) {
     const p = Array.from(this.principals).find(p => p.principal === principal);
     if (p) {
-      debugLog('*', `Deleting principal at ${[...p.wsDirs].map(cwd => toRelative(cwd) || '.')} (${[...p.pkgNames]})`);
+      debugLog(
+        '*',
+        `Deleting principal at ${[...p.wsDirs].map(dir => toRelative(dir, cwd) || '.')} (${[...p.pkgNames]})`
+      );
       this.principals.delete(p);
     }
   }

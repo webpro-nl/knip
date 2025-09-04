@@ -15,16 +15,28 @@ const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
 const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
   const inputs = new Set<Input>();
-  if (config.source?.entry) {
-    for (const entry of Object.values(config.source.entry)) {
-      if (typeof entry === 'string') inputs.add(toEntry(entry));
-      else if (Array.isArray(entry)) for (const e of entry) inputs.add(toEntry(e));
-      else {
-        if (typeof entry.import === 'string') inputs.add(toEntry(entry.import));
-        else if (Array.isArray(entry.import)) for (const e of entry.import) inputs.add(toEntry(e));
+
+  const checkSource = (source: RsbuildConfig['source']) => {
+    if (source?.entry) {
+      for (const entry of Object.values(source.entry)) {
+        if (typeof entry === 'string') inputs.add(toEntry(entry));
+        else if (Array.isArray(entry)) for (const e of entry) inputs.add(toEntry(e));
+        else {
+          if (typeof entry.import === 'string') inputs.add(toEntry(entry.import));
+          else if (Array.isArray(entry.import)) for (const e of entry.import) inputs.add(toEntry(e));
+        }
       }
     }
+  };
+
+  checkSource(config.source);
+
+  if (config.environments) {
+    for (const environment of Object.values(config.environments)) {
+      checkSource(environment.source);
+    }
   }
+
   return Array.from(inputs);
 };
 

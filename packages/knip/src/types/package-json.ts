@@ -46,6 +46,7 @@ export type PackageJson = {
   browser?: string;
   types?: string;
   typings?: string;
+  packageManager?: string;
 } & Plugins;
 
 export type WorkspacePackage = {

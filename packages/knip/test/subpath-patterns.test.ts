@@ -1,17 +1,16 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { join, resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
+import { join } from '../src/util/path.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/subpath-patterns');
 
 test('Allows subpath-patterns', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.files.has(join(cwd, 'src/internals/unused.ts')));
 
@@ -24,11 +23,8 @@ test('Allows subpath-patterns', async () => {
 });
 
 test('Allows subpath-patterns (production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-  });
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
 
   assert(issues.files.has(join(cwd, 'src/internals/unused.ts')));
 
@@ -41,12 +37,8 @@ test('Allows subpath-patterns (production)', async () => {
 });
 
 test('Allows subpath-patterns (strict)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-    isStrict: true,
-  });
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues, counters } = await main(options);
 
   assert(issues.files.has(join(cwd, 'src/internals/unused.ts')));
 

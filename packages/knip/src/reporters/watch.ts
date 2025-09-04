@@ -1,26 +1,27 @@
 import picocolors from 'picocolors';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { Entries } from '../types/entries.js';
-import type { Issues, Report } from '../types/issues.js';
+import type { Issues } from '../types/issues.js';
 import { perfObserver } from '../util/Performance.js';
+import type { MainOptions } from '../util/create-options.js';
 import { prettyMilliseconds } from '../util/string.js';
 import { getIssueTypeTitle, getTableForType } from './util/util.js';
 
 interface WatchReporter {
-  report: Report;
   issues: Issues;
   streamer: ConsoleStreamer;
   startTime?: number;
   size: number;
-  isDebug: boolean;
 }
 
-export default ({ report, issues, streamer, startTime, size, isDebug }: WatchReporter) => {
-  const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
+export default (options: MainOptions, { issues, streamer, startTime, size }: WatchReporter) => {
+  const reportMultipleGroups = Object.values(options.includedIssueTypes).filter(Boolean).length > 1;
   let totalIssues = 0;
   const lines: string[] = [];
 
-  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+  for (let [reportType, isReportType] of Object.entries(options.includedIssueTypes) as Entries<
+    typeof options.includedIssueTypes
+  >) {
     if (reportType === 'files') reportType = '_files';
 
     if (isReportType) {
@@ -31,7 +32,7 @@ export default ({ report, issues, streamer, startTime, size, isDebug }: WatchRep
         if (title) {
           lines.push(`${picocolors.yellowBright(picocolors.underline(title))} (${issuesForType.length})`);
         }
-        lines.push(...getTableForType(issuesForType).toRows());
+        lines.push(...getTableForType(issuesForType, options.cwd).toRows());
       }
 
       totalIssues = totalIssues + issuesForType.length;
@@ -47,6 +48,6 @@ export default ({ report, issues, streamer, startTime, size, isDebug }: WatchRep
       ? ['✂️  Excellent, Knip found no issues.', '', picocolors.gray(summary)]
       : [...lines, '', picocolors.gray(summary)];
 
-  if (isDebug) console.log(messages.join('\n'));
+  if (options.isDebug) console.log(messages.join('\n'));
   else streamer.cast(messages);
 };

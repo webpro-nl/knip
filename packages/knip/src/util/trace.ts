@@ -1,23 +1,19 @@
 import picocolors from 'picocolors';
 import type { ModuleGraph } from '../types/module-graph.js';
-import parsedArgValues from './cli-arguments.js';
+import type { MainOptions } from './create-options.js';
 import { toAbsolute, toRelative } from './path.js';
 
 const IS_ENTRY = ' ◯';
 const HAS_REF = ' ✓';
 const HAS_NO_REF = ' x';
 
-const { 'trace-export': traceExport, 'trace-file': traceFile, trace } = parsedArgValues;
-
-const isTrace = Boolean(trace || traceExport || traceFile);
-
-type CreateNode = {
+type CreateNodeOpts = {
   identifier?: string;
   hasRef?: boolean;
   isEntry?: boolean;
 };
 
-type Create = (filePath: string, options?: CreateNode) => TraceNode;
+type Create = (filePath: string, options?: CreateNodeOpts) => TraceNode;
 
 export type TraceNode = {
   filePath: string;
@@ -26,8 +22,6 @@ export type TraceNode = {
   isEntry: boolean;
   children: Set<TraceNode>;
 };
-
-export { isTrace };
 
 const getPadding = (level: number, levels: Set<number>) => {
   let padding = '';
@@ -42,7 +36,7 @@ const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => 
   for (const child of node.children) {
     const isLast = ++index === size;
     const hasRef = child.hasRef === true;
-    const rel = toRelative(child.filePath);
+    const rel = child.filePath;
     const file = hasRef ? rel : picocolors.dim(rel);
     const suffix = (hasRef ? HAS_REF : '') + (child.isEntry ? IS_ENTRY : '');
     const text = `${padding}${picocolors.dim(isLast ? '└─' : '├─')} ${file}${suffix}`;
@@ -56,19 +50,18 @@ const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => 
   }
 };
 
-export const printTrace = isTrace
-  ? (node: TraceNode, filePath: string, identifier?: string) => {
-      if (traceExport && identifier && identifier !== traceExport) return;
-      if (traceFile && filePath !== toAbsolute(traceFile)) return;
-      const suffix = (node.isEntry ? IS_ENTRY : '') + (node.children.size === 0 ? HAS_NO_REF : '');
-      const header = `${toRelative(filePath)}${identifier ? `:${identifier}` : ''}${suffix}`;
-      // biome-ignore lint/suspicious/noConsoleLog:
-      console.log(header);
-      renderTrace(node);
-      // biome-ignore lint/suspicious/noConsoleLog:
-      console.log();
-    }
-  : () => {};
+export const printTrace = (node: TraceNode, filePath: string, options: MainOptions, identifier?: string) => {
+  if (!options.isTrace) return;
+  if (options.traceExport && identifier && identifier !== options.traceExport) return;
+  if (options.traceFile && filePath !== toAbsolute(options.traceFile, options.cwd)) return;
+  const suffix = (node.isEntry ? IS_ENTRY : '') + (node.children.size === 0 ? HAS_NO_REF : '');
+  const header = `${toRelative(filePath, options.cwd)}${identifier ? `:${identifier}` : ''}${suffix}`;
+  // biome-ignore lint/suspicious/noConsoleLog:
+  console.log(header);
+  renderTrace(node);
+  // biome-ignore lint/suspicious/noConsoleLog:
+  console.log();
+};
 
 export const createNode: Create = (filePath, { hasRef = false, isEntry = false, identifier } = {}) => ({
   filePath,
@@ -78,7 +71,7 @@ export const createNode: Create = (filePath, { hasRef = false, isEntry = false, 
   children: new Set<TraceNode>(),
 });
 
-const addNode = (parent: TraceNode, filePath: string, { hasRef = false, isEntry = false }: CreateNode) => {
+const addNode = (parent: TraceNode, filePath: string, { hasRef = false, isEntry = false }: CreateNodeOpts) => {
   const node = createNode(filePath, { hasRef, isEntry });
   parent.children.add(node);
   return node;
@@ -91,8 +84,8 @@ export const addNodes = (node: TraceNode, id: string, importedSymbols: ModuleGra
   }
 };
 
-export const createAndPrintTrace = (filePath: string, options: CreateNode = {}) => {
-  if (!isTrace || traceExport || traceFile) return;
-  const traceNode = createNode(filePath, options);
-  printTrace(traceNode, filePath, options.identifier);
+export const createAndPrintTrace = (filePath: string, options: MainOptions, opts: CreateNodeOpts = {}) => {
+  if (!options.isTrace) return;
+  const traceNode = createNode(filePath, opts);
+  printTrace(traceNode, filePath, options, opts.identifier);
 };

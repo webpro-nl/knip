@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/self-reference');
 
 test('Allows self-references', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.unlisted).length, 0);
 
@@ -23,11 +21,8 @@ test('Allows self-references', async () => {
 });
 
 test('Allows self-references (production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-  });
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.unlisted).length, 0);
 
@@ -39,12 +34,8 @@ test('Allows self-references (production)', async () => {
 });
 
 test('Allows self-references (strict)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-    isStrict: true,
-  });
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.unlisted).length, 0);
 

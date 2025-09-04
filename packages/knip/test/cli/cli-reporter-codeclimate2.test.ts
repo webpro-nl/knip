@@ -1,9 +1,9 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import type { Issue } from 'codeclimate-types';
-import { resolve } from '../../src/util/path.js';
 import { assertAndRemoveFingerprint, orderByPos } from '../helpers/assertAndRemoveProperty.js';
 import { exec } from '../helpers/exec.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/module-resolution-non-std');
 

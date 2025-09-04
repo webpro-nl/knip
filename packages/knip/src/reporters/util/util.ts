@@ -25,11 +25,11 @@ type LogIssueLine = {
   severity?: IssueSeverity;
 };
 
-export const getIssueLine = ({ owner, filePath, symbols, parentSymbol, severity }: LogIssueLine) => {
+export const getIssueLine = ({ owner, filePath, symbols, parentSymbol, severity }: LogIssueLine, cwd: string) => {
   const symbol = symbols ? `: ${symbols.map(s => s.symbol).join(', ')}` : '';
   const parent = parentSymbol ? ` (${parentSymbol})` : '';
   const print = severity === 'warn' ? dim : plain;
-  return `${owner ? `${picocolors.cyan(owner)} ` : ''}${print(`${relative(filePath)}${symbol}${parent}`)}`;
+  return `${owner ? `${picocolors.cyan(owner)} ` : ''}${print(`${relative(cwd, filePath)}${symbol}${parent}`)}`;
 };
 
 export const convert = (issue: Issue | IssueSymbol) => ({
@@ -60,7 +60,11 @@ const highlightSymbol =
     return issue.symbol;
   };
 
-export const getTableForType = (issues: Issue[], options: { isUseColors?: boolean } = { isUseColors: true }) => {
+export const getTableForType = (
+  issues: Issue[],
+  cwd: string,
+  options: { isUseColors?: boolean } = { isUseColors: true }
+) => {
   const table = new Table({ truncateStart: ['filePath'], noTruncate: ['symbolType'] });
 
   for (const issue of issues.sort(sortByPos)) {
@@ -76,7 +80,7 @@ export const getTableForType = (issues: Issue[], options: { isUseColors?: boolea
 
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
     // @ts-expect-error TODO Fix up in next major
-    const cell = issue.type === 'files' ? '' : `${relative(issue.filePath)}${pos}`;
+    const cell = issue.type === 'files' ? '' : `${relative(cwd, issue.filePath)}${pos}`;
     table.cell('filePath', print(cell));
 
     table.cell('fixed', issue.isFixed && print('(removed)'));

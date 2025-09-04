@@ -1,19 +1,24 @@
 import os from 'node:os';
 import { type PerformanceEntry, PerformanceObserver, performance } from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
-import parsedArgValues from './cli-arguments.js';
+import { parseArgs } from 'node:util';
 import { getStats } from './math.js';
 import { Table } from './table.js';
 
-const {
-  performance: enableTimerify = false,
-  'performance-fn': timerifyOnlyFnName,
-  memory: enableMemoryUsage = false,
-  'memory-realtime': memoryRealtime = false,
-} = parsedArgValues;
+const { values } = parseArgs({
+  strict: false,
+  options: {
+    performance: { type: 'boolean' },
+    'performance-fn': { type: 'string' },
+    memory: { type: 'boolean' },
+    'memory-realtime': { type: 'boolean' },
+  },
+});
 
-const isTimerifyFunctions = enableTimerify || !!timerifyOnlyFnName;
-const isMemoryUsageEnabled = enableMemoryUsage || memoryRealtime;
+const timerifyOnlyFnName = values['performance-fn'];
+const isMemoryRealtime = !!values['memory-realtime'];
+const isTimerifyFunctions = !!values.performance || !!timerifyOnlyFnName;
+const isMemoryUsageEnabled = !!values.memory || isMemoryRealtime;
 
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
   if (!isTimerifyFunctions) return fn;
@@ -84,7 +89,7 @@ class Performance {
       });
       this.memObserver.observe({ type: 'mark' });
 
-      if (memoryRealtime) logHead();
+      if (isMemoryRealtime) logHead();
       this.addMemoryMark(0);
     }
   }
@@ -142,7 +147,7 @@ class Performance {
     const id = `${this.memId}:${index}`;
     const detail = getMemInfo();
     performance.mark(id, { detail });
-    if (memoryRealtime && detail) log(detail);
+    if (isMemoryRealtime && detail) log(detail);
   }
 
   getMemoryUsageTable() {

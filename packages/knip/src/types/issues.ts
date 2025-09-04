@@ -1,5 +1,3 @@
-import type { Workspace } from '../ConfigurationChief.js';
-
 export enum SymbolType {
   VARIABLE = 'variable',
   TYPE = 'type',
@@ -74,7 +72,7 @@ export type ReporterOptions = {
   isShowProgress: boolean;
   options: string;
   preprocessorOptions: string;
-  includedWorkspaces: Workspace[];
+  includedWorkspaceDirs: string[];
   configFilePath?: string;
 };
 

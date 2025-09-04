@@ -19,7 +19,7 @@ const positionalBinaries = new Set(['concurrently']);
 
 export const resolve: BinaryResolver = (binary, args, { fromArgs }) => {
   const parsed = parseArgs(args, { boolean: ['quiet', 'verbose'], '--': endOfCommandBinaries.includes(binary) });
-  const bin = binary.startsWith('.') ? toEntry(binary) : binary.includes('*') ? undefined : toBinary(binary);
+  const bin = binary.startsWith('.') ? toEntry(binary) : /[*:]/.test(binary) ? undefined : toBinary(binary);
   const shiftedArgs = spawningBinaries.includes(binary) ? fromArgs(args) : [];
   const pos = positionals.has(binary) ? [toDeferResolve(parsed._[0])] : [];
   const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];

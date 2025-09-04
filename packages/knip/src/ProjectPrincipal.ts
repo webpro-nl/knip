@@ -3,7 +3,7 @@ import { CacheConsultant } from './CacheConsultant.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { ANONYMOUS, DEFAULT_EXTENSIONS, PUBLIC_TAG } from './constants.js';
-import type { GetImportsAndExportsOptions } from './types/config.js';
+import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from './types/config.js';
 import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.js';
 import type { Paths, PrincipalOptions } from './types/project.js';
 import type { BoundSourceFile } from './typescript/SourceFile.js';
@@ -13,6 +13,7 @@ import { _getImportsAndExports } from './typescript/get-imports-and-exports.js';
 import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
 import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
+import type { MainOptions } from './util/create-options.js';
 import { extname, isInNodeModules, toAbsolute } from './util/path.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
@@ -80,20 +81,7 @@ export class ProjectPrincipal {
   findReferences?: ts.LanguageService['findReferences'];
   getImplementationAtPosition?: ts.LanguageService['getImplementationAtPosition'];
 
-  constructor({
-    compilerOptions,
-    cwd,
-    compilers,
-    isSkipLibs,
-    isWatch,
-    pkgName,
-    toSourceFilePath,
-    isCache,
-    cacheLocation,
-    isProduction,
-  }: PrincipalOptions) {
-    this.cwd = cwd;
-
+  constructor(options: MainOptions, { compilerOptions, compilers, pkgName, toSourceFilePath }: PrincipalOptions) {
     this.compilerOptions = {
       ...compilerOptions,
       ...baseCompilerOptions,
@@ -105,14 +93,15 @@ export class ProjectPrincipal {
     this.extensions = new Set([...DEFAULT_EXTENSIONS, ...getCompilerExtensions(compilers)]);
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
-    this.isSkipLibs = isSkipLibs;
-    this.isWatch = isWatch;
-    this.cache = new CacheConsultant({ name: pkgName || ANONYMOUS, isEnabled: isCache, cacheLocation, isProduction });
+    this.cwd = options.cwd;
+    this.isSkipLibs = options.isSkipLibs;
+    this.isWatch = options.isWatch;
+    this.cache = new CacheConsultant(pkgName || ANONYMOUS, options);
     this.toSourceFilePath = toSourceFilePath;
 
     // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
     this.backend = {
-      fileManager: new SourceFileManager({ compilers, isSkipLibs }),
+      fileManager: new SourceFileManager({ compilers, isSkipLibs: options.isSkipLibs }),
     };
   }
 
@@ -235,7 +224,11 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
   }
 
-  public analyzeSourceFile(filePath: string, options: Omit<GetImportsAndExportsOptions, 'skipExports'>) {
+  public analyzeSourceFile(
+    filePath: string,
+    options: GetImportsAndExportsOptions,
+    ignoreExportsUsedInFile: IgnoreExportsUsedInFile
+  ) {
     const fd = this.cache.getFileDescriptor(filePath);
     if (!fd.changed && fd.meta?.data) return fd.meta.data;
 
@@ -252,7 +245,7 @@ export class ProjectPrincipal {
 
     const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
-    return _getImportsAndExports(sourceFile, resolve, typeChecker, { ...options, skipExports });
+    return _getImportsAndExports(sourceFile, resolve, typeChecker, options, ignoreExportsUsedInFile, skipExports);
   }
 
   invalidateFile(filePath: string) {

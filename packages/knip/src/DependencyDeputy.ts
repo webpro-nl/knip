@@ -19,6 +19,7 @@ import type {
   InstalledBinaries,
   WorkspaceManifests,
 } from './types/workspace.js';
+import type { MainOptions } from './util/create-options.js';
 import {
   getDefinitelyTypedFor,
   getPackageFromDefinitelyTyped,
@@ -26,11 +27,6 @@ import {
   isDefinitelyTyped,
 } from './util/modules.js';
 import { findMatch, toRegexOrString } from './util/regex.js';
-
-type Options = {
-  isProduction: boolean;
-  isStrict: boolean;
-};
 
 /**
  * - Stores manifests
@@ -49,7 +45,7 @@ export class DependencyDeputy {
   installedBinaries: Map<string, InstalledBinaries>;
   hasTypesIncluded: Map<string, Set<string>>;
 
-  constructor({ isProduction, isStrict }: Options) {
+  constructor({ isProduction, isStrict }: MainOptions) {
     this.isProduction = isProduction;
     this.isStrict = isStrict;
     this.referencedDependencies = new Map();

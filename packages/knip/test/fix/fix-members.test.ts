@@ -2,8 +2,9 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { main } from '../../src/index.js';
-import { join, resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
+import { createOptions } from '../../src/util/create-options.js';
+import { join } from '../../src/util/path.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/fix-members');
 
@@ -48,12 +49,8 @@ export enum Fruits {
     ],
   ];
 
-  const { issues } = await main({
-    ...baseArguments,
-    cwd,
-    includedIssueTypes: ['classMembers'],
-    isFix: true,
-  });
+  const options = await createOptions({ cwd, includedIssueTypes: ['classMembers'], isFix: true });
+  const { issues } = await main(options);
 
   assert(issues.enumMembers['enums.ts']['Fruits.orange']);
   assert(issues.enumMembers['enums.ts']['Directions.North']);

@@ -118,7 +118,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     const parsed = parse(script);
     return parsed?.commands ? getDependenciesFromNodes(parsed.commands) : [];
   } catch (error) {
-    const msg = `Warning: failed to parse and ignoring script in ${relative(options.containingFilePath)} (${truncate(script, 30)})`;
+    const msg = `Warning: failed to parse and ignoring script in ${relative(options.cwd, options.containingFilePath)} (${truncate(script, 30)})`;
     debugLogObject('*', msg, error);
     return [];
   }

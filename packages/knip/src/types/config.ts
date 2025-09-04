@@ -6,8 +6,8 @@ import type { pluginSchema } from '../schema/plugins.js';
 import type { Input } from '../util/input.js';
 import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';
-import type { Tags } from './cli.js';
-import type { IssueType, Rules, SymbolType } from './issues.js';
+import type { SymbolType } from './issues.js';
+import type { Tags } from './options.js';
 import type { PackageJson } from './package-json.js';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
@@ -41,34 +41,28 @@ export type IgnorePatterns = (string | RegExp)[];
 
 type IgnorableExport = Exclude<SymbolType, SymbolType.UNKNOWN>;
 
-type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
-  skipExports: boolean;
   isFixExports: boolean;
   isFixTypes: boolean;
   isReportClassMembers: boolean;
-  ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   tags: Tags;
 };
 
 export interface Configuration {
-  rules: Rules;
-  include: IssueType[];
-  exclude: IssueType[];
   ignore: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   ignoreMembers: IgnorePatterns;
+  ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
-  isTreatConfigHintsAsErrors: boolean;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;
-  tags: string[];
 }
 
 type NormalizedGlob = string[];
