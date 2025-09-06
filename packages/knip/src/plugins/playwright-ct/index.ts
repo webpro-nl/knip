@@ -12,7 +12,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['playwright-ct.config.{js,ts}'];
 
-const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)', 'playwright/index.{js,ts,jsx,tsx}']
+const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)', 'playwright/index.{js,ts,jsx,tsx}'];
 
 export default {
   title,
