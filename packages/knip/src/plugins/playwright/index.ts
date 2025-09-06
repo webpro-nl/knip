@@ -15,7 +15,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['playwright.config.{js,ts,mjs}'];
 
-export const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
+const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
 const toEntryPatterns = (
   testMatch: string | RegExp | Array<string | RegExp>,
