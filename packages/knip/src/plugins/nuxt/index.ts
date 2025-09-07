@@ -47,8 +47,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
 
   const deps = localConfig.modules?.map(id => toDependency(id)) ?? [];
 
-  return [...deps , ...patterns];
-   
+  return [...deps, ...patterns];
 };
 
 const note = `Knip works best with [explicit imports](https://nuxt.com/docs/guide/concepts/auto-imports#explicit-imports).
