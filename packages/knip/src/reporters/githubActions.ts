@@ -2,10 +2,11 @@ import { ISSUE_TYPE_TITLE } from '../constants.js';
 import type { Entries } from '../types/entries.js';
 import type { Issue, IssueRecords, ReporterOptions } from '../types/issues.js';
 import { relative } from '../util/path.js';
+import { hintPrinters } from './util/configuration-hints.js';
 
 const createGitHubActionsLogger = () => {
   const formatAnnotation = (
-    level: 'error' | 'warning',
+    level: 'error' | 'warning' | 'notice',
     message: string,
     options: {
       file: string;
@@ -20,6 +21,7 @@ const createGitHubActionsLogger = () => {
     if (options.endLine != null) params.push(`endLine=${options.endLine}`);
     if (options.startColumn != null) params.push(`col=${options.startColumn}`);
     if (options.endColumn != null) params.push(`endColumn=${options.endColumn}`);
+    params.push('title=Knip');
 
     const paramString = params.join(',');
     console.log(`::${level} ${paramString}::${message}`);
@@ -27,8 +29,18 @@ const createGitHubActionsLogger = () => {
 
   return {
     info: (message: string) => console.log(message),
-    error: (message: string, options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number }) => formatAnnotation('error', message, options),
-    warning: (message: string, options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number }) => formatAnnotation('warning', message, options),
+    error: (
+      message: string,
+      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number }
+    ) => formatAnnotation('error', message, options),
+    warning: (
+      message: string,
+      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number }
+    ) => formatAnnotation('warning', message, options),
+    notice: (
+      message: string,
+      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number }
+    ) => formatAnnotation('notice', message, options),
   };
 };
 
@@ -36,9 +48,17 @@ function flatten(issues: IssueRecords): Issue[] {
   return Object.values(issues).flatMap(Object.values);
 }
 
-export default ({ report, issues, cwd }: ReporterOptions) => {
+export default ({
+  report,
+  issues,
+  cwd,
+  configurationHints,
+  isDisableConfigHints,
+  isTreatConfigHintsAsErrors,
+  configFilePath,
+}: ReporterOptions) => {
   const core = createGitHubActionsLogger();
-  
+
   for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (!isReportType) continue;
 
@@ -68,6 +88,43 @@ export default ({ report, issues, cwd }: ReporterOptions) => {
         startColumn: issueItem.col ?? 1,
         endColumn: issueItem.col ?? 1,
       });
+    }
+  }
+
+  if (!isDisableConfigHints && configurationHints.size > 0) {
+    for (const hint of configurationHints) {
+      const hintPrinter = hintPrinters.get(hint.type);
+      const message =
+        hintPrinter?.print({
+          ...hint,
+          filePath: hint.filePath ?? configFilePath ?? '',
+          configFilePath,
+        }) ?? '';
+
+      const hintMessage = `${message}: ${hint.identifier}`;
+      const file = hint.filePath
+        ? relative(cwd, hint.filePath)
+        : configFilePath
+          ? relative(cwd, configFilePath)
+          : 'knip.json';
+
+      if (isTreatConfigHintsAsErrors) {
+        core.error(hintMessage, {
+          file,
+          startLine: 1,
+          endLine: 1,
+          startColumn: 1,
+          endColumn: 1,
+        });
+      } else {
+        core.notice(hintMessage, {
+          file,
+          startLine: 1,
+          endLine: 1,
+          startColumn: 1,
+          endColumn: 1,
+        });
+      }
     }
   }
 };
