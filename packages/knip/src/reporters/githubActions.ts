@@ -63,10 +63,10 @@ export default ({ report, issues, cwd }: ReporterOptions) => {
 
       log(message, {
         file: relative(cwd, issueItem.filePath),
-        startLine: issueItem.line ?? 0,
-        endLine: issueItem.line ?? 0,
-        startColumn: issueItem.col ?? 0,
-        endColumn: issueItem.col ?? 0,
+        startLine: issueItem.line ?? 1,
+        endLine: issueItem.line ?? 1,
+        startColumn: issueItem.col ?? 1,
+        endColumn: issueItem.col ?? 1,
       });
     }
   }
