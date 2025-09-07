@@ -1,5 +1,6 @@
-import { ISSUE_TYPES, ISSUE_TYPE_TITLE } from '../constants.js';
-import type { ReporterOptions } from '../types/issues.js';
+import { ISSUE_TYPE_TITLE } from '../constants.js';
+import type { Entries } from '../types/entries.js';
+import type { Issue, IssueRecords, ReporterOptions } from '../types/issues.js';
 import { relative } from '../util/path.js';
 
 const createGitHubActionsLogger = () => {
@@ -31,16 +32,24 @@ const createGitHubActionsLogger = () => {
   };
 };
 
-export default ({ issues, cwd }: ReporterOptions) => {
+function flatten(issues: IssueRecords): Issue[] {
+  return Object.values(issues).flatMap(Object.values);
+}
+
+export default ({ report, issues, cwd }: ReporterOptions) => {
   const core = createGitHubActionsLogger();
-  for (const issueName of ISSUE_TYPES) {
-    const issue = issues[issueName];
+  
+  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
+    if (!isReportType) continue;
+
+    if (reportType === 'files') reportType = '_files';
+
+    const issue = issues[reportType];
     if (!issue) continue;
 
-    const issueSet =
-      issue instanceof Set ? Array.from(issue) : Object.values(issue).flatMap(record => Object.values(record));
+    const issueList: (string | Issue)[] = issue instanceof Set ? Array.from(issue) : flatten(issue);
 
-    for (const issueItem of issueSet) {
+    for (const issueItem of issueList) {
       if (typeof issueItem === 'string') {
         core.info(relative(cwd, issueItem));
         continue;
@@ -50,8 +59,9 @@ export default ({ issues, cwd }: ReporterOptions) => {
       }
 
       const log = issueItem.severity === 'error' ? core.error : core.warning;
+      const message = `${ISSUE_TYPE_TITLE[issueItem.type]}: ${issueItem.symbol}`;
 
-      log(ISSUE_TYPE_TITLE[issueItem.type], {
+      log(message, {
         file: relative(cwd, issueItem.filePath),
         startLine: issueItem.line,
         endLine: issueItem.line,
