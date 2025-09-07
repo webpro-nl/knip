@@ -16,10 +16,10 @@ const createGitHubActionsLogger = () => {
     }
   ) => {
     const params = [`file=${options.file}`];
-    if (options.startLine) params.push(`line=${options.startLine}`);
-    if (options.endLine) params.push(`endLine=${options.endLine}`);
-    if (options.startColumn) params.push(`col=${options.startColumn}`);
-    if (options.endColumn) params.push(`endColumn=${options.endColumn}`);
+    if (options.startLine != null) params.push(`line=${options.startLine}`);
+    if (options.endLine != null) params.push(`endLine=${options.endLine}`);
+    if (options.startColumn != null) params.push(`col=${options.startColumn}`);
+    if (options.endColumn != null) params.push(`endColumn=${options.endColumn}`);
 
     const paramString = params.join(',');
     console.log(`::${level} ${paramString}::${message}`);
@@ -63,10 +63,10 @@ export default ({ report, issues, cwd }: ReporterOptions) => {
 
       log(message, {
         file: relative(cwd, issueItem.filePath),
-        startLine: issueItem.line,
-        endLine: issueItem.line,
-        endColumn: issueItem.col,
-        startColumn: issueItem.col,
+        startLine: issueItem.line ?? 0,
+        endLine: issueItem.line ?? 0,
+        startColumn: issueItem.col ?? 0,
+        endColumn: issueItem.col ?? 0,
       });
     }
   }
