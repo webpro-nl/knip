@@ -15,6 +15,7 @@ const createGitHubActionsLogger = () => {
       endLine?: number;
       startColumn?: number;
       endColumn?: number;
+      title?: string;
     }
   ) => {
     const params = [`file=${options.file}`];
@@ -22,7 +23,7 @@ const createGitHubActionsLogger = () => {
     if (options.endLine != null) params.push(`endLine=${options.endLine}`);
     if (options.startColumn != null) params.push(`col=${options.startColumn}`);
     if (options.endColumn != null) params.push(`endColumn=${options.endColumn}`);
-    params.push('title=✂️ Knip');
+    params.push(`title=✂️ Knip${options.title ? ` / ${options.title}` : ''}`);
 
     const paramString = params.join(',');
     console.log(`::${level} ${paramString}::${message}`);
@@ -32,15 +33,15 @@ const createGitHubActionsLogger = () => {
     info: (message: string) => console.log(message),
     error: (
       message: string,
-      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number }
+      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number; title?: string }
     ) => formatAnnotation('error', message, options),
     warning: (
       message: string,
-      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number }
+      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number; title?: string }
     ) => formatAnnotation('warning', message, options),
     notice: (
       message: string,
-      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number }
+      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number; title?: string }
     ) => formatAnnotation('notice', message, options),
   };
 };
@@ -71,14 +72,17 @@ export default ({
           if (issue.isFixed || issue.severity === 'off') continue;
 
           const log = issue.severity === 'error' ? core.error : core.warning;
-          const message = `${ISSUE_TYPE_TITLE[issue.type]}: ${issue.symbol}`;
+          const filePath = relative(cwd, issue.filePath);
+          
+          const message = reportType === '_files' ? issue.symbol : `${issue.symbol} in ${filePath}`;
 
           log(message, {
-            file: relative(cwd, issue.filePath),
+            file: filePath,
             startLine: issue.line ?? 1,
             endLine: issue.line ?? 1,
             startColumn: issue.col ?? 1,
             endColumn: issue.col ?? 1,
+            title: ISSUE_TYPE_TITLE[issue.type],
           });
         }
       }
@@ -86,8 +90,9 @@ export default ({
   }
 
   if (!isDisableConfigHints && configurationHints.size > 0) {
-    core.info(`Configuration hints (${configurationHints.size})`);
-    
+    const CONFIG_HINTS_TITLE = 'Configuration hints';
+    core.info(`${CONFIG_HINTS_TITLE} (${configurationHints.size})`);
+
     for (const hint of configurationHints) {
       const hintPrinter = hintPrinters.get(hint.type);
       const message =
@@ -97,12 +102,13 @@ export default ({
           configFilePath,
         }) ?? '';
 
-      const hintMessage = `${message}: ${hint.identifier}`;
       const file = hint.filePath
         ? relative(cwd, hint.filePath)
         : configFilePath
           ? relative(cwd, configFilePath)
           : 'knip.json';
+
+      const hintMessage = `${message}: ${hint.identifier} in ${file}`;
 
       if (isTreatConfigHintsAsErrors) {
         core.error(hintMessage, {
@@ -111,6 +117,7 @@ export default ({
           endLine: 1,
           startColumn: 1,
           endColumn: 1,
+          title: CONFIG_HINTS_TITLE,
         });
       } else {
         core.notice(hintMessage, {
@@ -119,6 +126,7 @@ export default ({
           endLine: 1,
           startColumn: 1,
           endColumn: 1,
+          title: CONFIG_HINTS_TITLE,
         });
       }
     }
