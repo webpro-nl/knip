@@ -1,8 +1,9 @@
 import { ISSUE_TYPE_TITLE } from '../constants.js';
 import type { Entries } from '../types/entries.js';
-import type { Issue, IssueRecords, ReporterOptions } from '../types/issues.js';
+import type { Issue, ReporterOptions } from '../types/issues.js';
 import { relative } from '../util/path.js';
 import { hintPrinters } from './util/configuration-hints.js';
+import { getIssueTypeTitle } from './util/util.js';
 
 const createGitHubActionsLogger = () => {
   const formatAnnotation = (
@@ -44,10 +45,6 @@ const createGitHubActionsLogger = () => {
   };
 };
 
-function flatten(issues: IssueRecords): Issue[] {
-  return Object.values(issues).flatMap(Object.values);
-}
-
 export default ({
   report,
   issues,
@@ -58,40 +55,39 @@ export default ({
   configFilePath,
 }: ReporterOptions) => {
   const core = createGitHubActionsLogger();
+  const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
   for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
-    if (!isReportType) continue;
-
     if (reportType === 'files') reportType = '_files';
 
-    const issue = issues[reportType];
-    if (!issue) continue;
+    if (isReportType) {
+      const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
-    const issueList: (string | Issue)[] = issue instanceof Set ? Array.from(issue) : flatten(issue);
+      const issuesForType: Issue[] = Object.values(issues[reportType]).flatMap(Object.values);
+      if (issuesForType.length > 0) {
+        title && core.info(`${title} (${issuesForType.length})`);
+        
+        for (const issue of issuesForType) {
+          if (issue.isFixed || issue.severity === 'off') continue;
 
-    for (const issueItem of issueList) {
-      if (typeof issueItem === 'string') {
-        core.info(relative(cwd, issueItem));
-        continue;
+          const log = issue.severity === 'error' ? core.error : core.warning;
+          const message = `${ISSUE_TYPE_TITLE[issue.type]}: ${issue.symbol}`;
+
+          log(message, {
+            file: relative(cwd, issue.filePath),
+            startLine: issue.line ?? 1,
+            endLine: issue.line ?? 1,
+            startColumn: issue.col ?? 1,
+            endColumn: issue.col ?? 1,
+          });
+        }
       }
-      if (issueItem.isFixed || issueItem.severity === 'off') {
-        continue;
-      }
-
-      const log = issueItem.severity === 'error' ? core.error : core.warning;
-      const message = `${ISSUE_TYPE_TITLE[issueItem.type]}: ${issueItem.symbol}`;
-
-      log(message, {
-        file: relative(cwd, issueItem.filePath),
-        startLine: issueItem.line ?? 1,
-        endLine: issueItem.line ?? 1,
-        startColumn: issueItem.col ?? 1,
-        endColumn: issueItem.col ?? 1,
-      });
     }
   }
 
   if (!isDisableConfigHints && configurationHints.size > 0) {
+    core.info(`Configuration hints (${configurationHints.size})`);
+    
     for (const hint of configurationHints) {
       const hintPrinter = hintPrinters.get(hint.type);
       const message =
