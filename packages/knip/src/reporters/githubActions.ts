@@ -21,7 +21,7 @@ const createGitHubActionsLogger = () => {
     if (options.endLine != null) params.push(`endLine=${options.endLine}`);
     if (options.startColumn != null) params.push(`col=${options.startColumn}`);
     if (options.endColumn != null) params.push(`endColumn=${options.endColumn}`);
-    params.push('title=Knip');
+    params.push('title=✂️ Knip');
 
     const paramString = params.join(',');
     console.log(`::${level} ${paramString}::${message}`);
