@@ -9,7 +9,7 @@ import { toBinary, toDeferResolve, toEntry } from '../util/input.js';
 const spawningBinaries = ['cross-env', 'retry-cli'];
 
 // Binaries that have a new script behind the double-dash/end-of-command
-const endOfCommandBinaries = ['dotenvx'];
+const endOfCommandBinaries = ['dotenvx', 'env-cmd'];
 
 // Binaries with entry at first positional arg
 const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);
