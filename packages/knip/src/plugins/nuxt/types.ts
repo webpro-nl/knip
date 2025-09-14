@@ -5,5 +5,5 @@ export interface NuxtConfig {
     layouts?: string;
     middleware?: string;
   };
-  modules?: Array<string>;
+  modules?: Array<string | Function | [string, Record<string, any>]>;
 }

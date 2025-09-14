@@ -1,4 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { Input } from '../../util/input.js';
 import { toDependency, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -45,7 +46,11 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
     'server/plugins/**/*.ts',
   ].map(pattern => toProductionEntry(join(srcDir, pattern)));
 
-  const deps = localConfig.modules?.map(id => toDependency(id)) ?? [];
+  const deps =
+    localConfig.modules?.reduce<Input[]>((acc, id) => {
+      if (typeof id === 'string') acc.push(toDependency(id));
+      return acc;
+    }, []) ?? [];
 
   return [...deps, ...patterns];
 };
