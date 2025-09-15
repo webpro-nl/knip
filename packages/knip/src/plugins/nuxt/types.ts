@@ -5,5 +5,5 @@ export interface NuxtConfig {
     layouts?: string;
     middleware?: string;
   };
-  modules?: Array<string | Function | [string, Record<string, any>]>;
+  modules?: Array<string | ((inlineOptions: any, nuxt: any) => any) | [string, Record<string, any>]>;
 }
