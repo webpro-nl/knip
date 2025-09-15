@@ -48,6 +48,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
 
   const deps =
     localConfig.modules?.reduce<Input[]>((acc, id) => {
+      if (Array.isArray(id) && typeof id[0] === 'string') acc.push(toDependency(id[0]));
       if (typeof id === 'string') acc.push(toDependency(id));
       return acc;
     }, []) ?? [];
