@@ -84,7 +84,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
   }
 
   // 2. dependencies (layers)
-  for (const l of nuxt.options.extends) {
+  for (const l of nuxt.options.extends || []) {
     const layerName = Array.isArray(l) ? l[0] : l;
     if (typeof layerName === 'string') {
       dependencies.add(layerName);
