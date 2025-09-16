@@ -27,13 +27,12 @@ const production = [
 
 const setup = async () => {};
 
-const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
+const resolveConfig: ResolveConfig<NuxtConfig> = async (_localConfig, options) => {
   const inputs: Input[] = [];
 
   const { loadNuxt, resolveAlias } = await import('nuxt/kit');
-  const cwd = localConfig.srcDir ?? '.';
   const nuxt = await loadNuxt({
-    cwd,
+    cwd: options.cwd,
     // we want to register hooks before proceeding with nuxt lifecycle
     ready: false,
     overrides: {
@@ -44,21 +43,15 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
 
   const extensionGlob = nuxt.options.extensions.join(',');
 
-  const filesystemPaths = new Set<string>();
+  const availableSources = new Set<string>();
   const dependencies = new Set<string>();
-
-  nuxt.hook('imports:dirs', dirs => {
-    for (const dir of dirs) {
-      inputs.push(toProductionEntry(resolve(resolveAlias(dir, nuxt.options.alias), `*{${extensionGlob}}`)));
-    }
-  });
 
   nuxt.hook('imports:extend', imports => {
     for (const i of imports) {
       if (isAbsolute(i.from)) {
-        dependencies.add(i.from);
+        availableSources.add(i.from);
       } else {
-        filesystemPaths.add(i.from);
+        dependencies.add(i.from);
       }
     }
   });
@@ -66,7 +59,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
   nuxt.hook('components:extend', components => {
     for (const c of components) {
       if (isAbsolute(c.filePath)) {
-        filesystemPaths.add(c.filePath);
+        availableSources.add(c.filePath);
       }
     }
   });
@@ -75,11 +68,10 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
 
   // 1. dependencies (modules)
   for (const m of nuxt.options._installedModules) {
-    if (m.meta.name) {
-      dependencies.add(m.meta.name);
-    }
     if (m.entryPath) {
       inputs.push(toProductionEntry(m.entryPath));
+    } else if (m.meta.name && !m.meta.name.startsWith('nuxt:')) {
+      dependencies.add(m.meta.name);
     }
   }
 
@@ -109,7 +101,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
     const pluginsDir = resolve(srcDir, resolveAlias(config.dir?.plugins || 'plugins', nuxt.options.alias));
     const serverDir = resolve(srcDir, resolveAlias(config.serverDir || 'server', nuxt.options.alias));
 
-    const patterns: string[] = [
+    const entryPatterns: string[] = [
       // nitro routes
       resolve(serverDir, config.nitro.apiDir || 'api', `**/*{${extensionGlob}}`),
       resolve(serverDir, config.nitro.routesDir || 'routes', `**/*{${extensionGlob}}`),
@@ -122,27 +114,30 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
       join(middlewareDir, `*/index{${extensionGlob}}`),
       join(pluginsDir, `*{${extensionGlob}}`),
       join(pluginsDir, `*/index{${extensionGlob}}`),
+      join(srcDir, `app{${extensionGlob}}`),
+      join(srcDir, `App{${extensionGlob}}`),
     ];
 
     // file-system routing integration with vue-router
     if (isPagesEnabled) {
       for (const pattern of pagesPatterns) {
-        patterns.push(resolve(srcDir, resolveAlias(config.dir?.pages || 'pages', nuxt.options.alias), pattern));
+        entryPatterns.push(resolve(srcDir, resolveAlias(config.dir?.pages || 'pages', nuxt.options.alias), pattern));
       }
     }
 
     // add nitro auto-imported paths to cover edge case where they are
     // enabled for nitro but not for nuxt
     if (isNitroImportsEnabled) {
-      patterns.push(resolve(rootDir, config.dir.shared ?? 'shared', 'utils'));
-      patterns.push(resolve(rootDir, config.dir.shared ?? 'shared', 'types'));
+      availableSources.add(resolve(rootDir, config.dir.shared ?? 'shared', `utils/*{${extensionGlob}}`));
+      availableSources.add(resolve(rootDir, config.dir.shared ?? 'shared', `types/*{${extensionGlob}}`));
     }
 
-    inputs.push(...patterns.map(s => toProductionEntry(s)));
+    inputs.push(...entryPatterns.map(s => toProductionEntry(s)));
   }
 
-  for (const path of filesystemPaths) {
-    inputs.push(toProductionEntry(path));
+  // TODO: we need to register these as source files which may not be all used
+  for (const path of availableSources) {
+    inputs.push(toProductionEntry(path, { allowIncludeExports: true }));
   }
 
   for (const dep of dependencies) {
