@@ -1,6 +1,6 @@
 import type { NuxtOptions } from 'nuxt/schema';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDependency, toProductionEntry } from '../../util/input.js';
+import { type Input, toAlias, toDependency, toProductionEntry } from '../../util/input.js';
 import { isAbsolute, join, resolve } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { NuxtConfig } from './types.js';
@@ -147,6 +147,10 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
 
   for (const dep of dependencies) {
     inputs.push(toDependency(dep));
+  }
+
+  for (const alias in nuxt.options.alias) {
+    inputs.push(toAlias(alias, nuxt.options.alias[alias]));
   }
 
   await nuxt.close();
