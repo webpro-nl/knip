@@ -42,6 +42,8 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
     },
   });
 
+  const extensionGlob = nuxt.options.extensions.join(',');
+
   const filesystemPaths = new Set<string>();
   const dependencies = new Set<string>();
 
@@ -90,8 +92,6 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
   }
 
   // 3. user code
-  const extensionGlob = nuxt.options.extensions.join(',');
-
   const isPagesEnabled = nuxt.options.pages !== false;
   const pagesPatterns =
     typeof nuxt.options.pages === 'boolean' || !nuxt.options.pages.pattern
