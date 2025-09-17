@@ -22,11 +22,14 @@ const isExpansion = (node: Prefix): node is ExpansionNode => 'expansion' in node
 
 const isAssignment = (node: Prefix): node is Assignment => 'type' in node && node.type === 'AssignmentWord';
 
+export const isValidBinary = (str: string) => !/[*:!()]/.test(str);
+
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
 
   // Helper for recursive calls
   const fromArgs: FromArgs = (args, opts): Input[] => {
+    if(args.length === 0 || !isValidBinary(args[0])) return [];
     return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
       ...options,
       ...opts,

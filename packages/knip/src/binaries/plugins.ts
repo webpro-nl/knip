@@ -56,7 +56,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
     typeof pluginArgs.fromArgs === 'function'
       ? fromArgs(pluginArgs.fromArgs(parsed, args))
       : Array.isArray(pluginArgs.fromArgs)
-        ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey))
+        ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey).filter(Boolean))
         : [];
 
   const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
