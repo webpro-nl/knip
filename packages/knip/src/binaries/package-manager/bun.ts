@@ -8,6 +8,7 @@ import { resolveX } from './bunx.js';
 const commands = [
   'add',
   'audit',
+  'ci',
   'create',
   'init',
   'install',
