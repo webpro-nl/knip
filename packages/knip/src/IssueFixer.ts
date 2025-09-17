@@ -1,5 +1,5 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import type { Fix, Fixes } from './types/exports.js';
+import type { ExportPosTuple, Fix, Fixes } from './types/exports.js';
 import type { Issues } from './types/issues.js';
 import type { MainOptions } from './util/create-options.js';
 import { load, save } from './util/package-json.js';
@@ -66,7 +66,9 @@ export class IssueFixer {
     for (const filePath of filePaths) {
       const types = (this.options.isFixUnusedTypes && this.unusedTypeNodes.get(filePath)) || [];
       const exports = (this.options.isFixUnusedExports && this.unusedExportNodes.get(filePath)) || [];
-      const exportPositions = [...types, ...exports].filter(fix => fix !== undefined).sort((a, b) => b[0] - a[0]);
+      const exportPositions = [...types, ...exports]
+        .filter((fix): fix is ExportPosTuple => fix !== undefined)
+        .sort((a, b) => b[0] - a[0]);
 
       if (exportPositions.length > 0) {
         const sourceFileText = exportPositions.reduce(

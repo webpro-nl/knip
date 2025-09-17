@@ -23,7 +23,7 @@ export const inputsFromPlugins = (
       if (typeof plugin !== 'string') return;
       return isInternal(plugin) ? toDeferResolveEntry(plugin) : toDependency(plugin);
     })
-    .filter(input => !!input);
+    .filter((input): input is Input => !!input);
 };
 
 export type ConfigFile = (config: Config) => void;
