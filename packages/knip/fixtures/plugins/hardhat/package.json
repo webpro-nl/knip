@@ -1,6 +1,10 @@
 {
   "name": "@plugins/hardhat",
   "devDependencies": {
+    "@nomicfoundation/hardhat-node-test-reporter": "*",
+    "@openzeppelin/contracts": "*",
+    "@solidstate/contracts": "*",
+    "@solidstate/hardhat-contract-sizer": "*",
     "hardhat": "*"
   }
 }
