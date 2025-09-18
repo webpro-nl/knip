@@ -64,6 +64,8 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
   ['package-entry', { print: packageEntry }],
 ]);
 
+export { hintPrinters };
+
 const hintTypesOrder: ConfigurationHintType[][] = [
   ['workspace-unconfigured'],
   ['entry-top-level', 'project-top-level'],
