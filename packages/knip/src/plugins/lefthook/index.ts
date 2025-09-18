@@ -23,6 +23,8 @@ type Command = {
 };
 
 const resolveConfig: ResolveConfig = async (localConfig, options) => {
+  if (options.isProduction) return [];
+
   const { manifest, configFileName, cwd, getInputsFromScripts } = options;
 
   const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(id => toDependency(id)) : [];

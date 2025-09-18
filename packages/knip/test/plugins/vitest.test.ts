@@ -1,17 +1,16 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../../src/index.js';
-import { join, resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
+import { createOptions } from '../../src/util/create-options.js';
+import { join } from '../../src/util/path.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/vitest');
 
 test('Find dependencies with the Vitest plugin', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.unlisted['vite.config.ts']['@vitest/coverage-c8']);
   assert(issues.unlisted['vite.config.ts']['@edge-runtime/vm']);
@@ -32,11 +31,8 @@ test('Find dependencies with the Vitest plugin', async () => {
 });
 
 test('Find dependencies with the Vitest plugin (production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-  });
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
 
   assert.deepEqual(issues.files, new Set([join(cwd, 'src/setupTests.ts')]));
 

@@ -75,11 +75,7 @@ export class Table {
     const columnWidths = columns.reduce(
       (acc, col) => {
         acc[col] = Math.max(
-          ...this.rows.map(row =>
-            row[col]?.formatted
-              ? stripVTControlCharacters(row[col].formatted).length
-              : String(row[col]?.value || '').length
-          )
+          ...this.rows.map(row => stripVTControlCharacters(row[col]?.formatted ?? String(row[col].value || '')).length)
         );
         return acc;
       },

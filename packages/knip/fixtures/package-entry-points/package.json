@@ -12,6 +12,7 @@
     "./feature/internal/*": null,
     "./*": "./src/public/*/index.ts",
     "./runtime/*": "./dist/runtime/*",
-    "./ignored": "./*"
+    "./ignored": "./*",
+    "./not-found": "./not-found.tsx"
   }
 }

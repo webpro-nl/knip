@@ -1,18 +1,9 @@
 import picomatch from 'picomatch';
 import type { ConfigurationHint, Issue, Rules, TagHint } from './types/issues.js';
 import { timerify } from './util/Performance.js';
+import type { MainOptions } from './util/create-options.js';
 import { initCounters, initIssues } from './util/issue-initializers.js';
-import { relative } from './util/path.js';
-
-type Filters = Partial<{
-  dir: string;
-}>;
-
-type IssueCollectorOptions = {
-  cwd: string;
-  rules: Rules;
-  filters: Filters;
-};
+import { join, relative } from './util/path.js';
 
 const hasConfigurationHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>
   Array.from(hints).some(
@@ -28,7 +19,7 @@ const isMatch = timerify(picomatch.isMatch, 'isMatch');
 export class IssueCollector {
   private cwd: string;
   private rules: Rules;
-  private filters: Filters;
+  private filter: string | undefined;
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles = new Set<string>();
@@ -37,10 +28,10 @@ export class IssueCollector {
   private ignorePatterns = new Set<string>();
   private isMatch: (filePath: string) => boolean;
 
-  constructor({ cwd, rules, filters }: IssueCollectorOptions) {
-    this.cwd = cwd;
-    this.rules = rules;
-    this.filters = filters;
+  constructor(options: MainOptions) {
+    this.cwd = options.cwd;
+    this.rules = options.rules;
+    this.filter = options.workspace ? join(options.cwd, options.workspace) : undefined;
     this.isMatch = () => false;
   }
 
@@ -57,12 +48,12 @@ export class IssueCollector {
 
   addFilesIssues(filePaths: string[]) {
     for (const filePath of filePaths) {
-      if (this.filters.dir && !filePath.startsWith(`${this.filters.dir}/`)) continue;
+      if (this.filter && !filePath.startsWith(`${this.filter}/`)) continue;
       if (this.referencedFiles.has(filePath)) continue;
       if (this.isMatch(filePath)) continue;
 
       this.issues.files.add(filePath);
-      const symbol = relative(filePath);
+      const symbol = relative(this.cwd, filePath);
       // @ts-expect-error TODO Fix up in next major
       this.issues._files[symbol] = [{ type: 'files', filePath, symbol, severity: this.rules.files }];
 
@@ -72,15 +63,14 @@ export class IssueCollector {
   }
 
   addIssue(issue: Issue) {
-    if (this.filters.dir && !issue.filePath.startsWith(`${this.filters.dir}/`)) return;
+    if (this.filter && !issue.filePath.startsWith(`${this.filter}/`)) return;
     if (this.isMatch(issue.filePath)) return;
     const key = relative(this.cwd, issue.filePath);
     const { type } = issue;
     issue.severity = this.rules[type];
     const issues = this.issues[type];
     issues[key] = issues[key] ?? {};
-    const symbol =
-      type.endsWith('Members') && issue.parentSymbol ? `${issue.parentSymbol}.${issue.symbol}` : issue.symbol;
+    const symbol = issue.parentSymbol ? `${issue.parentSymbol}.${issue.symbol}` : issue.symbol;
     if (!issues[key][symbol]) {
       issues[key][symbol] = issue;
       this.counters[issue.type]++;

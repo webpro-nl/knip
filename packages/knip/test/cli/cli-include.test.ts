@@ -1,7 +1,7 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { resolve } from '../../src/util/path.js';
 import { exec } from '../helpers/exec.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/cli');
 

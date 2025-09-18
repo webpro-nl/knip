@@ -1,18 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/jsdoc-exports');
 
 test('Find exports from jsdoc @type tags', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    tags: [[], ['ignoreunresolved']],
-  });
+  const options = await createOptions({ cwd, tags: ['-ignoreunresolved'] });
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['module.ts']['alphaFn']);
   assert(issues.exports['module.ts']['internalUnusedFn']);
@@ -28,12 +25,8 @@ test('Find exports from jsdoc @type tags', async () => {
 });
 
 test('Find exports from jsdoc @type tags (production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-    tags: [[], ['ignoreunresolved']],
-  });
+  const options = await createOptions({ cwd, isProduction: true, tags: ['-ignoreunresolved'] });
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['module.ts']['alphaFn']);
   assert(issues.exports['module.ts']['invalidTaggedFn']);

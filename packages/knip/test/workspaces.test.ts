@@ -1,17 +1,16 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { join, resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
+import { join } from '../src/util/path.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/workspaces');
 
 test('Find unused dependencies, exports and files in workspaces (default)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
 
@@ -44,11 +43,8 @@ test('Find unused dependencies, exports and files in workspaces (default)', asyn
 });
 
 test('Find unused dependencies, exports and files in workspaces (production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-  });
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
 
   assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
 
@@ -81,11 +77,8 @@ test('Find unused dependencies, exports and files in workspaces (production)', a
 });
 
 test('Analyze only ancestor and dependent workspaces', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    workspace: 'packages/shared',
-  });
+  const options = await createOptions({ cwd, workspace: 'packages/shared' });
+  const { issues, counters } = await main(options);
 
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
 

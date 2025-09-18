@@ -52,6 +52,7 @@ export type PluginName =
   | 'netlify'
   | 'next'
   | 'node'
+  | 'node-modules-inspector'
   | 'nodemon'
   | 'npm-package-json-lint'
   | 'nuxt'
@@ -63,6 +64,7 @@ export type PluginName =
   | 'playwright-ct'
   | 'playwright-test'
   | 'plop'
+  | 'pnpm'
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
@@ -75,6 +77,7 @@ export type PluginName =
   | 'remix'
   | 'rollup'
   | 'rsbuild'
+  | 'rslib'
   | 'rspack'
   | 'semantic-release'
   | 'sentry'
@@ -163,6 +166,7 @@ export const pluginNames = [
   'netlify',
   'next',
   'node',
+  'node-modules-inspector',
   'nodemon',
   'npm-package-json-lint',
   'nuxt',
@@ -174,6 +178,7 @@ export const pluginNames = [
   'playwright-ct',
   'playwright-test',
   'plop',
+  'pnpm',
   'postcss',
   'preconstruct',
   'prettier',
@@ -186,6 +191,7 @@ export const pluginNames = [
   'remix',
   'rollup',
   'rsbuild',
+  'rslib',
   'rspack',
   'semantic-release',
   'sentry',

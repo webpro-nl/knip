@@ -1,4 +1,4 @@
-import type { Entries } from 'type-fest';
+import type { Entries } from '../types/entries.js';
 import type { ReporterOptions } from '../types/issues.js';
 import { printConfigurationHints } from './util/configuration-hints.js';
 import { getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.js';
@@ -17,7 +17,7 @@ export default (options: ReporterOptions) => {
       const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
       if (issuesForType.length > 0) {
         title && console.log(getColoredTitle(title, issuesForType.length));
-        console.log(getTableForType(issuesForType).toString());
+        console.log(getTableForType(issuesForType, options.cwd).toString());
         totalIssues = totalIssues + issuesForType.length;
       }
     }
@@ -27,7 +27,11 @@ export default (options: ReporterOptions) => {
     printConfigurationHints(options);
   }
 
-  if (totalIssues === 0 && isShowProgress) {
+  if (
+    totalIssues === 0 &&
+    isShowProgress &&
+    (!options.isTreatConfigHintsAsErrors || options.configurationHints.size === 0)
+  ) {
     console.log('✂️  Excellent, Knip found no issues.');
   }
 };

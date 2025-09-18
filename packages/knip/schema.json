@@ -503,6 +503,10 @@
           "title": "node plugin configuration (https://knip.dev/reference/plugins/node)",
           "$ref": "#/definitions/plugin"
         },
+        "node-modules-inspector": {
+          "title": "node-modules-inspector plugin configuration (https://knip.dev/reference/plugins/node-modules-inspector)",
+          "$ref": "#/definitions/plugin"
+        },
         "node-test-runner": {
           "title": "node-test-runner plugin configuration (https://knip.dev/reference/plugins/node-test-runner)",
           "$ref": "#/definitions/plugin"
@@ -545,6 +549,10 @@
         },
         "playwright-test": {
           "title": "playwright-test plugin configuration (https://knip.dev/reference/plugins/playwright-test)",
+          "$ref": "#/definitions/plugin"
+        },
+        "pnpm": {
+          "title": "pnpm plugin configuration (https://knip.dev/reference/plugins/pnpm)",
           "$ref": "#/definitions/plugin"
         },
         "postcss": {
@@ -593,6 +601,10 @@
         },
         "rsbuild": {
           "title": "rsbuild plugin configuration (https://knip.dev/reference/plugins/rsbuild)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rslib": {
+          "title": "rslib plugin configuration (https://knip.dev/reference/plugins/rslib)",
           "$ref": "#/definitions/plugin"
         },
         "rspack": {

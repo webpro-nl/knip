@@ -1,7 +1,7 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { resolve } from '../../src/util/path.js';
 import { exec } from '../helpers/exec.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/cli-preprocessor');
 
@@ -28,4 +28,9 @@ test.skip('knip --preprocessor @org/preprocessor', () => {
 test.skip(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake"}`, () => {
   const { stdout } = exec(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake"}`, { cwd });
   assert.equal(stdout, 'hi from with-args preprocessor, you gave me: cupcake');
+});
+
+test('knip --preprocessor {cwd}/index.js', () => {
+  const { stdout } = exec(`knip --preprocessor ${cwd}/index.js`, { cwd });
+  assert.equal(stdout, 'hi from js preprocessor');
 });

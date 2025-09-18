@@ -39,7 +39,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 5rem;
+  gap: 4rem;
 }
 
 .sponsors.column {
@@ -47,7 +47,7 @@
 }
 
 .sl-markdown-content .sponsors.row {
-  margin: 3rem 0;
+  margin: 4rem 0 8rem;
   gap: 3rem;
 }
 

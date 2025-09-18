@@ -1,17 +1,15 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/skip-exports-analysis');
 
-test('Skip exports analysis', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+test('ignore exports', async () => {
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.binaries['package.json'].nodemon);
   assert(issues.binaries['package.json'].playwright);
@@ -30,13 +28,9 @@ test('Skip exports analysis', async () => {
   });
 });
 
-test('Skip exports analysis (isIncludeEntryExports)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: true,
-  });
-
+test('ignore exports (isIncludeEntryExports)', async () => {
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { issues, counters } = await main(options);
   assert(issues.binaries['package.json'].nodemon);
   assert(issues.binaries['package.json'].playwright);
 
@@ -59,14 +53,10 @@ test('Skip exports analysis (isIncludeEntryExports)', async () => {
   });
 });
 
-test('Skip exports analysis (production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-  });
+test('ignore exports (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
 
-  assert(issues.exports['src/used.js'].default);
   assert(issues.exports['src/used.js'].unused);
 
   assert.deepEqual(counters, {

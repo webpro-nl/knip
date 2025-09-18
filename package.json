@@ -27,5 +27,8 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "installed-check": "^9.3.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

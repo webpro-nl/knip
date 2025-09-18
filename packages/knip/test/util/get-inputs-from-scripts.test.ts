@@ -2,7 +2,8 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { _getInputsFromScripts } from '../../src/binaries/index.js';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
-import { join, resolve, cwd as rootCwd } from '../../src/util/path.js';
+import { join } from '../../src/util/path.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
@@ -160,8 +161,8 @@ test('getInputsFromScripts (bun)', () => {
   t('bunx cowsay "Hello world!"', [toDependency('cowsay', opt)]);
   t('bunx my-cli --foo bar', [toDependency('my-cli', opt)]);
   t('bun x pkg', [toDependency('pkg', opt)]);
-  t('bun ./main.ts', [toEntry(join(rootCwd, 'fixtures/binaries', 'main.ts'))]);
-  t('bun run script.js', [toEntry(join(rootCwd, 'fixtures/binaries', 'script.js'))]);
+  t('bun ./main.ts', [toEntry(join(cwd, 'main.ts'))]);
+  t('bun run script.js', [toEntry(join(cwd, 'script.js'))]);
   t('bun run --cwd packages/knip watch', []);
 });
 
@@ -243,8 +244,17 @@ test('getInputsFromScripts (nodemon)', () => {
   t('nodemon ./script.js', [toBinary('nodemon')]);
 });
 
+test('getInputsFromScripts (concurrently)', () => {
+  t('concurrently some:script npm:version:node', [toBinary('concurrently')]);
+  t('concurrently "tsx watch s.ts" "tsx watch c.ts"', [toBinary('concurrently'), toBinary('tsx'), toDeferResolveEntry('s.ts', opt), toBinary('tsx'), toDeferResolveEntry('c.ts', opt)]);
+  t('sleep 2 && concurrently "npm:watch-*"', [toBinary('sleep'), toBinary('concurrently')]);
+  t('concurrently -g -c red,green,yellow,blue,magenta pnpm:lint:*', [toBinary('concurrently')]);
+  t('concurrently "npm:lint:*(!fix)" program --names "lint:" --prefixColors auto', [toBinary('concurrently'), toBinary('program')]);
+});
+
 test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toDeferResolveEntry('src/index.ts', opt)]);
+  t('env-cmd --no-overrides -- tsx watch src/index.ts', [toBinary('env-cmd'), toBinary('tsx'), toDeferResolveEntry('src/index.ts', opt)]);
 });
 
 test('getInputsFromScripts (bash expressions)', () => {

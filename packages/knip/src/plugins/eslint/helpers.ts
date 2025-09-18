@@ -17,8 +17,10 @@ export const getInputs = (
   }
 
   const dependencies = (config as ESLintConfig).flatMap(config =>
-    config.settings ? getDependenciesFromSettings(config.settings).filter(id => id !== '@typescript-eslint/parser') : []
+    config.settings ? getDependenciesFromSettings(config.settings) : []
   );
+
+  dependencies.push('eslint-import-resolver-typescript');
 
   return compact(dependencies).map(id => toDeferResolve(id, { optional: true }));
 };

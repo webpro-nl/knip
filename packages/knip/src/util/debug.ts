@@ -1,10 +1,9 @@
-import util from 'node:util';
+import util, { parseArgs } from 'node:util';
 import picocolors from 'picocolors';
-import parsedArgValues from './cli-arguments.js';
 
-const { debug } = parsedArgValues;
+const { values } = parseArgs({ strict: false, options: { debug: { type: 'boolean' } } });
 
-const IS_DEBUG_ENABLED = debug ?? false;
+const IS_DEBUG_ENABLED = values.debug ?? false;
 
 const IS_COLORS = !process.env.NO_COLOR;
 

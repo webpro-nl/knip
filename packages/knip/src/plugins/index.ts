@@ -50,6 +50,7 @@ import { default as nanoStaged } from './nano-staged/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
+import { default as nodeModulesInspector } from './node-modules-inspector/index.js';
 import { default as node } from './node/index.js';
 import { default as nodemon } from './nodemon/index.js';
 import { default as npmPackageJsonLint } from './npm-package-json-lint/index.js';
@@ -62,6 +63,7 @@ import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
 import { default as playwright } from './playwright/index.js';
 import { default as plop } from './plop/index.js';
+import { default as pnpm } from './pnpm/index.js';
 import { default as postcss } from './postcss/index.js';
 import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
@@ -74,6 +76,7 @@ import { default as remark } from './remark/index.js';
 import { default as remix } from './remix/index.js';
 import { default as rollup } from './rollup/index.js';
 import { default as rsbuild } from './rsbuild/index.js';
+import { default as rslib } from './rslib/index.js';
 import { default as rspack } from './rspack/index.js';
 import { default as semanticRelease } from './semantic-release/index.js';
 import { default as sentry } from './sentry/index.js';
@@ -163,6 +166,7 @@ export const Plugins = {
   netlify,
   next,
   node,
+  'node-modules-inspector': nodeModulesInspector,
   nodemon,
   'npm-package-json-lint': npmPackageJsonLint,
   nuxt,
@@ -174,6 +178,7 @@ export const Plugins = {
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,
   plop,
+  pnpm,
   postcss,
   preconstruct,
   prettier,
@@ -186,6 +191,7 @@ export const Plugins = {
   remix,
   rollup,
   rsbuild,
+  rslib,
   rspack,
   'semantic-release': semanticRelease,
   sentry,

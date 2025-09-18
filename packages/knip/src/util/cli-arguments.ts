@@ -30,7 +30,7 @@ Options:
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
-  --reporter               Select reporter: symbols, compact, codeowners, json, codeclimate, markdown, disclosure, can be repeated (default: symbols)
+  --reporter               Select reporter: symbols, compact, codeowners, json, codeclimate, markdown, disclosure, github-actions, can be repeated (default: symbols)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
   --tags                   Include or exclude tagged exports
   --no-config-hints        Suppress configuration hints
@@ -62,10 +62,8 @@ $ knip --tags=-lintignore
 
 Website: https://knip.dev`;
 
-// biome-ignore lint/suspicious/noImplicitAnyLet: TODO
-let parsedArgs;
-try {
-  parsedArgs = parseArgs({
+export default function () {
+  return parseArgs({
     options: {
       cache: { type: 'boolean' },
       'cache-location': { type: 'string' },
@@ -112,14 +110,5 @@ try {
       watch: { type: 'boolean' },
       workspace: { type: 'string', short: 'W' },
     },
-  });
-} catch (error: unknown) {
-  if (error instanceof Error) {
-    console.error(error.message);
-    console.log(`\n${helpText}`);
-    process.exit(1);
-  }
-  throw error;
+  }).values;
 }
-
-export default parsedArgs.values;

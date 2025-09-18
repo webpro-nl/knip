@@ -15,7 +15,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = [
   'package.json',
-  ...toLilconfig('size-limit', { configDir: false, additionalExtensions: ['ts', 'mts', 'cts'], rcSuffix: '' }),
+  ...toLilconfig('size-limit', { configDir: false, additionalExtensions: ['mts', 'cts'], rcSuffix: '' }),
 ];
 
 const resolve: Resolve = options => {

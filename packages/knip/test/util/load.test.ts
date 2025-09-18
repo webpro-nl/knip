@@ -1,7 +1,8 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { _load as load } from '../../src/util/loader.js';
-import { join, resolve } from '../../src/util/path.js';
+import { join } from '../../src/util/path.js';
+import { resolve } from '../helpers/resolve.js';
 
 test('Should load modules (CommonJS)', async () => {
   const cwd = resolve('fixtures/load-cjs');

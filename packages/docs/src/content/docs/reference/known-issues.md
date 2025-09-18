@@ -16,8 +16,8 @@ to locate the cause of the issue with more details. Examples of issues when Knip
 loads configuration files:
 
 - Missing environment variable
-- Relative path in a workspace (e.g. only `'.'` is set, try
-  `import.meta.dirname` or `__dirname`)
+- Relative path (e.g. which is sometimes not resolved from correct directory,
+  try `import.meta.dirname` or `__dirname`)
 
 As a last resort, the [plugin can be disabled][1].
 

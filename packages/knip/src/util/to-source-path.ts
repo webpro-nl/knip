@@ -33,7 +33,7 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
         const srcFilePath = _syncGlob({ patterns: pattern })[0];
         toSourceMapCache.set(filePath, srcFilePath);
         if (srcFilePath && srcFilePath !== filePath) {
-          debugLog('*', `Source mapping ${toRelative(filePath)} → ${toRelative(srcFilePath)}`);
+          debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
           return srcFilePath;
         }
       }
@@ -42,11 +42,11 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
 };
 
 export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
-  return async (specifiers: Set<string>, cwd: string, extensions = defaultExtensions) => {
+  return async (specifiers: Set<string>, dir: string, extensions = defaultExtensions) => {
     const patterns = new Set<string>();
 
     for (const specifier of specifiers) {
-      const absSpecifier = isAbsolute(specifier) ? specifier : join(cwd, specifier);
+      const absSpecifier = isAbsolute(specifier) ? specifier : join(dir, specifier);
       const ws = chief.findWorkspaceByFilePath(absSpecifier);
       if (ws?.srcDir && ws.outDir && !absSpecifier.startsWith(ws.srcDir) && absSpecifier.startsWith(ws.outDir)) {
         const pattern = absSpecifier.replace(ws.outDir, ws.srcDir).replace(matchExt, extensions);
@@ -56,9 +56,9 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
       }
     }
 
-    const filePaths = await _glob({ patterns: Array.from(patterns), cwd });
+    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir });
 
-    debugLogArray(toRelative(cwd), 'Source mapping (package.json)', filePaths);
+    debugLogArray(toRelative(dir, chief.cwd), 'Source mapping (package.json)', filePaths);
 
     return filePaths;
   };

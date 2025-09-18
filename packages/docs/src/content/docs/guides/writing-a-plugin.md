@@ -465,8 +465,7 @@ The documentation website takes care of generating the [plugin list and the
 individual plugin pages][2] from the exported plugin values.
 
 Thanks for reading. If you have been following this guide to create a new
-plugin, this might be the right time to open a pull request! Feel free to join
-[the Knip Discord channel][9] if you have any questions.
+plugin, this might be the right time to open a pull request!
 
 [1]: #create-a-new-plugin
 [2]: ../reference/plugins.md
@@ -478,4 +477,3 @@ plugin, this might be the right time to open a pull request! Feel free to join
 [7]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
 [8]:
   https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
-[9]: https://discord.gg/r5uXTtbTpc

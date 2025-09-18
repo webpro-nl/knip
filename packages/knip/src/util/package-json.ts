@@ -56,21 +56,18 @@ export const save = async (filePath: string, content: ExtendedPackageJson) => {
   await writeFile(filePath, fileContent);
 };
 
-export const getEntryPathsFromManifest = (manifest: PackageJson) => {
+export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   const { main, module, browser, bin, exports, types, typings } = manifest;
 
   const entryPaths = new Set<string>();
 
   if (typeof main === 'string') entryPaths.add(main);
-
   if (typeof module === 'string') entryPaths.add(module);
-
   if (typeof browser === 'string') entryPaths.add(browser);
-
-  if (bin) {
-    if (typeof bin === 'string') entryPaths.add(bin);
-    if (typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
-  }
+  if (typeof bin === 'string') entryPaths.add(bin);
+  if (bin && typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
+  if (typeof types === 'string') entryPaths.add(types);
+  if (typeof typings === 'string') entryPaths.add(typings);
 
   if (exports) {
     for (const item of getEntriesFromExports(exports)) {
@@ -83,8 +80,17 @@ export const getEntryPathsFromManifest = (manifest: PackageJson) => {
     }
   }
 
-  if (typeof types === 'string') entryPaths.add(types);
-  if (typeof typings === 'string') entryPaths.add(typings);
-
   return entryPaths;
+};
+
+export const getManifestImportDependencies = (manifest: PackageJson) => {
+  const dependencies = new Set<string>();
+  if (!manifest.imports) return dependencies;
+  for (const [entry, exportValue] of Object.entries(manifest.imports)) {
+    if (!entry.startsWith('#')) continue;
+    for (const item of getEntriesFromExports(exportValue)) {
+      if (!item.startsWith('.') && !item.startsWith('!')) dependencies.add(item);
+    }
+  }
+  return dependencies;
 };

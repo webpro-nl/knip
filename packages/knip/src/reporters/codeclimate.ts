@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type * as codeclimate from 'codeclimate-types';
-import type { Entries } from 'type-fest';
 import { ISSUE_TYPE_TITLE } from '../constants.js';
+import type { Entries } from '../types/entries.js';
 import type {
   Issue,
   IssueRecords,
@@ -14,7 +14,7 @@ import type {
 import { toRelative } from '../util/path.js';
 import { getIssueTypeTitle } from './util/util.js';
 
-export default async ({ report, issues }: ReporterOptions) => {
+export default async ({ report, issues, cwd }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
@@ -34,9 +34,9 @@ export default async ({ report, issues }: ReporterOptions) => {
             check_name: getIssueTypeTitle(fixedType),
             description: getSymbolDescription({ type: issue.type, symbol, parentSymbol: issue.parentSymbol }),
             categories: ['Duplication'],
-            location: createLocation(filePath, symbol.line, symbol.col),
+            location: createLocation(filePath, cwd, symbol.line, symbol.col),
             severity: convertSeverity(issue.severity),
-            fingerprint: createFingerprint(filePath, symbol.symbol),
+            fingerprint: createFingerprint(filePath, cwd, symbol.symbol),
           }))
         );
       } else {
@@ -45,9 +45,9 @@ export default async ({ report, issues }: ReporterOptions) => {
           check_name: getIssueTypeTitle(fixedType),
           description: getIssueDescription(issue),
           categories: ['Bug Risk'],
-          location: createLocation(filePath, issue.line, issue.col),
+          location: createLocation(filePath, cwd, issue.line, issue.col),
           severity: convertSeverity(issue.severity),
-          fingerprint: createFingerprint(filePath, issue.symbol),
+          fingerprint: createFingerprint(filePath, cwd, issue.symbol),
         });
       }
     }
@@ -93,10 +93,10 @@ function getSymbolDescription({
   return `${getPrefix(type)}: ${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
 }
 
-function createLocation(filePath: string, line?: number, col?: number): codeclimate.Location {
+function createLocation(filePath: string, cwd: string, line?: number, col?: number): codeclimate.Location {
   if (col !== undefined) {
     return {
-      path: toRelative(filePath),
+      path: toRelative(filePath, cwd),
       positions: {
         begin: {
           line: line ?? 0,
@@ -111,7 +111,7 @@ function createLocation(filePath: string, line?: number, col?: number): codeclim
   }
 
   return {
-    path: toRelative(filePath),
+    path: toRelative(filePath, cwd),
     lines: {
       begin: line ?? 0,
       end: line ?? 0,
@@ -119,10 +119,10 @@ function createLocation(filePath: string, line?: number, col?: number): codeclim
   };
 }
 
-function createFingerprint(filePath: string, message: string): string {
+function createFingerprint(filePath: string, cwd: string, message: string): string {
   const md5 = createHash('md5');
 
-  md5.update(toRelative(filePath));
+  md5.update(toRelative(filePath, cwd));
   md5.update(message);
 
   return md5.digest('hex');

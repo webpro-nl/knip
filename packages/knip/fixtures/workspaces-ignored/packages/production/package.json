@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspaces-ignored__production",
+  "scripts": {
+    "start": "ignored-in-production-mode"
+  }
+}

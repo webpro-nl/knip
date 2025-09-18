@@ -6,6 +6,8 @@
       "packages/d*",
       "packages/not-found",
       "packages/g",
+      "packages/production!",
+      "packages/production-not-found!",
       "packages/deep/**",
       "packages/flat/*",
       "packages/un/**/used",

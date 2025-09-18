@@ -22,20 +22,18 @@ complicated". Knip and documentation are always a work in progress.
 If it doesn't come your way at the first try, please understand this also shows
 the dynamic and innovative nature of the ecosystem. Often only small changes go
 a long way towards success. When a bit of configuration doesn't improve things,
-consider [opening an issue][5] and/or [ask away on Discord][6]. With the help of
-the community (that's you!) we can improve Knip for everyone and make project
-maintenance easier and more fun!
+consider [opening an issue][5].
 
 :::
 
 ## Lint issues reported by Knip
 
-Knip reports lint issues in your codebase. See [handling issues][7] to deal with
+Knip reports lint issues in your codebase. See [handling issues][6] to deal with
 the reported issues.
 
 If Knip reports false positives and you're considering filing a GitHub issue,
 please do! It'll make Knip better for everyone. Please read [issue
-reproduction][8] first.
+reproduction][7] first.
 
 Exit code 1 indicates a successful run, but lint issues were found.
 
@@ -43,12 +41,12 @@ Exit code 1 indicates a successful run, but lint issues were found.
 
 Knip may throw an exception, resulting in an unsuccessful run.
 
-See [known issues][9] as it may be listed there and a workaround may be
+See [known issues][8] as it may be listed there and a workaround may be
 available. If it isn't clear what's throwing the exception, try another run with
 `--debug` to locate the cause of the issue with more details.
 
 If Knip throws an exception and you're considering filing a GitHub issue, please
-do! It'll make Knip better for everyone. Please read [issue reproduction][8]
+do! It'll make Knip better for everyone. Please read [issue reproduction][7]
 first.
 
 Exit code 2 indicates an exception was thrown by Knip.
@@ -97,33 +95,32 @@ opposite direction and shows where exports are imported.
 
 ## Opening an issue
 
-If you want to open an issue, please see [issue reproduction][8].
+If you want to open an issue, please see [issue reproduction][7].
 
 ## Understanding Knip
 
-Looking to better understand how Knip works? The [entry files][10] and
-[plugins][11] explanations cover two core concepts. After this you might want to
-check out features like [production mode][12] and [monorepos & workspaces][13].
+Looking to better understand how Knip works? The [entry files][9] and
+[plugins][10] explanations cover two core concepts. After this you might want to
+check out features like [production mode][11] and [monorepos & workspaces][12].
 
-In a more general sense, [Why use Knip?][14] explains what Knip can do for you.
+In a more general sense, [Why use Knip?][13] explains what Knip can do for you.
 
 ## Asking for help
 
 If you can't find your answer in any of the aforementioned resources, feel free
-to [open an issue on GitHub][15] or discuss it in [the Discord channel][6].
+to [open an issue on GitHub][14].
 
 [1]: #lint-issues-reported-by-knip
 [2]: #exceptions-thrown-by-knip
 [3]: #debug
 [4]: #trace
 [5]: https://github.com/webpro-nl/knip/issues/new/choose
-[6]: https://discord.gg/r5uXTtbTpc
-[7]: ../guides/handling-issues.md
-[8]: ./issue-reproduction.md
-[9]: ../reference/known-issues.md
-[10]: ../explanations/entry-files.md
-[11]: ../explanations/plugins.md
-[12]: ../features/production-mode.md
-[13]: ../features/monorepos-and-workspaces.md
-[14]: ../explanations/why-use-knip.md
-[15]: https://github.com/webpro-nl/knip/issues
+[6]: ../guides/handling-issues.md
+[7]: ./issue-reproduction.md
+[8]: ../reference/known-issues.md
+[9]: ../explanations/entry-files.md
+[10]: ../explanations/plugins.md
+[11]: ../features/production-mode.md
+[12]: ../features/monorepos-and-workspaces.md
+[13]: ../explanations/why-use-knip.md
+[14]: https://github.com/webpro-nl/knip/issues

@@ -1,5 +1,3 @@
-import type { Workspace } from '../ConfigurationChief.js';
-
 export enum SymbolType {
   VARIABLE = 'variable',
   TYPE = 'type',
@@ -74,7 +72,8 @@ export type ReporterOptions = {
   isShowProgress: boolean;
   options: string;
   preprocessorOptions: string;
-  includedWorkspaces: Workspace[];
+  includedWorkspaceDirs: string[];
+  configFilePath?: string;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
@@ -98,11 +97,13 @@ export type ConfigurationHintType =
   | 'project-top-level'
   | 'entry-empty'
   | 'project-empty'
+  | 'package-entry'
   | 'workspace-unconfigured';
 
 export type ConfigurationHint = {
   type: ConfigurationHintType;
   identifier: string | RegExp;
+  filePath?: string;
   workspaceName?: string;
   size?: number;
 };

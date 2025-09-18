@@ -10,6 +10,10 @@ type C = 'import' | 'require' | 'node' | 'node-addons' | 'deno' | 'browser' | 'e
 type ExportCondition = LiteralUnion<C, string>;
 type Exports = null | string | string[] | { [key in ExportCondition]: Exports } | { [key: string]: Exports };
 
+type Imports = {
+  [key: `#${string}`]: Exports;
+};
+
 type PackageJsonPath<T> = T extends { packageJsonPath: infer P } ? (P extends string ? P : never) : never;
 
 type WithPackageJsonPathAsKey<T> = {
@@ -31,6 +35,7 @@ export type PackageJson = {
   version?: string;
   workspaces?: string[] | { packages?: string[] };
   exports?: Exports;
+  imports?: Imports;
   scripts?: Scripts;
   dependencies?: Dependencies;
   devDependencies?: Dependencies;
@@ -41,6 +46,7 @@ export type PackageJson = {
   browser?: string;
   types?: string;
   typings?: string;
+  packageManager?: string;
 } & Plugins;
 
 export type WorkspacePackage = {

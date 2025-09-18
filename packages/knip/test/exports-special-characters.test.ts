@@ -1,21 +1,20 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/exports-special-characters');
 
 test('Handle special characters in named exports and members', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['exports.ts']['$dollar']);
   assert(issues.exports['exports.ts']['dollar$']);
   assert(issues.exports['exports.ts']['_underscore']);
+  assert(issues.exports['exports.ts']['__underscores']);
   assert(issues.exports['exports.ts']['$Dollar']);
 
   assert(issues.types['exports.ts']['$DollarType']);
@@ -28,7 +27,7 @@ test('Handle special characters in named exports and members', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     classMembers: 4,
-    exports: 4,
+    exports: 5,
     types: 1,
     processed: 2,
     total: 2,
@@ -36,15 +35,13 @@ test('Handle special characters in named exports and members', async () => {
 });
 
 test('Handle special characters in named exports and members (nsTypes)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    includedIssueTypes: ['nsTypes'],
-  });
+  const options = await createOptions({ cwd, includedIssueTypes: ['nsTypes'] });
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['exports.ts']['$dollar']);
   assert(issues.exports['exports.ts']['dollar$']);
   assert(issues.exports['exports.ts']['_underscore']);
+  assert(issues.exports['exports.ts']['__underscores']);
   assert(issues.exports['exports.ts']['$Dollar']);
 
   assert(issues.types['exports.ts']['$DollarType']);
@@ -79,7 +76,7 @@ test('Handle special characters in named exports and members (nsTypes)', async (
     ...baseCounters,
     classMembers: 4,
     enumMembers: 20,
-    exports: 4,
+    exports: 5,
     types: 1,
     processed: 2,
     total: 2,

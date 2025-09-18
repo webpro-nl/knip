@@ -63,21 +63,6 @@ Array of glob patterns to find project files. Example:
 
 Also see [configuration][2] and [entry files][3].
 
-### `workspaces`
-
-Individual workspace configurations may contain all other options listed on this
-page, except for the following root-only options:
-
-- `exclude` / `include`
-- `ignoreExportsUsedInFile`
-- `ignoreWorkspaces`
-- `workspaces`
-
-Workspaces can't be nested in a Knip configuration, but they can be nested in a
-monorepo folder structure.
-
-Also see [Monorepos and workspaces][4].
-
 ### `paths`
 
 Tools like TypeScript, webpack and Babel support import aliases in various ways.
@@ -100,7 +85,22 @@ TypeScript semantics:
 - Path values are an array of relative paths.
 - Paths without an `*` are exact matches.
 
-### Plugins
+## Workspaces
+
+Individual workspace configurations may contain all other options listed on this
+page, except for the following root-only options:
+
+- `exclude` / `include`
+- `ignoreExportsUsedInFile`
+- `ignoreWorkspaces`
+- `workspaces`
+
+Workspaces can't be nested in a Knip configuration, but they can be nested in a
+monorepo folder structure.
+
+Also see [Monorepos and workspaces][4].
+
+## Plugins
 
 There are a few options to modify the behavior of a plugin:
 
@@ -181,6 +181,16 @@ notation below is valid and will report only exports tagged `@lintignore` or
 ```
 
 Also see [JSDoc & TSDoc Tags][8].
+
+### `treatConfigHintsAsErrors`
+
+Exit with non-zero code (1) if there are any configuration hints.
+
+```json title="knip.json"
+{
+  "treatConfigHintsAsErrors": true
+}
+```
 
 ## Ignore Issues
 
@@ -279,7 +289,7 @@ Array of workspaces to ignore, globs allowed. Example:
 {
   "ignoreWorkspaces": [
     "packages/go-server",
-    "packages/flat/*"
+    "packages/flat/*",
     "packages/deep/**"
   ]
 }
@@ -332,6 +342,23 @@ This will also enable reporting unused members of exported classes and enums.
 Set this option at root level to enable this globally, or within workspace
 configurations individually.
 
+## Compilers
+
+Knip supports custom compilers to transform files before analysis.
+
+:::note
+
+Since compilers are functions, they can only be used in dynamic configuration
+files (`.js` or `.ts`), not in JSON configuration files.
+
+:::
+
+### `compilers`
+
+Override built-in compilers or add custom compilers for additional file types.
+
+Also see [Compilers][10].
+
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
 [3]: ../explanations/entry-files.md
@@ -341,3 +368,4 @@ configurations individually.
 [7]: ../features/rules-and-filters.md#filters
 [8]: ./jsdoc-tsdoc-tags.md
 [9]: ../guides/configuring-project-files.md
+[10]: ../features/compilers.md

@@ -4,6 +4,7 @@ export default {
   compilers: {
     html: (text: string) =>
       [...text.matchAll(/<link[^>]+href="([^"]+)"/g)].map(match => `import '${match[1]}';`).join('\n'),
-    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
+    css: (text: string) =>
+      [...text.matchAll(/(?<=@)(?:import|plugin)[^;]+/g)].map(m => m[0].replace(/^plugin\b/, 'import')).join('\n'),
   },
 } satisfies KnipConfig;

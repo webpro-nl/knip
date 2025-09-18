@@ -1,11 +1,18 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { ALIAS_TAG, ANONYMOUS, IMPORT_STAR, PROTOCOL_VIRTUAL } from '../constants.js';
-import type { GetImportsAndExportsOptions } from '../types/config.js';
+import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
-import type { ExportMap, ExportMember, ImportDetails, ImportMap, UnresolvedImport } from '../types/module-graph.js';
+import type {
+  ExportMap,
+  ExportMember,
+  FileNode,
+  ImportDetails,
+  ImportMap,
+  UnresolvedImport,
+} from '../types/module-graph.js';
 import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/module-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
@@ -67,9 +74,10 @@ const getImportsAndExports = (
   sourceFile: BoundSourceFile,
   resolveModule: (specifier: string) => ts.ResolvedModuleFull | undefined,
   typeChecker: ts.TypeChecker,
-  options: GetImportsAndExportsOptions
-) => {
-  const { skipTypeOnly, tags, ignoreExportsUsedInFile } = options;
+  options: GetImportsAndExportsOptions,
+  ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
+  skipExports: boolean
+): FileNode => {
   const internal: ImportMap = new Map();
   const external = new Set<string>();
   const unresolved = new Set<UnresolvedImport>();
@@ -160,8 +168,8 @@ const getImportsAndExports = (
     }
   };
 
-  const addImport = (options: ImportNode, node: ts.Node) => {
-    const { specifier, isTypeOnly, pos, identifier = ANONYMOUS, isReExport = false } = options;
+  const addImport = (opts: ImportNode, node: ts.Node) => {
+    const { specifier, isTypeOnly, pos, identifier = ANONYMOUS, isReExport = false } = opts;
     if (isBuiltin(specifier)) return;
 
     const module = resolveModule(specifier);
@@ -169,17 +177,17 @@ const getImportsAndExports = (
     if (module) {
       const filePath = module.resolvedFileName;
       if (filePath) {
-        if (options.resolve && !isInNodeModules(filePath)) {
+        if (opts.resolve && !isInNodeModules(filePath)) {
           resolved.add(filePath);
           return;
         }
 
         if (!module.isExternalLibraryImport || !isInNodeModules(filePath)) {
-          addInternalImport({ ...options, identifier, filePath, isReExport });
+          addInternalImport({ ...opts, identifier, filePath, isReExport });
         }
 
         if (module.isExternalLibraryImport) {
-          if (skipTypeOnly && isTypeOnly) return;
+          if (options.skipTypeOnly && isTypeOnly) return;
 
           const sanitizedSpecifier = sanitizeSpecifier(
             isInNodeModules(specifier) || isInNodeModules(filePath) ? getPackageNameFromFilePath(specifier) : specifier
@@ -196,8 +204,8 @@ const getImportsAndExports = (
         }
       }
     } else {
-      if (skipTypeOnly && isTypeOnly) return;
-      if (shouldIgnore(getJSDocTags(node), tags)) return;
+      if (options.skipTypeOnly && isTypeOnly) return;
+      if (shouldIgnore(getJSDocTags(node), options.tags)) return;
       if (specifier.startsWith(PROTOCOL_VIRTUAL)) return;
 
       if (typeof pos === 'number') {
@@ -210,7 +218,7 @@ const getImportsAndExports = (
   };
 
   const addExport = ({ node, symbol, identifier, type, pos, members = [], fix }: ExportNode) => {
-    if (options.skipExports) return;
+    if (skipExports) return;
 
     if (symbol) {
       const importedSymbolFilePath = importedInternalSymbols.get(symbol);

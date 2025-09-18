@@ -9,6 +9,8 @@ export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
   if (pattern.endsWith('/')) pattern = pattern.slice(0, -1);
   if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
 
+  if (pattern === '*' || pattern === '**') return { negated, patterns: [pattern, pattern] };
+
   if (pattern.startsWith('/')) pattern = pattern.slice(1);
   else if (!pattern.startsWith('**/')) pattern = `**/${pattern}`;
 

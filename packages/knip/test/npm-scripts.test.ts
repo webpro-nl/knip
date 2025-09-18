@@ -2,10 +2,11 @@ import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
 import { getDependencyMetaData } from '../src/manifest/index.js';
-import { join, resolve } from '../src/util/path.js';
+import { createOptions } from '../src/util/create-options.js';
+import { join } from '../src/util/path.js';
 import { load } from '../src/util/plugin.js';
-import baseArguments from './helpers/baseArguments.js';
 import baseCounters from './helpers/baseCounters.js';
+import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/npm-scripts');
 const manifest = await load(join(cwd, 'package.json'));
@@ -17,7 +18,7 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
     packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
   };
 
-  const { hostDependencies, installedBinaries } = await getDependencyMetaData(config);
+  const { hostDependencies, installedBinaries } = getDependencyMetaData(config);
 
   const expectedHostDependencies = new Map();
   expectedHostDependencies.set('pm2-peer-dep', [{ name: 'pm2', isPeerOptional: false }]);
@@ -49,10 +50,8 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
 });
 
 test('Unused dependencies in npm scripts', async () => {
-  const { issues, counters, configurationHints } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters, configurationHints } = await main(options);
 
   assert.deepEqual(issues.files, new Set([join(cwd, 'script.js')]));
 
@@ -90,13 +89,8 @@ test('Unused dependencies in npm scripts', async () => {
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-    isStrict: true,
-  });
-
+  const options = await createOptions({ cwd, isProduction: true, isStrict: true });
+  const { issues, counters } = await main(options);
   assert(issues.dependencies['package.json']['express']);
   assert(issues.dependencies['package.json']['unused-peer-dep']);
 

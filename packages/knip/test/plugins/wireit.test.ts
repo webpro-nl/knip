@@ -1,17 +1,16 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { main } from '../../src/index.js';
-import { join, resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
+import { createOptions } from '../../src/util/create-options.js';
+import { join } from '../../src/util/path.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/wireit');
 
 test('Find no dependencies when the wireit configuration is missing', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd: join(cwd, 'apps/missing'),
-  });
+  const options = await createOptions({ cwd: join(cwd, 'apps/missing') });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -19,10 +18,8 @@ test('Find no dependencies when the wireit configuration is missing', async () =
 });
 
 test('Find dependencies with the wireit plugin', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.binaries['package.json']['tsc']);
   assert(issues.binaries['apps/example-configuration/package.json']['rollup']);

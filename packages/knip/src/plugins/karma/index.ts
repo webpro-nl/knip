@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { type Input, toEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
+import { isAbsolute, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { type ConfigFile, configFiles, inputsFromFrameworks, inputsFromPlugins, loadConfig } from './helpers.js';
 
@@ -30,12 +30,14 @@ const resolveConfig: ResolveConfig<ConfigFile> = async (localConfig, options) =>
   if (config.files) {
     for (const fileOrPatternObj of config.files) {
       const fileOrPattern = typeof fileOrPatternObj === 'string' ? fileOrPatternObj : fileOrPatternObj.pattern;
-      inputs.add(toEntry(join(options.configFileDir, basePath, fileOrPattern)));
+      const absPath = isAbsolute(fileOrPattern) ? fileOrPattern : join(options.configFileDir, basePath, fileOrPattern);
+      inputs.add(toEntry(absPath));
     }
   }
   if (config.exclude) {
     for (const fileOrPattern of config.exclude) {
-      inputs.add(toEntry(`!${join(options.configFileDir, basePath, fileOrPattern)}`));
+      const absPath = isAbsolute(fileOrPattern) ? fileOrPattern : join(options.configFileDir, basePath, fileOrPattern);
+      inputs.add(toEntry(`!${absPath}`));
     }
   }
 
