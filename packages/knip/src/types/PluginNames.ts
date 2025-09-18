@@ -3,6 +3,7 @@ export type PluginName =
   | 'angular'
   | 'astro'
   | 'ava'
+  | 'aws-cdk'
   | 'babel'
   | 'biome'
   | 'bun'
@@ -117,6 +118,7 @@ export const pluginNames = [
   'angular',
   'astro',
   'ava',
+  'aws-cdk',
   'babel',
   'biome',
   'bun',
