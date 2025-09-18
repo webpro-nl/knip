@@ -13,7 +13,8 @@ test('Find dependencies with the rslib plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 0,
-    total: 0,
+    files: 1,
+    processed: 1,
+    total: 1,
   });
 });
