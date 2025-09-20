@@ -3,6 +3,7 @@ import { ANONYMOUS } from '../../../constants.js';
 import {
   findAncestor,
   findDescendants,
+  getAccessedIdentifiers,
   isAccessExpression,
   isImportCall,
   isTopLevel,
@@ -92,6 +93,12 @@ export default visit(
               // Pattern: const identifier = await import('specifier');
               const alias = String(variableDeclaration.name.escapedText);
               const symbol = getSymbol(variableDeclaration, isTLA);
+              // @ts-expect-error ts.isFunctionBody
+              const scope: ts.Node = findAncestor(variableDeclaration, ts.isFunctionBody) || node.getSourceFile();
+              const accessed = getAccessedIdentifiers(alias, scope);
+              if (accessed.length > 0) {
+                return accessed.map(acc => ({ identifier: acc.identifier, alias, symbol, specifier, pos: acc.pos }));
+              }
               return { identifier: 'default', alias, symbol, specifier, pos: node.arguments[0].pos };
             }
             const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);

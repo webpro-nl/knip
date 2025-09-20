@@ -314,3 +314,33 @@ export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName
   }
   return values;
 };
+
+export const getAccessedIdentifiers = (alias: string, scope: ts.Node) => {
+  const identifiers: Array<{ identifier: string; pos: number }> = [];
+  for (const prop of findDescendants<ts.PropertyAccessExpression>(scope, ts.isPropertyAccessExpression).filter(
+    access => access.expression.getText() === alias
+  )) {
+    identifiers.push({ identifier: String(prop.name.escapedText), pos: prop.name.pos });
+  }
+  for (const access of findDescendants<ts.ElementAccessExpression>(scope, ts.isElementAccessExpression).filter(
+    access => access.expression.getText() === alias && ts.isStringLiteral(access.argumentExpression)
+  )) {
+    identifiers.push({
+      identifier: stripQuotes((access.argumentExpression as ts.StringLiteral).text),
+      pos: access.argumentExpression.pos,
+    });
+  }
+  for (const decl of findDescendants<ts.VariableDeclaration>(scope, ts.isVariableDeclaration).filter(
+    decl => decl.initializer?.getText() === alias
+  )) {
+    if (ts.isObjectBindingPattern(decl.name)) {
+      for (const element of decl.name.elements) {
+        if (ts.isBindingElement(element)) {
+          const identifier = (element.propertyName ?? element.name).getText();
+          identifiers.push({ identifier, pos: element.pos });
+        }
+      }
+    }
+  }
+  return identifiers;
+};
