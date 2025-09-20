@@ -5,7 +5,7 @@ export interface ImportNode {
   identifier: string | undefined;
   alias?: string | undefined;
   namespace?: string | undefined;
-  pos: number | undefined;
+  pos: number;
   symbol?: ts.Symbol;
   isTypeOnly?: boolean;
   isReExport?: boolean;

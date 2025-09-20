@@ -10,7 +10,7 @@ import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import type { PluginName } from '../types/PluginNames.js';
 import type { GetImportsAndExportsOptions } from '../types/config.js';
-import type { ModuleGraph, UnresolvedImport } from '../types/module-graph.js';
+import type { Import, ModuleGraph } from '../types/module-graph.js';
 import { perfObserver } from '../util/Performance.js';
 import type { MainOptions } from '../util/create-options.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
@@ -341,7 +341,7 @@ export async function build({
       const file = principal.analyzeSourceFile(filePath, analyzeOpts, chief.config.ignoreExportsUsedInFile);
 
       // Post-processing
-      const _unresolved = new Set<UnresolvedImport>();
+      const unresolvedImports = new Set<Import>();
       for (const unresolvedImport of file.imports.unresolved) {
         const { specifier } = unresolvedImport;
 
@@ -353,13 +353,13 @@ export async function build({
         // - or maintain unresolved status if not ignored and not foreign
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
         if (isStartsLikePackageName(sanitizedSpecifier)) {
-          file.imports.external.add(sanitizedSpecifier);
+          file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
         } else {
           const isIgnored = isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
           if (!isIgnored) {
             const ext = extname(sanitizedSpecifier);
             const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);
-            if (!ext || (ext !== '.json' && !hasIgnoredExtension)) _unresolved.add(unresolvedImport);
+            if (!ext || (ext !== '.json' && !hasIgnoredExtension)) unresolvedImports.add(unresolvedImport);
           }
         }
       }
@@ -369,10 +369,10 @@ export async function build({
         if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
       }
 
-      for (const [specifier, specifierFilePath] of file.imports.specifiers) {
-        const packageName = getPackageNameFromModuleSpecifier(specifier);
+      for (const [import_, specifierFilePath] of file.imports.specifiers) {
+        const packageName = getPackageNameFromModuleSpecifier(import_.specifier);
         if (packageName && isInternalWorkspace(packageName)) {
-          file.imports.external.add(packageName);
+          file.imports.external.add({ ...import_, specifier: packageName });
           const principal = getPrincipalByFilePath(specifierFilePath);
           if (principal && !isGitIgnored(specifierFilePath)) {
             principal.addNonEntryPath(specifierFilePath);
@@ -402,7 +402,7 @@ export async function build({
 
       const node = getOrCreateFileNode(graph, filePath);
 
-      file.imports.unresolved = _unresolved;
+      file.imports.unresolved = unresolvedImports;
 
       Object.assign(node, file);
 

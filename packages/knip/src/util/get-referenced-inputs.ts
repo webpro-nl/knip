@@ -68,7 +68,6 @@ export const getReferencedInputsHandler =
         if (isWorkspace || isDependency(input)) {
           if (!isHandled) {
             if (!input.optional && ((deputy.isProduction && input.production) || !deputy.isProduction)) {
-              // Unlisted dependency
               collector.addIssue({
                 type: 'unlisted',
                 filePath: containingFilePath,

@@ -14,16 +14,16 @@ test('knip --reporter markdown', () => {
 
 ## Unlisted dependencies (2)
 
-| Name            | Location     | Severity |
-| :-------------- | :----------- | :------- |
-| @org/unresolved | src/index.ts | error    |
-| unresolved      | src/index.ts | error    |
+| Name            | Location           | Severity |
+| :-------------- | :----------------- | :------- |
+| @org/unresolved | src/index.ts:10:27 | error    |
+| unresolved      | src/index.ts:9:27  | error    |
 
 ## Unresolved imports (1)
 
 | Name         | Location          | Severity |
 | :----------- | :---------------- | :------- |
-| ./unresolved | src/index.ts:8:23 | error    |`;
+| ./unresolved | src/index.ts:8:24 | error    |`;
   const out = exec('knip --reporter markdown', { cwd }).stdout;
   assert.equal(out, markdown);
 });
