@@ -15,7 +15,7 @@ test('Respect ignored binaries and dependencies, including regex, show config hi
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
+    binaries: 3,
     processed: 2,
     total: 2,
   });
@@ -49,7 +49,7 @@ test('Respect ignored binaries when excluding dependencies+unlisted+unresolved',
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
+    binaries: 3,
     processed: 2,
     total: 2,
   });

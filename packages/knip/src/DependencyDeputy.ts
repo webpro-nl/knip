@@ -28,6 +28,9 @@ import {
 } from './util/modules.js';
 import { findMatch, toRegexOrString } from './util/regex.js';
 
+const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
+  typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
+
 /**
  * - Stores manifests
  * - Stores referenced external dependencies
@@ -106,8 +109,8 @@ export class DependencyDeputy {
     this.setInstalledBinaries(name, installedBinaries);
     this.setHasTypesIncluded(name, hasTypesIncluded);
 
-    const ignoreDependencies = id.map(toRegexOrString);
-    const ignoreBinaries = ib.map(toRegexOrString);
+    const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
+    const ignoreBinaries = ib.flatMap(ib => filterIsProduction(ib, this.isProduction)).map(toRegexOrString);
     const ignoreUnresolved = iu.map(toRegexOrString);
 
     this._manifests.set(name, {
