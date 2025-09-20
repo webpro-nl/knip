@@ -3,7 +3,7 @@ import { KNIP_CONFIG_LOCATIONS } from '../constants.js';
 import { knipConfigurationSchema } from '../schema/configuration.js';
 import type { RawConfiguration } from '../types/config.js';
 import type { Options } from '../types/options.js';
-import type parseArgs from './cli-arguments.js';
+import type { ParsedCLIArgs } from './cli-arguments.js';
 import { ConfigurationError } from './errors.js';
 import { findFile, loadJSON } from './fs.js';
 import { getIncludedIssueTypes, shorthandDeps, shorthandFiles, shorthandTypes } from './get-included-issue-types.js';
@@ -14,10 +14,8 @@ import { getKeysByValue } from './object.js';
 import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.js';
 import { splitTags } from './tag.js';
 
-type ParsedArgs = ReturnType<typeof parseArgs>;
-
 interface CreateOptions extends Partial<Options> {
-  parsedCLIArgs?: ParsedArgs;
+  parsedCLIArgs?: ParsedCLIArgs;
 }
 
 const pcwd = process.cwd();
@@ -54,7 +52,7 @@ export const createOptions = async (options: CreateOptions) => {
   const loadedConfig = Object.assign(
     {},
     manifest.knip,
-    configFilePath ? await loadResolvedConfigFile(configFilePath) : {}
+    configFilePath ? await loadResolvedConfigFile(configFilePath, parsedCLIArgs) : {}
   );
 
   const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(partitionCompilers(loadedConfig));

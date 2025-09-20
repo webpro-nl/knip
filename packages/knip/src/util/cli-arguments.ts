@@ -62,7 +62,9 @@ $ knip --tags=-lintignore
 
 Website: https://knip.dev`;
 
-export default function () {
+export type ParsedCLIArgs = ReturnType<typeof parseCLIArgs>;
+
+export default function parseCLIArgs() {
   return parseArgs({
     options: {
       cache: { type: 'boolean' },
