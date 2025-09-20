@@ -33,15 +33,36 @@ const createGitHubActionsLogger = () => {
     info: (message: string) => console.log(message),
     error: (
       message: string,
-      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number; title?: string }
+      options: {
+        file: string;
+        startLine?: number;
+        endLine?: number;
+        startColumn?: number;
+        endColumn?: number;
+        title?: string;
+      }
     ) => formatAnnotation('error', message, options),
     warning: (
       message: string,
-      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number; title?: string }
+      options: {
+        file: string;
+        startLine?: number;
+        endLine?: number;
+        startColumn?: number;
+        endColumn?: number;
+        title?: string;
+      }
     ) => formatAnnotation('warning', message, options),
     notice: (
       message: string,
-      options: { file: string; startLine?: number; endLine?: number; startColumn?: number; endColumn?: number; title?: string }
+      options: {
+        file: string;
+        startLine?: number;
+        endLine?: number;
+        startColumn?: number;
+        endColumn?: number;
+        title?: string;
+      }
     ) => formatAnnotation('notice', message, options),
   };
 };
@@ -67,13 +88,13 @@ export default ({
       const issuesForType: Issue[] = Object.values(issues[reportType]).flatMap(Object.values);
       if (issuesForType.length > 0) {
         title && core.info(`${title} (${issuesForType.length})`);
-        
+
         for (const issue of issuesForType) {
           if (issue.isFixed || issue.severity === 'off') continue;
 
           const log = issue.severity === 'error' ? core.error : core.warning;
           const filePath = relative(cwd, issue.filePath);
-          
+
           const message = reportType === '_files' ? issue.symbol : `${issue.symbol} in ${filePath}`;
 
           log(message, {

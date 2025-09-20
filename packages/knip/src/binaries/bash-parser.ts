@@ -29,7 +29,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
 
   // Helper for recursive calls
   const fromArgs: FromArgs = (args, opts): Input[] => {
-    if(args.length === 0 || !isValidBinary(args[0])) return [];
+    if (args.length === 0 || !isValidBinary(args[0])) return [];
     return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
       ...options,
       ...opts,
