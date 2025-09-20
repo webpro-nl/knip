@@ -54,12 +54,21 @@ export const findInternalReferences = (
           if (declaration) {
             // @ts-expect-error Keep it cheap
             if (findInFlow(declaration.name?.flowNode, item.symbol)) {
-              return [++refCount, isSymbolInExport];
+              refCount++;
+              return [refCount, isSymbolInExport];
             }
 
             if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
               // Consider re-exports referenced
               return [++refCount, isSymbolInExport];
+            }
+          }
+
+          if (symbol && symbol.flags & ts.SymbolFlags.Property) {
+            const type = typeChecker.getTypeOfSymbol(symbol);
+            if (type?.symbol && item.symbol === type.symbol) {
+              refCount++;
+              if (isBindingElement) return [refCount, isSymbolInExport];
             }
           }
 

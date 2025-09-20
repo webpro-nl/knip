@@ -13,7 +13,7 @@ test('Find unused exports respecting an ignoreExportsUsedInFile (shorthand)', as
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });
