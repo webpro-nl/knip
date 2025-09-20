@@ -376,6 +376,11 @@ parser (through the `getInputsFromScripts` helper). Think of GitHub Actions
 worfklow YAML files or husky scripts. Using this input type, a binary is
 "assigned" to the dependency that has it as a `"bin"` in their `package.json`.
 
+### toAlias
+
+The `alias` input type adds path aliases to the core module resolver. They're
+added to `compilerOptions.paths` so the syntax is identical.
+
 ### Options
 
 When creating inputs from specifiers, an extra `options` object as the second
@@ -405,6 +410,11 @@ toDependency('esbuild', { dir: 'packages/app' });
 
 Knip now understands `esbuild` is a dependency of the workspace in the
 `packages/app` directory.
+
+#### optional
+
+Use the `optional` flag to indicate the dependency is optional. Then, a
+dependency won't be flagged as unlisted if it isn't.
 
 #### allowIncludeExports
 
