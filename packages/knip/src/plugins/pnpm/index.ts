@@ -11,10 +11,13 @@ const isEnabled: IsPluginEnabled = async ({ cwd, manifest }) =>
       (await _firstGlob({ cwd, patterns: ['pnpm-lock.yaml', 'pnpm-workspace.yaml'] }))
   );
 
+const isRootOnly = true;
+
 const config: string[] = ['.pnpmfile.cjs'];
 
 export default {
   title,
   isEnabled,
+  isRootOnly,
   config,
 } satisfies Plugin;
