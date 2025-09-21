@@ -91,6 +91,7 @@ export const pluginsSchema = z.object({
   rsbuild: pluginSchema,
   rslib: pluginSchema,
   rspack: pluginSchema,
+  rstest: pluginSchema,
   'semantic-release': pluginSchema,
   sentry: pluginSchema,
   'simple-git-hooks': pluginSchema,
