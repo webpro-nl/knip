@@ -1,10 +1,10 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { join } from 'node:path';
 import { main } from '../../src/index.js';
 import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
 import { resolve } from '../helpers/resolve.js';
+import { join } from '../../src/util/path.js';
 
 const cwd = resolve('fixtures/plugins/rstest2');
 
