@@ -121,6 +121,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'tac',
   'tee',
   'test', // exception (node built-in module)
+  'time',
   'timeout',
   'touch',
   'tr',
@@ -130,6 +131,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'uname',
   'unexpand',
   'uniq',
+  'unzip',
   'wc',
   'who',
   'whoami',
