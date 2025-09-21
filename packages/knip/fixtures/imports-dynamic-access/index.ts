@@ -9,9 +9,16 @@ async function fn() {
   const module = await import('./fruits.ts');
   module.cherry;
 
-  const { durian, elderberry: e } = module;
-  durian;
-  e;
+  {
+    const { durian, elderberry: e } = module;
+    durian;
+    e;
+  }
+
+  const notModule = { fig: false, grape: false };
+  const { grape } = notModule;
+  notModule.fig;
+  grape;
 }
 
 await fn();

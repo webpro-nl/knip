@@ -315,32 +315,38 @@ export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName
   return values;
 };
 
-export const getAccessedIdentifiers = (alias: string, scope: ts.Node) => {
+export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
   const identifiers: Array<{ identifier: string; pos: number }> = [];
-  for (const prop of findDescendants<ts.PropertyAccessExpression>(scope, ts.isPropertyAccessExpression).filter(
-    access => access.expression.getText() === alias
-  )) {
-    identifiers.push({ identifier: String(prop.name.escapedText), pos: prop.name.pos });
-  }
-  for (const access of findDescendants<ts.ElementAccessExpression>(scope, ts.isElementAccessExpression).filter(
-    access => access.expression.getText() === alias && ts.isStringLiteral(access.argumentExpression)
-  )) {
-    identifiers.push({
-      identifier: stripQuotes((access.argumentExpression as ts.StringLiteral).text),
-      pos: access.argumentExpression.pos,
-    });
-  }
-  for (const decl of findDescendants<ts.VariableDeclaration>(scope, ts.isVariableDeclaration).filter(
-    decl => decl.initializer?.getText() === alias
-  )) {
-    if (ts.isObjectBindingPattern(decl.name)) {
-      for (const element of decl.name.elements) {
+
+  function visit(node: ts.Node) {
+    if (ts.isPropertyAccessExpression(node) && node.expression.getText() === identifier) {
+      identifiers.push({ identifier: String(node.name.escapedText), pos: node.name.pos });
+    } else if (
+      ts.isElementAccessExpression(node) &&
+      node.expression.getText() === identifier &&
+      ts.isStringLiteral(node.argumentExpression)
+    ) {
+      identifiers.push({
+        identifier: stripQuotes(node.argumentExpression.text),
+        pos: node.argumentExpression.pos,
+      });
+    } else if (
+      ts.isVariableDeclaration(node) &&
+      node.initializer?.getText() === identifier &&
+      ts.isObjectBindingPattern(node.name)
+    ) {
+      for (const element of node.name.elements) {
         if (ts.isBindingElement(element)) {
           const identifier = (element.propertyName ?? element.name).getText();
           identifiers.push({ identifier, pos: element.pos });
         }
       }
     }
+
+    ts.forEachChild(node, visit);
   }
+
+  visit(scope);
+
   return identifiers;
 };
