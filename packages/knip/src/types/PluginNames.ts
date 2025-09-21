@@ -5,6 +5,7 @@ export type PluginName =
   | 'ava'
   | 'babel'
   | 'biome'
+  | 'bumpp'
   | 'bun'
   | 'c8'
   | 'capacitor'
@@ -120,6 +121,7 @@ export const pluginNames = [
   'ava',
   'babel',
   'biome',
+  'bumpp',
   'bun',
   'c8',
   'capacitor',
