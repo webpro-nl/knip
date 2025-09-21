@@ -5,16 +5,16 @@ import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
 import { resolve } from '../helpers/resolve.js';
 
-const cwd = resolve('fixtures/plugins/rstest');
+const cwd = resolve('fixtures/plugins/rstest2');
 
-test('Find dependencies with the rstest plugin', async () => {
+test('Find dependencies with the rstest plugin (2)', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 3,
-    total: 3,
+    files: 2,
+    processed: 5,
+    total: 5,
   });
 });

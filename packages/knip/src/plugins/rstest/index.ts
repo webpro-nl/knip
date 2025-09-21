@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/input.js';
+import { toDeferResolve, toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { RstestConfig } from './types.js';
 
@@ -18,12 +18,19 @@ const config: string[] = ['rstest.config.{js,cjs,mjs,ts,cts,mts}'];
 const mocks = ['**/__mocks__/**/*.?(c|m)[jt]s?(x)'];
 
 // https://rstest.rs/config/test/include
-const entry = ['**/*.{test,spec}.?(c|m)[jt]s?(x)', ...mocks];
+const entry = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 
 const resolveConfig: ResolveConfig<RstestConfig> = async config => {
-  const environments = config.testEnvironment === 'node' ? [] : [config.testEnvironment];
+  const entries = (config.include ?? entry)
+    .concat(...mocks)
+    .map(toEntry)
+    .concat(...(config.exclude ?? []).map(id => toEntry(`!${id}`)));
 
-  return [...environments].map(id => (typeof id === 'string' ? toDeferResolve(id) : id));
+  const environments = config.testEnvironment === 'node' ? [] : [config.testEnvironment ?? 'node'];
+
+  const setupFiles = config.setupFiles ?? [];
+
+  return [...environments, ...setupFiles, ...entries].map(id => (typeof id === 'string' ? toDeferResolve(id) : id));
 };
 
 export default {
@@ -31,6 +38,5 @@ export default {
   enablers,
   isEnabled,
   config,
-  entry,
   resolveConfig,
 } satisfies Plugin;
