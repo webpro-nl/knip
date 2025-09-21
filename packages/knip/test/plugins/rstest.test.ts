@@ -8,13 +8,12 @@ import { resolve } from '../helpers/resolve.js';
 const cwd = resolve('fixtures/plugins/rstest');
 
 test('Find dependencies with the rstest plugin', async () => {
-  // Ideally, plugin tests have no `issues` left and only `total` and `processed` values in `counters`
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 0,
-    total: 0,
+    processed: 1,
+    total: 1,
   });
 });
