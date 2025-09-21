@@ -77,6 +77,7 @@ import { default as rollup } from './rollup/index.js';
 import { default as rsbuild } from './rsbuild/index.js';
 import { default as rslib } from './rslib/index.js';
 import { default as rspack } from './rspack/index.js';
+import { default as rstest } from './rstest/index.js';
 import { default as semanticRelease } from './semantic-release/index.js';
 import { default as sentry } from './sentry/index.js';
 import { default as simpleGitHooks } from './simple-git-hooks/index.js';
@@ -191,6 +192,7 @@ export const Plugins = {
   rsbuild,
   rslib,
   rspack,
+  rstest,
   'semantic-release': semanticRelease,
   sentry,
   'simple-git-hooks': simpleGitHooks,

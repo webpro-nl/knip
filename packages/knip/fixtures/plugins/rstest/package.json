@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/rstest",
+  "devDependencies": {
+    "@rstest/core": "*",
+    "happy-dom": "*"
+  }
+}

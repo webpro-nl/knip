@@ -603,6 +603,10 @@
           "title": "rslib plugin configuration (https://knip.dev/reference/plugins/rslib)",
           "$ref": "#/definitions/plugin"
         },
+        "rstest": {
+          "title": "rstest plugin configuration (https://knip.dev/reference/plugins/rstest)",
+          "$ref": "#/definitions/plugin"
+        },
         "rspack": {
           "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
           "$ref": "#/definitions/plugin"
