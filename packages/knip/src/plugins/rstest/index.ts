@@ -20,13 +20,18 @@ const mocks = ['**/__mocks__/**/*.?(c|m)[jt]s?(x)'];
 // https://rstest.rs/config/test/include
 const entry = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 
+function testEnvironment(config: RstestConfig) {
+  if (!config.testEnvironment || config.testEnvironment === 'node') return [];
+  return [config.testEnvironment];
+}
+
 const resolveConfig: ResolveConfig<RstestConfig> = async config => {
   const entries = (config.include ?? entry)
     .concat(...mocks)
     .map(toEntry)
     .concat(...(config.exclude ?? []).map(id => toEntry(`!${id}`)));
 
-  const environments = config.testEnvironment === 'node' ? [] : [config.testEnvironment ?? 'node'];
+  const environments = testEnvironment(config);
 
   const setupFiles = config.setupFiles ?? [];
 
