@@ -1,4 +1,5 @@
 import type { ParsedArgs } from 'minimist';
+import type { Input } from '../util/input.js';
 
 export type ConfigArg = boolean | (string | [string, (id: string) => string])[];
 
@@ -88,4 +89,14 @@ export type Args = {
    * @default undefined
    */
   fromArgs?: string[] | ((parsed: ParsedArgs, args: string[]) => string[]);
+
+  /**
+   * Return inputs from parsed arguments
+   *
+   * @example resolveInputs: (parsed: ParsedArgs) => parsed['flag'] ? [toDependency('dependency'] : []
+   *
+   * @default undefined
+   */
+
+  resolveInputs?: (parsed: ParsedArgs, args: string[]) => Input[];
 };
