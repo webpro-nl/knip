@@ -21,7 +21,6 @@ const resolveConfig: ResolveConfig<PrismaConfig> = async (config, options) => {
 };
 
 const args = {
-  binaries: ['prisma'],
   config: true,
 };
 

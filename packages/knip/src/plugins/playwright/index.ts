@@ -54,7 +54,6 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
 };
 
 const args = {
-  binaries: ['playwright'],
   positional: true,
   args: (args: string[]) => args.filter(arg => arg !== 'install' && arg !== 'test'),
   config: true,
