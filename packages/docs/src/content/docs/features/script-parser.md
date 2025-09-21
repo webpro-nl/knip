@@ -6,8 +6,9 @@ Knip parses shell commands and scripts to find additional dependencies, entry
 files and configuration files in various places:
 
 - In [`package.json`][1]
-- In specific [`config` files][2]
-- In [source code][3]
+- In [CLI arguments][2]
+- In [scripts][3]
+- In [source code][4]
 
 Shell scripts can be read and statically analyzed, but they're not executed.
 
@@ -30,7 +31,7 @@ take a look at this example:
     "program": "bin/cli.js"
   },
   "scripts": {
-    "build": "bundle src/entry.ts",
+    "build": "rollup src/entry.ts",
     "start": "node --loader tsx server.ts"
   }
 }
@@ -54,10 +55,10 @@ Knip does not add scripts without a standard extension. For instance, the
 `bin/tool` file might be a valid executable for Node.js, but wouldn't be added
 or parsed by Knip.
 
-### package.json
+### CLI Arguments
 
-When parsing the `scripts` entries of `package.json`, Knip detects various types
-of inputs. Some examples:
+When parsing the `scripts` of `package.json` and other files, Knip detects
+various types of inputs. Some examples:
 
 - The first positional argument is usually an entry file
 - Configuration files are often in the `-c` or `--config` argument
@@ -74,19 +75,20 @@ of inputs. Some examples:
 }
 ```
 
-This will have `tsx` marked as a referenced dependency, and adds `run.ts` as an
-entry file.
+The `"start"` script will have `tsx` marked as a referenced dependency, and adds
+`run.ts` as an entry file.
 
-The following files are detected as configuration files:
+Additionally, the following files are detected as configuration files:
 
 - `tsup.lib.config.ts` - to be handled by the tsup plugin
 - `tsconfig.app.json` - to be handled by the TypeScript plugin
 
-The arguments are defined in plugins separately for fine-grained results.
+Such executables and their arguments are all defined in plugins separately for
+fine-grained results.
 
-## Plugins
+## Scripts
 
-Some plugins also use the script parser to extract entry files and dependencies
+Plugins may also use the script parser to extract entry files and dependencies
 from commands. A few examples:
 
 - GitHub Actions: workflow files may contain `run` commands (e.g.
@@ -100,7 +102,7 @@ from commands. A few examples:
 
 Plugins can also return configuration files. Some examples:
 
-- The Angular detects `options.tsConfig` as a TypeScript config file
+- The Angular plugin detects `options.tsConfig` as a TypeScript config file
 - The GitHub Actions plugin parses `run` commands which may contain
   configuration file paths
 
@@ -149,5 +151,6 @@ await $`node scripts/parse.js`;
 This will add `scripts/parse.js` as an entry file.
 
 [1]: #packagejson
-[2]: #plugins
-[3]: #source-code
+[2]: #cli-arguments
+[3]: #scripts
+[4]: #source-code

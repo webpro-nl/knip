@@ -1,5 +1,5 @@
 ---
-title: Argument parsing
+title: Argument Parsing
 sidebar:
   order: 3
 ---
