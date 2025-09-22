@@ -319,6 +319,10 @@
           "title": "biome plugin configuration (https://knip.dev/reference/plugins/biome)",
           "$ref": "#/definitions/plugin"
         },
+        "bumpp": {
+          "title": "bumpp plugin configuration (https://knip.dev/reference/plugins/bumpp)",
+          "$ref": "#/definitions/plugin"
+        },
         "bun": {
           "title": "bun plugin configuration (https://knip.dev/reference/plugins/bun)",
           "$ref": "#/definitions/plugin"
@@ -603,12 +607,12 @@
           "title": "rslib plugin configuration (https://knip.dev/reference/plugins/rslib)",
           "$ref": "#/definitions/plugin"
         },
-        "rstest": {
-          "title": "rstest plugin configuration (https://knip.dev/reference/plugins/rstest)",
-          "$ref": "#/definitions/plugin"
-        },
         "rspack": {
           "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rstest": {
+          "title": "rstest plugin configuration (https://knip.dev/reference/plugins/rstest)",
           "$ref": "#/definitions/plugin"
         },
         "semantic-release": {

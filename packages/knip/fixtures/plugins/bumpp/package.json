@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/bumpp",
+  "scripts": {
+    "bump-version": "bumpp"
+  },
+  "devDependencies": {
+    "bumpp": "*"
+  }
+}
