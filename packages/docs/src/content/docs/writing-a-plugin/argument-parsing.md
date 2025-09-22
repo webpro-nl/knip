@@ -15,7 +15,7 @@ parsing and some options are identical ([alias](#alias), [boolean](#boolean),
 
 Also see [type definitions][7] and [examples in existing plugins][8].
 
-### alias
+## alias
 
 Define aliases.
 
@@ -29,7 +29,7 @@ Example:
 
 Also see [nodeImportArgs](#nodeimportargs).
 
-### args
+## args
 
 Modify or filter arguments before parsing. For edge cases preprocessing is
 useful, e.g. if minimist has trouble parsing or to modify/discard arguments.
@@ -42,7 +42,7 @@ Example:
 }
 ```
 
-### binaries
+## binaries
 
 Executables for the dependency.
 
@@ -56,12 +56,12 @@ Example:
 
 Default: plugin name, e.g. for the ESLint plugin the value is `["eslint"]`
 
-### boolean
+## boolean
 
 Mark arguments as boolean. By default, arguments are expected to have string
 values.
 
-### config
+## config
 
 Define arguments that contain the configuration file path. Usually you'll want
 to set aliases too. Use `true` for shorthand to set `alias` + `string` +
@@ -89,7 +89,7 @@ Example:
 This will mark e.g. `tsc -p tsconfig.lib.json` as a configuration file and it
 will be handled by `resolveConfig` of the (typescript) plugin.
 
-### fromArgs
+## fromArgs
 
 Parse return value as a new script. Can be a an array of strings, or function
 that returns an array of strings and those values will be parsed separately.
@@ -110,7 +110,7 @@ nodemon --exec "node index.js"
 
 Will have `"node index.js"` being parsed as a new script.
 
-### nodeImportArgs
+## nodeImportArgs
 
 Set to `true` as a shorthand for this [alias](#alias):
 
@@ -128,7 +128,7 @@ Example:
 }
 ```
 
-### positional
+## positional
 
 Set to `true` to use the first positional argument as an entry point.
 
@@ -143,7 +143,7 @@ Example:
 The `tsx` plugin has this and `"tsx script.ts"` as a script will result in the
 `script.ts` file being an entry point.
 
-### resolve
+## resolve
 
 List of arguments to resolve to a dependency or entry file path.
 
@@ -158,7 +158,18 @@ Example:
 Now for a script like `"program --plugin package"` this will result in
 `"package"` being resolved as a dependency.
 
-### string
+## resolveInputs
+
+Return inputs from parsed arguments
+
+```ts
+{
+  resolveInputs: (parsed: ParsedArgs) =>
+    parsed['flag'] ? [toDependency('package')] : [];
+}
+```
+
+## string
 
 Mark arguments as string. This is the default, but number-looking arguments are
 returned as numbers by minimist.

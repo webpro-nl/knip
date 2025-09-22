@@ -9,33 +9,33 @@ way for plugins to tell what they've found and how Knip should handle those. The
 more precise a plugin can be, the better it is for results and performance.
 Here's an overview of all input type functions:
 
-### toEntry
+## toEntry
 
 An `entry` input is just like an `entry` in the configuration. It should either
 be an absolute or relative path, and glob patterns are allowed.
 
-### toProductionEntry
+## toProductionEntry
 
 A production `entry` input is just like an `production` in the configuration. It
 should either be an absolute or relative path, and it can have glob patterns.
 
-### toProject
+## toProject
 
 A `project` input is the equivalent of `project` patterns in the configuration.
 It should either be an absolute or relative path, and (negated) glob patterns
 are allowed.
 
-### toDependency
+## toDependency
 
 The `dependency` indicates the entry is a dependency, belonging in either the
 `"dependencies"` or `"devDependencies"` section of `package.json`.
 
-### toProductionDependency
+## toProductionDependency
 
 The production `dependency` indicates the entry is a production dependency,
 expected to be listed in `"dependencies"`.
 
-### toDeferResolve
+## toDeferResolve
 
 The `deferResolve` input type is used to defer the resolution of a specifier.
 This could be resolved to a dependency or an entry file. For instance, the
@@ -46,13 +46,13 @@ files, package names are external dependencies.
 If this does not lead to a resolution, the specifier will be reported under
 "unresolved imports".
 
-### toDeferResolveEntry
+## toDeferResolveEntry
 
 The `deferResolveEntry` input type is similar to `deferResolve`, but it's used
 for entry files only (not dependencies) and unresolved inputs are ignored. It's
 different from `toEntry` as glob patterns are not supported.
 
-### toConfig
+## toConfig
 
 The `config` input type is a way for plugins to reference a configuration file
 that should be handled by a different plugin. For instance, Angular
@@ -69,24 +69,24 @@ toConfig('typescript', './path/to/tsconfig.json');
 For instance, the Angular plugin uses this to tell Knip about its `tsConfig`
 value in `angular.json` projects.
 
-### toBinary
+## toBinary
 
 The `binary` input type isn't used by plugins directly, but by the shell script
 parser (through the `getInputsFromScripts` helper). Think of GitHub Actions
 worfklow YAML files or husky scripts. Using this input type, a binary is
 "assigned" to the dependency that has it as a `"bin"` in their `package.json`.
 
-### toAlias
+## toAlias
 
 The `alias` input type adds path aliases to the core module resolver. They're
 added to `compilerOptions.paths` so the syntax is identical.
 
-### Options
+## Options
 
 When creating inputs from specifiers, an extra `options` object as the second
 argument can be provided.
 
-#### dir
+### dir
 
 The optional `dir` option assigns the input to a different workspace. For
 instance, GitHub Action workflows are always stored in the root workspace, and
@@ -111,12 +111,12 @@ toDependency('esbuild', { dir: 'packages/app' });
 Knip now understands `esbuild` is a dependency of the workspace in the
 `packages/app` directory.
 
-#### optional
+### optional
 
 Use the `optional` flag to indicate the dependency is optional. Then, a
 dependency won't be flagged as unlisted if it isn't.
 
-#### allowIncludeExports
+### allowIncludeExports
 
 By default, exports of entry files such as `src/index.ts` or the files in
 `package.json#exports` are not reported as unused. When using the

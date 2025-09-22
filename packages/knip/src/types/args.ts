@@ -97,6 +97,5 @@ export type Args = {
    *
    * @default undefined
    */
-
   resolveInputs?: (parsed: ParsedArgs, args: string[]) => Input[];
 };
