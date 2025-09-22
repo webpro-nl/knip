@@ -9,11 +9,10 @@ plugins to customize how command-line arguments are parsed for their tool's
 executables. Argument parsing in plugins help Knip identify dependencies and
 entry files from scripts.
 
-Knip uses [minimist](https://www.npmjs.com/package/minimist) for argument
-parsing and some options are identical ([alias](#alias), [boolean](#boolean),
-[string](#string)).
+Knip uses [minimist][1] for argument parsing and some options are identical
+([alias][2], [boolean][3], [string][4]).
 
-Also see [type definitions][7] and [examples in existing plugins][8].
+Also see [type definitions][5] and [examples in existing plugins][6].
 
 ## alias
 
@@ -27,7 +26,7 @@ Example:
 }
 ```
 
-Also see [nodeImportArgs](#nodeimportargs).
+Also see [nodeImportArgs][7].
 
 ## args
 
@@ -112,7 +111,7 @@ Will have `"node index.js"` being parsed as a new script.
 
 ## nodeImportArgs
 
-Set to `true` as a shorthand for this [alias](#alias):
+Set to `true` as a shorthand for this [alias][2]:
 
 ```ts
 {
@@ -174,6 +173,11 @@ Return inputs from parsed arguments
 Mark arguments as string. This is the default, but number-looking arguments are
 returned as numbers by minimist.
 
-[7]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
-[8]:
+[1]: https://www.npmjs.com/package/minimist
+[2]: #alias
+[3]: #boolean
+[4]: #string
+[5]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
+[6]:
   https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
+[7]: #nodeimportargs

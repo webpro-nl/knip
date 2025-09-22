@@ -318,8 +318,7 @@ way for plugins to tell what they've found and how Knip should handle those. The
 more precision a plugin can provide here, the better results and performance
 will be.
 
-Find all the details over at
-[Writing A Plugin → Inputs](./writing-a-plugin/inputs.md).
+Find all the details over at [Writing A Plugin → Inputs][5].
 
 ## Argument Parsing
 
@@ -327,8 +326,7 @@ As part of the [script parser][6], Knip parses command-line arguments. Plugins
 can implement the `arg` object to add custom argument parsing tailored to the
 tool.
 
-Read more in
-[Writing A Plugin → Argument Parsing](./writing-a-plugin/argument-parsing.md).
+Read more in [Writing A Plugin → Argument Parsing][7].
 
 ## Create a new plugin
 
@@ -366,5 +364,6 @@ plugin, this might be the right time to open a pull request!
 [3]: ../explanations/plugins.md#entry-files-from-config-files
 [4]:
   https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
-[5]: #toproductionentry
+[5]: ./writing-a-plugin/inputs.md
 [6]: ../features/script-parser.md
+[7]: ./writing-a-plugin/argument-parsing.md

@@ -129,7 +129,7 @@ consume named exports from entry files, causing false positives.
 
 The `allowIncludeExports` option allows the exports of entry files to be
 reported as unused when using `--include-entry-exports`. This option is
-typically used with the [toProductionEntry][5] input type.
+typically used with the [toProductionEntry][1] input type.
 
 Example:
 
@@ -137,4 +137,4 @@ Example:
 toProductionEntry('./entry.ts', { allowIncludeExports: true });
 ```
 
-[5]: #toproductionentry
+[1]: #toproductionentry
