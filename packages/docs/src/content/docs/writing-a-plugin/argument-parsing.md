@@ -14,6 +14,18 @@ Knip uses [minimist][1] for argument parsing and some options are identical
 
 Also see [type definitions][5] and [examples in existing plugins][6].
 
+- [alias][2]
+- [args][7]
+- [binaries][8]
+- [boolean][3]
+- [config][9]
+- [fromArgs][10]
+- [nodeImportArgs][11]
+- [positional][12]
+- [resolve][13]
+- [resolveInputs][14]
+- [string][4]
+
 ## alias
 
 Define aliases.
@@ -26,7 +38,7 @@ Example:
 }
 ```
 
-Also see [nodeImportArgs][7].
+Also see [nodeImportArgs][11].
 
 ## args
 
@@ -180,4 +192,11 @@ returned as numbers by minimist.
 [5]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
 [6]:
   https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
-[7]: #nodeimportargs
+[7]: #args
+[8]: #binaries
+[9]: #config
+[10]: #fromargs
+[11]: #nodeimportargs
+[12]: #positional
+[13]: #resolve
+[14]: #resolveinputs

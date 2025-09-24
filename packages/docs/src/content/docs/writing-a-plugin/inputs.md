@@ -9,6 +9,18 @@ way for plugins to tell what they've found and how Knip should handle those. The
 more precise a plugin can be, the better it is for results and performance.
 Here's an overview of all input type functions:
 
+- [toEntry][1]
+- [toProductionEntry][2]
+- [toProject][3]
+- [toDependency][4]
+- [toProductionDependency][5]
+- [toDeferResolve][6]
+- [toDeferResolveEntry][7]
+- [toConfig][8]
+- [toBinary][9]
+- [toAlias][10]
+- [Options][11]
+
 ## toEntry
 
 An `entry` input is just like an `entry` in the configuration. It should either
@@ -129,7 +141,7 @@ consume named exports from entry files, causing false positives.
 
 The `allowIncludeExports` option allows the exports of entry files to be
 reported as unused when using `--include-entry-exports`. This option is
-typically used with the [toProductionEntry][1] input type.
+typically used with the [toProductionEntry][2] input type.
 
 Example:
 
@@ -137,4 +149,14 @@ Example:
 toProductionEntry('./entry.ts', { allowIncludeExports: true });
 ```
 
-[1]: #toproductionentry
+[1]: #toentry
+[2]: #toproductionentry
+[3]: #toproject
+[4]: #todependency
+[5]: #toproductiondependency
+[6]: #todeferresolve
+[7]: #todeferresolveentry
+[8]: #toconfig
+[9]: #tobinary
+[10]: #toalias
+[11]: #options
