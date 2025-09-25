@@ -73,7 +73,7 @@
   },
   "peerDependencies": {
     "@types/node": ">=18",
-    "typescript": ">=5.0.4"
+    "typescript": ">=5.0.4 <7"
   },
   "devDependencies": {
     "@jest/types": "^29.6.3",
