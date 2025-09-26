@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { EOL } from 'node:os';
 import test from 'node:test';
-import { convertGitignoreToPicomatchIgnorePatterns as convert } from '../../src/util/parse-and-convert-gitignores.js';
-import { parseAndConvertGitignorePatterns as parse } from '../../src/util/parse-and-convert-gitignores.js';
+import {
+  convertGitignoreToPicomatchIgnorePatterns as convert,
+  parseAndConvertGitignorePatterns as parse,
+} from '../../src/util/parse-and-convert-gitignores.js';
 
 test('convertGitignoreToPicomatch', () => {
   assert.deepEqual(convert('*.ext'), { negated: false, patterns: ['**/*.ext', '**/*.ext/**'] });

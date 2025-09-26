@@ -2,8 +2,8 @@ import picocolors from 'picocolors';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { Entries } from '../types/entries.js';
 import type { Issues } from '../types/issues.js';
-import { perfObserver } from '../util/Performance.js';
 import type { MainOptions } from '../util/create-options.js';
+import { perfObserver } from '../util/Performance.js';
 import { prettyMilliseconds } from '../util/string.js';
 import { getIssueTypeTitle, getTableForType } from './util/util.js';
 

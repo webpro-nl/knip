@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { EOL } from 'node:os';
-// biome-ignore lint/nursery/noRestrictedImports: script
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 
 const HEADER = '// This file is generated (no need to edit)';

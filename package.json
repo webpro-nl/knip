@@ -15,7 +15,9 @@
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
   },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "watch": "pnpm run --dir packages/knip watch",
     "docs": "pnpm run --dir packages/docs dev",
@@ -25,7 +27,7 @@
     "ci": "biome ci . && installed-check --ignore-dev"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "2.2.4",
     "installed-check": "^9.3.0"
   },
   "engines": {

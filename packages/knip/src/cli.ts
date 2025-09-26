@@ -1,11 +1,11 @@
+// biome-ignore-all lint/suspicious/noConsole: ignore
 import { main } from './index.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
-import { perfObserver } from './util/Performance.js';
-import { helpText } from './util/cli-arguments.js';
-import parseArgs from './util/cli-arguments.js';
+import parseArgs, { helpText } from './util/cli-arguments.js';
 import { createOptions } from './util/create-options.js';
 import { getKnownError, isConfigurationError, isDisplayReason, isKnownError } from './util/errors.js';
 import { logError, logWarning } from './util/log.js';
+import { perfObserver } from './util/Performance.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { prettyMilliseconds } from './util/string.js';
 import { version } from './version.js';

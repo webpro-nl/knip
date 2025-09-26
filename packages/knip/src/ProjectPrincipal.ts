@@ -6,14 +6,14 @@ import { ANONYMOUS, DEFAULT_EXTENSIONS, PUBLIC_TAG } from './constants.js';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from './types/config.js';
 import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.js';
 import type { Paths, PrincipalOptions } from './types/project.js';
-import type { BoundSourceFile } from './typescript/SourceFile.js';
-import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { createHosts } from './typescript/create-hosts.js';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.js';
 import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
-import { timerify } from './util/Performance.js';
+import type { BoundSourceFile } from './typescript/SourceFile.js';
+import { SourceFileManager } from './typescript/SourceFileManager.js';
 import { compact } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
+import { timerify } from './util/Performance.js';
 import { extname, isInNodeModules, toAbsolute } from './util/path.js';
 import type { ToSourceFilePath } from './util/to-source-path.js';
 
@@ -316,6 +316,7 @@ export class ProjectPrincipal {
     for (const [filePath, file] of graph.entries()) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;
+      // biome-ignore lint: correctness/noUnusedVariables
       const { imported, internalImportCache, ...clone } = file;
       fd.meta.data = clone;
     }

@@ -123,7 +123,7 @@ export const printConfigurationHints = ({
         return hints.map(hint => {
           hint.filePath = relative(cwd, hint.filePath ?? configFilePath ?? '');
           const hintPrinter = hintPrinters.get(hint.type);
-          // @ts-ignore
+          // @ts-expect-error
           const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath }) : '';
           return { ...hint, message };
         });

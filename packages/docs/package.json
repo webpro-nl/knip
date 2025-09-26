@@ -47,6 +47,8 @@
     "unist-util-visit": "5.0.0"
   },
   "remarkConfig": {
-    "plugins": ["preset-webpro"]
+    "plugins": [
+      "preset-webpro"
+    ]
   }
 }

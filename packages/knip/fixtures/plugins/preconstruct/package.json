@@ -7,6 +7,9 @@
     "@preconstruct/cli": "*"
   },
   "preconstruct": {
-    "entrypoints": ["index.js", "other.js"]
+    "entrypoints": [
+      "index.js",
+      "other.js"
+    ]
   }
 }

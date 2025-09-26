@@ -33,7 +33,7 @@ export const findInternalReferences = (
   let isSymbolInExport = false;
   let index = 0;
 
-  // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+  // biome-ignore lint: suspicious/noAssignInExpressions
   while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
     if (!isIdChar(text.charAt(index - 1)) && !isIdChar(text.charAt(index + id.length))) {
       const isExportDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`

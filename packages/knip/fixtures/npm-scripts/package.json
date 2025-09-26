@@ -40,6 +40,11 @@
   },
   "knip": {
     "ignore": "ignore.js",
-    "ignoreBinaries": ["rm", "bash", "deploy", "eslint"]
+    "ignoreBinaries": [
+      "rm",
+      "bash",
+      "deploy",
+      "eslint"
+    ]
   }
 }

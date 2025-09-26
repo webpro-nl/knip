@@ -14,12 +14,11 @@ import type {
   ImportMap,
   Specifiers,
 } from '../types/module-graph.js';
-import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/module-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
+import { timerify } from '../util/Performance.js';
 import { isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
-import type { BoundSourceFile } from './SourceFile.js';
 import {
   getAccessMembers,
   getDestructuredIds,
@@ -35,6 +34,7 @@ import {
   isReferencedInExport,
 } from './ast-helpers.js';
 import { findInternalReferences, isType } from './find-internal-references.js';
+import type { BoundSourceFile } from './SourceFile.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getImportsFromPragmas } from './visitors/helpers.js';

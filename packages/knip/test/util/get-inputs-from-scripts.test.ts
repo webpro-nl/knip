@@ -1,3 +1,5 @@
+// biome-ignore-all lint/suspicious/noUselessEscapeInString: ignore
+// biome-ignore-all lint/suspicious/noTemplateCurlyInString: ignore
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.js';

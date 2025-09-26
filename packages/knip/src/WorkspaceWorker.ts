@@ -1,11 +1,10 @@
 import picomatch from 'picomatch';
-import { CacheConsultant } from './CacheConsultant.js';
-import { type Workspace, isDefaultPattern } from './ConfigurationChief.js';
 import { _getInputsFromScripts } from './binaries/index.js';
+import { CacheConsultant } from './CacheConsultant.js';
+import { isDefaultPattern, type Workspace } from './ConfigurationChief.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { getFilteredScripts } from './manifest/helpers.js';
 import { PluginEntries, Plugins } from './plugins.js';
-import type { PluginName } from './types/PluginNames.js';
 import type {
   Configuration,
   EnsuredPluginConfiguration,
@@ -15,9 +14,9 @@ import type {
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { ConfigurationHints } from './types/issues.js';
+import type { PluginName } from './types/PluginNames.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
-import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
@@ -32,6 +31,7 @@ import {
   toProductionEntry,
 } from './util/input.js';
 import { getKeysByValue } from './util/object.js';
+import { timerify } from './util/Performance.js';
 import { basename, dirname, join } from './util/path.js';
 import { loadConfigForPlugin } from './util/plugin.js';
 import { ELLIPSIS } from './util/string.js';
@@ -59,7 +59,7 @@ const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, proj
 
 const initEnabledPluginsMap = () =>
   Object.keys(Plugins).reduce(
-    // biome-ignore lint/performance/noAccumulatingSpread: TODO
+    // biome-ignore lint: performance/noAccumulatingSpread
     (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
     {} as Record<PluginName, boolean>
   );

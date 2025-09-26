@@ -25,10 +25,6 @@ html {
   border: none;
 }
 
-:root[data-theme='dark'] .sl-markdown-content table td code {
-  padding-left: 0;
-}
-
 .sl-markdown-content table thead {
   border-bottom: 1px solid var(--sl-color-gray-1);
 }
@@ -93,6 +89,10 @@ section.plugins li {
   .header {
     border-bottom-color: var(--sl-color-orange);
   }
+}
+
+:root[data-theme='dark'] .sl-markdown-content table td code {
+  padding-left: 0;
 }
 
 .sl-markdown-content .sponsor {
@@ -172,6 +172,7 @@ section.plugins li {
 
 .badges {
   margin: 4rem auto;
+  /* biome-ignore lint/style/noDescendingSpecificity: they're different props, biome */
   p {
     display: flex;
     justify-content: center;

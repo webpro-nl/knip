@@ -1,13 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
-import { type Entry, walk as _walk } from '@nodelib/fs.walk';
+import { walk as _walk, type Entry } from '@nodelib/fs.walk';
 import fg, { type Options as FastGlobOptions } from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
-import { timerify } from './Performance.js';
 import { compact, partition } from './array.js';
 import { debugLogObject } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
+import { timerify } from './Performance.js';
 import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
 import { dirname, join, relative, toPosix } from './path.js';
 
@@ -40,7 +40,7 @@ const findAncestorGitignoreFiles = (cwd: string): string[] => {
     const filePath = join(dir, '.gitignore');
     if (isFile(filePath)) gitignorePaths.push(filePath);
     if (isDirectory(join(dir, '.git'))) break;
-    // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+    // biome-ignore lint: suspicious/noAssignInExpressions
     dir = dirname((prev = dir));
     if (prev === dir || dir === '.') break;
   }
@@ -172,7 +172,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
           // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
           _ignore.push(...cacheForDir.ignores);
         }
-        // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+        // biome-ignore lint: suspicious/noAssignInExpressions
         dir = dirname((prev = dir));
         if (prev === dir || dir === '.') break;
       }

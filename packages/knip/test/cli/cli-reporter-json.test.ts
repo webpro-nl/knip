@@ -79,7 +79,7 @@ test('knip --reporter json (exports & types)', () => {
         binaries: [],
         unresolved: [],
         exports: [{ name: 'nsUnusedKey', line: 3, col: 14, pos: 84 }],
-        types: [{ name: 'MyNamespace', line: 6, col: 18, pos: 184 }],
+        types: [{ name: 'MyNamespace', line: 6, col: 18, pos: 169 }],
         enumMembers: {},
         duplicates: [],
       },
@@ -110,7 +110,7 @@ test('knip --reporter json (exports & types)', () => {
         exports: [],
         types: [
           { name: 'MyEnum', line: 3, col: 13, pos: 71 },
-          { name: 'MyType', line: 9, col: 14, pos: 210 },
+          { name: 'MyType', line: 9, col: 14, pos: 195 },
         ],
         enumMembers: {},
         duplicates: [],

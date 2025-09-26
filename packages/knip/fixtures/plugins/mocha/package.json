@@ -1,8 +1,13 @@
 {
   "name": "@plugins/mocha",
   "mocha": {
-    "spec": ["**/*.test.ts"],
-    "require": ["ts-node/register", "hooks.ts"]
+    "spec": [
+      "**/*.test.ts"
+    ],
+    "require": [
+      "ts-node/register",
+      "hooks.ts"
+    ]
   },
   "devDependencies": {
     "@types/mocha": "*",

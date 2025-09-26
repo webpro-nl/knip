@@ -1,7 +1,7 @@
-import { timerify } from './Performance.js';
 import { LoaderError } from './errors.js';
 import { loadFile, loadJSON, loadTOML, loadYAML, parseJSON, parseYAML } from './fs.js';
 import { jiti } from './jiti.js';
+import { timerify } from './Performance.js';
 import { extname, isInternal } from './path.js';
 
 const load = async (filePath: string) => {

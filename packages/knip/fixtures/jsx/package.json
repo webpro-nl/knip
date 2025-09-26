@@ -5,7 +5,11 @@
     "preact": "*"
   },
   "knip": {
-    "entry": ["App.tsx"],
-    "project": ["*.tsx"]
+    "entry": [
+      "App.tsx"
+    ],
+    "project": [
+      "*.tsx"
+    ]
   }
 }

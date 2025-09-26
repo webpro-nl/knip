@@ -1,11 +1,11 @@
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
+import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
-import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import { debugLog } from './debug.js';
 import {
-  type Input,
   fromBinary,
+  type Input,
   isBinary,
   isConfig,
   isDeferResolve,

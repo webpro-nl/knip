@@ -1,5 +1,5 @@
 import { ISSUE_TYPES } from '../constants.js';
-import type { Counters, Issue, IssueType, Issues, Rules } from '../types/issues.js';
+import type { Counters, Issue, Issues, IssueType, Rules } from '../types/issues.js';
 
 export const initIssues = (): Issues => ({
   ...(Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, {}])) as Record<IssueType, never>),

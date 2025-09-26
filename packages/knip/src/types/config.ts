@@ -4,10 +4,10 @@ import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
 import type { Input } from '../util/input.js';
-import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';
 import type { SymbolType } from './issues.js';
 import type { Tags } from './options.js';
+import type { PluginName } from './PluginNames.js';
 import type { PackageJson } from './package-json.js';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {

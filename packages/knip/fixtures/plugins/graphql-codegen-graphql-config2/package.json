@@ -8,7 +8,10 @@
   },
   "graphql": {
     "schema": "schema.graphql",
-    "documents": ["src/**/*.tsx", "!src/gql/**/*"],
+    "documents": [
+      "src/**/*.tsx",
+      "!src/gql/**/*"
+    ],
     "extensions": {
       "codegen": {
         "generates": {

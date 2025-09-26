@@ -1,17 +1,15 @@
+import { _getInputsFromScripts } from '../binaries/index.js';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
+import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
-import { WorkspaceWorker } from '../WorkspaceWorker.js';
-import { _getInputsFromScripts } from '../binaries/index.js';
-import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
-import type { PluginName } from '../types/PluginNames.js';
 import type { GetImportsAndExportsOptions } from '../types/config.js';
 import type { Import, ModuleGraph } from '../types/module-graph.js';
-import { perfObserver } from '../util/Performance.js';
+import type { PluginName } from '../types/PluginNames.js';
 import type { MainOptions } from '../util/create-options.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
@@ -31,9 +29,11 @@ import {
 import { loadTSConfig } from '../util/load-tsconfig.js';
 import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
+import { perfObserver } from '../util/Performance.js';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.js';
 import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
 import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
+import { WorkspaceWorker } from '../WorkspaceWorker.js';
 
 interface BuildOptions {
   chief: ConfigurationChief;

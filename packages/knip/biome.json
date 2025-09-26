@@ -1,17 +1,18 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-  "extends": ["../../biome.json"],
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "extends": "//",
   "files": {
-    "ignore": [
-      "**/dist",
-      "package.json",
-      "vendor/bash-parser/index.js",
-      "fixtures/plugins/biome-workspace/packages/stub"
+    "includes": [
+      "!vendor/bash-parser/index.js",
+      "!fixtures/plugins/biome-workspace/packages/stub"
     ]
   },
   "linter": {
     "rules": {
-      "nursery": {
+      "suspicious": {
+        "useIterableCallbackReturn": "off"
+      },
+      "style": {
         "noRestrictedImports": {
           "level": "error",
           "options": {
@@ -25,51 +26,57 @@
     }
   },
   "formatter": {
-    "ignore": ["ignore-exports-used-in-file-alias-exclude/more.ts"]
+    "includes": ["**", "!**/ignore-exports-used-in-file-alias-exclude/more.ts"]
   },
   "overrides": [
     {
-      "include": ["test/util/get-inputs-from-scripts.test.ts"],
-      "formatter": {
-        "lineWidth": 200
-      }
-    },
-    {
-      "include": [
-        "fixtures/cli-preprocessor",
-        "fixtures/cli-reporter",
-        "scripts",
-        "src/cli.ts",
-        "src/reporters",
-        "src/util/cli-arguments.ts",
-        "src/util/debug.ts"
+      "includes": [
+        "src/reporters/**",
+        "scripts/**",
+        "fixtures/cli-preprocessor/**",
+        "fixtures/cli-reporter/**"
       ],
       "linter": {
         "rules": {
           "suspicious": {
-            "noConsoleLog": "off"
+            "noConsole": "off"
           }
         }
       }
     },
     {
-      "include": ["fixtures"],
-      "organizeImports": {
-        "enabled": false
-      },
+      "includes": ["test/util/get-inputs-from-scripts.test.ts"],
+      "formatter": {
+        "lineWidth": 200
+      }
+    },
+    {
+      "includes": ["fixtures/**"],
+      "assist": { "actions": { "source": { "organizeImports": "off" } } },
       "linter": {
         "rules": {
+          "complexity": {
+            "useLiteralKeys": "off",
+            "noImportantStyles": "off"
+          },
           "correctness": {
-            "noUnusedVariables": "off",
-            "noUnusedImports": "off"
+            "noUnusedFunctionParameters": "off",
+            "noUnusedPrivateClassMembers": "off",
+            "noUnusedImports": "off",
+            "useUniqueElementIds": "off",
+            "noUnusedVariables": "off"
+          },
+          "performance": {
+            "noDynamicNamespaceImportAccess": "off"
+          },
+          "suspicious": {
+            "noDuplicateProperties": "off",
+            "noTemplateCurlyInString": "off",
+            "noUnknownAtRules": "off"
           },
           "style": {
-            "useImportType": "off"
-          },
-          "nursery": {
-            "noRestrictedImports": {
-              "level": "off"
-            }
+            "useImportType": "off",
+            "noRestrictedImports": "off"
           }
         }
       }

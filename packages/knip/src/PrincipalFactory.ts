@@ -1,6 +1,6 @@
 import ts from 'typescript';
-import { ProjectPrincipal } from './ProjectPrincipal.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
+import { ProjectPrincipal } from './ProjectPrincipal.js';
 import type { PrincipalOptions } from './types/project.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLog } from './util/debug.js';

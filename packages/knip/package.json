@@ -34,8 +34,8 @@
   "scripts": {
     "knip": "node ./dist/cli.js --directory ../..",
     "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
-    "lint": "biome lint ../..",
-    "format": "biome format --write .",
+    "lint": "biome lint",
+    "format": "biome format --write",
     "test": "node scripts/run-test.ts",
     "test:node": "tsx --test test/*.test.ts test/**/*.test.ts",
     "test:bun": "bun test test/*.test.ts test/**/*.test.ts",
