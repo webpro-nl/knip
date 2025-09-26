@@ -68,8 +68,7 @@
     "picomatch": "^4.0.1",
     "smol-toml": "^1.4.1",
     "strip-json-comments": "5.0.2",
-    "zod": "^3.25.0",
-    "zod-validation-error": "^3.0.3"
+    "zod": "^4.1.11"
   },
   "peerDependencies": {
     "@types/node": ">=18",

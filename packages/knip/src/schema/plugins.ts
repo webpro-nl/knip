@@ -1,14 +1,14 @@
 // This file is generated (no need to edit)
-import { z } from 'zod';
+import { z } from 'zod/mini';
 export const globSchema = z.union([z.string(), z.array(z.string())]);
 
 export const pluginSchema = z.union([
   z.boolean(),
   globSchema,
   z.object({
-    config: globSchema.optional(),
-    entry: globSchema.optional(),
-    project: globSchema.optional(),
+    config: z.optional(globSchema),
+    entry: z.optional(globSchema),
+    project: z.optional(globSchema),
   }),
 ]);
 

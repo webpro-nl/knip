@@ -1,5 +1,5 @@
 import type ts from 'typescript';
-import type { z } from 'zod';
+import type { z } from 'zod/mini';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
