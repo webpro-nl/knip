@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { deserialize, serialize } from 'node:v8';
 
 test('Should serialize and deserialize file back to original', () => {

@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.js';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
 import { join } from '../../src/util/path.js';

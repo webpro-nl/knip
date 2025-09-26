@@ -2,21 +2,16 @@
 
 Development in this repository is using:
 
-- Bun ¹
+- pnpm
 - TypeScript
 - Biome
-
-You should have Bun installed, the rest comes with `bun install`.
 
 This document describes commands and tasks that might help during development.
 Use what fits your workflow best, but make sure [QA][1] passes.
 
-¹ Many tasks could be done using Node.js, another package manager and e.g. `tsx`
-(except package management, as Bun's lockfile requires updating).
-
 > [!TIP]
 >
-> tl;dr The quickest way to get started: `git clone`, `bun install`, find a
+> tl;dr The quickest way to get started: `git clone`, `pnpm install`, find a
 > relevant test file in `packages/knip/test`, and [hit F5 in VS Code or
 > WebStorm][2].
 
@@ -35,24 +30,18 @@ Example terminal commands on your machine to get started:
 git clone git@github.com:[username]/knip.git
 # Or using gh CLI: gh repo fork webpro-nl/knip --clone
 cd knip
-bun install
+pnpm install
 cd packages/knip
-bun run build
-bun run test
+pnpm build
+pnpm test
 ```
 
 To skip slower tests related to CLI and `--fix`, while still covering all the
 essentials and plugins:
 
 ```shell
-bun run test:smoke
-```
-
-To run the tests in Node.js:
-
-```shell
-npm run test:node
-npm run test:node:smoke
+pnpm test:smoke
+bun test:bun:smoke
 ```
 
 ## Contributing a plugin?
@@ -72,14 +61,14 @@ your changes:
 
 ### Compile
 
-Use `bun run build` to compile using `tsc` once. To recompile on changes:
+Use `pnpm build` to compile using `tsc` once. To recompile on changes:
 
 ```shell
-bun run watch
+pnpm watch
 ```
 
 On source code changes, `tsc` will compile to JavaScript, and the `knip`
-executable is available globally to run from any directory:
+executable is available globally to run from any directory.
 
 ### Without compilation
 
@@ -115,7 +104,7 @@ with fixtures for you.
 ### Run single test file
 
 ```shell
-bun test test/my-feature.test.ts
+tsx --test test/my-feature.test.ts
 bun test test/plugins/my-plugin.test.ts
 ```
 
@@ -169,7 +158,7 @@ In case you're wondering if or why some code is ever hit, attach the debugger to
 each test. Set a breakpoint and run all tests (warning: slow):
 
 ```shell
-tsx --inspect --test --import ./transform-test.js test/**/*.test.ts
+tsx --inspect --test test/**/*.test.ts
 ```
 
 ## QA
@@ -178,11 +167,11 @@ Knip has a few tools set up to verify code quality and to format code and
 documentation:
 
 ```shell
-bun format
-bun lint
-bun knip
-bun knip --strict
-bun run test
+pnpm format
+pnpm lint
+pnpm knip
+pnpm knip --strict
+pnpm test
 ```
 
 ## GitHub Action

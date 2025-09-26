@@ -17,9 +17,9 @@
   },
   "workspaces": ["packages/*"],
   "scripts": {
-    "watch": "bun run --cwd packages/knip watch",
-    "docs": "bun run --cwd packages/docs dev",
-    "test": "bun run --cwd packages/knip test",
+    "watch": "pnpm run --dir packages/knip watch",
+    "docs": "pnpm run --dir packages/docs dev",
+    "test": "pnpm run --dir packages/knip test",
     "format": "biome check --write",
     "lint": "biome lint .",
     "ci": "biome ci . && installed-check --ignore-dev"

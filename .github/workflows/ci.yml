@@ -5,9 +5,9 @@ on:
   pull_request:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '!**'
+      - "!**"
 
 jobs:
   test:
@@ -18,7 +18,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         node:
-          - 18.19.0 # 18.18.0 is fine, but transform-test.js requires 18.19.0 for module.register
+          - 18
           - 20
           - 22
 
@@ -30,14 +30,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - name: Install dependencies
-        run: npm install typescript@5.0.4 @types/node@18 --ignore-scripts
+        run: pnpm install
+      - name: Install earliest supported peer dependencies
+        run: pnpm add typescript@5.0.4 @types/node@18
+        working-directory: packages/knip
       - name: Build knip
-        run: npm run build
+        run: pnpm run build
+        working-directory: packages/knip
+      - name: Test knip
+        run: pnpm run test:smoke
         working-directory: packages/knip
       - name: Run knip
-        run: npx --yes knip --reporter github-actions
-      - name: Run knip (production/strict)
-        run: npx --yes knip --production --strict
-      - name: Test knip
-        run: npm run --workspace packages/knip test:node:smoke
+        run: ./packages/knip/bin/knip.js --reporter github-actions
+      - name: Run knip in strict mode
+        run: ./packages/knip/bin/knip.js --production --strict
