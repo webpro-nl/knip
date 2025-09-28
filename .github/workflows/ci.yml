@@ -31,8 +31,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - name: Install dependencies
         run: pnpm install
       - name: Install earliest supported peer dependencies

@@ -19,8 +19,6 @@ jobs:
         with:
           node-version: 24
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - name: Install dependencies
         run: pnpm install
       - name: Install latest peer dependencies
