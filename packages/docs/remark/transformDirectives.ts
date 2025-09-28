@@ -16,7 +16,7 @@ export const transformDirectives = () => (tree: Parent) => {
   const visitor: Visitor<Node> = node => {
     if (isDirectiveNode(node)) {
       const hast = h(node.name, node.attributes);
-      // biome-ignore lint/suspicious/noAssignInExpressions: ignore
+      // biome-ignore lint: suspicious/noAssignInExpressions
       const data = node.data || (node.data = {});
       data.hName = hast.tagName;
       data.hProperties = hast.properties;

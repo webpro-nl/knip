@@ -1,7 +1,11 @@
 {
   "name": "@fixtures/js-only",
   "knip": {
-    "entry": ["index.js"],
-    "project": ["*.js"]
+    "entry": [
+      "index.js"
+    ],
+    "project": [
+      "*.js"
+    ]
   }
 }

@@ -1,6 +1,8 @@
 {
   "name": "@fixtures/tags-include",
   "knip": {
-    "include": ["classMembers"]
+    "include": [
+      "classMembers"
+    ]
   }
 }

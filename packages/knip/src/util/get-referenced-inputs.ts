@@ -1,11 +1,11 @@
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
+import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
-import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import { debugLog } from './debug.js';
 import {
-  type Input,
   fromBinary,
+  type Input,
   isBinary,
   isConfig,
   isDeferResolve,
@@ -68,7 +68,6 @@ export const getReferencedInputsHandler =
         if (isWorkspace || isDependency(input)) {
           if (!isHandled) {
             if (!input.optional && ((deputy.isProduction && input.production) || !deputy.isProduction)) {
-              // Unlisted dependency
               collector.addIssue({
                 type: 'unlisted',
                 filePath: containingFilePath,

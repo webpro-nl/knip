@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
 import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';

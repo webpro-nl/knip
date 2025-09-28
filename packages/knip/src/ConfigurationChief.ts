@@ -1,9 +1,8 @@
-// biome-ignore lint/nursery/noRestrictedImports: ignore
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import picomatch from 'picomatch';
 import type { SyncCompilers } from './compilers/types.js';
 import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.js';
-import { type PluginName, pluginNames } from './types/PluginNames.js';
 import type {
   Configuration,
   IgnorePatterns,
@@ -13,10 +12,11 @@ import type {
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { ConfigurationHints } from './types/issues.js';
+import { type PluginName, pluginNames } from './types/PluginNames.js';
 import type { WorkspacePackage } from './types/package-json.js';
 import { arrayify, compact, partition } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
-import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
+import { createWorkspaceGraph, type WorkspaceGraph } from './util/create-workspace-graph.js';
 import { ConfigurationError } from './util/errors.js';
 import { isDirectory, isFile } from './util/fs.js';
 import { _dirGlob, removeProductionSuffix } from './util/glob.js';
@@ -197,7 +197,7 @@ export class ConfigurationChief {
       this.includedWorkspaces.map(workspace => workspace.dir)
     );
     const [root, rest] = partition(sorted.chunks.flat(), dir => dir === this.cwd);
-    // biome-ignore lint/style/noNonNullAssertion: deal with it
+    // biome-ignore lint: style/noNonNullAssertion
     return [...root, ...rest.reverse()].map(dir => this.includedWorkspaces.find(w => w.dir === dir)!);
   }
 

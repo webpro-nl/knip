@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { findAndParseGitignores } from '../../src/util/glob-core.js';
 import { resolve } from '../helpers/resolve.js';
 

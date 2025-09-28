@@ -1,8 +1,8 @@
 import picomatch from 'picomatch';
 import type { ConfigurationHint, Issue, Rules, TagHint } from './types/issues.js';
-import { timerify } from './util/Performance.js';
 import type { MainOptions } from './util/create-options.js';
 import { initCounters, initIssues } from './util/issue-initializers.js';
+import { timerify } from './util/Performance.js';
 import { join, relative } from './util/path.js';
 
 const hasConfigurationHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>

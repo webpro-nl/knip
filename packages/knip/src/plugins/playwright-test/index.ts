@@ -10,7 +10,6 @@ const enablers = ['playwright-test'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const args = {
-  binaries: ['playwright-test'],
   positional: true,
   args: (args: string[]) => args.filter(arg => arg !== 'install' && arg !== 'test'),
   config: true,

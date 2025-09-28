@@ -1,6 +1,6 @@
 import { stripVTControlCharacters } from 'node:util';
 
-// biome-ignore lint/suspicious/noControlCharactersInRegex: deal with it
+// biome-ignore lint: suspicious/noControlCharactersInRegex
 const CONTROL_CHARACTERS = /\u001b\[[0-9;]+m/g;
 export const ELLIPSIS = '…';
 

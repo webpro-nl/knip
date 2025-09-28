@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises';
-// biome-ignore lint/nursery/noRestrictedImports: script
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Root } from 'mdast';

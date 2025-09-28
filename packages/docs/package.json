@@ -14,7 +14,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "prebuild": "bun ./scripts/generate-plugin-docs.ts",
+    "prebuild": "tsx ./scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
     "postbuild": "[ \"$CF_PAGES\" = \"1\" ] && find dist -mindepth 2 -type f -name 'index.html' -exec bash -c 'f=\"$1\"; d=$(dirname \"$f\"); bn=$(basename \"$d\"); mv -v \"$f\" \"$d/../$bn.html\"' _ {} \\; && find dist -mindepth 1 -type d -empty -print -delete || true",
     "dev": "astro dev",
@@ -23,16 +23,16 @@
     "postremark": ". remark/postremark.sh"
   },
   "dependencies": {
-    "@astro-community/astro-embed-youtube": "0.5.6",
-    "@astrojs/starlight": "0.35.2",
-    "sharp": "0.34.3"
+    "@astro-community/astro-embed-youtube": "0.5.7",
+    "@astrojs/starlight": "0.36.0",
+    "sharp": "0.34.4"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.4",
     "@octokit/graphql": "^9.0.1",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "5.13.2",
+    "astro": "5.14.0",
     "hastscript": "9.0.1",
     "picocolors": "^1.1.1",
     "remark-cli": "12.0.1",
@@ -41,11 +41,14 @@
     "remark-parse": "11.0.0",
     "remark-preset-webpro": "^1.1.1",
     "remark-stringify": "11.0.0",
+    "tsx": "^4.20.6",
     "unified": "11.0.5",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.0.0"
   },
   "remarkConfig": {
-    "plugins": ["preset-webpro"]
+    "plugins": [
+      "preset-webpro"
+    ]
   }
 }

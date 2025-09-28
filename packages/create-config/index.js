@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
 import { closeSync, openSync, readFileSync, readSync, statSync } from 'node:fs';
-// biome-ignore lint/nursery/noRestrictedImports: ignore
 import path from 'node:path';
 
 const fileExists = filePath => {

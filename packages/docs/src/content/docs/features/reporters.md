@@ -9,9 +9,10 @@ Knip provides the following built-in reporters:
 - `codeowners`
 - `compact`
 - [`disclosure`][1]
-- [`json`][2]
-- [`markdown`][3]
-- [`codeclimate`][4]
+- [`github-actions`][2]
+- [`json`][3]
+- [`markdown`][4]
+- [`codeclimate`][5]
 - `symbols` (default)
 
 Example usage:
@@ -72,10 +73,20 @@ object per file structured like this:
 }
 ```
 
-The keys match the [reported issue types][5]. Example usage:
+The keys match the [reported issue types][6]. Example usage:
 
 ```sh
 knip --reporter json
+```
+
+### Github Actions
+
+TODO
+
+Example usage:
+
+```sh
+knip --reporter github-actions
 ```
 
 ### Markdown
@@ -284,7 +295,8 @@ knip --preprocessor ./preprocess.ts
 ```
 
 [1]: #disclosure
-[2]: #json
-[3]: #markdown
-[4]: #codeclimate
-[5]: ../reference/issue-types.md
+[2]: #github-actions
+[3]: #json
+[4]: #markdown
+[5]: #codeclimate
+[6]: ../reference/issue-types.md

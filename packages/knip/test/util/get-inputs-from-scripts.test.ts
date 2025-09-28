@@ -1,5 +1,7 @@
-import { test } from 'bun:test';
+// biome-ignore-all lint/suspicious/noUselessEscapeInString: ignore
+// biome-ignore-all lint/suspicious/noTemplateCurlyInString: ignore
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.js';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
 import { join } from '../../src/util/path.js';
@@ -249,10 +251,12 @@ test('getInputsFromScripts (concurrently)', () => {
   t('concurrently "tsx watch s.ts" "tsx watch c.ts"', [toBinary('concurrently'), toBinary('tsx'), toDeferResolveEntry('s.ts', opt), toBinary('tsx'), toDeferResolveEntry('c.ts', opt)]);
   t('sleep 2 && concurrently "npm:watch-*"', [toBinary('sleep'), toBinary('concurrently')]);
   t('concurrently -g -c red,green,yellow,blue,magenta pnpm:lint:*', [toBinary('concurrently')]);
+  t('concurrently "npm:lint:*(!fix)" program --names "lint:" --prefixColors auto', [toBinary('concurrently'), toBinary('program')]);
 });
 
 test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toDeferResolveEntry('src/index.ts', opt)]);
+  t('env-cmd --no-overrides -- tsx watch src/index.ts', [toBinary('env-cmd'), toBinary('tsx'), toDeferResolveEntry('src/index.ts', opt)]);
 });
 
 test('getInputsFromScripts (bash expressions)', () => {

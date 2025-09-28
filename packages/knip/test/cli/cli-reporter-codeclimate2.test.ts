@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type { Issue } from 'codeclimate-types';
 import { assertAndRemoveFingerprint, orderByPos } from '../helpers/assertAndRemoveProperty.js';
 import { exec } from '../helpers/exec.js';
@@ -22,7 +22,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unlisted dependencies',
       description: 'Unlisted dependency: unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', lines: { begin: 0, end: 0 } },
+      location: { path: 'src/index.ts', positions: { begin: { line: 9, column: 27 }, end: { line: 9, column: 27 } } },
       severity: 'major',
     },
     {
@@ -30,7 +30,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unlisted dependencies',
       description: 'Unlisted dependency: @org/unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', lines: { begin: 0, end: 0 } },
+      location: { path: 'src/index.ts', positions: { begin: { line: 10, column: 27 }, end: { line: 10, column: 27 } } },
       severity: 'major',
     },
     {
@@ -38,7 +38,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unresolved imports',
       description: 'Unresolved import: ./unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', positions: { begin: { line: 8, column: 23 }, end: { line: 8, column: 23 } } },
+      location: { path: 'src/index.ts', positions: { begin: { line: 8, column: 24 }, end: { line: 8, column: 24 } } },
       severity: 'major',
     },
   ];

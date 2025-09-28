@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type { Issue } from 'codeclimate-types';
 import { assertAndRemoveFingerprint, orderByPos } from '../helpers/assertAndRemoveProperty.js';
 import { exec } from '../helpers/exec.js';

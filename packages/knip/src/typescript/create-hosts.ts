@@ -1,12 +1,12 @@
 import { EOL } from 'node:os';
-// biome-ignore lint/nursery/noRestrictedImports: ignore
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import ts from 'typescript';
 import { getCompilerExtensions } from '../compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
-import type { SourceFileManager } from './SourceFileManager.js';
 import { createCustomModuleResolver } from './resolve-module-names.js';
+import type { SourceFileManager } from './SourceFileManager.js';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 

@@ -5,7 +5,6 @@ import type { Plugin } from '../../types/config.js';
 const title = 'glob';
 
 const args = {
-  binaries: ['glob'],
   positional: true,
   alias: { cmd: ['c'] },
   fromArgs: ['cmd'],

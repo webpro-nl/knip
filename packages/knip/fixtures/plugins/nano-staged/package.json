@@ -4,6 +4,9 @@
     "nano-staged": "*"
   },
   "nano-staged": {
-    "*.js": ["eslint", "prettier --write"]
+    "*.js": [
+      "eslint",
+      "prettier --write"
+    ]
   }
 }

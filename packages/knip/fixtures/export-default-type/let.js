@@ -1,4 +1,4 @@
-// biome-ignore lint/style/useConst:  fixture festa
+// biome-ignore lint: style/useConst
 let fruit = 1;
 
 export default fruit;

@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { toUnconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toUnconfig } from '../../util/plugin-config.js';
 
 // https://github.com/antfu/node-modules-inspector
 
@@ -13,7 +13,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config: string[] = [...toUnconfig('node-modules-inspector.config')];
 
 const args = {
-  binaries: ['node-modules-inspector'],
   config: true,
 };
 

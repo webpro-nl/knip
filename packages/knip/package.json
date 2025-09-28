@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "5.63.1",
+  "version": "5.64.1",
   "description": "Find and fix unused dependencies, exports and files in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
   "repository": {
@@ -34,20 +34,20 @@
   "scripts": {
     "knip": "node ./dist/cli.js --directory ../..",
     "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
-    "lint": "biome lint ../..",
-    "format": "biome format --write .",
-    "test": "bun test test/*.test.ts test/**/*.test.ts",
-    "test:watch": "bun test test/*.test.ts test/**/*.test.ts --reporter=junit --reporter-outfile=junit.xml || bun test --watch $(grep -o 'name=\"[^\"]*\".*failures=\"[^0]' junit.xml | grep -v 'name=\"bun test\"' | grep -o 'name=\"[^\"]*\"' | cut -d'\"' -f2)",
-    "test:smoke": "bun test test/*.test.ts test/{plugins,util}/*.test.ts",
-    "test:node": "glob -c \"tsx --test --import ./transform-test.js\" \"test/**/*.test.ts\"",
-    "test:node:smoke": "glob -c \"tsx --test --import ./transform-test.js\" \"test/*.test.ts\" && glob -c \"tsx --test --import ./transform-test.js\" \"test/{plugins,util}/*.test.ts\"",
+    "lint": "biome lint",
+    "format": "biome format --write",
+    "test": "node scripts/run-test.ts",
+    "test:node": "tsx --test test/*.test.ts test/**/*.test.ts",
+    "test:bun": "bun test test/*.test.ts test/**/*.test.ts",
+    "test:smoke": "glob -c \"tsx --test\" \"test/*.test.ts\" && glob -c \"tsx --test\" \"test/{plugins,util}/*.test.ts\"",
+    "test:bun:smoke": "bun test test/*.test.ts test/{plugins,util}/*.test.ts",
     "watch": "npm link && tsc --watch",
-    "prebuild": "npm run generate-plugin-defs && node rmdir.js dist",
+    "prebuild": "pnpm run generate-plugin-defs && node rmdir.js dist",
     "build": "tsc",
-    "qa": "bun lint && bun run build && bun knip && bun knip:production && bun run test",
+    "qa": "pnpm lint && pnpm build && pnpm knip && pnpm knip:production && pnpm run test",
     "release": "release-it",
-    "create-plugin": "bun ./scripts/create-new-plugin.ts",
-    "postcreate-plugin": "bun run build && biome format --write schema.json schema-jsonc.json src/schema/plugins.ts",
+    "create-plugin": "node ./scripts/create-new-plugin.ts",
+    "postcreate-plugin": "pnpm run build && biome format --write schema.json schema-jsonc.json src/schema/plugins.ts",
     "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && biome check --write src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts"
   },
   "files": [
@@ -60,25 +60,24 @@
     "@nodelib/fs.walk": "^1.2.3",
     "fast-glob": "^3.3.3",
     "formatly": "^0.3.0",
-    "jiti": "^2.5.1",
+    "jiti": "^2.6.0",
     "js-yaml": "^4.1.0",
     "minimist": "^1.2.8",
-    "oxc-resolver": "^11.6.2",
+    "oxc-resolver": "^11.8.3",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.1",
     "smol-toml": "^1.4.1",
     "strip-json-comments": "5.0.2",
-    "zod": "^3.25.0",
-    "zod-validation-error": "^3.0.3"
+    "zod": "^4.1.11"
   },
   "peerDependencies": {
     "@types/node": ">=18",
-    "typescript": ">=5.0.4"
+    "typescript": ">=5.0.4 <7"
   },
   "devDependencies": {
     "@jest/types": "^29.6.3",
     "@release-it/bumper": "^7.0.5",
-    "@types/bun": "1.2.19",
+    "@types/bun": "1.2.22",
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/picomatch": "3.0.1",
@@ -86,7 +85,7 @@
     "@wdio/types": "^9.16.2",
     "codeclimate-types": "^0.3.1",
     "glob": "^11.0.2",
-    "release-it": "^19.0.4",
+    "release-it": "^19.0.5",
     "tsx": "^4.20.3",
     "typescript": "^5.5.2"
   },

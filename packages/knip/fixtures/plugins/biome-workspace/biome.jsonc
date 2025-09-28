@@ -1,4 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "root": false,
   "extends": ["@org/shared-configs/biome"]
 }

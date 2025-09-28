@@ -49,10 +49,21 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
 };
 
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
-const matchDirectives = /^([?!|-]+)?([^!?:]+).*/;
 export const sanitizeSpecifier = (specifier: string) => {
-  if (isBuiltin(specifier)) return specifier;
-  if (isAbsolute(specifier)) return specifier;
-  if (specifier.startsWith(PROTOCOL_VIRTUAL)) return specifier;
-  return specifier.replace(matchDirectives, '$2');
+  if (isBuiltin(specifier) || isAbsolute(specifier) || specifier.startsWith(PROTOCOL_VIRTUAL)) return specifier;
+  let s = specifier;
+  let end = s.length;
+  let i = 0;
+  while (i < s.length && (s[i] === '!' || s[i] === '-')) i++;
+  s = s.substring(i);
+  for (let j = 0; j < s.length; j++) {
+    const char = s[j];
+    if (char === '!' || char === '?' || (char === '#' && j > 0)) {
+      end = j;
+      break;
+    }
+  }
+  s = s.substring(0, end);
+  if (s.includes(':') && !s.includes('/')) s = s.split(':')[0];
+  return s;
 };

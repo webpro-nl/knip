@@ -1,7 +1,7 @@
-// biome-ignore lint/suspicious/noRedundantUseStrict:  fixture festa
+// biome-ignore lint: suspicious/noRedundantUseStrict
 'use strict';
 
-// biome-ignore lint/complexity/useArrowFunction:  fixture festa
+// biome-ignore lint: complexity/useArrowFunction
 module.exports = async function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy('./src/assets/');
 };

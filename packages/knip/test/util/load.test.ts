@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { _load as load } from '../../src/util/loader.js';
 import { join } from '../../src/util/path.js';
 import { resolve } from '../helpers/resolve.js';

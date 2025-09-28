@@ -230,6 +230,8 @@ export default {
 };
 ```
 
+Suffix an item with `!` to enable it only in production mode.
+
 ### `ignoreDependencies`
 
 Array of package names to exclude from the report. Regular expressions allowed.
@@ -248,6 +250,8 @@ export default {
   ignoreDependencies: [/@org\/.*/, /^lib-.+/],
 };
 ```
+
+Suffix an item with `!` to enable it only in production mode.
 
 ### `ignoreMembers`
 
@@ -294,6 +298,8 @@ Array of workspaces to ignore, globs allowed. Example:
   ]
 }
 ```
+
+Suffix an item with `!` to enable it only in production mode.
 
 ## Exports
 

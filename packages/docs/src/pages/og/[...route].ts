@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-// biome-ignore lint/nursery/noRestrictedImports: ignore
 import { resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);

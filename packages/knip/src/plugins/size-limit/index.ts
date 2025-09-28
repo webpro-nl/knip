@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
 import { toDependency } from '../../util/input.js';
-import { toLilconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toLilconfig } from '../../util/plugin-config.js';
 
 // https://github.com/ai/size-limit
 // Uses lilconfig but with custom searchPlaces

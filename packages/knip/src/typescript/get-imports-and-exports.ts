@@ -9,16 +9,16 @@ import type {
   ExportMap,
   ExportMember,
   FileNode,
+  Import,
   ImportDetails,
   ImportMap,
-  UnresolvedImport,
+  Specifiers,
 } from '../types/module-graph.js';
-import { timerify } from '../util/Performance.js';
 import { addNsValue, addValue, createImports } from '../util/module-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
+import { timerify } from '../util/Performance.js';
 import { isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
-import type { BoundSourceFile } from './SourceFile.js';
 import {
   getAccessMembers,
   getDestructuredIds,
@@ -34,6 +34,7 @@ import {
   isReferencedInExport,
 } from './ast-helpers.js';
 import { findInternalReferences, isType } from './find-internal-references.js';
+import type { BoundSourceFile } from './SourceFile.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
 import { getImportsFromPragmas } from './visitors/helpers.js';
@@ -68,6 +69,8 @@ interface AddInternalImportOptions extends ImportNode {
   identifier: string;
   filePath: string;
   isReExport: boolean;
+  line: number;
+  col: number;
 }
 
 const getImportsAndExports = (
@@ -79,10 +82,10 @@ const getImportsAndExports = (
   skipExports: boolean
 ): FileNode => {
   const internal: ImportMap = new Map();
-  const external = new Set<string>();
-  const unresolved = new Set<UnresolvedImport>();
+  const external = new Set<Import>();
+  const unresolved = new Set<Import>();
   const resolved = new Set<string>();
-  const specifiers = new Set<[string, string]>();
+  const specifiers: Specifiers = new Set();
   const exports: ExportMap = new Map();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
@@ -129,7 +132,7 @@ const getImportsAndExports = (
 
     const isStar = identifier === IMPORT_STAR;
 
-    specifiers.add([specifier, filePath]);
+    specifiers.add([{ specifier, pos: options.pos, line: options.line, col: options.col }, filePath]);
 
     const file = internal.get(filePath);
 
@@ -169,10 +172,9 @@ const getImportsAndExports = (
   };
 
   const addImport = (opts: ImportNode, node: ts.Node) => {
-    const { specifier, isTypeOnly, pos, identifier = ANONYMOUS, isReExport = false } = opts;
-    if (isBuiltin(specifier)) return;
+    if (isBuiltin(opts.specifier)) return;
 
-    const module = resolveModule(specifier);
+    const module = resolveModule(opts.specifier);
 
     if (module) {
       const filePath = module.resolvedFileName;
@@ -183,14 +185,24 @@ const getImportsAndExports = (
         }
 
         if (!module.isExternalLibraryImport || !isInNodeModules(filePath)) {
-          addInternalImport({ ...opts, identifier, filePath, isReExport });
+          const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(opts.pos);
+          addInternalImport({
+            ...opts,
+            identifier: opts.identifier ?? ANONYMOUS,
+            filePath,
+            isReExport: opts.isReExport ?? false,
+            line: line + 1,
+            col: character + 1,
+          });
         }
 
         if (module.isExternalLibraryImport) {
-          if (options.skipTypeOnly && isTypeOnly) return;
+          if (options.skipTypeOnly && opts.isTypeOnly) return;
+
+          const isInNM = isInNodeModules(opts.specifier);
 
           const sanitizedSpecifier = sanitizeSpecifier(
-            isInNodeModules(specifier) || isInNodeModules(filePath) ? getPackageNameFromFilePath(specifier) : specifier
+            isInNM || isInNodeModules(filePath) ? getPackageNameFromFilePath(opts.specifier) : opts.specifier
           );
 
           if (!isStartsLikePackageName(sanitizedSpecifier)) {
@@ -200,20 +212,23 @@ const getImportsAndExports = (
 
           // Module resolver may return DTS references or unaliased npm package names,
           // but in the rest of the program we want the package name based on the original specifier.
-          external.add(sanitizedSpecifier);
+          if (isInNM) {
+            external.add({ specifier: sanitizedSpecifier });
+          } else {
+            const { line, character } = sourceFile.getLineAndCharacterOfPosition(opts.pos);
+            external.add({ specifier: sanitizedSpecifier, pos: opts.pos, line: line + 1, col: character + 2 });
+          }
         }
       }
     } else {
-      if (options.skipTypeOnly && isTypeOnly) return;
+      if (options.skipTypeOnly && opts.isTypeOnly) return;
       if (shouldIgnore(getJSDocTags(node), options.tags)) return;
-      if (specifier.startsWith(PROTOCOL_VIRTUAL)) return;
+      if (opts.specifier.startsWith(PROTOCOL_VIRTUAL)) return;
 
-      if (typeof pos === 'number') {
-        const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
-        unresolved.add({ specifier, pos, line: line + 1, col: character + 1 });
-      } else {
-        unresolved.add({ specifier });
-      }
+      // @ts-expect-error TODO
+      const pos = 'moduleSpecifier' in node ? node.moduleSpecifier.pos : node.pos;
+      const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
+      unresolved.add({ specifier: opts.specifier, pos, line: line + 1, col: character + 2 });
     }
   };
 

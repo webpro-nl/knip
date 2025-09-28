@@ -6,7 +6,7 @@ import type { RslibConfig } from './types.js';
 
 const title = 'Rslib';
 
-const enablers = ['rslib'];
+const enablers = ['@rslib/core'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

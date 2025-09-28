@@ -4,6 +4,7 @@ import { default as astro } from './astro/index.js';
 import { default as ava } from './ava/index.js';
 import { default as babel } from './babel/index.js';
 import { default as biome } from './biome/index.js';
+import { default as bumpp } from './bumpp/index.js';
 import { default as bun } from './bun/index.js';
 import { default as c8 } from './c8/index.js';
 import { default as capacitor } from './capacitor/index.js';
@@ -49,8 +50,8 @@ import { default as nanoStaged } from './nano-staged/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
-import { default as nodeModulesInspector } from './node-modules-inspector/index.js';
 import { default as node } from './node/index.js';
+import { default as nodeModulesInspector } from './node-modules-inspector/index.js';
 import { default as nodemon } from './nodemon/index.js';
 import { default as npmPackageJsonLint } from './npm-package-json-lint/index.js';
 import { default as nuxt } from './nuxt/index.js';
@@ -58,9 +59,9 @@ import { default as nx } from './nx/index.js';
 import { default as nyc } from './nyc/index.js';
 import { default as oclif } from './oclif/index.js';
 import { default as oxlint } from './oxlint/index.js';
+import { default as playwright } from './playwright/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
-import { default as playwright } from './playwright/index.js';
 import { default as plop } from './plop/index.js';
 import { default as pnpm } from './pnpm/index.js';
 import { default as postcss } from './postcss/index.js';
@@ -77,6 +78,7 @@ import { default as rollup } from './rollup/index.js';
 import { default as rsbuild } from './rsbuild/index.js';
 import { default as rslib } from './rslib/index.js';
 import { default as rspack } from './rspack/index.js';
+import { default as rstest } from './rstest/index.js';
 import { default as semanticRelease } from './semantic-release/index.js';
 import { default as sentry } from './sentry/index.js';
 import { default as simpleGitHooks } from './simple-git-hooks/index.js';
@@ -118,6 +120,7 @@ export const Plugins = {
   ava,
   babel,
   biome,
+  bumpp,
   bun,
   c8,
   capacitor,
@@ -191,6 +194,7 @@ export const Plugins = {
   rsbuild,
   rslib,
   rspack,
+  rstest,
   'semantic-release': semanticRelease,
   sentry,
   'simple-git-hooks': simpleGitHooks,

@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toDependency } from '../../util/input.js';
-import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
 import type { CommitLintConfig } from './types.js';
 
 // https://commitlint.js.org

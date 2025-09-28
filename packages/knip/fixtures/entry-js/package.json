@@ -1,7 +1,11 @@
 {
   "name": "@fixtures/entry-js",
   "knip": {
-    "entry": ["index.js"],
-    "project": ["*.{js,ts}"]
+    "entry": [
+      "index.js"
+    ],
+    "project": [
+      "*.{js,ts}"
+    ]
   }
 }

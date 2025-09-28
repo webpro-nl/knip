@@ -5,6 +5,7 @@ export type PluginName =
   | 'ava'
   | 'babel'
   | 'biome'
+  | 'bumpp'
   | 'bun'
   | 'c8'
   | 'capacitor'
@@ -78,6 +79,7 @@ export type PluginName =
   | 'rsbuild'
   | 'rslib'
   | 'rspack'
+  | 'rstest'
   | 'semantic-release'
   | 'sentry'
   | 'simple-git-hooks'
@@ -119,6 +121,7 @@ export const pluginNames = [
   'ava',
   'babel',
   'biome',
+  'bumpp',
   'bun',
   'c8',
   'capacitor',
@@ -192,6 +195,7 @@ export const pluginNames = [
   'rsbuild',
   'rslib',
   'rspack',
+  'rstest',
   'semantic-release',
   'sentry',
   'simple-git-hooks',

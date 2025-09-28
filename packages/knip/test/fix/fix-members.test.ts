@@ -1,6 +1,6 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
+import test from 'node:test';
 import { main } from '../../src/index.js';
 import { createOptions } from '../../src/util/create-options.js';
 import { join } from '../../src/util/path.js';

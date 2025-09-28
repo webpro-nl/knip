@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type { ImportDetails, ModuleGraph } from '../../src/types/module-graph.js';
 import { hasStrictlyNsReferences } from '../../src/util/has-strictly-ns-references.js';
 

@@ -1,9 +1,10 @@
 {
   "name": "@plugins/eslint2",
   "scripts": {
-    "lint": "eslint"
+    "lint": "eslint --inspect-config"
   },
   "devDependencies": {
+    "@eslint/config-inspector": "*",
     "@eslint/js": "*",
     "eslint": "*",
     "eslint-import-resolver-typescript": "*",

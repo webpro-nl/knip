@@ -1,7 +1,11 @@
 {
   "name": "@fixtures/re-exports",
   "knip": {
-    "entry": ["1-entry.ts"],
-    "project": ["*.ts"]
+    "entry": [
+      "1-entry.ts"
+    ],
+    "project": [
+      "*.ts"
+    ]
   }
 }

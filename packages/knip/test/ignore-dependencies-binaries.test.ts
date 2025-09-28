@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
 import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
@@ -15,7 +15,7 @@ test('Respect ignored binaries and dependencies, including regex, show config hi
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
+    binaries: 3,
     processed: 2,
     total: 2,
   });
@@ -49,7 +49,7 @@ test('Respect ignored binaries when excluding dependencies+unlisted+unresolved',
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
+    binaries: 3,
     processed: 2,
     total: 2,
   });

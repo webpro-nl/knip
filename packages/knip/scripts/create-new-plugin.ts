@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-// biome-ignore lint/nursery/noRestrictedImports: script
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -88,7 +88,7 @@ properties[name] = {
 
 plugins.properties = Object.keys(properties)
   .sort()
-  // biome-ignore lint/performance/noAccumulatingSpread: ignore
+  // biome-ignore lint: performance/noAccumulatingSpread
   .reduce((props, key) => ({ ...props, [key]: properties[key] }), {});
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));
