@@ -20,8 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - run: pnpm install --frozen-lockfile
         working-directory: packages/knip
       - run: pnpm run build
@@ -157,8 +155,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Run Knip in ${{ matrix.project.repo }}
         working-directory: ${{ matrix.project.name }}
