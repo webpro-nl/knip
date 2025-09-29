@@ -11,7 +11,7 @@ import type {
   RawPluginConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { ConfigurationHints } from './types/issues.js';
+import type { ConfigurationHint } from './types/issues.js';
 import { type PluginName, pluginNames } from './types/PluginNames.js';
 import type { WorkspacePackage } from './types/package-json.js';
 import { arrayify, compact, partition } from './util/array.js';
@@ -114,7 +114,7 @@ export class ConfigurationChief {
   }
 
   public getConfigurationHints() {
-    const hints: ConfigurationHints = new Set();
+    const hints = new Set<ConfigurationHint>();
     if (this.rawConfig) {
       if (this.workspacePackages.size > 1) {
         const entry = arrayify(this.rawConfig.entry);

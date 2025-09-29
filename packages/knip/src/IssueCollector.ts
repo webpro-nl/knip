@@ -1,14 +1,9 @@
 import picomatch from 'picomatch';
-import type { ConfigurationHint, Issue, Rules, TagHint } from './types/issues.js';
+import type { ConfigurationHint, ConfigurationHints, Issue, Rules, TagHint } from './types/issues.js';
 import type { MainOptions } from './util/create-options.js';
 import { initCounters, initIssues } from './util/issue-initializers.js';
 import { timerify } from './util/Performance.js';
 import { join, relative } from './util/path.js';
-
-const hasConfigurationHint = (hints: Set<ConfigurationHint>, hint: ConfigurationHint) =>
-  Array.from(hints).some(
-    item => item.identifier === hint.identifier && item.type === hint.type && item.workspaceName === hint.workspaceName
-  );
 
 const isMatch = timerify(picomatch.isMatch, 'isMatch');
 
@@ -23,7 +18,7 @@ export class IssueCollector {
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles = new Set<string>();
-  private configurationHints = new Set<ConfigurationHint>();
+  private configurationHints: ConfigurationHints = new Map();
   private tagHints = new Set<TagHint>();
   private ignorePatterns = new Set<string>();
   private isMatch: (filePath: string) => boolean;
@@ -79,9 +74,8 @@ export class IssueCollector {
   }
 
   addConfigurationHint(issue: ConfigurationHint) {
-    if (!hasConfigurationHint(this.configurationHints, issue)) {
-      this.configurationHints.add(issue);
-    }
+    const key = `${issue.workspaceName}::${issue.type}::${issue.identifier}`;
+    if (!this.configurationHints.has(key)) this.configurationHints.set(key, issue);
   }
 
   addTagHint(issue: TagHint) {
@@ -100,7 +94,7 @@ export class IssueCollector {
       issues: this.issues,
       counters: this.counters,
       tagHints: this.tagHints,
-      configurationHints: this.configurationHints,
+      configurationHints: new Set(this.configurationHints.values()),
     };
   }
 }

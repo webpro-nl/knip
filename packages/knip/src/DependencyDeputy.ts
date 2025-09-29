@@ -10,7 +10,7 @@ import {
 } from './constants.js';
 import { getDependencyMetaData } from './manifest/index.js';
 import { PackagePeeker } from './PackagePeeker.js';
-import type { ConfigurationHints, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
+import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
 import type { PackageJson } from './types/package-json.js';
 import type {
   DependencyArray,
@@ -440,7 +440,7 @@ export class DependencyDeputy {
   }
 
   public getConfigurationHints() {
-    const configurationHints: ConfigurationHints = new Set();
+    const configurationHints = new Set<ConfigurationHint>();
 
     for (const [workspaceName, manifest] of this._manifests.entries()) {
       for (const identifier of manifest.unusedIgnoreDependencies) {

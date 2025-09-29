@@ -13,7 +13,7 @@ import type {
   GetSourceFile,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { ConfigurationHints } from './types/issues.js';
+import type { ConfigurationHint } from './types/issues.js';
 import type { PluginName } from './types/PluginNames.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
@@ -454,7 +454,7 @@ export class WorkspaceWorker {
     filePaths: string[],
     includedPaths: Set<string>
   ) {
-    const hints: ConfigurationHints = new Set();
+    const hints = new Set<ConfigurationHint>();
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
     const workspaceName = this.name;
     const userDefinedPatterns = entries.filter(id => !isDefaultPattern(type, id));

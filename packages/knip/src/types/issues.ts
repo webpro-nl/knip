@@ -64,7 +64,7 @@ export type ReporterOptions = {
   issues: Issues;
   counters: Counters;
   tagHints: TagHints;
-  configurationHints: ConfigurationHints;
+  configurationHints: Set<ConfigurationHint>;
   isDisableConfigHints: boolean;
   isTreatConfigHintsAsErrors: boolean;
   cwd: string;
@@ -84,7 +84,7 @@ export type IssueSeverity = 'error' | 'warn' | 'off';
 
 export type Rules = Record<IssueType, IssueSeverity>;
 
-export type ConfigurationHints = Set<ConfigurationHint>;
+export type ConfigurationHints = Map<string, ConfigurationHint>;
 
 export type ConfigurationHintType =
   | 'ignoreBinaries'
