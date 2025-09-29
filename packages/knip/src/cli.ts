@@ -87,7 +87,7 @@ const run = async () => {
 
     if (
       (!parsedCLIArgs['no-exit-code'] && totalErrorCount > Number(parsedCLIArgs['max-issues'] ?? 0)) ||
-      (options.isTreatConfigHintsAsErrors && configurationHints.size > 0)
+      (!options.isDisableConfigHints && configurationHints.size > 0)
     ) {
       process.exit(1);
     }

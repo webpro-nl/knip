@@ -16,3 +16,10 @@ test('knip (treatConfigHintsAsErrors: true)', () => {
   assert.equal(result.stderr, 'bananas    package.json  Remove from ignoreDependencies');
   assert.equal(result.status, 1);
 });
+
+test('knip (production)', () => {
+  const cwd = resolve('fixtures/treat-config-hints-as-errors2');
+  const result = exec('knip --production', { cwd });
+  assert.equal(result.stderr, '');
+  assert.equal(result.status, 0);
+});
