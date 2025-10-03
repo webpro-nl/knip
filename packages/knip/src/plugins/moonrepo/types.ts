@@ -1,7 +1,7 @@
 export interface MoonConfiguration {
   tasks?: {
     [taskName: string]: {
-      command: string;
+      command: string | string[];
     };
   };
 }
