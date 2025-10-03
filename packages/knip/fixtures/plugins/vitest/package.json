@@ -1,9 +1,11 @@
 {
   "name": "@plugins/vitest",
   "scripts": {
-    "test": "vitest --config vitest-default-coverage.config.ts"
+    "test": "vitest --config vitest-default-coverage.config.ts",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
-    "vitest": "*"
+    "vitest": "*",
+    "@vitest/ui": "*"
   }
 }
