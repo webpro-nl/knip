@@ -16,7 +16,8 @@ export const getInputs = (
     return getInputsDeprecated(config as ESLintConfigDeprecated | OverrideConfigDeprecated, options);
   }
 
-  const dependencies = (config as ESLintConfig).flatMap(config =>
+  const configArray = Array.isArray(config) ? config : [config];
+  const dependencies = configArray.flatMap(config =>
     config.settings ? getDependenciesFromSettings(config.settings) : []
   );
 
