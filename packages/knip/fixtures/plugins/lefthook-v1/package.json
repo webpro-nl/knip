@@ -3,7 +3,6 @@
   "scripts": {},
   "devDependencies": {
     "eslint": "*",
-    "lefthook": "*",
     "prettier": "*",
     "stylelint": "*"
   }
