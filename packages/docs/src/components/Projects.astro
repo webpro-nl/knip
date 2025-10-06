@@ -1,10 +1,15 @@
 ---
 import Adobe from '../assets/projects/adobe.svg';
+import AGGrid from '../assets/projects/ag-grid.svg';
+import AGGrid2 from '../assets/projects/ag-grid2.svg';
+import Anthropic from '../assets/projects/anthropic.svg';
 import ArkType from '../assets/projects/arktype.svg';
 import AstroLogo from '../assets/projects/astro.svg';
 import AWS from '../assets/projects/aws.svg';
 import Backstage from '../assets/projects/backstage.svg';
+import Cloudflare from '../assets/projects/cloudflare.svg';
 import CreateTypeScriptApp from '../assets/projects/create-typescript-app.png';
+import Datadog from '../assets/projects/datadog.svg';
 import ESLint from '../assets/projects/eslint.svg';
 import FreeCodeCamp from '../assets/projects/freecodecamp.svg';
 import Grafana from '../assets/projects/grafana.svg';
@@ -21,6 +26,7 @@ import Storybook from '../assets/projects/storybook.svg';
 import Svelte from '../assets/projects/svelte.svg';
 import TanStack from '../assets/projects/tanstack.png';
 import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
+import Vercel from '../assets/projects/vercel.svg';
 ---
 
 <style>
@@ -30,14 +36,15 @@ import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
     flex-wrap: wrap;
     align-content: center;
     align-items: center;
-    justify-content: center;
-    gap: 2.6rem;
+    justify-content: space-between;
+    gap: 2.5rem;
     list-style: none;
     padding: 0;
   }
 
   a {
     border-bottom: none !important;
+    display: flex;
   }
 
   svg, img {
@@ -53,54 +60,65 @@ import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
     opacity: 0.7;
   }
 
-  .contrast {
+  .contrast svg {
     opacity: 1;
     filter: contrast(1) grayscale(100%)
   }
+  .shrink {
+    margin: 0 -3%;
+    svg {
+      scale: 0.75;
+    }
+  }
+  .grow svg {
+    scale: 1.4;
+  }
+  .raise svg {
+    translate: 0 -6px;
+  }
+  .sink svg {
+    translate: 0 6px;
+  }
 
-  svg:hover,
-  img:hover {
+
+  a:hover svg,
+  a:hover img {
     filter: none;
   }
 
-  [data-theme=light] svg:hover,
-  [data-theme=light] img:hover {
+  [data-theme=light] a:hover svg,
+  [data-theme=light] a:hover img {
     opacity: 1;
     filter: none;
-  }
-
-  a[href="https://github.com/withastro"] {
-    transform: translateY(6px);
-  }
-  a[href="https://github.com/adobe"] {
-    transform: scale(1.5);
-  }
-  a[href="https://github.com/aws-samples"] {
-    transform: translateY(6px);
   }
 </style>
 
 <div id="projects">
-    <a href="https://github.com/withastro"><AstroLogo /></a>
-    <a href="https://github.com/guardian"><Guardian /></a>
-    <a href="https://github.com/microsoft"><Microsoft /></a>
-    <a href="https://github.com/typescript-eslint"><TypeScriptESLint class="contrast"/></a>
-    <a href="https://github.com/aws-samples"><AWS /></a>
-    <a href="https://github.com/grafana"><Grafana /></a>
-    <a href="https://github.com/prettier"><Prettier class="contrast" /></a>
-    <a href="https://github.com/eslint"><ESLint class="contrast" /></a>
-    <a href="https://github.com/shopify"><Shopify /></a>
-    <a href="https://github.com/getsentry"><Sentry /></a>
-    <a href="https://github.com/sveltejs"><Svelte class="contrast" /></a>
-    <a href="https://github.com/JoshuaKGoldberg/create-typescript-app"><img src={CreateTypeScriptApp.src}/></a>
-    <a href="https://github.com/sourcegraph"><SourceGraph /></a>
-    <a href="https://github.com/tanstack"><img src={TanStack.src} class="contrast"/></a>
-    <a href="https://github.com/nuxt"><Nuxt /></a>
-    <a href="https://github.com/freeCodeCamp"><FreeCodeCamp  /></a>
+    <a href="https://github.com/adobe" class="contrast grow"><Adobe /></a>
+    <a href="https://github.com/ag-grid"><AGGrid /><AGGrid2 /></a>
+    <a href="https://github.com/anthropics" class="shrink"><Anthropic /></a>
     <a href="https://github.com/arktypeio"><ArkType  /></a>
-    <a href="https://github.com/statelyai"><Stately /></a>
-    <a href="https://github.com/mochajs"><Mocha class="contrast" /></a>
+    <a href="https://github.com/withastro"><AstroLogo /></a>
+    <a href="https://github.com/aws-samples"  class="sink" ><AWS/></a>
     <a href="https://github.com/backstage"><Backstage /></a>
+    <a href="https://github.com/cloudflare" class="grow"><Cloudflare /></a>
+    <a href="https://github.com/datadog"><Datadog /></a>
+    <a href="https://github.com/eslint"class="contrast"><ESLint  /></a>
+    <a href="https://github.com/freeCodeCamp"><FreeCodeCamp  /></a>
+    <a href="https://github.com/grafana"><Grafana /></a>
+    <a href="https://github.com/guardian"><Guardian /></a>
+    <a href="https://github.com/JoshuaKGoldberg/create-typescript-app"><img src={CreateTypeScriptApp.src}/></a>
+    <a href="https://github.com/microsoft"><Microsoft /></a>
+    <a href="https://github.com/mochajs"  class="contrast"><Mocha /></a>
+    <a href="https://github.com/nuxt"><Nuxt /></a>
+    <a href="https://github.com/prettier"  class="contrast"><Prettier /></a>
+    <a href="https://github.com/getsentry"><Sentry /></a>
+    <a href="https://github.com/shopify"><Shopify /></a>
+    <a href="https://github.com/sourcegraph"><SourceGraph /></a>
+    <a href="https://github.com/statelyai"><Stately /></a>
     <a href="https://github.com/storybookjs"><Storybook  /></a>
-    <a href="https://github.com/adobe"><Adobe class="contrast" /></a>
+    <a href="https://github.com/sveltejs"  class="contrast"><Svelte /></a>
+    <a href="https://github.com/tanstack"  class="contrast"><img src={TanStack.src}/></a>
+    <a href="https://github.com/typescript-eslint"  class="contrast"><TypeScriptESLint/></a>
+    <a href="https://github.com/vercel" class="shrink"><Vercel/></a>
 </div>
