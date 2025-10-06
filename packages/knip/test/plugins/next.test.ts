@@ -27,7 +27,7 @@ test('Find dependencies with the Next.js plugin', async () => {
     files: 2,
     devDependencies: 0,
     unlisted: 6,
-    processed: 11,
-    total: 11,
+    processed: 13,
+    total: 13,
   });
 });
