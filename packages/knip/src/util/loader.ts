@@ -24,7 +24,7 @@ const load = async (filePath: string) => {
       return await loadFile(filePath);
     }
 
-    if (ext === '.json' || ext === '.jsonc') {
+    if (ext === '.json' || ext === '.jsonc' || ext === '.json5') {
       return await loadJSON(filePath);
     }
 

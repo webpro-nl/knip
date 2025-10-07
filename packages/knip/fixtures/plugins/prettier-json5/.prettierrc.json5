@@ -1,0 +1,8 @@
+{
+  // Prettier config with JSON5 syntax
+  "semi": false,
+  "singleQuote": true,
+  "plugins": [
+    "prettier-plugin-tailwindcss",
+  ], // trailing comma is allowed in JSON5
+}
