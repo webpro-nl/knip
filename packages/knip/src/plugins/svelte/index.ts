@@ -1,8 +1,9 @@
-import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
-import { toAlias } from '../../util/input.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.js';
+import { toAlias, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { config as viteConfig } from '../vite/index.js';
+import type { SvelteKitConfig } from './types.js';
 
 // https://kit.svelte.dev/docs
 
@@ -21,8 +22,28 @@ const production = [
 ];
 
 const resolve: Resolve = options => {
-  const alias = toAlias('$app/*', [join(options.cwd, 'node_modules/@sveltejs/kit/src/runtime/app/*')]);
-  return [alias];
+  return [
+    toAlias('$app/*', [join(options.cwd, 'node_modules/@sveltejs/kit/src/runtime/app/*')]),
+    // https://svelte.dev/docs/kit/$service-worker
+    toAlias('$service-worker', [join(options.cwd, 'node_modules/@sveltejs/kit/types/index.d.ts')]),
+  ];
+};
+
+export const config = ['svelte.config.{js,mjs,ts,cjs,mts,cts}'];
+
+const resolveConfig: ResolveConfig<SvelteKitConfig> = localConfig => {
+  // https://svelte.dev/docs/kit/configuration#serviceWorker
+  if (localConfig.kit?.serviceWorker?.register === false) {
+    return [];
+  }
+
+  // https://svelte.dev/docs/kit/configuration#files
+  let serviceWorkerPath = localConfig.kit?.files?.serviceWorker ?? 'src/service-worker';
+  if (!serviceWorkerPath.endsWith('.js') && !serviceWorkerPath.endsWith('.ts')) {
+    serviceWorkerPath += '{.js,.ts,/index.js,/index.ts}';
+  }
+
+  return [toProductionEntry(serviceWorkerPath)];
 };
 
 export default {
@@ -31,5 +52,6 @@ export default {
   isEnabled,
   entry,
   production,
+  resolveConfig,
   resolve,
 } satisfies Plugin;
