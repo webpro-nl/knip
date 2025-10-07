@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/lint-staged-comment",
+  "devDependencies": {
+    "lint-staged": "*"
+  }
+}
