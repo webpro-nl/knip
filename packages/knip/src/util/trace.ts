@@ -52,7 +52,7 @@ const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => 
 
 export const printTrace = (node: TraceNode, filePath: string, options: MainOptions, identifier?: string) => {
   if (!options.isTrace) return;
-  if (options.traceExport && identifier && identifier !== options.traceExport) return;
+  if (options.traceExport && identifier !== options.traceExport) return;
   if (options.traceFile && filePath !== toAbsolute(options.traceFile, options.cwd)) return;
   const suffix = (node.isEntry ? IS_ENTRY : '') + (node.children.size === 0 ? HAS_NO_REF : '');
   const header = `${toRelative(filePath, options.cwd)}${identifier ? `:${identifier}` : ''}${suffix}`;

@@ -134,7 +134,7 @@ export const createOptions = async (options: CreateOptions) => {
       parsedCLIArgs['no-progress'] === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function',
     isSkipLibs: !(isIncludeLibs || includedIssueTypes.classMembers),
     isStrict,
-    isTrace: parsedCLIArgs.trace ?? false,
+    isTrace: Boolean(parsedCLIArgs.trace ?? parsedCLIArgs['trace-file'] ?? parsedCLIArgs['trace-export']),
     isTreatConfigHintsAsErrors:
       parsedCLIArgs['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
     isWatch: parsedCLIArgs.watch ?? rest.isWatch ?? false,
