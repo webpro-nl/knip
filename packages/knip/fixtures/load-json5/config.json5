@@ -1,0 +1,9 @@
+{
+  // This is a JSON5 file with comments
+  "name": "test-config",
+  "plugins": [
+    "prettier-plugin-xml",
+    "prettier-plugin-tailwindcss",
+  ], // trailing comma
+  "enabled": true,
+}
