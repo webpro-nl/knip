@@ -1,0 +1,16 @@
+/* Header comment block */
+// Secondary header comment
+{
+  "data": {
+    // Nested comment
+    "value": 42,
+    /* Another block */ "name": "test",
+    "list": [
+      // Item 1
+      1,
+      /* Item 2 */ 2,
+      // Item 3
+      3
+    ]
+  } // End of data
+} // End of file

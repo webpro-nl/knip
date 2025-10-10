@@ -1,0 +1,23 @@
+// Typical configuration file style JSONC
+{
+  // Editor settings
+  "editor": {
+    "fontSize": 14,
+    "tabSize": 2,
+    "insertSpaces": true
+  },
+  // File associations
+  "files": {
+    "exclude": [
+      "**/node_modules",
+      "**/.git"
+    ]
+  },
+  /* 
+   * Advanced settings 
+   * Usually commented out
+   */
+  "advanced": {
+    "experimental": false
+  }
+}

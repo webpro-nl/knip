@@ -1,0 +1,10 @@
+{
+  "name": "test-standard-json",
+  "version": "1.0.0",
+  "enabled": true,
+  "count": 42,
+  "nested": {
+    "key": "value"
+  },
+  "array": [1, 2, 3]
+}
