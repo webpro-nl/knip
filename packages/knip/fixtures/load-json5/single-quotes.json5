@@ -1,0 +1,5 @@
+// JSON5 Feature: Single-quoted strings
+{
+  "singleQuoted": 'I can use "double quotes" inside',
+  "mixed": "I can use 'single quotes' inside double"
+}

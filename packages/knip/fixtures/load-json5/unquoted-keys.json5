@@ -1,0 +1,7 @@
+// JSON5 Feature: Unquoted object keys (IdentifierName)
+{
+  unquotedKey: "value",
+  $dollarKey: "dollar",
+  _underscoreKey: "underscore",
+  key123: "with numbers"
+}

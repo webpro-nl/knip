@@ -1,0 +1,6 @@
+// JSON5 Feature: Hexadecimal numbers
+{
+  "positiveHex": 0xdecaf,
+  "negativeHex": -0xC0FFEE,
+  "upperCaseHex": 0XBEEF
+}

@@ -1,0 +1,6 @@
+// JSON5 Feature: Multi-line strings with escaped newlines
+{
+  "multiLine": "This string spans \
+multiple lines by escaping \
+the newline characters"
+}
