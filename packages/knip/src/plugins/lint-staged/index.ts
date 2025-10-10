@@ -29,7 +29,10 @@ const resolveConfig: ResolveConfig<LintStagedConfig> = async (config, options) =
 
   const inputs = new Set<Input>();
 
-  for (const entry of Object.values(config).flat()) {
+  for (const [key, entry] of Object.entries(config)) {
+    // Skip non-glob keys (comments, metadata, etc.)
+    if (key.startsWith('_')) continue;
+
     const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
     for (const id of options.getInputsFromScripts(scripts)) inputs.add(id);
   }

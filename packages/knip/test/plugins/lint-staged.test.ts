@@ -36,3 +36,26 @@ test('Find dependencies with the lint-staged plugin (production)', async () => {
     total: 0,
   });
 });
+
+test('Find dependencies with the lint-staged plugin (with _comment field)', async () => {
+  const cwd = resolve('fixtures/plugins/lint-staged-comment');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert(issues.binaries['.lintstagedrc.json']['eslint']);
+  assert(issues.binaries['.lintstagedrc.json']['prettier']);
+  assert(issues.devDependencies['package.json']['lint-staged']);
+
+  // Should not report words from _comment as binaries
+  assert(!issues.binaries['.lintstagedrc.json']?.['This']);
+  assert(!issues.binaries['.lintstagedrc.json']?.['Note']);
+  assert(!issues.binaries['.lintstagedrc.json']?.['changes']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 2,
+    devDependencies: 1,
+    processed: 0,
+    total: 0,
+  });
+});
