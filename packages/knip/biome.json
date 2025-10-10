@@ -26,7 +26,13 @@
     }
   },
   "formatter": {
-    "includes": ["**", "!**/ignore-exports-used-in-file-alias-exclude/more.ts"]
+    "includes": [
+      "**",
+      "!**/ignore-exports-used-in-file-alias-exclude/more.ts",
+      "!fixtures/load-json/**/*.json",
+      "!fixtures/load-jsonc/**/*.jsonc",
+      "!fixtures/load-json5/**/*.json5"
+    ]
   },
   "overrides": [
     {
