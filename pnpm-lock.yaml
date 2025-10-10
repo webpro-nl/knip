@@ -101,6 +101,9 @@ importers:
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
+      json5:
+        specifier: 2.2.3
+        version: 2.2.3
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -116,9 +119,6 @@ importers:
       smol-toml:
         specifier: ^1.4.1
         version: 1.4.2
-      strip-json-comments:
-        specifier: 5.0.2
-        version: 5.0.2
       zod:
         specifier: ^4.1.11
         version: 4.1.11
@@ -3347,10 +3347,6 @@ packages:
   strip-final-newline@3.0.0:
     resolution: {integrity: sha512-dOESqjYr96iWYylGObzd39EuNTa5VJxyvVAEm5Jnh7KGo75V43Hk1odPQkNDyXNmUR6k+gEiDVXnjB8HJ3crXw==}
     engines: {node: '>=12'}
-
-  strip-json-comments@5.0.2:
-    resolution: {integrity: sha512-4X2FR3UwhNUE9G49aIsJW5hRRR3GXGTBTZRMfv568O60ojM8HcWjV/VxAxCDW3SUND33O6ZY66ZuRcdkj73q2g==}
-    engines: {node: '>=14.16'}
 
   style-to-js@1.1.17:
     resolution: {integrity: sha512-xQcBGDxJb6jjFCTzvQtfiPn6YvvP2O8U1MDIPNfJQlWMYfktPy+iGsHE7cssjs7y84d9fQaK4UF3RIJaAHSoYA==}
@@ -7973,8 +7969,6 @@ snapshots:
   strip-bom@4.0.0: {}
 
   strip-final-newline@3.0.0: {}
-
-  strip-json-comments@5.0.2: {}
 
   style-to-js@1.1.17:
     dependencies:

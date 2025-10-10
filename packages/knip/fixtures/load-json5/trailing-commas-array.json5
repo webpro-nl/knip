@@ -1,0 +1,8 @@
+// JSON5 Feature: Trailing commas in arrays
+{
+  "array": [
+    1,
+    2,
+    3,
+  ]
+}

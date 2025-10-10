@@ -1,0 +1,8 @@
+{
+  "integer": 42,
+  "negative": -17,
+  "decimal": 3.14159,
+  "scientific": 1.23e-4,
+  "scientificPos": 5e+10,
+  "zero": 0
+}

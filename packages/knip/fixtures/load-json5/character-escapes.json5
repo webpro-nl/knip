@@ -1,0 +1,6 @@
+// JSON5 Feature: Character escapes (hex, unicode)
+{
+  "hexEscape": "\x41",
+  "unicodeEscape": "\u0041",
+  "verticalTab": "\v"
+}

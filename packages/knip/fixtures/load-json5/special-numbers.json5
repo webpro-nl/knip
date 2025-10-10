@@ -1,0 +1,7 @@
+// JSON5 Feature: IEEE 754 special values
+{
+  "positiveInfinity": Infinity,
+  "negativeInfinity": -Infinity,
+  "notANumber": NaN,
+  "plusInfinity": +Infinity
+}

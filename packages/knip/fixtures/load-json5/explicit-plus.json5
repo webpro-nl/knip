@@ -1,0 +1,5 @@
+// JSON5 Feature: Explicit plus sign on numbers
+{
+  "explicitPlus": +1,
+  "explicitPlusDecimal": +42.5
+}

@@ -1,0 +1,6 @@
+// JSON5 Feature: Leading and trailing decimal points
+{
+  "leadingDecimal": .8675309,
+  "trailingDecimal": 8675309.,
+  "normalDecimal": 3.14
+}

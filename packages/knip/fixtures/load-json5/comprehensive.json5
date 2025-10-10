@@ -1,0 +1,99 @@
+// Comprehensive JSON5 test fixture covering all features from https://spec.json5.org/
+{
+  // OBJECTS: Unquoted keys (ECMAScript IdentifierName)
+  unquotedKey: 'This key has no quotes',
+  $dollarKey: 'Keys can start with dollar sign',
+  _underscoreKey: 'Keys can start with underscore',
+  key123: 'Keys can contain numbers',
+  
+  /* STRINGS: Single quotes */
+  singleQuoted: 'I can use "double quotes" inside single quotes',
+  doubleQuoted: "I can use 'single quotes' inside double quotes",
+  
+  // STRINGS: Multi-line (escaped newlines)
+  multiLine: "This string spans \
+multiple lines by escaping \
+the newline characters",
+  
+  // STRINGS: Character escapes
+  escapes: {
+    apostrophe: '\'',
+    quotationMark: "\"",
+    reverseSolidus: '\\',
+    backspace: '\b',
+    formFeed: '\f',
+    lineFeed: '\n',
+    carriageReturn: '\r',
+    horizontalTab: '\t',
+    verticalTab: '\v',
+    nullChar: '\0',
+    hexEscape: '\x41',  // Letter 'A'
+    unicodeEscape: '\u0041',  // Letter 'A'
+  },
+  
+  /* NUMBERS: Hexadecimal */
+  hexNumbers: {
+    positiveHex: 0xdecaf,
+    negativeHex: -0xC0FFEE,
+    upperCaseHex: 0XBEEF,
+  },
+  
+  // NUMBERS: Leading and trailing decimal points
+  decimals: {
+    leadingDecimalPoint: .8675309,
+    trailingDecimalPoint: 8675309.,
+    bothDecimalPoints: 3.14,
+  },
+  
+  /* NUMBERS: Explicit plus sign */
+  explicitPlus: +1,
+  explicitPlusDecimal: +42.5,
+  
+  // NUMBERS: IEEE 754 special values
+  specialNumbers: {
+    positiveInfinity: Infinity,
+    negativeInfinity: -Infinity,
+    notANumber: NaN,
+    plusInfinity: +Infinity,
+  },
+  
+  /* NUMBERS: Scientific notation */
+  scientific: {
+    simple: 1e10,
+    withPlus: 1e+10,
+    withMinus: 123e-456,
+    decimal: 1.23e10,
+  },
+  
+  // ARRAYS: Trailing commas
+  arrayWithTrailing: [
+    1,
+    2,
+    3,
+  ],
+  
+  /* ARRAYS: Mixed types */
+  mixedArray: [
+    'string',
+    42,
+    true,
+    null,
+    { nested: 'object' },
+    [1, 2, 3],
+  ],
+  
+  // OBJECTS: Nested with trailing commas
+  nested: {
+    level1: {
+      level2: {
+        value: 'deeply nested',
+      },
+    },
+  },
+  
+  /* COMMENTS: Both single and multi-line */
+  commentsWork: true, // Single-line comment
+  
+  // TRAILING COMMAS: In objects (this is the last property)
+  lastProperty: 'trailing comma after this',
+}

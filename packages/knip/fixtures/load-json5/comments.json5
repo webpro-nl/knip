@@ -1,0 +1,12 @@
+// JSON5 Feature: Single-line and multi-line comments
+{
+  // This is a single-line comment
+  "singleLine": true,
+  
+  /* This is a
+     multi-line
+     comment */
+  "multiLine": true,
+  
+  "inline": "value", // inline comment
+}

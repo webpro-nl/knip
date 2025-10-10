@@ -1,0 +1,17 @@
+{
+  "emptyString": "",
+  "emptyObject": {},
+  "emptyArray": [],
+  "nullValue": null,
+  "boolTrue": true,
+  "boolFalse": false,
+  "deeplyNested": {
+    "level1": {
+      "level2": {
+        "level3": {
+          "value": "deep"
+        }
+      }
+    }
+  }
+}

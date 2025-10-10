@@ -18,11 +18,3 @@ test('Should load modules (ESM/TS)', async () => {
   const cwd = resolve('fixtures/load-esm-ts');
   await assert.doesNotReject(load(join(cwd, 'index.ts')));
 });
-
-test('Should load JSON5 files', async () => {
-  const cwd = resolve('fixtures/load-json5');
-  const config = await load(join(cwd, 'config.json5'));
-  assert.equal(config.name, 'test-config');
-  assert.equal(config.plugins.length, 2);
-  assert.equal(config.enabled, true);
-});

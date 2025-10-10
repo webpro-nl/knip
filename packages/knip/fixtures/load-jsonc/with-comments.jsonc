@@ -1,0 +1,16 @@
+// This is a JSONC file with comments
+{
+  // Single-line comment before property
+  "name": "test-jsonc",
+  /* Multi-line comment
+     spanning multiple lines */
+  "version": "1.0.0",
+  "enabled": true, // Inline comment
+  /*
+   * Block comment with asterisks
+   */
+  "features": [
+    "comments", // Comment in array
+    "standard-json"
+  ]
+}

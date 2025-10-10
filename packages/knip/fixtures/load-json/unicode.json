@@ -1,0 +1,5 @@
+{
+  "unicode": "Hello 世界 🌍",
+  "escaped": "Line 1\nLine 2\tTabbed",
+  "special": "Quote: \" Backslash: \\ Slash: /"
+}

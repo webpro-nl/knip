@@ -1,0 +1,6 @@
+// JSON5 Feature: Trailing commas in objects
+{
+  "first": "value1",
+  "second": "value2",
+  "third": "value3",
+}

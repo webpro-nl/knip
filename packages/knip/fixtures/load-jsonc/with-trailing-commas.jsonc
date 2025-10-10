@@ -1,0 +1,13 @@
+// JSONC with trailing commas
+{
+  "object": {
+    "key1": "value1",
+    "key2": "value2",
+    "key3": "value3",
+  },
+  "array": [
+    "item1",
+    "item2",
+    "item3",
+  ],
+}
