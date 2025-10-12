@@ -85,7 +85,7 @@ value in `angular.json` projects.
 
 The `binary` input type isn't used by plugins directly, but by the shell script
 parser (through the `getInputsFromScripts` helper). Think of GitHub Actions
-worfklow YAML files or husky scripts. Using this input type, a binary is
+workflow YAML files or husky scripts. Using this input type, a binary is
 "assigned" to the dependency that has it as a `"bin"` in their `package.json`.
 
 ## toAlias

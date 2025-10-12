@@ -28,7 +28,7 @@ Knip (otherwise please consider to read at least [entry files][2] and
 
 ### Case 1: Next.js
 
-Let's say this default configuration respresents, greatly simplified, [the
+Let's say this default configuration represents, greatly simplified, [the
 default `entry` patterns][4] for projects using Next.js:
 
 ```json
@@ -84,7 +84,7 @@ $ knip
 ```
 
 Obviously a contrived example, but the gist is that lots of tooling
-configuration expects enviroment variables to be defined. But when running Knip
+configuration expects environment variables to be defined. But when running Knip
 there might not be a mechanism to set those. Clearly a breaking change when Knip
 starts doing this, only for Next.js projects with a configuration file that
 doesn't read environment variables safely (or has other contextual
