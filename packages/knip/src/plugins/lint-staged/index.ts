@@ -2,7 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import type { Input } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import { toLilconfig } from '../../util/plugin-config.js';
-import type { LintStagedConfig } from './types.js';
+import type { Entry, LintStagedConfig } from './types.js';
 
 // https://github.com/okonet/lint-staged
 
@@ -20,20 +20,26 @@ const config = [
   ...toLilconfig('lintstaged'),
 ];
 
+const resolveEntry = async (value: Entry): Promise<string[]> => {
+  if (Array.isArray(value)) return (await Promise.all(value.map(resolveEntry))).flat();
+  if (typeof value === 'function') return [await value([])].flat().filter(item => typeof item === 'string');
+  return typeof value === 'string' ? [value] : [];
+};
+
 const resolveConfig: ResolveConfig<LintStagedConfig> = async (config, options) => {
   if (options.isProduction) return [];
 
-  if (typeof config === 'function') config = config();
+  const cfg = typeof config === 'function' ? await config([]) : config;
 
-  if (!config) return [];
+  if (!cfg) return [];
 
   const inputs = new Set<Input>();
 
-  for (const [key, entry] of Object.entries(config)) {
+  for (const [key, entry] of Object.entries(cfg)) {
     // Skip non-glob keys (comments, metadata, etc.)
     if (key.startsWith('_')) continue;
 
-    const scripts = [typeof entry === 'function' ? await entry([]) : entry].flat();
+    const scripts = await resolveEntry(entry);
     for (const id of options.getInputsFromScripts(scripts)) inputs.add(id);
   }
 
