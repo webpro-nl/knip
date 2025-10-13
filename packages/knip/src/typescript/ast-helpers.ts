@@ -204,8 +204,18 @@ export const isDestructuring = (node: ts.Node) =>
   ts.isVariableDeclarationList(node.parent.parent) &&
   ts.isObjectBindingPattern(node.parent.name);
 
-export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
-  name.elements.map(element => element.name.getText());
+export const getDestructuredNames = (name: ts.ObjectBindingPattern): [string[], boolean] => {
+  const members: string[] = [];
+  let hasSpread = false;
+  for (const element of name.elements) {
+    if (element.dotDotDotToken) {
+      hasSpread = true;
+      break;
+    }
+    members.push(element.name.getText());
+  }
+  return [members, hasSpread];
+};
 
 export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isPropertyAssignment(node.parent) ||

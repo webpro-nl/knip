@@ -21,7 +21,7 @@ import { isInNodeModules } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
 import {
   getAccessMembers,
-  getDestructuredIds,
+  getDestructuredNames,
   getJSDocTags,
   getLineAndCharacterOfPosition,
   getTypeRef,
@@ -346,13 +346,19 @@ const getImportsAndExports = (
               if (isAccessExpression(node.parent)) {
                 if (isDestructuring(node.parent)) {
                   if (ts.isPropertyAccessExpression(node.parent)) {
-                    // Pattern: const { id, id } = NS.sub;
+                    // Pattern: const { id, ...id } = NS.sub;
                     const ns = String(symbol.escapedName);
                     const key = String(node.parent.name.escapedText);
-                    // @ts-expect-error safe after isDestructuring
-                    const members = getDestructuredIds(node.parent.parent.name).map(n => `${key}.${n}`);
-                    addNsMemberRefs(imports, ns, key);
-                    addNsMemberRefs(imports, ns, members);
+                    const [members, hasSpread] = getDestructuredNames(
+                      // @ts-expect-error safe after isDestructuring
+                      node.parent.parent.name
+                    );
+                    if (hasSpread) imports.refs.add(id);
+                    else {
+                      const ids = members.map(id => `${key}.${id}`);
+                      addNsMemberRefs(imports, ns, key);
+                      addNsMemberRefs(imports, ns, ids);
+                    }
                   }
                 } else {
                   // Patterns: NS.id, NS['id'], NS.sub.id, NS[TypeId], etc.
@@ -360,10 +366,11 @@ const getImportsAndExports = (
                   addNsMemberRefs(imports, id, members);
                 }
               } else if (isDestructuring(node)) {
-                // Pattern: const { id, id } = NS;
+                // Pattern: const { id, ...id } = NS;
                 // @ts-expect-error safe after isDestructuring
-                const members = getDestructuredIds(node.parent.name);
-                addNsMemberRefs(imports, id, members);
+                const [members, hasSpread] = getDestructuredNames(node.parent.name);
+                if (hasSpread) imports.refs.add(id);
+                else addNsMemberRefs(imports, id, members);
               } else {
                 const typeRef = getTypeRef(node);
                 if (typeRef) {
