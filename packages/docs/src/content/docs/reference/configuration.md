@@ -198,8 +198,9 @@ Exit with non-zero code (1) if there are any configuration hints.
 
 :::tip
 
-Please read [project files configuration][9] before using the `ignore` option,
-because in many cases you'll want to **fine-tune project files** instead.
+Please read [configuring project files][9] before using the `ignore` option,
+because in most cases you'll want to fine‑tune `entry` and `project` (or use
+production mode) instead.
 
 :::
 

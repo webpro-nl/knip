@@ -21,7 +21,8 @@ external dependencies.
 :::tip
 
 Run Knip without configuration. If it reports false positives, you need a
-configuration file. Please also read [configure project files][1].
+configuration file. Then read [configuring project files][1] to avoid overusing
+`ignore` patterns.
 
 :::
 
@@ -62,7 +63,7 @@ folder:
 If you override the `entry` file patterns, you may also want to override
 `project` file patterns. The set of project files is used to determine what
 files are unused. The `project` patterns can also be negated to exclude files
-from the analysis. Also see [configuring project files][1].
+from the analysis. See [configuring project files][1] for details.
 
 The values you set override the default values, they are not merged.
 

@@ -16,7 +16,7 @@ Files matching the `ignore` patterns are not excluded from the analysis. They're
 just not printed in the report. Use negated `entry` and `project` patterns to
 exclude files from the analysis.
 
-Read [project file configuration][1] for more details and examples. Improving
+Read [configuring project files][1] for details and examples. Improving
 configuration may have a significant impact on performance.
 
 ## Workspace sharing
