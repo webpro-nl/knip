@@ -17,6 +17,8 @@ test('findAndParseGitignores', async () => {
       '.yarn',
       '**/a/b/c',
       '**/a/b/c/**',
+      '**/.npmrc',
+      '**/.npmrc/**',
     ]),
     unignores: [],
   });
@@ -36,6 +38,8 @@ test('findAndParseGitignores (/a)', async () => {
       '**/b/c/**',
       '**/.cache',
       '**/.cache/**',
+      '**/.npmrc',
+      '**/.npmrc/**',
     ]),
     unignores: [],
   });
@@ -61,6 +65,8 @@ test('findAndParseGitignores (/a/b', async () => {
       '**/c/**',
       '**/.cache',
       '**/.cache/**',
+      '**/.npmrc',
+      '**/.npmrc/**',
     ]),
     unignores: [],
   });
