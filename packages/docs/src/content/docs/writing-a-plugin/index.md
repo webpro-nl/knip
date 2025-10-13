@@ -206,7 +206,7 @@ default values.
 
 ## Example 4: Use the AST directly
 
-If the `resolveFromConfig` function is impemented, Knip loads the configuration
+If the `resolveFromConfig` function is implemented, Knip loads the configuration
 file and passes the default-exported object to this plugin function. However,
 that object might then not contain the information we need.
 
