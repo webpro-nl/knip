@@ -53,6 +53,7 @@ export type GetImportsAndExportsOptions = {
 
 export interface Configuration {
   ignore: NormalizedGlob;
+  ignoreFiles: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
@@ -78,6 +79,7 @@ interface BaseWorkspaceConfiguration {
   project: NormalizedGlob;
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
+  ignoreFiles: NormalizedGlob;
   isIncludeEntryExports: boolean;
 }
 

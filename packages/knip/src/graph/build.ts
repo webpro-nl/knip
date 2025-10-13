@@ -13,7 +13,7 @@ import type { PluginName } from '../types/PluginNames.js';
 import type { MainOptions } from '../util/create-options.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
-import { _glob, _syncGlob, negate } from '../util/glob.js';
+import { _glob, _syncGlob, negate, prependDirToPattern } from '../util/glob.js';
 import {
   type Input,
   isAlias,
@@ -80,6 +80,9 @@ export async function build({
     });
   }
 
+  collector.addIgnorePatterns(chief.config.ignore.map(p => join(options.cwd, p)));
+  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(p => join(options.cwd, p)));
+
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName, manifestPath: filePath } = workspace;
 
@@ -108,7 +111,6 @@ export async function build({
       dependencies,
       getReferencedInternalFilePath: (input: Input) => getReferencedInternalFilePath(input, workspace),
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
-      rootIgnore: chief.config.ignore,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
@@ -126,10 +128,10 @@ export async function build({
       for (const id of definitionPaths) inputs.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
     }
 
-    const ignore = worker.getIgnorePatterns();
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    collector.addIgnorePatterns(ignore.map(pattern => join(options.cwd, pattern)));
+    collector.addIgnorePatterns(config.ignore.map(p => join(options.cwd, prependDirToPattern(name, p))));
+    collector.addIgnoreFilesPatterns(config.ignoreFiles.map(p => join(options.cwd, prependDirToPattern(name, p))));
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);

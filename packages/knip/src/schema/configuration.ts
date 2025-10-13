@@ -148,6 +148,14 @@ const rootConfigurationSchema = z.object({
    */
   ignore: z.optional(globSchema),
   /**
+   * Array of glob patterns of files to exclude from the "Unused files" report section only.
+   *
+   * Unlike `ignore`, which suppresses all issue types for matching files, `ignoreFiles` only
+   * affects the `files` issue type. Use this when a file should still be analyzed for other
+   * issues (exports, dependencies, unresolved) but should not be considered for unused file detection.
+   */
+  ignoreFiles: z.optional(globSchema),
+  /**
    * Exclude binaries that are used but not provided by any dependency from the
    * report. Value is an array of binary names or regular expressions.
    *
@@ -378,6 +386,7 @@ const baseWorkspaceConfigurationSchema = z.object({
   project: z.optional(globSchema),
   paths: z.optional(pathsSchema),
   ignore: z.optional(globSchema),
+  ignoreFiles: z.optional(globSchema),
   ignoreBinaries: z.optional(stringOrRegexSchema),
   ignoreDependencies: z.optional(stringOrRegexSchema),
   ignoreMembers: z.optional(stringOrRegexSchema),

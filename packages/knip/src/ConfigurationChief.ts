@@ -50,6 +50,7 @@ const isPluginName = (name: string): name is PluginName => pluginNames.includes(
 
 const defaultConfig: Configuration = {
   ignore: [],
+  ignoreFiles: [],
   ignoreBinaries: [],
   ignoreDependencies: [],
   ignoreMembers: [],
@@ -134,6 +135,7 @@ export class ConfigurationChief {
 
   private normalize(rawConfig: RawConfiguration): Configuration {
     const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
+    const ignoreFiles = arrayify(rawConfig.ignoreFiles ?? defaultConfig.ignoreFiles);
     const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
     const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
@@ -154,6 +156,7 @@ export class ConfigurationChief {
 
     return {
       ignore,
+      ignoreFiles,
       ignoreBinaries,
       ignoreDependencies,
       ignoreMembers,
@@ -386,6 +389,7 @@ export class ConfigurationChief {
     const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : baseConfig.project;
     const paths = workspaceConfig.paths ?? {};
     const ignore = arrayify(workspaceConfig.ignore);
+    const ignoreFiles = arrayify(workspaceConfig.ignoreFiles);
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
     const plugins: Partial<PluginsConfiguration> = {};
@@ -400,7 +404,7 @@ export class ConfigurationChief {
       }
     }
 
-    return { entry, project, paths, ignore, isIncludeEntryExports, ...plugins };
+    return { entry, project, paths, ignore, ignoreFiles, isIncludeEntryExports, ...plugins };
   }
 
   public findWorkspaceByFilePath(filePath: string) {

@@ -21,19 +21,28 @@ export class IssueCollector {
   private configurationHints: ConfigurationHints = new Map();
   private tagHints = new Set<TagHint>();
   private ignorePatterns = new Set<string>();
+  private ignoreFilesPatterns = new Set<string>();
   private isMatch: (filePath: string) => boolean;
+  private isFileMatch: (filePath: string) => boolean;
 
   constructor(options: MainOptions) {
     this.cwd = options.cwd;
     this.rules = options.rules;
     this.filter = options.workspace ? join(options.cwd, options.workspace) : undefined;
     this.isMatch = () => false;
+    this.isFileMatch = () => false;
   }
 
   addIgnorePatterns(patterns: string[]) {
     for (const pattern of patterns) this.ignorePatterns.add(pattern);
-    const p = [...this.ignorePatterns];
-    this.isMatch = (filePath: string) => isMatch(filePath, p, { dot: true });
+    const _patterns = Array.from(this.ignorePatterns);
+    this.isMatch = (filePath: string) => isMatch(filePath, _patterns, { dot: true });
+  }
+
+  addIgnoreFilesPatterns(patterns: string[]) {
+    for (const pattern of patterns) this.ignoreFilesPatterns.add(pattern);
+    const _patterns = Array.from(this.ignoreFilesPatterns);
+    this.isFileMatch = (filePath: string) => isMatch(filePath, _patterns, { dot: true });
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
@@ -46,6 +55,7 @@ export class IssueCollector {
       if (this.filter && !filePath.startsWith(`${this.filter}/`)) continue;
       if (this.referencedFiles.has(filePath)) continue;
       if (this.isMatch(filePath)) continue;
+      if (this.isFileMatch(filePath)) continue;
 
       this.issues.files.add(filePath);
       const symbol = relative(this.cwd, filePath);

@@ -6,7 +6,6 @@ import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { getFilteredScripts } from './manifest/helpers.js';
 import { PluginEntries, Plugins } from './plugins.js';
 import type {
-  Configuration,
   EnsuredPluginConfiguration,
   GetInputsFromScriptsPartial,
   GetReferencedInternalFilePath,
@@ -20,7 +19,7 @@ import type { DependencySet } from './types/workspace.js';
 import { compact } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
-import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
+import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.js';
 import {
   type ConfigInput,
   type Input,
@@ -45,7 +44,6 @@ type WorkspaceManagerOptions = {
   getReferencedInternalFilePath: GetReferencedInternalFilePath;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getSourceFile: GetSourceFile;
-  rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -78,7 +76,6 @@ export class WorkspaceWorker {
   getReferencedInternalFilePath: GetReferencedInternalFilePath;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getSourceFile: GetSourceFile;
-  rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
@@ -98,7 +95,6 @@ export class WorkspaceWorker {
     config,
     manifest,
     dependencies,
-    rootIgnore,
     negatedWorkspacePatterns,
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors,
@@ -113,7 +109,6 @@ export class WorkspaceWorker {
     this.config = config;
     this.manifest = manifest;
     this.dependencies = dependencies;
-    this.rootIgnore = rootIgnore;
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
@@ -246,10 +241,6 @@ export class WorkspaceWorker {
     const plugin = Plugins[pluginName];
     const pluginConfig = this.getConfigForPlugin(pluginName);
     return pluginConfig.config ?? plugin.config ?? [];
-  }
-
-  public getIgnorePatterns() {
-    return [...this.rootIgnore, ...this.config.ignore.map(pattern => prependDirToPattern(this.name, pattern))];
   }
 
   public async runPlugins() {

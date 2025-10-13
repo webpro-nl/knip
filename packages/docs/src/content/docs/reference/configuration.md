@@ -212,6 +212,23 @@ Array of glob patterns to ignore issues from matching files. Example:
 }
 ```
 
+### `ignoreFiles`
+
+Array of glob patterns of files to exclude from the "Unused files" section only.
+
+Unlike `ignore`, which suppresses all issue types for matching files,
+`ignoreFiles` only affects the `files` issue type. Use this when a file should
+remain analyzed for other issues (exports, dependencies, unresolved) but should
+not be considered for unused file detection.
+
+```json title="knip.json"
+{
+  "ignoreFiles": ["src/generated/**", "fixtures/**"]
+}
+```
+
+Suffix an item with `!` to enable it only in production mode.
+
 ### `ignoreBinaries`
 
 Exclude binaries that are used but not provided by any dependency from the
