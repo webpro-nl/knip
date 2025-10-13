@@ -4,6 +4,7 @@
 // biome-ignore lint: complexity/useArrowFunction
 module.exports = async function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy('./src/assets/');
+  eleventyConfig.addBundle('css', { hoist: true });
 };
 
 module.exports.config = {
