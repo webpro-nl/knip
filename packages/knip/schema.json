@@ -22,27 +22,32 @@
   ],
   "properties": {
     "ignoreBinaries": {
-      "title": "Binaries to ignore (regex allowed)",
+      "title": "Binaries to exclude from the report (regex allowed)",
       "examples": ["rm", "docker-compose", "curl"],
       "$ref": "#/definitions/list"
     },
     "ignoreDependencies": {
-      "title": "Dependencies from package.json to ignore (regex allowed)",
+      "title": "Dependencies to exclude from the report (regex allowed)",
+      "examples": ["husky", "lint-staged"],
+      "$ref": "#/definitions/list"
+    },
+    "ignoreFiles": {
+      "title": "Unused files to exclude from the report",
       "examples": ["husky", "lint-staged"],
       "$ref": "#/definitions/list"
     },
     "ignoreMembers": {
-      "title": "Class and enum members to ignore (regex allowed)",
+      "title": "Class and enum members to exclude from the report (regex allowed)",
       "examples": ["render", "on.*"],
       "$ref": "#/definitions/list"
     },
     "ignoreUnresolved": {
-      "title": "Unresolved imports to ignore (regex allowed)",
+      "title": "Unresolved imports to exclude from the report (regex allowed)",
       "examples": ["#/virtual"],
       "$ref": "#/definitions/list"
     },
     "ignoreWorkspaces": {
-      "title": "Workspaces to ignore",
+      "title": "Workspaces to exclude from the report",
       "examples": ["packages/ignore-me"],
       "$ref": "#/definitions/list"
     },
@@ -240,23 +245,29 @@
           "$ref": "#/definitions/paths"
         },
         "ignore": {
-          "title": "Files to ignore in the analysis.",
-          "example": ["**/fixtures", "mocks"],
+          "title": "Files to exclude from the report (any issue type)",
+          "example": ["**/fixtures/**", "mocks/**"],
+          "default": [],
+          "$ref": "#/definitions/globPatterns"
+        },
+        "ignoreFiles": {
+          "title": "Unused files to exclude the report",
+          "example": ["**/fixtures/**", "mocks/**"],
           "default": [],
           "$ref": "#/definitions/globPatterns"
         },
         "ignoreBinaries": {
-          "title": "Binaries to ignore (regex allowed)",
+          "title": "Binaries to exclude from the report (regex allowed)",
           "examples": ["rm", "docker-compose", "curl"],
           "$ref": "#/definitions/list"
         },
         "ignoreDependencies": {
-          "title": "Dependencies from package.json to ignore (regex allowed)",
+          "title": "Dependencies to exclude from the report (regex allowed)",
           "examples": ["husky", "lint-staged"],
           "$ref": "#/definitions/list"
         },
         "ignoreUnresolved": {
-          "title": "Unresolved imports to ignore (regex allowed)",
+          "title": "Unresolved imports to exclude from the report (regex allowed)",
           "examples": ["#/virtual"],
           "$ref": "#/definitions/list"
         },
