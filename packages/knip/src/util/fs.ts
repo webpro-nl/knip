@@ -53,7 +53,7 @@ export const loadTOML = async (filePath: string) => {
 
 export const parseJSON = async (filePath: string, contents: string) => {
   try {
-    return JSON.parse(stripJsonComments(contents, { trailingCommas: true }));
+    return JSON.parse(stripJsonComments(contents, { trailingCommas: true, whitespace: false }));
   } catch (error) {
     throw new LoaderError(`Error parsing ${filePath}`, { cause: error });
   }
