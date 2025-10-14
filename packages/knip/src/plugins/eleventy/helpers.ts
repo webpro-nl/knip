@@ -93,6 +93,7 @@ export class DummyEleventyConfig {
   setLayoutsDirectory() {}
   setFreezeReservedData() {}
   addDateParsing() {}
+  addBundle() {}
 
   _uniqueId = {};
   events = {};
