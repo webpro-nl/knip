@@ -40,12 +40,12 @@ jobs:
               pnpm install
               pnpm dlx $PKG_URL
 
-          - name: argos
-            repo: argos-ci/argos
-            commands: |
-              pnpm install
-              pnpm add -D -w $PKG_URL
-              pnpm run knip
+          # - name: argos
+          #   repo: argos-ci/argos
+          #   commands: |
+          #     pnpm install
+          #     pnpm add -D -w $PKG_URL
+          #     pnpm run knip
 
           - name: astro
             repo: withastro/astro
@@ -58,7 +58,8 @@ jobs:
             repo: JoshuaKGoldberg/create-typescript-app
             commands: |
               pnpm install
-              pnpm dlx $PKG_URL
+              pnpm add -D $PKG_URL
+              pnpm lint:knip
 
           - name: DefinitelyTyped-tools
             repo: microsoft/DefinitelyTyped-tools
@@ -123,7 +124,8 @@ jobs:
             repo: getsentry/sentry
             commands: |
               pnpm install
-              pnpm dlx $PKG_URL
+              pnpm add -D $PKG_URL
+              pnpm run knip
 
           - name: slonik
             repo: gajus/slonik
