@@ -57,7 +57,7 @@ export class IssueCollector {
         if (!issueTypePatterns.has(issueType)) {
           issueTypePatterns.set(issueType, []);
         }
-        issueTypePatterns.get(issueType)!.push(pattern);
+        issueTypePatterns.get(issueType)?.push(pattern);
       }
     }
 

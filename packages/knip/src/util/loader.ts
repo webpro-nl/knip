@@ -2,7 +2,7 @@ import { LoaderError } from './errors.js';
 import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.js';
 import { jiti } from './jiti.js';
 import { timerify } from './Performance.js';
-import { basename, extname, isInternal } from './path.js';
+import { extname, isInternal } from './path.js';
 
 const load = async (filePath: string) => {
   try {
