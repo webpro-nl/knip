@@ -38,7 +38,16 @@ export const loadFile = async (filePath: string) => {
 
 export const loadJSON = async (filePath: string) => {
   const contents = await loadFile(filePath);
-  return parseJSON(filePath, contents);
+  try {
+    return JSON.parse(contents);
+  } catch {
+    return parseJSONC(filePath, contents);
+  }
+};
+
+export const loadJSONC = async (filePath: string) => {
+  const contents = await loadFile(filePath);
+  return parseJSONC(filePath, contents);
 };
 
 export const loadYAML = async (filePath: string) => {
@@ -51,7 +60,7 @@ export const loadTOML = async (filePath: string) => {
   return parseTOML(contents);
 };
 
-export const parseJSON = async (filePath: string, contents: string) => {
+export const parseJSONC = async (filePath: string, contents: string) => {
   try {
     return JSON.parse(stripJsonComments(contents, { trailingCommas: true, whitespace: false }));
   } catch (error) {

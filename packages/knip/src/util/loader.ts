@@ -1,8 +1,8 @@
 import { LoaderError } from './errors.js';
-import { loadFile, loadJSON, loadTOML, loadYAML, parseJSON, parseYAML } from './fs.js';
+import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.js';
 import { jiti } from './jiti.js';
 import { timerify } from './Performance.js';
-import { extname, isInternal } from './path.js';
+import { basename, extname, isInternal } from './path.js';
 
 const load = async (filePath: string) => {
   try {
@@ -12,7 +12,7 @@ const load = async (filePath: string) => {
       try {
         return parseYAML(contents);
       } catch {
-        return parseJSON(filePath, contents);
+        return parseJSONC(filePath, contents);
       }
     }
 
@@ -24,8 +24,12 @@ const load = async (filePath: string) => {
       return await loadFile(filePath);
     }
 
-    if (ext === '.json' || ext === '.jsonc' || ext === '.json5') {
+    if (ext === '.json') {
       return await loadJSON(filePath);
+    }
+
+    if (ext === '.jsonc' || ext === '.json5') {
+      return await loadJSONC(filePath);
     }
 
     if (typeof Bun !== 'undefined') {
