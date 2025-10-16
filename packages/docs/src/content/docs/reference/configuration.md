@@ -319,6 +319,22 @@ Array of workspaces to ignore, globs allowed. Example:
 
 Suffix an item with `!` to enable it only in production mode.
 
+### `ignoreIssues`
+
+Ignore specific issue types for specific file patterns. Keys are glob patterns
+and values are arrays of issue types to ignore for matching files. This allows
+ignoring specific issues (like unused exports) in generated files while still
+reporting other issues in those same files.
+
+```json title="knip.json"
+{
+  "ignoreIssues": {
+    "src/generated/**": ["exports", "types"],
+    "**/*.generated.ts": ["exports", "classMembers"]
+  }
+}
+```
+
 ## Exports
 
 ### `ignoreExportsUsedInFile`

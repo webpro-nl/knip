@@ -10,6 +10,10 @@ but it might still be good to understand inefficient patterns for Knip.
 
 Use the `--debug` and `--performance` flags to find potential bottlenecks.
 
+## Cache
+
+Use `--cache` to speed up consecutive runs.
+
 ## Ignoring files
 
 Files matching the `ignore` patterns are not excluded from the analysis. They're
