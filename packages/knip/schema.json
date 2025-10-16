@@ -103,6 +103,19 @@
         }
       ]
     },
+    "ignoreIssues": {
+      "title": " Ignore specific issue types for specific file patterns",
+      "examples": [
+        {
+          "src/generated/**": ["exports", "types"],
+          "**/*.generated.ts": ["exports", "classMembers"]
+        }
+      ],
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/issueTypes"
+      }
+    },
     "includeEntryExports": {
       "title": "Include entry files when reporting unused exports",
       "type": "boolean"
