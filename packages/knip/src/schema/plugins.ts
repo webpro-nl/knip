@@ -32,6 +32,7 @@ export const pluginsSchema = z.object({
   cspell: pluginSchema,
   cucumber: pluginSchema,
   cypress: pluginSchema,
+  danger: pluginSchema,
   'dependency-cruiser': pluginSchema,
   docusaurus: pluginSchema,
   dotenv: pluginSchema,

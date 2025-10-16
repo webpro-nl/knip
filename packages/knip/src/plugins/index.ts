@@ -18,6 +18,7 @@ import { default as createTypescriptApp } from './create-typescript-app/index.js
 import { default as cspell } from './cspell/index.js';
 import { default as cucumber } from './cucumber/index.js';
 import { default as cypress } from './cypress/index.js';
+import { default as danger } from './danger/index.js';
 import { default as dependencyCruiser } from './dependency-cruiser/index.js';
 import { default as docusaurus } from './docusaurus/index.js';
 import { default as dotenv } from './dotenv/index.js';
@@ -134,6 +135,7 @@ export const Plugins = {
   cspell,
   cucumber,
   cypress,
+  danger,
   'dependency-cruiser': dependencyCruiser,
   docusaurus,
   dotenv,

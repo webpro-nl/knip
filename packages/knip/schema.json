@@ -386,6 +386,10 @@
           "title": "Cypress plugin configuration (https://knip.dev/reference/plugins/cypress)",
           "$ref": "#/definitions/plugin"
         },
+        "danger": {
+          "title": "danger plugin configuration (https://knip.dev/reference/plugins/danger)",
+          "$ref": "#/definitions/plugin"
+        },
         "dependency-cruiser": {
           "title": "dependency-cruiser plugin configuration (https://knip.dev/reference/plugins/dependency-cruiser)",
           "$ref": "#/definitions/plugin"

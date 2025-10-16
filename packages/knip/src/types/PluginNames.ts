@@ -19,6 +19,7 @@ export type PluginName =
   | 'cspell'
   | 'cucumber'
   | 'cypress'
+  | 'danger'
   | 'dependency-cruiser'
   | 'docusaurus'
   | 'dotenv'
@@ -135,6 +136,7 @@ export const pluginNames = [
   'cspell',
   'cucumber',
   'cypress',
+  'danger',
   'dependency-cruiser',
   'docusaurus',
   'dotenv',
