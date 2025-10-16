@@ -141,6 +141,7 @@ export class ConfigurationChief {
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
     const ignoreUnresolved = rawConfig.ignoreUnresolved ?? [];
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
+    const ignoreIssues = rawConfig.ignoreIssues;
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
 
@@ -162,6 +163,7 @@ export class ConfigurationChief {
       ignoreMembers,
       ignoreUnresolved,
       ignoreExportsUsedInFile,
+      ignoreIssues,
       ignoreWorkspaces,
       isIncludeEntryExports,
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,

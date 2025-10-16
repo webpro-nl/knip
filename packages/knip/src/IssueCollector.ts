@@ -1,5 +1,6 @@
 import picomatch from 'picomatch';
-import type { ConfigurationHint, ConfigurationHints, Issue, Rules, TagHint } from './types/issues.js';
+import type { IgnoreIssues } from './types/config.js';
+import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, TagHint } from './types/issues.js';
 import type { MainOptions } from './util/create-options.js';
 import { initCounters, initIssues } from './util/issue-initializers.js';
 import { timerify } from './util/Performance.js';
@@ -24,6 +25,7 @@ export class IssueCollector {
   private ignoreFilesPatterns = new Set<string>();
   private isMatch: (filePath: string) => boolean;
   private isFileMatch: (filePath: string) => boolean;
+  private issueMatchers: Map<IssueType, (filePath: string) => boolean> = new Map();
 
   constructor(options: MainOptions) {
     this.cwd = options.cwd;
@@ -35,14 +37,42 @@ export class IssueCollector {
 
   addIgnorePatterns(patterns: string[]) {
     for (const pattern of patterns) this.ignorePatterns.add(pattern);
-    const _patterns = Array.from(this.ignorePatterns);
-    this.isMatch = (filePath: string) => isMatch(filePath, _patterns, { dot: true });
+    const p = [...this.ignorePatterns];
+    this.isMatch = (filePath: string) => isMatch(filePath, p, { dot: true });
   }
 
   addIgnoreFilesPatterns(patterns: string[]) {
     for (const pattern of patterns) this.ignoreFilesPatterns.add(pattern);
-    const _patterns = Array.from(this.ignoreFilesPatterns);
-    this.isFileMatch = (filePath: string) => isMatch(filePath, _patterns, { dot: true });
+    const p = [...this.ignoreFilesPatterns];
+    this.isFileMatch = (filePath: string) => isMatch(filePath, p, { dot: true });
+  }
+
+  setIgnoreIssues(ignoreIssues?: IgnoreIssues) {
+    if (!ignoreIssues) return;
+
+    // Pre-compile matchers for each issue type
+    const issueTypePatterns = new Map<IssueType, string[]>();
+    for (const [pattern, issueTypes] of Object.entries(ignoreIssues)) {
+      for (const issueType of issueTypes) {
+        if (!issueTypePatterns.has(issueType)) {
+          issueTypePatterns.set(issueType, []);
+        }
+        issueTypePatterns.get(issueType)!.push(pattern);
+      }
+    }
+
+    for (const [issueType, patterns] of issueTypePatterns) {
+      this.issueMatchers.set(issueType, (filePath: string) => isMatch(filePath, patterns, { dot: true }));
+    }
+  }
+
+  private shouldIgnoreIssue(filePath: string, issueType: IssueType): boolean {
+    const matcher = this.issueMatchers.get(issueType);
+    if (!matcher) return false;
+
+    // Match against relative path
+    const relativePath = relative(this.cwd, filePath);
+    return matcher(relativePath);
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
@@ -56,6 +86,7 @@ export class IssueCollector {
       if (this.referencedFiles.has(filePath)) continue;
       if (this.isMatch(filePath)) continue;
       if (this.isFileMatch(filePath)) continue;
+      if (this.shouldIgnoreIssue(filePath, 'files')) continue;
 
       this.issues.files.add(filePath);
       const symbol = relative(this.cwd, filePath);
@@ -70,6 +101,7 @@ export class IssueCollector {
   addIssue(issue: Issue) {
     if (this.filter && !issue.filePath.startsWith(`${this.filter}/`)) return;
     if (this.isMatch(issue.filePath)) return;
+    if (this.shouldIgnoreIssue(issue.filePath, issue.type)) return;
     const key = relative(this.cwd, issue.filePath);
     const { type } = issue;
     issue.severity = this.rules[type];

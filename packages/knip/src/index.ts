@@ -45,6 +45,9 @@ export const main = async (options: MainOptions) => {
   const workspaces = await chief.getWorkspaces();
   const isGitIgnored = await getGitIgnoredHandler(options);
 
+  // Set up per-file issue ignoring
+  collector.setIgnoreIssues(chief.config.ignoreIssues);
+
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
   debugLogObject('*', 'Included workspace configs', () =>
     workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }))

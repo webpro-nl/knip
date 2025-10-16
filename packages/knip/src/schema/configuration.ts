@@ -43,6 +43,8 @@ const ignoreExportsUsedInFileObjectSchema = z.strictObject({
 
 const ignoreExportsUsedInFileSchema = z.union([z.boolean(), ignoreExportsUsedInFileObjectSchema]);
 
+const ignoreIssuesSchema = z.record(z.string(), z.array(issueTypeSchema));
+
 const rootConfigurationSchema = z.object({
   /**
    * A `$schema` field is a URL that you put at the top of your JSON file. This
@@ -256,6 +258,15 @@ const rootConfigurationSchema = z.object({
    * ```
    */
   ignoreExportsUsedInFile: z.optional(ignoreExportsUsedInFileSchema),
+  /**
+   * Ignore specific issue types for specific file patterns. Keys are glob
+   * patterns and values are arrays of issue types to ignore for matching files.
+   * This allows ignoring specific issues (like unused exports) in generated
+   * files while still reporting other issues in those same files.
+   *
+   * @see {@link https://knip.dev/reference/configuration#ignoreissues}
+   */
+  ignoreIssues: z.optional(ignoreIssuesSchema),
   /**
    * Array of workspaces to ignore, globs allowed.
    *
