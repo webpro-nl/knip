@@ -5,7 +5,7 @@ import type { knipConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
 import type { Input } from '../util/input.js';
 import type { Args } from './args.js';
-import type { SymbolType } from './issues.js';
+import type { IssueType, SymbolType } from './issues.js';
 import type { Tags } from './options.js';
 import type { PluginName } from './PluginNames.js';
 import type { PackageJson } from './package-json.js';
@@ -43,6 +43,8 @@ type IgnorableExport = Exclude<SymbolType, SymbolType.UNKNOWN>;
 
 export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
 
+export type IgnoreIssues = Record<string, IssueType[]>;
+
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
   isFixExports: boolean;
@@ -57,6 +59,7 @@ export interface Configuration {
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
+  ignoreIssues?: IgnoreIssues;
   ignoreMembers: IgnorePatterns;
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
