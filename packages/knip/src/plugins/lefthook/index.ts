@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { getGitHookPaths } from '../../util/git.js';
+import { _firstGlob } from '../../util/glob.js';
 import { fromBinary, toDependency } from '../../util/input.js';
 import { findByKeyDeep } from '../../util/object.js';
 import { extname } from '../../util/path.js';
@@ -11,11 +12,22 @@ const title = 'Lefthook';
 
 const enablers = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+const patterns = [
+  'lefthook.{yml,yaml,json,toml}',
+  '.lefthook.{yml,yaml,json,toml}',
+  'lefthook-local.{yml,yaml,json,toml}',
+  '.lefthook-local.{yml,yaml,json,toml}',
+  '.config/lefthook.{yml,yaml,json,toml}',
+];
+
+const isEnabled: IsPluginEnabled = async ({ dependencies, cwd }) =>
+  Boolean(hasDependency(dependencies, enablers) || (await _firstGlob({ cwd, patterns })));
+
+const isRootOnly = true;
 
 const gitHookPaths = getGitHookPaths();
 
-const config = ['lefthook.yml', ...gitHookPaths];
+const config = [...patterns, ...gitHookPaths];
 
 type Command = {
   run: string;
@@ -29,7 +41,7 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
 
   const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(id => toDependency(id)) : [];
 
-  if (extname(configFileName) === '.yml') {
+  if (['.yml', '.yaml', '.json', '.toml'].includes(extname(configFileName))) {
     const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
       const deps = getInputsFromScripts([command.run], { ...options, knownBinsOnly: true });
       const dir = command.root ?? cwd;
@@ -56,6 +68,7 @@ export default {
   title,
   enablers,
   isEnabled,
+  isRootOnly,
   config,
   resolveConfig,
 } satisfies Plugin;
