@@ -3,6 +3,8 @@ import test from 'node:test';
 import { exec } from '../helpers/exec.js';
 import { resolve } from '../helpers/resolve.js';
 
+const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
+
 const cwd = resolve('fixtures/cli-preprocessor');
 
 test('knip --preprocessor ./index.js', () => {
@@ -15,17 +17,17 @@ test('knip --preprocessor ./index.ts', () => {
   assert.equal(stdout, 'hi from ts preprocessor');
 });
 
-test.skip('knip --preprocessor knip-preprocessor', () => {
+skipIfBun('knip --preprocessor knip-preprocessor', () => {
   const { stdout } = exec('knip --preprocessor knip-preprocessor', { cwd });
   assert.equal(stdout, 'hi from pkg preprocessor');
 });
 
-test.skip('knip --preprocessor @org/preprocessor', () => {
+skipIfBun('knip --preprocessor @org/preprocessor', () => {
   const { stdout } = exec('knip --preprocessor @org/preprocessor', { cwd });
   assert.equal(stdout, 'hi from scoped preprocessor');
 });
 
-test.skip(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake"}`, () => {
+skipIfBun(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake"}`, () => {
   const { stdout } = exec(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake"}`, { cwd });
   assert.equal(stdout, 'hi from with-args preprocessor, you gave me: cupcake');
 });
