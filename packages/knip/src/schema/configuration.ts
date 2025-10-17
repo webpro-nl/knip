@@ -33,12 +33,13 @@ const issueTypeSchema = z.union([
 const rulesSchema = z.partialRecord(issueTypeSchema, z.enum(['error', 'warn', 'off']));
 
 const ignoreExportsUsedInFileObjectSchema = z.strictObject({
-  class: z.optional(z.boolean()),
+  variable: z.optional(z.boolean()),
+  type: z.optional(z.boolean()),
+  interface: z.optional(z.boolean()),
   enum: z.optional(z.boolean()),
   function: z.optional(z.boolean()),
-  interface: z.optional(z.boolean()),
+  class: z.optional(z.boolean()),
   member: z.optional(z.boolean()),
-  type: z.optional(z.boolean()),
 });
 
 const ignoreExportsUsedInFileSchema = z.union([z.boolean(), ignoreExportsUsedInFileObjectSchema]);
