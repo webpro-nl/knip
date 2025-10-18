@@ -1,7 +1,6 @@
 import ts from 'typescript';
-import { FIX_FLAGS } from '../../../constants.js';
+import { FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
-import { SymbolType } from '../../../types/issues.js';
 import { hasRequireCall, isModuleExportsAccess, stripQuotes } from '../../ast-helpers.js';
 import { isJS } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
@@ -21,7 +20,7 @@ export default visit(isJS, (node, { isFixExports }) => {
           return {
             node: node.expression.left.name,
             identifier,
-            type: SymbolType.UNKNOWN,
+            type: SYMBOL_TYPE.UNKNOWN,
             pos,
             fix,
           };
@@ -32,7 +31,7 @@ export default visit(isJS, (node, { isFixExports }) => {
             // Pattern: module.exports = { identifier, identifier2 }
             return expr.properties.map(node => {
               const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
-              return { node, identifier: node.getText(), type: SymbolType.UNKNOWN, pos: node.getStart(), fix };
+              return { node, identifier: node.getText(), type: SYMBOL_TYPE.UNKNOWN, pos: node.getStart(), fix };
             });
           }
 
@@ -42,7 +41,7 @@ export default visit(isJS, (node, { isFixExports }) => {
           }
 
           // Pattern: module.exports = any
-          return { node, identifier: 'default', type: SymbolType.UNKNOWN, pos: expr.pos + 1, fix: undefined };
+          return { node, identifier: 'default', type: SYMBOL_TYPE.UNKNOWN, pos: expr.pos + 1, fix: undefined };
         }
       } else if (
         ts.isElementAccessExpression(node.expression.left) &&
@@ -57,7 +56,7 @@ export default visit(isJS, (node, { isFixExports }) => {
         return {
           node: node.expression.left.argumentExpression,
           identifier,
-          type: SymbolType.UNKNOWN,
+          type: SYMBOL_TYPE.UNKNOWN,
           pos,
           fix,
         };

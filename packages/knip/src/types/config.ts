@@ -39,7 +39,7 @@ export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
 export type IgnorePatterns = (string | RegExp)[];
 
-type IgnorableExport = Exclude<SymbolType, SymbolType.UNKNOWN>;
+type IgnorableExport = Exclude<SymbolType, 'unknown'>;
 
 export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
 

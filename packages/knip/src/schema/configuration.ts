@@ -1,4 +1,5 @@
 import { z } from 'zod/mini';
+import { SYMBOL_TYPE } from '../constants.js';
 import { globSchema, pluginsSchema } from './plugins.js';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
@@ -32,14 +33,11 @@ const issueTypeSchema = z.union([
 
 const rulesSchema = z.partialRecord(issueTypeSchema, z.enum(['error', 'warn', 'off']));
 
-const ignoreExportsUsedInFileObjectSchema = z.strictObject({
-  class: z.optional(z.boolean()),
-  enum: z.optional(z.boolean()),
-  function: z.optional(z.boolean()),
-  interface: z.optional(z.boolean()),
-  member: z.optional(z.boolean()),
-  type: z.optional(z.boolean()),
-});
+const ignorableSymbolTypes = Object.values(SYMBOL_TYPE).filter(type => type !== 'unknown');
+
+const ignoreExportsUsedInFileObjectSchema = z.strictObject(
+  Object.fromEntries(ignorableSymbolTypes.map(type => [type, z.optional(z.boolean())]))
+);
 
 const ignoreExportsUsedInFileSchema = z.union([z.boolean(), ignoreExportsUsedInFileObjectSchema]);
 

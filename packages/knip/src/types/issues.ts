@@ -1,13 +1,6 @@
-export enum SymbolType {
-  VARIABLE = 'variable',
-  TYPE = 'type',
-  INTERFACE = 'interface',
-  ENUM = 'enum',
-  FUNCTION = 'function',
-  CLASS = 'class',
-  MEMBER = 'member',
-  UNKNOWN = 'unknown',
-}
+import type { SYMBOL_TYPE } from '../constants.js';
+
+export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 
 export type IssueSymbol = { symbol: string; pos?: number; line?: number; col?: number };
 

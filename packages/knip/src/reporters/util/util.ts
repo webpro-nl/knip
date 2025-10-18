@@ -1,6 +1,6 @@
 import picocolors from 'picocolors';
-import { ISSUE_TYPE_TITLE } from '../../constants.js';
-import { type Issue, type IssueSeverity, type IssueSymbol, SymbolType } from '../../types/issues.js';
+import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.js';
+import type { Issue, IssueSeverity, IssueSymbol } from '../../types/issues.js';
 import { relative } from '../../util/path.js';
 import { Table } from '../../util/table.js';
 
@@ -76,7 +76,7 @@ export const getTableForType = (
     table.cell('symbol', print(symbol), options.isUseColors ? highlightSymbol(issue) : () => symbol);
 
     table.cell('parentSymbol', issue.parentSymbol && print(issue.parentSymbol));
-    table.cell('symbolType', issue.symbolType && issue.symbolType !== SymbolType.UNKNOWN && print(issue.symbolType));
+    table.cell('symbolType', issue.symbolType && issue.symbolType !== SYMBOL_TYPE.UNKNOWN && print(issue.symbolType));
 
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
     // @ts-expect-error TODO Fix up in next major

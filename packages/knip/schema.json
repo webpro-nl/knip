@@ -98,6 +98,9 @@
             },
             "type": {
               "type": "boolean"
+            },
+            "variable": {
+              "type": "boolean"
             }
           }
         }
