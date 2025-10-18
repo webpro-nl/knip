@@ -27,7 +27,11 @@ const production = [
 
 const setup = async () => {
   if (globalThis && !('defineNuxtConfig' in globalThis)) {
-    Object.defineProperty(globalThis, 'defineNuxtConfig', { value: (id: any) => id });
+    Object.defineProperty(globalThis, 'defineNuxtConfig', {
+      value: (id: any) => id,
+      writable: true,
+      configurable: true,
+    });
   }
 };
 
