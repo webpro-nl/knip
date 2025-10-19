@@ -131,7 +131,7 @@ export const createOptions = async (options: CreateOptions) => {
     isReportTypes: includedIssueTypes.types || includedIssueTypes.nsTypes || includedIssueTypes.enumMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports || isReportClassMembers,
     isShowProgress:
-      parsedCLIArgs['no-progress'] === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function',
+      parsedCLIArgs['no-progress'] !== true && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function',
     isSkipLibs: !(isIncludeLibs || includedIssueTypes.classMembers),
     isStrict,
     isTrace: Boolean(parsedCLIArgs.trace ?? parsedCLIArgs['trace-file'] ?? parsedCLIArgs['trace-export']),
