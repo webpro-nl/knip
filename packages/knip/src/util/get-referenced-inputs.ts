@@ -1,7 +1,7 @@
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
-import type { IssueCollector } from '../IssueCollector.js';
+import type { Issue } from '../types/issues.js';
 import { debugLog } from './debug.js';
 import {
   fromBinary,
@@ -30,10 +30,10 @@ const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Wor
  */
 export const getReferencedInputsHandler =
   (
-    collector: IssueCollector,
     deputy: DependencyDeputy,
     chief: ConfigurationChief,
-    isGitIgnored: (s: string) => boolean
+    isGitIgnored: (s: string) => boolean,
+    addIssue: (issue: Issue) => void
   ) =>
   (input: Input, workspace: Workspace) => {
     const { specifier, containingFilePath } = input;
@@ -45,7 +45,7 @@ export const getReferencedInputsHandler =
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
       const isHandled = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
       if (isHandled || input.optional) return;
-      collector.addIssue({
+      addIssue({
         type: 'binaries',
         filePath: containingFilePath,
         workspace: workspace.name,
@@ -68,7 +68,7 @@ export const getReferencedInputsHandler =
         if (isWorkspace || isDependency(input)) {
           if (!isHandled) {
             if (!input.optional && ((deputy.isProduction && input.production) || !deputy.isProduction)) {
-              collector.addIssue({
+              addIssue({
                 type: 'unlisted',
                 filePath: containingFilePath,
                 workspace: inputWorkspace.name,
@@ -103,7 +103,7 @@ export const getReferencedInputsHandler =
     if (input.optional) return;
 
     if (!isInternal(filePath)) {
-      collector.addIssue({
+      addIssue({
         type: 'unlisted',
         filePath: containingFilePath,
         workspace: workspace.name,
@@ -113,7 +113,7 @@ export const getReferencedInputsHandler =
     } else if (!isGitIgnored(filePath)) {
       // Let's start out conservatively
       if (!isDeferResolveEntry(input) && !isConfig(input)) {
-        collector.addIssue({
+        addIssue({
           type: 'unresolved',
           filePath: containingFilePath,
           workspace: workspace.name,

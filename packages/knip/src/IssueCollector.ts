@@ -112,7 +112,7 @@ export class IssueCollector {
       issues[key][symbol] = issue;
       this.counters[issue.type]++;
     }
-    return issue;
+    return true;
   }
 
   addConfigurationHint(issue: ConfigurationHint) {
@@ -138,5 +138,14 @@ export class IssueCollector {
       tagHints: this.tagHints,
       configurationHints: new Set(this.configurationHints.values()),
     };
+  }
+
+  // Retain issues from `getReferencedInternalFilePath` that would otherwise get lost between analysis runs (e.g. in watch mode)
+  private retainedIssues: Issue[] = [];
+  retainIssue(issue: Issue) {
+    this.retainedIssues.push(issue);
+  }
+  getRetainedIssues() {
+    return this.retainedIssues;
   }
 }

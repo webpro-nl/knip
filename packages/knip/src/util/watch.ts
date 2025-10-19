@@ -156,6 +156,8 @@ export const getWatchHandler = async (
     collector.addFilesIssues(unusedFiles);
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
+    for (const issue of collector.getRetainedIssues()) collector.addIssue(issue);
+
     onUpdate({ issues: getIssues(), duration: performance.now() - startTime });
   };
 

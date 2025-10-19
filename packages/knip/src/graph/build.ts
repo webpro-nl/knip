@@ -8,6 +8,7 @@ import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
 import type { GetImportsAndExportsOptions } from '../types/config.js';
+import type { Issue } from '../types/issues.js';
 import type { Import, ModuleGraph } from '../types/module-graph.js';
 import type { PluginName } from '../types/PluginNames.js';
 import type { MainOptions } from '../util/create-options.js';
@@ -63,7 +64,9 @@ export async function build({
   const toSourceFilePath = getToSourcePathHandler(chief);
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
-  const getReferencedInternalFilePath = getReferencedInputsHandler(collector, deputy, chief, isGitIgnored);
+  const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
+
+  const getReferencedInternalFilePath = getReferencedInputsHandler(deputy, chief, isGitIgnored, addIssue);
 
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
