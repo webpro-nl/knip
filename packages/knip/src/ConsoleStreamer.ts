@@ -9,7 +9,7 @@ export class ConsoleStreamer {
   private lines = 0;
 
   constructor(options: MainOptions) {
-    this.isEnabled = options.isShowProgress;
+    this.isEnabled = options.isShowProgress && !options.isDebug;
     this.isWatch = options.isWatch;
   }
 

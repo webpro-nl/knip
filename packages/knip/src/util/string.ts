@@ -66,5 +66,7 @@ export const prettyMilliseconds = (ms: number): string => {
   const hours = Math.floor(minutes / 60);
   if (hours > 0) return `${hours}h ${minutes % 60}m ${Math.floor(seconds % 60)}s`;
   if (minutes > 0) return `${minutes}m ${Math.floor(seconds % 60)}s`;
-  return seconds % 1 ? `${seconds.toFixed(1)}s` : `${Math.floor(seconds)}s`;
+  if (seconds > 10) return `${Math.round(seconds)}s`;
+  if (seconds > 1) return `${seconds.toFixed(1)}s`;
+  return `${Math.round(ms)}ms`;
 };

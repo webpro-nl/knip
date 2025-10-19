@@ -1,16 +1,17 @@
 import type { WatchListener } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.js';
-import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
-import watchReporter from '../reporters/watch.js';
+import type { Issues } from '../types/issues.js';
 import type { ModuleGraph } from '../types/module-graph.js';
 import type { MainOptions } from './create-options.js';
 import { debugLog } from './debug.js';
 import { isFile } from './fs.js';
 import { updateImportMap } from './module-graph.js';
-import { join, toPosix } from './path.js';
+import { join, toAbsolute, toRelative } from './path.js';
+
+export type OnUpdate = (options: { issues: Issues; duration?: number }) => void;
 
 type Watch = {
   analyzedFiles: Set<string>;
@@ -21,9 +22,12 @@ type Watch = {
   factory: PrincipalFactory;
   graph: ModuleGraph;
   isIgnored: (path: string) => boolean;
-  streamer: ConsoleStreamer;
+  onUpdate: OnUpdate;
   unreferencedFiles: Set<string>;
 };
+
+type Change = 'added' | 'deleted' | 'modified';
+type FileChange = [Change, string];
 
 export const getWatchHandler = async (
   options: MainOptions,
@@ -36,99 +40,134 @@ export const getWatchHandler = async (
     factory,
     graph,
     isIgnored,
-    streamer,
+    onUpdate,
     unreferencedFiles,
   }: Watch
 ) => {
-  const reportIssues = async (startTime?: number) => {
-    const { issues } = collector.getIssues();
-    watchReporter(options, { issues, streamer, startTime, size: analyzedFiles.size });
-  };
+  const getIssues = () => collector.getIssues().issues;
 
-  const listener: WatchListener<string | Buffer> = async (eventType: string, filename: string | Buffer | null) => {
-    debugLog('*', `(raw) ${eventType} ${filename}`);
+  const processBatch = async (changes: FileChange[]) => {
+    const startTime = performance.now();
 
-    if (typeof filename === 'string') {
-      const startTime = performance.now();
-      const filePath = join(options.cwd, toPosix(filename));
+    const added = new Set<string>();
+    const deleted = new Set<string>();
+    const modified = new Set<string>();
+
+    for (const [type, _path] of changes) {
+      const filePath = toAbsolute(_path, options.cwd);
+      const relativePath = toRelative(_path, options.cwd);
 
       if (isIgnored(filePath)) {
-        debugLog('*', `ignoring ${eventType} ${filename}`);
-        return;
+        debugLog('*', `ignoring ${type} ${relativePath}`);
+        continue;
       }
 
       const workspace = chief.findWorkspaceByFilePath(filePath);
-      if (workspace) {
-        const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-        if (principal) {
-          const event = eventType === 'rename' ? (isFile(filePath) ? 'added' : 'deleted') : 'modified';
+      if (!workspace) continue;
 
-          principal.invalidateFile(filePath);
-          unreferencedFiles.clear();
-          const cachedUnusedFiles = collector.purge();
+      const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+      if (!principal) continue;
 
-          switch (event) {
-            case 'added':
-              principal.addProjectPath(filePath);
-              principal.deletedFiles.delete(filePath);
-              cachedUnusedFiles.add(filePath);
-              debugLog(workspace.name, `Watcher: + ${filename}`);
-              break;
-            case 'deleted':
-              analyzedFiles.delete(filePath);
-              principal.removeProjectPath(filePath);
-              cachedUnusedFiles.delete(filePath);
-              debugLog(workspace.name, `Watcher: - ${filename}`);
-              break;
-            case 'modified':
-              debugLog(workspace.name, `Watcher: ± ${filename}`);
-              break;
-          }
+      switch (type) {
+        case 'added':
+          added.add(filePath);
+          principal.addProjectPath(filePath);
+          principal.deletedFiles.delete(filePath);
+          debugLog(workspace.name, `Watcher: + ${relativePath}`);
+          break;
+        case 'deleted':
+          deleted.add(filePath);
+          analyzedFiles.delete(filePath);
+          principal.removeProjectPath(filePath);
+          debugLog(workspace.name, `Watcher: - ${relativePath}`);
+          break;
+        case 'modified':
+          modified.add(filePath);
+          debugLog(workspace.name, `Watcher: ± ${relativePath}`);
+          break;
+      }
 
-          const filePaths = factory.getPrincipals().flatMap(p => p.getUsedResolvedFiles());
+      principal.invalidateFile(filePath);
+    }
 
-          if (event === 'added' || event === 'deleted') {
-            // Flush to reset imports/exports
-            graph.clear();
-            for (const filePath of filePaths) analyzeSourceFile(filePath, principal);
-          } else {
-            for (const [filePath, file] of graph) {
-              if (filePaths.includes(filePath)) {
-                // Reset dep graph
-                file.imported = undefined;
-              } else {
-                // Remove files no longer referenced
-                graph.delete(filePath);
-                analyzedFiles.delete(filePath);
-                if (principal.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
-              }
-            }
+    if (added.size === 0 && deleted.size === 0 && modified.size === 0) return;
 
-            // Add existing files that were not yet part of the program
-            for (const filePath of filePaths) if (!graph.has(filePath)) analyzeSourceFile(filePath, principal);
+    unreferencedFiles.clear();
+    const cachedUnusedFiles = collector.purge();
 
-            if (!cachedUnusedFiles.has(filePath)) analyzeSourceFile(filePath, principal);
+    for (const filePath of added) cachedUnusedFiles.add(filePath);
+    for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
 
-            // Rebuild dep graph
-            for (const filePath of filePaths) {
-              const file = graph.get(filePath);
-              if (file?.internalImportCache) updateImportMap(file, file.internalImportCache, graph);
-            }
-          }
+    const filePaths = factory.getPrincipals().flatMap(p => p.getUsedResolvedFiles());
 
-          await analyze();
-
-          const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
-          collector.addFilesIssues(unusedFiles);
-          collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
-
-          await reportIssues(startTime);
+    if (added.size > 0 || deleted.size > 0) {
+      graph.clear();
+      for (const filePath of filePaths) {
+        const workspace = chief.findWorkspaceByFilePath(filePath);
+        if (workspace) {
+          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+          if (principal) analyzeSourceFile(filePath, principal);
         }
       }
+    } else {
+      for (const [filePath, file] of graph) {
+        if (filePaths.includes(filePath)) {
+          file.imported = undefined;
+        } else {
+          graph.delete(filePath);
+          analyzedFiles.delete(filePath);
+          const workspace = chief.findWorkspaceByFilePath(filePath);
+          if (workspace) {
+            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+            if (principal?.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
+          }
+        }
+      }
+
+      for (const filePath of filePaths) {
+        if (!graph.has(filePath)) {
+          const workspace = chief.findWorkspaceByFilePath(filePath);
+          if (workspace) {
+            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+            if (principal) analyzeSourceFile(filePath, principal);
+          }
+        }
+      }
+
+      for (const filePath of modified) {
+        if (!cachedUnusedFiles.has(filePath)) {
+          const workspace = chief.findWorkspaceByFilePath(filePath);
+          if (workspace) {
+            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+            if (principal) analyzeSourceFile(filePath, principal);
+          }
+        }
+      }
+
+      for (const filePath of filePaths) {
+        const file = graph.get(filePath);
+        if (file?.internalImportCache) updateImportMap(file, file.internalImportCache, graph);
+      }
+    }
+
+    await analyze();
+
+    const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
+    collector.addFilesIssues(unusedFiles);
+    collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
+
+    onUpdate({ issues: getIssues(), duration: performance.now() - startTime });
+  };
+
+  const listener: WatchListener<string | Buffer> = (eventType, filename) => {
+    debugLog('*', `(raw) ${eventType} ${filename}`);
+    if (typeof filename === 'string') {
+      const event = eventType === 'rename' ? (isFile(join(options.cwd, filename)) ? 'added' : 'deleted') : 'modified';
+      processBatch([[event, filename]]);
     }
   };
 
-  await reportIssues();
+  onUpdate({ issues: getIssues() });
 
   return listener;
 };

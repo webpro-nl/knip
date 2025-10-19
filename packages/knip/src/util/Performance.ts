@@ -164,8 +164,8 @@ class Performance {
     return table.toString();
   }
 
-  getCurrentDurationInMs(startTime?: number) {
-    return performance.now() - (startTime ?? this.startTime);
+  getCurrentDurationInMs() {
+    return performance.now() - this.startTime;
   }
 
   getMemHeapUsage() {

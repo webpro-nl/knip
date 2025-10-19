@@ -8,10 +8,11 @@ import { build } from './graph/build.js';
 import { IssueCollector } from './IssueCollector.js';
 import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
+import watchReporter from './reporters/watch.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
-import { getWatchHandler } from './util/watch.js';
+import { getWatchHandler, type OnUpdate } from './util/watch.js';
 
 export type { RawConfiguration as KnipConfig } from './types/config.js';
 export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
@@ -82,6 +83,10 @@ export const main = async (options: MainOptions) => {
     const isIgnored = (filePath: string) =>
       filePath.startsWith(options.cacheLocation) || filePath.includes('/.git/') || isGitIgnored(filePath);
 
+    const onUpdate: OnUpdate = options.isWatch
+      ? ({ issues, duration }) => watchReporter(options, { issues, streamer, size: analyzedFiles.size, duration })
+      : () => {};
+
     const watchHandler = await getWatchHandler(options, {
       analyzedFiles,
       analyzeSourceFile,
@@ -91,7 +96,7 @@ export const main = async (options: MainOptions) => {
       factory,
       graph,
       isIgnored,
-      streamer,
+      onUpdate,
       unreferencedFiles,
     });
 
