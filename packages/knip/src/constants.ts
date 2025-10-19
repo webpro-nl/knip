@@ -1,5 +1,3 @@
-import type { IssueType } from './types/issues.js';
-
 export const ROOT_WORKSPACE_NAME = '.';
 
 export const IMPORT_STAR = '*';
