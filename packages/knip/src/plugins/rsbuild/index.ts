@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toEntry } from '../../util/input.js';
+import { toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { RsbuildConfig } from './types.js';
 
@@ -14,16 +14,16 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
 const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
-  const inputs = new Set<Input>();
+  const entries = new Set<string>();
 
   const checkSource = (source: RsbuildConfig['source']) => {
     if (source?.entry) {
       for (const entry of Object.values(source.entry)) {
-        if (typeof entry === 'string') inputs.add(toEntry(entry));
-        else if (Array.isArray(entry)) for (const e of entry) inputs.add(toEntry(e));
+        if (typeof entry === 'string') entries.add(entry);
+        else if (Array.isArray(entry)) for (const e of entry) entries.add(e);
         else {
-          if (typeof entry.import === 'string') inputs.add(toEntry(entry.import));
-          else if (Array.isArray(entry.import)) for (const e of entry.import) inputs.add(toEntry(e));
+          if (typeof entry.import === 'string') entries.add(entry.import);
+          else if (Array.isArray(entry.import)) for (const e of entry.import) entries.add(e);
         }
       }
     }
@@ -37,7 +37,7 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
     }
   }
 
-  return Array.from(inputs);
+  return Array.from(entries).map(input => toProductionEntry(input));
 };
 
 export default {

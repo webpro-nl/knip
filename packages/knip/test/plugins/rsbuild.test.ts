@@ -18,3 +18,14 @@ test('Find dependencies with the rsbuild plugin', async () => {
     total: 9,
   });
 });
+
+test('Find dependencies with the rsbuild plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 8,
+    total: 8,
+  });
+});
