@@ -42,7 +42,7 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
 };
 
 export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
-  return async (specifiers: Set<string>, dir: string, extensions = defaultExtensions) => {
+  return async (specifiers: Set<string>, dir: string, extensions = defaultExtensions, label: string) => {
     const patterns = new Set<string>();
 
     for (const specifier of specifiers) {
@@ -56,7 +56,7 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
       }
     }
 
-    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir });
+    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir, label });
 
     debugLogArray(toRelative(dir, chief.cwd), 'Source mapping (package.json)', filePaths);
 

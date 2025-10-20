@@ -138,7 +138,8 @@ export async function build({
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
-    for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr)) {
+    const label = 'entry paths from package.json';
+    for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr, label)) {
       inputs.add(toProductionEntry(filePath));
     }
 
