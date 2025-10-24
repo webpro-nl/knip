@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspaces-symlinks",
+  "workspaces": [
+    "packages/*"
+  ]
+}
