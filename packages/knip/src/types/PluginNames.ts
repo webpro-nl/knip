@@ -26,6 +26,7 @@ export type PluginName =
   | 'drizzle'
   | 'eleventy'
   | 'eslint'
+  | 'exec-staged'
   | 'expo'
   | 'gatsby'
   | 'github-action'
