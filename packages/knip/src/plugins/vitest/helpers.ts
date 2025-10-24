@@ -30,20 +30,20 @@ export const getEnvPackageName = (env: string) => {
 // https://github.com/vitest-dev/vitest/blob/v3.2.4/packages/vitest/src/node/reporters/index.ts#L46-L58
 // https://github.com/vitest-dev/vitest/blob/v4.0.3/packages/vitest/src/node/reporters/index.ts#L47-L59
 const builtInReporters = [
-    'basic',
-    'blob',
-    'default',
-    'dot',
-    'github-actions',
-    'hanging-process',
-    'html',
-    'json',
-    'junit',
-    'tap',
-    'tap-flat',
-    'tree',
-    'verbose',
-  ];
+  'basic',
+  'blob',
+  'default',
+  'dot',
+  'github-actions',
+  'hanging-process',
+  'html',
+  'json',
+  'junit',
+  'tap',
+  'tap-flat',
+  'tree',
+  'verbose',
+];
 
 export const getExternalReporters = (reporters?: ViteConfig['test']['reporters']) =>
   reporters
