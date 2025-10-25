@@ -54,7 +54,7 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
                   node: element,
                   // @ts-expect-error We'll use the symbol in `findInternalReferences`
                   symbol: element.symbol,
-                  identifier: element.getText(),
+                  identifier: element.name.getText(),
                   type: SYMBOL_TYPE.UNKNOWN,
                   pos: element.getStart(),
                   fix,
