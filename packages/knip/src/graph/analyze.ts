@@ -231,7 +231,7 @@ export const analyze = async ({
       const ws = chief.findWorkspaceByFilePath(filePath);
 
       if (ws) {
-        if (file.duplicates) {
+        if (file.duplicates && options.includedIssueTypes.duplicates) {
           for (const symbols of file.duplicates) {
             if (symbols.length > 1) {
               const symbol = symbols.map(s => s.symbol).join('|');
