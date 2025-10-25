@@ -2,6 +2,7 @@ import { partitionCompilers } from '../compilers/index.js';
 import { KNIP_CONFIG_LOCATIONS } from '../constants.js';
 import { knipConfigurationSchema } from '../schema/configuration.js';
 import type { RawConfiguration } from '../types/config.js';
+import type { IssueType } from '../types/issues.js';
 import type { Options } from '../types/options.js';
 import type { ParsedCLIArgs } from './cli-arguments.js';
 import { ConfigurationError } from './errors.js';
@@ -88,6 +89,10 @@ export const createOptions = async (options: CreateOptions) => {
       ...(parsedCLIArgs.files ? shorthandFiles : []),
     ],
   });
+
+  for (const [key, value] of Object.entries(includedIssueTypes) as [IssueType, boolean][]) {
+    if (!value) rules[key] = 'off';
+  }
 
   const fixTypes = rest.fixTypes ?? parsedCLIArgs['fix-type'] ?? [];
   const isFixFiles = parsedCLIArgs['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
