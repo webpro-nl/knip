@@ -30,7 +30,7 @@
     "knip-bun": "bin/knip-bun.js"
   },
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types.d.ts",
   "scripts": {
     "knip": "node ./dist/cli.js --directory ../..",
     "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",

@@ -14,9 +14,6 @@ import { debugLogArray, debugLogObject } from './util/debug.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { getWatchHandler, type OnUpdate } from './util/watch.js';
 
-export type { RawConfiguration as KnipConfig } from './types/config.js';
-export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
-
 /**
  * The main sequence
  *
