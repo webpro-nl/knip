@@ -64,7 +64,7 @@ export const removeExport = ({ text, start, end, flags }: FixerOptions) => {
     const openingBracketIndex = getOpeningBracketIndex(beforeStart);
     if (closingBracketOffset !== -1 && openingBracketIndex !== -1) {
       const beforeBracket = beforeStart.substring(0, openingBracketIndex).trim();
-      const exportLength = beforeBracket.endsWith('export') ? 6 : beforeBracket.endsWith('export type') ? 12 : 0;
+      const exportLength = beforeBracket.endsWith('export') ? 6 : beforeBracket.endsWith('export type') ? 11 : 0;
       const exportKeywordOffset = beforeBracket.length - exportLength;
       if (exportLength) {
         const fromBracket = afterEnd.substring(closingBracketOffset).trim();
