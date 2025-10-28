@@ -118,7 +118,7 @@ export const createOptions = async (options: CreateOptions) => {
     isCache: parsedCLIArgs.cache ?? false,
     isDebug: parsedCLIArgs.debug ?? false,
     isDisableConfigHints: parsedCLIArgs['no-config-hints'] || isProduction || Boolean(parsedCLIArgs.workspace),
-    isFix: parsedCLIArgs.fix ?? rest.isFix ?? false,
+    isFix: parsedCLIArgs.fix ?? rest.isFix ?? isFixFiles ?? fixTypes.length > 0,
     isFixDependencies: fixTypes.length === 0 || fixTypes.includes('dependencies'),
     isFixFiles,
     isFixUnusedExports: fixTypes.length === 0 || fixTypes.includes('exports'),
