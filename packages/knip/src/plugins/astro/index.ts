@@ -23,8 +23,6 @@ const production = [
   'src/content/**/*.mdx',
   'src/middleware.{js,ts}',
   'src/actions/index.{js,ts}',
-  'db/config.{js,ts}',
-  'db/seed.{js,ts}',
 ];
 
 const resolveFromAST: ResolveFromAST = sourceFile => {
