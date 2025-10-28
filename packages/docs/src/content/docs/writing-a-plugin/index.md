@@ -66,7 +66,7 @@ Regular expressions are allowed as well.
 ### 3. `isEnabled`
 
 This function checks whether a match is found in the `dependencies` or
-`devDependencies` in `package.json`. The plugin is be enabled if the dependency
+`devDependencies` in `package.json`. The plugin is enabled if the dependency
 is listed in `package.json`.
 
 This function can be kept straightforward with the `hasDependency` helper.
