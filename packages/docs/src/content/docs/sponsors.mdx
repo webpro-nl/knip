@@ -10,42 +10,29 @@ import SponsorsComponent from '../../components/Sponsors.astro';
 import SponsorsChart from '../../components/SponsorsChart.astro';
 import SponsorsPast from '../../components/SponsorsPast.astro';
 
-<article class="sponsors-body">
-  <div class="column">
-    <p>
-      Knip is a powerful tool that helps thousands of developers keep their
-      JavaScript and TypeScript projects lean and maintainable. Knip saves
-      teams valuable time and resources.
-    </p>
+:::article{.prose}
 
-    <p>
-      Building and maintaining Knip has been, and remains, a lot of work.
-      Supportive resources allow me to focus on maintenance and development of
-      Knip, which is <a href="#-projects-using-knip">relied upon</a>
-      <a href="https://github.com/webpro-nl/knip/network/dependents">by many</a>
-      in the JavaScript community. Please consider supporting the project! The
-      following platforms are available to support Knip:
-    </p>
+Knip is a powerful tool that helps thousands of developers keep their JavaScript
+and TypeScript projects lean and maintainable. Knip saves teams valuable time
+and resources.
 
-    <ul>
-      <li><a href="https://github.com/sponsors/webpro">GitHub Sponsors</a></li>
-      <li><a href="https://opencollective.com/knip">OpenCollective</a></li>
-    </ul>
+Building and maintaining Knip has been, and remains, a lot of work. Supportive
+resources allow me to focus on maintenance and development of Knip, which is
+[relied upon][1] [by many][2] in the JavaScript community. Please consider
+supporting the project! The following platforms are available to support Knip:
 
-    <p>
-      You or your company logo will be added to this page if you decide to
-      support the project on an ongoing basis. Eternal gratitude to the
-      companies and people supporting the project!
-    </p>
+- [GitHub Sponsors][3]
+- [OpenCollective][4]
 
-  </div>
+You or your company logo with a backlink to your website will be added to this
+page if you decide to support the project on an ongoing basis. Eternal gratitude
+to the companies and people supporting the project!
 
-  <div class="column">
-    <SponsorsComponent showAll={true} />
-  </div>
-</article>
+:::
 
-## 🧡 Monthly Overview
+<SponsorsComponent showAll={true} />
+
+## Monthly Overview
 
 Overview of gross GitHub and OpenCollective sponsorships and invoices, starting
 from the moment the project openly asked for support. Actual development started
@@ -55,17 +42,21 @@ one year before that.
 
 - The monthly aggregated average over the charted period is $506.
 - The monthly recurring average without one-time payments is $323.
-- GitHub Sponsors is for my GitHub account, which has more repositories, but in
-  practice targets mostly Knip (and perhaps some [release-it][1]).
+- GitHub Sponsors is for my GitHub account. This has more repositories, but in
+  practice targets mostly Knip (and perhaps some [release-it][5]).
 
-## 🧡 Projects using Knip
+## Trusted by the world's best software teams
 
 <section class="columns min300">
   <Projects />
 </section>
 
-## 🧡 Testimonials
+## Don't just take our word for it
 
 <Posts />
 
-[1]: https://github.com/release-it/release-it
+[1]: #trusted-by-the-worlds-best-software-teams
+[2]: https://github.com/webpro-nl/knip/network/dependents
+[3]: https://github.com/sponsors/webpro
+[4]: https://opencollective.com/knip
+[5]: https://github.com/release-it/release-it

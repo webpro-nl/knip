@@ -23,7 +23,7 @@ Let's dive in and expand on all of these.
 
 Avoid adding too many files as `entry` files:
 
-1. Knip does not report [unused exports][2] in entry files by default.
+1. Knip does not report [unused exports][1] in entry files by default.
 2. Proper `entry` and `project` patterns allow Knip to find unused files and
    exports.
 
@@ -36,7 +36,7 @@ not resolved from the `entry` files:
 unused files = project files - (entry files + resolved files)
 ```
 
-See [entry files][1] to see where Knip looks for entry files. Fine-tune `entry`
+See [entry files][2] to see where Knip looks for entry files. Fine-tune `entry`
 and adjust `project` to fit your codebase.
 
 :::tip
@@ -196,13 +196,13 @@ To reiterate, the default `entry` and `project` files for each workspace:
 }
 ```
 
-Next to this, there are other places where [Knip looks for entry files][1].
+Next to this, there are other places where [Knip looks for entry files][2].
 
 Additionally, [plugins have plenty of entry files configured][5] that are
 automatically added as well.
 
-[1]: ../explanations/entry-files.md
-[2]: ../typescript/unused-exports.md
+[1]: ../typescript/unused-exports.md
+[2]: ../explanations/entry-files.md
 [3]: ../reference/configuration#ignoreexportsusedinfile
 [4]: ../features/production-mode.md
 [5]: ../explanations/plugins.md#entry-files

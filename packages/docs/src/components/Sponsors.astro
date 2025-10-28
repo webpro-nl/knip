@@ -2,7 +2,7 @@
 const { direction = 'column', showAll = true } = Astro.props;
 ---
 
-<div class=`sponsors ${direction}`>
+<div class=`sponsors ${showAll ? '' : 'front'}`>
   <a class="smaller" href="https://datadoghq.com">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800.5 203.19" class="w500">
       <style type="text/css">
@@ -188,6 +188,10 @@ const { direction = 'column', showAll = true } = Astro.props;
     <img src="/sponsors/f42.png" alt="Forge 42" class="w150" />
   </a>
 
+  <a href="http://ustark.de">
+    <img src="/sponsors/ulrichstark.png" alt="Ulrich Stark" class="w150" />
+  </a>
+
   <a href="https://github.com/samdenty">
     <img src="/sponsors/samdenty.jpeg" alt="Sam Denty" class="w150" />
   </a>
@@ -219,6 +223,10 @@ const { direction = 'column', showAll = true } = Astro.props;
 
   <a href="https://understandlegacycode.com">
     <img src="/sponsors/nicoespeon.png" alt="Nicolas Carlo" class="w150" />
+  </a>
+
+  <a href="https://github.com/mintuhouse">
+    <img src="/sponsors/hasankumar.jpg" alt="Hasan Kumar" class="w150" />
   </a>
 
   <a href="http://www.midnight-design.at">
