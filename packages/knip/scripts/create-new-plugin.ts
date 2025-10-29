@@ -70,10 +70,10 @@ await fs.cp(pluginTestTemplateFilePath, pluginTestFilePath, {
 
 // String replacements
 for (const filePath of [newPluginFile, pluginTestFilePath, pluginTestFixtureManifest]) {
-  if (await fs.exists(filePath)) {
+  try {
     const content = String(await fs.readFile(filePath));
     await fs.writeFile(filePath, content.replaceAll('_template', name).replaceAll('__PLUGIN_NAME__', name));
-  }
+  } catch {}
 }
 
 // Add plugin to JSON Schema

@@ -46,7 +46,7 @@
     "build": "tsc",
     "qa": "pnpm lint && pnpm build && pnpm knip && pnpm knip:production && pnpm run test",
     "release": "release-it",
-    "create-plugin": "node ./scripts/create-new-plugin.ts",
+    "create-plugin": "tsx ./scripts/create-new-plugin.ts",
     "postcreate-plugin": "pnpm run build && biome format --write schema.json schema-jsonc.json src/schema/plugins.ts",
     "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && biome check --write src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts"
   },
