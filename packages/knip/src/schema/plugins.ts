@@ -15,6 +15,7 @@ export const pluginSchema = z.union([
 export const pluginsSchema = z.object({
   angular: pluginSchema,
   astro: pluginSchema,
+  'astro-db': pluginSchema,
   ava: pluginSchema,
   babel: pluginSchema,
   biome: pluginSchema,

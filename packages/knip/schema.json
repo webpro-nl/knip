@@ -334,6 +334,10 @@
           "title": "astro plugin configuration (https://knip.dev/reference/plugins/astro)",
           "$ref": "#/definitions/plugin"
         },
+        "astro-db": {
+          "title": "astro-db plugin configuration (https://knip.dev/reference/plugins/astro-db)",
+          "$ref": "#/definitions/plugin"
+        },
         "ava": {
           "title": "ava plugin configuration (https://knip.dev/reference/plugins/ava)",
           "$ref": "#/definitions/plugin"
