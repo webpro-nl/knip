@@ -66,8 +66,8 @@ Regular expressions are allowed as well.
 ### 3. `isEnabled`
 
 This function checks whether a match is found in the `dependencies` or
-`devDependencies` in `package.json`. The plugin is enabled if the dependency
-is listed in `package.json`.
+`devDependencies` in `package.json`. The plugin is enabled if the dependency is
+listed in `package.json`.
 
 This function can be kept straightforward with the `hasDependency` helper.
 
@@ -334,15 +334,16 @@ The easiest way to create a new plugin is to use the `create-plugin` script:
 
 ```sh
 cd packages/knip
-bun create-plugin --name tool
+pnpm create-plugin --name tool
 ```
 
 This adds source and test files and fixtures to get you started. It also adds
 the plugin to the JSON Schema and TypeScript types.
 
-Run the test for your new plugin:
+Run the test for your new plugin using one of the following commands:
 
 ```sh
+pnpm tsx --test test/plugins/tool.test.ts
 bun test test/plugins/tool.test.ts
 ```
 
