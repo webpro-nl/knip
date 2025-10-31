@@ -65,7 +65,8 @@ to Knip. This means you don't need to add something like `**/*.{ts,vue}` to the
 
 - [CSS][1]
 - [MDX][2]
-- [Vue][3]
+- [Svelte][3]
+- [Vue][4]
 
 #### CSS
 
@@ -97,10 +98,26 @@ export default {
 };
 ```
 
+#### Svelte
+
+In a Svelte project, the compiler is automatically enabled. Override and use
+Svelte's compiler for better results if the built-in "compiler" is not enough:
+
+```ts
+import type { KnipConfig } from 'knip';
+import { compile } from 'svelte/compiler';
+
+export default {
+  compilers: {
+    svelte: (source: string) => compile(source, {}).js.code,
+  },
+} satisfies KnipConfig;
+```
+
 #### Vue
 
-In a project with Vue, the compiler is automatically enabled. Override and use
-Vue's parser for better results if the built-in "compiler" is not enough:
+In a Vue project, the compiler is automatically enabled. Override and use Vue's
+parser for better results if the built-in "compiler" is not enough:
 
 ```ts
 import type { KnipConfig } from 'knip';
@@ -144,4 +161,5 @@ export default config;
 
 [1]: #css
 [2]: #mdx
-[3]: #vue
+[3]: #svelte
+[4]: #vue
