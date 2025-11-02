@@ -18,16 +18,20 @@ type TableRow = ConfigurationHint & { message: string };
 const getWorkspaceName = (hint: ConfigurationHint) =>
   hint.workspaceName &&
   hint.workspaceName !== '.' &&
+  hint.type !== 'top-level-unconfigured' &&
   hint.type !== 'workspace-unconfigured' &&
   hint.type !== 'package-entry'
     ? hint.workspaceName
     : '';
 
+const getIdentifier = (hint: ConfigurationHint) =>
+  hint.identifier === '.' ? `. ${dim('(root)')}` : hint.identifier.toString();
+
 const getTableForHints = (hints: TableRow[]) => {
   const table = new Table({ truncateStart: ['identifier', 'workspace', 'filePath'] });
   for (const hint of hints) {
     table.row();
-    table.cell('identifier', hint.identifier.toString());
+    table.cell('identifier', getIdentifier(hint));
     table.cell('workspace', getWorkspaceName(hint));
     table.cell('filePath', hint.filePath);
     table.cell('description', dim(hint.message));
@@ -44,6 +48,10 @@ const topLevel = (options: PrintHintOptions) =>
   `Remove, or move unused top-level ${type(options.type)} to one of ${bright('"workspaces"')}`;
 const add = (options: PrintHintOptions) =>
   options.configFilePath
+    ? `Add ${bright('entry')} and/or refine ${bright('project')} files (${options.size} unused files)`
+    : `Create ${bright('knip.json')} configuration file, and add ${bright('entry')} and/or refine ${bright('project')} files (${options.size} unused files)`;
+const addWorkspace = (options: PrintHintOptions) =>
+  options.configFilePath
     ? `Add ${bright('entry')} and/or refine ${bright('project')} files in ${bright(`workspaces["${options.workspaceName}"]`)} (${options.size} unused files)`
     : `Create ${bright('knip.json')} configuration file with ${bright(`workspaces["${options.workspaceName}"]`)} object (${options.size} unused files)`;
 
@@ -58,7 +66,8 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
   ['project-empty', { print: empty }],
   ['entry-redundant', { print: remove }],
   ['project-redundant', { print: remove }],
-  ['workspace-unconfigured', { print: add }],
+  ['top-level-unconfigured', { print: add }],
+  ['workspace-unconfigured', { print: addWorkspace }],
   ['entry-top-level', { print: topLevel }],
   ['project-top-level', { print: topLevel }],
   ['package-entry', { print: packageEntry }],
@@ -67,7 +76,7 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
 export { hintPrinters };
 
 const hintTypesOrder: ConfigurationHintType[][] = [
-  ['workspace-unconfigured'],
+  ['top-level-unconfigured', 'workspace-unconfigured'],
   ['entry-top-level', 'project-top-level'],
   ['ignoreWorkspaces'],
   ['ignoreDependencies'],
@@ -98,11 +107,14 @@ export const printConfigurationHints = ({
       if (workspace) workspace.size++;
     }
 
-    const hlWorkspaces = workspaces.sort((a, b) => b.size - a.size).filter(ws => ws.size > 1);
-
-    for (const { dir, size } of hlWorkspaces) {
-      const identifier = toRelative(dir, cwd) || '.';
-      configurationHints.add({ type: 'workspace-unconfigured', workspaceName: identifier, identifier, size });
+    if (workspaces.length === 1) {
+      configurationHints.add({ type: 'top-level-unconfigured', identifier: '.', size: workspaces[0].size });
+    } else {
+      const topWorkspaces = workspaces.sort((a, b) => b.size - a.size).filter(ws => ws.size > 1);
+      for (const { dir, size } of topWorkspaces) {
+        const identifier = toRelative(dir, cwd) || '.';
+        configurationHints.add({ type: 'workspace-unconfigured', workspaceName: identifier, identifier, size });
+      }
     }
   }
 
@@ -119,14 +131,19 @@ export const printConfigurationHints = ({
 
     const rows: TableRow[] = hintTypesOrder.flatMap(hintTypes =>
       hintTypes.flatMap(hintType => {
-        const hints = hintsByType.get(hintType) ?? [];
-        return hints.map(hint => {
+        const _hints = hintsByType.get(hintType) ?? [];
+        const hints = _hints.length > 10 ? _hints.toSpliced(10) : _hints;
+        const row = hints.map(hint => {
           hint.filePath = relative(cwd, hint.filePath ?? configFilePath ?? '');
           const hintPrinter = hintPrinters.get(hint.type);
-          // @ts-expect-error
           const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath }) : '';
           return { ...hint, message };
         });
+        if (_hints.length !== hints.length) {
+          const identifier = dim(`...${_hints.length - hints.length} more similar hints`);
+          row.push({ type: hintType, identifier, filePath: '', message: '' });
+        }
+        return row;
       })
     );
 

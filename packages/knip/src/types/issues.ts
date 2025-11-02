@@ -92,6 +92,7 @@ export type ConfigurationHintType =
   | 'entry-empty'
   | 'project-empty'
   | 'package-entry'
+  | 'top-level-unconfigured'
   | 'workspace-unconfigured';
 
 export type ConfigurationHint = {
