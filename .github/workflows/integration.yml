@@ -40,12 +40,13 @@ jobs:
               pnpm install
               pnpm dlx $PKG_URL
 
-          # - name: argos
-          #   repo: argos-ci/argos
-          #   commands: |
-          #     pnpm install
-          #     pnpm add -D -w $PKG_URL
-          #     pnpm run knip
+          - name: argos
+            repo: argos-ci/argos
+            commands: |
+              pnpm install
+              pnpm build
+              pnpm add -D -w $PKG_URL
+              pnpm run knip
 
           - name: astro
             repo: withastro/astro
