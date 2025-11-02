@@ -136,6 +136,7 @@ export const printConfigurationHints = ({
         const row = hints.map(hint => {
           hint.filePath = relative(cwd, hint.filePath ?? configFilePath ?? '');
           const hintPrinter = hintPrinters.get(hint.type);
+          // @ts-expect-error
           const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath }) : '';
           return { ...hint, message };
         });
