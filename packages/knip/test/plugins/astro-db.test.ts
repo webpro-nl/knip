@@ -8,13 +8,12 @@ import { resolve } from '../helpers/resolve.js';
 const cwd = resolve('fixtures/plugins/astro-db');
 
 test('Find dependencies with the astro-db plugin', async () => {
-  // Ideally, plugin tests have no `issues` left and only `total` and `processed` values in `counters`
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 4,
+    total: 4,
   });
 });
