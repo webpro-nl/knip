@@ -36,7 +36,8 @@ Options:
   --no-config-hints        Suppress configuration hints
   --treat-config-hints-as-errors    Exit with non-zero code (1) if there are any configuration hints
   --no-exit-code           Always exit with code zero (0)
-  --max-issues             Maximum number of issues before non-zero exit code (default: 0)
+  --max-issues             Maximum number of total issues before non-zero exit code (default: 0)
+  --max-show-issues     Maximum number of issues to display per type
   -d, --debug              Show debug output
   --trace                  Show trace output
   --trace-export [name]    Show trace output for named export(s)
@@ -89,6 +90,7 @@ export default function parseCLIArgs() {
       'include-entry-exports': { type: 'boolean' },
       'isolate-workspaces': { type: 'boolean' },
       'max-issues': { type: 'string' },
+      'max-show-issues': { type: 'string' },
       memory: { type: 'boolean' },
       'memory-realtime': { type: 'boolean' },
       'no-config-hints': { type: 'boolean' },

@@ -88,7 +88,51 @@ Now you can run Knip to lint your project:
 
 Knip will lint your project and report unused dependencies, exports and files.
 
-You can skip the rest of this page and go to [configuration][2].
+If the output makes sense to you, feel free to go to the next page:
+[configuration][2].
+
+## Too Much?
+
+In large or complex codebases the output might be overwhelming. Start by
+limiting the number of shown issues per type:
+
+<Tabs syncKey="pm">
+  <TabItem label="npm">
+
+    ```shell
+    npm run knip -- --max-show-issues 5
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm">
+
+    ```shell
+    pnpm knip --max-show-issues 5
+    ```
+
+  </TabItem>
+
+  <TabItem label="bun">
+
+    ```shell
+    bun knip --max-show-issues 5
+    ```
+
+  </TabItem>
+
+  <TabItem label="yarn">
+
+    ```shell
+    yarn knip --max-show-issues 5
+    ```
+
+  </TabItem>
+</Tabs>
+
+The output is easier to digest and may include some configuration hints to get
+an idea of what's left to configure. Many unused files? Go to [configuration][2]
+and follow up with [troubleshooting][3] if needed.
 
 ## Manual
 
@@ -178,3 +222,4 @@ already.
 
 [1]: /playground
 [2]: ./configuration.md
+[3]: ../guides/troubleshooting.md

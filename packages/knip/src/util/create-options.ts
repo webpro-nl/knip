@@ -146,6 +146,7 @@ export const createOptions = async (options: CreateOptions) => {
     isTreatConfigHintsAsErrors:
       parsedCLIArgs['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
     isWatch: parsedCLIArgs.watch ?? options.isWatch ?? false,
+    maxShowIssues: parsedCLIArgs['max-show-issues'] ? Number(parsedCLIArgs['max-show-issues']) : undefined,
     parsedConfig,
     rules,
     tags,

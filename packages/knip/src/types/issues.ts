@@ -67,6 +67,7 @@ export type ReporterOptions = {
   preprocessorOptions: string;
   includedWorkspaceDirs: string[];
   configFilePath?: string;
+  maxShowIssues?: number;
 };
 
 export type Reporter = (options: ReporterOptions) => void;

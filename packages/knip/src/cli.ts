@@ -54,6 +54,7 @@ const run = async () => {
       isProduction: options.isProduction,
       isShowProgress: options.isShowProgress,
       isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
+      maxShowIssues: parsedCLIArgs['max-show-issues'] ? Number(parsedCLIArgs['max-show-issues']) : undefined,
       options: parsedCLIArgs['reporter-options'] ?? '',
       preprocessorOptions: parsedCLIArgs['preprocessor-options'] ?? '',
     };
