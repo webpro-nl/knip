@@ -9,12 +9,12 @@ Knip finds and fixes unused dependencies, exports and files. As a "kitchen sink"
 in the npm ecosystem, it creates comprehensive module and dependency graphs of
 your project.
 
-:::note
+:::note[Rationale]
 
-The JavaScript/TypeScript ecosystem has a vast amount of frameworks and tools,
-and even more ways to configure those. Files and dependencies can be referenced
-in many ways, not just through static import statements. In short: "it's
-complicated". Knip and documentation are always a work in progress.
+The JavaScript/TypeScript ecosystem has a vast amount of frameworks and tools.
+Additionally, file locations, configuration semantics, commmand-line arguments
+and so on vary wildly. Files and dependencies are referenced in many ways. Knip
+tries harder than you think to cover it all.
 
 :::
 
