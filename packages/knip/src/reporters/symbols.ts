@@ -18,7 +18,9 @@ export default (options: ReporterOptions) => {
       if (issuesForType.length > 0) {
         title && console.log(getColoredTitle(title, issuesForType.length));
         const issues =
-          typeof options.maxShowIssues === 'number' ? issuesForType.toSpliced(options.maxShowIssues) : issuesForType;
+          typeof options.maxShowIssues === 'number'
+            ? Array.from(issuesForType).slice(0, options.maxShowIssues)
+            : issuesForType;
         if (issues.length > 0) console.log(getTableForType(issues, options.cwd).toString());
         if (issues.length !== issuesForType.length)
           console.log(dim(`…${issuesForType.length - issues.length} more items`));

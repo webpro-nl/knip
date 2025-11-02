@@ -131,17 +131,17 @@ export const printConfigurationHints = ({
 
     const rows: TableRow[] = hintTypesOrder.flatMap(hintTypes =>
       hintTypes.flatMap(hintType => {
-        const _hints = hintsByType.get(hintType) ?? [];
-        const hints = _hints.length > 10 ? _hints.toSpliced(10) : _hints;
-        const row = hints.map(hint => {
+        const hints = hintsByType.get(hintType) ?? [];
+        const topHints = hints.length > 10 ? Array.from(hints).slice(0, 10) : hints;
+        const row = topHints.map(hint => {
           hint.filePath = relative(cwd, hint.filePath ?? configFilePath ?? '');
           const hintPrinter = hintPrinters.get(hint.type);
           // @ts-expect-error
           const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath }) : '';
           return { ...hint, message };
         });
-        if (_hints.length !== hints.length) {
-          const identifier = dim(`...${_hints.length - hints.length} more similar hints`);
+        if (hints.length !== topHints.length) {
+          const identifier = dim(`...${hints.length - topHints.length} more similar hints`);
           row.push({ type: hintType, identifier, filePath: '', message: '' });
         }
         return row;
