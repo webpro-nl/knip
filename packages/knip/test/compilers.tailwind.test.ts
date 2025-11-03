@@ -13,7 +13,8 @@ test('Built-in compiler for Tailwind CSS', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    unresolved: 1,
+    processed: 6,
+    total: 6,
   });
 });
