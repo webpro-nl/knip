@@ -22,19 +22,13 @@
   ],
   "properties": {
     "ignoreBinaries": {
-      "title": "Binaries to exclude from the report (regex allowed)",
-      "examples": ["rm", "docker-compose", "curl"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreBinaries"
     },
     "ignoreDependencies": {
-      "title": "Dependencies to exclude from the report (regex allowed)",
-      "examples": ["husky", "lint-staged"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreDependencies"
     },
     "ignoreFiles": {
-      "title": "Unused files to exclude from the report",
-      "examples": ["husky", "lint-staged"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreFiles"
     },
     "ignoreMembers": {
       "title": "Class and enum members to exclude from the report (regex allowed)",
@@ -42,9 +36,7 @@
       "$ref": "#/definitions/list"
     },
     "ignoreUnresolved": {
-      "title": "Unresolved imports to exclude from the report (regex allowed)",
-      "examples": ["#/virtual"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreUnresolved"
     },
     "ignoreWorkspaces": {
       "title": "Workspaces to exclude from the report",
@@ -120,8 +112,7 @@
       }
     },
     "includeEntryExports": {
-      "title": "Include entry files when reporting unused exports",
-      "type": "boolean"
+      "$ref": "#/definitions/includeEntryExports"
     },
     "tags": {
       "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
@@ -203,6 +194,31 @@
         "type": "string"
       }
     },
+    "ignoreBinaries": {
+      "title": "Binaries to exclude from the report (regex allowed)",
+      "examples": ["rm", "docker-compose", "curl"],
+      "$ref": "#/definitions/list"
+    },
+    "ignoreDependencies": {
+      "title": "Dependencies to exclude from the report (regex allowed)",
+      "examples": ["husky", "lint-staged"],
+      "$ref": "#/definitions/list"
+    },
+    "ignoreFiles": {
+      "title": "Unused files to exclude from the report",
+      "examples": ["husky", "lint-staged", "**/fixtures/**", "mocks/**"],
+      "default": [],
+      "$ref": "#/definitions/globPatterns"
+    },
+    "ignoreUnresolved": {
+      "title": "Unresolved imports to exclude from the report (regex allowed)",
+      "examples": ["#/virtual"],
+      "$ref": "#/definitions/list"
+    },
+    "includeEntryExports": {
+      "title": "Include entry files when reporting unused exports",
+      "type": "boolean"
+    },
     "issueTypes": {
       "type": "array",
       "items": {
@@ -267,29 +283,19 @@
           "$ref": "#/definitions/globPatterns"
         },
         "ignoreFiles": {
-          "title": "Unused files to exclude the report",
-          "example": ["**/fixtures/**", "mocks/**"],
-          "default": [],
-          "$ref": "#/definitions/globPatterns"
+          "$ref": "#/definitions/ignoreFiles"
         },
         "ignoreBinaries": {
-          "title": "Binaries to exclude from the report (regex allowed)",
-          "examples": ["rm", "docker-compose", "curl"],
-          "$ref": "#/definitions/list"
+          "$ref": "#/definitions/ignoreBinaries"
         },
         "ignoreDependencies": {
-          "title": "Dependencies to exclude from the report (regex allowed)",
-          "examples": ["husky", "lint-staged"],
-          "$ref": "#/definitions/list"
+          "$ref": "#/definitions/ignoreDependencies"
         },
         "ignoreUnresolved": {
-          "title": "Unresolved imports to exclude from the report (regex allowed)",
-          "examples": ["#/virtual"],
-          "$ref": "#/definitions/list"
+          "$ref": "#/definitions/ignoreUnresolved"
         },
         "includeEntryExports": {
-          "title": "Include entry files when reporting unused exports",
-          "type": "boolean"
+          "$ref": "#/definitions/includeEntryExports"
         }
       }
     },
