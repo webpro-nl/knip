@@ -37,9 +37,7 @@
       "$ref": "#/definitions/list"
     },
     "ignoreMembers": {
-      "title": "Class and enum members to exclude from the report (regex allowed)",
-      "examples": ["render", "on.*"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreMembers"
     },
     "ignoreUnresolved": {
       "title": "Unresolved imports to exclude from the report (regex allowed)",
@@ -203,6 +201,11 @@
         "type": "string"
       }
     },
+    "ignoreMembers": {
+      "title": "Class and enum members to exclude from the report (regex allowed)",
+      "examples": ["render", "on.*"],
+      "$ref": "#/definitions/list"
+    },
     "issueTypes": {
       "type": "array",
       "items": {
@@ -281,6 +284,9 @@
           "title": "Dependencies to exclude from the report (regex allowed)",
           "examples": ["husky", "lint-staged"],
           "$ref": "#/definitions/list"
+        },
+        "ignoreMembers": {
+          "$ref": "#/definitions/ignoreMembers"
         },
         "ignoreUnresolved": {
           "title": "Unresolved imports to exclude from the report (regex allowed)",
