@@ -29,6 +29,7 @@ test('Should sanitize import specifier', () => {
   assert.equal(sanitizeSpecifier('#id/specifier'), '#id/specifier');
   assert.equal(sanitizeSpecifier('~/id/specifier'), '~/id/specifier');
   assert.equal(sanitizeSpecifier('astro:content'), 'astro');
+  assert.equal(sanitizeSpecifier('astro:env/client'), 'astro');
   assert.equal(sanitizeSpecifier('virtual:specifier'), 'virtual:specifier');
   assert.equal(sanitizeSpecifier('fs'), 'fs');
   assert.equal(sanitizeSpecifier('node:fs'), 'node:fs');

@@ -64,6 +64,7 @@ export const sanitizeSpecifier = (specifier: string) => {
     }
   }
   s = s.substring(0, end);
-  if (s.includes(':') && !s.includes('/')) s = s.split(':')[0];
+  if (s.startsWith('astro:')) s = 'astro';
+  else if (s.includes(':') && !s.includes('/')) s = s.split(':')[0];
   return s;
 };
