@@ -31,9 +31,7 @@
       "$ref": "#/definitions/ignoreFiles"
     },
     "ignoreMembers": {
-      "title": "Class and enum members to exclude from the report (regex allowed)",
-      "examples": ["render", "on.*"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreMembers"
     },
     "ignoreUnresolved": {
       "$ref": "#/definitions/ignoreUnresolved"
@@ -219,6 +217,11 @@
       "title": "Include entry files when reporting unused exports",
       "type": "boolean"
     },
+    "ignoreMembers": {
+      "title": "Class and enum members to exclude from the report (regex allowed)",
+      "examples": ["render", "on.*"],
+      "$ref": "#/definitions/list"
+    },
     "issueTypes": {
       "type": "array",
       "items": {
@@ -290,6 +293,9 @@
         },
         "ignoreDependencies": {
           "$ref": "#/definitions/ignoreDependencies"
+        },
+        "ignoreMembers": {
+          "$ref": "#/definitions/ignoreMembers"
         },
         "ignoreUnresolved": {
           "$ref": "#/definitions/ignoreUnresolved"
