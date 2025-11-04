@@ -15,7 +15,7 @@ troubleshoot issues.
 :::note[Rationale]
 
 The JavaScript/TypeScript ecosystem has a vast amount of frameworks and tools.
-Additionally, file locations, configuration semantics, commmand-line arguments
+Additionally, file locations, configuration semantics, command-line arguments
 and so on vary wildly. Files and dependencies are referenced in many ways. Knip
 tries harder than you think to cover it all.
 
