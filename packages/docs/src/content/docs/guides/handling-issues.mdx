@@ -499,7 +499,6 @@ non-standard consumption of your exports? Here's an example:
 
 <Tabs>
   <TabItem label="index.js">
-
     ```ts
     import loadable from '@loadable/component';
 
@@ -511,16 +510,13 @@ non-standard consumption of your exports? Here's an example:
       resolveComponent: components => components.Orange,
     });
     ```
-
   </TabItem>
 
   <TabItem label="components.js">
-
     ```ts
     export const Apple = () => 'Apple';
     export const Orange = () => 'Orange';
     ```
-
   </TabItem>
 </Tabs>
 
@@ -625,15 +621,13 @@ issue on GitHub. It'll make Knip better for everyone!
 [22]: ../reference/configuration.md#ignoredependencies
 [23]: ../explanations/plugins.md#entry-files
 [24]: ../explanations/entry-files.md#plugins
-[25]:
-  ../reference/faq.md#why-cant-i-use-path-aliases-to-reference-other-workspaces
+[25]: ../reference/faq.md#why-cant-i-use-path-aliases-to-reference-other-workspaces
 [26]: ../features/integrated-monorepos.md
 [27]: #missing-or-incomplete-plugin
 [28]: #unrecognized-reference
 [29]: #type-definition-packages
 [30]: #unlisted-binaries
-[31]:
-  https://github.com/webpro-nl/knip/blob/b70958a58ea255ee7a7831e404786da807ca93d7/packages/knip/src/constants.ts#L37-L139
+[31]: https://github.com/webpro-nl/knip/blob/b70958a58ea255ee7a7831e404786da807ca93d7/packages/knip/src/constants.ts#L37-L139
 [32]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [33]: #template-strings
 [34]: #unrecognized-path-aliases

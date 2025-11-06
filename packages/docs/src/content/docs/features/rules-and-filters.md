@@ -42,14 +42,12 @@ Also see the [list of issue types][2].
 Knip has shortcuts to include only specific issue types.
 
 1. The `--dependencies` flag includes:
-
    - `dependencies` (and `devDependencies` + `optionalPeerDependencies`)
    - `unlisted`
    - `binaries`
    - `unresolved`
 
 2. The `--exports` flag includes:
-
    - `exports`
    - `types`
    - `enumMembers`
