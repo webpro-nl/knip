@@ -25,6 +25,9 @@ importers:
       '@astrojs/starlight':
         specifier: 0.36.0
         version: 0.36.0(astro@5.14.1(@types/node@24.3.0)(jiti@2.6.0)(rollup@4.49.0)(terser@5.43.1)(tsx@4.20.6)(typescript@5.9.2)(yaml@2.8.1))
+      mdxlint-preset-webpro:
+        specifier: 1.0.1
+        version: 1.0.1
       sharp:
         specifier: 0.34.4
         version: 0.34.4
@@ -47,6 +50,9 @@ importers:
       hastscript:
         specifier: 9.0.1
         version: 9.0.1
+      mdxlint:
+        specifier: 1.0.0
+        version: 1.0.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -63,8 +69,8 @@ importers:
         specifier: 11.0.0
         version: 11.0.0
       remark-preset-webpro:
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^2.0.1
+        version: 2.0.1
       remark-stringify:
         specifier: 11.0.0
         version: 11.0.0
@@ -2531,6 +2537,13 @@ packages:
   mdn-data@2.12.2:
     resolution: {integrity: sha512-IEn+pegP1aManZuckezWCO+XZQDplx1366JoVhTpMpBB1sPey/SbveZQUosKiKiGYjg1wH4pMlNgXbCiYgihQA==}
 
+  mdxlint-preset-webpro@1.0.1:
+    resolution: {integrity: sha512-+W6hvfSVoZUsym0T6zQkyJfr18H9J9oXGSlJInCfawOo2WGQGa0mE2NfB8OmRIebwD8w4PawGqpGdoOY1s4gcA==}
+
+  mdxlint@1.0.0:
+    resolution: {integrity: sha512-EEOFUOYM1VPPqW/l1WyTxEiL8N1+LBNSBpzPk/Aq4z8UkfA19Abo75pK3qRZAi3MEW9NHK49+Fz0BdRrwLVzaQ==}
+    hasBin: true
+
   meow@12.1.1:
     resolution: {integrity: sha512-BhXM0Au22RwUneMPwSCnyhTOizdWoIEPU9sp0Aqa1PnDMR5Wv2FGXYDjuzJEIX+Eo2Rb8xuYe5jrnm5QowQFkw==}
     engines: {node: '>=16.10'}
@@ -3114,8 +3127,8 @@ packages:
   remark-parse@11.0.0:
     resolution: {integrity: sha512-FCxlKLNGknS5ba/1lmpYijMUzX2esxW5xQqjWxw2eHFfS2MSdaHVINFmhjo+qN1WhZhNimq0dZATN9pH0IDrpA==}
 
-  remark-preset-webpro@1.1.1:
-    resolution: {integrity: sha512-kQhLn+nzDxMQJv4x+Q/4HMBKgcnwzSOO/CGI4UkDD77oKie9b2mI/VSonDc9mxxhJ6JBjo5nYqkOjjq9s1qbeQ==}
+  remark-preset-webpro@2.0.1:
+    resolution: {integrity: sha512-ejqKfDng4fN1yMfthwEAYTT+hqbVx+8FkqhBTOVIQfLaCQNVT3pxihSVDbTFK12Tg1vwH9mu4R7/wX5uqmaSHw==}
 
   remark-reference-links@7.0.0:
     resolution: {integrity: sha512-OMACEps7CkpBio5nutUToCcXFJr9QkkoHdku41iIholMdFZ0jdRxgFmPm2B7R+DSvW83ZShdA3ubWTH+C3M6Eg==}
@@ -3542,9 +3555,6 @@ packages:
 
   unist-util-remove@3.1.1:
     resolution: {integrity: sha512-kfCqZK5YVY5yEa89tvpl7KnBBHu2c6CzMkqHUrlOqaRgGOMp0sMvwWOVrbAtj03KhovQB7i96Gda72v/EFE0vw==}
-
-  unist-util-remove@4.0.0:
-    resolution: {integrity: sha512-b4gokeGId57UVRX/eVKej5gXqGlc9+trkORhFJpu9raqZkZhU0zm8Doi05+HaiBsMEIJowL+2WtQ5ItjsngPXg==}
 
   unist-util-stringify-position@4.0.0:
     resolution: {integrity: sha512-0ASV06AAoKCDkS2+xw5RXJywruurpbC4JZSm7nr7MOt1ojAzvyyaO+UxZf18j8FCF6kmzCZKcAgN/yu2gm2XgQ==}
@@ -6750,6 +6760,28 @@ snapshots:
 
   mdn-data@2.12.2: {}
 
+  mdxlint-preset-webpro@1.0.1:
+    dependencies:
+      mdast-util-directive: 3.1.0
+      remark-directive: 4.0.0
+      remark-frontmatter: 5.0.0
+      remark-order-reference-links: 0.0.3
+      remark-reference-links: 7.0.0
+    transitivePeerDependencies:
+      - supports-color
+
+  mdxlint@1.0.0:
+    dependencies:
+      '@types/mdast': 4.0.4
+      remark-mdx: 3.1.0
+      remark-parse: 11.0.0
+      remark-stringify: 11.0.0
+      unified: 11.0.5
+      unified-args: 11.0.1
+    transitivePeerDependencies:
+      - bluebird
+      - supports-color
+
   meow@12.1.1: {}
 
   merge-stream@2.0.0: {}
@@ -7652,21 +7684,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  remark-preset-webpro@1.1.1:
+  remark-preset-webpro@2.0.1:
     dependencies:
-      hastscript: 9.0.1
+      mdast-util-directive: 3.1.0
       prettier: 3.6.2
-      remark-directive: 3.0.1
+      remark-directive: 4.0.0
       remark-frontmatter: 5.0.0
       remark-gfm: 4.0.1
-      remark-mdx: 3.1.0
       remark-order-reference-links: 0.0.3
       remark-parse: 11.0.0
       remark-reference-links: 7.0.0
       unified-prettier: 2.0.1(prettier@3.6.2)
-      unist-util-is: 6.0.0
-      unist-util-remove: 4.0.0
-      unist-util-visit: 5.0.0
     transitivePeerDependencies:
       - supports-color
 
@@ -8188,12 +8216,6 @@ snapshots:
       '@types/unist': 2.0.11
       unist-util-is: 5.2.1
       unist-util-visit-parents: 5.1.3
-
-  unist-util-remove@4.0.0:
-    dependencies:
-      '@types/unist': 3.0.3
-      unist-util-is: 6.0.0
-      unist-util-visit-parents: 6.0.1
 
   unist-util-stringify-position@4.0.0:
     dependencies:
