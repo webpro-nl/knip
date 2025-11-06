@@ -1,3 +1,3 @@
-export type RemarkConfig = {
+export type MdxlintConfig = {
   plugins?: (string | [string, unknown] | unknown)[];
 };

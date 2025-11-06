@@ -514,6 +514,10 @@
           "title": "markdownlint plugin configuration (https://knip.dev/reference/plugins/markdownlint)",
           "$ref": "#/definitions/plugin"
         },
+        "mdxlint": {
+          "title": "mdxlint plugin configuration (https://knip.dev/reference/plugins/mdxlint)",
+          "$ref": "#/definitions/plugin"
+        },
         "metro": {
           "title": "metro plugin configuration (https://knip.dev/reference/plugins/metro)",
           "$ref": "#/definitions/plugin"
