@@ -48,22 +48,37 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
   return typedDependency;
 };
 
+const CHAR_EXCLAMATION = 33; // '!'
+const CHAR_DASH = 45; // '-'
+const CHAR_SLASH = 47; // '/'
+const CHAR_COLON = 58; // ':'
+const CHAR_HASH = 35; // '#'
+const CHAR_QUESTION = 63; // '?'
+
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
 export const sanitizeSpecifier = (specifier: string) => {
   if (isBuiltin(specifier) || isAbsolute(specifier) || specifier.startsWith(PROTOCOL_VIRTUAL)) return specifier;
-  let s = specifier;
-  let end = s.length;
-  let i = 0;
-  while (i < s.length && (s[i] === '!' || s[i] === '-')) i++;
-  s = s.substring(i);
-  for (let j = 0; j < s.length; j++) {
-    const char = s[j];
-    if (char === '!' || char === '?' || (char === '#' && j > 0)) {
-      end = j;
+  const len = specifier.length;
+  let start = 0;
+  let end = len;
+  let colon = -1;
+  let sawSlash = false;
+  for (let i = 0; i < len; i++) {
+    const ch = specifier.charCodeAt(i);
+    if (i === start && (ch === CHAR_EXCLAMATION || ch === CHAR_DASH)) {
+      start++;
+      continue;
+    }
+    if (ch === CHAR_SLASH && colon === -1) {
+      sawSlash = true;
+    }
+    if (colon === -1 && ch === CHAR_COLON && !sawSlash) {
+      colon = i;
+    }
+    if (ch === CHAR_EXCLAMATION || ch === CHAR_QUESTION || (ch === CHAR_HASH && i > start)) {
+      end = i;
       break;
     }
   }
-  s = s.substring(0, end);
-  if (/[^/]+:/.test(s)) s = s.split(':')[0];
-  return s;
+  return colon !== -1 && colon < end ? specifier.slice(start, colon) : specifier.slice(start, end);
 };
