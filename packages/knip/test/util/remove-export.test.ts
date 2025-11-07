@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { FIX_FLAGS } from '../../src/constants.js';
 import { removeExport } from '../../src/util/remove-export.js';
 

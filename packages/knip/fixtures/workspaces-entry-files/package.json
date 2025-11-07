@@ -2,7 +2,9 @@
   "scripts": {
     "storybook": "storybook dev"
   },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "storybook": "*",
     "@storybook/react": "*"

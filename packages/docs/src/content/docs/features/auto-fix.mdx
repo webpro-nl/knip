@@ -104,35 +104,27 @@ manager.
 
 <Tabs syncKey="pm">
   <TabItem label="npm">
-
     ```shell
     npm install
     ```
-
   </TabItem>
 
   <TabItem label="pnpm">
-
     ```shell
     pnpm install
     ```
-
   </TabItem>
 
   <TabItem label="bun">
-
     ```shell
     bun install
     ```
-
   </TabItem>
 
   <TabItem label="yarn">
-
     ```shell
     yarn
     ```
-
   </TabItem>
 </Tabs>
 
@@ -143,35 +135,27 @@ using the package manager in the project, for example:
 
 <Tabs syncKey="pm">
   <TabItem label="npm">
-
     ```shell
     npm install unlisted-package
     ```
-
   </TabItem>
 
   <TabItem label="pnpm">
-
     ```shell
     pnpm add unlisted-package
     ```
-
   </TabItem>
 
   <TabItem label="bun">
-
     ```shell
     bun add unlisted-package
     ```
-
   </TabItem>
 
   <TabItem label="yarn">
-
     ```shell
     yarn add unlisted-package
     ```
-
   </TabItem>
 </Tabs>
 
@@ -216,30 +200,24 @@ Also across any chain of re-exports:
 
 <Tabs>
   <TabItem label="module.ts">
-
     ```diff
     export const Hawk = 'Tony';
     -export const Owl = 'Hedwig';
     +const Owl = 'Hedwig';
     ```
-
   </TabItem>
 
   <TabItem label="barrel.ts">
-
     ```diff
     export * from './module.js';
     ```
-
   </TabItem>
 
   <TabItem label="index.ts">
-
     ```diff
     -export { Hawk, Owl } from './barrel.js';
     +export { Hawk } from './barrel.js'
     ```
-
   </TabItem>
 </Tabs>
 

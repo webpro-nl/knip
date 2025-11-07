@@ -16,6 +16,7 @@ Knip has built-in "compilers" for the following file extensions:
 - `.mdx`
 - `.svelte`
 - `.vue`
+- `.css` (only enabled by `tailwindcss`)
 
 Knip does not include real compilers for those files, but regular expressions to
 collect `import` statements. This is fast, requires no dependencies, and enough
@@ -27,7 +28,10 @@ might represent component properties. This results in those exports being
 reported as unused by Knip.
 
 The built-in functions seem to do a decent job, but override them however you
-like. They can enabled manually if none if the enabling dependencies were found:
+like.
+
+Compilers are enabled only if certain dependencies are found. If that's not
+working for your project, set `true` and enable any compiler manually:
 
 ```ts title="knip.ts"
 export default {
@@ -65,7 +69,8 @@ to Knip. This means you don't need to add something like `**/*.{ts,vue}` to the
 
 - [CSS][1]
 - [MDX][2]
-- [Vue][3]
+- [Svelte][3]
+- [Vue][4]
 
 #### CSS
 
@@ -97,10 +102,26 @@ export default {
 };
 ```
 
+#### Svelte
+
+In a Svelte project, the compiler is automatically enabled. Override and use
+Svelte's compiler for better results if the built-in "compiler" is not enough:
+
+```ts
+import type { KnipConfig } from 'knip';
+import { compile } from 'svelte/compiler';
+
+export default {
+  compilers: {
+    svelte: (source: string) => compile(source, {}).js.code,
+  },
+} satisfies KnipConfig;
+```
+
 #### Vue
 
-In a project with Vue, the compiler is automatically enabled. Override and use
-Vue's parser for better results if the built-in "compiler" is not enough:
+In a Vue project, the compiler is automatically enabled. Override and use Vue's
+parser for better results if the built-in "compiler" is not enough:
 
 ```ts
 import type { KnipConfig } from 'knip';
@@ -144,4 +165,5 @@ export default config;
 
 [1]: #css
 [2]: #mdx
-[3]: #vue
+[3]: #svelte
+[4]: #vue

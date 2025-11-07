@@ -6,7 +6,7 @@ description: config
 ## Defaults
 
 Knip has good defaults and aims for "zero config". Here's a simplified version
-of the default configuration:
+of the default `entry` and `project` values:
 
 ```json
 {
@@ -17,13 +17,6 @@ of the default configuration:
 
 Entry files are the starting point for Knip to find more source files and
 external dependencies.
-
-:::tip
-
-Run Knip without configuration. If it reports false positives, you need a
-configuration file. Please also read [configure project files][1].
-
-:::
 
 ## Location
 
@@ -62,7 +55,7 @@ folder:
 If you override the `entry` file patterns, you may also want to override
 `project` file patterns. The set of project files is used to determine what
 files are unused. The `project` patterns can also be negated to exclude files
-from the analysis. Also see [configuring project files][1].
+from the analysis. See [configuring project files][1] for details.
 
 The values you set override the default values, they are not merged.
 
@@ -71,20 +64,19 @@ The values you set override the default values, they are not merged.
 Be specific with `entry` files. Minimize the number of entry files and wildcards
 for better results.
 
-Plugins set entry files for you, such as those for Next.js, Remix, Vitest, and
-many more.
+Plugins are enabled automatically, and set entry files for you. Such as for
+Next.js, Astro, Remix, Vitest, Playwright and many more.
 
 :::
 
-Knip looks in many places for entry files. Learn more about this in the next
-page about [entry files][2].
+Knip looks for entry files in many places. Learn more in the next page about
+[entry files][2].
 
 ## Configuration Options
 
 See [configuration file options][3].
 
-To use JavaScript or TypeScript in the configuration file, see [dynamic
-configuration][4].
+Use JavaScript or TypeScript in a [dynamic configuration file][4].
 
 ## What's next?
 
@@ -96,10 +88,10 @@ Want to learn more about some of the main features?
 - Working with [monorepos & workspaces][5].
 - Learn more about [production mode][6].
 
-Having troubles configuring Knip?
+Having trouble configuring Knip?
 
 - [Configuring project files][1]
-- [Handling issues][7]
+- [Troubleshooting][7]
 
 Search this website using the bar at the top (`Ctrl+K` or `⌘+K`).
 
@@ -109,4 +101,4 @@ Search this website using the bar at the top (`Ctrl+K` or `⌘+K`).
 [4]: ../reference/dynamic-configuration.mdx
 [5]: ../features/monorepos-and-workspaces.md
 [6]: ../features/production-mode.md
-[7]: ../guides/handling-issues.md
+[7]: ../guides/troubleshooting.md

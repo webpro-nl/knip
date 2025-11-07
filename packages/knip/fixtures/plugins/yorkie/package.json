@@ -6,7 +6,9 @@
   "lint-staged": {
     "*.js": "eslint --fix",
     "*.md": "markdownlint --fix",
-    "docs/**/*.svg": ["npx svgo -r --multipass"]
+    "docs/**/*.svg": [
+      "npx svgo -r --multipass"
+    ]
   },
   "devDependencies": {
     "lint-staged": "^11.0.0",

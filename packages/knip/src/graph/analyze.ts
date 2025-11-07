@@ -231,7 +231,7 @@ export const analyze = async ({
       const ws = chief.findWorkspaceByFilePath(filePath);
 
       if (ws) {
-        if (file.duplicates) {
+        if (file.duplicates && options.includedIssueTypes.duplicates) {
           for (const symbols of file.duplicates) {
             if (symbols.length > 1) {
               const symbol = symbols.map(s => s.symbol).join('|');
@@ -241,16 +241,19 @@ export const analyze = async ({
         }
 
         if (file.imports?.external) {
-          for (const specifier of file.imports.external) {
-            const packageName = getPackageNameFromModuleSpecifier(specifier);
+          for (const extImport of file.imports.external) {
+            const packageName = getPackageNameFromModuleSpecifier(extImport.specifier);
             const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(ws, packageName);
             if (!isHandled)
               collector.addIssue({
                 type: 'unlisted',
                 filePath,
                 workspace: ws.name,
-                symbol: packageName ?? specifier,
-                specifier,
+                symbol: packageName ?? extImport.specifier,
+                specifier: extImport.specifier,
+                pos: extImport.pos,
+                line: extImport.line,
+                col: extImport.col,
               });
           }
         }

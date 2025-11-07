@@ -26,8 +26,8 @@ export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: Mod
     else updateImportDetails(importedFileImports, importDetails);
 
     const importedFile = getOrCreateFileNode(graph, importedFilePath);
-    if (!importedFile.imported) importedFile.imported = importDetails;
-    else updateImportDetails(importedFile.imported, importDetails);
+    if (!importedFile.imported) importedFile.imported = createImports();
+    updateImportDetails(importedFile.imported, importDetails);
 
     graph.set(importedFilePath, importedFile);
   }

@@ -1,3 +1,4 @@
+import type { ParsedArgs } from 'minimist';
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
@@ -180,6 +181,11 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
 const args = {
   config: true,
+  resolveInputs: (parsed: ParsedArgs) => {
+    const inputs: Input[] = [];
+    if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));
+    return inputs;
+  },
 };
 
 export default {

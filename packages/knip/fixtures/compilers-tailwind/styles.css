@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+@import './components.css';
+
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+@plugin "./local-js-plugin.js";
+@plugin "./local-ts-plugin.ts";
+@plugin "./missing-plugin.ts";

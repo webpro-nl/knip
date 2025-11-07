@@ -11,6 +11,8 @@
     "underscore": "*"
   },
   "babel": {
-    "presets": ["@babel/env"]
+    "presets": [
+      "@babel/env"
+    ]
   }
 }

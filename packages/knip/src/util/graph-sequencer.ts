@@ -35,7 +35,7 @@ export function graphSequencer<T>(graph: Graph<T>, includedNodes: T[] = [...grap
     for (const to of edges) {
       if (nodes.has(from) && nodes.has(to)) {
         changeOutDegree(from, 1);
-        // biome-ignore lint/style/noNonNullAssertion: deal with it
+        // biome-ignore lint: style/noNonNullAssertion
         reverseGraph.get(to)!.push(from);
       }
     }
@@ -51,7 +51,7 @@ export function graphSequencer<T>(graph: Graph<T>, includedNodes: T[] = [...grap
     const chunk: T[] = [];
     let minDegree = Number.MAX_SAFE_INTEGER;
     for (const node of nodes) {
-      // biome-ignore lint/style/noNonNullAssertion: deal with it
+      // biome-ignore lint: style/noNonNullAssertion
       const degree = outDegree.get(node)!;
       if (degree === 0) {
         chunk.push(node);
@@ -90,7 +90,7 @@ export function graphSequencer<T>(graph: Graph<T>, includedNodes: T[] = [...grap
 
   // Function to remove a node from the graph.
   function removeNode(node: T) {
-    // biome-ignore lint/style/noNonNullAssertion: deal with it
+    // biome-ignore lint: style/noNonNullAssertion
     for (const from of reverseGraph.get(node)!) {
       changeOutDegree(from, -1);
     }
@@ -104,7 +104,7 @@ export function graphSequencer<T>(graph: Graph<T>, includedNodes: T[] = [...grap
     const cycles: T[][] = [];
 
     while (queue.length) {
-      // biome-ignore lint/style/noNonNullAssertion: deal with it
+      // biome-ignore lint: style/noNonNullAssertion
       const [id, cycle] = queue.shift()!;
       const nodes = graph.get(id);
       if (!nodes) continue;

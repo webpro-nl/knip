@@ -1,16 +1,16 @@
 import { isBuiltin } from 'node:module';
 import type { Workspace } from './ConfigurationChief.js';
-import { PackagePeeker } from './PackagePeeker.js';
 import {
   DT_SCOPE,
+  IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
   IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
-  IGNORE_DEFINITELY_TYPED,
   ROOT_WORKSPACE_NAME,
 } from './constants.js';
 import { getDependencyMetaData } from './manifest/index.js';
-import type { ConfigurationHints, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
+import { PackagePeeker } from './PackagePeeker.js';
+import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
 import type { PackageJson } from './types/package-json.js';
 import type {
   DependencyArray,
@@ -27,6 +27,9 @@ import {
   isDefinitelyTyped,
 } from './util/modules.js';
 import { findMatch, toRegexOrString } from './util/regex.js';
+
+const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
+  typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
 
 /**
  * - Stores manifests
@@ -106,8 +109,8 @@ export class DependencyDeputy {
     this.setInstalledBinaries(name, installedBinaries);
     this.setHasTypesIncluded(name, hasTypesIncluded);
 
-    const ignoreDependencies = id.map(toRegexOrString);
-    const ignoreBinaries = ib.map(toRegexOrString);
+    const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
+    const ignoreBinaries = ib.flatMap(ib => filterIsProduction(ib, this.isProduction)).map(toRegexOrString);
     const ignoreUnresolved = iu.map(toRegexOrString);
 
     this._manifests.set(name, {
@@ -437,7 +440,7 @@ export class DependencyDeputy {
   }
 
   public getConfigurationHints() {
-    const configurationHints: ConfigurationHints = new Set();
+    const configurationHints = new Set<ConfigurationHint>();
 
     for (const [workspaceName, manifest] of this._manifests.entries()) {
       for (const identifier of manifest.unusedIgnoreDependencies) {

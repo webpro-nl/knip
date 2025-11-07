@@ -2,19 +2,19 @@ import picocolors from 'picocolors';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { Entries } from '../types/entries.js';
 import type { Issues } from '../types/issues.js';
-import { perfObserver } from '../util/Performance.js';
 import type { MainOptions } from '../util/create-options.js';
+import { perfObserver } from '../util/Performance.js';
 import { prettyMilliseconds } from '../util/string.js';
 import { getIssueTypeTitle, getTableForType } from './util/util.js';
 
 interface WatchReporter {
   issues: Issues;
   streamer: ConsoleStreamer;
-  startTime?: number;
+  duration?: number;
   size: number;
 }
 
-export default (options: MainOptions, { issues, streamer, startTime, size }: WatchReporter) => {
+export default (options: MainOptions, { issues, streamer, duration, size }: WatchReporter) => {
   const reportMultipleGroups = Object.values(options.includedIssueTypes).filter(Boolean).length > 1;
   let totalIssues = 0;
   const lines: string[] = [];
@@ -40,8 +40,8 @@ export default (options: MainOptions, { issues, streamer, startTime, size }: Wat
   }
 
   const mem = perfObserver.getCurrentMemUsageInMb();
-  const duration = perfObserver.getCurrentDurationInMs(startTime);
-  const summary = `${size} files in ${prettyMilliseconds(duration)} (${mem}MB)`;
+  const ms = duration ?? perfObserver.getCurrentDurationInMs();
+  const summary = `${size} files in ${prettyMilliseconds(ms)} (${mem}MB)`;
 
   const messages =
     totalIssues === 0

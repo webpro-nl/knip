@@ -8,7 +8,7 @@ export const importMatcher = /import[^'"]+['"][^'"]+['"]/g;
 export const importsWithinScripts: SyncCompilerFn = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
-  // biome-ignore lint/suspicious/noAssignInExpressions: ignore
+  // biome-ignore lint: suspicious/noAssignInExpressions
   while ((scriptMatch = scriptExtractor.exec(text))) {
     for (const importMatch of scriptMatch[1].matchAll(importMatcher)) {
       scripts.push(importMatch);
@@ -22,7 +22,7 @@ const scriptBodyExtractor = /<script\b[^>]*>(?<body>[\s\S]*?)<\/script>/gm;
 export const scriptBodies: SyncCompilerFn = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
-  // biome-ignore lint/suspicious/noAssignInExpressions: ignore
+  // biome-ignore lint: suspicious/noAssignInExpressions
   while ((scriptMatch = scriptBodyExtractor.exec(text))) {
     if (scriptMatch.groups?.body) scripts.push(scriptMatch.groups.body);
   }

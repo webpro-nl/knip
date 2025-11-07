@@ -2,6 +2,7 @@ import parseArgs from 'minimist';
 import type { BinaryResolver } from '../types/config.js';
 import { compact } from '../util/array.js';
 import { toBinary, toDeferResolve, toEntry } from '../util/input.js';
+import { isValidBinary } from './bash-parser.js';
 
 // Generic fallbacks for basic handling of binaries that don't have a plugin nor a custom resolver
 
@@ -9,7 +10,7 @@ import { toBinary, toDeferResolve, toEntry } from '../util/input.js';
 const spawningBinaries = ['cross-env', 'retry-cli'];
 
 // Binaries that have a new script behind the double-dash/end-of-command
-const endOfCommandBinaries = ['dotenvx'];
+const endOfCommandBinaries = ['dotenvx', 'env-cmd'];
 
 // Binaries with entry at first positional arg
 const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);
@@ -19,7 +20,7 @@ const positionalBinaries = new Set(['concurrently']);
 
 export const resolve: BinaryResolver = (binary, args, { fromArgs }) => {
   const parsed = parseArgs(args, { boolean: ['quiet', 'verbose'], '--': endOfCommandBinaries.includes(binary) });
-  const bin = binary.startsWith('.') ? toEntry(binary) : /[*:]/.test(binary) ? undefined : toBinary(binary);
+  const bin = binary.startsWith('.') ? toEntry(binary) : isValidBinary(binary) ? toBinary(binary) : undefined;
   const shiftedArgs = spawningBinaries.includes(binary) ? fromArgs(args) : [];
   const pos = positionals.has(binary) ? [toDeferResolve(parsed._[0])] : [];
   const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];

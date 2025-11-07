@@ -1,13 +1,6 @@
-export enum SymbolType {
-  VARIABLE = 'variable',
-  TYPE = 'type',
-  INTERFACE = 'interface',
-  ENUM = 'enum',
-  FUNCTION = 'function',
-  CLASS = 'class',
-  MEMBER = 'member',
-  UNKNOWN = 'unknown',
-}
+import type { SYMBOL_TYPE } from '../constants.js';
+
+export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 
 export type IssueSymbol = { symbol: string; pos?: number; line?: number; col?: number };
 
@@ -64,7 +57,7 @@ export type ReporterOptions = {
   issues: Issues;
   counters: Counters;
   tagHints: TagHints;
-  configurationHints: ConfigurationHints;
+  configurationHints: Set<ConfigurationHint>;
   isDisableConfigHints: boolean;
   isTreatConfigHintsAsErrors: boolean;
   cwd: string;
@@ -74,6 +67,7 @@ export type ReporterOptions = {
   preprocessorOptions: string;
   includedWorkspaceDirs: string[];
   configFilePath?: string;
+  maxShowIssues?: number;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
@@ -84,7 +78,7 @@ export type IssueSeverity = 'error' | 'warn' | 'off';
 
 export type Rules = Record<IssueType, IssueSeverity>;
 
-export type ConfigurationHints = Set<ConfigurationHint>;
+export type ConfigurationHints = Map<string, ConfigurationHint>;
 
 export type ConfigurationHintType =
   | 'ignoreBinaries'
@@ -98,6 +92,7 @@ export type ConfigurationHintType =
   | 'entry-empty'
   | 'project-empty'
   | 'package-entry'
+  | 'top-level-unconfigured'
   | 'workspace-unconfigured';
 
 export type ConfigurationHint = {

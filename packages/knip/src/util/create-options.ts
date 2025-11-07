@@ -2,11 +2,12 @@ import { partitionCompilers } from '../compilers/index.js';
 import { KNIP_CONFIG_LOCATIONS } from '../constants.js';
 import { knipConfigurationSchema } from '../schema/configuration.js';
 import type { RawConfiguration } from '../types/config.js';
+import type { IssueType } from '../types/issues.js';
 import type { Options } from '../types/options.js';
-import type parseArgs from './cli-arguments.js';
+import type { ParsedCLIArgs } from './cli-arguments.js';
 import { ConfigurationError } from './errors.js';
 import { findFile, loadJSON } from './fs.js';
-import { getIncludedIssueTypes, shorthandDeps, shorthandFiles, shorthandTypes } from './get-included-issue-types.js';
+import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.js';
 import { defaultRules } from './issue-initializers.js';
 import { loadResolvedConfigFile } from './load-config.js';
 import { _load } from './loader.js';
@@ -14,10 +15,8 @@ import { getKeysByValue } from './object.js';
 import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.js';
 import { splitTags } from './tag.js';
 
-type ParsedArgs = ReturnType<typeof parseArgs>;
-
 interface CreateOptions extends Partial<Options> {
-  parsedCLIArgs?: ParsedArgs;
+  parsedCLIArgs?: ParsedCLIArgs;
 }
 
 const pcwd = process.cwd();
@@ -28,7 +27,7 @@ const pcwd = process.cwd();
  * - Creates options
  */
 export const createOptions = async (options: CreateOptions) => {
-  const { parsedCLIArgs = {}, ...rest } = options;
+  const { parsedCLIArgs = {} } = options;
   const cwd = normalize(toPosix(toAbsolute(options.cwd ?? parsedCLIArgs.directory ?? pcwd, pcwd)));
 
   const manifestPath = findFile(cwd, 'package.json');
@@ -54,7 +53,7 @@ export const createOptions = async (options: CreateOptions) => {
   const loadedConfig = Object.assign(
     {},
     manifest.knip,
-    configFilePath ? await loadResolvedConfigFile(configFilePath) : {}
+    configFilePath ? await loadResolvedConfigFile(configFilePath, parsedCLIArgs) : {}
   );
 
   const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(partitionCompilers(loadedConfig));
@@ -72,8 +71,8 @@ export const createOptions = async (options: CreateOptions) => {
         : (manifest.workspaces.packages ?? [])
       : []);
 
-  const isStrict = rest.isStrict ?? parsedCLIArgs.strict ?? false;
-  const isProduction = rest.isProduction ?? parsedCLIArgs.production ?? isStrict;
+  const isStrict = options.isStrict ?? parsedCLIArgs.strict ?? false;
+  const isProduction = options.isProduction ?? parsedCLIArgs.production ?? isStrict;
 
   const rules = { ...defaultRules, ...parsedConfig.rules };
   const excludesFromRules = getKeysByValue(rules, 'off');
@@ -82,22 +81,26 @@ export const createOptions = async (options: CreateOptions) => {
     isProduction,
     exclude: [...excludesFromRules, ...(parsedConfig.exclude ?? [])],
     include: parsedConfig.include ?? [],
-    excludeOverrides: rest.excludedIssueTypes ?? parsedCLIArgs.exclude ?? [],
+    excludeOverrides: options.excludedIssueTypes ?? parsedCLIArgs.exclude ?? [],
     includeOverrides: [
-      ...(rest.includedIssueTypes ?? parsedCLIArgs.include ?? []),
+      ...(options.includedIssueTypes ?? parsedCLIArgs.include ?? []),
       ...(parsedCLIArgs.dependencies ? shorthandDeps : []),
-      ...(parsedCLIArgs.exports ? shorthandTypes : []),
+      ...(parsedCLIArgs.exports ? shorthandExports : []),
       ...(parsedCLIArgs.files ? shorthandFiles : []),
     ],
   });
 
-  const fixTypes = rest.fixTypes ?? parsedCLIArgs['fix-type'] ?? [];
+  for (const [key, value] of Object.entries(includedIssueTypes) as [IssueType, boolean][]) {
+    if (!value) rules[key] = 'off';
+  }
+
+  const fixTypes = options.fixTypes ?? parsedCLIArgs['fix-type'] ?? [];
   const isFixFiles = parsedCLIArgs['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
-  const isIncludeLibs = parsedCLIArgs['include-libs'] ?? rest.isIncludeLibs ?? false;
+  const isIncludeLibs = parsedCLIArgs['include-libs'] ?? options.isIncludeLibs ?? false;
 
   const isReportClassMembers = includedIssueTypes.classMembers;
   const tags = splitTags(
-    parsedCLIArgs.tags ?? rest.tags ?? parsedConfig.tags ?? parsedCLIArgs['experimental-tags'] ?? []
+    parsedCLIArgs.tags ?? options.tags ?? parsedConfig.tags ?? parsedCLIArgs['experimental-tags'] ?? []
   );
 
   return {
@@ -110,19 +113,19 @@ export const createOptions = async (options: CreateOptions) => {
     exports: parsedCLIArgs.exports ?? false,
     files: parsedCLIArgs.files ?? false,
     fixTypes,
-    gitignore: parsedCLIArgs['no-gitignore'] ? false : (rest.gitignore ?? true),
+    gitignore: parsedCLIArgs['no-gitignore'] ? false : (options.gitignore ?? true),
     includedIssueTypes,
     isCache: parsedCLIArgs.cache ?? false,
     isDebug: parsedCLIArgs.debug ?? false,
     isDisableConfigHints: parsedCLIArgs['no-config-hints'] || isProduction || Boolean(parsedCLIArgs.workspace),
-    isFix: parsedCLIArgs.fix ?? rest.isFix ?? false,
+    isFix: parsedCLIArgs.fix ?? options.isFix ?? isFixFiles ?? fixTypes.length > 0,
     isFixDependencies: fixTypes.length === 0 || fixTypes.includes('dependencies'),
     isFixFiles,
     isFixUnusedExports: fixTypes.length === 0 || fixTypes.includes('exports'),
     isFixUnusedTypes: fixTypes.length === 0 || fixTypes.includes('types'),
-    isFormat: parsedCLIArgs.format ?? rest.isFormat ?? false,
-    isIncludeEntryExports: parsedCLIArgs['include-entry-exports'] ?? rest.isIncludeEntryExports ?? false,
-    isIsolateWorkspaces: rest.isIsolateWorkspaces ?? parsedCLIArgs['isolate-workspaces'] ?? false,
+    isFormat: parsedCLIArgs.format ?? options.isFormat ?? false,
+    isIncludeEntryExports: parsedCLIArgs['include-entry-exports'] ?? options.isIncludeEntryExports ?? false,
+    isIsolateWorkspaces: options.isIsolateWorkspaces ?? parsedCLIArgs['isolate-workspaces'] ?? false,
     isProduction,
     isReportClassMembers,
     isReportDependencies:
@@ -133,20 +136,24 @@ export const createOptions = async (options: CreateOptions) => {
     isReportTypes: includedIssueTypes.types || includedIssueTypes.nsTypes || includedIssueTypes.enumMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports || isReportClassMembers,
     isShowProgress:
-      parsedCLIArgs['no-progress'] === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function',
+      parsedCLIArgs['no-progress'] !== true &&
+      options.isShowProgress !== false &&
+      process.stdout.isTTY &&
+      typeof process.stdout.cursorTo === 'function',
     isSkipLibs: !(isIncludeLibs || includedIssueTypes.classMembers),
     isStrict,
-    isTrace: parsedCLIArgs.trace ?? false,
+    isTrace: Boolean(parsedCLIArgs.trace ?? parsedCLIArgs['trace-file'] ?? parsedCLIArgs['trace-export']),
     isTreatConfigHintsAsErrors:
       parsedCLIArgs['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
-    isWatch: parsedCLIArgs.watch ?? rest.isWatch ?? false,
+    isWatch: parsedCLIArgs.watch ?? options.isWatch ?? false,
+    maxShowIssues: parsedCLIArgs['max-show-issues'] ? Number(parsedCLIArgs['max-show-issues']) : undefined,
     parsedConfig,
     rules,
     tags,
     traceExport: parsedCLIArgs['trace-export'],
     traceFile: parsedCLIArgs['trace-file'],
     tsConfigFile: parsedCLIArgs.tsConfig,
-    workspace: rest.workspace ?? parsedCLIArgs.workspace,
+    workspace: options.workspace ?? parsedCLIArgs.workspace,
     workspaces,
   };
 };

@@ -1,6 +1,8 @@
 {
   "name": "@fixtures/exports-special-characters",
   "knip": {
-    "include": ["classMembers"]
+    "include": [
+      "classMembers"
+    ]
   }
 }

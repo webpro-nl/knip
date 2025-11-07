@@ -93,7 +93,7 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
               item[parentSymbol].push(convert(issue));
             }
           } else {
-            if (['unlisted', 'binaries'].includes(type)) {
+            if (type === 'binaries') {
               json[filePath][type]?.push({ name: symbol });
             } else {
               json[filePath][type]?.push(convert(issue));

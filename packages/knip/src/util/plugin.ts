@@ -1,4 +1,5 @@
 export { _load as load } from './loader.js';
+
 import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.js';
 import { arrayify } from './array.js';
 import { _load as load } from './loader.js';

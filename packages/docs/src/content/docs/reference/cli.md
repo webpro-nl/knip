@@ -449,6 +449,10 @@ Always exit with code zero (`0`), even when there are lint issues.
 
 Maximum number of issues before non-zero exit code. Default: `0`
 
+### `--max-show-issues`
+
+Maximum number of issues per type to display (does not affect exit code).
+
 ### `--no-config-hints`
 
 Suppress configuration hints.

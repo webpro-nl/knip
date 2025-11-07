@@ -1,5 +1,5 @@
-import type { PluginName } from '../types/PluginNames.js';
 import type { IssueType } from '../types/issues.js';
+import type { PluginName } from '../types/PluginNames.js';
 import { isAbsolute, toRelative } from './path.js';
 
 type InputType =

@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
 
 // https://github.com/lirantal/lockfile-lint/blob/main/packages/lockfile-lint/README.md
 

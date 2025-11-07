@@ -89,7 +89,11 @@ function getSymbolDescription({
   type,
   symbol,
   parentSymbol,
-}: { type: SymbolIssueType; symbol: IssueSymbol; parentSymbol?: string }) {
+}: {
+  type: SymbolIssueType;
+  symbol: IssueSymbol;
+  parentSymbol?: string;
+}) {
   return `${getPrefix(type)}: ${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
 }
 

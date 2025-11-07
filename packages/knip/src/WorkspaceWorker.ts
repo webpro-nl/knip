@@ -1,27 +1,25 @@
 import picomatch from 'picomatch';
-import { CacheConsultant } from './CacheConsultant.js';
-import { type Workspace, isDefaultPattern } from './ConfigurationChief.js';
 import { _getInputsFromScripts } from './binaries/index.js';
+import { CacheConsultant } from './CacheConsultant.js';
+import { isDefaultPattern, type Workspace } from './ConfigurationChief.js';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { getFilteredScripts } from './manifest/helpers.js';
 import { PluginEntries, Plugins } from './plugins.js';
-import type { PluginName } from './types/PluginNames.js';
 import type {
-  Configuration,
   EnsuredPluginConfiguration,
   GetInputsFromScriptsPartial,
   GetReferencedInternalFilePath,
   GetSourceFile,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { ConfigurationHints } from './types/issues.js';
+import type { ConfigurationHint } from './types/issues.js';
+import type { PluginName } from './types/PluginNames.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
-import { timerify } from './util/Performance.js';
 import { compact } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
-import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate, prependDirToPattern } from './util/glob.js';
+import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.js';
 import {
   type ConfigInput,
   type Input,
@@ -32,6 +30,7 @@ import {
   toProductionEntry,
 } from './util/input.js';
 import { getKeysByValue } from './util/object.js';
+import { timerify } from './util/Performance.js';
 import { basename, dirname, join } from './util/path.js';
 import { loadConfigForPlugin } from './util/plugin.js';
 import { ELLIPSIS } from './util/string.js';
@@ -45,7 +44,6 @@ type WorkspaceManagerOptions = {
   getReferencedInternalFilePath: GetReferencedInternalFilePath;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getSourceFile: GetSourceFile;
-  rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -59,7 +57,7 @@ const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, proj
 
 const initEnabledPluginsMap = () =>
   Object.keys(Plugins).reduce(
-    // biome-ignore lint/performance/noAccumulatingSpread: TODO
+    // biome-ignore lint: performance/noAccumulatingSpread
     (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
     {} as Record<PluginName, boolean>
   );
@@ -78,7 +76,6 @@ export class WorkspaceWorker {
   getReferencedInternalFilePath: GetReferencedInternalFilePath;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getSourceFile: GetSourceFile;
-  rootIgnore: Configuration['ignore'];
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
@@ -98,7 +95,6 @@ export class WorkspaceWorker {
     config,
     manifest,
     dependencies,
-    rootIgnore,
     negatedWorkspacePatterns,
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors,
@@ -113,7 +109,6 @@ export class WorkspaceWorker {
     this.config = config;
     this.manifest = manifest;
     this.dependencies = dependencies;
-    this.rootIgnore = rootIgnore;
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
@@ -246,10 +241,6 @@ export class WorkspaceWorker {
     const plugin = Plugins[pluginName];
     const pluginConfig = this.getConfigForPlugin(pluginName);
     return pluginConfig.config ?? plugin.config ?? [];
-  }
-
-  public getIgnorePatterns() {
-    return [...this.rootIgnore, ...this.config.ignore.map(pattern => prependDirToPattern(this.name, pattern))];
   }
 
   public async runPlugins() {
@@ -454,7 +445,7 @@ export class WorkspaceWorker {
     filePaths: string[],
     includedPaths: Set<string>
   ) {
-    const hints: ConfigurationHints = new Set();
+    const hints = new Set<ConfigurationHint>();
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
     const workspaceName = this.name;
     const userDefinedPatterns = entries.filter(id => !isDefaultPattern(type, id));

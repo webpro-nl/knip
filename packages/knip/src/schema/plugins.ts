@@ -1,23 +1,25 @@
 // This file is generated (no need to edit)
-import { z } from 'zod';
+import { z } from 'zod/mini';
 export const globSchema = z.union([z.string(), z.array(z.string())]);
 
 export const pluginSchema = z.union([
   z.boolean(),
   globSchema,
   z.object({
-    config: globSchema.optional(),
-    entry: globSchema.optional(),
-    project: globSchema.optional(),
+    config: z.optional(globSchema),
+    entry: z.optional(globSchema),
+    project: z.optional(globSchema),
   }),
 ]);
 
 export const pluginsSchema = z.object({
   angular: pluginSchema,
   astro: pluginSchema,
+  'astro-db': pluginSchema,
   ava: pluginSchema,
   babel: pluginSchema,
   biome: pluginSchema,
+  bumpp: pluginSchema,
   bun: pluginSchema,
   c8: pluginSchema,
   capacitor: pluginSchema,
@@ -31,6 +33,7 @@ export const pluginsSchema = z.object({
   cspell: pluginSchema,
   cucumber: pluginSchema,
   cypress: pluginSchema,
+  danger: pluginSchema,
   'dependency-cruiser': pluginSchema,
   docusaurus: pluginSchema,
   dotenv: pluginSchema,
@@ -55,6 +58,7 @@ export const pluginsSchema = z.object({
   'lockfile-lint': pluginSchema,
   'lost-pixel': pluginSchema,
   markdownlint: pluginSchema,
+  mdxlint: pluginSchema,
   metro: pluginSchema,
   mocha: pluginSchema,
   moonrepo: pluginSchema,
@@ -91,6 +95,7 @@ export const pluginsSchema = z.object({
   rsbuild: pluginSchema,
   rslib: pluginSchema,
   rspack: pluginSchema,
+  rstest: pluginSchema,
   'semantic-release': pluginSchema,
   sentry: pluginSchema,
   'simple-git-hooks': pluginSchema,

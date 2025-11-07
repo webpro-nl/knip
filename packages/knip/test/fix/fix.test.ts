@@ -1,9 +1,9 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
+import test from 'node:test';
 import { main } from '../../src/index.js';
-import { createOptions } from '../../src/util/create-options.js';
 import { join } from '../../src/util/path.js';
+import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/fix');
@@ -18,9 +18,9 @@ test('Fix exports and dependencies', async () => {
       `const x = 1;
 const y = 2;
 
-// biome-ignore lint/suspicious/noEmptyInterface:  fixture festa
+// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint/complexity/noBannedTypes:  fixture festa
+// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 
@@ -101,6 +101,7 @@ type Seven = unknown;
 const Eight = 8;
 const Nine = 9;
 type Ten = unknown[];
+
 ;
 
 export {   Nine,  };
@@ -168,9 +169,9 @@ test('Fix only exported types', async () => {
       `export const x = 1;
 export const y = 2;
 
-// biome-ignore lint/suspicious/noEmptyInterface:  fixture festa
+// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint/complexity/noBannedTypes:  fixture festa
+// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 
@@ -209,6 +210,7 @@ type Seven = unknown;
 const Eight = 8;
 const Nine = 9;
 type Ten = unknown[];
+
 ;
 
 export {  Eight, Nine,  };

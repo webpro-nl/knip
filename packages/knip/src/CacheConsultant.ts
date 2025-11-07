@@ -1,6 +1,6 @@
-import { timerify } from './util/Performance.js';
 import type { MainOptions } from './util/create-options.js';
 import { type FileDescriptor, FileEntryCache } from './util/file-entry-cache.js';
+import { timerify } from './util/Performance.js';
 import { version } from './version.js';
 
 const dummyFileDescriptor: FileDescriptor<any> = { key: '', changed: true, notFound: true };

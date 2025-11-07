@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { pad, truncate, truncateStart } from '../../src/util/string.js';
 
 test('truncate', () => {

@@ -6,6 +6,8 @@
     ".": "./dist/index.js",
     "./*": "./dist/*"
   },
-  "files": ["dist/**/*.js"],
+  "files": [
+    "dist/**/*.js"
+  ],
   "sideEffects": false
 }

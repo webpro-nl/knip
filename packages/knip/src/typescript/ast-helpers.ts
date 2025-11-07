@@ -1,7 +1,7 @@
 import ts from 'typescript';
-import { FIX_FLAGS } from '../constants.js';
+import { FIX_FLAGS, SYMBOL_TYPE } from '../constants.js';
 import type { Fix } from '../types/exports.js';
-import { SymbolType } from '../types/issues.js';
+import type { SymbolType } from '../types/issues.js';
 
 function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
   return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
@@ -52,14 +52,14 @@ export function isPropertyAccessCall(node: ts.Node, identifier: string): node is
 }
 
 export const getNodeType = (node: ts.Node): SymbolType => {
-  if (!node) return SymbolType.UNKNOWN;
-  if (ts.isFunctionDeclaration(node)) return SymbolType.FUNCTION;
-  if (ts.isClassDeclaration(node)) return SymbolType.CLASS;
-  if (ts.isInterfaceDeclaration(node)) return SymbolType.INTERFACE;
-  if (ts.isTypeAliasDeclaration(node)) return SymbolType.TYPE;
-  if (ts.isEnumDeclaration(node)) return SymbolType.ENUM;
-  if (ts.isVariableDeclaration(node)) return SymbolType.VARIABLE;
-  return SymbolType.UNKNOWN;
+  if (!node) return SYMBOL_TYPE.UNKNOWN;
+  if (ts.isFunctionDeclaration(node)) return SYMBOL_TYPE.FUNCTION;
+  if (ts.isClassDeclaration(node)) return SYMBOL_TYPE.CLASS;
+  if (ts.isInterfaceDeclaration(node)) return SYMBOL_TYPE.INTERFACE;
+  if (ts.isTypeAliasDeclaration(node)) return SYMBOL_TYPE.TYPE;
+  if (ts.isEnumDeclaration(node)) return SYMBOL_TYPE.ENUM;
+  if (ts.isVariableDeclaration(node)) return SYMBOL_TYPE.VARIABLE;
+  return SYMBOL_TYPE.UNKNOWN;
 };
 
 export const isNonPrivatePropertyOrMethodDeclaration = (
@@ -73,7 +73,7 @@ export const getClassMember = (member: ts.MethodDeclaration | ts.PropertyDeclara
   identifier: member.name.getText(),
   // Naive, but [does.the.job()]
   pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
-  type: SymbolType.MEMBER,
+  type: SYMBOL_TYPE.MEMBER,
   fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
 });
 
@@ -81,7 +81,7 @@ export const getEnumMember = (member: ts.EnumMember, isFixTypes: boolean) => ({
   node: member,
   identifier: stripQuotes(member.name.getText()),
   pos: member.name.getStart(),
-  type: SymbolType.MEMBER,
+  type: SYMBOL_TYPE.MEMBER,
   fix: isFixTypes
     ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
     : undefined,
@@ -204,8 +204,18 @@ export const isDestructuring = (node: ts.Node) =>
   ts.isVariableDeclarationList(node.parent.parent) &&
   ts.isObjectBindingPattern(node.parent.name);
 
-export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
-  name.elements.map(element => element.name.getText());
+export const getDestructuredNames = (name: ts.ObjectBindingPattern): [string[], boolean] => {
+  const members: string[] = [];
+  let hasSpread = false;
+  for (const element of name.elements) {
+    if (element.dotDotDotToken) {
+      hasSpread = true;
+      break;
+    }
+    members.push(element.name.getText());
+  }
+  return [members, hasSpread];
+};
 
 export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isPropertyAssignment(node.parent) ||
@@ -313,4 +323,40 @@ export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName
     }
   }
   return values;
+};
+
+export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
+  const identifiers: Array<{ identifier: string; pos: number }> = [];
+
+  function visit(node: ts.Node) {
+    if (ts.isPropertyAccessExpression(node) && node.expression.getText() === identifier) {
+      identifiers.push({ identifier: String(node.name.escapedText), pos: node.name.pos });
+    } else if (
+      ts.isElementAccessExpression(node) &&
+      node.expression.getText() === identifier &&
+      ts.isStringLiteral(node.argumentExpression)
+    ) {
+      identifiers.push({
+        identifier: stripQuotes(node.argumentExpression.text),
+        pos: node.argumentExpression.pos,
+      });
+    } else if (
+      ts.isVariableDeclaration(node) &&
+      node.initializer?.getText() === identifier &&
+      ts.isObjectBindingPattern(node.name)
+    ) {
+      for (const element of node.name.elements) {
+        if (ts.isBindingElement(element)) {
+          const identifier = (element.propertyName ?? element.name).getText();
+          identifiers.push({ identifier, pos: element.pos });
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(scope);
+
+  return identifiers;
 };

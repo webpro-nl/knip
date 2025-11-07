@@ -40,7 +40,7 @@ const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => 
     const file = hasRef ? rel : picocolors.dim(rel);
     const suffix = (hasRef ? HAS_REF : '') + (child.isEntry ? IS_ENTRY : '');
     const text = `${padding}${picocolors.dim(isLast ? '└─' : '├─')} ${file}${suffix}`;
-    // biome-ignore lint/suspicious/noConsoleLog:
+    // biome-ignore lint: suspicious
     console.log(text);
     if (child.children.size > 0) {
       if (!isLast) levels.add(level);
@@ -52,14 +52,14 @@ const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => 
 
 export const printTrace = (node: TraceNode, filePath: string, options: MainOptions, identifier?: string) => {
   if (!options.isTrace) return;
-  if (options.traceExport && identifier && identifier !== options.traceExport) return;
+  if (options.traceExport && identifier !== options.traceExport) return;
   if (options.traceFile && filePath !== toAbsolute(options.traceFile, options.cwd)) return;
   const suffix = (node.isEntry ? IS_ENTRY : '') + (node.children.size === 0 ? HAS_NO_REF : '');
   const header = `${toRelative(filePath, options.cwd)}${identifier ? `:${identifier}` : ''}${suffix}`;
-  // biome-ignore lint/suspicious/noConsoleLog:
+  // biome-ignore lint: suspicious
   console.log(header);
   renderTrace(node);
-  // biome-ignore lint/suspicious/noConsoleLog:
+  // biome-ignore lint: suspicious
   console.log();
 };
 

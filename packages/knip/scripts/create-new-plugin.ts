@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-// biome-ignore lint/nursery/noRestrictedImports: script
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -70,10 +70,10 @@ await fs.cp(pluginTestTemplateFilePath, pluginTestFilePath, {
 
 // String replacements
 for (const filePath of [newPluginFile, pluginTestFilePath, pluginTestFixtureManifest]) {
-  if (await fs.exists(filePath)) {
+  try {
     const content = String(await fs.readFile(filePath));
     await fs.writeFile(filePath, content.replaceAll('_template', name).replaceAll('__PLUGIN_NAME__', name));
-  }
+  } catch {}
 }
 
 // Add plugin to JSON Schema
@@ -88,7 +88,7 @@ properties[name] = {
 
 plugins.properties = Object.keys(properties)
   .sort()
-  // biome-ignore lint/performance/noAccumulatingSpread: ignore
+  // biome-ignore lint: performance/noAccumulatingSpread
   .reduce((props, key) => ({ ...props, [key]: properties[key] }), {});
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));

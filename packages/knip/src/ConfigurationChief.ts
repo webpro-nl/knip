@@ -1,9 +1,8 @@
-// biome-ignore lint/nursery/noRestrictedImports: ignore
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import picomatch from 'picomatch';
 import type { SyncCompilers } from './compilers/types.js';
 import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.js';
-import { type PluginName, pluginNames } from './types/PluginNames.js';
 import type {
   Configuration,
   IgnorePatterns,
@@ -12,11 +11,12 @@ import type {
   RawPluginConfiguration,
   WorkspaceConfiguration,
 } from './types/config.js';
-import type { ConfigurationHints } from './types/issues.js';
+import type { ConfigurationHint } from './types/issues.js';
+import { type PluginName, pluginNames } from './types/PluginNames.js';
 import type { WorkspacePackage } from './types/package-json.js';
 import { arrayify, compact, partition } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
-import { type WorkspaceGraph, createWorkspaceGraph } from './util/create-workspace-graph.js';
+import { createWorkspaceGraph, type WorkspaceGraph } from './util/create-workspace-graph.js';
 import { ConfigurationError } from './util/errors.js';
 import { isDirectory, isFile } from './util/fs.js';
 import { _dirGlob, removeProductionSuffix } from './util/glob.js';
@@ -50,6 +50,7 @@ const isPluginName = (name: string): name is PluginName => pluginNames.includes(
 
 const defaultConfig: Configuration = {
   ignore: [],
+  ignoreFiles: [],
   ignoreBinaries: [],
   ignoreDependencies: [],
   ignoreMembers: [],
@@ -114,7 +115,7 @@ export class ConfigurationChief {
   }
 
   public getConfigurationHints() {
-    const hints: ConfigurationHints = new Set();
+    const hints = new Set<ConfigurationHint>();
     if (this.rawConfig) {
       if (this.workspacePackages.size > 1) {
         const entry = arrayify(this.rawConfig.entry);
@@ -134,11 +135,13 @@ export class ConfigurationChief {
 
   private normalize(rawConfig: RawConfiguration): Configuration {
     const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
+    const ignoreFiles = arrayify(rawConfig.ignoreFiles ?? defaultConfig.ignoreFiles);
     const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
     const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
     const ignoreUnresolved = rawConfig.ignoreUnresolved ?? [];
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
+    const ignoreIssues = rawConfig.ignoreIssues;
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
 
@@ -154,11 +157,13 @@ export class ConfigurationChief {
 
     return {
       ignore,
+      ignoreFiles,
       ignoreBinaries,
       ignoreDependencies,
       ignoreMembers,
       ignoreUnresolved,
       ignoreExportsUsedInFile,
+      ignoreIssues,
       ignoreWorkspaces,
       isIncludeEntryExports,
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,
@@ -197,7 +202,7 @@ export class ConfigurationChief {
       this.includedWorkspaces.map(workspace => workspace.dir)
     );
     const [root, rest] = partition(sorted.chunks.flat(), dir => dir === this.cwd);
-    // biome-ignore lint/style/noNonNullAssertion: deal with it
+    // biome-ignore lint: style/noNonNullAssertion
     return [...root, ...rest.reverse()].map(dir => this.includedWorkspaces.find(w => w.dir === dir)!);
   }
 
@@ -386,6 +391,7 @@ export class ConfigurationChief {
     const project = workspaceConfig.project ? arrayify(workspaceConfig.project) : baseConfig.project;
     const paths = workspaceConfig.paths ?? {};
     const ignore = arrayify(workspaceConfig.ignore);
+    const ignoreFiles = arrayify(workspaceConfig.ignoreFiles);
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
     const plugins: Partial<PluginsConfiguration> = {};
@@ -400,7 +406,7 @@ export class ConfigurationChief {
       }
     }
 
-    return { entry, project, paths, ignore, isIncludeEntryExports, ...plugins };
+    return { entry, project, paths, ignore, ignoreFiles, isIncludeEntryExports, ...plugins };
   }
 
   public findWorkspaceByFilePath(filePath: string) {

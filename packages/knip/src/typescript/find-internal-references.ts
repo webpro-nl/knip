@@ -33,7 +33,7 @@ export const findInternalReferences = (
   let isSymbolInExport = false;
   let index = 0;
 
-  // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+  // biome-ignore lint: suspicious/noAssignInExpressions
   while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
     if (!isIdChar(text.charAt(index - 1)) && !isIdChar(text.charAt(index + id.length))) {
       const isExportDeclaration = index === item.pos || index === item.pos + 1; // off-by-one from `stripQuotes`
@@ -54,12 +54,21 @@ export const findInternalReferences = (
           if (declaration) {
             // @ts-expect-error Keep it cheap
             if (findInFlow(declaration.name?.flowNode, item.symbol)) {
-              return [++refCount, isSymbolInExport];
+              refCount++;
+              return [refCount, isSymbolInExport];
             }
 
             if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) {
               // Consider re-exports referenced
               return [++refCount, isSymbolInExport];
+            }
+          }
+
+          if (symbol && symbol.flags & ts.SymbolFlags.Property) {
+            const type = typeChecker.getTypeOfSymbol(symbol);
+            if (type?.symbol && item.symbol === type.symbol) {
+              refCount++;
+              if (isBindingElement) return [refCount, isSymbolInExport];
             }
           }
 

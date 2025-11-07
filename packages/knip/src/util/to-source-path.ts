@@ -3,7 +3,7 @@ import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { debugLog, debugLogArray } from './debug.js';
 import { isDirectory } from './fs.js';
-import { _glob, _syncGlob } from './glob.js';
+import { _glob, _syncGlob, prependDirToPattern } from './glob.js';
 import { isAbsolute, isInternal, join, toRelative } from './path.js';
 
 const defaultExtensions = `.{${DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',')}}`;
@@ -42,11 +42,11 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
 };
 
 export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
-  return async (specifiers: Set<string>, dir: string, extensions = defaultExtensions) => {
+  return async (specifiers: Set<string>, dir: string, extensions = defaultExtensions, label: string) => {
     const patterns = new Set<string>();
 
     for (const specifier of specifiers) {
-      const absSpecifier = isAbsolute(specifier) ? specifier : join(dir, specifier);
+      const absSpecifier = isAbsolute(specifier) ? specifier : prependDirToPattern(dir, specifier);
       const ws = chief.findWorkspaceByFilePath(absSpecifier);
       if (ws?.srcDir && ws.outDir && !absSpecifier.startsWith(ws.srcDir) && absSpecifier.startsWith(ws.outDir)) {
         const pattern = absSpecifier.replace(ws.outDir, ws.srcDir).replace(matchExt, extensions);
@@ -56,7 +56,7 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
       }
     }
 
-    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir });
+    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir, label });
 
     debugLogArray(toRelative(dir, chief.cwd), 'Source mapping (package.json)', filePaths);
 

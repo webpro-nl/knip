@@ -1,5 +1,3 @@
-import type { IssueType } from './types/issues.js';
-
 export const ROOT_WORKSPACE_NAME = '.';
 
 export const IMPORT_STAR = '*';
@@ -121,6 +119,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'tac',
   'tee',
   'test', // exception (node built-in module)
+  'time',
   'timeout',
   'touch',
   'tr',
@@ -130,6 +129,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'uname',
   'unexpand',
   'uniq',
+  'unzip',
   'wc',
   'who',
   'whoami',
@@ -177,7 +177,7 @@ export const IGNORE_DEFINITELY_TYPED = new Set([
   'jest',
 ]);
 
-export const ISSUE_TYPES: IssueType[] = [
+export const ISSUE_TYPES = [
   'files',
   'dependencies',
   'devDependencies',
@@ -192,9 +192,9 @@ export const ISSUE_TYPES: IssueType[] = [
   'enumMembers',
   'classMembers',
   'duplicates',
-];
+] as const;
 
-export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
+export const ISSUE_TYPE_TITLE = {
   files: 'Unused files',
   _files: 'Unused files',
   dependencies: 'Unused dependencies',
@@ -210,7 +210,18 @@ export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   enumMembers: 'Unused exported enum members',
   classMembers: 'Unused exported class members',
   duplicates: 'Duplicate exports',
-};
+} as const;
+
+export const SYMBOL_TYPE = {
+  CLASS: 'class',
+  ENUM: 'enum',
+  FUNCTION: 'function',
+  INTERFACE: 'interface',
+  MEMBER: 'member',
+  TYPE: 'type',
+  UNKNOWN: 'unknown',
+  VARIABLE: 'variable',
+} as const;
 
 export const FIX_FLAGS = {
   NONE: 0,

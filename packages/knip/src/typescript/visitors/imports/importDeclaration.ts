@@ -49,7 +49,7 @@ export default visit(
               // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportSpecifier'.
               symbol: element.symbol,
               isTypeOnly: node.importClause?.isTypeOnly,
-              pos: element.pos,
+              pos: element.getStart(),
             });
           }
         }

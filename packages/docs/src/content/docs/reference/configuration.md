@@ -198,8 +198,9 @@ Exit with non-zero code (1) if there are any configuration hints.
 
 :::tip
 
-Please read [project files configuration][9] before using the `ignore` option,
-because in many cases you'll want to **fine-tune project files** instead.
+Please read [configuring project files][9] before using the `ignore` option,
+because in most cases you'll want to fine‑tune `entry` and `project` (or use
+production mode) instead.
 
 :::
 
@@ -210,6 +211,23 @@ Array of glob patterns to ignore issues from matching files. Example:
   "ignore": ["src/generated.ts", "fixtures/**"]
 }
 ```
+
+### `ignoreFiles`
+
+Array of glob patterns of files to exclude from the "Unused files" section only.
+
+Unlike `ignore`, which suppresses all issue types for matching files,
+`ignoreFiles` only affects the `files` issue type. Use this when a file should
+remain analyzed for other issues (exports, dependencies, unresolved) but should
+not be considered for unused file detection.
+
+```json title="knip.json"
+{
+  "ignoreFiles": ["src/generated/**", "fixtures/**"]
+}
+```
+
+Suffix an item with `!` to enable it only in production mode.
 
 ### `ignoreBinaries`
 
@@ -230,6 +248,8 @@ export default {
 };
 ```
 
+Suffix an item with `!` to enable it only in production mode.
+
 ### `ignoreDependencies`
 
 Array of package names to exclude from the report. Regular expressions allowed.
@@ -248,6 +268,8 @@ export default {
   ignoreDependencies: [/@org\/.*/, /^lib-.+/],
 };
 ```
+
+Suffix an item with `!` to enable it only in production mode.
 
 ### `ignoreMembers`
 
@@ -292,6 +314,24 @@ Array of workspaces to ignore, globs allowed. Example:
     "packages/flat/*",
     "packages/deep/**"
   ]
+}
+```
+
+Suffix an item with `!` to enable it only in production mode.
+
+### `ignoreIssues`
+
+Ignore specific issue types for specific file patterns. Keys are glob patterns
+and values are arrays of issue types to ignore for matching files. This allows
+ignoring specific issues (like unused exports) in generated files while still
+reporting other issues in those same files.
+
+```json title="knip.json"
+{
+  "ignoreIssues": {
+    "src/generated/**": ["exports", "types"],
+    "**/*.generated.ts": ["exports", "classMembers"]
+  }
 }
 ```
 

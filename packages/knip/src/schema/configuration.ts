@@ -1,10 +1,14 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
+import { SYMBOL_TYPE } from '../constants.js';
 import { globSchema, pluginsSchema } from './plugins.js';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
-const syncCompilerSchema = z.union([z.function().args(z.string(), z.string()).returns(z.string()), z.literal(true)]);
-const asyncCompilerSchema = z.function().args(z.string(), z.string()).returns(z.promise(z.string()));
+type SyncCompiler = (filename: string, contents: string) => string;
+type AsyncCompiler = (filename: string, contents: string) => Promise<string>;
+
+const syncCompilerSchema = z.union([z.literal(true), z.custom<SyncCompiler>()]);
+const asyncCompilerSchema = z.custom<AsyncCompiler>();
 const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
 const compilersSchema = z.record(z.string(), compilerSchema);
 
@@ -27,22 +31,17 @@ const issueTypeSchema = z.union([
   z.literal('classMembers'),
 ]);
 
-const rulesSchema = z.record(issueTypeSchema, z.enum(['error', 'warn', 'off']));
+const rulesSchema = z.partialRecord(issueTypeSchema, z.enum(['error', 'warn', 'off']));
 
-const ignoreExportsUsedInFileSchema = z.union([
-  z.boolean(),
-  z.record(
-    z.union([
-      z.literal('class'),
-      z.literal('enum'),
-      z.literal('function'),
-      z.literal('interface'),
-      z.literal('member'),
-      z.literal('type'),
-    ]),
-    z.boolean()
-  ),
-]);
+const ignorableSymbolTypes = Object.values(SYMBOL_TYPE).filter(type => type !== 'unknown');
+
+const ignoreExportsUsedInFileObjectSchema = z.strictObject(
+  Object.fromEntries(ignorableSymbolTypes.map(type => [type, z.optional(z.boolean())]))
+);
+
+const ignoreExportsUsedInFileSchema = z.union([z.boolean(), ignoreExportsUsedInFileObjectSchema]);
+
+const ignoreIssuesSchema = z.record(z.string(), z.array(issueTypeSchema));
 
 const rootConfigurationSchema = z.object({
   /**
@@ -72,13 +71,13 @@ const rootConfigurationSchema = z.object({
    * @remarks
    * Use JSONC if you want to use comments and/or trailing commas.
    */
-  $schema: z.string().optional(),
+  $schema: z.optional(z.string()),
   /**
    * @default {}
    *
    * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
    */
-  rules: rulesSchema.optional(),
+  rules: z.optional(rulesSchema),
   /**
    * Array of glob patterns to find entry files. Prefix with `!` for negation.
    *
@@ -91,7 +90,7 @@ const rootConfigurationSchema = z.object({
    *
    * @see {@link https://knip.dev/overview/configuration | configuration} and {@link https://knip.dev/explanations/entry-files | entry files}
    */
-  entry: globSchema.optional(),
+  entry: z.optional(globSchema),
   /**
    * Array of glob patterns to find project files.
    *
@@ -104,7 +103,7 @@ const rootConfigurationSchema = z.object({
    *
    * @see {@link https://knip.dev/overview/configuration | configuration} and {@link https://knip.dev/explanations/entry-files | entry files}
    */
-  project: globSchema.optional(),
+  project: z.optional(globSchema),
   /**
    * Tools like TypeScript, webpack and Babel support import aliases in various ways.
    * Knip automatically includes `compilerOptions.paths` from the TypeScript
@@ -129,7 +128,7 @@ const rootConfigurationSchema = z.object({
    * - Paths without an `*` are exact matches
    *
    */
-  paths: pathsSchema.optional(),
+  paths: z.optional(pathsSchema),
   /**
    * :::tip
    *
@@ -147,7 +146,15 @@ const rootConfigurationSchema = z.object({
    * }
    * ```
    */
-  ignore: globSchema.optional(),
+  ignore: z.optional(globSchema),
+  /**
+   * Array of glob patterns of files to exclude from the "Unused files" report section only.
+   *
+   * Unlike `ignore`, which suppresses all issue types for matching files, `ignoreFiles` only
+   * affects the `files` issue type. Use this when a file should still be analyzed for other
+   * issues (exports, dependencies, unresolved) but should not be considered for unused file detection.
+   */
+  ignoreFiles: z.optional(globSchema),
   /**
    * Exclude binaries that are used but not provided by any dependency from the
    * report. Value is an array of binary names or regular expressions.
@@ -168,7 +175,7 @@ const rootConfigurationSchema = z.object({
    * };
    * ```
    */
-  ignoreBinaries: stringOrRegexSchema.optional(),
+  ignoreBinaries: z.optional(stringOrRegexSchema),
   /**
    * Array of package names to exclude from the report. Regular expressions allowed.
    *
@@ -187,7 +194,7 @@ const rootConfigurationSchema = z.object({
    * };
    * ```
    */
-  ignoreDependencies: stringOrRegexSchema.optional(),
+  ignoreDependencies: z.optional(stringOrRegexSchema),
   /**
    * Array of class and enum members to exclude from the report. Regular expressions
    * allowed.
@@ -201,7 +208,7 @@ const rootConfigurationSchema = z.object({
    *
    * Actual regular expressions can be used in dynamic configurations.
    */
-  ignoreMembers: stringOrRegexSchema.optional(),
+  ignoreMembers: z.optional(stringOrRegexSchema),
   /**
    * Array of specifiers to exclude from the report. Regular expressions allowed.
    *
@@ -220,7 +227,7 @@ const rootConfigurationSchema = z.object({
    * };
    * ```
    */
-  ignoreUnresolved: stringOrRegexSchema.optional(),
+  ignoreUnresolved: z.optional(stringOrRegexSchema),
   /**
    * In files with multiple exports, some of them might be used only internally. If
    * these exports should not be reported, there is a `ignoreExportsUsedInFile`
@@ -248,7 +255,16 @@ const rootConfigurationSchema = z.object({
    * }
    * ```
    */
-  ignoreExportsUsedInFile: ignoreExportsUsedInFileSchema.optional(),
+  ignoreExportsUsedInFile: z.optional(ignoreExportsUsedInFileSchema),
+  /**
+   * Ignore specific issue types for specific file patterns. Keys are glob
+   * patterns and values are arrays of issue types to ignore for matching files.
+   * This allows ignoring specific issues (like unused exports) in generated
+   * files while still reporting other issues in those same files.
+   *
+   * @see {@link https://knip.dev/reference/configuration#ignoreissues}
+   */
+  ignoreIssues: z.optional(ignoreIssuesSchema),
   /**
    * Array of workspaces to ignore, globs allowed.
    *
@@ -263,7 +279,7 @@ const rootConfigurationSchema = z.object({
    * }
    * ```
    */
-  ignoreWorkspaces: z.array(z.string()).optional(),
+  ignoreWorkspaces: z.optional(z.array(z.string())),
   /**
    * By default, Knip does not report unused exports in entry files. When a
    * repository (or workspace) is self-contained or private, you may want to include
@@ -289,17 +305,17 @@ const rootConfigurationSchema = z.object({
    * configurations individually.
    *
    */
-  includeEntryExports: z.boolean().optional(),
+  includeEntryExports: z.optional(z.boolean()),
   /**
    * Override built-in compilers or add custom compilers for additional file types.
    *
    * @see {@link https://knip.dev/features/compilers | Compilers}
    */
-  compilers: compilersSchema.optional(),
+  compilers: z.optional(compilersSchema),
   /** @internal */
-  syncCompilers: z.record(z.string(), syncCompilerSchema).optional(),
+  syncCompilers: z.optional(z.record(z.string(), syncCompilerSchema)),
   /** @internal */
-  asyncCompilers: z.record(z.string(), asyncCompilerSchema).optional(),
+  asyncCompilers: z.optional(z.record(z.string(), asyncCompilerSchema)),
   /**
    * Exports can be tagged with known or arbitrary JSDoc/TSDoc tags.
    *
@@ -343,7 +359,7 @@ const rootConfigurationSchema = z.object({
    *
    * @see {@link https://knip.dev/reference/jsdoc-tsdoc-tags | JSDoc & TSDoc Tags }
    */
-  tags: z.array(z.string()).optional(),
+  tags: z.optional(z.array(z.string())),
   /**
    * Exit with non-zero code (1) if there are any configuration hints.
    *
@@ -356,7 +372,7 @@ const rootConfigurationSchema = z.object({
    * }
    * ```
    */
-  treatConfigHintsAsErrors: z.boolean().optional(),
+  treatConfigHintsAsErrors: z.optional(z.boolean()),
 });
 
 const reportConfigSchema = z.object({
@@ -365,35 +381,42 @@ const reportConfigSchema = z.object({
    *
    * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
    */
-  include: z.array(issueTypeSchema).optional(),
+  include: z.optional(z.array(issueTypeSchema)),
   /**
    * @default []
    *
    * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}
    */
-  exclude: z.array(issueTypeSchema).optional(),
+  exclude: z.optional(z.array(issueTypeSchema)),
 });
 
 const baseWorkspaceConfigurationSchema = z.object({
-  entry: globSchema.optional(),
-  project: globSchema.optional(),
-  paths: pathsSchema.optional(),
-  ignore: globSchema.optional(),
-  ignoreBinaries: stringOrRegexSchema.optional(),
-  ignoreDependencies: stringOrRegexSchema.optional(),
-  ignoreMembers: stringOrRegexSchema.optional(),
-  ignoreUnresolved: stringOrRegexSchema.optional(),
-  includeEntryExports: z.boolean().optional(),
+  entry: z.optional(globSchema),
+  project: z.optional(globSchema),
+  paths: z.optional(pathsSchema),
+  ignore: z.optional(globSchema),
+  ignoreFiles: z.optional(globSchema),
+  ignoreBinaries: z.optional(stringOrRegexSchema),
+  ignoreDependencies: z.optional(stringOrRegexSchema),
+  ignoreMembers: z.optional(stringOrRegexSchema),
+  ignoreUnresolved: z.optional(stringOrRegexSchema),
+  includeEntryExports: z.optional(z.boolean()),
 });
 
-const workspaceConfigurationSchema = baseWorkspaceConfigurationSchema.merge(pluginsSchema.partial());
+const partialPluginsSchema = z.partial(pluginsSchema);
+
+const workspaceConfigurationSchema = z.strictObject({
+  ...baseWorkspaceConfigurationSchema.shape,
+  ...partialPluginsSchema.shape,
+});
 
 const workspacesConfigurationSchema = z.object({
-  workspaces: z.record(z.string(), workspaceConfigurationSchema).optional(),
+  workspaces: z.optional(z.record(z.string(), workspaceConfigurationSchema)),
 });
 
-export const knipConfigurationSchema = rootConfigurationSchema
-  .merge(reportConfigSchema)
-  .merge(workspacesConfigurationSchema)
-  .merge(pluginsSchema.partial())
-  .strict();
+export const knipConfigurationSchema = z.strictObject({
+  ...rootConfigurationSchema.shape,
+  ...reportConfigSchema.shape,
+  ...workspacesConfigurationSchema.shape,
+  ...partialPluginsSchema.shape,
+});

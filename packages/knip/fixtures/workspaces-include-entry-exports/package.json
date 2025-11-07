@@ -1,6 +1,8 @@
 {
   "name": "@fixtures/workspaces-include-entry-exports",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "knip": {
     "workspaces": {
       "packages/app": {},

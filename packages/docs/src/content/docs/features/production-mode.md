@@ -63,7 +63,8 @@ negated patterns to exclude those files in production mode:
 }
 ```
 
-Also see [Configuring Project Files][2].
+Also see [configuring project files][2] to align `entry` and `project` with
+production mode.
 
 ## Strict Mode
 

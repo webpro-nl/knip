@@ -26,7 +26,7 @@ export type ImportDetails = {
 
 export type ImportMap = Map<FilePath, ImportDetails>;
 
-export type UnresolvedImport = { specifier: string; pos?: number; line?: number; col?: number };
+export type Import = { specifier: string; pos?: number; line?: number; col?: number };
 
 export interface Export {
   identifier: Identifier;
@@ -56,13 +56,15 @@ export type ExportMember = {
 
 export type ExportMap = Map<Identifier, Export>;
 
+export type Specifiers = Set<[Import, FilePath]>;
+
 export type FileNode = {
   imports: {
     internal: ImportMap;
-    external: Set<string>;
-    unresolved: Set<UnresolvedImport>;
+    external: Set<Import>;
+    unresolved: Set<Import>;
     resolved: Set<FilePath>;
-    specifiers: Set<[string, FilePath]>;
+    specifiers: Specifiers;
   };
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;

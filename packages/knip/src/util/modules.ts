@@ -48,11 +48,37 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
   return typedDependency;
 };
 
+const CHAR_EXCLAMATION = 33; // '!'
+const CHAR_DASH = 45; // '-'
+const CHAR_SLASH = 47; // '/'
+const CHAR_COLON = 58; // ':'
+const CHAR_HASH = 35; // '#'
+const CHAR_QUESTION = 63; // '?'
+
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
-const matchDirectives = /^([?!|-]+)?([^!?:]+).*/;
 export const sanitizeSpecifier = (specifier: string) => {
-  if (isBuiltin(specifier)) return specifier;
-  if (isAbsolute(specifier)) return specifier;
-  if (specifier.startsWith(PROTOCOL_VIRTUAL)) return specifier;
-  return specifier.replace(matchDirectives, '$2');
+  if (isBuiltin(specifier) || isAbsolute(specifier) || specifier.startsWith(PROTOCOL_VIRTUAL)) return specifier;
+  const len = specifier.length;
+  let start = 0;
+  let end = len;
+  let colon = -1;
+  let sawSlash = false;
+  for (let i = 0; i < len; i++) {
+    const ch = specifier.charCodeAt(i);
+    if (i === start && (ch === CHAR_EXCLAMATION || ch === CHAR_DASH)) {
+      start++;
+      continue;
+    }
+    if (ch === CHAR_SLASH && colon === -1) {
+      sawSlash = true;
+    }
+    if (colon === -1 && ch === CHAR_COLON && !sawSlash) {
+      colon = i;
+    }
+    if (ch === CHAR_EXCLAMATION || ch === CHAR_QUESTION || (ch === CHAR_HASH && i > start)) {
+      end = i;
+      break;
+    }
+  }
+  return colon !== -1 && colon < end ? specifier.slice(start, colon) : specifier.slice(start, end);
 };

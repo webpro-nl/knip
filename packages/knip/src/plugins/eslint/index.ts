@@ -1,4 +1,6 @@
+import type { ParsedArgs } from 'minimist';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { type Input, toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getInputs } from './helpers.js';
 import type { ESLintConfigDeprecated } from './types.js';
@@ -61,12 +63,23 @@ consider using an extended glob pattern like this:
 /** @public */
 export const docs = { note };
 
+const args = {
+  config: true,
+  boolean: ['inspect-config'],
+  resolveInputs: (parsed: ParsedArgs) => {
+    const inputs: Input[] = [];
+    if (parsed['inspect-config']) inputs.push(toDependency('@eslint/config-inspector', { optional: true }));
+    return inputs;
+  },
+};
+
 export default {
   title,
   enablers,
   isEnabled,
   packageJsonPath,
   config,
+  args,
   isLoadConfig,
   resolveConfig,
 } satisfies Plugin;

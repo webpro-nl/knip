@@ -5,10 +5,12 @@ import type { MainOptions } from './util/create-options.js';
  */
 export class ConsoleStreamer {
   isEnabled = false;
+  isWatch = false;
   private lines = 0;
 
   constructor(options: MainOptions) {
-    this.isEnabled = options.isShowProgress;
+    this.isEnabled = options.isShowProgress && !options.isDebug;
+    this.isWatch = options.isWatch;
   }
 
   private clearLines(count: number) {
@@ -21,12 +23,12 @@ export class ConsoleStreamer {
     process.stdout.cursorTo(0);
   }
 
-  private resetLines() {
-    this.clearLines(this.lines);
+  private clearScreen() {
+    process.stdout.write('\x1b[2J\x1b[1;1f');
   }
 
   private update(messages: string[]) {
-    this.resetLines();
+    this.clear();
     process.stdout.write(`${messages.join('\n')}\n`);
     this.lines = messages.length;
   }
@@ -39,6 +41,7 @@ export class ConsoleStreamer {
 
   clear() {
     if (!this.isEnabled) return;
-    this.resetLines();
+    if (this.isWatch) this.clearScreen();
+    else this.clearLines(this.lines);
   }
 }

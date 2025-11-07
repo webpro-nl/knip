@@ -22,27 +22,22 @@
   ],
   "properties": {
     "ignoreBinaries": {
-      "title": "Binaries to ignore (regex allowed)",
-      "examples": ["rm", "docker-compose", "curl"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreBinaries"
     },
     "ignoreDependencies": {
-      "title": "Dependencies from package.json to ignore (regex allowed)",
-      "examples": ["husky", "lint-staged"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreDependencies"
+    },
+    "ignoreFiles": {
+      "$ref": "#/definitions/ignoreFiles"
     },
     "ignoreMembers": {
-      "title": "Class and enum members to ignore (regex allowed)",
-      "examples": ["render", "on.*"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreMembers"
     },
     "ignoreUnresolved": {
-      "title": "Unresolved imports to ignore (regex allowed)",
-      "examples": ["#/virtual"],
-      "$ref": "#/definitions/list"
+      "$ref": "#/definitions/ignoreUnresolved"
     },
     "ignoreWorkspaces": {
-      "title": "Workspaces to ignore",
+      "title": "Workspaces to exclude from the report",
       "examples": ["packages/ignore-me"],
       "$ref": "#/definitions/list"
     },
@@ -93,14 +88,29 @@
             },
             "type": {
               "type": "boolean"
+            },
+            "variable": {
+              "type": "boolean"
             }
           }
         }
       ]
     },
+    "ignoreIssues": {
+      "title": " Ignore specific issue types for specific file patterns",
+      "examples": [
+        {
+          "src/generated/**": ["exports", "types"],
+          "**/*.generated.ts": ["exports", "classMembers"]
+        }
+      ],
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/issueTypes"
+      }
+    },
     "includeEntryExports": {
-      "title": "Include entry files when reporting unused exports",
-      "type": "boolean"
+      "$ref": "#/definitions/includeEntryExports"
     },
     "tags": {
       "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
@@ -182,6 +192,36 @@
         "type": "string"
       }
     },
+    "ignoreBinaries": {
+      "title": "Binaries to exclude from the report (regex allowed)",
+      "examples": ["rm", "docker-compose", "curl"],
+      "$ref": "#/definitions/list"
+    },
+    "ignoreDependencies": {
+      "title": "Dependencies to exclude from the report (regex allowed)",
+      "examples": ["husky", "lint-staged"],
+      "$ref": "#/definitions/list"
+    },
+    "ignoreFiles": {
+      "title": "Unused files to exclude from the report",
+      "examples": ["husky", "lint-staged", "**/fixtures/**", "mocks/**"],
+      "default": [],
+      "$ref": "#/definitions/globPatterns"
+    },
+    "ignoreUnresolved": {
+      "title": "Unresolved imports to exclude from the report (regex allowed)",
+      "examples": ["#/virtual"],
+      "$ref": "#/definitions/list"
+    },
+    "includeEntryExports": {
+      "title": "Include entry files when reporting unused exports",
+      "type": "boolean"
+    },
+    "ignoreMembers": {
+      "title": "Class and enum members to exclude from the report (regex allowed)",
+      "examples": ["render", "on.*"],
+      "$ref": "#/definitions/list"
+    },
     "issueTypes": {
       "type": "array",
       "items": {
@@ -240,29 +280,28 @@
           "$ref": "#/definitions/paths"
         },
         "ignore": {
-          "title": "Files to ignore in the analysis.",
-          "example": ["**/fixtures", "mocks"],
+          "title": "Files to exclude from the report (any issue type)",
+          "example": ["**/fixtures/**", "mocks/**"],
           "default": [],
           "$ref": "#/definitions/globPatterns"
         },
+        "ignoreFiles": {
+          "$ref": "#/definitions/ignoreFiles"
+        },
         "ignoreBinaries": {
-          "title": "Binaries to ignore (regex allowed)",
-          "examples": ["rm", "docker-compose", "curl"],
-          "$ref": "#/definitions/list"
+          "$ref": "#/definitions/ignoreBinaries"
         },
         "ignoreDependencies": {
-          "title": "Dependencies from package.json to ignore (regex allowed)",
-          "examples": ["husky", "lint-staged"],
-          "$ref": "#/definitions/list"
+          "$ref": "#/definitions/ignoreDependencies"
+        },
+        "ignoreMembers": {
+          "$ref": "#/definitions/ignoreMembers"
         },
         "ignoreUnresolved": {
-          "title": "Unresolved imports to ignore (regex allowed)",
-          "examples": ["#/virtual"],
-          "$ref": "#/definitions/list"
+          "$ref": "#/definitions/ignoreUnresolved"
         },
         "includeEntryExports": {
-          "title": "Include entry files when reporting unused exports",
-          "type": "boolean"
+          "$ref": "#/definitions/includeEntryExports"
         }
       }
     },
@@ -307,6 +346,10 @@
           "title": "astro plugin configuration (https://knip.dev/reference/plugins/astro)",
           "$ref": "#/definitions/plugin"
         },
+        "astro-db": {
+          "title": "astro-db plugin configuration (https://knip.dev/reference/plugins/astro-db)",
+          "$ref": "#/definitions/plugin"
+        },
         "ava": {
           "title": "ava plugin configuration (https://knip.dev/reference/plugins/ava)",
           "$ref": "#/definitions/plugin"
@@ -317,6 +360,10 @@
         },
         "biome": {
           "title": "biome plugin configuration (https://knip.dev/reference/plugins/biome)",
+          "$ref": "#/definitions/plugin"
+        },
+        "bumpp": {
+          "title": "bumpp plugin configuration (https://knip.dev/reference/plugins/bumpp)",
           "$ref": "#/definitions/plugin"
         },
         "bun": {
@@ -369,6 +416,10 @@
         },
         "cypress": {
           "title": "Cypress plugin configuration (https://knip.dev/reference/plugins/cypress)",
+          "$ref": "#/definitions/plugin"
+        },
+        "danger": {
+          "title": "danger plugin configuration (https://knip.dev/reference/plugins/danger)",
           "$ref": "#/definitions/plugin"
         },
         "dependency-cruiser": {
@@ -461,6 +512,10 @@
         },
         "markdownlint": {
           "title": "markdownlint plugin configuration (https://knip.dev/reference/plugins/markdownlint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "mdxlint": {
+          "title": "mdxlint plugin configuration (https://knip.dev/reference/plugins/mdxlint)",
           "$ref": "#/definitions/plugin"
         },
         "metro": {
@@ -605,6 +660,10 @@
         },
         "rspack": {
           "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rstest": {
+          "title": "rstest plugin configuration (https://knip.dev/reference/plugins/rstest)",
           "$ref": "#/definitions/plugin"
         },
         "semantic-release": {

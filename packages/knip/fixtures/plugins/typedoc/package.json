@@ -4,6 +4,8 @@
     "typedoc": "*"
   },
   "typedocOptions": {
-    "plugin": ["typedoc-plugin-umami"]
+    "plugin": [
+      "typedoc-plugin-umami"
+    ]
   }
 }

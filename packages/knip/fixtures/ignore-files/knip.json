@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreFiles": ["bananas/**", "rooted.js"],
+  "workspaces": {
+    "apples": {
+      "ignoreFiles": ["**/unused.js", "used.js"]
+    },
+    "bananas": {
+      "ignoreFiles": []
+    }
+  }
+}

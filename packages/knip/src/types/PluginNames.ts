@@ -2,9 +2,11 @@
 export type PluginName =
   | 'angular'
   | 'astro'
+  | 'astro-db'
   | 'ava'
   | 'babel'
   | 'biome'
+  | 'bumpp'
   | 'bun'
   | 'c8'
   | 'capacitor'
@@ -18,6 +20,7 @@ export type PluginName =
   | 'cspell'
   | 'cucumber'
   | 'cypress'
+  | 'danger'
   | 'dependency-cruiser'
   | 'docusaurus'
   | 'dotenv'
@@ -42,6 +45,7 @@ export type PluginName =
   | 'lockfile-lint'
   | 'lost-pixel'
   | 'markdownlint'
+  | 'mdxlint'
   | 'metro'
   | 'mocha'
   | 'moonrepo'
@@ -78,6 +82,7 @@ export type PluginName =
   | 'rsbuild'
   | 'rslib'
   | 'rspack'
+  | 'rstest'
   | 'semantic-release'
   | 'sentry'
   | 'simple-git-hooks'
@@ -116,9 +121,11 @@ export type PluginName =
 export const pluginNames = [
   'angular',
   'astro',
+  'astro-db',
   'ava',
   'babel',
   'biome',
+  'bumpp',
   'bun',
   'c8',
   'capacitor',
@@ -132,6 +139,7 @@ export const pluginNames = [
   'cspell',
   'cucumber',
   'cypress',
+  'danger',
   'dependency-cruiser',
   'docusaurus',
   'dotenv',
@@ -156,6 +164,7 @@ export const pluginNames = [
   'lockfile-lint',
   'lost-pixel',
   'markdownlint',
+  'mdxlint',
   'metro',
   'mocha',
   'moonrepo',
@@ -192,6 +201,7 @@ export const pluginNames = [
   'rsbuild',
   'rslib',
   'rspack',
+  'rstest',
   'semantic-release',
   'sentry',
   'simple-git-hooks',

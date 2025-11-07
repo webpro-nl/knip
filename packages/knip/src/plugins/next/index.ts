@@ -16,11 +16,12 @@ const config = ['next.config.{js,ts,cjs,mjs}'];
 const defaultPageExtensions = ['{js,jsx,ts,tsx}'];
 
 const productionEntryFilePatterns = [
-  '{instrumentation,instrumentation-client,middleware}.{js,ts}',
-  'app/global-error.{js,jsx,ts,tsx}',
-  'app/**/{error,layout,loading,not-found,page,template,default}.{js,jsx,ts,tsx}',
+  '{instrumentation,instrumentation-client,middleware,proxy}.{js,ts}',
+  'app/global-{error,not-found}.{js,jsx,ts,tsx}',
+  'app/**/{error,layout,loading,not-found,page,template,default,forbidden,unauthorized}.{js,jsx,ts,tsx}',
   'app/**/route.{js,jsx,ts,tsx}',
-  'app/{manifest,sitemap,robots}.{js,ts}',
+  'app/{manifest,robots}.{js,ts}',
+  'app/**/sitemap.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
   'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
   'mdx-components.{js,jsx,ts,tsx}',

@@ -1,5 +1,5 @@
 require(id);
-// biome-ignore lint/style/useTemplate:  fixture festa
+// biome-ignore lint: style/useTemplate
 require('str' + id);
 require(`str${id}`);
 require.resolve(id);

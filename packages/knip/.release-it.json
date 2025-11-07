@@ -2,11 +2,11 @@
   "$schema": "https://unpkg.com/release-it@18/schema/release-it.json",
   "hooks": {
     "before:init": [
-      "bun run lint",
-      "bun run build",
-      "bun run knip",
-      "bun run knip:production",
-      "bun run test"
+      "pnpm lint",
+      "pnpm build",
+      "pnpm knip",
+      "pnpm knip:production",
+      "pnpm test"
     ]
   },
   "github": {

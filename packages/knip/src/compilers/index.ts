@@ -1,9 +1,10 @@
 import type { RawConfiguration } from '../types/config.js';
 import type { DependencySet } from '../types/workspace.js';
-import AstroMDX from './astro-mdx.js';
 import Astro from './astro.js';
+import AstroMDX from './astro-mdx.js';
 import MDX from './mdx.js';
 import Svelte from './svelte.js';
+import CSS from './tailwind.js';
 import type { AsyncCompilerFn, AsyncCompilers, RawSyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
 import Vue from './vue.js';
 
@@ -38,6 +39,7 @@ export const partitionCompilers = (rawLocalConfig: RawConfiguration) => {
 
 const compilers = new Map([
   ['.astro', Astro],
+  ['.css', CSS],
   ['.mdx', MDX],
   ['.svelte', Svelte],
   ['.vue', Vue],

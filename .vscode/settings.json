@@ -5,6 +5,9 @@
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "[mdx]": {
+    "editor.defaultFormatter": "remcohaszing.vscode-mdxlint"
+  },
   "[typescript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -12,7 +15,6 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
   "cSpell.enabled": true,

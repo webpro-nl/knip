@@ -1,11 +1,11 @@
+// biome-ignore-all lint/suspicious/noConsole: ignore
 import { main } from './index.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
-import { perfObserver } from './util/Performance.js';
-import { helpText } from './util/cli-arguments.js';
-import parseArgs from './util/cli-arguments.js';
+import parseArgs, { helpText } from './util/cli-arguments.js';
 import { createOptions } from './util/create-options.js';
-import { getKnownError, isConfigurationError, isDisplayReason, isKnownError } from './util/errors.js';
+import { getKnownErrors, hasErrorCause, isConfigurationError, isKnownError } from './util/errors.js';
 import { logError, logWarning } from './util/log.js';
+import { perfObserver } from './util/Performance.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { prettyMilliseconds } from './util/string.js';
 import { version } from './version.js';
@@ -54,6 +54,7 @@ const run = async () => {
       isProduction: options.isProduction,
       isShowProgress: options.isShowProgress,
       isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
+      maxShowIssues: parsedCLIArgs['max-show-issues'] ? Number(parsedCLIArgs['max-show-issues']) : undefined,
       options: parsedCLIArgs['reporter-options'] ?? '',
       preprocessorOptions: parsedCLIArgs['preprocessor-options'] ?? '',
     };
@@ -87,17 +88,17 @@ const run = async () => {
 
     if (
       (!parsedCLIArgs['no-exit-code'] && totalErrorCount > Number(parsedCLIArgs['max-issues'] ?? 0)) ||
-      (options.isTreatConfigHintsAsErrors && configurationHints.size > 0)
+      (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.size > 0)
     ) {
       process.exit(1);
     }
   } catch (error: unknown) {
     process.exitCode = 2;
     if (!parsedCLIArgs.debug && error instanceof Error && isKnownError(error)) {
-      const knownError = getKnownError(error);
-      logError('ERROR', knownError.message);
-      if (isDisplayReason(knownError)) console.error('Reason:', knownError.cause.message);
-      if (isConfigurationError(knownError)) console.log('\nRun `knip --help` or visit https://knip.dev for help');
+      const knownErrors = getKnownErrors(error);
+      for (const knownError of knownErrors) logError('ERROR', knownError.message);
+      if (hasErrorCause(knownErrors[0])) console.error('Reason:', knownErrors[0].cause.message);
+      if (isConfigurationError(knownErrors[0])) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw

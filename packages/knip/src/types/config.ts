@@ -1,13 +1,13 @@
 import type ts from 'typescript';
-import type { z } from 'zod';
+import type { z } from 'zod/mini';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
 import type { Input } from '../util/input.js';
-import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';
-import type { SymbolType } from './issues.js';
+import type { IssueType, SymbolType } from './issues.js';
 import type { Tags } from './options.js';
+import type { PluginName } from './PluginNames.js';
 import type { PackageJson } from './package-json.js';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
@@ -39,9 +39,11 @@ export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
 export type IgnorePatterns = (string | RegExp)[];
 
-type IgnorableExport = Exclude<SymbolType, SymbolType.UNKNOWN>;
+type IgnorableExport = Exclude<SymbolType, 'unknown'>;
 
 export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+
+export type IgnoreIssues = Record<string, IssueType[]>;
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
@@ -53,9 +55,11 @@ export type GetImportsAndExportsOptions = {
 
 export interface Configuration {
   ignore: NormalizedGlob;
+  ignoreFiles: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
+  ignoreIssues?: IgnoreIssues;
   ignoreMembers: IgnorePatterns;
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
@@ -78,6 +82,7 @@ interface BaseWorkspaceConfiguration {
   project: NormalizedGlob;
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
+  ignoreFiles: NormalizedGlob;
   isIncludeEntryExports: boolean;
 }
 

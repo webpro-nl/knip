@@ -1,7 +1,7 @@
 import type { Entries } from '../types/entries.js';
 import type { ReporterOptions } from '../types/issues.js';
 import { printConfigurationHints } from './util/configuration-hints.js';
-import { getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.js';
+import { dim, getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.js';
 
 export default (options: ReporterOptions) => {
   const { report, issues, isDisableConfigHints, isShowProgress } = options;
@@ -17,7 +17,13 @@ export default (options: ReporterOptions) => {
       const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
       if (issuesForType.length > 0) {
         title && console.log(getColoredTitle(title, issuesForType.length));
-        console.log(getTableForType(issuesForType, options.cwd).toString());
+        const issues =
+          typeof options.maxShowIssues === 'number'
+            ? Array.from(issuesForType).slice(0, options.maxShowIssues)
+            : issuesForType;
+        if (issues.length > 0) console.log(getTableForType(issues, options.cwd).toString());
+        if (issues.length !== issuesForType.length)
+          console.log(dim(`…${issuesForType.length - issues.length} more items`));
         totalIssues = totalIssues + issuesForType.length;
       }
     }

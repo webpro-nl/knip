@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { findAndParseGitignores } from '../../src/util/glob-core.js';
 import { resolve } from '../helpers/resolve.js';
 
@@ -17,6 +17,8 @@ test('findAndParseGitignores', async () => {
       '.yarn',
       '**/a/b/c',
       '**/a/b/c/**',
+      '**/.npmrc',
+      '**/.npmrc/**',
     ]),
     unignores: [],
   });
@@ -36,6 +38,8 @@ test('findAndParseGitignores (/a)', async () => {
       '**/b/c/**',
       '**/.cache',
       '**/.cache/**',
+      '**/.npmrc',
+      '**/.npmrc/**',
     ]),
     unignores: [],
   });
@@ -61,6 +65,8 @@ test('findAndParseGitignores (/a/b', async () => {
       '**/c/**',
       '**/.cache',
       '**/.cache/**',
+      '**/.npmrc',
+      '**/.npmrc/**',
     ]),
     unignores: [],
   });

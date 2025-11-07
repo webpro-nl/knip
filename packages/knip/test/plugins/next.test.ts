@@ -1,9 +1,9 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../../src/index.js';
-import { createOptions } from '../../src/util/create-options.js';
 import { join } from '../../src/util/path.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/next');
@@ -27,7 +27,7 @@ test('Find dependencies with the Next.js plugin', async () => {
     files: 2,
     devDependencies: 0,
     unlisted: 6,
-    processed: 11,
-    total: 11,
+    processed: 13,
+    total: 13,
   });
 });

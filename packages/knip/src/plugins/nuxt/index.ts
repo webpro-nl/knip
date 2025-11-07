@@ -1,4 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { Input } from '../../util/input.js';
 import { toDependency, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -26,7 +27,11 @@ const production = [
 
 const setup = async () => {
   if (globalThis && !('defineNuxtConfig' in globalThis)) {
-    Object.defineProperty(globalThis, 'defineNuxtConfig', { value: (id: any) => id });
+    Object.defineProperty(globalThis, 'defineNuxtConfig', {
+      value: (id: any) => id,
+      writable: true,
+      configurable: true,
+    });
   }
 };
 
@@ -45,10 +50,14 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async localConfig => {
     'server/plugins/**/*.ts',
   ].map(pattern => toProductionEntry(join(srcDir, pattern)));
 
-  const deps = localConfig.modules?.map(id => toDependency(id)) ?? [];
+  const deps =
+    localConfig.modules?.reduce<Input[]>((acc, id) => {
+      if (Array.isArray(id) && typeof id[0] === 'string') acc.push(toDependency(id[0]));
+      if (typeof id === 'string') acc.push(toDependency(id));
+      return acc;
+    }, []) ?? [];
 
-  return [...deps , ...patterns];
-   
+  return [...deps, ...patterns];
 };
 
 const note = `Knip works best with [explicit imports](https://nuxt.com/docs/guide/concepts/auto-imports#explicit-imports).

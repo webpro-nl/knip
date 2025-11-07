@@ -19,12 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --ignore-scripts --frozen-lockfile
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
         working-directory: packages/knip
-      - run: bun run build
+      - run: pnpm run build
         working-directory: packages/knip
-      - run: bunx pkg-pr-new publish --compact ./packages/knip
+      - run: pnpx pkg-pr-new publish --compact ./packages/knip
 
   test:
     name: Run
@@ -44,6 +44,7 @@ jobs:
             repo: argos-ci/argos
             commands: |
               pnpm install
+              pnpm build
               pnpm add -D -w $PKG_URL
               pnpm run knip
 
@@ -58,7 +59,8 @@ jobs:
             repo: JoshuaKGoldberg/create-typescript-app
             commands: |
               pnpm install
-              pnpm dlx $PKG_URL
+              pnpm add -D $PKG_URL
+              pnpm lint:knip
 
           - name: DefinitelyTyped-tools
             repo: microsoft/DefinitelyTyped-tools
@@ -123,7 +125,8 @@ jobs:
             repo: getsentry/sentry
             commands: |
               pnpm install
-              pnpm dlx $PKG_URL
+              pnpm add -D $PKG_URL
+              pnpm run knip
 
           - name: slonik
             repo: gajus/slonik
@@ -155,8 +158,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Run Knip in ${{ matrix.project.repo }}
         working-directory: ${{ matrix.project.name }}

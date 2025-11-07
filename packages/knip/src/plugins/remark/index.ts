@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toDeferResolve } from '../../util/input.js';
+import { isInternal } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { RemarkConfig } from './types.js';
 
@@ -23,7 +24,7 @@ const resolveConfig: ResolveConfig<RemarkConfig> = config => {
         if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
         return [];
       })
-      .map(plugin => (plugin.startsWith('remark-') ? plugin : `remark-${plugin}`)) ?? [];
+      .map(plugin => (isInternal(plugin) ? plugin : plugin.startsWith('remark-') ? plugin : `remark-${plugin}`)) ?? [];
   return plugins.map(id => toDeferResolve(id));
 };
 

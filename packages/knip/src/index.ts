@@ -3,18 +3,16 @@ import { formatly } from 'formatly';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
 import { DependencyDeputy } from './DependencyDeputy.js';
+import { analyze } from './graph/analyze.js';
+import { build } from './graph/build.js';
 import { IssueCollector } from './IssueCollector.js';
 import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
-import { analyze } from './graph/analyze.js';
-import { build } from './graph/build.js';
+import watchReporter from './reporters/watch.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
-import { getWatchHandler } from './util/watch.js';
-
-export type { RawConfiguration as KnipConfig } from './types/config.js';
-export type { Preprocessor, Reporter, ReporterOptions } from './types/issues.js';
+import { getWatchHandler, type OnUpdate } from './util/watch.js';
 
 /**
  * The main sequence
@@ -44,6 +42,9 @@ export const main = async (options: MainOptions) => {
 
   const workspaces = await chief.getWorkspaces();
   const isGitIgnored = await getGitIgnoredHandler(options);
+
+  // Set up per-file issue ignoring
+  collector.setIgnoreIssues(chief.config.ignoreIssues);
 
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
   debugLogObject('*', 'Included workspace configs', () =>
@@ -79,6 +80,10 @@ export const main = async (options: MainOptions) => {
     const isIgnored = (filePath: string) =>
       filePath.startsWith(options.cacheLocation) || filePath.includes('/.git/') || isGitIgnored(filePath);
 
+    const onUpdate: OnUpdate = options.isWatch
+      ? ({ issues, duration }) => watchReporter(options, { issues, streamer, size: analyzedFiles.size, duration })
+      : () => {};
+
     const watchHandler = await getWatchHandler(options, {
       analyzedFiles,
       analyzeSourceFile,
@@ -88,7 +93,7 @@ export const main = async (options: MainOptions) => {
       factory,
       graph,
       isIgnored,
-      streamer,
+      onUpdate,
       unreferencedFiles,
     });
 
