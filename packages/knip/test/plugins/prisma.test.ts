@@ -13,7 +13,7 @@ test('Find dependencies with the Prisma plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });
