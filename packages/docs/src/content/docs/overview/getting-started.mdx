@@ -8,7 +8,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Requirements
 
-Knip v5 requires Node.js v18.18.0 or higher. Or Bun.
+Knip v5 requires at least Node.js v18.18.0. Or Bun.
 
 Want to try Knip without installation? Visit [the playground][1].
 
@@ -110,6 +110,13 @@ The output is easier to digest and may include some configuration hints to get
 an idea of what's left to configure. Many unused files? Go to [configuration][2]
 and follow up with [troubleshooting][3] if needed.
 
+:::tip
+
+Do not use the `ignore` option just to get rid of unwanted output. Read
+[Configuring Project Files][4] to get the most out of Knip.
+
+:::
+
 ## Manual
 
 Alternatively, manually install Knip using your package manager:
@@ -185,3 +192,4 @@ already.
 [1]: /playground
 [2]: ./configuration.md
 [3]: ../guides/troubleshooting.md
+[4]: ../guides/configuring-project-files.md

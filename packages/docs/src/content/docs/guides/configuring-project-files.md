@@ -5,14 +5,11 @@ sidebar:
 ---
 
 The `entry` and `project` file patterns are the first and most important
-options. Getting those right is essential to get the most value and performance
-out of Knip.
-
-TL;DR;
+options. Getting those right is essential to help you delete more code and make
+Knip faster:
 
 - Start with defaults. Only add targeted `entry` overrides when needed.
-- Use `project` patterns (with negations) to define "what belongs to the
-  codebase" for unused file detection.
+- Use `project` patterns (with negations) to define the scope for Knip.
 - Use production mode to exclude tests and other non-production files.
 - Use `ignore` only to suppress issues in specific files. It does not exclude
   files from analysis.
