@@ -38,6 +38,7 @@
     "remark-cli": "12.0.1",
     "remark-directive": "4.0.0",
     "remark-frontmatter": "5.0.0",
+    "remark-gfm": "4.0.1",
     "remark-parse": "11.0.0",
     "remark-preset-webpro": "^2.0.1",
     "remark-stringify": "11.0.0",
