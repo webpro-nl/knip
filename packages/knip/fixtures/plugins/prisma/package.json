@@ -1,5 +1,8 @@
 {
   "name": "@plugins/prisma",
+  "dependencies": {
+    "@prisma/client": "*"
+  },
   "devDependencies": {
     "prisma": "*",
     "tsx": "*"
