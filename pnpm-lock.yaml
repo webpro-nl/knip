@@ -25,9 +25,6 @@ importers:
       '@astrojs/starlight':
         specifier: 0.36.0
         version: 0.36.0(astro@5.14.1(@types/node@24.3.0)(jiti@2.6.0)(rollup@4.49.0)(terser@5.43.1)(tsx@4.20.6)(typescript@5.9.2)(yaml@2.8.1))
-      mdxlint-preset-webpro:
-        specifier: 1.0.1
-        version: 1.0.1
       sharp:
         specifier: 0.34.4
         version: 0.34.4
@@ -53,6 +50,9 @@ importers:
       mdxlint:
         specifier: 1.0.0
         version: 1.0.0
+      mdxlint-preset-webpro:
+        specifier: ^1.0.2
+        version: 1.0.2
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -2537,8 +2537,8 @@ packages:
   mdn-data@2.12.2:
     resolution: {integrity: sha512-IEn+pegP1aManZuckezWCO+XZQDplx1366JoVhTpMpBB1sPey/SbveZQUosKiKiGYjg1wH4pMlNgXbCiYgihQA==}
 
-  mdxlint-preset-webpro@1.0.1:
-    resolution: {integrity: sha512-+W6hvfSVoZUsym0T6zQkyJfr18H9J9oXGSlJInCfawOo2WGQGa0mE2NfB8OmRIebwD8w4PawGqpGdoOY1s4gcA==}
+  mdxlint-preset-webpro@1.0.2:
+    resolution: {integrity: sha512-ORcyA9CqnKE6Q3CeKYn4O7q11ojIan1hNliVVdrBqr8zijCIbap0lQJQ6XI/1xiePJ46T0/8KkNHywWuos+EJQ==}
 
   mdxlint@1.0.0:
     resolution: {integrity: sha512-EEOFUOYM1VPPqW/l1WyTxEiL8N1+LBNSBpzPk/Aq4z8UkfA19Abo75pK3qRZAi3MEW9NHK49+Fz0BdRrwLVzaQ==}
@@ -6760,7 +6760,7 @@ snapshots:
 
   mdn-data@2.12.2: {}
 
-  mdxlint-preset-webpro@1.0.1:
+  mdxlint-preset-webpro@1.0.2:
     dependencies:
       mdast-util-directive: 3.1.0
       remark-directive: 4.0.0
