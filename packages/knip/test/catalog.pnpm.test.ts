@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
 import baseCounters from './helpers/baseCounters.js';
 import { createOptions } from './helpers/create-options.js';
+import { resolve } from './helpers/resolve.js';
 
 test('Should track referenced default catalog entries', async () => {
   const cwd = resolve('fixtures/catalog-pnpm');

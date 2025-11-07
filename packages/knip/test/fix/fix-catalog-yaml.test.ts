@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { main } from '../../src/index.js';
-import { join, resolve } from '../../src/util/path.js';
+import { join } from '../../src/util/path.js';
 import { createOptions } from '../helpers/create-options.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/catalog-named');
 const manifestPath = join(cwd, 'pnpm-workspace.yaml');

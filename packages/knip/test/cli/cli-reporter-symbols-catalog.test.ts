@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { resolve } from '../../src/util/path.js';
 import { exec } from '../helpers/exec.js';
+import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/catalog-pnpm');
 

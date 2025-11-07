@@ -1,5 +1,13 @@
 import { DEFAULT_CATALOG } from './util/catalog.js';
 
+function matchesKey(line: string, indent: string, key: string) {
+  return (
+    line.startsWith(`${indent}${key}:`) ||
+    line.startsWith(`${indent}"${key}":`) ||
+    line.startsWith(`${indent}'${key}':`)
+  );
+}
+
 export class YamlCatalogPeeker {
   private lines: string[] = [];
   private sections: Record<string, number> = {};
@@ -20,14 +28,6 @@ export class YamlCatalogPeeker {
     this.ready = true;
   }
 
-  private matchesKey(line: string, indent: string, key: string): boolean {
-    return (
-      line.startsWith(`${indent}${key}:`) ||
-      line.startsWith(`${indent}"${key}":`) ||
-      line.startsWith(`${indent}'${key}':`)
-    );
-  }
-
   public getLocation(parentSymbol: string, symbol: string) {
     if (!this.ready) this.init();
 
@@ -40,7 +40,7 @@ export class YamlCatalogPeeker {
       for (let i = startLine + 1; i < this.lines.length; i++) {
         const line = this.lines[i];
         if (!line.startsWith('  ')) break;
-        if (this.matchesKey(line, '  ', symbol)) {
+        if (matchesKey(line, '  ', symbol)) {
           return { line: i + 1, col: line.indexOf(symbol) + 1 };
         }
       }
@@ -50,14 +50,14 @@ export class YamlCatalogPeeker {
         const line = this.lines[i];
         if (!line.startsWith('  ')) break;
 
-        if (this.matchesKey(line, '  ', parentSymbol)) {
+        if (matchesKey(line, '  ', parentSymbol)) {
           inTargetCatalog = true;
         } else if (inTargetCatalog) {
           if (!line.startsWith('    ')) {
             inTargetCatalog = false;
             continue;
           }
-          if (this.matchesKey(line, '    ', symbol)) {
+          if (matchesKey(line, '    ', symbol)) {
             return { line: i + 1, col: line.indexOf(symbol) + 1 };
           }
         }
