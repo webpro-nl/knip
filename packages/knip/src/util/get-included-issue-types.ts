@@ -16,8 +16,8 @@ const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.
 
 const normalize = (values: string[]) => values.flatMap(value => value.split(','));
 
-export const shorthandDeps = ['dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
-export const shorthandTypes = ['types', 'nsTypes', 'enumMembers', 'duplicates'];
+export const shorthandDeps = ['dependencies', 'unlisted', 'binaries', 'unresolved'];
+export const shorthandExports = ['exports', 'types', 'enumMembers', 'duplicates'];
 export const shorthandFiles = ['files'];
 
 export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => {

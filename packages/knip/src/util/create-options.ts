@@ -7,7 +7,7 @@ import type { Options } from '../types/options.js';
 import type { ParsedCLIArgs } from './cli-arguments.js';
 import { ConfigurationError } from './errors.js';
 import { findFile, loadJSON } from './fs.js';
-import { getIncludedIssueTypes, shorthandDeps, shorthandFiles, shorthandTypes } from './get-included-issue-types.js';
+import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.js';
 import { defaultRules } from './issue-initializers.js';
 import { loadResolvedConfigFile } from './load-config.js';
 import { _load } from './loader.js';
@@ -85,7 +85,7 @@ export const createOptions = async (options: CreateOptions) => {
     includeOverrides: [
       ...(options.includedIssueTypes ?? parsedCLIArgs.include ?? []),
       ...(parsedCLIArgs.dependencies ? shorthandDeps : []),
-      ...(parsedCLIArgs.exports ? shorthandTypes : []),
+      ...(parsedCLIArgs.exports ? shorthandExports : []),
       ...(parsedCLIArgs.files ? shorthandFiles : []),
     ],
   });

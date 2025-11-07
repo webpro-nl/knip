@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { ISSUE_TYPES } from '../../src/constants.js';
-import { defaultExcludedIssueTypes, getIncludedIssueTypes } from '../../src/util/get-included-issue-types.js';
+import {
+  defaultExcludedIssueTypes,
+  getIncludedIssueTypes,
+  shorthandDeps,
+  shorthandExports,
+  shorthandFiles,
+} from '../../src/util/get-included-issue-types.js';
 
 const included = (type: string) => [type, true];
 const excluded = (type: string) => [type, false];
@@ -68,7 +74,7 @@ test('Resolve included issue types (exclude dependencies)', async () => {
 test('Resolve included issue types (--dependencies)', async () => {
   const config = getIncludedIssueTypes({
     ...base,
-    includeOverrides: ['dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'],
+    includeOverrides: shorthandDeps,
   });
   assert.deepEqual(config, {
     ...none,
@@ -84,13 +90,13 @@ test('Resolve included issue types (--dependencies)', async () => {
 test('Resolve included issue types (--exports)', async () => {
   const config = getIncludedIssueTypes({
     ...base,
-    includeOverrides: ['exports', 'types', 'enumMembers', 'duplicates'],
+    includeOverrides: shorthandExports,
   });
   assert.deepEqual(config, { ...none, exports: true, types: true, enumMembers: true, duplicates: true });
 });
 
 test('Resolve included issue types (--files)', async () => {
-  const config = getIncludedIssueTypes({ ...base, includeOverrides: ['files'] });
+  const config = getIncludedIssueTypes({ ...base, includeOverrides: shorthandFiles });
   assert.deepEqual(config, { ...none, files: true });
 });
 
