@@ -5,7 +5,7 @@ import AstroMDX from './astro-mdx.js';
 import MDX from './mdx.js';
 import Svelte from './svelte.js';
 import CSS from './tailwind.js';
-import type { AsyncCompilerFn, AsyncCompilers, RawSyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
+import type { AsyncCompilerFn, AsyncCompilers, HasDependency, RawSyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
 import Vue from './vue.js';
 
 // TODO This does not detect functions returning a promise (just the async keyword)
@@ -37,8 +37,11 @@ export const partitionCompilers = (rawLocalConfig: RawConfiguration) => {
   return { ...rawLocalConfig, syncCompilers, asyncCompilers };
 };
 
-const compilers = new Map([
-  ['.astro', Astro],
+const asyncBuiltInCompilers = new Map([
+  ['.astro', Astro]
+])
+
+const syncBuiltInCompilers = new Map([
   ['.css', CSS],
   ['.mdx', MDX],
   ['.svelte', Svelte],
@@ -52,12 +55,21 @@ export const getIncludedCompilers = (
 ): [SyncCompilers, AsyncCompilers] => {
   const hasDependency = (packageName: string) => dependencies.has(packageName);
 
-  for (const [extension, { condition, compiler }] of compilers.entries()) {
-    // For MDX, try Astro compiler first if available
-    if (extension === '.mdx' && AstroMDX.condition(hasDependency)) {
+  for (const [extension, { condition, compiler }] of asyncBuiltInCompilers.entries()) {
+    if (condition(hasDependency)) {
+      asyncCompilers.set(extension, compiler)
+    }
+  }
+
+  for (const [extension, { condition, compiler }] of syncBuiltInCompilers.entries()) {
+    const isAstroMDX = extension === '.mdx' && AstroMDX.condition(hasDependency) // If the extension is mdx but the project seems to be Astro, use the AstroMDX compiler not the standard one
+    const isManuallyEnabled = syncCompilers.get(extension) === true // if the syncCompiler's value is true, instead of a compiler function, it means the compiler has been manually enabled by the user. We then replace `true` with the compiler function.
+    const isFirstWithDependency = !syncCompilers.has(extension) && condition(hasDependency) // Insert the compiler, but don't overwrite
+
+    if (isAstroMDX) {
       syncCompilers.set(extension, AstroMDX.compiler);
-    } else if ((!syncCompilers.has(extension) && condition(hasDependency)) || syncCompilers.get(extension) === true) {
-      asyncCompilers.set(extension, compiler);
+    } else if(isManuallyEnabled || isFirstWithDependency) {
+      syncCompilers.set(extension, compiler)
     }
   }
   return [syncCompilers as SyncCompilers, asyncCompilers];
