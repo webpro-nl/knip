@@ -27,7 +27,7 @@
     "ci": "biome ci . && installed-check --ignore-dev"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
+    "@biomejs/biome": "2.3.4",
     "installed-check": "^9.3.0"
   },
   "engines": {
