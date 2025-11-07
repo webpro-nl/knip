@@ -53,7 +53,7 @@
   },
   "mdxlint": {
     "plugins": [
-      "preset-webpro"
+      "mdxlint-preset-webpro"
     ]
   }
 }
