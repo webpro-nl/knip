@@ -62,7 +62,7 @@ const hasWorkspaces = () => {
   if (hasAccess('pnpm-workspace.yaml')) {
     try {
       const content = fs.readFileSync('pnpm-workspace.yaml', 'utf-8');
-      return /\npackages:\n/.test(content);
+      return /(^|\n)packages:\n/.test(content);
     } catch {
       return false;
     }
