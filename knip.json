@@ -14,8 +14,7 @@
       ]
     },
     "packages/docs": {
-      "entry": ["{remark,scripts}/*.ts"],
-      "ignoreDependencies": ["remark-gfm"]
+      "entry": ["{remark,scripts}/*.ts"]
     }
   }
 }

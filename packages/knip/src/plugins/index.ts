@@ -44,6 +44,7 @@ import { default as linthtml } from './linthtml/index.js';
 import { default as lockfileLint } from './lockfile-lint/index.js';
 import { default as lostPixel } from './lost-pixel/index.js';
 import { default as markdownlint } from './markdownlint/index.js';
+import { default as mdx } from './mdx/index.js';
 import { default as mdxlint } from './mdxlint/index.js';
 import { default as metro } from './metro/index.js';
 import { default as mocha } from './mocha/index.js';
@@ -163,6 +164,7 @@ export const Plugins = {
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
   markdownlint,
+  mdx,
   mdxlint,
   metro,
   mocha,

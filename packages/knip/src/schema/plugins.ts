@@ -58,6 +58,7 @@ export const pluginsSchema = z.object({
   'lockfile-lint': pluginSchema,
   'lost-pixel': pluginSchema,
   markdownlint: pluginSchema,
+  mdx: pluginSchema,
   mdxlint: pluginSchema,
   metro: pluginSchema,
   mocha: pluginSchema,

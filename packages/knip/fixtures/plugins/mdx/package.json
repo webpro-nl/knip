@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/mdx",
+  "devDependencies": {
+    "astro": "*",
+    "remark-directive": "*",
+    "typescript": "*"
+  }
+}
