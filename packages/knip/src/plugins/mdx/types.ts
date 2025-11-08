@@ -1,3 +1,3 @@
 export type MdxConfig = {
-  plugins?: string[];
+  plugins?: (string | [string, unknown])[];
 };

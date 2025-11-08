@@ -3,6 +3,7 @@
   "devDependencies": {
     "astro": "*",
     "remark-directive": "*",
+    "remark-frontmatter": "*",
     "typescript": "*"
   }
 }
