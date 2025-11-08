@@ -1,7 +1,9 @@
 {
   "name": "@plugins/prisma",
   "dependencies": {
-    "@prisma/client": "*"
+    "@prisma/client": "*",
+    "@prisma/client2": "*",
+    "@prisma/client3": "*"
   },
   "devDependencies": {
     "prisma": "*",

@@ -13,7 +13,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config: string[] = [
   'prisma.config.{js,ts,mjs,cjs,mts,cts}',
-  './config/prisma.config.{js,ts,mjs,cjs,mts,cts}',
+  '.config/prisma.{js,ts,mjs,cjs,mts,cts}',
   'package.json',
 ];
 
