@@ -1,8 +1,8 @@
 import type { ParsedArgs } from 'minimist';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDependency } from '../../util/input.js';
+import { type Input, toDeferResolve, toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getInputs } from './helpers.js';
+import { getInputs, resolveFormatters } from './helpers.js';
 import type { ESLintConfigDeprecated } from './types.js';
 
 // https://eslint.org/docs/latest/use/configure/configuration-files
@@ -65,10 +65,12 @@ export const docs = { note };
 
 const args = {
   config: true,
+  alias: { format: ['f'] },
   boolean: ['inspect-config'],
   resolveInputs: (parsed: ParsedArgs) => {
     const inputs: Input[] = [];
     if (parsed['inspect-config']) inputs.push(toDependency('@eslint/config-inspector', { optional: true }));
+    if (parsed['format']) for (const input of resolveFormatters(parsed['format'])) inputs.push(input);
     return inputs;
   },
 };

@@ -1,12 +1,13 @@
 {
   "name": "@plugins/eslint2",
   "scripts": {
-    "lint": "eslint --inspect-config"
+    "lint": "eslint --inspect-config --format codeframe"
   },
   "devDependencies": {
     "@eslint/config-inspector": "*",
     "@eslint/js": "*",
     "eslint": "*",
+    "eslint-formatter-codeframe": "*",
     "eslint-import-resolver-typescript": "*",
     "typescript-eslint": "*"
   }

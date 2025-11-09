@@ -1,6 +1,6 @@
 import type { PluginOptions } from '../../types/config.js';
 import { compact } from '../../util/array.js';
-import { type ConfigInput, type Input, toConfig, toDeferResolve } from '../../util/input.js';
+import { type ConfigInput, type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.js';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.js';
 import { extname, isAbsolute, isInternal } from '../../util/path.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
@@ -106,4 +106,15 @@ const getDependenciesFromSettings = (settings: ESLintConfigDeprecated['settings'
       });
     }
   });
+};
+
+const builtinFormatters = new Set(['html', 'json-with-metadata', 'json', 'stylish']);
+export const resolveFormatters = (formatters: string | string[]) => {
+  const inputs: Set<Input> = new Set();
+  for (const formatter of [formatters].flat()) {
+    if (builtinFormatters.has(formatter)) continue;
+    else if (isInternal(formatter)) inputs.add(toDeferResolve(formatter));
+    else inputs.add(toDependency(`eslint-formatter-${formatter}`));
+  }
+  return inputs;
 };
