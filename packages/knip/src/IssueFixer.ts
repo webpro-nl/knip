@@ -131,7 +131,7 @@ export class IssueFixer {
     const filePaths = new Set(Object.keys(issues.catalog));
 
     for (const filePath of filePaths) {
-      if (extname(filePath) === '.yaml') {
+      if (['.yml', '.yaml'].includes(extname(filePath))) {
         const absFilePath = join(this.options.cwd, filePath);
         const fileContent = await readFile(absFilePath, 'utf-8');
         const remove = new Set<number>();

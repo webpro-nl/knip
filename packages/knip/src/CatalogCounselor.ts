@@ -40,7 +40,7 @@ export class CatalogCounselor {
 
     if (this.entries.size > this.referencedEntries.size) {
       this.fileContent = await readFile(filePath, 'utf-8');
-      const isYaml = extname(filePath) === '.yaml';
+      const isYaml = ['.yml', '.yaml'].includes(extname(filePath));
       const Peeker = isYaml ? YamlCatalogPeeker : JsonCatalogPeeker;
       const peeker = new Peeker(this.fileContent);
 

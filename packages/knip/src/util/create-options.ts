@@ -6,9 +6,10 @@ import type { RawConfiguration } from '../types/config.js';
 import type { IssueType } from '../types/issues.js';
 import type { Options } from '../types/options.js';
 import type { PackageJson } from '../types/package-json.js';
+import { getCatalogContainer } from './catalog.js';
 import type { ParsedCLIArgs } from './cli-arguments.js';
 import { ConfigurationError } from './errors.js';
-import { findFile, loadJSON } from './fs.js';
+import { findFile, isFile, loadJSON } from './fs.js';
 import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.js';
 import { defaultRules } from './issue-initializers.js';
 import { loadResolvedConfigFile } from './load-config.js';
@@ -105,21 +106,9 @@ export const createOptions = async (options: CreateOptions) => {
     parsedCLIArgs.tags ?? options.tags ?? parsedConfig.tags ?? parsedCLIArgs['experimental-tags'] ?? []
   );
 
-  const catalog: CatalogContainer = {
-    filePath: pnpmWorkspacePath ?? manifestPath,
-    catalog:
-      pnpmWorkspace?.catalog ??
-      manifest.catalog ??
-      ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalog) || {}),
-    catalogs:
-      pnpmWorkspace?.catalogs ??
-      manifest.catalogs ??
-      ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalogs) || {}),
-  };
-
   return {
     cacheLocation: parsedCLIArgs['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
-    catalog,
+    catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
     config: parsedCLIArgs.config,
     configFilePath,
     cwd,

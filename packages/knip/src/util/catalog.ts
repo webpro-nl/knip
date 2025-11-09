@@ -1,7 +1,36 @@
 import type { CatalogContainer } from '../CatalogCounselor.js';
 import type { PackageJson } from '../types/package-json.js';
+import { isFile } from './fs.js';
+import { _load } from './loader.js';
+import { basename, join } from './path.js';
 
 export const DEFAULT_CATALOG = 'default';
+
+export const getCatalogContainer = async (
+  cwd: string,
+  manifest: PackageJson,
+  manifestPath: string,
+  pnpmWorkspacePath?: string,
+  pnpmWorkspace?: any
+): Promise<CatalogContainer> => {
+  const filePath = pnpmWorkspacePath ?? (isFile(join(cwd, '.yarnrc.yml')) ? join(cwd, '.yarnrc.yml') : manifestPath);
+
+  const yarnWorkspace = basename(filePath) === '.yarnrc.yml' ? await _load(filePath) : undefined;
+
+  const catalog =
+    pnpmWorkspace?.catalog ??
+    yarnWorkspace?.catalog ??
+    manifest.catalog ??
+    ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalog) || {});
+
+  const catalogs =
+    pnpmWorkspace?.catalogs ??
+    yarnWorkspace?.catalogs ??
+    manifest.catalogs ??
+    ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalogs) || {});
+
+  return { filePath, catalog, catalogs };
+};
 
 const extractEntries = (catalog: unknown): string[] => {
   if (catalog && typeof catalog === 'object') return Object.keys(catalog).map(entry => `${DEFAULT_CATALOG}:${entry}`);
