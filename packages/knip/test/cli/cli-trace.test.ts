@@ -8,10 +8,10 @@ const cwd = resolve('fixtures/dependencies');
 test('knip --trace', () => {
   const actual = exec('knip --trace', { cwd }).stdout;
   const expected = `my-module.ts:program
-└─ ${cwd}/entry.ts ✓
+└─ entry.ts ✓
 
 my-module.ts:default
-└─ ${cwd}/entry.ts ✓`;
+└─ entry.ts ✓`;
 
   assert.equal(actual, expected);
 });
@@ -19,7 +19,7 @@ my-module.ts:default
 test('knip --trace-export program', () => {
   const actual = exec('knip --trace-export program', { cwd }).stdout;
   const expected = `my-module.ts:program
-└─ ${cwd}/entry.ts ✓`;
+└─ entry.ts ✓`;
 
   assert.equal(actual, expected);
 });
@@ -27,10 +27,10 @@ test('knip --trace-export program', () => {
 test('knip --trace-file my-module.ts', () => {
   const actual = exec('knip --trace', { cwd }).stdout;
   const expected = `my-module.ts:program
-└─ ${cwd}/entry.ts ✓
+└─ entry.ts ✓
 
 my-module.ts:default
-└─ ${cwd}/entry.ts ✓`;
+└─ entry.ts ✓`;
 
   assert.equal(actual, expected);
 });

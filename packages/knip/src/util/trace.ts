@@ -29,14 +29,14 @@ const getPadding = (level: number, levels: Set<number>) => {
   return padding;
 };
 
-const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => {
+const renderTrace = (node: TraceNode, options: MainOptions, level = 0, levels = new Set<number>()) => {
   let index = 0;
   const size = node.children.size;
   const padding = getPadding(level, levels);
   for (const child of node.children) {
     const isLast = ++index === size;
     const hasRef = child.hasRef === true;
-    const rel = child.filePath;
+    const rel = toRelative(child.filePath, options.cwd);
     const file = hasRef ? rel : picocolors.dim(rel);
     const suffix = (hasRef ? HAS_REF : '') + (child.isEntry ? IS_ENTRY : '');
     const text = `${padding}${picocolors.dim(isLast ? '└─' : '├─')} ${file}${suffix}`;
@@ -45,7 +45,7 @@ const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => 
     if (child.children.size > 0) {
       if (!isLast) levels.add(level);
       if (isLast) levels.delete(level);
-      renderTrace(child, level + 1, levels);
+      renderTrace(child, options, level + 1, levels);
     }
   }
 };
@@ -58,7 +58,7 @@ export const printTrace = (node: TraceNode, filePath: string, options: MainOptio
   const header = `${toRelative(filePath, options.cwd)}${identifier ? `:${identifier}` : ''}${suffix}`;
   // biome-ignore lint: suspicious
   console.log(header);
-  renderTrace(node);
+  renderTrace(node, options);
   // biome-ignore lint: suspicious
   console.log();
 };
