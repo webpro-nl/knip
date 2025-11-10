@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { IMPORT_MODIFIERS } from '../../../constants.js';
 import type { ImportNode } from '../../../types/imports.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -13,7 +14,12 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
       if (ts.isLiteralTypeNode(importClause) && ts.isStringLiteral(importClause.literal)) {
         const identifier =
           node.qualifier && ts.isIdentifier(node.qualifier) ? String(node.qualifier.escapedText) : 'default';
-        imports.push({ specifier: importClause.literal.text, identifier, pos: importClause.literal.pos });
+        imports.push({
+          specifier: importClause.literal.text,
+          identifier,
+          pos: importClause.literal.pos,
+          modifiers: IMPORT_MODIFIERS.NONE,
+        });
       }
     }
 
@@ -23,7 +29,12 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
       // biome-ignore lint: suspicious/noTsIgnore
       // @ts-ignore node.moduleSpecifier added in TS v5.5.0
       const moduleSpecifier = node.moduleSpecifier;
-      imports.push({ specifier: moduleSpecifier.text, identifier: undefined, pos: moduleSpecifier.pos });
+      imports.push({
+        specifier: moduleSpecifier.text,
+        identifier: undefined,
+        pos: moduleSpecifier.pos,
+        modifiers: IMPORT_MODIFIERS.NONE,
+      });
     }
 
     ts.forEachChild(node, visit);

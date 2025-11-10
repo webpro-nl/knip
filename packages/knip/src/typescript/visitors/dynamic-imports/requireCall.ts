@@ -1,7 +1,6 @@
 import ts from 'typescript';
-import { IMPORT_STAR } from '../../../constants.js';
+import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
 import { findAncestor, findDescendants, isModuleExportsAccess, isRequireCall, isTopLevel } from '../../ast-helpers.js';
-import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -10,6 +9,7 @@ export default visit(
     if (isRequireCall(node)) {
       if (ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
+        const modifiers = IMPORT_MODIFIERS.NONE;
 
         if (specifier) {
           const propertyAccessExpression = findAncestor<ts.PropertyAccessExpression>(node, _node => {
@@ -17,12 +17,10 @@ export default visit(
             return ts.isPropertyAccessExpression(_node);
           });
 
-          const resolve = isNotJS(node.getSourceFile());
-
           if (propertyAccessExpression) {
             // Pattern: require('side-effects').identifier
             const identifier = String(propertyAccessExpression.name.escapedText);
-            return { identifier, specifier, pos: propertyAccessExpression.name.pos, resolve };
+            return { identifier, specifier, pos: propertyAccessExpression.name.pos, modifiers };
           }
           const variableDeclaration = node.parent;
           if (
@@ -40,7 +38,7 @@ export default visit(
                 symbol: isTLA ? variableDeclaration.symbol : undefined,
                 specifier,
                 pos: node.arguments[0].pos,
-                resolve,
+                modifiers,
               };
             }
             const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
@@ -51,11 +49,11 @@ export default visit(
                 const alias = element.propertyName ? element.name.getText() : undefined;
                 // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
                 const symbol = isTLA ? element.symbol : undefined;
-                return { identifier, specifier, alias, symbol, pos: element.pos, resolve };
+                return { identifier, specifier, alias, symbol, pos: element.pos, modifiers };
               });
             }
             // Pattern: require('specifier')
-            return { identifier: 'default', specifier, pos: node.arguments[0].pos, resolve };
+            return { identifier: 'default', specifier, pos: node.arguments[0].pos, modifiers };
           }
 
           if (
@@ -64,11 +62,16 @@ export default visit(
             isModuleExportsAccess(node.parent.left)
           ) {
             // Pattern: module.exports = require('specifier')
-            return { identifier: IMPORT_STAR, specifier, isReExport: true, pos: node.arguments[0].pos };
+            return {
+              identifier: IMPORT_STAR,
+              specifier,
+              pos: node.arguments[0].pos,
+              modifiers: IMPORT_MODIFIERS.RE_EXPORT,
+            };
           }
 
           // Pattern: require('side-effects')
-          return { identifier: 'default', specifier, pos: node.arguments[0].pos, resolve };
+          return { identifier: 'default', specifier, pos: node.arguments[0].pos, modifiers };
         }
       }
     }
