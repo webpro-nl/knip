@@ -22,7 +22,13 @@ const resolveConfig: ResolveConfig<MdxlintConfig> = config => {
         if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
         return [];
       })
-      .map(plugin => (isInternal(plugin) ? plugin : plugin.startsWith('remark-') || plugin.startsWith('mdxlint-') ? plugin : `mdxlint-${plugin}`)) ?? [];
+      .map(plugin =>
+        isInternal(plugin)
+          ? plugin
+          : plugin.startsWith('remark-') || plugin.startsWith('mdxlint-')
+            ? plugin
+            : `remark-${plugin}`
+      ) ?? [];
   return plugins.map(id => toDeferResolve(id));
 };
 
