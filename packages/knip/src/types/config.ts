@@ -3,6 +3,7 @@ import type { z } from 'zod/mini';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
+import type { ParsedCLIArgs } from '../util/cli-arguments.js';
 import type { Input } from '../util/input.js';
 import type { Args } from './args.js';
 import type { IssueType, SymbolType } from './issues.js';
@@ -34,6 +35,10 @@ export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
 export type BinaryResolver = (binary: string, args: string[], options: BinaryResolverOptions) => Input[];
 
 export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
+
+export type RawConfigurationOrFn =
+  | RawConfiguration
+  | ((options: ParsedCLIArgs) => RawConfiguration | Promise<RawConfiguration>);
 
 export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
