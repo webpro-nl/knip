@@ -11,7 +11,8 @@
       "packages/deep/**",
       "packages/flat/*",
       "packages/un/**/used",
-      "packages/wut/*"
+      "packages/wut/*",
+      "!packages/deep/unignored"
     ]
   }
 }

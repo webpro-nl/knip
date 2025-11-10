@@ -11,9 +11,9 @@ test('Ignore workspaces', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters, configurationHints } = await main(options);
 
-  assert.equal(Object.keys(issues.binaries).length, 2);
   assert(issues.binaries['packages/e/package.json']['not-ignored']);
   assert(issues.binaries['packages/production/package.json']['ignored-in-production-mode']);
+  assert(issues.binaries['packages/deep/unignored/package.json']['unignored']);
 
   assert.deepEqual(
     configurationHints,
@@ -27,7 +27,7 @@ test('Ignore workspaces', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 2,
+    binaries: 3,
   });
 });
 
@@ -35,11 +35,11 @@ test('Ignore workspaces (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert.equal(Object.keys(issues.binaries).length, 1);
   assert(issues.binaries['packages/e/package.json']['not-ignored']);
+  assert(issues.binaries['packages/deep/unignored/package.json']['unignored']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
+    binaries: 2,
   });
 });

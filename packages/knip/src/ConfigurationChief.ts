@@ -248,8 +248,11 @@ export class ConfigurationChief {
 
   private getAvailableWorkspaceNames(names: Iterable<string>) {
     const availableWorkspaceNames = [];
+    const [ignore, patterns] = partition(this.ignoredWorkspacePatterns, pattern => pattern.startsWith('!'));
     for (const name of names) {
-      if (!picomatch.isMatch(name, this.ignoredWorkspacePatterns)) availableWorkspaceNames.push(name);
+      if (!picomatch.isMatch(name, patterns, { ignore: ignore.map(pattern => pattern.slice(1)) })) {
+        availableWorkspaceNames.push(name);
+      }
     }
     return availableWorkspaceNames;
   }
