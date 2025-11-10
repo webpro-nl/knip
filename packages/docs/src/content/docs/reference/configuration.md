@@ -319,6 +319,8 @@ Array of workspaces to ignore, globs allowed. Example:
 
 Suffix an item with `!` to enable it only in production mode.
 
+Prefix an item with `!` to override an earlier wildcard.
+
 ### `ignoreIssues`
 
 Ignore specific issue types for specific file patterns. Keys are glob patterns
