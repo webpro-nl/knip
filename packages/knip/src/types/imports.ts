@@ -7,7 +7,5 @@ export interface ImportNode {
   namespace?: string | undefined;
   pos: number;
   symbol?: ts.Symbol;
-  isTypeOnly?: boolean;
-  isReExport?: boolean;
-  resolve?: boolean;
+  modifiers: number;
 }

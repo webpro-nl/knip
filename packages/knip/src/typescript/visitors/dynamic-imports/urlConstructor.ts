@@ -1,10 +1,12 @@
 import ts from 'typescript';
+import { IMPORT_MODIFIERS } from '../../../constants.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
   () => true,
   node => {
     if (ts.isNewExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'URL') {
+      // Pattern: new URL('./specifier.js', import.meta.url)
       if (
         node.arguments &&
         node.arguments.length >= 2 &&
@@ -16,7 +18,13 @@ export default visit(
         node.arguments[1].name.text === 'url'
       ) {
         const specifier = node.arguments[0].text;
-        if (specifier) return { specifier, identifier: undefined, pos: node.arguments[0].pos, resolve: true };
+        if (specifier)
+          return {
+            specifier,
+            identifier: undefined,
+            pos: node.arguments[0].pos,
+            modifiers: IMPORT_MODIFIERS.ENTRY | IMPORT_MODIFIERS.OPTIONAL,
+          };
       }
     }
   }

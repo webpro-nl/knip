@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_STAR } from '../../../constants.js';
+import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -10,7 +10,12 @@ export default visit(
         // Re-exports
         if (!node.exportClause) {
           // Pattern: export * from 'specifier';
-          return { identifier: IMPORT_STAR, specifier: node.moduleSpecifier.text, isReExport: true, pos: node.pos };
+          return {
+            identifier: IMPORT_STAR,
+            specifier: node.moduleSpecifier.text,
+            pos: node.pos,
+            modifiers: IMPORT_MODIFIERS.RE_EXPORT,
+          };
         }
         if (node.exportClause.kind === ts.SyntaxKind.NamespaceExport) {
           // Pattern: export * as namespace from 'specifier';
@@ -18,8 +23,8 @@ export default visit(
             identifier: IMPORT_STAR,
             namespace: String(node.exportClause.name.text),
             specifier: node.moduleSpecifier.text,
-            isReExport: true,
             pos: node.exportClause.name.pos,
+            modifiers: IMPORT_MODIFIERS.RE_EXPORT,
           };
         }
         const specifier = node.moduleSpecifier; // Assign to satisfy TS
@@ -30,16 +35,16 @@ export default visit(
               identifier: String(element.propertyName.text),
               alias: String(element.name.text),
               specifier: specifier.text,
-              isReExport: true,
               pos: element.pos,
+              modifiers: IMPORT_MODIFIERS.RE_EXPORT,
             };
           }
           // Pattern: export { identifier } from 'specifier';
           return {
             identifier: (element.propertyName ?? element.name).getText(),
             specifier: specifier.text,
-            isReExport: true,
             pos: element.pos,
+            modifiers: IMPORT_MODIFIERS.RE_EXPORT,
           };
         });
       }

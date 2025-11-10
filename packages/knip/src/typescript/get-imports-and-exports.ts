@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ALIAS_TAG, ANONYMOUS, IMPORT_STAR, PROTOCOL_VIRTUAL } from '../constants.js';
+import { ALIAS_TAG, ANONYMOUS, IMPORT_MODIFIERS, IMPORT_STAR, PROTOCOL_VIRTUAL } from '../constants.js';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
@@ -17,7 +17,7 @@ import type {
 import { addNsValue, addValue, createImports } from '../util/module-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { timerify } from '../util/Performance.js';
-import { isInNodeModules } from '../util/path.js';
+import { dirname, isInNodeModules, resolve } from '../util/path.js';
 import { shouldIgnore } from '../util/tag.js';
 import {
   getAccessMembers,
@@ -68,7 +68,6 @@ interface AddInternalImportOptions extends ImportNode {
   namespace?: string;
   identifier: string;
   filePath: string;
-  isReExport: boolean;
   line: number;
   col: number;
 }
@@ -128,7 +127,7 @@ const getImportsAndExports = (
   };
 
   const addInternalImport = (options: AddInternalImportOptions) => {
-    const { identifier, symbol, filePath, namespace, alias, specifier, isReExport } = options;
+    const { identifier, symbol, filePath, namespace, alias, specifier } = options;
 
     const isStar = identifier === IMPORT_STAR;
 
@@ -142,7 +141,7 @@ const getImportsAndExports = (
 
     const nsOrAlias = symbol ? String(symbol.escapedName) : alias;
 
-    if (isReExport) {
+    if (options.modifiers & IMPORT_MODIFIERS.RE_EXPORT) {
       if (isStar && namespace) {
         // Pattern: export * as NS from 'specifier';
         addValue(imports.reExportedNs, namespace, sourceFile.fileName);
@@ -179,7 +178,7 @@ const getImportsAndExports = (
     if (module) {
       const filePath = module.resolvedFileName;
       if (filePath) {
-        if (opts.resolve && !isInNodeModules(filePath)) {
+        if (opts.modifiers && opts.modifiers & IMPORT_MODIFIERS.ENTRY && !isInNodeModules(filePath)) {
           resolved.add(filePath);
           return;
         }
@@ -190,14 +189,13 @@ const getImportsAndExports = (
             ...opts,
             identifier: opts.identifier ?? ANONYMOUS,
             filePath,
-            isReExport: opts.isReExport ?? false,
             line: line + 1,
             col: character + 1,
           });
         }
 
         if (module.isExternalLibraryImport) {
-          if (options.skipTypeOnly && opts.isTypeOnly) return;
+          if (options.skipTypeOnly && opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY) return;
 
           const isInNM = isInNodeModules(opts.specifier);
 
@@ -221,9 +219,15 @@ const getImportsAndExports = (
         }
       }
     } else {
-      if (options.skipTypeOnly && opts.isTypeOnly) return;
+      if (options.skipTypeOnly && opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY) return;
       if (shouldIgnore(getJSDocTags(node), options.tags)) return;
       if (opts.specifier.startsWith(PROTOCOL_VIRTUAL)) return;
+
+      const r = resolve(dirname(sourceFile.fileName), opts.specifier);
+      if (opts.modifiers && opts.modifiers & IMPORT_MODIFIERS.OPTIONAL) {
+        resolved.add(r);
+        return;
+      }
 
       // @ts-expect-error TODO
       const pos = 'moduleSpecifier' in node ? node.moduleSpecifier.pos : node.pos;

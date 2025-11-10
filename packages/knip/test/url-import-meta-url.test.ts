@@ -13,7 +13,7 @@ test('Support URL constructor using import.meta.url', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });

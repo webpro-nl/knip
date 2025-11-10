@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { IMPORT_MODIFIERS } from '../../../constants.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -6,7 +7,12 @@ export default visit(
   node => {
     if (ts.isImportTypeNode(node)) {
       if (ts.isLiteralTypeNode(node.argument) && ts.isStringLiteral(node.argument.literal)) {
-        return { specifier: node.argument.literal.text, identifier: undefined, pos: 0, isTypeOnly: true };
+        return {
+          specifier: node.argument.literal.text,
+          identifier: undefined,
+          pos: 0,
+          modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
+        };
       }
     }
   }

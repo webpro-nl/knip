@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_STAR } from '../../../constants.js';
+import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
 import { isDefaultImport } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -10,7 +10,7 @@ export default visit(
       const specifier = node.moduleSpecifier.text;
       if (!node.importClause) {
         // Pattern: import 'side-effects';
-        return { specifier, identifier: undefined, pos: node.pos };
+        return { specifier, identifier: undefined, pos: node.pos, modifiers: IMPORT_MODIFIERS.NONE };
       }
       const imports = [];
 
@@ -23,6 +23,7 @@ export default visit(
           // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportClause'.
           symbol: node.importClause.symbol,
           pos: node.moduleSpecifier.pos,
+          modifiers: IMPORT_MODIFIERS.NONE,
         });
       }
 
@@ -35,8 +36,8 @@ export default visit(
             symbol,
             specifier,
             identifier: IMPORT_STAR,
-            isTypeOnly: node.importClause?.isTypeOnly,
             pos: symbol?.declarations[0]?.pos ?? node.pos,
+            modifiers: node.importClause?.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE,
           });
         }
         if (ts.isNamedImports(node.importClause.namedBindings)) {
@@ -48,8 +49,8 @@ export default visit(
               specifier,
               // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportSpecifier'.
               symbol: element.symbol,
-              isTypeOnly: node.importClause?.isTypeOnly,
               pos: element.getStart(),
+              modifiers: node.importClause?.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE,
             });
           }
         }
@@ -58,8 +59,8 @@ export default visit(
           imports.push({
             specifier,
             identifier: undefined,
-            isTypeOnly: node.importClause?.isTypeOnly,
             pos: node.importClause.namedBindings.pos,
+            modifiers: node.importClause?.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE,
           });
         }
       }
