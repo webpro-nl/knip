@@ -36,7 +36,7 @@ export class IssueFixer {
     return touchedFiles;
   }
 
-  private markExportFixed(issues: Issues, filePath: string) {
+  private markExportIssuesFixed(issues: Issues, filePath: string) {
     const relPath = relative(this.options.cwd, filePath);
 
     const types = [
@@ -80,7 +80,7 @@ export class IssueFixer {
 
         touchedFiles.add(filePath);
 
-        this.markExportFixed(issues, filePath);
+        this.markExportIssuesFixed(issues, filePath);
       }
     }
     return touchedFiles;
