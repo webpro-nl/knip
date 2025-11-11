@@ -22,15 +22,15 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.7",
-    "@astrojs/starlight": "0.36.0",
-    "sharp": "0.34.4"
+    "@astrojs/starlight": "0.36.2",
+    "sharp": "0.34.5"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.4",
-    "@octokit/graphql": "^9.0.2",
+    "@astrojs/check": "0.9.5",
+    "@octokit/graphql": "^9.0.3",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "5.14.1",
+    "astro": "5.15.5",
     "hastscript": "9.0.1",
     "mdxlint": "1.0.0",
     "mdxlint-preset-webpro": "^1.0.2",
