@@ -17,7 +17,7 @@ Options:
   --no-gitignore           Don't use .gitignore
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
-  --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved
+  --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved,catalog
   --exports                Shortcut for --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
   --files                  Shortcut for --include files
   --fix                    Fix issues
@@ -49,8 +49,8 @@ Options:
   -h, --help               Print this help text
   -V, --version            Print version
 
-(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates
-(2) Fixable issue types: dependencies, exports, types
+(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates, catalog
+(2) Fixable issue types: dependencies, exports, types, catalog
 
 Examples:
 

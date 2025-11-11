@@ -1,3 +1,4 @@
+import type { CatalogCounselor } from '../CatalogCounselor.js';
 import type { ConfigurationChief } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
@@ -15,6 +16,7 @@ import { createAndPrintTrace, printTrace } from '../util/trace.js';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
+  counselor: CatalogCounselor;
   chief: ConfigurationChief;
   collector: IssueCollector;
   deputy: DependencyDeputy;
@@ -29,6 +31,7 @@ interface AnalyzeOptions {
 
 export const analyze = async ({
   analyzedFiles,
+  counselor,
   chief,
   collector,
   deputy,
@@ -284,6 +287,9 @@ export const analyze = async ({
       const configurationHints = deputy.getConfigurationHints();
       for (const hint of configurationHints) collector.addConfigurationHint(hint);
     }
+
+    const catalogIssues = await counselor.settleCatalogIssues();
+    for (const issue of catalogIssues) collector.addIssue(issue);
 
     const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
     for (const identifier of unusedIgnoredWorkspaces) {

@@ -46,6 +46,7 @@ Knip has shortcuts to include only specific issue types.
    - `unlisted`
    - `binaries`
    - `unresolved`
+   - `catalog`
 
 2. The `--exports` flag includes:
    - `exports`

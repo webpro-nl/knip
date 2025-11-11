@@ -84,6 +84,7 @@ test('Resolve included issue types (--dependencies)', async () => {
     unlisted: true,
     binaries: true,
     unresolved: true,
+    catalog: true,
   });
 });
 
@@ -117,6 +118,7 @@ test('Resolve included issue types (all)', async () => {
       'enumMembers',
       'duplicates',
       'files',
+      'catalog',
     ],
   });
   assert.deepEqual(config, all);

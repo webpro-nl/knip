@@ -192,6 +192,7 @@ export const ISSUE_TYPES = [
   'enumMembers',
   'classMembers',
   'duplicates',
+  'catalog',
 ] as const;
 
 export const ISSUE_TYPE_TITLE = {
@@ -210,6 +211,7 @@ export const ISSUE_TYPE_TITLE = {
   enumMembers: 'Unused exported enum members',
   classMembers: 'Unused exported class members',
   duplicates: 'Duplicate exports',
+  catalog: 'Unused catalog entries',
 } as const;
 
 export const SYMBOL_TYPE = {
