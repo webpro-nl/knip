@@ -1,0 +1,22 @@
+{
+  "name": "@plugins/astro",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "*",
+    "@astrojs/sitemap": "*",
+    "astro": "*",
+    "is-odd": "^0.1.2",
+    "is-even": "^1.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "*"
+  }
+}
