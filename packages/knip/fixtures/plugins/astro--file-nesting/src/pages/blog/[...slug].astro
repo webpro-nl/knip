@@ -3,7 +3,7 @@ Astro.response.headers.set('Cache-Control', `max-age=1800, s-maxage=1800, stale-
 
 import { type CollectionEntry, getCollection } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
-import { used } from "./_nested-used-file"
+import { used } from './_nested-used-file';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -17,7 +17,7 @@ type Props = CollectionEntry<'blog'>;
 const post = Astro.props;
 const { Content } = await post.render();
 
-const message = `used: ${used}`
+const message = `used: ${used}`;
 ---
 
 <BlogPost {...post.data}>

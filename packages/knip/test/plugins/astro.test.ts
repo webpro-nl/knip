@@ -6,7 +6,6 @@ import baseCounters from '../helpers/baseCounters.js';
 import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
-
 test('Find dependencies at various levels of nesting with the Astro plugin', async () => {
   const cwd = resolve('fixtures/plugins/astro--file-nesting');
   const options = await createOptions({ cwd });
@@ -31,33 +30,33 @@ test('Find dependencies at various levels of nesting with the Astro plugin', asy
 });
 
 test('Find dependencies of various filetypes with the Astro plugin', async () => {
-const cwd = resolve('fixtures/plugins/astro--file-types');
+  const cwd = resolve('fixtures/plugins/astro--file-types');
   const options = await createOptions({ cwd });
   const { issues } = await main(options);
 
-  assert(issues.dependencies["package.json"]["is-even"])
-  assert(issues.files.has(join(cwd, "src/imports/unused.css")))
-  assert(issues.files.has(join(cwd, "src/imports/unused.ts")))
-  assert(issues.files.has(join(cwd, "src/imports/unused-js.js")))
-  assert(issues.files.has(join(cwd, "src/imports/unused.astro")))
-  
-  assert(!issues.dependencies["package.json"]["is-odd"])
-  assert(!issues.files.has(join(cwd, "src/imports/used.css")))
-  assert(!issues.files.has(join(cwd, "src/imports/used.ts")))
-  assert(!issues.files.has(join(cwd, "src/imports/used-js.js")))
-  assert(!issues.files.has(join(cwd, "src/imports/used.astro")))
+  assert(issues.dependencies['package.json']['is-even']);
+  assert(issues.files.has(join(cwd, 'src/imports/unused.css')));
+  assert(issues.files.has(join(cwd, 'src/imports/unused.ts')));
+  assert(issues.files.has(join(cwd, 'src/imports/unused-js.js')));
+  assert(issues.files.has(join(cwd, 'src/imports/unused.astro')));
+
+  assert(!issues.dependencies['package.json']['is-odd']);
+  assert(!issues.files.has(join(cwd, 'src/imports/used.css')));
+  assert(!issues.files.has(join(cwd, 'src/imports/used.ts')));
+  assert(!issues.files.has(join(cwd, 'src/imports/used-js.js')));
+  assert(!issues.files.has(join(cwd, 'src/imports/used.astro')));
 });
 
 test('Find dependencies by following various kinds of import', async () => {
-const cwd = resolve('fixtures/plugins/astro--import-strategies');
+  const cwd = resolve('fixtures/plugins/astro--import-strategies');
   const options = await createOptions({ cwd });
   const { issues } = await main(options);
 
-  assert(issues.files.has(join(cwd, "src/imports/frontmatter-import-unused.ts")))
-  assert(issues.files.has(join(cwd, "src/imports/script-src-import-unused.ts")))
-  assert(issues.files.has(join(cwd, "src/imports/script-text-import-unused.ts")))
+  assert(issues.files.has(join(cwd, 'src/imports/frontmatter-import-unused.ts')));
+  assert(issues.files.has(join(cwd, 'src/imports/script-src-import-unused.ts')));
+  assert(issues.files.has(join(cwd, 'src/imports/script-text-import-unused.ts')));
 
-  assert(!issues.files.has(join(cwd, "src/imports/frontmatter-import-used.ts")))
-  assert(!issues.files.has(join(cwd, "src/imports/script-src-import-used.ts")))
-  assert(!issues.files.has(join(cwd, "src/imports/script-text-import-used.ts")))
+  assert(!issues.files.has(join(cwd, 'src/imports/frontmatter-import-used.ts')));
+  assert(!issues.files.has(join(cwd, 'src/imports/script-src-import-used.ts')));
+  assert(!issues.files.has(join(cwd, 'src/imports/script-text-import-used.ts')));
 });

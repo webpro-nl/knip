@@ -1,13 +1,12 @@
 ---
-import "../imports/used.css"
-import "../imports/used"
-import "../imports/used-js"
-import Used from "../imports/used.astro"
+import '../imports/used.css';
+import '../imports/used';
+import '../imports/used-js';
+import Used from '../imports/used.astro';
 
-import isOdd from "is-odd"
+import isOdd from 'is-odd';
 
-console.log(isOdd(1))
-
+const oddRes = isOdd(1)
 ---
 
 <!doctype html>
@@ -17,5 +16,6 @@ console.log(isOdd(1))
 	<body>
 		<Used />
 		<img src={image.src} />
+		<h1>isOdd: {oddRes}</h1>
 	</body>
 </html>
