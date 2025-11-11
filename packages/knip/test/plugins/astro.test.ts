@@ -47,3 +47,17 @@ const cwd = resolve('fixtures/plugins/astro--file-types');
   assert(!issues.files.has(join(cwd, "src/imports/used-js.js")))
   assert(!issues.files.has(join(cwd, "src/imports/used.astro")))
 });
+
+test('Find dependencies by following various kinds of import', async () => {
+const cwd = resolve('fixtures/plugins/astro--import-strategies');
+  const options = await createOptions({ cwd });
+  const { issues } = await main(options);
+
+  assert(issues.files.has(join(cwd, "src/imports/frontmatter-import-unused.ts")))
+  assert(issues.files.has(join(cwd, "src/imports/script-src-import-unused.ts")))
+  assert(issues.files.has(join(cwd, "src/imports/script-text-import-unused.ts")))
+
+  assert(!issues.files.has(join(cwd, "src/imports/frontmatter-import-used.ts")))
+  assert(!issues.files.has(join(cwd, "src/imports/script-src-import-used.ts")))
+  assert(!issues.files.has(join(cwd, "src/imports/script-text-import-used.ts")))
+});

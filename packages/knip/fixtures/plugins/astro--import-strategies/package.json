@@ -1,0 +1,20 @@
+{
+  "name": "@plugins/astro",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "*",
+    "@astrojs/sitemap": "*",
+    "astro": "*"
+  },
+  "devDependencies": {
+    "@astrojs/check": "*"
+  }
+}
