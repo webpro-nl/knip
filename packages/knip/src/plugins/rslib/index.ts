@@ -16,10 +16,12 @@ const resolveConfig: ResolveConfig<RslibConfig> = () => {
   return [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

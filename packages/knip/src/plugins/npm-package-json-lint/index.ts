@@ -20,11 +20,13 @@ const resolveConfig: ResolveConfig<NpmPkgJsonLintConfig> = localConfig => {
   return localConfig?.extends ? [localConfig.extends].map(id => toDependency(id)) : [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   packageJsonPath,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

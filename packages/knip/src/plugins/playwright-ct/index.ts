@@ -12,11 +12,13 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['playwright-ct.config.{js,ts}', 'playwright/index.{js,ts,jsx,tsx}'];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

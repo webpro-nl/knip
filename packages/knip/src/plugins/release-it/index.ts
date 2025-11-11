@@ -29,10 +29,12 @@ const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
   return [...plugins.map(id => toDependency(id)), ...inputs];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

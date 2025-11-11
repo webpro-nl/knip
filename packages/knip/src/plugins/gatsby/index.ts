@@ -45,11 +45,13 @@ const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConf
   return [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

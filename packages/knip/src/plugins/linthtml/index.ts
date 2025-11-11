@@ -22,11 +22,13 @@ const resolveConfig: ResolveConfig<LintHTMLConfig> = config => {
   return [extensions, plugins].flat().map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   packageJsonPath,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

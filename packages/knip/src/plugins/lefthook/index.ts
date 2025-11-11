@@ -52,10 +52,12 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
   return matches ? [matches] : [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

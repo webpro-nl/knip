@@ -55,7 +55,7 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
   ];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -63,4 +63,6 @@ export default {
   entry,
   project,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

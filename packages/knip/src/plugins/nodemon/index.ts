@@ -9,7 +9,9 @@ const args = {
   fromArgs: ['exec'],
 };
 
-export default {
+const plugin: Plugin = {
   title,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

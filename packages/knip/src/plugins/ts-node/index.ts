@@ -11,7 +11,9 @@ const args = {
   alias: { transpileOnly: ['T'], compilerHost: ['H'], ignoreDiagnostics: ['D'] },
 };
 
-export default {
+const plugin: Plugin = {
   title,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

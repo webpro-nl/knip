@@ -20,11 +20,13 @@ const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
   return babelPlugins.map(plugin => toDependency(plugin));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
   resolveFromAST,
-} satisfies Plugin;
+};
+
+export default plugin;

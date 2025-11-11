@@ -25,11 +25,13 @@ const resolve: Resolve = options => {
   return [alias];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   production,
   resolve,
-} satisfies Plugin;
+};
+
+export default plugin;

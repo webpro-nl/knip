@@ -31,11 +31,13 @@ const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
   return [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   packageJsonPath,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

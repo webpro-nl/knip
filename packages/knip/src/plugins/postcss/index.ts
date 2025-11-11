@@ -36,10 +36,12 @@ const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
     : inputs;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

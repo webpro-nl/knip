@@ -15,9 +15,11 @@ const args = {
   config: true,
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

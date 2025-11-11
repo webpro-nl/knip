@@ -29,10 +29,12 @@ const resolve: Resolve = options => {
   return sizeLimitDeps.map(dep => toDependency(dep));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolve,
-} satisfies Plugin;
+};
+
+export default plugin;

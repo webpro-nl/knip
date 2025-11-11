@@ -10,7 +10,9 @@ const args = {
   fromArgs: (parsed: ParsedArgs, args: string[]) => argsFrom(args, parsed._[0]),
 };
 
-export default {
+const plugin: Plugin = {
   title,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

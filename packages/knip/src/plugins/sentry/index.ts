@@ -11,9 +11,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const production = ['sentry.{client,server,edge}.config.{js,ts}'];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   production,
-} satisfies Plugin;
+};
+
+export default plugin;

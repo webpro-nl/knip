@@ -28,10 +28,12 @@ const resolveConfig: ResolveConfig<SimpleGitHooksConfig> = async (config, option
   return [toDependency('simple-git-hooks'), ...Array.from(inputs)];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

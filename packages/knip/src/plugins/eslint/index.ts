@@ -75,7 +75,7 @@ const args = {
   },
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -84,4 +84,6 @@ export default {
   args,
   isLoadConfig,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -22,7 +22,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async config => {
   return [...inputs].map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -30,4 +30,6 @@ export default {
   entry,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

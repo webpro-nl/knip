@@ -18,10 +18,12 @@ const resolveConfig: ResolveConfig<DrizzleConfig> = config => {
   return [config.schema].flat().map(id => toProductionEntry(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

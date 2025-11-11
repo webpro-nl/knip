@@ -54,11 +54,13 @@ Override the default \`entry\` patterns to match platforms and extensions.`;
 /** @public */
 export const docs = { note };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

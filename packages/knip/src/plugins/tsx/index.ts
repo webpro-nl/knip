@@ -39,11 +39,13 @@ const args = {
   args: (args: string[]) => args.filter(arg => arg !== 'watch'),
 };
 
-export default {
+const plugin: Plugin = {
   title,
   isEnabled,
   packageJsonPath,
   config,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

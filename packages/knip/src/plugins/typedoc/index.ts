@@ -34,7 +34,7 @@ const args = {
   resolve: ['plugin', 'theme'],
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -42,4 +42,6 @@ export default {
   config,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

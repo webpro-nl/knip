@@ -12,9 +12,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
-} satisfies Plugin;
+};
+
+export default plugin;

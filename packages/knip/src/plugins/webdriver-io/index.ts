@@ -37,10 +37,12 @@ const resolveConfig: ResolveConfig<WebdriverIOConfig> = async config => {
   return [...frameworks, ...runners, ...reporters].map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

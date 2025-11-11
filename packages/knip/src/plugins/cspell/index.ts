@@ -22,10 +22,12 @@ const resolveConfig: ResolveConfig<CSpellConfig> = config => {
   return [config?.import ?? []].flat().map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

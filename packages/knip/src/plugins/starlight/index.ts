@@ -18,10 +18,12 @@ const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
   return Array.from(componentPaths).map(id => toProductionEntry(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveFromAST,
-} satisfies Plugin;
+};
+
+export default plugin;

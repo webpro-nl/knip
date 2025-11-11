@@ -32,10 +32,12 @@ const resolveConfig: ResolveConfig<MdxlintConfig> = config => {
   return plugins.map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -50,7 +50,7 @@ const resolve: Resolve = options => {
   return inputs;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -60,4 +60,6 @@ export default {
   resolveFromAST,
   resolve,
   project,
-} satisfies Plugin;
+};
+
+export default plugin;

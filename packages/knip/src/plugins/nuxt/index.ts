@@ -66,7 +66,7 @@ Nuxt allows to [disable auto-imports](https://nuxt.com/docs/guide/concepts/auto-
 /** @public */
 export const docs = { note };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -74,4 +74,6 @@ export default {
   production,
   setup,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;
