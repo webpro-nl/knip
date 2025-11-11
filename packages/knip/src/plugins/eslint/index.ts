@@ -1,6 +1,6 @@
 import type { ParsedArgs } from 'minimist';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDeferResolve, toDependency } from '../../util/input.js';
+import { type Input, toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getInputs, resolveFormatters } from './helpers.js';
 import type { ESLintConfigDeprecated } from './types.js';

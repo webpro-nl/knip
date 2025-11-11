@@ -1,4 +1,4 @@
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   --sl-color-white: hsl(224, 10%, 10%);
   --sl-color-black: hsl(0, 0%, 100%);
   --sl-color-gray-1: hsl(224, 14%, 16%);

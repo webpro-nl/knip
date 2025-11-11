@@ -10,7 +10,7 @@ export class JsonCatalogPeeker {
   private init() {
     this.lines = this.fileContent.split('\n');
     let inCatalogs = false;
-    let catalogName: string | undefined = undefined;
+    let catalogName: string | undefined;
     let braceLevel = 0;
 
     for (let i = 0; i < this.lines.length; i++) {

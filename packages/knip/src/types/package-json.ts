@@ -1,4 +1,3 @@
-import type { MainOptions } from '../util/create-options.js';
 import type { PluginMap, WorkspaceConfiguration } from './config.js';
 
 type Primitive = null | undefined | string | number | boolean | symbol | bigint;

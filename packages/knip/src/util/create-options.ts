@@ -1,4 +1,3 @@
-import type { CatalogContainer } from '../CatalogCounselor.js';
 import { partitionCompilers } from '../compilers/index.js';
 import { KNIP_CONFIG_LOCATIONS } from '../constants.js';
 import { knipConfigurationSchema } from '../schema/configuration.js';
@@ -9,7 +8,7 @@ import type { PackageJson } from '../types/package-json.js';
 import { getCatalogContainer } from './catalog.js';
 import type { ParsedCLIArgs } from './cli-arguments.js';
 import { ConfigurationError } from './errors.js';
-import { findFile, isFile, loadJSON } from './fs.js';
+import { findFile, loadJSON } from './fs.js';
 import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.js';
 import { defaultRules } from './issue-initializers.js';
 import { loadResolvedConfigFile } from './load-config.js';
