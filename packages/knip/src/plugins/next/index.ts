@@ -17,9 +17,6 @@ const defaultPageExtensions = ['{js,jsx,ts,tsx}'];
 
 const productionEntryFilePatterns = [
   '{instrumentation,instrumentation-client,middleware,proxy}.{js,ts}',
-  'app/global-{error,not-found}.{js,jsx,ts,tsx}',
-  'app/**/{error,layout,loading,not-found,page,template,default,forbidden,unauthorized}.{js,jsx,ts,tsx}',
-  'app/**/route.{js,jsx,ts,tsx}',
   'app/{manifest,robots}.{js,ts}',
   'app/**/sitemap.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
@@ -28,8 +25,15 @@ const productionEntryFilePatterns = [
 ];
 
 const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {
-  const pages = pageExtensions.map(ext => `pages/**/*.${ext}`);
-  const patterns = [...productionEntryFilePatterns, ...pages];
+  const patterns = [...productionEntryFilePatterns];
+  for (const ext of pageExtensions) {
+    patterns.push(
+      `app/global-{error,not-found}.${ext}`,
+      `app/**/{error,layout,loading,not-found,page,template,default,forbidden,unauthorized}.${ext}`,
+      `app/**/route.${ext}`,
+      `pages/**/*.${ext}`
+    );
+  }
   return [...patterns, ...patterns.map(pattern => `src/${pattern}`)];
 };
 
