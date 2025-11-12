@@ -197,10 +197,10 @@ const getImportsAndExports = (
         if (module.isExternalLibraryImport) {
           if (options.skipTypeOnly && opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY) return;
 
-          const isInNM = isInNodeModules(opts.specifier);
-
           const sanitizedSpecifier = sanitizeSpecifier(
-            isInNM || isInNodeModules(filePath) ? getPackageNameFromFilePath(opts.specifier) : opts.specifier
+            isInNodeModules(filePath) || isInNodeModules(opts.specifier)
+              ? getPackageNameFromFilePath(opts.specifier)
+              : opts.specifier
           );
 
           if (!isStartsLikePackageName(sanitizedSpecifier)) {
@@ -208,14 +208,10 @@ const getImportsAndExports = (
             return;
           }
 
-          // Module resolver may return DTS references or unaliased npm package names,
-          // but in the rest of the program we want the package name based on the original specifier.
-          if (isInNM) {
-            external.add({ specifier: sanitizedSpecifier });
-          } else {
-            const { line, character } = sourceFile.getLineAndCharacterOfPosition(opts.pos);
-            external.add({ specifier: sanitizedSpecifier, pos: opts.pos, line: line + 1, col: character + 2 });
-          }
+          // @ts-expect-error ts.ImportDeclaration
+          const pos = node.moduleSpecifier?.getStart() ?? opts.pos; // switch from identifier → specifier pos
+          const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
+          external.add({ specifier: sanitizedSpecifier, pos: opts.pos, line: line + 1, col: character + 2 });
         }
       }
     } else {

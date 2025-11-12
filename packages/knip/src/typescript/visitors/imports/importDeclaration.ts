@@ -22,7 +22,7 @@ export default visit(
           specifier,
           // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportClause'.
           symbol: node.importClause.symbol,
-          pos: node.moduleSpecifier.pos,
+          pos: node.importClause.name?.getStart() ?? node.getStart(),
           modifiers: IMPORT_MODIFIERS.NONE,
         });
       }

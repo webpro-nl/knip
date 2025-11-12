@@ -15,7 +15,7 @@ function isPrivateMember(
 
 export function isDefaultImport(
   node: ts.ImportDeclaration | ts.ImportEqualsDeclaration | ts.ExportDeclaration
-): boolean {
+): node is ts.ImportDeclaration {
   return node.kind === ts.SyntaxKind.ImportDeclaration && !!node.importClause && !!node.importClause.name;
 }
 

@@ -18,7 +18,7 @@ export default visit(isNotJS, node => {
       identifier: 'default',
       // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportEqualsDeclaration'.
       symbol: node.symbol,
-      pos: node.moduleReference.expression.pos,
+      pos: node.name.getStart(),
       modifiers: IMPORT_MODIFIERS.NONE,
     };
   }
