@@ -316,17 +316,24 @@ export class DependencyDeputy {
 
       for (const symbol of this.getProductionDependencies(workspace).filter(isNotReferencedDependency)) {
         const position = peeker.getLocation('dependencies', symbol);
-        dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, ...position });
+        dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, fixes: [], ...position });
       }
 
       for (const symbol of this.getDevDependencies(workspace).filter(isNotReferencedDependency)) {
         const position = peeker.getLocation('devDependencies', symbol);
-        devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, ...position });
+        devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
 
       for (const symbol of this.getOptionalPeerDependencies(workspace).filter(d => isReferencedDependency(d))) {
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
-        optionalPeerDependencyIssues.push({ type: 'optionalPeerDependencies', filePath, workspace, symbol, ...pos });
+        optionalPeerDependencyIssues.push({
+          type: 'optionalPeerDependencies',
+          filePath,
+          workspace,
+          symbol,
+          fixes: [],
+          ...pos,
+        });
       }
     }
 

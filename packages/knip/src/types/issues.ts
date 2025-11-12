@@ -1,4 +1,5 @@
 import type { SYMBOL_TYPE } from '../constants.js';
+import type { Fixes } from './exports.js';
 
 export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 
@@ -17,6 +18,7 @@ export type Issue = {
   pos?: number;
   line?: number;
   col?: number;
+  fixes: Fixes;
   isFixed?: boolean;
 };
 

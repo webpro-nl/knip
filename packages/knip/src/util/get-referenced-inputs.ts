@@ -51,6 +51,7 @@ export const getReferencedInputsHandler =
         workspace: workspace.name,
         symbol: binaryName,
         specifier,
+        fixes: [],
       });
       return;
     }
@@ -74,6 +75,7 @@ export const getReferencedInputsHandler =
                 workspace: inputWorkspace.name,
                 symbol: packageName ?? specifier,
                 specifier,
+                fixes: [],
               });
             }
             return;
@@ -109,6 +111,7 @@ export const getReferencedInputsHandler =
         workspace: workspace.name,
         symbol: packageName ?? specifier,
         specifier,
+        fixes: [],
       });
     } else if (!isGitIgnored(filePath)) {
       // Let's start out conservatively
@@ -118,6 +121,7 @@ export const getReferencedInputsHandler =
           filePath: containingFilePath,
           workspace: workspace.name,
           symbol: specifier,
+          fixes: [],
         });
       } else {
         debugLog(workspace.name, `Unable to resolve ${toDebugString(input, chief.cwd)}`);

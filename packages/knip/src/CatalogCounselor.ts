@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { ROOT_WORKSPACE_NAME } from './constants.js';
 import { JsonCatalogPeeker } from './JsonCatalogPeeker.js';
+import type { Fixes } from './types/exports.js';
 import type { Issue } from './types/issues.js';
 import type { Catalog, Catalogs, PackageJson } from './types/package-json.js';
 import { extractCatalogReferences, parseCatalog } from './util/catalog.js';
@@ -31,7 +32,7 @@ export class CatalogCounselor {
     for (const catalogEntryName of catalogReferences) this.addReferencedCatalogEntry(catalogEntryName);
   }
 
-  public async settleCatalogIssues() {
+  public async settleCatalogIssues(options: MainOptions) {
     if (this.entries.size === 0) return [];
 
     const filePath = this.filePath;
@@ -48,7 +49,9 @@ export class CatalogCounselor {
         if (!this.referencedEntries.has(entry)) {
           const [parentSymbol, symbol] = entry.split(':');
           const pos = peeker.getLocation(parentSymbol, symbol);
-          catalogIssues.push({ type: 'catalog', filePath, workspace, symbol, parentSymbol, ...pos });
+          const fixes: Fixes = [];
+          if (options.isFix && isYaml && pos) fixes.push([pos.line, 0, 0]);
+          catalogIssues.push({ type: 'catalog', filePath, workspace, symbol, parentSymbol, fixes, ...pos });
         }
       }
     }

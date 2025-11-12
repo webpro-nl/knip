@@ -37,7 +37,6 @@ export const analyze = async ({
   deputy,
   entryPaths,
   factory,
-  fixer,
   graph,
   streamer,
   unreferencedFiles,
@@ -134,7 +133,7 @@ export const analyze = async ({
                       if (!isReferenced) {
                         if (isIgnored) continue;
 
-                        const isIssueAdded = collector.addIssue({
+                        collector.addIssue({
                           type: 'enumMembers',
                           filePath,
                           workspace: workspace.name,
@@ -143,10 +142,8 @@ export const analyze = async ({
                           pos: member.pos,
                           line: member.line,
                           col: member.col,
+                          fixes: member.fix ? [member.fix] : [],
                         });
-
-                        if (options.isFix && isIssueAdded && member.fix)
-                          fixer.addUnusedTypeNode(filePath, [member.fix]);
                       } else if (isIgnored) {
                         for (const tagName of exportedItem.jsDocTags) {
                           if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
@@ -173,7 +170,7 @@ export const analyze = async ({
                       continue;
                     }
 
-                    const isIssueAdded = collector.addIssue({
+                    collector.addIssue({
                       type: 'classMembers',
                       filePath,
                       workspace: workspace.name,
@@ -182,9 +179,8 @@ export const analyze = async ({
                       pos: member.pos,
                       line: member.line,
                       col: member.col,
+                      fixes: member.fix ? [member.fix] : [],
                     });
-
-                    if (options.isFix && isIssueAdded && member.fix) fixer.addUnusedTypeNode(filePath, [member.fix]);
                   }
                 }
 
@@ -208,7 +204,7 @@ export const analyze = async ({
               if (!options.isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
 
               const type = getType(hasStrictlyNsRefs, isType);
-              const isIssueAdded = collector.addIssue({
+              collector.addIssue({
                 type,
                 filePath,
                 workspace: workspace.name,
@@ -218,12 +214,8 @@ export const analyze = async ({
                 pos: exportedItem.pos,
                 line: exportedItem.line,
                 col: exportedItem.col,
+                fixes: exportedItem.fixes,
               });
-
-              if (options.isFix && isIssueAdded) {
-                if (isType) fixer.addUnusedTypeNode(filePath, exportedItem.fixes);
-                else fixer.addUnusedExportNode(filePath, exportedItem.fixes);
-              }
             }
           }
         }
@@ -238,7 +230,7 @@ export const analyze = async ({
           for (const symbols of file.duplicates) {
             if (symbols.length > 1) {
               const symbol = symbols.map(s => s.symbol).join('|');
-              collector.addIssue({ type: 'duplicates', filePath, workspace: ws.name, symbol, symbols });
+              collector.addIssue({ type: 'duplicates', filePath, workspace: ws.name, symbol, symbols, fixes: [] });
             }
           }
         }
@@ -257,6 +249,7 @@ export const analyze = async ({
                 pos: extImport.pos,
                 line: extImport.line,
                 col: extImport.col,
+                fixes: [],
               });
           }
         }
@@ -264,7 +257,16 @@ export const analyze = async ({
         if (file.imports?.unresolved) {
           for (const unresolvedImport of file.imports.unresolved) {
             const { specifier, pos, line, col } = unresolvedImport;
-            collector.addIssue({ type: 'unresolved', filePath, workspace: ws.name, symbol: specifier, pos, line, col });
+            collector.addIssue({
+              type: 'unresolved',
+              filePath,
+              workspace: ws.name,
+              symbol: specifier,
+              pos,
+              line,
+              col,
+              fixes: [],
+            });
           }
         }
       }
@@ -288,7 +290,7 @@ export const analyze = async ({
       for (const hint of configurationHints) collector.addConfigurationHint(hint);
     }
 
-    const catalogIssues = await counselor.settleCatalogIssues();
+    const catalogIssues = await counselor.settleCatalogIssues(options);
     for (const issue of catalogIssues) collector.addIssue(issue);
 
     const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
