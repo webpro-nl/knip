@@ -5,7 +5,7 @@ const withTM = require('next-transpile-modules')([]);
 module.exports = phase => {
   const config = withTM({});
   return {
-    pageExtensions: ['page.tsx'],
+    pageExtensions: ['ts', 'tsx'],
     ...config,
   };
 };
