@@ -27,8 +27,6 @@ import { getWatchHandler, type OnUpdate } from './util/watch.js';
  */
 
 export const main = async (options: MainOptions) => {
-  const { cwd } = options;
-
   debugLogObject('*', 'Unresolved configuration', options);
   debugLogObject('*', 'Included issue types', options.includedIssueTypes);
 
@@ -109,7 +107,7 @@ export const main = async (options: MainOptions) => {
   if (options.isFix) {
     const touchedFiles = await fixer.fixIssues(issues);
     if (options.isFormat) {
-      const report = await formatly(Array.from(touchedFiles), { cwd });
+      const report = await formatly(Array.from(touchedFiles));
       if (report.ran && report.result && (report.result.runner === 'virtual' || report.result.code === 0)) {
         debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);
       } else {
