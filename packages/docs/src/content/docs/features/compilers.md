@@ -17,6 +17,7 @@ Knip has built-in "compilers" for the following file extensions:
 - `.svelte`
 - `.vue`
 - `.css` (only enabled by `tailwindcss`)
+- `.prisma`
 
 Knip does not include real compilers for those files, but regular expressions to
 collect `import` statements. This is fast, requires no dependencies, and enough

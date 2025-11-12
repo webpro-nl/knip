@@ -10,9 +10,11 @@
     "tsx": "*"
   },
   "scripts": {
-    "generate": "prisma generate --config config/prisma.custom-config.ts"
+    "generate": "prisma generate --schema prisma/schema-script.prisma --config config/prisma.custom-config.ts",
+    "generate-multi-schema": "prisma generate --schema prisma-multi-schema"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "schema": "prisma/schema-package-json.prisma",
+    "seed": "tsx prisma/seed-package-json.ts"
   }
 }

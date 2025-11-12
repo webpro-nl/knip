@@ -3,6 +3,7 @@ import type { DependencySet } from '../types/workspace.js';
 import Astro from './astro.js';
 import AstroMDX from './astro-mdx.js';
 import MDX from './mdx.js';
+import Prisma from './prisma.js';
 import Svelte from './svelte.js';
 import CSS from './tailwind.js';
 import type { AsyncCompilerFn, AsyncCompilers, RawSyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
@@ -41,6 +42,7 @@ const compilers = new Map([
   ['.astro', Astro],
   ['.css', CSS],
   ['.mdx', MDX],
+  ['.prisma', Prisma],
   ['.svelte', Svelte],
   ['.vue', Vue],
 ]);

@@ -5,15 +5,15 @@ import baseCounters from '../helpers/baseCounters.js';
 import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
-const cwd = resolve('fixtures/plugins/prisma');
+const cwd = resolve('fixtures/plugins/prisma2');
 
-test('Find dependencies with the Prisma plugin', async () => {
+test('Find default entries with the Prisma plugin', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 13,
-    total: 13,
+    processed: 2,
+    total: 2,
   });
 });
