@@ -116,7 +116,7 @@ test('knip --reporter json (exports & types)', () => {
         exports: [],
         types: [
           { name: 'MyEnum', line: 3, col: 13, pos: 71 },
-          { name: 'MyType', line: 9, col: 14, pos: 195 },
+          { name: 'MyType', line: 9, col: 15, pos: 196 },
         ],
         enumMembers: {},
         duplicates: [],

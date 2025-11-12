@@ -20,7 +20,7 @@ export default visit(isModule, (node, { isFixExports, isFixTypes }) => {
         // @ts-expect-error TODO Fix (convenience in addExport)
         // const symbol = element.symbol ?? declarations?.get(identifier)?.find((d: ts.Node) => d !== element)?.symbol;
         const symbol = declarations?.get(propName ?? identifier)?.[0]?.symbol;
-        const pos = element.name.pos;
+        const pos = element.name.getStart();
         const type = element.isTypeOnly ? SYMBOL_TYPE.TYPE : nodeType;
         const fix: Fix =
           (isFixExports && type !== SYMBOL_TYPE.TYPE) || (isFixTypes && type === SYMBOL_TYPE.TYPE)

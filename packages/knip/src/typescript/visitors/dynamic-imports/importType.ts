@@ -10,7 +10,7 @@ export default visit(
         return {
           specifier: node.argument.literal.text,
           identifier: undefined,
-          pos: 0,
+          pos: node.argument.literal.getStart(),
           modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
         };
       }

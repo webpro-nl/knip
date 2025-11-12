@@ -114,7 +114,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
       check_name: 'Unused exported types',
       description: 'Unused exported type: MyType',
       categories: ['Bug Risk'],
-      location: { path: 'types.ts', positions: { begin: { line: 9, column: 14 }, end: { line: 9, column: 14 } } },
+      location: { path: 'types.ts', positions: { begin: { line: 9, column: 15 }, end: { line: 9, column: 15 } } },
       severity: 'major',
     },
     {
