@@ -1,5 +1,7 @@
 import type { ParsedArgs } from 'minimist';
+import type { Args } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { isDirectory } from '../../util/fs.js';
 import { type Input, toEntry } from '../../util/input.js';
 import { extname, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -23,10 +25,8 @@ const config: string[] = [
   'package.json',
 ];
 
-const resolveSchema = (path: string) => {
-  // `cwd` is not available in resolveInputs, so we just use extension instead
-  // of isDirectory to determine if it's a file or directory.
-  if (extname(path) === '.prisma') {
+const resolveSchema = (path: string, cwd: string) => {
+  if (!isDirectory(join(cwd, path))) {
     return toEntry(path);
   }
   // Multi-file schema directory
@@ -48,18 +48,18 @@ const resolveConfig: ResolveConfig<PrismaConfig> = async (config, options) => {
   // Entry/Schema
   if (config.schema) {
     // package.json and Prisma config file
-    inputs.push(resolveSchema(config.schema));
+    inputs.push(resolveSchema(config.schema, options.cwd));
   }
 
   return inputs;
 };
 
-const args = {
+const args: Args = {
   config: true,
-  resolveInputs: (parsed: ParsedArgs) => {
+  resolveInputs: (parsed: ParsedArgs, { cwd }) => {
     const inputs: Input[] = [];
     if (parsed['schema']) {
-      inputs.push(resolveSchema(parsed['schema']));
+      inputs.push(resolveSchema(parsed['schema'], cwd));
     }
     return inputs;
   },
