@@ -36,7 +36,7 @@ export default visit(
             symbol,
             specifier,
             identifier: IMPORT_STAR,
-            pos: symbol?.declarations[0]?.pos ?? node.pos,
+            pos: node.importClause.namedBindings.name.getStart(),
             modifiers: node.importClause?.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE,
           });
         }
