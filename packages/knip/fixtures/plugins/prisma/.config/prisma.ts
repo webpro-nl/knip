@@ -1,8 +1,8 @@
 import { defineConfig } from 'prisma/config';
 
 export default defineConfig({
-  schema: 'prisma/schema4.prisma',
+  schema: 'prisma/schema-dot-config.prisma',
   migrations: {
-    seed: 'tsx ../prisma/seed3.ts',
+    seed: 'tsx ../prisma/seed-dot-config.ts',
   },
 });
