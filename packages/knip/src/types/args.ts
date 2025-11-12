@@ -97,5 +97,5 @@ export type Args = {
    *
    * @default undefined
    */
-  resolveInputs?: (parsed: ParsedArgs, args: string[]) => Input[];
+  resolveInputs?: (parsed: ParsedArgs, options: { cwd: string; args: string[] }) => Input[];
 };
