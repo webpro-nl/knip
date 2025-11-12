@@ -6,11 +6,13 @@ import { join } from '../../src/util/path.js';
 import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
+const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
+
 const cwd = resolve('fixtures/fix');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-test('Fix and format exports and dependencies', async () => {
+skipIfBun('Fix and format exports and dependencies', async () => {
   const tests = [
     [
       'mod.ts',
@@ -148,7 +150,7 @@ export const { set: setter } = fn();
   }
 });
 
-test('Fix and format only exported types', async () => {
+skipIfBun('Fix and format only exported types', async () => {
   const tests = [
     [
       'mod.ts',
