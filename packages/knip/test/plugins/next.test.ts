@@ -13,12 +13,12 @@ test('Find dependencies with the Next.js plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.files.has(join(cwd, 'app/unused.ts')));
-  assert(issues.files.has(join(cwd, 'pages/unused.tsx')));
+  assert(issues.files.has(join(cwd, 'pages/unused.jsx')));
 
   assert(issues.unlisted['next.config.js']['next-transpile-modules']);
-  assert(issues.unlisted['pages/[[...route]].page.tsx']['react']);
-  assert(issues.unlisted['pages/[[...route]].page.tsx']['react-helmet']);
-  assert(issues.unlisted['pages/home.page.tsx']['react']);
+  assert(issues.unlisted['pages/[[...route]].tsx']['react']);
+  assert(issues.unlisted['pages/[[...route]].tsx']['react-helmet']);
+  assert(issues.unlisted['pages/home.tsx']['react']);
   assert(issues.unlisted['app/layout.tsx']['react']);
   assert(issues.unlisted['app/home/page.tsx']['react']);
 
