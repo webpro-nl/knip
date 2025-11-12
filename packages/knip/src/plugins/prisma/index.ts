@@ -3,7 +3,7 @@ import type { Args } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { isDirectory } from '../../util/fs.js';
 import { type Input, toEntry } from '../../util/input.js';
-import { extname, join } from '../../util/path.js';
+import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PrismaConfig } from './types.js';
 
