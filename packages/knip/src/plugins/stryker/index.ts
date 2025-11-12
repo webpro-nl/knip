@@ -23,10 +23,12 @@ const resolveConfig: ResolveConfig<StrykerConfig> = localConfig => {
   return [...runners, ...checkers, ...plugins].map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -1,0 +1,9 @@
+{
+  "name": "app",
+  "dependencies": {
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

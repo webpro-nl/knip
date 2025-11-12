@@ -59,7 +59,7 @@ const args = {
   config: true,
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -67,4 +67,6 @@ export default {
   entry,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -49,11 +49,13 @@ const args = {
   args: (args: string[]) => args.filter(arg => !/--test-reporter[= ](spec|tap|dot|junit|lcov)/.test(arg)),
 };
 
-export default {
+const plugin: Plugin = {
   title,
   isEnabled,
   packageJsonPath,
   config,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

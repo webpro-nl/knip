@@ -60,11 +60,13 @@ const resolveConfig: ResolveConfig = async (config, options) => {
   return [...inputs, ...getActionDependencies(config, options).map(id => toEntry(id))];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -38,10 +38,12 @@ const resolveConfig: ResolveConfig<RstestConfig> = async config => {
   return [...environments, ...setupFiles, ...entries].map(id => (typeof id === 'string' ? toDeferResolve(id) : id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

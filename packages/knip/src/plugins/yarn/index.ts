@@ -13,10 +13,12 @@ const isRootOnly = true;
 
 const entry = ['yarn.config.cjs'];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   entry,
-} satisfies Plugin;
+};
+
+export default plugin;

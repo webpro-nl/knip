@@ -75,11 +75,13 @@ const args = {
   fromArgs: (parsed: ParsedArgs) => (parsed._[0] === 'exec' ? parsed._.slice(1) : []),
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

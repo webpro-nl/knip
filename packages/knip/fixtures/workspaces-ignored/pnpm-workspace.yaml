@@ -1,6 +1,6 @@
 packages:
   - 'packages/*'
   - 'packages/flat/*'
-  - 'packages/deep/er/*'
+  - 'packages/deep/**'
   - '!packages/a'
   - '!packages/b*'

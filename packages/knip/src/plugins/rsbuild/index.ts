@@ -40,10 +40,12 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
   return Array.from(entries).map(input => toProductionEntry(input));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -12,9 +12,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['package.json', ...toC12config('bump')];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -61,11 +61,13 @@ const note =
 /** @public */
 export const docs = { note };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

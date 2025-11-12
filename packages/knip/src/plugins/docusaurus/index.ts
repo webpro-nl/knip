@@ -42,7 +42,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
   ];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -50,4 +50,6 @@ export default {
   entry,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

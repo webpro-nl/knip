@@ -21,7 +21,7 @@ const resolveConfig: ResolveConfig<CommitizenConfig> = config => {
   return config.path ? [toDependency(config.path)] : [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -29,4 +29,6 @@ export default {
   packageJsonPath,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

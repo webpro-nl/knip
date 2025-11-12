@@ -15,9 +15,11 @@ const isRootOnly = true;
 
 const config: string[] = ['.pnpmfile.cjs'];
 
-export default {
+const plugin: Plugin = {
   title,
   isEnabled,
   isRootOnly,
   config,
-} satisfies Plugin;
+};
+
+export default plugin;

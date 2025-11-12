@@ -35,7 +35,7 @@
   }
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   .hero img {
     border-color: var(--sl-color-black);
   }

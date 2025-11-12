@@ -36,11 +36,13 @@ const resolveConfig: ResolveConfig<NetlifyConfig> = async localConfig => {
     ]);
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -25,10 +25,12 @@ const resolveConfig: ResolveConfig<CapacitorConfig> = async (config, { configFil
   return [...plugins, ...android, ...ios].map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

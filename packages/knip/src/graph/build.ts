@@ -1,4 +1,5 @@
 import { _getInputsFromScripts } from '../binaries/index.js';
+import type { CatalogCounselor } from '../CatalogCounselor.js';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
@@ -39,6 +40,7 @@ import { WorkspaceWorker } from '../WorkspaceWorker.js';
 interface BuildOptions {
   chief: ConfigurationChief;
   collector: IssueCollector;
+  counselor: CatalogCounselor;
   deputy: DependencyDeputy;
   factory: PrincipalFactory;
   isGitIgnored: (path: string) => boolean;
@@ -50,6 +52,7 @@ interface BuildOptions {
 export async function build({
   chief,
   collector,
+  counselor,
   deputy,
   factory,
   isGitIgnored,
@@ -72,6 +75,7 @@ export async function build({
     const { name, dir, manifestPath, manifestStr } = workspace;
     const manifest = chief.getManifestForWorkspace(name);
     if (!manifest) continue;
+
     deputy.addWorkspace({
       name,
       cwd: options.cwd,
@@ -81,6 +85,8 @@ export async function build({
       manifest,
       ...chief.getIgnores(name),
     });
+
+    counselor.addWorkspace(manifest);
   }
 
   collector.addIgnorePatterns(chief.config.ignore.map(p => join(options.cwd, p)));

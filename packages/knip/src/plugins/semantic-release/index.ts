@@ -30,7 +30,7 @@ const resolveConfig: ResolveConfig<SemanticReleaseConfig> = config => {
   return plugins.filter(plugin => !excludePackages.includes(plugin)).map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -38,4 +38,6 @@ export default {
   packageJsonPath,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

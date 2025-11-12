@@ -42,12 +42,14 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) =>
 
 const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
 
-export default {
+const plugin: Plugin {
   title,
   enablers,
   isEnabled,
   entry,
-} satisfies Plugin;
+};
+
+export default plugin;
 ```
 
 Yes, that's the entire plugin! Let's go over each item one by one:
@@ -115,13 +117,15 @@ const resolveConfig: ResolveConfig<NycConfig> = config => {
   return [extend, requires].flat().map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin {
   title,
   enablers,
   isEnabled,
   config,
-  resolveConfig,
-} satisfies Plugin;
+  resolveConfig
+};
+
+export default plugin;
 ```
 
 Here's an example `config` file that will be handled by this plugin:
@@ -304,11 +308,13 @@ const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
   return [...production, ...componentPaths].map(id => toProductionEntry(id));
 };
 
-export default {
+const plugin: Plugin {
   title,
   production,
   resolveFromAST,
-} satisfies Plugin;
+}
+
+export default plugin;
 ```
 
 ## Inputs

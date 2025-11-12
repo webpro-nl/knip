@@ -31,10 +31,12 @@ const resolveConfig: ResolveConfig<MdxConfig | { mdx: MdxConfig }> = async (conf
   return [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

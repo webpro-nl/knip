@@ -28,11 +28,13 @@ const resolveConfig: ResolveConfig<RemarkConfig> = config => {
   return plugins.map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   packageJsonPath,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

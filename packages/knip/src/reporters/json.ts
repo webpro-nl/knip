@@ -38,6 +38,7 @@ type Row = {
   duplicates?: Array<Items>;
   enumMembers?: Record<string, Items>;
   classMembers?: Record<string, Items>;
+  catalog?: Items;
 };
 
 export default async ({ report, issues, options, cwd }: ReporterOptions) => {
@@ -72,6 +73,7 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
       ...(report.enumMembers && { enumMembers: {} }),
       ...(report.classMembers && { classMembers: {} }),
       ...(report.duplicates && { duplicates: [] }),
+      ...(report.catalog && { catalog: [] }),
     };
     return row;
   };

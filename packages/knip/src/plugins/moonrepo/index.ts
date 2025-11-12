@@ -25,11 +25,13 @@ const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) 
   return [...inputs];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

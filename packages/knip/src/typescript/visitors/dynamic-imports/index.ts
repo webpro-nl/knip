@@ -4,7 +4,8 @@ import importType from './importType.js';
 import jsDocType from './jsDocType.js';
 import requireCall from './requireCall.js';
 import resolveCall from './resolveCall.js';
+import urlConstructor from './urlConstructor.js';
 
-const visitors = [importCall, importType, jsDocType, resolveCall, requireCall];
+const visitors = [importCall, importType, jsDocType, resolveCall, requireCall, urlConstructor];
 
 export default (sourceFile: ts.SourceFile) => visitors.map(v => v(sourceFile));

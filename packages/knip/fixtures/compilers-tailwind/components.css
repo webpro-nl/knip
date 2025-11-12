@@ -1,4 +1,4 @@
-@import './unused.css';
+@import "./unused.css";
 
 .component {
   @apply bg-blue-500;

@@ -164,10 +164,12 @@ type ScriptsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['scripts'],
 const PRODUCTION_CONFIG_NAME = 'production';
 const BUILD_TARGET_NAME = 'build';
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

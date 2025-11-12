@@ -19,10 +19,12 @@ const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options)
   return inputs.filter(input => !input.specifier.startsWith('builtin:'));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

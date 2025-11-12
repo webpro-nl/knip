@@ -192,6 +192,7 @@ export const ISSUE_TYPES = [
   'enumMembers',
   'classMembers',
   'duplicates',
+  'catalog',
 ] as const;
 
 export const ISSUE_TYPE_TITLE = {
@@ -210,6 +211,7 @@ export const ISSUE_TYPE_TITLE = {
   enumMembers: 'Unused exported enum members',
   classMembers: 'Unused exported class members',
   duplicates: 'Duplicate exports',
+  catalog: 'Unused catalog entries',
 } as const;
 
 export const SYMBOL_TYPE = {
@@ -228,4 +230,12 @@ export const FIX_FLAGS = {
   OBJECT_BINDING: 1 << 0, // remove next comma
   EMPTY_DECLARATION: 1 << 1, // remove declaration if empty
   WITH_NEWLINE: 1 << 2, // remove with newline
+} as const;
+
+export const IMPORT_MODIFIERS = {
+  NONE: 0,
+  RE_EXPORT: 1 << 0,
+  TYPE_ONLY: 1 << 1,
+  ENTRY: 1 << 2, // entry path, ignore exports
+  OPTIONAL: 1 << 3, // no error if not resolved
 } as const;

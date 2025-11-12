@@ -11,9 +11,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['create-typescript-app.config.{js,cjs,mjs,ts}'];
 
-export default {
+const plugin: Plugin = {
   enablers,
   entry,
   isEnabled,
   title,
-} satisfies Plugin;
+};
+
+export default plugin;

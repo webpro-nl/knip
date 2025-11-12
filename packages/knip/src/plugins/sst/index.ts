@@ -18,10 +18,12 @@ const resolveFromAST: ResolveFromAST = (sourceFile, options) => {
   return inputs;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveFromAST,
-} satisfies Plugin;
+};
+
+export default plugin;

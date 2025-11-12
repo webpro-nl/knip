@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { IMPORT_MODIFIERS } from '../../../constants.js';
 import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -11,7 +12,14 @@ export default visit(isNotJS, node => {
     // Pattern: import identifier = require('specifier')
     const specifier = node.moduleReference.expression.text;
     const alias = String(node.name.escapedText);
-    // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportEqualsDeclaration'.
-    return { specifier, alias, identifier: 'default', symbol: node.symbol, pos: node.moduleReference.expression.pos };
+    return {
+      specifier,
+      alias,
+      identifier: 'default',
+      // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportEqualsDeclaration'.
+      symbol: node.symbol,
+      pos: node.moduleReference.expression.pos,
+      modifiers: IMPORT_MODIFIERS.NONE,
+    };
   }
 });

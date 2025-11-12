@@ -35,10 +35,12 @@ const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
   return [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths].map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

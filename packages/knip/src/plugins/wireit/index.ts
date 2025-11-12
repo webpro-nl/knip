@@ -20,10 +20,12 @@ const resolveConfig: ResolveConfig<WireitConfig> = (localConfig, options) => {
   return scriptDependencies;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

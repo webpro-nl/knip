@@ -59,11 +59,13 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
     );
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

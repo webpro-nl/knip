@@ -23,10 +23,10 @@ To tell Knip what is production code, add an exclamation mark behind each
 }
 ```
 
-Depending on file structure and enabled plugins, it's possible that you don't
-need to modify your configuration at all.
+Depending on file structure and enabled plugins, you might not need to modify
+your configuration at all.
 
-Then run Knip with the `--production` flag:
+Run Knip with the `--production` flag:
 
 ```sh
 knip --production
@@ -68,13 +68,14 @@ production mode.
 
 ## Strict Mode
 
+In production mode, only `dependencies` (not `devDependencies`) are considered
+when finding unused or unlisted dependencies.
+
 Additionally, the `--strict` flag can be added to:
 
-- Consider `dependencies` (not `devDependencies`) when finding unused or
-  unlisted dependencies
-- Include `peerDependencies` when finding unused or unlisted dependencies
 - Verify isolation: workspaces should use strictly their own `dependencies`
-- Type-only imports should be in `devDependencies`
+- Include `peerDependencies` when finding unused or unlisted dependencies
+- Report type-only imports listed in `dependencies`
 
 ```sh
 knip --production --strict

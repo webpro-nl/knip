@@ -14,10 +14,12 @@ const entry = ['package.json', ...toC12config('changelog')];
 
 const isRootOnly = true;
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   entry,
-} satisfies Plugin;
+};
+
+export default plugin;

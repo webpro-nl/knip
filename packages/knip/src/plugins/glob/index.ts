@@ -10,7 +10,9 @@ const args = {
   fromArgs: ['cmd'],
 };
 
-export default {
+const plugin: Plugin = {
   title,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

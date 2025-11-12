@@ -11,9 +11,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['db/config.{js,ts}', 'db/seed.{js,ts}'];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
-} satisfies Plugin;
+};
+
+export default plugin;

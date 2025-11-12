@@ -42,11 +42,13 @@ const resolveFromAST: ResolveFromAST = sourceFile => {
   return patterns.map(id => toProductionEntry(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
   resolveFromAST,
-} satisfies Plugin;
+};
+
+export default plugin;
