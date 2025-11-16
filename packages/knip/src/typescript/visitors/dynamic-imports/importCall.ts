@@ -116,7 +116,7 @@ export default visit(
                 const identifier = (element.propertyName ?? element.name).getText();
                 const alias = element.propertyName ? element.name.getText() : undefined;
                 const symbol = getSymbol(element, isTLA);
-                return { identifier, alias, symbol, specifier, pos: element.pos, modifiers };
+                return { identifier, alias, symbol, specifier, pos: element.name.getStart(), modifiers };
               });
             }
             // Pattern: import('specifier')
@@ -141,7 +141,7 @@ export default visit(
                   const identifier = (element.propertyName ?? element.name).getText();
                   const alias = element.propertyName ? element.name.getText() : undefined;
                   const symbol = getSymbol(element, isTL);
-                  return { identifier, alias, symbol, specifier, pos: element.pos, modifiers };
+                  return { identifier, alias, symbol, specifier, pos: element.getStart(), modifiers };
                 });
               }
 
@@ -149,10 +149,10 @@ export default visit(
                 // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
                 const alias = String(element.name.escapedText);
                 const symbol = getSymbol(element, isTL);
-                return { identifier: 'default', symbol, alias, specifier, pos: element.pos, modifiers };
+                return { identifier: 'default', symbol, alias, specifier, pos: element.getStart(), modifiers };
               }
 
-              return { identifier: 'default', specifier, pos: element.pos, modifiers };
+              return { identifier: 'default', specifier, pos: element.getStart(), modifiers };
             }
           }
 
