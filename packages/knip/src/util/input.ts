@@ -22,6 +22,7 @@ export interface Input {
   containingFilePath?: string;
   allowIncludeExports?: boolean;
   skipExportsAnalysis?: boolean;
+  group?: string;
 }
 
 export interface ConfigInput extends Input {

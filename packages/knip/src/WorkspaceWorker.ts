@@ -167,18 +167,8 @@ export class WorkspaceWorker {
   getProjectFilePatterns(projectFilePatterns: string[]) {
     const { project } = this.config;
     if (project.length === 0) return [];
-
     const excludeProductionNegations = project.filter(pattern => !(pattern.startsWith('!') && pattern.endsWith('!')));
-    const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
-    const negatedPluginProjectFilePatterns = this.getPluginProjectFilePatterns().map(negate);
-
-    return [
-      excludeProductionNegations,
-      negatedPluginConfigPatterns,
-      negatedPluginProjectFilePatterns,
-      projectFilePatterns,
-      this.negatedWorkspacePatterns,
-    ].flat();
+    return [excludeProductionNegations, projectFilePatterns, this.negatedWorkspacePatterns].flat();
   }
 
   getPluginProjectFilePatterns(patterns: string[] = []) {
@@ -272,19 +262,11 @@ export class WorkspaceWorker {
     const inputs: Input[] = [];
     const remainingPlugins = new Set(this.enabledPlugins);
 
-    const addInput = (input: Input, containingFilePath = input.containingFilePath) => {
-      if (isConfig(input)) {
-        handleConfigInput(input.pluginName, { ...input, containingFilePath });
-      } else {
-        inputs.push({ ...input, containingFilePath });
-      }
-    };
-
     const configFilesMap = this.configFilesMap;
     const configFiles = this.configFilesMap.get(wsName);
     const seen = new Map<string, Set<string>>();
 
-    const handleConfigInput = (pluginName: PluginName, input: ConfigInput) => {
+    const storeConfigFilePath = (pluginName: PluginName, input: ConfigInput) => {
       const configFilePath = this.getReferencedInternalFilePath(input);
       if (configFilePath) {
         const workspace = this.findWorkspaceByFilePath(configFilePath);
@@ -300,10 +282,9 @@ export class WorkspaceWorker {
 
     for (const input of [...inputsFromManifest, ...productionInputsFromManifest]) {
       if (isConfig(input)) {
-        handleConfigInput(input.pluginName, { ...input, containingFilePath });
-      } else {
-        if (!isProduction) addInput(input, containingFilePath);
-        else if (isProduction && (input.production || hasProductionInput(input))) addInput(input, containingFilePath);
+        storeConfigFilePath(input.pluginName, { ...input, containingFilePath });
+      } else if (!isProduction || (isProduction && (input.production || hasProductionInput(input)))) {
+        inputs.push({ ...input, containingFilePath });
       }
     }
 
@@ -311,7 +292,16 @@ export class WorkspaceWorker {
       const plugin = Plugins[pluginName];
       const config = this.getConfigForPlugin(pluginName);
 
-      if (!config) return;
+      if (!config) return [];
+
+      const inputs: Input[] = [];
+      const addInput = (input: Input, containingFilePath = input.containingFilePath) => {
+        if (isConfig(input)) {
+          storeConfigFilePath(input.pluginName, { ...input, containingFilePath });
+        } else {
+          inputs.push(Object.assign(input, { containingFilePath }));
+        }
+      };
 
       const label = 'config file';
       const configFilePaths = await _glob({ patterns, cwd: rootCwd, dir: cwd, gitignore: false, label });
@@ -327,15 +317,15 @@ export class WorkspaceWorker {
 
       if (config.entry) {
         const toInput = isProduction && plugin.production && plugin.production.length > 0 ? toProductionEntry : toEntry;
-        for (const id of config.entry) addInput(toInput(id));
+        for (const id of config.entry) inputs.push(toInput(id));
       } else if (
         (!plugin.resolveConfig && !plugin.resolveFromAST) ||
         (configFilePaths.filter(path => basename(path) !== 'package.json').length === 0 &&
           (!this.configFilesMap.get(wsName)?.get(pluginName) ||
             this.configFilesMap.get(wsName)?.get(pluginName)?.size === 0))
       ) {
-        if (plugin.entry) for (const id of plugin.entry) addInput(toEntry(id));
-        if (plugin.production) for (const id of plugin.production) addInput(toProductionEntry(id));
+        if (plugin.entry) for (const id of plugin.entry) inputs.push(toEntry(id));
+        if (plugin.production) for (const id of plugin.production) inputs.push(toProductionEntry(id));
       }
 
       for (const configFilePath of configFilePaths) {
@@ -391,8 +381,8 @@ export class WorkspaceWorker {
         }
 
         if (!isManifest) {
-          addInput(toEntry(configFilePath));
-          addInput(toConfig(pluginName, configFilePath));
+          inputs.push(toEntry(configFilePath));
+          storeConfigFilePath(pluginName, toConfig(pluginName, configFilePath));
           cache.configFile = toEntry(configFilePath);
 
           if (fd?.changed && fd.meta && !seen.get(key)?.has(configFilePath)) {
@@ -408,6 +398,11 @@ export class WorkspaceWorker {
         const dependencies = (await plugin.resolve(options)) ?? [];
         for (const id of dependencies) addInput(id, containingFilePath);
       }
+
+      // Any negated pattern will move all plugin inputs to new group
+      if (inputs.some(input => input.specifier.startsWith('!'))) for (const input of inputs) input.group = pluginName;
+
+      return inputs;
     };
 
     const enabledPluginTitles = this.enabledPlugins.map(name => Plugins[name].title);
@@ -416,7 +411,7 @@ export class WorkspaceWorker {
     for (const pluginName of this.enabledPlugins) {
       const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles?.get(pluginName) ?? [])];
       configFiles?.delete(pluginName);
-      await runPlugin(pluginName, compact(patterns));
+      for (const input of await runPlugin(pluginName, compact(patterns))) inputs.push(input);
       remainingPlugins.delete(pluginName);
     }
 
@@ -427,8 +422,9 @@ export class WorkspaceWorker {
         do {
           for (const [pluginName, dependencies] of configFiles.entries()) {
             configFiles.delete(pluginName);
-            if (this.enabledPlugins.includes(pluginName)) await runPlugin(pluginName, Array.from(dependencies));
-            else for (const id of dependencies) addInput(toEntry(id));
+            if (this.enabledPlugins.includes(pluginName)) {
+              for (const input of await runPlugin(pluginName, Array.from(dependencies))) inputs.push(input);
+            } else for (const id of dependencies) inputs.push(toEntry(id));
           }
         } while (remainingPlugins.size > 0 && configFiles.size > 0);
       }
