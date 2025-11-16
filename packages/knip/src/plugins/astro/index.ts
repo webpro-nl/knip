@@ -14,7 +14,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
 
 const entry = ['src/content/config.ts', 'src/content.config.ts'];
-const project = ['src/**/*'];
 
 const production = [
   'src/pages/**/*.{astro,mdx,js,ts}',
@@ -59,7 +58,6 @@ const plugin: Plugin = {
   production,
   resolveFromAST,
   resolve,
-  project,
 };
 
 export default plugin;
