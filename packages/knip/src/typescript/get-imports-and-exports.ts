@@ -10,9 +10,9 @@ import type {
   ExportMember,
   FileNode,
   Import,
-  ImportDetails,
   ImportMap,
-  Specifiers,
+  ImportMaps,
+  Imports,
 } from '../types/module-graph.js';
 import { addNsValue, addValue, createImports } from '../util/module-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
@@ -84,7 +84,7 @@ const getImportsAndExports = (
   const external = new Set<Import>();
   const unresolved = new Set<Import>();
   const resolved = new Set<string>();
-  const specifiers: Specifiers = new Set();
+  const imports: Imports = new Set();
   const exports: ExportMap = new Map();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
@@ -96,7 +96,7 @@ const getImportsAndExports = (
 
   const visitors = getVisitors(sourceFile);
 
-  const addNsMemberRefs = (internalImport: ImportDetails, namespace: string, member: string | string[]) => {
+  const addNsMemberRefs = (internalImport: ImportMaps, namespace: string, member: string | string[]) => {
     if (typeof member === 'string') {
       internalImport.refs.add(`${namespace}.${member}`);
       traceRefs.add(`${namespace}.${member}`);
@@ -131,39 +131,39 @@ const getImportsAndExports = (
 
     const isStar = identifier === IMPORT_STAR;
 
-    specifiers.add([{ specifier, pos: options.pos, line: options.line, col: options.col }, filePath]);
+    imports.add([{ specifier, pos: options.pos, line: options.line, col: options.col }, filePath]);
 
     const file = internal.get(filePath);
 
-    const imports = file ?? createImports();
+    const importMaps = file ?? createImports();
 
-    if (!file) internal.set(filePath, imports);
+    if (!file) internal.set(filePath, importMaps);
 
     const nsOrAlias = symbol ? String(symbol.escapedName) : alias;
 
     if (options.modifiers & IMPORT_MODIFIERS.RE_EXPORT) {
       if (isStar && namespace) {
         // Pattern: export * as NS from 'specifier';
-        addValue(imports.reExportedNs, namespace, sourceFile.fileName);
+        addValue(importMaps.reExportedNs, namespace, sourceFile.fileName);
       } else if (nsOrAlias) {
         // Pattern: export { id as alias } from 'specifier';
-        addNsValue(imports.reExportedAs, identifier, nsOrAlias, sourceFile.fileName);
+        addNsValue(importMaps.reExportedAs, identifier, nsOrAlias, sourceFile.fileName);
       } else {
         // Patterns:
         // export { id } from 'specifier';
         // export * from 'specifier';
         // module.exports = require('specifier');
-        addValue(imports.reExported, identifier, sourceFile.fileName);
+        addValue(importMaps.reExported, identifier, sourceFile.fileName);
       }
     } else {
       if (nsOrAlias && nsOrAlias !== identifier) {
         if (isStar) {
-          addValue(imports.importedNs, nsOrAlias, sourceFile.fileName);
+          addValue(importMaps.importedNs, nsOrAlias, sourceFile.fileName);
         } else {
-          addNsValue(imports.importedAs, identifier, nsOrAlias, sourceFile.fileName);
+          addNsValue(importMaps.importedAs, identifier, nsOrAlias, sourceFile.fileName);
         }
       } else if (identifier !== ANONYMOUS && identifier !== IMPORT_STAR) {
-        addValue(imports.imported, identifier, sourceFile.fileName);
+        addValue(importMaps.imported, identifier, sourceFile.fileName);
       }
 
       if (symbol) importedInternalSymbols.set(symbol, filePath);
@@ -460,7 +460,7 @@ const getImportsAndExports = (
   }
 
   return {
-    imports: { internal, external, resolved, specifiers, unresolved },
+    imports: { internal, external, resolved, imports: imports, unresolved },
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,

@@ -14,7 +14,7 @@ type Tags = Set<string>;
 export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
 
-export type ImportDetails = {
+export type ImportMaps = {
   refs: References;
   imported: IdToFileMap;
   importedAs: IdToNsToFileMap;
@@ -24,7 +24,7 @@ export type ImportDetails = {
   reExportedNs: IdToFileMap;
 };
 
-export type ImportMap = Map<FilePath, ImportDetails>;
+export type ImportMap = Map<FilePath, ImportMaps>;
 
 export type Import = { specifier: string; pos?: number; line?: number; col?: number };
 
@@ -56,7 +56,7 @@ export type ExportMember = {
 
 export type ExportMap = Map<Identifier, Export>;
 
-export type Specifiers = Set<[Import, FilePath]>;
+export type Imports = Set<[Import, FilePath]>;
 
 export type FileNode = {
   imports: {
@@ -64,12 +64,12 @@ export type FileNode = {
     external: Set<Import>;
     unresolved: Set<Import>;
     resolved: Set<FilePath>;
-    specifiers: Specifiers;
+    imports: Imports;
   };
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
-  imported?: ImportDetails;
+  imported?: ImportMaps;
   internalImportCache?: ImportMap;
   traceRefs: References;
 };

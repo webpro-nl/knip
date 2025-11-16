@@ -1,7 +1,7 @@
 import { IMPORT_STAR } from '../constants.js';
-import type { ImportDetails, ModuleGraph } from '../types/module-graph.js';
+import type { ImportMaps, ModuleGraph } from '../types/module-graph.js';
 
-export const hasStrictlyEnumReferences = (importsForExport: ImportDetails | undefined, id: string) => {
+export const hasStrictlyEnumReferences = (importsForExport: ImportMaps | undefined, id: string) => {
   if (!importsForExport || !importsForExport.refs.has(id)) return false;
   for (const ref of importsForExport.refs) if (ref.startsWith(`${id}.`)) return false;
   return true;
@@ -9,7 +9,7 @@ export const hasStrictlyEnumReferences = (importsForExport: ImportDetails | unde
 
 export const hasStrictlyNsReferences = (
   graph: ModuleGraph,
-  importsForExport: ImportDetails | undefined,
+  importsForExport: ImportMaps | undefined,
   id: string
 ): [boolean, string?] => {
   if (!importsForExport) return [false];

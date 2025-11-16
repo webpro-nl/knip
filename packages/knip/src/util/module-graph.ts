@@ -2,32 +2,32 @@ import type {
   FileNode,
   IdToFileMap,
   IdToNsToFileMap,
-  ImportDetails,
   ImportMap,
+  ImportMaps,
   ModuleGraph,
 } from '../types/module-graph.js';
 
 export const getOrCreateFileNode = (graph: ModuleGraph, filePath: string) => graph.get(filePath) ?? createFileNode();
 
-const updateImportDetails = (importedModule: ImportDetails, importItems: ImportDetails) => {
-  for (const id of importItems.refs) importedModule.refs.add(id);
-  for (const [id, v] of importItems.imported.entries()) addValues(importedModule.imported, id, v);
-  for (const [id, v] of importItems.importedAs.entries()) addNsValues(importedModule.importedAs, id, v);
-  for (const [id, v] of importItems.importedNs.entries()) addValues(importedModule.importedNs, id, v);
-  for (const [id, v] of importItems.reExported.entries()) addValues(importedModule.reExported, id, v);
-  for (const [id, v] of importItems.reExportedAs.entries()) addNsValues(importedModule.reExportedAs, id, v);
-  for (const [id, v] of importItems.reExportedNs.entries()) addValues(importedModule.reExportedNs, id, v);
+const updateImportMaps = (fromImportMaps: ImportMaps, toImportMaps: ImportMaps) => {
+  for (const id of fromImportMaps.refs) toImportMaps.refs.add(id);
+  for (const [id, v] of fromImportMaps.imported.entries()) addValues(toImportMaps.imported, id, v);
+  for (const [id, v] of fromImportMaps.importedAs.entries()) addNsValues(toImportMaps.importedAs, id, v);
+  for (const [id, v] of fromImportMaps.importedNs.entries()) addValues(toImportMaps.importedNs, id, v);
+  for (const [id, v] of fromImportMaps.reExported.entries()) addValues(toImportMaps.reExported, id, v);
+  for (const [id, v] of fromImportMaps.reExportedAs.entries()) addNsValues(toImportMaps.reExportedAs, id, v);
+  for (const [id, v] of fromImportMaps.reExportedNs.entries()) addValues(toImportMaps.reExportedNs, id, v);
 };
 
 export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: ModuleGraph) => {
-  for (const [importedFilePath, importDetails] of importMap.entries()) {
-    const importedFileImports = file.imports.internal.get(importedFilePath);
-    if (!importedFileImports) file.imports.internal.set(importedFilePath, importDetails);
-    else updateImportDetails(importedFileImports, importDetails);
+  for (const [importedFilePath, fileImportMaps] of importMap.entries()) {
+    const importMaps = file.imports.internal.get(importedFilePath);
+    if (!importMaps) file.imports.internal.set(importedFilePath, fileImportMaps);
+    else updateImportMaps(fileImportMaps, importMaps);
 
     const importedFile = getOrCreateFileNode(graph, importedFilePath);
     if (!importedFile.imported) importedFile.imported = createImports();
-    updateImportDetails(importedFile.imported, importDetails);
+    updateImportMaps(fileImportMaps, importedFile.imported);
 
     graph.set(importedFilePath, importedFile);
   }
@@ -39,7 +39,7 @@ const createFileNode = (): FileNode => ({
     external: new Set(),
     unresolved: new Set(),
     resolved: new Set(),
-    specifiers: new Set(),
+    imports: new Set(),
   },
   exports: new Map(),
   duplicates: new Set(),
@@ -47,7 +47,7 @@ const createFileNode = (): FileNode => ({
   traceRefs: new Set(),
 });
 
-export const createImports = (): ImportDetails => ({
+export const createImports = (): ImportMaps => ({
   refs: new Set(),
   imported: new Map(),
   importedAs: new Map(),

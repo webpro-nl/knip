@@ -381,10 +381,10 @@ export async function build({
         if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
       }
 
-      for (const [import_, specifierFilePath] of file.imports.specifiers) {
-        const packageName = getPackageNameFromModuleSpecifier(import_.specifier);
+      for (const [_import, specifierFilePath] of file.imports.imports) {
+        const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
         if (packageName && isInternalWorkspace(packageName)) {
-          file.imports.external.add({ ...import_, specifier: packageName });
+          file.imports.external.add({ ..._import, specifier: packageName });
           const principal = getPrincipalByFilePath(specifierFilePath);
           if (principal && !isGitIgnored(specifierFilePath)) {
             principal.addNonEntryPath(specifierFilePath);

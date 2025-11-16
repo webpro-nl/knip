@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import type { ImportDetails, ModuleGraph } from '../../src/types/module-graph.js';
+import type { ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
 import { hasStrictlyNsReferences } from '../../src/util/has-strictly-ns-references.js';
 
 const map: ModuleGraph = new Map();
 
-const base: ImportDetails = {
+const base: ImportMaps = {
   refs: new Set(),
   imported: new Map(),
   importedAs: new Map(),
