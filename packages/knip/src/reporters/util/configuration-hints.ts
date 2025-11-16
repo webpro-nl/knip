@@ -152,7 +152,7 @@ export const printConfigurationHints = ({
   }
 
   if (tagHints.size > 0) {
-    console.log(getColoredTitle('Tag issues', tagHints.size));
+    console.log(getDimmedTitle('Tag hints', tagHints.size));
     for (const hint of tagHints) {
       const { filePath, identifier, tagName } = hint;
       const message = `Unused tag in ${toRelative(filePath, cwd)}:`;
