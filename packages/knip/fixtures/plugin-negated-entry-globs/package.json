@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/plugin-entry-globs",
+  "type": "module",
+  "dependencies": {
+    "astro": "*"
+  },
+  "devDependencies": {
+    "@storybook/chapter": "*"
+  }
+}
