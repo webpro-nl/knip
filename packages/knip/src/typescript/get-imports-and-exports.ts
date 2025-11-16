@@ -321,6 +321,21 @@ const getImportsAndExports = (
         const result = visitor(node, options);
         result && (Array.isArray(result) ? result.forEach(addExport) : addExport(result));
       }
+
+      if (
+        ts.isImportEqualsDeclaration(node) &&
+        ts.isQualifiedName(node.moduleReference) &&
+        ts.isIdentifier(node.moduleReference.left)
+      ) {
+        // Pattern: import name = NS.identifier
+        const { left, right } = node.moduleReference;
+        const namespace = left.text;
+        const { filePath } = getImport(namespace, node);
+        if (filePath) {
+          const internalImport = internal.get(filePath);
+          if (internalImport) addNsMemberRefs(internalImport, namespace, right.text);
+        }
+      }
     }
 
     for (const visitor of visitors.dynamicImport) {
@@ -404,22 +419,6 @@ const getImportsAndExports = (
         if (!isTopLevel && symbol.exportSymbol && isReferencedInExport(node)) {
           referencedSymbolsInExport.add(symbol.exportSymbol);
         }
-      }
-    }
-
-    if (
-      isTopLevel &&
-      ts.isImportEqualsDeclaration(node) &&
-      ts.isQualifiedName(node.moduleReference) &&
-      ts.isIdentifier(node.moduleReference.left)
-    ) {
-      // Pattern: import name = NS.identifier
-      const { left, right } = node.moduleReference;
-      const namespace = left.text;
-      const { filePath } = getImport(namespace, node);
-      if (filePath) {
-        const internalImport = internal.get(filePath);
-        if (internalImport) addNsMemberRefs(internalImport, namespace, right.text);
       }
     }
 
