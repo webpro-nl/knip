@@ -232,11 +232,12 @@ export async function build({
       }
     }
 
-    const negatedEntryPatterns: string[] = options.isProduction
-      ? [...(entryPatterns.get(DEFAULT_GROUP) ?? []), ...(entryPatternsSkipExports.get(DEFAULT_GROUP) ?? [])].map(
-          negate
-        )
-      : [];
+    const negatedEntryPatterns: string[] = [];
+    if (options.isProduction) {
+      for (const map of [entryPatterns, entryPatternsSkipExports]) {
+        for (const patterns of map.values()) for (const pattern of patterns) negatedEntryPatterns.push(negate(pattern));
+      }
+    }
 
     {
       const patterns = options.isProduction
