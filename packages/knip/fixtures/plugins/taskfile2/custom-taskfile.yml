@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  custom-build:
+    cmd: node scripts/custom-build.js
+  custom-test:
+    cmds:
+      - npx jest
+      - node scripts/custom-test.js
+

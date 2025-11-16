@@ -96,6 +96,7 @@ import { default as svelte } from './svelte/index.js';
 import { default as svgo } from './svgo/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
+import { default as taskfile } from './taskfile/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
 import { default as tsdown } from './tsdown/index.js';
@@ -216,6 +217,7 @@ export const Plugins = {
   svgo,
   syncpack,
   tailwind,
+  taskfile,
   travis,
   'ts-node': tsNode,
   tsdown,
