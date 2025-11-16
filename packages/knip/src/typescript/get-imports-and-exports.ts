@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ALIAS_TAG, ANONYMOUS, IMPORT_MODIFIERS, IMPORT_STAR, PROTOCOL_VIRTUAL } from '../constants.js';
+import { ALIAS_TAG, IMPORT_MODIFIERS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.js';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
@@ -66,7 +66,6 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Exp
 
 interface AddInternalImportOptions extends ImportNode {
   namespace?: string;
-  identifier: string;
   filePath: string;
   line: number;
   col: number;
@@ -127,11 +126,13 @@ const getImportsAndExports = (
   };
 
   const addInternalImport = (options: AddInternalImportOptions) => {
-    const { identifier, symbol, filePath, namespace, alias, specifier } = options;
+    const { symbol, filePath, namespace, specifier, modifiers } = options;
+
+    const identifier = options.identifier ?? (modifiers & IMPORT_MODIFIERS.OPAQUE ? OPAQUE : SIDE_EFFECTS);
 
     const isStar = identifier === IMPORT_STAR;
 
-    imports.add([{ specifier, pos: options.pos, line: options.line, col: options.col }, filePath]);
+    imports.add([{ specifier, identifier, pos: options.pos, line: options.line, col: options.col }, filePath]);
 
     const file = internal.get(filePath);
 
@@ -139,9 +140,9 @@ const getImportsAndExports = (
 
     if (!file) internal.set(filePath, importMaps);
 
-    const nsOrAlias = symbol ? String(symbol.escapedName) : alias;
+    const nsOrAlias = symbol ? String(symbol.escapedName) : options.alias;
 
-    if (options.modifiers & IMPORT_MODIFIERS.RE_EXPORT) {
+    if (modifiers & IMPORT_MODIFIERS.RE_EXPORT) {
       if (isStar && namespace) {
         // Pattern: export * as NS from 'specifier';
         addValue(importMaps.reExportedNs, namespace, sourceFile.fileName);
@@ -162,7 +163,7 @@ const getImportsAndExports = (
         } else {
           addNsValue(importMaps.importedAs, identifier, nsOrAlias, sourceFile.fileName);
         }
-      } else if (identifier !== ANONYMOUS && identifier !== IMPORT_STAR) {
+      } else if (identifier !== SIDE_EFFECTS && identifier !== IMPORT_STAR) {
         addValue(importMaps.imported, identifier, sourceFile.fileName);
       }
 
@@ -187,7 +188,6 @@ const getImportsAndExports = (
           const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(opts.pos);
           addInternalImport({
             ...opts,
-            identifier: opts.identifier ?? ANONYMOUS,
             filePath,
             line: line + 1,
             col: character + 1,
@@ -211,7 +211,13 @@ const getImportsAndExports = (
           // @ts-expect-error ts.ImportDeclaration
           const pos = node.moduleSpecifier?.getStart() ?? opts.pos; // switch from identifier → specifier pos
           const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
-          external.add({ specifier: sanitizedSpecifier, pos: opts.pos, line: line + 1, col: character + 2 });
+          external.add({
+            specifier: sanitizedSpecifier,
+            identifier: opts.identifier ?? SIDE_EFFECTS,
+            pos: opts.pos,
+            line: line + 1,
+            col: character + 2,
+          });
         }
       }
     } else {
@@ -227,7 +233,13 @@ const getImportsAndExports = (
       // @ts-expect-error TODO
       const pos = 'moduleSpecifier' in node ? node.moduleSpecifier.pos : node.pos;
       const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
-      unresolved.add({ specifier: opts.specifier, pos, line: line + 1, col: character + 2 });
+      unresolved.add({
+        specifier: opts.specifier,
+        identifier: opts.identifier ?? SIDE_EFFECTS,
+        pos,
+        line: line + 1,
+        col: character + 2,
+      });
     }
   };
 
@@ -259,17 +271,13 @@ const getImportsAndExports = (
 
     const exportMembers = members.map(member => createMember(node, member, member.pos));
 
-    const isReExport = Boolean(
-      node.parent?.parent && ts.isExportDeclaration(node.parent.parent) && node.parent.parent.moduleSpecifier
-    );
-
     const item = exports.get(identifier);
     if (item) {
       // Code path for fn overloads, simple merge
       const members = [...(item.members ?? []), ...exportMembers];
       const tags = new Set([...(item.jsDocTags ?? []), ...jsDocTags]);
       const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
-      exports.set(identifier, { ...item, members, jsDocTags: tags, fixes, isReExport });
+      exports.set(identifier, { ...item, members, jsDocTags: tags, fixes });
     } else {
       const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
       exports.set(identifier, {
@@ -284,7 +292,6 @@ const getImportsAndExports = (
         col: character + 1,
         fixes: fix ? [fix] : [],
         refs: [0, false],
-        isReExport,
       });
     }
 

@@ -27,7 +27,13 @@ export type ImportMaps = {
 
 export type ImportMap = Map<FilePath, ImportMaps>;
 
-export type Import = { specifier: string; pos?: number; line?: number; col?: number };
+export type Import = {
+  specifier: string;
+  identifier: string;
+  pos?: number;
+  line?: number;
+  col?: number;
+};
 
 export interface Export {
   identifier: Identifier;
@@ -40,7 +46,6 @@ export interface Export {
   refs: [number, boolean];
   fixes: Fixes;
   symbol?: ts.Symbol;
-  isReExport: boolean;
 }
 
 export type ExportMember = {

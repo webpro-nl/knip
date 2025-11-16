@@ -227,6 +227,15 @@ export const isConsiderReferencedNS = (node: ts.Identifier) =>
   (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent.parent);
 
+export const isInOpaqueExpression = (node: ts.Node): boolean =>
+  ts.isAwaitExpression(node.parent)
+    ? isInOpaqueExpression(node.parent)
+    : ts.isCallExpression(node.parent) ||
+      ts.isReturnStatement(node.parent) ||
+      ts.isArrowFunction(node.parent) ||
+      ts.isPropertyAssignment(node.parent) ||
+      ts.isSpreadAssignment(node.parent.parent);
+
 const objectEnumerationMethods = new Set(['keys', 'entries', 'values', 'getOwnPropertyNames']);
 export const isObjectEnumerationCallExpressionArgument = (node: ts.Identifier) =>
   ts.isCallExpression(node.parent) &&

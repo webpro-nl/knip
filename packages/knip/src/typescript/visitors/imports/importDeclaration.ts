@@ -10,7 +10,7 @@ export default visit(
       const specifier = node.moduleSpecifier.text;
       if (!node.importClause) {
         // Pattern: import 'side-effects';
-        return { specifier, identifier: undefined, pos: node.pos, modifiers: IMPORT_MODIFIERS.NONE };
+        return { specifier, identifier: undefined, pos: node.pos, modifiers: IMPORT_MODIFIERS.SIDE_EFFECTS };
       }
       const imports = [];
 

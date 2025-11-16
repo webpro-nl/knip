@@ -1,11 +1,12 @@
 import ts from 'typescript';
-import { ANONYMOUS, IMPORT_MODIFIERS } from '../../../constants.js';
+import { IMPORT_MODIFIERS } from '../../../constants.js';
 import {
   findAncestor,
   findDescendants,
   getAccessedIdentifiers,
   isAccessExpression,
   isImportCall,
+  isInOpaqueExpression,
   isTopLevel,
   stripQuotes,
 } from '../../ast-helpers.js';
@@ -120,7 +121,12 @@ export default visit(
               });
             }
             // Pattern: import('specifier')
-            return { identifier: ANONYMOUS, specifier, pos: node.arguments[0].pos, modifiers };
+            return {
+              identifier: undefined,
+              specifier,
+              pos: node.arguments[0].pos,
+              modifiers: IMPORT_MODIFIERS.SIDE_EFFECTS,
+            };
           }
           const arrayLiteralExpression = node.parent;
           const variableDeclarationParent = node.parent.parent?.parent?.parent;
@@ -156,8 +162,13 @@ export default visit(
             }
           }
 
-          // Pattern: return import('side-effects')
-          return { identifier: 'default', specifier, pos: node.arguments[0].pos, modifiers };
+          // Pattern: import('side-effects')
+          return {
+            identifier: undefined,
+            specifier,
+            pos: node.arguments[0].pos,
+            modifiers: isInOpaqueExpression(node) ? IMPORT_MODIFIERS.OPAQUE : IMPORT_MODIFIERS.SIDE_EFFECTS,
+          };
         }
 
         // Fallback, seems to never happen though

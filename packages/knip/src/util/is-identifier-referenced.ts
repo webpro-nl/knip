@@ -1,4 +1,4 @@
-import { IMPORT_STAR } from '../constants.js';
+import { IMPORT_STAR, OPAQUE } from '../constants.js';
 import type { ModuleGraph } from '../types/module-graph.js';
 import { addNodes, createNode, type TraceNode } from './trace.js';
 
@@ -33,8 +33,9 @@ export const getIsIdentifierReferencedHandler = (graph: ModuleGraph, entryPaths:
     if (!file) return { isReferenced, reExportingEntryFile, traceNode };
 
     if (
-      ((identifier !== id && file.refs.has(id)) || identifier === id) &&
-      (file.imported.has(identifier) || file.importedAs.has(identifier))
+      file.imported.get(OPAQUE) ||
+      (((identifier !== id && file.refs.has(id)) || identifier === id) &&
+        (file.imported.has(identifier) || file.importedAs.has(identifier)))
     ) {
       isReferenced = true;
       if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
