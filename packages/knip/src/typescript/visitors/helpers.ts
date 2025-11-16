@@ -14,6 +14,7 @@ export function getImportsFromPragmas(sourceFile: BoundSourceFile) {
   const importNodes: ImportNode[] = [];
 
   if (sourceFile.pragmas) {
+    const modifiers = IMPORT_MODIFIERS.TYPE_ONLY;
     const jsxImportSourcePragmas = sourceFile.pragmas.get('jsximportsource');
     if (jsxImportSourcePragmas) {
       const jsxImportSourcePragma = Array.isArray(jsxImportSourcePragmas)
@@ -21,13 +22,7 @@ export function getImportsFromPragmas(sourceFile: BoundSourceFile) {
         : jsxImportSourcePragmas;
       const { factory: specifier } = jsxImportSourcePragma?.arguments ?? {};
       const pos = jsxImportSourcePragma.range?.pos ?? 0;
-      if (specifier)
-        importNodes.push({
-          specifier,
-          identifier: '__jsx',
-          pos,
-          modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
-        });
+      if (specifier) importNodes.push({ specifier, identifier: undefined, pos, modifiers });
     }
 
     const referencePragma = sourceFile.pragmas.get('reference');
@@ -36,13 +31,7 @@ export function getImportsFromPragmas(sourceFile: BoundSourceFile) {
       for (const ref of refs) {
         if (ref.arguments?.types) {
           const { value: specifier, pos } = ref.arguments.types;
-          if (specifier)
-            importNodes.push({
-              specifier,
-              identifier: undefined,
-              pos,
-              modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
-            });
+          if (specifier) importNodes.push({ specifier, identifier: undefined, pos, modifiers });
         }
       }
     }

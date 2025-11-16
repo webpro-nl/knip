@@ -219,9 +219,8 @@ const getImportsAndExports = (
       if (shouldIgnore(getJSDocTags(node), options.tags)) return;
       if (opts.specifier.startsWith(PROTOCOL_VIRTUAL)) return;
 
-      const r = resolve(dirname(sourceFile.fileName), opts.specifier);
       if (opts.modifiers && opts.modifiers & IMPORT_MODIFIERS.OPTIONAL) {
-        resolved.add(r);
+        resolved.add(resolve(dirname(sourceFile.fileName), opts.specifier));
         return;
       }
 

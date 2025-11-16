@@ -15,6 +15,7 @@ export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
 
 export type ImportMaps = {
+  /** References to imported identifiers ("default", "named", "NS.member", etc) */
   refs: References;
   imported: IdToFileMap;
   importedAs: IdToNsToFileMap;
