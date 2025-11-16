@@ -25,16 +25,16 @@ export const getIsIdentifierReferencedHandler = (graph: ModuleGraph, entryPaths:
 
     seen.add(filePath);
 
-    const ids = id.split('.');
-    const [identifier, ...rest] = ids;
+    const restIds = id.split('.');
+    const identifier = restIds.shift();
 
     const file = graph.get(filePath)?.imported;
 
-    if (!file) return { isReferenced, reExportingEntryFile, traceNode };
+    if (!identifier || !file) return { isReferenced, reExportingEntryFile, traceNode };
 
     if (
       file.imported.get(OPAQUE) ||
-      (((identifier !== id && file.refs.has(id)) || identifier === id) &&
+      ((identifier === id || (identifier !== id && file.refs.has(id))) &&
         (file.imported.has(identifier) || file.importedAs.has(identifier)))
     ) {
       isReferenced = true;
@@ -49,12 +49,10 @@ export const getIsIdentifierReferencedHandler = (graph: ModuleGraph, entryPaths:
     for (const [exportId, aliases] of file.importedAs.entries()) {
       if (identifier === exportId) {
         for (const alias of aliases.keys()) {
-          const aliasedRef = [alias, ...rest].join('.');
+          const aliasedRef = [alias, ...restIds].join('.');
           if (file.refs.has(aliasedRef)) {
             isReferenced = true;
-            if (!isTrace) {
-              return { isReferenced, reExportingEntryFile, traceNode };
-            }
+            if (!isTrace) return { isReferenced, reExportingEntryFile, traceNode };
             addNodes(traceNode, aliasedRef, graph, aliases.get(alias));
           }
         }
@@ -113,7 +111,7 @@ export const getIsIdentifierReferencedHandler = (graph: ModuleGraph, entryPaths:
           if (!seen.has(byFilePath)) {
             const child = createNode(byFilePath);
             traceNode.children.add(child);
-            const ref = [alias, ...rest].join('.');
+            const ref = [alias, ...restIds].join('.');
             const result = isIdentifierReferenced(byFilePath, ref, isIncludeEntryExports, child, seen);
             if (result.reExportingEntryFile) reExportingEntryFile = result.reExportingEntryFile;
             if (result.isReferenced) {
