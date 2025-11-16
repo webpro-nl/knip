@@ -2,7 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { _firstGlob } from '../../util/glob.js';
 import type { Input } from '../../util/input.js';
 import { toConfig } from '../../util/input.js';
-import { dirname, isAbsolute, join, relative } from '../../util/path.js';
+import { join, relative } from '../../util/path.js';
 import type { TaskfileCommand, TaskfileConfig, TaskfileTask } from './types.js';
 
 // https://taskfile.dev/
@@ -12,6 +12,8 @@ const title = 'Taskfile';
 const enablers =
   'This plugin is enabled when a Taskfile is found (Taskfile.yml, taskfile.yml, Taskfile.yaml, taskfile.yaml, etc.).';
 
+const isRootOnly = true;
+
 const defaultConfigPatterns = ['{T,t}askfile.{yml,yaml}', '{T,t}askfile.dist.{yml,yaml}'];
 
 const isEnabled: IsPluginEnabled = async ({ cwd, config }) => {
@@ -19,9 +21,6 @@ const isEnabled: IsPluginEnabled = async ({ cwd, config }) => {
   return Boolean(await _firstGlob({ cwd, patterns: defaultConfigPatterns }));
 };
 
-const config = defaultConfigPatterns;
-
-// https://taskfile.dev/docs/reference/schema#command
 const extractScriptsFromCommand = (command: TaskfileCommand): string[] => {
   const scripts: string[] = [];
   if (typeof command === 'string') {
@@ -46,7 +45,6 @@ const extractScriptsFromCommand = (command: TaskfileCommand): string[] => {
   return scripts;
 };
 
-// https://taskfile.dev/docs/reference/schema#command
 const extractScriptsFromTask = (task: TaskfileTask): string[] => {
   const scripts: string[] = [];
   if (typeof task === 'string') {
@@ -78,14 +76,11 @@ const extractScriptsFromTask = (task: TaskfileTask): string[] => {
   return scripts;
 };
 
-// https://taskfile.dev/docs/reference/schema#include
 const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options) => {
   if (!localConfig || !options.configFilePath) return [];
 
-  const { configFilePath, rootCwd, getInputsFromScripts, isProduction } = options;
-  const inputs = new Set<Input>();
-  const normalizedPath = isAbsolute(configFilePath) ? configFilePath : join(rootCwd, configFilePath);
-  const taskfileDir = dirname(normalizedPath);
+  const { configFilePath, getInputsFromScripts, isProduction, configFileDir } = options;
+  const inputs: Input[] = [];
 
   if (localConfig.includes && typeof localConfig.includes === 'object') {
     for (const includeValue of Object.values(localConfig.includes)) {
@@ -96,8 +91,8 @@ const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options
             ? includeValue.taskfile
             : undefined;
       if (includePath) {
-        const resolvedPath = isAbsolute(includePath) ? includePath : join(taskfileDir, includePath);
-        inputs.add(toConfig('taskfile', relative(taskfileDir, resolvedPath), { containingFilePath: normalizedPath }));
+        const resolvedPath = join(configFileDir, includePath);
+        inputs.push(toConfig('taskfile', relative(configFileDir, resolvedPath), { containingFilePath: configFileDir }));
       }
     }
   }
@@ -107,24 +102,25 @@ const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options
       for (const script of extractScriptsFromTask(task)) {
         for (const input of getInputsFromScripts([script], {
           knownBinsOnly: true,
-          containingFilePath: relative(rootCwd, normalizedPath),
+          containingFilePath: configFilePath,
         })) {
           if (isProduction) Object.assign(input, { optional: true });
-          inputs.add({ ...input, dir: taskfileDir });
+          inputs.push({ ...input, dir: configFileDir });
         }
       }
     }
   }
 
-  return [...inputs];
+  return inputs;
 };
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  config: defaultConfigPatterns,
   resolveConfig,
+  isRootOnly,
 };
 
 export default plugin;
