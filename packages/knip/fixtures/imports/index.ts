@@ -97,6 +97,10 @@ const { identifier15 } = await import('./catch.js').catch(() => {
   throw new Error('caught');
 });
 
+const importPromise = import('./await-import.js');
+const { default: awaitedImport } = await importPromise;
+awaitedImport();
+
 export default fn({
   components: {
     child1,

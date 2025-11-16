@@ -85,7 +85,9 @@ export default visit(
             accessExpression.name &&
             accessExpression.name.escapedText === 'catch'
               ? node.parent.parent.parent.parent
-              : node.parent.parent;
+              : ts.isVariableDeclaration(node.parent)
+                ? node.parent
+                : node.parent.parent;
           if (
             ts.isVariableDeclaration(variableDeclaration) &&
             ts.isVariableDeclarationList(variableDeclaration.parent)
@@ -93,6 +95,7 @@ export default visit(
             const isTLA = isTopLevel(variableDeclaration.parent);
             if (ts.isIdentifier(variableDeclaration.name)) {
               // Pattern: const identifier = await import('specifier');
+              // Pattern: const promise = import('specifier'); const { identifier: alias } = await promise;
               const alias = String(variableDeclaration.name.escapedText);
               const symbol = getSymbol(variableDeclaration, isTLA);
               // @ts-expect-error ts.isFunctionBody

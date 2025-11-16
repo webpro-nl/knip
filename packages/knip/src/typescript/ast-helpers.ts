@@ -334,15 +334,20 @@ export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName
   return values;
 };
 
+const isMatchAlias = (expression: ts.Expression | undefined, identifier: string) => {
+  while (expression && ts.isAwaitExpression(expression)) expression = expression.expression;
+  return expression && ts.isIdentifier(expression) && expression.escapedText === identifier;
+};
+
 export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
   const identifiers: Array<{ identifier: string; pos: number }> = [];
 
   function visit(node: ts.Node) {
-    if (ts.isPropertyAccessExpression(node) && node.expression.getText() === identifier) {
+    if (ts.isPropertyAccessExpression(node) && isMatchAlias(node.expression, identifier)) {
       identifiers.push({ identifier: String(node.name.escapedText), pos: node.name.pos });
     } else if (
       ts.isElementAccessExpression(node) &&
-      node.expression.getText() === identifier &&
+      isMatchAlias(node.expression, identifier) &&
       ts.isStringLiteral(node.argumentExpression)
     ) {
       identifiers.push({
@@ -351,13 +356,13 @@ export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
       });
     } else if (
       ts.isVariableDeclaration(node) &&
-      node.initializer?.getText() === identifier &&
+      isMatchAlias(node.initializer, identifier) &&
       ts.isObjectBindingPattern(node.name)
     ) {
       for (const element of node.name.elements) {
         if (ts.isBindingElement(element)) {
           const identifier = (element.propertyName ?? element.name).getText();
-          identifiers.push({ identifier, pos: element.pos });
+          identifiers.push({ identifier, pos: element.getStart() });
         }
       }
     }
