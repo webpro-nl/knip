@@ -92,7 +92,9 @@ const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options
             : undefined;
       if (includePath) {
         const resolvedPath = join(configFileDir, includePath);
-        inputs.push(toConfig('taskfile', relative(configFileDir, resolvedPath), { containingFilePath: configFileDir }));
+        inputs.push(
+          toConfig('taskfile', relative(configFileDir, resolvedPath), { containingFilePath: configFilePath })
+        );
       }
     }
   }
