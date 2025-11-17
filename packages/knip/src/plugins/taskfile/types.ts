@@ -20,7 +20,7 @@ export type TaskfileTask =
     };
 
 // https://taskfile.dev/docs/reference/schema#include
-export type TaskfileInclude = string | { taskfile: string; [key: string]: unknown };
+type TaskfileInclude = string | { taskfile: string; [key: string]: unknown };
 
 // https://taskfile.dev/docs/reference/schema
 export type TaskfileConfig = {
