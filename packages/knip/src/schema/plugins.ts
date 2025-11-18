@@ -110,6 +110,7 @@ export const pluginsSchema = z.object({
   svgo: pluginSchema,
   syncpack: pluginSchema,
   tailwind: pluginSchema,
+  taskfile: pluginSchema,
   travis: pluginSchema,
   'ts-node': pluginSchema,
   tsdown: pluginSchema,

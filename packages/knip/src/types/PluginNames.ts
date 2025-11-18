@@ -97,6 +97,7 @@ export type PluginName =
   | 'svgo'
   | 'syncpack'
   | 'tailwind'
+  | 'taskfile'
   | 'travis'
   | 'ts-node'
   | 'tsdown'
@@ -217,6 +218,7 @@ export const pluginNames = [
   'svgo',
   'syncpack',
   'tailwind',
+  'taskfile',
   'travis',
   'ts-node',
   'tsdown',
