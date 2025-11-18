@@ -25,6 +25,7 @@ const commands = [
   'patch-commit',
   'patch',
   'plugin',
+  'publish',
   'rebuild',
   'remove',
   'search',
