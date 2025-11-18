@@ -1,3 +1,4 @@
+// @vitest-environment node
 // @vitest-environment ./local-env.js
 
 /**
