@@ -1,4 +1,3 @@
-import { isAbsolute, isInternal } from '../../util/path.js';
 import type { ViteConfig } from './types.js';
 
 /**

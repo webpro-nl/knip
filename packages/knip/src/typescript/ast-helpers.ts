@@ -149,11 +149,7 @@ export function findDescendants<T>(node: ts.Node | undefined, callback: (element
   return results;
 }
 
-export interface TopOfFileCommentRange extends ts.CommentRange {
-  text: string;
-}
-
-export const getLeadingComments = (sourceFile: BoundSourceFile): TopOfFileCommentRange[] => {
+export const getLeadingComments = (sourceFile: BoundSourceFile) => {
   const text = sourceFile.text;
   if (!text) return [];
 
@@ -163,7 +159,7 @@ export const getLeadingComments = (sourceFile: BoundSourceFile): TopOfFileCommen
   const ranges = ts.getLeadingCommentRanges(text, 0);
   if (!ranges?.length) return [];
 
-  const comments: TopOfFileCommentRange[] = [];
+  const comments = [];
   for (const range of ranges) {
     if (range.end > limit) break;
     comments.push({ ...range, text: text.slice(range.pos, range.end) });
