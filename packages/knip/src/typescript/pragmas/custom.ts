@@ -22,7 +22,7 @@ export const collectCustomImports = (sourceFile: BoundSourceFile): ImportNode[] 
       const isLocal = isInternal(id) || isAbsolute(id);
       const modifiers = isLocal ? IMPORT_MODIFIERS.ENTRY : IMPORT_MODIFIERS.NONE;
       const offset = match[0].length - match[2].length;
-      const specifier = isLocal ? id : getEnvSpecifier(id);
+      const specifier = isLocal || id === 'node' ? id : getEnvSpecifier(id);
       importNodes.push({ specifier, identifier: undefined, pos: comment.pos + match.index + offset, modifiers });
     }
   }
