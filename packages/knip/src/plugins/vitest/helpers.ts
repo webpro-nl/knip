@@ -1,3 +1,4 @@
+import { isAbsolute, isInternal } from '../../util/path.js';
 import type { ViteConfig } from './types.js';
 
 /**
@@ -6,7 +7,7 @@ import type { ViteConfig } from './types.js';
  * - https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/reporters/index.ts
  */
 
-type BuiltinEnvironment = 'node' | 'jsdom' | 'happy-dom' | 'edge-runtime';
+type KnownEnvironment = 'node' | 'jsdom' | 'happy-dom' | 'edge-runtime';
 
 const environments = {
   node: null,
@@ -21,8 +22,8 @@ const envPackageNames: Record<Exclude<keyof typeof environments, 'node'>, string
   'edge-runtime': '@edge-runtime/vm',
 };
 
-export const getEnvPackageName = (env: string) => {
-  if (env in envPackageNames) return envPackageNames[env as Exclude<BuiltinEnvironment, 'node'>];
+export const getEnvSpecifier = (env: string) => {
+  if (env in envPackageNames) return envPackageNames[env as Exclude<KnownEnvironment, 'node'>];
   return `vitest-environment-${env}`;
 };
 

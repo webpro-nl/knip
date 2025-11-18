@@ -2,6 +2,7 @@ import ts from 'typescript';
 import { FIX_FLAGS, SYMBOL_TYPE } from '../constants.js';
 import type { Fix } from '../types/exports.js';
 import type { SymbolType } from '../types/issues.js';
+import type { BoundSourceFile } from './SourceFile.js';
 
 function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
   return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
@@ -147,6 +148,29 @@ export function findDescendants<T>(node: ts.Node | undefined, callback: (element
 
   return results;
 }
+
+export interface TopOfFileCommentRange extends ts.CommentRange {
+  text: string;
+}
+
+export const getLeadingComments = (sourceFile: BoundSourceFile): TopOfFileCommentRange[] => {
+  const text = sourceFile.text;
+  if (!text) return [];
+
+  const firstStatement = sourceFile.statements[0];
+  const limit = firstStatement ? firstStatement.getStart() : text.length;
+
+  const ranges = ts.getLeadingCommentRanges(text, 0);
+  if (!ranges?.length) return [];
+
+  const comments: TopOfFileCommentRange[] = [];
+  for (const range of ranges) {
+    if (range.end > limit) break;
+    comments.push({ ...range, text: text.slice(range.pos, range.end) });
+  }
+
+  return comments;
+};
 
 export const isDeclarationFileExtension = (extension: string) =>
   extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';

@@ -4,9 +4,9 @@ import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../.
 import type { PackageJson } from '../../types/package-json.js';
 import { _glob } from '../../util/glob.js';
 import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
-import { join, toPosix } from '../../util/path.js';
+import { isAbsolute, isInternal, join, toPosix } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getEnvPackageName, getExternalReporters } from './helpers.js';
+import { getEnvSpecifier, getExternalReporters } from './helpers.js';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
 
 // https://vitest.dev/config/
@@ -34,8 +34,13 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
 
   if (!testConfig) return [];
 
+  const env = testConfig.environment;
   const environments =
-    testConfig.environment && testConfig.environment !== 'node' ? [getEnvPackageName(testConfig.environment)] : [];
+    env && env !== 'node'
+      ? isInternal(env) || isAbsolute(env)
+        ? [toDeferResolve(env)]
+        : [toDependency(getEnvSpecifier(env))]
+      : [];
   const reporters = getExternalReporters(testConfig.reporters);
 
   const hasCoverageEnabled =
@@ -62,7 +67,9 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
   }
 
   return [
-    ...[...environments, ...reporters, ...coverage].map(id => toDependency(id)),
+    ...environments,
+    ...reporters.map(id => toDependency(id)),
+    ...coverage.map(id => toDependency(id)),
     ...setupFiles,
     ...globalSetup,
     ...workspaceDependencies,

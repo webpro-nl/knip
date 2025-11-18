@@ -18,7 +18,7 @@ test('Find dependencies with the Vitest plugin (8)', async () => {
     ...baseCounters,
     unlisted: 0,
     unresolved: 2,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });

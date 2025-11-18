@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/pragma",
+  "devDependencies": {
+    "@types/oh-my-types": "*",
+    "happy-dom": "*",
+    "jsdom": "*",
+    "preact": "*",
+    "vitest": "*"
+  }
+}

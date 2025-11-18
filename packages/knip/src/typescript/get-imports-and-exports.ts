@@ -34,10 +34,10 @@ import {
   isReferencedInExport,
 } from './ast-helpers.js';
 import { findInternalReferences, isType } from './find-internal-references.js';
+import { getImportsFromPragmas } from './pragmas/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
 import getExportVisitors from './visitors/exports/index.js';
-import { getImportsFromPragmas } from './visitors/helpers.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 
@@ -433,8 +433,10 @@ const getImportsAndExports = (
 
   visit(sourceFile);
 
-  // Collect imports from file pragmas
-  // Patterns: /** @jsxImportSource preact */, /// <reference types="astro/client" />)
+  // Collect imports from file pragmas/docblocks
+  // Pattern: /** @jsxImportSource preact */
+  // Pattern: /// <reference types="astro/client" />)
+  // Pattern: /** @vitest-environment jsdom */
   const pragmaImports = getImportsFromPragmas(sourceFile);
   if (pragmaImports) for (const node of pragmaImports) addImport(node, sourceFile);
 
@@ -466,7 +468,7 @@ const getImportsAndExports = (
   }
 
   return {
-    imports: { internal, external, resolved, imports: imports, unresolved },
+    imports: { internal, external, resolved, imports, unresolved },
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,
