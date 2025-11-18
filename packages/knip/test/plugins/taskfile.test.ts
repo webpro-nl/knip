@@ -24,8 +24,9 @@ test('Find dependencies with the taskfile plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 10,
-    unresolved: 1,
+    // case-sensitivity: fast-glob returns two files (taskfile.yml and Taskfile.yml) while there's only one
+    binaries: process.platform === 'darwin' || process.platform === 'win32' ? 15 : 9,
+    unresolved: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
     processed: 7,
     total: 7,
   });
