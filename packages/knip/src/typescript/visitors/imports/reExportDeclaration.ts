@@ -13,7 +13,7 @@ export default visit(
           return {
             identifier: IMPORT_STAR,
             specifier: node.moduleSpecifier.text,
-            pos: node.pos,
+            pos: node.moduleSpecifier.getStart() - 7,
             modifiers: IMPORT_MODIFIERS.RE_EXPORT,
           };
         }
@@ -23,7 +23,7 @@ export default visit(
             identifier: IMPORT_STAR,
             namespace: String(node.exportClause.name.text),
             specifier: node.moduleSpecifier.text,
-            pos: node.exportClause.name.pos,
+            pos: node.exportClause.name.getStart(),
             modifiers: IMPORT_MODIFIERS.RE_EXPORT,
           };
         }
@@ -35,7 +35,7 @@ export default visit(
               identifier: String(element.propertyName.text),
               alias: String(element.name.text),
               specifier: specifier.text,
-              pos: element.pos,
+              pos: element.propertyName.getStart(),
               modifiers: IMPORT_MODIFIERS.RE_EXPORT,
             };
           }
@@ -43,7 +43,7 @@ export default visit(
           return {
             identifier: (element.propertyName ?? element.name).getText(),
             specifier: specifier.text,
-            pos: element.pos,
+            pos: element.name.getStart(),
             modifiers: IMPORT_MODIFIERS.RE_EXPORT,
           };
         });

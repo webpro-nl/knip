@@ -20,7 +20,7 @@ export default visit(
           if (propertyAccessExpression) {
             // Pattern: require('side-effects').identifier
             const identifier = String(propertyAccessExpression.name.escapedText);
-            return { identifier, specifier, pos: propertyAccessExpression.name.pos, modifiers };
+            return { identifier, specifier, pos: propertyAccessExpression.name.getStart(), modifiers };
           }
           const variableDeclaration = node.parent;
           if (
@@ -37,7 +37,7 @@ export default visit(
                 // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'VariableDeclaration'.
                 symbol: isTLA ? variableDeclaration.symbol : undefined,
                 specifier,
-                pos: node.arguments[0].pos,
+                pos: variableDeclaration.name.getStart(),
                 modifiers,
               };
             }
@@ -49,7 +49,7 @@ export default visit(
                 const alias = element.propertyName ? element.name.getText() : undefined;
                 // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
                 const symbol = isTLA ? element.symbol : undefined;
-                return { identifier, specifier, alias, symbol, pos: element.pos, modifiers };
+                return { identifier, specifier, alias, symbol, pos: element.name.getStart(), modifiers };
               });
             }
             // Pattern: require('specifier')
@@ -70,8 +70,13 @@ export default visit(
             };
           }
 
+          // Pattern: require('side-effects')()
+          if (ts.isCallExpression(node.parent)) {
+            return { identifier: 'default', specifier, pos: node.getEnd(), modifiers };
+          }
+
           // Pattern: require('side-effects')
-          return { identifier: 'default', specifier, pos: node.arguments[0].pos, modifiers };
+          return { identifier: 'default', specifier, pos: node.getStart(), modifiers };
         }
       }
     }

@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS } from '../../../constants.js';
+import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
 import type { ImportNode } from '../../../types/imports.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -17,7 +17,7 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
         imports.push({
           specifier: importClause.literal.text,
           identifier,
-          pos: importClause.literal.pos,
+          pos: node.qualifier?.getStart() ?? importClause.literal.pos,
           modifiers: IMPORT_MODIFIERS.NONE,
         });
       }
@@ -28,13 +28,27 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
     if (supportsJSDocImportTag && ts.isJSDocImportTag(node) && ts.isStringLiteralLike(node.moduleSpecifier)) {
       // biome-ignore lint: suspicious/noTsIgnore
       // @ts-ignore node.moduleSpecifier added in TS v5.5.0
-      const moduleSpecifier = node.moduleSpecifier;
-      imports.push({
-        specifier: moduleSpecifier.text,
-        identifier: undefined,
-        pos: moduleSpecifier.pos,
-        modifiers: IMPORT_MODIFIERS.NONE,
-      });
+      if (node.importClause?.namedBindings && ts.isNamedImportBindings(node.importClause.namedBindings)) {
+        const bindings = node.importClause.namedBindings;
+        if (ts.isNamespaceImport(bindings)) {
+          imports.push({
+            specifier: node.moduleSpecifier.text,
+            identifier: IMPORT_STAR,
+            pos: bindings.name.getStart(),
+            modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
+          });
+        } else {
+          for (const element of bindings.elements) {
+            imports.push({
+              specifier: node.moduleSpecifier.text,
+              // @ts-expect-error deal with it
+              identifier: String((element.propertyName ?? element.name).escapedText),
+              pos: element.name.getStart(),
+              modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
+            });
+          }
+        }
+      }
     }
 
     ts.forEachChild(node, visit);
