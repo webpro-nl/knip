@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "**/.pnp.{cjs,mjs,js}",
+    "**/.pnp.loader.{cjs,mjs,js}"
+  ]
+}
