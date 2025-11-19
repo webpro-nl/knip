@@ -24,15 +24,19 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
     }
 
     // biome-ignore lint: suspicious/noTsIgnore
-    // @ts-ignore ts.isJSDocImportTag/node.moduleSpecifier added in TS v5.5.0
+    // @ts-ignore ts.isJSDocImportTag/node.moduleSpecifier/node.importClause added in TS v5.5.0
     if (supportsJSDocImportTag && ts.isJSDocImportTag(node) && ts.isStringLiteralLike(node.moduleSpecifier)) {
       // biome-ignore lint: suspicious/noTsIgnore
       // @ts-ignore node.moduleSpecifier added in TS v5.5.0
-      if (node.importClause?.namedBindings && ts.isNamedImportBindings(node.importClause.namedBindings)) {
-        const bindings = node.importClause.namedBindings;
+      const moduleSpecifier = node.moduleSpecifier;
+      // biome-ignore lint: suspicious/noTsIgnore
+      // @ts-ignore node.importClause added in TS v5.5.0
+      const importClause = node.importClause;
+      if (moduleSpecifier && importClause?.namedBindings && ts.isNamedImportBindings(importClause.namedBindings)) {
+        const bindings = importClause.namedBindings;
         if (ts.isNamespaceImport(bindings)) {
           imports.push({
-            specifier: node.moduleSpecifier.text,
+            specifier: moduleSpecifier.text,
             identifier: IMPORT_STAR,
             pos: bindings.name.getStart(),
             modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
@@ -40,8 +44,9 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
         } else {
           for (const element of bindings.elements) {
             imports.push({
-              specifier: node.moduleSpecifier.text,
-              // @ts-expect-error deal with it
+              specifier: moduleSpecifier.text,
+              // biome-ignore lint: suspicious/noTsIgnore
+              // @ts-ignore <sigh>
               identifier: String((element.propertyName ?? element.name).escapedText),
               pos: element.name.getStart(),
               modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
