@@ -381,13 +381,15 @@ export async function build({
         if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
       }
 
-      for (const [_import, specifierFilePath] of file.imports.imports) {
-        const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
-        if (packageName && isInternalWorkspace(packageName)) {
-          file.imports.external.add({ ..._import, specifier: packageName });
-          const principal = getPrincipalByFilePath(specifierFilePath);
-          if (principal && !isGitIgnored(specifierFilePath)) {
-            principal.addNonEntryPath(specifierFilePath);
+      for (const _import of file.imports.imports) {
+        if (_import.filePath) {
+          const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
+          if (packageName && isInternalWorkspace(packageName)) {
+            file.imports.external.add({ ..._import, specifier: packageName });
+            const principal = getPrincipalByFilePath(_import.filePath);
+            if (principal && !isGitIgnored(_import.filePath)) {
+              principal.addNonEntryPath(_import.filePath);
+            }
           }
         }
       }

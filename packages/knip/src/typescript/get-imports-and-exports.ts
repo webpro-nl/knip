@@ -132,7 +132,15 @@ const getImportsAndExports = (
 
     const isStar = identifier === IMPORT_STAR;
 
-    imports.add([{ specifier, identifier, pos: options.pos, line: options.line, col: options.col }, filePath]);
+    imports.add({
+      filePath,
+      specifier,
+      identifier: namespace ?? options.identifier,
+      pos: options.pos,
+      line: options.line,
+      col: options.col,
+      isTypeOnly: !!(modifiers & IMPORT_MODIFIERS.TYPE_ONLY),
+    });
 
     const file = internal.get(filePath);
 
@@ -212,11 +220,13 @@ const getImportsAndExports = (
           const pos = node.moduleSpecifier?.getStart() ?? opts.pos; // switch from identifier → specifier pos
           const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
           external.add({
+            filePath,
             specifier: sanitizedSpecifier,
             identifier: opts.identifier ?? SIDE_EFFECTS,
             pos: opts.pos,
             line: line + 1,
             col: character + 2,
+            isTypeOnly: !!(opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY),
           });
         }
       }
@@ -234,11 +244,13 @@ const getImportsAndExports = (
       const pos = 'moduleSpecifier' in node ? node.moduleSpecifier.pos : node.pos;
       const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
       unresolved.add({
+        filePath: undefined,
         specifier: opts.specifier,
         identifier: opts.identifier ?? SIDE_EFFECTS,
         pos,
         line: line + 1,
         col: character + 2,
+        isTypeOnly: !!(opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY),
       });
     }
   };

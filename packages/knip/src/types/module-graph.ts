@@ -29,10 +29,12 @@ export type ImportMap = Map<FilePath, ImportMaps>;
 
 export type Import = {
   specifier: string;
-  identifier: string;
+  filePath: string | undefined;
+  identifier: string | undefined;
   pos?: number;
   line?: number;
   col?: number;
+  isTypeOnly: boolean;
 };
 
 export interface Export {
@@ -46,6 +48,7 @@ export interface Export {
   refs: [number, boolean];
   fixes: Fixes;
   symbol?: ts.Symbol;
+  isReExport?: boolean;
 }
 
 export type ExportMember = {
@@ -62,7 +65,7 @@ export type ExportMember = {
 
 export type ExportMap = Map<Identifier, Export>;
 
-export type Imports = Set<[Import, FilePath]>;
+export type Imports = Set<Import>;
 
 export type FileNode = {
   imports: {
