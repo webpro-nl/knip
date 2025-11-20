@@ -6,7 +6,9 @@
       "!**/dist",
       "!**/tmp",
       "!packages/docs/.astro",
-      "!.vscode"
+      "!.vscode",
+      "!**/.pnp.{cjs,mjs,js}",
+      "!**/.pnp.loader.{cjs,mjs,js}"
     ]
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },

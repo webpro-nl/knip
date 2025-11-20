@@ -1,7 +1,7 @@
 import type { Scripts } from '../types/package-json.js';
 import { isFile } from '../util/fs.js';
-import { _require } from '../util/require.js';
 import { dirname, join } from '../util/path.js';
+import { _require } from '../util/require.js';
 
 type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 
@@ -113,6 +113,7 @@ const tryLoadManifestWithYarnPnp = (dir: string, packageName: string) => {
       }
     }
   } catch (error) {
+    // biome-ignore lint/suspicious/noConsole: ignore
     console.error(error);
     // Explicitly suppressing errors here
   }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { main } from '../src/index.js';
 import { join, resolve } from '../src/util/path.js';
 import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js'
+import { createOptions } from './helpers/create-options.js';
 
 test('Find unused dependencies in yarn pnp', async () => {
   const cwd = resolve('fixtures/yarn-pnp/packages/dependencies');
