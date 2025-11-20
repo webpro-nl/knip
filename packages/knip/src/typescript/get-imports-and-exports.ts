@@ -171,7 +171,7 @@ const getImportsAndExports = (
         } else {
           addNsValue(importMaps.importedAs, identifier, nsOrAlias, sourceFile.fileName);
         }
-      } else if (identifier !== SIDE_EFFECTS && identifier !== IMPORT_STAR) {
+      } else if (identifier !== IMPORT_STAR) {
         addValue(importMaps.imported, identifier, sourceFile.fileName);
       }
 
