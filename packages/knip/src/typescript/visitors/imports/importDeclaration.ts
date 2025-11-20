@@ -12,7 +12,10 @@ export default visit(
         // Pattern: import 'side-effects';
         return { specifier, identifier: undefined, pos: node.pos, modifiers: IMPORT_MODIFIERS.SIDE_EFFECTS };
       }
+
       const imports = [];
+
+      const modifiers = node.importClause.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE;
 
       if (isDefaultImport(node)) {
         // Pattern: import identifier from 'specifier'
@@ -23,7 +26,7 @@ export default visit(
           // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportClause'.
           symbol: node.importClause.symbol,
           pos: node.importClause.name?.getStart() ?? node.getStart(),
-          modifiers: IMPORT_MODIFIERS.NONE,
+          modifiers,
         });
       }
 
@@ -37,7 +40,7 @@ export default visit(
             specifier,
             identifier: IMPORT_STAR,
             pos: node.importClause.namedBindings.name.getStart(),
-            modifiers: node.importClause?.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE,
+            modifiers,
           });
         }
         if (ts.isNamedImports(node.importClause.namedBindings)) {
@@ -50,7 +53,7 @@ export default visit(
               // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportSpecifier'.
               symbol: element.symbol,
               pos: element.name.getStart(),
-              modifiers: node.importClause?.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE,
+              modifiers,
             });
           }
         }
@@ -60,7 +63,7 @@ export default visit(
             specifier,
             identifier: undefined,
             pos: node.importClause.namedBindings.pos,
-            modifiers: node.importClause?.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE,
+            modifiers,
           });
         }
       }

@@ -18,7 +18,7 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
           specifier: importClause.literal.text,
           identifier,
           pos: node.qualifier?.getStart() ?? importClause.literal.pos,
-          modifiers: IMPORT_MODIFIERS.NONE,
+          modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
         });
       }
     }
