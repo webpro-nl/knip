@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/yarn-pnp-workspace-no-main-export",
+  "private": true,
+  "exports": {
+    "./utils": "./src/utils.ts",
+    "./utils/*": "./src/utils/*",
+    "./components/*": "./src/components/*"
+  }
+}

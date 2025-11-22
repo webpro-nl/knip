@@ -95,21 +95,10 @@ const tryLoadManifestWithYarnPnp = (dir: string, packageName: string) => {
       const pnpApi = _require(pnpStatus.pnpPath);
 
       if (pnpApi != null) {
-        try {
-          const packageJsonPath = join(packageName, 'package.json');
-          const resolvedPath = pnpApi.resolveRequest(packageJsonPath, dir);
+        const packageJsonPath = join(packageName, 'package.json');
+        const resolvedPath = pnpApi.resolveToUnqualified(packageJsonPath, dir);
 
-          return readManifest(resolvedPath);
-        } catch {
-          // Fallback to resolving the path manually if no manifest is found under the `packageName` path.
-          const resolvedPath = pnpApi.resolveRequest(packageName, dir);
-
-          const packageLocation = pnpApi.findPackageLocator(resolvedPath);
-          const packageInformation = pnpApi.getPackageInformation(packageLocation);
-          const packageJsonPath = join(packageInformation.packageLocation, 'package.json');
-
-          return readManifest(packageJsonPath);
-        }
+        return readManifest(resolvedPath);
       }
     }
   } catch (error) {

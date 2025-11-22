@@ -78,6 +78,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@fixtures/yarn-pnp-workspace-consumer@workspace:packages/workspace-consumer":
+  version: 0.0.0-use.local
+  resolution: "@fixtures/yarn-pnp-workspace-consumer@workspace:packages/workspace-consumer"
+  dependencies:
+    "@fixtures/yarn-pnp-workspace-no-main-export": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@fixtures/yarn-pnp-workspace-no-main-export@workspace:*, @fixtures/yarn-pnp-workspace-no-main-export@workspace:packages/workspace-no-main-export":
+  version: 0.0.0-use.local
+  resolution: "@fixtures/yarn-pnp-workspace-no-main-export@workspace:packages/workspace-no-main-export"
+  languageName: unknown
+  linkType: soft
+
 "@fixtures/yarn-pnp@workspace:.":
   version: 0.0.0-use.local
   resolution: "@fixtures/yarn-pnp@workspace:."

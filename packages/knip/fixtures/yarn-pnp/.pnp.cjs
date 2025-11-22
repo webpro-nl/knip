@@ -25,6 +25,14 @@ const RAW_RUNTIME_STATE =
     {\
       "name": "@fixtures/yarn-pnp-peer-dependencies",\
       "reference": "workspace:packages/peer-dependencies"\
+    },\
+    {\
+      "name": "@fixtures/yarn-pnp-workspace-consumer",\
+      "reference": "workspace:packages/workspace-consumer"\
+    },\
+    {\
+      "name": "@fixtures/yarn-pnp-workspace-no-main-export",\
+      "reference": "workspace:packages/workspace-no-main-export"\
     }\
   ],\
   "enableTopLevelFallback": true,\
@@ -34,7 +42,9 @@ const RAW_RUNTIME_STATE =
     ["@fixtures/yarn-pnp", ["workspace:."]],\
     ["@fixtures/yarn-pnp-dependencies", ["workspace:packages/dependencies"]],\
     ["@fixtures/yarn-pnp-dependencies-types", ["workspace:packages/dependencies-types"]],\
-    ["@fixtures/yarn-pnp-peer-dependencies", ["workspace:packages/peer-dependencies"]]\
+    ["@fixtures/yarn-pnp-peer-dependencies", ["workspace:packages/peer-dependencies"]],\
+    ["@fixtures/yarn-pnp-workspace-consumer", ["workspace:packages/workspace-consumer"]],\
+    ["@fixtures/yarn-pnp-workspace-no-main-export", ["workspace:packages/workspace-no-main-export"]]\
   ],\
   "fallbackPool": [\
   ],\
@@ -133,6 +143,25 @@ const RAW_RUNTIME_STATE =
           ["react", "npm:19.2.0"],\
           ["react-dom", "virtual:45ce2a934f6183b9c8f9d06008af876204539ad22757383da9b60eec7122984d56c531649a8992b93b0316cdc446034b18d84fcdb1cd8fd569614056a3acbd69#npm:19.2.0"],\
           ["styled-components", "virtual:45ce2a934f6183b9c8f9d06008af876204539ad22757383da9b60eec7122984d56c531649a8992b93b0316cdc446034b18d84fcdb1cd8fd569614056a3acbd69#npm:6.1.19"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["@fixtures/yarn-pnp-workspace-consumer", [\
+      ["workspace:packages/workspace-consumer", {\
+        "packageLocation": "./packages/workspace-consumer/",\
+        "packageDependencies": [\
+          ["@fixtures/yarn-pnp-workspace-consumer", "workspace:packages/workspace-consumer"],\
+          ["@fixtures/yarn-pnp-workspace-no-main-export", "workspace:packages/workspace-no-main-export"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["@fixtures/yarn-pnp-workspace-no-main-export", [\
+      ["workspace:packages/workspace-no-main-export", {\
+        "packageLocation": "./packages/workspace-no-main-export/",\
+        "packageDependencies": [\
+          ["@fixtures/yarn-pnp-workspace-no-main-export", "workspace:packages/workspace-no-main-export"]\
         ],\
         "linkType": "SOFT"\
       }]\

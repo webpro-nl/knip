@@ -60,3 +60,27 @@ test('Allow peer dependencies in yarn pnp', async () => {
     total: 1,
   });
 });
+
+test('Handle package with no main export in yarn pnp', async () => {
+  const cwd = resolve('fixtures/yarn-pnp/packages/workspace-no-main-export');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 3,
+    total: 3,
+  });
+});
+
+test('Handle importing from workspace package with no main export in yarn pnp', async () => {
+  const cwd = resolve('fixtures/yarn-pnp/packages/workspace-consumer');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});
