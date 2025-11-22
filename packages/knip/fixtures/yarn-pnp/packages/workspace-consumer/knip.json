@@ -1,0 +1,4 @@
+{
+  "$schema": "../../../../schema.json",
+  "entry": ["entry.ts"]
+}
