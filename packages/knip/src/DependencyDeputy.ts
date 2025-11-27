@@ -259,7 +259,7 @@ export class DependencyDeputy {
     const devDependencyIssues: Issue[] = [];
     const optionalPeerDependencyIssues: Issue[] = [];
 
-    for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests.entries()) {
+    for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests) {
       const referencedDependencies = this.referencedDependencies.get(workspace);
       const hasTypesIncluded = this.getHasTypesIncluded(workspace);
       const peeker = new PackagePeeker(manifestStr);
@@ -449,7 +449,7 @@ export class DependencyDeputy {
   public getConfigurationHints() {
     const configurationHints = new Set<ConfigurationHint>();
 
-    for (const [workspaceName, manifest] of this._manifests.entries()) {
+    for (const [workspaceName, manifest] of this._manifests) {
       for (const identifier of manifest.unusedIgnoreDependencies) {
         configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' });
       }

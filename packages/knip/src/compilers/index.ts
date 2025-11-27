@@ -54,7 +54,7 @@ export const getIncludedCompilers = (
 ): [SyncCompilers, AsyncCompilers] => {
   const hasDependency = (packageName: string) => dependencies.has(packageName);
 
-  for (const [extension, { condition, compiler }] of compilers.entries()) {
+  for (const [extension, { condition, compiler }] of compilers) {
     // For MDX, try Astro compiler first if available
     if (extension === '.mdx' && AstroMDX.condition(hasDependency)) {
       syncCompilers.set(extension, AstroMDX.compiler);

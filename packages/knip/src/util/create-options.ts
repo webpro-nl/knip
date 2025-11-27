@@ -155,7 +155,7 @@ export const createOptions = async (options: CreateOptions) => {
     rules,
     tags,
     traceExport: parsedCLIArgs['trace-export'],
-    traceFile: parsedCLIArgs['trace-file'],
+    traceFile: parsedCLIArgs['trace-file'] ? toAbsolute(parsedCLIArgs['trace-file'], cwd) : undefined,
     tsConfigFile: parsedCLIArgs.tsConfig,
     workspace: options.workspace ?? parsedCLIArgs.workspace,
     workspaces,

@@ -30,7 +30,7 @@ export function graphSequencer<T>(graph: Graph<T>, includedNodes: T[] = [...grap
   const nodes = new Set<T>(includedNodes);
   const visited = new Set<T>();
   const outDegree = new Map<T, number>();
-  for (const [from, edges] of graph.entries()) {
+  for (const [from, edges] of graph) {
     outDegree.set(from, 0);
     for (const to of edges) {
       if (nodes.has(from) && nodes.has(to)) {

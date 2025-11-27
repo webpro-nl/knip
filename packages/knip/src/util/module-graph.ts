@@ -11,16 +11,16 @@ export const getOrCreateFileNode = (graph: ModuleGraph, filePath: string) => gra
 
 const updateImportMaps = (fromImportMaps: ImportMaps, toImportMaps: ImportMaps) => {
   for (const id of fromImportMaps.refs) toImportMaps.refs.add(id);
-  for (const [id, v] of fromImportMaps.imported.entries()) addValues(toImportMaps.imported, id, v);
-  for (const [id, v] of fromImportMaps.importedAs.entries()) addNsValues(toImportMaps.importedAs, id, v);
-  for (const [id, v] of fromImportMaps.importedNs.entries()) addValues(toImportMaps.importedNs, id, v);
-  for (const [id, v] of fromImportMaps.reExported.entries()) addValues(toImportMaps.reExported, id, v);
-  for (const [id, v] of fromImportMaps.reExportedAs.entries()) addNsValues(toImportMaps.reExportedAs, id, v);
-  for (const [id, v] of fromImportMaps.reExportedNs.entries()) addValues(toImportMaps.reExportedNs, id, v);
+  for (const [id, v] of fromImportMaps.imported) addValues(toImportMaps.imported, id, v);
+  for (const [id, v] of fromImportMaps.importedAs) addNsValues(toImportMaps.importedAs, id, v);
+  for (const [id, v] of fromImportMaps.importedNs) addValues(toImportMaps.importedNs, id, v);
+  for (const [id, v] of fromImportMaps.reExported) addValues(toImportMaps.reExported, id, v);
+  for (const [id, v] of fromImportMaps.reExportedAs) addNsValues(toImportMaps.reExportedAs, id, v);
+  for (const [id, v] of fromImportMaps.reExportedNs) addValues(toImportMaps.reExportedNs, id, v);
 };
 
 export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: ModuleGraph) => {
-  for (const [importedFilePath, fileImportMaps] of importMap.entries()) {
+  for (const [importedFilePath, fileImportMaps] of importMap) {
     const importMaps = file.imports.internal.get(importedFilePath);
     if (!importMaps) file.imports.internal.set(importedFilePath, fileImportMaps);
     else updateImportMaps(fileImportMaps, importMaps);

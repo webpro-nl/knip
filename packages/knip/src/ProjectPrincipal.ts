@@ -313,7 +313,7 @@ export class ProjectPrincipal {
   }
 
   reconcileCache(graph: ModuleGraph) {
-    for (const [filePath, file] of graph.entries()) {
+    for (const [filePath, file] of graph) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;
       // biome-ignore lint: correctness/noUnusedVariables

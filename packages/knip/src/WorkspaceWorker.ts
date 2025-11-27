@@ -420,7 +420,7 @@ export class WorkspaceWorker {
       const configFiles = this.configFilesMap.get(wsName);
       if (configFiles) {
         do {
-          for (const [pluginName, dependencies] of configFiles.entries()) {
+          for (const [pluginName, dependencies] of configFiles) {
             configFiles.delete(pluginName);
             if (this.enabledPlugins.includes(pluginName)) {
               for (const input of await runPlugin(pluginName, Array.from(dependencies))) inputs.push(input);

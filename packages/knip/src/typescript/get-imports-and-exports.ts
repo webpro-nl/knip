@@ -258,9 +258,14 @@ const getImportsAndExports = (
   const addExport = ({ node, symbol, identifier, type, pos, members = [], fix }: ExportNode) => {
     if (skipExports) return;
 
+    let isReExport = Boolean(
+      node.parent?.parent && ts.isExportDeclaration(node.parent.parent) && node.parent.parent.moduleSpecifier
+    );
+
     if (symbol) {
       const importedSymbolFilePath = importedInternalSymbols.get(symbol);
       if (importedSymbolFilePath) {
+        isReExport = true;
         const importId = String(symbol.escapedName);
         const internalImport = internal.get(importedSymbolFilePath);
         if (internalImport) {
@@ -289,7 +294,7 @@ const getImportsAndExports = (
       const members = [...(item.members ?? []), ...exportMembers];
       const tags = new Set([...(item.jsDocTags ?? []), ...jsDocTags]);
       const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
-      exports.set(identifier, { ...item, members, jsDocTags: tags, fixes });
+      exports.set(identifier, { ...item, members, jsDocTags: tags, fixes, isReExport });
     } else {
       const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
       exports.set(identifier, {
@@ -304,6 +309,7 @@ const getImportsAndExports = (
         col: character + 1,
         fixes: fix ? [fix] : [],
         refs: [0, false],
+        isReExport,
       });
     }
 

@@ -2,7 +2,7 @@ import type ts from 'typescript';
 import type { Fix, Fixes } from './exports.js';
 import type { IssueSymbol, SymbolType } from './issues.js';
 
-type Identifier = string;
+export type Identifier = string;
 type FilePath = string;
 type NamespaceOrAlias = string;
 
@@ -10,6 +10,12 @@ type Reference = string;
 type References = Set<Reference>;
 
 type Tags = Set<string>;
+
+interface SourceLocation {
+  pos: number;
+  line: number;
+  col: number;
+}
 
 export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
@@ -27,21 +33,15 @@ export type ImportMaps = {
 
 export type ImportMap = Map<FilePath, ImportMaps>;
 
-export type Import = {
+export interface Import extends SourceLocation {
   specifier: string;
   filePath: string | undefined;
   identifier: string | undefined;
-  pos?: number;
-  line?: number;
-  col?: number;
   isTypeOnly: boolean;
-};
+}
 
-export interface Export {
+export interface Export extends SourceLocation {
   identifier: Identifier;
-  pos: number;
-  line: number;
-  col: number;
   type: SymbolType;
   members: ExportMember[];
   jsDocTags: Tags;

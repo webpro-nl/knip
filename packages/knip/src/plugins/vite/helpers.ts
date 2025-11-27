@@ -12,7 +12,7 @@ export const getReactBabelPlugins = (sourceFile: ts.SourceFile): string[] => {
   const reactPluginNames = new Set<string>();
 
   // Find the default import for @vitejs/plugin-react
-  for (const [importName, importPath] of importMap.entries()) {
+  for (const [importName, importPath] of importMap) {
     if (importPath.includes('@vitejs/plugin-react')) {
       reactPluginNames.add(importName);
     }

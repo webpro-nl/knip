@@ -114,7 +114,7 @@ export class FileEntryCache<T> {
   reconcile() {
     this.removeNotFoundFiles();
 
-    for (const [entryName, cacheEntry] of this.normalizedEntries.entries()) {
+    for (const [entryName, cacheEntry] of this.normalizedEntries) {
       try {
         const meta = this._getMetaForFileUsingMtimeAndSize(cacheEntry);
         this.cache.set(entryName, meta);
