@@ -244,6 +244,7 @@ export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isSpreadAssignment(node.parent) ||
   ts.isArrayLiteralExpression(node.parent) ||
   ts.isExportAssignment(node.parent) ||
+  ts.isConditionalExpression(node.parent) ||
   (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent.parent);
 

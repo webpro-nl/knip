@@ -7,6 +7,7 @@ import * as NS5 from './namespace5';
 import * as NS6 from './namespace6';
 import * as NS7 from './namespace7';
 import * as NS8 from './namespace8';
+import * as NS9 from './namespace9';
 import fn from 'external';
 
 NS.identifier15;
@@ -30,3 +31,8 @@ const assign = NS6;
 fn([NS7]);
 
 fn({ NS8 });
+
+const func = () => {
+  const cond = fn() ? NS9 : { identifier43: 43 };
+  cond.identifier43;
+};

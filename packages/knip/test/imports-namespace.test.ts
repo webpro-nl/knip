@@ -14,7 +14,7 @@ test('Ignore namespace re-export by entry file', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 1,
-    processed: 10,
-    total: 10,
+    processed: 11,
+    total: 11,
   });
 });
