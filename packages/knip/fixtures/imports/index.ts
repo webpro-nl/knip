@@ -14,6 +14,9 @@ const dynamicB = () => import('./dir/import-b.js').then(m => m.dynamic);
 
 const dynamicF = () => import('./dir/import-f.js').then(({ dynamic, named: renamed }) => [dynamic, renamed]);
 
+const dynamicG = import('./import-g.js');
+dynamicG.then(module => module.func());
+
 import('./top-level-side-effects-call.js');
 
 async function main() {

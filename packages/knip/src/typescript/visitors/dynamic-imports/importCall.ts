@@ -4,6 +4,7 @@ import {
   findAncestor,
   findDescendants,
   getAccessedIdentifiers,
+  getThenBindings,
   isAccessExpression,
   isImportCall,
   isInOpaqueExpression,
@@ -35,28 +36,12 @@ export default visit(
               const pos = accessExpression.name.pos;
               if (identifier === 'then') {
                 const callExpression = node.parent.parent;
-                if (ts.isCallExpression(callExpression) && ts.isFunctionLike(callExpression.arguments[0])) {
-                  const arg = callExpression.arguments[0].parameters[0];
-                  if (arg && ts.isIdentifier(arg.name)) {
-                    const argName = arg.name.escapedText;
-                    const accessExpressions = findDescendants<ts.PropertyAccessExpression>(
-                      callExpression.arguments[0].body,
-                      ts.isPropertyAccessExpression
-                    ).filter(binding => binding.expression.getText() === argName);
-                    if (accessExpressions.length > 0) {
-                      // Pattern: import('specifier').then(module => module.identifier);
-                      return accessExpressions.map(binding => {
-                        const identifier = String(binding.name.escapedText);
-                        return { identifier, specifier, pos, modifiers };
-                      });
-                    }
-                  } else if (arg && ts.isObjectBindingPattern(arg.name)) {
+                if (ts.isCallExpression(callExpression)) {
+                  const accessed = getThenBindings(callExpression);
+                  if (accessed && accessed.length > 0) {
+                    // Pattern: import('specifier').then(module => module.identifier);
                     // Pattern: import('specifier').then({ identifier } => identifier);
-                    return arg.name.elements.map(element => {
-                      const identifier = (element.propertyName ?? element.name).getText();
-                      const alias = element.propertyName ? element.name.getText() : undefined;
-                      return { identifier, alias, specifier, pos: element.pos, modifiers };
-                    });
+                    return accessed.map(acc => ({ ...acc, specifier, modifiers }));
                   }
                 }
                 // Pattern: import('specifier').then(id => id)

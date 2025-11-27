@@ -360,6 +360,30 @@ const isMatchAlias = (expression: ts.Expression | undefined, identifier: string)
   return expression && ts.isIdentifier(expression) && expression.escapedText === identifier;
 };
 
+export function getThenBindings(callExpression: ts.CallExpression) {
+  if (!ts.isFunctionLike(callExpression.arguments[0])) return;
+  const fn = callExpression.arguments[0];
+  const param = fn.parameters[0];
+  if (!param) return;
+
+  if (ts.isIdentifier(param.name)) {
+    const paramName = param.name.escapedText;
+    const identifiers: Array<{ identifier: string; pos: number }> = [];
+    for (const node of findDescendants<ts.PropertyAccessExpression>(fn.body, ts.isPropertyAccessExpression)) {
+      if (ts.isIdentifier(node.expression) && node.expression.escapedText === paramName) {
+        identifiers.push({ identifier: String(node.name.escapedText), pos: node.name.pos });
+      }
+    }
+    if (identifiers.length > 0) return identifiers;
+  } else if (ts.isObjectBindingPattern(param.name)) {
+    return param.name.elements.map(element => {
+      const identifier = (element.propertyName ?? element.name).getText();
+      const alias = element.propertyName ? element.name.getText() : undefined;
+      return { identifier, alias, pos: element.pos };
+    });
+  }
+}
+
 export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
   const identifiers: Array<{ identifier: string; pos: number }> = [];
 
@@ -386,6 +410,15 @@ export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
           identifiers.push({ identifier, pos: element.getStart() });
         }
       }
+    } else if (
+      // Pattern: identifier.then(module => module.property)
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      isMatchAlias(node.expression.expression, identifier) &&
+      node.expression.name.escapedText === 'then'
+    ) {
+      const accessed = getThenBindings(node);
+      if (accessed) for (const acc of accessed) identifiers.push(acc);
     }
 
     ts.forEachChild(node, visit);
