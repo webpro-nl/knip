@@ -24,7 +24,16 @@
       "url": "https://opencollective.com/knip"
     }
   ],
-  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./session": {
+      "types": "./dist/session/index.d.ts",
+      "default": "./dist/session/index.js"
+    }
+  },
   "bin": {
     "knip": "bin/knip.js",
     "knip-bun": "bin/knip-bun.js"

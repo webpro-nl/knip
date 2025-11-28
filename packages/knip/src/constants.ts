@@ -176,6 +176,7 @@ export const IGNORE_DEFINITELY_TYPED = new Set([
   'bun',
   // Packages that confusingly include `package.json#types` but also recommend to install DT pkg
   'jest',
+  'vscode',
 ]);
 
 export const ISSUE_TYPES = [

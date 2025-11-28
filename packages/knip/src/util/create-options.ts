@@ -139,6 +139,7 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.binaries,
     isReportTypes: includedIssueTypes.types || includedIssueTypes.nsTypes || includedIssueTypes.enumMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports || isReportClassMembers,
+    isSession: options.isSession ?? false,
     isShowProgress:
       parsedCLIArgs['no-progress'] !== true &&
       options.isShowProgress !== false &&

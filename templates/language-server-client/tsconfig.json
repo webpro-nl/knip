@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "files": [],
+  "references": [
+    { "path": "packages/client" },
+    { "path": "packages/server" },
+    { "path": "packages/shared" }
+  ]
+}

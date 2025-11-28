@@ -15,7 +15,7 @@
     "rootDir": "./src",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "strict": true,
     "target": "es2022",
     "verbatimModuleSyntax": true

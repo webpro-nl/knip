@@ -17,6 +17,7 @@ export interface Options {
   isIsolateWorkspaces: boolean;
   isProduction: boolean;
   isRemoveFiles: boolean;
+  isSession: boolean;
   isShowProgress: boolean;
   isStrict: boolean;
   isWatch: boolean;

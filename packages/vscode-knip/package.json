@@ -1,0 +1,227 @@
+{
+  "name": "vscode-knip",
+  "version": "0.0.0",
+  "private": true,
+  "preview": true,
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webpro-nl/knip.git",
+    "directory": "packages/vscode-knip"
+  },
+  "displayName": "Knip",
+  "description": "Knip",
+  "icon": "icon-192x192.png",
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  "qna": false,
+  "keywords": [
+    "analysis",
+    "dead code",
+    "dependencies",
+    "entropy",
+    "exports",
+    "imports",
+    "javascript",
+    "lint",
+    "maintenance",
+    "monorepo",
+    "types",
+    "typescript",
+    "unused"
+  ],
+  "sponsor": {
+    "url": "https://github.com/sponsors/webpro"
+  },
+  "publisher": "webpro",
+  "type": "module",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "main": "./src/index.js",
+  "dependencies": {
+    "@knip/language-server": "workspace:*",
+    "vscode": "1.1.37",
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.106.1",
+    "knip": "workspace:*"
+  },
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:knip.restart",
+    "onCommand:knip.showHover"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "knip.restart",
+        "title": "Knip: Restart Knip Server"
+      },
+      {
+        "command": "knip.expandAll",
+        "title": "Expand All",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "knip.showHover",
+        "title": "Knip: Show Hover"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "knip.showHover",
+        "key": "ctrl+cmd+e",
+        "when": "editorTextFocus"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "knip.imports",
+          "name": "Imports",
+          "contextualTitle": "Imports",
+          "when": "config.knip.imports.enabled",
+          "icon": "callhierarchy-incoming"
+        },
+        {
+          "id": "knip.exports",
+          "name": "Exports",
+          "contextualTitle": "Exports",
+          "when": "config.knip.exports.enabled",
+          "icon": "call-outgoing"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "knip.expandAll",
+          "when": "view == knip.imports",
+          "group": "navigation"
+        },
+        {
+          "command": "knip.expandAll",
+          "when": "view == knip.exports",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": [
+      {
+        "title": "Knip",
+        "order": 1,
+        "properties": {
+          "knip.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable Knip"
+          },
+          "knip.requireConfig": {
+            "type": "boolean",
+            "default": true,
+            "description": "Require Knip configuration file"
+          }
+        }
+      },
+      {
+        "id": "editor",
+        "title": "Editor",
+        "displayName": "Editor",
+        "order": 2,
+        "properties": {
+          "knip.editor.exports.codelens.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show CodeLens for imports of exports"
+          },
+          "knip.editor.exports.hover.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show imports for exports on hover"
+          },
+          "knip.editor.exports.hover.maxSnippets": {
+            "type": "number",
+            "default": 10,
+            "minimum": -1,
+            "description": "Limit number of snippets per file (-1 = unlimited, 0 = disable)"
+          },
+          "knip.editor.exports.hover.includeImportLocationSnippet": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include import location with snippets"
+          },
+          "knip.editor.exports.hover.timeout": {
+            "type": "number",
+            "default": 300,
+            "minimum": 0,
+            "description": "Limit time to collect hover snippets (in ms)"
+          },
+          "knip.editor.exports.quickfix.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable quickfixes for unused exports and members of exported classes and enums"
+          },
+          "knip.editor.exports.quickfix.jsdocTags": {
+            "type": "array",
+            "default": [
+              "@lintignore",
+              "@internal",
+              "@public"
+            ],
+            "description": "JSDoc tags for unused export quick fixes",
+            "items": {
+              "type": "string"
+            }
+          },
+          "knip.editor.exports.highlight.dimExports": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused exports (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimTypes": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused types (instead of warnings)"
+          }
+        }
+      },
+      {
+        "id": "imports",
+        "title": "Imports",
+        "displayName": "Imports & Exports",
+        "order": 3,
+        "type": "object",
+        "properties": {
+          "knip.imports.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable imports view"
+          }
+        }
+      },
+      {
+        "id": "exports",
+        "title": "Exports",
+        "displayName": "Imports & Exports",
+        "order": 4,
+        "type": "object",
+        "properties": {
+          "knip.exports.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable exports view"
+          },
+          "knip.exports.contention.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Report export contention (branching and conflicts)"
+          }
+        }
+      }
+    ]
+  }
+}

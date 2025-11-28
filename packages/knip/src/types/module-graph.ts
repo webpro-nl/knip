@@ -11,7 +11,7 @@ type References = Set<Reference>;
 
 type Tags = Set<string>;
 
-interface SourceLocation {
+export interface SourceLocation {
   pos: number;
   line: number;
   col: number;

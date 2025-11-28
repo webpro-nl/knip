@@ -1,5 +1,6 @@
 import type { WatchListener } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.js';
+import { invalidateCache } from '../graph-explorer/cache.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
@@ -13,7 +14,7 @@ import { join, toAbsolute, toRelative } from './path.js';
 
 export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
-type WatchChange = {
+export type WatchChange = {
   type: 'added' | 'deleted' | 'modified';
   filePath: string;
 };
@@ -103,6 +104,8 @@ export const getWatchHandler = async (
     }
 
     if (added.size === 0 && deleted.size === 0 && modified.size === 0) return createUpdate({ startTime });
+
+    invalidateCache(graph);
 
     unreferencedFiles.clear();
     const cachedUnusedFiles = collector.purge();

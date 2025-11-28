@@ -327,7 +327,7 @@ export async function build({
   };
 
   const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
-    if (!options.isWatch && analyzedFiles.has(filePath)) return;
+    if (!options.isWatch && !options.isSession && analyzedFiles.has(filePath)) return;
     analyzedFiles.add(filePath);
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -441,14 +441,14 @@ export async function build({
     principal.reconcileCache(graph);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (options.isIsolateWorkspaces || (options.isSkipLibs && !options.isWatch)) {
+    if (options.isIsolateWorkspaces || (options.isSkipLibs && !options.isWatch && !options.isSession)) {
       factory.deletePrincipal(principal, options.cwd);
       principals[i] = undefined;
     }
     perfObserver.addMemoryMark(factory.getPrincipalCount());
   }
 
-  if (!options.isWatch && options.isSkipLibs && !options.isIsolateWorkspaces) {
+  if (!options.isWatch && !options.isSession && options.isSkipLibs && !options.isIsolateWorkspaces) {
     for (const principal of principals) {
       if (principal) factory.deletePrincipal(principal, options.cwd);
     }

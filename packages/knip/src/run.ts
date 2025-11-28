@@ -68,7 +68,7 @@ export const run = async (options: MainOptions) => {
 
   let watchHandler: WatchHandler | undefined;
 
-  if (options.isWatch) {
+  if (options.isWatch || options.isSession) {
     const isIgnored = (filePath: string) =>
       (!!options.cacheLocation && filePath.startsWith(options.cacheLocation)) ||
       filePath.includes('/.git/') ||
@@ -97,7 +97,7 @@ export const run = async (options: MainOptions) => {
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
-  if (options.isFix) {
+  if (options.isFix && !options.isSession) {
     const touchedFiles = await fixer.fixIssues(issues);
     if (options.isFormat) {
       const report = await formatly(Array.from(touchedFiles));
