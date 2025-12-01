@@ -177,28 +177,24 @@ importers:
       knip:
         specifier: workspace:*
         version: link:../knip
-      mdast-util-to-markdown:
-        specifier: 2.1.2
-        version: 2.1.2
-      unist-builder:
-        specifier: 4.0.0
-        version: 4.0.0
       vscode-languageserver:
         specifier: ^9.0.1
         version: 9.0.1
       vscode-languageserver-textdocument:
         specifier: ^1.0.12
         version: 1.0.12
-    devDependencies:
-      '@types/mdast':
-        specifier: 4.0.4
-        version: 4.0.4
 
   packages/vscode-knip:
     dependencies:
       '@knip/language-server':
         specifier: workspace:*
         version: link:../language-server
+      mdast-util-to-markdown:
+        specifier: 2.1.2
+        version: 2.1.2
+      unist-builder:
+        specifier: 4.0.0
+        version: 4.0.0
       vscode:
         specifier: 1.1.37
         version: 1.1.37
@@ -206,6 +202,9 @@ importers:
         specifier: ^9.0.1
         version: 9.0.1
     devDependencies:
+      '@types/mdast':
+        specifier: 4.0.4
+        version: 4.0.4
       '@types/vscode':
         specifier: ^1.106.1
         version: 1.106.1

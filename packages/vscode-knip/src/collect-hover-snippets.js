@@ -1,20 +1,25 @@
 import * as vscode from 'vscode';
 
 /**
- * @import { HoverSnippets, HoverSnippetsRequest } from '@knip/language-server';
+ * @import { SourceLocation } from 'knip/session';
  */
 
 /**
- * @param {HoverSnippetsRequest} payload
+ * @typedef {{ line: number; col: number; snippet: string }} HoverSnippet
+ * @typedef {(HoverSnippet[] | undefined)[]} HoverSnippets
+ */
+
+/**
+ * @param {string} identifier
+ * @param {SourceLocation[]} locations
+ * @param {{ timeout?: number; includeImportLocationSnippet?: boolean }} [options]
  * @returns {Promise<HoverSnippets>}
  */
-export async function collectExportHoverSnippets(payload) {
-  const { locations, includeImportLocationSnippet } = payload;
+export async function collectHoverSnippets(identifier, locations, options = {}) {
+  const { timeout = 300, includeImportLocationSnippet = false } = options;
 
   if (!Array.isArray(locations) || locations.length === 0) return [];
 
-  const config = vscode.workspace.getConfiguration('knip');
-  const timeout = config.get('editor.exports.hover.timeout', 300);
   const startTime = Date.now();
 
   /** @type {HoverSnippets} */
@@ -57,7 +62,7 @@ export async function collectExportHoverSnippets(payload) {
         seen.add(dedupeKey);
 
         const text = document.lineAt(line).text;
-        if (!text.includes(payload.identifier)) continue;
+        if (!text.includes(identifier)) continue;
 
         const char = highlight.range.start.character;
         const start = Math.max(0, char - 30);

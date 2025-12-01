@@ -1,9 +1,11 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { KNIP_CONFIG_LOCATIONS, REQUEST_HOVER_SNIPPETS } from '@knip/language-server/constants';
+import { REQUEST_FILE_NODE } from '@knip/language-server/constants';
+import { KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
-import { collectExportHoverSnippets } from './hover-snippets.js';
+import { collectHoverSnippets } from './collect-hover-snippets.js';
+import { renderExportHover, renderExportHoverEntryPaths } from './render-export-hover.js';
 import { ExportsTreeViewProvider } from './tree-view-exports.js';
 import { ImportsTreeViewProvider } from './tree-view-imports.js';
 
@@ -52,7 +54,9 @@ export class Extension {
 
   async init() {
     this.#registerCommands();
-    this.#setupTreeView();
+    this.#registerHoverProvider();
+    this.#registerCodeLensProvider();
+    this.#setupTreeViews();
     this.#setupEventHandlers();
 
     const config = vscode.workspace.getConfiguration('knip');
@@ -97,20 +101,12 @@ export class Extension {
       const clientOptions = {
         documentSelector: [{ scheme: 'file' }],
         synchronize: { fileEvents: [vscode.workspace.createFileSystemWatcher('**/*')] },
-        initializationOptions: { config, features: { exportHoverSnippets: true } },
+        initializationOptions: { config },
         outputChannel: this.#outputChannel,
         outputChannelName: 'Knip',
       };
 
       this.#client = new LanguageClient('knip', 'Knip', serverOptions, clientOptions);
-
-      this.#client.onRequest(REQUEST_HOVER_SNIPPETS, async payload => {
-        try {
-          return await collectExportHoverSnippets(payload);
-        } catch (_error) {
-          return [];
-        }
-      });
     }
 
     await this.#client.start();
@@ -138,19 +134,77 @@ export class Extension {
 
     const showHover = vscode.commands.registerCommand('knip.showHover', async () => {
       const editor = vscode.window.activeTextEditor;
-      if (!editor || !this.#client) return;
-      const position = editor.selection.active;
-      try {
-        const uri = editor.document.uri.toString();
-        const hoverParams = { textDocument: { uri }, position };
-        const hover = await this.#client.sendRequest('knip.showHover', hoverParams);
-        if (hover?.contents?.value) vscode.window.showInformationMessage(hover.contents.value, { modal: true });
-      } catch (error) {
-        vscode.window.showErrorMessage((error?.message || error).toString());
-      }
+      if (!editor) return;
+      await vscode.commands.executeCommand('editor.action.showHover');
     });
 
     this.#context.subscriptions.push(restart, showHover);
+  }
+
+  /**
+   *
+   * @param {vscode.TextDocument} document
+   * @return {Promise<import('knip/session').File | null>}
+   */
+  async #requestFileDescriptor(document) {
+    const uri = document.uri.toString();
+    if (!this.#client) return null;
+    return await this.#client.sendRequest(REQUEST_FILE_NODE, { uri });
+  }
+
+  #registerHoverProvider() {
+    const hoverProvider = vscode.languages.registerHoverProvider(
+      { scheme: 'file' },
+      {
+        provideHover: async (document, position) => {
+          const content = await this.#getHoverContent(document, position);
+          if (!content) return null;
+          const md = new vscode.MarkdownString(content.value);
+          md.isTrusted = true;
+          return new vscode.Hover(md);
+        },
+      }
+    );
+    this.#context.subscriptions.push(hoverProvider);
+  }
+
+  #registerCodeLensProvider() {
+    const codeLensProvider = vscode.languages.registerCodeLensProvider(
+      { scheme: 'file' },
+      /** @type {vscode.CodeLensProvider} */ ({ provideCodeLenses: this.#provideCodeLenses.bind(this) })
+    );
+    this.#context.subscriptions.push(codeLensProvider);
+  }
+
+  /**
+   * @param {vscode.TextDocument} document
+   * @param {vscode.CancellationToken} _token
+   * @returns {Promise<vscode.CodeLens[] | null>}
+   */
+  async #provideCodeLenses(document, _token) {
+    const config = vscode.workspace.getConfiguration('knip');
+    if (!config.get('editor.exports.codelens.enabled', true)) return null;
+
+    const file = await this.#requestFileDescriptor(document);
+    if (!file) return null;
+
+    /** @type {vscode.CodeLens[]} */
+    const codeLenses = [];
+
+    for (const _export of file.exports) {
+      const size = _export.importLocations.length;
+      if (size === 0) continue;
+      const pos = document.positionAt(_export.pos);
+      codeLenses.push(
+        new vscode.CodeLens(new vscode.Range(pos, pos), {
+          title: `↻ ${size} import${size > 1 ? 's' : ''}`,
+          command: 'knip.showReferences',
+          arguments: [document.uri, pos, _export.importLocations],
+        })
+      );
+    }
+
+    return codeLenses;
   }
 
   /** @param {vscode.TextEditor} [editor]  */
@@ -163,7 +217,7 @@ export class Extension {
     }
 
     const position = activeEditor.selection?.active ?? new vscode.Position(0, 0);
-    const data = await this.#getTreeDataForEditor(activeEditor);
+    const data = await this.#getFileForTreeViews(activeEditor);
     if (!data) return;
     await this.#importsProvider?.refresh(data, position);
     await this.#exportsProvider?.refresh(data, position);
@@ -173,7 +227,7 @@ export class Extension {
    * @param {vscode.TextEditor} editor
    * @returns {Promise<TreeData | undefined>}
    */
-  async #getTreeDataForEditor(editor) {
+  async #getFileForTreeViews(editor) {
     const document = editor.document;
     const uri = document.uri;
 
@@ -189,18 +243,80 @@ export class Extension {
       return { kind: 'manifest', uri, manifest: contents };
     }
 
-    if (!this.#client) {
-      return { message: 'Language server not connected' };
-    }
+    if (!this.#client) return { message: 'Language server not connected' };
 
-    const requestUri = uri.toString();
     try {
-      const file = await this.#client.sendRequest('knip.getFileNode', { uri: requestUri });
+      const file = await this.#requestFileDescriptor(document);
       if (!file) return { message: '(file not in project)' };
       return { kind: 'file', uri, file };
     } catch (error) {
       this.#outputChannel.error(`Error requesting file: ${(error?.message || error).toString()}`);
       return { message: '(error requesting file)' };
+    }
+  }
+
+  /**
+   * @param {vscode.TextDocument} document
+   * @param {vscode.Position} position
+   * @returns {Promise<{ kind: 'markdown'; value: string } | null>}
+   */
+  async #getHoverContent(document, position) {
+    if (!this.#client) return null;
+
+    const config = vscode.workspace.getConfiguration('knip');
+    if (!config.get('editor.exports.hover.enabled', true)) return null;
+
+    const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!root) return null;
+
+    const file = await this.#requestFileDescriptor(document);
+    if (!file) return null;
+
+    const _export = this.#findExportAtPosition(file, position);
+    if (!_export) return null;
+
+    const filePath = fileURLToPath(document.uri.toString());
+
+    if (_export.importLocations.length > 0) {
+      /** @type {number} */
+      const maxSnippets = config.get('editor.exports.hover.maxSnippets', 3);
+      /** @type {number} */
+      const timeout = config.get('editor.exports.hover.timeout', 300);
+      /** @type {boolean} */
+      const includeImportLocationSnippet = config.get('editor.exports.hover.includeImportLocationSnippet', false);
+
+      /** @type {import('./collect-hover-snippets.js').HoverSnippets} */
+      let snippets = [];
+      if (maxSnippets !== 0) {
+        snippets = await collectHoverSnippets(_export.identifier, _export.importLocations, {
+          timeout,
+          includeImportLocationSnippet,
+        });
+      }
+
+      return renderExportHover(_export, filePath, root, snippets, maxSnippets);
+    }
+
+    if (_export.entryPaths.size > 0) {
+      return renderExportHoverEntryPaths(_export, filePath, root);
+    }
+
+    return null;
+  }
+
+  /**
+   * @param {import('knip/session').File} file
+   * @param {vscode.Position} position
+   * @returns {import('knip/session').Export | undefined}
+   */
+  #findExportAtPosition(file, position) {
+    for (const _export of file.exports) {
+      const exportLine = _export.line - 1;
+      if (position.line !== exportLine) continue;
+      const col = _export.col - 1;
+      const identifier = _export.identifier;
+      if (identifier === 'default') return _export;
+      if (position.character >= col && position.character <= col + identifier.length) return _export;
     }
   }
 
@@ -219,7 +335,7 @@ export class Extension {
     return false;
   }
 
-  #setupTreeView() {
+  #setupTreeViews() {
     this.#importsProvider = new ImportsTreeViewProvider();
     const importsView = vscode.window.createTreeView('knip.imports', {
       treeDataProvider: this.#importsProvider,
@@ -238,8 +354,8 @@ export class Extension {
 
     const goToPosition = vscode.commands.registerCommand('knip.goToPosition', (uri, line, col) => {
       const position = new vscode.Position(line, col);
-      const range = new vscode.Range(position, position);
-      vscode.window.showTextDocument(uri, { selection: range });
+      const selection = new vscode.Range(position, position);
+      vscode.window.showTextDocument(uri, { selection });
     });
 
     const showReferences = vscode.commands.registerCommand('knip.showReferences', (uri, position, importLocations) => {

@@ -12,12 +12,7 @@
   },
   "dependencies": {
     "knip": "workspace:*",
-    "mdast-util-to-markdown": "2.1.2",
-    "unist-builder": "4.0.0",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.12"
-  },
-  "devDependencies": {
-    "@types/mdast": "4.0.4"
   }
 }

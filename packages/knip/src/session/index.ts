@@ -5,4 +5,4 @@ export type { PackageJson } from '../types/package-json.js';
 export { createOptions, type MainOptions } from '../util/create-options.js';
 export { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.js';
 export { createSession, type Session } from './session.js';
-export type { ContentionDetails, Export, File, ImportLocation } from './types.js';
+export type { ContentionDetails, Export, File, SourceLocation } from './types.js';

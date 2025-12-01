@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { SIDE_EFFECTS } from '@knip/language-server/constants';
+import { SIDE_EFFECTS } from 'knip/session';
 import { BaseTreeViewProvider, toTree } from './tree-view-base.js';
 
 /**

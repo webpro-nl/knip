@@ -7,8 +7,8 @@ import { u } from 'unist-builder';
  * @typedef {import('mdast').List} List
  * @typedef {import('mdast').Paragraph} Paragraph
  * @typedef {import('mdast').PhrasingContent} PhrasingContent
- * @typedef {import('./types.js').HoverSnippets} HoverSnippets
- * @typedef {import('vscode-languageserver').Hover} Hover
+ * @typedef {import('./collect-hover-snippets.js').HoverSnippets} HoverSnippets
+ * @import { Export } from 'knip/session';
  */
 
 /** @param {string} text */
@@ -16,20 +16,18 @@ const replaceLessThan = text => text.replace(lessThanMatch, '‹');
 const lessThanMatch = /</g;
 
 /**
- * @param {{
- *   identifier: string;
- *   root: string;
- *   locations: import('knip/session').SourceLocation[];
- *   snippets: HoverSnippets;
- *   maxSnippets: number;
- * }} options
- * @returns {Hover}
+ * @param {Export} _export
+ * @param {string} filePath
+ * @param {string} root
+ * @param {HoverSnippets} snippets
+ * @param {number} maxSnippets
+ * @returns {{ kind: 'markdown'; value: string }}
  */
-export const getImportedByHoverContent = options => {
-  const { identifier, snippets, maxSnippets } = options;
-  const refs = options.locations.length;
+export function renderExportHover(_export, filePath, root, snippets, maxSnippets) {
+  const { identifier, importLocations } = _export;
+  const refs = importLocations.length;
   const identifierMatch = new RegExp(`\\b${identifier}\\b`, 'g');
-  const _root = `${options.root}/`;
+  const _root = `${root}/`;
 
   /** @type {PhrasingContent[]} */
   const nodes = [
@@ -37,8 +35,8 @@ export const getImportedByHoverContent = options => {
     u('strong', [u('text', identifier)]),
   ];
 
-  for (let index = 0; index < options.locations.length; index++) {
-    const loc = options.locations[index];
+  for (let index = 0; index < importLocations.length; index++) {
+    const loc = importLocations[index];
     const uri = pathToFileURL(loc.filePath).toString();
     const position = loc.line && loc.col ? `#${loc.line},${loc.col}` : loc.line ? `#${loc.line}` : '';
     const relativePath = loc.filePath.replace(_root, '');
@@ -79,22 +77,21 @@ export const getImportedByHoverContent = options => {
   }
 
   return {
-    contents: {
-      kind: 'markdown',
-      value: toMarkdown(u('root', [u('paragraph', nodes)])),
-    },
+    kind: 'markdown',
+    value: toMarkdown(u('root', [u('paragraph', nodes)])),
   };
-};
+}
 
 /**
- * @param {string} identifier
- * @param {string} root
- * @param {Set<string>} entryPaths
+ * @param {Export} _export
  * @param {string} filePath
- * @returns {Hover}
+ * @param {string} root
+ * @returns {{ kind: 'markdown'; value: string }}
  */
-export const getEntryPathsHoverContent = (identifier, root, entryPaths, filePath) => {
-  const isEntryFile = entryPaths.size === 1 && entryPaths.has(filePath);
+export function renderExportHoverEntryPaths(_export, filePath, root) {
+  const { identifier, entryPaths } = _export;
+  const entryPathsArray = Array.from(entryPaths);
+  const isEntryFile = entryPathsArray.length === 1 && entryPathsArray[0] === filePath;
 
   /** @type {(Paragraph | List)[]} */
   const rootNode = [
@@ -105,13 +102,13 @@ export const getEntryPathsHoverContent = (identifier, root, entryPaths, filePath
         'text',
         isEntryFile
           ? '; exported by entry file'
-          : `; re-exported by ${entryPaths.size} entry file${entryPaths.size > 1 ? 's' : ''}:`
+          : `; re-exported by ${entryPathsArray.length} entry file${entryPathsArray.length > 1 ? 's' : ''}:`
       ),
     ]),
   ];
 
   if (!isEntryFile) {
-    const nodes = Array.from(entryPaths, entryPath => {
+    const nodes = entryPathsArray.map(entryPath => {
       const url = pathToFileURL(entryPath).toString();
       const text = relative(root, entryPath);
       return u('listItem', { spread: false }, [u('paragraph', [u('link', { url }, [u('text', text)])])]);
@@ -121,9 +118,7 @@ export const getEntryPathsHoverContent = (identifier, root, entryPaths, filePath
   }
 
   return {
-    contents: {
-      kind: 'markdown',
-      value: toMarkdown(u('root', rootNode)),
-    },
+    kind: 'markdown',
+    value: toMarkdown(u('root', rootNode)),
   };
-};
+}

@@ -43,10 +43,13 @@
   "main": "./src/index.js",
   "dependencies": {
     "@knip/language-server": "workspace:*",
+    "mdast-util-to-markdown": "2.1.2",
+    "unist-builder": "4.0.0",
     "vscode": "1.1.37",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
+    "@types/mdast": "4.0.4",
     "@types/vscode": "^1.106.1",
     "knip": "workspace:*"
   },

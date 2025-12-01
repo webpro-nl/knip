@@ -6,17 +6,13 @@ interface SymbolRef extends SourceLocation {
   identifier: string;
 }
 
-export interface ImportLocation extends SourceLocation {
-  filePath: string;
-}
-
 export interface InternalImport extends SymbolRef {
   importLine: number;
   importCol: number;
 }
 
 export interface Export extends SymbolRef {
-  importLocations: ImportLocation[];
+  importLocations: SourceLocation[];
   entryPaths: Set<string>;
   exports: Export[] | undefined;
 }

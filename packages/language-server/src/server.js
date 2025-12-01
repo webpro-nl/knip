@@ -1,6 +1,6 @@
 import { basename, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createOptions, createSession } from 'knip/session';
+import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -9,19 +9,17 @@ import {
   createDeleteFileEdit,
   createRemoveDependencyEdit,
   createRemoveExportEdit,
-} from './code-action.js';
-import { DEFAULT_JSDOC_TAGS, KNIP_CONFIG_LOCATIONS, REQUEST_HOVER_SNIPPETS } from './constants.js';
+} from './code-actions.js';
+import { DEFAULT_JSDOC_TAGS, REQUEST_FILE_NODE } from './constants.js';
 import { issueToDiagnostic } from './diagnostics.js';
-import { getEntryPathsHoverContent, getImportedByHoverContent } from './hover.js';
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
 
 /**
  * @import { Issues, Rules } from 'knip/session';
  * @import { Connection, Diagnostic, CodeAction } from 'vscode-languageserver';
- * @import { CodeActionParams, CodeLensParams, URI } from 'vscode-languageserver';
- * @import { Hover, HoverParams, CodeLens, DidChangeWatchedFilesParams } from 'vscode-languageserver';
- * @import { Config, HoverSnippets, IssuesByUri } from './types.js';
+ * @import { CodeActionParams, DidChangeWatchedFilesParams, URI } from 'vscode-languageserver';
+ * @import { Config, IssuesByUri } from './types.js';
  *
  * @typedef {import('knip/session').Session} Session
  * @typedef {import('knip/session').File} File
@@ -65,9 +63,6 @@ export class LanguageServer {
   /** @type TextDocuments<TextDocument> */
   documents;
 
-  /** @type {boolean} */
-  clientSupportsExportHoverSnippets = false;
-
   constructor() {
     this.connection = createConnection(ProposedFeatures.all);
     this.documents = new TextDocuments(TextDocument);
@@ -84,13 +79,7 @@ export class LanguageServer {
 
       this.cwd = fileURLToPath(uri);
 
-      const features = params.initializationOptions?.features;
-      this.clientSupportsExportHoverSnippets = Boolean(features?.exportHoverSnippets);
-
-      // Always provide all capabilities - config is checked at runtime
       const capabilities = {
-        codeLensProvider: { resolveProvider: false },
-        hoverProvider: true,
         codeActionProvider: {
           codeActionKinds: [CodeActionKind.QuickFix],
         },
@@ -109,19 +98,13 @@ export class LanguageServer {
 
     this.connection.onRequest('knip.restart', () => this.restart());
 
-    this.connection.onRequest('knip.getFileNode', async params => {
+    this.connection.onRequest(REQUEST_FILE_NODE, async params => {
       const config = await this.getConfig();
       const isShowContention = config.exports?.contention?.enabled !== false;
       return this.getFileDescriptor(fileURLToPath(params.uri), { isShowContention });
     });
 
     this.connection.onCodeAction(params => this.handleCodeAction(params));
-
-    this.connection.onCodeLens(params => this.handleCodeLens(params));
-
-    this.connection.onRequest('knip.showHover', params => this.handleHover(params));
-
-    this.connection.onHover(params => this.handleHover(params));
 
     this.connection.onDidChangeWatchedFiles(params => this.handleFileChanges(params));
   }
@@ -363,117 +346,5 @@ export class LanguageServer {
     }
 
     return codeActions;
-  }
-
-  /**
-   * @param {CodeLensParams} params
-   * @returns {Promise<CodeLens[]>}
-   */
-  async handleCodeLens(params) {
-    const config = await this.getConfig();
-    if (!config.editor.exports.codelens.enabled) return [];
-
-    const uri = params.textDocument.uri;
-    const filePath = fileURLToPath(uri);
-
-    const file = this.getFileDescriptor(filePath);
-    if (!file) return [];
-
-    const codeLenses = [];
-
-    for (const _export of file.exports) {
-      const size = _export.importLocations.length;
-      if (size === 0) continue;
-
-      const document = this.documents.get(uri);
-      if (!document) continue;
-
-      const range = {
-        start: document.positionAt(_export.pos),
-        end: document.positionAt(_export.pos),
-      };
-
-      codeLenses.push({
-        range,
-        command: {
-          title: `↻ ${size} import${size > 1 ? 's' : ''}`,
-          command: 'knip.showReferences',
-          arguments: [uri, range.start, _export.importLocations],
-        },
-      });
-    }
-
-    return codeLenses;
-  }
-
-  /**
-   * @param {HoverParams} params
-   * @returns {Promise<Hover | null>}
-   */
-  async handleHover(params) {
-    const config = await this.getConfig();
-    if (!config.editor.exports.hover.enabled) return null;
-
-    const root = this.cwd;
-    if (!root) return null;
-
-    const uri = params.textDocument.uri;
-    const filePath = fileURLToPath(uri);
-
-    const file = this.getFileDescriptor(filePath);
-    if (!file) return null;
-
-    const document = this.documents.get(uri);
-    if (!document) return null;
-
-    const maxSnippets = config.editor.exports.hover.maxSnippets;
-    const offset = document.offsetAt(params.position);
-
-    for (const _export of file.exports) {
-      const identifier = _export.identifier;
-
-      let isInRange = offset >= _export.pos && offset <= _export.pos + identifier.length;
-
-      if (!isInRange && identifier === 'default' && params.position.line === _export.line - 1) {
-        const lineText = document.getText({
-          start: { line: _export.line - 1, character: 0 },
-          end: { line: _export.line, character: 0 },
-        });
-        if (/export\s+default\s+/.test(lineText)) isInRange = true;
-      }
-
-      if (isInRange) {
-        if (_export.importLocations.length > 0) {
-          /** @type {HoverSnippets} */
-          let snippets = [];
-          if (maxSnippets !== 0 && this.clientSupportsExportHoverSnippets) {
-            try {
-              const response = await this.connection.sendRequest(REQUEST_HOVER_SNIPPETS, {
-                identifier,
-                locations: _export.importLocations,
-                includeImportLocationSnippet: config.editor.exports.hover.includeImportLocationSnippet,
-              });
-              if (Array.isArray(response)) snippets = response;
-            } catch (_error) {}
-          }
-
-          return getImportedByHoverContent({
-            identifier,
-            root,
-            locations: _export.importLocations,
-            snippets,
-            maxSnippets,
-          });
-        }
-
-        if (_export.entryPaths.size > 0) {
-          return getEntryPathsHoverContent(identifier, root, _export.entryPaths, filePath);
-        }
-
-        return null;
-      }
-    }
-
-    return null;
   }
 }
