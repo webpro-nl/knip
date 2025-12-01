@@ -1,0 +1,15 @@
+@use "pkg:@fortawesome/fontawesome-free";
+@use "pkg:bootstrap/scss/bootstrap";
+@use "./components";
+@use './variables' as vars;
+@use "./theme" as *;
+@use "./partial";
+@use "./_grid";
+@forward "./mixins";
+@forward "./utils" as util-*;
+@import "./legacy";
+
+.icon {
+  @include fa-icon;
+  color: vars.$primary;
+}
