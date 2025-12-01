@@ -1,10 +1,10 @@
-import type { Identifier, ModuleGraph, SourceLocation } from '../../types/module-graph.js';
+import type { Identifier, ModuleGraph, Position } from '../../types/module-graph.js';
 import { getCachedUsage, setCachedUsage } from '../cache.js';
 import { CONTINUE } from '../constants.js';
 import { findImportRef } from '../utils.js';
 import { walkDown } from '../walk-down.js';
 
-interface UsageLocation extends SourceLocation {
+interface UsageLocation extends Position {
   filePath: string;
   identifier: string;
   isEntry: boolean;

@@ -1,18 +1,18 @@
 import type { RE_EXPORT_KIND } from '../graph-explorer/constants.js';
-import type { Import, SourceLocation } from '../types/module-graph.js';
+import type { Import, Position } from '../types/module-graph.js';
 
-interface SymbolRef extends SourceLocation {
+export interface SourceLocation extends Position {
   filePath: string;
   identifier: string;
 }
 
-export interface InternalImport extends SymbolRef {
+export interface InternalImport extends SourceLocation {
   importLine: number;
   importCol: number;
 }
 
-export interface Export extends SymbolRef {
-  importLocations: SourceLocation[];
+export interface Export extends SourceLocation {
+  importLocations: Position[];
   entryPaths: Set<string>;
   exports: Export[] | undefined;
 }
