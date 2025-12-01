@@ -29,7 +29,7 @@ const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
   scripts ? Object.values(scripts).some(script => isVitestCoverageCommand.test(script)) : false;
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
-  const { manifest, cwd: dir } = options;
+  const { manifest, configFileDir: dir } = options;
   const testConfig = localConfig.test;
 
   if (!testConfig) return [];
