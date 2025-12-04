@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noConfusingVoidType: deal with it */
 import { IMPORT_STAR } from '../constants.js';
 import type { ImportMaps } from '../types/module-graph.js';
 
