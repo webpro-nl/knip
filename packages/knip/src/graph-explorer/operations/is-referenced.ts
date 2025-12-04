@@ -20,8 +20,6 @@ export const isReferenced = (
     const isEntryFile = entryPaths.has(currentPath);
     let reExportingEntryFile: string | undefined = isEntryFile ? currentPath : undefined;
 
-    if (isEntryFile && !options.includeEntryExports) return [false, reExportingEntryFile];
-
     if (seen.has(currentPath)) return [false, reExportingEntryFile];
     seen.add(currentPath);
 
@@ -82,6 +80,8 @@ export const isReferenced = (
         if (followSources(nsReExportSources, `${namespace}.${currentId}`)) return [true, reExportingEntryFile];
       }
     }
+
+    if (isEntryFile && !options.includeEntryExports) return [false, reExportingEntryFile];
 
     const aliasMap = getAliasReExportMap(file, identifier);
     if (aliasMap) {

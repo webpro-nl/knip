@@ -101,7 +101,7 @@ export const analyze = async ({
 
               if (isIgnored) continue;
 
-              if (reExportingEntryFile) {
+              if (reExportingEntryFile && !isReferenced) {
                 if (!isIncludeEntryExports) {
                   continue;
                 }

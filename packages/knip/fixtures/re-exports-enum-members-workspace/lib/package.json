@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/re-exports-enum-members-workspace__lib",
+  "exports": "./index.ts",
+  "types": "./index.ts"
+}
