@@ -5,6 +5,10 @@ import { isReferenced } from './operations/is-referenced.js';
 
 export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>) => {
   return {
+    /**
+     * Is exported `identifier` imported/referenced in the module graph?
+     * @returns `[isReferenced, reExportingEntryFile]` → [is export used, entry path if traversing through re-exports]
+     */
     isReferenced: (filePath: string, identifier: string, options: { includeEntryExports: boolean }) =>
       isReferenced(graph, entryPaths, filePath, identifier, options),
     hasStrictlyNsReferences: (filePath: string, identifier: string) =>

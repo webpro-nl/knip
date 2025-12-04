@@ -20,12 +20,15 @@ interface SourceLocation {
 export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
 
+/** Aggregated imports from other files (who imports this file's exports) */
 export type ImportMaps = {
-  /** References to imported identifiers ("default", "named", "NS.member", etc) */
+  /** Usage references to imported identifiers ("default", "named", "NS.export", "enum.member", etc.) */
   refs: References;
+  /** Directly imported identifiers */
   imported: IdToFileMap;
   importedAs: IdToNsToFileMap;
   importedNs: IdToFileMap;
+  /** Identifiers re-exported (not directly imported) */
   reExported: IdToFileMap;
   reExportedAs: IdToNsToFileMap;
   reExportedNs: IdToFileMap;
