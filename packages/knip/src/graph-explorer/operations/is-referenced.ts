@@ -31,9 +31,6 @@ export const isReferenced = (
       return [false, reExportingEntryFile];
     }
 
-    const directSources = getPassThroughReExportSources(file, identifier);
-    const starSources = getStarReExportSources(file);
-
     const followSources = (sources: Set<string>, nextId: string): boolean => {
       for (const byFilePath of sources) {
         if (seen.has(byFilePath)) continue;
@@ -90,6 +87,9 @@ export const isReferenced = (
         if (followSources(sources, ref)) return [true, reExportingEntryFile];
       }
     }
+
+    const directSources = getPassThroughReExportSources(file, identifier);
+    const starSources = getStarReExportSources(file);
 
     if (directSources) {
       if (followSources(directSources, currentId)) return [true, reExportingEntryFile];
