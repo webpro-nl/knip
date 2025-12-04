@@ -3,7 +3,8 @@
   "include": ["classMembers"],
   "workspaces": {
     ".": {
-      "project": ["!templates/**"]
+      "project": ["!templates/**"],
+      "ignoreDependencies": ["remark-preset-webpro", "mdxlint-preset-webpro"]
     },
     "packages/knip": {
       "project": [
