@@ -13,11 +13,12 @@ project. That's why Knip supports compilers.
 Knip has built-in "compilers" for the following file extensions:
 
 - `.astro`
+- `.css` (only enabled by `tailwindcss`)
 - `.mdx`
+- `.prisma`
+- `.sass` + `.scss`
 - `.svelte`
 - `.vue`
-- `.css` (only enabled by `tailwindcss`)
-- `.prisma`
 
 Knip does not include real compilers for those files, but regular expressions to
 collect `import` statements. This is fast, requires no dependencies, and enough
@@ -87,7 +88,8 @@ export default {
 
 You may wonder why the CSS compiler is not included by default. It's currently
 not clear if it should be included. And if so, what would be the best way to
-determine it should be enabled, and what syntax(es) it should support.
+determine it should be enabled, and what syntax(es) it should support. Note that
+Tailwind CSS and SASS/SCSS compilers are included.
 
 #### MDX
 
