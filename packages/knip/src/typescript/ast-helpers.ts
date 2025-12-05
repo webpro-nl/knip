@@ -205,7 +205,7 @@ const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => 
   }
 };
 
-export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Identifier) => {
+export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Node) => {
   let members: string[] = [];
   let current: ts.Node = node.parent;
   while (current) {
@@ -239,13 +239,10 @@ export const getDestructuredNames = (name: ts.ObjectBindingPattern): [string[], 
 
 export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isPropertyAssignment(node.parent) ||
-  ts.isShorthandPropertyAssignment(node.parent) ||
   (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
   ts.isSpreadAssignment(node.parent) ||
   ts.isArrayLiteralExpression(node.parent) ||
   ts.isExportAssignment(node.parent) ||
-  ts.isConditionalExpression(node.parent) ||
-  (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent.parent);
 
 export const isInOpaqueExpression = (node: ts.Node): boolean =>

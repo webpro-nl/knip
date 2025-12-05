@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { buildExportsTree } from '../../src/graph-explorer/operations/build-trace-tree.js';
-import type { FileNode, ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
+import type { Export, FileNode, ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
 import { resolve } from '../helpers/resolve.js';
 
 const createGraph = (): ModuleGraph => new Map();
@@ -28,35 +28,31 @@ const baseImportMaps: ImportMaps = {
   reExportedNs: new Map(),
 };
 
+const baseExport: Export = {
+  identifier: 'identifier',
+  pos: 0,
+  line: 1,
+  col: 14,
+  type: 'unknown',
+  members: [],
+  jsDocTags: new Set(),
+  self: [0, false],
+  fixes: [],
+};
+
 test('Trace export through reExportedNs', () => {
   const graph = createGraph();
   const entryPaths = new Set([filePath4]);
 
-  // right.ts exports fn, re-exported as namespace by pseudo.ts
   graph.set(filePath2, {
     ...baseFileNode,
-    exports: new Map([
-      [
-        'fn',
-        {
-          identifier: 'fn',
-          pos: 0,
-          line: 1,
-          col: 14,
-          type: 'unknown',
-          members: [],
-          jsDocTags: new Set(),
-          refs: [0, false],
-        },
-      ],
-    ]),
+    exports: new Map([['identifier', baseExport]]),
     imported: {
       ...baseImportMaps,
       reExportedNs: new Map([['namespaceR', new Set([filePath3])]]),
     },
   });
 
-  // pseudo.ts imports namespaceR, imported by index.ts
   graph.set(filePath3, {
     ...baseFileNode,
     imported: {
@@ -65,11 +61,10 @@ test('Trace export through reExportedNs', () => {
         ['namespaceL', new Set([filePath4])],
         ['namespaceR', new Set([filePath4])],
       ]),
-      refs: new Set(['namespaceL']), // Only namespaceL has ref
+      refs: new Set(['namespaceL']),
     },
   });
 
-  // index.ts is entry
   graph.set(filePath4, {
     ...baseFileNode,
     imported: {
@@ -77,67 +72,92 @@ test('Trace export through reExportedNs', () => {
     },
   });
 
-  const [trace] = buildExportsTree(graph, entryPaths, { filePath: filePath2, identifier: 'fn' });
+  const [trace] = buildExportsTree(graph, entryPaths, { filePath: filePath2, identifier: 'identifier' });
 
-  assert(trace.children.length > 0, 'Should have trace steps');
-  assert(trace.children[0].via === 'reExportNS', 'Should have via=reExportNS');
-  assert(trace.children[0].identifier === 'namespaceR.fn', 'Should have correct identifier');
+  assert(trace.children.length > 0);
+  assert(trace.children[0].via === 'reExportNS');
+  assert(trace.children[0].identifier === 'namespaceR.identifier');
 });
 
 test('Trace export through importedNs (with ref)', () => {
   const graph = createGraph();
   const entryPaths = new Set([filePath4]);
 
-  // left.ts exports fn, imported as namespace by pseudo.ts
   graph.set(filePath1, {
     ...baseFileNode,
-    exports: new Map([
-      [
-        'fn',
-        {
-          identifier: 'fn',
-          pos: 0,
-          line: 1,
-          col: 14,
-          type: 'unknown',
-          members: [],
-          jsDocTags: new Set(),
-          refs: [0, false],
-        },
-      ],
-    ]),
+    exports: new Map([['identifier', baseExport]]),
     imported: {
       ...baseImportMaps,
-      // NS is imported by pseudo.ts
       importedNs: new Map([['NS', new Set([filePath3])]]),
     },
   });
 
-  // pseudo.ts has namespaceL imported by index.ts, WITH ref
   graph.set(filePath3, {
     ...baseFileNode,
     imports: {
       ...baseFileNode.imports,
-      internal: new Map([[filePath1, { ...baseImportMaps, refs: new Set(['NS.fn']) }]]),
+      internal: new Map([[filePath1, { ...baseImportMaps, refs: new Set(['NS.identifier']) }]]),
     },
     imported: {
       ...baseImportMaps,
       imported: new Map([['namespaceL', new Set([filePath4])]]),
-      refs: new Set(['namespaceL']), // Has ref because used in conditional
+      refs: new Set(['namespaceL']),
     },
   });
 
-  // index.ts is entry
   graph.set(filePath4, {
     ...baseFileNode,
     imported: { ...baseImportMaps },
   });
 
-  const [trace] = buildExportsTree(graph, entryPaths, { filePath: filePath1, identifier: 'fn' });
+  const [trace] = buildExportsTree(graph, entryPaths, { filePath: filePath1, identifier: 'identifier' });
 
-  assert(trace.children.length > 0, 'Should have trace steps');
-  // Check that we can see the path through pseudo.ts
+  assert(trace.children.length > 0);
   const pseudoStep = trace.children[0];
-  assert(pseudoStep.via === 'importNS', 'Should have via=importNS');
-  assert(pseudoStep.identifier === 'NS.fn', 'Should have correct identifier');
+  assert(pseudoStep.via === 'importNS');
+  assert(pseudoStep.identifier === 'NS.identifier');
+});
+
+test('Trace export through importedNs (with reExportedAs)', () => {
+  const graph = createGraph();
+  const entryPaths = new Set([filePath4]);
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    imported: {
+      ...baseImportMaps,
+      importedNs: new Map([['NS', new Set([filePath3])]]),
+    },
+  });
+
+  graph.set(filePath3, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [
+          filePath1,
+          { ...baseImportMaps, reExportedAs: new Map([['NS', new Map([['namespaceL', new Set([filePath3])]])]]) },
+        ],
+      ]),
+    },
+    imported: {
+      ...baseImportMaps,
+      imported: new Map([['namespaceL', new Set([filePath4])]]),
+      refs: new Set(['namespaceL', 'namespaceL.fn']),
+    },
+  });
+
+  graph.set(filePath4, {
+    ...baseFileNode,
+    imported: { ...baseImportMaps },
+  });
+
+  const [trace] = buildExportsTree(graph, entryPaths, { filePath: filePath1, identifier: 'identifier' });
+
+  assert(trace.children.length > 0);
+  const pseudoStep = trace.children[0];
+  assert(pseudoStep.via === 'importNS');
+  assert(pseudoStep.identifier === 'NS.identifier');
 });

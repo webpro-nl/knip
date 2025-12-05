@@ -1,14 +1,14 @@
-import type { FileNode, Identifier, ModuleGraph } from '../../types/module-graph.js';
+import type { FileNode, Identifier, ImportMaps, ModuleGraph } from '../../types/module-graph.js';
 import { CONTINUE } from '../constants.js';
 import type { Via } from '../walk-down.js';
 import { walkDown } from '../walk-down.js';
 
-/** @public */
+/** @internal */
 export interface TreeNode {
   filePath: string;
   identifier: string;
-  originalName?: string;
-  via?: Via;
+  originalId: string | undefined;
+  via: Via | undefined;
   refs: string[];
   isEntry: boolean;
   children: TreeNode[];
@@ -48,17 +48,14 @@ const buildExportTree = (
 ): TreeNode => {
   const file = graph.get(filePath);
 
-  const filterRefs = (refs: Set<string> | undefined, id: string): string[] => {
-    if (!refs) return [];
-    return Array.from(refs).filter(ref => id === ref || id.startsWith(`${ref}.`) || ref.startsWith(`${id}.`));
-  };
-
   const rootNode: TreeNode = {
     filePath,
     identifier,
     refs: filterRefs(file?.imported?.refs, identifier),
     isEntry: entryPaths.has(filePath),
     children: [],
+    originalId: undefined,
+    via: undefined,
   };
 
   const nodeMap = new Map<string, TreeNode>();
@@ -69,22 +66,24 @@ const buildExportTree = (
     filePath,
     identifier,
     (sourceFile, sourceId, importingFile, id, isEntry, via) => {
+      const importMaps = graph.get(importingFile)?.imports.internal.get(sourceFile);
+      const importRefs = importMaps?.refs;
+      const ns = id.split('.')[0];
+      if (via === 'importNS' && !hasRelevantRef(importRefs, id) && !isNsReExported(importMaps, ns)) return CONTINUE;
       const key = `${importingFile}:${id}`;
-      const importRefs = graph.get(importingFile)?.imports.internal.get(sourceFile)?.refs;
-      const isRenamed = via.endsWith('As') && sourceId !== id.split('.')[0];
+      const isRenamed = via.endsWith('As') && sourceId !== ns;
+      const refs = filterRefs(importRefs, id);
       const childNode = nodeMap.get(key) ?? {
         filePath: importingFile,
         identifier: id,
-        originalName: isRenamed ? sourceId : undefined,
+        originalId: isRenamed ? sourceId : undefined,
         via,
-        refs: filterRefs(importRefs, id),
+        refs,
         isEntry,
         children: [],
       };
       nodeMap.set(key, childNode);
-
-      const parentKey = `${sourceFile}:${sourceId}`;
-      let parentNode = nodeMap.get(parentKey);
+      let parentNode = nodeMap.get(`${sourceFile}:${sourceId}`);
       if (!parentNode) {
         for (const [k, v] of nodeMap) {
           if (k.startsWith(`${sourceFile}:${sourceId}.`) || k === `${sourceFile}:${sourceId}`) {
@@ -94,11 +93,37 @@ const buildExportTree = (
         }
       }
       (parentNode ?? rootNode).children.push(childNode);
-
       return CONTINUE;
     },
     entryPaths
   );
 
+  pruneReExportStarOnlyBranches(rootNode);
+
   return rootNode;
+};
+
+const filterRefs = (refs: Set<string> | undefined, id: string): string[] => {
+  if (!refs) return [];
+  return Array.from(refs).filter(ref => id === ref || id.startsWith(`${ref}.`) || ref.startsWith(`${id}.`));
+};
+
+const hasRelevantRef = (refs: Set<string> | undefined, id: string): boolean => {
+  if (!refs || refs.size === 0) return false;
+  return Array.from(refs).some(ref => ref === id || ref.startsWith(`${id}.`));
+};
+
+const isNsReExported = (importMaps: ImportMaps | undefined, ns: string): boolean => {
+  if (!importMaps) return false;
+  return importMaps.reExportedAs.has(ns) || importMaps.reExportedNs.has(ns);
+};
+
+const hasNonReExportStar = (node: TreeNode): boolean => {
+  if (node.via && node.via !== 'reExportStar') return true;
+  return node.children.some(child => hasNonReExportStar(child));
+};
+
+const pruneReExportStarOnlyBranches = (node: TreeNode): void => {
+  node.children = node.children.filter(child => hasNonReExportStar(child));
+  for (const child of node.children) pruneReExportStarOnlyBranches(child);
 };

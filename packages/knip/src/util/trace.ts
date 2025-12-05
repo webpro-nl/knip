@@ -20,7 +20,7 @@ export const formatTrace = (node: TreeNode, toRelative: (path: string) => string
     const parts = child.identifier.split('.');
     const name = parts[0];
     const rest = parts.slice(1).join('.');
-    const nameDisplay = child.originalName ? `${id(child.originalName)}${dim(' → ')}${id(name)}` : id(name);
+    const nameDisplay = child.originalId ? `${id(child.originalId)}${dim(' → ')}${id(name)}` : id(name);
     return `${via(child.via)}${dim('[')}${nameDisplay}${rest ? `${dim('.')}${id(rest)}` : ''}${dim(']')}`;
   };
 
@@ -35,10 +35,12 @@ export const formatTrace = (node: TreeNode, toRelative: (path: string) => string
       `${dim(prefix)}${dim(connector)}${file(toRelative(child.filePath))}${dim(':')}${formatVia(child)}${entryMarker}${leafMarker}`
     );
 
-    const refsPrefix = isLeaf ? ' ' : '│';
-    lines.push(
-      `${dim(prefix)}${dim(childPrefix)}${dim(refsPrefix)} ${dim('refs: [')}${child.refs.map(r => ref(r)).join(dim(', '))}${dim(']')}`
-    );
+    if (child.refs.length > 0) {
+      const refsPrefix = isLeaf ? ' ' : '│';
+      lines.push(
+        `${dim(prefix)}${dim(childPrefix)}${dim(refsPrefix)} ${dim('refs: [')}${child.refs.map(r => ref(r)).join(dim(', '))}${dim(']')}`
+      );
+    }
 
     for (let i = 0; i < child.children.length; i++) {
       formatChild(child.children[i], prefix + childPrefix, i === child.children.length - 1);
