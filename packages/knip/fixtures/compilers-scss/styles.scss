@@ -1,6 +1,6 @@
 @use "pkg:@fortawesome/fontawesome-free";
 @use "pkg:bootstrap/scss/bootstrap";
-@use "./components";
+@use "components";
 @use './variables' as vars;
 @use "./theme" as *;
 @use "./partial";
