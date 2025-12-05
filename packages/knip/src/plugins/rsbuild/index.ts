@@ -27,6 +27,12 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
         }
       }
     }
+
+    if (source?.preEntry) {
+      const entry = source.preEntry;
+      if (typeof entry === 'string') entries.add(entry);
+      else if (Array.isArray(entry)) for (const e of entry) entries.add(e);
+    }
   };
 
   checkSource(config.source);

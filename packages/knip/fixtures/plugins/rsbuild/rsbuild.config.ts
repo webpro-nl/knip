@@ -10,6 +10,7 @@ export default defineConfig({
       entry3: { import: 'entry-3.ts' },
       entry4: { import: ['entry-4.ts'] },
     },
+    preEntry: 'pre-entry-1.ts',
   },
   environments: {
     test: {
@@ -20,6 +21,7 @@ export default defineConfig({
           entry7: { import: 'entry-7.ts' },
           entry8: { import: ['entry-8.ts'] },
         },
+        preEntry: ['pre-entry-2.ts', 'pre-entry-3.ts'],
       },
     },
   },
