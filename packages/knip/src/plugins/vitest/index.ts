@@ -1,5 +1,6 @@
 import type { ParsedArgs } from 'minimist';
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
+import type { Args } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { _glob } from '../../util/glob.js';
@@ -186,7 +187,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   return Array.from(inputs);
 };
 
-const args = {
+const args: Args = {
   config: true,
   resolveInputs: (parsed: ParsedArgs) => {
     const inputs: Input[] = [];
