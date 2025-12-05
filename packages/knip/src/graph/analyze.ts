@@ -10,9 +10,10 @@ import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
 import type { MainOptions } from '../util/create-options.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
+import { toRelative } from '../util/path.js';
 import { findMatch } from '../util/regex.js';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.js';
-import { printTraceNode } from '../util/trace.js';
+import { formatTrace } from '../util/trace.js';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -49,8 +50,8 @@ export const analyze = async ({
 
   const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
   const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
-    exportedItem.refs[1] ||
-    (exportedItem.refs[0] > 0 &&
+    exportedItem.self[1] ||
+    (exportedItem.self[0] > 0 &&
       (typeof ignoreExportsUsedInFile === 'object'
         ? exportedItem.type !== 'unknown' && !!ignoreExportsUsedInFile[exportedItem.type]
         : ignoreExportsUsedInFile));
@@ -91,7 +92,7 @@ export const analyze = async ({
                 includeEntryExports: isIncludeEntryExports,
               });
 
-              if ((isReferenced || exportedItem.refs[1]) && isIgnored) {
+              if ((isReferenced || exportedItem.self[1]) && isIgnored) {
                 for (const tagName of exportedItem.jsDocTags) {
                   if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
@@ -119,7 +120,7 @@ export const analyze = async ({
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
                     if (shouldIgnore(member.jsDocTags)) continue;
 
-                    if (member.refs[0] === 0) {
+                    if (member.self[0] === 0) {
                       const id = `${identifier}.${member.identifier}`;
                       const [isMemberReferenced] = explorer.isReferenced(filePath, id, {
                         includeEntryExports: true,
@@ -301,7 +302,20 @@ export const analyze = async ({
 
   if (options.isTrace) {
     const nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: options.traceExport });
-    for (const node of nodes) printTraceNode(node, options);
+    const rel = (path: string) => toRelative(path, options.cwd);
+    for (const node of nodes) {
+      const exportItem = graph.get(node.filePath)?.exports.get(node.identifier);
+      const [graphReferenced] = explorer.isReferenced(node.filePath, node.identifier, { includeEntryExports: false });
+      const [hasNsRefs] = explorer.hasStrictlyNsReferences(node.filePath, node.identifier);
+      const itemReferenced = exportItem ? isExportedItemReferenced(exportItem) : false;
+      const isType = exportItem ? ['enum', 'type', 'interface'].includes(exportItem.type) : false;
+      const skipNsExport =
+        hasNsRefs &&
+        ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType));
+      const isRef = graphReferenced || skipNsExport || itemReferenced;
+      // biome-ignore lint/suspicious/noConsole: gotta show it somehow..
+      console.log(formatTrace(node, rel, isRef));
+    }
   }
 
   return analyzeGraph;

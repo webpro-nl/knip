@@ -48,7 +48,7 @@ export interface Export extends SourceLocation {
   type: SymbolType;
   members: ExportMember[];
   jsDocTags: Tags;
-  refs: [number, boolean];
+  self: [number, boolean];
   fixes: Fixes;
   symbol?: ts.Symbol;
   isReExport?: boolean;
@@ -60,7 +60,7 @@ export type ExportMember = {
   line: number;
   col: number;
   type: SymbolType;
-  refs: [number, boolean];
+  self: [number, boolean];
   fix: Fix;
   symbol?: ts.Symbol;
   jsDocTags: Tags;
@@ -83,7 +83,6 @@ export type FileNode = {
   scripts: Set<string>;
   imported?: ImportMaps;
   internalImportCache?: ImportMap;
-  traceRefs: References;
 };
 
 export type ModuleGraph = Map<FilePath, FileNode>;

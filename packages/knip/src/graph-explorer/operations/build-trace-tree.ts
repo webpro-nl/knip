@@ -1,12 +1,15 @@
 import type { FileNode, Identifier, ModuleGraph } from '../../types/module-graph.js';
 import { CONTINUE } from '../constants.js';
+import type { Via } from '../walk-down.js';
 import { walkDown } from '../walk-down.js';
 
 /** @public */
 export interface TreeNode {
   filePath: string;
   identifier: string;
-  hasRef: boolean;
+  originalName?: string;
+  via?: Via;
+  refs: string[];
   isEntry: boolean;
   children: TreeNode[];
 }
@@ -43,10 +46,17 @@ const buildExportTree = (
   filePath: string,
   identifier: string
 ): TreeNode => {
+  const file = graph.get(filePath);
+
+  const filterRefs = (refs: Set<string> | undefined, id: string): string[] => {
+    if (!refs) return [];
+    return Array.from(refs).filter(ref => id === ref || id.startsWith(`${ref}.`) || ref.startsWith(`${id}.`));
+  };
+
   const rootNode: TreeNode = {
     filePath,
     identifier,
-    hasRef: false,
+    refs: filterRefs(file?.imported?.refs, identifier),
     isEntry: entryPaths.has(filePath),
     children: [],
   };
@@ -58,20 +68,32 @@ const buildExportTree = (
     graph,
     filePath,
     identifier,
-    (sourceFile, sourceId, importingFile, id, isEntry, isReExport) => {
+    (sourceFile, sourceId, importingFile, id, isEntry, via) => {
       const key = `${importingFile}:${id}`;
+      const importRefs = graph.get(importingFile)?.imports.internal.get(sourceFile)?.refs;
+      const isRenamed = via.endsWith('As') && sourceId !== id.split('.')[0];
       const childNode = nodeMap.get(key) ?? {
         filePath: importingFile,
         identifier: id,
-        hasRef: !isReExport && Boolean(graph.get(importingFile)?.traceRefs?.has(id)),
+        originalName: isRenamed ? sourceId : undefined,
+        via,
+        refs: filterRefs(importRefs, id),
         isEntry,
         children: [],
       };
       nodeMap.set(key, childNode);
 
       const parentKey = `${sourceFile}:${sourceId}`;
-      const parentNode = nodeMap.get(parentKey) ?? rootNode;
-      parentNode.children.push(childNode);
+      let parentNode = nodeMap.get(parentKey);
+      if (!parentNode) {
+        for (const [k, v] of nodeMap) {
+          if (k.startsWith(`${sourceFile}:${sourceId}.`) || k === `${sourceFile}:${sourceId}`) {
+            parentNode = v;
+            break;
+          }
+        }
+      }
+      (parentNode ?? rootNode).children.push(childNode);
 
       return CONTINUE;
     },

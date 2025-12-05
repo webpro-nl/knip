@@ -1,53 +1,58 @@
-import picocolors from 'picocolors';
-import type { MainOptions } from './create-options.js';
-import { toRelative } from './path.js';
+import pc from 'picocolors';
+import type { TreeNode } from '../graph-explorer/operations/build-trace-tree.js';
 
-const IS_ENTRY = ' ◯';
-const HAS_REF = ' ✓';
-const HAS_NO_REF = ' x';
+export const formatTrace = (node: TreeNode, toRelative: (path: string) => string, isReferenced: boolean): string => {
+  const lines: string[] = [];
 
-const getPadding = (level: number, levels: Set<number>) => {
-  let padding = '';
-  for (let i = 0; i < level; i++) padding += levels.has(i) ? `${picocolors.dim('│')}  ` : '   ';
-  return padding;
-};
+  const dim = pc.dim;
+  const file = pc.white;
+  const id = pc.cyanBright;
+  const via = pc.green;
+  const ref = pc.cyan;
+  const ok = pc.green;
+  const fail = pc.red;
 
-type ExplorerTraceNode = {
-  filePath: string;
-  identifier?: string;
-  hasRef: boolean;
-  isEntry: boolean;
-  children: ExplorerTraceNode[];
-};
+  const entryMarker = node.isEntry ? dim(' ◯') : '';
+  lines.push(`${file(toRelative(node.filePath))}${dim(':')}${id(node.identifier)}${entryMarker}`);
 
-const renderExplorerTrace = (node: ExplorerTraceNode, options: MainOptions, level = 0, levels = new Set<number>()) => {
-  let index = 0;
-  const size = node.children.length;
-  const padding = getPadding(level, levels);
-  for (const child of node.children) {
-    const isLast = ++index === size;
-    const hasRef = child.hasRef === true;
-    const rel = toRelative(child.filePath, options.cwd);
-    const file = hasRef ? rel : picocolors.dim(rel);
-    // Only show hasRef marker on child nodes, not entry marker
-    const suffix = hasRef ? HAS_REF : '';
-    const text = `${padding}${picocolors.dim(isLast ? '└─' : '├─')} ${file}${suffix}`;
-    // biome-ignore lint: suspicious
-    console.log(text);
-    if (child.children.length > 0) {
-      if (!isLast) levels.add(level);
-      if (isLast) levels.delete(level);
-      renderExplorerTrace(child, options, level + 1, levels);
+  const formatVia = (child: TreeNode): string => {
+    if (!child.via) return id(child.identifier);
+    const parts = child.identifier.split('.');
+    const name = parts[0];
+    const rest = parts.slice(1).join('.');
+    const nameDisplay = child.originalName ? `${id(child.originalName)}${dim(' → ')}${id(name)}` : id(name);
+    return `${via(child.via)}${dim('[')}${nameDisplay}${rest ? `${dim('.')}${id(rest)}` : ''}${dim(']')}`;
+  };
+
+  const formatChild = (child: TreeNode, prefix: string, isLast: boolean) => {
+    const connector = isLast ? '└── ' : '├── ';
+    const childPrefix = isLast ? '    ' : '│   ';
+    const entryMarker = child.isEntry ? dim(' ◯') : '';
+    const isLeaf = child.children.length === 0;
+    const leafMarker = isLeaf ? (isReferenced ? ok(' ✓') : fail(' ✗')) : '';
+
+    lines.push(
+      `${dim(prefix)}${dim(connector)}${file(toRelative(child.filePath))}${dim(':')}${formatVia(child)}${entryMarker}${leafMarker}`
+    );
+
+    const refsPrefix = isLeaf ? ' ' : '│';
+    lines.push(
+      `${dim(prefix)}${dim(childPrefix)}${dim(refsPrefix)} ${dim('refs: [')}${child.refs.map(r => ref(r)).join(dim(', '))}${dim(']')}`
+    );
+
+    for (let i = 0; i < child.children.length; i++) {
+      formatChild(child.children[i], prefix + childPrefix, i === child.children.length - 1);
     }
-  }
-};
+  };
 
-export const printTraceNode = (node: ExplorerTraceNode, options: MainOptions) => {
-  const suffix = (node.isEntry ? IS_ENTRY : '') + (node.children.length === 0 ? HAS_NO_REF : '');
-  const header = `${toRelative(node.filePath, options.cwd)}${node.identifier ? `:${node.identifier}` : ''}${suffix}`;
-  // biome-ignore lint: suspicious
-  console.log(header);
-  renderExplorerTrace(node, options);
-  // biome-ignore lint: suspicious
-  console.log();
+  for (let i = 0; i < node.children.length; i++) {
+    formatChild(node.children[i], '', i === node.children.length - 1);
+  }
+
+  if (node.children.length === 0) {
+    const leafMarker = isReferenced ? ok(' ✓') : fail(' ✗');
+    lines.push(`${dim('└── (no imports found)')}${leafMarker}`);
+  }
+
+  return lines.join('\n');
 };

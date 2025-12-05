@@ -16,7 +16,6 @@ const baseFileNode: FileNode = {
   exports: new Map(),
   duplicates: [],
   scripts: new Set(),
-  traceRefs: new Set(),
 };
 
 const baseImportMaps: ImportMaps = {
@@ -37,7 +36,7 @@ const baseExport: Export = {
   type: 'unknown',
   members: [],
   jsDocTags: new Set(),
-  refs: [0, false],
+  self: [0, false],
   fixes: [],
 };
 
@@ -88,7 +87,7 @@ test('should find direct importers', () => {
     graph,
     filePath1,
     'identifier',
-    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry, _isReExport) => {
+    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry) => {
       importers.push(importingFile);
       return undefined;
     },
@@ -119,7 +118,7 @@ test('should find aliased importers', () => {
     graph,
     filePath1,
     'identifier',
-    (_sourceFile, _sourceId, importingFile, identifier, _isEntry, _isReExport) => {
+    (_sourceFile, _sourceId, importingFile, identifier, _isEntry) => {
       importers.push({ file: importingFile, identifier });
       return undefined;
     },
@@ -170,7 +169,7 @@ test('should follow re-export chain', () => {
     graph,
     filePath1,
     'identifier',
-    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry, _isReExport) => {
+    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry) => {
       importers.push(importingFile);
       return undefined;
     },
@@ -211,7 +210,7 @@ test('should mark entry files correctly', () => {
     graph,
     filePath1,
     'identifier',
-    (_sourceFile, _sourceId, _importingFile, _identifier, isEntry, _isReExport) => {
+    (_sourceFile, _sourceId, _importingFile, _identifier, isEntry) => {
       if (isEntry) isEntryFound = true;
       return undefined;
     },
@@ -271,7 +270,7 @@ test('should bail out early when visitor returns stop', () => {
     graph,
     filePath1,
     'identifier',
-    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry, _isReExport) => {
+    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry) => {
       importers.push(importingFile);
       return 'stop';
     },
@@ -311,7 +310,7 @@ test('should handle circular imports without infinite loop', () => {
     graph,
     filePath1,
     'identifier',
-    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry, _isReExport) => {
+    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry) => {
       importers.push(importingFile);
       return undefined;
     },
@@ -357,7 +356,7 @@ test('should handle namespace imports with member refs', () => {
     graph,
     filePath1,
     'identifier',
-    (_sourceFile, _sourceId, importingFile, identifier, _isEntry, _isReExport) => {
+    (_sourceFile, _sourceId, importingFile, identifier, _isEntry) => {
       importers.push({ file: importingFile, identifier });
       return undefined;
     },
@@ -369,7 +368,7 @@ test('should handle namespace imports with member refs', () => {
   assert.equal(importers[0].identifier, 'NS.identifier');
 });
 
-test('should visitor receives correct isEntry and isReExport flags', () => {
+test('should visitor receives correct isEntry and via flags', () => {
   const graph = createGraph();
   const entryPaths = new Set([filePath2]);
 
@@ -413,13 +412,13 @@ test('should visitor receives correct isEntry and isReExport flags', () => {
     },
   });
 
-  const results: Array<{ file: string; isEntry: boolean; isReExport: boolean }> = [];
+  const results: Array<{ file: string; isEntry: boolean; via: string }> = [];
   walkDown(
     graph,
     filePath1,
     'identifier',
-    (_sourceFile, _sourceId, importingFile, _identifier, isEntry, isReExport) => {
-      results.push({ file: importingFile, isEntry, isReExport });
+    (_sourceFile, _sourceId, importingFile, _identifier, isEntry, via) => {
+      results.push({ file: importingFile, isEntry, via });
       return undefined;
     },
     entryPaths
@@ -428,5 +427,5 @@ test('should visitor receives correct isEntry and isReExport flags', () => {
   const file2Result = results.find(r => r.file === filePath2);
   assert.ok(file2Result !== undefined);
   assert.equal(file2Result?.isEntry, true);
-  assert.equal(file2Result?.isReExport, false);
+  assert.equal(file2Result?.via, 'import');
 });

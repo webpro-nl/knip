@@ -59,7 +59,7 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Exp
     line: line + 1,
     col: character + 1,
     fix: member.fix,
-    refs: [0, false],
+    self: [0, false],
     jsDocTags: getJSDocTags(member.node),
   };
 };
@@ -87,7 +87,6 @@ const getImportsAndExports = (
   const exports: ExportMap = new Map();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
-  const traceRefs = new Set<string>();
 
   const importedInternalSymbols = new Map<ts.Symbol, string>();
 
@@ -98,11 +97,9 @@ const getImportsAndExports = (
   const addNsMemberRefs = (internalImport: ImportMaps, namespace: string, member: string | string[]) => {
     if (typeof member === 'string') {
       internalImport.refs.add(`${namespace}.${member}`);
-      traceRefs.add(`${namespace}.${member}`);
     } else {
       for (const m of member) {
         internalImport.refs.add(`${namespace}.${m}`);
-        traceRefs.add(`${namespace}.${m}`);
       }
     }
   };
@@ -308,7 +305,7 @@ const getImportsAndExports = (
         line: line + 1,
         col: character + 1,
         fixes: fix ? [fix] : [],
-        refs: [0, false],
+        self: [0, false],
         isReExport,
       });
     }
@@ -381,7 +378,6 @@ const getImportsAndExports = (
           if (!isImportSpecifier(node)) {
             const imports = internal.get(filePath);
             if (imports) {
-              traceRefs.add(id);
               if (isAccessExpression(node.parent)) {
                 if (isDestructuring(node.parent)) {
                   if (ts.isPropertyAccessExpression(node.parent)) {
@@ -463,7 +459,7 @@ const getImportsAndExports = (
   for (const item of exports.values()) {
     // TODO Reconsider this messy logic in AST visitors + `isReferencedInExport` + `findInternalReferences`
     if (!isType(item) && item.symbol && referencedSymbolsInExport.has(item.symbol)) {
-      item.refs = [1, true];
+      item.self = [1, true];
     } else {
       const isBindingElement = item.symbol?.valueDeclaration && ts.isBindingElement(item.symbol.valueDeclaration);
       if (
@@ -473,12 +469,12 @@ const getImportsAndExports = (
           ignoreExportsUsedInFile[item.type]) ||
         isBindingElement
       ) {
-        item.refs = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExport, isBindingElement);
+        item.self = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExport, isBindingElement);
       }
     }
 
     for (const member of item.members) {
-      member.refs = findInternalReferences(member, sourceFile, typeChecker, referencedSymbolsInExport);
+      member.self = findInternalReferences(member, sourceFile, typeChecker, referencedSymbolsInExport);
       member.symbol = undefined;
     }
 
@@ -490,7 +486,6 @@ const getImportsAndExports = (
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,
-    traceRefs,
   };
 };
 

@@ -44,7 +44,6 @@ const createFileNode = (): FileNode => ({
   exports: new Map(),
   duplicates: new Set(),
   scripts: new Set(),
-  traceRefs: new Set(),
 });
 
 export const createImports = (): ImportMaps => ({

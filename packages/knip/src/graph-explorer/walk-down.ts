@@ -1,7 +1,8 @@
 import type { ModuleGraph } from '../types/module-graph.js';
 import { STOP } from './constants.js';
-import { hasNamespaceMemberReference } from './utils.js';
 import { getAliasReExportMap, getPassThroughReExportSources, getStarReExportSources } from './visitors.js';
+
+export type Via = 'import' | 'importAs' | 'importNS' | 'reExport' | 'reExportAs' | 'reExportNS' | 'reExportStar';
 
 type Visitor = (
   sourceFile: string,
@@ -9,7 +10,7 @@ type Visitor = (
   importingFile: string,
   identifierPath: string,
   isEntry: boolean,
-  isReExport: boolean
+  via: Via
 ) => 'continue' | 'stop' | undefined;
 
 export const walkDown = (
@@ -37,7 +38,7 @@ export const walkDown = (
   if (importedByFiles) {
     for (const importingFile of importedByFiles) {
       const isEntry = entryPaths.has(importingFile);
-      if (visitor(filePath, id, importingFile, id, isEntry, false) === STOP) return true;
+      if (visitor(filePath, id, importingFile, id, isEntry, 'import') === STOP) return true;
     }
   }
 
@@ -46,16 +47,15 @@ export const walkDown = (
     for (const [alias, byFilePaths] of importedAsAliases) {
       for (const importingFile of byFilePaths) {
         const isEntry = entryPaths.has(importingFile);
-        if (visitor(filePath, id, importingFile, alias, isEntry, false) === STOP) return true;
+        if (visitor(filePath, id, importingFile, alias, isEntry, 'importAs') === STOP) return true;
       }
     }
   }
 
   for (const [namespace, byFilePaths] of imported.importedNs) {
     for (const importingFile of byFilePaths) {
-      if (hasNamespaceMemberReference(graph, importingFile, filePath, namespace, identifier) === false) continue;
       const isEntry = entryPaths.has(importingFile);
-      if (visitor(filePath, identifier, importingFile, `${namespace}.${identifier}`, isEntry, false) === STOP) {
+      if (visitor(filePath, identifier, importingFile, `${namespace}.${identifier}`, isEntry, 'importNS') === STOP) {
         return true;
       }
     }
@@ -68,7 +68,7 @@ export const walkDown = (
     if (passThroughSources) {
       for (const reExportingFile of passThroughSources) {
         const isEntry = entryPaths.has(reExportingFile);
-        if (visitor(filePath, id, reExportingFile, id, isEntry, true) === STOP) {
+        if (visitor(filePath, id, reExportingFile, id, isEntry, 'reExport') === STOP) {
           done = true;
           break;
         }
@@ -86,7 +86,7 @@ export const walkDown = (
       for (const [alias, sources] of aliasReExportMap) {
         for (const reExportingFile of sources) {
           const isEntry = entryPaths.has(reExportingFile);
-          if (visitor(filePath, id, reExportingFile, alias, isEntry, true) === STOP) {
+          if (visitor(filePath, id, reExportingFile, alias, isEntry, 'reExportAs') === STOP) {
             done = true;
             break;
           }
@@ -107,7 +107,9 @@ export const walkDown = (
     for (const [namespace, sources] of imported.reExportedNs) {
       for (const reExportingFile of sources) {
         const isEntry = entryPaths.has(reExportingFile);
-        if (visitor(filePath, identifier, reExportingFile, `${namespace}.${identifier}`, isEntry, true) === STOP) {
+        if (
+          visitor(filePath, identifier, reExportingFile, `${namespace}.${identifier}`, isEntry, 'reExportNS') === STOP
+        ) {
           done = true;
           break;
         }
@@ -125,7 +127,7 @@ export const walkDown = (
     if (starSources) {
       for (const reExportingFile of starSources) {
         const isEntry = entryPaths.has(reExportingFile);
-        if (visitor(filePath, id, reExportingFile, id, isEntry, true) === STOP) {
+        if (visitor(filePath, id, reExportingFile, id, isEntry, 'reExportStar') === STOP) {
           done = true;
           break;
         }
