@@ -5,6 +5,7 @@ import { toPosix } from './path.js';
 
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({
+    tsconfig: 'auto',
     extensions,
     extensionAlias: {
       '.js': ['.js', '.ts'],
@@ -17,7 +18,7 @@ const createSyncResolver = (extensions: string[]) => {
 
   return function resolveSync(specifier: string, baseDir: string) {
     try {
-      const resolved = resolver.sync(baseDir, specifier);
+      const resolved = resolver.resolveFileSync(baseDir, specifier);
       if (resolved?.path) return toPosix(resolved.path);
     } catch (_error) {}
   };
