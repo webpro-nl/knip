@@ -6,6 +6,12 @@ import { toPosix } from './path.js';
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({
     extensions,
+    extensionAlias: {
+      '.js': ['.js', '.ts'],
+      '.jsx': ['.jsx', '.tsx'],
+      '.mjs': ['.mjs', '.mts'],
+      '.cjs': ['.cjs', '.cts'],
+    },
     conditionNames: ['require', 'import', 'node', 'default'],
   });
 
