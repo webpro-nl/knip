@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildExportsTree } from '../../src/graph-explorer/operations/build-trace-tree.js';
+import { buildExportsTree } from '../../src/graph-explorer/operations/build-exports-tree.js';
 import type { Export, FileNode, ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
 import { resolve } from '../helpers/resolve.js';
 

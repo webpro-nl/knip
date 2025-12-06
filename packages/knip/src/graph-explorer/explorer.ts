@@ -1,5 +1,5 @@
 import type { ModuleGraph } from '../types/module-graph.js';
-import { buildExportsTree } from './operations/build-trace-tree.js';
+import { buildExportsTree } from './operations/build-exports-tree.js';
 import { hasStrictlyNsReferences } from './operations/has-strictly-ns-references.js';
 import { isReferenced } from './operations/is-referenced.js';
 

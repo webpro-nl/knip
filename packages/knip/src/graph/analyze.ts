@@ -3,6 +3,7 @@ import type { ConfigurationChief } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import { createGraphExplorer } from '../graph-explorer/explorer.js';
+import type { TreeNode } from '../graph-explorer/operations/build-exports-tree.js';
 import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { IssueFixer } from '../IssueFixer.js';
@@ -49,7 +50,7 @@ export const analyze = async ({
   const explorer = createGraphExplorer(graph, entryPaths);
 
   const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
-  const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
+  const isExportReferencedInFile = (exportedItem: Export | ExportMember) =>
     exportedItem.self[1] ||
     (exportedItem.self[0] > 0 &&
       (typeof ignoreExportsUsedInFile === 'object'
@@ -196,7 +197,7 @@ export const analyze = async ({
             )
               continue;
 
-            if (!isExportedItemReferenced(exportedItem)) {
+            if (!isExportReferencedInFile(exportedItem)) {
               if (isIgnored) continue;
               if (!options.isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
 
@@ -302,20 +303,15 @@ export const analyze = async ({
 
   if (options.isTrace) {
     const nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: options.traceExport });
-    const rel = (path: string) => toRelative(path, options.cwd);
-    for (const node of nodes) {
+    const toRel = (path: string) => toRelative(path, options.cwd);
+    const isReferenced = (node: TreeNode) => {
+      if (explorer.isReferenced(node.filePath, node.identifier, { includeEntryExports: false })[0]) return true;
+      if (explorer.hasStrictlyNsReferences(node.filePath, node.identifier)[0]) return true;
       const exportItem = graph.get(node.filePath)?.exports.get(node.identifier);
-      const [graphReferenced] = explorer.isReferenced(node.filePath, node.identifier, { includeEntryExports: false });
-      const [hasNsRefs] = explorer.hasStrictlyNsReferences(node.filePath, node.identifier);
-      const itemReferenced = exportItem ? isExportedItemReferenced(exportItem) : false;
-      const isType = exportItem ? ['enum', 'type', 'interface'].includes(exportItem.type) : false;
-      const skipNsExport =
-        hasNsRefs &&
-        ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType));
-      const isRef = graphReferenced || skipNsExport || itemReferenced;
-      // biome-ignore lint/suspicious/noConsole: gotta show it somehow..
-      console.log(formatTrace(node, rel, isRef));
-    }
+      return exportItem ? isExportReferencedInFile(exportItem) : false;
+    };
+    // biome-ignore lint/suspicious/noConsole: gotta show it somehow..
+    for (const node of nodes) console.log(formatTrace(node, toRel, isReferenced(node)));
   }
 
   return analyzeGraph;
