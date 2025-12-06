@@ -9,7 +9,7 @@ const { values } = parseArgs({
   strict: false,
   options: {
     performance: { type: 'boolean' },
-    'performance-fn': { type: 'string' },
+    'performance-fn': { type: 'string', multiple: true },
     memory: { type: 'boolean' },
     'memory-realtime': { type: 'boolean' },
   },
@@ -22,7 +22,7 @@ const isMemoryUsageEnabled = !!values.memory || isMemoryRealtime;
 
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
   if (!isTimerifyFunctions) return fn;
-  if (timerifyOnlyFnName && name !== timerifyOnlyFnName) return fn;
+  if (timerifyOnlyFnName && !timerifyOnlyFnName.includes(name)) return fn;
   return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));
 };
 

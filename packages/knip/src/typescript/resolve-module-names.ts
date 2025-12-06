@@ -25,6 +25,8 @@ const fileExists = (name: string, containingFile: string) => {
 
 export type ResolveModuleNames = ReturnType<typeof createCustomModuleResolver>;
 
+const tsResolveModuleName = timerify(ts.resolveModuleName);
+
 export function createCustomModuleResolver(
   compilerOptions: ts.CompilerOptions,
   customCompilerExtensions: string[],
@@ -117,7 +119,7 @@ export function createCustomModuleResolver(
       };
     }
 
-    const tsResolvedModule = ts.resolveModuleName(
+    const tsResolvedModule = tsResolveModuleName(
       sanitizedSpecifier,
       containingFile,
       compilerOptions,
