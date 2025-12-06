@@ -94,7 +94,7 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins, bail out
     if (isBuiltin(sanitizedSpecifier)) return undefined;
 
-    const resolvedFileName = isSkipLibs && resolveSync(sanitizedSpecifier, dirname(containingFile));
+    const resolvedFileName = isSkipLibs && resolveSync(sanitizedSpecifier, containingFile);
 
     if (resolvedFileName) {
       const ext = extname(resolvedFileName);

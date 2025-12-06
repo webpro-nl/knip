@@ -16,9 +16,9 @@ const createSyncResolver = (extensions: string[]) => {
     conditionNames: ['require', 'import', 'node', 'default'],
   });
 
-  return function resolveSync(specifier: string, baseDir: string) {
+  return function resolveSync(specifier: string, basePath: string) {
     try {
-      const resolved = resolver.resolveFileSync(baseDir, specifier);
+      const resolved = resolver.resolveFileSync(basePath, specifier);
       if (resolved?.path) return toPosix(resolved.path);
     } catch (_error) {}
   };
