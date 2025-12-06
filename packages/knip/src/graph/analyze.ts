@@ -303,6 +303,7 @@ export const analyze = async ({
 
   if (options.isTrace) {
     const nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: options.traceExport });
+    nodes.sort((a, b) => a.filePath.localeCompare(b.filePath) || a.identifier.localeCompare(b.identifier));
     const toRel = (path: string) => toRelative(path, options.cwd);
     const isReferenced = (node: TreeNode) => {
       if (explorer.isReferenced(node.filePath, node.identifier, { includeEntryExports: false })[0]) return true;
