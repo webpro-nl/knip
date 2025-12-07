@@ -154,9 +154,11 @@ class Performance {
 
   getMemoryUsageTable() {
     const table = new Table({ header: true });
+    let i = 0;
     for (const entry of this.memEntries) {
       if (!entry.detail) continue;
       table.row();
+      table.cell('#', String(i++));
       table.cell('heapUsed', inMB(entry.detail.heapUsed), twoFixed);
       table.cell('heapTotal', inMB(entry.detail.heapTotal), twoFixed);
       table.cell('freemem', inMB(entry.detail.freemem), twoFixed);
