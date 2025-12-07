@@ -2,13 +2,13 @@ import type { Identifier, ModuleGraph, Position } from '../../types/module-graph
 import { getCachedUsage, setCachedUsage } from '../cache.js';
 import { CONTINUE } from '../constants.js';
 import { findImportRef } from '../utils.js';
-import { walkDown } from '../walk-down.js';
+import { type Via, walkDown } from '../walk-down.js';
 
-interface UsageLocation extends Position {
+export interface UsageLocation extends Position {
   filePath: string;
   identifier: string;
   isEntry: boolean;
-  isReExport: boolean;
+  via: Via;
 }
 
 export interface UsageResult {
@@ -36,7 +36,7 @@ export const getUsage = (
     graph,
     filePath,
     identifier,
-    (sourceFile, _sourceId, importingFile, id, isEntry, isReExport) => {
+    (sourceFile, _sourceId, importingFile, id, isEntry, via) => {
       const importRef = findImportRef(graph, importingFile, sourceFile, id);
       locations.push({
         filePath: importingFile,
@@ -45,7 +45,7 @@ export const getUsage = (
         line: importRef?.line ?? 0,
         col: importRef?.col ?? 0,
         isEntry,
-        isReExport,
+        via,
       });
 
       if (isEntry && !reExportingEntryFile) reExportingEntryFile = importingFile;

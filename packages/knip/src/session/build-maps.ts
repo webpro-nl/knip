@@ -1,5 +1,6 @@
 import { IMPORT_STAR } from '../constants.js';
 import type { GraphExplorer } from '../graph-explorer/explorer.js';
+import type { UsageLocation } from '../graph-explorer/operations/get-usage.js';
 import { getExportedIdentifiers } from '../graph-explorer/utils.js';
 import {
   forEachAliasReExport,
@@ -29,6 +30,12 @@ export const buildImportLookup = (fileNode: FileNode) => {
 
   return imports;
 };
+
+const excludeReExports = (location: UsageLocation) =>
+  location.via !== 'reExport' &&
+  location.via !== 'reExportAs' &&
+  location.via !== 'reExportNS' &&
+  location.via !== 'reExportStar';
 
 export const buildExportsMap = (
   fileNode: FileNode,
@@ -62,7 +69,9 @@ export const buildExportsMap = (
       pos,
       line,
       col,
-      importLocations: usage.locations.filter((loc: { isReExport: boolean }) => !loc.isReExport),
+      importLocations: usage.locations
+        .filter(excludeReExports)
+        .sort((a, b) => a.filePath.localeCompare(b.filePath) || a.line - b.line || a.col - b.col),
       entryPaths: usageEntryPaths,
       exports: childExports,
     });
