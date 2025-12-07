@@ -82,7 +82,7 @@ export const getReferencedInputsHandler =
           }
 
           // Return resolved path for refs to internal workspaces
-          const ref = _resolveSync(specifier, containingFilePath);
+          const ref = _resolveSync(specifier, dirname(containingFilePath));
           if (ref && isInternal(ref) && !isGitIgnored(ref)) return ref;
         }
 
@@ -94,8 +94,9 @@ export const getReferencedInputsHandler =
       return;
     }
 
-    const filePath = isAbsolute(specifier) ? specifier : join(input.dir ?? dirname(containingFilePath), specifier);
-    const resolvedFilePath = _resolveSync(filePath, containingFilePath);
+    const baseDir = input.dir ?? dirname(containingFilePath);
+    const filePath = isAbsolute(specifier) ? specifier : join(baseDir, specifier);
+    const resolvedFilePath = _resolveSync(filePath, baseDir);
 
     if (resolvedFilePath && isInternal(resolvedFilePath)) {
       return isGitIgnored(resolvedFilePath) ? undefined : resolvedFilePath;

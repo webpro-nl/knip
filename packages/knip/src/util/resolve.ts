@@ -3,7 +3,7 @@ import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { timerify } from './Performance.js';
 import { toPosix } from './path.js';
 
-const createSyncResolver = (extensions: string[]) => {
+const createSyncModuleResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({
     tsconfig: 'auto',
     extensions,
@@ -24,8 +24,27 @@ const createSyncResolver = (extensions: string[]) => {
   };
 };
 
-const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
+const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
+
+export const _resolveModuleSync = timerify(resolveModuleSync);
+
+export const _createSyncModuleResolver: typeof createSyncModuleResolver = extensions =>
+  timerify(createSyncModuleResolver(extensions));
+
+const createSyncResolver = (extensions: string[]) => {
+  const resolver = new ResolverFactory({
+    extensions,
+    conditionNames: ['require', 'import', 'node', 'default'],
+  });
+
+  return function resolveSync(specifier: string, baseDir: string) {
+    try {
+      const resolved = resolver.sync(baseDir, specifier);
+      if (resolved?.path) return toPosix(resolved.path);
+    } catch (_error) {}
+  };
+};
+
+const resolveSync = createSyncResolver(DEFAULT_EXTENSIONS);
 
 export const _resolveSync = timerify(resolveSync);
-
-export const _createSyncResolver: typeof createSyncResolver = extensions => timerify(createSyncResolver(extensions));
