@@ -82,7 +82,7 @@ Use `--trace` to see where all exports are used. Or be more specific:
 This works across re-exports, barrel files and workspaces. Here's an example
 screenshot:
 
-<img src="/screenshots/trace.png" alt="trace" class="mw500" />
+<img src="/screenshots/trace-export.png" alt="trace export" class="mw500" />
 
 It's like a reversed module graph. Instead of traversing imports it goes in the
 opposite direction and shows where exports are imported.
