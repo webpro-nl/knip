@@ -20,8 +20,6 @@ export const isReferenced = (
     const isEntryFile = entryPaths.has(currentPath);
     let reExportingEntryFile: string | undefined = isEntryFile ? currentPath : undefined;
 
-    if (isEntryFile && !options.includeEntryExports) return [false, reExportingEntryFile];
-
     if (seen.has(currentPath)) return [false, reExportingEntryFile];
     seen.add(currentPath);
 
@@ -32,9 +30,6 @@ export const isReferenced = (
     if (!identifier || !file) {
       return [false, reExportingEntryFile];
     }
-
-    const directSources = getPassThroughReExportSources(file, identifier);
-    const starSources = getStarReExportSources(file);
 
     const followSources = (sources: Set<string>, nextId: string): boolean => {
       for (const byFilePath of sources) {
@@ -83,6 +78,8 @@ export const isReferenced = (
       }
     }
 
+    if (isEntryFile && !options.includeEntryExports) return [false, reExportingEntryFile];
+
     const aliasMap = getAliasReExportMap(file, identifier);
     if (aliasMap) {
       for (const [alias, sources] of aliasMap) {
@@ -90,6 +87,9 @@ export const isReferenced = (
         if (followSources(sources, ref)) return [true, reExportingEntryFile];
       }
     }
+
+    const directSources = getPassThroughReExportSources(file, identifier);
+    const starSources = getStarReExportSources(file);
 
     if (directSources) {
       if (followSources(directSources, currentId)) return [true, reExportingEntryFile];

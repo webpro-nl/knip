@@ -151,6 +151,12 @@ jobs:
           path: ${{ matrix.project.name }}
           sparse-checkout: ${{ matrix.project.sparse-checkout }}
 
+      - name: Apply patch if exists
+        working-directory: ${{ matrix.project.name }}
+        run: |
+          PATCH_FILE="${{ github.workspace }}/.github/workflows/patches/${{ matrix.project.name }}.patch"
+          [ -f "$PATCH_FILE" ] && git apply --verbose "$PATCH_FILE" || true
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24

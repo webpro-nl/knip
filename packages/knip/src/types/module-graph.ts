@@ -20,12 +20,15 @@ export interface Position {
 export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
 
+/** Aggregated imports from other files (who imports this file's exports) */
 export type ImportMaps = {
-  /** References to imported identifiers ("default", "named", "NS.member", etc) */
+  /** Usage references to imported identifiers ("default", "named", "NS.export", "enum.member", etc.) */
   refs: References;
+  /** Directly imported identifiers */
   imported: IdToFileMap;
   importedAs: IdToNsToFileMap;
   importedNs: IdToFileMap;
+  /** Identifiers re-exported (not directly imported) */
   reExported: IdToFileMap;
   reExportedAs: IdToNsToFileMap;
   reExportedNs: IdToFileMap;
@@ -45,7 +48,7 @@ export interface Export extends Position {
   type: SymbolType;
   members: ExportMember[];
   jsDocTags: Tags;
-  refs: [number, boolean];
+  self: [number, boolean];
   fixes: Fixes;
   symbol?: ts.Symbol;
   isReExport?: boolean;
@@ -57,7 +60,7 @@ export type ExportMember = {
   line: number;
   col: number;
   type: SymbolType;
-  refs: [number, boolean];
+  self: [number, boolean];
   fix: Fix;
   symbol?: ts.Symbol;
   jsDocTags: Tags;
@@ -80,7 +83,6 @@ export type FileNode = {
   scripts: Set<string>;
   imported?: ImportMaps;
   internalImportCache?: ImportMap;
-  traceRefs: References;
 };
 
 export type ModuleGraph = Map<FilePath, FileNode>;

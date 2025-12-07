@@ -60,7 +60,6 @@ test('Should serialize and deserialize file back to original', () => {
       ]),
     },
     scripts: new Set(['script', 'script2']),
-    traceRefs: new Set(['ref']),
   };
 
   assert.deepEqual(deserialize(serialize(file)), file);

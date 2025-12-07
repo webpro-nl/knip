@@ -75,6 +75,8 @@ export const createOptions = async (options: CreateOptions) => {
 
   const isStrict = options.isStrict ?? parsedCLIArgs.strict ?? false;
   const isProduction = options.isProduction ?? parsedCLIArgs.production ?? isStrict;
+  const isDebug = parsedCLIArgs.debug ?? false;
+  const isTrace = Boolean(parsedCLIArgs.trace ?? parsedCLIArgs['trace-file'] ?? parsedCLIArgs['trace-export']);
 
   const rules = { ...defaultRules, ...parsedConfig.rules };
   const excludesFromRules = getKeysByValue(rules, 'off');
@@ -119,7 +121,7 @@ export const createOptions = async (options: CreateOptions) => {
     gitignore: parsedCLIArgs['no-gitignore'] ? false : (options.gitignore ?? true),
     includedIssueTypes,
     isCache: parsedCLIArgs.cache ?? false,
-    isDebug: parsedCLIArgs.debug ?? false,
+    isDebug,
     isDisableConfigHints: parsedCLIArgs['no-config-hints'] || isProduction || Boolean(parsedCLIArgs.workspace),
     isFix: parsedCLIArgs.fix ?? options.isFix ?? isFixFiles ?? fixTypes.length > 0,
     isFixCatalog: fixTypes.length === 0 || fixTypes.includes('catalog'),
@@ -141,13 +143,13 @@ export const createOptions = async (options: CreateOptions) => {
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports || isReportClassMembers,
     isSession: options.isSession ?? false,
     isShowProgress:
-      parsedCLIArgs['no-progress'] !== true &&
-      options.isShowProgress !== false &&
-      process.stdout.isTTY &&
+      !isDebug &&
+      !isTrace &&
+      parsedCLIArgs['no-progress'] !== true && options.isShowProgress !== false && process.stdout.isTTY &&
       typeof process.stdout.cursorTo === 'function',
     isSkipLibs: !(isIncludeLibs || includedIssueTypes.classMembers),
     isStrict,
-    isTrace: Boolean(parsedCLIArgs.trace ?? parsedCLIArgs['trace-file'] ?? parsedCLIArgs['trace-export']),
+    isTrace,
     isTreatConfigHintsAsErrors:
       parsedCLIArgs['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
     isWatch: parsedCLIArgs.watch ?? options.isWatch ?? false,

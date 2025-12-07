@@ -20,7 +20,7 @@ test('Find dependencies in vitest configuration (projects with inline and extern
     devDependencies: 0,
     unlisted: 2,
     unresolved: 0,
-    processed: 6,
-    total: 6,
+    processed: 7,
+    total: 7,
   });
 });

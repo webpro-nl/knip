@@ -1,4 +1,3 @@
-import { OPAQUE } from '../constants.js';
 import type { Import, ImportMaps, ModuleGraph } from '../types/module-graph.js';
 import { getCachedExportedIdentifiers, setCachedExportedIdentifiers } from './cache.js';
 import {
@@ -63,27 +62,6 @@ export const getExportedIdentifiers = (
 
   setCachedExportedIdentifiers(graph, filePath, identifiers);
   return identifiers;
-};
-
-export const hasNamespaceMemberReference = (
-  graph: ModuleGraph,
-  importingFile: string,
-  importedFile: string,
-  namespace: string,
-  member: string
-): boolean | null => {
-  const importerNode = graph.get(importingFile);
-  if (!importerNode) return null;
-
-  const importMap = importerNode.imports.internal.get(importedFile);
-  if (!importMap) return null;
-
-  if (importMap.imported.get(OPAQUE)) return true;
-
-  if (importMap.refs.size === 0) return false;
-
-  const refKey = member ? `${namespace}.${member}` : namespace;
-  return refKey ? importMap.refs.has(refKey) : null;
 };
 
 export const hasStrictlyEnumReferences = (importsForExport: ImportMaps | undefined, identifier: string): boolean => {

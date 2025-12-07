@@ -27,11 +27,23 @@
     "ci": "biome ci . && installed-check --ignore-dev"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.4",
+    "@biomejs/biome": "2.3.8",
+    "remark-preset-webpro": "^2.0.1",
+    "mdxlint-preset-webpro": "^1.0.2",
     "installed-check": "^9.3.0"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "preset-webpro"
+    ]
+  },
+  "mdxlint": {
+    "plugins": [
+      "mdxlint-preset-webpro"
+    ]
   },
   "engines": {
     "node": ">=22.0.0"
   },
-  "packageManager": "pnpm@10.21.0"
+  "packageManager": "pnpm@10.24.0"
 }

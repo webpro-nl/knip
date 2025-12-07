@@ -21,40 +21,28 @@
     "remark": "remark README.md 'src/content/docs/**/*.md' --verbose -o && mdxlint 'src/content/docs/**/*.mdx' --verbose -o"
   },
   "dependencies": {
-    "@astro-community/astro-embed-youtube": "0.5.7",
-    "@astrojs/starlight": "0.36.2",
+    "@astro-community/astro-embed-youtube": "0.5.9",
+    "@astrojs/starlight": "0.37.0",
     "sharp": "0.34.5"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.5",
+    "@astrojs/check": "0.9.6",
     "@octokit/graphql": "^9.0.3",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "5.15.5",
+    "astro": "5.16.3",
     "hastscript": "9.0.1",
     "mdxlint": "1.0.0",
-    "mdxlint-preset-webpro": "^1.0.2",
     "picocolors": "^1.1.1",
     "remark-cli": "12.0.1",
     "remark-directive": "4.0.0",
     "remark-frontmatter": "5.0.0",
     "remark-gfm": "4.0.1",
     "remark-parse": "11.0.0",
-    "remark-preset-webpro": "^2.0.1",
     "remark-stringify": "11.0.0",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "unified": "11.0.5",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.0.0"
-  },
-  "remarkConfig": {
-    "plugins": [
-      "preset-webpro"
-    ]
-  },
-  "mdxlint": {
-    "plugins": [
-      "mdxlint-preset-webpro"
-    ]
   }
 }

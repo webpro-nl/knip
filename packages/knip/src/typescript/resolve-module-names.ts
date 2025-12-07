@@ -5,7 +5,7 @@ import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { sanitizeSpecifier } from '../util/modules.js';
 import { timerify } from '../util/Performance.js';
 import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.js';
-import { _createSyncResolver, _resolveSync } from '../util/resolve.js';
+import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.js';
 import type { ToSourceFilePath } from '../util/to-source-path.js';
 import { isDeclarationFileExtension } from './ast-helpers.js';
 
@@ -25,6 +25,8 @@ const fileExists = (name: string, containingFile: string) => {
 
 export type ResolveModuleNames = ReturnType<typeof createCustomModuleResolver>;
 
+const tsResolveModuleName = timerify(ts.resolveModuleName);
+
 export function createCustomModuleResolver(
   compilerOptions: ts.CompilerOptions,
   customCompilerExtensions: string[],
@@ -34,7 +36,8 @@ export function createCustomModuleResolver(
 ) {
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
-  const resolveSync = customCompilerExtensionsSet.size === 0 ? _resolveSync : _createSyncResolver(extensions);
+  const resolveSync =
+    customCompilerExtensionsSet.size === 0 ? _resolveModuleSync : _createSyncModuleResolver(extensions);
 
   const virtualDeclarationFiles = new Map<string, { path: string; ext: string }>();
 
@@ -92,7 +95,7 @@ export function createCustomModuleResolver(
     // No need to try and resolve builtins, bail out
     if (isBuiltin(sanitizedSpecifier)) return undefined;
 
-    const resolvedFileName = isSkipLibs && resolveSync(sanitizedSpecifier, dirname(containingFile));
+    const resolvedFileName = isSkipLibs && resolveSync(sanitizedSpecifier, containingFile);
 
     if (resolvedFileName) {
       const ext = extname(resolvedFileName);
@@ -117,7 +120,7 @@ export function createCustomModuleResolver(
       };
     }
 
-    const tsResolvedModule = ts.resolveModuleName(
+    const tsResolvedModule = tsResolveModuleName(
       sanitizedSpecifier,
       containingFile,
       compilerOptions,

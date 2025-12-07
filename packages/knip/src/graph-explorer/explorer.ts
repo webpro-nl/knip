@@ -1,6 +1,6 @@
 import type { ModuleGraph } from '../types/module-graph.js';
 import { invalidateCache as invalidateCacheInternal } from './cache.js';
-import { buildExportsTree } from './operations/build-trace-tree.js';
+import { buildExportsTree } from './operations/build-exports-tree.js';
 import { findCycles } from './operations/find-cycles.js';
 import { getContention } from './operations/get-contention.js';
 import { getUsage } from './operations/get-usage.js';
@@ -10,6 +10,10 @@ import { resolveDefinition } from './operations/resolve-definition.js';
 
 export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>) => {
   return {
+    /**
+     * Is exported `identifier` imported/referenced in the module graph?
+     * @returns `[isReferenced, reExportingEntryFile]` → [is export used, entry path if traversing through re-exports]
+     */
     isReferenced: (filePath: string, identifier: string, options: { includeEntryExports: boolean }) =>
       isReferenced(graph, entryPaths, filePath, identifier, options),
     hasStrictlyNsReferences: (filePath: string, identifier: string) =>

@@ -59,7 +59,7 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Exp
     line: line + 1,
     col: character + 1,
     fix: member.fix,
-    refs: [0, false],
+    self: [0, false],
     jsDocTags: getJSDocTags(member.node),
   };
 };
@@ -87,9 +87,15 @@ const getImportsAndExports = (
   const exports: ExportMap = new Map();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const scripts = new Set<string>();
-  const traceRefs = new Set<string>();
 
   const importedInternalSymbols = new Map<ts.Symbol, string>();
+
+  const importAliases = new Map<string, Set<{ id: string; filePath: string }>>();
+  const addImportAlias = (aliasName: string, id: string, filePath: string) => {
+    const aliases = importAliases.get(aliasName);
+    if (aliases) aliases.add({ id, filePath });
+    else importAliases.set(aliasName, new Set([{ id, filePath }]));
+  };
 
   const referencedSymbolsInExport = new Set<ts.Symbol>();
 
@@ -98,11 +104,9 @@ const getImportsAndExports = (
   const addNsMemberRefs = (internalImport: ImportMaps, namespace: string, member: string | string[]) => {
     if (typeof member === 'string') {
       internalImport.refs.add(`${namespace}.${member}`);
-      traceRefs.add(`${namespace}.${member}`);
     } else {
       for (const m of member) {
         internalImport.refs.add(`${namespace}.${m}`);
-        traceRefs.add(`${namespace}.${m}`);
       }
     }
   };
@@ -308,7 +312,7 @@ const getImportsAndExports = (
         line: line + 1,
         col: character + 1,
         fixes: fix ? [fix] : [],
-        refs: [0, false],
+        self: [0, false],
         isReExport,
       });
     }
@@ -372,17 +376,37 @@ const getImportsAndExports = (
       result && (Array.isArray(result) ? result.forEach(addScript) : addScript(result));
     }
 
-    // Find and populate `refs` to internal import symbols
+    // Populate `refs` to imported symbols during a single pass for the current file
+    // The imported symbols have been added by AST visitors
+    // The `refs` will be used by `explorer.isReferenced` and `explorer.hasStrictlyNsReferences` to find unused exports
+    // Regular imports are ignored (unused imports is for file-based linters); `refs` is for namespaces, members, etc.
     if (ts.isIdentifier(node)) {
       const id = String(node.escapedText);
       const { symbol, filePath } = getImport(id, node);
+
+      if (importAliases.has(id) && isAccessExpression(node.parent)) {
+        // Pattern: const alias = cond ? NS1 : NS2; alias.member
+        // Pattern: const spread = { ...NS }; spread.member
+        // Pattern: const assign = NS; assign.member
+        const members = getAccessMembers(typeChecker, node);
+        // biome-ignore lint/style/noNonNullAssertion: deal with it
+        for (const { id: aliasedId, filePath: aliasFilePath } of importAliases.get(id)!) {
+          const aliasImports = internal.get(aliasFilePath);
+          if (aliasImports) addNsMemberRefs(aliasImports, aliasedId, members);
+        }
+      }
+
       if (symbol) {
         if (filePath) {
           if (!isImportSpecifier(node)) {
             const imports = internal.get(filePath);
             if (imports) {
-              traceRefs.add(id);
-              if (isAccessExpression(node.parent)) {
+              const isPropName = ts.isPropertyAccessExpression(node.parent) && node.parent.name === node;
+              if (isPropName && isAccessExpression(node.parent.parent)) {
+                // Pattern: alias.NS.identifier
+                const members = getAccessMembers(typeChecker, node.parent);
+                addNsMemberRefs(imports, id, members);
+              } else if (isAccessExpression(node.parent) && !isPropName) {
                 if (isDestructuring(node.parent)) {
                   if (ts.isPropertyAccessExpression(node.parent)) {
                     // Pattern: const { id, ...id } = NS.sub;
@@ -410,6 +434,26 @@ const getImportsAndExports = (
                 const [members, hasSpread] = getDestructuredNames(node.parent.name);
                 if (hasSpread) imports.refs.add(id);
                 else addNsMemberRefs(imports, id, members);
+              } else if (ts.isSpreadAssignment(node.parent)) {
+                // Pattern: export const named = { ...id };
+                // Pattern: export const named = { ns: { ...id } };
+                // Pattern: const spread = { ...NS }; spread.member;
+                const path: string[] = [];
+                let _node: ts.Node = node.parent;
+                while (_node && !ts.isVariableDeclaration(_node)) {
+                  if (ts.isPropertyAssignment(_node) && ts.isIdentifier(_node.name)) path.unshift(_node.name.text);
+                  _node = _node.parent;
+                }
+                if (_node && ts.isIdentifier(_node.name)) {
+                  const varName = _node.name.text;
+                  if (exports.has(varName)) {
+                    addNsValue(imports.reExportedAs, id, [varName, ...path].join('.'), sourceFile.fileName);
+                  } else if (path.length === 0) {
+                    // Pattern: const spread = { ...NS }; spread.member
+                    addImportAlias(varName, id, filePath);
+                  }
+                }
+                imports.refs.add(id);
               } else {
                 const typeRef = getTypeRef(node);
                 if (typeRef) {
@@ -422,6 +466,34 @@ const getImportsAndExports = (
                   } else {
                     imports.refs.add(id);
                   }
+                } else if (
+                  ts.isVariableDeclaration(node.parent) &&
+                  node.parent.initializer === node &&
+                  ts.isIdentifier(node.parent.name)
+                ) {
+                  // Pattern: const alias = NS;
+                  const aliasName = node.parent.name.text;
+                  if (exports.has(aliasName)) {
+                    // Pattern: export const alias = NS;
+                    addNsValue(imports.reExportedAs, id, aliasName, sourceFile.fileName);
+                  } else {
+                    // Pattern: const alias = NS; alias.member
+                    addImportAlias(aliasName, id, filePath);
+                    imports.refs.add(id);
+                  }
+                } else if (ts.isConditionalExpression(node.parent) || ts.isBinaryExpression(node.parent)) {
+                  // Pattern: const x = cond ? NS1 : NS2; x.member
+                  // Pattern: const x = NS1 || NS2; x.member
+                  let _node: ts.Node = node.parent;
+                  while (_node && !ts.isVariableDeclaration(_node)) _node = _node.parent;
+                  if (_node && ts.isIdentifier(_node.name)) addImportAlias(_node.name.text, id, filePath);
+                  imports.refs.add(id);
+                } else if (ts.isShorthandPropertyAssignment(node.parent)) {
+                  // Pattern: const hello = { NS }; hello.NS.member
+                  let _node: ts.Node = node.parent;
+                  while (_node && !ts.isVariableDeclaration(_node)) _node = _node.parent;
+                  if (_node && ts.isIdentifier(_node.name)) addImportAlias(`${_node.name.text}.${id}`, id, filePath);
+                  imports.refs.add(id);
                 } else if (imports.importedNs.has(id) && isConsiderReferencedNS(node)) {
                   // Pattern: fn(NS), { ...NS } etc. (https://knip.dev/guides/namespace-imports)
                   imports.refs.add(id);
@@ -458,12 +530,12 @@ const getImportsAndExports = (
   const pragmaImports = getImportsFromPragmas(sourceFile);
   if (pragmaImports) for (const node of pragmaImports) addImport(node, sourceFile);
 
-  // For each export, see if it's referenced in same file,
-  // and whether it's referenced in an exported type and should be exported with it (*)
+  // If `ignoreExportsUsedInFile` is set, see for each export if it's referenced in this same file,
+  // and if it's referenced in an exported type and therefore should be exported with it (*)
   for (const item of exports.values()) {
     // TODO Reconsider this messy logic in AST visitors + `isReferencedInExport` + `findInternalReferences`
     if (!isType(item) && item.symbol && referencedSymbolsInExport.has(item.symbol)) {
-      item.refs = [1, true];
+      item.self = [1, true];
     } else {
       const isBindingElement = item.symbol?.valueDeclaration && ts.isBindingElement(item.symbol.valueDeclaration);
       if (
@@ -473,12 +545,12 @@ const getImportsAndExports = (
           ignoreExportsUsedInFile[item.type]) ||
         isBindingElement
       ) {
-        item.refs = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExport, isBindingElement);
+        item.self = findInternalReferences(item, sourceFile, typeChecker, referencedSymbolsInExport, isBindingElement);
       }
     }
 
     for (const member of item.members) {
-      member.refs = findInternalReferences(member, sourceFile, typeChecker, referencedSymbolsInExport);
+      member.self = findInternalReferences(member, sourceFile, typeChecker, referencedSymbolsInExport);
       member.symbol = undefined;
     }
 
@@ -490,7 +562,6 @@ const getImportsAndExports = (
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,
-    traceRefs,
   };
 };
 

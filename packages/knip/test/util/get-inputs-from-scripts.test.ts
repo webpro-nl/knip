@@ -264,6 +264,7 @@ test('getInputsFromScripts (bash expressions)', () => {
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [toBinary('node'), toBinary('make')]);
   t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('pkg'), toBinary('exit')]);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', [toBinary('exec'), toBinary('cz'), toBinary('true')]);
+  t('f() { vite build "$@" || (echo foo; exit 1;) }; f', [toBinary('vite'), toBinary('echo'), toBinary('exit')]);
 });
 
 test('getInputsFromScripts (bash expansion)', () => {
