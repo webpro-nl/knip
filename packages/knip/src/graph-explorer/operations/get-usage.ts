@@ -1,3 +1,4 @@
+import { IMPORT_STAR } from '../../constants.js';
 import type { Identifier, ModuleGraph, Position } from '../../types/module-graph.js';
 import { getCachedUsage, setCachedUsage } from '../cache.js';
 import { CONTINUE } from '../constants.js';
@@ -36,8 +37,9 @@ export const getUsage = (
     graph,
     filePath,
     identifier,
-    (sourceFile, _sourceId, importingFile, id, isEntry, via) => {
-      const importRef = findImportRef(graph, importingFile, sourceFile, id);
+    (sourceFile, sourceId, importingFile, id, isEntry, via) => {
+      const lookupId = via === 'importNS' ? IMPORT_STAR : sourceId;
+      const importRef = findImportRef(graph, importingFile, sourceFile, lookupId);
       locations.push({
         filePath: importingFile,
         identifier: id,

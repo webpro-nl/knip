@@ -25,7 +25,8 @@ const lessThanMatch = /</g;
  */
 export function renderExportHover(_export, filePath, root, snippets, maxSnippets) {
   const { identifier, importLocations } = _export;
-  const refs = importLocations.length;
+  const uniqueFiles = new Set(importLocations.map(loc => loc.filePath));
+  const refs = uniqueFiles.size;
   const identifierMatch = new RegExp(`\\b${identifier}\\b`, 'g');
   const _root = `${root}/`;
 
@@ -35,14 +36,19 @@ export function renderExportHover(_export, filePath, root, snippets, maxSnippets
     u('strong', [u('text', identifier)]),
   ];
 
+  let lastFilePath = '';
+
   for (let index = 0; index < importLocations.length; index++) {
     const loc = importLocations[index];
     const uri = pathToFileURL(loc.filePath).toString();
     const position = loc.line && loc.col ? `#${loc.line},${loc.col}` : loc.line ? `#${loc.line}` : '';
     const relativePath = loc.filePath.replace(_root, '');
 
-    nodes.push(u('break'));
-    nodes.push(u('link', { url: `${uri}${position}` }, [u('text', relativePath)]));
+    if (loc.filePath !== lastFilePath) {
+      nodes.push(u('break'));
+      nodes.push(u('link', { url: `${uri}${position}` }, [u('text', relativePath)]));
+      lastFilePath = loc.filePath;
+    }
 
     const snippetsForFile = snippets[index] ?? [];
     const limitedSnippets = maxSnippets < 0 ? snippetsForFile : snippetsForFile.slice(0, maxSnippets);

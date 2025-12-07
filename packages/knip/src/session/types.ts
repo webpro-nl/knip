@@ -12,7 +12,7 @@ export interface InternalImport extends SourceLocation {
 }
 
 export interface Export extends SourceLocation {
-  importLocations: Position[];
+  importLocations: SourceLocation[];
   entryPaths: Set<string>;
   exports: Export[] | undefined;
 }

@@ -79,6 +79,8 @@ export async function collectHoverSnippets(identifier, locations, options = {}) 
 
         snippets[index].push({ line: line + 1, col: char + 1, snippet });
       }
+
+      if (snippets[index]) snippets[index].sort((a, b) => a.line - b.line || a.col - b.col);
     } catch (_error) {}
   }
 
