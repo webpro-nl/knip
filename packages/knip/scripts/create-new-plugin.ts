@@ -16,7 +16,7 @@ const {
 const errorOnExist = force ? false : !graceful;
 
 if (!name) {
-  console.error('Usage: npm run create-plugin -- --name [name]');
+  console.error('Usage: pnpm create-plugin --name [name]');
   process.exit(1);
 }
 
