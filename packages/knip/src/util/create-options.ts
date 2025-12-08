@@ -144,7 +144,9 @@ export const createOptions = async (options: CreateOptions) => {
     isShowProgress:
       !isDebug &&
       !isTrace &&
-      parsedCLIArgs['no-progress'] !== true && options.isShowProgress !== false && process.stdout.isTTY &&
+      parsedCLIArgs['no-progress'] !== true &&
+      options.isShowProgress !== false &&
+      process.stdout.isTTY &&
       typeof process.stdout.cursorTo === 'function',
     isSkipLibs: !(isIncludeLibs || includedIssueTypes.classMembers),
     isStrict,
