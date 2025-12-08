@@ -714,6 +714,10 @@
           "title": "svgo plugin configuration (https://knip.dev/reference/plugins/svgo)",
           "$ref": "#/definitions/plugin"
         },
+        "svgr": {
+          "title": "svgr plugin configuration (https://knip.dev/reference/plugins/svgr)",
+          "$ref": "#/definitions/plugin"
+        },
         "syncpack": {
           "title": "syncpack plugin configuration (https://knip.dev/reference/plugins/syncpack)",
           "$ref": "#/definitions/plugin"
