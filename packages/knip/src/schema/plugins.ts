@@ -68,6 +68,7 @@ export const pluginsSchema = z.object({
   nest: pluginSchema,
   netlify: pluginSchema,
   next: pluginSchema,
+  'next-intl': pluginSchema,
   node: pluginSchema,
   'node-modules-inspector': pluginSchema,
   nodemon: pluginSchema,

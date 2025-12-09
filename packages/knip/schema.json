@@ -554,6 +554,10 @@
           "title": "Next.js plugin configuration (https://knip.dev/reference/plugins/main)",
           "$ref": "#/definitions/plugin"
         },
+        "next-intl": {
+          "title": "next-intl plugin configuration (https://knip.dev/reference/plugins/next-intl)",
+          "$ref": "#/definitions/plugin"
+        },
         "node": {
           "title": "node plugin configuration (https://knip.dev/reference/plugins/node)",
           "$ref": "#/definitions/plugin"
