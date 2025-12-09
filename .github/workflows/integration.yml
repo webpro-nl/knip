@@ -9,6 +9,9 @@ on:
     tags:
       - '!**'
 
+permissions:
+  issues: write
+
 jobs:
   publish:
     name: Build and publish Knip
