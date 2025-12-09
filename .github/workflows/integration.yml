@@ -26,7 +26,7 @@ jobs:
       - run: pnpm run build
         working-directory: packages/knip
       - id: publish
-        run: pnpx pkg-pr-new publish --compact --bin ./packages/knip
+        run: pnpx pkg-pr-new publish --compact --commentWithDev ./packages/knip
       - name: Comment on referenced issues
         if: github.event_name == 'push'
         uses: actions/github-script@v7
