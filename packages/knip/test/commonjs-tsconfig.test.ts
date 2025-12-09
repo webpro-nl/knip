@@ -22,7 +22,7 @@ test('Support CommonJS-style imports and exports (w tsconfig.json)', async () =>
     ...baseCounters,
     exports: 3,
     unlisted: 2,
-    processed: 6,
-    total: 6,
+    processed: 8,
+    total: 8,
   });
 });

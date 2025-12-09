@@ -1,6 +1,7 @@
 import ts from 'typescript';
 import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
 import { findAncestor, findDescendants, isModuleExportsAccess, isRequireCall, isTopLevel } from '../../ast-helpers.js';
+import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -9,7 +10,7 @@ export default visit(
     if (isRequireCall(node)) {
       if (ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
-        const modifiers = IMPORT_MODIFIERS.NONE;
+        const modifiers = isNotJS(node.getSourceFile()) ? IMPORT_MODIFIERS.ENTRY : IMPORT_MODIFIERS.NONE;
 
         if (specifier) {
           const propertyAccessExpression = findAncestor<ts.PropertyAccessExpression>(node, _node => {
