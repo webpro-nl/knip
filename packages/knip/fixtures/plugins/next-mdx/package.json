@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/next-mdx",
+  "dependencies": {
+    "@next/mdx": "*"
+  }
+}

@@ -558,6 +558,10 @@
           "title": "next-intl plugin configuration (https://knip.dev/reference/plugins/next-intl)",
           "$ref": "#/definitions/plugin"
         },
+        "next-mdx": {
+          "title": "next-mdx plugin configuration (https://knip.dev/reference/plugins/next-mdx)",
+          "$ref": "#/definitions/plugin"
+        },
         "node": {
           "title": "node plugin configuration (https://knip.dev/reference/plugins/node)",
           "$ref": "#/definitions/plugin"

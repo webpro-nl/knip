@@ -56,6 +56,7 @@ export type PluginName =
   | 'netlify'
   | 'next'
   | 'next-intl'
+  | 'next-mdx'
   | 'node'
   | 'node-modules-inspector'
   | 'nodemon'
@@ -179,6 +180,7 @@ export const pluginNames = [
   'netlify',
   'next',
   'next-intl',
+  'next-mdx',
   'node',
   'node-modules-inspector',
   'nodemon',
