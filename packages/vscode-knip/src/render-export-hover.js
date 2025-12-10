@@ -17,13 +17,12 @@ const lessThanMatch = /</g;
 
 /**
  * @param {Export} _export
- * @param {string} filePath
  * @param {string} root
  * @param {HoverSnippets} snippets
  * @param {number} maxSnippets
  * @returns {{ kind: 'markdown'; value: string }}
  */
-export function renderExportHover(_export, filePath, root, snippets, maxSnippets) {
+export function renderExportHover(_export, root, snippets, maxSnippets) {
   const { identifier, importLocations } = _export;
   const uniqueFiles = new Set(importLocations.map(loc => loc.filePath));
   const refs = uniqueFiles.size;

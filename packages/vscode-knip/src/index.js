@@ -294,7 +294,7 @@ export class Extension {
         });
       }
 
-      return renderExportHover(_export, filePath, root, snippets, maxSnippets);
+      return renderExportHover(_export, root, snippets, maxSnippets);
     }
 
     if (_export.entryPaths.size > 0) {

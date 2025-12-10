@@ -217,10 +217,9 @@ export class BaseTreeViewProvider {
   createTreeViewItems(options) {
     const { filePath, line, col, importLine, importCol } = options;
 
-    let absPath;
-    if (filePath) {
-      absPath = path.isAbsolute(filePath) ? filePath : this.workspaceRoot ? path.join(this.workspaceRoot, filePath) : undefined;
-    }
+    const absPath =
+      filePath &&
+      (path.isAbsolute(filePath) ? filePath : this.workspaceRoot && path.join(this.workspaceRoot, filePath));
 
     const uri = absPath ? vscode.Uri.file(absPath) : undefined;
     const relPath = absPath
