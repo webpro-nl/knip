@@ -3,7 +3,7 @@ import type { CatalogCounselor } from '../CatalogCounselor.js';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
@@ -108,7 +108,8 @@ export async function build({
     const config = chief.getConfigForWorkspace(name, extensions);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
-    const { isFile, compilerOptions, definitionPaths } = await loadTSConfig(tsConfigFilePath);
+    const { isFile, compilerOptions, fileNames } = await loadTSConfig(tsConfigFilePath);
+    const definitionPaths = fileNames.filter(filePath => IS_DTS.test(filePath));
 
     if (isFile) augmentWorkspace(workspace, dir, compilerOptions);
 

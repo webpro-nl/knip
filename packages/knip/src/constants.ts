@@ -18,6 +18,8 @@ export const KNIP_CONFIG_LOCATIONS = [
 // TS extensions: https://github.com/microsoft/TypeScript/blob/da8dfbf0ff6a94df65568fd048aec0d763c65811/src/compiler/types.ts#L7637-L7651
 export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'];
 
+export const IS_DTS = /\.d\.(c|m)?ts$/;
+
 export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
 
 export const PUBLIC_TAG = '@public';
