@@ -10,7 +10,7 @@ export default visit(
     if (isRequireCall(node)) {
       if (ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
-        const modifiers = isNotJS(node.getSourceFile()) ? IMPORT_MODIFIERS.ENTRY : IMPORT_MODIFIERS.NONE;
+        const modifiers = isNotJS(node.getSourceFile()) ? IMPORT_MODIFIERS.BRIDGE : IMPORT_MODIFIERS.NONE;
 
         if (specifier) {
           const propertyAccessExpression = findAncestor<ts.PropertyAccessExpression>(node, _node => {

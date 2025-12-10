@@ -52,7 +52,7 @@ export class ProjectPrincipal {
   // Configured by user and returned from plugins
   entryPaths = new Set<string>();
   projectPaths = new Set<string>();
-  nonEntryPaths = new Set<string>();
+  programPaths = new Set<string>();
 
   // Don't report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
@@ -147,7 +147,7 @@ export class ProjectPrincipal {
    */
   private createProgram() {
     this.backend.program = tsCreateProgram(
-      [...this.entryPaths, ...this.nonEntryPaths],
+      [...this.entryPaths, ...this.programPaths],
       this.compilerOptions,
       this.backend.compilerHost,
       this.backend.program
@@ -173,9 +173,9 @@ export class ProjectPrincipal {
     for (const filePath of filePaths) this.addEntryPath(filePath, options);
   }
 
-  public addNonEntryPath(filePath: string) {
+  public addProgramPath(filePath: string) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
-      this.nonEntryPaths.add(filePath);
+      this.programPaths.add(filePath);
     }
   }
 

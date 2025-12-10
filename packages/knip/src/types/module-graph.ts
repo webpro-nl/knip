@@ -75,7 +75,8 @@ export type FileNode = {
     internal: ImportMap;
     external: Set<Import>;
     unresolved: Set<Import>;
-    resolved: Set<FilePath>;
+    programFiles: Set<FilePath>;
+    entryFiles: Set<FilePath>;
     imports: Imports;
   };
   exports: ExportMap;

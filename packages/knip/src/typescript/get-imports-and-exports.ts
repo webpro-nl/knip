@@ -82,7 +82,8 @@ const getImportsAndExports = (
   const internal: ImportMap = new Map();
   const external = new Set<Import>();
   const unresolved = new Set<Import>();
-  const resolved = new Set<string>();
+  const programFiles = new Set<string>();
+  const entryFiles = new Set<string>();
   const imports: Imports = new Set();
   const exports: ExportMap = new Map();
   const aliasedExports = new Map<string, IssueSymbol[]>();
@@ -191,9 +192,9 @@ const getImportsAndExports = (
     if (module) {
       const filePath = module.resolvedFileName;
       if (filePath) {
-        if (opts.modifiers && opts.modifiers & IMPORT_MODIFIERS.ENTRY && !isInNodeModules(filePath)) {
-          resolved.add(filePath);
-          return;
+        if (!isInNodeModules(filePath)) {
+          if (opts.modifiers & IMPORT_MODIFIERS.ENTRY) entryFiles.add(filePath);
+          if (opts.modifiers & IMPORT_MODIFIERS.BRIDGE) programFiles.add(filePath);
         }
 
         if (!module.isExternalLibraryImport || !isInNodeModules(filePath)) {
@@ -240,7 +241,7 @@ const getImportsAndExports = (
       if (opts.specifier.startsWith(PROTOCOL_VIRTUAL)) return;
 
       if (opts.modifiers && opts.modifiers & IMPORT_MODIFIERS.OPTIONAL) {
-        resolved.add(resolve(dirname(sourceFile.fileName), opts.specifier));
+        programFiles.add(resolve(dirname(sourceFile.fileName), opts.specifier));
         return;
       }
 
@@ -558,7 +559,7 @@ const getImportsAndExports = (
   }
 
   return {
-    imports: { internal, external, resolved, imports, unresolved },
+    imports: { internal, external, programFiles, entryFiles, imports, unresolved },
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,

@@ -245,7 +245,8 @@ export const IMPORT_MODIFIERS = {
   RE_EXPORT: 1 << 0,
   TYPE_ONLY: 1 << 1,
   ENTRY: 1 << 2, // entry path, ignore exports
-  OPTIONAL: 1 << 3, // no error if not resolved
-  SIDE_EFFECTS: 1 << 4,
-  OPAQUE: 1 << 5,
+  BRIDGE: 1 << 3, // add require() target in ts module to program
+  OPTIONAL: 1 << 4, // no error if not resolved
+  SIDE_EFFECTS: 1 << 5,
+  OPAQUE: 1 << 6,
 } as const;
