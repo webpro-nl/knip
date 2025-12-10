@@ -135,7 +135,7 @@ test('detects circular dependency c → a → b → c', async () => {
   assert.ok(hasCycle);
 });
 
-test('reportContention: false disables contention reporting', async () => {
+test('false disables contention reporting', async () => {
   const options = await createOptions({ cwd, isSession: true });
   const session = await createSession(options);
 
@@ -143,11 +143,11 @@ test('reportContention: false disables contention reporting', async () => {
   assert.ok(withContention);
   assert.ok(withContention.contention.DIAMOND);
 
-  const { watchHandler } = await (await import('../../src/run.js')).run(options);
-  assert.ok(watchHandler);
+  const { session: sessionHandler } = await (await import('../../src/run.js')).run(options);
+  assert.ok(sessionHandler);
 
-  const graph = watchHandler.getGraph();
-  const entryPaths = watchHandler.getEntryPaths();
+  const graph = sessionHandler.getGraph();
+  const entryPaths = sessionHandler.getEntryPaths();
   const filePath = join(options.cwd, 'diamond-top.ts');
 
   const withoutContention = buildFileDescriptor(filePath, options.cwd, graph, entryPaths, {
