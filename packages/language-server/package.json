@@ -14,5 +14,8 @@
     "knip": "workspace:*",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.12"
+  },
+  "engines": {
+    "node": ">=18.18.0"
   }
 }
