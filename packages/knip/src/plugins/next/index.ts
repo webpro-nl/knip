@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
-import { toDependency, toProductionEntry } from '../../util/input.js';
+import { toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getMdxPlugins, getPageExtensions } from './resolveFromAST.js';
+import { getPageExtensions } from './resolveFromAST.js';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -21,7 +21,6 @@ const productionEntryFilePatterns = [
   'app/**/sitemap.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
   'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
-  'mdx-components.{js,jsx,ts,tsx}',
 ];
 
 const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {
@@ -43,8 +42,7 @@ const resolveFromAST: ResolveFromAST = sourceFile => {
   const pageExtensions = getPageExtensions(sourceFile);
   const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
   const patterns = getEntryFilePatterns(extensions);
-  const mdxPlugins = getMdxPlugins(sourceFile);
-  return [...patterns.map(id => toProductionEntry(id)), ...Array.from(mdxPlugins).map(id => toDependency(id))];
+  return patterns.map(id => toProductionEntry(id));
 };
 
 const plugin: Plugin = {

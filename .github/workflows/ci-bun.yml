@@ -5,9 +5,9 @@ on:
   pull_request:
   push:
     branches:
-      - "**"
+      - '**'
     tags:
-      - "!**"
+      - '!**'
 
 jobs:
   test:

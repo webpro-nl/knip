@@ -29,9 +29,11 @@ export const DT_SCOPE = '@types';
 
 export const PROTOCOL_VIRTUAL = 'virtual:';
 
-// Binaries that are expected to be globally installed
-// In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
-// Package may exist in npm registry, but last publish is at least 6 years ago
+/**
+ * Binaries that are expected to be globally available. The package at
+ * https://www.npmjs.com/package/[name] might exist, but is not expected to be
+ * listed in package.json and last npm publish was at least 6 years ago.
+ */
 export const IGNORED_GLOBAL_BINARIES = new Set([
   'amplify',
   'aws',
@@ -47,6 +49,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'chmod',
   'chown',
   'cksum',
+  'clear',
   'cmd',
   'comm',
   'command',
@@ -243,7 +246,8 @@ export const IMPORT_MODIFIERS = {
   RE_EXPORT: 1 << 0,
   TYPE_ONLY: 1 << 1,
   ENTRY: 1 << 2, // entry path, ignore exports
-  OPTIONAL: 1 << 3, // no error if not resolved
-  SIDE_EFFECTS: 1 << 4,
-  OPAQUE: 1 << 5,
+  BRIDGE: 1 << 3, // add require() target in ts module to program
+  OPTIONAL: 1 << 4, // no error if not resolved
+  SIDE_EFFECTS: 1 << 5,
+  OPAQUE: 1 << 6,
 } as const;

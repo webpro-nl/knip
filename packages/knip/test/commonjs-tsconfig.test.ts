@@ -12,17 +12,21 @@ test('Support CommonJS-style imports and exports (w tsconfig.json)', async () =>
   const { issues, counters } = await main(options);
 
   assert(issues.exports['dir/exports.js']['unused']);
-  assert(issues.exports['dir/mod1.js']['identifier']);
-  assert(issues.exports['dir/mod1.js']['identifier2']);
+  assert(issues.exports['dir/script2.js']['identifier']);
+  assert(issues.exports['dir/script2.js']['identifier2']);
 
-  assert(issues.unlisted['dir/mod.js']['string-literal']);
-  assert(issues.unlisted['dir/mod.js']['another-unlisted']);
+  assert(issues.exports['dir/module1.ts']['unused']);
+  assert(issues.exports['dir/module2.ts']['unused']);
+  assert(issues.exports['dir/module3.js']['unused']);
+
+  assert(issues.unlisted['dir/script1.js']['string-literal']);
+  assert(issues.unlisted['dir/script1.js']['another-unlisted']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 3,
+    exports: 6,
     unlisted: 2,
-    processed: 6,
-    total: 6,
+    processed: 10,
+    total: 10,
   });
 });

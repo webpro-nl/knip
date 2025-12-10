@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/next-intl",
+  "dependencies": {
+    "next-intl": "*"
+  }
+}

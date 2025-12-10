@@ -16,11 +16,6 @@ test('Find dependencies with the Next.js plugin', async () => {
   assert(issues.files.has(join(cwd, 'pages/unused.jsx')));
 
   assert(issues.unlisted['next.config.js']['next-transpile-modules']);
-  assert(issues.unlisted['next.config.js']['@next/mdx']);
-  assert(issues.unlisted['next.config.js']['remark-frontmatter']);
-  assert(issues.unlisted['next.config.js']['remark-mdx-frontmatter']);
-  assert(issues.unlisted['next.config.js']['rehype-starry-night']);
-  assert(issues.unlisted['next.config.js']['recma-export-filepath']);
   assert(issues.unlisted['pages/[[...route]].tsx']['react']);
   assert(issues.unlisted['pages/[[...route]].tsx']['react-helmet']);
   assert(issues.unlisted['pages/home.tsx']['react']);
@@ -31,7 +26,7 @@ test('Find dependencies with the Next.js plugin', async () => {
     ...baseCounters,
     files: 2,
     devDependencies: 0,
-    unlisted: 11,
+    unlisted: 6,
     processed: 13,
     total: 13,
   });

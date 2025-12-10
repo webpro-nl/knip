@@ -57,12 +57,19 @@ const CHAR_QUESTION = 63; // '?'
 
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
 export const sanitizeSpecifier = (specifier: string) => {
-  if (isBuiltin(specifier) || isAbsolute(specifier) || specifier.startsWith(PROTOCOL_VIRTUAL)) return specifier;
+  if (
+    isBuiltin(specifier) ||
+    isAbsolute(specifier) ||
+    specifier.charCodeAt(0) === CHAR_COLON ||
+    specifier.startsWith(PROTOCOL_VIRTUAL)
+  ) {
+    return specifier;
+  }
   const len = specifier.length;
   let start = 0;
   let end = len;
   let colon = -1;
-  let sawSlash = false;
+  let hasSlash = false;
   for (let i = 0; i < len; i++) {
     const ch = specifier.charCodeAt(i);
     if (i === start && (ch === CHAR_EXCLAMATION || ch === CHAR_DASH)) {
@@ -70,9 +77,9 @@ export const sanitizeSpecifier = (specifier: string) => {
       continue;
     }
     if (ch === CHAR_SLASH && colon === -1) {
-      sawSlash = true;
+      hasSlash = true;
     }
-    if (colon === -1 && ch === CHAR_COLON && !sawSlash) {
+    if (colon === -1 && ch === CHAR_COLON && !hasSlash) {
       colon = i;
     }
     if (ch === CHAR_EXCLAMATION || ch === CHAR_QUESTION || (ch === CHAR_HASH && i > start)) {

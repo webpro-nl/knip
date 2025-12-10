@@ -359,7 +359,12 @@ export async function build({
         }
       }
 
-      for (const filePath of file.imports.resolved) {
+      for (const filePath of file.imports.programFiles) {
+        const isIgnored = isGitIgnored(filePath);
+        if (!isIgnored) principal.addProgramPath(filePath);
+      }
+
+      for (const filePath of file.imports.entryFiles) {
         const isIgnored = isGitIgnored(filePath);
         if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
       }
@@ -371,7 +376,7 @@ export async function build({
             file.imports.external.add({ ..._import, specifier: packageName });
             const principal = getPrincipalByFilePath(_import.filePath);
             if (principal && !isGitIgnored(_import.filePath)) {
-              principal.addNonEntryPath(_import.filePath);
+              principal.addProgramPath(_import.filePath);
             }
           }
         }

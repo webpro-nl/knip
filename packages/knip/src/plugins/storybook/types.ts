@@ -10,5 +10,10 @@ export type StorybookConfig = {
     | string
     | {
         name?: string;
+        options?: {
+          builder?: {
+            viteConfigPath?: string;
+          };
+        };
       };
 };

@@ -1,22 +1,23 @@
-name: Run Knip against external projects
+name: Publish preview & run ecosystem tests
 
 on:
   workflow_dispatch:
   pull_request:
   push:
     branches:
-      - "**"
+      - '**'
     tags:
-      - "!**"
+      - '!**'
 
-env:
-  PKG_URL: |
-    https://pkg.pr.new/knip@${{ github.event.pull_request.head.sha || github.sha }}
+permissions:
+  issues: write
 
 jobs:
-  prepare:
+  publish:
     name: Build and publish Knip
     runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.publish.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -24,12 +25,38 @@ jobs:
         working-directory: packages/knip
       - run: pnpm run build
         working-directory: packages/knip
-      - run: pnpx pkg-pr-new publish --compact ./packages/knip
+      - id: publish
+        run: pnpx pkg-pr-new publish --compact ./packages/knip
+      - name: Comment on referenced issues
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = '${{ steps.publish.outputs.sha }}';
+            const commits = context.payload.commits || [];
+            const messages = commits.map(commit => commit.message).join('\n');
+            const issueRefs = messages.match(/#(\d+)/g) || [];
+            const issues = [...new Set(issueRefs.map(ref => parseInt(ref.slice(1))))];
 
-  test:
-    name: Run
+            for (const issue of issues) {
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue,
+                  body: `Preview release available:\n\`\`\`sh\nnpm i -D https://pkg.pr.new/knip@${sha}\n\`\`\``
+                });
+              } catch (error) {
+                console.log(`Could not comment on #${issue}: ${error.message}`);
+              }
+            }
+
+  integration:
+    name: Run Knip in ${{ matrix.project.name }}
+    needs: publish
     runs-on: ubuntu-latest
-    needs: prepare
+    env:
+      PKG_URL: https://pkg.pr.new/knip@${{ needs.publish.outputs.sha }}
     strategy:
       fail-fast: false
       matrix:

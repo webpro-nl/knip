@@ -54,6 +54,8 @@ import { default as nanoStaged } from './nano-staged/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
+import { default as nextIntl } from './next-intl/index.js';
+import { default as nextMdx } from './next-mdx/index.js';
 import { default as node } from './node/index.js';
 import { default as nodeModulesInspector } from './node-modules-inspector/index.js';
 import { default as nodemon } from './nodemon/index.js';
@@ -94,6 +96,7 @@ import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
 import { default as svgo } from './svgo/index.js';
+import { default as svgr } from './svgr/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
 import { default as taskfile } from './taskfile/index.js';
@@ -175,6 +178,8 @@ export const Plugins = {
   nest,
   netlify,
   next,
+  'next-intl': nextIntl,
+  'next-mdx': nextMdx,
   node,
   'node-modules-inspector': nodeModulesInspector,
   nodemon,
@@ -215,6 +220,7 @@ export const Plugins = {
   stylelint,
   svelte,
   svgo,
+  svgr,
   syncpack,
   tailwind,
   taskfile,

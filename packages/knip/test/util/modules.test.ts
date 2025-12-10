@@ -18,6 +18,8 @@ test('Should sanitize import specifier', () => {
   assert.equal(sanitizeSpecifier('/specifier'), '/specifier');
   assert.equal(sanitizeSpecifier('./specifier'), './specifier');
   assert.equal(sanitizeSpecifier('../specifier.ext'), '../specifier.ext');
+  assert.equal(sanitizeSpecifier('./icon.svg?raw'), './icon.svg');
+  assert.equal(sanitizeSpecifier('../styles.css#hash'), '../styles.css');
   assert.equal(sanitizeSpecifier('specifier?query=1'), 'specifier');
   assert.equal(sanitizeSpecifier('specifier#hash'), 'specifier');
   assert.equal(sanitizeSpecifier('style-loader!css-loader?modules!./styles.css'), 'style-loader');
@@ -28,9 +30,12 @@ test('Should sanitize import specifier', () => {
   assert.equal(sanitizeSpecifier('#specifier'), '#specifier');
   assert.equal(sanitizeSpecifier('#id/specifier'), '#id/specifier');
   assert.equal(sanitizeSpecifier('~/id/specifier'), '~/id/specifier');
+  assert.equal(sanitizeSpecifier(':/id/specifier'), ':/id/specifier');
+  assert.equal(sanitizeSpecifier(':id/specifier'), ':id/specifier');
   assert.equal(sanitizeSpecifier('astro:content'), 'astro');
   assert.equal(sanitizeSpecifier('astro:env/client'), 'astro');
   assert.equal(sanitizeSpecifier('virtual:specifier'), 'virtual:specifier');
   assert.equal(sanitizeSpecifier('fs'), 'fs');
   assert.equal(sanitizeSpecifier('node:fs'), 'node:fs');
+  assert.equal(sanitizeSpecifier('node:assert/strict'), 'node:assert/strict');
 });

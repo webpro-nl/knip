@@ -4,13 +4,13 @@ import type { TreeNode } from '../graph-explorer/operations/build-exports-tree.j
 export const formatTrace = (node: TreeNode, toRelative: (path: string) => string, isReferenced: boolean): string => {
   const lines: string[] = [];
 
-  const dim = pc.dim;
   const file = pc.white;
   const id = pc.cyanBright;
-  const via = pc.dim;
   const ref = pc.cyanBright;
+  const via = pc.dim;
   const ok = pc.green;
   const fail = pc.red;
+  const dim = pc.dim;
 
   const entryMarker = node.isEntry ? dim(' ◯') : '';
   lines.push(`${file(toRelative(node.filePath))}${dim(':')}${id(node.identifier)}${entryMarker}`);
@@ -24,16 +24,12 @@ export const formatTrace = (node: TreeNode, toRelative: (path: string) => string
     return `${via(child.via)}${dim('[')}${nameDisplay}${rest ? `${dim('.')}${id(rest)}` : ''}${dim(']')}`;
   };
 
-  const isReExport = (via: string | undefined) =>
-    via?.startsWith('reExport') ?? false;
-
   const formatChild = (child: TreeNode, prefix: string, isLast: boolean) => {
     const connector = isLast ? '└── ' : '├── ';
     const childPrefix = isLast ? '    ' : '│   ';
     const entryMarker = child.isEntry ? dim(' ◯') : '';
     const isLeaf = child.children.length === 0;
-    const showLeafMarker = isLeaf && !isReExport(child.via);
-    const leafMarker = showLeafMarker ? (isReferenced ? ok(' ✓') : fail(' ✗')) : '';
+    const leafMarker = isLeaf && !child.via?.startsWith('reExport') ? (isReferenced ? ok(' ✓') : fail(' ✗')) : '';
 
     lines.push(
       `${dim(prefix)}${dim(connector)}${file(toRelative(child.filePath))}${dim(':')}${formatVia(child)}${entryMarker}${leafMarker}`
