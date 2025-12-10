@@ -154,6 +154,7 @@ export const createOptions = async (options: CreateOptions) => {
     isTrace,
     isTreatConfigHintsAsErrors:
       parsedCLIArgs['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
+    isUseTscFiles: options.isUseTscFiles ?? parsedCLIArgs['use-tsconfig-files'] ?? false,
     isWatch: parsedCLIArgs.watch ?? options.isWatch ?? false,
     maxShowIssues: parsedCLIArgs['max-show-issues'] ? Number(parsedCLIArgs['max-show-issues']) : undefined,
     parsedConfig,

@@ -12,6 +12,7 @@ import type { GetImportsAndExportsOptions } from '../types/config.js';
 import type { Issue } from '../types/issues.js';
 import type { Import, ModuleGraph } from '../types/module-graph.js';
 import type { PluginName } from '../types/PluginNames.js';
+import { partition } from '../util/array.js';
 import type { MainOptions } from '../util/create-options.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
@@ -109,7 +110,7 @@ export async function build({
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
     const { isFile, compilerOptions, fileNames } = await loadTSConfig(tsConfigFilePath);
-    const definitionPaths = fileNames.filter(filePath => IS_DTS.test(filePath));
+    const [definitionPaths, tscSourcePaths] = partition(fileNames, filePath => IS_DTS.test(filePath));
 
     if (isFile) augmentWorkspace(workspace, dir, compilerOptions);
 
@@ -277,7 +278,16 @@ export async function build({
       }
     }
 
-    {
+    if (options.isUseTscFiles) {
+      const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
+      debugLogArray(name, 'Using tsconfig files as project files', tscSourcePaths);
+      for (const filePath of tscSourcePaths) {
+        if (!isGitIgnored(filePath) && !isIgnoredWorkspace(filePath)) {
+          principal.addProgramPath(filePath);
+          principal.addProjectPath(filePath);
+        }
+      }
+    } else {
       const patterns = options.isProduction
         ? worker.getProductionProjectFilePatterns(negatedEntryPatterns)
         : worker.getProjectFilePatterns([

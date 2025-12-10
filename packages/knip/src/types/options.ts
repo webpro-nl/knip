@@ -20,6 +20,7 @@ export interface Options {
   isSession: boolean;
   isShowProgress: boolean;
   isStrict: boolean;
+  isUseTscFiles: boolean;
   isWatch: boolean;
   tags: string[];
   tsConfigFile: string | undefined;
