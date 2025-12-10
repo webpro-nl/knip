@@ -125,7 +125,7 @@
           },
           "knip.requireConfig": {
             "type": "boolean",
-            "default": true,
+            "default": false,
             "description": "Require Knip configuration file"
           }
         }
