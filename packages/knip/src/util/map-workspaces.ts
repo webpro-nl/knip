@@ -2,7 +2,6 @@ import { readFile } from 'node:fs/promises';
 import fg from 'fast-glob';
 import type { PackageJson, WorkspacePackage } from '../types/package-json.js';
 import { partition } from './array.js';
-import { debugLog } from './debug.js';
 import { ConfigurationError } from './errors.js';
 import { getPackageName } from './package-name.js';
 import { join } from './path.js';
@@ -17,15 +16,17 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
 
   if (patterns.length === 0 && negatedPatterns.length === 0) return [packages, wsPkgNames];
 
-  const matches = await fg.glob(patterns, {
+  const manifestPatterns = patterns.map(p => join(p, 'package.json'));
+
+  const matches = await fg.glob(manifestPatterns, {
     cwd,
-    onlyDirectories: true,
-    ignore: ['**/node_modules/**', ...negatedPatterns],
+    ignore: ['**/node_modules/**', ...negatedPatterns.map(p => p.slice(1))],
   });
 
-  for (const name of matches) {
+  for (const match of matches) {
+    const name = match === 'package.json' ? '.' : match.replace(/\/package\.json$/, '');
     const dir = join(cwd, name);
-    const manifestPath = join(dir, 'package.json');
+    const manifestPath = join(cwd, match);
     try {
       const manifestStr = await readFile(manifestPath, 'utf8');
       const manifest: PackageJson = JSON.parse(manifestStr);
