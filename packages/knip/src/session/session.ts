@@ -1,7 +1,7 @@
 import { run } from '../run.js';
 import type { Issues } from '../types/issues.js';
 import type { MainOptions } from '../util/create-options.js';
-import type { WatchChange, WatchHandler } from '../util/watch.js';
+import type { SessionHandler, WatchChange } from '../util/watch.js';
 import { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.js';
 import type { File } from './types.js';
 
@@ -13,15 +13,15 @@ export interface Session {
   describeFile(filePath: string, options?: FileDescriptorOptions): File | null;
 }
 
-export const createSession = async (options: MainOptions): Promise<Session> => {
-  const { watchHandler } = await run(options);
+export const createSession = async (options: MainOptions) => {
+  const { session } = await run(options);
 
-  if (!watchHandler) throw new Error('Unable to initialize watch session');
+  if (!session) throw new Error('Unable to initialize watch session');
 
-  return createSessionAdapter(options.cwd, watchHandler);
+  return createSessionAdapter(options.cwd, session);
 };
 
-const createSessionAdapter = (cwd: string, session: WatchHandler): Session => {
+const createSessionAdapter = (cwd: string, session: SessionHandler): Session => {
   return {
     handleFileChanges: session.handleFileChanges,
     getIssues: session.getIssues,

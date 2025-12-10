@@ -19,9 +19,9 @@ export type WatchChange = {
   filePath: string;
 };
 
-export type WatchHandler = Awaited<ReturnType<typeof getWatchHandler>>;
+export type SessionHandler = Awaited<ReturnType<typeof getSessionHandler>>;
 
-type Watch = {
+type WatchOptions = {
   analyzedFiles: Set<string>;
   analyzeSourceFile: (filePath: string, principal: ProjectPrincipal) => void;
   chief: ConfigurationChief;
@@ -41,7 +41,7 @@ const createUpdate = (options: { startTime: number }) => {
   return { duration, mem };
 };
 
-export const getWatchHandler = async (
+export const getSessionHandler = async (
   options: MainOptions,
   {
     analyzedFiles,
@@ -55,7 +55,7 @@ export const getWatchHandler = async (
     onFileChange,
     unreferencedFiles,
     entryPaths,
-  }: Watch
+  }: WatchOptions
 ) => {
   const getIssues = () => collector.getIssues().issues;
 

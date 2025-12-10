@@ -13,7 +13,7 @@ import watchReporter from './reporters/watch.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
-import { getWatchHandler, type OnFileChange, type WatchHandler } from './util/watch.js';
+import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.js';
 
 export const run = async (options: MainOptions) => {
   debugLogObject('*', 'Unresolved configuration', options);
@@ -66,7 +66,7 @@ export const run = async (options: MainOptions) => {
     options,
   });
 
-  let watchHandler: WatchHandler | undefined;
+  let session: SessionHandler | undefined;
 
   if (options.isWatch || options.isSession) {
     const isIgnored = (filePath: string) =>
@@ -78,7 +78,7 @@ export const run = async (options: MainOptions) => {
       ? ({ issues, duration }) => watchReporter(options, { issues, streamer, size: analyzedFiles.size, duration })
       : undefined;
 
-    watchHandler = await getWatchHandler(options, {
+    session = await getSessionHandler(options, {
       analyzedFiles,
       analyzeSourceFile,
       chief,
@@ -92,7 +92,7 @@ export const run = async (options: MainOptions) => {
       entryPaths,
     });
 
-    if (options.isWatch) watch('.', { recursive: true }, watchHandler.listener);
+    if (options.isWatch) watch('.', { recursive: true }, session.listener);
   }
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
@@ -119,7 +119,7 @@ export const run = async (options: MainOptions) => {
       configurationHints,
       includedWorkspaceDirs: chief.includedWorkspaces.map(w => w.dir),
     },
-    watchHandler,
+    session,
     streamer,
   };
 };
