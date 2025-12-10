@@ -37,18 +37,16 @@ jobs:
             const messages = commits.map(commit => commit.message).join('\n');
             const issueRefs = messages.match(/#(\d+)/g) || [];
             const issues = [...new Set(issueRefs.map(ref => parseInt(ref.slice(1))))];
-
-            for (const issue of issues) {
+            for (const issue_number of issues) {
               try {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue,
-                  body: `Preview release available:\n\`\`\`sh\nnpm i -D https://pkg.pr.new/knip@${sha}\n\`\`\``
-                });
-              } catch (error) {
-                console.log(`Could not comment on #${issue}: ${error.message}`);
-              }
+                const { owner, repo } = context.repo;
+                const { data } = await github.rest.issues.get({ owner, repo, issue_number });
+                if (data.state === 'open') {
+                  const body = `Preview release available:\n\`\`\`sh\nnpm i -D https://pkg.pr.new/knip@${sha}\n\`\`\``;
+                  await github.rest.issues.createComment({ owner, repo, issue_number, body });
+                }
+              } catch(error) {
+               console.log(`Could not comment on #${issue}: ${error.message}`);}
             }
 
   integration:
