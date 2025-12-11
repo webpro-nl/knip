@@ -227,18 +227,21 @@
       "items": {
         "type": "string",
         "enum": [
-          "binaries",
-          "classMembers",
-          "dependencies",
-          "duplicates",
-          "enumMembers",
-          "exports",
           "files",
+          "dependencies",
+          "devDependencies",
+          "optionalPeerDependencies",
+          "unlisted",
+          "binaries",
+          "unresolved",
+          "exports",
+          "types",
           "nsExports",
           "nsTypes",
-          "types",
-          "unlisted",
-          "unresolved"
+          "duplicates",
+          "enumMembers",
+          "classMembers",
+          "catalog"
         ]
       }
     },
