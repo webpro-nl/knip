@@ -6,7 +6,8 @@
       "!**/dist",
       "!**/tmp",
       "!packages/docs/.astro",
-      "!.vscode"
+      "!.vscode",
+      "!templates/language-server-client"
     ]
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },

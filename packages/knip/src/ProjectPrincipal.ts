@@ -95,7 +95,7 @@ export class ProjectPrincipal {
     this.asyncCompilers = asyncCompilers;
     this.cwd = options.cwd;
     this.isSkipLibs = options.isSkipLibs;
-    this.isWatch = options.isWatch;
+    this.isWatch = options.isWatch || options.isSession;
     this.cache = new CacheConsultant(pkgName || ANONYMOUS, options);
     this.toSourceFilePath = toSourceFilePath;
 
@@ -249,8 +249,7 @@ export class ProjectPrincipal {
   }
 
   invalidateFile(filePath: string) {
-    this.backend.fileManager.snapshotCache.delete(filePath);
-    this.backend.fileManager.sourceFileCache.delete(filePath);
+    this.backend.fileManager.invalidate(filePath);
   }
 
   public findUnusedMembers(filePath: string, members: ExportMember[]) {

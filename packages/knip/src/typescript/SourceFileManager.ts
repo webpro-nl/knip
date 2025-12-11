@@ -14,6 +14,7 @@ export class SourceFileManager {
   isSkipLibs: boolean;
   sourceFileCache = new Map<string, ts.SourceFile | undefined>();
   snapshotCache = new Map<string, ts.IScriptSnapshot | undefined>();
+  scriptVersions = new Map<string, number>();
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
 
@@ -56,6 +57,16 @@ export class SourceFileManager {
     const snapshot = ts.ScriptSnapshot.fromString(sourceFile.text);
     this.snapshotCache.set(filePath, snapshot);
     return snapshot;
+  }
+
+  getScriptVersion(filePath: string) {
+    return this.scriptVersions.get(filePath) ?? 0;
+  }
+
+  invalidate(filePath: string) {
+    this.sourceFileCache.delete(filePath);
+    this.snapshotCache.delete(filePath);
+    this.scriptVersions.set(filePath, (this.scriptVersions.get(filePath) ?? 0) + 1);
   }
 
   async compileAndAddSourceFile(filePath: string) {

@@ -2,3 +2,4 @@ node_modules
 /.idea/*
 !/.idea/runConfigurations
 .npmrc
+packages/*/dist

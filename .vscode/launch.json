@@ -26,6 +26,60 @@
       "request": "attach",
       "name": "Attach to Bun",
       "url": "ws://localhost:6499/knip"
+    },
+    {
+      "name": "Try Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-knip",
+        "--disable-extensions",
+        "${input:projectPath}"
+      ]
+    },
+    {
+      "name": "Run Extension (Playground Monorepo)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-knip",
+        "--disable-extensions",
+        "${workspaceFolder}/templates/language-server-client"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode-knip/**/*.js",
+        "${workspaceFolder}/packages/language-server/**/*.js"
+      ]
+    },
+    {
+      "name": "Attach to Knip Server",
+      "type": "node",
+      "request": "attach",
+      "port": 6009,
+      "restart": true,
+      "outFiles": [
+        "${workspaceFolder}/packages/language-server/**/*.js",
+        "${workspaceFolder}/packages/knip/dist/**/*.js",
+        "${workspaceFolder}/packages/knip/src/**/*.ts"
+      ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run + Attach Knip LSP",
+      "configurations": ["Run Extension (Playground Monorepo)", "Attach to Knip Server"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "projectPath",
+      "type": "promptString",
+      "description": "Enter absolute path to y${lineNumber}our project dir",
+      "default": "${workspaceFolder}/templates/language-server-client"
     }
   ]
 }
