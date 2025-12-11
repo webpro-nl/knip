@@ -243,6 +243,7 @@ export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isSpreadAssignment(node.parent) ||
   ts.isArrayLiteralExpression(node.parent) ||
   ts.isExportAssignment(node.parent) ||
+  (ts.isBindingElement(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent.parent);
 
 export const isInOpaqueExpression = (node: ts.Node): boolean =>
