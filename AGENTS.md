@@ -121,8 +121,7 @@ If requested to create a new plugin for a certain package/tool/framework:
 [10]: ./packages/knip/src/binaries/bash-parser.ts
 [11]: ./packages/knip/src/graph/analyze.ts
 [12]: ./packages/knip/src/graph-explorer/operations/is-referenced.ts
-[13]:
-  ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
+[13]: ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
 [14]: ./packages/knip/src/DependencyDeputy.ts
 [15]: ./packages/knip/src/reporters/symbols.ts
 [16]: ./packages/docs/src/content/docs/writing-a-plugin/index.md

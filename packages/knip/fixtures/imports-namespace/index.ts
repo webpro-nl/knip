@@ -51,4 +51,4 @@ const func = () => {
 
 const props: { values?: { identifier45: number; identifier46: number } } = {};
 const { values = NS10 } = props;
-values.identifier45
+values.identifier45;
