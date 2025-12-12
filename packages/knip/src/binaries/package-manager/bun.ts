@@ -14,6 +14,7 @@ const commands = [
   'install',
   'link',
   'pm',
+  'publish',
   'remove',
   'run',
   'test',

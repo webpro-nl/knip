@@ -166,6 +166,8 @@ test('getInputsFromScripts (bun)', () => {
   t('bun ./main.ts', [toEntry(join(cwd, 'main.ts'))]);
   t('bun run script.js', [toEntry(join(cwd, 'script.js'))]);
   t('bun run --cwd packages/knip watch', []);
+  t('bun publish --access public', []);
+  t('bun publish --access public --tag latest', []);
 });
 
 test('getInputsFromScripts (pnpm)', () => {
