@@ -28,9 +28,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.8",
-    "remark-preset-webpro": "^2.0.1",
+    "installed-check": "^9.3.0",
+    "mdxlint": "^1.0.0",
     "mdxlint-preset-webpro": "^1.0.2",
-    "installed-check": "^9.3.0"
+    "remark-cli": "12.0.1",
+    "remark-preset-webpro": "^2.0.1"
   },
   "remarkConfig": {
     "plugins": [

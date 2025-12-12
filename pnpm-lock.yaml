@@ -14,9 +14,15 @@ importers:
       installed-check:
         specifier: ^9.3.0
         version: 9.3.0
+      mdxlint:
+        specifier: ^1.0.0
+        version: 1.0.0
       mdxlint-preset-webpro:
         specifier: ^1.0.2
         version: 1.0.2
+      remark-cli:
+        specifier: 12.0.1
+        version: 12.0.1
       remark-preset-webpro:
         specifier: ^2.0.1
         version: 2.0.1
@@ -53,15 +59,9 @@ importers:
       hastscript:
         specifier: 9.0.1
         version: 9.0.1
-      mdxlint:
-        specifier: 1.0.0
-        version: 1.0.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
-      remark-cli:
-        specifier: 12.0.1
-        version: 12.0.1
       remark-directive:
         specifier: 4.0.0
         version: 4.0.0
