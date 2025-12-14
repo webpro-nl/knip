@@ -729,6 +729,10 @@
           "title": "svgr plugin configuration (https://knip.dev/reference/plugins/svgr)",
           "$ref": "#/definitions/plugin"
         },
+        "swc": {
+          "title": "swc plugin configuration (https://knip.dev/reference/plugins/swc)",
+          "$ref": "#/definitions/plugin"
+        },
         "syncpack": {
           "title": "syncpack plugin configuration (https://knip.dev/reference/plugins/syncpack)",
           "$ref": "#/definitions/plugin"

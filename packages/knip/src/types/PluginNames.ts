@@ -98,6 +98,7 @@ export type PluginName =
   | 'svelte'
   | 'svgo'
   | 'svgr'
+  | 'swc'
   | 'syncpack'
   | 'tailwind'
   | 'taskfile'
@@ -222,6 +223,7 @@ export const pluginNames = [
   'svelte',
   'svgo',
   'svgr',
+  'swc',
   'syncpack',
   'tailwind',
   'taskfile',
