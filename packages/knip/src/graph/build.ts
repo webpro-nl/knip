@@ -29,7 +29,7 @@ import {
   toProductionEntry,
 } from '../util/input.js';
 import { loadTSConfig } from '../util/load-tsconfig.js';
-import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
+import { updateImportMap } from '../util/module-graph.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { perfObserver } from '../util/Performance.js';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.js';
@@ -402,16 +402,21 @@ export async function build({
         }
       }
 
-      const node = getOrCreateFileNode(graph, filePath);
-
       file.imports.unresolved = unresolvedImports;
 
-      Object.assign(node, file);
-
-      updateImportMap(node, file.imports.internal, graph);
-      node.internalImportCache = file.imports.internal;
-
-      graph.set(filePath, node);
+      const node = graph.get(filePath);
+      if (node) {
+        node.imports = file.imports;
+        node.exports = file.exports;
+        node.duplicates = file.duplicates;
+        node.scripts = file.scripts;
+        updateImportMap(node, file.imports.internal, graph);
+        node.internalImportCache = file.imports.internal;
+      } else {
+        updateImportMap(file, file.imports.internal, graph);
+        file.internalImportCache = file.imports.internal;
+        graph.set(filePath, file);
+      }
     }
   };
 

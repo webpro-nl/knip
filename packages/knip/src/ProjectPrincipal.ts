@@ -329,9 +329,7 @@ export class ProjectPrincipal {
     for (const [filePath, file] of graph) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;
-      // biome-ignore lint: correctness/noUnusedVariables
-      const { imported, internalImportCache, ...clone } = file;
-      fd.meta.data = clone;
+      fd.meta.data = { ...file, internalImportCache: undefined, imported: undefined };
     }
     this.cache.reconcile();
   }

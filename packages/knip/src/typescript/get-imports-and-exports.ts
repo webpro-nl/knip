@@ -555,6 +555,8 @@ const getImportsAndExports = (
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,
+    imported: undefined,
+    internalImportCache: undefined,
   };
 };
 
