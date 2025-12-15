@@ -255,3 +255,6 @@ export const IMPORT_FLAGS = {
   SIDE_EFFECTS: 1 << 5,
   OPAQUE: 1 << 6,
 } as const;
+
+export const EMPTY_ARRAY: never[] = [];
+export const EMPTY_SET: ReadonlySet<never> = new Set();

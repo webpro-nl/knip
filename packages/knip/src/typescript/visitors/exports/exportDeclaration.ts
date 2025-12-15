@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
+import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
 import type { BoundSourceFile } from '../../SourceFile.js';
 import { isModule } from '../helpers.js';
@@ -26,7 +26,7 @@ export default visit(isModule, (node, { isFixExports, isFixTypes }) => {
           (isFixExports && type !== SYMBOL_TYPE.TYPE) || (isFixTypes && type === SYMBOL_TYPE.TYPE)
             ? [element.getStart(), element.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.EMPTY_DECLARATION]
             : undefined;
-        return { node: element, symbol, identifier, type, pos, fix };
+        return { node: element, symbol, identifier, type, pos, fix, members: EMPTY_ARRAY, jsDocTags: undefined };
       });
     }
   }

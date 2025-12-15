@@ -15,7 +15,16 @@ export const collectTypeScriptPragmaImports = (sourceFile: BoundSourceFile): Imp
       : jsxImportSourcePragmas;
     const { factory: specifier } = jsxImportSourcePragma?.arguments ?? {};
     const pos = jsxImportSourcePragma.range?.pos ?? 0;
-    if (specifier) importNodes.push({ specifier, identifier: undefined, pos, modifiers });
+    if (specifier)
+      importNodes.push({
+        specifier,
+        identifier: undefined,
+        pos,
+        modifiers,
+        alias: undefined,
+        namespace: undefined,
+        symbol: undefined,
+      });
   }
 
   const referencePragma = sourceFile.pragmas.get('reference');
@@ -24,7 +33,16 @@ export const collectTypeScriptPragmaImports = (sourceFile: BoundSourceFile): Imp
     for (const ref of refs) {
       if (ref.arguments?.types) {
         const { value: specifier, pos } = ref.arguments.types;
-        if (specifier) importNodes.push({ specifier, identifier: undefined, pos, modifiers });
+        if (specifier)
+          importNodes.push({
+            specifier,
+            identifier: undefined,
+            pos,
+            modifiers,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
+          });
       }
     }
   }

@@ -17,6 +17,9 @@ export default visit(
             identifier: undefined,
             pos: node.arguments[0].pos,
             modifiers: IMPORT_FLAGS.ENTRY,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
           };
       }
     }

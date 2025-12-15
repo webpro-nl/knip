@@ -23,7 +23,15 @@ export const collectCustomImports = (sourceFile: BoundSourceFile): ImportNode[] 
       const modifiers = isLocal ? IMPORT_FLAGS.ENTRY : IMPORT_FLAGS.NONE;
       const offset = match[0].length - match[2].length;
       const specifier = isLocal || id === 'node' ? id : getEnvSpecifier(id);
-      importNodes.push({ specifier, identifier: undefined, pos: comment.pos + match.index + offset, modifiers });
+      importNodes.push({
+        specifier,
+        identifier: undefined,
+        pos: comment.pos + match.index + offset,
+        modifiers,
+        alias: undefined,
+        namespace: undefined,
+        symbol: undefined,
+      });
     }
   }
 

@@ -10,7 +10,15 @@ export default visit(
       const specifier = node.moduleSpecifier.text;
       if (!node.importClause) {
         // Pattern: import 'side-effects';
-        return { specifier, identifier: undefined, pos: node.pos, modifiers: IMPORT_FLAGS.SIDE_EFFECTS };
+        return {
+          specifier,
+          identifier: undefined,
+          pos: node.pos,
+          modifiers: IMPORT_FLAGS.SIDE_EFFECTS,
+          alias: undefined,
+          namespace: undefined,
+          symbol: undefined,
+        };
       }
 
       const imports = [];
@@ -27,6 +35,7 @@ export default visit(
           symbol: node.importClause.symbol,
           pos: node.importClause.name?.getStart() ?? node.getStart(),
           modifiers,
+          namespace: undefined,
         });
       }
 
@@ -41,6 +50,8 @@ export default visit(
             identifier: IMPORT_STAR,
             pos: node.importClause.namedBindings.name.getStart(),
             modifiers,
+            alias: undefined,
+            namespace: undefined,
           });
         }
         if (ts.isNamedImports(node.importClause.namedBindings)) {
@@ -54,6 +65,8 @@ export default visit(
               symbol: element.symbol,
               pos: element.name.getStart(),
               modifiers,
+              alias: undefined,
+              namespace: undefined,
             });
           }
         }
@@ -64,6 +77,9 @@ export default visit(
             identifier: undefined,
             pos: node.importClause.namedBindings.pos,
             modifiers,
+            alias: undefined,
+            symbol: undefined,
+            namespace: undefined,
           });
         }
       }

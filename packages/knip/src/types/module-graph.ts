@@ -50,8 +50,8 @@ export interface Export extends SourceLocation {
   jsDocTags: Tags;
   self: [number, boolean];
   fixes: Fixes;
-  symbol?: ts.Symbol;
-  isReExport?: boolean;
+  symbol: undefined | ts.Symbol;
+  isReExport: boolean;
 }
 
 export type ExportMember = {
@@ -62,7 +62,7 @@ export type ExportMember = {
   type: SymbolType;
   self: [number, boolean];
   fix: Fix;
-  symbol?: ts.Symbol;
+  symbol: undefined | ts.Symbol;
   jsDocTags: Tags;
   flags: number;
 };

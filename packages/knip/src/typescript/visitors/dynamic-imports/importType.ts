@@ -12,6 +12,9 @@ export default visit(
           identifier: undefined,
           pos: node.argument.literal.getStart(),
           modifiers: IMPORT_FLAGS.TYPE_ONLY,
+          alias: undefined,
+          namespace: undefined,
+          symbol: undefined,
         };
       }
     }

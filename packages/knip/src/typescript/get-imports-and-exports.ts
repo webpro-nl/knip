@@ -66,7 +66,6 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Exp
 };
 
 interface AddInternalImportOptions extends ImportNode {
-  namespace?: string;
   filePath: string;
   line: number;
   col: number;
@@ -81,8 +80,8 @@ const getImportsAndExports = (
   skipExports: boolean
 ): FileNode => {
   const internal: ImportMap = new Map();
-  const external = new Set<Import>();
-  const unresolved = new Set<Import>();
+  const external: Imports = new Set();
+  const unresolved: Imports = new Set();
   const programFiles = new Set<string>();
   const entryFiles = new Set<string>();
   const imports: Imports = new Set();
@@ -261,7 +260,7 @@ const getImportsAndExports = (
     }
   };
 
-  const addExport = ({ node, symbol, identifier, type, pos, members = [], fix }: ExportNode) => {
+  const addExport = ({ node, symbol, identifier, type, pos, members, fix }: ExportNode) => {
     if (skipExports) return;
 
     let isReExport = Boolean(
@@ -297,9 +296,9 @@ const getImportsAndExports = (
     const item = exports.get(identifier);
     if (item) {
       // Code path for fn overloads, simple merge
-      const members = [...(item.members ?? []), ...exportMembers];
-      const tags = new Set([...(item.jsDocTags ?? []), ...jsDocTags]);
-      const fixes = fix ? [...(item.fixes ?? []), fix] : item.fixes;
+      const members = [...item.members, ...exportMembers];
+      const tags = new Set([...item.jsDocTags, ...jsDocTags]);
+      const fixes = fix ? [...item.fixes, fix] : item.fixes;
       exports.set(identifier, { ...item, members, jsDocTags: tags, fixes, isReExport });
     } else {
       const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);

@@ -20,6 +20,7 @@ export default visit(isNotJS, node => {
       symbol: node.symbol,
       pos: node.name.getStart(),
       modifiers: IMPORT_FLAGS.NONE,
+      namespace: undefined,
     };
   }
 });

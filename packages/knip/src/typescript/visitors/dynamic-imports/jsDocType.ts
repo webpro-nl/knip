@@ -19,6 +19,9 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
           identifier,
           pos: node.qualifier?.getStart() ?? importClause.literal.pos,
           modifiers: IMPORT_FLAGS.TYPE_ONLY,
+          alias: undefined,
+          namespace: undefined,
+          symbol: undefined,
         });
       }
     }
@@ -40,6 +43,9 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
             identifier: IMPORT_STAR,
             pos: bindings.name.getStart(),
             modifiers: IMPORT_FLAGS.TYPE_ONLY,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
           });
         } else {
           for (const element of bindings.elements) {
@@ -50,6 +56,9 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
               identifier: String((element.propertyName ?? element.name).escapedText),
               pos: element.name.getStart(),
               modifiers: IMPORT_FLAGS.TYPE_ONLY,
+              alias: undefined,
+              namespace: undefined,
+              symbol: undefined,
             });
           }
         }

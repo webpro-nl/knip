@@ -9,12 +9,12 @@ export type Fixes = Array<ExportPosTuple>;
 
 export type ExportNode = {
   node: ts.Node;
-  symbol?: ts.Symbol;
+  symbol: undefined | ts.Symbol;
   identifier: Identifier;
   pos: number;
   type: SymbolType;
-  members?: ExportNodeMember[];
-  jsDocTags?: Set<string>;
+  members: ExportNodeMember[];
+  jsDocTags: undefined | Set<string>;
   fix: Fix;
 };
 

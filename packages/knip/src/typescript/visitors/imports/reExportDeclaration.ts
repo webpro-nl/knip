@@ -15,6 +15,9 @@ export default visit(
             specifier: node.moduleSpecifier.text,
             pos: node.moduleSpecifier.getStart() - 7,
             modifiers: IMPORT_FLAGS.RE_EXPORT,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
           };
         }
         if (node.exportClause.kind === ts.SyntaxKind.NamespaceExport) {
@@ -25,6 +28,8 @@ export default visit(
             specifier: node.moduleSpecifier.text,
             pos: node.exportClause.name.getStart(),
             modifiers: IMPORT_FLAGS.RE_EXPORT,
+            alias: undefined,
+            symbol: undefined,
           };
         }
         const specifier = node.moduleSpecifier; // Assign to satisfy TS
@@ -37,6 +42,8 @@ export default visit(
               specifier: specifier.text,
               pos: element.propertyName.getStart(),
               modifiers: IMPORT_FLAGS.RE_EXPORT,
+              namespace: undefined,
+              symbol: undefined,
             };
           }
           // Pattern: export { identifier } from 'specifier';
@@ -45,6 +52,9 @@ export default visit(
             specifier: specifier.text,
             pos: element.name.getStart(),
             modifiers: IMPORT_FLAGS.RE_EXPORT,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
           };
         });
       }
