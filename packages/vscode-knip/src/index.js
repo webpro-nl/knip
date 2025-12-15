@@ -16,6 +16,9 @@ import { ImportsTreeViewProvider } from './tree-view-imports.js';
  * @import { TreeData } from './tree-view-base.js';
  */
 
+/** @param {string} value */
+const toPosix = value => value.split(path.sep).join(path.posix.sep);
+
 export class Extension {
   /** @type {Extension | undefined} */
   static #instance;
@@ -266,8 +269,9 @@ export class Extension {
     const config = vscode.workspace.getConfiguration('knip');
     if (!config.get('editor.exports.hover.enabled', true)) return null;
 
-    const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (!root) return null;
+    const fsPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!fsPath) return null;
+    const root = toPosix(fsPath);
 
     const file = await this.#requestFileDescriptor(document);
     if (!file) return null;

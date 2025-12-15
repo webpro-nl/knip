@@ -1,4 +1,4 @@
-import { basename, relative } from 'node:path';
+import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
@@ -14,6 +14,9 @@ import { DEFAULT_JSDOC_TAGS, REQUEST_FILE_NODE } from './constants.js';
 import { issueToDiagnostic } from './diagnostics.js';
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
+
+/** @param {string} value */
+const toPosix = value => value.split(path.sep).join(path.posix.sep);
 
 /**
  * @import { Issues, Rules } from 'knip/session';
@@ -199,7 +202,7 @@ export class LanguageServer {
     const changes = [];
     for (const change of params.changes) {
       const filePath = fileURLToPath(change.uri);
-      if (RESTART_FOR.has(basename(change.uri))) return this.restart();
+      if (RESTART_FOR.has(path.basename(change.uri))) return this.restart();
       const type = FILE_CHANGE_TYPES.get(change.type);
       if (!type) continue;
       changes.push({ type, filePath });
@@ -223,7 +226,7 @@ export class LanguageServer {
    * @returns {File | undefined}
    */
   getFileDescriptor(filePath, options) {
-    const relPath = relative(this.cwd ?? process.cwd(), filePath);
+    const relPath = toPosix(path.relative(this.cwd ?? process.cwd(), filePath));
     if (!this.session) return;
     if (this.fileCache?.filePath === relPath) return this.fileCache.file;
     const startTime = performance.now();
