@@ -15,7 +15,6 @@ type CreateHostsOptions = {
   compilerOptions: ts.CompilerOptions;
   entryPaths: Set<string>;
   compilers: [SyncCompilers, AsyncCompilers];
-  isSkipLibs: boolean;
   toSourceFilePath: ToSourceFilePath;
   useResolverCache: boolean;
   fileManager: SourceFileManager;
@@ -27,7 +26,6 @@ export const createHosts = ({
   fileManager,
   entryPaths,
   compilers,
-  isSkipLibs,
   toSourceFilePath,
   useResolverCache,
 }: CreateHostsOptions) => {
@@ -36,8 +34,7 @@ export const createHosts = ({
     compilerOptions,
     compilerExtensions,
     toSourceFilePath,
-    useResolverCache,
-    isSkipLibs
+    useResolverCache
   );
 
   const languageServiceHost: ts.LanguageServiceHost = {

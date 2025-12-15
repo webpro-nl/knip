@@ -62,7 +62,6 @@ export class ProjectPrincipal {
   extensions: Set<string>;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
-  isSkipLibs: boolean;
   isWatch: boolean;
 
   cache: CacheConsultant<FileNode>;
@@ -94,7 +93,6 @@ export class ProjectPrincipal {
     this.syncCompilers = syncCompilers;
     this.asyncCompilers = asyncCompilers;
     this.cwd = options.cwd;
-    this.isSkipLibs = options.isSkipLibs;
     this.isWatch = options.isWatch;
     this.cache = new CacheConsultant(pkgName || ANONYMOUS, options);
     this.toSourceFilePath = toSourceFilePath;
@@ -111,7 +109,6 @@ export class ProjectPrincipal {
       compilerOptions: this.compilerOptions,
       entryPaths: this.entryPaths,
       compilers: [this.syncCompilers, this.asyncCompilers],
-      isSkipLibs: this.isSkipLibs,
       toSourceFilePath: this.toSourceFilePath,
       useResolverCache: !this.isWatch,
       fileManager: this.backend.fileManager,
