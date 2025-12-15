@@ -24,4 +24,5 @@ export type ExportNodeMember = {
   pos: number;
   type: SymbolType;
   fix: Fix;
+  flags: number;
 };

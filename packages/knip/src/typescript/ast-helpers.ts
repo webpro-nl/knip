@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { FIX_FLAGS, SYMBOL_TYPE } from '../constants.js';
+import { FIX_FLAGS, MEMBER_FLAGS, SYMBOL_TYPE } from '../constants.js';
 import type { Fix } from '../types/exports.js';
 import type { SymbolType } from '../types/issues.js';
 import type { BoundSourceFile } from './SourceFile.js';
@@ -63,19 +63,23 @@ export const getNodeType = (node: ts.Node): SymbolType => {
   return SYMBOL_TYPE.UNKNOWN;
 };
 
-export const isNonPrivatePropertyOrMethodDeclaration = (
+export const isNonPrivateDeclaration = (
   member: ts.ClassElement
-): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
+): member is ts.MethodDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration =>
   (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member) || isGetOrSetAccessorDeclaration(member)) &&
   !isPrivateMember(member);
 
-export const getClassMember = (member: ts.MethodDeclaration | ts.PropertyDeclaration, isFixTypes: boolean) => ({
+export const getClassMember = (
+  member: ts.MethodDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration,
+  isFixTypes: boolean
+) => ({
   node: member,
   identifier: member.name.getText(),
   // Naive, but [does.the.job()]
   pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
   type: SYMBOL_TYPE.MEMBER,
   fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
+  flags: member.kind === ts.SyntaxKind.SetAccessor ? MEMBER_FLAGS.SETTER : MEMBER_FLAGS.NONE,
 });
 
 export const getEnumMember = (member: ts.EnumMember, isFixTypes: boolean) => ({
@@ -86,6 +90,7 @@ export const getEnumMember = (member: ts.EnumMember, isFixTypes: boolean) => ({
   fix: isFixTypes
     ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
     : undefined,
+  flags: MEMBER_FLAGS.NONE,
 });
 
 export function stripQuotes(name: string) {

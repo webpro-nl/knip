@@ -1,12 +1,7 @@
 import ts from 'typescript';
 import { FIX_FLAGS } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
-import {
-  getClassMember,
-  getEnumMember,
-  getNodeType,
-  isNonPrivatePropertyOrMethodDeclaration,
-} from '../../ast-helpers.js';
+import { getClassMember, getEnumMember, getNodeType, isNonPrivateDeclaration } from '../../ast-helpers.js';
 import { isModule } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
 
@@ -30,9 +25,7 @@ export default visit(isModule, (node, { isFixExports, isReportClassMembers, isFi
 
       if (ts.isClassDeclaration(decl)) {
         const members = isReportClassMembers
-          ? decl.members
-              .filter(isNonPrivatePropertyOrMethodDeclaration)
-              .map(member => getClassMember(member, isFixTypes))
+          ? decl.members.filter(isNonPrivateDeclaration).map(member => getClassMember(member, isFixTypes))
           : [];
         return { node, symbol, identifier: 'default', type, pos, fix, members };
       }

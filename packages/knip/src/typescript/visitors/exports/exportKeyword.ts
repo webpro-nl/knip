@@ -7,7 +7,7 @@ import {
   getDefaultKeywordNode,
   getEnumMember,
   getExportKeywordNode,
-  isNonPrivatePropertyOrMethodDeclaration,
+  isNonPrivateDeclaration,
 } from '../../ast-helpers.js';
 import { isModule } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
@@ -86,7 +86,7 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
       const pos = (node.name ?? node).getStart();
       const fix = getFix(exportKeyword, defaultKeyword);
       const members = isReportClassMembers
-        ? node.members.filter(isNonPrivatePropertyOrMethodDeclaration).map(member => getClassMember(member, isFixTypes))
+        ? node.members.filter(isNonPrivateDeclaration).map(member => getClassMember(member, isFixTypes))
         : [];
 
       return { node, identifier, type: SYMBOL_TYPE.CLASS, pos, members, fix };

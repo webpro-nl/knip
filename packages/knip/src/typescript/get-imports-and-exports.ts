@@ -61,6 +61,7 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Exp
     fix: member.fix,
     self: [0, false],
     jsDocTags: getJSDocTags(member.node),
+    flags: member.flags,
   };
 };
 

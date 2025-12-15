@@ -236,6 +236,11 @@ export const FIX_FLAGS = {
   WITH_NEWLINE: 1 << 2, // remove with newline
 } as const;
 
+export const MEMBER_FLAGS = {
+  NONE: 0,
+  SETTER: 1 << 0,
+} as const;
+
 export const SIDE_EFFECTS = '__side-effects';
 
 export const OPAQUE = '__opaque';

@@ -64,6 +64,7 @@ export type ExportMember = {
   fix: Fix;
   symbol?: ts.Symbol;
   jsDocTags: Tags;
+  flags: number;
 };
 
 export type ExportMap = Map<Identifier, Export>;

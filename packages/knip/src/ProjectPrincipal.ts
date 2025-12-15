@@ -2,7 +2,7 @@ import ts from 'typescript';
 import { CacheConsultant } from './CacheConsultant.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, PUBLIC_TAG } from './constants.js';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, MEMBER_FLAGS, PUBLIC_TAG } from './constants.js';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from './types/config.js';
 import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.js';
 import type { Paths, PrincipalOptions } from './types/project.js';
@@ -253,6 +253,11 @@ export class ProjectPrincipal {
     this.backend.fileManager.sourceFileCache.delete(filePath);
   }
 
+  /**
+   * Find unused class members:
+   * - Include members with no or only write references
+   * - Exclude setters and members implementing external types
+   */
   public findUnusedMembers(filePath: string, members: ExportMember[]) {
     if (!this.findReferences || !this.getImplementationAtPosition) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
@@ -262,13 +267,22 @@ export class ProjectPrincipal {
 
     return members.filter(member => {
       if (member.jsDocTags.has(PUBLIC_TAG)) return false;
+
       const implementations =
-        this.getImplementationAtPosition?.(filePath, member.pos)?.filter(
+        // biome-ignore lint/style/noNonNullAssertion: assigned in guard
+        this.getImplementationAtPosition!(filePath, member.pos)?.filter(
           impl => impl.fileName !== filePath || impl.textSpan.start !== member.pos
         ) ?? [];
 
-      const referencedSymbols =
-        this.findReferences?.(filePath, member.pos)?.filter(
+      // biome-ignore lint/style/noNonNullAssertion: assigned in guard
+      const referencedSymbols = this.findReferences!(filePath, member.pos) ?? [];
+
+      if (referencedSymbols.length > 1 && referencedSymbols.some(sym => isInNodeModules(sym.definition.fileName))) {
+        return false;
+      }
+
+      const refs = referencedSymbols
+        .filter(
           sym =>
             !implementations.some(
               impl =>
@@ -276,20 +290,22 @@ export class ProjectPrincipal {
                 impl.textSpan.start === sym.definition.textSpan.start &&
                 impl.textSpan.length === sym.definition.textSpan.length
             )
-        ) ?? [];
+        )
+        .flatMap(refs => refs.references)
+        .filter(ref => !ref.isDefinition);
 
-      const refs = referencedSymbols.flatMap(refs => refs.references).filter(ref => !ref.isDefinition);
-      return refs.length === 0;
+      if (refs.length === 0) return true;
+      if (member.flags & MEMBER_FLAGS.SETTER) return false;
+      return !refs.some(ref => !ref.isWriteAccess);
     });
   }
 
   public hasExternalReferences(filePath: string, exportedItem: Export) {
     if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
 
-    if (!this.findReferences || !this.getImplementationAtPosition) {
+    if (!this.findReferences) {
       const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
       this.findReferences = timerify(languageService.findReferences);
-      this.getImplementationAtPosition = timerify(languageService.getImplementationAtPosition);
     }
 
     const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
@@ -300,7 +316,7 @@ export class ProjectPrincipal {
       .flatMap(refs => refs.references)
       .filter(ref => !ref.isDefinition && ref.fileName !== filePath)
       .filter(ref => {
-        // Filter out are re-exports
+        // Filter out re-exports
         const sourceFile = this.backend.program?.getSourceFile(ref.fileName);
         if (!sourceFile) return true;
         // @ts-expect-error ts.getTokenAtPosition is internal fn
