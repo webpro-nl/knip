@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS } from '../../../constants.js';
+import { IMPORT_FLAGS } from '../../../constants.js';
 import { isPropertyAccessCall } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -16,7 +16,10 @@ export default visit(
             specifier,
             identifier: undefined,
             pos: node.arguments[0].pos,
-            modifiers: IMPORT_MODIFIERS.ENTRY,
+            modifiers: IMPORT_FLAGS.ENTRY,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
           };
       }
     }

@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
 import { findAncestor, findDescendants, isModuleExportsAccess, isRequireCall, isTopLevel } from '../../ast-helpers.js';
 import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
@@ -10,7 +10,7 @@ export default visit(
     if (isRequireCall(node)) {
       if (ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
-        const modifiers = isNotJS(node.getSourceFile()) ? IMPORT_MODIFIERS.BRIDGE : IMPORT_MODIFIERS.NONE;
+        const modifiers = isNotJS(node.getSourceFile()) ? IMPORT_FLAGS.BRIDGE : IMPORT_FLAGS.NONE;
 
         if (specifier) {
           const propertyAccessExpression = findAncestor<ts.PropertyAccessExpression>(node, _node => {
@@ -21,7 +21,15 @@ export default visit(
           if (propertyAccessExpression) {
             // Pattern: require('side-effects').identifier
             const identifier = String(propertyAccessExpression.name.escapedText);
-            return { identifier, specifier, pos: propertyAccessExpression.name.getStart(), modifiers };
+            return {
+              identifier,
+              specifier,
+              pos: propertyAccessExpression.name.getStart(),
+              modifiers,
+              alias: undefined,
+              namespace: undefined,
+              symbol: undefined,
+            };
           }
           const variableDeclaration = node.parent;
           if (
@@ -39,6 +47,7 @@ export default visit(
                 symbol: isTLA ? variableDeclaration.symbol : undefined,
                 specifier,
                 pos: variableDeclaration.name.getStart(),
+                namespace: undefined,
                 modifiers,
               };
             }
@@ -50,11 +59,27 @@ export default visit(
                 const alias = element.propertyName ? element.name.getText() : undefined;
                 // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'BindingElement'.
                 const symbol = isTLA ? element.symbol : undefined;
-                return { identifier, specifier, alias, symbol, pos: element.name.getStart(), modifiers };
+                return {
+                  identifier,
+                  specifier,
+                  alias,
+                  symbol,
+                  pos: element.name.getStart(),
+                  modifiers,
+                  namespace: undefined,
+                };
               });
             }
             // Pattern: require('specifier')
-            return { identifier: 'default', specifier, pos: node.arguments[0].pos, modifiers };
+            return {
+              identifier: 'default',
+              specifier,
+              pos: node.arguments[0].pos,
+              modifiers,
+              alias: undefined,
+              namespace: undefined,
+              symbol: undefined,
+            };
           }
 
           if (
@@ -67,17 +92,36 @@ export default visit(
               identifier: IMPORT_STAR,
               specifier,
               pos: node.arguments[0].pos,
-              modifiers: IMPORT_MODIFIERS.RE_EXPORT,
+              modifiers: IMPORT_FLAGS.RE_EXPORT,
+              alias: undefined,
+              namespace: undefined,
+              symbol: undefined,
             };
           }
 
           // Pattern: require('side-effects')()
           if (ts.isCallExpression(node.parent)) {
-            return { identifier: 'default', specifier, pos: node.getEnd(), modifiers };
+            return {
+              identifier: 'default',
+              specifier,
+              pos: node.getEnd(),
+              modifiers,
+              alias: undefined,
+              namespace: undefined,
+              symbol: undefined,
+            };
           }
 
           // Pattern: require('side-effects')
-          return { identifier: 'default', specifier, pos: node.getStart(), modifiers };
+          return {
+            identifier: 'default',
+            specifier,
+            pos: node.getStart(),
+            modifiers,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
+          };
         }
       }
     }

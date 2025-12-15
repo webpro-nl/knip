@@ -1,4 +1,4 @@
-import { IMPORT_MODIFIERS } from '../../constants.js';
+import { IMPORT_FLAGS } from '../../constants.js';
 import type { ImportNode } from '../../types/imports.js';
 import type { BoundSourceFile } from '../SourceFile.js';
 
@@ -6,7 +6,7 @@ export const collectTypeScriptPragmaImports = (sourceFile: BoundSourceFile): Imp
   if (!sourceFile.pragmas || sourceFile.pragmas.size === 0) return [];
 
   const importNodes: ImportNode[] = [];
-  const modifiers = IMPORT_MODIFIERS.TYPE_ONLY;
+  const modifiers = IMPORT_FLAGS.TYPE_ONLY;
 
   const jsxImportSourcePragmas = sourceFile.pragmas.get('jsximportsource');
   if (jsxImportSourcePragmas) {
@@ -15,7 +15,16 @@ export const collectTypeScriptPragmaImports = (sourceFile: BoundSourceFile): Imp
       : jsxImportSourcePragmas;
     const { factory: specifier } = jsxImportSourcePragma?.arguments ?? {};
     const pos = jsxImportSourcePragma.range?.pos ?? 0;
-    if (specifier) importNodes.push({ specifier, identifier: undefined, pos, modifiers });
+    if (specifier)
+      importNodes.push({
+        specifier,
+        identifier: undefined,
+        pos,
+        modifiers,
+        alias: undefined,
+        namespace: undefined,
+        symbol: undefined,
+      });
   }
 
   const referencePragma = sourceFile.pragmas.get('reference');
@@ -24,7 +33,16 @@ export const collectTypeScriptPragmaImports = (sourceFile: BoundSourceFile): Imp
     for (const ref of refs) {
       if (ref.arguments?.types) {
         const { value: specifier, pos } = ref.arguments.types;
-        if (specifier) importNodes.push({ specifier, identifier: undefined, pos, modifiers });
+        if (specifier)
+          importNodes.push({
+            specifier,
+            identifier: undefined,
+            pos,
+            modifiers,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
+          });
       }
     }
   }

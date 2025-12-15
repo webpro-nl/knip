@@ -11,7 +11,7 @@ type NamespaceReExportCallback = (namespace: string, sources: Set<string>) => bo
 export const forEachPassThroughReExport = (importMaps: ImportMaps, callback: PassThroughReExportCallback): boolean => {
   for (const [identifier, sources] of importMaps.reExported) {
     if (identifier === IMPORT_STAR) continue;
-    if (callback(identifier, sources ?? new Set()) === false) return false;
+    if (callback(identifier, sources) === false) return false;
   }
   return true;
 };
@@ -19,7 +19,7 @@ export const forEachPassThroughReExport = (importMaps: ImportMaps, callback: Pas
 export const forEachAliasReExport = (importMaps: ImportMaps, callback: AliasReExportCallback): boolean => {
   for (const [identifier, aliasMap] of importMaps.reExportedAs) {
     for (const [alias, sources] of aliasMap) {
-      if (callback(identifier, alias, sources ?? new Set()) === false) return false;
+      if (callback(identifier, alias, sources) === false) return false;
     }
   }
   return true;
@@ -27,7 +27,7 @@ export const forEachAliasReExport = (importMaps: ImportMaps, callback: AliasReEx
 
 export const forEachNamespaceReExport = (importMaps: ImportMaps, callback: NamespaceReExportCallback): boolean => {
   for (const [namespace, sources] of importMaps.reExportedNs) {
-    if (callback(namespace, sources ?? new Set()) === false) return false;
+    if (callback(namespace, sources) === false) return false;
   }
   return true;
 };

@@ -26,10 +26,15 @@ const createSyncModuleResolver = (extensions: string[]) => {
 
 const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
 
-export const _resolveModuleSync = timerify(resolveModuleSync);
+/**
+ * Resolver for the TS program during module resolution (i.e. used in
+ * languageServiceHost.resolveModuleNames + compilerHost.resolveModuleNames).
+ * Serves as fast resolver, with fallback to `ts.resolveModuleName`.
+ */
+export const _resolveModuleSync = timerify(resolveModuleSync, 'resolveModuleSync');
 
 export const _createSyncModuleResolver: typeof createSyncModuleResolver = extensions =>
-  timerify(createSyncModuleResolver(extensions));
+  timerify(createSyncModuleResolver(extensions), 'resolveModuleSync');
 
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({
@@ -45,6 +50,11 @@ const createSyncResolver = (extensions: string[]) => {
   };
 };
 
-const resolveSync = createSyncResolver(DEFAULT_EXTENSIONS);
+const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.d.ts', '.d.mts', '.d.cts', '.json', '.jsonc']);
 
+/**
+ * Resolver for everything outside the realm of TS module resolution.
+ * That's everything coming directly from package.json, scripts and plugins
+ * that's an `Input` except those of type `entry` or `project`.
+ */
 export const _resolveSync = timerify(resolveSync);

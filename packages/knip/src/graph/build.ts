@@ -30,12 +30,12 @@ import {
   toProductionEntry,
 } from '../util/input.js';
 import { loadTSConfig } from '../util/load-tsconfig.js';
-import { getOrCreateFileNode, updateImportMap } from '../util/module-graph.js';
+import { updateImportMap } from '../util/module-graph.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { perfObserver } from '../util/Performance.js';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.js';
 import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
-import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
+import { augmentWorkspace, getModuleSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 import { WorkspaceWorker } from '../WorkspaceWorker.js';
 
 interface BuildOptions {
@@ -65,7 +65,7 @@ export async function build({
 
   const enabledPluginsStore = new Map<string, string[]>();
 
-  const toSourceFilePath = getToSourcePathHandler(chief);
+  const toModuleSourceFilePath = getModuleSourcePathHandler(chief);
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
   const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
@@ -171,7 +171,7 @@ export async function build({
       compilerOptions,
       compilers,
       pkgName,
-      toSourceFilePath,
+      toSourceFilePath: toModuleSourceFilePath,
     });
 
     principal.addPaths(config.paths, dir);
@@ -413,16 +413,21 @@ export async function build({
         }
       }
 
-      const node = getOrCreateFileNode(graph, filePath);
-
       file.imports.unresolved = unresolvedImports;
 
-      Object.assign(node, file);
-
-      updateImportMap(node, file.imports.internal, graph);
-      node.internalImportCache = file.imports.internal;
-
-      graph.set(filePath, node);
+      const node = graph.get(filePath);
+      if (node) {
+        node.imports = file.imports;
+        node.exports = file.exports;
+        node.duplicates = file.duplicates;
+        node.scripts = file.scripts;
+        updateImportMap(node, file.imports.internal, graph);
+        node.internalImportCache = file.imports.internal;
+      } else {
+        updateImportMap(file, file.imports.internal, graph);
+        file.internalImportCache = file.imports.internal;
+        graph.set(filePath, file);
+      }
     }
   };
 

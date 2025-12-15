@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
 import type { ImportNode } from '../../../types/imports.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -18,7 +18,10 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
           specifier: importClause.literal.text,
           identifier,
           pos: node.qualifier?.getStart() ?? importClause.literal.pos,
-          modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
+          modifiers: IMPORT_FLAGS.TYPE_ONLY,
+          alias: undefined,
+          namespace: undefined,
+          symbol: undefined,
         });
       }
     }
@@ -39,7 +42,10 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
             specifier: moduleSpecifier.text,
             identifier: IMPORT_STAR,
             pos: bindings.name.getStart(),
-            modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
+            modifiers: IMPORT_FLAGS.TYPE_ONLY,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
           });
         } else {
           for (const element of bindings.elements) {
@@ -49,7 +55,10 @@ const getImportSpecifiers = (node: ts.JSDocTag) => {
               // @ts-ignore <sigh>
               identifier: String((element.propertyName ?? element.name).escapedText),
               pos: element.name.getStart(),
-              modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
+              modifiers: IMPORT_FLAGS.TYPE_ONLY,
+              alias: undefined,
+              namespace: undefined,
+              symbol: undefined,
             });
           }
         }

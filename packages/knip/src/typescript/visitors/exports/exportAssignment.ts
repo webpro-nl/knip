@@ -1,12 +1,7 @@
 import ts from 'typescript';
-import { FIX_FLAGS } from '../../../constants.js';
+import { EMPTY_ARRAY, FIX_FLAGS } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
-import {
-  getClassMember,
-  getEnumMember,
-  getNodeType,
-  isNonPrivatePropertyOrMethodDeclaration,
-} from '../../ast-helpers.js';
+import { getClassMember, getEnumMember, getNodeType, isNonPrivateDeclaration } from '../../ast-helpers.js';
 import { isModule } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
 
@@ -25,19 +20,17 @@ export default visit(isModule, (node, { isFixExports, isReportClassMembers, isFi
       const decl = symbol.valueDeclaration;
       if (ts.isEnumDeclaration(decl)) {
         const members = decl.members.map(member => getEnumMember(member, isFixExports));
-        return { node, symbol, identifier: 'default', type, pos, fix, members };
+        return { node, symbol, identifier: 'default', type, pos, fix, members, jsDocTags: undefined };
       }
 
       if (ts.isClassDeclaration(decl)) {
         const members = isReportClassMembers
-          ? decl.members
-              .filter(isNonPrivatePropertyOrMethodDeclaration)
-              .map(member => getClassMember(member, isFixTypes))
-          : [];
-        return { node, symbol, identifier: 'default', type, pos, fix, members };
+          ? decl.members.filter(isNonPrivateDeclaration).map(member => getClassMember(member, isFixTypes))
+          : EMPTY_ARRAY;
+        return { node, symbol, identifier: 'default', type, pos, fix, members, jsDocTags: undefined };
       }
     }
 
-    return { node, symbol, identifier: 'default', type, pos, fix };
+    return { node, symbol, identifier: 'default', type, pos, fix, members: EMPTY_ARRAY, jsDocTags: undefined };
   }
 });

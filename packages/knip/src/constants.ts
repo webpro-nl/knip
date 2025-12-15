@@ -239,11 +239,16 @@ export const FIX_FLAGS = {
   WITH_NEWLINE: 1 << 2, // remove with newline
 } as const;
 
+export const MEMBER_FLAGS = {
+  NONE: 0,
+  SETTER: 1 << 0,
+} as const;
+
 export const SIDE_EFFECTS = '__side-effects';
 
 export const OPAQUE = '__opaque';
 
-export const IMPORT_MODIFIERS = {
+export const IMPORT_FLAGS = {
   NONE: 0,
   RE_EXPORT: 1 << 0,
   TYPE_ONLY: 1 << 1,
@@ -253,3 +258,5 @@ export const IMPORT_MODIFIERS = {
   SIDE_EFFECTS: 1 << 5,
   OPAQUE: 1 << 6,
 } as const;
+
+export const EMPTY_ARRAY: readonly never[] = [];

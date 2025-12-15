@@ -37,33 +37,34 @@ export type ImportMaps = {
 export type ImportMap = Map<FilePath, ImportMaps>;
 
 export interface Import extends Position {
-  specifier: string;
-  filePath: string | undefined;
-  identifier: string | undefined;
-  isTypeOnly: boolean;
+  readonly specifier: string;
+  readonly filePath: string | undefined;
+  readonly identifier: string | undefined;
+  readonly isTypeOnly: boolean;
 }
 
 export interface Export extends Position {
-  identifier: Identifier;
-  type: SymbolType;
-  members: ExportMember[];
-  jsDocTags: Tags;
+  readonly identifier: Identifier;
+  readonly type: SymbolType;
+  readonly members: ExportMember[];
+  readonly jsDocTags: Tags;
   self: [number, boolean];
-  fixes: Fixes;
-  symbol?: ts.Symbol;
-  isReExport?: boolean;
+  readonly fixes: Fixes;
+  symbol: undefined | ts.Symbol;
+  readonly isReExport: boolean;
 }
 
 export type ExportMember = {
-  identifier: Identifier;
-  pos: number;
-  line: number;
-  col: number;
-  type: SymbolType;
+  readonly identifier: Identifier;
+  readonly pos: number;
+  readonly line: number;
+  readonly col: number;
+  readonly type: SymbolType;
+  readonly fix: Fix;
+  readonly jsDocTags: Tags;
+  readonly flags: number;
   self: [number, boolean];
-  fix: Fix;
-  symbol?: ts.Symbol;
-  jsDocTags: Tags;
+  symbol: undefined | ts.Symbol;
 };
 
 export type ExportMap = Map<Identifier, Export>;
@@ -72,18 +73,18 @@ export type Imports = Set<Import>;
 
 export type FileNode = {
   imports: {
-    internal: ImportMap;
-    external: Set<Import>;
+    readonly internal: ImportMap;
+    readonly external: Set<Import>;
     unresolved: Set<Import>;
-    programFiles: Set<FilePath>;
-    entryFiles: Set<FilePath>;
-    imports: Imports;
+    readonly programFiles: Set<FilePath>;
+    readonly entryFiles: Set<FilePath>;
+    readonly imports: Imports;
   };
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
-  imported?: ImportMaps;
-  internalImportCache?: ImportMap;
+  imported: undefined | ImportMaps;
+  internalImportCache: undefined | ImportMap;
 };
 
 export type ModuleGraph = Map<FilePath, FileNode>;

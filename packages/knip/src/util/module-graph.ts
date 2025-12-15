@@ -7,8 +7,6 @@ import type {
   ModuleGraph,
 } from '../types/module-graph.js';
 
-export const getOrCreateFileNode = (graph: ModuleGraph, filePath: string) => graph.get(filePath) ?? createFileNode();
-
 const updateImportMaps = (fromImportMaps: ImportMaps, toImportMaps: ImportMaps) => {
   for (const id of fromImportMaps.refs) toImportMaps.refs.add(id);
   for (const [id, v] of fromImportMaps.imported) addValues(toImportMaps.imported, id, v);
@@ -25,7 +23,7 @@ export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: Mod
     if (!importMaps) file.imports.internal.set(importedFilePath, fileImportMaps);
     else updateImportMaps(fileImportMaps, importMaps);
 
-    const importedFile = getOrCreateFileNode(graph, importedFilePath);
+    const importedFile = graph.get(importedFilePath) ?? createFileNode();
     if (!importedFile.imported) importedFile.imported = createImports();
     updateImportMaps(fileImportMaps, importedFile.imported);
 
@@ -45,6 +43,8 @@ const createFileNode = (): FileNode => ({
   exports: new Map(),
   duplicates: new Set(),
   scripts: new Set(),
+  imported: undefined,
+  internalImportCache: undefined,
 });
 
 export const createImports = (): ImportMaps => ({

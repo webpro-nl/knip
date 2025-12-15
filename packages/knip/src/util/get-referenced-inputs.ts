@@ -22,12 +22,6 @@ const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Wor
   (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) ||
   workspace;
 
-/**
- * Resolve internal file paths + collect issues
- *
- * Try not to use module resolver. This is slow. Use known workspaces and dependencies.
- * Eventually we might be able to work mostly from lockfile alone.
- */
 export const getReferencedInputsHandler =
   (
     deputy: DependencyDeputy,
@@ -59,7 +53,7 @@ export const getReferencedInputsHandler =
     const packageName = getPackageNameFromSpecifier(specifier);
 
     if (packageName && (isDependency(input) || isDeferResolve(input) || isConfig(input))) {
-      // Attempt fast path first for external dependencies and internal workspaces
+      // Attempt fast path first for external dependencies (including internal workspaces)
       const isWorkspace = chief.workspacesByPkgName.has(packageName);
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
 
@@ -82,8 +76,8 @@ export const getReferencedInputsHandler =
           }
 
           // Return resolved path for refs to internal workspaces
-          const ref = _resolveSync(specifier, dirname(containingFilePath));
-          if (ref && isInternal(ref) && !isGitIgnored(ref)) return ref;
+          const internalPath = _resolveSync(specifier, dirname(containingFilePath));
+          if (internalPath && isInternal(internalPath) && !isGitIgnored(internalPath)) return internalPath;
         }
 
         if (isHandled) return;

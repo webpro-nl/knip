@@ -26,7 +26,7 @@ const production = [
 
 const resolveFromAST: ResolveFromAST = sourceFile => {
   const srcDir = getSrcDir(sourceFile);
-  const setSrcDir = (entry: string) => entry.replace(/^`src\//, `${srcDir}/`);
+  const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
 
   return [
     ...entry.map(setSrcDir).map(path => toEntry(path)),

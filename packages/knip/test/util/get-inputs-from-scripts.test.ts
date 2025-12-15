@@ -166,6 +166,29 @@ test('getInputsFromScripts (bun)', () => {
   t('bun ./main.ts', [toEntry(join(cwd, 'main.ts'))]);
   t('bun run script.js', [toEntry(join(cwd, 'script.js'))]);
   t('bun run --cwd packages/knip watch', []);
+  t('bun test', []);
+  t('bun add zod', []);
+  t('bun install', []);
+  t('bun remove webpack', []);
+  t('bun update lodash', []);
+  t('bun link', []);
+  t('bun unlink', []);
+  t('bun pm cache', []);
+  t('bun audit', []);
+  t('bun outdated', []);
+  t('bun init', []);
+  t('bun create next-app', []);
+  t('bun upgrade', []);
+  t('bun build ./index.ts --outdir ./dist', []);
+  t('bun patch zod', []);
+  t('bun why elysia', []);
+  t('bun info tailwindcss', []);
+  t('bun publish --access public', []);
+  t('bun publish --access public --tag latest', []);
+  t('bun repl', []);
+  t('bun exec ./script.sh', []);
+  t('bun feedback', []);
+  t('bun ci', []);
 });
 
 test('getInputsFromScripts (pnpm)', () => {
