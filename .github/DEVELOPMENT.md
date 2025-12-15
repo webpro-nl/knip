@@ -133,39 +133,30 @@ tsx --inspect ../../src/cli.ts
 Make sure VS Code is set up to attach to the Node.js process ("Always" or "With
 flag").
 
-### Attach debugger to Bun from a test
+### Attach debugger from inside a test file
 
 Run configurations for VS Code and WebStorm² are set up in the repo. This a
-great way to debug almost anything in Knip:
+great way to debug almost anything in Knip.
 
-- VS Code: ensure the [Bun extension][15] is enabled
-- WebStorm: ensure the [Bun plugin][16] is enabled
-- Optionally set a breakpoint anywhere in source or test code
-- From any test file, run the "Debug Bun test" run configuration
+- Using Node.js
+  - From any test file, run the "Debug test with tsx/Node.js" launch config
+- Using Bun
+  - VS Code: ensure the [Bun extension][15] is enabled
+  - WebStorm: ensure the [Bun plugin][16] is enabled
+  - From any test file, run the "Debug test with Bun" launch config
 
-From now on, just hit `F5` (Code) or `ctrl-r` (WS) from any test file to run and
-debug.
+From now on, just set a breakpoint and hit `F5` (Code) or `ctrl-r` (WS) from any
+test file to run and debug.
 
 ² Requires at least WebStorm 2025.2 EAP
-
-### Attach debugger to Node.js from a test
-
-Run configurations for VS Code and WebStorm are set up in the repo.
-
-- Optionally set a breakpoint anywhere in source or test code
-- From any test file, run the "Debug Node test" run configuration
-
-From now on, just hit `F5` (Code) or `ctrl-r` (WS) from any test file to run and
-debug.
 
 ### Attach debugger to tests
 
 In case you're wondering if or why some code is ever hit, attach the debugger to
-each test. Set a breakpoint and run all tests (warning: slow):
+each test. Set a breakpoint and run all tests in one of the following ways:
 
-```shell
-tsx --inspect --test test/**/*.test.ts
-```
+- From built-in terminal: `tsx --inspect --test test/**/*.test.ts`
+- Use the "Debug all tests with Bun" launch config.
 
 ## QA
 

@@ -2,9 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug test with tsx/Node.js",
+      "runtimeExecutable": "${workspaceFolder}/packages/knip/node_modules/.bin/tsx",
+      "runtimeArgs": ["--test"],
+      "args": ["${file}"],
+      "cwd": "${workspaceFolder}/packages/knip",
+      "console": "integratedTerminal"
+    },
+    {
       "type": "bun",
       "request": "launch",
-      "name": "Debug Bun test",
+      "name": "Debug test with Bun",
       "program": "${file}",
       "cwd": "${workspaceFolder}/packages/knip",
       "runtime": "bun",
@@ -12,20 +22,14 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug Node test",
-      "program": "${workspaceFolder}/node_modules/.bin/tsx",
-      "args": ["--test", "--import", "./transform-test.js", "${file}"],
-      "cwd": "${workspaceFolder}/packages/knip",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "openOnSessionStart"
-    },
-    {
       "type": "bun",
-      "request": "attach",
-      "name": "Attach to Bun",
-      "url": "ws://localhost:6499/knip"
+      "request": "launch",
+      "name": "Debug all tests with Bun",
+      "program": ".",
+      "cwd": "${workspaceFolder}/packages/knip",
+      "runtime": "bun",
+      "runtimeArgs": ["test", "--timeout", "999999999"],
+      "internalConsoleOptions": "openOnSessionStart"
     }
   ]
 }
