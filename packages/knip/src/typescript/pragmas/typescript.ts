@@ -1,4 +1,4 @@
-import { IMPORT_MODIFIERS } from '../../constants.js';
+import { IMPORT_FLAGS } from '../../constants.js';
 import type { ImportNode } from '../../types/imports.js';
 import type { BoundSourceFile } from '../SourceFile.js';
 
@@ -6,7 +6,7 @@ export const collectTypeScriptPragmaImports = (sourceFile: BoundSourceFile): Imp
   if (!sourceFile.pragmas || sourceFile.pragmas.size === 0) return [];
 
   const importNodes: ImportNode[] = [];
-  const modifiers = IMPORT_MODIFIERS.TYPE_ONLY;
+  const modifiers = IMPORT_FLAGS.TYPE_ONLY;
 
   const jsxImportSourcePragmas = sourceFile.pragmas.get('jsximportsource');
   if (jsxImportSourcePragmas) {

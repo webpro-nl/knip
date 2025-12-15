@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
 import { isDefaultImport } from '../../ast-helpers.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -10,12 +10,12 @@ export default visit(
       const specifier = node.moduleSpecifier.text;
       if (!node.importClause) {
         // Pattern: import 'side-effects';
-        return { specifier, identifier: undefined, pos: node.pos, modifiers: IMPORT_MODIFIERS.SIDE_EFFECTS };
+        return { specifier, identifier: undefined, pos: node.pos, modifiers: IMPORT_FLAGS.SIDE_EFFECTS };
       }
 
       const imports = [];
 
-      const modifiers = node.importClause.isTypeOnly ? IMPORT_MODIFIERS.TYPE_ONLY : IMPORT_MODIFIERS.NONE;
+      const modifiers = node.importClause.isTypeOnly ? IMPORT_FLAGS.TYPE_ONLY : IMPORT_FLAGS.NONE;
 
       if (isDefaultImport(node)) {
         // Pattern: import identifier from 'specifier'

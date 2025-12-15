@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS } from '../../../constants.js';
+import { IMPORT_FLAGS } from '../../../constants.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -11,7 +11,7 @@ export default visit(
           specifier: node.argument.literal.text,
           identifier: undefined,
           pos: node.argument.literal.getStart(),
-          modifiers: IMPORT_MODIFIERS.TYPE_ONLY,
+          modifiers: IMPORT_FLAGS.TYPE_ONLY,
         };
       }
     }

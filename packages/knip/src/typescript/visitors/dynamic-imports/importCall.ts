@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS } from '../../../constants.js';
+import { IMPORT_FLAGS } from '../../../constants.js';
 import {
   findAncestor,
   findDescendants,
@@ -22,7 +22,7 @@ export default visit(
     if (isImportCall(node)) {
       if (node.arguments[0] && ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
-        const modifiers = IMPORT_MODIFIERS.NONE;
+        const modifiers = IMPORT_FLAGS.NONE;
 
         if (specifier) {
           const accessExpression = findAncestor<ts.AccessExpression>(node, _node => {
@@ -113,7 +113,7 @@ export default visit(
               identifier: undefined,
               specifier,
               pos: node.arguments[0].pos,
-              modifiers: IMPORT_MODIFIERS.SIDE_EFFECTS,
+              modifiers: IMPORT_FLAGS.SIDE_EFFECTS,
             };
           }
           const arrayLiteralExpression = node.parent;
@@ -155,7 +155,7 @@ export default visit(
             identifier: undefined,
             specifier,
             pos: node.arguments[0].pos,
-            modifiers: isInOpaqueExpression(node) ? IMPORT_MODIFIERS.OPAQUE : IMPORT_MODIFIERS.SIDE_EFFECTS,
+            modifiers: isInOpaqueExpression(node) ? IMPORT_FLAGS.OPAQUE : IMPORT_FLAGS.SIDE_EFFECTS,
           };
         }
 

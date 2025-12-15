@@ -1,4 +1,4 @@
-import { IMPORT_MODIFIERS } from '../../constants.js';
+import { IMPORT_FLAGS } from '../../constants.js';
 import { getEnvSpecifier } from '../../plugins/vitest/helpers.js';
 import type { ImportNode } from '../../types/imports.js';
 import { isAbsolute, isInternal } from '../../util/path.js';
@@ -20,7 +20,7 @@ export const collectCustomImports = (sourceFile: BoundSourceFile): ImportNode[] 
       const id = stripQuotes(match[2].trim());
       if (!id) continue;
       const isLocal = isInternal(id) || isAbsolute(id);
-      const modifiers = isLocal ? IMPORT_MODIFIERS.ENTRY : IMPORT_MODIFIERS.NONE;
+      const modifiers = isLocal ? IMPORT_FLAGS.ENTRY : IMPORT_FLAGS.NONE;
       const offset = match[0].length - match[2].length;
       const specifier = isLocal || id === 'node' ? id : getEnvSpecifier(id);
       importNodes.push({ specifier, identifier: undefined, pos: comment.pos + match.index + offset, modifiers });

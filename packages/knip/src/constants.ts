@@ -240,7 +240,7 @@ export const SIDE_EFFECTS = '__side-effects';
 
 export const OPAQUE = '__opaque';
 
-export const IMPORT_MODIFIERS = {
+export const IMPORT_FLAGS = {
   NONE: 0,
   RE_EXPORT: 1 << 0,
   TYPE_ONLY: 1 << 1,

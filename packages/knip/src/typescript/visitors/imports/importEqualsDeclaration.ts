@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS } from '../../../constants.js';
+import { IMPORT_FLAGS } from '../../../constants.js';
 import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
 
@@ -19,7 +19,7 @@ export default visit(isNotJS, node => {
       // @ts-expect-error TODO FIXME Property 'symbol' does not exist on type 'ImportEqualsDeclaration'.
       symbol: node.symbol,
       pos: node.name.getStart(),
-      modifiers: IMPORT_MODIFIERS.NONE,
+      modifiers: IMPORT_FLAGS.NONE,
     };
   }
 });

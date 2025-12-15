@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ALIAS_TAG, IMPORT_MODIFIERS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.js';
+import { ALIAS_TAG, IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.js';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
@@ -133,7 +133,7 @@ const getImportsAndExports = (
   const addInternalImport = (options: AddInternalImportOptions) => {
     const { symbol, filePath, namespace, specifier, modifiers } = options;
 
-    const identifier = options.identifier ?? (modifiers & IMPORT_MODIFIERS.OPAQUE ? OPAQUE : SIDE_EFFECTS);
+    const identifier = options.identifier ?? (modifiers & IMPORT_FLAGS.OPAQUE ? OPAQUE : SIDE_EFFECTS);
 
     const isStar = identifier === IMPORT_STAR;
 
@@ -144,7 +144,7 @@ const getImportsAndExports = (
       pos: options.pos,
       line: options.line,
       col: options.col,
-      isTypeOnly: !!(modifiers & IMPORT_MODIFIERS.TYPE_ONLY),
+      isTypeOnly: !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
     });
 
     const file = internal.get(filePath);
@@ -155,7 +155,7 @@ const getImportsAndExports = (
 
     const nsOrAlias = symbol ? String(symbol.escapedName) : options.alias;
 
-    if (modifiers & IMPORT_MODIFIERS.RE_EXPORT) {
+    if (modifiers & IMPORT_FLAGS.RE_EXPORT) {
       if (isStar && namespace) {
         // Pattern: export * as NS from 'specifier';
         addValue(importMaps.reExportedNs, namespace, sourceFile.fileName);
@@ -193,8 +193,8 @@ const getImportsAndExports = (
       const filePath = module.resolvedFileName;
       if (filePath) {
         if (!isInNodeModules(filePath)) {
-          if (opts.modifiers & IMPORT_MODIFIERS.ENTRY) entryFiles.add(filePath);
-          if (opts.modifiers & IMPORT_MODIFIERS.BRIDGE) programFiles.add(filePath);
+          if (opts.modifiers & IMPORT_FLAGS.ENTRY) entryFiles.add(filePath);
+          if (opts.modifiers & IMPORT_FLAGS.BRIDGE) programFiles.add(filePath);
         }
 
         if (!module.isExternalLibraryImport || !isInNodeModules(filePath)) {
@@ -208,7 +208,7 @@ const getImportsAndExports = (
         }
 
         if (module.isExternalLibraryImport) {
-          if (options.skipTypeOnly && opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY) return;
+          if (options.skipTypeOnly && opts.modifiers & IMPORT_FLAGS.TYPE_ONLY) return;
 
           const sanitizedSpecifier = sanitizeSpecifier(
             isInNodeModules(filePath) || isInNodeModules(opts.specifier)
@@ -231,16 +231,16 @@ const getImportsAndExports = (
             pos: opts.pos,
             line: line + 1,
             col: character + 2,
-            isTypeOnly: !!(opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY),
+            isTypeOnly: !!(opts.modifiers & IMPORT_FLAGS.TYPE_ONLY),
           });
         }
       }
     } else {
-      if (options.skipTypeOnly && opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY) return;
+      if (options.skipTypeOnly && opts.modifiers & IMPORT_FLAGS.TYPE_ONLY) return;
       if (shouldIgnore(getJSDocTags(node), options.tags)) return;
       if (opts.specifier.startsWith(PROTOCOL_VIRTUAL)) return;
 
-      if (opts.modifiers && opts.modifiers & IMPORT_MODIFIERS.OPTIONAL) {
+      if (opts.modifiers && opts.modifiers & IMPORT_FLAGS.OPTIONAL) {
         programFiles.add(resolve(dirname(sourceFile.fileName), opts.specifier));
         return;
       }
@@ -255,7 +255,7 @@ const getImportsAndExports = (
         pos,
         line: line + 1,
         col: character + 2,
-        isTypeOnly: !!(opts.modifiers & IMPORT_MODIFIERS.TYPE_ONLY),
+        isTypeOnly: !!(opts.modifiers & IMPORT_FLAGS.TYPE_ONLY),
       });
     }
   };

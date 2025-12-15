@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
 import { findAncestor, findDescendants, isModuleExportsAccess, isRequireCall, isTopLevel } from '../../ast-helpers.js';
 import { isNotJS } from '../helpers.js';
 import { importVisitor as visit } from '../index.js';
@@ -10,7 +10,7 @@ export default visit(
     if (isRequireCall(node)) {
       if (ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
-        const modifiers = isNotJS(node.getSourceFile()) ? IMPORT_MODIFIERS.BRIDGE : IMPORT_MODIFIERS.NONE;
+        const modifiers = isNotJS(node.getSourceFile()) ? IMPORT_FLAGS.BRIDGE : IMPORT_FLAGS.NONE;
 
         if (specifier) {
           const propertyAccessExpression = findAncestor<ts.PropertyAccessExpression>(node, _node => {
@@ -67,7 +67,7 @@ export default visit(
               identifier: IMPORT_STAR,
               specifier,
               pos: node.arguments[0].pos,
-              modifiers: IMPORT_MODIFIERS.RE_EXPORT,
+              modifiers: IMPORT_FLAGS.RE_EXPORT,
             };
           }
 
