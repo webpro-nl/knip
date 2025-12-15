@@ -14,7 +14,8 @@ const compiler = (text: string) => {
 
   // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
   while ((match = importMatcher.exec(text))) {
-    if (match[2]) imports.push(`import _$${index++} from '${match[1] ? match[2] : toRelative(match[2])}';`);
+    if (match[2] && !match[2].startsWith('sass:'))
+      imports.push(`import _$${index++} from '${match[1] ? match[2] : toRelative(match[2])}';`);
   }
 
   return imports.join('\n');
