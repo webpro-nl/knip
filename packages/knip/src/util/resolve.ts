@@ -45,6 +45,6 @@ const createSyncResolver = (extensions: string[]) => {
   };
 };
 
-const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.d.ts', '.d.mts', '.d.cts']);
+const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.d.ts', '.d.mts', '.d.cts', '.json', '.jsonc']);
 
 export const _resolveSync = timerify(resolveSync);
