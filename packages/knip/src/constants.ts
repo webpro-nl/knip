@@ -256,5 +256,4 @@ export const IMPORT_FLAGS = {
   OPAQUE: 1 << 6,
 } as const;
 
-export const EMPTY_ARRAY: never[] = [];
-export const EMPTY_SET: ReadonlySet<never> = new Set();
+export const EMPTY_ARRAY: readonly never[] = [];

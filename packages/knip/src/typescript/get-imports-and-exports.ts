@@ -5,15 +5,7 @@ import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../ty
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
 import type { IssueSymbol } from '../types/issues.js';
-import type {
-  ExportMap,
-  ExportMember,
-  FileNode,
-  Import,
-  ImportMap,
-  ImportMaps,
-  Imports,
-} from '../types/module-graph.js';
+import type { ExportMap, ExportMember, FileNode, ImportMap, ImportMaps, Imports } from '../types/module-graph.js';
 import { addNsValue, addValue, createImports } from '../util/module-graph.js';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { timerify } from '../util/Performance.js';

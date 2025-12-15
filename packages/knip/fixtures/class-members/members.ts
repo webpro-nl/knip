@@ -16,6 +16,7 @@ export class MyClass {
 
 export class MyComponentClass extends Component {
   constructor() {
+    super();
     this.bound = this.bound.bind(this);
     this.writeOnly();
     this.cWriteOnlyPublic = 2;
