@@ -11,7 +11,7 @@ import { isDeclarationFileExtension } from './ast-helpers.js';
 
 const resolutionCache = new Map<string, ts.ResolvedModuleFull | undefined>();
 
-const fileExists = (name: string, containingFile: string) => {
+const moduleIfFileExists = (name: string, containingFile: string) => {
   const resolvedFileName = isAbsolute(name) ? name : join(dirname(containingFile), name);
   if (existsSync(resolvedFileName)) {
     return {
@@ -42,24 +42,15 @@ export function createCustomModuleResolver(
 
   const tsSys: ts.System = {
     ...ts.sys,
-    // We trick TypeScript into resolving paths with arbitrary extensions. When
-    // a module "./module.ext" is imported TypeScript only tries to resolve it to
-    // "./module.d.ext.ts". TypeScript never checks whether "./module.ext" itself exists.
-    // So, if TypeScript checks whether "./module.d.ext.ts" exists and the file
-    // does not exist we can assume the compiler wants to resolve `./module.ext`.
-    // If the latter exists we return true and record this fact in
-    // `virtualDeclarationFiles`.
+    // TS resolves "./module.ext" to "./module.d.ext.ts". If that doesn't exist
+    // but the original does, pretend it exists and record the mapping.
     fileExists(path: string) {
-      if (ts.sys.fileExists(path)) {
-        return true;
-      }
-
+      if (ts.sys.fileExists(path)) return true;
       const original = originalFromDeclarationPath(path);
       if (original && ts.sys.fileExists(original.path)) {
         virtualDeclarationFiles.set(path, original);
         return true;
       }
-
       return false;
     },
   };
@@ -85,8 +76,8 @@ export function createCustomModuleResolver(
 
   /**
    * - Virtual files have built-in or custom compiler, return as JS
-   * - Foreign files have path resolved verbatim (file manager will return empty source file)
-   * - For dist/outDir and DTS files an attempt is made to resolve to src path
+   * - Foreign files (e.g. .css, .png) have path resolved verbatim (file manager will return empty source file)
+   * - For "dist" and DTS files source mapping is attempted
    */
   function resolveModuleName(name: string, containingFile: string): ts.ResolvedModuleFull | undefined {
     const sanitizedSpecifier = sanitizeSpecifier(name);
@@ -151,10 +142,7 @@ export function createCustomModuleResolver(
       return tsResolvedModule;
     }
 
-    const module = fileExists(sanitizedSpecifier, containingFile);
-    if (module) return module;
-
-    return undefined;
+    return moduleIfFileExists(sanitizedSpecifier, containingFile);
   }
 
   return timerify(resolveModuleNames);

@@ -34,7 +34,7 @@ import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpe
 import { perfObserver } from '../util/Performance.js';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.js';
 import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
-import { augmentWorkspace, getToSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
+import { augmentWorkspace, getModuleSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
 import { WorkspaceWorker } from '../WorkspaceWorker.js';
 
 interface BuildOptions {
@@ -64,7 +64,7 @@ export async function build({
 
   const enabledPluginsStore = new Map<string, string[]>();
 
-  const toSourceFilePath = getToSourcePathHandler(chief);
+  const toModuleSourceFilePath = getModuleSourcePathHandler(chief);
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
   const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
@@ -169,7 +169,7 @@ export async function build({
       compilerOptions,
       compilers,
       pkgName,
-      toSourceFilePath,
+      toSourceFilePath: toModuleSourceFilePath,
     });
 
     principal.addPaths(config.paths, dir);
