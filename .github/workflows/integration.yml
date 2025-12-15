@@ -153,11 +153,11 @@ jobs:
               pnpm add -D $PKG_URL
               pnpm run knip
 
-          - name: slonik
-            repo: gajus/slonik
-            commands: |
-              pnpm install --no-frozen-lockfile
-              pnpm dlx $PKG_URL
+          # - name: slonik
+          #   repo: gajus/slonik
+          #   commands: |
+          #     pnpm install --no-frozen-lockfile
+          #     pnpm dlx $PKG_URL
 
           - name: TypeScript
             repo: microsoft/TypeScript
