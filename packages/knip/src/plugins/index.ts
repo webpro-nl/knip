@@ -97,6 +97,7 @@ import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
 import { default as svgo } from './svgo/index.js';
 import { default as svgr } from './svgr/index.js';
+import { default as swc } from './swc/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
 import { default as taskfile } from './taskfile/index.js';
@@ -221,6 +222,7 @@ export const Plugins = {
   svelte,
   svgo,
   svgr,
+  swc,
   syncpack,
   tailwind,
   taskfile,
