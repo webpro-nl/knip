@@ -1,6 +1,12 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { REQUEST_FILE_NODE } from '@knip/language-server/constants';
+import {
+  REQUEST_FILE_NODE,
+  REQUEST_RESTART,
+  REQUEST_START,
+  REQUEST_STOP,
+  SESSION_LOADING,
+} from '@knip/language-server/constants';
 import { KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
@@ -81,7 +87,7 @@ export class Extension {
     this.#outputChannel.info('Initializing extension');
 
     await this.#startClient();
-    await this.#client?.sendRequest('knip.start');
+    await this.#client?.sendRequest(REQUEST_START);
     await this.#refresh();
   }
 
@@ -125,17 +131,17 @@ export class Extension {
     setLanguageClient(undefined);
     if (!this.#client.needsStart()) {
       try {
-        await this.#client.sendRequest('knip.stop');
+        await this.#client.sendRequest(REQUEST_STOP);
       } catch (_error) {}
     }
     if (this.#client.needsStop()) await this.#client.stop();
   }
 
   #registerCommands() {
-    const restart = vscode.commands.registerCommand('knip.restart', async () => {
+    const restart = vscode.commands.registerCommand(REQUEST_RESTART, async () => {
       if (!this.#client) return;
       try {
-        await this.#client.sendRequest('knip.restart');
+        await this.#client.sendRequest(REQUEST_RESTART);
       } catch (error) {
         vscode.window.showErrorMessage((error?.message || error).toString());
       }
@@ -153,11 +159,11 @@ export class Extension {
   /**
    *
    * @param {vscode.TextDocument} document
-   * @return {Promise<import('knip/session').File | null>}
+   * @return {Promise<import('knip/session').File | typeof SESSION_LOADING | undefined>}
    */
   async #requestFileDescriptor(document) {
     const uri = document.uri.toString();
-    if (!this.#client) return null;
+    if (!this.#client) return;
     return await this.#client.sendRequest(REQUEST_FILE_NODE, { uri });
   }
 
@@ -220,8 +226,8 @@ export class Extension {
   async #refresh(editor) {
     const activeEditor = editor ?? vscode.window.activeTextEditor;
     if (!activeEditor) {
-      this.#importsProvider?.clear('Open a file to inspect imports');
-      this.#exportsProvider?.clear('Open a file to inspect exports');
+      this.#importsProvider?.clear('Open a file to show imports');
+      this.#exportsProvider?.clear('Open a file to show exports');
       return;
     }
 
@@ -256,6 +262,7 @@ export class Extension {
 
     try {
       const file = await this.#requestFileDescriptor(document);
+      if (file === SESSION_LOADING) return { message: '(building module graph...)' };
       if (!file) return { message: '(file not in project)' };
       return { kind: 'file', uri, file };
     } catch (error) {

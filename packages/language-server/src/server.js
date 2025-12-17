@@ -10,7 +10,15 @@ import {
   createRemoveDependencyEdit,
   createRemoveExportEdit,
 } from './code-actions.js';
-import { DEFAULT_JSDOC_TAGS, REQUEST_FILE_NODE, REQUEST_RESULTS } from './constants.js';
+import {
+  DEFAULT_JSDOC_TAGS,
+  REQUEST_FILE_NODE,
+  REQUEST_RESTART,
+  REQUEST_RESULTS,
+  REQUEST_START,
+  REQUEST_STOP,
+  SESSION_LOADING,
+} from './constants.js';
 import { issueToDiagnostic } from './diagnostics.js';
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
@@ -93,13 +101,13 @@ export class LanguageServer {
 
     this.connection.onInitialized(() => {});
 
-    this.connection.onRequest('knip.start', () => this.start());
+    this.connection.onRequest(REQUEST_START, () => this.start());
 
-    this.connection.onRequest('knip.stop', () => this.stop());
+    this.connection.onRequest(REQUEST_STOP, () => this.stop());
 
     this.connection.onShutdown(() => this.stop());
 
-    this.connection.onRequest('knip.restart', () => this.restart());
+    this.connection.onRequest(REQUEST_RESTART, () => this.restart());
 
     this.connection.onRequest(REQUEST_RESULTS, () => this.getResults());
 
@@ -230,11 +238,11 @@ export class LanguageServer {
   /**
    * @param {string} filePath
    * @param {{ isShowContention?: boolean }} [options]
-   * @returns {File | undefined}
+   * @returns {File | typeof SESSION_LOADING | undefined}
    */
   getFileDescriptor(filePath, options) {
+    if (!this.session) return SESSION_LOADING;
     const relPath = toPosix(path.relative(this.cwd ?? process.cwd(), filePath));
-    if (!this.session) return;
     if (this.fileCache?.filePath === relPath) return this.fileCache.file;
     const startTime = performance.now();
     const file = this.session.describeFile(relPath, options);

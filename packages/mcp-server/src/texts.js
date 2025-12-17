@@ -67,10 +67,10 @@ export const ERROR_HINT = `For unexpected errors (exit code 2) such as "error lo
 export const CONFIG_REVIEW_HINT = `Review the existing configuration for potential improvements:
 
 - Never use "ignore" patterns (hides real issues!), always prefer specific solutions, other ignore* options are allowed
-- Ignore patterns that don't match any files can be removed
+- Many unused exported types? Add: ignoreExportsUsedInFile: { interface: true, type: true } (prefer this over other ignore* options)
+- Remove ignore patterns that don't match any files
 - Redundant ignore patterns: Knip respects .gitignore by default (node_modules, dist, build, .git)
-- Entry patterns already covered by plugins can be removed
+- Remove entry patterns covered by config defaults and plugins
 - Config files (e.g. vite.config.ts) showing as unused? Enable/disable the plugin explicitly
-- Many unused exported types? Add: ignoreExportsUsedInFile: { interface: true, type: true }
 - Dependencies matching Node.js builtins: add to ignoreDependencies (e.g. buffer, process)
 - Unresolved imports from path aliases: add paths to Knip config (tsconfig.json semantics)`;
