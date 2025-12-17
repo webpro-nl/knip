@@ -42,7 +42,7 @@
   "publisher": "webpro",
   "type": "module",
   "engines": {
-    "vscode": "^1.100.0"
+    "vscode": "^1.106.1"
   },
   "main": "./src/index.js",
   "scripts": {
@@ -53,7 +53,6 @@
     "@knip/mcp": "workspace:*",
     "mdast-util-to-markdown": "2.1.2",
     "unist-builder": "4.0.0",
-    "vscode": "1.1.37",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {

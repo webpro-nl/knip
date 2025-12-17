@@ -90,9 +90,10 @@ barrel files. Knip warns:
 [10]: #conflicts
 [11]: #branching
 [12]: #vs-code-extension-settings
-[13]: ./assets/diagnostics.webp
-[14]: ./assets/imports-exports.webp
-[15]: ./assets/circular-dependency.webp
-[16]: ./assets/conflict.webp
-[17]: ./assets/branch.webp
-[18]: ./assets/vscode-extension-settings.webp
+[13]: https://knip.dev/screenshots/editors-and-agents/diagnostics.webp
+[14]: https://knip.dev/screenshots/editors-and-agents/imports-exports.webp
+[15]: https://knip.dev/screenshots/editors-and-agents/circular-dependency.webp
+[16]: https://knip.dev/screenshots/editors-and-agents/conflict.webp
+[17]: https://knip.dev/screenshots/editors-and-agents/branch.webp
+[18]:
+  https://knip.dev/screenshots/editors-and-agents/vscode-extension-settings.webp

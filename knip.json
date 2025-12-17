@@ -17,7 +17,8 @@
       "entry": ["{remark,scripts}/*.ts"]
     },
     "packages/vscode-knip": {
-      "entry": ["scripts/*.js"]
+      "entry": ["scripts/*.js"],
+      "ignoreDependencies": ["vscode!"]
     }
   }
 }
