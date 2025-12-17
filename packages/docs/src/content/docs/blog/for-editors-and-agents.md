@@ -1,11 +1,11 @@
 ---
 title: Knip for Editors & Agents
-date: 2025-12-20
+date: 2025-12-18
 sidebar:
   order: 1
 ---
 
-_Published: 2025-12-20_
+_Published: 2025-12-18_
 
 ## VS Code Extension
 
@@ -25,8 +25,8 @@ check. We're starting out with [3 key features][2]:
 
 Configuring Knip has always been a major headache to many. No more. Tell your
 coding agent to "configure knip" and it will RTFM so you don't have to. Using a
-newer model like Opus 4.5 result in an optimized `knip.json` file and an
-uncluttered codebase.
+newer model like Opus 4.5 or GPT 5.2 results in an optimized `knip.json` file
+and an uncluttered codebase.
 
 The [MCP Server is available][3] separately and built into the VS Code
 Extension.

@@ -8,11 +8,12 @@ projects.
 - Website: [knip.dev][1]
 - GitHub repo: [webpro-nl/knip][2]
 - Follow [@webpro.nl on Bluesky][3] for updates
-- [Sponsor Knip][4]
+- Blogpost: [Knip for Editors & Agents][4]
+- [Sponsor Knip][5]
 
 ## VS Code Extension
 
-Install the [Knip VS Code Extension][5] — it comes with the MCP Server included.
+Install the [Knip VS Code Extension][6] — it comes with the MCP Server included.
 
 ## MCP Server
 
@@ -47,6 +48,6 @@ All pages of the [Knip documentation][1] are available as MCP resources
 [1]: https://knip.dev
 [2]: https://github.com/webpro-nl/knip
 [3]: https://bsky.app/profile/webpro.nl
-[4]: https://knip.dev/sponsors
-[5]:
-  https://github.com/webpro-nl/knip/tree/feat/lang-server-and-vscode-ext/packages/mcp-server
+[4]: https://knip.dev/blog/for-editors-and-agents
+[5]: https://knip.dev/sponsors
+[6]: https://github.com/webpro-nl/knip/tree/main/packages/mcp-server

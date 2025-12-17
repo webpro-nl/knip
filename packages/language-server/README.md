@@ -8,37 +8,38 @@ projects.
 - Website: [knip.dev][1]
 - GitHub repo: [webpro-nl/knip][2]
 - Follow [@webpro.nl on Bluesky][3] for updates
-- [Sponsor Knip][4]
+- Blogpost: [Knip for Editors & Agents][4]
+- [Sponsor Knip][5]
 
 ## Contents
 
-- [Configuration][5]
-- [Diagnostics][6]
-- [Code Actions][7]
-- [File Descriptor][8]
-  - [Annotations][9]
-  - [Export Hover][10]
-  - [Imports][11]
-  - [Exports][12]
+- [Configuration][6]
+- [Diagnostics][7]
+- [Code Actions][8]
+- [File Descriptor][9]
+  - [Annotations][10]
+  - [Export Hover][11]
+  - [Imports][12]
+  - [Exports][13]
 
 ## Configuration
 
-Latest version of available settings: [types.d.ts][13]
+Latest version of available settings: [types.d.ts][14]
 
 ## Diagnostics
 
 Diagnostics should work out of the box.
 
-Most [Knip issue types][14] are translated to `Diagnostic` items with a
+Most [Knip issue types][15] are translated to `Diagnostic` items with a
 `DiagnosticSeverity` and emitted using `this.connection.sendDiagnostics()`. Also
-see [diagnostics.js][15] for details.
+see [diagnostics.js][16] for details.
 
 ## Code Actions
 
 Code actions should work out of the box.
 
 Some issues/diagnostics have code actions available. Also see
-[code-actions.js][16] for details.
+[code-actions.js][17] for details.
 
 ## File Descriptor
 
@@ -51,10 +52,10 @@ const file = await this.#client.sendRequest(REQUEST_FILE_NODE, {
 });
 ```
 
-Type definition for `File`: [session/types.ts][17]
+Type definition for `File`: [session/types.ts][18]
 
-The `file` descriptor can be used to implement features like [Annotations][9],
-[Export Hover][10], [Imports][11] and [Exports][12].
+The `file` descriptor can be used to implement features like [Annotations][10],
+[Export Hover][11], [Imports][12] and [Exports][13].
 
 ### Annotations
 
@@ -63,7 +64,7 @@ implemented using data from the `file` descriptor.
 
 Example:
 
-- [registerCodeLensProvider][18]
+- [registerCodeLensProvider][19]
 
 ### Export Hover
 
@@ -75,9 +76,9 @@ mixed into the rendered list.
 
 Example:
 
-- [registerHoverProvider → getHoverContent][18]
-- [Collect hover snippets][19]
-- [Render export hover][20]
+- [registerHoverProvider → getHoverContent][19]
+- [Collect hover snippets][20]
+- [Render export hover][21]
 
 ### Imports
 
@@ -91,8 +92,8 @@ Optionally, the client can implement:
 
 Example:
 
-- [setupTreeViews + refresh → getFileForTreeViews][18]
-- [Tree View Imports][21]
+- [setupTreeViews + refresh → getFileForTreeViews][19]
+- [Tree View Imports][22]
 
 ### Exports
 
@@ -107,28 +108,29 @@ Optionally, the client can implement:
 
 Example:
 
-- [setupTreeViews + refresh → getFileForTreeViews][18]
-- [Tree View Exports][22]
+- [setupTreeViews + refresh → getFileForTreeViews][19]
+- [Tree View Exports][23]
 
 [1]: https://knip.dev
 [2]: https://github.com/webpro-nl/knip
 [3]: https://bsky.app/profile/webpro.nl
-[4]: https://knip.dev/sponsors
-[5]: #configuration
-[6]: #diagnostics
-[7]: #code-actions
-[8]: #file-descriptor
-[9]: #annotations
-[10]: #export-hover
-[11]: #imports
-[12]: #exports
-[13]: ./src/types.d.ts
-[14]: https://knip.dev/reference/issue-types
-[15]: ./src/diagnostics.js
-[16]: ./src/code-actions.js
-[17]: ../knip/src/session/types.ts
-[18]: ../vscode-knip/src/index.js
-[19]: ../vscode-knip/src/collect-hover-snippets.js
-[20]: ../vscode-knip/src/render-export-hover.js
-[21]: ../vscode-knip/src/tree-view-imports.js
-[22]: ../vscode-knip/src/tree-view-exports.js
+[4]: https://knip.dev/blog/for-editors-and-agents
+[5]: https://knip.dev/sponsors
+[6]: #configuration
+[7]: #diagnostics
+[8]: #code-actions
+[9]: #file-descriptor
+[10]: #annotations
+[11]: #export-hover
+[12]: #imports
+[13]: #exports
+[14]: ./src/types.d.ts
+[15]: https://knip.dev/reference/issue-types
+[16]: ./src/diagnostics.js
+[17]: ./src/code-actions.js
+[18]: ../knip/src/session/types.ts
+[19]: ../vscode-knip/src/index.js
+[20]: ../vscode-knip/src/collect-hover-snippets.js
+[21]: ../vscode-knip/src/render-export-hover.js
+[22]: ../vscode-knip/src/tree-view-imports.js
+[23]: ../vscode-knip/src/tree-view-exports.js
