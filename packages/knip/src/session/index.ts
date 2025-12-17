@@ -1,5 +1,7 @@
 export { IMPORT_STAR, KNIP_CONFIG_LOCATIONS, SIDE_EFFECTS } from '../constants.js';
+export { finalizeConfigurationHints } from '../reporters/util/configuration-hints.js';
 export { getIssuePrefix } from '../reporters/util/util.js';
+export type { Results } from '../run.js';
 export type { Issue, Issues, IssueType, Rules } from '../types/issues.js';
 export type { PackageJson } from '../types/package-json.js';
 export { createOptions, type MainOptions } from '../util/create-options.js';

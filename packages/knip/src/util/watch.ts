@@ -57,8 +57,6 @@ export const getSessionHandler = async (
     entryPaths,
   }: WatchOptions
 ) => {
-  const getIssues = () => collector.getIssues().issues;
-
   const handleFileChanges = async (changes: WatchChange[]) => {
     const startTime = performance.now();
 
@@ -175,7 +173,7 @@ export const getSessionHandler = async (
 
     const update = createUpdate({ startTime });
 
-    if (onFileChange) onFileChange(Object.assign({ issues: getIssues() }, update));
+    if (onFileChange) onFileChange(Object.assign({ issues: getIssues().issues }, update));
 
     return update;
   };
@@ -188,11 +186,13 @@ export const getSessionHandler = async (
     }
   };
 
-  if (onFileChange) onFileChange({ issues: getIssues() });
+  const getIssues = () => collector.getIssues();
 
   const getEntryPaths = () => entryPaths;
 
   const getGraph = () => graph;
+
+  if (onFileChange) onFileChange({ issues: getIssues().issues });
 
   return { listener, handleFileChanges, getEntryPaths, getGraph, getIssues };
 };

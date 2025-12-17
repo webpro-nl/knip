@@ -8,6 +8,8 @@ import { join, relative } from './util/path.js';
 
 const isMatch = timerify(picomatch.isMatch, 'isMatch');
 
+export type CollectorIssues = ReturnType<IssueCollector['getIssues']>;
+
 /**
  * - Collects issues and counts them
  * - Hands them out, to be consumed by reporters

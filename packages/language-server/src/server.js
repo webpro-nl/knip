@@ -10,7 +10,7 @@ import {
   createRemoveDependencyEdit,
   createRemoveExportEdit,
 } from './code-actions.js';
-import { DEFAULT_JSDOC_TAGS, REQUEST_FILE_NODE } from './constants.js';
+import { DEFAULT_JSDOC_TAGS, REQUEST_FILE_NODE, REQUEST_RESULTS } from './constants.js';
 import { issueToDiagnostic } from './diagnostics.js';
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
@@ -21,7 +21,7 @@ const toPosix = value => value.split(path.sep).join(path.posix.sep);
 /**
  * @import { Issues, Rules } from 'knip/session';
  * @import { Connection, Diagnostic, CodeAction } from 'vscode-languageserver';
- * @import { CodeActionParams, DidChangeWatchedFilesParams, URI } from 'vscode-languageserver';
+ * @import { CodeActionParams, DidChangeWatchedFilesParams } from 'vscode-languageserver';
  * @import { Config, IssuesByUri } from './types.js';
  *
  * @typedef {import('knip/session').Session} Session
@@ -101,6 +101,8 @@ export class LanguageServer {
 
     this.connection.onRequest('knip.restart', () => this.restart());
 
+    this.connection.onRequest(REQUEST_RESULTS, () => this.getResults());
+
     this.connection.onRequest(REQUEST_FILE_NODE, async params => {
       const config = await this.getConfig();
       const isShowContention = config.exports?.contention?.enabled !== false;
@@ -163,7 +165,7 @@ export class LanguageServer {
       if (!config?.enabled) return;
 
       this.connection.console.log('Creating options');
-      const options = await createOptions({ cwd: this.cwd, isSession: true, isFix: true });
+      const options = await createOptions({ cwd: this.cwd, isSession: true });
       this.rules = options.rules;
 
       this.connection.console.log('Building module graph...');
@@ -172,7 +174,7 @@ export class LanguageServer {
       this.connection.console.log(`Finished building module graph (${Date.now() - start}ms)`);
 
       this.session = session;
-      this.publishDiagnostics(this.buildDiagnostics(session.getIssues(), config, this.rules));
+      this.publishDiagnostics(this.buildDiagnostics(session.getIssues().issues, config, this.rules));
     } catch (_error) {
       this.connection.console.error(`Error: ${_error}`);
     }
@@ -188,6 +190,11 @@ export class LanguageServer {
   restart() {
     this.stop();
     this.start();
+  }
+
+  getResults() {
+    if (!this.session) return null;
+    return this.session.getResults();
   }
 
   /**
@@ -217,7 +224,7 @@ export class LanguageServer {
     }
 
     const config = await this.getConfig();
-    this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues(), config, this.rules));
+    this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues().issues, config, this.rules));
   }
 
   /**

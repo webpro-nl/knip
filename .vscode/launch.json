@@ -32,7 +32,7 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
-      "name": "Try Extension",
+      "name": "Try Extension (w/o MCP Server)",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -43,18 +43,28 @@
       ]
     },
     {
-      "name": "Run Extension (Playground Monorepo)",
+      "name": "Try Extension (w/ MCP Server)",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-knip",
-        "--disable-extensions",
+        "${input:projectPath}"
+      ]
+    },
+    {
+      "name": "Run Extension on Playground Monorepo (w/ MCP Server)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-knip",
         "${workspaceFolder}/templates/language-server-client"
       ],
       "outFiles": [
         "${workspaceFolder}/packages/vscode-knip/**/*.js",
-        "${workspaceFolder}/packages/language-server/**/*.js"
+        "${workspaceFolder}/packages/language-server/**/*.js",
+        "${workspaceFolder}/packages/mcp-server/**/*.js"
       ]
     },
     {
@@ -71,6 +81,7 @@
       "sourceMaps": true,
       "resolveSourceMapLocations": [
         "${workspaceFolder}/**",
+
         "!**/node_modules/**"
       ]
     }
@@ -79,7 +90,7 @@
     {
       "name": "Run + Attach Knip LSP",
       "configurations": [
-        "Run Extension (Playground Monorepo)",
+        "Run Extension on Playground Monorepo (w/ MCP Server)",
         "Attach to Knip Server"
       ]
     }

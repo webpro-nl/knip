@@ -15,6 +15,8 @@ import { debugLogArray, debugLogObject } from './util/debug.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.js';
 
+export type Results = Awaited<ReturnType<typeof run>>['results'];
+
 export const run = async (options: MainOptions) => {
   debugLogObject('*', 'Unresolved configuration', options);
   debugLogObject('*', 'Included issue types', options.includedIssueTypes);

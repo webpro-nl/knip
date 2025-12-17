@@ -10,7 +10,7 @@
     "directory": "packages/vscode-knip"
   },
   "displayName": "Knip",
-  "description": "Knip",
+  "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
   "icon": "icon-192x192.png",
   "categories": [
     "Linters",
@@ -43,6 +43,7 @@
   "main": "./src/index.js",
   "dependencies": {
     "@knip/language-server": "workspace:*",
+    "@knip/mcp": "workspace:*",
     "mdast-util-to-markdown": "2.1.2",
     "unist-builder": "4.0.0",
     "vscode": "1.1.37",
@@ -59,6 +60,47 @@
     "onCommand:knip.showHover"
   ],
   "contributes": {
+    "languageModelTools": [
+      {
+        "name": "configure-knip",
+        "displayName": "Configure Knip",
+        "toolReferenceName": "configure-knip",
+        "icon": "$(tools)",
+        "userDescription": "Set up and optimize Knip configuration",
+        "modelDescription": "Run Knip and return configuration hints and issues. Returns ordered configurationHints (address first), counters, files (unused), issues by type, and configFile status. Iterate: adjust knip.json based on hints, run again until resolved.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "cwd": {
+              "type": "string",
+              "description": "Working directory (default: workspace root)"
+            }
+          }
+        }
+      },
+      {
+        "name": "knip-docs",
+        "displayName": "Knip Documentation",
+        "toolReferenceName": "knip-docs",
+        "icon": "$(book)",
+        "userDescription": "Get Knip documentation",
+        "modelDescription": "Get Knip documentation by topic. Available topics: getting-started (New to Knip? Start here), configuration (config basics and file locations), configuring-project-files (READ FIRST for unused files/false positives), handling-issues (handle each issue type), monorepos-and-workspaces (multi-package repo setup), production-mode (exclude tests/devDependencies), compilers (.vue/.svelte/.astro/.mdx support), configuration-reference (complete config options), plugins-explanation (config files showing unused?), entry-files (how Knip discovers entries), plugin-list (check if plugin exists), known-issues (errors or unexpected behavior). Can also fetch by path (e.g. 'reference/cli'). Use this instead of fetching from knip.dev.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "topic": {
+              "type": "string",
+              "description": "Topic ID (e.g. 'configuring-project-files') or path (e.g. 'reference/cli')"
+            }
+          },
+          "required": [
+            "topic"
+          ]
+        }
+      }
+    ],
     "commands": [
       {
         "command": "knip.restart",

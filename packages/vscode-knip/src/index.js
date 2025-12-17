@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 import { collectHoverSnippets } from './collect-hover-snippets.js';
 import { renderExportHover, renderExportHoverEntryPaths } from './render-export-hover.js';
+import { registerKnipTools, setLanguageClient } from './tools.js';
 import { ExportsTreeViewProvider } from './tree-view-exports.js';
 import { ImportsTreeViewProvider } from './tree-view-imports.js';
 
@@ -62,6 +63,9 @@ export class Extension {
     this.#setupTreeViews();
     this.#setupEventHandlers();
 
+    // Register LM tools (available even when extension is disabled)
+    registerKnipTools(this.#context);
+
     const config = vscode.workspace.getConfiguration('knip');
 
     const isEnabled = config.get('enabled', true);
@@ -113,10 +117,12 @@ export class Extension {
     }
 
     await this.#client.start();
+    setLanguageClient(this.#client);
   }
 
   async #stopClient() {
     if (!this.#client) return;
+    setLanguageClient(undefined);
     if (!this.#client.needsStart()) {
       try {
         await this.#client.sendRequest('knip.stop');
