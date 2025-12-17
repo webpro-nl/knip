@@ -17,6 +17,10 @@
     "Programming Languages"
   ],
   "qna": false,
+  "galleryBanner": {
+    "color": "#F56E0F",
+    "theme": "light"
+  },
   "keywords": [
     "analysis",
     "dead code",
@@ -33,7 +37,7 @@
     "unused"
   ],
   "sponsor": {
-    "url": "https://github.com/sponsors/webpro"
+    "url": "https://knip.dev/sponsors"
   },
   "publisher": "webpro",
   "type": "module",
@@ -41,6 +45,9 @@
     "vscode": "^1.100.0"
   },
   "main": "./src/index.js",
+  "scripts": {
+    "vscode:prepublish": "node scripts/sync-from-mcp.js"
+  },
   "dependencies": {
     "@knip/language-server": "workspace:*",
     "@knip/mcp": "workspace:*",
@@ -62,12 +69,12 @@
   "contributes": {
     "languageModelTools": [
       {
-        "name": "configure-knip",
+        "name": "knip-configure",
         "displayName": "Configure Knip",
-        "toolReferenceName": "configure-knip",
+        "toolReferenceName": "knip-configure",
         "icon": "$(tools)",
         "userDescription": "Set up and optimize Knip configuration",
-        "modelDescription": "Run Knip and return configuration hints and issues. Returns ordered configurationHints (address first), counters, files (unused), issues by type, and configFile status. Iterate: adjust knip.json based on hints, run again until resolved.",
+        "modelDescription": "Run Knip and return configuration hints and issues.\n\nReturns:\n- configurationHints: Ordered suggestions to improve configuration (address these first)\n- counters: Summary counts of each issue type\n- files: List of unused files\n- issues: Detailed issues by type (dependencies, exports, types, etc.)\n- configFile: Current config file status\n\nIterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
@@ -85,14 +92,14 @@
         "toolReferenceName": "knip-docs",
         "icon": "$(book)",
         "userDescription": "Get Knip documentation",
-        "modelDescription": "Get Knip documentation by topic. Available topics: getting-started (New to Knip? Start here), configuration (config basics and file locations), configuring-project-files (READ FIRST for unused files/false positives), handling-issues (handle each issue type), monorepos-and-workspaces (multi-package repo setup), production-mode (exclude tests/devDependencies), compilers (.vue/.svelte/.astro/.mdx support), configuration-reference (complete config options), plugins-explanation (config files showing unused?), entry-files (how Knip discovers entries), plugin-list (check if plugin exists), known-issues (errors or unexpected behavior). Can also fetch by path (e.g. 'reference/cli'). Use this instead of fetching from knip.dev.",
+        "modelDescription": "Get Knip documentation by topic.\n\nIf registered resources are unavailable, use this tool.\n\nAvailable topics (use these IDs):\n- getting-started: New to Knip? Start here for installation and first run\n- configuration: Understand configuration basics, defaults, and file locations\n- configuring-project-files: READ FIRST for unused files or false positives. Covers entry/project patterns\n- handling-issues: How to handle each issue type: files, dependencies, exports, types, duplicates\n- monorepos-and-workspaces: Multi-package repo? Configure workspaces and cross-references here\n- production-mode: Exclude tests, stories, devDependencies with --production and --strict flags\n- compilers: Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them\n- configuration-reference: Complete reference of all config options: entry, project, ignore, plugins, etc.\n- plugins-explanation: Config files showing as unused? Understand plugin config vs entry files\n- entry-files: Understand how Knip discovers entry files and default patterns per plugin\n- plugin-list: Check if a plugin exists for your tool (Jest, Vitest, ESLint, etc.)\n- known-issues: Errors or unexpected behavior? Check workarounds for common problems\n\nCan also fetch any doc by path (e.g., \"reference/cli\" or \"guides/troubleshooting\").\nUse this instead of fetching from knip.dev.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
           "properties": {
             "topic": {
               "type": "string",
-              "description": "Topic ID (e.g. 'configuring-project-files') or path (e.g. 'reference/cli')"
+              "description": "Topic key (e.g. \"configuring-project-files\") for curated resources, or path (e.g. \"explanations/plugins\") for all available docs"
             }
           },
           "required": [

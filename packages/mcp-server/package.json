@@ -1,7 +1,7 @@
 {
   "name": "@knip/mcp",
   "version": "0.0.0",
-  "description": "MCP server for Knip  find unused files, dependencies and exports",
+  "description": "Knip MCP Server",
   "type": "module",
   "bin": {
     "knip-mcp": "./src/cli.js"
@@ -20,9 +20,7 @@
   "keywords": [
     "knip",
     "mcp",
-    "model-context-protocol",
-    "unused",
-    "dead-code"
+    "model-context-protocol"
   ],
   "repository": {
     "type": "git",

@@ -21,6 +21,7 @@ performance, less maintenance and easier refactorings.
 - GitHub repo: [webpro-nl/knip][4]
 - npm package: [knip][1]
 - [Contributing Guide][7]
+- Follow [@webpro.nl on Bluesky][3] for updates
 - [Sponsor Knip!][8]
 
 ## Contributors

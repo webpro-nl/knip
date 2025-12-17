@@ -84,6 +84,6 @@ const docsTool = new KnipDocsTool();
  * @param {ExtensionContext} context
  */
 export function registerKnipTools(context) {
-  context.subscriptions.push(vscode.lm.registerTool('configure-knip', configureTool));
+  context.subscriptions.push(vscode.lm.registerTool('knip-configure', configureTool));
   context.subscriptions.push(vscode.lm.registerTool('knip-docs', docsTool));
 }

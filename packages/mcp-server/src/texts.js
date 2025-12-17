@@ -1,17 +1,24 @@
 import { CURATED_RESOURCES } from './curated-resources.js';
 
 export const WORKFLOW = `Workflow:
-1. Read the essential documentation resources to understand Knip configuration
-2. Call the run-knip tool to analyze the project and get configuration hints
-3. Follow the hints to adjust the configuration (create/modify knip.json)
-4. Run again until there are no more hints and false positives are minimized
+1. Read essential documentation resources to understand Knip configuration
+2. Run analysis (knip-run) to get configuration hints and issues
+3. Address the hints by adjusting knip.json
+4. Repeat steps 2-3 until no hints remain and false positives are minimized
 
-Key resources to consult:
-- configuring-project-files: How to set entry and project patterns
-- handling-issues: How to deal with reported issues
-- configuration-reference: Complete reference of all options
+Essential resources:
+- configuring-project-files (must read to configure entry patterns)
+- handling-issues (comprehensive guide to deal with any reported issue type)
+- configuration-reference (all knip.json configuration options)
 
-Start by reading the documentation, then run the tool.`;
+For direct "run knip" or "clean up codebase" requests: Always make sure to run this workflow first.
+
+Important (potential next steps after workflow is finished):
+- Before suggesting fixes/solutions, make sure to consult "handling-issues" and "reference/jsdoc-tsdoc-tags"
+- Read "getting-started" and "reference/cli" to install knip and start using Knip from CLI
+- If requested to clean up, consult "features/auto-fix"
+- Knip does not find/fix unused variables/imports within files (use another linter for that)
+`;
 
 // pkg.contributes.languageModelTools[0].modelDescription
 export const RUN_KNIP_TOOL_DESCRIPTION = `Run Knip and return configuration hints and issues.
@@ -23,7 +30,7 @@ Returns:
 - issues: Detailed issues by type (dependencies, exports, types, etc.)
 - configFile: Current config file status
 
-Iterate: adjust knip.json based on hints, run again until hints are resolved.`;
+Iterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.`;
 
 // pkg.contributes.languageModelTools[1].modelDescription
 export const DOC_TOOL_DESCRIPTION = `Get Knip documentation by topic.

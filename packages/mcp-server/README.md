@@ -7,7 +7,7 @@ projects.
 
 - Website: [knip.dev][1]
 - GitHub repo: [webpro-nl/knip][2]
-- Bluesky: [webpro.nl][3]
+- Follow [@webpro.nl on Bluesky][3] for updates
 - [Sponsor Knip][4]
 
 ## VS Code Extension
@@ -32,12 +32,12 @@ Add to your MCP configuration:
 
 ## Prompts
 
-- `configure-knip` — Guided workflow to set up and optimize Knip configuration
+- `knip-configure` — Guided workflow to set up and optimize Knip configuration
 
 ## Tools
 
-- `run-knip` — Run Knip, returns configuration hints and issues
-- `get-docs` — Get Knip documentation by topic
+- `knip-run` — Run Knip, returns configuration hints and issues
+- `knip-docs` — Get Knip documentation by topic
 
 ## Resources
 

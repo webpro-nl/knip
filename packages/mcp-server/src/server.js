@@ -36,7 +36,7 @@ class MCP {
     }));
 
     this.server.registerPrompt(
-      'configure-knip',
+      'knip-configure',
       {
         description: 'Set up and optimize Knip configuration. Guides through initial setup and iterative refinement.',
         arguments: [{ name: 'cwd', description: 'Working directory (default: current directory)', required: false }],
@@ -82,7 +82,7 @@ class MCP {
 
   #registerTools() {
     this.server.registerTool(
-      'run-knip',
+      'knip-run',
       {
         description: RUN_KNIP_TOOL_DESCRIPTION,
         inputSchema: {
@@ -105,7 +105,7 @@ class MCP {
     );
 
     this.server.registerTool(
-      'get-docs',
+      'knip-docs',
       { description: DOC_TOOL_DESCRIPTION, inputSchema: { topic: z.string().describe(DOC_TOOL_TOPIC_DESCRIPTION) } },
       async ({ topic }) => {
         const docs = getDocs(topic);
