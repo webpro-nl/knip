@@ -32,34 +32,13 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
-      "name": "Try Extension (w/o MCP Server)",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-knip",
-        "--disable-extensions",
-        "${input:projectPath}"
-      ]
-    },
-    {
-      "name": "Try Extension (w/ MCP Server)",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-knip",
-        "${input:projectPath}"
-      ]
-    },
-    {
       "name": "Run Extension on Playground Monorepo (w/ MCP Server)",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-knip",
-        "${workspaceFolder}/templates/language-server-client"
+        "${workspaceFolder}/templates/language-server-client" // Point at any repo
       ],
       "outFiles": [
         "${workspaceFolder}/packages/vscode-knip/**/*.js",
