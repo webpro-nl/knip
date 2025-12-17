@@ -1,0 +1,279 @@
+{
+  "name": "vscode-knip",
+  "version": "0.0.0",
+  "private": true,
+  "preview": true,
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webpro-nl/knip.git",
+    "directory": "packages/vscode-knip"
+  },
+  "displayName": "Knip",
+  "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
+  "icon": "icon-192x192.png",
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  "qna": false,
+  "galleryBanner": {
+    "color": "#F56E0F",
+    "theme": "light"
+  },
+  "keywords": [
+    "analysis",
+    "dead code",
+    "dependencies",
+    "entropy",
+    "exports",
+    "imports",
+    "javascript",
+    "lint",
+    "maintenance",
+    "monorepo",
+    "types",
+    "typescript",
+    "unused"
+  ],
+  "sponsor": {
+    "url": "https://knip.dev/sponsors"
+  },
+  "publisher": "webpro",
+  "type": "module",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "main": "./src/index.js",
+  "scripts": {
+    "vscode:prepublish": "node scripts/sync-from-mcp.js"
+  },
+  "dependencies": {
+    "@knip/language-server": "workspace:*",
+    "@knip/mcp": "workspace:*",
+    "mdast-util-to-markdown": "2.1.2",
+    "unist-builder": "4.0.0",
+    "vscode": "1.1.37",
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/mdast": "4.0.4",
+    "@types/vscode": "^1.106.1",
+    "knip": "workspace:*"
+  },
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:knip.restart",
+    "onCommand:knip.showHover"
+  ],
+  "contributes": {
+    "languageModelTools": [
+      {
+        "name": "knip-configure",
+        "displayName": "Configure Knip",
+        "toolReferenceName": "knip-configure",
+        "icon": "$(tools)",
+        "userDescription": "Set up and optimize Knip configuration",
+        "modelDescription": "Run Knip and return configuration hints and issues.\n\nReturns:\n- configurationHints: Ordered suggestions to improve configuration (address these first)\n- counters: Summary counts of each issue type\n- files: List of unused files\n- issues: Detailed issues by type (dependencies, exports, types, etc.)\n- configFile: Current config file status\n\nIterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "cwd": {
+              "type": "string",
+              "description": "Working directory (default: workspace root)"
+            }
+          }
+        }
+      },
+      {
+        "name": "knip-docs",
+        "displayName": "Knip Documentation",
+        "toolReferenceName": "knip-docs",
+        "icon": "$(book)",
+        "userDescription": "Get Knip documentation",
+        "modelDescription": "Get Knip documentation by topic.\n\nIf registered resources are unavailable, use this tool.\n\nAvailable topics (use these IDs):\n- getting-started: New to Knip? Start here for installation and first run\n- configuration: Understand configuration basics, defaults, and file locations\n- configuring-project-files: READ FIRST for unused files or false positives. Covers entry/project patterns\n- handling-issues: How to handle each issue type: files, dependencies, exports, types, duplicates\n- monorepos-and-workspaces: Multi-package repo? Configure workspaces and cross-references here\n- production-mode: Exclude tests, stories, devDependencies with --production and --strict flags\n- compilers: Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them\n- configuration-reference: Complete reference of all config options: entry, project, ignore, plugins, etc.\n- plugins-explanation: Config files showing as unused? Understand plugin config vs entry files\n- entry-files: Understand how Knip discovers entry files and default patterns per plugin\n- plugin-list: Check if a plugin exists for your tool (Jest, Vitest, ESLint, etc.)\n- known-issues: Errors or unexpected behavior? Check workarounds for common problems\n\nCan also fetch any doc by path (e.g., \"reference/cli\" or \"guides/troubleshooting\").\nUse this instead of fetching from knip.dev.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "topic": {
+              "type": "string",
+              "description": "Topic key (e.g. \"configuring-project-files\") for curated resources, or path (e.g. \"explanations/plugins\") for all available docs"
+            }
+          },
+          "required": [
+            "topic"
+          ]
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "knip.restart",
+        "title": "Knip: Restart Knip Server"
+      },
+      {
+        "command": "knip.expandAll",
+        "title": "Expand All",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "knip.showHover",
+        "title": "Knip: Show Hover"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "knip.showHover",
+        "key": "ctrl+cmd+e",
+        "when": "editorTextFocus"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "knip.imports",
+          "name": "Imports",
+          "contextualTitle": "Imports",
+          "when": "config.knip.imports.enabled",
+          "icon": "callhierarchy-incoming"
+        },
+        {
+          "id": "knip.exports",
+          "name": "Exports",
+          "contextualTitle": "Exports",
+          "when": "config.knip.exports.enabled",
+          "icon": "call-outgoing"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "knip.expandAll",
+          "when": "view == knip.imports",
+          "group": "navigation"
+        },
+        {
+          "command": "knip.expandAll",
+          "when": "view == knip.exports",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": [
+      {
+        "title": "Knip",
+        "order": 1,
+        "properties": {
+          "knip.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable Knip"
+          },
+          "knip.requireConfig": {
+            "type": "boolean",
+            "default": false,
+            "description": "Require Knip configuration file"
+          }
+        }
+      },
+      {
+        "id": "editor",
+        "title": "Editor",
+        "displayName": "Editor",
+        "order": 2,
+        "properties": {
+          "knip.editor.exports.codelens.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show CodeLens for imports of exports"
+          },
+          "knip.editor.exports.hover.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show imports for exports on hover"
+          },
+          "knip.editor.exports.hover.maxSnippets": {
+            "type": "number",
+            "default": 10,
+            "minimum": -1,
+            "description": "Limit number of snippets per file (-1 = unlimited, 0 = disable)"
+          },
+          "knip.editor.exports.hover.includeImportLocationSnippet": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include import location with snippets"
+          },
+          "knip.editor.exports.hover.timeout": {
+            "type": "number",
+            "default": 300,
+            "minimum": 0,
+            "description": "Limit time to collect hover snippets (in ms)"
+          },
+          "knip.editor.exports.quickfix.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable quickfixes for unused exports and members of exported classes and enums"
+          },
+          "knip.editor.exports.quickfix.jsdocTags": {
+            "type": "array",
+            "default": [
+              "@lintignore",
+              "@internal",
+              "@public"
+            ],
+            "description": "JSDoc tags for unused export quick fixes",
+            "items": {
+              "type": "string"
+            }
+          },
+          "knip.editor.exports.highlight.dimExports": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused exports (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimTypes": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused types (instead of warnings)"
+          }
+        }
+      },
+      {
+        "id": "imports",
+        "title": "Imports",
+        "displayName": "Imports & Exports",
+        "order": 3,
+        "type": "object",
+        "properties": {
+          "knip.imports.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable imports view"
+          }
+        }
+      },
+      {
+        "id": "exports",
+        "title": "Exports",
+        "displayName": "Imports & Exports",
+        "order": 4,
+        "type": "object",
+        "properties": {
+          "knip.exports.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable exports view"
+          },
+          "knip.exports.contention.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Report export contention (branching and conflicts)"
+          }
+        }
+      }
+    ]
+  }
+}

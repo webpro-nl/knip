@@ -1,3 +1,4 @@
+import type { Results } from '../../run.js';
 import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.js';
 import { relative, toRelative } from '../../util/path.js';
 import { Table } from '../../util/table.js';
@@ -86,6 +87,62 @@ const hintTypesOrder: ConfigurationHintType[][] = [
   ['package-entry'],
 ];
 
+export interface ProcessedHint extends ConfigurationHint {
+  message: string;
+}
+
+export const finalizeConfigurationHints = (
+  results: Results,
+  options: { cwd: string; configFilePath?: string }
+): ProcessedHint[] => {
+  if (results.counters.files > 20) {
+    const workspaces = results.includedWorkspaceDirs
+      .sort(byPathDepth)
+      .reverse()
+      .map(dir => ({ dir, size: 0 }));
+
+    for (const filePath of results.issues.files) {
+      const workspace = workspaces.find(ws => filePath.startsWith(ws.dir));
+      if (workspace) workspace.size++;
+    }
+
+    if (workspaces.length === 1) {
+      results.configurationHints.add({ type: 'top-level-unconfigured', identifier: '.', size: workspaces[0].size });
+    } else {
+      const topWorkspaces = workspaces.sort((a, b) => b.size - a.size).filter(ws => ws.size > 1);
+      for (const { dir, size } of topWorkspaces) {
+        const identifier = toRelative(dir, options.cwd) || '.';
+        results.configurationHints.add({ type: 'workspace-unconfigured', workspaceName: identifier, identifier, size });
+      }
+    }
+  }
+
+  const hintsByType = new Map<ConfigurationHintType, ConfigurationHint[]>();
+  for (const hint of results.configurationHints) {
+    const hints = hintsByType.get(hint.type) ?? [];
+    hintsByType.set(hint.type, [...hints, hint]);
+  }
+
+  return hintTypesOrder.flatMap(hintTypes =>
+    hintTypes.flatMap(hintType => {
+      const hints = hintsByType.get(hintType) ?? [];
+      const topHints = hints.length > 10 ? Array.from(hints).slice(0, 10) : hints;
+      const row = topHints.map(hint => {
+        hint.filePath = relative(options.cwd, hint.filePath ?? options.configFilePath ?? '');
+        const hintPrinter = hintPrinters.get(hint.type);
+        // @ts-expect-error
+        const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath: options.configFilePath }) : '';
+        return { ...hint, message };
+      });
+      if (hints.length !== topHints.length) {
+        const more = hints.length - topHints.length;
+        row.push({ type: hintType, identifier: `...${more} more similar hints`, filePath: '', message: '' });
+      }
+      return row;
+    })
+  );
+};
+
 export const printConfigurationHints = ({
   cwd,
   counters,
@@ -96,58 +153,14 @@ export const printConfigurationHints = ({
   includedWorkspaceDirs,
   configFilePath,
 }: ReporterOptions) => {
-  if (counters.files > 20) {
-    const workspaces = includedWorkspaceDirs
-      .sort(byPathDepth)
-      .reverse()
-      .map(dir => ({ dir, size: 0 }));
+  const rows = finalizeConfigurationHints(
+    { issues, counters, configurationHints, tagHints, includedWorkspaceDirs },
+    { cwd, configFilePath }
+  );
 
-    for (const filePath of issues.files) {
-      const workspace = workspaces.find(ws => filePath.startsWith(ws.dir));
-      if (workspace) workspace.size++;
-    }
-
-    if (workspaces.length === 1) {
-      configurationHints.add({ type: 'top-level-unconfigured', identifier: '.', size: workspaces[0].size });
-    } else {
-      const topWorkspaces = workspaces.sort((a, b) => b.size - a.size).filter(ws => ws.size > 1);
-      for (const { dir, size } of topWorkspaces) {
-        const identifier = toRelative(dir, cwd) || '.';
-        configurationHints.add({ type: 'workspace-unconfigured', workspaceName: identifier, identifier, size });
-      }
-    }
-  }
-
-  if (configurationHints.size > 0) {
+  if (rows.length > 0) {
     const getTitle = isTreatConfigHintsAsErrors ? getColoredTitle : getDimmedTitle;
-
     console.log(getTitle('Configuration hints', configurationHints.size));
-
-    const hintsByType = new Map<ConfigurationHintType, ConfigurationHint[]>();
-    for (const hint of configurationHints) {
-      const hints = hintsByType.get(hint.type) ?? [];
-      hintsByType.set(hint.type, [...hints, hint]);
-    }
-
-    const rows: TableRow[] = hintTypesOrder.flatMap(hintTypes =>
-      hintTypes.flatMap(hintType => {
-        const hints = hintsByType.get(hintType) ?? [];
-        const topHints = hints.length > 10 ? Array.from(hints).slice(0, 10) : hints;
-        const row = topHints.map(hint => {
-          hint.filePath = relative(cwd, hint.filePath ?? configFilePath ?? '');
-          const hintPrinter = hintPrinters.get(hint.type);
-          // @ts-expect-error
-          const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath }) : '';
-          return { ...hint, message };
-        });
-        if (hints.length !== topHints.length) {
-          const identifier = dim(`...${hints.length - topHints.length} more similar hints`);
-          row.push({ type: hintType, identifier, filePath: '', message: '' });
-        }
-        return row;
-      })
-    );
-
     console.warn(getTableForHints(rows).toString());
   }
 

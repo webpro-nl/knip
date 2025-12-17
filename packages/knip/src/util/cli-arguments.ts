@@ -27,6 +27,7 @@ Options:
   --include-libs           Include type definitions from external dependencies (default: false)
   --include-entry-exports  Include entry files when reporting unused exports
   --isolate-workspaces     Isolate workspaces into separate programs
+  --use-tsconfig-files     Use tsconfig.json to define project files (override \`project\` patterns)
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
@@ -110,6 +111,7 @@ export default function parseCLIArgs() {
       'trace-file': { type: 'string' },
       'treat-config-hints-as-errors': { type: 'boolean' },
       tsConfig: { type: 'string', short: 't' },
+      'use-tsconfig-files': { type: 'boolean' },
       version: { type: 'boolean', short: 'V' },
       watch: { type: 'boolean' },
       workspace: { type: 'string', short: 'W' },

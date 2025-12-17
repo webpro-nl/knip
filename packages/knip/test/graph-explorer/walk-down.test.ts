@@ -67,13 +67,7 @@ test('should find direct importers', () => {
     ...baseFileNode,
     imports: {
       internal: new Map([
-        [
-          filePath1,
-          {
-            ...baseImportMaps,
-            imported: new Map([['identifier', new Set([filePath2])]]),
-          },
-        ],
+        [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath2])]]) }],
       ]),
       external: new Set(),
       unresolved: new Set(),

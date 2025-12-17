@@ -40,7 +40,7 @@ export const createHosts = ({
   const languageServiceHost: ts.LanguageServiceHost = {
     getCompilationSettings: () => compilerOptions,
     getScriptFileNames: () => Array.from(entryPaths),
-    getScriptVersion: () => '0',
+    getScriptVersion: (fileName: string) => fileManager.getScriptVersion(fileName).toString(),
     getScriptSnapshot: (fileName: string) => fileManager.getSnapshot(fileName),
     getCurrentDirectory: () => cwd,
     getDefaultLibFileName: ts.getDefaultLibFilePath,

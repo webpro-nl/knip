@@ -1,5 +1,6 @@
 import type { WatchListener } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.js';
+import { invalidateCache } from '../graph-explorer/cache.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
@@ -13,14 +14,14 @@ import { join, toAbsolute, toRelative } from './path.js';
 
 export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
-type WatchChange = {
+export type WatchChange = {
   type: 'added' | 'deleted' | 'modified';
   filePath: string;
 };
 
-export type WatchHandler = Awaited<ReturnType<typeof getWatchHandler>>;
+export type SessionHandler = Awaited<ReturnType<typeof getSessionHandler>>;
 
-type Watch = {
+type WatchOptions = {
   analyzedFiles: Set<string>;
   analyzeSourceFile: (filePath: string, principal: ProjectPrincipal) => void;
   chief: ConfigurationChief;
@@ -40,7 +41,7 @@ const createUpdate = (options: { startTime: number }) => {
   return { duration, mem };
 };
 
-export const getWatchHandler = async (
+export const getSessionHandler = async (
   options: MainOptions,
   {
     analyzedFiles,
@@ -54,10 +55,8 @@ export const getWatchHandler = async (
     onFileChange,
     unreferencedFiles,
     entryPaths,
-  }: Watch
+  }: WatchOptions
 ) => {
-  const getIssues = () => collector.getIssues().issues;
-
   const handleFileChanges = async (changes: WatchChange[]) => {
     const startTime = performance.now();
 
@@ -103,6 +102,8 @@ export const getWatchHandler = async (
     }
 
     if (added.size === 0 && deleted.size === 0 && modified.size === 0) return createUpdate({ startTime });
+
+    invalidateCache(graph);
 
     unreferencedFiles.clear();
     const cachedUnusedFiles = collector.purge();
@@ -172,7 +173,7 @@ export const getWatchHandler = async (
 
     const update = createUpdate({ startTime });
 
-    if (onFileChange) onFileChange(Object.assign({ issues: getIssues() }, update));
+    if (onFileChange) onFileChange(Object.assign({ issues: getIssues().issues }, update));
 
     return update;
   };
@@ -185,11 +186,13 @@ export const getWatchHandler = async (
     }
   };
 
-  if (onFileChange) onFileChange({ issues: getIssues() });
+  const getIssues = () => collector.getIssues();
 
   const getEntryPaths = () => entryPaths;
 
   const getGraph = () => graph;
+
+  if (onFileChange) onFileChange({ issues: getIssues().issues });
 
   return { listener, handleFileChanges, getEntryPaths, getGraph, getIssues };
 };

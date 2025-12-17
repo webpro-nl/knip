@@ -15,6 +15,9 @@
     },
     "packages/docs": {
       "entry": ["{remark,scripts}/*.ts"]
+    },
+    "packages/vscode-knip": {
+      "entry": ["scripts/*.js"]
     }
   }
 }

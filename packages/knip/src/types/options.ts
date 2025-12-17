@@ -17,8 +17,10 @@ export interface Options {
   isIsolateWorkspaces: boolean;
   isProduction: boolean;
   isRemoveFiles: boolean;
+  isSession: boolean;
   isShowProgress: boolean;
   isStrict: boolean;
+  isUseTscFiles: boolean;
   isWatch: boolean;
   tags: string[];
   tsConfigFile: string | undefined;

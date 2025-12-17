@@ -3,7 +3,7 @@ import type { CatalogCounselor } from '../CatalogCounselor.js';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS } from '../constants.js';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
@@ -12,6 +12,7 @@ import type { GetImportsAndExportsOptions } from '../types/config.js';
 import type { Issue } from '../types/issues.js';
 import type { Import, ModuleGraph } from '../types/module-graph.js';
 import type { PluginName } from '../types/PluginNames.js';
+import { partition } from '../util/array.js';
 import type { MainOptions } from '../util/create-options.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
 import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
@@ -108,7 +109,8 @@ export async function build({
     const config = chief.getConfigForWorkspace(name, extensions);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
-    const { isFile, compilerOptions, definitionPaths } = await loadTSConfig(tsConfigFilePath);
+    const { isFile, compilerOptions, fileNames } = await loadTSConfig(tsConfigFilePath);
+    const [definitionPaths, tscSourcePaths] = partition(fileNames, filePath => IS_DTS.test(filePath));
 
     if (isFile) augmentWorkspace(workspace, dir, compilerOptions);
 
@@ -276,7 +278,16 @@ export async function build({
       }
     }
 
-    {
+    if (options.isUseTscFiles) {
+      const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
+      debugLogArray(name, 'Using tsconfig files as project files', tscSourcePaths);
+      for (const filePath of tscSourcePaths) {
+        if (!isGitIgnored(filePath) && !isIgnoredWorkspace(filePath)) {
+          principal.addProgramPath(filePath);
+          principal.addProjectPath(filePath);
+        }
+      }
+    } else {
       const patterns = options.isProduction
         ? worker.getProductionProjectFilePatterns(negatedEntryPatterns)
         : worker.getProjectFilePatterns([
@@ -327,7 +338,7 @@ export async function build({
   };
 
   const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
-    if (!options.isWatch && analyzedFiles.has(filePath)) return;
+    if (!options.isWatch && !options.isSession && analyzedFiles.has(filePath)) return;
     analyzedFiles.add(filePath);
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -451,14 +462,14 @@ export async function build({
     principal.reconcileCache(graph);
 
     // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (options.isIsolateWorkspaces || (options.isSkipLibs && !options.isWatch)) {
+    if (options.isIsolateWorkspaces || (options.isSkipLibs && !options.isWatch && !options.isSession)) {
       factory.deletePrincipal(principal, options.cwd);
       principals[i] = undefined;
     }
     perfObserver.addMemoryMark(factory.getPrincipalCount());
   }
 
-  if (!options.isWatch && options.isSkipLibs && !options.isIsolateWorkspaces) {
+  if (!options.isWatch && !options.isSession && options.isSkipLibs && !options.isIsolateWorkspaces) {
     for (const principal of principals) {
       if (principal) factory.deletePrincipal(principal, options.cwd);
     }

@@ -1,0 +1,40 @@
+{
+  "name": "@knip/mcp",
+  "version": "0.0.0",
+  "description": "Knip MCP Server",
+  "type": "module",
+  "bin": {
+    "knip-mcp": "./src/cli.js"
+  },
+  "exports": {
+    ".": "./src/server.js",
+    "./tools": "./src/tools.js"
+  },
+  "files": [
+    "src",
+    "docs"
+  ],
+  "scripts": {
+    "prepack": "cp -r ../docs/src/content/docs ./docs"
+  },
+  "keywords": [
+    "knip",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webpro-nl/knip",
+    "directory": "packages/mcp-server"
+  },
+  "author": "Lars Kappert <lars@webpro.nl>",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "knip": "workspace:*",
+    "zod": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}

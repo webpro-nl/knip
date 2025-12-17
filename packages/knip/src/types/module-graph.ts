@@ -11,7 +11,7 @@ type References = Set<Reference>;
 
 type Tags = Set<string>;
 
-interface SourceLocation {
+export interface Position {
   pos: number;
   line: number;
   col: number;
@@ -36,14 +36,14 @@ export type ImportMaps = {
 
 export type ImportMap = Map<FilePath, ImportMaps>;
 
-export interface Import extends SourceLocation {
+export interface Import extends Position {
   readonly specifier: string;
   readonly filePath: string | undefined;
   readonly identifier: string | undefined;
   readonly isTypeOnly: boolean;
 }
 
-export interface Export extends SourceLocation {
+export interface Export extends Position {
   readonly identifier: Identifier;
   readonly type: SymbolType;
   readonly members: ExportMember[];

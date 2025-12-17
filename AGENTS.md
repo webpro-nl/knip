@@ -7,6 +7,8 @@ JavaScript and TypeScript projects.
 
 - Monorepo
 - Main package is core in `packages/knip` (TypeScript)
+- Language Server in `packages/language-server` (JS + JSDoc for types)
+- VS Code Extension in `packages/vscode-knip` (JS + JSDoc for types)
 - [Documentation][1] content in `packages/docs` (Astro + MD/MDX)
 
 ## General guidelines
