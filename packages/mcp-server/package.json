@@ -1,6 +1,6 @@
 {
   "name": "@knip/mcp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Knip MCP Server",
   "type": "module",
   "bin": {
@@ -31,7 +31,7 @@
   "license": "ISC",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
-    "knip": "workspace:*",
+    "knip": "^5.75.2",
     "zod": "^4.1.11"
   },
   "engines": {
