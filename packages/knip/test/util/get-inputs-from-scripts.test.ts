@@ -193,7 +193,7 @@ test('getInputsFromScripts (bun)', () => {
   t('bun ci', []);
 });
 
-test.only('getInputsFromScripts (pnpm)', () => {
+test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
   t('pnpm run program', []);
   t('pnpm program', [toBinary('program')]);
