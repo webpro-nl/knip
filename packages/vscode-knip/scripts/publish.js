@@ -29,7 +29,7 @@ const targets = {
 };
 
 const banner = `import{createRequire}from'module';import{fileURLToPath}from'url';import{dirname}from'path';const require=createRequire(import.meta.url),__filename=fileURLToPath(import.meta.url),__dirname=dirname(__filename);`;
-const ext = ['vscode', /^@oxc-resolver\/binding-/];
+const ext = ['vscode', /^@oxc-resolver\/binding-/, 'jiti', /jiti\/dist/];
 const extSession = [...ext, 'knip/session'];
 
 const cmd = args.publish ? 'publish' : 'package';
@@ -58,6 +58,10 @@ for (const f of ['extension.js', 'node_modules/knip/session.js']) {
   const p = join(dist, f);
   writeFileSync(p, banner + readFileSync(p, 'utf8'));
 }
+
+const jitiSrc = join(root, '..', '..', 'node_modules', 'jiti');
+const jitiDst = join(nm, 'jiti');
+cpSync(jitiSrc, jitiDst, { recursive: true });
 
 for (const [target, binding] of args.target ? [[args.target, targets[args.target]]] : Object.entries(targets)) {
   rmSync(join(nm, '@oxc-resolver'), { recursive: true, force: true });
