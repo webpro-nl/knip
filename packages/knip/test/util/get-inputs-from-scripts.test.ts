@@ -68,6 +68,7 @@ test('getInputsFromScripts (node -r)', () => {
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toDeferResolveEntry('script', opt), toDeferResolve('pkg1'), toDeferResolve('pkg2')]);
   t('node --import tsx ./main.ts', [toBinary('node'), toDeferResolveEntry('./main.ts', opt), toDeferResolve('tsx')]);
+  t('node --import=tsx ./main.ts', [toBinary('node'), ts, toDeferResolve('tsx')]);
   t('node --loader ts-node/esm node_modules/pkg/bin/cli.js -c ./webpack.config.ts', [toBinary('node'), toDeferResolveEntry('node_modules/pkg/bin/cli.js', opt), toDeferResolve('ts-node/esm')]);
   t('node --experimental-loader ts-node/esm/transpile-only ./script.js', [toBinary('node'), js, toDeferResolve('ts-node/esm/transpile-only')]);
   t('node -r @scope/package/register ./dir', [toBinary('node'), toDeferResolveEntry('./dir', opt), toDeferResolve('@scope/package/register')]);
@@ -280,6 +281,8 @@ test('getInputsFromScripts (concurrently)', () => {
 test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toDeferResolveEntry('src/index.ts', opt)]);
   t('env-cmd --no-overrides -- tsx watch src/index.ts', [toBinary('env-cmd'), toBinary('tsx'), toDeferResolveEntry('src/index.ts', opt)]);
+  t('op run --env-file=.env -- node server.ts', [toBinary('op'), toBinary('node'), toDeferResolveEntry('server.ts', opt)]);
+  t('op run --env-file=.env -- node --import=mocks.ts server.ts', [toBinary('op'), toBinary('node'), toDeferResolveEntry('server.ts', opt), toDeferResolve('mocks.ts')]);
 });
 
 test('getInputsFromScripts (bash expressions)', () => {
