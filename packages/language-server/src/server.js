@@ -172,8 +172,20 @@ export class LanguageServer {
       const config = await this.getConfig();
       if (!config?.enabled) return;
 
+      const configFilePath = config.configFilePath
+        ? path.isAbsolute(config.configFilePath)
+          ? config.configFilePath
+          : path.resolve(this.cwd ?? process.cwd(), config.configFilePath)
+        : undefined;
+
+      if (configFilePath) {
+        this.cwd = path.dirname(configFilePath);
+        process.chdir(this.cwd);
+      }
+
+
       this.connection.console.log('Creating options');
-      const options = await createOptions({ cwd: this.cwd, isSession: true });
+      const options = await createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
       this.rules = options.rules;
 
       this.connection.console.log('Building module graph...');

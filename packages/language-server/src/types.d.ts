@@ -2,6 +2,7 @@ import type { Issue, IssueType } from 'knip/session';
 
 export type Config = {
   enabled: boolean;
+  configFilePath?: string;
   editor: {
     exports: {
       codelens: {

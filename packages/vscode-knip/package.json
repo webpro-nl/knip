@@ -183,6 +183,11 @@
             "type": "boolean",
             "default": false,
             "description": "Require Knip configuration file"
+          },
+          "knip.configFilePath": {
+            "type": "string",
+            "default": "",
+            "description": "Path to Knip configuration file (relative to workspace root)"
           }
         }
       },

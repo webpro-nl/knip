@@ -341,7 +341,11 @@ export class Extension {
     const folder = vscode.workspace.workspaceFolders?.[0];
     if (!folder) return false;
 
-    for (const location of KNIP_CONFIG_LOCATIONS) {
+    const config = vscode.workspace.getConfiguration('knip');
+    const configFile = config.get('configFilePath', '');
+    const locations = configFile ? [configFile] : KNIP_CONFIG_LOCATIONS;
+
+    for (const location of locations) {
       const candidate = vscode.Uri.joinPath(folder.uri, location);
       try {
         await vscode.workspace.fs.stat(candidate);
