@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createSession } from '../../src/session/session.js';
 import { join } from '../../src/util/path.js';
-import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 import { describeFile } from './util.js';
 
