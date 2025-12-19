@@ -2,7 +2,7 @@ import path from 'node:path';
 import * as vscode from 'vscode';
 
 /**
- * @import { File, PackageJson } from "knip/session"
+ * @import { File, PackageJson } from 'knip/session'
  */
 
 /**

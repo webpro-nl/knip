@@ -1,9 +1,7 @@
 # Knip VS Code Extension
 
-## Knip
-
-Find unused files, dependencies, and exports in your JavaScript/TypeScript
-projects.
+This extension is powered by Knip: Find unused files, dependencies, and exports
+in your JavaScript/TypeScript projects.
 
 - Website: [knip.dev][1]
 - GitHub repo: [webpro-nl/knip][2]
@@ -11,26 +9,40 @@ projects.
 - Blogpost: [Knip for Editors & Agents][4]
 - [Sponsor Knip][5]
 
+## What Is This?
+
+[The usual suspects][6] like red squiggles for unused exports are there. What
+really moves the needle for DX with Knip's module graph is **navigation**. A
+completely unique way to view & fly through codebases for developers who care.
+Connect the dots during development and refactors, while keeping things in
+check. We're starting out with [3 key features][7]:
+
+1. **Hover over Export** for import & usage locations
+2. **Imports Tree View** for direct links to implementations
+3. **Exports Tree View** for direct links to import & usage locations
+
 ## Features
 
 - Diagnostics for unused files, dependencies, and exports
-- CodeLens showing import counts for exports
 - Hover on exports to see import locations
-- Code actions to fix or ignore issues
 - Tree views for imports and exports
+- Code actions to fix or ignore issues
+- CodeLens showing import counts for exports
 
-## Tools for Coding Agents
+## MCP Tools
 
-### GitHub Copilot
-
-The extension provides MCP tools for GitHub Copilot:
+The extension provides MCP tools for coding agents:
 
 - `knip-configure` — Run Knip and configure
 - `knip-docs` — Get Knip documentation by topic
 
+In other words, you can tell your coding agent to "configure knip" and it will
+RTFM so you don't have to. Using a newer model results in an optimized
+`knip.json` file and an uncluttered codebase.
+
 ## Screenshots
 
-- [Lint Problems][6]
+- [Lint Findings][6]
 - [Imports & Exports][7]
 - [Contention][8]
   - [Circular Dependencies][9]
@@ -38,9 +50,9 @@ The extension provides MCP tools for GitHub Copilot:
   - [Branching][11]
 - [VS Code Extension Settings][12]
 
-### Lint Problems
+### Lint Findings
 
-![Lint Problems][13]
+![Lint Findings][13]
 
 ### Imports & Exports
 
@@ -83,7 +95,7 @@ barrel files. Knip warns:
 [3]: https://bsky.app/profile/webpro.nl
 [4]: https://knip.dev/blog/for-editors-and-agents
 [5]: https://knip.dev/sponsors
-[6]: #lint-problems
+[6]: #lint-findings
 [7]: #imports--exports
 [8]: #contention
 [9]: #circular-dependencies

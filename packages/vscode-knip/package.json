@@ -1,8 +1,7 @@
 {
   "name": "vscode-knip",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "private": true,
-  "preview": true,
   "license": "ISC",
   "repository": {
     "type": "git",
@@ -44,8 +43,16 @@
   "engines": {
     "vscode": "^1.106.1"
   },
-  "main": "./src/index.js",
+  "files": [
+    "dist/",
+    "icon-192x192.png",
+    "license",
+    "README.md"
+  ],
+  "main": "./dist/extension.js",
   "scripts": {
+    "package": "node scripts/publish.js",
+    "publish": "node scripts/publish.js --publish",
     "vscode:prepublish": "node scripts/sync-from-mcp.js"
   },
   "dependencies": {
@@ -58,7 +65,8 @@
   "devDependencies": {
     "@types/mdast": "4.0.4",
     "@types/vscode": "^1.106.1",
-    "knip": "workspace:*"
+    "knip": "workspace:*",
+    "rolldown": "1.0.0-beta.55"
   },
   "activationEvents": [
     "onStartupFinished",
