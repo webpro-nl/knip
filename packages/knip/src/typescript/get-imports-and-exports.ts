@@ -220,7 +220,7 @@ const getImportsAndExports = (
             filePath,
             specifier: sanitizedSpecifier,
             identifier: opts.identifier ?? SIDE_EFFECTS,
-            pos: opts.pos,
+            pos,
             line: line + 1,
             col: character + 2,
             isTypeOnly: !!(opts.modifiers & IMPORT_FLAGS.TYPE_ONLY),

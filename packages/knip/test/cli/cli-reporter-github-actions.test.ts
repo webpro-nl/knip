@@ -38,11 +38,11 @@ Unlisted binaries (1)
 Unresolved imports (1)
 ::warning file=index.ts,line=4,endLine=4,col=8,endColumn=8,title=✂️ Knip / Unresolved imports::./unresolved in index.ts
 Unused exports (2)
-::warning file=ns.ts,line=2,endLine=2,col=14,endColumn=14,title=✂️ Knip / Unused exports::unused in ns.ts
 ::warning file=exports.ts,line=2,endLine=2,col=14,endColumn=14,title=✂️ Knip / Unused exports::unused in exports.ts
+::warning file=ns.ts,line=2,endLine=2,col=14,endColumn=14,title=✂️ Knip / Unused exports::unused in ns.ts
 Unused exported types (2)
-::warning file=ns.ts,line=5,endLine=5,col=13,endColumn=13,title=✂️ Knip / Unused exported types::UnusedType in ns.ts
 ::warning file=exports.ts,line=5,endLine=5,col=13,endColumn=13,title=✂️ Knip / Unused exported types::UnusedType in exports.ts
+::warning file=ns.ts,line=5,endLine=5,col=13,endColumn=13,title=✂️ Knip / Unused exported types::UnusedType in ns.ts
 Unused exported enum members (1)
 ::warning file=exports.ts,line=15,endLine=15,col=3,endColumn=3,title=✂️ Knip / Unused exported enum members::unused in exports.ts
 Unused exported class members (1)
@@ -60,22 +60,22 @@ test('knip --reporter github-actions (workspaces: unused export, unused dep, unl
   const expected = `Unused files (1)
 ::error file=docs/dangling.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused files::docs/dangling.ts
 Unused dependencies (4)
-::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
-::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 ::error file=apps/backend/package.json,line=7,endLine=7,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::picomatch in apps/backend/package.json
 ::error file=apps/backend/package.json,line=8,endLine=8,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::next in apps/backend/package.json
+::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
+::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
-::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
-::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
-::error file=apps/backend/index.ts,line=3,endLine=3,col=25,endColumn=25,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
 ::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
+::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
+::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)
 ::error file=packages/tools/utils.ts,line=3,endLine=3,col=14,endColumn=14,title=✂️ Knip / Unused exports::helperFn in packages/tools/utils.ts
 Unused exported types (1)
 ::error file=packages/shared/types.ts,line=3,endLine=3,col=13,endColumn=13,title=✂️ Knip / Unused exported types::UnusedEnum in packages/shared/types.ts
 Configuration hints (4)
-::notice file=apps/frontend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/frontend/package.json
 ::notice file=apps/backend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/backend/package.json
+::notice file=apps/frontend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/frontend/package.json
 ::notice file=packages/shared/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in packages/shared/package.json
 ::notice file=packages/tools/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in packages/tools/package.json`;
   if (actual !== expected) showDiff(actual, expected);
@@ -87,15 +87,15 @@ test('knip --reporter github-actions (workspaces: config hints disabled)', () =>
   const expected = `Unused files (1)
 ::error file=docs/dangling.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused files::docs/dangling.ts
 Unused dependencies (4)
-::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
-::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 ::error file=apps/backend/package.json,line=7,endLine=7,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::picomatch in apps/backend/package.json
 ::error file=apps/backend/package.json,line=8,endLine=8,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::next in apps/backend/package.json
+::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
+::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
-::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
-::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
-::error file=apps/backend/index.ts,line=3,endLine=3,col=25,endColumn=25,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
 ::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
+::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
+::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)
 ::error file=packages/tools/utils.ts,line=3,endLine=3,col=14,endColumn=14,title=✂️ Knip / Unused exports::helperFn in packages/tools/utils.ts
 Unused exported types (1)
@@ -109,22 +109,22 @@ test('knip --reporter github-actions (workspaces: config hints as errors)', () =
   const expected = `Unused files (1)
 ::error file=docs/dangling.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused files::docs/dangling.ts
 Unused dependencies (4)
-::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
-::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 ::error file=apps/backend/package.json,line=7,endLine=7,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::picomatch in apps/backend/package.json
 ::error file=apps/backend/package.json,line=8,endLine=8,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::next in apps/backend/package.json
+::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
+::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
-::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
-::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
-::error file=apps/backend/index.ts,line=3,endLine=3,col=25,endColumn=25,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
 ::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
+::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
+::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)
 ::error file=packages/tools/utils.ts,line=3,endLine=3,col=14,endColumn=14,title=✂️ Knip / Unused exports::helperFn in packages/tools/utils.ts
 Unused exported types (1)
 ::error file=packages/shared/types.ts,line=3,endLine=3,col=13,endColumn=13,title=✂️ Knip / Unused exported types::UnusedEnum in packages/shared/types.ts
 Configuration hints (4)
-::error file=apps/frontend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/frontend/package.json
 ::error file=apps/backend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/backend/package.json
+::error file=apps/frontend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/frontend/package.json
 ::error file=packages/shared/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in packages/shared/package.json
 ::error file=packages/tools/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in packages/tools/package.json`;
   if (actual !== expected) showDiff(actual, expected);
