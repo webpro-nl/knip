@@ -1,7 +1,11 @@
 import pc from 'picocolors';
-import type { TreeNode } from '../graph-explorer/operations/build-exports-tree.js';
+import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.js';
 
-export const formatTrace = (node: TreeNode, toRelative: (path: string) => string, isReferenced: boolean): string => {
+export const formatTrace = (
+  node: ExportsTreeNode,
+  toRelative: (path: string) => string,
+  isReferenced: boolean
+): string => {
   const lines: string[] = [];
 
   const file = pc.white;
@@ -15,7 +19,7 @@ export const formatTrace = (node: TreeNode, toRelative: (path: string) => string
   const entryMarker = node.isEntry ? dim(' ◯') : '';
   lines.push(`${file(toRelative(node.filePath))}${dim(':')}${id(node.identifier)}${entryMarker}`);
 
-  const formatVia = (child: TreeNode): string => {
+  const formatVia = (child: ExportsTreeNode): string => {
     if (!child.via) return id(child.identifier);
     const parts = child.identifier.split('.');
     const name = parts[0];
@@ -24,7 +28,7 @@ export const formatTrace = (node: TreeNode, toRelative: (path: string) => string
     return `${via(child.via)}${dim('[')}${nameDisplay}${rest ? `${dim('.')}${id(rest)}` : ''}${dim(']')}`;
   };
 
-  const formatChild = (child: TreeNode, prefix: string, isLast: boolean) => {
+  const formatChild = (child: ExportsTreeNode, prefix: string, isLast: boolean) => {
     const connector = isLast ? '└── ' : '├── ';
     const childPrefix = isLast ? '    ' : '│   ';
     const entryMarker = child.isEntry ? dim(' ◯') : '';

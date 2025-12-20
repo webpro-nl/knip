@@ -4,14 +4,14 @@ import type { Via } from '../walk-down.js';
 import { walkDown } from '../walk-down.js';
 
 /** @internal */
-export interface TreeNode {
+export interface ExportsTreeNode {
   filePath: string;
   identifier: string;
   originalId: string | undefined;
   via: Via | undefined;
   refs: string[];
   isEntry: boolean;
-  children: TreeNode[];
+  children: ExportsTreeNode[];
 }
 
 export const buildExportsTree = (
@@ -19,7 +19,7 @@ export const buildExportsTree = (
   entryPaths: Set<string>,
   options: { filePath?: string; identifier?: Identifier }
 ) => {
-  const traces: TreeNode[] = [];
+  const traces: ExportsTreeNode[] = [];
 
   const processFile = (filePath: string, file: FileNode) => {
     for (const exportId of options.identifier ? [options.identifier] : file.exports.keys()) {
@@ -45,10 +45,10 @@ const buildExportTree = (
   entryPaths: Set<string>,
   filePath: string,
   identifier: string
-): TreeNode => {
+): ExportsTreeNode => {
   const file = graph.get(filePath);
 
-  const rootNode: TreeNode = {
+  const rootNode: ExportsTreeNode = {
     filePath,
     identifier,
     refs: filterRefs(file?.imported?.refs, identifier),
@@ -58,7 +58,7 @@ const buildExportTree = (
     via: undefined,
   };
 
-  const nodeMap = new Map<string, TreeNode>();
+  const nodeMap = new Map<string, ExportsTreeNode>();
   nodeMap.set(`${filePath}:${identifier}`, rootNode);
 
   walkDown(
@@ -118,12 +118,12 @@ const isNsReExported = (importMaps: ImportMaps | undefined, ns: string): boolean
   return importMaps.reExportedAs.has(ns) || importMaps.reExportedNs.has(ns);
 };
 
-const hasNonReExportStar = (node: TreeNode): boolean => {
+const hasNonReExportStar = (node: ExportsTreeNode): boolean => {
   if (node.via && node.via !== 'reExportStar') return true;
   return node.children.some(child => hasNonReExportStar(child));
 };
 
-const pruneReExportStarOnlyBranches = (node: TreeNode): void => {
+const pruneReExportStarOnlyBranches = (node: ExportsTreeNode): void => {
   node.children = node.children.filter(child => hasNonReExportStar(child));
   for (const child of node.children) pruneReExportStarOnlyBranches(child);
 };
