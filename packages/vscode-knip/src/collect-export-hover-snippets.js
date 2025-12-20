@@ -15,7 +15,7 @@ import * as vscode from 'vscode';
  * @param {{ timeout?: number; includeImportLocationSnippet?: boolean }} [options]
  * @returns {Promise<HoverSnippets>}
  */
-export async function collectHoverSnippets(identifier, locations, options = {}) {
+export async function collectExportHoverSnippets(identifier, locations, options = {}) {
   const { timeout = 300, includeImportLocationSnippet = false } = options;
 
   if (!Array.isArray(locations) || locations.length === 0) return [];

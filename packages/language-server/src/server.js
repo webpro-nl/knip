@@ -13,6 +13,7 @@ import {
 import {
   DEFAULT_JSDOC_TAGS,
   REQUEST_FILE_NODE,
+  REQUEST_PACKAGE_JSON,
   REQUEST_RESTART,
   REQUEST_RESULTS,
   REQUEST_START,
@@ -117,6 +118,8 @@ export class LanguageServer {
       return this.getFileDescriptor(fileURLToPath(params.uri), { isShowContention });
     });
 
+    this.connection.onRequest(REQUEST_PACKAGE_JSON, () => this.getPackageJsonDescriptor());
+
     this.connection.onCodeAction(params => this.handleCodeAction(params));
 
     this.connection.onDidChangeWatchedFiles(params => this.handleFileChanges(params));
@@ -183,7 +186,6 @@ export class LanguageServer {
         process.chdir(this.cwd);
       }
 
-
       this.connection.console.log('Creating options');
       const options = await createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
       this.rules = options.rules;
@@ -223,6 +225,7 @@ export class LanguageServer {
    */
   async handleFileChanges(params) {
     this.fileCache = undefined;
+    this.packageJsonCache = undefined;
     if (!this.session) return;
 
     /** @type {{ type: "added" | "deleted" | "modified"; filePath: string }[]} */
@@ -274,6 +277,18 @@ export class LanguageServer {
     }
     this.fileCache = { filePath: relPath, file };
     return file;
+  }
+
+  /**
+   * @returns {import('knip/session').PackageJsonFile & { dependenciesUsage: Record<string, import('knip/session').DependencyNodes> } | typeof SESSION_LOADING}
+   */
+  getPackageJsonDescriptor() {
+    if (!this.session) return SESSION_LOADING;
+    if (this.packageJsonCache) return this.packageJsonCache;
+    const result = this.session.describePackageJson();
+    // Convert Map to object for JSON serialization
+    this.packageJsonCache = { dependenciesUsage: Object.fromEntries(result.dependenciesUsage) };
+    return this.packageJsonCache;
   }
 
   /**

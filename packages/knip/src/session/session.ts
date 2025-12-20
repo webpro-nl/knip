@@ -4,6 +4,7 @@ import { type Results, run } from '../run.js';
 import type { MainOptions } from '../util/create-options.js';
 import type { SessionHandler, WatchChange } from '../util/watch.js';
 import { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.js';
+import { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.js';
 import type { File } from './types.js';
 
 type WatchUpdate = { duration: number; mem: number };
@@ -14,6 +15,7 @@ export interface Session {
   getResults(): Results;
   getConfigurationHints(): ProcessedHint[];
   describeFile(filePath: string, options?: FileDescriptorOptions): File | undefined;
+  describePackageJson(): PackageJsonFile;
 }
 
 export const createSession = async (options: MainOptions): Promise<Session> => {
@@ -32,5 +34,6 @@ const createSessionAdapter = (session: SessionHandler, results: Results, options
     getConfigurationHints: () => finalizeConfigurationHints(results, options),
     describeFile: (filePath, opts) =>
       buildFileDescriptor(filePath, options.cwd, session.getGraph(), session.getEntryPaths(), opts),
+    describePackageJson: () => buildPackageJsonDescriptor(session.getGraph(), session.getEntryPaths()),
   };
 };

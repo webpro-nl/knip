@@ -202,6 +202,11 @@
             "default": true,
             "description": "Show CodeLens for imports of exports"
           },
+          "knip.editor.dependencies.hover.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show import locations on hover over dependencies in package.json"
+          },
           "knip.editor.exports.hover.enabled": {
             "type": "boolean",
             "default": true,

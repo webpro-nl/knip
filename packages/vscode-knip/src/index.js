@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   REQUEST_FILE_NODE,
+  REQUEST_PACKAGE_JSON,
   REQUEST_RESTART,
   REQUEST_START,
   REQUEST_STOP,
@@ -10,7 +11,9 @@ import {
 import { KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
-import { collectHoverSnippets } from './collect-hover-snippets.js';
+import { collectDependencySnippets } from './collect-dependency-hover-snippets.js';
+import { collectExportHoverSnippets } from './collect-export-hover-snippets.js';
+import { renderDependencyHover } from './render-dependency-hover.js';
 import { renderExportHover, renderExportHoverEntryPaths } from './render-export-hover.js';
 import { registerKnipTools, setLanguageClient } from './tools.js';
 import { ExportsTreeViewProvider } from './tree-view-exports.js';
@@ -44,6 +47,9 @@ export class Extension {
 
   /** @type {ExportsTreeViewProvider | undefined} */
   #exportsProvider;
+
+  /** @type {{ dependenciesUsage: Record<string, import('knip/session').DependencyNodes> } | undefined} */
+  #packageJsonCache;
 
   /**
    * @param {ExtensionContext} context
@@ -141,6 +147,7 @@ export class Extension {
     const restart = vscode.commands.registerCommand(REQUEST_RESTART, async () => {
       if (!this.#client) return;
       try {
+        this.#packageJsonCache = undefined;
         await this.#client.sendRequest(REQUEST_RESTART);
       } catch (error) {
         vscode.window.showErrorMessage((error?.message || error).toString());
@@ -286,6 +293,11 @@ export class Extension {
     if (!fsPath) return null;
     const root = toPosix(fsPath);
 
+    if (path.basename(document.uri.fsPath) === 'package.json') {
+      if (!config.get('editor.dependencies.hover.enabled', true)) return null;
+      return this.#getDependencyHoverContent(document, position, root);
+    }
+
     const file = await this.#requestFileDescriptor(document);
     if (!file) return null;
 
@@ -302,10 +314,10 @@ export class Extension {
       /** @type {boolean} */
       const includeImportLocationSnippet = config.get('editor.exports.hover.includeImportLocationSnippet', false);
 
-      /** @type {import('./collect-hover-snippets.js').HoverSnippets} */
+      /** @type {import('./collect-export-hover-snippets.js').HoverSnippets} */
       let snippets = [];
       if (maxSnippets !== 0) {
-        snippets = await collectHoverSnippets(_export.identifier, _export.importLocations, {
+        snippets = await collectExportHoverSnippets(_export.identifier, _export.importLocations, {
           timeout,
           includeImportLocationSnippet,
         });
@@ -319,6 +331,95 @@ export class Extension {
     }
 
     return null;
+  }
+
+  /**
+   * @param {vscode.TextDocument} document
+   * @param {vscode.Position} position
+   * @param {string} root
+   * @returns {Promise<{ kind: 'markdown'; value: string } | null>}
+   */
+  async #getDependencyHoverContent(document, position, root) {
+    const packageName = this.#findDependencyAtPosition(document, position);
+    if (!packageName) return null;
+
+    try {
+      if (!this.#packageJsonCache) {
+        /** @type {{ dependenciesUsage: Record<string, import('knip/session').DependencyNodes> } | typeof SESSION_LOADING | undefined} */
+        const result = await this.#client?.sendRequest(REQUEST_PACKAGE_JSON);
+        if (!result || result === SESSION_LOADING) return null;
+        this.#packageJsonCache = result;
+      }
+
+      const usage = this.#packageJsonCache.dependenciesUsage[packageName];
+      if (!usage || usage.imports.length === 0) return null;
+
+      const workspaceDir = `${toPosix(path.dirname(document.uri.fsPath))}/`;
+      const imports = usage.imports.filter(_import => _import.filePath.startsWith(workspaceDir));
+      if (imports.length === 0) return null;
+
+      const snippets = await collectDependencySnippets(imports);
+      return renderDependencyHover({ packageName, imports }, root, snippets);
+    } catch (error) {
+      this.#outputChannel.error(`Error getting dependency usage: ${(error?.message || error).toString()}`);
+      return null;
+    }
+  }
+
+  /**
+   * @param {vscode.TextDocument} document
+   * @param {vscode.Position} position
+   * @returns {string | undefined}
+   */
+  #findDependencyAtPosition(document, position) {
+    const text = document.getText();
+    let manifest;
+    try {
+      manifest = JSON.parse(text);
+    } catch {
+      return;
+    }
+
+    const depSections = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
+
+    for (const section of depSections) {
+      if (!manifest[section]) continue;
+
+      const sectionRegex = new RegExp(`"${section}"\\s*:\\s*\\{`, 'g');
+      const sectionMatch = sectionRegex.exec(text);
+      if (!sectionMatch) continue;
+
+      const sectionStart = sectionMatch.index;
+      let braceCount = 1;
+      let sectionEnd = sectionStart + sectionMatch[0].length;
+
+      while (braceCount > 0 && sectionEnd < text.length) {
+        if (text[sectionEnd] === '{') braceCount++;
+        else if (text[sectionEnd] === '}') braceCount--;
+        sectionEnd++;
+      }
+
+      const offset = document.offsetAt(position);
+      if (offset < sectionStart || offset > sectionEnd) continue;
+
+      for (const packageName of Object.keys(manifest[section])) {
+        const packageRegex = new RegExp(`"(${packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})"\\s*:`, 'g');
+        packageRegex.lastIndex = sectionStart;
+
+        let match;
+        // biome-ignore lint: suspicious/noAssignInExpressions
+        while ((match = packageRegex.exec(text)) !== null) {
+          if (match.index > sectionEnd) break;
+
+          const matchStart = match.index + 1;
+          const matchEnd = matchStart + packageName.length;
+
+          if (offset >= matchStart && offset <= matchEnd) {
+            return packageName;
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -440,6 +541,7 @@ export class Extension {
     });
 
     const diagnosticsHandler = vscode.languages.onDidChangeDiagnostics(() => {
+      this.#packageJsonCache = undefined;
       this.#refresh();
     });
 

@@ -8,6 +8,8 @@ export const REQUEST_RESTART = 'knip.restart';
 
 export const REQUEST_FILE_NODE = 'knip.getFileNode';
 
+export const REQUEST_PACKAGE_JSON = 'knip.getPackageJson';
+
 export const REQUEST_RESULTS = 'knip.getResults';
 
 export const SESSION_LOADING = 'session-loading';

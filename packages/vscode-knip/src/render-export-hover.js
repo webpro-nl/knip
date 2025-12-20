@@ -7,7 +7,7 @@ import { u } from 'unist-builder';
  * @typedef {import('mdast').List} List
  * @typedef {import('mdast').Paragraph} Paragraph
  * @typedef {import('mdast').PhrasingContent} PhrasingContent
- * @typedef {import('./collect-hover-snippets.js').HoverSnippets} HoverSnippets
+ * @typedef {import('./collect-export-hover-snippets.js').HoverSnippets} HoverSnippets
  * @import { Export } from 'knip/session';
  */
 
@@ -35,9 +35,14 @@ export function renderExportHover(_export, root, snippets, maxSnippets) {
     u('strong', [u('text', identifier)]),
   ];
 
+  const len = importLocations.length;
+  const sortedIndices = new Array(len);
+  for (let i = 0; i < len; i++) sortedIndices[i] = i;
+  sortedIndices.sort((a, b) => importLocations[a].filePath.localeCompare(importLocations[b].filePath));
+
   let lastFilePath = '';
 
-  for (let index = 0; index < importLocations.length; index++) {
+  for (const index of sortedIndices) {
     const loc = importLocations[index];
     const uri = pathToFileURL(loc.filePath).toString();
     const position = loc.line && loc.col ? `#${loc.line},${loc.col}` : loc.line ? `#${loc.line}` : '';
