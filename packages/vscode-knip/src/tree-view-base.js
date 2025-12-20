@@ -20,6 +20,9 @@ import * as vscode from 'vscode';
  * } TreeData
  */
 
+/** @param {string} specifier */
+const isGlobLike = specifier => specifier.includes('*');
+
 /** @implements {vscode.TreeDataProvider<TreeViewItem>} */
 export class BaseTreeViewProvider {
   constructor() {
@@ -217,9 +220,9 @@ export class BaseTreeViewProvider {
   createTreeViewItems(options) {
     const { filePath, line, col, importLine, importCol } = options;
 
-    const absPath =
-      filePath &&
-      (path.isAbsolute(filePath) ? filePath : this.workspaceRoot && path.join(this.workspaceRoot, filePath));
+    const baseDir =
+      this.kind === 'manifest' && this.currentUri ? path.dirname(this.currentUri.fsPath) : this.workspaceRoot;
+    const absPath = filePath && (path.isAbsolute(filePath) ? filePath : baseDir && path.join(baseDir, filePath));
 
     const uri = absPath ? vscode.Uri.file(absPath) : undefined;
     const relPath = absPath
@@ -306,7 +309,7 @@ export class BaseTreeViewProvider {
  * @returns {TreeNode[]}
  */
 export const toTree = value => {
-  if (typeof value === 'string') return [{ filePath: value }];
+  if (typeof value === 'string') return isGlobLike(value) ? [{ label: value }] : [{ filePath: value }];
   if (value === null) return [{ label: '!value' }];
   if (Array.isArray(value)) return value.map((entry, index) => ({ label: `[${index}]`, children: toTree(entry) }));
   if (typeof value !== 'object') return [{ label: String(value) }];
