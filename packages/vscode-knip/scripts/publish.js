@@ -33,10 +33,11 @@ const targets = {
   'win32-arm64': 'win32-arm64-msvc',
 };
 
+const currentTarget = `${process.platform}-${process.arch}`;
+
 const ext = ['vscode', /^@oxc-resolver\/binding-/, 'jiti', /jiti\/dist/];
 const extSession = [...ext, 'knip/session'];
 
-const cmd = args.publish ? 'publish' : 'package';
 const flags = [args['pre-release'] && '--pre-release', '--no-dependencies'].filter(Boolean).join(' ');
 const vsixFiles = [];
 
@@ -51,12 +52,11 @@ const paths = { 'knip/session': '../../knip/session.js' };
 
 await bundle('../knip/src/session/index.ts', 'node_modules/knip/session.js');
 await bundle('../mcp-server/src/tools.js', 'node_modules/@knip/mcp/tools.js', extSession, paths);
-await bundle('../language-server/src/constants.js', 'node_modules/@knip/language-server/constants.js');
 await bundle('../language-server/src/index.js', 'node_modules/@knip/language-server/index.js', extSession, paths);
-await bundle('src/index.js', 'extension.js', [...extSession, '@knip/mcp/tools', '@knip/language-server/constants'], {
+await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-server'], {
   'knip/session': './node_modules/knip/session.js',
   '@knip/mcp/tools': './node_modules/@knip/mcp/tools.js',
-  '@knip/language-server/constants': './node_modules/@knip/language-server/constants.js',
+  '@knip/language-server': './node_modules/@knip/language-server/index.js',
 });
 
 const jitiSrc = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 'node_modules', 'jiti');
@@ -72,7 +72,13 @@ const pkg = JSON.parse(pkgOriginal);
 delete pkg.type;
 writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
 
-for (const [target, binding] of args.target ? [[args.target, targets[args.target]]] : Object.entries(targets)) {
+const selectedTargets = args.target
+  ? [[args.target, targets[args.target]]]
+  : args.publish
+    ? Object.entries(targets)
+    : [[currentTarget, targets[currentTarget]]];
+
+for (const [target, binding] of selectedTargets) {
   rmSync(join(nm, '@oxc-resolver'), { recursive: true, force: true });
   mkdirSync(join(nm, `@oxc-resolver/binding-${binding}`), { recursive: true });
 
@@ -86,7 +92,7 @@ for (const [target, binding] of args.target ? [[args.target, targets[args.target
   cpSync(join(tmp, 'package/package.json'), join(nm, `@oxc-resolver/binding-${binding}/package.json`));
   rmSync(tmp, { recursive: true });
 
-  execSync(`pnpm vsce ${cmd} ${flags} --target ${target}`, { cwd: root, stdio: 'inherit' });
+  execSync(`pnpm vsce package ${flags} --target ${target}`, { cwd: root, stdio: 'inherit' });
 
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   vsixFiles.push(join(root, `${pkg.name}-${target}-${pkg.version}.vsix`));
@@ -94,6 +100,7 @@ for (const [target, binding] of args.target ? [[args.target, targets[args.target
 
 if (args.publish) {
   for (const vsix of vsixFiles) {
+    execSync(`pnpm vsce publish --packagePath ${vsix}`, { cwd: root, stdio: 'inherit' });
     execSync(`ovsx publish ${vsix}`, { cwd: root, stdio: 'inherit' });
   }
 }

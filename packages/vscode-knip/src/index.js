@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -18,6 +19,8 @@ import { renderExportHover, renderExportHoverEntryPaths } from './render-export-
 import { registerKnipTools, setLanguageClient } from './tools.js';
 import { ExportsTreeViewProvider } from './tree-view-exports.js';
 import { ImportsTreeViewProvider } from './tree-view-imports.js';
+
+const require = createRequire(import.meta.url);
 
 /**
  * @import { ExtensionContext, LogOutputChannel } from 'vscode';
@@ -106,7 +109,7 @@ export class Extension {
 
     if (!this.#client) {
       const config = vscode.workspace.getConfiguration('knip');
-      const module = path.join(__dirname, 'node_modules', '@knip', 'language-server', 'index.js');
+      const module = require.resolve('@knip/language-server');
 
       this.#outputChannel.info('Starting Knip Language Server');
 
