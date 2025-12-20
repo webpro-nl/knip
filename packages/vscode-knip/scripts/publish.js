@@ -59,9 +59,11 @@ await bundle('src/index.js', 'extension.js', [...extSession, '@knip/mcp/tools', 
   '@knip/language-server/constants': './node_modules/@knip/language-server/constants.js',
 });
 
-const jitiSrc = join(root, '..', '..', 'node_modules', 'jiti');
+const jitiSrc = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 'node_modules', 'jiti');
 const jitiDst = join(nm, 'jiti');
-cpSync(jitiSrc, jitiDst, { recursive: true });
+cpSync(jitiSrc, jitiDst, { recursive: true, dereference: true });
+
+cpSync(join(root, '../mcp-server/docs'), join(nm, '@knip/docs'), { recursive: true });
 
 // Remove "type": "module" from package.json so CJS extension.js works
 const pkgPath = join(root, 'package.json');
