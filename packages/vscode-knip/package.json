@@ -41,7 +41,7 @@
   "publisher": "webpro",
   "type": "module",
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.95.0"
   },
   "files": [
     "dist/",
@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@types/mdast": "4.0.4",
-    "@types/vscode": "^1.106.1",
+    "@types/vscode": "^1.95.0",
     "knip": "workspace:*",
     "rolldown": "1.0.0-beta.55"
   },

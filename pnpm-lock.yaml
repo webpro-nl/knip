@@ -218,7 +218,7 @@ importers:
         specifier: 4.0.4
         version: 4.0.4
       '@types/vscode':
-        specifier: ^1.106.1
+        specifier: ^1.95.0
         version: 1.106.1
       knip:
         specifier: workspace:*

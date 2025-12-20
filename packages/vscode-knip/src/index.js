@@ -106,7 +106,7 @@ export class Extension {
 
     if (!this.#client) {
       const config = vscode.workspace.getConfiguration('knip');
-      const module = fileURLToPath(import.meta.resolve('@knip/language-server'));
+      const module = path.join(__dirname, 'node_modules', '@knip', 'language-server', 'index.js');
 
       this.#outputChannel.info('Starting Knip Language Server');
 
