@@ -208,7 +208,7 @@ export class Extension {
     if (!config.get('editor.exports.codelens.enabled', true)) return null;
 
     const file = await this.#requestFileDescriptor(document);
-    if (!file) return null;
+    if (!file || file === SESSION_LOADING) return null;
 
     /** @type {vscode.CodeLens[]} */
     const codeLenses = [];
@@ -299,7 +299,7 @@ export class Extension {
     }
 
     const file = await this.#requestFileDescriptor(document);
-    if (!file) return null;
+    if (!file || file === SESSION_LOADING) return null;
 
     const _export = this.#findExportAtPosition(file, position);
     if (!_export) return null;
