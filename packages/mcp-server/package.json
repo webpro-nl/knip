@@ -31,7 +31,7 @@
   "license": "ISC",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
-    "knip": "^5.75.2",
+    "knip": "workspace:*",
     "zod": "^4.1.11"
   },
   "engines": {
