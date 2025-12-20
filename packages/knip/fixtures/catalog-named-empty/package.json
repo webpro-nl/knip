@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/catalog-empty-bug",
+  "name": "@fixtures/catalog-named-empty",
   "private": true,
   "workspaces": [
     "packages/*"
