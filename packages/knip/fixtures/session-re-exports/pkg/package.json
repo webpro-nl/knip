@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/session-re-exports-pkg",
+  "exports": {
+    "./Box": "./Box/barrel.ts",
+    "./Foo": "./Foo/consumer-1.ts"
+  }
+}
