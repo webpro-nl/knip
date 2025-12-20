@@ -14,11 +14,11 @@ export const buildFileDescriptor = (
   graph: ModuleGraph,
   entryPaths: Set<string>,
   options: FileDescriptorOptions = {}
-): File | null => {
+): File | undefined => {
   const absolutePath = toAbsolute(filePath, cwd);
 
   const node = graph.get(absolutePath);
-  if (!node) return null;
+  if (!node) return;
 
   const explorer = createGraphExplorer(graph, entryPaths);
 

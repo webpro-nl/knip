@@ -255,6 +255,7 @@ export class LanguageServer {
   getFileDescriptor(filePath, options) {
     if (!this.session) return SESSION_LOADING;
     const relPath = toPosix(path.relative(this.cwd ?? process.cwd(), filePath));
+    if (relPath.startsWith('..')) return;
     if (this.fileCache?.filePath === relPath) return this.fileCache.file;
     const startTime = performance.now();
     const file = this.session.describeFile(relPath, options);
@@ -268,10 +269,11 @@ export class LanguageServer {
       this.connection.console.log(
         `  ↳ imports: ${Math.round(m.imports)}ms, exports: ${Math.round(m.exports)}ms, cycles: ${Math.round(m.cycles)}ms, contention: ${Math.round(m.contention)}ms`
       );
-      this.fileCache = { filePath: relPath, file };
-      return file;
+    } else {
+      this.connection.console.log(`File not in project (${relPath})`);
     }
-    this.connection.console.log(`File not in project (${relPath})`);
+    this.fileCache = { filePath: relPath, file };
+    return file;
   }
 
   /**

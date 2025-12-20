@@ -13,7 +13,7 @@ export interface Session {
   getIssues(): CollectorIssues;
   getResults(): Results;
   getConfigurationHints(): ProcessedHint[];
-  describeFile(filePath: string, options?: FileDescriptorOptions): File | null;
+  describeFile(filePath: string, options?: FileDescriptorOptions): File | undefined;
 }
 
 export const createSession = async (options: MainOptions): Promise<Session> => {
