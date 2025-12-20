@@ -31,10 +31,11 @@ export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: Mod
   }
 };
 
-const createFileNode = (): FileNode => ({
+export const createFileNode = (): FileNode => ({
   imports: {
     internal: new Map(),
     external: new Set(),
+    externalRefs: new Set(),
     unresolved: new Set(),
     programFiles: new Set(),
     entryFiles: new Set(),

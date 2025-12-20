@@ -417,6 +417,9 @@ export async function build({
 
       file.imports.unresolved = unresolvedImports;
 
+      const pluginRefs = externalRefsFromInputs.get(filePath);
+      if (pluginRefs) for (const ref of pluginRefs) file.imports.externalRefs.add(ref);
+
       const node = graph.get(filePath);
       if (node) {
         node.imports = file.imports;
@@ -476,6 +479,12 @@ export async function build({
       if (principal) factory.deletePrincipal(principal, options.cwd);
     }
     principals.length = 0;
+  }
+
+  for (const [filePath, refs] of externalRefsFromInputs) {
+    if (!graph.has(filePath)) graph.set(filePath, createFileNode());
+    // biome-ignore lint/style/noNonNullAssertion: srsly
+    for (const ref of refs) graph.get(filePath)!.imports.externalRefs.add(ref);
   }
 
   return {

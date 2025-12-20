@@ -226,8 +226,8 @@ export class DependencyDeputy {
     return false;
   }
 
-  public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): boolean {
-    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return true;
+  public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): Set<string> | undefined {
+    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return new Set();
 
     this.addReferencedBinary(workspace.name, binaryName);
 
@@ -239,12 +239,12 @@ export class DependencyDeputy {
         const dependencies = binaries.get(binaryName);
         if (dependencies?.size) {
           for (const dependency of dependencies) this.addReferencedDependency(name, dependency);
-          return true;
+          return dependencies;
         }
       }
     }
 
-    return false;
+    return;
   }
 
   private isInDependencies(workspaceName: string, packageName: string) {

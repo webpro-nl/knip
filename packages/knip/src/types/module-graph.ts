@@ -43,6 +43,11 @@ export interface Import extends Position {
   readonly isTypeOnly: boolean;
 }
 
+export interface ExternalRef {
+  readonly specifier: string;
+  readonly identifier: string | undefined;
+}
+
 export interface Export extends Position {
   readonly identifier: Identifier;
   readonly type: SymbolType;
@@ -75,6 +80,7 @@ export type FileNode = {
   imports: {
     readonly internal: ImportMap;
     readonly external: Set<Import>;
+    readonly externalRefs: Set<ExternalRef>;
     unresolved: Set<Import>;
     readonly programFiles: Set<FilePath>;
     readonly entryFiles: Set<FilePath>;
