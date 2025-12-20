@@ -21,11 +21,15 @@ export default ({ graph, explorer, options, isExportReferencedInFile }: TraceRep
     const workspaceDir = options.workspace ? join(options.cwd, options.workspace) : undefined;
     const toRel = (path: string) => toRelative(path, options.cwd);
     const table = new Table({ truncateStart: ['filePath'] });
+    const seen = new Set<string>();
     for (const [packageName, { imports }] of explorer.getDependencyUsage(pattern)) {
       const filtered = workspaceDir ? imports.filter(i => i.filePath.startsWith(workspaceDir)) : imports;
       filtered.sort((a, b) => a.filePath.localeCompare(b.filePath) || (a.line ?? 0) - (b.line ?? 0));
       for (const _import of filtered) {
         const pos = _import.line ? `:${_import.line}:${_import.col}` : '';
+        const key = `${_import.filePath}${pos}:${packageName}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
         table.row();
         table.cell('filePath', pc.whiteBright(`${toRel(_import.filePath)}${pos}`));
         table.cell('package', pc.cyanBright(packageName));
