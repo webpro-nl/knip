@@ -3,18 +3,16 @@ import type { ConfigurationChief } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import { createGraphExplorer } from '../graph-explorer/explorer.js';
-import type { TreeNode } from '../graph-explorer/operations/build-exports-tree.js';
 import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { IssueFixer } from '../IssueFixer.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
+import traceReporter from '../reporters/trace.js';
 import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
 import type { MainOptions } from '../util/create-options.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
-import { toRelative } from '../util/path.js';
 import { findMatch } from '../util/regex.js';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.js';
-import { formatTrace } from '../util/trace.js';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -301,19 +299,7 @@ export const analyze = async ({
 
   await analyzeGraph();
 
-  if (options.isTrace) {
-    const nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: options.traceExport });
-    nodes.sort((a, b) => a.filePath.localeCompare(b.filePath) || a.identifier.localeCompare(b.identifier));
-    const toRel = (path: string) => toRelative(path, options.cwd);
-    const isReferenced = (node: TreeNode) => {
-      if (explorer.isReferenced(node.filePath, node.identifier, { includeEntryExports: false })[0]) return true;
-      if (explorer.hasStrictlyNsReferences(node.filePath, node.identifier)[0]) return true;
-      const exportItem = graph.get(node.filePath)?.exports.get(node.identifier);
-      return exportItem ? isExportReferencedInFile(exportItem) : false;
-    };
-    // biome-ignore lint/suspicious/noConsole: gotta show it somehow..
-    for (const node of nodes) console.log(formatTrace(node, toRel, isReferenced(node)));
-  }
+  if (options.isTrace) traceReporter({ graph, explorer, options, isExportReferencedInFile });
 
   return analyzeGraph;
 };

@@ -38,9 +38,10 @@ Options:
   --treat-config-hints-as-errors    Exit with non-zero code (1) if there are any configuration hints
   --no-exit-code           Always exit with code zero (0)
   --max-issues             Maximum number of total issues before non-zero exit code (default: 0)
-  --max-show-issues     Maximum number of issues to display per type
+  --max-show-issues        Maximum number of issues to display per type
   -d, --debug              Show debug output
   --trace                  Show trace output
+  --trace-dependency [name] Show files that import the named dependency
   --trace-export [name]    Show trace output for named export(s)
   --trace-file [file]      Show trace output for exports in file
   --performance            Measure count and running time of key functions and display stats table
@@ -107,6 +108,7 @@ export default function parseCLIArgs() {
       'reporter-options': { type: 'string' },
       strict: { type: 'boolean' },
       trace: { type: 'boolean' },
+      'trace-dependency': { type: 'string' },
       'trace-export': { type: 'string' },
       'trace-file': { type: 'string' },
       'treat-config-hints-as-errors': { type: 'boolean' },

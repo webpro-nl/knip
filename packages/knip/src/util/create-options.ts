@@ -76,7 +76,7 @@ export const createOptions = async (options: CreateOptions) => {
   const isStrict = options.isStrict ?? args.strict ?? false;
   const isProduction = options.isProduction ?? args.production ?? isStrict;
   const isDebug = args.debug ?? false;
-  const isTrace = Boolean(args.trace ?? args['trace-file'] ?? args['trace-export']);
+  const isTrace = Boolean(args.trace ?? args['trace-file'] ?? args['trace-export'] ?? args['trace-dependency']);
 
   const rules = { ...defaultRules, ...parsedConfig.rules };
   const excludesFromRules = getKeysByValue(rules, 'off');
@@ -157,6 +157,7 @@ export const createOptions = async (options: CreateOptions) => {
     parsedConfig,
     rules,
     tags,
+    traceDependency: args['trace-dependency'],
     traceExport: args['trace-export'],
     traceFile: args['trace-file'] ? toAbsolute(args['trace-file'], cwd) : undefined,
     tsConfigFile: args.tsConfig,
