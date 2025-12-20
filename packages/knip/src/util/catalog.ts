@@ -41,7 +41,9 @@ const extractNamedEntries = (catalogs: unknown) => {
   const entries = new Set<string>();
   if (catalogs && typeof catalogs === 'object') {
     for (const [catalogName, catalog] of Object.entries(catalogs)) {
-      for (const name of Object.keys(catalog)) entries.add(`${catalogName}:${name}`);
+      if (catalog && typeof catalog === 'object') {
+        for (const name of Object.keys(catalog)) entries.add(`${catalogName}:${name}`);
+      }
     }
   }
   return entries;

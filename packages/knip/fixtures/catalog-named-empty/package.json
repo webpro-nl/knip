@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/catalog-empty-bug",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "express": "catalog:prod"
+  }
+}
