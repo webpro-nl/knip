@@ -1,4 +1,4 @@
-import { Box, internal } from './implementation.ts';
+import { Box, internal } from '../Box/implementation.ts';
 
 internal;
 Box;

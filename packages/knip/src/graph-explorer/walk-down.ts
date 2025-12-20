@@ -72,7 +72,7 @@ export const walkDown = (
           done = true;
           break;
         }
-        if (!isEntry && walkDown(graph, reExportingFile, identifier, visitor, entryPaths, visited)) {
+        if (walkDown(graph, reExportingFile, identifier, visitor, entryPaths, visited)) {
           done = true;
           break;
         }
@@ -90,12 +90,9 @@ export const walkDown = (
             done = true;
             break;
           }
-          if (!isEntry) {
-            const ref = [alias, ...restIds].join('.');
-            if (walkDown(graph, reExportingFile, ref, visitor, entryPaths, visited)) {
-              done = true;
-              break;
-            }
+          if (walkDown(graph, reExportingFile, [alias, ...restIds].join('.'), visitor, entryPaths, visited)) {
+            done = true;
+            break;
           }
         }
         if (done) break;
@@ -113,7 +110,7 @@ export const walkDown = (
           done = true;
           break;
         }
-        if (!isEntry && walkDown(graph, reExportingFile, `${namespace}.${identifier}`, visitor, entryPaths, visited)) {
+        if (walkDown(graph, reExportingFile, `${namespace}.${identifier}`, visitor, entryPaths, visited)) {
           done = true;
           break;
         }
@@ -131,7 +128,7 @@ export const walkDown = (
           done = true;
           break;
         }
-        if (!isEntry && walkDown(graph, reExportingFile, identifier, visitor, entryPaths, visited)) {
+        if (walkDown(graph, reExportingFile, identifier, visitor, entryPaths, visited)) {
           done = true;
           break;
         }
