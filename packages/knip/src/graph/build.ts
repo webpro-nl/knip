@@ -13,9 +13,9 @@ import type { Issue } from '../types/issues.js';
 import type { Import, ModuleGraph } from '../types/module-graph.js';
 import type { PluginName } from '../types/PluginNames.js';
 import { partition } from '../util/array.js';
+import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.js';
 import type { MainOptions } from '../util/create-options.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
-import { getReferencedInputsHandler } from '../util/get-referenced-inputs.js';
 import { _glob, _syncGlob, negate, prependDirToPattern } from '../util/glob.js';
 import {
   type Input,
@@ -30,7 +30,7 @@ import {
   toProductionEntry,
 } from '../util/input.js';
 import { loadTSConfig } from '../util/load-tsconfig.js';
-import { updateImportMap } from '../util/module-graph.js';
+import { createFileNode, updateImportMap } from '../util/module-graph.js';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
 import { perfObserver } from '../util/Performance.js';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.js';
@@ -70,7 +70,9 @@ export async function build({
 
   const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
 
-  const getReferencedInternalFilePath = getReferencedInputsHandler(deputy, chief, isGitIgnored, addIssue);
+  const externalRefsFromInputs: ExternalRefsFromInputs = new Map();
+
+  const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
 
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
@@ -120,7 +122,7 @@ export async function build({
       config,
       manifest,
       dependencies,
-      getReferencedInternalFilePath: (input: Input) => getReferencedInternalFilePath(input, workspace),
+      handleInput: (input: Input) => handleInput(input, workspace),
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
@@ -221,7 +223,7 @@ export async function build({
         }
       } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
-        const resolvedFilePath = getReferencedInternalFilePath(input, ws);
+        const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
           if (isDeferResolveProductionEntry(input)) {
             addPattern(productionPatternsSkipExports, input, resolvedFilePath);
@@ -408,7 +410,7 @@ export async function build({
         for (const input of inputs) {
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
-          const specifierFilePath = getReferencedInternalFilePath(input, workspace);
+          const specifierFilePath = handleInput(input, workspace);
           if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }
       }

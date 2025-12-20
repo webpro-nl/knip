@@ -142,7 +142,7 @@ export class IssueCollector {
     };
   }
 
-  // Retain issues from `getReferencedInternalFilePath` that would otherwise get lost between analysis runs (e.g. in watch mode)
+  // Retain issues from `handleInput` that would otherwise get lost between analysis runs (e.g. in watch mode)
   private retainedIssues: Issue[] = [];
   retainIssue(issue: Issue) {
     this.retainedIssues.push(issue);

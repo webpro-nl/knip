@@ -8,8 +8,8 @@ import { PluginEntries, Plugins } from './plugins.js';
 import type {
   EnsuredPluginConfiguration,
   GetInputsFromScriptsPartial,
-  GetReferencedInternalFilePath,
   GetSourceFile,
+  HandleInput,
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { ConfigurationHint } from './types/issues.js';
@@ -41,7 +41,7 @@ type WorkspaceManagerOptions = {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
-  getReferencedInternalFilePath: GetReferencedInternalFilePath;
+  handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getSourceFile: GetSourceFile;
   negatedWorkspacePatterns: string[];
@@ -73,7 +73,7 @@ export class WorkspaceWorker {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
-  getReferencedInternalFilePath: GetReferencedInternalFilePath;
+  handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getSourceFile: GetSourceFile;
   negatedWorkspacePatterns: string[] = [];
@@ -98,7 +98,7 @@ export class WorkspaceWorker {
     negatedWorkspacePatterns,
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors,
-    getReferencedInternalFilePath,
+    handleInput,
     findWorkspaceByFilePath,
     getSourceFile,
     configFilesMap,
@@ -114,7 +114,7 @@ export class WorkspaceWorker {
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
     this.configFilesMap = configFilesMap;
 
-    this.getReferencedInternalFilePath = getReferencedInternalFilePath;
+    this.handleInput = handleInput;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
     this.getSourceFile = getSourceFile;
 
@@ -267,7 +267,7 @@ export class WorkspaceWorker {
     const seen = new Map<string, Set<string>>();
 
     const storeConfigFilePath = (pluginName: PluginName, input: ConfigInput) => {
-      const configFilePath = this.getReferencedInternalFilePath(input);
+      const configFilePath = this.handleInput(input);
       if (configFilePath) {
         const workspace = this.findWorkspaceByFilePath(configFilePath);
         if (workspace) {
@@ -368,11 +368,7 @@ export class WorkspaceWorker {
 
         if (plugin.resolveFromAST) {
           const sourceFile = this.getSourceFile(configFilePath);
-          const resolveASTOpts = {
-            ...resolveOpts,
-            getSourceFile: this.getSourceFile,
-            getReferencedInternalFilePath: this.getReferencedInternalFilePath,
-          };
+          const resolveASTOpts = { ...resolveOpts, getSourceFile: this.getSourceFile };
           if (sourceFile) {
             const inputs = plugin.resolveFromAST(sourceFile, resolveASTOpts);
             for (const input of inputs) addInput(input, configFilePath);

@@ -135,13 +135,12 @@ export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
 export type GetSourceFile = (filePath: string) => ts.SourceFile | undefined;
 
-export type GetReferencedInternalFilePath = (input: Input) => string | undefined;
+export type HandleInput = (input: Input) => string | undefined;
 
 export type ResolveFromAST = (
   sourceFile: ts.SourceFile,
   options: PluginOptions & {
     getSourceFile: GetSourceFile;
-    getReferencedInternalFilePath: GetReferencedInternalFilePath;
   }
 ) => Input[];
 

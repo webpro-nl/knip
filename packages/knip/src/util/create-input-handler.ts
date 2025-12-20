@@ -2,6 +2,8 @@ import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { Issue } from '../types/issues.js';
+import type { ExternalRef } from '../types/module-graph.js';
+import type { MainOptions } from './create-options.js';
 import { debugLog } from './debug.js';
 import {
   fromBinary,
@@ -17,17 +19,26 @@ import { getPackageNameFromSpecifier } from './modules.js';
 import { dirname, isAbsolute, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
 
+export type ExternalRefsFromInputs = Map<string, Set<ExternalRef>>;
+
 const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Workspace) =>
   (input.dir && chief.findWorkspaceByFilePath(`${input.dir}/`)) ||
   (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) ||
   workspace;
 
-export const getReferencedInputsHandler =
+const addExternalRef = (map: ExternalRefsFromInputs, containingFilePath: string, ref: ExternalRef) => {
+  if (!map.has(containingFilePath)) map.set(containingFilePath, new Set());
+  map.get(containingFilePath)!.add(ref);
+};
+
+export const createInputHandler =
   (
     deputy: DependencyDeputy,
     chief: ConfigurationChief,
-    isGitIgnored: (s: string) => boolean,
-    addIssue: (issue: Issue) => void
+    isGitIgnored: (filePath: string) => boolean,
+    addIssue: (issue: Issue) => void,
+    externalRefs: ExternalRefsFromInputs,
+    options: MainOptions
   ) =>
   (input: Input, workspace: Workspace) => {
     const { specifier, containingFilePath } = input;
@@ -37,8 +48,17 @@ export const getReferencedInputsHandler =
     if (isBinary(input)) {
       const binaryName = fromBinary(input);
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
-      const isHandled = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
-      if (isHandled || input.optional) return;
+
+      const dependencies = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
+      if (dependencies) {
+        for (const dependency of dependencies) {
+          addExternalRef(externalRefs, containingFilePath, { specifier: dependency, identifier: binaryName });
+        }
+        return;
+      }
+
+      if (dependencies || input.optional) return;
+
       addIssue({
         type: 'binaries',
         filePath: containingFilePath,
@@ -47,6 +67,7 @@ export const getReferencedInputsHandler =
         specifier,
         fixes: [],
       });
+
       return;
     }
 
@@ -60,9 +81,13 @@ export const getReferencedInputsHandler =
       if (inputWorkspace) {
         const isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName);
 
+        if (!isWorkspace) {
+          addExternalRef(externalRefs, containingFilePath, { specifier: packageName, identifier: undefined });
+        }
+
         if (isWorkspace || isDependency(input)) {
           if (!isHandled) {
-            if (!input.optional && ((deputy.isProduction && input.production) || !deputy.isProduction)) {
+            if (!input.optional && ((options.isProduction && input.production) || !options.isProduction)) {
               addIssue({
                 type: 'unlisted',
                 filePath: containingFilePath,
@@ -118,7 +143,7 @@ export const getReferencedInputsHandler =
           fixes: [],
         });
       } else {
-        debugLog(workspace.name, `Unable to resolve ${toDebugString(input, chief.cwd)}`);
+        debugLog(workspace.name, `Unable to resolve ${toDebugString(input, options.cwd)}`);
       }
     }
   };

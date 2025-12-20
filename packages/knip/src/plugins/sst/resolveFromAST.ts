@@ -2,9 +2,10 @@ import ts from 'typescript';
 import type { ResolveFromAST } from '../../types/config.js';
 import { getImportMap, getPropertyValues } from '../../typescript/ast-helpers.js';
 import { toDeferResolveProductionEntry } from '../../util/input.js';
+import { dirname } from '../../util/path.js';
+import { _resolveSync } from '../../util/resolve.js';
 
 export const getInputsFromHandlers: ResolveFromAST = (sourceFile, options) => {
-  const { getSourceFile, getReferencedInternalFilePath } = options;
   const entries = new Set<string>();
   const importMap = getImportMap(sourceFile);
 
@@ -25,10 +26,9 @@ export const getInputsFromHandlers: ResolveFromAST = (sourceFile, options) => {
           if (ts.isIdentifier(arg)) {
             const importPath = importMap.get(arg.text);
             if (importPath) {
-              const input = toDeferResolveProductionEntry(importPath, { containingFilePath: options.configFilePath });
-              const resolvedPath = getReferencedInternalFilePath(input); // Resolve here as well so we can `getSourceFile`
+              const resolvedPath = _resolveSync(importPath, dirname(options.configFilePath));
               if (resolvedPath) {
-                const stackFile = getSourceFile(resolvedPath);
+                const stackFile = options.getSourceFile(resolvedPath);
                 if (stackFile) ts.forEachChild(stackFile, addHandlerSpecifiers);
               }
             }
