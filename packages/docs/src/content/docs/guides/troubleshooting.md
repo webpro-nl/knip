@@ -73,10 +73,11 @@ This will give a lengthy output, including:
 
 ## Trace
 
-Use `--trace` to see where all exports are used. Or be more specific:
+Use `--trace` to see where exports or dependencies are used:
 
 - Use `--trace-file [path]` to output this only for the given file.
 - Use `--trace-export [name]` to output this only for the given export name.
+- Use `--trace-dependency [name]` to find where a dependency is imported
 - Use both to trace a specific named or default export of a certain file.
 
 This works across re-exports, barrel files and workspaces. Here's an example
@@ -86,6 +87,13 @@ screenshot:
 
 It's like a reversed module graph. Instead of traversing imports it goes in the
 opposite direction and shows where exports are imported.
+
+The `--trace-dependency` accepts strings for exact matches, but if it looks like
+a regex that works too:
+
+<img src="/screenshots/trace-dependency.png" alt="trace dependency" class="mw500" />
+
+Use [--workspace \[dir\]][8] to filter accordingly.
 
 #### Legend
 
@@ -101,16 +109,16 @@ If you want to open an issue, please see [issue reproduction][6].
 
 ## Understanding Knip
 
-Looking to better understand how Knip works? The [entry files][8] and
-[plugins][9] explanations cover two core concepts. After this you might want to
-check out features like [production mode][10] and [monorepos & workspaces][11].
+Looking to better understand how Knip works? The [entry files][9] and
+[plugins][10] explanations cover two core concepts. After this you might want to
+check out features like [production mode][11] and [monorepos & workspaces][12].
 
-In a more general sense, [Why use Knip?][12] explains what Knip can do for you.
+In a more general sense, [Why use Knip?][13] explains what Knip can do for you.
 
 ## Asking for help
 
 If you can't find your answer in any of the aforementioned resources, feel free
-to [open an issue on GitHub][13].
+to [open an issue on GitHub][14].
 
 [1]: #lint-issues-reported-by-knip
 [2]: #exceptions-thrown-by-knip
@@ -119,9 +127,10 @@ to [open an issue on GitHub][13].
 [5]: ../guides/handling-issues.md
 [6]: ./issue-reproduction.md
 [7]: ../reference/known-issues.md
-[8]: ../explanations/entry-files.md
-[9]: ../explanations/plugins.md
-[10]: ../features/production-mode.md
-[11]: ../features/monorepos-and-workspaces.md
-[12]: ../explanations/why-use-knip.md
-[13]: https://github.com/webpro-nl/knip/issues
+[8]: ../reference/cli.md#--workspace-dir
+[9]: ../explanations/entry-files.md
+[10]: ../explanations/plugins.md
+[11]: ../features/production-mode.md
+[12]: ../features/monorepos-and-workspaces.md
+[13]: ../explanations/why-use-knip.md
+[14]: https://github.com/webpro-nl/knip/issues

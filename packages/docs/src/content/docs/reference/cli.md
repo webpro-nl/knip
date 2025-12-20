@@ -155,6 +155,10 @@ Trace exports to see where they are imported.
 
 Also see [Trace][7].
 
+### `--trace-dependency [name]`
+
+Trace package or binary name to see where it's referenced. Implies [--trace][8].
+
 ### `--trace-export [name]`
 
 Trace export name to see where it's imported. Implies [--trace][8].
