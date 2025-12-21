@@ -75,6 +75,11 @@ const args = {
   fromArgs: (parsed: ParsedArgs) => (parsed._[0] === 'exec' ? parsed._.slice(1) : []),
 };
 
+/** @public */
+export const docs = {
+  note: `Also see [integrated monorepos](/features/integrated-monorepos) and the note regarding internal workspace dependencies.`,
+};
+
 const plugin: Plugin = {
   title,
   enablers,
