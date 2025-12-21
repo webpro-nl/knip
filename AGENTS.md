@@ -13,6 +13,8 @@ JavaScript and TypeScript projects.
 
 ## General guidelines
 
+- Verify your claims, do not make assumptions after failed actions (like a file
+  read or fetched resource/URL). Inform the user.
 - Don't add comments, unless explicitly asked for.
 - For features and issues concerning the module graph, make sure to consult
   [ModuleGraph type definitions][2].
@@ -37,6 +39,14 @@ The sequence from [CLI][3]:
       3. [Settle unused/unlisted dependencies][14]
       4. Settle unused catalog entries
 3. [Run default reporter][15]
+
+## Run without compilation
+
+On the system, `k` should be a global alias for
+`tsx --inspect ~/p/knip/knip/packages/knip/src/cli.ts` to run Knip without
+having to compile it first. If that's not available, run the CLI using `bun` or
+`tsx`. The rest of this document shows `knip` in commands for consistency,
+replace it with `k` or `bun ../../src/cli.ts` or `tsx ../../src/cli.ts`.
 
 ## Build
 
@@ -84,19 +94,38 @@ pnpm test
 
 ## Fixtures
 
-There are plenty of directories with fixtures in `packages/knip/fixtures`. In
-general, a test has its own fixture dir. For debugging, it might be useful to
-run Knip from the fixture directory and see output in terminal.
+There are plenty of directories with fixtures in `packages/knip/fixtures`.
+
+- In general, a test has its own fixture directory.
+- For trivial changes or fixes, extend an existing fixture.
+- Don't use "foo" or vague names. One fixture should consist of descriptive file
+  and variable names like `module.ts` and `barrel.ts`, or build upon a "theme"
+  such as fruits or animals to indicate relation/hierarchy.
+- For debugging, it might be useful to run Knip from the fixture directory and
+  see output in terminal:
 
 ```sh
 cd packages/knip/fixtures/commonjs
-k
+knip
 ```
 
-On the system, `k` is a global alias for
-`tsx --inspect ~/p/knip/knip/packages/knip/src/cli.ts` to run Knip without
-having to build/compile it first. If that's not available, run e.g.
-`bun ../../src/cli.ts`.
+## Debug
+
+### Trace exported identifier
+
+With optional `--trace-file` filter:
+
+```sh
+knip --trace-export [name] --trace-file [file]
+```
+
+### Trace external dependency
+
+With optional `--workspace` filter:
+
+```sh
+knip --trace-dependency [name] --workspace [dir]
+```
 
 ## Plugins
 
@@ -123,7 +152,8 @@ If requested to create a new plugin for a certain package/tool/framework:
 [10]: ./packages/knip/src/binaries/bash-parser.ts
 [11]: ./packages/knip/src/graph/analyze.ts
 [12]: ./packages/knip/src/graph-explorer/operations/is-referenced.ts
-[13]: ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
+[13]:
+  ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
 [14]: ./packages/knip/src/DependencyDeputy.ts
 [15]: ./packages/knip/src/reporters/symbols.ts
 [16]: ./packages/docs/src/content/docs/writing-a-plugin/index.md
