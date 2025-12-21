@@ -1,3 +1,3 @@
 import type { Element, Root } from 'hast';
 
-export const Foo = (): Element | Root => <g />;
+export const Identifier = (): Element | Root => <g />;

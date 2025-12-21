@@ -1,3 +1,3 @@
-import { Box } from 'pkg/Box';
+import { Box } from 'pkg/public';
 
 Box;

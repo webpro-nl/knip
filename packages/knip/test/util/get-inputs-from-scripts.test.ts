@@ -151,7 +151,7 @@ test('getInputsFromScripts (npx)', () => {
   t('npx retry-cli@0.6.0 -- curl --output /dev/null ', [toDependency('retry-cli', opt), toBinary('curl')]);
   t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('curl'), toDependency('pkg', opt)]);
   t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('curl'), toDependency('@scope/pkg', opt), toDependency('pkg', opt)]);
-  t("npx --package=foo -c 'curl --output /dev/null'", [toDependency('foo', opt), toBinary('curl')]);
+  t("npx --package=pkg -c 'curl --output /dev/null'", [toDependency('pkg', opt), toBinary('curl')]);
   t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api')]);
   t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api')]);
   t('npx tsx main', [toBinary('tsx'), toDeferResolveEntry('main', opt)]);
@@ -162,7 +162,7 @@ test('getInputsFromScripts (npx)', () => {
 test('getInputsFromScripts (bun)', () => {
   t('bunx pkg', [toDependency('pkg', opt)]);
   t('bunx cowsay "Hello world!"', [toDependency('cowsay', opt)]);
-  t('bunx my-cli --foo bar', [toDependency('my-cli', opt)]);
+  t('bunx my-cli --arg value', [toDependency('my-cli', opt)]);
   t('bun x pkg', [toDependency('pkg', opt)]);
   t('bun ./main.ts', [toEntry(join(cwd, 'main.ts'))]);
   t('bun run script.js', [toEntry(join(cwd, 'script.js'))]);
@@ -290,7 +290,7 @@ test('getInputsFromScripts (bash expressions)', () => {
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [toBinary('node'), toBinary('make')]);
   t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('pkg'), toBinary('exit')]);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', [toBinary('exec'), toBinary('cz'), toBinary('true')]);
-  t('f() { vite build "$@" || (echo foo; exit 1;) }; f', [toBinary('vite'), toBinary('echo'), toBinary('exit')]);
+  t('f() { vite build "$@" || (echo content; exit 1;) }; f', [toBinary('vite'), toBinary('echo'), toBinary('exit')]);
 });
 
 test('getInputsFromScripts (bash expansion)', () => {

@@ -1,2 +1,2 @@
-export * from './foo.mjs';
-export * from './bar.mjs';
+export * from './module-a.mjs';
+export * from './module-b.mjs';

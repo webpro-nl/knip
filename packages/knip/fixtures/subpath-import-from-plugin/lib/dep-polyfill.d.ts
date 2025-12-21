@@ -1,2 +1,2 @@
-declare const foo: string;
-export default foo;
+declare const identifier: string;
+export default identifier;

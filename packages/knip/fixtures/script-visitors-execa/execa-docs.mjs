@@ -7,5 +7,5 @@ await $`dep deploy --branch=${branch}`;
 
 await Promise.all([$`executable1; echo 1`, $`executable2; echo 2`, $`executable3; echo 3`]);
 
-const name = 'foo bar';
+const name = 'content';
 await $`mkdir /tmp/${name}`;

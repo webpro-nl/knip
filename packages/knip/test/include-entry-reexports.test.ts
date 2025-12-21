@@ -22,7 +22,7 @@ test('Report unused nsExports in entry source files', async () => {
   const options = await createOptions({ cwd, isIncludeEntryExports: true });
   const { issues, counters } = await main(options);
 
-  assert(issues.exports['packages/shared/bar.mjs']['bar']);
+  assert(issues.exports['packages/shared/module-b.mjs']['identifierB']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
