@@ -16,6 +16,7 @@
     "tsup": "tsup -c tsup.cool.json",
     "tsuppy": "tsup --config tsup.cool.json",
     "serve": "http-server",
+    "bun": "bun run ./entry",
     "@ignore": "ignored",
     "#ignore": "ignored"
   },

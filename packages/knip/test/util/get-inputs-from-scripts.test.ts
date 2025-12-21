@@ -166,6 +166,7 @@ test('getInputsFromScripts (bun)', () => {
   t('bun x pkg', [toDependency('pkg', opt)]);
   t('bun ./main.ts', [toEntry(join(cwd, 'main.ts'))]);
   t('bun run script.js', [toEntry(join(cwd, 'script.js'))]);
+  t('bun run ./main', [toEntry(join(cwd, 'main.ts'))]);
   t('bun run --cwd packages/knip watch', []);
   t('bun test', []);
   t('bun add zod', []);

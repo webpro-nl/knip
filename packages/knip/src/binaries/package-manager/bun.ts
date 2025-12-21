@@ -1,8 +1,8 @@
 import parseArgs from 'minimist';
 import type { BinaryResolver } from '../../types/config.js';
-import { isFile } from '../../util/fs.js';
 import { toEntry } from '../../util/input.js';
 import { isAbsolute, join } from '../../util/path.js';
+import { _resolveSync } from '../../util/resolve.js';
 import { resolveX } from './bunx.js';
 
 const commands = [
@@ -49,8 +49,10 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   if (command !== 'run' && commands.includes(command)) return [];
 
   const filePath = command === 'run' ? script : command;
-  const absFilePath = isAbsolute(filePath) ? filePath : join(cwd, filePath);
-  if (isFile(absFilePath)) return [toEntry(absFilePath)];
+  if (!filePath) return [];
+  const _cwd = parsed.cwd ? join(cwd, parsed.cwd) : cwd;
+  const resolved = _resolveSync(isAbsolute(filePath) ? filePath : join(_cwd, filePath), _cwd);
+  if (resolved) return [toEntry(resolved)];
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const opts = dir ? { cwd: dir } : {};
