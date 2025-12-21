@@ -131,6 +131,7 @@ test('getInputsFromScripts (npm)', () => {
   t('npm run script', []);
   t('npm run publish:latest -- --npm-tag=debug --no-push', []);
   t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
+  t('npm run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
 });
 
 test('getInputsFromScripts (npx)', () => {
@@ -195,6 +196,7 @@ test('getInputsFromScripts (bun)', () => {
 
 test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
+  t('pnpm exec -- vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
   t('pnpm run program', []);
   t('pnpm program', [toBinary('program')]);
   t('pnpm run program', [], pkgScripts);
@@ -208,6 +210,7 @@ test('getInputsFromScripts (pnpm)', () => {
   t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, []);
   t('pnpm --filter docs typedoc:check', []);
   t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
+  t('pnpm program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
@@ -227,6 +230,7 @@ test('getInputsFromScripts (yarn)', () => {
   t('yarn --mode skip-build', []);
   const dir = join(cwd, 'components');
   t('yarn --cwd components vitest -c vitest.components.config.ts', [toBinary('vitest', { dir }), toConfig('vitest', 'vitest.components.config.ts', { dir })]);
+  t('yarn program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
 });
 
 test('getInputsFromScripts (yarn dlx)', () => {

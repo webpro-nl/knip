@@ -2,8 +2,11 @@ import parseArgs from 'minimist';
 import type { BinaryResolver } from '../../types/config.js';
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
-  const { fromArgs } = options;
-  const parsed = parseArgs(args);
-  const [command] = parsed._;
-  return command !== 'exec' ? [] : fromArgs(parsed._.slice(1));
+  const { fromArgs, manifestScriptNames } = options;
+  const parsed = parseArgs(args, { '--': true });
+  const [command, script] = parsed._;
+  const _childArgs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
+  if (command === 'exec') return _childArgs;
+  if (command === 'run' && manifestScriptNames.has(script)) return _childArgs;
+  return [];
 };

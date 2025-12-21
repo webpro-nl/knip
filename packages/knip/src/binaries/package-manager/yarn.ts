@@ -58,17 +58,19 @@ const resolveDlx = (args: string[], options: BinaryResolverOptions) => {
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
   const { manifestScriptNames, fromArgs, cwd, rootCwd } = options;
-  const parsed = parseArgs(args, { boolean: ['top-level'], string: ['cwd'] });
+  const parsed = parseArgs(args, { boolean: ['top-level'], string: ['cwd'], '--': true });
   const dir = parsed['top-level'] ? rootCwd : parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const [command, binary] = parsed._;
 
   if (!command && !binary) return [];
 
+  const _childArgs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
+
   if (command === 'run') {
-    if (manifestScriptNames.has(binary)) return [];
+    if (manifestScriptNames.has(binary)) return _childArgs;
     const bin = toBinary(binary, { optional: true });
     if (dir) Object.assign(bin, { dir });
-    return [bin];
+    return [bin, ..._childArgs];
   }
 
   if (command === 'node') return fromArgs(parsed._);
@@ -78,7 +80,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
     return resolveDlx(argsForDlx, options);
   }
 
-  if ((!dir && manifestScriptNames.has(command)) || commands.includes(command)) return [];
+  if ((!dir && manifestScriptNames.has(command)) || commands.includes(command)) return _childArgs;
 
   const opts = dir ? { cwd: dir } : {};
   return fromArgs(argsFrom(args, command === 'exec' ? binary : command), opts);
