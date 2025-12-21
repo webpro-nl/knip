@@ -1,6 +1,6 @@
 {
   "name": "vscode-knip",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "private": true,
   "license": "ISC",
   "repository": {
@@ -81,7 +81,7 @@
         "toolReferenceName": "knip-configure",
         "icon": "$(tools)",
         "userDescription": "Set up and optimize Knip configuration",
-        "modelDescription": "Run Knip and return configuration hints and issues.\n\nReturns:\n- configurationHints: Ordered suggestions to improve configuration (address these first)\n- counters: Summary counts of each issue type\n- files: List of unused files\n- issues: Detailed issues by type (dependencies, exports, types, etc.)\n- configFile: Current config file status\n\nIterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.",
+        "modelDescription": "Run Knip and return configuration hints and issues.\n\nReturns:\n- configurationHints: Ordered suggestions to improve configuration (address these first)\n- counters: Summary counts of each issue type\n- enabledPlugins: Auto-detected plugins per workspace\n- files: List of unused files\n- issues: Detailed issues by type (dependencies, exports, types, etc.)\n- configFile: Current config file status\n\nIterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
