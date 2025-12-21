@@ -7,6 +7,11 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { rolldown } from 'rolldown';
 
+// https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
+// https://marketplace.visualstudio.com/manage/publishers/webpro
+// https://open-vsx.org/extension/webpro/vscode-knip
+// https://open-vsx.org/user-settings/extensions
+
 const { values: args } = parseArgs({
   options: {
     target: { type: 'string' },

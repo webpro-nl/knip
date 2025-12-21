@@ -16,7 +16,7 @@ tidy.
 
 Don't forget... Knip it before you ship it!
 
-## VS Code Extension
+## VS Code/Open VSX Extension
 
 This one is for you.
 
@@ -32,6 +32,8 @@ check. We're starting out with [3 key features][4]:
 
 Find [Knip on the VS Code Marketplace][5].
 
+**EDIT:** Or find [Knip on the Open VSX Registry][6].
+
 ## MCP Server
 
 Configuring Knip has always been a major headache to many. No more. Tell your
@@ -39,7 +41,7 @@ coding agent to "configure knip" and it will RTFM so you don't have to. Using a
 newer model like Opus 4.5 or GPT 5.2 results in an optimized `knip.json` file
 and an uncluttered codebase.
 
-The [MCP Server is available][6] separately and built into the VS Code
+The [MCP Server is available][7] separately and built into the VS Code
 Extension.
 
 ## Language Server
@@ -51,25 +53,25 @@ information. Queries like "where is an export imported" or "is this import part
 of a circular dependency" are just scratching the surface here.
 
 Extensions for other IDEs can be built on top. See
-[language-server/README.md][7]
+[language-server/README.md][8]
 
 ## Screenshots
 
 - [Lint Findings][3]
 - [Imports & Exports][4]
-- [Contention][8]
-  - [Circular Dependencies][9]
-  - [Conflicts][10]
-  - [Branching][11]
-- [VS Code Extension Settings][12]
+- [Contention][9]
+  - [Circular Dependencies][10]
+  - [Conflicts][11]
+  - [Branching][12]
+- [VS Code Extension Settings][13]
 
 ### Lint Findings
 
-![Lint Findings][13]
+![Lint Findings][14]
 
 ### Imports & Exports
 
-![hover][14]
+![hover][15]
 
 ### Contention
 
@@ -81,7 +83,7 @@ branched/diamond-shaped import chains.
 
 If an import is part of a circular dependency, Knip will display:
 
-![Circular Dependencies][15]
+![Circular Dependencies][16]
 
 #### Conflicts
 
@@ -89,7 +91,7 @@ TypeScript shows direct conflicts when importing or re-exporting the same named
 export from different files. Except when the problem is more subtle and the
 chain spans more than one file. Knip warns:
 
-![Conflicts][16]
+![Conflicts][17]
 
 #### Branching
 
@@ -97,28 +99,29 @@ Branched or diamond-shaped imports chains indicate unnecessary re-exports and
 complexity. They help to untangle large codebases and shrink or get rid of
 barrel files. Knip warns:
 
-![Branching][17]
+![Branching][18]
 
 ### VS Code Extension Settings
 
-![VS Code Extension Settings][18]
+![VS Code Extension Settings][19]
 
 [1]: https://github.com/webpro-nl/knip/network/dependents
 [2]: https://www.npmjs.com/package/knip
 [3]: #lint-findings
 [4]: #imports--exports
 [5]: https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
-[6]: https://www.npmjs.com/package/@knip/mcp
-[7]:
+[6]: https://open-vsx.org/extension/webpro/vscode-knip
+[7]: https://www.npmjs.com/package/@knip/mcp
+[8]:
   https://github.com/webpro-nl/knip/blob/main/packages/language-server/README.md
-[8]: #contention
-[9]: #circular-dependencies
-[10]: #conflicts
-[11]: #branching
-[12]: #vs-code-extension-settings
-[13]: /screenshots/editors-and-agents/diagnostics.webp
-[14]: /screenshots/editors-and-agents/imports-exports.webp
-[15]: /screenshots/editors-and-agents/circular-dependency.webp
-[16]: /screenshots/editors-and-agents/conflict.webp
-[17]: /screenshots/editors-and-agents/branch.webp
-[18]: /screenshots/editors-and-agents/vscode-extension-settings.webp
+[9]: #contention
+[10]: #circular-dependencies
+[11]: #conflicts
+[12]: #branching
+[13]: #vs-code-extension-settings
+[14]: /screenshots/editors-and-agents/diagnostics.webp
+[15]: /screenshots/editors-and-agents/imports-exports.webp
+[16]: /screenshots/editors-and-agents/circular-dependency.webp
+[17]: /screenshots/editors-and-agents/conflict.webp
+[18]: /screenshots/editors-and-agents/branch.webp
+[19]: /screenshots/editors-and-agents/vscode-extension-settings.webp
