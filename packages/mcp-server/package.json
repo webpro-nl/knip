@@ -1,6 +1,6 @@
 {
   "name": "@knip/mcp",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Knip MCP Server",
   "type": "module",
   "bin": {
