@@ -21,6 +21,7 @@ export function buildResults(results, options) {
       : { exists: false, locations: KNIP_CONFIG_LOCATIONS },
     configurationHints: finalizeConfigurationHints(results, options),
     counters: results.counters,
+    enabledPlugins: results.enabledPlugins,
     files: Array.from(results.issues.files),
     issues: Object.fromEntries(Object.entries(results.issues).filter(([key]) => key !== 'files' && key !== '_files')),
   };

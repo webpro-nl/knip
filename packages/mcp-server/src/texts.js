@@ -8,6 +8,7 @@ export const WORKFLOW = `Workflow:
 
 Essential resources:
 - configuring-project-files (must read to configure entry patterns)
+- plugins-explanation (understand entries added by auto-detected plugins)
 - handling-issues (comprehensive guide to deal with any reported issue type)
 - configuration-reference (all knip.json configuration options)
 
@@ -26,6 +27,7 @@ export const RUN_KNIP_TOOL_DESCRIPTION = `Run Knip and return configuration hint
 Returns:
 - configurationHints: Ordered suggestions to improve configuration (address these first)
 - counters: Summary counts of each issue type
+- enabledPlugins: Auto-detected plugins per workspace
 - files: List of unused files
 - issues: Detailed issues by type (dependencies, exports, types, etc.)
 - configFile: Current config file status
@@ -70,7 +72,7 @@ export const CONFIG_REVIEW_HINT = `Review the existing configuration for potenti
 - Many unused exported types? Add: ignoreExportsUsedInFile: { interface: true, type: true } (prefer this over other ignore* options)
 - Remove ignore patterns that don't match any files
 - Redundant ignore patterns: Knip respects .gitignore by default (node_modules, dist, build, .git)
-- Remove entry patterns covered by config defaults and plugins
+- Remove entry patterns covered by config defaults and auto-detected plugins
 - Config files (e.g. vite.config.ts) showing as unused? Enable/disable the plugin explicitly
 - Dependencies matching Node.js builtins: add to ignoreDependencies (e.g. buffer, process)
 - Unresolved imports from path aliases: add paths to Knip config (tsconfig.json semantics)`;

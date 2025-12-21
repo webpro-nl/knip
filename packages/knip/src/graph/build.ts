@@ -493,5 +493,6 @@ export async function build({
     analyzedFiles,
     unreferencedFiles,
     analyzeSourceFile,
+    enabledPluginsStore,
   };
 }

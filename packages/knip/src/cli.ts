@@ -36,7 +36,8 @@ const run = async () => {
       process.exit(0);
     }
 
-    const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs } = await main(options);
+    const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs, enabledPlugins } =
+      await main(options);
 
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
@@ -47,6 +48,7 @@ const run = async () => {
       counters,
       tagHints,
       configurationHints,
+      enabledPlugins,
       includedWorkspaceDirs,
       cwd: options.cwd,
       configFilePath: options.configFilePath,
