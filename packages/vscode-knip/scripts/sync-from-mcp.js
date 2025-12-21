@@ -19,5 +19,4 @@ pkg.contributes.languageModelTools[1].inputSchema.properties.topic.description =
 
 writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
 
-// biome-ignore lint/suspicious/noConsole: yolo
 console.log('Synced content to vscode-knip/package.json');
