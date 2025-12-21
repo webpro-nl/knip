@@ -46,7 +46,7 @@ jobs:
                   await github.rest.issues.createComment({ owner, repo, issue_number, body });
                 }
               } catch(error) {
-               console.log(`Could not comment on #${issue}: ${error.message}`);}
+               console.log(`Could not comment on #${issue_number}: ${error.message}`);}
             }
 
   integration:
