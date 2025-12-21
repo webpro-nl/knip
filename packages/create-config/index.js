@@ -75,6 +75,21 @@ const getWorkspaceFlag = pm => {
   if (pm === 'pnpm' || pm === 'yarn') return hasWorkspaces() ? '-w' : undefined;
 };
 
+const getPackageManagerFromPackageJson = () => {
+  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  if (!fileExists(packageJsonPath)) return undefined;
+
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+  if (!packageJson.packageManager) return undefined;
+
+  const pmName = packageJson.packageManager.split('@')[0];
+
+  const validPackageManagers = ['bun', 'yarn', 'yarn-berry', 'pnpm', 'npm'];
+  if (!validPackageManagers.includes(pmName)) return undefined;
+
+  return pmName;
+};
+
 const main = () => {
   if (!fileExists('package.json')) {
     console.error('Please run this command from the root of a repository with a package.json.');
@@ -82,7 +97,7 @@ const main = () => {
   }
 
   // Differentiate yarn v1 and v2+ but call them both with `yarn`
-  const pm = getPackageManager();
+  const pm = getPackageManagerFromPackageJson() ?? getPackageManager();
   const bin = pm === 'yarn-berry' ? 'yarn' : pm;
 
   const cmd = [bin, 'add', getWorkspaceFlag(pm), '-D', 'knip', 'typescript', '@types/node'].filter(Boolean).join(' ');
