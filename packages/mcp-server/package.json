@@ -15,7 +15,8 @@
     "docs"
   ],
   "scripts": {
-    "prepack": "cp -r ../docs/src/content/docs ./docs"
+    "prepack": "cp -r ../docs/src/content/docs ./docs",
+    "release": "npm version patch --no-git-tag-version --no-workspaces-update && pnpm publish --access public --no-git-checks"
   },
   "keywords": [
     "knip",
@@ -31,7 +32,7 @@
   "license": "ISC",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
-    "knip": "workspace:*",
+    "knip": "workspace:^",
     "zod": "^4.1.11"
   },
   "engines": {

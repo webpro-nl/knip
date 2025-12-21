@@ -9,8 +9,11 @@
     },
     "./constants": "./src/constants.js"
   },
+  "scripts": {
+    "release": "npm version patch --no-git-tag-version --no-workspaces-update && pnpm publish --access public --no-git-checks"
+  },
   "dependencies": {
-    "knip": "workspace:*",
+    "knip": "workspace:^",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.12"
   },

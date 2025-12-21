@@ -175,7 +175,7 @@ importers:
   packages/language-server:
     dependencies:
       knip:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../knip
       vscode-languageserver:
         specifier: ^9.0.1
@@ -190,7 +190,7 @@ importers:
         specifier: ^1.24.3
         version: 1.24.3(zod@4.1.11)
       knip:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../knip
       zod:
         specifier: ^4.1.11
