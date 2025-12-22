@@ -74,6 +74,8 @@ export async function build({
 
   const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
 
+  const rootManifest = chief.getManifestForWorkspace('.');
+
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
     const manifest = chief.getManifestForWorkspace(name);
@@ -122,6 +124,7 @@ export async function build({
       config,
       manifest,
       dependencies,
+      rootManifest,
       handleInput: (input: Input) => handleInput(input, workspace),
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
@@ -405,6 +408,7 @@ export async function build({
           containingFilePath: filePath,
           dependencies,
           manifestScriptNames,
+          rootManifest,
         };
         const inputs = _getInputsFromScripts(file.scripts, opts);
         for (const input of inputs) {

@@ -101,6 +101,7 @@ interface BaseOptions {
   rootCwd: string;
   cwd: string;
   manifestScriptNames: Set<string>;
+  rootManifest: PackageJson | undefined;
 }
 
 type IsPluginEnabledOptions = {

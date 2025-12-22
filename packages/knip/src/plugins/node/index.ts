@@ -1,29 +1,28 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import type { PackageJson } from '../../types/package-json.js';
+import type { IsPluginEnabled, Plugin, PluginOptions } from '../../types/config.js';
 import { toEntry, toProductionEntry } from '../../util/input.js';
 
 const title = 'Node.js';
 
 const isEnabled: IsPluginEnabled = () => true;
 
-const config = ['package.json'];
+// From https://nodejs.org/api/test.html#running-tests-from-the-command-line
+const patterns = [
+  '**/*{.,-,_}test.{cjs,mjs,js,cts,mts,ts}',
+  '**/test-*.{cjs,mjs,js,cts,mts,ts}',
+  '**/test.{cjs,mjs,js,cts,mts,ts}',
+  '**/test/**/*.{cjs,mjs,js,cts,mts,ts}',
+];
 
-const packageJsonPath = (id: PackageJson) => id;
+const hasNodeTest = (scripts: Record<string, string> | undefined) =>
+  scripts && Object.values(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(script));
 
-const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
-  const scripts = localConfig.scripts;
+const entry = ['server.js'];
 
-  const entries = [toProductionEntry('server.js')];
+const resolve = (options: PluginOptions) => {
+  const entries = entry.map(id => toProductionEntry(id));
 
-  if (scripts && Object.values(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(script))) {
-    // From https://nodejs.org/api/test.html#running-tests-from-the-command-line
-    const patterns = [
-      '**/*{.,-,_}test.{cjs,mjs,js,cts,mts,ts}',
-      '**/test-*.{cjs,mjs,js,cts,mts,ts}',
-      '**/test.{cjs,mjs,js,cts,mts,ts}',
-      '**/test/**/*.{cjs,mjs,js,cts,mts,ts}',
-    ];
-    entries.push(...patterns.map(id => toEntry(id)));
+  if (hasNodeTest(options.manifest.scripts) || hasNodeTest(options.rootManifest?.scripts)) {
+    entries.push(...patterns.map(toEntry));
   }
 
   return entries;
@@ -52,9 +51,8 @@ const args = {
 const plugin: Plugin = {
   title,
   isEnabled,
-  packageJsonPath,
-  config,
-  resolveConfig,
+  entry,
+  resolve,
   args,
 };
 
