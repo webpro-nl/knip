@@ -1,4 +1,4 @@
 export const sharedFunction = () => {
-  const shared = "sha" + "red";
+  const shared = 'sha' + 'red';
   return shared;
 };

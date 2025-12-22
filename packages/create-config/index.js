@@ -50,7 +50,7 @@ const getBinX = pm => {
   return pm;
 };
 
-const hasWorkspaces = (manifest) => {
+const hasWorkspaces = manifest => {
   if (manifest.workspaces) {
     if (Array.isArray(manifest.workspaces) && manifest.workspaces.length > 0) return true;
     if (typeof manifest.workspaces === 'object' && manifest.workspaces.packages?.length > 0) return true;
@@ -72,7 +72,7 @@ const getWorkspaceFlag = (manifest, pm) => {
   if (pm === 'pnpm' || pm === 'yarn') return hasWorkspaces(manifest) ? '-w' : undefined;
 };
 
-const getPackageManagerFromPackageJson = (manifest) => {
+const getPackageManagerFromPackageJson = manifest => {
   if (!manifest.packageManager) return undefined;
 
   const pmName = manifest.packageManager.split('@')[0];
@@ -96,7 +96,9 @@ const main = () => {
   const pm = getPackageManagerFromPackageJson(manifest) ?? getPackageManager();
   const bin = pm === 'yarn-berry' ? 'yarn' : pm;
 
-  const cmd = [bin, 'add', getWorkspaceFlag(manifest, pm), '-D', 'knip', 'typescript', '@types/node'].filter(Boolean).join(' ');
+  const cmd = [bin, 'add', getWorkspaceFlag(manifest, pm), '-D', 'knip', 'typescript', '@types/node']
+    .filter(Boolean)
+    .join(' ');
 
   execSync(cmd, { stdio: 'inherit' });
 
