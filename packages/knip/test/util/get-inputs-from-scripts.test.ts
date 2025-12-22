@@ -161,10 +161,11 @@ test('getInputsFromScripts (npx)', () => {
 });
 
 test('getInputsFromScripts (bun)', () => {
-  t('bunx pkg', [toDependency('pkg', opt)]);
-  t('bunx cowsay "Hello world!"', [toDependency('cowsay', opt)]);
-  t('bunx my-cli --arg value', [toDependency('my-cli', opt)]);
-  t('bun x pkg', [toDependency('pkg', opt)]);
+  t('bunx pkg', [toBinary('pkg', opt)]);
+  t('bunx cowsay "Hello world!"', [toBinary('cowsay', opt)]);
+  t('bunx my-cli --arg value', [toBinary('my-cli', opt)]);
+  t('bunx --bun biome format --write', [toBinary('biome', opt)]);
+  t('bun x pkg', [toBinary('pkg', opt)]);
   t('bun ./main.ts', [toEntry(join(cwd, 'main.ts'))]);
   t('bun run script.js', [toEntry(join(cwd, 'script.js'))]);
   t('bun run ./main', [toEntry(join(cwd, 'main.ts'))]);
