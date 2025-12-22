@@ -70,7 +70,7 @@ export async function build({
 
   const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
 
-  const externalRefsFromInputs: ExternalRefsFromInputs = new Map();
+  const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
   const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
 
@@ -421,7 +421,7 @@ export async function build({
 
       file.imports.unresolved = unresolvedImports;
 
-      const pluginRefs = externalRefsFromInputs.get(filePath);
+      const pluginRefs = externalRefsFromInputs?.get(filePath);
       if (pluginRefs) for (const ref of pluginRefs) file.imports.externalRefs.add(ref);
 
       const node = graph.get(filePath);
@@ -485,10 +485,12 @@ export async function build({
     principals.length = 0;
   }
 
-  for (const [filePath, refs] of externalRefsFromInputs) {
-    if (!graph.has(filePath)) graph.set(filePath, createFileNode());
-    // biome-ignore lint/style/noNonNullAssertion: srsly
-    for (const ref of refs) graph.get(filePath)!.imports.externalRefs.add(ref);
+  if (externalRefsFromInputs) {
+    for (const [filePath, refs] of externalRefsFromInputs) {
+      if (!graph.has(filePath)) graph.set(filePath, createFileNode());
+      // biome-ignore lint/style/noNonNullAssertion: srsly
+      for (const ref of refs) graph.get(filePath)!.imports.externalRefs.add(ref);
+    }
   }
 
   return {

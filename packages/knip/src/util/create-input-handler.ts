@@ -38,7 +38,7 @@ export const createInputHandler =
     chief: ConfigurationChief,
     isGitIgnored: (filePath: string) => boolean,
     addIssue: (issue: Issue) => void,
-    externalRefs: ExternalRefsFromInputs,
+    externalRefs: ExternalRefsFromInputs | undefined,
     options: MainOptions
   ) =>
   (input: Input, workspace: Workspace) => {
@@ -52,8 +52,10 @@ export const createInputHandler =
 
       const dependencies = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
       if (dependencies) {
-        for (const dependency of dependencies) {
-          addExternalRef(externalRefs, containingFilePath, { specifier: dependency, identifier: binaryName });
+        if (externalRefs) {
+          for (const dependency of dependencies) {
+            addExternalRef(externalRefs, containingFilePath, { specifier: dependency, identifier: binaryName });
+          }
         }
         return;
       }
@@ -82,7 +84,7 @@ export const createInputHandler =
       if (inputWorkspace) {
         const isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName);
 
-        if (!isWorkspace) {
+        if (externalRefs && !isWorkspace) {
           addExternalRef(externalRefs, containingFilePath, { specifier: packageName, identifier: undefined });
         }
 
