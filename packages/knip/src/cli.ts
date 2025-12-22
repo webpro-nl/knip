@@ -24,8 +24,6 @@ try {
 
 const run = async () => {
   try {
-    const options = await createOptions({ args });
-
     if (args.help) {
       console.log(helpText);
       process.exit(0);
@@ -35,6 +33,8 @@ const run = async () => {
       console.log(version);
       process.exit(0);
     }
+
+    const options = await createOptions({ args });
 
     const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs, enabledPlugins } =
       await main(options);
