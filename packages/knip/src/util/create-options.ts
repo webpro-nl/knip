@@ -137,6 +137,15 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.unlisted ||
       includedIssueTypes.unresolved ||
       includedIssueTypes.binaries,
+    isReportExports:
+      includedIssueTypes.exports ||
+      includedIssueTypes.types ||
+      includedIssueTypes.nsExports ||
+      includedIssueTypes.nsTypes ||
+      includedIssueTypes.enumMembers ||
+      includedIssueTypes.duplicates ||
+      isReportClassMembers,
+    isReportFiles: includedIssueTypes.files,
     isReportTypes: includedIssueTypes.types || includedIssueTypes.nsTypes || includedIssueTypes.enumMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports || isReportClassMembers,
     isSession: options.isSession ?? false,

@@ -338,6 +338,7 @@ export async function build({
     isFixExports: options.isFixUnusedExports,
     isFixTypes: options.isFixUnusedTypes,
     isReportClassMembers: options.isReportClassMembers,
+    isReportExports: options.isReportExports,
     skipTypeOnly: options.isStrict,
     tags: options.tags,
   };

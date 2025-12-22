@@ -268,9 +268,11 @@ export const analyze = async ({
       }
     }
 
-    const unusedFiles = [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath));
+    const unusedFiles = options.isReportFiles
+      ? [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath))
+      : [];
 
-    collector.addFilesIssues(unusedFiles);
+    if (options.isReportFiles) collector.addFilesIssues(unusedFiles);
 
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 

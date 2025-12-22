@@ -69,8 +69,9 @@ const getImportsAndExports = (
   typeChecker: ts.TypeChecker,
   options: GetImportsAndExportsOptions,
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
-  skipExports: boolean
+  skipExportsForFile: boolean
 ): FileNode => {
+  const skipExports = skipExportsForFile || !options.isReportExports;
   const internal: ImportMap = new Map();
   const external: Imports = new Set();
   const unresolved: Imports = new Set();
@@ -253,8 +254,6 @@ const getImportsAndExports = (
   };
 
   const addExport = ({ node, symbol, identifier, type, pos, members, fix }: ExportNode) => {
-    if (skipExports) return;
-
     let isReExport = Boolean(
       node.parent?.parent && ts.isExportDeclaration(node.parent.parent) && node.parent.parent.moduleSpecifier
     );
@@ -338,9 +337,11 @@ const getImportsAndExports = (
         result && (Array.isArray(result) ? result.forEach(addImportWithNode) : addImportWithNode(result));
       }
 
-      for (const visitor of visitors.export) {
-        const result = visitor(node, options);
-        result && (Array.isArray(result) ? result.forEach(addExport) : addExport(result));
+      if (!skipExports) {
+        for (const visitor of visitors.export) {
+          const result = visitor(node, options);
+          result && (Array.isArray(result) ? result.forEach(addExport) : addExport(result));
+        }
       }
 
       if (
