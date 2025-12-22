@@ -41,6 +41,7 @@ const filterIsProduction = (id: string | RegExp, isProduction: boolean): string 
 export class DependencyDeputy {
   isProduction;
   isStrict;
+  isReportDependencies;
   _manifests: WorkspaceManifests = new Map();
   referencedDependencies: Map<string, Set<string>>;
   referencedBinaries: Map<string, Set<string>>;
@@ -48,9 +49,10 @@ export class DependencyDeputy {
   installedBinaries: Map<string, InstalledBinaries>;
   hasTypesIncluded: Map<string, Set<string>>;
 
-  constructor({ isProduction, isStrict }: MainOptions) {
+  constructor({ isProduction, isStrict, isReportDependencies }: MainOptions) {
     this.isProduction = isProduction;
     this.isStrict = isStrict;
+    this.isReportDependencies = isReportDependencies;
     this.referencedDependencies = new Map();
     this.referencedBinaries = new Map();
     this.hostDependencies = new Map();
@@ -99,15 +101,17 @@ export class DependencyDeputy {
       ...(this.isProduction ? [] : devDependencies),
     ];
 
-    const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
-      packageNames,
-      dir,
-      cwd,
-    });
+    if (this.isReportDependencies) {
+      const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
+        packageNames,
+        dir,
+        cwd,
+      });
 
-    this.setHostDependencies(name, hostDependencies);
-    this.setInstalledBinaries(name, installedBinaries);
-    this.setHasTypesIncluded(name, hasTypesIncluded);
+      this.setHostDependencies(name, hostDependencies);
+      this.setInstalledBinaries(name, installedBinaries);
+      this.setHasTypesIncluded(name, hasTypesIncluded);
+    }
 
     const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
     const ignoreBinaries = ib.flatMap(ib => filterIsProduction(ib, this.isProduction)).map(toRegexOrString);
@@ -201,6 +205,7 @@ export class DependencyDeputy {
    * wants to mark the dependency as "unlisted".
    */
   public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string): boolean {
+    if (!this.isReportDependencies) return true;
     if (isBuiltin(packageName)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
@@ -227,6 +232,7 @@ export class DependencyDeputy {
   }
 
   public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): Set<string> | undefined {
+    if (!this.isReportDependencies) return new Set();
     if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return new Set();
 
     this.addReferencedBinary(workspace.name, binaryName);
