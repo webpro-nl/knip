@@ -13,6 +13,9 @@
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
   },
+  "scripts": {
+    "release": "npm version patch --no-git-tag-version --no-workspaces-update && npm publish --no-git-checks"
+  },
   "funding": [
     {
       "type": "github",
