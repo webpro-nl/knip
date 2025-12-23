@@ -52,6 +52,7 @@
   "main": "./dist/extension.js",
   "scripts": {
     "package": "node scripts/publish.js",
+    "prepublish": "release-it -c ../../.release-it.json --no-npm.publish",
     "publish": "node scripts/publish.js --publish",
     "vscode:prepublish": "node scripts/sync-from-mcp.js"
   },

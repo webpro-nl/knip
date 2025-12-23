@@ -24,13 +24,16 @@
     "test": "pnpm run --dir packages/knip test",
     "format": "biome check --write",
     "lint": "biome lint .",
-    "ci": "biome ci . && installed-check --ignore-dev"
+    "ci": "biome ci . && installed-check --ignore-dev",
+    "release": "./release.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.8",
+    "@release-it/bumper": "^7.0.5",
     "installed-check": "^9.3.0",
     "mdxlint": "^1.0.0",
     "mdxlint-preset-webpro": "^1.0.2",
+    "release-it": "^19.2.0",
     "remark-cli": "12.0.1",
     "remark-preset-webpro": "^2.0.1"
   },
