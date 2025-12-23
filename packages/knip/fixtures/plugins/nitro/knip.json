@@ -1,0 +1,3 @@
+{
+  "ignore": [".nitro/types/*.d.ts"]
+}
