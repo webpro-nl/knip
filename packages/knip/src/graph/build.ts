@@ -246,19 +246,15 @@ export async function build({
       }
     }
 
-    {
-      const patterns = options.isProduction
-        ? worker.getProductionEntryFilePatterns(negatedEntryPatterns)
-        : worker.getEntryFilePatterns();
-      const entryPaths = await _glob({ ...sharedGlobOptions, patterns, gitignore: false, label: 'entry paths' });
-
-      if (!options.isProduction) {
-        const hints = worker.getConfigurationHints('entry', patterns, entryPaths, principal.entryPaths);
-        for (const hint of hints) collector.addConfigurationHint(hint);
-      }
-
-      principal.addEntryPaths(entryPaths);
-    }
+    const userEntryPatterns = options.isProduction
+      ? worker.getProductionEntryFilePatterns(negatedEntryPatterns)
+      : worker.getEntryFilePatterns();
+    const userEntryPaths = await _glob({
+      ...sharedGlobOptions,
+      patterns: userEntryPatterns,
+      gitignore: false,
+      label: 'entry paths',
+    });
 
     for (const group of groups) {
       {
@@ -282,6 +278,13 @@ export async function build({
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
       }
     }
+
+    if (!options.isProduction) {
+      const hints = worker.getConfigurationHints('entry', userEntryPatterns, userEntryPaths, principal.entryPaths);
+      for (const hint of hints) collector.addConfigurationHint(hint);
+    }
+
+    principal.addEntryPaths(userEntryPaths);
 
     if (options.isUseTscFiles) {
       const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
