@@ -111,6 +111,10 @@ knip
 
 ## Debug
 
+- Run `knip` directly in a fixture or temp directory (over creating test scripts
+  that import the `main` function). Knip requires `package.json` in root dir.
+- Enable [debug & helpers][16] with `--debug` (not `DEBUG=`). Warning: noisy.
+
 ### Trace exported identifier
 
 With optional `--trace-file` filter:
@@ -133,12 +137,12 @@ If requested to create a new plugin for a certain package/tool/framework:
 
 - Come up with a kebab-cased `name`.
 - Run `pnpm create-plugin --name [name]` from the `packages/knip` directory.
-- Must read [Writing A Plugin][16] first to understand plugin responsibilities
+- Must read [Writing A Plugin][17] first to understand plugin responsibilities
   and `Input[]` plugin functions like `resolveConfig` return.
 - Update the plugin's `types.ts`: add only relevant types, remove if unused.
 - Consult similar plugins and the tool's website to implement the plugin.
 - Update and fill out the blanks in the new files.
-- Don't forget: [run tests][17] individually first
+- Don't forget: [run tests][18] individually first
 
 [1]: https://knip.dev
 [2]: ./packages/knip/src/types/module-graph.ts
@@ -156,5 +160,6 @@ If requested to create a new plugin for a certain package/tool/framework:
   ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
 [14]: ./packages/knip/src/DependencyDeputy.ts
 [15]: ./packages/knip/src/reporters/symbols.ts
-[16]: ./packages/docs/src/content/docs/writing-a-plugin/index.md
-[17]: #test
+[16]: packages/knip/src/util/debug.ts
+[17]: ./packages/docs/src/content/docs/writing-a-plugin/index.md
+[18]: #test

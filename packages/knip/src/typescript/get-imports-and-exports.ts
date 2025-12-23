@@ -338,6 +338,7 @@ const getImportsAndExports = (
       }
 
       if (!skipExports) {
+        // Import visitors handle re-exports; connections only required for export tracking
         for (const visitor of visitors.export) {
           const result = visitor(node, options);
           result && (Array.isArray(result) ? result.forEach(addExport) : addExport(result));

@@ -16,7 +16,7 @@ test('Find dependencies with the __PLUGIN_NAME__ plugin', async () => {
    * Either we accept the missing binaries and count them as issues (`binaries: [n]`), or we add 2 fixture files:
    * → `node_modules/package-name/package.json` with a `bin` pointing to an existing empty `./index.js` file
    *
-   * Sometimes the "Run Knip against external projects" workflow in CI (GitHub Action) fails, you can probably ignore.
+   * Sometimes the "Publish preview & run ecosystem tests" workflow in CI (GitHub Action) fails, you can probably ignore.
    * All other workflows should be green though!
    *
    * Here's a link to the docs, just in case: https://knip.dev/writing-a-plugin
