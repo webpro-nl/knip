@@ -3,7 +3,7 @@ import { hasDependency } from '../../util/plugin.js';
 
 // https://vitepress.dev/
 
-const title = 'vitepress';
+const title = 'VitePress';
 
 const enablers = ['vitepress'];
 
