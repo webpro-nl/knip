@@ -3,7 +3,7 @@ import { toDeferResolve } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 
-// link to vitepress docs
+// https://vitepress.dev/
 
 const title = 'vitepress';
 
@@ -13,7 +13,10 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config: string[] = [];
 
-const entry: string[] = [];
+const entry: string[] = [
+  ".vitepress/config.{js,ts,mjs,mts}",
+  ".vitepress/theme/index.{js,ts,mjs,mts}"
+];
 
 const production: string[] = [];
 

@@ -1,3 +1,6 @@
 {
-  "name": "@plugins/vitepress"
+  "name": "@plugins/vitepress",
+  "dependencies": {
+    "vitepress": "*"
+  }
 }
