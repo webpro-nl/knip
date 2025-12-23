@@ -113,6 +113,7 @@ import { default as unocss } from './unocss/index.js';
 import { default as vercelOg } from './vercel-og/index.js';
 import { default as vike } from './vike/index.js';
 import { default as vite } from './vite/index.js';
+import { default as vitepress } from './vitepress/index.js';
 import { default as vitest } from './vitest/index.js';
 import { default as vue } from './vue/index.js';
 import { default as webdriverIo } from './webdriver-io/index.js';
@@ -238,6 +239,7 @@ export const Plugins = {
   'vercel-og': vercelOg,
   vike,
   vite,
+  vitepress,
   vitest,
   vue,
   'webdriver-io': webdriverIo,
