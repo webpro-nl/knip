@@ -5,7 +5,7 @@ import { hasDependency } from '../../util/plugin.js';
 import type { KnexConfig } from './types.js';
 import { clientToPackages, getKnexClients } from './helpers.js';
 
-// https://knexjs.org/guide/
+// https://knexjs.org
 
 const title = 'Knex';
 
