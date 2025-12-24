@@ -6,7 +6,7 @@ import { hasDependency } from '../../util/plugin.js';
 
 const title = 'SVGO';
 
-const enablers = ['svgo'];
+const enablers = ['svgo', '@svgr/plugin-svgo'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

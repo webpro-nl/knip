@@ -55,8 +55,8 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         }
         return opts.isProduction ? toProductionEntry(normalizedPath) : toEntry(normalizedPath);
       };
-      for (const [configName, entriesByOption] of entriesByOptionByConfig.entries()) {
-        for (const [option, entries] of entriesByOption.entries()) {
+      for (const [configName, entriesByOption] of entriesByOptionByConfig) {
+        for (const [option, entries] of entriesByOption) {
           for (const entry of entries) {
             inputs.add(
               toInput(entry, {
@@ -67,7 +67,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           }
         }
       }
-      for (const [option, entries] of defaultEntriesByOption.entries()) {
+      for (const [option, entries] of defaultEntriesByOption) {
         for (const entry of entries) {
           inputs.add(
             toInput(entry, {

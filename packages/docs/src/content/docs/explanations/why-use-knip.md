@@ -4,9 +4,8 @@ sidebar:
   order: 3
 ---
 
-The value of removing clutter from your code is undeniable. However, finding it
-is a tedious job. This is where Knip comes in. As codebases grow in complexity
-and size, comprehensive and automated tooling is indispensable.
+The value of removing clutter is clear, but finding it manually is tedious. This
+is where Knip comes in: comprehensive and accurate results at any scale.
 
 :::tip[TL;DR]
 
@@ -90,7 +89,7 @@ Use Knip in a CI environment to prevent future regressions.
 :::
 
 In large and/or legacy projects, Knip may report false positives and require
-some configuration. Yet it can be a great assistant when cleaning up parts of
+some configuration. It aims to be a great assistant when cleaning up parts of
 the project or doing large refactors. Even a list of results with a few false
 positives is many times better and faster than if you were to do it manually.
 

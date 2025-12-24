@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve, toDependency, toEntry } from '../../util/input.js';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
 import { join, relative } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { StorybookConfig } from './types.js';
@@ -23,7 +23,7 @@ const entry = [...restEntry, ...stories];
 const project = ['.{storybook,rnstorybook}/**/*.{js,jsx,ts,tsx,mts}'];
 
 const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, options) => {
-  const { cwd, configFileDir } = options;
+  const { cwd, configFileDir, configFilePath } = options;
   const strs = typeof localConfig?.stories === 'function' ? await localConfig.stories(stories) : localConfig?.stories;
   const relativePatterns = strs?.map(pattern => {
     if (typeof pattern === 'string') return relative(cwd, join(configFileDir, pattern));
@@ -44,14 +44,25 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
       : [builder]
     : [];
 
-  const framework = typeof localConfig.framework === 'string' ? localConfig.framework : localConfig.framework?.name;
-  const frameworks = framework ? [framework] : [];
+  const framework = localConfig.framework;
+  const frameworkName = typeof framework === 'string' ? framework : framework?.name;
+  const frameworks = frameworkName ? [frameworkName] : [];
+
+  const viteConfigPath =
+    typeof framework === 'object' &&
+    framework?.name === '@storybook/react-vite' &&
+    framework?.options?.builder?.viteConfigPath;
+
+  const configs: Input[] = viteConfigPath
+    ? [toConfig('vite', viteConfigPath, { dir: cwd, containingFilePath: configFilePath })]
+    : [];
 
   return [
     ...patterns.map(id => toEntry(id)),
     ...addons.map(id => toDeferResolve(id)),
     ...builderPackages.map(id => toDependency(id)),
     ...frameworks.map(id => toDependency(id)),
+    ...configs,
   ];
 };
 

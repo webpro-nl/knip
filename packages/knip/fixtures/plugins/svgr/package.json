@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/svgr",
+  "devDependencies": {
+    "@svgr/cli": "*",
+    "@svgr/plugin-jsx": "*"
+  },
+  "scripts": {
+    "build": "svgr"
+  }
+}

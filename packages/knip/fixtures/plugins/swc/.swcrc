@@ -1,0 +1,13 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  "jsc": {
+    "experimental": {
+      "plugins": [
+        [
+          "@swc/plugin-styled-components",
+          {}
+        ]
+      ]
+    }
+  }
+}

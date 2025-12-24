@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
+import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
 import { hasRequireCall, isModuleExportsAccess, stripQuotes } from '../../ast-helpers.js';
 import { isJS } from '../helpers.js';
@@ -19,10 +19,13 @@ export default visit(isJS, (node, { isFixExports }) => {
           const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
           return {
             node: node.expression.left.name,
+            symbol: undefined,
             identifier,
             type: SYMBOL_TYPE.UNKNOWN,
             pos,
             fix,
+            members: EMPTY_ARRAY,
+            jsDocTags: undefined,
           };
         }
         if (isModuleExportsAccess(node.expression.left)) {
@@ -31,7 +34,16 @@ export default visit(isJS, (node, { isFixExports }) => {
             // Pattern: module.exports = { identifier, identifier2 }
             return expr.properties.map(node => {
               const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
-              return { node, identifier: node.getText(), type: SYMBOL_TYPE.UNKNOWN, pos: node.getStart(), fix };
+              return {
+                node,
+                symbol: undefined,
+                identifier: node.getText(),
+                type: SYMBOL_TYPE.UNKNOWN,
+                pos: node.getStart(),
+                fix,
+                members: EMPTY_ARRAY,
+                jsDocTags: undefined,
+              };
             });
           }
 
@@ -41,7 +53,16 @@ export default visit(isJS, (node, { isFixExports }) => {
           }
 
           // Pattern: module.exports = any
-          return { node, identifier: 'default', type: SYMBOL_TYPE.UNKNOWN, pos: expr.pos + 1, fix: undefined };
+          return {
+            node,
+            symbol: undefined,
+            identifier: 'default',
+            type: SYMBOL_TYPE.UNKNOWN,
+            pos: expr.pos + 1,
+            fix: undefined,
+            members: EMPTY_ARRAY,
+            jsDocTags: undefined,
+          };
         }
       } else if (
         ts.isElementAccessExpression(node.expression.left) &&
@@ -55,10 +76,13 @@ export default visit(isJS, (node, { isFixExports }) => {
         const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
         return {
           node: node.expression.left.argumentExpression,
+          symbol: undefined,
           identifier,
           type: SYMBOL_TYPE.UNKNOWN,
           pos,
           fix,
+          members: EMPTY_ARRAY,
+          jsDocTags: undefined,
         };
       }
     }

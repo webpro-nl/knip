@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "files": {
     "includes": [
       "**",
@@ -8,7 +8,8 @@
       "!packages/docs/.astro",
       "!.vscode",
       "!**/.pnp.{cjs,mjs,js}",
-      "!**/.pnp.loader.{cjs,mjs,js}"
+      "!**/.pnp.loader.{cjs,mjs,js}",
+      "!templates/language-server-client"
     ]
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },

@@ -57,7 +57,7 @@ as unlisted. And vice versa, if there are any ESLint plugins listed in
 
 ### Example: Vitest
 
-The second example uses [the Vitest plugin][7]. Here's a minimal example of a
+The second example uses [the Vitest plugin][8]. Here's a minimal example of a
 Vitest configuration file:
 
 ```ts title="vitest.config.ts"
@@ -293,7 +293,7 @@ node --loader tsx scripts/deploy.ts
 playwright test -c playwright.web.config.ts
 ```
 
-Please see [script parser][8] for more details.
+Please see [script parser][9] for more details.
 
 ## Summary
 
@@ -315,4 +315,5 @@ Plugins are configured with two distinct types of files:
 [5]: #command-line-arguments
 [6]: ./entry-files.md
 [7]: ../reference/plugins/eslint.md
-[8]: ../features/script-parser.md
+[8]: ../reference/plugins/vitest.md
+[9]: ../features/script-parser.md

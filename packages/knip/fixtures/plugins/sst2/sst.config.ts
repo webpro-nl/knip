@@ -18,8 +18,8 @@ export default $config({
     api.route('GET /', {
       handler: 'route.handler',
     });
-    api.route('GET /foo', 'route.handler', { auth: { iam: true } });
-    api.route('GET /bar', 'route.handler', {
+    api.route('GET /endpoint-a', 'route.handler', { auth: { iam: true } });
+    api.route('GET /endpoint-b', 'route.handler', {
       auth: {
         jwt: {
           issuer: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_Rq4d8zILG',

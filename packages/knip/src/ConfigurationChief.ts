@@ -337,6 +337,15 @@ export class ConfigurationChief {
       .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name));
   }
 
+  public createIgnoredWorkspaceMatcher(name: string, dir: string) {
+    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name);
+    if (ignoredWorkspaces.length === 0) return () => false;
+    return (filePath: string) => {
+      const relativePath = filePath.startsWith(dir) ? filePath.slice(dir.length + 1) : filePath;
+      return picomatch.isMatch(relativePath, ignoredWorkspaces);
+    };
+  }
+
   public getNegatedWorkspacePatterns(name: string) {
     const descendentWorkspaces = this.getDescendentWorkspaces(name);
     const matchName = new RegExp(`^${name}/`);

@@ -10,7 +10,7 @@ import { isValidBinary } from './bash-parser.js';
 const spawningBinaries = ['cross-env', 'retry-cli'];
 
 // Binaries that have a new script behind the double-dash/end-of-command
-const endOfCommandBinaries = ['dotenvx', 'env-cmd'];
+const endOfCommandBinaries = ['dotenvx', 'env-cmd', 'op'];
 
 // Binaries with entry at first positional arg
 const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);

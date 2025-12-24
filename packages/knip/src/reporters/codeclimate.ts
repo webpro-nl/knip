@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import type * as codeclimate from 'codeclimate-types';
-import { ISSUE_TYPE_TITLE } from '../constants.js';
 import type { Entries } from '../types/entries.js';
 import type {
   Issue,
@@ -12,7 +11,7 @@ import type {
   SymbolIssueType,
 } from '../types/issues.js';
 import { toRelative } from '../util/path.js';
-import { getIssueTypeTitle } from './util/util.js';
+import { getIssuePrefix, getIssueTypeTitle } from './util/util.js';
 
 export default async ({ report, issues, cwd }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];
@@ -76,13 +75,9 @@ function convertSeverity(severity?: IssueSeverity): codeclimate.Severity {
   }
 }
 
-function getPrefix(type: SymbolIssueType) {
-  return ISSUE_TYPE_TITLE[type].replace(/ies$/, 'y').replace(/s$/, '');
-}
-
 function getIssueDescription({ type, symbol, symbols, parentSymbol }: Issue) {
   const symbolDescription = symbols ? `${symbols.map(s => s.symbol).join(', ')}` : symbol;
-  return `${getPrefix(type)}: ${symbolDescription}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+  return `${getIssuePrefix(type)}: ${symbolDescription}${parentSymbol ? ` (${parentSymbol})` : ''}`;
 }
 
 function getSymbolDescription({
@@ -94,7 +89,7 @@ function getSymbolDescription({
   symbol: IssueSymbol;
   parentSymbol?: string;
 }) {
-  return `${getPrefix(type)}: ${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+  return `${getIssuePrefix(type)}: ${symbol.symbol}${parentSymbol ? ` (${parentSymbol})` : ''}`;
 }
 
 function createLocation(filePath: string, cwd: string, line?: number, col?: number): codeclimate.Location {

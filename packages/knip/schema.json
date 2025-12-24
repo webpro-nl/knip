@@ -227,18 +227,21 @@
       "items": {
         "type": "string",
         "enum": [
-          "binaries",
-          "classMembers",
-          "dependencies",
-          "duplicates",
-          "enumMembers",
-          "exports",
           "files",
+          "dependencies",
+          "devDependencies",
+          "optionalPeerDependencies",
+          "unlisted",
+          "binaries",
+          "unresolved",
+          "exports",
+          "types",
           "nsExports",
           "nsTypes",
-          "types",
-          "unlisted",
-          "unresolved"
+          "duplicates",
+          "enumMembers",
+          "classMembers",
+          "catalog"
         ]
       }
     },
@@ -554,6 +557,14 @@
           "title": "Next.js plugin configuration (https://knip.dev/reference/plugins/main)",
           "$ref": "#/definitions/plugin"
         },
+        "next-intl": {
+          "title": "next-intl plugin configuration (https://knip.dev/reference/plugins/next-intl)",
+          "$ref": "#/definitions/plugin"
+        },
+        "next-mdx": {
+          "title": "next-mdx plugin configuration (https://knip.dev/reference/plugins/next-mdx)",
+          "$ref": "#/definitions/plugin"
+        },
         "node": {
           "title": "node plugin configuration (https://knip.dev/reference/plugins/node)",
           "$ref": "#/definitions/plugin"
@@ -714,6 +725,14 @@
           "title": "svgo plugin configuration (https://knip.dev/reference/plugins/svgo)",
           "$ref": "#/definitions/plugin"
         },
+        "svgr": {
+          "title": "svgr plugin configuration (https://knip.dev/reference/plugins/svgr)",
+          "$ref": "#/definitions/plugin"
+        },
+        "swc": {
+          "title": "swc plugin configuration (https://knip.dev/reference/plugins/swc)",
+          "$ref": "#/definitions/plugin"
+        },
         "syncpack": {
           "title": "syncpack plugin configuration (https://knip.dev/reference/plugins/syncpack)",
           "$ref": "#/definitions/plugin"
@@ -772,6 +791,10 @@
         },
         "vite": {
           "title": "vite plugin configuration (https://knip.dev/reference/plugins/vite)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vitepress": {
+          "title": "vitepress plugin configuration (https://knip.dev/reference/plugins/vitepress)",
           "$ref": "#/definitions/plugin"
         },
         "vitest": {

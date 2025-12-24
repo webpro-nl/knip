@@ -1,0 +1,10 @@
+{
+  "name": "@knip-ls/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@knip-ls/shared": "workspace:*"
+  }
+}

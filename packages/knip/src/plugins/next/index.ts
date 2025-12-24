@@ -21,7 +21,6 @@ const productionEntryFilePatterns = [
   'app/**/sitemap.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
   'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
-  'mdx-components.{js,jsx,ts,tsx}',
 ];
 
 const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {

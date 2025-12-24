@@ -41,7 +41,7 @@ export default (options: MainOptions, { issues, streamer, duration, size }: Watc
 
   const mem = perfObserver.getCurrentMemUsageInMb();
   const ms = duration ?? perfObserver.getCurrentDurationInMs();
-  const summary = `${size} files in ${prettyMilliseconds(ms)} (${mem}MB)`;
+  const summary = `${size} files (${prettyMilliseconds(ms)} • ${mem}MB)`;
 
   const messages =
     totalIssues === 0

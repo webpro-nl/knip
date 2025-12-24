@@ -69,6 +69,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const parsed = parseArgs(args, {
     boolean: ['recursive', 'silent', 'shell-mode'],
     alias: { recursive: 'r', silent: 's', 'shell-mode': 'c', filter: 'F' },
+    '--': true,
   });
   const [command] = parsed._;
 
@@ -81,9 +82,14 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   if (parsed.filter && !parsed.recursive) return [];
 
-  if (manifestScriptNames.has(command) || commands.includes(command)) return [];
+  const childInputs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
 
-  if (command === 'exec') return fromArgs(parsed._.slice(1));
+  if (command === 'exec') {
+    return childInputs.length > 0 ? childInputs : fromArgs(parsed._.slice(1));
+  }
+
+  const isScript = manifestScriptNames.has(command);
+  if (isScript || commands.includes(command)) return childInputs;
 
   return command ? [toBinary(command)] : [];
 };

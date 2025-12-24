@@ -1,5 +1,6 @@
 import type { WatchListener } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.js';
+import { invalidateCache } from '../graph-explorer/cache.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
@@ -11,9 +12,16 @@ import { isFile } from './fs.js';
 import { updateImportMap } from './module-graph.js';
 import { join, toAbsolute, toRelative } from './path.js';
 
-export type OnUpdate = (options: { issues: Issues; duration?: number }) => void;
+export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
-type Watch = {
+export type WatchChange = {
+  type: 'added' | 'deleted' | 'modified';
+  filePath: string;
+};
+
+export type SessionHandler = Awaited<ReturnType<typeof getSessionHandler>>;
+
+type WatchOptions = {
   analyzedFiles: Set<string>;
   analyzeSourceFile: (filePath: string, principal: ProjectPrincipal) => void;
   chief: ConfigurationChief;
@@ -22,14 +30,18 @@ type Watch = {
   factory: PrincipalFactory;
   graph: ModuleGraph;
   isIgnored: (path: string) => boolean;
-  onUpdate: OnUpdate;
+  onFileChange?: OnFileChange;
   unreferencedFiles: Set<string>;
+  entryPaths: Set<string>;
 };
 
-type Change = 'added' | 'deleted' | 'modified';
-type FileChange = [Change, string];
+const createUpdate = (options: { startTime: number }) => {
+  const duration = performance.now() - options.startTime;
+  const mem = process.memoryUsage().heapUsed;
+  return { duration, mem };
+};
 
-export const getWatchHandler = async (
+export const getSessionHandler = async (
   options: MainOptions,
   {
     analyzedFiles,
@@ -40,25 +52,24 @@ export const getWatchHandler = async (
     factory,
     graph,
     isIgnored,
-    onUpdate,
+    onFileChange,
     unreferencedFiles,
-  }: Watch
+    entryPaths,
+  }: WatchOptions
 ) => {
-  const getIssues = () => collector.getIssues().issues;
-
-  const processBatch = async (changes: FileChange[]) => {
+  const handleFileChanges = async (changes: WatchChange[]) => {
     const startTime = performance.now();
 
     const added = new Set<string>();
     const deleted = new Set<string>();
     const modified = new Set<string>();
 
-    for (const [type, _path] of changes) {
-      const filePath = toAbsolute(_path, options.cwd);
-      const relativePath = toRelative(_path, options.cwd);
+    for (const change of changes) {
+      const filePath = toAbsolute(change.filePath, options.cwd);
+      const relativePath = toRelative(change.filePath, options.cwd);
 
       if (isIgnored(filePath)) {
-        debugLog('*', `ignoring ${type} ${relativePath}`);
+        debugLog('*', `ignoring ${change.type} ${relativePath}`);
         continue;
       }
 
@@ -68,7 +79,7 @@ export const getWatchHandler = async (
       const principal = factory.getPrincipalByPackageName(workspace.pkgName);
       if (!principal) continue;
 
-      switch (type) {
+      switch (change.type) {
         case 'added':
           added.add(filePath);
           principal.addProjectPath(filePath);
@@ -81,7 +92,7 @@ export const getWatchHandler = async (
           principal.removeProjectPath(filePath);
           debugLog(workspace.name, `Watcher: - ${relativePath}`);
           break;
-        case 'modified':
+        default:
           modified.add(filePath);
           debugLog(workspace.name, `Watcher: ± ${relativePath}`);
           break;
@@ -90,7 +101,9 @@ export const getWatchHandler = async (
       principal.invalidateFile(filePath);
     }
 
-    if (added.size === 0 && deleted.size === 0 && modified.size === 0) return;
+    if (added.size === 0 && deleted.size === 0 && modified.size === 0) return createUpdate({ startTime });
+
+    invalidateCache(graph);
 
     unreferencedFiles.clear();
     const cachedUnusedFiles = collector.purge();
@@ -158,18 +171,28 @@ export const getWatchHandler = async (
 
     for (const issue of collector.getRetainedIssues()) collector.addIssue(issue);
 
-    onUpdate({ issues: getIssues(), duration: performance.now() - startTime });
+    const update = createUpdate({ startTime });
+
+    if (onFileChange) onFileChange(Object.assign({ issues: getIssues().issues }, update));
+
+    return update;
   };
 
-  const listener: WatchListener<string | Buffer> = (eventType, filename) => {
-    debugLog('*', `(raw) ${eventType} ${filename}`);
-    if (typeof filename === 'string') {
-      const event = eventType === 'rename' ? (isFile(join(options.cwd, filename)) ? 'added' : 'deleted') : 'modified';
-      processBatch([[event, filename]]);
+  const listener: WatchListener<string | Buffer> = (eventType, filePath) => {
+    debugLog('*', `(raw) ${eventType} ${filePath}`);
+    if (typeof filePath === 'string') {
+      const type = eventType === 'rename' ? (isFile(join(options.cwd, filePath)) ? 'added' : 'deleted') : 'modified';
+      handleFileChanges([{ type, filePath }]);
     }
   };
 
-  onUpdate({ issues: getIssues() });
+  const getIssues = () => collector.getIssues();
 
-  return listener;
+  const getEntryPaths = () => entryPaths;
+
+  const getGraph = () => graph;
+
+  if (onFileChange) onFileChange({ issues: getIssues().issues });
+
+  return { listener, handleFileChanges, getEntryPaths, getGraph, getIssues };
 };

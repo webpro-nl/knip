@@ -17,7 +17,7 @@ export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOpti
   workspace.outDir = compilerOptions.outDir || workspace.srcDir;
 };
 
-export const getToSourcePathHandler = (chief: ConfigurationChief) => {
+export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string>();
 
   return (filePath: string) => {
@@ -64,4 +64,4 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
   };
 };
 
-export type ToSourceFilePath = ReturnType<typeof getToSourcePathHandler>;
+export type ToSourceFilePath = ReturnType<typeof getModuleSourcePathHandler>;

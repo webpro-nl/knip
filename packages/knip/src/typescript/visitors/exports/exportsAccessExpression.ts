@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
+import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
 import { isJS } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
@@ -13,10 +13,13 @@ export default visit(isJS, (node, { isFixExports }) => {
       const fix: Fix = isFixExports ? [node.getStart(), node.getEnd(), FIX_FLAGS.NONE] : undefined;
       return {
         node: node.left.name,
+        symbol: undefined,
         identifier,
         type: SYMBOL_TYPE.UNKNOWN,
         pos,
         fix,
+        members: EMPTY_ARRAY,
+        jsDocTags: undefined,
       };
     }
   }

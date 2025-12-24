@@ -55,6 +55,8 @@ export type PluginName =
   | 'nest'
   | 'netlify'
   | 'next'
+  | 'next-intl'
+  | 'next-mdx'
   | 'node'
   | 'node-modules-inspector'
   | 'nodemon'
@@ -95,6 +97,8 @@ export type PluginName =
   | 'stylelint'
   | 'svelte'
   | 'svgo'
+  | 'svgr'
+  | 'swc'
   | 'syncpack'
   | 'tailwind'
   | 'taskfile'
@@ -110,6 +114,7 @@ export type PluginName =
   | 'vercel-og'
   | 'vike'
   | 'vite'
+  | 'vitepress'
   | 'vitest'
   | 'vue'
   | 'webdriver-io'
@@ -176,6 +181,8 @@ export const pluginNames = [
   'nest',
   'netlify',
   'next',
+  'next-intl',
+  'next-mdx',
   'node',
   'node-modules-inspector',
   'nodemon',
@@ -216,6 +223,8 @@ export const pluginNames = [
   'stylelint',
   'svelte',
   'svgo',
+  'svgr',
+  'swc',
   'syncpack',
   'tailwind',
   'taskfile',
@@ -231,6 +240,7 @@ export const pluginNames = [
   'vercel-og',
   'vike',
   'vite',
+  'vitepress',
   'vitest',
   'vue',
   'webdriver-io',

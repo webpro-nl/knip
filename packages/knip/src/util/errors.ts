@@ -26,6 +26,8 @@ export const getKnownErrors = (error: Error) => {
       if (error.path.length > 0) details.push(`location: ${error.path.join('.')}`);
       // @ts-expect-error
       if (typeof error.expected === 'string') details.push(`expected: ${error.expected}`);
+      // @ts-expect-error
+      if (Array.isArray(error.keys)) details.push(`${error.code}: ${error.keys.join(', ')}`);
       if (details.length > 0) message += ` (${details.join(', ')})`;
       return new Error(message);
     });

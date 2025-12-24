@@ -2,7 +2,7 @@
 title: The State of Knip
 date: 2025-02-28
 sidebar:
-  order: 1
+  order: 2
 ---
 
 _Published: 2025-02-28_

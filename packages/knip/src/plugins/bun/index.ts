@@ -1,6 +1,5 @@
 import parseArgs from 'minimist';
-import type { Plugin, ResolveConfig } from '../../types/config.js';
-import type { PackageJson } from '../../types/package-json.js';
+import type { IsPluginEnabled, Plugin, PluginOptions } from '../../types/config.js';
 import { toEntry } from '../../util/input.js';
 
 // https://bun.sh/docs/cli/test
@@ -9,25 +8,23 @@ const title = 'Bun';
 
 const enablers = ['bun'];
 
-const isEnabled = () => true;
+const hasBunTest = (scripts: Record<string, string> | undefined) =>
+  scripts && Object.values(scripts).some(script => /(?<=^|\s)bun test/.test(script));
 
-const config = ['package.json'];
+const isEnabled: IsPluginEnabled = ({ manifest }) => !!hasBunTest(manifest.scripts);
 
-const packageJsonPath = (id: PackageJson) => id;
+const patterns = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'];
 
-const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
-  const scripts = localConfig.scripts;
-
-  if (scripts) {
-    const testScripts = Object.keys(scripts).filter(script => /(?<=^|\s)bun test/.test(scripts[script]));
-    for (const script of testScripts) {
-      const parsed = parseArgs(scripts[script].split(' '));
+const resolve = (options: PluginOptions) => {
+  const scripts = { ...options.rootManifest?.scripts, ...options.manifest.scripts };
+  for (const script of Object.values(scripts)) {
+    if (/(?<=^|\s)bun test/.test(script)) {
+      const parsed = parseArgs(script.split(' '));
       if (parsed._.filter(id => id !== 'bun' && id !== 'test').length === 0) {
-        return ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'].map(toEntry);
+        return patterns.map(toEntry);
       }
     }
   }
-
   return [];
 };
 
@@ -35,9 +32,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
-  packageJsonPath,
-  resolveConfig,
+  resolve,
 };
 
 export default plugin;

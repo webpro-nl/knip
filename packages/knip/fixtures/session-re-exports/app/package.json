@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/session-re-exports-app",
+  "dependencies": {
+    "pkg": "file:../pkg"
+  }
+}

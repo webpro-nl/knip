@@ -51,12 +51,13 @@ Please consider this before opening a pull request:
   choose a direction upfront.
 - Pull requests may not align with the general philosophy, or may not be
   affordable to maintain, and therefore rejected.
+- Generated ("vibe-coded") pull requests may be rejected without explanation.
 - Read [development][6] instructions and guidelines.
 - If you think your PR is not ready for review yet, [set it as a draft][7].
 - No need to worry about commit messages, they will probably be squashed into a
   single commit when merged.
-- After your first PR is merged, you are automatically added to the
-  [list of contributors](https://knip.dev/#-contributors).
+- After your first PR is merged, you are automatically added to the [list of
+  contributors][8].
 
 [1]: ./CODE_OF_CONDUCT.md
 [2]: https://knip.dev
@@ -66,3 +67,4 @@ Please consider this before opening a pull request:
 [6]: ./DEVELOPMENT.md
 [7]:
   https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request
+[8]: https://knip.dev/#created-by-awesome-contributors

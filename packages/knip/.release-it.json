@@ -1,5 +1,6 @@
 {
-  "$schema": "https://unpkg.com/release-it@18/schema/release-it.json",
+  "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
+  "extends": "../../.release-it.json",
   "hooks": {
     "before:init": [
       "pnpm lint",

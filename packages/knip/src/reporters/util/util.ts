@@ -1,6 +1,6 @@
 import picocolors from 'picocolors';
 import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.js';
-import type { Issue, IssueSeverity, IssueSymbol } from '../../types/issues.js';
+import type { Issue, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.js';
 import { relative } from '../../util/path.js';
 import { Table } from '../../util/table.js';
 
@@ -88,3 +88,5 @@ export const getTableForType = (
 
   return table;
 };
+
+export const getIssuePrefix = (type: IssueType) => ISSUE_TYPE_TITLE[type].replace(/ies$/, 'y').replace(/s$/, '');

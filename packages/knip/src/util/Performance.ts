@@ -9,7 +9,7 @@ const { values } = parseArgs({
   strict: false,
   options: {
     performance: { type: 'boolean' },
-    'performance-fn': { type: 'string' },
+    'performance-fn': { type: 'string', multiple: true },
     memory: { type: 'boolean' },
     'memory-realtime': { type: 'boolean' },
   },
@@ -22,7 +22,7 @@ const isMemoryUsageEnabled = !!values.memory || isMemoryRealtime;
 
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
   if (!isTimerifyFunctions) return fn;
-  if (timerifyOnlyFnName && name !== timerifyOnlyFnName) return fn;
+  if (timerifyOnlyFnName && !timerifyOnlyFnName.includes(name)) return fn;
   return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));
 };
 
@@ -154,9 +154,11 @@ class Performance {
 
   getMemoryUsageTable() {
     const table = new Table({ header: true });
+    let i = 0;
     for (const entry of this.memEntries) {
       if (!entry.detail) continue;
       table.row();
+      table.cell('#', String(i++));
       table.cell('heapUsed', inMB(entry.detail.heapUsed), twoFixed);
       table.cell('heapTotal', inMB(entry.detail.heapTotal), twoFixed);
       table.cell('freemem', inMB(entry.detail.freemem), twoFixed);

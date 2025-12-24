@@ -4,6 +4,7 @@ import Astro from './astro.js';
 import AstroMDX from './astro-mdx.js';
 import MDX from './mdx.js';
 import Prisma from './prisma.js';
+import SCSS from './scss.js';
 import Svelte from './svelte.js';
 import CSS from './tailwind.js';
 import type { AsyncCompilerFn, AsyncCompilers, RawSyncCompilers, SyncCompilerFn, SyncCompilers } from './types.js';
@@ -43,6 +44,8 @@ const compilers = new Map([
   ['.css', CSS],
   ['.mdx', MDX],
   ['.prisma', Prisma],
+  ['.sass', SCSS],
+  ['.scss', SCSS],
   ['.svelte', Svelte],
   ['.vue', Vue],
 ]);
@@ -54,7 +57,7 @@ export const getIncludedCompilers = (
 ): [SyncCompilers, AsyncCompilers] => {
   const hasDependency = (packageName: string) => dependencies.has(packageName);
 
-  for (const [extension, { condition, compiler }] of compilers.entries()) {
+  for (const [extension, { condition, compiler }] of compilers) {
     // For MDX, try Astro compiler first if available
     if (extension === '.mdx' && AstroMDX.condition(hasDependency)) {
       syncCompilers.set(extension, AstroMDX.compiler);

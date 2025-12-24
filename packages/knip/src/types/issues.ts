@@ -3,9 +3,14 @@ import type { Fixes } from './exports.js';
 
 export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 
-export type IssueSymbol = { symbol: string; pos?: number; line?: number; col?: number };
+export interface IssueSymbol {
+  symbol: string;
+  pos?: number;
+  line?: number;
+  col?: number;
+}
 
-export type Issue = {
+export interface Issue {
   type: SymbolIssueType;
   filePath: string;
   workspace: string;
@@ -20,7 +25,7 @@ export type Issue = {
   col?: number;
   fixes: Fixes;
   isFixed?: boolean;
-};
+}
 
 export type IssueSet = Set<string>;
 
@@ -61,6 +66,7 @@ export type ReporterOptions = {
   counters: Counters;
   tagHints: TagHints;
   configurationHints: Set<ConfigurationHint>;
+  enabledPlugins: Record<string, string[]>;
   isDisableConfigHints: boolean;
   isTreatConfigHintsAsErrors: boolean;
   cwd: string;
@@ -69,7 +75,7 @@ export type ReporterOptions = {
   options: string;
   preprocessorOptions: string;
   includedWorkspaceDirs: string[];
-  configFilePath?: string;
+  configFilePath: string | undefined;
   maxShowIssues?: number;
 };
 

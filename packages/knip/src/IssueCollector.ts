@@ -8,6 +8,8 @@ import { join, relative } from './util/path.js';
 
 const isMatch = timerify(picomatch.isMatch, 'isMatch');
 
+export type CollectorIssues = ReturnType<IssueCollector['getIssues']>;
+
 /**
  * - Collects issues and counts them
  * - Hands them out, to be consumed by reporters
@@ -140,7 +142,7 @@ export class IssueCollector {
     };
   }
 
-  // Retain issues from `getReferencedInternalFilePath` that would otherwise get lost between analysis runs (e.g. in watch mode)
+  // Retain issues from `handleInput` that would otherwise get lost between analysis runs (e.g. in watch mode)
   private retainedIssues: Issue[] = [];
   retainIssue(issue: Issue) {
     this.retainedIssues.push(issue);

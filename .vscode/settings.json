@@ -5,6 +5,9 @@
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "[markdown]": {
+    "editor.defaultFormatter": "unifiedjs.vscode-remark"
+  },
   "[mdx]": {
     "editor.defaultFormatter": "remcohaszing.vscode-mdxlint"
   },

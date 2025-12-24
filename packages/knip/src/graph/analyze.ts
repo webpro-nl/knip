@@ -2,17 +2,17 @@ import type { CatalogCounselor } from '../CatalogCounselor.js';
 import type { ConfigurationChief } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
+import { createGraphExplorer } from '../graph-explorer/explorer.js';
+import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { IssueFixer } from '../IssueFixer.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
+import traceReporter from '../reporters/trace.js';
 import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
 import type { MainOptions } from '../util/create-options.js';
-import { getType, hasStrictlyEnumReferences, hasStrictlyNsReferences } from '../util/has-strictly-ns-references.js';
-import { getIsIdentifierReferencedHandler } from '../util/is-identifier-referenced.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { findMatch } from '../util/regex.js';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.js';
-import { createAndPrintTrace, printTrace } from '../util/trace.js';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -45,12 +45,12 @@ export const analyze = async ({
   const shouldIgnore = getShouldIgnoreHandler(options.isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(options.tags);
 
-  const isIdentifierReferenced = getIsIdentifierReferencedHandler(graph, entryPaths, options.isTrace);
+  const explorer = createGraphExplorer(graph, entryPaths);
 
   const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
-  const isExportedItemReferenced = (exportedItem: Export | ExportMember) =>
-    exportedItem.refs[1] ||
-    (exportedItem.refs[0] > 0 &&
+  const isExportReferencedInFile = (exportedItem: Export | ExportMember) =>
+    exportedItem.self[1] ||
+    (exportedItem.self[0] > 0 &&
       (typeof ignoreExportsUsedInFile === 'object'
         ? exportedItem.type !== 'unknown' && !!ignoreExportsUsedInFile[exportedItem.type]
         : ignoreExportsUsedInFile));
@@ -59,7 +59,7 @@ export const analyze = async ({
     if (options.isReportValues || options.isReportTypes) {
       streamer.cast('Connecting the dots');
 
-      for (const [filePath, file] of graph.entries()) {
+      for (const [filePath, file] of graph) {
         const exportItems = file.exports;
 
         if (!exportItems || exportItems.size === 0) continue;
@@ -75,26 +75,23 @@ export const analyze = async ({
 
           // Bail out when in entry file (unless `isIncludeEntryExports`)
           if (!isIncludeEntryExports && isEntry) {
-            createAndPrintTrace(filePath, options, { isEntry });
             continue;
           }
 
           const importsForExport = file.imported;
 
-          for (const [identifier, exportedItem] of exportItems.entries()) {
+          for (const [identifier, exportedItem] of exportItems) {
             // Skip tagged exports
             if (shouldIgnore(exportedItem.jsDocTags)) continue;
 
             const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags);
 
             if (importsForExport) {
-              const { isReferenced, reExportingEntryFile, traceNode } = isIdentifierReferenced(
-                filePath,
-                identifier,
-                isIncludeEntryExports
-              );
+              const [isReferenced, reExportingEntryFile] = explorer.isReferenced(filePath, identifier, {
+                includeEntryExports: isIncludeEntryExports,
+              });
 
-              if ((isReferenced || exportedItem.refs[1]) && isIgnored) {
+              if ((isReferenced || exportedItem.self[1]) && isIgnored) {
                 for (const tagName of exportedItem.jsDocTags) {
                   if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
@@ -104,17 +101,14 @@ export const analyze = async ({
 
               if (isIgnored) continue;
 
-              if (reExportingEntryFile) {
+              if (reExportingEntryFile && !isReferenced) {
                 if (!isIncludeEntryExports) {
-                  createAndPrintTrace(filePath, options, { identifier, isEntry, hasRef: isReferenced });
                   continue;
                 }
                 // Skip exports if re-exported from entry file and tagged
                 const reExportedItem = graph.get(reExportingEntryFile)?.exports.get(identifier);
                 if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
               }
-
-              if (traceNode) printTrace(traceNode, filePath, options, identifier);
 
               if (isReferenced) {
                 if (options.includedIssueTypes.enumMembers && exportedItem.type === 'enum') {
@@ -125,12 +119,14 @@ export const analyze = async ({
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
                     if (shouldIgnore(member.jsDocTags)) continue;
 
-                    if (member.refs[0] === 0) {
+                    if (member.self[0] === 0) {
                       const id = `${identifier}.${member.identifier}`;
-                      const { isReferenced } = isIdentifierReferenced(filePath, id, true);
+                      const [isMemberReferenced] = explorer.isReferenced(filePath, id, {
+                        includeEntryExports: true,
+                      });
                       const isIgnored = shouldIgnoreTags(member.jsDocTags);
 
-                      if (!isReferenced) {
+                      if (!isMemberReferenced) {
                         if (isIgnored) continue;
 
                         collector.addIssue({
@@ -189,7 +185,7 @@ export const analyze = async ({
               }
             }
 
-            const [hasStrictlyNsRefs, namespace] = hasStrictlyNsReferences(graph, importsForExport, identifier);
+            const [hasStrictlyNsRefs, namespace] = explorer.hasStrictlyNsReferences(filePath, identifier);
 
             const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
@@ -199,11 +195,11 @@ export const analyze = async ({
             )
               continue;
 
-            if (!isExportedItemReferenced(exportedItem)) {
+            if (!isExportReferencedInFile(exportedItem)) {
               if (isIgnored) continue;
               if (!options.isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
 
-              const type = getType(hasStrictlyNsRefs, isType);
+              const type = getIssueType(hasStrictlyNsRefs, isType);
               collector.addIssue({
                 type,
                 filePath,
@@ -222,7 +218,7 @@ export const analyze = async ({
       }
     }
 
-    for (const [filePath, file] of graph.entries()) {
+    for (const [filePath, file] of graph) {
       const ws = chief.findWorkspaceByFilePath(filePath);
 
       if (ws) {
@@ -272,9 +268,11 @@ export const analyze = async ({
       }
     }
 
-    const unusedFiles = [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath));
+    const unusedFiles = options.isReportFiles
+      ? [...unreferencedFiles].filter(filePath => !analyzedFiles.has(filePath))
+      : [];
 
-    collector.addFilesIssues(unusedFiles);
+    if (options.isReportFiles) collector.addFilesIssues(unusedFiles);
 
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
@@ -302,6 +300,8 @@ export const analyze = async ({
   };
 
   await analyzeGraph();
+
+  if (options.isTrace) traceReporter({ graph, explorer, options, isExportReferencedInFile });
 
   return analyzeGraph;
 };

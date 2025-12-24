@@ -43,6 +43,11 @@ type Function_ = {
   body: CompoundList;
 };
 
+type Subshell = {
+  type: 'Subshell';
+  list: CompoundList;
+};
+
 export type ExpansionNode = {
   expansion: Expansion[];
 };
@@ -62,7 +67,7 @@ export type Assignment = {
   text: string;
 };
 
-export type Node = CompoundList | Command | LogicalExpression | If | For | Function_ | Pipeline;
+export type Node = CompoundList | Command | LogicalExpression | If | For | Function_ | Pipeline | Subshell;
 
 export type AST = {
   type: 'Script';

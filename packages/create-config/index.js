@@ -50,13 +50,10 @@ const getBinX = pm => {
   return pm;
 };
 
-const hasWorkspaces = () => {
-  const packageJsonPath = path.join(process.cwd(), 'package.json');
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-
-  if (packageJson.workspaces) {
-    if (Array.isArray(packageJson.workspaces) && packageJson.workspaces.length > 0) return true;
-    if (typeof packageJson.workspaces === 'object' && packageJson.workspaces.packages?.length > 0) return true;
+const hasWorkspaces = manifest => {
+  if (manifest.workspaces) {
+    if (Array.isArray(manifest.workspaces) && manifest.workspaces.length > 0) return true;
+    if (typeof manifest.workspaces === 'object' && manifest.workspaces.packages?.length > 0) return true;
   }
 
   if (hasAccess('pnpm-workspace.yaml')) {
@@ -71,8 +68,19 @@ const hasWorkspaces = () => {
   return false;
 };
 
-const getWorkspaceFlag = pm => {
-  if (pm === 'pnpm' || pm === 'yarn') return hasWorkspaces() ? '-w' : undefined;
+const getWorkspaceFlag = (manifest, pm) => {
+  if (pm === 'pnpm' || pm === 'yarn') return hasWorkspaces(manifest) ? '-w' : undefined;
+};
+
+const getPackageManagerFromPackageJson = manifest => {
+  if (!manifest.packageManager) return undefined;
+
+  const pmName = manifest.packageManager.split('@')[0];
+
+  const validPackageManagers = ['bun', 'yarn', 'yarn-berry', 'pnpm', 'npm'];
+  if (!validPackageManagers.includes(pmName)) return undefined;
+
+  return pmName;
 };
 
 const main = () => {
@@ -81,11 +89,16 @@ const main = () => {
     return;
   }
 
+  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  const manifest = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+
   // Differentiate yarn v1 and v2+ but call them both with `yarn`
-  const pm = getPackageManager();
+  const pm = getPackageManagerFromPackageJson(manifest) ?? getPackageManager();
   const bin = pm === 'yarn-berry' ? 'yarn' : pm;
 
-  const cmd = [bin, 'add', getWorkspaceFlag(pm), '-D', 'knip', 'typescript', '@types/node'].filter(Boolean).join(' ');
+  const cmd = [bin, 'add', getWorkspaceFlag(manifest, pm), '-D', 'knip', 'typescript', '@types/node']
+    .filter(Boolean)
+    .join(' ');
 
   execSync(cmd, { stdio: 'inherit' });
 
@@ -101,7 +114,7 @@ const main = () => {
     tags: ['-lintignore'],
   };
 
-  if (hasWorkspaces()) knipConfig.workspaces = { '.': {} };
+  if (hasWorkspaces(manifest)) knipConfig.workspaces = { '.': {} };
 
   try {
     if (!fileExists('knip.json')) {

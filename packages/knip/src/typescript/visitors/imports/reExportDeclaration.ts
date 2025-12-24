@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_MODIFIERS, IMPORT_STAR } from '../../../constants.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
 import { importVisitor as visit } from '../index.js';
 
 export default visit(
@@ -14,7 +14,10 @@ export default visit(
             identifier: IMPORT_STAR,
             specifier: node.moduleSpecifier.text,
             pos: node.moduleSpecifier.getStart() - 7,
-            modifiers: IMPORT_MODIFIERS.RE_EXPORT,
+            modifiers: IMPORT_FLAGS.RE_EXPORT,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
           };
         }
         if (node.exportClause.kind === ts.SyntaxKind.NamespaceExport) {
@@ -24,7 +27,9 @@ export default visit(
             namespace: String(node.exportClause.name.text),
             specifier: node.moduleSpecifier.text,
             pos: node.exportClause.name.getStart(),
-            modifiers: IMPORT_MODIFIERS.RE_EXPORT,
+            modifiers: IMPORT_FLAGS.RE_EXPORT,
+            alias: undefined,
+            symbol: undefined,
           };
         }
         const specifier = node.moduleSpecifier; // Assign to satisfy TS
@@ -36,7 +41,9 @@ export default visit(
               alias: String(element.name.text),
               specifier: specifier.text,
               pos: element.propertyName.getStart(),
-              modifiers: IMPORT_MODIFIERS.RE_EXPORT,
+              modifiers: IMPORT_FLAGS.RE_EXPORT,
+              namespace: undefined,
+              symbol: undefined,
             };
           }
           // Pattern: export { identifier } from 'specifier';
@@ -44,7 +51,10 @@ export default visit(
             identifier: (element.propertyName ?? element.name).getText(),
             specifier: specifier.text,
             pos: element.name.getStart(),
-            modifiers: IMPORT_MODIFIERS.RE_EXPORT,
+            modifiers: IMPORT_FLAGS.RE_EXPORT,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
           };
         });
       }

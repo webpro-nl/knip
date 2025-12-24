@@ -86,6 +86,7 @@ export default ({
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
       const issuesForType: Issue[] = Object.values(issues[reportType]).flatMap(Object.values);
+      issuesForType.sort((a, b) => a.filePath.localeCompare(b.filePath) || (a.line ?? 0) - (b.line ?? 0));
       if (issuesForType.length > 0) {
         title && core.info(`${title} (${issuesForType.length})`);
 
@@ -114,7 +115,8 @@ export default ({
     const CONFIG_HINTS_TITLE = 'Configuration hints';
     core.info(`${CONFIG_HINTS_TITLE} (${configurationHints.size})`);
 
-    for (const hint of configurationHints) {
+    const sortedHints = [...configurationHints].sort((a, b) => (a.filePath ?? '').localeCompare(b.filePath ?? ''));
+    for (const hint of sortedHints) {
       const hintPrinter = hintPrinters.get(hint.type);
       const message =
         hintPrinter?.print({

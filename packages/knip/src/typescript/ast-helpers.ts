@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { FIX_FLAGS, SYMBOL_TYPE } from '../constants.js';
+import { FIX_FLAGS, MEMBER_FLAGS, SYMBOL_TYPE } from '../constants.js';
 import type { Fix } from '../types/exports.js';
 import type { SymbolType } from '../types/issues.js';
 import type { BoundSourceFile } from './SourceFile.js';
@@ -63,19 +63,23 @@ export const getNodeType = (node: ts.Node): SymbolType => {
   return SYMBOL_TYPE.UNKNOWN;
 };
 
-export const isNonPrivatePropertyOrMethodDeclaration = (
+export const isNonPrivateDeclaration = (
   member: ts.ClassElement
-): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
+): member is ts.MethodDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration =>
   (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member) || isGetOrSetAccessorDeclaration(member)) &&
   !isPrivateMember(member);
 
-export const getClassMember = (member: ts.MethodDeclaration | ts.PropertyDeclaration, isFixTypes: boolean) => ({
+export const getClassMember = (
+  member: ts.MethodDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration,
+  isFixTypes: boolean
+) => ({
   node: member,
   identifier: member.name.getText(),
   // Naive, but [does.the.job()]
   pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
   type: SYMBOL_TYPE.MEMBER,
   fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
+  flags: member.kind === ts.SyntaxKind.SetAccessor ? MEMBER_FLAGS.SETTER : MEMBER_FLAGS.NONE,
 });
 
 export const getEnumMember = (member: ts.EnumMember, isFixTypes: boolean) => ({
@@ -86,6 +90,7 @@ export const getEnumMember = (member: ts.EnumMember, isFixTypes: boolean) => ({
   fix: isFixTypes
     ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
     : undefined,
+  flags: MEMBER_FLAGS.NONE,
 });
 
 export function stripQuotes(name: string) {
@@ -205,7 +210,7 @@ const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => 
   }
 };
 
-export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Identifier) => {
+export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Node) => {
   let members: string[] = [];
   let current: ts.Node = node.parent;
   while (current) {
@@ -239,12 +244,11 @@ export const getDestructuredNames = (name: ts.ObjectBindingPattern): [string[], 
 
 export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isPropertyAssignment(node.parent) ||
-  ts.isShorthandPropertyAssignment(node.parent) ||
   (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
   ts.isSpreadAssignment(node.parent) ||
   ts.isArrayLiteralExpression(node.parent) ||
   ts.isExportAssignment(node.parent) ||
-  (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
+  (ts.isBindingElement(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent.parent);
 
 export const isInOpaqueExpression = (node: ts.Node): boolean =>
@@ -312,6 +316,7 @@ export const isModuleExportsAccess = (node: ts.PropertyAccessExpression) =>
 export const getImportMap = (sourceFile: ts.SourceFile) => {
   const importMap = new Map<string, string>();
   for (const statement of sourceFile.statements) {
+    // ESM
     if (ts.isImportDeclaration(statement)) {
       const importClause = statement.importClause;
       const importPath = stripQuotes(statement.moduleSpecifier.getText());
@@ -320,7 +325,24 @@ export const getImportMap = (sourceFile: ts.SourceFile) => {
         for (const element of importClause.namedBindings.elements) importMap.set(element.name.text, importPath);
       }
     }
+
+    // CommonJS
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (
+          declaration.initializer &&
+          isRequireCall(declaration.initializer) &&
+          ts.isIdentifier(declaration.name) &&
+          ts.isStringLiteral(declaration.initializer.arguments[0])
+        ) {
+          const importName = declaration.name.text;
+          const importPath = stripQuotes(declaration.initializer.arguments[0].text);
+          importMap.set(importName, importPath);
+        }
+      }
+    }
   }
+
   return importMap;
 };
 
@@ -359,6 +381,30 @@ const isMatchAlias = (expression: ts.Expression | undefined, identifier: string)
   return expression && ts.isIdentifier(expression) && expression.escapedText === identifier;
 };
 
+export function getThenBindings(callExpression: ts.CallExpression) {
+  if (!ts.isFunctionLike(callExpression.arguments[0])) return;
+  const fn = callExpression.arguments[0];
+  const param = fn.parameters[0];
+  if (!param) return;
+
+  if (ts.isIdentifier(param.name)) {
+    const paramName = param.name.escapedText;
+    const identifiers: Array<{ identifier: string; pos: number }> = [];
+    for (const node of findDescendants<ts.PropertyAccessExpression>(fn.body, ts.isPropertyAccessExpression)) {
+      if (ts.isIdentifier(node.expression) && node.expression.escapedText === paramName) {
+        identifiers.push({ identifier: String(node.name.escapedText), pos: node.name.pos });
+      }
+    }
+    if (identifiers.length > 0) return identifiers;
+  } else if (ts.isObjectBindingPattern(param.name)) {
+    return param.name.elements.map(element => {
+      const identifier = (element.propertyName ?? element.name).getText();
+      const alias = element.propertyName ? element.name.getText() : undefined;
+      return { identifier, alias, pos: element.pos };
+    });
+  }
+}
+
 export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
   const identifiers: Array<{ identifier: string; pos: number }> = [];
 
@@ -385,6 +431,15 @@ export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
           identifiers.push({ identifier, pos: element.getStart() });
         }
       }
+    } else if (
+      // Pattern: identifier.then(module => module.property)
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      isMatchAlias(node.expression.expression, identifier) &&
+      node.expression.name.escapedText === 'then'
+    ) {
+      const accessed = getThenBindings(node);
+      if (accessed) for (const acc of accessed) identifiers.push(acc);
     }
 
     ts.forEachChild(node, visit);
