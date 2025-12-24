@@ -38,6 +38,7 @@ export type PluginName =
   | 'i18next-parser'
   | 'jest'
   | 'karma'
+  | 'knex'
   | 'ladle'
   | 'lefthook'
   | 'lint-staged'
@@ -164,6 +165,7 @@ export const pluginNames = [
   'i18next-parser',
   'jest',
   'karma',
+  'knex',
   'ladle',
   'lefthook',
   'lint-staged',
