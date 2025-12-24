@@ -142,7 +142,8 @@ If requested to create a new plugin for a certain package/tool/framework:
 - Update the plugin's `types.ts`: add only relevant types, remove if unused.
 - Consult similar plugins and the tool's website to implement the plugin.
 - Update and fill out the blanks in the new files.
-- Don't forget: [run tests][18] individually first
+- Don't forget: [run tests][18] individually first.
+- Remove unused variables and empty arrays from the template.
 
 [1]: https://knip.dev
 [2]: ./packages/knip/src/types/module-graph.ts
