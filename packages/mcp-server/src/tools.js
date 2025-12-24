@@ -8,7 +8,7 @@ import { CONFIG_REVIEW_HINT } from './texts.js';
 export { ERROR_HINT } from './texts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const docsDir = join(__dirname, '../docs');
+const docsDir = join(__dirname, './docs');
 
 /**
  * @param {import('knip/session').Results} results

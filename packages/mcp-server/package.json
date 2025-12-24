@@ -11,11 +11,10 @@
     "./tools": "./src/tools.js"
   },
   "files": [
-    "src",
-    "docs"
+    "src"
   ],
   "scripts": {
-    "prepack": "cp -r ../docs/src/content/docs ./docs",
+    "prepack": "cp -r ../docs/src/content/docs ./src/docs",
     "release": "release-it -c ../../.release-it.json"
   },
   "keywords": [
