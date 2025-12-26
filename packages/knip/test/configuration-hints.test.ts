@@ -14,13 +14,10 @@ test('Provide configuration hints', async () => {
 
   assert(issues.files.has(join(cwd, 'src/entry.js')));
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'entry-top-level', identifier: '[src/entry.js]' },
-      { type: 'project-top-level', identifier: '[src/**]' },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'entry-top-level', identifier: '[src/entry.js]' },
+    { type: 'project-top-level', identifier: '[src/**]' },
+  ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -35,14 +32,11 @@ test('Provide configuration hints for patterns covered by plugins and project re
   const options = await createOptions({ cwd });
   const { counters, configurationHints } = await main(options);
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'entry-redundant', identifier: 'create-typescript-app.config.js', workspaceName: '.' },
-      { type: 'entry-redundant', identifier: 'svgo.config.mjs', workspaceName: '.' },
-      { type: 'project-redundant', identifier: 'create-typescript-app.config.js', workspaceName: '.' },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'entry-redundant', identifier: 'create-typescript-app.config.js', workspaceName: '.' },
+    { type: 'entry-redundant', identifier: 'svgo.config.mjs', workspaceName: '.' },
+    { type: 'project-redundant', identifier: 'create-typescript-app.config.js', workspaceName: '.' },
+  ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -57,13 +51,10 @@ test('No hints when user overrides plugin entry config', async () => {
   const options = await createOptions({ cwd });
   const { counters, configurationHints } = await main(options);
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'entry-redundant', identifier: 'svgo.config.js', workspaceName: '.' },
-      { type: 'entry-redundant', identifier: 'yarn.config.cjs', workspaceName: '.' },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'entry-redundant', identifier: 'svgo.config.js', workspaceName: '.' },
+    { type: 'entry-redundant', identifier: 'yarn.config.cjs', workspaceName: '.' },
+  ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,

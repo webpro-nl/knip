@@ -115,18 +115,18 @@ export class ConfigurationChief {
   }
 
   public getConfigurationHints() {
-    const hints = new Set<ConfigurationHint>();
+    const hints: ConfigurationHint[] = [];
     if (this.rawConfig) {
       if (this.workspacePackages.size > 1) {
         const entry = arrayify(this.rawConfig.entry);
         if (entry.length > 0) {
           const identifier = `[${entry[0]}${entry.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
-          hints.add({ type: 'entry-top-level', identifier });
+          hints.push({ type: 'entry-top-level', identifier });
         }
         const project = arrayify(this.rawConfig.project);
         if (project.length > 0) {
           const identifier = `[${project[0]}${project.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
-          hints.add({ type: 'project-top-level', identifier });
+          hints.push({ type: 'project-top-level', identifier });
         }
       }
     }

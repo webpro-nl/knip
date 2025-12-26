@@ -78,14 +78,11 @@ test('Unused dependencies in npm scripts', async () => {
     total: 3,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
+  ]);
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {

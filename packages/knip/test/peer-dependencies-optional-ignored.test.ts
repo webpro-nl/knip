@@ -11,7 +11,7 @@ test('Find no issues/hints if optional peerDependencies are also ignored (dev)De
   const options = await createOptions({ cwd });
   const { counters, configurationHints } = await main(options);
 
-  assert.equal(configurationHints.size, 0);
+  assert.equal(configurationHints.length, 0);
 
   assert.deepEqual(counters, {
     ...baseCounters,

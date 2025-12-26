@@ -107,12 +107,17 @@ export const finalizeConfigurationHints = (
     }
 
     if (workspaces.length === 1) {
-      results.configurationHints.add({ type: 'top-level-unconfigured', identifier: '.', size: workspaces[0].size });
+      results.configurationHints.push({ type: 'top-level-unconfigured', identifier: '.', size: workspaces[0].size });
     } else {
       const topWorkspaces = workspaces.sort((a, b) => b.size - a.size).filter(ws => ws.size > 1);
       for (const { dir, size } of topWorkspaces) {
         const identifier = toRelative(dir, options.cwd) || '.';
-        results.configurationHints.add({ type: 'workspace-unconfigured', workspaceName: identifier, identifier, size });
+        results.configurationHints.push({
+          type: 'workspace-unconfigured',
+          workspaceName: identifier,
+          identifier,
+          size,
+        });
       }
     }
   }
@@ -161,7 +166,7 @@ export const printConfigurationHints = ({
 
   if (rows.length > 0) {
     const getTitle = isTreatConfigHintsAsErrors ? getColoredTitle : getDimmedTitle;
-    console.log(getTitle('Configuration hints', configurationHints.size));
+    console.log(getTitle('Configuration hints', configurationHints.length));
     console.warn(getTableForHints(rows).toString());
   }
 

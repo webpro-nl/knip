@@ -138,7 +138,7 @@ export class IssueCollector {
       issues: this.issues,
       counters: this.counters,
       tagHints: this.tagHints,
-      configurationHints: new Set(this.configurationHints.values()),
+      configurationHints: Array.from(this.configurationHints.values()),
     };
   }
 

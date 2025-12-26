@@ -453,19 +453,19 @@ export class DependencyDeputy {
   }
 
   public getConfigurationHints() {
-    const configurationHints = new Set<ConfigurationHint>();
+    const configurationHints: ConfigurationHint[] = [];
 
     for (const [workspaceName, manifest] of this._manifests) {
       for (const identifier of manifest.unusedIgnoreDependencies) {
-        configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' });
+        configurationHints.push({ workspaceName, identifier, type: 'ignoreDependencies' });
       }
 
       for (const identifier of manifest.unusedIgnoreBinaries) {
-        configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' });
+        configurationHints.push({ workspaceName, identifier, type: 'ignoreBinaries' });
       }
 
       for (const identifier of manifest.unusedIgnoreUnresolved) {
-        configurationHints.add({ workspaceName, identifier, type: 'ignoreUnresolved' });
+        configurationHints.push({ workspaceName, identifier, type: 'ignoreUnresolved' });
       }
     }
 

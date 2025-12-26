@@ -35,5 +35,5 @@ test('Respect ignored members, including string-to-regex, show config hints (pro
     total: 4,
   });
 
-  assert.deepEqual(configurationHints, new Set());
+  assert.deepEqual(configurationHints, []);
 });
