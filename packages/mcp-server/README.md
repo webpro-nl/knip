@@ -2,8 +2,8 @@
 
 ## Knip
 
-Find unused files, dependencies, and exports in your JavaScript/TypeScript
-projects.
+The Knip MCP Server is powered by Knip: Find unused files, dependencies, and
+exports in your JavaScript/TypeScript projects.
 
 - Website: [knip.dev][1]
 - GitHub repo: [webpro-nl/knip][2]
@@ -13,7 +13,8 @@ projects.
 
 ## VS Code Extension
 
-Install the [Knip VS Code Extension][6] — it comes with the MCP Server included.
+Install the [Knip VS Code Extension][6] or [Knip Open VSX Extension][7] — it
+comes with the MCP Server included.
 
 ## MCP Server
 
@@ -51,3 +52,4 @@ All pages of the [Knip documentation][1] are available as MCP resources
 [4]: https://knip.dev/blog/for-editors-and-agents
 [5]: https://knip.dev/sponsors
 [6]: https://github.com/webpro-nl/knip/tree/main/packages/mcp-server
+[7]: https://open-vsx.org/extension/webpro/vscode-knip
