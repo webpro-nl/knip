@@ -1,6 +1,6 @@
 import { eventHandler } from 'h3';
 
-import { fn } from '~/utils/fn';
+import { fn } from '../utils/fn';
 
 export default eventHandler(event => {
   fn();
