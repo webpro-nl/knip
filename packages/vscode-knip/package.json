@@ -1,6 +1,6 @@
 {
   "name": "vscode-knip",
-  "version": "0.0.11",
+  "version": "1.0.0",
   "private": true,
   "license": "ISC",
   "repository": {
@@ -52,7 +52,8 @@
   "main": "./dist/extension.js",
   "scripts": {
     "package": "node scripts/publish.js",
-    "publish": "node scripts/publish.js --publish",
+    "release": "release-it -c ../../.release-it.json --no-npm.publish",
+    "postrelease": "node scripts/publish.js --publish",
     "vscode:prepublish": "node scripts/sync-from-mcp.js"
   },
   "dependencies": {

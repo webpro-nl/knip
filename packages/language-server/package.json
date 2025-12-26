@@ -1,6 +1,6 @@
 {
   "name": "@knip/language-server",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "exports": {
     ".": {
@@ -10,7 +10,7 @@
     "./constants": "./src/constants.js"
   },
   "scripts": {
-    "release": "npm version patch --no-git-tag-version --no-workspaces-update && pnpm publish --access public --no-git-checks"
+    "release": "release-it -c ../../.release-it.json"
   },
   "dependencies": {
     "knip": "workspace:^",

@@ -14,7 +14,7 @@
     "email": "lars@webpro.nl"
   },
   "scripts": {
-    "release": "npm version patch --no-git-tag-version --no-workspaces-update && npm publish --no-git-checks"
+    "release": "release-it -c ../../.release-it.json"
   },
   "funding": [
     {

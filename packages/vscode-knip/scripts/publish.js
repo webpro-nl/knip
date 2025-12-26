@@ -58,7 +58,7 @@ const paths = { 'knip/session': '../../knip/session.js' };
 await bundle('../knip/src/session/index.ts', 'node_modules/knip/session.js');
 await bundle('../mcp-server/src/tools.js', 'node_modules/@knip/mcp/tools.js', extSession, paths);
 await bundle('../language-server/src/index.js', 'node_modules/@knip/language-server/index.js', extSession, paths);
-await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-server'], {
+await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-server', '@knip/mcp/tools'], {
   'knip/session': './node_modules/knip/session.js',
   '@knip/mcp/tools': './node_modules/@knip/mcp/tools.js',
   '@knip/language-server': './node_modules/@knip/language-server/index.js',
@@ -68,7 +68,7 @@ const jitiSrc = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 
 const jitiDst = join(nm, 'jiti');
 cpSync(jitiSrc, jitiDst, { recursive: true, dereference: true });
 
-cpSync(join(root, '../mcp-server/docs'), join(nm, '@knip/docs'), { recursive: true });
+cpSync(join(root, '../mcp-server/src/docs'), join(nm, '@knip/mcp/docs'), { recursive: true });
 
 // Remove "type": "module" from package.json so CJS extension.js works
 const pkgPath = join(root, 'package.json');

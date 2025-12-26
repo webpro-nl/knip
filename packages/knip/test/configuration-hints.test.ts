@@ -29,3 +29,46 @@ test('Provide configuration hints', async () => {
     total: 2,
   });
 });
+
+test('Provide configuration hints for patterns covered by plugins and project redundancy', async () => {
+  const cwd = resolve('fixtures/configuration-hints-plugin');
+  const options = await createOptions({ cwd });
+  const { counters, configurationHints } = await main(options);
+
+  assert.deepEqual(
+    configurationHints,
+    new Set([
+      { type: 'entry-redundant', identifier: 'create-typescript-app.config.js', workspaceName: '.' },
+      { type: 'entry-redundant', identifier: 'svgo.config.mjs', workspaceName: '.' },
+      { type: 'project-redundant', identifier: 'create-typescript-app.config.js', workspaceName: '.' },
+    ])
+  );
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 2,
+    processed: 2,
+    total: 2,
+  });
+});
+
+test('No hints when user overrides plugin entry config', async () => {
+  const cwd = resolve('fixtures/configuration-hints-plugin-override');
+  const options = await createOptions({ cwd });
+  const { counters, configurationHints } = await main(options);
+
+  assert.deepEqual(
+    configurationHints,
+    new Set([
+      { type: 'entry-redundant', identifier: 'svgo.config.js', workspaceName: '.' },
+      { type: 'entry-redundant', identifier: 'yarn.config.cjs', workspaceName: '.' },
+    ])
+  );
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 3,
+    processed: 3,
+    total: 3,
+  });
+});

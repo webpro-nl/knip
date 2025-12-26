@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
+  "git": {
+    "commitMessage": "Release ${npm.name}@${version}",
+    "tagName": "${npm.name}@${version}"
+  },
+  "npm": {
+    "publishPackageManager": "pnpm",
+    "publishArgs": ["--no-git-checks"]
+  }
+}

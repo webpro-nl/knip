@@ -406,7 +406,7 @@ const baseWorkspaceConfigurationSchema = z.object({
 
 const partialPluginsSchema = z.partial(pluginsSchema);
 
-const workspaceConfigurationSchema = z.strictObject({
+export const workspaceConfigurationSchema = z.strictObject({
   ...baseWorkspaceConfigurationSchema.shape,
   ...partialPluginsSchema.shape,
 });

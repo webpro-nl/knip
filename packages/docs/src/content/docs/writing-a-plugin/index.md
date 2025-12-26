@@ -343,8 +343,11 @@ cd packages/knip
 pnpm create-plugin --name tool
 ```
 
-This adds source and test files and fixtures to get you started. It also adds
-the plugin to the JSON Schema and TypeScript types.
+This adds source and test files and fixtures to get you started. Keep fixtures
+tidy, remove clutter that isn't required to test the plugin properly. E.g. using
+a starterkit, script or wizard often creates more than what we need here.
+
+The script adds the plugin to the JSON Schema and type definitions.
 
 Run the test for your new plugin using one of the following commands:
 
