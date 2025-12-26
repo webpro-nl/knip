@@ -13,7 +13,7 @@ import {
   RUN_KNIP_TOOL_DESCRIPTION,
   WORKFLOW,
 } from './texts.js';
-import { getDocs, readContent } from './tools.js';
+import { getDocs, getResults, readContent } from './tools.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
