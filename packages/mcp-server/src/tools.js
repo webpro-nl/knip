@@ -7,6 +7,21 @@ import { CONFIG_REVIEW_HINT } from './texts.js';
 
 export { ERROR_HINT } from './texts.js';
 
+/**
+ * @param {unknown} error
+ * @returns {string}
+ */
+export function getErrorMessage(error) {
+  if (!(error instanceof Error)) return String(error);
+  const messages = [error.message];
+  let cause = error.cause;
+  while (cause instanceof Error) {
+    messages.push(cause.message);
+    cause = cause.cause;
+  }
+  return `${messages.join('\nCaused by: ')}\nCurrent working dir: ${process.cwd()}`;
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const docsDir = join(__dirname, './docs');
 

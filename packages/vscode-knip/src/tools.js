@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { REQUEST_RESULTS } from '@knip/language-server/constants';
-import { buildResults, ERROR_HINT, getDocs, getResults } from '@knip/mcp/tools';
+import { buildResults, ERROR_HINT, getDocs, getErrorMessage, getResults } from '@knip/mcp/tools';
 import { KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import * as vscode from 'vscode';
 
@@ -13,11 +13,21 @@ import * as vscode from 'vscode';
 /** @type {LanguageClient | undefined} */
 let languageClient;
 
+/** @type {vscode.LogOutputChannel | undefined} */
+let outputChannel;
+
 /**
  * @param {LanguageClient | undefined} client
  */
 export function setLanguageClient(client) {
   languageClient = client;
+}
+
+/**
+ * @param {vscode.LogOutputChannel} channel
+ */
+export function setOutputChannel(channel) {
+  outputChannel = channel;
 }
 
 /**
@@ -60,17 +70,16 @@ class KnipConfigureTool {
       const configFilePath = findKnipConfig(cwd);
 
       if (configFilePath && languageClient && !languageClient.needsStart()) {
-        try {
-          const results = await languageClient.sendRequest(REQUEST_RESULTS);
-          if (results) result = buildResults(results, { cwd, configFilePath });
-        } catch {}
+        const results = await languageClient.sendRequest(REQUEST_RESULTS);
+        if (results) result = buildResults(results, { cwd, configFilePath });
       }
 
       if (!result) result = await getResults(cwd);
 
       return new vscode.LanguageModelToolResult([new vscode.LanguageModelTextPart(JSON.stringify(result))]);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = getErrorMessage(error);
+      outputChannel?.error(`Error running knip: ${message}`);
       const result = { error: message, hint: ERROR_HINT };
       return new vscode.LanguageModelToolResult([new vscode.LanguageModelTextPart(JSON.stringify(result))]);
     }

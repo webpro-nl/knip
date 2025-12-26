@@ -13,7 +13,7 @@ import {
   RUN_KNIP_TOOL_DESCRIPTION,
   WORKFLOW,
 } from './texts.js';
-import { getDocs, getResults, readContent } from './tools.js';
+import { getDocs, getErrorMessage, getResults, readContent } from './tools.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
@@ -95,7 +95,7 @@ class MCP {
           const results = await getResults(cwd);
           return { content: [{ type: 'text', text: JSON.stringify(results) }] };
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
+          const message = getErrorMessage(error);
           return {
             content: [{ type: 'text', text: JSON.stringify({ error: message, hint: ERROR_HINT }) }],
             isError: true,
