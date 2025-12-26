@@ -31,9 +31,15 @@ export function buildResults(results, options) {
  * @param {string} cwd
  */
 export async function getResults(cwd) {
-  const options = await createOptions({ cwd, isSession: true, isUseTscFiles: false });
-  const session = await createSession(options);
-  return buildResults(session.getResults(), options);
+  const originalCwd = process.cwd();
+  try {
+    process.chdir(cwd);
+    const options = await createOptions({ cwd, isSession: true, isUseTscFiles: false });
+    const session = await createSession(options);
+    return buildResults(session.getResults(), options);
+  } finally {
+    process.chdir(originalCwd);
+  }
 }
 
 /** @param {string} filePath */
