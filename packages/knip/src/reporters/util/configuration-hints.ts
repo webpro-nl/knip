@@ -87,7 +87,7 @@ const hintTypesOrder: ConfigurationHintType[][] = [
   ['package-entry'],
 ];
 
-export interface ProcessedHint extends ConfigurationHint {
+interface ProcessedHint extends ConfigurationHint {
   message: string;
 }
 
