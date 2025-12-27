@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/svelte-ts",
+  "type": "module",
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "*",
+    "@sveltejs/kit": "*",
+    "svelte": "*",
+    "vite": "*"
+  }
+}

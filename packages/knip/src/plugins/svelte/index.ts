@@ -12,7 +12,7 @@ const enablers = ['svelte'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['svelte.config.js', ...viteConfig];
+const entry = ['svelte.config.{js,mjs,ts,cjs,mts,cts}', ...viteConfig];
 
 const production = [
   'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',

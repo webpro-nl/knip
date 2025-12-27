@@ -21,3 +21,21 @@ test('Use compilers (svelte)', async () => {
     total: 16,
   });
 });
+
+test('Detect svelte.config.ts', async () => {
+  const cwd = resolve('fixtures/plugins/svelte-ts');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.equal(issues.devDependencies['package.json']?.['@sveltejs/adapter-auto'], undefined);
+  assert(issues.devDependencies['package.json']['@sveltejs/kit']);
+  assert(issues.devDependencies['package.json']['svelte']);
+  assert(issues.devDependencies['package.json']['vite']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 3,
+    processed: 2,
+    total: 2,
+  });
+});
