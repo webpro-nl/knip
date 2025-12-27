@@ -5,7 +5,6 @@ import type { DependencyDeputy } from '../DependencyDeputy.js';
 import { createGraphExplorer } from '../graph-explorer/explorer.js';
 import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.js';
 import type { IssueCollector } from '../IssueCollector.js';
-import type { IssueFixer } from '../IssueFixer.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import traceReporter from '../reporters/trace.js';
 import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
@@ -22,7 +21,6 @@ interface AnalyzeOptions {
   deputy: DependencyDeputy;
   entryPaths: Set<string>;
   factory: PrincipalFactory;
-  fixer: IssueFixer;
   graph: ModuleGraph;
   streamer: ConsoleStreamer;
   unreferencedFiles: Set<string>;
