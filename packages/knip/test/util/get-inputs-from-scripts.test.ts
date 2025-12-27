@@ -64,6 +64,7 @@ test('getInputsFromScripts (node --test)', () => {
 
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toDeferResolve('script.js')]);
+  t('node -r program -- node script.js', [toBinary('node'), toDeferResolve('script.js')], pkgScripts);
   t('node -r package/script', [toBinary('node'), toDeferResolve('package/script')]);
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toDeferResolveEntry('script', opt), toDeferResolve('pkg1'), toDeferResolve('pkg2')]);
@@ -206,6 +207,8 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --package=pkg-a dlx pkg', [toDependency('pkg', opt), toDependency('pkg-a', opt)]);
   t('pnpm --recursive --parallel test -- --sequence.seed=1700316221712', []);
   t('pnpm program script.js', [], pkgScripts);
+  t('pnpm program -- node script.js', [toBinary('node'), toDeferResolve('script.js')], pkgScripts);
+  t('pnpm program node script.js', [toBinary('node'), toDeferResolve('script.js')], pkgScripts);
   t('pnpm --silent program script.js', [], pkgScripts);
   t('pnpm --silent run program script.js', [], pkgScripts);
   t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, []);
