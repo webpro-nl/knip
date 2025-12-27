@@ -117,7 +117,7 @@ export const createInputHandler =
     }
 
     const baseDir = input.dir ?? dirname(containingFilePath);
-    const filePath = isAbsolute(specifier) ? specifier : join(baseDir, specifier);
+    const filePath = isAbsolute(specifier) || specifier.startsWith('#') ? specifier : join(baseDir, specifier);
     const resolvedFilePath = _resolveSync(filePath, baseDir);
 
     if (resolvedFilePath && isInternal(resolvedFilePath)) {

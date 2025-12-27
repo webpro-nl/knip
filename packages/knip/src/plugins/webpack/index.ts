@@ -119,7 +119,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
       if (entries.length === 0 && opts.context) entries.push('./src/index');
 
       for (const entry of entries) {
-        if (isInternal(entry)) {
+        if (isInternal(entry) || entry.startsWith('#')) {
           const dir = opts.context ? opts.context : cwd;
           const input = isProduction
             ? toDeferResolveProductionEntry(entry, { dir })
