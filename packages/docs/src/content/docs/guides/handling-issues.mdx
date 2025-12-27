@@ -290,6 +290,45 @@ like a plugin could solve it, a last resort is to use [ignoreDependencies][22].
 If a binary (or "executable") is referenced you'll want to use `ignoreBinaries`
 instead. See [unlisted binaries][30].
 
+#### Conditional or dynamic dependencies
+
+Dependencies added conditionally in configuration files may not be detected by
+Knip. This happens because Knip loads and executes config files, and conditional
+logic may evaluate differently during analysis.
+
+For example, this Playwright configuration conditionally adds a reporter:
+
+```ts title="playwright.config.ts"
+import { defineConfig } from '@playwright/test';
+
+const reporters: any[] = [['list']];
+if (process.env.REPORT_PORTAL_ENABLED) {
+  reporters.push(['@reportportal/agent-js-playwright', config]);
+}
+
+export default defineConfig({
+  reporter: reporters,
+});
+```
+
+If `process.env.REPORT_PORTAL_ENABLED` evaluates to `false` when Knip runs, the
+`@reportportal/agent-js-playwright` dependency won't be detected and may be
+reported as unused.
+
+This limitation exists because Knip executes configuration files to parse them.
+While it's possible to parse configuration files statically using AST (Abstract
+Syntax Tree) analysis, this approach becomes complex very quickly and most of
+the time it is easier to use the [`ignoreDependencies`][22] configuration option
+for conditionals.
+
+```json title="knip.json"
+{
+  "ignoreDependencies": ["@reportportal/agent-js-playwright"]
+}
+```
+
+This pattern can be applied to any plugin that loads configuration files.
+
 ### Type Definition Packages
 
 #### Bundled types
@@ -510,6 +549,7 @@ non-standard consumption of your exports? Here's an example:
       resolveComponent: components => components.Orange,
     });
     ```
+
   </TabItem>
 
   <TabItem label="components.js">
@@ -621,13 +661,15 @@ issue on GitHub. It'll make Knip better for everyone!
 [22]: ../reference/configuration.md#ignoredependencies
 [23]: ../explanations/plugins.md#entry-files
 [24]: ../explanations/entry-files.md#plugins
-[25]: ../reference/faq.md#why-cant-i-use-path-aliases-to-reference-other-workspaces
+[25]:
+  ../reference/faq.md#why-cant-i-use-path-aliases-to-reference-other-workspaces
 [26]: ../features/integrated-monorepos.md
 [27]: #missing-or-incomplete-plugin
 [28]: #unrecognized-reference
 [29]: #type-definition-packages
 [30]: #unlisted-binaries
-[31]: https://github.com/webpro-nl/knip/blob/b70958a58ea255ee7a7831e404786da807ca93d7/packages/knip/src/constants.ts#L37-L139
+[31]:
+  https://github.com/webpro-nl/knip/blob/b70958a58ea255ee7a7831e404786da807ca93d7/packages/knip/src/constants.ts#L37-L139
 [32]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
 [33]: #template-strings
 [34]: #unrecognized-path-aliases
