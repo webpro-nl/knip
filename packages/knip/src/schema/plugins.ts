@@ -17,6 +17,7 @@ export const pluginsSchema = z.object({
   astro: pluginSchema,
   'astro-db': pluginSchema,
   ava: pluginSchema,
+  'aws-cdk': pluginSchema,
   babel: pluginSchema,
   biome: pluginSchema,
   bumpp: pluginSchema,
