@@ -155,7 +155,7 @@ export interface Plugin {
   enablers?: IgnorePatterns | string;
   isEnabled?: IsPluginEnabled;
   isRootOnly?: boolean;
-  config?: string[];
+  config?: string[] | ((options: { cwd: string }) => string[]);
   entry?: string[];
   production?: string[];
   project?: string[];

@@ -10,6 +10,7 @@ import type {
   GetInputsFromScriptsPartial,
   GetSourceFile,
   HandleInput,
+  Plugin,
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { ConfigurationHint } from './types/issues.js';
@@ -186,13 +187,16 @@ export class WorkspaceWorker {
     return [patterns, this.negatedWorkspacePatterns].flat();
   }
 
+  private getPluginConfig(plugin: Plugin) {
+    return typeof plugin.config === 'function' ? plugin.config({ cwd: this.dir }) : plugin.config;
+  }
+
   getPluginConfigPatterns() {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of PluginEntries) {
       const pluginConfig = this.getConfigForPlugin(pluginName);
       if (this.enabledPluginsMap[pluginName] && pluginConfig) {
-        const { config } = pluginConfig;
-        patterns.push(...(config ?? plugin.config ?? []));
+        patterns.push(...(pluginConfig.config ?? this.getPluginConfig(plugin) ?? []));
       }
     }
     return patterns;
@@ -234,7 +238,7 @@ export class WorkspaceWorker {
   private getConfigurationFilePatterns(pluginName: PluginName) {
     const plugin = Plugins[pluginName];
     const pluginConfig = this.getConfigForPlugin(pluginName);
-    return pluginConfig.config ?? plugin.config ?? [];
+    return pluginConfig.config ?? this.getPluginConfig(plugin) ?? [];
   }
 
   public async runPlugins() {
