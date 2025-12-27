@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/knex",
+  "dependencies": {
+    "knex": "*",
+    "pg": "*"
+  }
+}

@@ -37,6 +37,7 @@ import { default as husky } from './husky/index.js';
 import { default as i18nextParser } from './i18next-parser/index.js';
 import { default as jest } from './jest/index.js';
 import { default as karma } from './karma/index.js';
+import { default as knex } from './knex/index.js';
 import { default as ladle } from './ladle/index.js';
 import { default as lefthook } from './lefthook/index.js';
 import { default as lintStaged } from './lint-staged/index.js';
@@ -163,6 +164,7 @@ export const Plugins = {
   'i18next-parser': i18nextParser,
   jest,
   karma,
+  knex,
   ladle,
   lefthook,
   'lint-staged': lintStaged,

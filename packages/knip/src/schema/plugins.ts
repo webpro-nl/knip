@@ -51,6 +51,7 @@ export const pluginsSchema = z.object({
   'i18next-parser': pluginSchema,
   jest: pluginSchema,
   karma: pluginSchema,
+  knex: pluginSchema,
   ladle: pluginSchema,
   lefthook: pluginSchema,
   'lint-staged': pluginSchema,

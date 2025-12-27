@@ -489,6 +489,10 @@
           "title": "karma plugin configuration (https://knip.dev/reference/plugins/karma)",
           "$ref": "#/definitions/plugin"
         },
+        "knex": {
+          "title": "knex plugin configuration (https://knip.dev/reference/plugins/knex)",
+          "$ref": "#/definitions/plugin"
+        },
         "ladle": {
           "title": "ladle plugin configuration (https://knip.dev/reference/plugins/ladle)",
           "$ref": "#/definitions/plugin"
