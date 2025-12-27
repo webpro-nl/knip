@@ -4,3 +4,9 @@ tasks:
     command: 'vite-node $workspaceRoot/tools/linters/lint-readme.ts -- $projectRoot'
   start.prod:
     command: 'vitest ./server/server.ts'
+  build:
+    command:
+      - 'tsx'
+      - '$projectRoot/tools/build.ts'
+      - '--'
+      - '--verbose'
