@@ -17,10 +17,12 @@
     "tsuppy": "tsup --config tsup.cool.json",
     "serve": "http-server",
     "bun": "bun run ./entry",
+    "approuter": "node node_modules/@sap/approuter/approuter.js",
     "@ignore": "ignored",
     "#ignore": "ignored"
   },
   "dependencies": {
+    "@sap/approuter": "*",
     "express": "*",
     "package-cli": "*"
   },

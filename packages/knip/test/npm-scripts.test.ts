@@ -90,11 +90,12 @@ test('Unused dependencies in npm scripts (strict)', async () => {
   const { issues, counters } = await main(options);
   assert(issues.dependencies['package.json']['express']);
   assert(issues.dependencies['package.json']['unused-peer-dep']);
+  assert(issues.dependencies['package.json']['@sap/approuter']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
-    dependencies: 2,
+    dependencies: 3,
     processed: 2,
     total: 3,
   });
