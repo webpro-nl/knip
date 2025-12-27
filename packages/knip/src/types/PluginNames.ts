@@ -57,6 +57,7 @@ export type PluginName =
   | 'next'
   | 'next-intl'
   | 'next-mdx'
+  | 'nitro'
   | 'node'
   | 'node-modules-inspector'
   | 'nodemon'
@@ -183,6 +184,7 @@ export const pluginNames = [
   'next',
   'next-intl',
   'next-mdx',
+  'nitro',
   'node',
   'node-modules-inspector',
   'nodemon',
