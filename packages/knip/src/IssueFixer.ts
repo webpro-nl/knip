@@ -22,7 +22,7 @@ export const fix = async (issues: Issues, options: MainOptions) => {
   }
 };
 
-export class IssueFixer {
+class IssueFixer {
   options: MainOptions;
 
   constructor(options: MainOptions) {
