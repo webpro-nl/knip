@@ -30,9 +30,9 @@ export const scriptBodies: SyncCompilerFn = (text: string) => {
 };
 
 // Extract paths as imports from frontmatter for given keys (e.g., 'layout')
-const frontmatterMatcher = /---[\s\S]*?---/;
+export const frontmatterMatcher = /^---\r?\n([\s\S]*?)\r?\n---/;
 export const importsWithinFrontmatter = (text: string, keys: string[] = []) => {
-  const frontmatter = text.match(frontmatterMatcher)?.[0];
+  const frontmatter = text.match(frontmatterMatcher)?.[1];
   if (!frontmatter) return '';
 
   const imports = keys.flatMap(key => {

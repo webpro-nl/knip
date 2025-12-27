@@ -13,7 +13,7 @@ test('Exclude imports from tagged template literals', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
