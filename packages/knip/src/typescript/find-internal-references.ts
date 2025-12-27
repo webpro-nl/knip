@@ -2,9 +2,6 @@ import ts from 'typescript';
 import type { Export, ExportMember } from '../types/module-graph.js';
 import { isIdChar } from '../util/regex.js';
 
-export const isType = (item: Export | ExportMember) =>
-  item.type === 'type' || item.type === 'interface' || item.type === 'enum';
-
 const findInFlow = (flowNode: any, targetSymbol: ts.Symbol): boolean => {
   if (!flowNode?.node) return false;
   if (flowNode.node.symbol === targetSymbol) return true;

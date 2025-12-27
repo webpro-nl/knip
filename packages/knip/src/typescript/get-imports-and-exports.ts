@@ -25,7 +25,7 @@ import {
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
 } from './ast-helpers.js';
-import { findInternalReferences, isType } from './find-internal-references.js';
+import { findInternalReferences } from './find-internal-references.js';
 import { getImportsFromPragmas } from './pragmas/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
