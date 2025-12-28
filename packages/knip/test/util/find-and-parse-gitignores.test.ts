@@ -83,12 +83,15 @@ test('findAndParseGitignores (git worktree with .git file)', async () => {
   const gitignore = await findAndParseGitignores(cwd);
   // With a .git file (worktree), should NOT traverse to ancestor directories
   // (contrast with other tests that include ancestor gitignore files like '../../.gitignore')
+  // Should also correctly find info/exclude via the gitdir reference in the .git file
   assert.deepEqual(gitignore, {
-    gitignoreFiles: ['.gitignore', 'subdir/.gitignore'],
+    gitignoreFiles: ['../mock-git-dir/info/exclude', '.gitignore', 'subdir/.gitignore'],
     ignores: new Set([
       '.git',
       '**/node_modules/**',
       '.yarn',
+      '**/worktree-exclude-ignored',
+      '**/worktree-exclude-ignored/**',
       '**/worktree-ignored',
       '**/worktree-ignored/**',
       'subdir/**/subdir-ignored',
