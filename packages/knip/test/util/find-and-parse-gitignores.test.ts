@@ -77,3 +77,43 @@ test('findAndParseGitignores (/a/b', async () => {
     unignores: [],
   });
 });
+
+test('findAndParseGitignores (git worktree with .git file)', async () => {
+  const cwd = resolve('fixtures/glob-worktree/root');
+  const gitignore = await findAndParseGitignores(cwd);
+  // With a .git file (worktree), should NOT traverse to ancestor directories
+  // (contrast with other tests that include ancestor gitignore files like '../../.gitignore')
+  assert.deepEqual(gitignore, {
+    gitignoreFiles: ['.gitignore', 'subdir/.gitignore'],
+    ignores: new Set([
+      '.git',
+      '**/node_modules/**',
+      '.yarn',
+      '**/worktree-ignored',
+      '**/worktree-ignored/**',
+      'subdir/**/subdir-ignored',
+      'subdir/**/subdir-ignored/**',
+    ]),
+    unignores: [],
+  });
+});
+
+test('findAndParseGitignores (git worktree with .git file in ancestor)', async () => {
+  const cwd = resolve('fixtures/glob-worktree/root/subdir');
+  const gitignore = await findAndParseGitignores(cwd);
+  // Running from subdirectory within worktree - should stop at ancestor .git file
+  // and NOT continue to real ancestor directories outside the worktree
+  assert.deepEqual(gitignore, {
+    gitignoreFiles: ['../.gitignore', '.gitignore'],
+    ignores: new Set([
+      '.git',
+      '**/node_modules/**',
+      '.yarn',
+      '**/worktree-ignored',
+      '**/worktree-ignored/**',
+      '**/subdir-ignored',
+      '**/subdir-ignored/**',
+    ]),
+    unignores: [],
+  });
+});
