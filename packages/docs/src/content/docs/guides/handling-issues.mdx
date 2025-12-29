@@ -316,7 +316,7 @@ If `process.env.REPORT_PORTAL_ENABLED` evaluates to `false` when Knip runs, the
 reported as unused.
 
 This limitation exists because Knip executes configuration files to parse them.
-While it's possible to parse configuration files statically using AST (Abstract
+While Knip can parse configuration files statically using AST (Abstract
 Syntax Tree) analysis, this approach becomes complex very quickly and most of
 the time it is easier to use the [`ignoreDependencies`][22] configuration option
 for conditionals.
