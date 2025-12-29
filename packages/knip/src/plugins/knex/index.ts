@@ -1,9 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.js';
-import type ts from 'typescript';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { type Input, toDependency, toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { KnexConfig } from './types.js';
-import { clientToPackages, getKnexClients } from './helpers.js';
+import { clientToPackages } from './helpers.js';
 
 // https://knexjs.org
 
@@ -35,26 +34,13 @@ const processKnexConfig = (config: KnexConfig): Input[] => {
 };
 
 const resolveConfig: ResolveConfig<KnexConfig | Record<string, KnexConfig>> = config => {
-  if ('client' in config && config.client) {
-    return processKnexConfig(config as KnexConfig);
-  }
+  const configs = 'client' in config && config.client
+    ? [config as KnexConfig]
+    : Object.values(config as Record<string, KnexConfig>);
 
-  const inputs: Input[] = [];
-  const envConfigs = config as Record<string, KnexConfig>;
-  for (const key in envConfigs) {
-    const envConfig = envConfigs[key];
-    if (typeof envConfig === 'object' && envConfig !== null) {
-      inputs.push(...processKnexConfig(envConfig));
-    }
-  }
-  return inputs;
-};
-
-const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
-  const clients = getKnexClients(sourceFile);
-  const packages = clients.flatMap(client => clientToPackages(client));
-  const uniquePackages = [...new Set(packages)];
-  return uniquePackages.map(pkg => toDependency(pkg, { optional: true }));
+  return configs.flatMap(cfg =>
+    typeof cfg === 'object' && cfg !== null ? processKnexConfig(cfg) : []
+  );
 };
 
 const plugin: Plugin = {
@@ -63,7 +49,6 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
-  resolveFromAST,
 };
 
 export default plugin;
