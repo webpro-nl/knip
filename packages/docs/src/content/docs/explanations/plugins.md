@@ -73,7 +73,7 @@ export default defineConfig({
 });
 ```
 
-The Vitest plugin reads this configuration and return two dependencies:
+The Vitest plugin reads this configuration and returns two dependencies:
 
 - `@vitest/coverage-istanbul`
 - `vitest-environment-happy-dom`
