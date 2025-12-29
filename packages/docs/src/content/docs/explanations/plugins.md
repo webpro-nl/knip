@@ -283,36 +283,11 @@ automatically added as `entry` files for Knip to **statically** resolve the
 
 Additionally, `./setup-tests.ts` will be added as an `entry` file.
 
-## Conditional and dynamic dependencies
+:::note
 
-Plugins load and execute configuration files to find dependencies. However, dependencies added through conditional logic may not be detected if the condition evaluates differently during Knip's analysis.
+When plugins dynamically load configuration files, conditional dependencies may not be detected if the condition evaluates differently during analysis. See [conditional or dynamic dependencies][10] for details and workarounds.
 
-For example, this Playwright configuration conditionally adds a reporter:
-
-```ts title="playwright.config.ts"
-import { defineConfig } from '@playwright/test';
-
-const reporters: any[] = [['list']];
-if (process.env.REPORT_PORTAL_ENABLED) {
-  reporters.push(['@reportportal/agent-js-playwright', config]);
-}
-
-export default defineConfig({
-  reporter: reporters
-});
-```
-
-If `process.env.REPORT_PORTAL_ENABLED` evaluates to `false` when Knip runs, the `@reportportal/agent-js-playwright` dependency won't be detected and may be reported as unused.
-
-This limitation exists because Knip executes configuration files to parse them. While it's possible to parse configuration files statically using AST (Abstract Syntax Tree) analysis, this approach becomes complex very quickly and most of the time it is easier to use the [`ignoreDependencies`][10] configuration option for conditionals.
-
-```json title="knip.json"
-{
-  "ignoreDependencies": ["@reportportal/agent-js-playwright"]
-}
-```
-
-This pattern can be applied to any plugin that loads configuration files.
+:::
 
 ## Command-Line Arguments
 
@@ -348,4 +323,4 @@ Plugins are configured with two distinct types of files:
 [7]: ../reference/plugins/eslint.md
 [8]: ../reference/plugins/vitest.md
 [9]: ../features/script-parser.md
-[10]: ../reference/configuration.md#ignoredependencies
+[10]: ../guides/handling-issues.mdx#conditional-or-dynamic-dependencies
