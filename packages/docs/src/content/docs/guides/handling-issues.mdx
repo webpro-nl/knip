@@ -315,7 +315,7 @@ If `process.env.REPORT_PORTAL_ENABLED` evaluates to `false` when Knip runs, the
 `@reportportal/agent-js-playwright` dependency won't be detected and may be
 reported as unused.
 
-This limitation exists because Knip executes configuration files to parse them.
+This limitation exists because Knip executes configuration files to parse their exported value.
 While Knip can parse configuration files statically using AST (Abstract
 Syntax Tree) analysis, this approach becomes complex very quickly and most of
 the time it is easier to use the [`ignoreDependencies`][22] configuration option
