@@ -56,7 +56,8 @@ for await (const dir of directories) {
     const frontmatter = u('yaml', `title: ${title}\nsidebar:\n  hidden: true`);
 
     const defaults: Record<string, string[]> = {};
-    if (config && config.length > 0) defaults.config = config;
+    const configFiles = typeof config === 'function' ? config({ cwd: pluginDir }) : config;
+    if (configFiles && configFiles.length > 0) defaults.config = configFiles;
     if (entry && entry.length > 0) defaults.entry = entry;
     if (docs?.entry && docs.entry.length > 0) defaults.entry = [...(defaults.entry ?? []), ...docs.entry];
     if (production && production.length > 0) defaults.entry = [...(defaults.entry ?? []), ...production];
