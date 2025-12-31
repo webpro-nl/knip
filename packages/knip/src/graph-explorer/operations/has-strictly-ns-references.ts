@@ -8,10 +8,15 @@ import {
 
 export const hasStrictlyNsReferences = (
   graph: ModuleGraph,
+  filePath: string,
   importsForExport: ImportMaps | undefined,
-  identifier: string
+  identifier: string,
+  seenFiles = new Set<string>()
 ): [boolean, string?] => {
   if (!importsForExport) return [false];
+
+  if (seenFiles.has(filePath)) return [false];
+  seenFiles.add(filePath);
 
   let foundNamespace: string | undefined;
 
@@ -53,7 +58,7 @@ export const hasStrictlyNsReferences = (
     for (const filePath of sources) {
       const file = graph.get(filePath);
       if (!file?.imported) continue;
-      const result = hasStrictlyNsReferences(graph, file.imported, nextId);
+      const result = hasStrictlyNsReferences(graph, filePath, file.imported, nextId, seenFiles);
       if (result[0] === false) return result;
       if (propagateNamespace && result[1]) foundNamespace = result[1];
     }
