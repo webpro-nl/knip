@@ -294,6 +294,45 @@ Some packages have the same name as a Node.js builtin (for instance `buffer` or
 **Solution**: if Knip reports such a dependency as unused, add it to
 [ignoreDependencies][22].
 
+#### Conditional or dynamic dependencies
+
+Dependencies added conditionally in configuration files may not be detected by
+Knip. This happens because Knip loads and executes config files, and conditional
+logic may evaluate differently during analysis.
+
+For example, this Playwright configuration conditionally adds a reporter:
+
+```ts title="playwright.config.ts"
+import { defineConfig } from '@playwright/test';
+
+const reporters: any[] = [['list']];
+if (process.env.REPORT_PORTAL_ENABLED) {
+  reporters.push(['@reportportal/agent-js-playwright', config]);
+}
+
+export default defineConfig({
+  reporter: reporters,
+});
+```
+
+If `process.env.REPORT_PORTAL_ENABLED` evaluates to `false` when Knip runs, the
+`@reportportal/agent-js-playwright` dependency won't be detected and may be
+reported as unused.
+
+This limitation exists because Knip executes configuration files to parse their exported value.
+While Knip can parse configuration files statically using AST (Abstract
+Syntax Tree) analysis, this approach becomes complex very quickly and most of
+the time it is easier to use the [`ignoreDependencies`][22] configuration option
+for conditionals.
+
+```json title="knip.json"
+{
+  "ignoreDependencies": ["@reportportal/agent-js-playwright"]
+}
+```
+
+This pattern can be applied to any plugin that loads configuration files.
+
 ### Type Definition Packages
 
 #### Bundled types
