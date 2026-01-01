@@ -100,6 +100,7 @@ import { default as svgr } from './svgr/index.js';
 import { default as swc } from './swc/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
+import { default as tanstackRouter } from './tanstack-router/index.js';
 import { default as taskfile } from './taskfile/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
@@ -226,6 +227,7 @@ export const Plugins = {
   swc,
   syncpack,
   tailwind,
+  'tanstack-router': tanstackRouter,
   taskfile,
   travis,
   'ts-node': tsNode,

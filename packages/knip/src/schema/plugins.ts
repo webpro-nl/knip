@@ -114,6 +114,7 @@ export const pluginsSchema = z.object({
   swc: pluginSchema,
   syncpack: pluginSchema,
   tailwind: pluginSchema,
+  'tanstack-router': pluginSchema,
   taskfile: pluginSchema,
   travis: pluginSchema,
   'ts-node': pluginSchema,
