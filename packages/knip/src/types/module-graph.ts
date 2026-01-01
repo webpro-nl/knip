@@ -52,9 +52,9 @@ export interface Export extends Position {
   readonly type: SymbolType;
   readonly members: ExportMember[];
   readonly jsDocTags: Tags;
-  self: [number, boolean];
+  hasRefsInFile: boolean;
+  referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
-  symbol: undefined | ts.Symbol;
   readonly isReExport: boolean;
 }
 
@@ -64,9 +64,8 @@ export interface ExportMember extends Position {
   readonly fix: Fix;
   readonly jsDocTags: Tags;
   readonly flags: number;
-  self: [number, boolean];
-  symbol: undefined | ts.Symbol;
-};
+  hasRefsInFile: boolean;
+}
 
 export type ExportMap = Map<Identifier, Export>;
 

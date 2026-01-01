@@ -22,6 +22,16 @@ function setLogger(log: typeof logger): void {
   log;
 }
 
+export type UnusedTypeInUnusedExport = { id: number };
+
+export interface UnusedInterface {
+  api: UnusedTypeInUnusedExport;
+}
+
+export class UnusedClass {}
+
+export type UnusedTypeWithClass = typeof UnusedClass;
+
 const obj = {
   destrRefObj: 1,
 };

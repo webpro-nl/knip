@@ -286,15 +286,20 @@ export const isImportSpecifier = (node: ts.Node) =>
   ts.isImportClause(node.parent) ||
   ts.isNamespaceImport(node.parent);
 
-const isInExportedNode = (node: ts.Node): boolean => {
-  if (getExportKeywordNode(node)) return true;
-  return node.parent ? isInExportedNode(node.parent) : false;
+const getContainingExportDeclaration = (node: ts.Node): ts.Node | undefined => {
+  if (getExportKeywordNode(node)) return node;
+  return node.parent ? getContainingExportDeclaration(node.parent) : undefined;
 };
 
-export const isReferencedInExport = (node: ts.Node) => {
-  if (ts.isTypeQueryNode(node.parent) && isInExportedNode(node.parent.parent)) return true;
-  if (ts.isTypeReferenceNode(node.parent) && isInExportedNode(node.parent.parent)) return true;
-  return false;
+/** Returns the identifier of the containing export, or undefined if not in an export */
+export const isReferencedInExport = (node: ts.Node): string | undefined => {
+  const parent = node.parent;
+  if ((ts.isTypeQueryNode(parent) || ts.isTypeReferenceNode(parent)) && parent.parent) {
+    const exportDecl = getContainingExportDeclaration(parent.parent);
+    // @ts-expect-error name may not exist on all node types
+    if (exportDecl) return exportDecl.name?.getText();
+  }
+  return undefined;
 };
 
 export const getExportKeywordNode = (node: ts.Node) =>
