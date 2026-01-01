@@ -181,10 +181,8 @@ export class LanguageServer {
           : path.resolve(this.cwd ?? process.cwd(), config.configFilePath)
         : undefined;
 
-      if (configFilePath) {
-        this.cwd = path.dirname(configFilePath);
-        process.chdir(this.cwd);
-      }
+      if (configFilePath) this.cwd = path.dirname(configFilePath);
+      if (this.cwd) process.chdir(this.cwd);
 
       this.connection.console.log('Creating options');
       const options = await createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });

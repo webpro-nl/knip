@@ -16,6 +16,7 @@ JavaScript and TypeScript projects.
 - Verify your claims, do not make assumptions after failed actions (like a file
   read or fetched resource/URL). Inform the user.
 - Don't add comments, unless explicitly asked for.
+- Performance is key, both high level (design) and low level (impl).
 - For features and issues concerning the module graph, make sure to consult
   [ModuleGraph type definitions][2].
 
@@ -101,6 +102,7 @@ There are plenty of directories with fixtures in `packages/knip/fixtures`.
 - Don't use "foo" or vague names. One fixture should consist of descriptive file
   and variable names like `module.ts` and `barrel.ts`, or build upon a "theme"
   such as fruits or animals to indicate relation/hierarchy.
+- Use empty files when possible.
 - For debugging, it might be useful to run Knip from the fixture directory and
   see output in terminal:
 
@@ -144,6 +146,8 @@ If requested to create a new plugin for a certain package/tool/framework:
 - Update and fill out the blanks in the new files.
 - Don't forget: [run tests][18] individually first.
 - Remove unused variables and empty arrays from the template.
+- Consider `resolveFromAST` only for plugin-specific custom needs (core takes
+  care of module resolution, imports, exports, external dependencies).
 
 [1]: https://knip.dev
 [2]: ./packages/knip/src/types/module-graph.ts

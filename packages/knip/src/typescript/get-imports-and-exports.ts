@@ -25,7 +25,7 @@ import {
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
 } from './ast-helpers.js';
-import { findInternalReferences, isType } from './find-internal-references.js';
+import { findInternalReferences } from './find-internal-references.js';
 import { getImportsFromPragmas } from './pragmas/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -529,7 +529,7 @@ const getImportsAndExports = (
   // and if it's referenced in an exported type and therefore should be exported with it (*)
   for (const item of exports.values()) {
     // TODO Reconsider this messy logic in AST visitors + `isReferencedInExport` + `findInternalReferences`
-    if (!isType(item) && item.symbol && referencedSymbolsInExport.has(item.symbol)) {
+    if (item.symbol && referencedSymbolsInExport.has(item.symbol)) {
       item.self = [1, true];
     } else {
       const isBindingElement = item.symbol?.valueDeclaration && ts.isBindingElement(item.symbol.valueDeclaration);

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
+  "extends": "../../.release-it.json",
+  "npm": {
+    "publish": false
+  },
+  "hooks": {
+    "after:bump": "node scripts/publish.js --publish"
+  }
+}

@@ -1,5 +1,6 @@
 // biome-ignore-all lint/suspicious/noConsole: ignore
-import { main } from './index.js';
+import { fix } from './IssueFixer.js';
+import { run } from './run.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
 import parseArgs, { helpText } from './util/cli-arguments.js';
 import { createOptions } from './util/create-options.js';
@@ -22,7 +23,7 @@ try {
   throw error;
 }
 
-const run = async () => {
+const main = async () => {
   try {
     if (args.help) {
       console.log(helpText);
@@ -36,8 +37,9 @@ const run = async () => {
 
     const options = await createOptions({ args });
 
-    const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs, enabledPlugins } =
-      await main(options);
+    const { results } = await run(options);
+
+    const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs, enabledPlugins } = results;
 
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
@@ -62,6 +64,8 @@ const run = async () => {
     };
 
     const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
+
+    if (options.isFix) await fix(finalData.issues, options);
 
     await runReporters(args.reporter ?? ['symbols'], finalData);
 
@@ -90,7 +94,7 @@ const run = async () => {
 
     if (
       (!args['no-exit-code'] && totalErrorCount > Number(args['max-issues'] ?? 0)) ||
-      (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.size > 0)
+      (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0)
     ) {
       process.exit(1);
     }
@@ -110,4 +114,4 @@ const run = async () => {
   process.exit(0);
 };
 
-await run();
+await main();

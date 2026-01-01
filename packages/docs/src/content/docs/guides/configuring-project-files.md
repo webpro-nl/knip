@@ -11,7 +11,7 @@ Knip faster:
 - Start with defaults. Only add targeted `entry` overrides when needed.
 - Use `project` patterns (with negations) to define the scope for Knip.
 - Use production mode to exclude tests and other non-production files.
-- Use `ignore` only to suppress issues in specific files. It does not exclude
+- Use `ignore` only to suppress issues in specific files; it does not exclude
   files from analysis.
 
 Let's dive in and expand on all of these.
@@ -41,8 +41,8 @@ and adjust `project` to fit your codebase.
 Use negated `project` patterns to precisely include/exclude files for unused
 files detection.
 
-Use `ignore` to suppress issues in matching files; it does not remove those
-files from analysis.
+Use `ignore` to suppress issues in matching files; it does not exclude files
+from analysis.
 
 :::
 
@@ -87,12 +87,12 @@ positives)? Use negated `project` patterns:
 }
 ```
 
-Why is this better:
+Why this is better:
 
-- `project` defines "what belongs to the codebase" so build outputs are not part
-  of the analysis and don't appear in unused file detection at all
+- `project` defines what belongs to the codebase, so build outputs are excluded
+  from analysis and unused file detection
 - `ignore` is for the few files that should be analyzed but contain exceptions
-- increases performance by analyzing only source files
+- Improves performance by analyzing fewer files
 
 ## Ignore issues in specific files
 
@@ -127,8 +127,8 @@ instead.
 }
 ```
 
-Why not: `ignore` only hides issues from the report; it does not exclude files
-from analysis.
+Why not: `ignore` hides issues from the report; it does not exclude files from
+analysis.
 
 ❌   Also don't do this:
 
@@ -138,8 +138,8 @@ from analysis.
 }
 ```
 
-Why not: plugins for test frameworks add test file as `entry` files, you can't
-and shouldn't override that globally.
+Why not: plugins add test files as `entry` files; you can't and shouldn't
+override that globally.
 
 ❌   Or this:
 
@@ -149,8 +149,8 @@ and shouldn't override that globally.
 }
 ```
 
-Why not: `project` is used for unused file detection. Negating test files here
-is ineffective, because they're `entry` files.
+Why not: `project` is for unused file detection; negating test files is
+ineffective because they are `entry` files.
 
 ✅   Do this instead:
 

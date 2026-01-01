@@ -20,14 +20,11 @@ test('Respect ignored binaries and dependencies, including string-to-regex, conf
     total: 1,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
+    { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
+  ]);
 });
 
 test('Respect ignored binaries and dependencies, including string-to-regex', async () => {

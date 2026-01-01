@@ -2,8 +2,8 @@
 
 ## Knip
 
-Find unused files, dependencies, and exports in your JavaScript/TypeScript
-projects.
+The Knip Language Server is powered by Knip: Find unused files, dependencies,
+and exports in your JavaScript/TypeScript projects.
 
 - Website: [knip.dev][1]
 - GitHub repo: [webpro-nl/knip][2]
@@ -21,29 +21,31 @@ projects.
   - [Export Hover][11]
   - [Imports][12]
   - [Exports][13]
+- [File Descriptor for package.json][14]
+  - [Dependency Hover][15]
 
 ## Configuration
 
-Latest version of available settings: [types.d.ts][14]
+Latest version of available settings: [types.d.ts][16]
 
 ## Diagnostics
 
 Diagnostics should work out of the box.
 
-Most [Knip issue types][15] are translated to `Diagnostic` items with a
+Most [Knip issue types][17] are translated to `Diagnostic` items with a
 `DiagnosticSeverity` and emitted using `this.connection.sendDiagnostics()`. Also
-see [diagnostics.js][16] for details.
+see [diagnostics.js][18] for details.
 
 ## Code Actions
 
 Code actions should work out of the box.
 
 Some issues/diagnostics have code actions available. Also see
-[code-actions.js][17] for details.
+[code-actions.js][19] for details.
 
 ## File Descriptor
 
-Clients request the `file` descriptor to get available data for a document by
+Clients request a file descriptor to get available data for a document by
 sending the `REQUEST_FILE_NODE` request, in short:
 
 ```ts
@@ -52,23 +54,23 @@ const file = await this.#client.sendRequest(REQUEST_FILE_NODE, {
 });
 ```
 
-Type definition for `File`: [session/types.ts][18]
+Type definition for `File`: [session/types.ts][20]
 
-The `file` descriptor can be used to implement features like [Annotations][10],
+The file descriptor can be used to implement features like [Annotations][10],
 [Export Hover][11], [Imports][12] and [Exports][13].
 
 ### Annotations
 
 Annotations (aka "Code Lens" or "Inlay Hint") for exported identifiers can be
-implemented using data from the `file` descriptor.
+implemented using data from the file descriptor.
 
 Example:
 
-- [registerCodeLensProvider][19]
+- [registerCodeLensProvider][21]
 
 ### Export Hover
 
-On hover of an export identifier, the `file` descriptor can be used to render
+On hover of an export identifier, the file descriptor can be used to render
 import locations for the exported identifier.
 
 Optionally, code snippets can be searched for using the provided locations and
@@ -76,13 +78,13 @@ mixed into the rendered list.
 
 Example:
 
-- [registerHoverProvider → getHoverContent][19]
-- [Collect hover snippets][20]
-- [Render export hover][21]
+- [registerHoverProvider → getHoverContent][21]
+- [Collect hover snippets][22]
+- [Render export hover][23]
 
 ### Imports
 
-The `file` desciptor can be used to display an overview of imports of a document
+The file desciptor can be used to display an overview of imports of a document
 with direct links to their definition location.
 
 Optionally, the client can implement:
@@ -92,12 +94,12 @@ Optionally, the client can implement:
 
 Example:
 
-- [setupTreeViews + refresh → getFileForTreeViews][19]
-- [Tree View Imports][22]
+- [setupTreeViews + refresh → getFileForTreeViews][21]
+- [Tree View Imports][24]
 
 ### Exports
 
-The `file` desciptor can be used to display an overview of exports of a document
+The file desciptor can be used to display an overview of exports of a document
 with direct links to their usage locations.
 
 Optionally, the client can implement:
@@ -108,8 +110,30 @@ Optionally, the client can implement:
 
 Example:
 
-- [setupTreeViews + refresh → getFileForTreeViews][19]
-- [Tree View Exports][23]
+- [setupTreeViews + refresh → getFileForTreeViews][21]
+- [Tree View Exports][25]
+
+## File Descriptor for package.json
+
+Clients request the `package.json` file descriptor to get dependency usage data
+by sending the `REQUEST_PACKAGE_JSON` request:
+
+```ts
+const packageJson = await this.#client.sendRequest(REQUEST_PACKAGE_JSON);
+```
+
+Type definition for `DependencyNodes`: [session/types.ts][20]
+
+### Dependency Hover
+
+On hover of a dependency name in `package.json`, the `packageJson` descriptor
+can be used to render import locations for the dependency.
+
+Example:
+
+- [getDependencyHoverContent][21]
+- [Collect dependency snippets][26]
+- [Render dependency hover][27]
 
 [1]: https://knip.dev
 [2]: https://github.com/webpro-nl/knip
@@ -124,13 +148,17 @@ Example:
 [11]: #export-hover
 [12]: #imports
 [13]: #exports
-[14]: ./src/types.d.ts
-[15]: https://knip.dev/reference/issue-types
-[16]: ./src/diagnostics.js
-[17]: ./src/code-actions.js
-[18]: ../knip/src/session/types.ts
-[19]: ../vscode-knip/src/index.js
-[20]: ../vscode-knip/src/collect-hover-snippets.js
-[21]: ../vscode-knip/src/render-export-hover.js
-[22]: ../vscode-knip/src/tree-view-imports.js
-[23]: ../vscode-knip/src/tree-view-exports.js
+[14]: #file-descriptor-for-packagejson
+[15]: #dependency-hover
+[16]: ./src/types.d.ts
+[17]: https://knip.dev/reference/issue-types
+[18]: ./src/diagnostics.js
+[19]: ./src/code-actions.js
+[20]: ../knip/src/session/types.ts
+[21]: ../vscode-knip/src/index.js
+[22]: ../vscode-knip/src/collect-export-hover-snippets.js
+[23]: ../vscode-knip/src/render-export-hover.js
+[24]: ../vscode-knip/src/tree-view-imports.js
+[25]: ../vscode-knip/src/tree-view-exports.js
+[26]: ../vscode-knip/src/collect-dependency-hover-snippets.js
+[27]: ../vscode-knip/src/render-dependency-hover.js

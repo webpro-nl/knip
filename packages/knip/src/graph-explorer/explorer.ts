@@ -18,7 +18,7 @@ export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>)
     isReferenced: (filePath: string, identifier: string, options: { includeEntryExports: boolean }) =>
       isReferenced(graph, entryPaths, filePath, identifier, options),
     hasStrictlyNsReferences: (filePath: string, identifier: string) =>
-      hasStrictlyNsReferences(graph, graph.get(filePath)?.imported, identifier),
+      hasStrictlyNsReferences(graph, filePath, graph.get(filePath)?.imported, identifier),
     buildExportsTree: (options: { filePath?: string; identifier?: string }) =>
       buildExportsTree(graph, entryPaths, options),
     getDependencyUsage: (pattern?: string | RegExp) => getDependencyUsage(graph, pattern),

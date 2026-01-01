@@ -20,14 +20,11 @@ test('Respect ignored binaries and dependencies, including regex, show config hi
     total: 2,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
+    { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
+  ]);
 });
 
 test('Respect ignored binaries and dependencies, including regex, no config hints (production)', async () => {
@@ -54,12 +51,9 @@ test('Respect ignored binaries when excluding dependencies+unlisted+unresolved',
     total: 2,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
+    { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
+  ]);
 });

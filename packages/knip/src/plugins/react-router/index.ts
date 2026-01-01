@@ -17,7 +17,8 @@ const enablers = ['@react-router/dev'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['react-router.config.{js,ts}', ...(vite.config ?? [])];
+const viteConfig = typeof vite.config === 'function' ? [] : (vite.config ?? []);
+const config = ['react-router.config.{js,ts}', ...viteConfig];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) => {
   const { configFileDir } = options;

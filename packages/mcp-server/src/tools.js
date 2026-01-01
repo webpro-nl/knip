@@ -7,6 +7,21 @@ import { CONFIG_REVIEW_HINT } from './texts.js';
 
 export { ERROR_HINT } from './texts.js';
 
+/**
+ * @param {unknown} error
+ * @returns {string}
+ */
+export function getErrorMessage(error) {
+  if (!(error instanceof Error)) return String(error);
+  const messages = [error.message];
+  let cause = error.cause;
+  while (cause instanceof Error) {
+    messages.push(cause.message);
+    cause = cause.cause;
+  }
+  return `${messages.join('\nCaused by: ')}\nCurrent working dir: ${process.cwd()}`;
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const docsDir = join(__dirname, './docs');
 
@@ -31,9 +46,15 @@ export function buildResults(results, options) {
  * @param {string} cwd
  */
 export async function getResults(cwd) {
-  const options = await createOptions({ cwd, isSession: true, isUseTscFiles: false });
-  const session = await createSession(options);
-  return buildResults(session.getResults(), options);
+  const originalCwd = process.cwd();
+  try {
+    process.chdir(cwd);
+    const options = await createOptions({ cwd, isSession: true, isUseTscFiles: false });
+    const session = await createSession(options);
+    return buildResults(session.getResults(), options);
+  } finally {
+    process.chdir(originalCwd);
+  }
 }
 
 /** @param {string} filePath */

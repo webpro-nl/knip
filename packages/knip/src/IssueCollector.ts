@@ -1,12 +1,19 @@
 import picomatch from 'picomatch';
 import type { IgnoreIssues } from './types/config.js';
 import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, TagHint } from './types/issues.js';
+import { partition } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { initCounters, initIssues } from './util/issue-initializers.js';
-import { timerify } from './util/Performance.js';
 import { join, relative } from './util/path.js';
 
-const isMatch = timerify(picomatch.isMatch, 'isMatch');
+const createMatcher = (patterns: Set<string>) => {
+  const [negated, positive] = partition(patterns, p => p[0] === '!');
+  if (positive.length === 0) {
+    if (negated.length === 0) return () => false;
+    return picomatch(negated, { dot: true });
+  }
+  return picomatch(positive, { dot: true, ignore: negated.map(p => p.slice(1)) });
+};
 
 export type CollectorIssues = ReturnType<IssueCollector['getIssues']>;
 
@@ -39,14 +46,12 @@ export class IssueCollector {
 
   addIgnorePatterns(patterns: string[]) {
     for (const pattern of patterns) this.ignorePatterns.add(pattern);
-    const p = [...this.ignorePatterns];
-    this.isMatch = (filePath: string) => isMatch(filePath, p, { dot: true });
+    this.isMatch = createMatcher(this.ignorePatterns);
   }
 
   addIgnoreFilesPatterns(patterns: string[]) {
     for (const pattern of patterns) this.ignoreFilesPatterns.add(pattern);
-    const p = [...this.ignoreFilesPatterns];
-    this.isFileMatch = (filePath: string) => isMatch(filePath, p, { dot: true });
+    this.isFileMatch = createMatcher(this.ignoreFilesPatterns);
   }
 
   setIgnoreIssues(ignoreIssues?: IgnoreIssues) {
@@ -64,7 +69,7 @@ export class IssueCollector {
     }
 
     for (const [issueType, patterns] of issueTypePatterns) {
-      this.issueMatchers.set(issueType, (filePath: string) => isMatch(filePath, patterns, { dot: true }));
+      this.issueMatchers.set(issueType, picomatch(patterns, { dot: true }));
     }
   }
 
@@ -138,7 +143,7 @@ export class IssueCollector {
       issues: this.issues,
       counters: this.counters,
       tagHints: this.tagHints,
-      configurationHints: new Set(this.configurationHints.values()),
+      configurationHints: Array.from(this.configurationHints.values()),
     };
   }
 

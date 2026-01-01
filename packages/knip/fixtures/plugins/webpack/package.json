@@ -1,5 +1,8 @@
 {
   "name": "@plugins/webpack",
+  "imports": {
+    "#subpath/*": "./src/*"
+  },
   "scripts": {
     "build": "webpack",
     "dev": "webpack serve"

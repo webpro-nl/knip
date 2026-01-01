@@ -2,10 +2,14 @@
 import dedent from 'dedent';
 import Component from './Component.astro';
 
+Astro.response.headers.set('Cache-Control', `max-age=1800, s-maxage=1800`);
+
 const dedented = dedent`
   import Button from './Button'
   import type { FC } from 'react'
 `;
+
+const message = `Hello ${dedented}`;
 ---
 
 <Component>
