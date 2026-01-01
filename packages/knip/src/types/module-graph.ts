@@ -1,4 +1,3 @@
-import type ts from 'typescript';
 import type { Fix, Fixes } from './exports.js';
 import type { IssueSymbol, SymbolType } from './issues.js';
 
@@ -59,11 +58,8 @@ export interface Export extends Position {
   readonly isReExport: boolean;
 }
 
-export type ExportMember = {
+export interface ExportMember extends Position {
   readonly identifier: Identifier;
-  readonly pos: number;
-  readonly line: number;
-  readonly col: number;
   readonly type: SymbolType;
   readonly fix: Fix;
   readonly jsDocTags: Tags;
