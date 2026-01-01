@@ -75,7 +75,10 @@ const getWorkspaceFlag = (manifest, pm) => {
 const getPackageManagerFromPackageJson = manifest => {
   if (!manifest.packageManager) return undefined;
 
-  const pmName = manifest.packageManager.split('@')[0];
+  let [pmName, pmVersion] = manifest.packageManager.split('@');
+  if (pmName === 'yarn' && pmVersion?.[0] > 1) {
+    pmName = 'yarn-berry'
+  }
 
   const validPackageManagers = ['bun', 'yarn', 'yarn-berry', 'pnpm', 'npm'];
   if (!validPackageManagers.includes(pmName)) return undefined;
