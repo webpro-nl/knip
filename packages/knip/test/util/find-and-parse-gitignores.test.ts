@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
+import { copyFileSync } from 'node:fs';
+import { join } from 'node:path';
 import test from 'node:test';
 import { findAndParseGitignores } from '../../src/util/glob-core.js';
 import { resolve } from '../helpers/resolve.js';
+
+// Create the .git file for worktree tests (git won't track files named .git)
+const worktreeRoot = resolve('fixtures/glob-worktree/root');
+copyFileSync(join(worktreeRoot, 'dot-git'), join(worktreeRoot, '.git'));
 
 test('findAndParseGitignores', async () => {
   const cwd = resolve('fixtures/glob');
