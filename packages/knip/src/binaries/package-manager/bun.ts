@@ -50,8 +50,7 @@ const commands = [
   'use',
   'whoami',
   'why',
-  'x',
-  '-e'
+  'x'
 ];
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
