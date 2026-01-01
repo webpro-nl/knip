@@ -192,4 +192,6 @@ jobs:
 
       - name: Run Knip in ${{ matrix.project.repo }}
         working-directory: ${{ matrix.project.name }}
-        run: ${{ matrix.project.commands }}
+        run: |
+          set -x
+          ${{ matrix.project.commands }}
