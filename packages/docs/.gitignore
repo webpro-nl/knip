@@ -1,5 +1,4 @@
 .astro/
-.cache/
 .DS_Store
 .env
 dist/

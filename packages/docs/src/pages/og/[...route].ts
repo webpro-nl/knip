@@ -7,7 +7,7 @@ const require = createRequire(import.meta.url);
 const sharp = require('sharp');
 
 const template = readFileSync(resolve('src/assets/og-template.svg'), 'utf-8');
-const cacheDir = resolve('.cache/og');
+const cacheDir = resolve('node_modules/.astro/og');
 
 const getPages = async () => {
   const data = import.meta.glob(['/src/content/**/*.{md,mdx}'], { eager: true });
