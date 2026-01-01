@@ -7,7 +7,7 @@ import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import traceReporter from '../reporters/trace.js';
-import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
+import type { Export, ModuleGraph } from '../types/module-graph.js';
 import type { MainOptions } from '../util/create-options.js';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
 import { findMatch } from '../util/regex.js';
@@ -45,13 +45,13 @@ export const analyze = async ({
 
   const explorer = createGraphExplorer(graph, entryPaths);
 
-  const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
-  const isExportReferencedInFile = (exportedItem: Export | ExportMember) =>
-    exportedItem.self[1] ||
-    (exportedItem.self[0] > 0 &&
-      (typeof ignoreExportsUsedInFile === 'object'
-        ? exportedItem.type !== 'unknown' && !!ignoreExportsUsedInFile[exportedItem.type]
-        : ignoreExportsUsedInFile));
+  const isReferencedInUsedExport = (exportedItem: Export, filePath: string, includeEntryExports: boolean) => {
+    if (!exportedItem.referencedIn) return false;
+    for (const containingExport of exportedItem.referencedIn) {
+      if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
+    }
+    return false;
+  };
 
   const analyzeGraph = async () => {
     if (options.isReportValues || options.isReportTypes) {
@@ -89,7 +89,10 @@ export const analyze = async ({
                 includeEntryExports: isIncludeEntryExports,
               });
 
-              if ((isReferenced || exportedItem.self[1]) && isIgnored) {
+              if (
+                isIgnored &&
+                (isReferenced || isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports))
+              ) {
                 for (const tagName of exportedItem.jsDocTags) {
                   if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
@@ -117,7 +120,7 @@ export const analyze = async ({
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
                     if (shouldIgnore(member.jsDocTags)) continue;
 
-                    if (member.self[0] === 0) {
+                    if (!member.hasRefsInFile) {
                       const id = `${identifier}.${member.identifier}`;
                       const [isMemberReferenced] = explorer.isReferenced(filePath, id, {
                         includeEntryExports: true,
@@ -188,29 +191,30 @@ export const analyze = async ({
             const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
 
             if (
-              hasStrictlyNsRefs &&
-              ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType))
-            )
+              isIgnored ||
+              exportedItem.hasRefsInFile ||
+              isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports) ||
+              (hasStrictlyNsRefs &&
+                ((!options.includedIssueTypes.nsTypes && isType) ||
+                  !(options.includedIssueTypes.nsExports || isType))) ||
+              (!options.isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem))
+            ) {
               continue;
-
-            if (!isExportReferencedInFile(exportedItem)) {
-              if (isIgnored) continue;
-              if (!options.isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem)) continue;
-
-              const type = getIssueType(hasStrictlyNsRefs, isType);
-              collector.addIssue({
-                type,
-                filePath,
-                workspace: workspace.name,
-                symbol: identifier,
-                symbolType: exportedItem.type,
-                parentSymbol: namespace,
-                pos: exportedItem.pos,
-                line: exportedItem.line,
-                col: exportedItem.col,
-                fixes: exportedItem.fixes,
-              });
             }
+
+            const type = getIssueType(hasStrictlyNsRefs, isType);
+            collector.addIssue({
+              type,
+              filePath,
+              workspace: workspace.name,
+              symbol: identifier,
+              symbolType: exportedItem.type,
+              parentSymbol: namespace,
+              pos: exportedItem.pos,
+              line: exportedItem.line,
+              col: exportedItem.col,
+              fixes: exportedItem.fixes,
+            });
           }
         }
       }
@@ -299,7 +303,7 @@ export const analyze = async ({
 
   await analyzeGraph();
 
-  if (options.isTrace) traceReporter({ graph, explorer, options, isExportReferencedInFile });
+  if (options.isTrace) traceReporter({ graph, explorer, options });
 
   return analyzeGraph;
 };

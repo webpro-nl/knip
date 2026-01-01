@@ -73,7 +73,7 @@ export default defineConfig({
 });
 ```
 
-The Vitest plugin reads this configuration and return two dependencies:
+The Vitest plugin reads this configuration and returns two dependencies:
 
 - `@vitest/coverage-istanbul`
 - `vitest-environment-happy-dom`
@@ -283,6 +283,12 @@ automatically added as `entry` files for Knip to **statically** resolve the
 
 Additionally, `./setup-tests.ts` will be added as an `entry` file.
 
+:::note
+
+When plugins dynamically load configuration files, conditional dependencies may not be detected if the condition evaluates differently during analysis. See [conditional or dynamic dependencies][10] for details and workarounds.
+
+:::
+
 ## Command-Line Arguments
 
 Plugins may define the arguments where Knip should look for entry files,
@@ -317,3 +323,4 @@ Plugins are configured with two distinct types of files:
 [7]: ../reference/plugins/eslint.md
 [8]: ../reference/plugins/vitest.md
 [9]: ../features/script-parser.md
+[10]: ../guides/handling-issues.mdx#conditional-or-dynamic-dependencies

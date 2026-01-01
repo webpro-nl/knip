@@ -52,10 +52,9 @@ folder:
 }
 ```
 
-If you override the `entry` file patterns, you may also want to override
-`project` file patterns. The set of project files is used to determine what
-files are unused. The `project` patterns can also be negated to exclude files
-from the analysis. See [configuring project files][1] for details.
+The set of `project` files determines the analysis scope. Use negated `project`
+patterns to exclude files from the analysis. See [configuring project files][1]
+for details.
 
 The values you set override the default values, they are not merged.
 
@@ -64,8 +63,9 @@ The values you set override the default values, they are not merged.
 Be specific with `entry` files. Minimize the number of entry files and wildcards
 for better results.
 
-Plugins are enabled automatically, and set entry files for you. Such as for
-Next.js, Astro, Remix, Vitest, Playwright and many more.
+Plugins are enabled automatically, and their entry files are added
+automatically. Such as for Next.js, Astro, Remix, Vitest, Playwright and many
+more.
 
 :::
 

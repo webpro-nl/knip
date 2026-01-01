@@ -1,12 +1,13 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
 // ts-expect-error TS80005
 const sharp = require('sharp');
 
 const template = readFileSync(resolve('src/assets/og-template.svg'), 'utf-8');
+const cacheDir = resolve('node_modules/.astro/og');
 
 const getPages = async () => {
   const data = import.meta.glob(['/src/content/**/*.{md,mdx}'], { eager: true });
@@ -16,6 +17,18 @@ const getPages = async () => {
     pages[imagePath] = page;
   }
   return pages;
+};
+
+const getFromCache = (route: string) => {
+  const cachePath = resolve(cacheDir, route);
+  if (existsSync(cachePath)) return readFileSync(cachePath) as unknown as ArrayBuffer;
+  return null;
+};
+
+const saveToCache = (route: string, data: ArrayBuffer) => {
+  const cachePath = resolve(cacheDir, route);
+  mkdirSync(dirname(cachePath), { recursive: true });
+  writeFileSync(cachePath, new Uint8Array(data));
 };
 
 const renderSVG = ({ title }: { title: string }) => {
@@ -73,8 +86,13 @@ export const GET = async ({ params }: { params: { route: string } }) => {
 
   // @ts-expect-error TODO type properly
   const title = pageEntry.frontmatter.hero?.tagline ?? pageEntry.frontmatter.title;
-  const svgBuffer = Buffer.from(renderSVG({ title }));
-  const body = await sharp(svgBuffer).resize(1200, 630).webp({ lossless: true }).toBuffer();
+
+  let body = getFromCache(params.route);
+  if (!body) {
+    const svgBuffer = Buffer.from(renderSVG({ title }));
+    body = (await sharp(svgBuffer).resize(1200, 630).webp({ lossless: true }).toBuffer()) as unknown as ArrayBuffer;
+    saveToCache(params.route, body);
+  }
 
   return new Response(body, {
     headers: {

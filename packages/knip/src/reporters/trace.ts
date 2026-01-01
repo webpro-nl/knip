@@ -1,7 +1,7 @@
 import pc from 'picocolors';
 import type { GraphExplorer } from '../graph-explorer/explorer.js';
 import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.js';
-import type { Export, ExportMember, ModuleGraph } from '../types/module-graph.js';
+import type { ModuleGraph } from '../types/module-graph.js';
 import type { MainOptions } from '../util/create-options.js';
 import { join, toRelative } from '../util/path.js';
 import { toRegexOrString } from '../util/regex.js';
@@ -12,10 +12,9 @@ interface TraceReporterOptions {
   graph: ModuleGraph;
   explorer: GraphExplorer;
   options: MainOptions;
-  isExportReferencedInFile: (exportedItem: Export | ExportMember) => boolean;
 }
 
-export default ({ graph, explorer, options, isExportReferencedInFile }: TraceReporterOptions) => {
+export default ({ graph, explorer, options }: TraceReporterOptions) => {
   if (options.traceDependency) {
     const pattern = toRegexOrString(options.traceDependency);
     const workspaceDir = options.workspace ? join(options.cwd, options.workspace) : undefined;
@@ -43,8 +42,7 @@ export default ({ graph, explorer, options, isExportReferencedInFile }: TraceRep
     const isReferenced = (node: ExportsTreeNode) => {
       if (explorer.isReferenced(node.filePath, node.identifier, { includeEntryExports: false })[0]) return true;
       if (explorer.hasStrictlyNsReferences(node.filePath, node.identifier)[0]) return true;
-      const exportItem = graph.get(node.filePath)?.exports.get(node.identifier);
-      return exportItem ? isExportReferencedInFile(exportItem) : false;
+      return !!graph.get(node.filePath)?.exports.get(node.identifier)?.hasRefsInFile;
     };
     for (const node of nodes) console.log(formatTrace(node, toRel, isReferenced(node)));
   }

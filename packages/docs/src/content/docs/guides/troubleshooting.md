@@ -23,8 +23,7 @@ Knip is intentionally strict to maximize its potential. It may initially report
 many unused files. However, getting this right will result in great reports and
 tidy codebases.
 
-If it doesn't come your way at the first try, remember that often only a small
-change go a long way towards success.
+If it doesn't work out at first, a small change can go a long way.
 
 :::
 
@@ -33,9 +32,8 @@ change go a long way towards success.
 Knip reports lint issues in your codebase. See [handling issues][5] to deal with
 the reported issues.
 
-If Knip reports false positives and you're considering filing a GitHub issue,
-please do! It'll make Knip better for everyone. Please read [issue
-reproduction][6] first.
+If you're considering filing an issue, please read [issue reproduction][6]
+first.
 
 Exit code 1 indicates a successful run, but lint issues were found.
 
@@ -47,8 +45,7 @@ See [known issues][7] as it may be listed there and a workaround may be
 available. If it isn't clear what's throwing the exception, try another run with
 `--debug` to locate the cause of the issue with more details.
 
-If Knip throws an exception and you're considering filing a GitHub issue, please
-do! It'll make Knip better for everyone. Please read [issue reproduction][6]
+If you're considering filing an issue, please read [issue reproduction][6]
 first.
 
 Exit code 2 indicates an exception was thrown by Knip.
