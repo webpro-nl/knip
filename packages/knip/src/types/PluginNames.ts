@@ -102,6 +102,7 @@ export type PluginName =
   | 'swc'
   | 'syncpack'
   | 'tailwind'
+  | 'tanstack-router'
   | 'taskfile'
   | 'travis'
   | 'ts-node'
@@ -229,6 +230,7 @@ export const pluginNames = [
   'swc',
   'syncpack',
   'tailwind',
+  'tanstack-router',
   'taskfile',
   'travis',
   'ts-node',
