@@ -1,4 +1,4 @@
-exports.seed = async function (knex) {
+exports.seed = async knex => {
   await knex('users').del();
   await knex('users').insert([
     { id: 1, email: 'user1@example.com', name: 'User One' },

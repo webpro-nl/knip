@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import { join } from 'node:path';
 import test from 'node:test';
 import { findAndParseGitignores } from '../../src/util/glob-core.js';
+import { join } from '../../src/util/path.js';
 import { resolve } from '../helpers/resolve.js';
 
 test('findAndParseGitignores', async () => {

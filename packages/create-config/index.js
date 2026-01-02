@@ -77,7 +77,7 @@ const getPackageManagerFromPackageJson = manifest => {
 
   let [pmName, pmVersion] = manifest.packageManager.split('@');
   if (pmName === 'yarn' && pmVersion?.[0] > 1) {
-    pmName = 'yarn-berry'
+    pmName = 'yarn-berry';
   }
 
   const validPackageManagers = ['bun', 'yarn', 'yarn-berry', 'pnpm', 'npm'];

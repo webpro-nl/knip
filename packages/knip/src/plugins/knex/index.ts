@@ -1,8 +1,8 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { type Input, toDependency, toEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { KnexConfig } from './types.js';
 import { clientToPackages } from './helpers.js';
+import type { KnexConfig } from './types.js';
 
 // https://knexjs.org
 
@@ -34,13 +34,10 @@ const processKnexConfig = (config: KnexConfig): Input[] => {
 };
 
 const resolveConfig: ResolveConfig<KnexConfig | Record<string, KnexConfig>> = config => {
-  const configs = 'client' in config && config.client
-    ? [config as KnexConfig]
-    : Object.values(config as Record<string, KnexConfig>);
+  const configs =
+    'client' in config && config.client ? [config as KnexConfig] : Object.values(config as Record<string, KnexConfig>);
 
-  return configs.flatMap(cfg =>
-    typeof cfg === 'object' && cfg !== null ? processKnexConfig(cfg) : []
-  );
+  return configs.flatMap(cfg => (typeof cfg === 'object' && cfg !== null ? processKnexConfig(cfg) : []));
 };
 
 const plugin: Plugin = {
