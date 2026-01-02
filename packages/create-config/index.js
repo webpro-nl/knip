@@ -131,7 +131,7 @@ const main = () => {
   }
 
   try {
-    execSync('npm pkg set scripts.knip=knip 2>/dev/null');
+    execSync('npm pkg set scripts.knip=knip', { stdio: ['inherit', 'inherit', 'ignore'] });
     console.info('✓ Add knip to package.json#scripts');
     console.info('');
     console.info(`→ Run \`${bin} run knip --max-show-issues 5\` to run Knip for the first time`);
