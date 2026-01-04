@@ -3,7 +3,8 @@ import test from 'node:test';
 import { IMPORT_STAR } from '../../src/constants.js';
 import type { RE_EXPORT_KIND } from '../../src/graph-explorer/constants.js';
 import { walkUp } from '../../src/graph-explorer/walk-up.js';
-import type { Export, FileNode, ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
+import type { ModuleGraph } from '../../src/types/module-graph.js';
+import { baseExport, baseFileNode, baseImportMaps } from '../helpers/baseNodeObjects.js';
 import { resolve } from '../helpers/resolve.js';
 
 type ReExportKind = (typeof RE_EXPORT_KIND)[keyof typeof RE_EXPORT_KIND];
@@ -13,36 +14,6 @@ const createGraph = (): ModuleGraph => new Map();
 const filePath1 = resolve('module-1.ts');
 const filePath2 = resolve('module-2.ts');
 const filePath3 = resolve('module-3.ts');
-
-const baseFileNode: FileNode = {
-  imports: { internal: new Map(), external: new Set(), unresolved: new Set(), resolved: new Set(), imports: new Set() },
-  exports: new Map(),
-  duplicates: [],
-  scripts: new Set(),
-  traceRefs: new Set(),
-};
-
-const baseImportMaps: ImportMaps = {
-  refs: new Set(),
-  import: new Map(),
-  importAs: new Map(),
-  importNs: new Map(),
-  reExport: new Map(),
-  reExportAs: new Map(),
-  reExportNs: new Map(),
-};
-
-const baseExport: Export = {
-  identifier: 'identifier',
-  pos: 0,
-  line: 1,
-  col: 0,
-  type: 'unknown',
-  members: [],
-  jsDocTags: new Set(),
-  refs: [0, false],
-  fixes: [],
-};
 
 test('should find self export (original definition)', () => {
   const graph = createGraph();
@@ -72,13 +43,10 @@ test('should follow direct re-export chain', () => {
     ...baseFileNode,
     exports: new Map([['identifier', { ...baseExport, isReExport: true }]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath2, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath1])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -107,16 +75,13 @@ test('should follow aliased re-export', () => {
     ...baseFileNode,
     exports: new Map([['identifier', { ...baseExport, isReExport: true }]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [
           filePath2,
           { ...baseImportMaps, reExportAs: new Map([['alias', new Map([['identifier', new Set([filePath1])]])]]) },
         ],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -145,11 +110,8 @@ test('should follow namespace re-export', () => {
     ...baseFileNode,
     exports: new Map([['NS', { ...baseExport, identifier: 'NS', isReExport: true }]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([[filePath2, { ...baseImportMaps, reExportNs: new Map([['NS', new Set([filePath1])]]) }]]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -173,11 +135,8 @@ test('should follow star re-export', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([[filePath2, { ...baseImportMaps, reExport: new Map([[IMPORT_STAR, new Set([filePath1])]]) }]]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -203,26 +162,20 @@ test('should bail out early when visitor returns stop', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath2, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath1])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath3, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath2])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -250,26 +203,20 @@ test('should handle circular re-exports without infinite loop', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath2, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath1])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath1, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath2])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 

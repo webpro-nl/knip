@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { buildExportsTree } from '../../src/graph-explorer/operations/build-exports-tree.js';
-import type { Export, FileNode, ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
+import type { ModuleGraph } from '../../src/types/module-graph.js';
+import { baseExport, baseFileNode, baseImportMaps } from '../helpers/baseNodeObjects.js';
 import { resolve } from '../helpers/resolve.js';
 
 const createGraph = (): ModuleGraph => new Map();
@@ -10,35 +11,6 @@ const filePath1 = resolve('left.ts');
 const filePath2 = resolve('right.ts');
 const filePath3 = resolve('pseudo.ts');
 const filePath4 = resolve('index.ts');
-
-const baseFileNode: FileNode = {
-  imports: { internal: new Map(), external: new Set(), unresolved: new Set(), resolved: new Set(), imports: new Set() },
-  exports: new Map(),
-  duplicates: [],
-  scripts: new Set(),
-};
-
-const baseImportMaps: ImportMaps = {
-  refs: new Set(),
-  import: new Map(),
-  importAs: new Map(),
-  importNs: new Map(),
-  reExport: new Map(),
-  reExportAs: new Map(),
-  reExportNs: new Map(),
-};
-
-const baseExport: Export = {
-  identifier: 'identifier',
-  pos: 0,
-  line: 1,
-  col: 14,
-  type: 'unknown',
-  members: [],
-  jsDocTags: new Set(),
-  self: [0, false],
-  fixes: [],
-};
 
 test('Trace export through reExportNs', () => {
   const graph = createGraph();
