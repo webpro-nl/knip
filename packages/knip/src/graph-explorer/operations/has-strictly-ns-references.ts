@@ -1,10 +1,5 @@
 import type { ImportMaps, ModuleGraph } from '../../types/module-graph.js';
-import {
-  forEachAliasReExport,
-  forEachNamespaceReExport,
-  forEachPassThroughReExport,
-  getStarReExportSources,
-} from '../visitors.js';
+import { getAliasReExportMap, getPassThroughReExportSources, getStarReExportSources } from '../visitors.js';
 
 export const hasStrictlyNsReferences = (
   graph: ModuleGraph,
@@ -18,49 +13,15 @@ export const hasStrictlyNsReferences = (
   if (seenFiles.has(filePath)) return [false];
   seenFiles.add(filePath);
 
-  let foundNamespace: string | undefined;
+  let namespace: string | undefined;
 
-  const aliasByIdentifier = new Map<string, Array<{ alias: string; sources: Set<string> }>>();
-  const namespaceReExports = new Map<string, Array<Set<string>>>();
-  const namespaceEdges: Array<{ namespace: string; sources: Set<string> }> = [];
-  const directById = new Map<string, Set<string>>();
-
-  forEachPassThroughReExport(importsForExport, (id, sources) => {
-    directById.set(id, sources);
-  });
-
-  forEachAliasReExport(importsForExport, (id, alias, sources) => {
-    let arr = aliasByIdentifier.get(id);
-    if (!arr) {
-      arr = [];
-      aliasByIdentifier.set(id, arr);
-    }
-    arr.push({ alias, sources });
-  });
-
-  forEachNamespaceReExport(importsForExport, (namespace, sources) => {
-    namespaceEdges.push({ namespace, sources });
-    let arr = namespaceReExports.get(namespace);
-    if (!arr) {
-      arr = [];
-      namespaceReExports.set(namespace, arr);
-    }
-    arr.push(sources);
-  });
-
-  const starSources = getStarReExportSources(importsForExport);
-
-  const followReExports = (
-    sources: Set<string>,
-    nextId: string,
-    propagateNamespace = true
-  ): [boolean, string?] | undefined => {
+  const followReExports = (sources: Set<string>, nextId: string): [boolean, string?] | undefined => {
     for (const filePath of sources) {
       const file = graph.get(filePath);
       if (!file?.imported) continue;
       const result = hasStrictlyNsReferences(graph, filePath, file.imported, nextId, seenFiles);
-      if (result[0] === false) return result;
-      if (propagateNamespace && result[1]) foundNamespace = result[1];
+      if (result[0] === false && result[1]) return result;
+      if (result[1] && !namespace) namespace = result[1];
     }
     return undefined;
   };
@@ -73,50 +34,57 @@ export const hasStrictlyNsReferences = (
       if (ref.startsWith(`${ns}.`)) return [false, ns];
     }
 
-    const nsReExports = namespaceReExports.get(ns);
-    if (nsReExports) {
-      for (const sources of nsReExports) {
-        const result = followReExports(sources, identifier, false);
-        if (result) return result;
-      }
-    }
+    namespace = ns;
 
-    const nsAliases = aliasByIdentifier.get(ns);
+    const nsAliases = getAliasReExportMap(importsForExport, ns);
     if (nsAliases) {
-      for (const { sources } of nsAliases) {
-        const result = followReExports(sources, identifier, false);
+      for (const [alias, sources] of nsAliases) {
+        const result = followReExports(sources, alias);
         if (result) return result;
       }
     }
-
-    foundNamespace = ns;
   }
 
-  const directSources = directById.get(identifier);
+  const directSources = getPassThroughReExportSources(importsForExport, identifier);
   if (directSources) {
-    const result = followReExports(directSources, identifier, true);
+    const result = followReExports(directSources, identifier);
     if (result) return result;
   }
 
+  const starSources = getStarReExportSources(importsForExport);
   if (starSources) {
-    const result = followReExports(starSources, identifier, true);
+    const result = followReExports(starSources, identifier);
     if (result) return result;
   }
 
   const [id, ...rest] = identifier.split('.');
-  const aliasEntries = aliasByIdentifier.get(id);
+  const aliasEntries = getAliasReExportMap(importsForExport, id);
   if (aliasEntries) {
-    for (const { alias, sources } of aliasEntries) {
-      const result = followReExports(sources, [alias, ...rest].join('.'), true);
+    for (const [alias, sources] of aliasEntries) {
+      const result = followReExports(sources, [alias, ...rest].join('.'));
       if (result) return result;
     }
   }
 
-  for (const { namespace: ns, sources } of namespaceEdges) {
-    const result = followReExports(sources, `${ns}.${identifier}`, true);
+  for (const [ns, sources] of importsForExport.reExportedNs) {
+    const result = followReExports(sources, `${ns}.${identifier}`);
     if (result) return result;
   }
 
-  if (foundNamespace) return [true, foundNamespace];
+  const importedSources = importsForExport.imported.get(identifier);
+  if (importedSources) {
+    const result = followReExports(importedSources, identifier);
+    if (result) return result;
+  }
+
+  const importedAsMap = importsForExport.importedAs.get(identifier);
+  if (importedAsMap) {
+    for (const [alias, sources] of importedAsMap) {
+      const result = followReExports(sources, alias);
+      if (result) return result;
+    }
+  }
+
+  if (namespace) return [true, namespace];
   return [false];
 };
