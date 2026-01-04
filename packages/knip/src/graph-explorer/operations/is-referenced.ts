@@ -16,25 +16,25 @@ export const isReferenced = (
 ) => {
   const seen = new Set<string>();
 
-  const check = (currentPath: string, currentId: string): [boolean, string | undefined] => {
-    const isEntryFile = entryPaths.has(currentPath);
-    let reExportingEntryFile: string | undefined = isEntryFile ? currentPath : undefined;
+  const walkDown = (path: string, id: string): [boolean, string | undefined] => {
+    const isEntryFile = entryPaths.has(path);
+    let reExportingEntryFile: string | undefined = isEntryFile ? path : undefined;
 
-    if (seen.has(currentPath)) return [false, reExportingEntryFile];
-    seen.add(currentPath);
+    if (seen.has(path)) return [false, reExportingEntryFile];
+    seen.add(path);
 
-    const restIds = currentId.split('.');
+    const restIds = id.split('.');
     const identifier = restIds.shift();
-    const file = graph.get(currentPath)?.importedBy;
+    const file = graph.get(path)?.importedBy;
 
     if (!identifier || !file) {
       return [false, reExportingEntryFile];
     }
 
-    const followSources = (sources: Set<string>, nextId: string): boolean => {
+    const follow = (sources: Set<string>, nextId: string): boolean => {
       for (const byFilePath of sources) {
         if (seen.has(byFilePath)) continue;
-        const result = check(byFilePath, nextId);
+        const result = walkDown(byFilePath, nextId);
         if (result[1]) reExportingEntryFile = result[1];
         if (result[0]) return true;
       }
@@ -43,7 +43,7 @@ export const isReferenced = (
 
     if (
       file.import.get(OPAQUE) ||
-      ((identifier === currentId || (identifier !== currentId && file.refs.has(currentId))) &&
+      ((identifier === id || (identifier !== id && file.refs.has(id))) &&
         (file.import.has(identifier) || file.importAs.has(identifier)))
     ) {
       return [true, reExportingEntryFile];
@@ -61,20 +61,20 @@ export const isReferenced = (
     }
 
     for (const namespace of file.importNs.keys()) {
-      if (file.refs.has(`${namespace}.${currentId}`)) {
+      if (file.refs.has(`${namespace}.${id}`)) {
         return [true, reExportingEntryFile];
       }
 
       const nsAliasMap = getAliasReExportMap(file, namespace);
       if (nsAliasMap) {
         for (const [alias, sources] of nsAliasMap) {
-          if (followSources(sources, `${alias}.${currentId}`)) return [true, reExportingEntryFile];
+          if (follow(sources, `${alias}.${id}`)) return [true, reExportingEntryFile];
         }
       }
 
       const nsReExportSources = getNamespaceReExportSources(file, namespace);
       if (nsReExportSources) {
-        if (followSources(nsReExportSources, `${namespace}.${currentId}`)) return [true, reExportingEntryFile];
+        if (follow(nsReExportSources, `${namespace}.${id}`)) return [true, reExportingEntryFile];
       }
     }
 
@@ -83,8 +83,7 @@ export const isReferenced = (
     const aliasMap = getAliasReExportMap(file, identifier);
     if (aliasMap) {
       for (const [alias, sources] of aliasMap) {
-        const ref = [alias, ...restIds].join('.');
-        if (followSources(sources, ref)) return [true, reExportingEntryFile];
+        if (follow(sources, [alias, ...restIds].join('.'))) return [true, reExportingEntryFile];
       }
     }
 
@@ -92,13 +91,13 @@ export const isReferenced = (
     const starSources = getStarReExportSources(file);
 
     if (directSources) {
-      if (followSources(directSources, currentId)) return [true, reExportingEntryFile];
+      if (follow(directSources, id)) return [true, reExportingEntryFile];
     } else if (starSources) {
-      if (followSources(starSources, currentId)) return [true, reExportingEntryFile];
+      if (follow(starSources, id)) return [true, reExportingEntryFile];
     }
 
     for (const [namespace, sources] of file.reExportNs) {
-      if (followSources(sources, `${namespace}.${currentId}`)) {
+      if (follow(sources, `${namespace}.${id}`)) {
         return [true, reExportingEntryFile];
       }
     }
@@ -106,5 +105,5 @@ export const isReferenced = (
     return [false, reExportingEntryFile];
   };
 
-  return check(filePath, id);
+  return walkDown(filePath, id);
 };
