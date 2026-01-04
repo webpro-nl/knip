@@ -23,17 +23,17 @@ export type ImportMaps = {
   /** Usage references cq. property-access patterns on imports ("default", "named", "NS.member", "alias.sub", "enum.member", etc.); NOT mere import usage */
   refs: References;
   /** Identifiers imported from this file */
-  imported: IdToFileMap;
+  import: IdToFileMap;
   /** Identifiers imported with alias (id → alias → files) */
-  importedAs: IdToNsToFileMap;
+  importAs: IdToNsToFileMap;
   /** Namespace imports of this file */
-  importedNs: IdToFileMap;
+  importNs: IdToFileMap;
   /** Identifiers re-exported (not directly imported) */
-  reExported: IdToFileMap;
+  reExport: IdToFileMap;
   /** Namespace re-exports */
-  reExportedNs: IdToFileMap;
+  reExportNs: IdToFileMap;
   /** Irregular re-exports: id → namespace/alias → source files */
-  reExportedAs: IdToNsToFileMap;
+  reExportAs: IdToNsToFileMap;
 };
 
 export type ImportMap = Map<FilePath, ImportMaps>;
@@ -88,7 +88,7 @@ export type FileNode = {
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
   /** Aggregation of other files importing this file's exports */
-  imported: undefined | ImportMaps;
+  importedBy: undefined | ImportMaps;
   internalImportCache: undefined | ImportMap;
 };
 

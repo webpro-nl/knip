@@ -125,7 +125,7 @@ export const getSessionHandler = async (
     } else {
       for (const [filePath, file] of graph) {
         if (filePaths.includes(filePath)) {
-          file.imported = undefined;
+          file.importedBy = undefined;
         } else {
           graph.delete(filePath);
           analyzedFiles.delete(filePath);

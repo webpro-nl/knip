@@ -21,12 +21,12 @@ const baseFileNode: FileNode = {
 
 const baseImportMaps: ImportMaps = {
   refs: new Set(),
-  imported: new Map(),
-  importedAs: new Map(),
-  importedNs: new Map(),
-  reExported: new Map(),
-  reExportedAs: new Map(),
-  reExportedNs: new Map(),
+  import: new Map(),
+  importAs: new Map(),
+  importNs: new Map(),
+  reExport: new Map(),
+  reExportAs: new Map(),
+  reExportNs: new Map(),
 };
 
 const baseImport: Import = {

@@ -18,15 +18,15 @@ export const hasStrictlyNsReferences = (
   const followReExports = (sources: Set<string>, nextId: string): [boolean, string?] | undefined => {
     for (const filePath of sources) {
       const file = graph.get(filePath);
-      if (!file?.imported) continue;
-      const result = hasStrictlyNsReferences(graph, filePath, file.imported, nextId, seenFiles);
+      if (!file?.importedBy) continue;
+      const result = hasStrictlyNsReferences(graph, filePath, file.importedBy, nextId, seenFiles);
       if (result[0] === false && result[1]) return result;
       if (result[1] && !namespace) namespace = result[1];
     }
     return undefined;
   };
 
-  for (const ns of importsForExport.importedNs.keys()) {
+  for (const ns of importsForExport.importNs.keys()) {
     const hasNsRef = importsForExport.refs.has(ns);
     if (!hasNsRef) return [false, ns];
 
@@ -66,20 +66,20 @@ export const hasStrictlyNsReferences = (
     }
   }
 
-  for (const [ns, sources] of importsForExport.reExportedNs) {
+  for (const [ns, sources] of importsForExport.reExportNs) {
     const result = followReExports(sources, `${ns}.${identifier}`);
     if (result) return result;
   }
 
-  const importedSources = importsForExport.imported.get(identifier);
+  const importedSources = importsForExport.import.get(identifier);
   if (importedSources) {
     const result = followReExports(importedSources, identifier);
     if (result) return result;
   }
 
-  const importedAsMap = importsForExport.importedAs.get(identifier);
-  if (importedAsMap) {
-    for (const [alias, sources] of importedAsMap) {
+  const importAsMap = importsForExport.importAs.get(identifier);
+  if (importAsMap) {
+    for (const [alias, sources] of importAsMap) {
       const result = followReExports(sources, alias);
       if (result) return result;
     }

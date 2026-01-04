@@ -25,7 +25,7 @@ export const isReferenced = (
 
     const restIds = currentId.split('.');
     const identifier = restIds.shift();
-    const file = graph.get(currentPath)?.imported;
+    const file = graph.get(currentPath)?.importedBy;
 
     if (!identifier || !file) {
       return [false, reExportingEntryFile];
@@ -42,14 +42,14 @@ export const isReferenced = (
     };
 
     if (
-      file.imported.get(OPAQUE) ||
+      file.import.get(OPAQUE) ||
       ((identifier === currentId || (identifier !== currentId && file.refs.has(currentId))) &&
-        (file.imported.has(identifier) || file.importedAs.has(identifier)))
+        (file.import.has(identifier) || file.importAs.has(identifier)))
     ) {
       return [true, reExportingEntryFile];
     }
 
-    for (const [exportId, aliases] of file.importedAs) {
+    for (const [exportId, aliases] of file.importAs) {
       if (identifier === exportId) {
         for (const alias of aliases.keys()) {
           const aliasedRef = [alias, ...restIds].join('.');
@@ -60,7 +60,7 @@ export const isReferenced = (
       }
     }
 
-    for (const namespace of file.importedNs.keys()) {
+    for (const namespace of file.importNs.keys()) {
       if (file.refs.has(`${namespace}.${currentId}`)) {
         return [true, reExportingEntryFile];
       }
@@ -97,7 +97,7 @@ export const isReferenced = (
       if (followSources(starSources, currentId)) return [true, reExportingEntryFile];
     }
 
-    for (const [namespace, sources] of file.reExportedNs) {
+    for (const [namespace, sources] of file.reExportNs) {
       if (followSources(sources, `${namespace}.${currentId}`)) {
         return [true, reExportingEntryFile];
       }

@@ -76,7 +76,7 @@ export const analyze = async ({
             continue;
           }
 
-          const importsForExport = file.imported;
+          const importsForExport = file.importedBy;
 
           for (const [identifier, exportedItem] of exportItems) {
             // Skip tagged exports

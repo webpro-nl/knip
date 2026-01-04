@@ -51,7 +51,7 @@ const buildExportTree = (
   const rootNode: ExportsTreeNode = {
     filePath,
     identifier,
-    refs: filterRefs(file?.imported?.refs, identifier),
+    refs: filterRefs(file?.importedBy?.refs, identifier),
     isEntry: entryPaths.has(filePath),
     children: [],
     originalId: undefined,
@@ -115,7 +115,7 @@ const hasRelevantRef = (refs: Set<string> | undefined, id: string): boolean => {
 
 const isNsReExported = (importMaps: ImportMaps | undefined, ns: string): boolean => {
   if (!importMaps) return false;
-  return importMaps.reExportedAs.has(ns) || importMaps.reExportedNs.has(ns);
+  return importMaps.reExportAs.has(ns) || importMaps.reExportNs.has(ns);
 };
 
 const hasNonReExportStar = (node: ExportsTreeNode): boolean => {
