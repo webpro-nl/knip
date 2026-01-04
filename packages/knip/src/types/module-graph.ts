@@ -19,18 +19,21 @@ export interface Position {
 export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
 
-/** Aggregated imports from other files (who imports this file's exports) */
 export type ImportMaps = {
-  /** Usage references to imported identifiers ("default", "named", "NS.export", "enum.member", etc.) */
+  /** Usage references cq. property-access patterns on imports ("default", "named", "NS.member", "alias.sub", "enum.member", etc.); NOT mere import usage */
   refs: References;
-  /** Directly imported identifiers */
+  /** Identifiers imported from this file */
   imported: IdToFileMap;
+  /** Identifiers imported with alias (id → alias → files) */
   importedAs: IdToNsToFileMap;
+  /** Namespace imports of this file */
   importedNs: IdToFileMap;
   /** Identifiers re-exported (not directly imported) */
   reExported: IdToFileMap;
-  reExportedAs: IdToNsToFileMap;
+  /** Namespace re-exports */
   reExportedNs: IdToFileMap;
+  /** Irregular re-exports: id → namespace/alias → source files */
+  reExportedAs: IdToNsToFileMap;
 };
 
 export type ImportMap = Map<FilePath, ImportMaps>;
@@ -84,6 +87,7 @@ export type FileNode = {
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
+  /** Aggregation of other files importing this file's exports */
   imported: undefined | ImportMaps;
   internalImportCache: undefined | ImportMap;
 };
