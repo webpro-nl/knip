@@ -25,7 +25,7 @@ import {
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
 } from './ast-helpers.js';
-import { hasRefsInFile } from './find-internal-references.js';
+import { _hasRefsInFile } from './find-internal-references.js';
 import { getImportsFromPragmas } from './pragmas/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -548,12 +548,12 @@ const getImportsAndExports = (
       shouldCountRefs(ignoreExportsUsedInFile, item.type) ||
       (item.symbol?.valueDeclaration && ts.isBindingElement(item.symbol.valueDeclaration))
     ) {
-      item.hasRefsInFile = hasRefsInFile(item, sourceFile, typeChecker);
+      item.hasRefsInFile = _hasRefsInFile(item, sourceFile, typeChecker);
     }
 
     for (const member of item.members) {
       if (item.type === 'enum' || shouldCountRefs(ignoreExportsUsedInFile, member.type)) {
-        member.hasRefsInFile = hasRefsInFile(member, sourceFile, typeChecker);
+        member.hasRefsInFile = _hasRefsInFile(member, sourceFile, typeChecker);
       }
       delete member.symbol;
     }

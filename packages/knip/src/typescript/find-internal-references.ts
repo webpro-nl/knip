@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { timerify } from '../util/Performance.js';
 import { isIdChar } from '../util/regex.js';
 import type { ExportWithSymbol, MemberWithSymbol } from './get-imports-and-exports.js';
 
@@ -10,7 +11,7 @@ const findInFlow = (flowNode: any, targetSymbol: ts.Symbol): boolean => {
 
 // Find internal references to export item
 // Detect usage of non-types within types (e.g. class or typeof within interface/type) to keep those exported
-export const hasRefsInFile = (
+const hasRefsInFile = (
   item: ExportWithSymbol | MemberWithSymbol,
   sourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker
@@ -57,3 +58,5 @@ export const hasRefsInFile = (
 
   return false;
 };
+
+export const _hasRefsInFile = timerify(hasRefsInFile);
