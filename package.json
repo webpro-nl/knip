@@ -32,10 +32,10 @@
     "@release-it/bumper": "^7.0.5",
     "installed-check": "^9.3.0",
     "mdxlint": "^1.0.0",
-    "mdxlint-preset-webpro": "^1.0.2",
+    "mdxlint-preset-webpro": "^1.1.1",
     "release-it": "^19.2.2",
     "remark-cli": "12.0.1",
-    "remark-preset-webpro": "^2.0.1"
+    "remark-preset-webpro": "^2.1.0"
   },
   "remarkConfig": {
     "plugins": [

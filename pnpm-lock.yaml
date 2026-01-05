@@ -21,8 +21,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       mdxlint-preset-webpro:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^1.1.1
+        version: 1.1.1
       release-it:
         specifier: ^19.2.2
         version: 19.2.2(@types/node@24.3.0)(magicast@0.5.1)
@@ -30,8 +30,8 @@ importers:
         specifier: 12.0.1
         version: 12.0.1
       remark-preset-webpro:
-        specifier: ^2.0.1
-        version: 2.0.1
+        specifier: ^2.1.0
+        version: 2.1.0
 
   packages/create-config: {}
 
@@ -3050,8 +3050,8 @@ packages:
   mdn-data@2.12.2:
     resolution: {integrity: sha512-IEn+pegP1aManZuckezWCO+XZQDplx1366JoVhTpMpBB1sPey/SbveZQUosKiKiGYjg1wH4pMlNgXbCiYgihQA==}
 
-  mdxlint-preset-webpro@1.0.2:
-    resolution: {integrity: sha512-ORcyA9CqnKE6Q3CeKYn4O7q11ojIan1hNliVVdrBqr8zijCIbap0lQJQ6XI/1xiePJ46T0/8KkNHywWuos+EJQ==}
+  mdxlint-preset-webpro@1.1.1:
+    resolution: {integrity: sha512-6Cx8PwkXtZX7uijjjJ9Hb3TQZm3/efu61QDiFZVGXjD9ayXnWM+zPa1MMYNYIHRSMTIBc5ia6j8uNFcAsffKsA==}
 
   mdxlint@1.0.0:
     resolution: {integrity: sha512-EEOFUOYM1VPPqW/l1WyTxEiL8N1+LBNSBpzPk/Aq4z8UkfA19Abo75pK3qRZAi3MEW9NHK49+Fz0BdRrwLVzaQ==}
@@ -3691,8 +3691,8 @@ packages:
   remark-parse@11.0.0:
     resolution: {integrity: sha512-FCxlKLNGknS5ba/1lmpYijMUzX2esxW5xQqjWxw2eHFfS2MSdaHVINFmhjo+qN1WhZhNimq0dZATN9pH0IDrpA==}
 
-  remark-preset-webpro@2.0.1:
-    resolution: {integrity: sha512-ejqKfDng4fN1yMfthwEAYTT+hqbVx+8FkqhBTOVIQfLaCQNVT3pxihSVDbTFK12Tg1vwH9mu4R7/wX5uqmaSHw==}
+  remark-preset-webpro@2.1.0:
+    resolution: {integrity: sha512-eCnfRXxMb1LNA2uQA7ZQHOO1DK0SkirvAWf+UxyurNHC3ANL4dhFWcR7QMX29ATliYE+dll+3kLr4qMQBIiA7A==}
 
   remark-reference-links@7.0.0:
     resolution: {integrity: sha512-OMACEps7CkpBio5nutUToCcXFJr9QkkoHdku41iIholMdFZ0jdRxgFmPm2B7R+DSvW83ZShdA3ubWTH+C3M6Eg==}
@@ -3706,6 +3706,9 @@ packages:
 
   remark-stringify@11.0.0:
     resolution: {integrity: sha512-1OSmLd3awB/t8qdoEOMazZkNsfVTeY4fTsgzcQFdXNq8ToTN4ZGwrMnlda4K6smTFKD+GRV6O48i6Z4iKgPPpw==}
+
+  remark-validate-relative-links@0.0.2:
+    resolution: {integrity: sha512-cwm0r3yT6/Ne9Y5dQKXOhfaPHbTK7P94za+JH78jlOBeknnJxoXgQMlokFNNx3G9Ckp25caR2Tbc1Em8oLnb0g==}
 
   remark@15.0.1:
     resolution: {integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==}
@@ -4477,6 +4480,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -7744,13 +7748,14 @@ snapshots:
 
   mdn-data@2.12.2: {}
 
-  mdxlint-preset-webpro@1.0.2:
+  mdxlint-preset-webpro@1.1.1:
     dependencies:
       mdast-util-directive: 3.1.0
       remark-directive: 4.0.0
       remark-frontmatter: 5.0.0
       remark-order-reference-links: 0.0.3
       remark-reference-links: 7.0.0
+      remark-validate-relative-links: 0.0.2
     transitivePeerDependencies:
       - supports-color
 
@@ -8712,7 +8717,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  remark-preset-webpro@2.0.1:
+  remark-preset-webpro@2.1.0:
     dependencies:
       mdast-util-directive: 3.1.0
       prettier: 3.6.2
@@ -8722,6 +8727,7 @@ snapshots:
       remark-order-reference-links: 0.0.3
       remark-parse: 11.0.0
       remark-reference-links: 7.0.0
+      remark-validate-relative-links: 0.0.2
       unified-prettier: 2.0.1(prettier@3.6.2)
     transitivePeerDependencies:
       - supports-color
@@ -8751,6 +8757,10 @@ snapshots:
       '@types/mdast': 4.0.4
       mdast-util-to-markdown: 2.1.2
       unified: 11.0.5
+
+  remark-validate-relative-links@0.0.2:
+    dependencies:
+      unist-util-visit: 5.0.0
 
   remark@15.0.1:
     dependencies:
