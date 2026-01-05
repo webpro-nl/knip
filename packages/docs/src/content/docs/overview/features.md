@@ -44,7 +44,7 @@ Also see [related tooling][2].
 [4]: ../reference/cli.md#--cache
 [5]: ../guides/working-with-commonjs.md
 [6]: ../features/compilers.md
-[7]: ../guides/troubleshooting.md#issues-reported-by-knip
+[7]: ../guides/troubleshooting.md#debug
 [8]: ../features/rules-and-filters.md#filters
 [9]: ../features/auto-fix.mdx#format
 [10]: ../reference/jsdoc-tsdoc-tags.md
@@ -63,4 +63,4 @@ Also see [related tooling][2].
 [23]: ../features/production-mode.md#strict-mode
 [24]: ../guides/troubleshooting.md#trace
 [25]: ../reference/cli.md#--watch
-[26]: ../features/monorepos-and-workspaces#lint-a-single-workspace
+[26]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
