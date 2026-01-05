@@ -41,8 +41,8 @@ and adjust `project` to fit your codebase.
 Use negated `project` patterns to precisely include/exclude files for unused
 files detection.
 
-Use `ignore` to suppress issues in matching files; it does not exclude files
-from analysis.
+Use `ignore*` to suppress specific issues in matching files; it does not exclude
+files from analysis.
 
 :::
 
