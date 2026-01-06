@@ -11,12 +11,6 @@ const enablers = ['astro-og-canvas'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = [];
-
-const entry: string[] = [];
-
-const production: string[] = [];
-
 const resolveConfig: ResolveConfig<PluginConfig> = async config => {
   const inputs = config?.plugins ?? [];
   return [
@@ -29,9 +23,6 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
-  entry,
-  production,
   resolveConfig,
 };
 
