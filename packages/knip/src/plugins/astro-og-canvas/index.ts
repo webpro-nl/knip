@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.js';
 import { toDeferResolve, toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
@@ -10,6 +10,10 @@ const title = 'astro-og-canvas';
 const enablers = ['astro-og-canvas'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+
+const resolve: Resolve = async () => {
+  return [toDependency('astro-og-canvas')];
+};
 
 const resolveConfig: ResolveConfig<PluginConfig> = async config => {
   const inputs = config?.plugins ?? [];
@@ -23,6 +27,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
+  resolve,
   resolveConfig,
 };
 
