@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "astro-og-canvas": "^0.10.0",
     "canvaskit-wasm": "^0.40.0"
   },
   "name": "@plugins/astro-og-canvas"
