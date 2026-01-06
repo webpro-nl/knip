@@ -248,7 +248,7 @@ const resolveConfig: ResolveConfig<AstroConfig> = async config => {
 
 This is why plugins can implement the `resolveFromAST` function.
 
-### 7. resolveFromAST
+### 8. resolveFromAST
 
 Let's take a look at the Astro plugin implementation. This example assumes some
 familiarity with Abstract Syntax Trees (AST) and the TypeScript compiler API.
@@ -315,6 +315,19 @@ const plugin: Plugin {
 }
 
 export default plugin;
+```
+
+## None Of The Above
+
+### 9. `resolve`
+
+If there is no configuration file to parse or there is a need for customization,
+use `resolve`:
+
+```ts
+const resolve: Resolve = async options => {
+  return toDependency('troublesome', { optional: true });
+};
 ```
 
 ## Inputs

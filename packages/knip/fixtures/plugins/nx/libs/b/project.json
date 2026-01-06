@@ -21,15 +21,39 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest"
+      "executor": "@nrwl/jest:jest",
+      "options": {
+        "jestConfig": "libs/b/jest.config.ts"
+      }
     },
     "tsc": {
-      "executor": "./tools/executors/tsc:tsc"
+      "executor": "./tools/executors/tsc:tsc",
+      "options": {
+        "tsConfig": "libs/b/tsconfig.lib.json"
+      }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
         "commands": [{ "command": "biome lint ." }]
+      }
+    },
+    "eslint": {
+      "executor": "@nx/linter:eslint",
+      "options": {
+        "eslintConfig": "libs/b/.eslintrc.json"
+      }
+    },
+    "test-vitest": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "vitestConfig": "libs/b/vitest.config.ts"
+      }
+    },
+    "build-webpack": {
+      "executor": "@nx/webpack:webpack",
+      "options": {
+        "webpackConfig": "libs/b/webpack.config.js"
       }
     }
   }
