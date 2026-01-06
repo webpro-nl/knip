@@ -1,4 +1,5 @@
 import fg from 'fast-glob';
+import { globSync } from 'tinyglobby';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { compact } from './array.js';
 import { glob } from './glob-core.js';
@@ -55,9 +56,10 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
 };
 
 const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) =>
-  fg.sync(patterns, { cwd, followSymbolicLinks: false });
+  globSync(patterns, { cwd, followSymbolicLinks: false });
 
 const firstGlob = async ({ cwd, patterns }: GlobOptions) => {
+  // TODO: tinyglobby does not support globStream?
   const stream = fg.globStream(patterns.map(removeProductionSuffix), { cwd, ignore: GLOBAL_IGNORE_PATTERNS });
   for await (const entry of stream) {
     return entry;

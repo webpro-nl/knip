@@ -46,6 +46,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
 
   const routes = routeConfig
     .flatMap(mapRoute)
+    // TODO: reference tinyglobby instead?
     // Since these are literal paths, we need to escape any special characters that might
     // trip up micromatch/fast-glob.
     // See:
