@@ -408,7 +408,6 @@ Examples of features that have been requested include:
   - Unused object members (and e.g. React component props)
   - Unused object props in function return values
 - Analyze workspaces in parallel
-- Plugins for editors like VS Code and WebStorm (LSP-based?)
 - Support Deno
 - Improve internal code structures and accessibility to support contributions
 - One-shot dead code removal (more comprehensive removal of unused variables,
