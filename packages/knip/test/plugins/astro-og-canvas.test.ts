@@ -8,7 +8,6 @@ import { resolve } from '../helpers/resolve.js';
 const cwd = resolve('fixtures/plugins/astro-og-canvas');
 
 test('Find dependencies with the astro-og-canvas plugin', async () => {
-
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 

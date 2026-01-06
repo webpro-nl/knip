@@ -1,7 +1,6 @@
-import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve, toDependency } from '../../util/input.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
 
 // https://github.com/delucis/astro-og-canvas
 
@@ -15,20 +14,11 @@ const resolve: Resolve = async () => {
   return [toDependency('astro-og-canvas')];
 };
 
-const resolveConfig: ResolveConfig<PluginConfig> = async config => {
-  const inputs = config?.plugins ?? [];
-  return [
-    ...inputs.map(id => toDeferResolve(id)),
-    toDependency('canvaskit-wasm', { optional: true }),
-  ];
-};
-
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   resolve,
-  resolveConfig,
 };
 
 export default plugin;
