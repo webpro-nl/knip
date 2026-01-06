@@ -6,6 +6,11 @@ export interface NxProjectConfiguration {
       options?: {
         command?: string;
         commands?: Array<string | { command: string }>;
+        eslintConfig?: string;
+        jestConfig?: string;
+        tsConfig?: string;
+        vitestConfig?: string;
+        webpackConfig?: string;
       };
     };
   };
