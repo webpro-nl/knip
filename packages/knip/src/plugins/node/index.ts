@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, PluginOptions } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, Resolve } from '../../types/config.js';
 import { toEntry, toProductionEntry } from '../../util/input.js';
 
 const title = 'Node.js';
@@ -18,7 +18,7 @@ const hasNodeTest = (scripts: Record<string, string> | undefined) =>
 
 const entry = ['server.js'];
 
-const resolve = (options: PluginOptions) => {
+const resolve: Resolve = options => {
   const entries = entry.map(id => toProductionEntry(id));
 
   if (hasNodeTest(options.manifest.scripts) || hasNodeTest(options.rootManifest?.scripts)) {
