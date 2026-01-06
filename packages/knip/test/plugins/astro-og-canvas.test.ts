@@ -13,7 +13,7 @@ test('Find dependencies with the astro-og-canvas plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 0,
-    total: 0,
+    processed: 1,
+    total: 1,
   });
 });

@@ -11,7 +11,7 @@ const enablers = ['astro-og-canvas'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const resolve: Resolve = async () => {
-  return [toDependency('astro-og-canvas')];
+  return [toDependency('canvaskit-wasm', { optional: true })];
 };
 
 const plugin: Plugin = {
