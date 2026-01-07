@@ -18,6 +18,10 @@ test('Find dependencies with the tanstack-router plugin', async () => {
   assert(issues.devDependencies['package.json']['@tanstack/router-cli']);
   assert(issues.devDependencies['package.json']['vite']);
 
+  assert(!issues.exports['src/routes/__root.tsx']?.['Route']);
+  assert(!issues.exports['src/routes/index.tsx']?.['Route']);
+  assert(!issues.exports['src/routes/posts/$postId.tsx']?.['Route']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 2,
