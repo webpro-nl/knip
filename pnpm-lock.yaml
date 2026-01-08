@@ -13,7 +13,7 @@ importers:
         version: 2.3.8
       '@release-it/bumper':
         specifier: ^7.0.5
-        version: 7.0.5(release-it@19.2.2(@types/node@24.3.0)(magicast@0.5.1))
+        version: 7.0.5(release-it@19.2.3(@types/node@24.3.0)(magicast@0.5.1))
       installed-check:
         specifier: ^9.3.0
         version: 9.3.0
@@ -24,8 +24,8 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
       release-it:
-        specifier: ^19.2.2
-        version: 19.2.2(@types/node@24.3.0)(magicast@0.5.1)
+        specifier: ^19.2.3
+        version: 19.2.3(@types/node@24.3.0)(magicast@0.5.1)
       remark-cli:
         specifier: 12.0.1
         version: 12.0.1
@@ -3661,8 +3661,8 @@ packages:
   rehype@13.0.2:
     resolution: {integrity: sha512-j31mdaRFrwFRUIlxGeuPXXKWQxet52RBQRvCmzl5eCefn/KGbomK5GMHNMsOJf55fgo3qw5tST5neDuarDYR2A==}
 
-  release-it@19.2.2:
-    resolution: {integrity: sha512-57TBUTBbBXLJsPufYS+Hsb1dSZKZ0ktiYgPkNc3Pmlq/QQtH9X0oD0SG2ib5CsXHTI11m19pyK60NXmvtE6cLg==}
+  release-it@19.2.3:
+    resolution: {integrity: sha512-GTSfrKb0cPmssEFliX0+WQBHC6NiDsMR/M8Y2tkvct/TO36BjB5XV6LO5BUTYV12C3+f78Y8aroku7jCyNiDeA==}
     engines: {node: ^20.12.0 || >=22.0.0}
     hasBin: true
 
@@ -5631,7 +5631,7 @@ snapshots:
       '@pnpm/error': 6.0.3
       read-yaml-file: 2.1.0
 
-  '@release-it/bumper@7.0.5(release-it@19.2.2(@types/node@24.3.0)(magicast@0.5.1))':
+  '@release-it/bumper@7.0.5(release-it@19.2.3(@types/node@24.3.0)(magicast@0.5.1))':
     dependencies:
       '@iarna/toml': 3.0.0
       cheerio: 1.1.2
@@ -5640,7 +5640,7 @@ snapshots:
       ini: 5.0.0
       js-yaml: 4.1.1
       lodash-es: 4.17.21
-      release-it: 19.2.2(@types/node@24.3.0)(magicast@0.5.1)
+      release-it: 19.2.3(@types/node@24.3.0)(magicast@0.5.1)
       semver: 7.7.3
 
   '@rolldown/binding-android-arm64@1.0.0-beta.58':
@@ -8617,7 +8617,7 @@ snapshots:
       rehype-stringify: 10.0.1
       unified: 11.0.5
 
-  release-it@19.2.2(@types/node@24.3.0)(magicast@0.5.1):
+  release-it@19.2.3(@types/node@24.3.0)(magicast@0.5.1):
     dependencies:
       '@nodeutils/defaults-deep': 1.1.0
       '@octokit/rest': 22.0.1
