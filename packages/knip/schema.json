@@ -453,6 +453,10 @@
           "title": "Expo plugin configuration (https://knip.dev/reference/plugins/expo)",
           "$ref": "#/definitions/plugin"
         },
+        "expressive-code": {
+          "title": "expressive-code plugin configuration (https://knip.dev/reference/plugins/expressive-code)",
+          "$ref": "#/definitions/plugin"
+        },
         "gatsby": {
           "title": "Gatsby plugin configuration (https://knip.dev/reference/plugins/gatsby)",
           "$ref": "#/definitions/plugin"
