@@ -3,7 +3,7 @@ import os from 'node:os';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { _glob } from '../../util/glob.js';
 import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.js';
-import { isAbsolute, join, toAbsolute } from '../../util/path.js';
+import { join, toAbsolute } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import vite from '../vite/index.js';
 import type { PluginConfig, RouteConfigEntry } from './types.js';

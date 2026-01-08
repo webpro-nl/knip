@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, Resolve } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
 import { toEntry, toProductionEntry } from '../../util/input.js';
 
 const title = 'Node.js';

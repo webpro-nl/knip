@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import type { IsPluginEnabled, Plugin, PluginOptions, Resolve } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
 import { toEntry } from '../../util/input.js';
 
 // https://bun.sh/docs/cli/test

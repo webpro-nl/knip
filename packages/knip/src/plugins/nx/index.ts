@@ -97,7 +97,9 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     return configs;
   });
 
-  return compact([...executors, ...inputs, ...configInputs]).map(id => (typeof id === 'string' ? toDependency(id) : id));
+  return compact([...executors, ...inputs, ...configInputs]).map(id =>
+    typeof id === 'string' ? toDependency(id) : id
+  );
 };
 
 const args = {
