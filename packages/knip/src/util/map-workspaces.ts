@@ -23,7 +23,7 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
     ignore: ['**/node_modules/**', ...negatedPatterns.map(p => p.slice(1))],
   });
 
-  for (const match of matches) {
+  for (const match of matches.sort()) {
     const name = match === 'package.json' ? '.' : match.replace(/\/package\.json$/, '');
     const dir = join(cwd, name);
     const manifestPath = join(cwd, match);
