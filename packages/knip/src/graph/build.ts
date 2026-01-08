@@ -288,7 +288,7 @@ export async function build({
 
     principal.addEntryPaths(userEntryPaths);
 
-    if (options.isUseTscFiles) {
+    if (options.isUseTscFiles && isFile) {
       const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
       debugLogArray(name, 'Using tsconfig files as project files', tscSourcePaths);
       for (const filePath of tscSourcePaths) {

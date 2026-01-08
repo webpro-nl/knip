@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createGraphExplorer } from '../../src/graph-explorer/explorer.js';
-import type { Export, FileNode, ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
+import type { ModuleGraph } from '../../src/types/module-graph.js';
+import { baseExport, baseFileNode, baseImportMaps } from '../helpers/baseNodeObjects.js';
 import { resolve } from '../helpers/resolve.js';
 
 const createGraph = (): ModuleGraph => new Map();
@@ -10,36 +11,6 @@ const filePath1 = resolve('module-1.ts');
 const filePath2 = resolve('module-2.ts');
 const filePath3 = resolve('module-3.ts');
 const filePath4 = resolve('module-4.ts');
-
-const baseFileNode: FileNode = {
-  imports: { internal: new Map(), external: new Set(), unresolved: new Set(), resolved: new Set(), imports: new Set() },
-  exports: new Map(),
-  duplicates: [],
-  scripts: new Set(),
-  traceRefs: new Set(),
-};
-
-const baseImportMaps: ImportMaps = {
-  refs: new Set(),
-  imported: new Map(),
-  importedAs: new Map(),
-  importedNs: new Map(),
-  reExported: new Map(),
-  reExportedAs: new Map(),
-  reExportedNs: new Map(),
-};
-
-const baseExport: Export = {
-  identifier: 'identifier',
-  pos: 0,
-  line: 1,
-  col: 0,
-  type: 'unknown',
-  members: [],
-  jsDocTags: new Set(),
-  refs: [0, false],
-  fixes: [],
-};
 
 test('should detect branching (export re-exported through multiple paths)', () => {
   const graph = createGraph();
@@ -54,13 +25,10 @@ test('should detect branching (export re-exported through multiple paths)', () =
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
-        [filePath1, { ...baseImportMaps, reExported: new Map([['identifier', new Set([filePath2])]]) }],
+        [filePath1, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath2])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -68,13 +36,10 @@ test('should detect branching (export re-exported through multiple paths)', () =
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
-        [filePath1, { ...baseImportMaps, reExported: new Map([['identifier', new Set([filePath3])]]) }],
+        [filePath1, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath3])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -82,14 +47,11 @@ test('should detect branching (export re-exported through multiple paths)', () =
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
-        [filePath2, { ...baseImportMaps, reExported: new Map([['identifier', new Set([filePath4])]]) }],
-        [filePath3, { ...baseImportMaps, reExported: new Map([['identifier', new Set([filePath4])]]) }],
+        [filePath2, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath4])]]) }],
+        [filePath3, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath4])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -119,14 +81,11 @@ test('should detect conflict (same identifier defined in multiple files)', () =>
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
-        [filePath1, { ...baseImportMaps, reExported: new Map([['identifier', new Set([filePath3])]]) }],
-        [filePath2, { ...baseImportMaps, reExported: new Map([['identifier', new Set([filePath3])]]) }],
+        [filePath1, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath3])]]) }],
+        [filePath2, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath3])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -153,13 +112,10 @@ test('should return empty map when no contention exists', () => {
     ...baseFileNode,
     exports: new Map([['identifier', { ...baseExport, isReExport: true }]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
-        [filePath1, { ...baseImportMaps, reExported: new Map([['identifier', new Set([filePath2])]]) }],
+        [filePath1, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath2])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
@@ -214,11 +170,8 @@ test('should detect conflict through star re-exports chain', () => {
     ...baseFileNode,
     exports: new Map([['CONFLICT', { ...baseExport, identifier: 'CONFLICT' }]]),
     imports: {
-      internal: new Map([[filePath3, { ...baseImportMaps, reExported: new Map([['*', new Set([filePath2])]]) }]]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
+      ...baseFileNode.imports,
+      internal: new Map([[filePath3, { ...baseImportMaps, reExport: new Map([['*', new Set([filePath2])]]) }]]),
     },
   });
 
@@ -226,27 +179,24 @@ test('should detect conflict through star re-exports chain', () => {
     ...baseFileNode,
     exports: new Map([['CONFLICT', { ...baseExport, identifier: 'CONFLICT' }]]),
     imports: {
-      internal: new Map([[filePath2, { ...baseImportMaps, reExported: new Map([['*', new Set([filePath1])]]) }]]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
+      ...baseFileNode.imports,
+      internal: new Map([[filePath2, { ...baseImportMaps, reExport: new Map([['*', new Set([filePath1])]]) }]]),
     },
   });
 
   const file3Node = graph.get(filePath3);
   if (file3Node) {
-    file3Node.imported = {
+    file3Node.importedBy = {
       ...baseImportMaps,
-      reExported: new Map([['*', new Set([filePath2])]]),
+      reExport: new Map([['*', new Set([filePath2])]]),
     };
   }
 
   const file2Node = graph.get(filePath2);
   if (file2Node) {
-    file2Node.imported = {
+    file2Node.importedBy = {
       ...baseImportMaps,
-      reExported: new Map([['*', new Set([filePath1])]]),
+      reExport: new Map([['*', new Set([filePath1])]]),
     };
   }
 
@@ -305,39 +255,36 @@ test('should detect conflict from source file aggregated by consumer', () => {
     ...baseFileNode,
     exports: new Map([['identifier', { ...baseExport, isReExport: true }]]),
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
-        [fileA, { ...baseImportMaps, reExported: new Map([['*', new Set([indexFile])]]) }],
-        [fileB, { ...baseImportMaps, reExported: new Map([['*', new Set([indexFile])]]) }],
-        [fileC, { ...baseImportMaps, reExported: new Map([['*', new Set([indexFile])]]) }],
+        [fileA, { ...baseImportMaps, reExport: new Map([['*', new Set([indexFile])]]) }],
+        [fileB, { ...baseImportMaps, reExport: new Map([['*', new Set([indexFile])]]) }],
+        [fileC, { ...baseImportMaps, reExport: new Map([['*', new Set([indexFile])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
-      imports: new Set(),
     },
   });
 
   const fileANode = graph.get(fileA);
   if (fileANode) {
-    fileANode.imported = {
+    fileANode.importedBy = {
       ...baseImportMaps,
-      reExported: new Map([['*', new Set([indexFile])]]),
+      reExport: new Map([['*', new Set([indexFile])]]),
     };
   }
 
   const fileBNode = graph.get(fileB);
   if (fileBNode) {
-    fileBNode.imported = {
+    fileBNode.importedBy = {
       ...baseImportMaps,
-      reExported: new Map([['*', new Set([indexFile])]]),
+      reExport: new Map([['*', new Set([indexFile])]]),
     };
   }
 
   const fileCNode = graph.get(fileC);
   if (fileCNode) {
-    fileCNode.imported = {
+    fileCNode.importedBy = {
       ...baseImportMaps,
-      reExported: new Map([['*', new Set([indexFile])]]),
+      reExport: new Map([['*', new Set([indexFile])]]),
     };
   }
 

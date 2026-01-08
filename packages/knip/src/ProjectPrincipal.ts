@@ -328,7 +328,7 @@ export class ProjectPrincipal {
     for (const [filePath, file] of graph) {
       const fd = this.cache.getFileDescriptor(filePath);
       if (!fd?.meta) continue;
-      fd.meta.data = { ...file, internalImportCache: undefined, imported: undefined };
+      fd.meta.data = { ...file, internalImportCache: undefined, importedBy: undefined };
     }
     this.cache.reconcile();
   }

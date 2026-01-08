@@ -16,7 +16,7 @@ export const formatTrace = (
   const fail = pc.red;
   const dim = pc.dim;
 
-  const entryMarker = node.isEntry ? dim(' ◯') : '';
+  const entryMarker = node.isEntry ? dim(' ⎆') : '';
   lines.push(`${file(toRelative(node.filePath))}${dim(':')}${id(node.identifier)}${entryMarker}`);
 
   const formatVia = (child: ExportsTreeNode): string => {
@@ -31,7 +31,7 @@ export const formatTrace = (
   const formatChild = (child: ExportsTreeNode, prefix: string, isLast: boolean) => {
     const connector = isLast ? '└── ' : '├── ';
     const childPrefix = isLast ? '    ' : '│   ';
-    const entryMarker = child.isEntry ? dim(' ◯') : '';
+    const entryMarker = child.isEntry ? dim(' ⎆') : '';
     const isLeaf = child.children.length === 0;
     const leafMarker = isLeaf && !child.via?.startsWith('reExport') ? (isReferenced ? ok(' ✓') : fail(' ✗')) : '';
 

@@ -25,7 +25,7 @@ import {
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
 } from './ast-helpers.js';
-import { hasRefsInFile } from './find-internal-references.js';
+import { _hasRefsInFile } from './find-internal-references.js';
 import { getImportsFromPragmas } from './pragmas/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -158,26 +158,26 @@ const getImportsAndExports = (
     if (modifiers & IMPORT_FLAGS.RE_EXPORT) {
       if (isStar && namespace) {
         // Pattern: export * as NS from 'specifier';
-        addValue(importMaps.reExportedNs, namespace, sourceFile.fileName);
+        addValue(importMaps.reExportNs, namespace, sourceFile.fileName);
       } else if (nsOrAlias) {
         // Pattern: export { id as alias } from 'specifier';
-        addNsValue(importMaps.reExportedAs, identifier, nsOrAlias, sourceFile.fileName);
+        addNsValue(importMaps.reExportAs, identifier, nsOrAlias, sourceFile.fileName);
       } else {
         // Patterns:
         // export { id } from 'specifier';
         // export * from 'specifier';
         // module.exports = require('specifier');
-        addValue(importMaps.reExported, identifier, sourceFile.fileName);
+        addValue(importMaps.reExport, identifier, sourceFile.fileName);
       }
     } else {
       if (nsOrAlias && nsOrAlias !== identifier) {
         if (isStar) {
-          addValue(importMaps.importedNs, nsOrAlias, sourceFile.fileName);
+          addValue(importMaps.importNs, nsOrAlias, sourceFile.fileName);
         } else {
-          addNsValue(importMaps.importedAs, identifier, nsOrAlias, sourceFile.fileName);
+          addNsValue(importMaps.importAs, identifier, nsOrAlias, sourceFile.fileName);
         }
       } else if (identifier !== IMPORT_STAR) {
-        addValue(importMaps.imported, identifier, sourceFile.fileName);
+        addValue(importMaps.import, identifier, sourceFile.fileName);
       }
 
       if (symbol) importedInternalSymbols.set(symbol, filePath);
@@ -275,13 +275,13 @@ const getImportsAndExports = (
           if (importId !== identifier) {
             // Pattern: import { id as alias } from 'specifier'; export = id; export default id;
             // Pattern: import * as NS from 'specifier'; export { NS as aliased }
-            addNsValue(internalImport.reExportedAs, importId, identifier, sourceFile.fileName);
+            addNsValue(internalImport.reExportAs, importId, identifier, sourceFile.fileName);
           } else if (symbol.declarations && ts.isNamespaceImport(symbol.declarations[0])) {
             // Pattern: import * as NS from 'specifier'; export { NS };
-            addValue(internalImport.reExportedNs, identifier, sourceFile.fileName);
+            addValue(internalImport.reExportNs, identifier, sourceFile.fileName);
           } else {
             // Pattern: import { id } from 'specifier'; export { id };
-            addValue(internalImport.reExported, importId, sourceFile.fileName);
+            addValue(internalImport.reExport, importId, sourceFile.fileName);
           }
         }
       }
@@ -450,7 +450,7 @@ const getImportsAndExports = (
                 if (_node && ts.isIdentifier(_node.name)) {
                   const varName = _node.name.text;
                   if (exports.has(varName)) {
-                    addNsValue(imports.reExportedAs, id, [varName, ...path].join('.'), sourceFile.fileName);
+                    addNsValue(imports.reExportAs, id, [varName, ...path].join('.'), sourceFile.fileName);
                   } else if (path.length === 0) {
                     // Pattern: const spread = { ...NS }; spread.member
                     addImportAlias(varName, id, filePath);
@@ -478,7 +478,7 @@ const getImportsAndExports = (
                   const aliasName = node.parent.name.text;
                   if (exports.has(aliasName)) {
                     // Pattern: export const alias = NS;
-                    addNsValue(imports.reExportedAs, id, aliasName, sourceFile.fileName);
+                    addNsValue(imports.reExportAs, id, aliasName, sourceFile.fileName);
                   } else {
                     // Pattern: const alias = NS; alias.member
                     addImportAlias(aliasName, id, filePath);
@@ -497,7 +497,7 @@ const getImportsAndExports = (
                   while (_node && !ts.isVariableDeclaration(_node)) _node = _node.parent;
                   if (_node && ts.isIdentifier(_node.name)) addImportAlias(`${_node.name.text}.${id}`, id, filePath);
                   imports.refs.add(id);
-                } else if (imports.importedNs.has(id) && isConsiderReferencedNS(node)) {
+                } else if (imports.importNs.has(id) && isConsiderReferencedNS(node)) {
                   // Pattern: fn(NS), { ...NS } etc. (https://knip.dev/guides/namespace-imports)
                   imports.refs.add(id);
                 } else if (isObjectEnumerationCallExpressionArgument(node)) {
@@ -548,12 +548,12 @@ const getImportsAndExports = (
       shouldCountRefs(ignoreExportsUsedInFile, item.type) ||
       (item.symbol?.valueDeclaration && ts.isBindingElement(item.symbol.valueDeclaration))
     ) {
-      item.hasRefsInFile = hasRefsInFile(item, sourceFile, typeChecker);
+      item.hasRefsInFile = _hasRefsInFile(item, sourceFile, typeChecker);
     }
 
     for (const member of item.members) {
       if (item.type === 'enum' || shouldCountRefs(ignoreExportsUsedInFile, member.type)) {
-        member.hasRefsInFile = hasRefsInFile(member, sourceFile, typeChecker);
+        member.hasRefsInFile = _hasRefsInFile(member, sourceFile, typeChecker);
       }
       delete member.symbol;
     }
@@ -566,7 +566,7 @@ const getImportsAndExports = (
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,
-    imported: undefined,
+    importedBy: undefined,
     internalImportCache: undefined,
   };
 };

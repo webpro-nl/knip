@@ -36,12 +36,14 @@ jobs:
             const commits = context.payload.commits || [];
             const messages = commits.map(commit => commit.message).join('\n');
             const issueRefs = messages.match(/#(\d+)/g) || [];
-            const issues = [...new Set(issueRefs.map(ref => parseInt(ref.slice(1))))];
+            const issues = new Set(issueRefs.map(ref => parseInt(ref.slice(1))));
+            const isClosingMatch = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
+            const closingIssues = new Set([...messages.matchAll(isClosingMatch)].map(m => parseInt(m[1])));
             for (const issue_number of issues) {
               try {
                 const { owner, repo } = context.repo;
                 const { data } = await github.rest.issues.get({ owner, repo, issue_number });
-                if (data.state === 'open') {
+                if (data.state === 'open' || closingIssues.has(issue_number)) {
                   const body = `Preview release available:\n\`\`\`sh\nnpm i -D https://pkg.pr.new/knip@${sha}\n\`\`\``;
                   await github.rest.issues.createComment({ owner, repo, issue_number, body });
                 }

@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { buildExportsTree } from '../../src/graph-explorer/operations/build-exports-tree.js';
-import type { Export, FileNode, ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
+import type { ModuleGraph } from '../../src/types/module-graph.js';
+import { baseExport, baseFileNode, baseImportMaps } from '../helpers/baseNodeObjects.js';
 import { resolve } from '../helpers/resolve.js';
 
 const createGraph = (): ModuleGraph => new Map();
@@ -11,53 +12,24 @@ const filePath2 = resolve('right.ts');
 const filePath3 = resolve('pseudo.ts');
 const filePath4 = resolve('index.ts');
 
-const baseFileNode: FileNode = {
-  imports: { internal: new Map(), external: new Set(), unresolved: new Set(), resolved: new Set(), imports: new Set() },
-  exports: new Map(),
-  duplicates: [],
-  scripts: new Set(),
-};
-
-const baseImportMaps: ImportMaps = {
-  refs: new Set(),
-  imported: new Map(),
-  importedAs: new Map(),
-  importedNs: new Map(),
-  reExported: new Map(),
-  reExportedAs: new Map(),
-  reExportedNs: new Map(),
-};
-
-const baseExport: Export = {
-  identifier: 'identifier',
-  pos: 0,
-  line: 1,
-  col: 14,
-  type: 'unknown',
-  members: [],
-  jsDocTags: new Set(),
-  self: [0, false],
-  fixes: [],
-};
-
-test('Trace export through reExportedNs', () => {
+test('Trace export through reExportNs', () => {
   const graph = createGraph();
   const entryPaths = new Set([filePath4]);
 
   graph.set(filePath2, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      reExportedNs: new Map([['namespaceR', new Set([filePath3])]]),
+      reExportNs: new Map([['namespaceR', new Set([filePath3])]]),
     },
   });
 
   graph.set(filePath3, {
     ...baseFileNode,
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([
+      import: new Map([
         ['namespaceL', new Set([filePath4])],
         ['namespaceR', new Set([filePath4])],
       ]),
@@ -67,7 +39,7 @@ test('Trace export through reExportedNs', () => {
 
   graph.set(filePath4, {
     ...baseFileNode,
-    imported: {
+    importedBy: {
       ...baseImportMaps,
     },
   });
@@ -79,16 +51,16 @@ test('Trace export through reExportedNs', () => {
   assert(trace.children[0].identifier === 'namespaceR.identifier');
 });
 
-test('Trace export through importedNs (with ref)', () => {
+test('Trace export through importNs (with ref)', () => {
   const graph = createGraph();
   const entryPaths = new Set([filePath4]);
 
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      importedNs: new Map([['NS', new Set([filePath3])]]),
+      importNs: new Map([['NS', new Set([filePath3])]]),
     },
   });
 
@@ -98,16 +70,16 @@ test('Trace export through importedNs (with ref)', () => {
       ...baseFileNode.imports,
       internal: new Map([[filePath1, { ...baseImportMaps, refs: new Set(['NS.identifier']) }]]),
     },
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['namespaceL', new Set([filePath4])]]),
+      import: new Map([['namespaceL', new Set([filePath4])]]),
       refs: new Set(['namespaceL']),
     },
   });
 
   graph.set(filePath4, {
     ...baseFileNode,
-    imported: { ...baseImportMaps },
+    importedBy: { ...baseImportMaps },
   });
 
   const [trace] = buildExportsTree(graph, entryPaths, { filePath: filePath1, identifier: 'identifier' });
@@ -118,16 +90,16 @@ test('Trace export through importedNs (with ref)', () => {
   assert(pseudoStep.identifier === 'NS.identifier');
 });
 
-test('Trace export through importedNs (with reExportedAs)', () => {
+test('Trace export through importNs (with reExportAs)', () => {
   const graph = createGraph();
   const entryPaths = new Set([filePath4]);
 
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      importedNs: new Map([['NS', new Set([filePath3])]]),
+      importNs: new Map([['NS', new Set([filePath3])]]),
     },
   });
 
@@ -138,20 +110,20 @@ test('Trace export through importedNs (with reExportedAs)', () => {
       internal: new Map([
         [
           filePath1,
-          { ...baseImportMaps, reExportedAs: new Map([['NS', new Map([['namespaceL', new Set([filePath3])]])]]) },
+          { ...baseImportMaps, reExportAs: new Map([['NS', new Map([['namespaceL', new Set([filePath3])]])]]) },
         ],
       ]),
     },
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['namespaceL', new Set([filePath4])]]),
+      import: new Map([['namespaceL', new Set([filePath4])]]),
       refs: new Set(['namespaceL', 'namespaceL.fn']),
     },
   });
 
   graph.set(filePath4, {
     ...baseFileNode,
-    imported: { ...baseImportMaps },
+    importedBy: { ...baseImportMaps },
   });
 
   const [trace] = buildExportsTree(graph, entryPaths, { filePath: filePath1, identifier: 'identifier' });

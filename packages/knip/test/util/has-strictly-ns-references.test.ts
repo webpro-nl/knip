@@ -7,12 +7,12 @@ const map: ModuleGraph = new Map();
 
 const base: ImportMaps = {
   refs: new Set(),
-  imported: new Map(),
-  importedAs: new Map(),
-  importedNs: new Map(),
-  reExported: new Map(),
-  reExportedAs: new Map(),
-  reExportedNs: new Map(),
+  import: new Map(),
+  importAs: new Map(),
+  importNs: new Map(),
+  reExport: new Map(),
+  reExportAs: new Map(),
+  reExportNs: new Map(),
 };
 
 const filePath = 'test.ts';
@@ -29,7 +29,7 @@ test('Strictly namespace refs (single ns)', () => {
       filePath,
       {
         ...base,
-        importedNs: new Map([['ns', new Set()]]),
+        importNs: new Map([['ns', new Set()]]),
         refs: new Set(['ns']),
       },
       id
@@ -45,7 +45,7 @@ test('Strictly namespace refs (no id)', () => {
       filePath,
       {
         ...base,
-        importedNs: new Map([['ns', new Set()]]),
+        importNs: new Map([['ns', new Set()]]),
         refs: new Set([]),
       },
       id
@@ -61,7 +61,7 @@ test('Strictly namespace refs (single ns, no id)', () => {
       filePath,
       {
         ...base,
-        importedNs: new Map([]),
+        importNs: new Map([]),
         refs: new Set(['ns']),
       },
       id
@@ -77,7 +77,7 @@ test('Strictly namespace refs (multiple ns, no id)', () => {
       filePath,
       {
         ...base,
-        importedNs: new Map([
+        importNs: new Map([
           ['ns', new Set()],
           ['ns2', new Set()],
         ]),
@@ -96,7 +96,7 @@ test('Strictly namespace refs (member access)', () => {
       filePath,
       {
         ...base,
-        importedNs: new Map([['ns', new Set()]]),
+        importNs: new Map([['ns', new Set()]]),
         refs: new Set(['ns', 'ns.prop']),
       },
       id

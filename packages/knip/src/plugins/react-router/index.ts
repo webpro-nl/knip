@@ -3,7 +3,7 @@ import os from 'node:os';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { _glob } from '../../util/glob.js';
 import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
+import { join, toAbsolute } from '../../util/path.js';
 import { hasDependency, load } from '../../util/plugin.js';
 import vite from '../vite/index.js';
 import type { PluginConfig, RouteConfigEntry } from './types.js';
@@ -23,7 +23,7 @@ const config = ['react-router.config.{js,ts}', ...viteConfig];
 const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   const appDirectory = localConfig.appDirectory ?? 'app';
-  const appDir = join(configFileDir, appDirectory);
+  const appDir = toAbsolute(appDirectory, configFileDir);
 
   // If using flatRoutes from @react-router/fs-routes it will throw an error if this variable is not defined
   // @ts-expect-error
@@ -51,7 +51,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     // See:
     //  - https://reactrouter.com/how-to/file-route-conventions#optional-segments
     //  - https://www.npmjs.com/package/fast-glob#advanced-syntax
-    .map(route => (isWindows ? route : route.replace(/[\^*+?()[\]]/g, '\\$&')));
+    .map(route => (isWindows ? route : route.replace(/[\^*?()[\]]/g, '\\$&')));
 
   const resolved = [
     // routes.{ts,js} is only used as input to the bundler build system

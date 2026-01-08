@@ -4,7 +4,13 @@ import { run } from './run.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
 import parseArgs, { helpText } from './util/cli-arguments.js';
 import { createOptions } from './util/create-options.js';
-import { getKnownErrors, hasErrorCause, isConfigurationError, isKnownError } from './util/errors.js';
+import {
+  getKnownErrors,
+  hasErrorCause,
+  isConfigurationError,
+  isKnownError,
+  isModuleNotFoundError,
+} from './util/errors.js';
 import { logError, logWarning } from './util/log.js';
 import { perfObserver } from './util/Performance.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
@@ -103,7 +109,11 @@ const main = async () => {
     if (!args.debug && error instanceof Error && isKnownError(error)) {
       const knownErrors = getKnownErrors(error);
       for (const knownError of knownErrors) logError('ERROR', knownError.message);
-      if (hasErrorCause(knownErrors[0])) console.error('Reason:', knownErrors[0].cause.message);
+      if (hasErrorCause(knownErrors[0])) {
+        console.error('Reason:', knownErrors[0].cause.message);
+        if (isModuleNotFoundError(knownErrors[0].cause))
+          console.log('Module load error? Visit https://knip.dev/reference/known-issues');
+      }
       if (isConfigurationError(knownErrors[0])) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
     }

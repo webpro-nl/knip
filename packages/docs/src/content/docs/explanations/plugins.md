@@ -108,7 +108,7 @@ configured.
 
 :::tip[Plugins result in less configuration]
 
-Plugins uses entry file patterns as defined in the configuration files of these
+Plugins uses entry file patterns as defined in your configuration file of these
 tools. So you don't need to repeat this in your Knip configuration.
 
 :::
@@ -242,7 +242,8 @@ dependency.
 
 :::tip[Summary]
 
-Plugins can find additional entry files when parsing config files.
+In your config files, plugins can find additional entry files and also other
+config files recursively.
 
 :::
 
@@ -285,7 +286,9 @@ Additionally, `./setup-tests.ts` will be added as an `entry` file.
 
 :::note
 
-When plugins dynamically load configuration files, conditional dependencies may not be detected if the condition evaluates differently during analysis. See [conditional or dynamic dependencies][10] for details and workarounds.
+When plugins dynamically load configuration files, conditional dependencies may
+not be detected if the condition evaluates differently during analysis. See
+[conditional or dynamic dependencies][9] for details and workarounds.
 
 :::
 
@@ -299,7 +302,7 @@ node --loader tsx scripts/deploy.ts
 playwright test -c playwright.web.config.ts
 ```
 
-Please see [script parser][9] for more details.
+Please see [script parser][10] for more details.
 
 ## Summary
 
@@ -315,12 +318,12 @@ Plugins are configured with two distinct types of files:
 :::
 
 [1]: ../reference/plugins.md
-[2]: ../guides/writing-a-plugin.md
+[2]: ../writing-a-plugin/index.md
 [3]: #configuration-files
 [4]: #entry-files
 [5]: #command-line-arguments
 [6]: ./entry-files.md
 [7]: ../reference/plugins/eslint.md
 [8]: ../reference/plugins/vitest.md
-[9]: ../features/script-parser.md
-[10]: ../guides/handling-issues.mdx#conditional-or-dynamic-dependencies
+[9]: ../guides/handling-issues.mdx#conditional-or-dynamic-dependencies
+[10]: ../features/script-parser.md

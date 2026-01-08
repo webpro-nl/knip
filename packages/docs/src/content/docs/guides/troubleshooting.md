@@ -121,7 +121,7 @@ to [open an issue on GitHub][14].
 [2]: #exceptions-thrown-by-knip
 [3]: #debug
 [4]: #trace
-[5]: ../guides/handling-issues.md
+[5]: ../guides/handling-issues.mdx
 [6]: ./issue-reproduction.md
 [7]: ../reference/known-issues.md
 [8]: ../reference/cli.md#--workspace-dir

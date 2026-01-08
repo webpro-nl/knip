@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { IMPORT_STAR } from '../../src/constants.js';
 import { walkDown } from '../../src/graph-explorer/walk-down.js';
-import type { Export, FileNode, Import, ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
+import type { ModuleGraph } from '../../src/types/module-graph.js';
+import { baseExport, baseFileNode, baseImportMaps, getBaseImport } from '../helpers/baseNodeObjects.js';
 import { resolve } from '../helpers/resolve.js';
 
 const createGraph = (): ModuleGraph => new Map();
@@ -11,44 +12,7 @@ const filePath1 = resolve('module-1.ts');
 const filePath2 = resolve('module-2.ts');
 const filePath3 = resolve('module-3.ts');
 
-const baseFileNode: FileNode = {
-  imports: { internal: new Map(), external: new Set(), unresolved: new Set(), resolved: new Set(), imports: new Set() },
-  exports: new Map(),
-  duplicates: [],
-  scripts: new Set(),
-};
-
-const baseImportMaps: ImportMaps = {
-  refs: new Set(),
-  imported: new Map(),
-  importedAs: new Map(),
-  importedNs: new Map(),
-  reExported: new Map(),
-  reExportedAs: new Map(),
-  reExportedNs: new Map(),
-};
-
-const baseExport: Export = {
-  identifier: 'identifier',
-  pos: 0,
-  line: 1,
-  col: 0,
-  type: 'unknown',
-  members: [],
-  jsDocTags: new Set(),
-  self: [0, false],
-  fixes: [],
-};
-
-const baseImport: Import = {
-  specifier: './module-1',
-  filePath: filePath1,
-  identifier: 'identifier',
-  isTypeOnly: false,
-  pos: 0,
-  line: 0,
-  col: 0,
-};
+const baseImport = getBaseImport(filePath1);
 
 test('should find direct importers', () => {
   const graph = createGraph();
@@ -57,21 +21,19 @@ test('should find direct importers', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['identifier', new Set([filePath2])]]),
+      import: new Map([['identifier', new Set([filePath2])]]),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath2])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
       imports: new Set([baseImport]),
     },
   });
@@ -99,9 +61,9 @@ test('should find aliased importers', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      importedAs: new Map([['identifier', new Map([['alias', new Set([filePath2])]])]]),
+      importAs: new Map([['identifier', new Map([['alias', new Set([filePath2])]])]]),
     },
   });
 
@@ -131,29 +93,27 @@ test('should follow re-export chain', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      reExported: new Map([['identifier', new Set([filePath2])]]),
+      reExport: new Map([['identifier', new Set([filePath2])]]),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['identifier', new Set([filePath3])]]),
+      import: new Map([['identifier', new Set([filePath3])]]),
     },
   });
 
   graph.set(filePath3, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath2, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath3])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
       imports: new Set([{ ...baseImport, specifier: './module-2', filePath: filePath2 }]),
     },
   });
@@ -180,21 +140,19 @@ test('should mark entry files correctly', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['identifier', new Set([filePath2])]]),
+      import: new Map([['identifier', new Set([filePath2])]]),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath2])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
       imports: new Set([baseImport]),
     },
   });
@@ -221,15 +179,16 @@ test('should bail out early when visitor returns stop', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['identifier', new Set([filePath2, filePath3])]]),
+      import: new Map([['identifier', new Set([filePath2, filePath3])]]),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [
           filePath1,
@@ -239,9 +198,6 @@ test('should bail out early when visitor returns stop', () => {
           },
         ],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
       imports: new Set([baseImport]),
     },
   });
@@ -249,12 +205,10 @@ test('should bail out early when visitor returns stop', () => {
   graph.set(filePath3, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath3])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
       imports: new Set([baseImport]),
     },
   });
@@ -282,20 +236,20 @@ test('should handle circular imports without infinite loop', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['identifier', new Set([filePath2])]]),
-      reExported: new Map([['alias', new Set([filePath2])]]),
+      import: new Map([['identifier', new Set([filePath2])]]),
+      reExport: new Map([['alias', new Set([filePath2])]]),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
     exports: new Map([['alias', { ...baseExport, identifier: 'alias' }]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['alias', new Set([filePath1])]]),
-      reExported: new Map([['identifier', new Set([filePath1])]]),
+      import: new Map([['alias', new Set([filePath1])]]),
+      reExport: new Map([['identifier', new Set([filePath1])]]),
     },
   });
 
@@ -323,24 +277,22 @@ test('should handle namespace imports with member refs', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      importedNs: new Map([['NS', new Set([filePath2])]]),
+      importNs: new Map([['NS', new Set([filePath2])]]),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [
           filePath1,
-          { ...baseImportMaps, refs: new Set(['NS.identifier']), importedNs: new Map([['NS', new Set([filePath2])]]) },
+          { ...baseImportMaps, refs: new Set(['NS.identifier']), importNs: new Map([['NS', new Set([filePath2])]]) },
         ],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
       imports: new Set([{ ...baseImport, identifier: IMPORT_STAR }]),
     },
   });
@@ -369,22 +321,20 @@ test('should visitor receives correct isEntry and via flags', () => {
   graph.set(filePath1, {
     ...baseFileNode,
     exports: new Map([['identifier', baseExport]]),
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['identifier', new Set([filePath2])]]),
-      reExported: new Map([['identifier', new Set([filePath3])]]),
+      import: new Map([['identifier', new Set([filePath2])]]),
+      reExport: new Map([['identifier', new Set([filePath3])]]),
     },
   });
 
   graph.set(filePath2, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
         [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath2])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
       imports: new Set([baseImport]),
     },
   });
@@ -392,17 +342,15 @@ test('should visitor receives correct isEntry and via flags', () => {
   graph.set(filePath3, {
     ...baseFileNode,
     imports: {
+      ...baseFileNode.imports,
       internal: new Map([
-        [filePath1, { ...baseImportMaps, reExported: new Map([['identifier', new Set([filePath3])]]) }],
+        [filePath1, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath3])]]) }],
       ]),
-      external: new Set(),
-      unresolved: new Set(),
-      resolved: new Set(),
       imports: new Set([baseImport]),
     },
-    imported: {
+    importedBy: {
       ...baseImportMaps,
-      imported: new Map([['identifier', new Set([filePath2])]]),
+      import: new Map([['identifier', new Set([filePath2])]]),
     },
   });
 

@@ -19,18 +19,21 @@ export interface Position {
 export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
 
-/** Aggregated imports from other files (who imports this file's exports) */
 export type ImportMaps = {
-  /** Usage references to imported identifiers ("default", "named", "NS.export", "enum.member", etc.) */
+  /** Usage references cq. property-access patterns on imports ("default", "named", "NS.member", "alias.sub", "enum.member", etc.); NOT mere import usage */
   refs: References;
-  /** Directly imported identifiers */
-  imported: IdToFileMap;
-  importedAs: IdToNsToFileMap;
-  importedNs: IdToFileMap;
+  /** Identifiers imported from this file */
+  import: IdToFileMap;
+  /** Identifiers imported with alias (id → alias → files) */
+  importAs: IdToNsToFileMap;
+  /** Namespace imports of this file */
+  importNs: IdToFileMap;
   /** Identifiers re-exported (not directly imported) */
-  reExported: IdToFileMap;
-  reExportedAs: IdToNsToFileMap;
-  reExportedNs: IdToFileMap;
+  reExport: IdToFileMap;
+  /** Namespace re-exports */
+  reExportNs: IdToFileMap;
+  /** Irregular re-exports: id → namespace/alias → source files */
+  reExportAs: IdToNsToFileMap;
 };
 
 export type ImportMap = Map<FilePath, ImportMaps>;
@@ -84,7 +87,8 @@ export type FileNode = {
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
-  imported: undefined | ImportMaps;
+  /** Aggregation of other files importing this file's exports */
+  importedBy: undefined | ImportMaps;
   internalImportCache: undefined | ImportMap;
 };
 

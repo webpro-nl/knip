@@ -180,6 +180,13 @@ notation below is valid and will report only exports tagged `@lintignore` or
 }
 ```
 
+:::caution
+
+Tags must not contain hyphens or plus symbols, so it is recommended to stick to
+letters and avoid snake-case.
+
+:::
+
 Also see [JSDoc & TSDoc Tags][8].
 
 ### `treatConfigHintsAsErrors`

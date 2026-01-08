@@ -18,6 +18,8 @@ export const hasErrorCause = (error: Error): error is ErrorWithCause =>
 
 export const isConfigurationError = (error: Error) => error instanceof ConfigurationError;
 
+export const isModuleNotFoundError = (error: Error): boolean => 'code' in error && error.code === 'MODULE_NOT_FOUND';
+
 export const getKnownErrors = (error: Error) => {
   if (isZodErrorLike(error))
     return [...error.issues].map(error => {

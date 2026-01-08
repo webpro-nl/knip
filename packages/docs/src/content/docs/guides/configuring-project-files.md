@@ -41,8 +41,8 @@ and adjust `project` to fit your codebase.
 Use negated `project` patterns to precisely include/exclude files for unused
 files detection.
 
-Use `ignore` to suppress issues in matching files; it does not exclude files
-from analysis.
+Use `ignore*` to suppress specific issues in matching files; it does not exclude
+files from analysis.
 
 :::
 
@@ -200,6 +200,6 @@ automatically added as well.
 
 [1]: ../typescript/unused-exports.md
 [2]: ../explanations/entry-files.md
-[3]: ../reference/configuration#ignoreexportsusedinfile
+[3]: ../reference/configuration.md#ignoreexportsusedinfile
 [4]: ../features/production-mode.md
 [5]: ../explanations/plugins.md#entry-files
