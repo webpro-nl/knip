@@ -39,7 +39,15 @@ const main = async () => {
 
     const { results } = await run(options);
 
-    const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs, enabledPlugins } = results;
+    const {
+      issues,
+      counters,
+      tagHints,
+      configurationHints,
+      includedWorkspaceDirs,
+      enabledPlugins,
+      selectedWorkspaces,
+    } = results;
 
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
@@ -61,6 +69,7 @@ const main = async () => {
       maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
       options: args['reporter-options'] ?? '',
       preprocessorOptions: args['preprocessor-options'] ?? '',
+      selectedWorkspaces,
     };
 
     const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);

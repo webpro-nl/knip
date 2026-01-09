@@ -24,7 +24,7 @@ export interface Options {
   isWatch: boolean;
   tags: string[];
   tsConfigFile: string | undefined;
-  workspace: string | undefined;
+  workspace: string | string[] | undefined;
 }
 
 export type Tags = [string[], string[]];
