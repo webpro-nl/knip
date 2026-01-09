@@ -4,6 +4,7 @@ import { default as astro } from './astro/index.js';
 import { default as astroDb } from './astro-db/index.js';
 import { default as astroOgCanvas } from './astro-og-canvas/index.js';
 import { default as ava } from './ava/index.js';
+import { default as awsCdk } from './aws-cdk/index.js';
 import { default as babel } from './babel/index.js';
 import { default as biome } from './biome/index.js';
 import { default as bumpp } from './bumpp/index.js';
@@ -134,6 +135,7 @@ export const Plugins = {
   'astro-db': astroDb,
   'astro-og-canvas': astroOgCanvas,
   ava,
+  'aws-cdk': awsCdk,
   babel,
   biome,
   bumpp,
