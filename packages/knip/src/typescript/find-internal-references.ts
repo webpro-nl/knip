@@ -24,35 +24,64 @@ const hasRefsInFile = (
   const id = item.identifier;
   const symbols = new Set<ts.Symbol>();
   const pos = item.pos;
+
+  // Pre-compute declaration name ranges to skip (before expensive symbol lookups)
+  const declarationRanges: { start: number; end: number }[] = [];
+  for (const decl of item.symbol.declarations ?? []) {
+    // @ts-expect-error declaration.name may not exist
+    const name = decl.name;
+    if (name) declarationRanges.push({ start: name.pos, end: name.end });
+  }
+
   let index = 0;
 
   // biome-ignore lint: suspicious/noAssignInExpressions
   while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
-    if (!isIdChar(text.charAt(index - 1)) && !isIdChar(text.charAt(index + id.length))) {
-      // Might be off-by-one from `stripQuotes`
-      if (index !== pos && index !== pos + 1) {
-        // @ts-expect-error ts.getTokenAtPosition is internal fn
-        const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
-        if (symbol && id === symbol.escapedName) {
-          if (item.symbol === symbol) return true;
+    if (isIdChar(text.charAt(index - 1)) || isIdChar(text.charAt(index + id.length))) {
+      index += id.length;
+      continue;
+    }
 
-          const declaration = symbol.declarations?.[0];
-          if (declaration) {
-            // @ts-expect-error Keep it cheap
-            if (findInFlow(declaration.name?.flowNode, item.symbol)) return true;
-            // Consider re-exports referenced
-            if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) return true;
-          }
+    // Might be off-by-one from `stripQuotes`
+    if (index === pos || index === pos + 1) {
+      index += id.length;
+      continue;
+    }
 
-          if (symbol.flags & ts.SymbolFlags.Property) {
-            const type = typeChecker.getTypeOfSymbol(symbol);
-            if (type?.symbol && item.symbol === type.symbol) return true;
-          }
-
-          symbols.add(symbol);
-        }
+    // Skip declaration positions early (before expensive symbol lookups)
+    let skip = false;
+    for (const range of declarationRanges) {
+      if (index >= range.start && index < range.end) {
+        skip = true;
+        break;
       }
     }
+    if (skip) {
+      index += id.length;
+      continue;
+    }
+
+    // @ts-expect-error ts.getTokenAtPosition is internal fn
+    const symbol = typeChecker.getSymbolAtLocation(ts.getTokenAtPosition(sourceFile, index));
+    if (symbol && id === symbol.escapedName) {
+      if (item.symbol === symbol) return true;
+
+      const declaration = symbol.declarations?.[0];
+      if (declaration) {
+        // @ts-expect-error Keep it cheap
+        if (findInFlow(declaration.name?.flowNode, item.symbol)) return true;
+        // Consider re-exports referenced
+        if (ts.isImportSpecifier(declaration) && symbols.has(symbol)) return true;
+      }
+
+      if (symbol.flags & ts.SymbolFlags.Property) {
+        const type = typeChecker.getTypeOfSymbol(symbol);
+        if (type?.symbol && item.symbol === type.symbol) return true;
+      }
+
+      symbols.add(symbol);
+    }
+
     index += id.length;
   }
 

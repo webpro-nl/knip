@@ -303,7 +303,7 @@ const getImportsAndExports = (
       exports.set(identifier, {
         identifier,
         // @ts-expect-error node.symbol available, deleted upon exit
-        symbol: node.symbol,
+        symbol: symbol ?? node.symbol,
         type,
         members: exportMembers,
         jsDocTags,
