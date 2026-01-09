@@ -16,7 +16,7 @@ const isAsync = (fn?: SyncCompilerFn | AsyncCompilerFn) => (fn ? fn.constructor.
 const normalizeExt = (ext: string) => ext.replace(/^\.*/, '.');
 
 export const partitionCompilers = (rawLocalConfig: RawConfiguration) => {
-  const syncCompilers: Record<string, SyncCompilerFn> = {};
+  const syncCompilers: Record<string, SyncCompilerFn | true> = {};
   const asyncCompilers: Record<string, AsyncCompilerFn> = {};
 
   for (const extension in rawLocalConfig.compilers) {
@@ -28,6 +28,8 @@ export const partitionCompilers = (rawLocalConfig: RawConfiguration) => {
       } else {
         syncCompilers[ext] = compilerFn as SyncCompilerFn;
       }
+    } else if (compilerFn === true) {
+      syncCompilers[ext] = true;
     }
   }
 
