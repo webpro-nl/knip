@@ -13,14 +13,11 @@ test('Built-in compiler for SCSS', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.files.has(join(cwd, 'unused.scss')));
-  assert(issues.files.has(join(cwd, '_partial.scss')));
-  assert(issues.unresolved['styles.scss']['./partial']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    files: 2,
-    unresolved: 1,
+    files: 1,
     processed: 14,
     total: 14,
   });

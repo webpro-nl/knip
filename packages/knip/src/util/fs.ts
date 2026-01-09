@@ -6,24 +6,24 @@ import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
 import { extname, join } from './path.js';
 
-export const isDirectory = (filePath: string) => {
+export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
-    return statSync(filePath).isDirectory();
+    return statSync(name ? join(cwdOrPath, name) : cwdOrPath).isDirectory();
   } catch (_error) {
     return false;
   }
 };
 
-export const isFile = (filePath: string) => {
+export const isFile = (cwdOrPath: string, name?: string) => {
   try {
-    return statSync(filePath).isFile();
+    return statSync(name ? join(cwdOrPath, name) : cwdOrPath).isFile();
   } catch (_error) {
     return false;
   }
 };
 
-export const findFile = (workingDir: string, fileName: string) => {
-  const filePath = join(workingDir, fileName);
+export const findFile = (cwd: string, fileName: string) => {
+  const filePath = join(cwd, fileName);
   return isFile(filePath) ? filePath : undefined;
 };
 

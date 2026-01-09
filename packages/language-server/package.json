@@ -1,6 +1,6 @@
 {
   "name": "@knip/language-server",
-  "version": "0.0.10",
+  "version": "1.0.0",
   "type": "module",
   "exports": {
     ".": {

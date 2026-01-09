@@ -71,11 +71,12 @@ test('Handle special characters in named exports and members (nsTypes)', async (
   assert(issues.enumMembers['exports.ts']['Characters.$']);
   assert(issues.enumMembers['exports.ts']['Characters.Slash']);
   assert(issues.enumMembers['exports.ts']['Characters.Space']);
+  assert(issues.enumMembers['exports.ts']['Characters. ']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     classMembers: 4,
-    enumMembers: 20,
+    enumMembers: 21,
     exports: 5,
     types: 1,
     processed: 2,

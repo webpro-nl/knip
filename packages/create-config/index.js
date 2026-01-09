@@ -110,10 +110,6 @@ const main = () => {
 
   const knipConfig = {
     $schema: 'https://unpkg.com/knip@5/schema.json',
-    ignoreExportsUsedInFile: {
-      interface: true,
-      type: true,
-    },
     tags: ['-lintignore'],
   };
 

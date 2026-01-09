@@ -32,7 +32,7 @@ const cachedGitIgnores = new Map<string, Gitignores>();
 const cachedGlobIgnores = new Map<string, string[]>();
 
 // Check if directory is a git root (has .git directory or .git file for worktrees)
-const isGitRoot = (dir: string) => isDirectory(join(dir, '.git')) || isFile(join(dir, '.git'));
+const isGitRoot = (dir: string) => isDirectory(dir, '.git') || isFile(dir, '.git');
 
 // Get the git directory path, handling worktrees where .git is a file containing "gitdir: /path/to/git/dir"
 const getGitDir = (cwd: string): string | undefined => {

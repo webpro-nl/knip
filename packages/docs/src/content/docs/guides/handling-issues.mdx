@@ -294,7 +294,7 @@ Some packages have the same name as a Node.js builtin (for instance `buffer` or
 **Solution**: if Knip reports such a dependency as unused, add it to
 [ignoreDependencies][22].
 
-#### Conditional or dynamic dependencies
+### Conditional or dynamic dependencies
 
 Dependencies added conditionally in configuration files may not be detected by
 Knip. This happens because Knip loads and executes config files, and conditional
@@ -586,7 +586,7 @@ To exclude false positives from the report, there are a few options:
 - [Ignore exports used in file][47] for exports used internally.
 - Individual exports can be [tagged using JSDoc syntax][48].
 - Have the export in an entry file:
-  
+
   - Add the file to the `entry` file patterns array in the configuration.
   - Move the export(s) to an entry file.
   - Add the file to the `exports` field of `package.json`

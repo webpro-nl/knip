@@ -408,7 +408,6 @@ Examples of features that have been requested include:
   - Unused object members (and e.g. React component props)
   - Unused object props in function return values
 - Analyze workspaces in parallel
-- Plugins for editors like VS Code and WebStorm (LSP-based?)
 - Support Deno
 - Improve internal code structures and accessibility to support contributions
 - One-shot dead code removal (more comprehensive removal of unused variables,
@@ -427,7 +426,7 @@ require more development efforts and maintenance. Time is limited and
 [5]: ../explanations/why-use-knip.md#comprehensive
 [6]: #module-resolution
 [7]: ../features/script-parser.md
-[8]: ../guides/handling-issues.mdx#types-packages
+[8]: ../guides/handling-issues.mdx#type-definition-packages
 [9]: https://oxc.rs/docs/guide/usage/resolver.html
 [10]: ../guides/performance.md#workspace-sharing
 [11]: #whats-the-difference-between-workspaces-projects-and-programs

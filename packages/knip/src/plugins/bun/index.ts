@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import type { IsPluginEnabled, Plugin, PluginOptions } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
 import { toEntry } from '../../util/input.js';
 
 // https://bun.sh/docs/cli/test
@@ -15,7 +15,7 @@ const isEnabled: IsPluginEnabled = ({ manifest }) => !!hasBunTest(manifest.scrip
 
 const patterns = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'];
 
-const resolve = (options: PluginOptions) => {
+const resolve: Resolve = options => {
   const scripts = { ...options.rootManifest?.scripts, ...options.manifest.scripts };
   for (const script of Object.values(scripts)) {
     if (/(?<=^|\s)bun test/.test(script)) {

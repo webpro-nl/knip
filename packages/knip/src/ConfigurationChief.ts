@@ -449,7 +449,7 @@ export class ConfigurationChief {
       .filter(ignoredWorkspaceName => !workspaceNames.some(name => picomatch.isMatch(name, ignoredWorkspaceName)))
       .filter(ignoredWorkspaceName => {
         const dir = join(this.cwd, ignoredWorkspaceName);
-        return !isDirectory(dir) || isFile(join(dir, 'package.json'));
+        return !isDirectory(dir) || isFile(dir, 'package.json');
       });
   }
 }

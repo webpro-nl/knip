@@ -18,3 +18,9 @@ export function usedFunction(options: ReferencedInterfaceInternally) {
 export function referencedNeverFunction() {
   //
 }
+
+function declaredThenExportedDefault() {}
+export default declaredThenExportedDefault;
+
+function DeclaredThenExportedNamed() {}
+export { DeclaredThenExportedNamed };

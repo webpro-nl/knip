@@ -72,7 +72,6 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   const snapshotSerializers = config.snapshotSerializers ?? [];
   const testSequencer = config.testSequencer ? [config.testSequencer] : [];
 
-  // const resolve = (specifier: string) => resolveEntry(options, specifier);
   const setupFiles = config.setupFiles ?? [];
   const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
   const globalSetup = config.globalSetup ? [config.globalSetup] : [];

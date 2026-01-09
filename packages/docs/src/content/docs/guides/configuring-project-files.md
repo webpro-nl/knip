@@ -200,6 +200,6 @@ automatically added as well.
 
 [1]: ../typescript/unused-exports.md
 [2]: ../explanations/entry-files.md
-[3]: ../reference/configuration#ignoreexportsusedinfile
+[3]: ../reference/configuration.md#ignoreexportsusedinfile
 [4]: ../features/production-mode.md
 [5]: ../explanations/plugins.md#entry-files

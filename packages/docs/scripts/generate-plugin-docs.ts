@@ -99,7 +99,7 @@ for await (const dir of directories) {
           ...parseFragment('Depending on local configuration, plugins may modify the defaults as shown.'),
           ...parseFragment('Custom `config` or `entry` options override default values, they are not merged.'),
           ...parseFragment(
-            'See [Plugins](../../explanations/plugins) for more details about plugins and their `entry` and `config` options.'
+            'See [Plugins](../../explanations/plugins.md) for more details about plugins and their `entry` and `config` options.'
           ),
         ]
       : [];
@@ -126,7 +126,7 @@ for await (const dir of directories) {
               .join('\n')}\n\`\`\``
           ),
           ...parseFragment(
-            'The configuration was generated from source code. Also see [Script Parser](../../features/script-parser).'
+            'The configuration was generated from source code. Also see [Script Parser](../../features/script-parser.md).'
           ),
         ]
       : [];

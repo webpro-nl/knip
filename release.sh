@@ -8,10 +8,10 @@ set -e
 pnpm run --dir packages/knip release --no-git.tag --no-git.push --no-github.release
 
 # Bump and publish other packages
-BUMP_AND_PUBLISH="--no-git.changelog --no-git.commitMessage --no-git.tag --no-git.push '--git.commitArgs=--amend --no-edit'"
-pnpm run --dir packages/language-server release "$BUMP_AND_PUBLISH"
-pnpm run --dir packages/mcp-server release "$BUMP_AND_PUBLISH"
-pnpm run --dir packages/vscode-knip release "$BUMP_AND_PUBLISH"
+BUMP_AND_PUBLISH=(--no-git.changelog --no-git.commitMessage --no-git.tag --no-git.push '--git.commitArgs=--amend --no-edit')
+pnpm run --dir packages/language-server release "${BUMP_AND_PUBLISH[@]}"
+pnpm run --dir packages/mcp-server release "${BUMP_AND_PUBLISH[@]}"
+pnpm run --dir packages/vscode-knip release "${BUMP_AND_PUBLISH[@]}"
 
 # Tag other packages (this is why we run the show twice: git-amend + git-tag is moving target but we want to keep it clean)
 TAG="--no-git.changelog --no-increment --no-git.commit --no-git.push"

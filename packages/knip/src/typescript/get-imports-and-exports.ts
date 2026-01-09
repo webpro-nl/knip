@@ -25,7 +25,7 @@ import {
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
 } from './ast-helpers.js';
-import { _hasRefsInFile } from './find-internal-references.js';
+import { _hasRefsInFile } from './has-refs-in-file.js';
 import { getImportsFromPragmas } from './pragmas/index.js';
 import type { BoundSourceFile } from './SourceFile.js';
 import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
@@ -303,7 +303,7 @@ const getImportsAndExports = (
       exports.set(identifier, {
         identifier,
         // @ts-expect-error node.symbol available, deleted upon exit
-        symbol: node.symbol,
+        symbol: symbol ?? node.symbol,
         type,
         members: exportMembers,
         jsDocTags,

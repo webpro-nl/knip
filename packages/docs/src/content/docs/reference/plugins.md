@@ -1,5 +1,5 @@
 ---
-title: Plugins (123)
+title: Plugins (127)
 tableOfContents: false
 ---
 
@@ -42,6 +42,7 @@ tableOfContents: false
 - [i18next Parser](/reference/plugins/i18next-parser "i18next Parser")
 - [Jest](/reference/plugins/jest "Jest")
 - [Karma](/reference/plugins/karma "Karma")
+- [Knex](/reference/plugins/knex "Knex")
 - [Ladle](/reference/plugins/ladle "Ladle")
 - [Lefthook](/reference/plugins/lefthook "Lefthook")
 - [lint-staged](/reference/plugins/lint-staged "lint-staged")
@@ -70,6 +71,7 @@ tableOfContents: false
 - [nyc](/reference/plugins/nyc "nyc")
 - [oclif](/reference/plugins/oclif "oclif")
 - [Oxlint](/reference/plugins/oxlint "Oxlint")
+- [Parcel](/reference/plugins/parcel "Parcel")
 - [Playwright](/reference/plugins/playwright "Playwright")
 - [Playwright for components](/reference/plugins/playwright-ct "Playwright for components")
 - [playwright-test](/reference/plugins/playwright-test "playwright-test")
@@ -105,6 +107,7 @@ tableOfContents: false
 - [SWC](/reference/plugins/swc "SWC")
 - [Syncpack](/reference/plugins/syncpack "Syncpack")
 - [Tailwind](/reference/plugins/tailwind "Tailwind")
+- [TanStack Router](/reference/plugins/tanstack-router "TanStack Router")
 - [Taskfile](/reference/plugins/taskfile "Taskfile")
 - [Travis CI](/reference/plugins/travis "Travis CI")
 - [ts-node](/reference/plugins/ts-node "ts-node")
@@ -118,6 +121,7 @@ tableOfContents: false
 - [Vercel OG](/reference/plugins/vercel-og "Vercel OG")
 - [Vike](/reference/plugins/vike "Vike")
 - [Vite](/reference/plugins/vite "Vite")
+- [VitePress](/reference/plugins/vitepress "VitePress")
 - [Vitest](/reference/plugins/vitest "Vitest")
 - [Vue](/reference/plugins/vue "Vue")
 - [WebdriverIO](/reference/plugins/webdriver-io "WebdriverIO")

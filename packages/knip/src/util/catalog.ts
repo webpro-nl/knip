@@ -13,7 +13,7 @@ export const getCatalogContainer = async (
   pnpmWorkspacePath?: string,
   pnpmWorkspace?: any
 ): Promise<CatalogContainer> => {
-  const filePath = pnpmWorkspacePath ?? (isFile(join(cwd, '.yarnrc.yml')) ? join(cwd, '.yarnrc.yml') : manifestPath);
+  const filePath = pnpmWorkspacePath ?? (isFile(cwd, '.yarnrc.yml') ? join(cwd, '.yarnrc.yml') : manifestPath);
 
   const yarnWorkspace = basename(filePath) === '.yarnrc.yml' ? await _load(filePath) : undefined;
 

@@ -2,6 +2,7 @@
 import { default as angular } from './angular/index.js';
 import { default as astro } from './astro/index.js';
 import { default as astroDb } from './astro-db/index.js';
+import { default as astroOgCanvas } from './astro-og-canvas/index.js';
 import { default as ava } from './ava/index.js';
 import { default as babel } from './babel/index.js';
 import { default as biome } from './biome/index.js';
@@ -131,6 +132,7 @@ export const Plugins = {
   angular,
   astro,
   'astro-db': astroDb,
+  'astro-og-canvas': astroOgCanvas,
   ava,
   babel,
   biome,
