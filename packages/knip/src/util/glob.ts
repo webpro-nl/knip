@@ -57,13 +57,6 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
 const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) =>
   fg.sync(patterns, { cwd, followSymbolicLinks: false });
 
-const firstGlob = async ({ cwd, patterns }: GlobOptions) => {
-  const stream = fg.globStream(patterns.map(removeProductionSuffix), { cwd, ignore: GLOBAL_IGNORE_PATTERNS });
-  for await (const entry of stream) {
-    return entry;
-  }
-};
-
 const dirGlob = async ({ cwd, patterns, gitignore = true }: GlobOptions) =>
   glob(patterns, {
     cwd,
@@ -75,7 +68,5 @@ const dirGlob = async ({ cwd, patterns, gitignore = true }: GlobOptions) =>
 export const _glob = timerify(defaultGlob);
 
 export const _syncGlob = timerify(syncGlob);
-
-export const _firstGlob = timerify(firstGlob);
 
 export const _dirGlob = timerify(dirGlob);
