@@ -261,7 +261,7 @@ export class ConfigurationChief {
     if (this.workspace) {
       const dir = path.resolve(this.cwd, this.workspace);
       if (!isDirectory(dir)) throw new ConfigurationError('Workspace is not a directory');
-      if (!isFile(join(dir, 'package.json'))) throw new ConfigurationError('Unable to find package.json in workspace');
+      if (!isFile(dir, 'package.json')) throw new ConfigurationError('Unable to find package.json in workspace');
     }
 
     const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
@@ -433,7 +433,7 @@ export class ConfigurationChief {
       .filter(ignoredWorkspaceName => !workspaceNames.some(name => picomatch.isMatch(name, ignoredWorkspaceName)))
       .filter(ignoredWorkspaceName => {
         const dir = join(this.cwd, ignoredWorkspaceName);
-        return !isDirectory(dir) || isFile(join(dir, 'package.json'));
+        return !isDirectory(dir) || isFile(dir, 'package.json');
       });
   }
 }

@@ -26,7 +26,7 @@ const config: string[] = [
 ];
 
 const resolveSchema = (path: string, cwd: string) => {
-  if (!isDirectory(join(cwd, path))) {
+  if (!isDirectory(cwd, path)) {
     return toEntry(path);
   }
   // Multi-file schema directory

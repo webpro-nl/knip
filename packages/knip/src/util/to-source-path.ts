@@ -12,7 +12,7 @@ const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 
 export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOptions: CompilerOptions) => {
   const srcDir = join(dir, 'src');
-  const outDirHasSrc = compilerOptions.outDir && isDirectory(join(compilerOptions.outDir, 'src'));
+  const outDirHasSrc = compilerOptions.outDir && isDirectory(compilerOptions.outDir, 'src');
   workspace.srcDir = compilerOptions.rootDir ?? (outDirHasSrc ? dir : isDirectory(srcDir) ? srcDir : dir);
   workspace.outDir = compilerOptions.outDir || workspace.srcDir;
 };
