@@ -62,7 +62,7 @@ test('knip --reporter json (exports & types)', () => {
         exports: [
           { name: 'unusedNumber', line: 23, col: 14, pos: 682 },
           { name: 'unusedFunction', line: 24, col: 14, pos: 713 },
-          { name: 'default', line: 30, col: 8, pos: 847 },
+          { name: 'default', line: 30, col: 16, pos: 855 },
         ],
         types: [{ name: 'MyAnyType', line: 28, col: 13, pos: 822 }],
         enumMembers: {},
