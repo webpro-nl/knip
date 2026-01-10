@@ -72,6 +72,7 @@ export const pluginsSchema = z.object({
   next: pluginSchema,
   'next-intl': pluginSchema,
   'next-mdx': pluginSchema,
+  nitro: pluginSchema,
   node: pluginSchema,
   'node-modules-inspector': pluginSchema,
   nodemon: pluginSchema,
