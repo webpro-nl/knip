@@ -1,6 +1,5 @@
-import { readdir } from 'node:fs/promises';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { isDirectory } from '../../util/fs.js';
+import { hasFilesWithExtensions } from '../../util/fs.js';
 import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.js';
 import { findByKeyDeep } from '../../util/object.js';
 import { join, relative } from '../../util/path.js';
@@ -12,16 +11,8 @@ const title = 'GitHub Actions';
 
 const enablers = 'This plugin is enabled when a `.yml` or `.yaml` file is found in the `.github/workflows` folder.';
 
-const isEnabled: IsPluginEnabled = async ({ cwd }) => {
-  const workflowsDir = join(cwd, '.github/workflows');
-  if (!isDirectory(workflowsDir)) return false;
-
-  try {
-    const files = await readdir(workflowsDir);
-    return files.some(file => file.endsWith('.yml') || file.endsWith('.yaml'));
-  } catch {
-    return false;
-  }
+const isEnabled: IsPluginEnabled = ({ cwd }) => {
+  return hasFilesWithExtensions(cwd, '.github/workflows', ['yml', 'yaml']);
 };
 
 const isRootOnly = true;

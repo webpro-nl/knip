@@ -1,5 +1,4 @@
 import fg from 'fast-glob';
-import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { compact } from './array.js';
 import { glob } from './glob-core.js';
 import { timerify } from './Performance.js';
