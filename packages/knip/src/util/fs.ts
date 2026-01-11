@@ -1,4 +1,4 @@
-import { statSync } from 'node:fs';
+import { readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
 import { parse as parseTOML } from 'smol-toml';
@@ -9,7 +9,7 @@ import { extname, join } from './path.js';
 export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
     return statSync(name ? join(cwdOrPath, name) : cwdOrPath).isDirectory();
-  } catch (_error) {
+  } catch {
     return false;
   }
 };
@@ -17,7 +17,7 @@ export const isDirectory = (cwdOrPath: string, name?: string) => {
 export const isFile = (cwdOrPath: string, name?: string) => {
   try {
     return statSync(name ? join(cwdOrPath, name) : cwdOrPath).isFile();
-  } catch (_error) {
+  } catch {
     return false;
   }
 };
@@ -33,6 +33,20 @@ export const loadFile = async (filePath: string) => {
     return contents.toString();
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
+  }
+};
+
+export const hasFilesWithExtensions = (cwd: string, dirName: string, extensions: string[]): boolean => {
+  if (!isDirectory(cwd, dirName)) return false;
+
+  try {
+    const files = readdirSync(join(cwd, dirName));
+    return files.some(file => {
+      const ext = extname(file).slice(1);
+      return extensions.includes(ext);
+    });
+  } catch {
+    return false;
   }
 };
 
