@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
 import { walk as _walk, type Entry } from '@nodelib/fs.walk';
-import fg, { type Options as FastGlobOptions } from 'fast-glob';
 import picomatch from 'picomatch';
+import { type GlobOptions as TinyglobbyOptions, glob as tinyglob } from 'tinyglobby';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact, partition } from './array.js';
 import { debugLogObject } from './debug.js';
@@ -17,7 +17,7 @@ const _picomatch = timerify(picomatch);
 
 type Options = { gitignore: boolean; cwd: string };
 
-interface GlobOptions extends FastGlobOptions {
+interface GlobOptions extends TinyglobbyOptions {
   gitignore: boolean;
   cwd: string;
   dir: string;
@@ -188,6 +188,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
       while (dir) {
         const cacheForDir = cachedGitIgnores.get(dir);
         if (cacheForDir) {
+          // TODO: needed with tinyglobby?
           // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
           _ignore.push(...cacheForDir.ignores);
         }
@@ -206,7 +207,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
 
   const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns };
 
-  const paths = await fg.glob(patterns, fgOptions);
+  const paths = await tinyglob(patterns, fgOptions);
 
   debugLogObject(
     relative(options.cwd, dir) || ROOT_WORKSPACE_NAME,

@@ -134,6 +134,9 @@ importers:
       strip-json-comments:
         specifier: 5.0.3
         version: 5.0.3
+      tinyglobby:
+        specifier: ^0.2.15
+        version: 0.2.15
       zod:
         specifier: ^4.1.11
         version: 4.1.11

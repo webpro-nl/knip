@@ -185,7 +185,7 @@ regular package. Every push is published to their registry. Look for the
 `pkg-pr-new` bot in your pull request.
 
 [1]: #qa
-[2]: #attach-debugger-to-bun-from-a-test
+[2]: #attach-debugger-from-inside-a-test-file
 [3]: https://docs.github.com/get-started/quickstart/fork-a-repo
 [4]:
   https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
