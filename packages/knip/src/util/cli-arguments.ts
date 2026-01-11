@@ -9,7 +9,7 @@ Options:
   -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
   --production             Analyze only production source files (e.g. no test files, devDependencies)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
-  -W, --workspace [dir]    Analyze a single workspace (default: analyze all configured workspaces)
+  -W, --workspace [filter] Filter workspaces by name, directory, glob, or Git range (can be repeated)
   --directory [dir]        Run process from a different directory (default: cwd)
   --cache                  Enable caching
   --cache-location         Change cache location (default: node_modules/.cache/knip)
@@ -59,6 +59,9 @@ Examples:
 $ knip
 $ knip --production
 $ knip --workspace packages/client --include files,dependencies
+$ knip --workspace @myorg/* --workspace '!@myorg/legacy'
+$ knip --workspace './apps/*' --workspace '@shared/utils'
+$ knip --workspace [main] --workspace [HEAD~5...HEAD]
 $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 $ knip --tags=-lintignore
@@ -116,7 +119,7 @@ export default function parseCLIArgs() {
       'use-tsconfig-files': { type: 'boolean' },
       version: { type: 'boolean', short: 'V' },
       watch: { type: 'boolean' },
-      workspace: { type: 'string', short: 'W' },
+      workspace: { type: 'string', short: 'W', multiple: true },
     },
   }).values;
 }

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "paths": {
+      "@fixtures/workspaces__shared": ["./packages/shared/index.ts"],
+      "@fixtures/workspaces__tools": ["./packages/tools/index.ts"]
+    }
+  }
+}
